@@ -1381,6 +1381,7 @@
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
     <string name="text_new_color_library">새 색상 라이브러리</string>
     <string name="text_new_file">새로운 파일</string>
+    <string name="text_new_folder">새 폴더</string>
     <string name="text_new_intelligent_color_library">새 인텔리전트 색상 라이브러리</string>
     <string name="text_new_key_store">서명 키 생성</string>
     <string name="text_new_path">새로운 길</string>

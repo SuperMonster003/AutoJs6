@@ -51,6 +51,8 @@ internal data class ExplorerArchiveSessionInfo(
     val canExtractEntries: Boolean,
     val canDeleteEntries: Boolean = false,
     val canRenameEntries: Boolean = false,
+    val canCreateDirectory: Boolean = false,
+    val canAddEntries: Boolean = false,
     val formatId: String? = null,
     val formatDisplayName: String? = null,
     val displayNameMatchesFormat: Boolean = true,
@@ -71,11 +73,17 @@ internal data class ExplorerArchiveItemInfo(
     val canOpen: Boolean = false,
     val canDelete: Boolean = false,
     val canRename: Boolean = false,
+    val canCreateChildren: Boolean = false,
+    val canAddChildren: Boolean = false,
 )
 
 internal sealed interface ExplorerArchiveMutationRequest {
     data class Delete(val entryIds: List<String>) : ExplorerArchiveMutationRequest
     data class Rename(val entryId: String, val newName: String) : ExplorerArchiveMutationRequest
+    data class CreateDirectory(
+        val parentEntryId: String,
+        val newName: String,
+    ) : ExplorerArchiveMutationRequest
 }
 
 internal data class ExplorerArchiveMutationProgress(
@@ -264,6 +272,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
             canRenameEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
+            canCreateDirectory = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY, false),
+            canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
             filenameCharsetNames = metadata.supportedNames,
             filenameCharsetName = metadata.effectiveName,
             filenameCharsetOverride = metadata.overrideName,
@@ -404,6 +416,26 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     ExplorerArchiveSessionValues.MUTATION_RENAME,
                 )
                 requestBundle.putString(ExplorerArchiveMutationKeys.ENTRY_ID, entryId)
+                requestBundle.putString(ExplorerArchiveMutationKeys.NEW_NAME, newName)
+            }
+            is ExplorerArchiveMutationRequest.CreateDirectory -> {
+                check(
+                    protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                        info.canCreateDirectory,
+                ) { "Archive session does not support directory creation" }
+                val parentEntryId = requireValidId(
+                    request.parentEntryId,
+                    "archive destination directory",
+                )
+                val newName = requireValidMutationName(request.newName)
+                requestBundle.putInt(
+                    ExplorerArchiveMutationKeys.OPERATION,
+                    ExplorerArchiveSessionValues.MUTATION_CREATE_DIRECTORY,
+                )
+                requestBundle.putString(
+                    ExplorerArchiveMutationKeys.PARENT_ENTRY_ID,
+                    parentEntryId,
+                )
                 requestBundle.putString(ExplorerArchiveMutationKeys.NEW_NAME, newName)
             }
         }
@@ -670,6 +702,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
             canExtractEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES, false),
             canDeleteEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
             canRenameEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
+            canCreateDirectory = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY, false),
+            canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
             displayNameMatchesFormat = format.displayNameMatches,
             filenameCharsetNames = filenameCharsets.supportedNames,
             filenameCharsetName = filenameCharsets.effectiveName,
@@ -860,6 +896,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE, false),
             canRename = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME, false),
+            canCreateChildren = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_CREATE_CHILDREN, false),
+            canAddChildren = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_CHILDREN, false),
         )
     }
 
@@ -955,6 +995,14 @@ internal class ExplorerArchiveSessionConnection private constructor(
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
                         canRenameEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
+                        canCreateDirectory =
+                            protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                                bundle.getBoolean(
+                                    ExplorerArchiveSessionKeys.CAN_CREATE_DIRECTORY,
+                                    false,
+                                ),
+                        canAddEntries = protocolVersion >= DIRECTORY_CREATION_PROTOCOL_VERSION &&
+                            bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_ADD_ENTRIES, false),
                         formatId = formatMetadata.id,
                         formatDisplayName = formatMetadata.displayName,
                         displayNameMatchesFormat = formatMetadata.displayNameMatches,
@@ -1068,6 +1116,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         private const val FILENAME_CHARSET_PROTOCOL_VERSION = 13
         private const val ARCHIVE_FORMAT_PROTOCOL_VERSION = 17
         private const val MUTATION_PROTOCOL_VERSION = 19
+        private const val DIRECTORY_CREATION_PROTOCOL_VERSION = 20
         private const val SOURCE_TARGET_ID = "archive-source"
         private val ARCHIVE_FORMAT_ID_PATTERN = Regex("[a-z0-9][a-z0-9._-]*")
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->

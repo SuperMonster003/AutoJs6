@@ -1381,6 +1381,7 @@
     <string name="text_need_to_enable_a11y_service">تحتاج إلى تمكين خدمة الوصول</string>
     <string name="text_new_color_library">مكتبة ألوان جديدة</string>
     <string name="text_new_file">ملف جديد</string>
+    <string name="text_new_folder">مجلد جديد</string>
     <string name="text_new_intelligent_color_library">مكتبة ألوان ذكية جديدة</string>
     <string name="text_new_key_store">إنشاء مفتاح التوقيع</string>
     <string name="text_new_path">طريق جديد</string>

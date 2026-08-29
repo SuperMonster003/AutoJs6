@@ -1380,6 +1380,7 @@
     <string name="text_need_to_enable_a11y_service">アクセシビリティサービスを有効にする必要があります</string>
     <string name="text_new_color_library">新しいカラーパレット</string>
     <string name="text_new_file">新規ファイル</string>
+    <string name="text_new_folder">新規フォルダ</string>
     <string name="text_new_intelligent_color_library">新しいインテリジェントカラーパレット</string>
     <string name="text_new_key_store">署名キーを生成</string>
     <string name="text_new_path">新しいパス</string>

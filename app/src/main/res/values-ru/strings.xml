@@ -1379,6 +1379,7 @@
     <string name="text_need_to_enable_a11y_service">Необходимо включить службу доступности</string>
     <string name="text_new_color_library">Новая цветовая библиотека</string>
     <string name="text_new_file">Новый файл</string>
+    <string name="text_new_folder">Новая папка</string>
     <string name="text_new_intelligent_color_library">Новая интеллектуальная цветовая библиотека</string>
     <string name="text_new_key_store">Создать ключ подписи</string>
     <string name="text_new_path">Новый путь</string>

@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.explorer
 
 import org.autojs.plugin.explorer.api.ExplorerActionPluginPermissions
+import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -707,27 +708,22 @@ class ExplorerActionCatalogPolicyTest {
 
     @Test
     fun protocolAndHostVersionCompatibilityAreStrict() {
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(1L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(2L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(3L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(4L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(5L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(6L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(7L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(8L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(9L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(10L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(11L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(12L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(13L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(14L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(15L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(16L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(17L))
-        assertTrue(ExplorerActionAvailabilityPolicy.isProtocolSupported(18L))
+        (ExplorerActionProtocol.MIN_SUPPORTED_VERSION..ExplorerActionProtocol.MAX_SUPPORTED_VERSION)
+            .forEach { protocolVersion ->
+                assertTrue(
+                    ExplorerActionAvailabilityPolicy.isProtocolSupported(protocolVersion.toLong()),
+                )
+            }
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(null))
         assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(0L))
-        assertFalse(ExplorerActionAvailabilityPolicy.isProtocolSupported(19L))
+        assertFalse(
+            ExplorerActionAvailabilityPolicy.isProtocolSupported(
+                ExplorerActionProtocol.MAX_SUPPORTED_VERSION.toLong() + 1L,
+            ),
+        )
+        // A v20 host keeps loading existing plugins at their own v1-v19 catalog version.
+        assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(19L, 19))
+        assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(20L, 20))
         assertTrue(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(4L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(3L, 4))
         assertFalse(ExplorerActionAvailabilityPolicy.isCatalogProtocolCompatible(null, 4))

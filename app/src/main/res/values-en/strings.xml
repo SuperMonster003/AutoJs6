@@ -1367,6 +1367,7 @@
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
     <string name="text_new_color_library">New color library</string>
     <string name="text_new_file">New file</string>
+    <string name="text_new_folder">New folder</string>
     <string name="text_new_intelligent_color_library">New intelligent color library</string>
     <string name="text_new_key_store">New Key Store</string>
     <string name="text_new_path">New path</string>

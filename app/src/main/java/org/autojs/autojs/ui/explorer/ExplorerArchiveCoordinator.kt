@@ -320,6 +320,54 @@ internal class ExplorerArchiveCoordinator(
         )
     }
 
+    fun showCreateDirectoryDialog(
+        provider: ArchiveExplorerProvider,
+        page: ArchiveExplorerPage,
+        selectedItems: List<ArchiveExplorerItem>,
+        previousScrollY: Int,
+        previousDirsCollapsed: Boolean,
+        previousFilesCollapsed: Boolean,
+    ) {
+        if (
+            isMutating ||
+            isExtracting ||
+            isFilenameReindexing ||
+            !provider.canCreateDirectory ||
+            !page.canCreateChildren
+        ) {
+            return
+        }
+        val dialog = MaterialDialog.Builder(host.archiveContext)
+            .title(R.string.text_new_folder)
+            .input(
+                host.archiveContext.getString(R.string.text_please_input_name),
+                "",
+                false,
+            ) { _, input ->
+                val newName = input?.toString().orEmpty()
+                if (newName.isNotBlank()) {
+                    startMutation(
+                        provider = provider,
+                        command = ArchiveMutationCommand.CreateDirectory(page, newName),
+                        navigation = mutationNavigationSnapshot(
+                            provider,
+                            page,
+                            selectedItems,
+                            previousScrollY,
+                            previousDirsCollapsed,
+                            previousFilesCollapsed,
+                        ),
+                    )
+                }
+            }
+            .positiveText(R.string.dialog_button_confirm)
+            .negativeText(R.string.dialog_button_cancel)
+            .show()
+        dialog.inputEditText?.filters = arrayOf(
+            InputFilter.LengthFilter(ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_NAME_LENGTH),
+        )
+    }
+
     /** Cancels work tied to the currently displayed archive without cancelling a new open request. */
     fun closeArchiveContent() {
         entryOpenJob?.cancel()
@@ -558,10 +606,10 @@ internal class ExplorerArchiveCoordinator(
         progressSession.scheduleShow(
             MaterialDialog.Builder(host.archiveContext)
                 .title(
-                    if (command is ArchiveMutationCommand.Delete) {
-                        R.string.text_deleting
-                    } else {
-                        R.string.text_rename
+                    when (command) {
+                        is ArchiveMutationCommand.Delete -> R.string.text_deleting
+                        is ArchiveMutationCommand.Rename -> R.string.text_rename
+                        is ArchiveMutationCommand.CreateDirectory -> R.string.text_new_folder
                     },
                 )
                 .content(R.string.text_preparing)
@@ -594,6 +642,12 @@ internal class ExplorerArchiveCoordinator(
                             provider.startDeletion(command.items, listener)
                         is ArchiveMutationCommand.Rename ->
                             provider.startRename(command.item, command.newName, listener)
+                        is ArchiveMutationCommand.CreateDirectory ->
+                            provider.startCreateDirectory(
+                                command.parent,
+                                command.newName,
+                                listener,
+                            )
                     }
                 }
                 uiState.operationId = operationId
@@ -1116,6 +1170,10 @@ internal class ExplorerArchiveCoordinator(
         data class Delete(val items: List<ArchiveExplorerItem>) : ArchiveMutationCommand
         data class Rename(
             val item: ArchiveExplorerItem,
+            val newName: String,
+        ) : ArchiveMutationCommand
+        data class CreateDirectory(
+            val parent: ArchiveExplorerPage,
             val newName: String,
         ) : ArchiveMutationCommand
     }

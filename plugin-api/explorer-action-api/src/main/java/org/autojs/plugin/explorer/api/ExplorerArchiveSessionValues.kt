@@ -26,6 +26,8 @@ object ExplorerArchiveSessionValues {
 
     const val MUTATION_DELETE = 1
     const val MUTATION_RENAME = 2
+    /** Creates one empty child directory below a root or directory ID. Added in protocol v20. */
+    const val MUTATION_CREATE_DIRECTORY = 3
 
     const val MUTATION_PHASE_PREPARING = 1
     const val MUTATION_PHASE_WRITING = 2

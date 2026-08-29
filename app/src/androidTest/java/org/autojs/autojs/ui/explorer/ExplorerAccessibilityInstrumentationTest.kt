@@ -102,7 +102,12 @@ class ExplorerAccessibilityInstrumentationTest {
 
         val explorer = ExplorerView(context)
         explorer.findViewById<View>(R.id.explorer_item_list).visibility = View.GONE
+        assertEquals(
+            View.GONE,
+            explorer.findViewById<View>(R.id.archive_create_directory).visibility,
+        )
         explorer.findViewById<View>(R.id.archive_filename_encoding).visibility = View.VISIBLE
+        explorer.findViewById<View>(R.id.archive_create_directory).visibility = View.VISIBLE
         explorer.findViewById<View>(R.id.archive_extract_current).visibility = View.VISIBLE
         measureAndLayout(explorer, specification.widthDp, specification.heightDp, context)
         assertHeight(context, explorer.findViewById(R.id.explorer_path_row), 33.5F)
@@ -112,6 +117,7 @@ class ExplorerAccessibilityInstrumentationTest {
             36F,
             33.5F,
             R.id.archive_filename_encoding,
+            R.id.archive_create_directory,
             R.id.archive_extract_current,
         )
 

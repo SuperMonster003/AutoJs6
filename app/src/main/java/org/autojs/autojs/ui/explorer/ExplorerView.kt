@@ -534,6 +534,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             binding.archiveFilenameEncoding.setOnClickListener {
                 showArchiveFilenameEncodingDialog()
             }
+            binding.archiveCreateDirectory.setOnClickListener {
+                showArchiveCreateDirectoryDialog()
+            }
             binding.archiveExtractCurrent.setOnClickListener { extractCurrentArchiveFolder() }
             mSelectionToolbar = ExplorerSelectionToolbarController(
                 context = context,
@@ -1137,6 +1140,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         )
     }
 
+    private fun showArchiveCreateDirectoryDialog() {
+        val provider = mArchiveNavigationState?.provider ?: return
+        val page = currentPageState.page as? ArchiveExplorerPage ?: return
+        mArchiveCoordinator.showCreateDirectoryDialog(
+            provider = provider,
+            page = page,
+            selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem },
+            previousScrollY = currentPageState.scrollY,
+            previousDirsCollapsed = currentPageState.dirsCollapsed,
+            previousFilesCollapsed = currentPageState.filesCollapsed,
+        )
+    }
+
 
     private fun updateArchiveExtractionAction() {
         val page = currentPageState.page as? ArchiveExplorerPage
@@ -1152,7 +1168,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 !mArchiveCoordinator.isMutating
             alpha = if (isEnabled) 1.0f else 0.38f
         }
+        updateArchiveCreateDirectoryAction()
         updateArchiveFilenameEncodingAction()
+    }
+
+    private fun updateArchiveCreateDirectoryAction() {
+        val provider = mArchiveNavigationState?.provider
+        val page = currentPageState.page as? ArchiveExplorerPage
+        val supported = page != null &&
+            page.canCreateChildren &&
+            provider?.canCreateDirectory == true
+        binding?.archiveCreateDirectory?.apply {
+            isVisible = supported
+            isEnabled = supported &&
+                !isInSelectionMode &&
+                !mArchiveCoordinator.isExtracting &&
+                !mArchiveCoordinator.isFilenameReindexing &&
+                !mArchiveCoordinator.isMutating
+            alpha = if (isEnabled) 1.0f else 0.38f
+        }
     }
 
     private fun updateArchiveFilenameEncodingAction() {

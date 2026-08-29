@@ -21,6 +21,10 @@ object ExplorerArchiveSessionKeys {
     const val CAN_DELETE_ENTRIES = "canDeleteEntries"
     /** False or absent before protocol v19. */
     const val CAN_RENAME_ENTRIES = "canRenameEntries"
+    /** False or absent before protocol v20. */
+    const val CAN_CREATE_DIRECTORY = "canCreateDirectory"
+    /** Reserved for the v20 bounded-input slice. False or absent until implemented. */
+    const val CAN_ADD_ENTRIES = "canAddEntries"
     /** Empty or absent before protocol v13, or when this format has no filename charset override. */
     const val FILENAME_CHARSET_NAMES = "filenameCharsetNames"
     /** Effective charset selected by the backend after automatic detection or an explicit override. */
@@ -45,4 +49,8 @@ object ExplorerArchiveSessionKeys {
     /** Per-entry mutation capabilities. False or absent before protocol v19. */
     const val CAN_DELETE = "canDelete"
     const val CAN_RENAME = "canRename"
+    /** Directory-only capability. False or absent before protocol v20. */
+    const val CAN_CREATE_CHILDREN = "canCreateChildren"
+    /** Reserved for the v20 bounded-input slice. False or absent until implemented. */
+    const val CAN_ADD_CHILDREN = "canAddChildren"
 }

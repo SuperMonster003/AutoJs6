@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
+import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationFailure
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationListener
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationProgress
@@ -172,6 +173,8 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
                 .single { entry -> entry.name == ENTRY_NAME }
             assertTrue(initial.canRenameEntry)
             assertTrue(initial.canDeleteEntry)
+            assertTrue(openedProvider.canCreateDirectory)
+            assertTrue(openedProvider.rootPage.canCreateChildren)
             val stableEntryId = initial.entryId
 
             val renamedResult = awaitMutation { listener ->
@@ -198,13 +201,31 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
             )
             assertEquals(listOf(KEEP_ENTRY_NAME), zipEntryNames(archive))
 
-            val remaining = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
-                .filterIsInstance<ArchiveExplorerFileItem>()
-                .single { entry -> entry.name == KEEP_ENTRY_NAME }
-            val deletedLastResult = awaitMutation { listener ->
-                openedProvider.startDeletion(listOf(remaining), listener)
+            val createdResult = awaitMutation { listener ->
+                openedProvider.startCreateDirectory(
+                    openedProvider.rootPage,
+                    CREATED_DIRECTORY_NAME,
+                    listener,
+                )
             }
-            assertEquals(1, deletedLastResult.mutatedEntries)
+            assertEquals(1, createdResult.mutatedEntries)
+            openedProvider.reloadAfterMutation()
+            assertEquals(
+                setOf(CREATED_DIRECTORY_NAME, KEEP_ENTRY_NAME),
+                openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
+                    .mapTo(linkedSetOf()) { entry -> entry.name },
+            )
+            assertEquals(
+                setOf("$CREATED_DIRECTORY_NAME/", KEEP_ENTRY_NAME),
+                zipEntryNames(archive).toSet(),
+            )
+
+            val remaining = openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet()
+                .filterIsInstance<ArchiveExplorerItem>()
+            val deletedLastResult = awaitMutation { listener ->
+                openedProvider.startDeletion(remaining, listener)
+            }
+            assertEquals(2, deletedLastResult.mutatedEntries)
             openedProvider.reloadAfterMutation()
             assertTrue(
                 openedProvider.getExplorerPage(openedProvider.rootPage).blockingGet().none(),
@@ -347,6 +368,7 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
         const val ACTION_OPEN_AS_ARCHIVE = "open-as-archive"
         const val ENTRY_NAME = "payload.txt"
         const val KEEP_ENTRY_NAME = "keep.txt"
+        const val CREATED_DIRECTORY_NAME = "empty"
         const val RENAMED_ENTRY_NAME = "renamed.txt"
         const val OPERATION_TIMEOUT_SECONDS = 30L
         const val ZIP_END_RECORD_MINIMUM_SIZE = 22

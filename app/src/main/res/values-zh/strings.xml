@@ -1376,6 +1376,7 @@
     <string name="text_need_to_enable_a11y_service">需要启用无障碍服务</string>
     <string name="text_new_color_library">新建颜色库</string>
     <string name="text_new_file">新建文件</string>
+    <string name="text_new_folder">新建文件夹</string>
     <string name="text_new_intelligent_color_library">新建智能颜色库</string>
     <string name="text_new_key_store">生成签名密钥</string>
     <string name="text_new_path">新路径</string>

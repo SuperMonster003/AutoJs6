@@ -40,8 +40,9 @@ interface IExplorerArchiveSession {
 
     /**
      * Starts one asynchronous, host-transactional archive mutation. Added in protocol v19.
-     * The initial protocol slice supports deletion and rename of existing entries. The supplied
-     * host session exposes only the archive source target and its atomic replacement transaction.
+     * The initial protocol slice supports deletion and rename of existing entries. Protocol v20
+     * also accepts creation of one empty child directory by opaque parent ID. The supplied host
+     * session exposes only the archive source target and its atomic replacement transaction.
      */
     void mutateEntries(
         in Bundle request,

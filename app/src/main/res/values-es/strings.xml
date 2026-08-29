@@ -1379,6 +1379,7 @@
     <string name="text_need_to_enable_a11y_service">Necesidad de habilitar el servicio de accesibilidad</string>
     <string name="text_new_color_library">Nueva biblioteca de colores</string>
     <string name="text_new_file">Nuevo archivo</string>
+    <string name="text_new_folder">Nueva carpeta</string>
     <string name="text_new_intelligent_color_library">Nueva biblioteca de colores inteligente</string>
     <string name="text_new_key_store">Generar clave de firma</string>
     <string name="text_new_path">Nueva ruta</string>
