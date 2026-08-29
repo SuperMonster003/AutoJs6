@@ -30,6 +30,7 @@ import kotlin.math.roundToInt
 /** Everything needed to render the current multi-selection actions. */
 internal data class ExplorerSelectionToolbarState(
     val selectedCount: Int,
+    val archiveSelection: Boolean,
     val archiveExtraction: Boolean,
     val copyEnabled: Boolean,
     val moveEnabled: Boolean,
@@ -73,9 +74,9 @@ internal class ExplorerSelectionToolbarController(
 
     fun render(state: ExplorerSelectionToolbarState) {
         binding.selectionCount.text = context.getString(R.string.text_selected_items, state.selectedCount)
-        binding.selectionCopy.isVisible = !state.archiveExtraction
-        binding.selectionMove.isVisible = !state.archiveExtraction
-        binding.selectionDelete.isVisible = !state.archiveExtraction
+        binding.selectionCopy.isVisible = !state.archiveSelection
+        binding.selectionMove.isVisible = !state.archiveSelection
+        binding.selectionDelete.isVisible = !state.archiveSelection || state.deleteEnabled
         updateActionState(binding.selectionCopy, state.copyEnabled)
         updateActionState(binding.selectionMove, state.moveEnabled)
         updateActionState(binding.selectionDelete, state.deleteEnabled)

@@ -17,6 +17,10 @@ object ExplorerArchiveSessionKeys {
     const val CAN_OPEN_ENTRIES = "canOpenEntries"
     /** False or absent before protocol v10. */
     const val CAN_EXTRACT_ENTRIES = "canExtractEntries"
+    /** False or absent before protocol v19. */
+    const val CAN_DELETE_ENTRIES = "canDeleteEntries"
+    /** False or absent before protocol v19. */
+    const val CAN_RENAME_ENTRIES = "canRenameEntries"
     /** Empty or absent before protocol v13, or when this format has no filename charset override. */
     const val FILENAME_CHARSET_NAMES = "filenameCharsetNames"
     /** Effective charset selected by the backend after automatic detection or an explicit override. */
@@ -38,4 +42,7 @@ object ExplorerArchiveSessionKeys {
     /** Per-entry preview capability. False or absent before protocol v11. */
     const val CAN_OPEN = "canOpen"
     const val CAN_EXTRACT = "canExtract"
+    /** Per-entry mutation capabilities. False or absent before protocol v19. */
+    const val CAN_DELETE = "canDelete"
+    const val CAN_RENAME = "canRename"
 }

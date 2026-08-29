@@ -414,6 +414,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         override fun resetFailed() {
             this@ExplorerView.resetFailed()
         }
+
+        override fun onBuiltInMenuItem(item: MenuItem): Boolean {
+            return this@ExplorerView.onMenuItemClick(item)
+        }
     }
     private val mExplorerCategoryViewHost = object : ExplorerCategoryViewHost {
         override val context: Context
@@ -642,7 +646,23 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         updateProjectToolbarVisibility()
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean = mBuiltInActions.handle(item)
+    override fun onMenuItemClick(item: MenuItem): Boolean {
+        val archiveItem = selectedItem as? ArchiveExplorerItem
+        if (archiveItem != null) {
+            return when (item.itemId) {
+                R.id.action_rename -> {
+                    showArchiveRenameDialog(archiveItem)
+                    true
+                }
+                R.id.action_delete -> {
+                    confirmArchiveDeletion(listOf(archiveItem))
+                    true
+                }
+                else -> false
+            }
+        }
+        return mBuiltInActions.handle(item)
+    }
     private fun showErrorDialog(t: Throwable, titleRes: Int) {
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
@@ -735,8 +755,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun isItemSelectable(item: ExplorerItem) = when (item) {
-        is ArchiveExplorerItem -> mArchiveNavigationState?.provider?.canExtractEntries == true &&
-            item.canExtractEntry
+        is ArchiveExplorerItem -> {
+            val provider = mArchiveNavigationState?.provider
+            provider != null &&
+                (
+                    provider.canExtractEntries && item.canExtractEntry ||
+                        provider.canDeleteEntries && item.canDeleteEntry
+                    )
+        }
         else -> item.canCopy() || item.canMove() || item.canDelete()
     }
 
@@ -747,8 +773,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     private fun updateSelectionToolbar() {
         val selectedItems = mSelection.items
         val archiveSelection = selectedItems.isNotEmpty() &&
-            selectedItems.all { it is ArchiveExplorerItem && it.canExtractEntry } &&
+            selectedItems.all { it is ArchiveExplorerItem }
+        val archiveExtraction = archiveSelection &&
+            selectedItems.all { (it as ArchiveExplorerItem).canExtractEntry } &&
             mArchiveNavigationState?.provider?.canExtractEntries == true
+        val archiveDeletion = archiveSelection &&
+            selectedItems.all { (it as ArchiveExplorerItem).canDeleteEntry } &&
+            mArchiveNavigationState?.provider?.canDeleteEntries == true
         val pluginAction = if (selectedItems.isEmpty() || archiveSelection) {
             null
         } else {
@@ -763,17 +794,26 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             }.getOrNull()
         }
         mSelectionPluginAction = pluginAction
-        mSelectionArchiveExtraction = archiveSelection
+        mSelectionArchiveExtraction = archiveExtraction
         if (::mSelectionToolbar.isInitialized) {
             mSelectionToolbar.render(
                 ExplorerSelectionToolbarState(
                     selectedCount = selectedItems.size,
-                    archiveExtraction = archiveSelection,
+                    archiveSelection = archiveSelection,
+                    archiveExtraction = archiveExtraction,
                     copyEnabled = !archiveSelection && selectedItems.all { it.canCopy() },
                     moveEnabled = !archiveSelection && selectedItems.all { it.canMove() },
-                    deleteEnabled = !archiveSelection && selectedItems.all { it.canDelete() },
+                    deleteEnabled = if (archiveSelection) {
+                        archiveDeletion && !mArchiveCoordinator.isMutating
+                    } else {
+                        selectedItems.all { it.canDelete() }
+                    },
                     pluginLabel = pluginAction?.actionLabel,
-                    pluginEnabled = if (archiveSelection) !mArchiveCoordinator.isExtracting else pluginAction != null,
+                    pluginEnabled = if (archiveExtraction) {
+                        !mArchiveCoordinator.isExtracting && !mArchiveCoordinator.isMutating
+                    } else {
+                        pluginAction != null
+                    },
                 ),
             )
         }
@@ -798,6 +838,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun deleteSelectedItems() {
+        val archiveItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem }
+        if (archiveItems.size == mSelection.size && archiveItems.isNotEmpty()) {
+            confirmArchiveDeletion(archiveItems)
+            return
+        }
         val selectedFiles = selectedScriptFiles()
         if (selectedFiles.isEmpty()) return
         ScriptOperations(context, this@ExplorerView, currentPage)
@@ -1064,6 +1109,34 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         mArchiveCoordinator.startExtraction(provider, items)
     }
 
+    private fun confirmArchiveDeletion(items: List<ArchiveExplorerItem>) {
+        val provider = mArchiveNavigationState?.provider ?: return
+        val page = currentPageState.page as? ArchiveExplorerPage ?: return
+        mArchiveCoordinator.confirmDeletion(
+            provider = provider,
+            items = items,
+            page = page,
+            selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem },
+            previousScrollY = currentPageState.scrollY,
+            previousDirsCollapsed = currentPageState.dirsCollapsed,
+            previousFilesCollapsed = currentPageState.filesCollapsed,
+        )
+    }
+
+    private fun showArchiveRenameDialog(item: ArchiveExplorerItem) {
+        val provider = mArchiveNavigationState?.provider ?: return
+        val page = currentPageState.page as? ArchiveExplorerPage ?: return
+        mArchiveCoordinator.showRenameDialog(
+            provider = provider,
+            item = item,
+            page = page,
+            selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem },
+            previousScrollY = currentPageState.scrollY,
+            previousDirsCollapsed = currentPageState.dirsCollapsed,
+            previousFilesCollapsed = currentPageState.filesCollapsed,
+        )
+    }
+
 
     private fun updateArchiveExtractionAction() {
         val page = currentPageState.page as? ArchiveExplorerPage
@@ -1075,7 +1148,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&
-                !mArchiveCoordinator.isFilenameReindexing
+                !mArchiveCoordinator.isFilenameReindexing &&
+                !mArchiveCoordinator.isMutating
             alpha = if (isEnabled) 1.0f else 0.38f
         }
         updateArchiveFilenameEncodingAction()
@@ -1090,7 +1164,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&
-                !mArchiveCoordinator.isFilenameReindexing
+                !mArchiveCoordinator.isFilenameReindexing &&
+                !mArchiveCoordinator.isMutating
             alpha = if (isEnabled) 1.0f else 0.38f
         }
     }

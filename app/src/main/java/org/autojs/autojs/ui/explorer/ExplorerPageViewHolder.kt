@@ -64,6 +64,7 @@ internal interface ExplorerPageViewHost {
     fun showErrorDialog(error: Throwable, titleRes: Int)
     fun resetSucceeded()
     fun resetFailed()
+    fun onBuiltInMenuItem(item: MenuItem): Boolean
 }
 internal class ExplorerPageViewHolder(
     itemView: View,
@@ -108,7 +109,7 @@ internal class ExplorerPageViewHolder(
         binding.item.setCardBackgroundColor(host.context.getColor(if (selected) R.color.window_background_selected else R.color.item_background))
         mOptions.visibility = when {
             data is ExplorerSamplePage -> GONE
-            data is ArchiveExplorerPage -> GONE
+            data is ArchiveExplorerPage && !data.canRename() && !data.canDelete() -> GONE
             host.isInSelectionMode -> INVISIBLE
             else -> VISIBLE
         }
@@ -193,6 +194,9 @@ internal class ExplorerPageViewHolder(
                 return@setOnMenuItemClickListener true
             }
             val selectedItem = explorerPage
+            if (selectedItem is ArchiveExplorerPage) {
+                return@setOnMenuItemClickListener host.onBuiltInMenuItem(item)
+            }
             val explorerView = host.explorerView
             when (item.itemId) {
                 R.id.action_copy_to ->

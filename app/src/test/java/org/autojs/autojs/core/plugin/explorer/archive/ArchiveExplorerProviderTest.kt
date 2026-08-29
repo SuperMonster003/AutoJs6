@@ -130,6 +130,33 @@ class ArchiveExplorerProviderTest {
     }
 
     @Test
+    fun providerForwardsOnlyWritableSessionOwnedMutationIds() {
+        val client = FakeClient(canMutateEntries = true)
+        val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("mutation-cache"))
+        val root = provider.rootPage
+        root.copyChildren(provider.getExplorerPage(root).blockingGet())
+        val items = root.map { it as ArchiveExplorerItem }
+
+        assertTrue(items.all(ExplorerItem::canDelete))
+        assertTrue(items.all(ExplorerItem::canRename))
+        assertEquals("mutation", provider.startDeletion(items, NoOpMutationListener))
+        assertEquals(
+            ExplorerArchiveMutationRequest.Delete(listOf("folder", "root-file")),
+            client.mutationRequest,
+        )
+
+        val file = items.filterIsInstance<ArchiveExplorerFileItem>().single()
+        assertEquals("mutation", provider.startRename(file, "renamed.txt", NoOpMutationListener))
+        assertEquals(
+            ExplorerArchiveMutationRequest.Rename("root-file", "renamed.txt"),
+            client.mutationRequest,
+        )
+        provider.cancelMutation("mutation")
+        assertEquals("mutation", client.cancelledMutationId)
+        provider.close()
+    }
+
+    @Test
     fun providerReindexesAndRestoresStablePageAndSelectionLocators() {
         val client = FakeClient(filenameCharsets = true)
         val provider = ArchiveExplorerProvider(client, temporaryFolder.newFolder("cache"))
@@ -155,6 +182,7 @@ class ArchiveExplorerProviderTest {
     private class FakeClient(
         canOpenEntries: Boolean = true,
         canExtractEntries: Boolean = true,
+        canMutateEntries: Boolean = false,
         filenameCharsets: Boolean = false,
         formatDisplayName: String? = null,
         displayNameMatchesFormat: Boolean = true,
@@ -168,6 +196,8 @@ class ArchiveExplorerProviderTest {
             sourceLastModified = 200L,
             canOpenEntries = canOpenEntries,
             canExtractEntries = canExtractEntries,
+            canDeleteEntries = canMutateEntries,
+            canRenameEntries = canMutateEntries,
             formatId = formatDisplayName?.lowercase(),
             formatDisplayName = formatDisplayName,
             displayNameMatchesFormat = displayNameMatchesFormat,
@@ -179,6 +209,9 @@ class ArchiveExplorerProviderTest {
         var extractionEntryIds: List<String>? = null
         var cancelledOperationId: String? = null
         var reindexedFilenameCharset: String? = null
+        var mutationRequest: ExplorerArchiveMutationRequest? = null
+        var cancelledMutationId: String? = null
+        private val mutableEntries = canMutateEntries
 
         override fun listAllChildren(parentId: String): List<ExplorerArchiveItemInfo> = when (parentId) {
             "root" -> listOf(
@@ -217,6 +250,18 @@ class ArchiveExplorerProviderTest {
             cancelledOperationId = operationId
         }
 
+        override fun startMutation(
+            request: ExplorerArchiveMutationRequest,
+            listener: ExplorerArchiveMutationListener,
+        ): String {
+            mutationRequest = request
+            return "mutation"
+        }
+
+        override fun cancelMutation(operationId: String) {
+            cancelledMutationId = operationId
+        }
+
         override fun close() {
             closed = true
         }
@@ -237,6 +282,8 @@ class ArchiveExplorerProviderTest {
             lastModified = 300L,
             canExtract = true,
             canOpen = !isDirectory,
+            canDelete = mutableEntries,
+            canRename = mutableEntries,
         )
     }
 
@@ -244,5 +291,11 @@ class ArchiveExplorerProviderTest {
         override fun onProgress(progress: ExplorerArchiveExtractionProgress) = Unit
         override fun onCompleted(result: ExplorerArchiveExtractionResult) = Unit
         override fun onFailed(failure: ExplorerArchiveExtractionFailure) = Unit
+    }
+
+    private object NoOpMutationListener : ExplorerArchiveMutationListener {
+        override fun onProgress(progress: ExplorerArchiveMutationProgress) = Unit
+        override fun onCompleted(result: ExplorerArchiveMutationResult) = Unit
+        override fun onFailed(failure: ExplorerArchiveMutationFailure) = Unit
     }
 }

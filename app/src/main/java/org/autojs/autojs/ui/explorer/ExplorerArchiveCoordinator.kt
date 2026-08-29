@@ -25,6 +25,10 @@ import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionL
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionProgress
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveExtractionResult
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationFailure
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationListener
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationProgress
+import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveMutationResult
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenInteractionException
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRequestOptions
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
@@ -86,6 +90,9 @@ internal class ExplorerArchiveCoordinator(
     private var filenameReindexJob: Job? = null
     private var extractionStartJob: Job? = null
     private var extractionUiState: ArchiveExtractionUiState? = null
+    private var mutationStartJob: Job? = null
+    private var mutationRefreshJob: Job? = null
+    private var mutationUiState: ArchiveMutationUiState? = null
 
     val isEntryOpening: Boolean
         get() = entryOpenJob?.isActive == true
@@ -95,6 +102,9 @@ internal class ExplorerArchiveCoordinator(
 
     val isExtracting: Boolean
         get() = extractionUiState != null
+
+    val isMutating: Boolean
+        get() = mutationUiState != null
 
     fun openArchive(
         provider: ExplorerPluginActionProvider,
@@ -241,6 +251,75 @@ internal class ExplorerArchiveCoordinator(
         startExtractionAttempt(uiState)
     }
 
+    fun confirmDeletion(
+        provider: ArchiveExplorerProvider,
+        items: List<ArchiveExplorerItem>,
+        page: ArchiveExplorerPage,
+        selectedItems: List<ArchiveExplorerItem>,
+        previousScrollY: Int,
+        previousDirsCollapsed: Boolean,
+        previousFilesCollapsed: Boolean,
+    ) {
+        if (items.isEmpty() || isMutating || isExtracting || isFilenameReindexing) return
+        MaterialDialog.Builder(host.archiveContext)
+            .title(if (items.size == 1) R.string.text_delete else R.string.text_delete_items)
+            .content(R.string.text_confirm_to_delete)
+            .positiveText(R.string.text_delete)
+            .negativeText(R.string.dialog_button_cancel)
+            .onPositive { _, _ ->
+                startMutation(
+                    provider = provider,
+                    command = ArchiveMutationCommand.Delete(items.toList()),
+                    navigation = mutationNavigationSnapshot(
+                        provider,
+                        page,
+                        selectedItems,
+                        previousScrollY,
+                        previousDirsCollapsed,
+                        previousFilesCollapsed,
+                    ),
+                )
+            }
+            .show()
+    }
+
+    fun showRenameDialog(
+        provider: ArchiveExplorerProvider,
+        item: ArchiveExplorerItem,
+        page: ArchiveExplorerPage,
+        selectedItems: List<ArchiveExplorerItem>,
+        previousScrollY: Int,
+        previousDirsCollapsed: Boolean,
+        previousFilesCollapsed: Boolean,
+    ) {
+        if (isMutating || isExtracting || isFilenameReindexing || !item.canRenameEntry) return
+        val dialog = MaterialDialog.Builder(host.archiveContext)
+            .title(R.string.text_rename)
+            .input(host.archiveContext.getString(R.string.text_name), item.name, false) { _, input ->
+                val newName = input?.toString().orEmpty()
+                if (newName != item.name) {
+                    startMutation(
+                        provider = provider,
+                        command = ArchiveMutationCommand.Rename(item, newName),
+                        navigation = mutationNavigationSnapshot(
+                            provider,
+                            page,
+                            selectedItems,
+                            previousScrollY,
+                            previousDirsCollapsed,
+                            previousFilesCollapsed,
+                        ),
+                    )
+                }
+            }
+            .positiveText(R.string.dialog_button_confirm)
+            .negativeText(R.string.dialog_button_cancel)
+            .show()
+        dialog.inputEditText?.filters = arrayOf(
+            InputFilter.LengthFilter(ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_NAME_LENGTH),
+        )
+    }
+
     /** Cancels work tied to the currently displayed archive without cancelling a new open request. */
     fun closeArchiveContent() {
         entryOpenJob?.cancel()
@@ -250,6 +329,11 @@ internal class ExplorerArchiveCoordinator(
         extractionStartJob?.cancel()
         extractionStartJob = null
         dismissExtractionUi()
+        mutationStartJob?.cancel()
+        mutationStartJob = null
+        mutationRefreshJob?.cancel()
+        mutationRefreshJob = null
+        dismissMutationUi()
         host.setArchiveBusy(false)
         stateChanged()
     }
@@ -435,6 +519,223 @@ internal class ExplorerArchiveCoordinator(
             }
         }
         stateChanged()
+    }
+
+    private fun mutationNavigationSnapshot(
+        provider: ArchiveExplorerProvider,
+        page: ArchiveExplorerPage,
+        selectedItems: List<ArchiveExplorerItem>,
+        previousScrollY: Int,
+        previousDirsCollapsed: Boolean,
+        previousFilesCollapsed: Boolean,
+    ) = ArchiveMutationNavigationSnapshot(
+        pageLocator = provider.locatorFor(page),
+        selectionLocators = selectedItems.map(provider::locatorFor),
+        previousScrollY = previousScrollY,
+        previousDirsCollapsed = previousDirsCollapsed,
+        previousFilesCollapsed = previousFilesCollapsed,
+    )
+
+    private fun startMutation(
+        provider: ArchiveExplorerProvider,
+        command: ArchiveMutationCommand,
+        navigation: ArchiveMutationNavigationSnapshot,
+    ) {
+        if (mutationUiState != null || host.archiveLifecycleOwner == null) return
+        val controller = DialogUtils.OperationController()
+        val progressSession = DialogUtils.ProgressDialogSession(controller)
+        val uiState = ArchiveMutationUiState(
+            provider = provider,
+            command = command,
+            navigation = navigation,
+            controller = controller,
+            progressSession = progressSession,
+        )
+        mutationUiState = uiState
+        host.cancelExplorerRefresh()
+        host.setArchiveBusy(true)
+        stateChanged()
+        progressSession.scheduleShow(
+            MaterialDialog.Builder(host.archiveContext)
+                .title(
+                    if (command is ArchiveMutationCommand.Delete) {
+                        R.string.text_deleting
+                    } else {
+                        R.string.text_rename
+                    },
+                )
+                .content(R.string.text_preparing)
+                .progress(true, 0, true)
+                .negativeText(R.string.dialog_button_cancel)
+                .onNegative { _, _ -> requestMutationCancellation(uiState) }
+                .cancelable(false)
+                .autoDismiss(false),
+        )
+        val listener = object : ExplorerArchiveMutationListener {
+            override fun onProgress(progress: ExplorerArchiveMutationProgress) {
+                host.postArchiveUi { renderMutationProgress(uiState, progress) }
+            }
+
+            override fun onCompleted(result: ExplorerArchiveMutationResult) {
+                host.postArchiveUi { completeMutation(uiState, result) }
+            }
+
+            override fun onFailed(failure: ExplorerArchiveMutationFailure) {
+                host.postArchiveUi { failMutation(uiState, failure) }
+            }
+        }
+        val lifecycleOwner = requireNotNull(host.archiveLifecycleOwner)
+        mutationStartJob = lifecycleOwner.lifecycleScope.launch {
+            val startingJob = coroutineContext[Job]
+            try {
+                val operationId = withContext(Dispatchers.IO) {
+                    when (command) {
+                        is ArchiveMutationCommand.Delete ->
+                            provider.startDeletion(command.items, listener)
+                        is ArchiveMutationCommand.Rename ->
+                            provider.startRename(command.item, command.newName, listener)
+                    }
+                }
+                uiState.operationId = operationId
+                if (controller.cancelled.get()) {
+                    withContext(Dispatchers.IO) { provider.cancelMutation(operationId) }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                Log.e(LOG_TAG, "Failed to start host archive mutation", error)
+                failMutation(
+                    uiState,
+                    ExplorerArchiveMutationFailure(
+                        ExplorerArchiveSessionValues.MUTATION_ERROR_UNKNOWN,
+                        error.message ?: error.toString(),
+                    ),
+                )
+            } finally {
+                if (mutationStartJob === startingJob) mutationStartJob = null
+            }
+        }
+    }
+
+    private fun requestMutationCancellation(uiState: ArchiveMutationUiState) {
+        if (mutationUiState !== uiState) return
+        uiState.controller.cancel()
+        val operationId = uiState.operationId ?: return
+        host.archiveLifecycleOwner?.lifecycleScope?.launch(Dispatchers.IO) {
+            runCatching { uiState.provider.cancelMutation(operationId) }
+                .onFailure { error -> Log.w(LOG_TAG, "Failed to cancel archive mutation", error) }
+        }
+    }
+
+    private fun renderMutationProgress(
+        uiState: ArchiveMutationUiState,
+        progress: ExplorerArchiveMutationProgress,
+    ) {
+        if (mutationUiState !== uiState) return
+        val content = buildList {
+            add(
+                host.archiveContext.getString(
+                    if (progress.phase == ExplorerArchiveSessionValues.MUTATION_PHASE_PREPARING) {
+                        R.string.text_preparing
+                    } else {
+                        R.string.text_processing
+                    },
+                ),
+            )
+            progress.currentEntry?.let(::add)
+        }.toMutableList()
+        uiState.progressSession.setContentThrottled(content)
+    }
+
+    private fun completeMutation(
+        uiState: ArchiveMutationUiState,
+        @Suppress("UNUSED_PARAMETER") result: ExplorerArchiveMutationResult,
+    ) {
+        if (mutationUiState !== uiState || mutationRefreshJob?.isActive == true) return
+        val lifecycleOwner = host.archiveLifecycleOwner ?: run {
+            finishMutationUi(uiState)
+            return
+        }
+        mutationRefreshJob = lifecycleOwner.lifecycleScope.launch {
+            val refreshingJob = coroutineContext[Job]
+            var refreshStarted = false
+            try {
+                val restored = withContext(Dispatchers.IO) {
+                    uiState.provider.reloadAfterMutation()
+                    val pages = runCatching {
+                        uiState.provider.restorePage(uiState.navigation.pageLocator)
+                    }.getOrElse { listOf(uiState.provider.rootPage) }
+                    val selection = uiState.navigation.selectionLocators.mapNotNull { locator ->
+                        runCatching { uiState.provider.restoreItem(locator) }.getOrNull()
+                    }
+                    pages to selection
+                }
+                if (!host.isArchiveProviderActive(uiState.provider)) return@launch
+                finishMutationUi(uiState, clearBusy = false)
+                host.applyArchiveReindex(
+                    ExplorerArchiveReindexResult(
+                        restoredPages = restored.first,
+                        restoredSelection = restored.second,
+                        exactPageRestored =
+                            restored.first.last().entryId ==
+                                uiState.navigation.pageLocator.lastOrNull(),
+                        previousScrollY = uiState.navigation.previousScrollY,
+                        previousDirsCollapsed = uiState.navigation.previousDirsCollapsed,
+                        previousFilesCollapsed = uiState.navigation.previousFilesCollapsed,
+                    ),
+                )
+                refreshStarted = true
+                ViewUtils.showToast(host.archiveContext, R.string.text_operation_is_completed)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                if (host.isArchiveProviderActive(uiState.provider)) {
+                    Log.e(LOG_TAG, "Failed to reload archive after mutation", error)
+                    finishMutationUi(uiState)
+                    ViewUtils.showToast(host.archiveContext, error.message ?: error.toString(), true)
+                    host.refreshArchivePage()
+                    refreshStarted = true
+                }
+            } finally {
+                if (mutationRefreshJob === refreshingJob) mutationRefreshJob = null
+                if (!refreshStarted && mutationUiState === uiState) finishMutationUi(uiState)
+            }
+        }
+    }
+
+    private fun failMutation(
+        uiState: ArchiveMutationUiState,
+        failure: ExplorerArchiveMutationFailure,
+    ) {
+        if (mutationUiState !== uiState) return
+        finishMutationUi(uiState)
+        ViewUtils.showToast(
+            host.archiveContext,
+            if (failure.code == ExplorerArchiveSessionValues.MUTATION_ERROR_CANCELLED) {
+                host.archiveContext.getString(R.string.text_operation_aborted)
+            } else {
+                failure.message
+            },
+            failure.code != ExplorerArchiveSessionValues.MUTATION_ERROR_CANCELLED,
+        )
+    }
+
+    private fun finishMutationUi(
+        uiState: ArchiveMutationUiState,
+        clearBusy: Boolean = true,
+    ) {
+        if (mutationUiState !== uiState) return
+        mutationUiState = null
+        uiState.controller.cancel()
+        uiState.progressSession.dismissSafely()
+        if (clearBusy) host.setArchiveBusy(false)
+        stateChanged()
+    }
+
+    private fun dismissMutationUi() {
+        val uiState = mutationUiState ?: return
+        uiState.controller.cancel()
+        finishMutationUi(uiState)
     }
 
     private fun startExtractionAttempt(uiState: ArchiveExtractionUiState) {
@@ -809,6 +1110,33 @@ internal class ExplorerArchiveCoordinator(
             passwordValue?.fill('\u0000')
             passwordValue = null
         }
+    }
+
+    private sealed interface ArchiveMutationCommand {
+        data class Delete(val items: List<ArchiveExplorerItem>) : ArchiveMutationCommand
+        data class Rename(
+            val item: ArchiveExplorerItem,
+            val newName: String,
+        ) : ArchiveMutationCommand
+    }
+
+    private data class ArchiveMutationNavigationSnapshot(
+        val pageLocator: List<String>,
+        val selectionLocators: List<List<String>>,
+        val previousScrollY: Int,
+        val previousDirsCollapsed: Boolean,
+        val previousFilesCollapsed: Boolean,
+    )
+
+    private class ArchiveMutationUiState(
+        val provider: ArchiveExplorerProvider,
+        val command: ArchiveMutationCommand,
+        val navigation: ArchiveMutationNavigationSnapshot,
+        val controller: DialogUtils.OperationController,
+        val progressSession: DialogUtils.ProgressDialogSession,
+    ) {
+        @Volatile
+        var operationId: String? = null
     }
 
     private companion object {

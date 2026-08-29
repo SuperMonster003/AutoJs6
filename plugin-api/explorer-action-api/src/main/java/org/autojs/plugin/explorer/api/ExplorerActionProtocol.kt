@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 18
+    const val VERSION = 19
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -33,6 +33,8 @@ object ExplorerActionProtocol {
     const val MAX_ARCHIVE_ITEMS = 100_000
     const val MAX_ARCHIVE_PAGE_SIZE = 128
     const val MAX_ARCHIVE_EXTRACTION_TARGETS = 128
+    const val MAX_ARCHIVE_MUTATION_TARGETS = 128
+    const val MAX_ARCHIVE_MUTATION_NAME_LENGTH = 4_096
     const val MAX_ARCHIVE_PASSWORD_LENGTH = 1_024
     const val MAX_ARCHIVE_OPERATION_MESSAGE_LENGTH = 1_024
     const val MAX_ARCHIVE_VOLUMES = 128

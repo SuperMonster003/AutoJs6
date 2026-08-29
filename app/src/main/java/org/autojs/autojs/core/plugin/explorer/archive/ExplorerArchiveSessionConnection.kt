@@ -9,6 +9,7 @@ import androidx.core.os.BundleCompat
 import org.autojs.autojs.core.plugin.explorer.session.ExplorerActionHostSession
 import org.autojs.autojs.core.plugin.explorer.session.ExplorerActionHostSessionTarget
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
+import org.autojs.plugin.explorer.api.ExplorerArchiveMutationKeys
 import org.autojs.plugin.explorer.api.ExplorerArchiveOperationKeys
 import org.autojs.plugin.explorer.api.ExplorerArchiveSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerArchiveSessionValues
@@ -33,6 +34,11 @@ internal interface ExplorerArchiveSessionClient : Closeable {
         listener: ExplorerArchiveExtractionListener,
     ): String
     fun cancelExtraction(operationId: String)
+    fun startMutation(
+        request: ExplorerArchiveMutationRequest,
+        listener: ExplorerArchiveMutationListener,
+    ): String
+    fun cancelMutation(operationId: String)
 }
 
 internal data class ExplorerArchiveSessionInfo(
@@ -43,6 +49,8 @@ internal data class ExplorerArchiveSessionInfo(
     val sourceLastModified: Long,
     val canOpenEntries: Boolean,
     val canExtractEntries: Boolean,
+    val canDeleteEntries: Boolean = false,
+    val canRenameEntries: Boolean = false,
     val formatId: String? = null,
     val formatDisplayName: String? = null,
     val displayNameMatchesFormat: Boolean = true,
@@ -61,7 +69,37 @@ internal data class ExplorerArchiveItemInfo(
     val lastModified: Long,
     val canExtract: Boolean,
     val canOpen: Boolean = false,
+    val canDelete: Boolean = false,
+    val canRename: Boolean = false,
 )
+
+internal sealed interface ExplorerArchiveMutationRequest {
+    data class Delete(val entryIds: List<String>) : ExplorerArchiveMutationRequest
+    data class Rename(val entryId: String, val newName: String) : ExplorerArchiveMutationRequest
+}
+
+internal data class ExplorerArchiveMutationProgress(
+    val phase: Int,
+    val currentEntry: String?,
+    val completedEntries: Int,
+    val totalEntries: Int,
+)
+
+internal data class ExplorerArchiveMutationResult(
+    val updatedInfo: ExplorerArchiveSessionInfo,
+    val mutatedEntries: Int,
+)
+
+internal data class ExplorerArchiveMutationFailure(
+    val code: Int,
+    val message: String,
+)
+
+internal interface ExplorerArchiveMutationListener {
+    fun onProgress(progress: ExplorerArchiveMutationProgress)
+    fun onCompleted(result: ExplorerArchiveMutationResult)
+    fun onFailed(failure: ExplorerArchiveMutationFailure)
+}
 
 internal data class ExplorerArchiveExtractionProgress(
     val phase: Int,
@@ -110,8 +148,9 @@ internal class ExplorerArchiveSessionConnection private constructor(
         private set
 
     private val closed = AtomicBoolean(false)
-    private val extractionLock = Any()
+    private val operationLock = Any()
     private val activeExtractions = LinkedHashMap<String, ActiveExtraction>()
+    private val activeMutations = LinkedHashMap<String, ActiveMutation>()
     private val deathRecipient = IBinder.DeathRecipient {
         DEATH_EXECUTOR.execute { closeInternal(notifyPluginUnavailable = true) }
     }
@@ -187,8 +226,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
         check(previous.filenameCharsetNames.isNotEmpty()) {
             "Archive format does not support filename charset overrides"
         }
-        check(synchronized(extractionLock) { activeExtractions.isEmpty() }) {
-            "Archive extraction is still running"
+        check(synchronized(operationLock) {
+            activeExtractions.isEmpty() && activeMutations.isEmpty()
+        }) {
+            "Another archive operation is still running"
         }
         val canonicalOverride = filenameCharsetName?.let { requested ->
             requireNotNull(previous.filenameCharsetNames.firstOrNull { supported ->
@@ -219,6 +260,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
                 ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES,
                 false,
             ),
+            canDeleteEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
+            canRenameEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
             filenameCharsetNames = metadata.supportedNames,
             filenameCharsetName = metadata.effectiveName,
             filenameCharsetOverride = metadata.overrideName,
@@ -283,14 +328,16 @@ internal class ExplorerArchiveSessionConnection private constructor(
                     options.allowResourceBudgetOverride,
                 )
             }
-            synchronized(extractionLock) {
+            synchronized(operationLock) {
                 check(!closed.get()) { "Archive session is closed" }
-                check(activeExtractions.isEmpty()) { "Another archive extraction is already running" }
+                check(activeExtractions.isEmpty() && activeMutations.isEmpty()) {
+                    "Another archive operation is already running"
+                }
                 activeExtractions[operationId] = active
             }
             remote.extractEntries(request, outputSession, extractionCallback(operationId))
         } catch (error: Throwable) {
-            synchronized(extractionLock) {
+            synchronized(operationLock) {
                 if (activeExtractions[operationId] === active) {
                     activeExtractions.remove(operationId)
                 }
@@ -307,8 +354,95 @@ internal class ExplorerArchiveSessionConnection private constructor(
     override fun cancelExtraction(operationId: String) {
         check(!closed.get()) { "Archive session is closed" }
         requireCanonicalOperationId(operationId)
-        if (synchronized(extractionLock) { operationId in activeExtractions }) {
+        if (synchronized(operationLock) { operationId in activeExtractions }) {
             remote.cancelExtraction(operationId)
+        }
+    }
+
+    override fun startMutation(
+        request: ExplorerArchiveMutationRequest,
+        listener: ExplorerArchiveMutationListener,
+    ): String {
+        check(!closed.get()) { "Archive session is closed" }
+        check(protocolVersion >= MUTATION_PROTOCOL_VERSION) {
+            "Archive session does not support host mutations"
+        }
+        val source = File(sourcePath).canonicalFile
+        require(source.isFile && source.canRead()) { "Archive source is no longer readable" }
+        val parent = requireNotNull(source.parentFile?.canonicalFile) {
+            "Archive source has no parent directory"
+        }
+        val requestBundle = Bundle()
+        when (request) {
+            is ExplorerArchiveMutationRequest.Delete -> {
+                check(info.canDeleteEntries) { "Archive session does not support deletion" }
+                require(
+                    request.entryIds.isNotEmpty() &&
+                        request.entryIds.size <= ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_TARGETS,
+                ) { "Archive mutation target count is invalid" }
+                val entryIds = request.entryIds.map { entryId ->
+                    requireValidId(entryId, "archive mutation entry")
+                }
+                require(entryIds.distinct().size == entryIds.size) {
+                    "Archive mutation contains duplicate entry IDs"
+                }
+                requestBundle.putInt(
+                    ExplorerArchiveMutationKeys.OPERATION,
+                    ExplorerArchiveSessionValues.MUTATION_DELETE,
+                )
+                requestBundle.putStringArrayList(
+                    ExplorerArchiveMutationKeys.ENTRY_IDS,
+                    ArrayList(entryIds),
+                )
+            }
+            is ExplorerArchiveMutationRequest.Rename -> {
+                check(info.canRenameEntries) { "Archive session does not support rename" }
+                val entryId = requireValidId(request.entryId, "archive mutation entry")
+                val newName = requireValidMutationName(request.newName)
+                requestBundle.putInt(
+                    ExplorerArchiveMutationKeys.OPERATION,
+                    ExplorerArchiveSessionValues.MUTATION_RENAME,
+                )
+                requestBundle.putString(ExplorerArchiveMutationKeys.ENTRY_ID, entryId)
+                requestBundle.putString(ExplorerArchiveMutationKeys.NEW_NAME, newName)
+            }
+        }
+        val outputSession = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = pluginPackageName,
+            commonParent = parent,
+            targets = listOf(ExplorerActionHostSessionTarget(SOURCE_TARGET_ID, source)),
+            allowCreateOutput = false,
+            allowReplaceTarget = true,
+            allowReplacementUndo = true,
+        )
+        val operationId = UUID.randomUUID().toString()
+        val active = ActiveMutation(outputSession, listener)
+        try {
+            requestBundle.putString(ExplorerArchiveMutationKeys.OPERATION_ID, operationId)
+            synchronized(operationLock) {
+                check(!closed.get()) { "Archive session is closed" }
+                check(activeExtractions.isEmpty() && activeMutations.isEmpty()) {
+                    "Another archive operation is already running"
+                }
+                activeMutations[operationId] = active
+            }
+            remote.mutateEntries(requestBundle, outputSession, mutationCallback(operationId))
+        } catch (error: Throwable) {
+            synchronized(operationLock) {
+                if (activeMutations[operationId] === active) activeMutations.remove(operationId)
+            }
+            runCatching { outputSession.closeFromHost() }
+            throw error
+        }
+        return operationId
+    }
+
+    override fun cancelMutation(operationId: String) {
+        check(!closed.get()) { "Archive session is closed" }
+        requireCanonicalOperationId(operationId)
+        if (synchronized(operationLock) { operationId in activeMutations }) {
+            remote.cancelMutation(operationId)
         }
     }
 
@@ -319,17 +453,34 @@ internal class ExplorerArchiveSessionConnection private constructor(
     private fun closeInternal(notifyPluginUnavailable: Boolean) {
         if (!closed.compareAndSet(false, true)) return
         runCatching { remote.asBinder().unlinkToDeath(deathRecipient, 0) }
-        val abandoned = synchronized(extractionLock) {
-            activeExtractions.values.toList().also { activeExtractions.clear() }
+        val (abandonedExtractions, abandonedMutations) = synchronized(operationLock) {
+            val extractions = activeExtractions.values.toList()
+            val mutations = activeMutations.values.toList()
+            activeExtractions.clear()
+            activeMutations.clear()
+            extractions to mutations
         }
         runCatching { remote.close() }
-        abandoned.forEach { extraction ->
+        abandonedExtractions.forEach { extraction ->
             runCatching { extraction.outputSession.closeFromHost() }
             if (notifyPluginUnavailable && extraction.terminal.compareAndSet(false, true)) {
                 runCatching {
                     extraction.listener.onFailed(
                         ExplorerArchiveExtractionFailure(
                             code = ExplorerArchiveSessionValues.EXTRACTION_ERROR_PLUGIN_UNAVAILABLE,
+                            message = "Archive plugin connection was lost",
+                        ),
+                    )
+                }
+            }
+        }
+        abandonedMutations.forEach { mutation ->
+            runCatching { mutation.outputSession.closeFromHost() }
+            if (notifyPluginUnavailable && mutation.terminal.compareAndSet(false, true)) {
+                runCatching {
+                    mutation.listener.onFailed(
+                        ExplorerArchiveMutationFailure(
+                            code = ExplorerArchiveSessionValues.MUTATION_ERROR_PLUGIN_UNAVAILABLE,
                             message = "Archive plugin connection was lost",
                         ),
                     )
@@ -344,7 +495,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         object : IExplorerArchiveOperationCallback.Stub() {
             override fun onProgress(update: Bundle) {
                 enforcePluginCaller()
-                val active = synchronized(extractionLock) { activeExtractions[operationId] } ?: return
+                val active = synchronized(operationLock) { activeExtractions[operationId] } ?: return
                 if (active.terminal.get()) return
                 runCatching { decodeProgress(update, operationId) }
                     .onSuccess(active.listener::onProgress)
@@ -366,6 +517,35 @@ internal class ExplorerArchiveSessionConnection private constructor(
             }
         }
 
+    private fun mutationCallback(operationId: String) =
+        object : IExplorerArchiveOperationCallback.Stub() {
+            override fun onProgress(update: Bundle) {
+                enforcePluginCaller()
+                val active = synchronized(operationLock) { activeMutations[operationId] } ?: return
+                if (active.terminal.get()) return
+                runCatching { decodeMutationProgress(update, operationId) }
+                    .onSuccess(active.listener::onProgress)
+                    .onFailure { error -> finishMalformedMutationCallback(operationId, error) }
+            }
+
+            override fun onCompleted(result: Bundle) {
+                enforcePluginCaller()
+                runCatching { decodeMutationResult(result, operationId) }
+                    .onSuccess { decoded ->
+                        info = decoded.updatedInfo
+                        finishMutation(operationId) { it.onCompleted(decoded) }
+                    }
+                    .onFailure { error -> finishMalformedMutationCallback(operationId, error) }
+            }
+
+            override fun onFailed(failure: Bundle) {
+                enforcePluginCaller()
+                runCatching { decodeMutationFailure(failure, operationId) }
+                    .onSuccess { decoded -> finishMutation(operationId) { it.onFailed(decoded) } }
+                    .onFailure { error -> finishMalformedMutationCallback(operationId, error) }
+            }
+        }
+
     private fun finishMalformedCallback(operationId: String, error: Throwable) {
         finishExtraction(operationId) { listener ->
             listener.onFailed(
@@ -381,10 +561,120 @@ internal class ExplorerArchiveSessionConnection private constructor(
         operationId: String,
         notify: (ExplorerArchiveExtractionListener) -> Unit,
     ) {
-        val active = synchronized(extractionLock) { activeExtractions.remove(operationId) } ?: return
+        val active = synchronized(operationLock) { activeExtractions.remove(operationId) } ?: return
         if (!active.terminal.compareAndSet(false, true)) return
         runCatching { active.outputSession.closeFromHost() }
         runCatching { notify(active.listener) }
+    }
+
+    private fun finishMalformedMutationCallback(operationId: String, error: Throwable) {
+        finishMutation(operationId) { listener ->
+            listener.onFailed(
+                ExplorerArchiveMutationFailure(
+                    code = ExplorerArchiveSessionValues.MUTATION_ERROR_UNKNOWN,
+                    message = safeMutationFailureMessage(error.message),
+                ),
+            )
+        }
+    }
+
+    private fun finishMutation(
+        operationId: String,
+        notify: (ExplorerArchiveMutationListener) -> Unit,
+    ) {
+        val active = synchronized(operationLock) { activeMutations.remove(operationId) } ?: return
+        if (!active.terminal.compareAndSet(false, true)) return
+        runCatching { active.outputSession.closeFromHost() }
+        runCatching { notify(active.listener) }
+    }
+
+    private fun decodeMutationProgress(
+        bundle: Bundle,
+        expectedOperationId: String,
+    ): ExplorerArchiveMutationProgress {
+        requireMutationOperationId(bundle, expectedOperationId)
+        val phase = bundle.getInt(ExplorerArchiveMutationKeys.PHASE, 0)
+        require(phase in MUTATION_PHASES) { "Archive mutation phase is invalid" }
+        val completedEntries = bundle.getInt(ExplorerArchiveMutationKeys.COMPLETED_ENTRIES, -1)
+        val totalEntries = bundle.getInt(ExplorerArchiveMutationKeys.TOTAL_ENTRIES, -1)
+        require(completedEntries >= 0 && totalEntries >= 0 && completedEntries <= totalEntries) {
+            "Archive mutation entry progress is invalid"
+        }
+        return ExplorerArchiveMutationProgress(
+            phase = phase,
+            currentEntry = bundle.getString(ExplorerArchiveMutationKeys.CURRENT_ENTRY)
+                ?.let(::sanitizeOperationText),
+            completedEntries = completedEntries,
+            totalEntries = totalEntries,
+        )
+    }
+
+    private fun decodeMutationResult(
+        bundle: Bundle,
+        expectedOperationId: String,
+    ): ExplorerArchiveMutationResult {
+        requireMutationOperationId(bundle, expectedOperationId)
+        val updatedBundle = requireNotNull(bundle.getBundle(ExplorerArchiveMutationKeys.SESSION_INFO)) {
+            "Archive mutation result has no updated session information"
+        }
+        val mutatedEntries = bundle.getInt(ExplorerArchiveMutationKeys.MUTATED_ENTRIES, -1)
+        require(mutatedEntries in 1..ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_TARGETS) {
+            "Archive mutation result count is invalid"
+        }
+        return ExplorerArchiveMutationResult(
+            updatedInfo = decodeUpdatedSessionInfo(updatedBundle),
+            mutatedEntries = mutatedEntries,
+        )
+    }
+
+    private fun decodeMutationFailure(
+        bundle: Bundle,
+        expectedOperationId: String,
+    ): ExplorerArchiveMutationFailure {
+        requireMutationOperationId(bundle, expectedOperationId)
+        val code = bundle.getInt(ExplorerArchiveMutationKeys.ERROR_CODE, 0)
+        require(code in MUTATION_ERROR_CODES) { "Archive mutation error code is invalid" }
+        return ExplorerArchiveMutationFailure(
+            code = code,
+            message = safeMutationFailureMessage(
+                bundle.getString(ExplorerArchiveMutationKeys.ERROR_MESSAGE),
+            ),
+        )
+    }
+
+    private fun decodeUpdatedSessionInfo(bundle: Bundle): ExplorerArchiveSessionInfo {
+        val previous = info
+        require(bundle.getString(ExplorerArchiveSessionKeys.SESSION_ID) == previous.sessionId) {
+            "Archive session ID changed after mutation"
+        }
+        require(bundle.getString(ExplorerArchiveSessionKeys.ROOT_ID) == previous.rootId) {
+            "Archive root ID changed after mutation"
+        }
+        require(sanitizeDisplayName(bundle.getString(ExplorerArchiveSessionKeys.DISPLAY_NAME)) == previous.displayName) {
+            "Archive display name changed after mutation"
+        }
+        val sourceSize = bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_SIZE, -1L)
+        val sourceLastModified = bundle.getLong(ExplorerArchiveSessionKeys.SOURCE_LAST_MODIFIED, -1L)
+        require(sourceSize >= 0L && sourceLastModified >= 0L) {
+            "Archive source identity is invalid after mutation"
+        }
+        val format = decodeFormatMetadata(bundle, protocolVersion)
+        require(format.id == previous.formatId && format.displayName == previous.formatDisplayName) {
+            "Archive format changed after mutation"
+        }
+        val filenameCharsets = decodeFilenameCharsetMetadata(bundle, protocolVersion)
+        return previous.copy(
+            sourceSize = sourceSize,
+            sourceLastModified = sourceLastModified,
+            canOpenEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_OPEN_ENTRIES, false),
+            canExtractEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES, false),
+            canDeleteEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
+            canRenameEntries = bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
+            displayNameMatchesFormat = format.displayNameMatches,
+            filenameCharsetNames = filenameCharsets.supportedNames,
+            filenameCharsetName = filenameCharsets.effectiveName,
+            filenameCharsetOverride = filenameCharsets.overrideName,
+        )
     }
 
     private fun decodeProgress(
@@ -483,6 +773,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
         }
     }
 
+    private fun requireMutationOperationId(bundle: Bundle, expectedOperationId: String) {
+        require(bundle.getString(ExplorerArchiveMutationKeys.OPERATION_ID) == expectedOperationId) {
+            "Archive mutation operation ID changed"
+        }
+    }
+
     private fun sanitizeOperationText(
         value: String,
         maxLength: Int = ExplorerActionProtocol.MAX_ARCHIVE_OPERATION_MESSAGE_LENGTH,
@@ -491,22 +787,42 @@ internal class ExplorerArchiveSessionConnection private constructor(
             .trim()
             .take(maxLength)
             .takeIf(String::isNotEmpty),
-    ) { "Archive extraction text is invalid" }
+    ) { "Archive operation text is invalid" }
 
     private fun safeFailureMessage(value: String?): String = runCatching {
         sanitizeOperationText(value ?: "Archive extraction failed")
     }.getOrDefault("Archive extraction failed")
 
+    private fun safeMutationFailureMessage(value: String?): String = runCatching {
+        sanitizeOperationText(value ?: "Archive mutation failed")
+    }.getOrDefault("Archive mutation failed")
+
+    private fun requireValidMutationName(value: String): String = requireNotNull(
+        value.takeIf { name ->
+            name.length in 1..ExplorerActionProtocol.MAX_ARCHIVE_MUTATION_NAME_LENGTH &&
+                name != "." &&
+                name != ".." &&
+                name.any { !it.isWhitespace() } &&
+                name.none { character ->
+                    character == '/' ||
+                        character == '\\' ||
+                        character == '\u0000' ||
+                        character.code < 0x20 ||
+                        character.code == 0x7F
+                }
+        },
+    ) { "Archive mutation entry name is invalid" }
+
     private fun enforcePluginCaller() {
         if (Binder.getCallingUid() != pluginUid) {
-            throw SecurityException("Archive extraction callback caller changed")
+            throw SecurityException("Archive operation callback caller changed")
         }
     }
 
     private fun requireCanonicalOperationId(value: String) {
         val parsed = runCatching { UUID.fromString(value) }.getOrNull()
         require(parsed?.toString()?.equals(value, ignoreCase = true) == true) {
-            "Archive extraction operation ID is invalid"
+            "Archive operation ID is invalid"
         }
     }
 
@@ -540,6 +856,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
             } else {
                 bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT, false)
             },
+            canDelete = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE, false),
+            canRename = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME, false),
         )
     }
 
@@ -562,6 +882,12 @@ internal class ExplorerArchiveSessionConnection private constructor(
     private data class ActiveExtraction(
         val outputSession: ExplorerActionHostSession,
         val listener: ExplorerArchiveExtractionListener,
+        val terminal: AtomicBoolean = AtomicBoolean(false),
+    )
+
+    private data class ActiveMutation(
+        val outputSession: ExplorerActionHostSession,
+        val listener: ExplorerArchiveMutationListener,
         val terminal: AtomicBoolean = AtomicBoolean(false),
     )
 
@@ -625,6 +951,10 @@ internal class ExplorerArchiveSessionConnection private constructor(
                         ),
                         canExtractEntries = protocolVersion >= EXTRACTION_PROTOCOL_VERSION &&
                             bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_EXTRACT_ENTRIES, false),
+                        canDeleteEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                            bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_DELETE_ENTRIES, false),
+                        canRenameEntries = protocolVersion >= MUTATION_PROTOCOL_VERSION &&
+                            bundle.getBoolean(ExplorerArchiveSessionKeys.CAN_RENAME_ENTRIES, false),
                         formatId = formatMetadata.id,
                         formatDisplayName = formatMetadata.displayName,
                         displayNameMatchesFormat = formatMetadata.displayNameMatches,
@@ -737,6 +1067,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
         private const val ENTRY_CAPABILITIES_PROTOCOL_VERSION = 11
         private const val FILENAME_CHARSET_PROTOCOL_VERSION = 13
         private const val ARCHIVE_FORMAT_PROTOCOL_VERSION = 17
+        private const val MUTATION_PROTOCOL_VERSION = 19
         private const val SOURCE_TARGET_ID = "archive-source"
         private val ARCHIVE_FORMAT_ID_PATTERN = Regex("[a-z0-9][a-z0-9._-]*")
         private val DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
@@ -757,6 +1088,22 @@ internal class ExplorerArchiveSessionConnection private constructor(
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_INVALID_REQUEST,
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_PLUGIN_UNAVAILABLE,
             ExplorerArchiveSessionValues.EXTRACTION_ERROR_UNKNOWN,
+        )
+        private val MUTATION_PHASES = setOf(
+            ExplorerArchiveSessionValues.MUTATION_PHASE_PREPARING,
+            ExplorerArchiveSessionValues.MUTATION_PHASE_WRITING,
+            ExplorerArchiveSessionValues.MUTATION_PHASE_VERIFYING,
+            ExplorerArchiveSessionValues.MUTATION_PHASE_COMMITTING,
+            ExplorerArchiveSessionValues.MUTATION_PHASE_REINDEXING,
+        )
+        private val MUTATION_ERROR_CODES = setOf(
+            ExplorerArchiveSessionValues.MUTATION_ERROR_CANCELLED,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_SOURCE_CHANGED,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_UNSUPPORTED,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_INVALID_REQUEST,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_OUTPUT,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_PLUGIN_UNAVAILABLE,
+            ExplorerArchiveSessionValues.MUTATION_ERROR_UNKNOWN,
         )
         private val EXTRACTION_INTERACTION_KINDS = setOf(
             ExplorerArchiveSessionValues.EXTRACTION_INTERACTION_PASSWORD_REQUIRED,

@@ -19,6 +19,8 @@ internal sealed class ArchiveExplorerItem(
     val compressedSize: Long,
     val canExtractEntry: Boolean,
     val canOpenEntry: Boolean,
+    val canDeleteEntry: Boolean,
+    val canRenameEntry: Boolean,
 ) : ExplorerItem {
 
     override fun getName(): String = displayName
@@ -35,9 +37,9 @@ internal sealed class ArchiveExplorerItem(
 
     override fun canCopy(): Boolean = false
 
-    override fun canRename(): Boolean = false
+    override fun canRename(): Boolean = canRenameEntry
 
-    override fun canDelete(): Boolean = false
+    override fun canDelete(): Boolean = canDeleteEntry
 
     override fun canBuildApk(): Boolean = false
 
@@ -87,6 +89,8 @@ internal class ArchiveExplorerFileItem(
     compressedSize = info.compressedSize,
     canExtractEntry = info.canExtract,
     canOpenEntry = info.canOpen,
+    canDeleteEntry = info.canDelete,
+    canRenameEntry = info.canRename,
 )
 
 internal class ArchiveExplorerPage internal constructor(
@@ -98,6 +102,8 @@ internal class ArchiveExplorerPage internal constructor(
     modifiedTime: Long,
     size: Long,
     canExtract: Boolean,
+    canDelete: Boolean,
+    canRename: Boolean,
 ) : ArchiveExplorerItem(
     entryId = entryId,
     displayName = name,
@@ -108,6 +114,8 @@ internal class ArchiveExplorerPage internal constructor(
     compressedSize = -1L,
     canExtractEntry = canExtract,
     canOpenEntry = false,
+    canDeleteEntry = canDelete,
+    canRenameEntry = canRename,
 ), ExplorerPage {
 
     private var children: MutableList<ExplorerItem> = mutableListOf()
@@ -141,6 +149,12 @@ internal class ArchiveExplorerProvider(
 
     val canExtractEntries: Boolean
         get() = connection.info.canExtractEntries
+
+    val canDeleteEntries: Boolean
+        get() = connection.info.canDeleteEntries
+
+    val canRenameEntries: Boolean
+        get() = connection.info.canRenameEntries
 
     val formatDisplayName: String?
         get() = connection.info.formatDisplayName
@@ -181,6 +195,8 @@ internal class ArchiveExplorerProvider(
             modifiedTime = parent.lastModified(),
             size = parent.size,
             canExtract = parent.canExtractEntry,
+            canDelete = parent.canDeleteEntry,
+            canRename = parent.canRenameEntry,
         )
         connection.listAllChildren(parent.entryId).forEach { info ->
             check(itemInfoById.putIfAbsent(info.id, info)?.let { it == info } != false) {
@@ -197,6 +213,8 @@ internal class ArchiveExplorerProvider(
                     modifiedTime = info.lastModified,
                     size = info.size,
                     canExtract = connection.info.canExtractEntries && info.canExtract,
+                    canDelete = connection.info.canDeleteEntries && info.canDelete,
+                    canRename = connection.info.canRenameEntries && info.canRename,
                 ).also {
                     loaded.addChild(it)
                     rememberPage(it)
@@ -239,6 +257,21 @@ internal class ArchiveExplorerProvider(
 
     fun reindexFilenameCharset(filenameCharsetName: String?): ExplorerArchiveSessionInfo {
         val updated = connection.reindexFilenameCharset(filenameCharsetName)
+        itemInfoById.clear()
+        pageById.clear()
+        pageByPath.clear()
+        restorationLoadedPageIds.clear()
+        entryMaterializer.close()
+        entryMaterializer = ArchiveEntryMaterializer(
+            cacheDirectory = cacheDirectory,
+            sessionId = updated.sessionId,
+        )
+        rootPage = createRootPage()
+        return updated
+    }
+
+    fun reloadAfterMutation(): ExplorerArchiveSessionInfo {
+        val updated = connection.info
         itemInfoById.clear()
         pageById.clear()
         pageByPath.clear()
@@ -304,6 +337,37 @@ internal class ArchiveExplorerProvider(
         connection.cancelExtraction(operationId)
     }
 
+    fun startDeletion(
+        items: List<ArchiveExplorerItem>,
+        listener: ExplorerArchiveMutationListener,
+    ): String {
+        check(canDeleteEntries) { "Archive session does not support deletion" }
+        require(items.isNotEmpty()) { "Archive deletion selection is empty" }
+        val entryIds = items.map { item ->
+            check(item.canDeleteEntry) { "Archive entry cannot be deleted" }
+            requireKnownItem(item)
+            item.entryId
+        }
+        return connection.startMutation(ExplorerArchiveMutationRequest.Delete(entryIds), listener)
+    }
+
+    fun startRename(
+        item: ArchiveExplorerItem,
+        newName: String,
+        listener: ExplorerArchiveMutationListener,
+    ): String {
+        check(canRenameEntries && item.canRenameEntry) { "Archive entry cannot be renamed" }
+        requireKnownItem(item)
+        return connection.startMutation(
+            ExplorerArchiveMutationRequest.Rename(item.entryId, newName),
+            listener,
+        )
+    }
+
+    fun cancelMutation(operationId: String) {
+        connection.cancelMutation(operationId)
+    }
+
     fun materializeEntry(item: ArchiveExplorerFileItem, maxBytes: Long): File {
         check(item.canOpenEntry) { "Archive entry cannot be opened" }
         val info = requireNotNull(itemInfoById[item.entryId]) { "Archive entry metadata is unavailable" }
@@ -350,7 +414,15 @@ internal class ArchiveExplorerProvider(
         modifiedTime = connection.info.sourceLastModified,
         size = connection.info.sourceSize,
         canExtract = connection.info.canExtractEntries,
+        canDelete = false,
+        canRename = false,
     ).also(::rememberPage)
+
+    private fun requireKnownItem(item: ArchiveExplorerItem) {
+        val knownPath = pageById[item.entryId]?.path
+            ?: itemInfoById[item.entryId]?.let { syntheticPath(it.id) }
+        check(knownPath == item.path) { "Archive entry does not belong to this session" }
+    }
 
     private fun ensurePageLoaded(page: ArchiveExplorerPage) {
         if (!restorationLoadedPageIds.add(page.entryId)) return

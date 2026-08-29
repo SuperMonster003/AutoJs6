@@ -37,4 +37,18 @@ interface IExplorerArchiveSession {
      * if rebuilding fails.
      */
     Bundle reindexFilenameCharset(String filenameCharsetName);
+
+    /**
+     * Starts one asynchronous, host-transactional archive mutation. Added in protocol v19.
+     * The initial protocol slice supports deletion and rename of existing entries. The supplied
+     * host session exposes only the archive source target and its atomic replacement transaction.
+     */
+    void mutateEntries(
+        in Bundle request,
+        IExplorerActionHostSession outputSession,
+        IExplorerArchiveOperationCallback callback
+    );
+
+    /** Requests cancellation of one mutation started by this caller. Added in protocol v19. */
+    void cancelMutation(String operationId);
 }
