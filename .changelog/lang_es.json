@@ -214,6 +214,7 @@
         "Los archivos fuente `.py/.ts/.java/.kt` compatibles con plugins no mostraban de forma coherente un icono de fuente ejecutable y la acción Ejecutar"
       ],
       "improvement": [
+        "Los mensajes de validación del runtime TypeScript TSX ahora siguen el idioma de la aplicación en los 10 idiomas compatibles en lugar de mostrar inglés codificado de forma fija",
         "Se eliminó la obsoleta opción de solicitud de eliminación heredada de TypeScript de Node.js Runtime; TypeScript sin compilar sigue requiriendo el compilador y el runtime nunca lo borra mediante expresiones regulares",
         "Se eliminaron del host los conmutadores Gradle de Node.js y las copias de ejemplos, declaraciones de tipos, asistente de proyectos y scripts de verificación; los valores predeterminados del runtime y los recursos de desarrollo ahora pertenecen al plugin Node.js Runtime",
         "Los diagnósticos del compilador DEX ahora conservan, dentro del límite existente, detalles INFO/WARNING/ERROR redactados y metadatos opcionales de origen lógico, entrada del archivo y posición; las opciones para desarrolladores muestran la última ruta de carga de JAR guardada solo en la memoria del proceso y avisos localizados de BUSY, tiempo de espera agotado y reserva",

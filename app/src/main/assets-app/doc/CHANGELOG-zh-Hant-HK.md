@@ -215,6 +215,7 @@
 * `修復` ZIP/JAR 等由外掛程式處理的檔案, Explorer Action 拼圖圖示填滿整個操作格而顯得過大的問題
 * `修復` 檔案管理器無法可靠區分同為 `.ts/.mts` 副檔名的 TypeScript 原始碼/宣告檔與 MPEG-2 TS 影片, 且 `.d.ts/.d.mts/.d.cts` 未必一律視為宣告檔的問題
 * `修復` 由外掛程式支援的 `.py/.ts/.java/.kt` 原始碼檔未統一顯示可執行原始碼圖示與執行入口的問題
+* `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `優化` 移除已過時的 Node.js Runtime legacy TypeScript stripping 請求旗標; 原始 TypeScript 維持只可經編譯器處理, Runtime 絕不再以正則表達式擦除
 * `優化` 移除宿主側 Node.js Gradle 開關及重複的示例, 類型聲明, 項目嚮導與校驗腳本, 運行時默認值和開發資產現統一由 Node.js Runtime 插件維護
 * `優化` DEX 編譯器診斷現在於既有預算內保留經脫敏的 INFO/WARNING/ERROR 詳情及可選邏輯來源, 歸檔條目與位置元數據; 開發者選項會顯示僅存於進程內的最近一次 JAR 載入路徑, 並提供 BUSY, 超時及回退提示
