@@ -354,6 +354,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` La désactivation ou la désinstallation du plugin Ace externe pendant l'utilisation de l'éditeur ou de son interface de paramètres pouvait entraîner la perte de modifications non enregistrées ou laisser l'interface dans un état invalide
 * `Correction` Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas
 * `Correction` La défaillance du processus d'un seul plugin local pouvait laisser la liste du Centre des plugins entièrement vide
+* `Correction` Au retour vers le Centre des plugins depuis un autre écran ou l'arrière-plan, l'actualisation concurrente pouvait supprimer temporairement les plugins SDK hérités installés ou les remplacer par des entrées d'index désactivées, réordonner les lignes, réassocier les commutateurs et décaler la position de défilement
 * `Correction` Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit
 * `Correction` Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs
 * `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement

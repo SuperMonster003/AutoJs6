@@ -194,6 +194,7 @@
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
 * `Fix` A single local plugin process failure could leave Plugin Center with a completely blank list
+* `Fix` Returning to Plugin Center from another screen or the background could make a concurrent refresh transiently remove installed legacy SDK plugins or replace them with disabled index-only entries, reordering rows, rebinding switches, and shifting the scroll position
 * `Fix` Installed plugin icons on the Home Plugins tab did not switch dynamically when night mode changed
 * `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates

@@ -191,6 +191,7 @@
         "La désactivation ou la désinstallation du plugin Ace externe pendant l'utilisation de l'éditeur ou de son interface de paramètres pouvait entraîner la perte de modifications non enregistrées ou laisser l'interface dans un état invalide",
         "Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas",
         "La défaillance du processus d'un seul plugin local pouvait laisser la liste du Centre des plugins entièrement vide",
+        "Au retour vers le Centre des plugins depuis un autre écran ou l'arrière-plan, l'actualisation concurrente pouvait supprimer temporairement les plugins SDK hérités installés ou les remplacer par des entrées d'index désactivées, réordonner les lignes, réassocier les commutateurs et décaler la position de défilement",
         "Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit",
         "Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs",
         "Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement",
