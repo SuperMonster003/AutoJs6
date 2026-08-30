@@ -2632,6 +2632,84 @@ class ExplorerActionHostSessionInstrumentationTest {
     }
 
     @Test
+    fun relatedFileAccessOpensOnlyTheFrozenHostDerivedCandidate() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v22-related-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "release.apk").apply { writeText("apk") }
+        val idsig = File(testRoot, "release.apk.idsig").apply { writeText("idsig") }
+        val unrelated = File(testRoot, "release.apk.sig").apply { writeText("secret") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            relatedFileSuffixes = setOf(".idsig"),
+        )
+
+        try {
+            val actual = ParcelFileDescriptor.AutoCloseInputStream(
+                requireNotNull(session.openRelatedFile("selected", ".idsig")),
+            ).use { it.readBytes().decodeToString() }
+            assertEquals("idsig", actual)
+            expectIllegalArgument { session.openRelatedFile("selected", ".sig") }
+            expectIllegalState { session.listChildren("selected", "", 0, 100) }
+            expectIllegalState { session.openFile("selected", unrelated.name) }
+
+            assertTrue(idsig.delete())
+            idsig.writeText("replacement")
+            expectIllegalState { session.openRelatedFile("selected", ".idsig") }
+        } finally {
+            session.close()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun relatedFileAccessDoesNotAdoptLateOrSymbolicLinkCandidates() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v22-absent-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val selected = File(testRoot, "release.apk").apply { writeText("apk") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            relatedFileSuffixes = setOf(".idsig"),
+        )
+
+        try {
+            assertNull(session.openRelatedFile("selected", ".idsig"))
+            File(testRoot, "release.apk.idsig").writeText("late")
+            assertNull(session.openRelatedFile("selected", ".idsig"))
+        } finally {
+            session.close()
+        }
+
+        val real = File(testRoot, "real.idsig").apply { writeText("real") }
+        val link = File(testRoot, "release.apk.idsig")
+        assertTrue(link.delete())
+        Os.symlink(real.path, link.path)
+        val linkSession = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("selected", selected)),
+            allowCreateOutput = false,
+            relatedFileSuffixes = setOf(".idsig"),
+        )
+        try {
+            assertNull(linkSession.openRelatedFile("selected", ".idsig"))
+        } finally {
+            linkSession.close()
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
     fun playbackHistoryKeepsOnlyTheMostRecentlyOpenedVideo() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val previousEnabled = Pref.isExplorerPlaybackHistoryEnabled

@@ -60,6 +60,9 @@ internal object ExplorerActionCatalogParser {
                 maxOutputBytes = action.getLongOrNull(ExplorerActionCatalogKeys.MAX_OUTPUT_BYTES),
                 readSiblings = action.getBooleanOrNull(ExplorerActionCatalogKeys.READ_SIBLINGS),
                 playbackProgress = action.getBooleanOrNull(ExplorerActionCatalogKeys.PLAYBACK_PROGRESS),
+                relatedFileSuffixes = action.getStringArrayList(
+                    ExplorerActionCatalogKeys.RELATED_FILE_SUFFIXES,
+                ),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }

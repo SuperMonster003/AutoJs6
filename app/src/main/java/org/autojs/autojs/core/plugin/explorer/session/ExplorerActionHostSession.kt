@@ -52,6 +52,7 @@ internal class ExplorerActionHostSession private constructor(
     private val allowReplacementUndo: Boolean,
     allowReadSiblings: Boolean,
     allowPlaybackProgress: Boolean,
+    relatedFileSuffixes: Set<String>,
     private val onOutputCommitted: (File) -> Unit,
     private val onTargetReplaced: (File) -> Unit,
     private val onSourcesTrashed: () -> Unit,
@@ -71,6 +72,7 @@ internal class ExplorerActionHostSession private constructor(
         targets = targets,
         allowReadSiblings = allowReadSiblings,
         allowPlaybackProgress = allowPlaybackProgress,
+        relatedFileSuffixes = relatedFileSuffixes,
         playbackHistoryStore = playbackHistoryStore,
         requireSessionOpen = { synchronized(lock) { checkOpen() } },
     )
@@ -760,6 +762,11 @@ internal class ExplorerActionHostSession private constructor(
                 batchId = null,
             )
         }
+    }
+
+    override fun openRelatedFile(targetId: String, suffix: String): ParcelFileDescriptor? {
+        enforceCaller()
+        return inputAccess.openRelatedFile(targetId, suffix)
     }
 
     override fun queryTargetTrashBatch(targetTrashBatchId: String): Bundle {
@@ -1802,6 +1809,7 @@ internal class ExplorerActionHostSession private constructor(
             allowReplacementUndo: Boolean = false,
             allowReadSiblings: Boolean = false,
             allowPlaybackProgress: Boolean = false,
+            relatedFileSuffixes: Set<String> = emptySet(),
             onOutputCommitted: (File) -> Unit = ::notifyCreated,
             onTargetReplaced: (File) -> Unit = ::notifyChanged,
             onSourcesTrashed: () -> Unit = ::notifyWorkspaceChanged,
@@ -1846,6 +1854,7 @@ internal class ExplorerActionHostSession private constructor(
                 allowReplacementUndo = allowReplacementUndo,
                 allowReadSiblings = allowReadSiblings,
                 allowPlaybackProgress = allowPlaybackProgress,
+                relatedFileSuffixes = relatedFileSuffixes,
                 onOutputCommitted = onOutputCommitted,
                 onTargetReplaced = onTargetReplaced,
                 onSourcesTrashed = onSourcesTrashed,

@@ -13,6 +13,9 @@ internal object ExplorerActionCatalogPolicy {
     private val fileNameSuffixPattern = Regex(
         "[a-z0-9][a-z0-9+_-]*(?:\\.[a-z0-9][a-z0-9+_-]*)+",
     )
+    private val relatedFileSuffixPattern = Regex(
+        "\\.[a-z0-9][a-z0-9+_-]*(?:\\.[a-z0-9][a-z0-9+_-]*)*",
+    )
     private val mimePartPattern = Regex("[a-z0-9][a-z0-9!#$&^_.+-]*")
 
     @Suppress("LongParameterList")
@@ -39,6 +42,7 @@ internal object ExplorerActionCatalogPolicy {
         maxOutputBytes: Long? = null,
         readSiblings: Boolean? = null,
         playbackProgress: Boolean? = null,
+        relatedFileSuffixes: Collection<String>? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -214,10 +218,27 @@ internal object ExplorerActionCatalogPolicy {
         }
         val normalizedReadSiblings = readSiblings == true
         val normalizedPlaybackProgress = playbackProgress == true
+        val normalizedRelatedFileSuffixes = normalizeRelatedFileSuffixes(relatedFileSuffixes)
+            ?: return null
         if (
             (normalizedReadSiblings || normalizedPlaybackProgress) &&
             (
                 protocolVersion < SESSION_MEDIA_EXTENSION_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE
+                )
+        ) {
+            return null
+        }
+        if (
+            normalizedRelatedFileSuffixes.isNotEmpty() &&
+            (
+                protocolVersion < RELATED_FILE_PROTOCOL_VERSION ||
+                    normalizedReadSiblings ||
+                    normalizedPlaybackProgress ||
                     targetKind != ExplorerActionValues.TARGET_FILE ||
                     normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
                     accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
@@ -250,6 +271,7 @@ internal object ExplorerActionCatalogPolicy {
             maxOutputBytes = normalizedOutput.maxBytes,
             readSiblings = normalizedReadSiblings,
             playbackProgress = normalizedPlaybackProgress,
+            relatedFileSuffixes = normalizedRelatedFileSuffixes,
         )
     }
 
@@ -352,6 +374,23 @@ internal object ExplorerActionCatalogPolicy {
         }
     }
 
+    private fun normalizeRelatedFileSuffixes(values: Collection<String>?): Set<String>? {
+        if (values == null) return emptySet()
+        if (values.size > ExplorerActionProtocol.MAX_RELATED_FILE_SUFFIXES) return null
+        val result = LinkedHashSet<String>()
+        values.forEach { value ->
+            val normalized = value.trim().lowercase(Locale.ROOT)
+            if (
+                normalized.length !in 2..ExplorerActionProtocol.MAX_RELATED_FILE_SUFFIX_LENGTH ||
+                !relatedFileSuffixPattern.matches(normalized)
+            ) {
+                return null
+            }
+            if (!result.add(normalized)) return null
+        }
+        return result
+    }
+
     internal fun normalizeMimeType(value: String): String? {
         val normalized = value.substringBefore(';').trim().lowercase(Locale.ROOT)
         val parts = normalized.split('/')
@@ -435,4 +474,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val SESSION_MEDIA_EXTENSION_PROTOCOL_VERSION = 12
     private const val COMPOUND_SUFFIX_PROTOCOL_VERSION = 14
     private const val UNMATCHED_FILE_PROBE_PROTOCOL_VERSION = 17
+    private const val RELATED_FILE_PROTOCOL_VERSION = 22
 }

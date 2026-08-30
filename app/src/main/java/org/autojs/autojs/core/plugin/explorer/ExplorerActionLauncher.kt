@@ -102,6 +102,7 @@ internal object ExplorerActionLauncher {
                     action.descriptor.accessMode == ExplorerActionValues.ACCESS_MANAGE_TARGET ||
                     action.descriptor.readSiblings ||
                     action.descriptor.playbackProgress ||
+                    action.descriptor.relatedFileSuffixes.isNotEmpty() ||
                     targets.size > 1 ||
                     targets.any { target -> target.kind == ExplorerActionValues.TARGET_DIRECTORY }
                 )
@@ -127,6 +128,7 @@ internal object ExplorerActionLauncher {
                             ),
                 allowReadSiblings = action.descriptor.readSiblings,
                 allowPlaybackProgress = action.descriptor.playbackProgress,
+                relatedFileSuffixes = action.descriptor.relatedFileSuffixes,
             )
         } else {
             null

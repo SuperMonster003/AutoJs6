@@ -22,6 +22,7 @@ internal data class ExplorerActionDescriptor(
     val maxOutputBytes: Long?,
     val readSiblings: Boolean,
     val playbackProgress: Boolean,
+    val relatedFileSuffixes: Set<String>,
 )
 
 internal data class ExplorerActionTarget(

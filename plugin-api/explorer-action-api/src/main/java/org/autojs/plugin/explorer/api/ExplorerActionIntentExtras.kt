@@ -18,7 +18,8 @@ object ExplorerActionIntentExtras {
     /**
      * v4 Bundle containing an [IExplorerActionHostSession] under
      * [ExplorerActionHostSessionKeys.BINDER]. Present only when the action needs directory,
-     * multiple-target, create-in-parent, direct-sibling, or playback-progress capabilities.
+     * multiple-target, create-in-parent, direct-sibling, related-file, or playback-progress
+     * capabilities.
      */
     const val HOST_SESSION = "${PREFIX}HOST_SESSION"
 

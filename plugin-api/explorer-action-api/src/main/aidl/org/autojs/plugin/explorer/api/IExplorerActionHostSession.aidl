@@ -134,4 +134,11 @@ interface IExplorerActionHostSession {
      * best-effort per source; conflicts and recovery-required items remain in host Trash.
      */
     Bundle undoTargetTrashBatch(String targetTrashBatchId);
+
+    /**
+     * v22. Opens a frozen, read-only related-file candidate whose exact name was derived by the
+     * host as `<target display name><declared suffix>`. Returns null when that candidate did not
+     * exist at session creation. Appended to preserve every v1-v21 Binder transaction code.
+     */
+    ParcelFileDescriptor openRelatedFile(String targetId, String suffix);
 }

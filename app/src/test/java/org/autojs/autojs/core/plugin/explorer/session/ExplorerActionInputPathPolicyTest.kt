@@ -1,12 +1,26 @@
 package org.autojs.autojs.core.plugin.explorer.session
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
 
 class ExplorerActionInputPathPolicyTest {
+
+    @Test
+    fun relatedFileNamesAreDerivedOnlyFromStrictSuffixes() {
+        assertEquals(
+            "release.apk.idsig",
+            ExplorerActionRelatedFilePolicy.candidateName("release.apk", ".idsig"),
+        )
+        assertTrue(ExplorerActionRelatedFilePolicy.isValidSuffix(".proof.sig"))
+        listOf("idsig", "../idsig", ".", ".bad/idsig", ".bad\\idsig", ".sig.").forEach { suffix ->
+            assertFalse(ExplorerActionRelatedFilePolicy.isValidSuffix(suffix))
+        }
+    }
 
     @Test
     fun `relative path grammar rejects ambiguous or escaping segments`() {

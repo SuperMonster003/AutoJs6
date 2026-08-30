@@ -515,6 +515,81 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV22RelatedFilesAreBoundedToExactDeclaredSuffixes() {
+        val descriptor = descriptor(
+            protocolVersion = 22,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            relatedFileSuffixes = listOf(" .IDSIG ", ".proof.sig"),
+        ) ?: error("Expected a valid v22 related-file descriptor")
+
+        assertEquals(setOf(".idsig", ".proof.sig"), descriptor.relatedFileSuffixes)
+        assertNull(
+            descriptor(
+                protocolVersion = 21,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+        listOf("idsig", "../idsig", ".", ".bad/idsig", ".bad\\idsig", ".sig.").forEach { suffix ->
+            assertNull(
+                descriptor(
+                    protocolVersion = 22,
+                    cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                    relatedFileSuffixes = listOf(suffix),
+                ),
+            )
+        }
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                relatedFileSuffixes = listOf(".idsig", " .IDSIG "),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                readSiblings = true,
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                playbackProgress = true,
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                mimeTypes = emptyList(),
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+        assertNull(
+            descriptor(
+                protocolVersion = 22,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                relatedFileSuffixes = listOf(".idsig"),
+            ),
+        )
+    }
+
+    @Test
     fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
         val probe = descriptor(
             protocolVersion = 17,
@@ -790,6 +865,7 @@ class ExplorerActionCatalogPolicyTest {
         probeForActionId: String? = null,
         readSiblings: Boolean? = null,
         playbackProgress: Boolean? = null,
+        relatedFileSuffixes: Collection<String>? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -810,6 +886,7 @@ class ExplorerActionCatalogPolicyTest {
             probeForActionId = probeForActionId,
             readSiblings = readSiblings,
             playbackProgress = playbackProgress,
+            relatedFileSuffixes = relatedFileSuffixes,
         )
     }
 }

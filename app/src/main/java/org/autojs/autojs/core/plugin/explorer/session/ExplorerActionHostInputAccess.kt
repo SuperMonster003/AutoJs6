@@ -2,14 +2,19 @@ package org.autojs.autojs.core.plugin.explorer.session
 
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 import java.io.File
+import java.io.FileDescriptor
 import java.io.IOException
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Read-only side of an Explorer Action host capability.
@@ -23,6 +28,7 @@ internal class ExplorerActionHostInputAccess(
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowReadSiblings: Boolean,
     private val allowPlaybackProgress: Boolean,
+    relatedFileSuffixes: Set<String>,
     private val playbackHistoryStore: ExplorerPlaybackHistoryStore,
     private val requireSessionOpen: () -> Unit,
 ) {
@@ -36,6 +42,21 @@ internal class ExplorerActionHostInputAccess(
         val file = target.file.canonicalFile
         target.id to ExplorerActionHostTargetState(file, ExplorerActionFileIdentity.capture(file))
     }
+    private val allowedRelatedFileSuffixes = relatedFileSuffixes.toSet()
+    private val relatedFileOpenRequests = AtomicInteger(0)
+    private val relatedFiles = buildMap {
+        targetsById.forEach { (targetId, target) ->
+            allowedRelatedFileSuffixes.forEach { suffix ->
+                val displayName = ExplorerActionRelatedFilePolicy.candidateName(
+                    target.file.name,
+                    suffix,
+                )
+                captureRelatedFile(parent, displayName)?.let { candidate ->
+                    put(RelatedFileKey(targetId, suffix), candidate)
+                }
+            }
+        }
+    }
 
     init {
         require(parent.isDirectory) { "Explorer Action host session parent is not a directory" }
@@ -44,6 +65,12 @@ internal class ExplorerActionHostInputAccess(
         }
         require(targetsById.values.all { target -> target.file.parentFile?.canonicalFile == parent }) {
             "Explorer Action host session targets do not share the declared parent"
+        }
+        require(
+            allowedRelatedFileSuffixes.size <= ExplorerActionProtocol.MAX_RELATED_FILE_SUFFIXES &&
+                allowedRelatedFileSuffixes.all(ExplorerActionRelatedFilePolicy::isValidSuffix),
+        ) {
+            "Explorer Action related-file suffixes are invalid"
         }
     }
 
@@ -92,6 +119,35 @@ internal class ExplorerActionHostInputAccess(
         val file = resolveInput(targetId, relativePath)
         require(file.isFile && file.canRead()) { "Explorer Action session file is not readable" }
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    }
+
+    fun openRelatedFile(targetId: String, suffix: String): ParcelFileDescriptor? {
+        requireSessionOpen()
+        targetState(targetId)
+        require(suffix in allowedRelatedFileSuffixes) {
+            "Explorer Action related-file suffix is not part of this session"
+        }
+        check(
+            relatedFileOpenRequests.incrementAndGet() <=
+                ExplorerActionProtocol.MAX_RELATED_FILE_OPEN_REQUESTS,
+        ) {
+            "Explorer Action related-file open request limit was exceeded"
+        }
+        val candidate = relatedFiles[RelatedFileKey(targetId, suffix)] ?: return null
+        candidate.requireUnchanged(parent)
+        val descriptor = ParcelFileDescriptor.open(
+            candidate.file,
+            ParcelFileDescriptor.MODE_READ_ONLY,
+        )
+        return try {
+            check(candidate.identity.matchesDescriptor(descriptor.fileDescriptor)) {
+                "Explorer Action related file changed while it was being opened"
+            }
+            descriptor
+        } catch (error: Throwable) {
+            descriptor.close()
+            throw error
+        }
     }
 
     fun getPlaybackProgress(targetId: String, relativePath: String): Bundle {
@@ -185,6 +241,109 @@ internal class ExplorerActionHostInputAccess(
     private companion object {
         private const val DIRECTORY_MIME_TYPE = "inode/directory"
         private const val SIZE_UNKNOWN = -1L
+
+        private fun captureRelatedFile(parent: File, displayName: String): RelatedFileCandidate? {
+            val unresolved = File(parent, displayName).absoluteFile
+            val linkStat = try {
+                Os.lstat(unresolved.path)
+            } catch (_: ErrnoException) {
+                return null
+            }
+            if (!OsConstants.S_ISREG(linkStat.st_mode) || OsConstants.S_ISLNK(linkStat.st_mode)) {
+                return null
+            }
+            val candidate = try {
+                unresolved.canonicalFile
+            } catch (_: IOException) {
+                return null
+            }
+            if (
+                candidate != unresolved ||
+                candidate.parentFile != parent ||
+                !candidate.isFile ||
+                !candidate.canRead()
+            ) {
+                return null
+            }
+            val identity = try {
+                RelatedFileIdentity.capture(candidate)
+            } catch (_: IOException) {
+                return null
+            } catch (_: IllegalArgumentException) {
+                return null
+            }
+            return RelatedFileCandidate(candidate, identity)
+        }
+    }
+
+    private data class RelatedFileKey(val targetId: String, val suffix: String)
+
+    private data class RelatedFileCandidate(
+        val file: File,
+        val identity: RelatedFileIdentity,
+    ) {
+        fun requireUnchanged(parent: File) {
+            check(captureRelatedFile(parent, file.name) == this) {
+                "Explorer Action related file changed after the session was opened"
+            }
+        }
+    }
+
+    private data class RelatedFileIdentity(
+        val device: Long,
+        val inode: Long,
+        val size: Long,
+        val modifiedSeconds: Long,
+        val lastModifiedMillis: Long,
+    ) {
+        fun matchesDescriptor(descriptor: FileDescriptor): Boolean {
+            val stat = try {
+                Os.fstat(descriptor)
+            } catch (error: ErrnoException) {
+                throw IOException("Explorer Action related-file descriptor cannot be inspected", error)
+            }
+            return OsConstants.S_ISREG(stat.st_mode) &&
+                stat.st_dev == device &&
+                stat.st_ino == inode &&
+                stat.st_size == size &&
+                stat.st_mtime == modifiedSeconds
+        }
+
+        companion object {
+            fun capture(file: File): RelatedFileIdentity {
+                val stat = try {
+                    Os.stat(file.path)
+                } catch (error: ErrnoException) {
+                    throw IOException("Explorer Action related-file identity is unavailable", error)
+                }
+                require(OsConstants.S_ISREG(stat.st_mode)) {
+                    "Explorer Action related file is not a regular file"
+                }
+                return RelatedFileIdentity(
+                    device = stat.st_dev,
+                    inode = stat.st_ino,
+                    size = stat.st_size,
+                    modifiedSeconds = stat.st_mtime,
+                    lastModifiedMillis = file.lastModified(),
+                )
+            }
+        }
+    }
+}
+
+/** Pure declaration policy for exact host-derived related-file names. */
+internal object ExplorerActionRelatedFilePolicy {
+    private val suffixPattern = Regex(
+        "\\.[a-z0-9][a-z0-9+_-]*(?:\\.[a-z0-9][a-z0-9+_-]*)*",
+    )
+
+    fun isValidSuffix(suffix: String): Boolean =
+        suffix.length in 2..ExplorerActionProtocol.MAX_RELATED_FILE_SUFFIX_LENGTH &&
+            suffixPattern.matches(suffix)
+
+    fun candidateName(targetDisplayName: String, suffix: String): String {
+        require(isValidSuffix(suffix)) { "Explorer Action related-file suffix is invalid" }
+        return targetDisplayName + suffix
     }
 }
 

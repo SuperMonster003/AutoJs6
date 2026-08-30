@@ -32,4 +32,10 @@ object ExplorerActionCatalogKeys {
 
     /** v12 optional. Grants access to the host's opt-in playback progress channel. */
     const val PLAYBACK_PROGRESS = "playbackProgress"
+
+    /**
+     * v22 optional. The host may open only exact sibling names formed by appending one declared
+     * suffix to the selected file name. No sibling paths or directory listings are disclosed.
+     */
+    const val RELATED_FILE_SUFFIXES = "relatedFileSuffixes"
 }

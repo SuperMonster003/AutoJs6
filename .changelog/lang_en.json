@@ -80,6 +80,7 @@
         "File manager Explorer Action protocol v19 lets writable archive sessions expose native Rename and Delete for supported entries; rewrites use host-owned verified atomic replacement, keep the previous archive version recoverable, and rebuild the same session while preserving surviving paths and selections",
         "File manager Explorer Action protocol v20 lets writable native archive pages create empty folders and add explicit mixed selections of files and complete folder trees through a frozen, path-free input grant; empty folders and same-named directory roots are preserved with safe numbering, while source changes or any failed item roll back the whole archive replacement",
         "File manager Explorer Action protocol v21 provides host-owned durable source-to-Trash batches with opaque history, per-item outcomes, and cross-session best-effort restore; existing names are never overwritten, source restore never deletes created archives, and interrupted recovery evidence remains host-private",
+        "File manager Explorer Action protocol v22 lets a single-file read-only action declare bounded related-file suffixes; the host freezes only exact `<selected name><suffix>` candidates and opens them through read-only descriptors without exposing parent listings, paths, or arbitrary siblings",
         "Plugin Center provides a global settings page and a user guide page",
         "Plugin Center supports automatic SDK plugin mounting",
         "Plugin Center supports multi-variant priority sorting",
