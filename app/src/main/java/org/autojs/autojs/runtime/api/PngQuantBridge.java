@@ -5,7 +5,68 @@ import android.graphics.Bitmap;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost;
 
+import java.util.Objects;
+
 public class PngQuantBridge {
+
+    public static final class Options {
+
+        public static final int DEFAULT_MAX_COLORS = 256;
+        public static final int DEFAULT_SPEED = 8;
+        public static final float DEFAULT_DITHERING_LEVEL = 0.0F;
+        public static final int DEFAULT_POSTERIZE_BITS = 0;
+
+        private final int maxColors;
+        private final int speed;
+        private final int minQuality;
+        private final int maxQuality;
+        private final float ditheringLevel;
+        private final int posterizeBits;
+
+        /**
+         * Creates an immutable options snapshot. Range normalization is performed at the native
+         * boundary so Java, Rhino, and direct JNI callers share exactly the same behavior.
+         */
+        public Options(
+                int maxColors,
+                int speed,
+                int minQuality,
+                int maxQuality,
+                float ditheringLevel,
+                int posterizeBits
+        ) {
+            this.maxColors = maxColors;
+            this.speed = speed;
+            this.minQuality = minQuality;
+            this.maxQuality = maxQuality;
+            this.ditheringLevel = ditheringLevel;
+            this.posterizeBits = posterizeBits;
+        }
+
+        public int getMaxColors() {
+            return maxColors;
+        }
+
+        public int getSpeed() {
+            return speed;
+        }
+
+        public int getMinQuality() {
+            return minQuality;
+        }
+
+        public int getMaxQuality() {
+            return maxQuality;
+        }
+
+        public float getDitheringLevel() {
+            return ditheringLevel;
+        }
+
+        public int getPosterizeBits() {
+            return posterizeBits;
+        }
+    }
 
     /**
      * Quantizes a 32-bit RGBA image to an 8-bit indexed PNG and returns the encoded bytes.<br>
@@ -44,12 +105,38 @@ public class PngQuantBridge {
         return nativeQuantize(bitmap, quality);
     }
 
+    /** Quantizes a bitmap with the optional named-parameter API exposed by compatible runtimes. */
+    public static byte[] quantize(Bitmap bitmap, Options options) {
+        Objects.requireNonNull(options, "options");
+        var context = GlobalAppContext.get();
+        ImageQuantPluginHost.ensureOptionsApi(context);
+        return nativeQuantizeWithOptions(
+                bitmap,
+                options.maxColors,
+                options.speed,
+                options.minQuality,
+                options.maxQuality,
+                options.ditheringLevel,
+                options.posterizeBits
+        );
+    }
+
     /** Called only after the host has loaded a policy-approved native runtime. */
     public static String probeLoadedRuntime() {
         return nativeProbe();
     }
 
     private static native byte[] nativeQuantize(Bitmap bitmap, int quality);
+
+    private static native byte[] nativeQuantizeWithOptions(
+            Bitmap bitmap,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits
+    );
 
     private static native String nativeProbe();
 

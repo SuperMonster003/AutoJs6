@@ -3,7 +3,9 @@ package org.autojs.autojs.core.plugin.imagequant
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ImageQuantPluginPolicyTest {
@@ -130,6 +132,13 @@ class ImageQuantPluginPolicyTest {
             supported64BitAbis,
             ImageQuantProcessAbiPolicy.select(true, supported32BitAbis, supported64BitAbis),
         )
+    }
+
+    @Test
+    fun `options API capability is additive and backward compatible`() {
+        assertFalse(ImageQuantOptionsApiPolicy.supports(0))
+        assertTrue(ImageQuantOptionsApiPolicy.supports(ImageQuantPluginContract.OPTIONS_API_VERSION))
+        assertTrue(ImageQuantOptionsApiPolicy.supports(ImageQuantPluginContract.OPTIONS_API_VERSION + 1))
     }
 
     @Test

@@ -168,6 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ###### 2026/08/30
 
+* `Feature` `images.save`, `images.saveImage`, `images.compress`, and `images.compressToBytes` now accept named PNG quantization options for palette size, speed, independent quality bounds, dithering, and posterize; numeric `quality` remains backward compatible, while options require an Image Quantization plugin declaring `OPTIONS_API_VERSION>=1`
 * `Feature` In-memory TypeScript execution through `engines.execScript`: `.ts/.tsx/.mts/.cts` source names use the independent compiler with file-equivalent diagnostics and Source Map stack mapping, Rhino returns the final expression value, and the full Log page plus editor Log panel evaluate one-line snippets interactively
 * `Feature` Compiler-backed Node TypeScript projects can now compile runtime-created `.ts/.mts/.cts` files on demand: Node transfers bounded source through a byte- and SHA-256-bound PFD, the host reuses the resident project session, type diagnostics and Source Map stack mapping are preserved, and path escape, symlinks, and ambiguous targets remain denied
 * `Feature` Ace now incrementally refreshes its resident TypeScript project language service after a save and cancels stale work with a 450 ms idle debounce plus a 50 ms post-save diagnostic scheduling delay; on the acceptance device, TS2322 refreshed 201 ms after saving a 20-file project without blocking input

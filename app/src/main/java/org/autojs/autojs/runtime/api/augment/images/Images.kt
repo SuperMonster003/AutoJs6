@@ -34,6 +34,7 @@ import org.autojs.autojs.util.StringUtils.isUri
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ImageFeatureMatching
 import org.autojs.autojs.runtime.api.ImageSimilarity
+import org.autojs.autojs.runtime.api.PngQuantBridge
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.AsEmitter
@@ -371,12 +372,23 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.save must be a ImageWrapper" }
             try {
                 require(!path.isJsNullish()) { "Argument \"path\" ${path.jsBrief()} for images.save must be non-nullish" }
-                scriptRuntime.images.save(
-                    /* image = */ image,
-                    /* path = */ scriptRuntime.files.nonNullPath(coerceString(path)),
-                    /* format = */ parseImageFormat(format),
-                    /* quality = */ parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY),
-                )
+                val nicePath = scriptRuntime.files.nonNullPath(coerceString(path))
+                val niceFormat = parseImageFormat(format)
+                if (quality is NativeObject) {
+                    scriptRuntime.images.save(
+                        image,
+                        nicePath,
+                        niceFormat,
+                        parseImageQuantizationOptions(quality, DEFAULT_IMAGE_SAVE_QUALITY),
+                    )
+                } else {
+                    scriptRuntime.images.save(
+                        image,
+                        nicePath,
+                        niceFormat,
+                        parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY),
+                    )
+                }
             } finally {
                 image.shoot()
             }
@@ -390,12 +402,23 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.saveImage must be a ImageWrapper" }
             try {
                 require(!path.isJsNullish()) { "Argument \"path\" ${path.jsBrief()} for images.saveImage must be non-nullish" }
-                scriptRuntime.images.save(
-                    /* image = */ image,
-                    /* path = */ scriptRuntime.files.nonNullPath(coerceString(path)),
-                    /* format = */ parseImageFormat(format),
-                    /* quality = */ parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY),
-                )
+                val nicePath = scriptRuntime.files.nonNullPath(coerceString(path))
+                val niceFormat = parseImageFormat(format)
+                if (quality is NativeObject) {
+                    scriptRuntime.images.save(
+                        image,
+                        nicePath,
+                        niceFormat,
+                        parseImageQuantizationOptions(quality, DEFAULT_IMAGE_SAVE_QUALITY),
+                    )
+                } else {
+                    scriptRuntime.images.save(
+                        image,
+                        nicePath,
+                        niceFormat,
+                        parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY),
+                    )
+                }
             } finally {
                 image.shoot()
             }
@@ -1359,11 +1382,20 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.compress must be a ImageWrapper" }
             try {
-                scriptRuntime.images.compress(
-                    /* image = */ image,
-                    /* format = */ parseImageFormat(format),
-                    /* quality = */ parseQuality(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
-                )
+                val niceFormat = parseImageFormat(format)
+                if (quality is NativeObject) {
+                    scriptRuntime.images.compress(
+                        image,
+                        niceFormat,
+                        parseImageQuantizationOptions(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
+                    )
+                } else {
+                    scriptRuntime.images.compress(
+                        image,
+                        niceFormat,
+                        parseQuality(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
+                    )
+                }
             } finally {
                 image.shoot()
             }
@@ -1376,11 +1408,20 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.compressToBytes must be a ImageWrapper" }
             try {
-                scriptRuntime.images.compressToBytes(
-                    /* image = */ image,
-                    /* format = */ parseImageFormat(format),
-                    /* quality = */ parseQuality(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
-                )
+                val niceFormat = parseImageFormat(format)
+                if (quality is NativeObject) {
+                    scriptRuntime.images.compressToBytes(
+                        image,
+                        niceFormat,
+                        parseImageQuantizationOptions(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
+                    )
+                } else {
+                    scriptRuntime.images.compressToBytes(
+                        image,
+                        niceFormat,
+                        parseQuality(quality, DEFAULT_IMAGE_COMPRESS_QUALITY),
+                    )
+                }
             } finally {
                 image.shoot()
             }
@@ -1725,6 +1766,25 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         private fun parseQuality(q: Any?, def: Number): Int {
             return coerceIn(coerceNumber(q, def), 0.0, 100.0, def.toDouble()).roundToInt()
+        }
+
+        internal fun parseImageQuantizationOptions(
+            options: NativeObject,
+            defaultQuality: Int,
+        ): PngQuantBridge.Options {
+            val quality = parseQuality(options.inquire("quality"), defaultQuality)
+            return PngQuantBridge.Options(
+                options.inquire("maxColors") { coerceIntNumber(it) }
+                    ?: PngQuantBridge.Options.DEFAULT_MAX_COLORS,
+                options.inquire("speed") { coerceIntNumber(it) }
+                    ?: PngQuantBridge.Options.DEFAULT_SPEED,
+                options.inquire("minQuality") { coerceIntNumber(it) } ?: quality,
+                options.inquire("maxQuality") { coerceIntNumber(it) } ?: quality,
+                options.inquire("ditheringLevel") { coerceFloatNumber(it) }
+                    ?: PngQuantBridge.Options.DEFAULT_DITHERING_LEVEL,
+                options.inquire("posterizeBits") { coerceIntNumber(it) }
+                    ?: PngQuantBridge.Options.DEFAULT_POSTERIZE_BITS,
+            )
         }
 
         private fun parseImageFormat(o: Any?): String = when {

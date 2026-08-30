@@ -54,6 +54,7 @@ class ImageQuantPluginHostDeviceTest {
         assertEquals(ImageQuantPluginContract.EXPECTED_LIBPNG_VERSION, runtime.libpngVersion)
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_STL, runtime.nativeStl)
+        assertEquals(ImageQuantPluginContract.OPTIONS_API_VERSION, runtime.optionsApiVersion)
         assertEquals(ImageQuantPluginContract.RUNTIME_PROBE_VALUE, runtime.runtimeProbe)
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
 
@@ -85,6 +86,20 @@ class ImageQuantPluginHostDeviceTest {
             assertEquals(2, encoded.readPngInt(20))
             assertEquals(8, encoded[24].toInt() and 0xff)
             assertEquals("PNG must use indexed color", 3, encoded[25].toInt() and 0xff)
+
+            val encodedWithOptions = PngQuantBridge.quantize(
+                bitmap,
+                PngQuantBridge.Options(
+                    4,
+                    1,
+                    0,
+                    100,
+                    1.0F,
+                    0,
+                ),
+            )
+            assertEquals("PNG must use indexed color", 3, encodedWithOptions[25].toInt() and 0xff)
+            assertTrue(encodedWithOptions.readPngPaletteSize() in 1..4)
 
             val decoded = BitmapFactory.decodeByteArray(encoded, 0, encoded.size)
             try {
@@ -129,5 +144,22 @@ class ImageQuantPluginHostDeviceTest {
                 ((this[offset + 1].toInt() and 0xff) shl 16) or
                 ((this[offset + 2].toInt() and 0xff) shl 8) or
                 (this[offset + 3].toInt() and 0xff)
+    }
+
+    private fun ByteArray.readPngPaletteSize(): Int {
+        var offset = 8
+        while (offset + 12 <= size) {
+            val length = readPngInt(offset)
+            require(length >= 0 && offset + 12L + length <= size.toLong()) {
+                "PNG chunk at offset $offset is invalid"
+            }
+            val type = String(this, offset + 4, 4, Charsets.US_ASCII)
+            if (type == "PLTE") {
+                require(length % 3 == 0) { "PNG palette length is invalid: $length" }
+                return length / 3
+            }
+            offset += 12 + length
+        }
+        throw AssertionError("PNG does not contain a PLTE chunk")
     }
 }

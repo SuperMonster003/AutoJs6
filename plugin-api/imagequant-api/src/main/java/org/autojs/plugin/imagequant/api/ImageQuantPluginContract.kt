@@ -27,6 +27,7 @@ object ImageQuantPluginContract {
     const val META_DATA_NATIVE_STL = "org.autojs.plugin.imagequant.NATIVE_STL"
     const val META_DATA_NATIVE_ABI_VERSION = "org.autojs.plugin.imagequant.NATIVE_ABI_VERSION"
     const val META_DATA_NATIVE_ABIS = "org.autojs.plugin.imagequant.NATIVE_ABIS"
+    const val META_DATA_OPTIONS_API_VERSION = "org.autojs.plugin.imagequant.OPTIONS_API_VERSION"
     const val META_DATA_REQUIRES_HOST_VERSION = PluginCapabilityKeys.REQUIRES_HOST_VERSION
     const val META_DATA_MAX_HOST_VERSION = "org.autojs.plugin.imagequant.MAX_HOST_VERSION"
 
@@ -35,6 +36,7 @@ object ImageQuantPluginContract {
     const val EXPECTED_NATIVE_NDK_VERSION = "26.1.10909125"
     const val EXPECTED_NATIVE_STL = "c++_static"
     const val EXPECTED_NATIVE_ABI_VERSION = 1
+    const val OPTIONS_API_VERSION = 1
 
     const val NATIVE_LIBRARY_NAME = "pngquant_bridge"
     const val NATIVE_LIBRARY_FILE_NAME = "libpngquant_bridge.so"

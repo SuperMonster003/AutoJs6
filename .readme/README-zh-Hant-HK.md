@@ -168,6 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/08/30
 
+* `新增` `images.save`, `images.saveImage`, `images.compress` 與 `images.compressToBytes` 現支援 PNG 量化具名選項, 可控制調色板大小, 速度, 獨立品質範圍, 抖動和 posterize; 數字 `quality` 保持向後相容, 選項物件要求 Image Quantization 外掛程式聲明 `OPTIONS_API_VERSION>=1`
 * `新增` `engines.execScript` 記憶體 TypeScript 即時執行: `.ts/.tsx/.mts/.cts` 原始碼名稱經獨立編譯器處理, 診斷及 Source Map 堆疊映射與檔案指令碼一致, Rhino 傳回最終運算式值, 完整記錄頁及編輯器記錄面板可互動求值單行 TypeScript 片段
 * `新增` compiler-backed Node TypeScript 專案現可按需編譯執行期間建立的 `.ts/.mts/.cts`: Node 透過綁定精確位元組數及 SHA-256 的有界 PFD 將原始碼交給宿主, 宿主重用常駐專案會話, 保留類型診斷及 Source Map 堆疊映射, 並繼續拒絕路徑逃逸, 符號連結和歧義目標
 * `新增` Ace 編輯器現會在儲存後增量重新整理常駐 TypeScript 項目語言服務, 並以 450 ms 停頓 debounce 和儲存後 50 ms 診斷排程延遲取消過期工作; 20 個檔案的真機驗收在不阻塞輸入的前提下, 從儲存完成到 TS2322 重新整理實測 201 ms

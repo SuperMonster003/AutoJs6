@@ -68,6 +68,12 @@ internal object ImageQuantProcessAbiPolicy {
     ): List<String> = if (is64Bit) supported64BitAbis else supported32BitAbis
 }
 
+internal object ImageQuantOptionsApiPolicy {
+
+    fun supports(optionsApiVersion: Int): Boolean =
+        optionsApiVersion >= ImageQuantPluginContract.OPTIONS_API_VERSION
+}
+
 internal object ImageQuantRuntimeLifecyclePolicy {
 
     fun rejectionCode(

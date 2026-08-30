@@ -43,6 +43,7 @@ object ImageQuantPluginHost {
         val nativeStl: String,
         val nativeAbiVersion: Int,
         val nativeAbis: String,
+        val optionsApiVersion: Int,
         val requiresHostVersion: Long?,
         val maxHostVersion: Long?,
         val enabled: Boolean,
@@ -70,6 +71,7 @@ object ImageQuantPluginHost {
         val libimagequantVersion: String,
         val libpngVersion: String,
         val runtimeProbe: String,
+        val optionsApiVersion: Int,
         val packageName: String? = null,
         val packageIdentity: String? = null,
         val packageVersionCode: Long? = null,
@@ -150,7 +152,12 @@ object ImageQuantPluginHost {
     ): List<ServiceInfo> {
         val eligibleComponents = discover(context)
             .asSequence()
-            .filter { it.error == null }
+            .filter { discovered ->
+                discovered.error == null &&
+                        discovered.candidate?.let { candidate ->
+                            ImageQuantOptionsApiPolicy.supports(candidate.optionsApiVersion)
+                        } == true
+            }
             .map { it.serviceInfo.packageName to it.serviceInfo.name }
             .toSet()
         return services.filter { serviceInfo ->
@@ -236,6 +243,7 @@ object ImageQuantPluginHost {
                 libimagequantVersion = candidate.libimagequantVersion,
                 libpngVersion = candidate.libpngVersion,
                 runtimeProbe = runtimeProbe,
+                optionsApiVersion = candidate.optionsApiVersion,
                 packageName = candidate.serviceInfo.packageName,
                 packageIdentity = candidate.packageIdentity,
                 packageVersionCode = candidate.packageVersionCode,
@@ -254,6 +262,20 @@ object ImageQuantPluginHost {
         }
     }
 
+    /** Ensures the loaded runtime exposes the optional named-parameter JNI entry point. */
+    @JvmStatic
+    fun ensureOptionsApi(context: Context): LoadedRuntime {
+        val runtime = ensureLoaded(context)
+        if (!ImageQuantOptionsApiPolicy.supports(runtime.optionsApiVersion)) {
+            throw buildLoadException(
+                context = context,
+                code = ImageQuantPluginLoadError.OPTIONS_API_UNSUPPORTED,
+                packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
+            )
+        }
+        return runtime
+    }
+
     private fun tryLoadBundledRuntime(): LoadedRuntime? {
         try {
             System.loadLibrary(ImageQuantPluginContract.NATIVE_LIBRARY_NAME)
@@ -266,6 +288,7 @@ object ImageQuantPluginHost {
             libimagequantVersion = ImageQuantPluginContract.EXPECTED_LIBIMAGEQUANT_VERSION,
             libpngVersion = ImageQuantPluginContract.EXPECTED_LIBPNG_VERSION,
             runtimeProbe = runtimeProbe,
+            optionsApiVersion = ImageQuantPluginContract.OPTIONS_API_VERSION,
         ).also {
             Log.i(TAG, "Loaded bundled Image Quantization ${it.libimagequantVersion}")
         }
@@ -399,6 +422,12 @@ object ImageQuantPluginHost {
             ImageQuantPluginContract.META_DATA_NATIVE_ABIS,
             "native ABIs",
         )
+        val optionsApiVersion = optionalNonNegativeIntMetadata(
+            serviceInfo,
+            applicationInfo,
+            ImageQuantPluginContract.META_DATA_OPTIONS_API_VERSION,
+            "options API version",
+        )
         val requiresHostVersion = PluginCapabilityResolver.coerceLong(
             metadataValue(serviceInfo, applicationInfo, ImageQuantPluginContract.META_DATA_REQUIRES_HOST_VERSION),
         ) ?: throw ImageQuantPluginLoadException(
@@ -419,6 +448,7 @@ object ImageQuantPluginHost {
             nativeStl = nativeStl,
             nativeAbiVersion = nativeAbiVersion,
             nativeAbis = nativeAbis,
+            optionsApiVersion = optionsApiVersion,
             requiresHostVersion = requiresHostVersion,
             maxHostVersion = PluginCapabilityResolver.coerceLong(
                 metadataValue(serviceInfo, applicationInfo, ImageQuantPluginContract.META_DATA_MAX_HOST_VERSION),
@@ -458,6 +488,20 @@ object ImageQuantPluginHost {
             "Image Quantization plugin $label metadata is missing or invalid",
         )
 
+    private fun optionalNonNegativeIntMetadata(
+        serviceInfo: ServiceInfo,
+        applicationInfo: ApplicationInfo,
+        key: String,
+        label: String,
+    ): Int {
+        val value = metadataValue(serviceInfo, applicationInfo, key) ?: return 0
+        return value.toString().toIntOrNull()?.takeIf { it >= 0 }
+            ?: throw ImageQuantPluginLoadException(
+                ImageQuantPluginLoadError.CONTRACT_METADATA_INVALID,
+                "Image Quantization plugin $label metadata is invalid",
+            )
+    }
+
     private fun buildLoadException(
         context: Context,
         code: ImageQuantPluginLoadError,
@@ -486,6 +530,9 @@ object ImageQuantPluginHost {
             ImageQuantPluginLoadError.HOST_VERSION_TOO_HIGH ->
                 "Image Quantization plugin supports host version ${maxHostVersion ?: "unknown"} or lower; " +
                         "current version is ${BuildConfig.VERSION_CODE}"
+            ImageQuantPluginLoadError.OPTIONS_API_UNSUPPORTED ->
+                "Image Quantization runtime does not support options API version " +
+                        ImageQuantPluginContract.OPTIONS_API_VERSION
             ImageQuantPluginLoadError.PLUGIN_CHANGED_RESTART_REQUIRED ->
                 "Image Quantization plugin changed while its native runtime was loaded; restart AutoJs6 before using it again"
             else -> "Image Quantization plugin is incompatible or its native runtime is unavailable ($code)"

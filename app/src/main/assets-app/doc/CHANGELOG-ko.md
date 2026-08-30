@@ -8,6 +8,7 @@
 
 ###### 2026/08/30
 
+* `추가` `images.save`, `images.saveImage`, `images.compress`, `images.compressToBytes`가 팔레트 크기, 속도, 독립 품질 범위, 디더링 및 posterize를 제어하는 PNG 양자화 명명 옵션을 지원; 숫자 `quality`는 이전 버전과 호환되며 옵션에는 `OPTIONS_API_VERSION>=1`을 선언한 Image Quantization 플러그인이 필요
 * `추가` `engines.execScript` 기반 in-memory TypeScript 즉시 실행: `.ts/.tsx/.mts/.cts` source name은 독립 compiler를 사용해 file script와 동일한 diagnostics 및 Source Map stack mapping을 유지하고, Rhino는 최종 expression value를 반환하며, 전체 Log page와 editor Log panel에서 한 줄 snippet을 대화형으로 평가할 수 있습니다
 * `추가` compiler-backed Node TypeScript project가 실행 중 생성된 `.ts/.mts/.cts` 파일을 이제 on-demand compile할 수 있습니다: Node는 byte count와 SHA-256으로 고정된 PFD를 통해 source를 host로 전달하고, host는 resident project session을 재사용하며, type diagnostics와 Source Map stack mapping을 유지하면서 path escape, symbolic link, ambiguous target을 계속 거부합니다
 * `추가` Ace 편집기는 이제 저장 후 상주 TypeScript 프로젝트 언어 서비스를 증분 갱신하고, 450 ms 유휴 debounce와 저장 후 50 ms 진단 예약 지연으로 오래된 작업을 취소합니다; 입력을 막지 않은 20개 파일 인수 테스트에서 저장 완료 후 TS2322 갱신까지 201 ms가 걸렸습니다

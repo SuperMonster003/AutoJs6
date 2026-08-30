@@ -463,6 +463,27 @@ public class Images {
         }
     }
 
+    public boolean save(
+            @NonNull ImageWrapper image,
+            @NonNull String path,
+            @NonNull String format,
+            @NonNull PngQuantBridge.Options options
+    ) throws IOException {
+        try {
+            var nicePath = AnyExtensions.toRuntimePath(path, mScriptRuntime, true);
+            var file = new File(nicePath);
+            File parentFile = file.getParentFile();
+            if (parentFile != null && !parentFile.exists()) {
+                if (!parentFile.mkdirs()) {
+                    throw new IOException("Failed to create parent directory for image save: " + parentFile.getAbsolutePath());
+                }
+            }
+            return saveInternal(image, nicePath, format, options);
+        } finally {
+            shoot(image);
+        }
+    }
+
     private boolean saveInternal(@NonNull ImageWrapper image, @NonNull String path, @NonNull String format, int quality) throws IOException {
         Bitmap bitmap = image.getBitmap();
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
@@ -489,9 +510,41 @@ public class Images {
         }
     }
 
+    private boolean saveInternal(
+            @NonNull ImageWrapper image,
+            @NonNull String path,
+            @NonNull String format,
+            @NonNull PngQuantBridge.Options options
+    ) throws IOException {
+        Bitmap bitmap = image.getBitmap();
+        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+        requirePngQuantizationFormat(compressFormat);
+
+        byte[] compressed = PngQuantBridge.quantize(bitmap, options);
+        if (compressed != null) {
+            try (FileOutputStream fos = new FileOutputStream(path)) {
+                fos.write(compressed);
+                return true;
+            }
+        }
+        throw new WrappedRuntimeException("PNG quantization failed");
+    }
+
     public byte[] compressToBytes(@NotNull ImageWrapper image, @NotNull String format, int quality) {
         try {
             return compressToBytesInternal(image, format, quality);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    public byte[] compressToBytes(
+            @NotNull ImageWrapper image,
+            @NotNull String format,
+            @NotNull PngQuantBridge.Options options
+    ) {
+        try {
+            return compressToBytesInternal(image, format, options);
         } finally {
             shoot(image);
         }
@@ -520,8 +573,38 @@ public class Images {
         return outputStream.toByteArray();
     }
 
+    private byte[] compressToBytesInternal(
+            @NotNull ImageWrapper image,
+            @NotNull String format,
+            @NotNull PngQuantBridge.Options options
+    ) {
+        Bitmap bitmap = image.getBitmap();
+        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+        requirePngQuantizationFormat(compressFormat);
+
+        byte[] compressed = PngQuantBridge.quantize(bitmap, options);
+        if (compressed != null) {
+            return compressed;
+        }
+        throw new WrappedRuntimeException("PNG quantization failed");
+    }
+
     public ImageWrapper compress(@NotNull ImageWrapper image, @NotNull String format, int quality) throws BitmapUtils.DecodeException {
         return fromBytes(compressToBytes(image, format, quality));
+    }
+
+    public ImageWrapper compress(
+            @NotNull ImageWrapper image,
+            @NotNull String format,
+            @NotNull PngQuantBridge.Options options
+    ) throws BitmapUtils.DecodeException {
+        return fromBytes(compressToBytes(image, format, options));
+    }
+
+    private static void requirePngQuantizationFormat(Bitmap.CompressFormat compressFormat) {
+        if (compressFormat != Bitmap.CompressFormat.PNG) {
+            throw new IllegalArgumentException("Image quantization options are only supported for PNG format");
+        }
     }
 
     // public EventEmitter select() {
