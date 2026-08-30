@@ -69,6 +69,9 @@ interface HistoryDao {
     @Query("SELECT * FROM trash_item ORDER BY trashedAt DESC")
     fun listTrashItemsDesc(): List<TrashEntities.TrashItem>
 
+    @Query("SELECT * FROM trash_item WHERE trashId = :trashId LIMIT 1")
+    fun getTrashItem(trashId: String): TrashEntities.TrashItem?
+
     @Query("SELECT * FROM trash_item WHERE trashedAt < :expiredBefore ORDER BY trashedAt ASC")
     fun listExpiredTrashItems(expiredBefore: Long): List<TrashEntities.TrashItem>
 

@@ -12,6 +12,7 @@ import java.io.OutputStream
 import java.security.DigestOutputStream
 import java.security.MessageDigest
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.ZipEntry
@@ -60,6 +61,7 @@ class TrashRepository(private val context: Context) {
         fileCallback = fileCallback,
         operationController = operationController,
         beforeSourceDelete = null,
+        trashId = newTrashId(),
     )
 
     /**
@@ -72,15 +74,35 @@ class TrashRepository(private val context: Context) {
         fileCallback: ScriptOperations.FileProgressCallback?,
         operationController: DialogUtils.OperationController,
         beforeSourceDelete: (() -> Unit)?,
+    ): TrashEntities.TrashItem = moveToTrashWithProgress(
+        path = path,
+        progressCallback = progressCallback,
+        fileCallback = fileCallback,
+        operationController = operationController,
+        beforeSourceDelete = beforeSourceDelete,
+        trashId = newTrashId(),
+    )
+
+    /** Uses a host-reserved ID so a durable caller can recover an interrupted move. */
+    fun moveToTrashWithProgress(
+        path: String,
+        progressCallback: ScriptOperations.ProgressCallback?,
+        fileCallback: ScriptOperations.FileProgressCallback?,
+        operationController: DialogUtils.OperationController,
+        beforeSourceDelete: (() -> Unit)?,
+        trashId: String,
     ): TrashEntities.TrashItem {
         operationController.throwIfCancelled()
+
+        require(UUID.fromString(trashId).toString().equals(trashId, ignoreCase = true)) {
+            "Trash item ID is invalid"
+        }
 
         val src = File(path)
         require(src.exists()) { "Source not exists: $path" }
 
         val logicalPath = path.trimEnd('/')
 
-        val trashId = blobs.newTrashId()
         val now = System.currentTimeMillis()
 
         val isDir = src.isDirectory
@@ -270,6 +292,10 @@ class TrashRepository(private val context: Context) {
         blobs.deleteBlobByRelPath(item.blobRelPath)
     }
 
+    fun newTrashId(): String = blobs.newTrashId()
+
+    fun findTrashItem(trashId: String): TrashEntities.TrashItem? = dao.getTrashItem(trashId)
+
     /**
      * Clear all trash items.
      * zh-CN: 清空回收站.
@@ -353,6 +379,23 @@ class TrashRepository(private val context: Context) {
         // zh-CN: 恢复成功后删除回收站记录与 blob.
         dao.deleteTrashItemsByIds(listOf(item.trashId))
         blobs.deleteBlobByRelPath(item.blobRelPath)
+    }
+
+    /** Restores only when the destination name is still unused; existing data is never replaced. */
+    fun restoreTrashItemToPathWithoutOverwrite(
+        item: TrashEntities.TrashItem,
+        dest: File,
+        operationController: DialogUtils.OperationController,
+    ) {
+        require(!dest.exists()) { "Trash restore destination already exists: $dest" }
+        if (item.isDirectory) {
+            check(dest.mkdir()) { "Trash restore directory could not be reserved: $dest" }
+        } else {
+            val parent = requireNotNull(dest.parentFile)
+            require(parent.isDirectory) { "Trash restore parent is unavailable: $parent" }
+            check(dest.createNewFile()) { "Trash restore file could not be reserved: $dest" }
+        }
+        restoreTrashItemToPath(item, dest, operationController)
     }
 
     private fun zipDirectoryToStream(

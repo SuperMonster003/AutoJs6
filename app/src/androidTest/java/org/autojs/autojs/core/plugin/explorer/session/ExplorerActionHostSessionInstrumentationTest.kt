@@ -30,6 +30,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -1918,6 +1919,7 @@ class ExplorerActionHostSessionInstrumentationTest {
         )
         val repository = TrashRepository(context.applicationContext)
         var trashIds: List<String> = emptyList()
+        var targetTrashBatchId: String? = null
 
         try {
             val unknown = session.queryTargetTrash()
@@ -1932,6 +1934,13 @@ class ExplorerActionHostSessionInstrumentationTest {
             val result = session.moveTargetsToTrash(
                 mutableListOf("file", "directory"),
                 mutableListOf(outputId),
+            )
+            targetTrashBatchId = requireNotNull(
+                result.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID),
+            )
+            assertEquals(
+                targetTrashBatchId,
+                UUID.fromString(targetTrashBatchId).toString(),
             )
             trashIds = result.getStringArrayList(
                 ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
@@ -1948,6 +1957,32 @@ class ExplorerActionHostSessionInstrumentationTest {
             assertArrayEquals(outputBytes, File(testRoot, "sources.zip").readBytes())
             assertEquals(1, refreshCount.get())
 
+            val available = session.queryTargetTrashBatch(targetTrashBatchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_AVAILABLE,
+                available.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertEquals(2, available.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT))
+            assertEquals(0, available.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RESTORED_COUNT))
+            assertEquals(
+                mapOf(
+                    sourceFile.name to ExplorerActionHostSessionValues.TARGET_TRASH_ITEM_STATE_MOVED,
+                    sourceDirectory.name to ExplorerActionHostSessionValues.TARGET_TRASH_ITEM_STATE_MOVED,
+                ),
+                targetTrashItemStates(available),
+            )
+            assertTrue(
+                session.listTargetTrashBatches()
+                    .getParcelableArrayList<Bundle>(
+                        ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
+                    )
+                    .orEmpty()
+                    .any { batch ->
+                        batch.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID) ==
+                            targetTrashBatchId
+                    },
+            )
+
             val repeated = session.moveTargetsToTrash(
                 mutableListOf("file", "directory"),
                 mutableListOf(outputId),
@@ -1962,23 +1997,32 @@ class ExplorerActionHostSessionInstrumentationTest {
                 session.queryTargetTrash().getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE),
             )
 
-            val itemsById = HistoryDatabase.getInstance(context.applicationContext)
-                .historyDao()
-                .listTrashItemsDesc()
-                .filter { item -> item.trashId in trashIds }
-                .associateBy { item -> item.originalPath }
-            assertEquals(2, itemsById.size)
-            listOf(sourceFile, sourceDirectory).forEach { original ->
-                repository.restoreTrashItemToPath(
-                    requireNotNull(itemsById[original.canonicalPath]),
-                    original,
-                    DialogUtils.OperationController(),
-                )
-            }
-            trashIds = emptyList()
+            val restored = session.undoTargetTrashBatch(targetTrashBatchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED,
+                restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertEquals(2, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT))
+            assertEquals(2, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RESTORED_COUNT))
+            assertEquals(0, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT))
             assertArrayEquals(sourceFileBytes, sourceFile.readBytes())
             assertArrayEquals(nestedBytes, File(sourceDirectory, "nested.txt").readBytes())
             assertTrue(File(sourceDirectory, "empty").isDirectory)
+            assertArrayEquals(outputBytes, File(testRoot, "sources.zip").readBytes())
+            assertEquals(2, refreshCount.get())
+            assertTrue(
+                HistoryDatabase.getInstance(context.applicationContext)
+                    .historyDao()
+                    .listTrashItemsDesc()
+                    .none { item -> item.trashId in trashIds },
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED,
+                session.queryTargetTrashBatch(targetTrashBatchId)
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            expectIllegalState { session.undoTargetTrashBatch(targetTrashBatchId) }
+            trashIds = emptyList()
         } finally {
             val remaining = HistoryDatabase.getInstance(context.applicationContext)
                 .historyDao()
@@ -1986,6 +2030,304 @@ class ExplorerActionHostSessionInstrumentationTest {
                 .filter { item -> item.trashId in trashIds }
             remaining.forEach(repository::deleteTrashItem)
             runCatching { session.close() }
+            targetTrashBatchId?.let { batchId ->
+                ExplorerActionTargetTrashBatchStore(context).remove(batchId)
+            }
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun targetTrashBatchSurvivesSessionCloseAndRestoresFromANewParentSession() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v21-trash-reopen-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val sourceBytes = "v21 durable source".encodeToByteArray()
+        val outputBytes = "v21 durable archive".encodeToByteArray()
+        val source = File(testRoot, "source.txt").apply { writeBytes(sourceBytes) }
+        val output = File(testRoot, "sources.zip")
+        val firstSession = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+        )
+        val repository = TrashRepository(context.applicationContext)
+        var reopenedSession: ExplorerActionHostSession? = null
+        var targetTrashBatchId: String? = null
+        var trashIds: List<String> = emptyList()
+
+        try {
+            val outputId = prepareVerifiedOutput(firstSession, output.name, outputBytes)
+            firstSession.commitOutput(outputId)
+            val moved = firstSession.moveTargetsToTrash(
+                mutableListOf("source"),
+                mutableListOf(outputId),
+            )
+            targetTrashBatchId = requireNotNull(
+                moved.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID),
+            )
+            trashIds = moved.getStringArrayList(
+                ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
+            ).orEmpty()
+            assertFalse(source.exists())
+            assertArrayEquals(outputBytes, output.readBytes())
+            firstSession.close()
+
+            val refreshCount = AtomicInteger()
+            val reopened = ExplorerActionHostSession.create(
+                context = context,
+                pluginPackageName = context.packageName,
+                commonParent = testRoot,
+                targets = listOf(ExplorerActionHostSessionTarget("created-output", output)),
+                allowCreateOutput = true,
+                onSourcesTrashed = { refreshCount.incrementAndGet() },
+            )
+            reopenedSession = reopened
+            val listedIds = reopened.listTargetTrashBatches()
+                .getParcelableArrayList<Bundle>(
+                    ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
+                )
+                .orEmpty()
+                .mapNotNull { batch ->
+                    batch.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID)
+                }
+            assertTrue(targetTrashBatchId in listedIds)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_AVAILABLE,
+                reopened.queryTargetTrashBatch(targetTrashBatchId)
+                    .getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+
+            val restored = reopened.undoTargetTrashBatch(targetTrashBatchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED,
+                restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertEquals(1, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RESTORED_COUNT))
+            assertArrayEquals(sourceBytes, source.readBytes())
+            assertArrayEquals(outputBytes, output.readBytes())
+            assertEquals(1, refreshCount.get())
+            trashIds = emptyList()
+        } finally {
+            runCatching { reopenedSession?.close() }
+            runCatching { firstSession.close() }
+            HistoryDatabase.getInstance(context.applicationContext)
+                .historyDao()
+                .listTrashItemsDesc()
+                .filter { item -> item.trashId in trashIds }
+                .forEach(repository::deleteTrashItem)
+            targetTrashBatchId?.let { batchId ->
+                ExplorerActionTargetTrashBatchStore(context).remove(batchId)
+            }
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun targetTrashBatchUndoNeverOverwritesRecreatedSourceNames() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(context.cacheDir, "explorer-action-v21-trash-conflict-${System.nanoTime()}")
+        assertTrue(testRoot.mkdirs())
+        val first = File(testRoot, "first.txt").apply { writeText("original first") }
+        val second = File(testRoot, "second.txt").apply { writeText("original second") }
+        val outputBytes = "v21 conflict archive".encodeToByteArray()
+        val output = File(testRoot, "sources.zip")
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = testRoot,
+            targets = listOf(
+                ExplorerActionHostSessionTarget("first", first),
+                ExplorerActionHostSessionTarget("second", second),
+            ),
+            allowCreateOutput = true,
+        )
+        val repository = TrashRepository(context.applicationContext)
+        var targetTrashBatchId: String? = null
+        var trashIds: List<String> = emptyList()
+
+        try {
+            val outputId = prepareVerifiedOutput(session, output.name, outputBytes)
+            session.commitOutput(outputId)
+            val moved = session.moveTargetsToTrash(
+                mutableListOf("first", "second"),
+                mutableListOf(outputId),
+            )
+            targetTrashBatchId = requireNotNull(
+                moved.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID),
+            )
+            trashIds = moved.getStringArrayList(
+                ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
+            ).orEmpty()
+            first.writeText("new occupant")
+
+            val partiallyAvailable = session.queryTargetTrashBatch(targetTrashBatchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_PARTIAL,
+                partiallyAvailable.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertEquals(1, partiallyAvailable.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT))
+
+            val restored = session.undoTargetTrashBatch(targetTrashBatchId)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_STALE,
+                restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertEquals(2, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT))
+            assertEquals(1, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RESTORED_COUNT))
+            assertEquals(1, restored.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT))
+            assertEquals("new occupant", first.readText())
+            assertEquals("original second", second.readText())
+            assertArrayEquals(outputBytes, output.readBytes())
+            assertEquals(
+                mapOf(
+                    first.name to ExplorerActionHostSessionValues.TARGET_TRASH_ITEM_STATE_STALE,
+                    second.name to ExplorerActionHostSessionValues.TARGET_TRASH_ITEM_STATE_RESTORED,
+                ),
+                targetTrashItemStates(restored),
+            )
+            assertEquals(
+                1,
+                HistoryDatabase.getInstance(context.applicationContext)
+                    .historyDao()
+                    .listTrashItemsDesc()
+                    .count { item -> item.trashId in trashIds },
+            )
+            expectIllegalState { session.undoTargetTrashBatch(targetTrashBatchId) }
+        } finally {
+            HistoryDatabase.getInstance(context.applicationContext)
+                .historyDao()
+                .listTrashItemsDesc()
+                .filter { item -> item.trashId in trashIds }
+                .forEach(repository::deleteTrashItem)
+            runCatching { session.close() }
+            targetTrashBatchId?.let { batchId ->
+                ExplorerActionTargetTrashBatchStore(context).remove(batchId)
+            }
+            testRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun activeTargetTrashBatchIsHiddenFromConcurrentRecoveryUntilMoveCompletes() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val testRoot = File(
+            context.cacheDir,
+            "explorer-action-v21-trash-concurrent-${System.nanoTime()}",
+        )
+        assertTrue(testRoot.mkdirs())
+        val sourceBytes = "v21 concurrent recovery source".encodeToByteArray()
+        val source = File(testRoot, "source.txt").apply { writeBytes(sourceBytes) }
+        val repository = TrashRepository(context.applicationContext)
+        val movingStore = ExplorerActionTargetTrashBatchStore(context.applicationContext)
+        val recoveringStore = ExplorerActionTargetTrashBatchStore(context.applicationContext)
+        val record = movingStore.prepare(
+            pluginUid = context.applicationInfo.uid,
+            parent = testRoot,
+            sources = listOf(
+                ExplorerActionTargetTrashBatchSource(
+                    targetId = "source",
+                    file = source,
+                    identity = ExplorerActionFileIdentity.capture(source.canonicalFile),
+                ),
+            ),
+            repository = repository,
+        )
+        val trashId = record.items.single().trashId
+        val reachedDeleteBoundary = CountDownLatch(1)
+        val continueMove = CountDownLatch(1)
+        val moveCompleted = CountDownLatch(1)
+        val moveFailure = AtomicReference<Throwable?>()
+
+        movingStore.updateItem(record.id, 0, ExplorerActionTargetTrashItemState.MOVING)
+        Thread {
+            try {
+                repository.moveToTrashWithProgress(
+                    path = source.canonicalPath,
+                    progressCallback = null,
+                    fileCallback = null,
+                    operationController = DialogUtils.OperationController(),
+                    beforeSourceDelete = {
+                        reachedDeleteBoundary.countDown()
+                        check(continueMove.await(CONCURRENT_MOVE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                            "Concurrent target Trash move was not released"
+                        }
+                    },
+                    trashId = trashId,
+                )
+                // Deliberately omit the MOVED journal update. Finishing the in-process marker below
+                // simulates a process restart immediately after the durable Trash move completed.
+            } catch (error: Throwable) {
+                moveFailure.set(error)
+            } finally {
+                moveCompleted.countDown()
+            }
+        }.apply {
+            name = "ExplorerActionTargetTrashConcurrentTest"
+            start()
+        }
+
+        try {
+            assertTrue(
+                reachedDeleteBoundary.await(CONCURRENT_MOVE_TIMEOUT_SECONDS, TimeUnit.SECONDS),
+            )
+            recoveringStore.recover(repository)
+            assertNull(
+                recoveringStore.query(
+                    pluginUid = context.applicationInfo.uid,
+                    parent = testRoot,
+                    batchId = record.id,
+                    repository = repository,
+                ),
+            )
+            assertTrue(
+                recoveringStore.list(
+                    pluginUid = context.applicationInfo.uid,
+                    parent = testRoot,
+                    repository = repository,
+                ).none { batch -> batch.id == record.id },
+            )
+
+            continueMove.countDown()
+            assertTrue(moveCompleted.await(CONCURRENT_MOVE_TIMEOUT_SECONDS, TimeUnit.SECONDS))
+            moveFailure.get()?.let { error -> throw AssertionError("Target Trash move failed", error) }
+            assertFalse(source.exists())
+            assertNotNull(repository.findTrashItem(trashId))
+
+            movingStore.finish(record.id)
+            val recovered = requireNotNull(
+                recoveringStore.query(
+                    pluginUid = context.applicationInfo.uid,
+                    parent = testRoot,
+                    batchId = record.id,
+                    repository = repository,
+                ),
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_AVAILABLE,
+                recovered.protocolState,
+            )
+            assertEquals(ExplorerActionTargetTrashItemState.MOVED, recovered.items.single().state)
+
+            val restored = recoveringStore.undo(
+                pluginUid = context.applicationInfo.uid,
+                parent = testRoot,
+                batchId = record.id,
+                repository = repository,
+            )
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED,
+                restored.protocolState,
+            )
+            assertArrayEquals(sourceBytes, source.readBytes())
+        } finally {
+            continueMove.countDown()
+            moveCompleted.await(CONCURRENT_MOVE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            movingStore.finish(record.id)
+            repository.findTrashItem(trashId)?.let(repository::deleteTrashItem)
+            recoveringStore.remove(record.id)
             testRoot.deleteRecursively()
         }
     }
@@ -2357,6 +2699,15 @@ class ExplorerActionHostSessionInstrumentationTest {
         }
     }
 
+    private fun targetTrashItemStates(batch: Bundle): Map<String, Int> =
+        batch.getParcelableArrayList<Bundle>(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ITEMS,
+        ).orEmpty().associate { item ->
+            requireNotNull(
+                item.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_DISPLAY_NAME),
+            ) to item.getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_STATE)
+        }
+
     private fun expectIllegalState(block: () -> Unit) {
         try {
             block()
@@ -2403,6 +2754,7 @@ class ExplorerActionHostSessionInstrumentationTest {
     }
 
     private companion object {
+        const val CONCURRENT_MOVE_TIMEOUT_SECONDS = 10L
         const val CLIENT_DEATH_TIMEOUT_MILLIS = 5_000L
         const val DEEP_OUTPUT_TREE_DEPTH = 1_024
         const val PROCESS_DEATH_PHASE_ARGUMENT = "archiveManagerV15ProcessDeathPhase"

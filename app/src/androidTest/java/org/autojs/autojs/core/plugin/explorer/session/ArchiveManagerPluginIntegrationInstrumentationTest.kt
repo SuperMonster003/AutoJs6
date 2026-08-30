@@ -21,7 +21,6 @@ import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionTargetKeys
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -93,20 +92,28 @@ class ArchiveManagerPluginIntegrationInstrumentationTest {
             trashItem = waitForTrashItem(context, sourcePath)
             assertArrayEquals(sourceBytes, readZipEntry(output, source.name))
 
-            repository.restoreTrashItemToPath(
-                requireNotNull(trashItem),
-                source,
-                DialogUtils.OperationController(),
-            )
-            trashItem = null
+            val restoreButton = waitForPluginNode(
+                instrumentation = instrumentation,
+                resourceName = "createButton",
+            ) { node -> node.isEnabled }
+            assertTrue(restoreButton.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            waitUntil("source was not restored through the v21 plugin action") { source.isFile }
+            assertTrue("restoring sources removed the created archive", output.isFile)
             assertArrayEquals(sourceBytes, source.readBytes())
-            assertEquals(
-                0,
+            assertArrayEquals(sourceBytes, readZipEntry(output, source.name))
+            waitUntil("restored source remained in the host Trash database") {
                 HistoryDatabase.getInstance(context.applicationContext)
                     .historyDao()
                     .listTrashItemsDesc()
-                    .count { item -> item.originalPath == sourcePath },
-            )
+                    .none { item -> item.originalPath == sourcePath }
+            }
+            trashItem = null
+
+            val doneButton = waitForPluginNode(
+                instrumentation = instrumentation,
+                resourceName = "cancelButton",
+            ) { node -> node.isEnabled }
+            assertTrue(doneButton.performAction(AccessibilityNodeInfo.ACTION_CLICK))
         } finally {
             val remainingItem = trashItem ?: HistoryDatabase.getInstance(context.applicationContext)
                 .historyDao()
@@ -126,6 +133,15 @@ class ArchiveManagerPluginIntegrationInstrumentationTest {
                 }
             }
             runCatching { session.close() }
+            runCatching {
+                val pluginUid = context.packageManager
+                    .getApplicationInfo(PLUGIN_PACKAGE_NAME, 0)
+                    .uid
+                val store = ExplorerActionTargetTrashBatchStore(context.applicationContext)
+                store.list(pluginUid, testRoot, repository).forEach { record ->
+                    store.remove(record.id)
+                }
+            }
             testRoot.deleteRecursively()
         }
     }
@@ -184,9 +200,24 @@ class ArchiveManagerPluginIntegrationInstrumentationTest {
                 .orEmpty()
                 .firstOrNull(predicate)
             if (node != null) return node
+            root?.let(::scrollFirstScrollableNodeForward)
             SystemClock.sleep(POLL_INTERVAL_MILLIS)
         }
         throw AssertionError("Archive Manager view did not become ready: $viewId")
+    }
+
+    private fun scrollFirstScrollableNodeForward(node: AccessibilityNodeInfo): Boolean {
+        if (
+            node.isScrollable &&
+            node.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+        ) {
+            return true
+        }
+        repeat(node.childCount) { index ->
+            val child = node.getChild(index) ?: return@repeat
+            if (scrollFirstScrollableNodeForward(child)) return true
+        }
+        return false
     }
 
     private fun waitForTrashItem(

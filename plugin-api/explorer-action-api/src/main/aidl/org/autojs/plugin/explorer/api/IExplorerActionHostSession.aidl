@@ -119,4 +119,19 @@ interface IExplorerActionHostSession {
      * replacement committed by this history record. The history ID is single-use.
      */
     Bundle undoTargetReplacement(String targetId, String replacementHistoryId);
+
+    /**
+     * v21. Returns one host-owned source-to-Trash batch scoped to this plugin and parent.
+     * The result contains only an opaque batch ID and bounded per-source facts.
+     */
+    Bundle queryTargetTrashBatch(String targetTrashBatchId);
+
+    /** v21. Lists bounded recent source-to-Trash batches scoped to this plugin and parent. */
+    Bundle listTargetTrashBatches();
+
+    /**
+     * v21. Restores every still-available source in one batch to its original name. Restoration is
+     * best-effort per source; conflicts and recovery-required items remain in host Trash.
+     */
+    Bundle undoTargetTrashBatch(String targetTrashBatchId);
 }

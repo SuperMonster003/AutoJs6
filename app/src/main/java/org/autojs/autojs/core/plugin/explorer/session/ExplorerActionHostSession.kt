@@ -57,6 +57,7 @@ internal class ExplorerActionHostSession private constructor(
     private val onSourcesTrashed: () -> Unit,
     private val outputTreeStore: ExplorerActionOutputTreeStore,
     private val outputBatchStore: ExplorerActionOutputBatchStore,
+    private val targetTrashBatchStore: ExplorerActionTargetTrashBatchStore,
     private val replacementHistoryStore: ExplorerActionReplacementHistoryStore,
     playbackHistoryStore: ExplorerPlaybackHistoryStore,
     private val clock: () -> Long,
@@ -610,6 +611,7 @@ internal class ExplorerActionHostSession private constructor(
         enforceCaller()
         val requestedTargetIds = targetIds.toList()
         val requestedOutputIds = outputTransactionIds.toList()
+        val repository = TrashRepository(applicationContext)
         val plan = synchronized(lock) {
             checkOpen()
             targetTrashResult?.let { return Bundle(it) }
@@ -627,38 +629,100 @@ internal class ExplorerActionHostSession private constructor(
             }
             committedCreateOutputs.values.forEach(::requireCommittedCreateOutputIdentity)
             targetsById.values.forEach(::requireTargetIdentity)
+            val orderedTargets = targetsById.entries.toList()
+            val batch = targetTrashBatchStore.prepare(
+                pluginUid = expectedUid,
+                parent = parent,
+                sources = orderedTargets.map { (targetId, target) ->
+                    ExplorerActionTargetTrashBatchSource(
+                        targetId = targetId,
+                        file = target.file,
+                        identity = target.identity,
+                    )
+                },
+                repository = repository,
+            )
             targetTrashRunning = true
-            TargetTrashPlan(targetsById.values.toList())
+            TargetTrashPlan(
+                targets = orderedTargets.map { entry -> entry.value },
+                batch = batch,
+            )
         }
 
         try {
             val trashItemIds = ArrayList<String>(plan.targets.size)
-            var movedCount = 0
-            var recoveryCount = 0
-            var ordinaryFailureCount = 0
-            val repository = TrashRepository(applicationContext)
+            val movedIndices = HashSet<Int>()
+            val recoveryIndices = HashSet<Int>()
+            val failedIndices = HashSet<Int>()
             val operationController = DialogUtils.OperationController()
-            plan.targets.forEach { target ->
+            plan.targets.forEachIndexed { index, target ->
+                val historyItem = plan.batch.items[index]
                 try {
+                    targetTrashBatchStore.updateItem(
+                        plan.batch.id,
+                        index,
+                        ExplorerActionTargetTrashItemState.MOVING,
+                    )
                     val item = repository.moveToTrashWithProgress(
                         path = target.file.path,
                         progressCallback = null,
                         fileCallback = null,
                         operationController = operationController,
                         beforeSourceDelete = { requireTargetIdentity(target) },
+                        trashId = historyItem.trashId,
                     )
+                    check(item.trashId == historyItem.trashId) {
+                        "Explorer Action target Trash item ID changed"
+                    }
                     trashItemIds += item.trashId
-                    movedCount += 1
+                    movedIndices += index
+                    targetTrashBatchStore.updateItem(
+                        plan.batch.id,
+                        index,
+                        ExplorerActionTargetTrashItemState.MOVED,
+                    )
                 } catch (error: TrashMoveRecoveryRequiredException) {
                     trashItemIds += error.trashItem.trashId
-                    recoveryCount += 1
-                    if (!target.file.exists()) movedCount += 1
+                    recoveryIndices += index
+                    if (!target.file.exists()) movedIndices += index
+                    runCatching {
+                        targetTrashBatchStore.updateItem(
+                            plan.batch.id,
+                            index,
+                            ExplorerActionTargetTrashItemState.RECOVERY_REQUIRED,
+                        )
+                    }
                 } catch (_: Exception) {
-                    ordinaryFailureCount += 1
+                    val durableTrashItem = repository.findTrashItem(historyItem.trashId)
+                    if (durableTrashItem != null) {
+                        if (durableTrashItem.trashId !in trashItemIds) {
+                            trashItemIds += durableTrashItem.trashId
+                        }
+                        recoveryIndices += index
+                        if (!target.file.exists()) movedIndices += index
+                        runCatching {
+                            targetTrashBatchStore.updateItem(
+                                plan.batch.id,
+                                index,
+                                ExplorerActionTargetTrashItemState.RECOVERY_REQUIRED,
+                            )
+                        }
+                    } else {
+                        failedIndices += index
+                        runCatching {
+                            targetTrashBatchStore.updateItem(
+                                plan.batch.id,
+                                index,
+                                ExplorerActionTargetTrashItemState.NOT_MOVED,
+                            )
+                        }
+                    }
                 }
             }
+            val movedCount = movedIndices.size
+            val recoveryCount = recoveryIndices.size
             val state = when {
-                recoveryCount == 0 && ordinaryFailureCount == 0 && movedCount == plan.targets.size ->
+                recoveryCount == 0 && failedIndices.isEmpty() && movedCount == plan.targets.size ->
                     ExplorerActionHostSessionValues.TARGET_TRASH_STATE_COMMITTED
                 trashItemIds.isNotEmpty() || movedCount > 0 ->
                     ExplorerActionHostSessionValues.TARGET_TRASH_STATE_RECOVERY_REQUIRED
@@ -669,6 +733,7 @@ internal class ExplorerActionHostSession private constructor(
                 trashItemIds = trashItemIds,
                 movedCount = movedCount,
                 recoveryCount = recoveryCount,
+                batchId = plan.batch.id,
             )
             synchronized(lock) {
                 targetTrashResult = Bundle(result)
@@ -676,6 +741,7 @@ internal class ExplorerActionHostSession private constructor(
             if (movedCount > 0 || recoveryCount > 0) runCatching(onSourcesTrashed)
             return result
         } finally {
+            targetTrashBatchStore.finish(plan.batch.id)
             synchronized(lock) {
                 targetTrashRunning = false
             }
@@ -691,7 +757,92 @@ internal class ExplorerActionHostSession private constructor(
                 trashItemIds = emptyList(),
                 movedCount = 0,
                 recoveryCount = 0,
+                batchId = null,
             )
+        }
+    }
+
+    override fun queryTargetTrashBatch(targetTrashBatchId: String): Bundle {
+        enforceCaller()
+        require(isCanonicalUuid(targetTrashBatchId)) {
+            "Explorer Action target Trash batch ID is invalid"
+        }
+        check(allowCreateOutput) {
+            "Explorer Action does not have target Trash history access"
+        }
+        return synchronized(lock) {
+            checkOpen()
+            val repository = TrashRepository(applicationContext)
+            val record = targetTrashBatchStore.query(
+                pluginUid = expectedUid,
+                parent = parent,
+                batchId = targetTrashBatchId,
+                repository = repository,
+            )
+            targetTrashBatchBundle(record, targetTrashBatchId)
+        }
+    }
+
+    override fun listTargetTrashBatches(): Bundle {
+        enforceCaller()
+        check(allowCreateOutput) {
+            "Explorer Action does not have target Trash history access"
+        }
+        return synchronized(lock) {
+            checkOpen()
+            val repository = TrashRepository(applicationContext)
+            Bundle().apply {
+                putParcelableArrayList(
+                    ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
+                    ArrayList(
+                        targetTrashBatchStore.list(
+                            pluginUid = expectedUid,
+                            parent = parent,
+                            repository = repository,
+                        ).map { record -> targetTrashBatchBundle(record, record.id) },
+                    ),
+                )
+            }
+        }
+    }
+
+    override fun undoTargetTrashBatch(targetTrashBatchId: String): Bundle {
+        enforceCaller()
+        require(isCanonicalUuid(targetTrashBatchId)) {
+            "Explorer Action target Trash batch ID is invalid"
+        }
+        check(allowCreateOutput) {
+            "Explorer Action does not have target Trash history access"
+        }
+        val before = synchronized(lock) {
+            checkOpen()
+            check(!targetTrashRunning) {
+                "Explorer Action target Trash operation is already running"
+            }
+            val repository = TrashRepository(applicationContext)
+            val record = requireNotNull(
+                targetTrashBatchStore.query(
+                    pluginUid = expectedUid,
+                    parent = parent,
+                    batchId = targetTrashBatchId,
+                    repository = repository,
+                ),
+            ) { "Explorer Action target Trash batch is unknown" }
+            targetTrashRunning = true
+            record
+        }
+        return try {
+            val repository = TrashRepository(applicationContext)
+            val restored = targetTrashBatchStore.undo(
+                pluginUid = expectedUid,
+                parent = parent,
+                batchId = targetTrashBatchId,
+                repository = repository,
+            )
+            if (restored.restoredCount > before.restoredCount) runCatching(onSourcesTrashed)
+            targetTrashBatchBundle(restored, restored.id)
+        } finally {
+            synchronized(lock) { targetTrashRunning = false }
         }
     }
 
@@ -1423,14 +1574,69 @@ internal class ExplorerActionHostSession private constructor(
         trashItemIds: List<String>,
         movedCount: Int,
         recoveryCount: Int,
+        batchId: String?,
     ): Bundle = Bundle().apply {
         putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_STATE, state)
+        batchId?.let {
+            putString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID, it)
+        }
         putStringArrayList(
             ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_IDS,
             ArrayList(trashItemIds),
         )
         putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT, movedCount)
         putInt(ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT, recoveryCount)
+    }
+
+    private fun targetTrashBatchBundle(
+        record: ExplorerActionTargetTrashBatchRecord?,
+        requestedId: String,
+    ): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID, requestedId)
+        putInt(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE,
+            record?.protocolState
+                ?: ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_UNKNOWN,
+        )
+        putInt(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_MOVED_COUNT,
+            record?.movedCount ?: 0,
+        )
+        putInt(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_RECOVERY_COUNT,
+            record?.recoveryCount ?: 0,
+        )
+        putInt(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_RESTORED_COUNT,
+            record?.restoredCount ?: 0,
+        )
+        putParcelableArrayList(
+            ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ITEMS,
+            ArrayList(
+                record?.items.orEmpty().map { item ->
+                    Bundle().apply {
+                        putString(
+                            ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_DISPLAY_NAME,
+                            item.displayName,
+                        )
+                        putInt(
+                            ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_STATE,
+                            item.protocolState,
+                        )
+                    }
+                },
+            ),
+        )
+        record?.let { history ->
+            putLong(
+                ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_CREATED_AT,
+                history.createdAtMillis,
+            )
+            putLong(
+                ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_UPDATED_AT,
+                history.updatedAtMillis,
+            )
+        }
     }
 
     private fun replacementHistoryBundle(
@@ -1527,6 +1733,7 @@ internal class ExplorerActionHostSession private constructor(
 
     private data class TargetTrashPlan(
         val targets: List<TargetState>,
+        val batch: ExplorerActionTargetTrashBatchRecord,
     )
 
     private enum class OutputMode {
@@ -1615,6 +1822,13 @@ internal class ExplorerActionHostSession private constructor(
             ExplorerActionOutputRecovery.recoverOutputTrees(store, clock())
             val batchStore = ExplorerActionOutputBatchStore(applicationContext)
             ExplorerActionOutputRecovery.recoverOutputBatches(batchStore, clock())
+            val targetTrashBatchStore = ExplorerActionTargetTrashBatchStore(
+                applicationContext,
+                clock,
+            )
+            if (allowCreateOutput) {
+                targetTrashBatchStore.recover(TrashRepository(applicationContext))
+            }
             val replacementHistoryStore = ExplorerActionReplacementHistoryStore(
                 applicationContext,
                 clock,
@@ -1637,6 +1851,7 @@ internal class ExplorerActionHostSession private constructor(
                 onSourcesTrashed = onSourcesTrashed,
                 outputTreeStore = store,
                 outputBatchStore = batchStore,
+                targetTrashBatchStore = targetTrashBatchStore,
                 replacementHistoryStore = replacementHistoryStore,
                 playbackHistoryStore = ExplorerPlaybackHistoryStore(context.applicationContext, clock),
                 clock = clock,

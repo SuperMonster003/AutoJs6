@@ -37,6 +37,16 @@ object ExplorerActionHostSessionKeys {
     const val TARGET_TRASH_ITEM_IDS = "targetTrashItemIds"
     const val TARGET_TRASH_MOVED_COUNT = "targetTrashMovedCount"
     const val TARGET_TRASH_RECOVERY_COUNT = "targetTrashRecoveryCount"
+    const val TARGET_TRASH_RESTORED_COUNT = "targetTrashRestoredCount"
+
+    const val TARGET_TRASH_BATCH_ID = "targetTrashBatchId"
+    const val TARGET_TRASH_BATCH_STATE = "targetTrashBatchState"
+    const val TARGET_TRASH_BATCHES = "targetTrashBatches"
+    const val TARGET_TRASH_BATCH_ITEMS = "targetTrashBatchItems"
+    const val TARGET_TRASH_BATCH_CREATED_AT = "targetTrashBatchCreatedAt"
+    const val TARGET_TRASH_BATCH_UPDATED_AT = "targetTrashBatchUpdatedAt"
+    const val TARGET_TRASH_ITEM_DISPLAY_NAME = "targetTrashItemDisplayName"
+    const val TARGET_TRASH_ITEM_STATE = "targetTrashItemState"
 
     const val TARGET_REPLACEMENT_HISTORY_ID = "targetReplacementHistoryId"
     const val TARGET_REPLACEMENT_UNDO_STATE = "targetReplacementUndoState"

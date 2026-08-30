@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 20
+    const val VERSION = 21
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -24,6 +24,9 @@ object ExplorerActionProtocol {
     const val MAX_OUTPUT_TRANSACTION_RESULTS = 128
     const val MAX_OUTPUT_BATCH_ENTRIES = 128
     const val MAX_OUTPUT_BATCH_RESULTS = 128
+    const val MAX_TARGET_TRASH_BATCH_ID_LENGTH = 128
+    const val MAX_TARGET_TRASH_BATCH_RESULTS = 32
+    const val MAX_TARGET_TRASH_ITEM_RESULTS = MAX_TARGETS_PER_REQUEST
     const val MAX_TARGET_REPLACEMENT_HISTORY_ID_LENGTH = 128
     const val MAX_ARCHIVE_SESSION_ID_LENGTH = 128
     const val MAX_ARCHIVE_ENTRY_ID_LENGTH = 128
