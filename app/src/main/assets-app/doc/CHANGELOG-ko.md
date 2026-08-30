@@ -8,6 +8,7 @@
 
 ###### 2026/08/31
 
+* `추가` Image Quantization 옵션은 `OPTIONS_API_VERSION>=4`를 통해 `maxPixels`와 `maxMemoryBytes`를 추가하고 기본 16000000 픽셀 및 256 MiB 추가 작업 메모리 예산을 적용합니다; 예산 초과는 리소스 세부 정보가 있는 형식화 예외로 실패하고, 결과는 계산된 최대 메모리를 보고하며, 스크립트 중지는 활성 네이티브 양자화를 취소합니다
 * `추가` `images.quantizeToFile`은 인덱스 PNG를 디스크에 직접 스트리밍하고 크기와 품질 지표를 반환합니다; Image Quantization 옵션은 이제 `preserveAlpha`, 일반 Bitmap 구성, 하드웨어 입력 및 `OPTIONS_API_VERSION>=3`을 통해 sRGB로 정규화된 광색역 입력을 지원합니다
 * `추가` `images.quantize`가 이제 PNG 바이트, 크기, 실제 품질 및 양자화 오차를 반환합니다; 최소 품질을 생략하면 최선 노력 방식 (`minQuality=0`)을 사용하고, 명시한 하한을 충족할 수 없으면 코드 `PNG_QUANTIZATION_QUALITY_TOO_LOW`의 `PngQuantBridge.QualityTooLowException`을 발생시킵니다; 결과 API에는 `OPTIONS_API_VERSION>=2`가 필요합니다
 * `추가` `images.save`, `images.saveImage`, `images.compress`, `images.compressToBytes`가 팔레트 크기, 속도, 독립 품질 범위, 디더링 및 posterize를 제어하는 PNG 양자화 명명 옵션을 지원; 숫자 `quality`는 이전 버전과 호환되며 옵션에는 `OPTIONS_API_VERSION>=1`을 선언한 Image Quantization 플러그인이 필요

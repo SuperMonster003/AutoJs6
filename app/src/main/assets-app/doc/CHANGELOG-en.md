@@ -8,6 +8,7 @@
 
 ###### 2026/08/31
 
+* `Feature` Image Quantization options add `maxPixels` and `maxMemoryBytes` with default 16000000-pixel and 256 MiB additional-working-memory budgets through `OPTIONS_API_VERSION>=4`; over-budget work fails with typed resource details, results report accounted peak memory, and stopping a script cancels its active native quantization
 * `Feature` `images.quantizeToFile` streams an indexed PNG directly to disk with size and quality metrics; Image Quantization options now support `preserveAlpha`, common Bitmap configurations, hardware input, and wide-gamut input normalized to sRGB through `OPTIONS_API_VERSION>=3`
 * `Feature` `images.quantize` now returns PNG bytes, size, achieved quality, and quantization error; omitting the minimum quality uses best effort (`minQuality=0`), while an explicit unmet lower bound throws `PngQuantBridge.QualityTooLowException` with code `PNG_QUANTIZATION_QUALITY_TOO_LOW`; the result API requires `OPTIONS_API_VERSION>=2`
 * `Feature` `images.save`, `images.saveImage`, `images.compress`, and `images.compressToBytes` now accept named PNG quantization options for palette size, speed, independent quality bounds, dithering, and posterize; numeric `quality` remains backward compatible, while options require an Image Quantization plugin declaring `OPTIONS_API_VERSION>=1`
