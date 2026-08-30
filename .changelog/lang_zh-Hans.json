@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/08/30",
       "feature": [
+        "`images.quantize` 现返回 PNG 字节, 大小, 实际质量与量化误差; 省略质量下限时采用尽力而为 (`minQuality=0`), 显式下限无法满足时抛出带错误码 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 结果接口要求 `OPTIONS_API_VERSION>=2`",
         "`images.save`, `images.saveImage`, `images.compress` 与 `images.compressToBytes` 现支持 PNG 量化具名选项, 可控制调色板大小, 速度, 独立质量区间, 抖动和 posterize; 数字 `quality` 保持向后兼容, 选项对象要求 Image Quantization 插件声明 `OPTIONS_API_VERSION>=1`",
         "`engines.execScript` 内存 TypeScript 即时执行: `.ts/.tsx/.mts/.cts` 源名称经独立编译器处理, 诊断与 Source Map 栈映射同文件脚本一致, Rhino 返回最终表达式值, 完整日志页及编辑器日志面板可交互求值单行 TypeScript 片段",
         "compiler-backed Node TypeScript 项目现可按需编译运行中创建的 `.ts/.mts/.cts`: Node 通过绑定精确字节数与 SHA-256 的有界 PFD 将源码交给宿主, 宿主复用常驻项目会话, 保留类型诊断与 Source Map 栈映射, 并继续拒绝路径逃逸, 符号链接和歧义目标",

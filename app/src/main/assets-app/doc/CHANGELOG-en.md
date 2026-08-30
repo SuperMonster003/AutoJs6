@@ -8,6 +8,7 @@
 
 ###### 2026/08/30
 
+* `Feature` `images.quantize` now returns PNG bytes, size, achieved quality, and quantization error; omitting the minimum quality uses best effort (`minQuality=0`), while an explicit unmet lower bound throws `PngQuantBridge.QualityTooLowException` with code `PNG_QUANTIZATION_QUALITY_TOO_LOW`; the result API requires `OPTIONS_API_VERSION>=2`
 * `Feature` `images.save`, `images.saveImage`, `images.compress`, and `images.compressToBytes` now accept named PNG quantization options for palette size, speed, independent quality bounds, dithering, and posterize; numeric `quality` remains backward compatible, while options require an Image Quantization plugin declaring `OPTIONS_API_VERSION>=1`
 * `Feature` In-memory TypeScript execution through `engines.execScript`: `.ts/.tsx/.mts/.cts` source names use the independent compiler with file-equivalent diagnostics and Source Map stack mapping, Rhino returns the final expression value, and the full Log page plus editor Log panel evaluate one-line snippets interactively
 * `Feature` Compiler-backed Node TypeScript projects can now compile runtime-created `.ts/.mts/.cts` files on demand: Node transfers bounded source through a byte- and SHA-256-bound PFD, the host reuses the resident project session, type diagnostics and Source Map stack mapping are preserved, and path escape, symlinks, and ambiguous targets remain denied

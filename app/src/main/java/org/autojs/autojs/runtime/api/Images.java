@@ -589,6 +589,17 @@ public class Images {
         throw new WrappedRuntimeException("PNG quantization failed");
     }
 
+    public PngQuantBridge.Result quantize(
+            @NotNull ImageWrapper image,
+            @NotNull PngQuantBridge.Options options
+    ) throws PngQuantBridge.QualityTooLowException {
+        try {
+            return PngQuantBridge.quantizeWithResult(image.getBitmap(), options);
+        } finally {
+            shoot(image);
+        }
+    }
+
     public ImageWrapper compress(@NotNull ImageWrapper image, @NotNull String format, int quality) throws BitmapUtils.DecodeException {
         return fromBytes(compressToBytes(image, format, quality));
     }

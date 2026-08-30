@@ -155,7 +155,7 @@ object ImageQuantPluginHost {
             .filter { discovered ->
                 discovered.error == null &&
                         discovered.candidate?.let { candidate ->
-                            ImageQuantOptionsApiPolicy.supports(candidate.optionsApiVersion)
+                            ImageQuantOptionsApiPolicy.supportsQuantizationResult(candidate.optionsApiVersion)
                         } == true
             }
             .map { it.serviceInfo.packageName to it.serviceInfo.name }
@@ -270,6 +270,20 @@ object ImageQuantPluginHost {
             throw buildLoadException(
                 context = context,
                 code = ImageQuantPluginLoadError.OPTIONS_API_UNSUPPORTED,
+                packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
+            )
+        }
+        return runtime
+    }
+
+    /** Ensures the loaded runtime can return quantization quality metrics with encoded bytes. */
+    @JvmStatic
+    fun ensureQuantizationResultApi(context: Context): LoadedRuntime {
+        val runtime = ensureLoaded(context)
+        if (!ImageQuantOptionsApiPolicy.supportsQuantizationResult(runtime.optionsApiVersion)) {
+            throw buildLoadException(
+                context = context,
+                code = ImageQuantPluginLoadError.QUANTIZATION_RESULT_API_UNSUPPORTED,
                 packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
             )
         }
@@ -532,7 +546,10 @@ object ImageQuantPluginHost {
                         "current version is ${BuildConfig.VERSION_CODE}"
             ImageQuantPluginLoadError.OPTIONS_API_UNSUPPORTED ->
                 "Image Quantization runtime does not support options API version " +
-                        ImageQuantPluginContract.OPTIONS_API_VERSION
+                        ImageQuantPluginContract.MIN_OPTIONS_API_VERSION
+            ImageQuantPluginLoadError.QUANTIZATION_RESULT_API_UNSUPPORTED ->
+                "Image Quantization runtime does not support quantization result API version " +
+                        ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION
             ImageQuantPluginLoadError.PLUGIN_CHANGED_RESTART_REQUIRED ->
                 "Image Quantization plugin changed while its native runtime was loaded; restart AutoJs6 before using it again"
             else -> "Image Quantization plugin is incompatible or its native runtime is unavailable ($code)"

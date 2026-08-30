@@ -137,8 +137,18 @@ class ImageQuantPluginPolicyTest {
     @Test
     fun `options API capability is additive and backward compatible`() {
         assertFalse(ImageQuantOptionsApiPolicy.supports(0))
-        assertTrue(ImageQuantOptionsApiPolicy.supports(ImageQuantPluginContract.OPTIONS_API_VERSION))
+        assertTrue(ImageQuantOptionsApiPolicy.supports(ImageQuantPluginContract.MIN_OPTIONS_API_VERSION))
         assertTrue(ImageQuantOptionsApiPolicy.supports(ImageQuantPluginContract.OPTIONS_API_VERSION + 1))
+        assertFalse(
+            ImageQuantOptionsApiPolicy.supportsQuantizationResult(
+                ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION - 1,
+            ),
+        )
+        assertTrue(
+            ImageQuantOptionsApiPolicy.supportsQuantizationResult(
+                ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION,
+            ),
+        )
     }
 
     @Test

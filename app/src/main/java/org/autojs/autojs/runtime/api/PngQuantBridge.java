@@ -2,9 +2,12 @@ package org.autojs.autojs.runtime.api;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.Keep;
+
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class PngQuantBridge {
@@ -13,6 +16,7 @@ public class PngQuantBridge {
 
         public static final int DEFAULT_MAX_COLORS = 256;
         public static final int DEFAULT_SPEED = 8;
+        public static final int DEFAULT_MIN_QUALITY = 0;
         public static final float DEFAULT_DITHERING_LEVEL = 0.0F;
         public static final int DEFAULT_POSTERIZE_BITS = 0;
 
@@ -65,6 +69,53 @@ public class PngQuantBridge {
 
         public int getPosterizeBits() {
             return posterizeBits;
+        }
+    }
+
+    /** Encoded PNG data together with the palette quality measured by libimagequant. */
+    @Keep
+    public static final class Result {
+
+        private final byte[] bytes;
+        private final int quality;
+        private final double quantizationError;
+
+        /** Called from the optional result JNI entry point. */
+        public Result(byte[] bytes, int quality, double quantizationError) {
+            this.bytes = Objects.requireNonNull(bytes, "bytes");
+            this.quality = quality;
+            this.quantizationError = quantizationError;
+        }
+
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public int getSize() {
+            return bytes.length;
+        }
+
+        public int getQuality() {
+            return quality;
+        }
+
+        public double getQuantizationError() {
+            return quantizationError;
+        }
+    }
+
+    /** A strict minimum quality could not be achieved with the requested color budget. */
+    @Keep
+    public static final class QualityTooLowException extends IOException {
+
+        public static final String CODE = "PNG_QUANTIZATION_QUALITY_TOO_LOW";
+
+        public QualityTooLowException(String message) {
+            super(message);
+        }
+
+        public String getCode() {
+            return CODE;
         }
     }
 
@@ -121,6 +172,22 @@ public class PngQuantBridge {
         );
     }
 
+    /** Quantizes a bitmap and returns both encoded data and measured palette quality. */
+    public static Result quantizeWithResult(Bitmap bitmap, Options options) throws QualityTooLowException {
+        Objects.requireNonNull(options, "options");
+        var context = GlobalAppContext.get();
+        ImageQuantPluginHost.ensureQuantizationResultApi(context);
+        return nativeQuantizeWithResult(
+                bitmap,
+                options.maxColors,
+                options.speed,
+                options.minQuality,
+                options.maxQuality,
+                options.ditheringLevel,
+                options.posterizeBits
+        );
+    }
+
     /** Called only after the host has loaded a policy-approved native runtime. */
     public static String probeLoadedRuntime() {
         return nativeProbe();
@@ -137,6 +204,16 @@ public class PngQuantBridge {
             float ditheringLevel,
             int posterizeBits
     );
+
+    private static native Result nativeQuantizeWithResult(
+            Bitmap bitmap,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits
+    ) throws QualityTooLowException;
 
     private static native String nativeProbe();
 

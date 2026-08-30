@@ -1,5 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.images
 
+import org.autojs.autojs.runtime.api.PngQuantBridge
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mozilla.javascript.NativeObject
@@ -28,12 +30,12 @@ class ImagesCompatibilityTest {
     }
 
     @Test
-    fun imageQuantizationOptionsPreserveLegacyDefaults() {
+    fun imageQuantizationOptionsDefaultToBestEffortMinimumQuality() {
         val parsed = Images.parseImageQuantizationOptions(NativeObject(), 60)
 
         assertEquals(256, parsed.maxColors)
         assertEquals(8, parsed.speed)
-        assertEquals(60, parsed.minQuality)
+        assertEquals(0, parsed.minQuality)
         assertEquals(60, parsed.maxQuality)
         assertEquals(0.0F, parsed.ditheringLevel, 0.0F)
         assertEquals(0, parsed.posterizeBits)
@@ -70,6 +72,37 @@ class ImagesCompatibilityTest {
 
         assertEquals(100, parsed.minQuality)
         assertEquals(100, parsed.maxQuality)
+    }
+
+    @Test
+    fun imageQuantizationExplicitMinimumOverridesBestEffortAndQualityShortcut() {
+        val bestEffort = Images.parseImageQuantizationOptions(
+            NativeObject().apply { put("maxQuality", this, 90) },
+            60,
+        )
+        val strict = Images.parseImageQuantizationOptions(
+            NativeObject().apply {
+                put("quality", this, 75)
+                put("minQuality", this, 50)
+            },
+            60,
+        )
+
+        assertEquals(0, bestEffort.minQuality)
+        assertEquals(90, bestEffort.maxQuality)
+        assertEquals(50, strict.minQuality)
+        assertEquals(75, strict.maxQuality)
+    }
+
+    @Test
+    fun pngQuantizationResultExposesStableScriptFields() {
+        val bytes = byteArrayOf(0x01, 0x02, 0x03)
+        val result = PngQuantizationResult(PngQuantBridge.Result(bytes, 73, 0.125))
+
+        assertArrayEquals(bytes, result.bytes)
+        assertEquals(bytes.size, result.size)
+        assertEquals(73, result.quality)
+        assertEquals(0.125, result.quantizationError, 0.0)
     }
 
     private fun options(name: String, value: String) = NativeObject().apply {

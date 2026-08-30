@@ -71,7 +71,10 @@ internal object ImageQuantProcessAbiPolicy {
 internal object ImageQuantOptionsApiPolicy {
 
     fun supports(optionsApiVersion: Int): Boolean =
-        optionsApiVersion >= ImageQuantPluginContract.OPTIONS_API_VERSION
+        optionsApiVersion >= ImageQuantPluginContract.MIN_OPTIONS_API_VERSION
+
+    fun supportsQuantizationResult(optionsApiVersion: Int): Boolean =
+        optionsApiVersion >= ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION
 }
 
 internal object ImageQuantRuntimeLifecyclePolicy {

@@ -148,6 +148,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::matchFeatures.name,
         ::isRecycled.name,
         ::recycle.name,
+        ::quantize.name,
         ::compress.name,
         ::compressToBytes.name,
         ::downsample.name,
@@ -1357,6 +1358,34 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun quantize(scriptRuntime: ScriptRuntime, args: Array<out Any?>): PngQuantizationResult =
+            ensureArgumentsLengthInRange(args, 1..2) {
+                val (o, optionsArg) = it
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) {
+                    "Argument \"image\" ${image.jsBrief()} for images.quantize must be a ImageWrapper"
+                }
+                val options = when {
+                    optionsArg.isJsNullish() -> NativeObject()
+                    optionsArg is NativeObject -> optionsArg
+                    else -> throw WrappedIllegalArgumentException(
+                        "Argument \"options\" ${optionsArg.jsBrief()} for images.quantize must be an object",
+                    )
+                }
+                try {
+                    PngQuantizationResult(
+                        scriptRuntime.images.quantize(
+                            image,
+                            parseImageQuantizationOptions(options, DEFAULT_IMAGE_SAVE_QUALITY),
+                        ),
+                    )
+                } finally {
+                    image.shoot()
+                }
+            }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun compress(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 1..3) {
 
             // @Comment by SuperMonster003 on May 19, 2025.
@@ -1772,13 +1801,15 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             options: NativeObject,
             defaultQuality: Int,
         ): PngQuantBridge.Options {
-            val quality = parseQuality(options.inquire("quality"), defaultQuality)
+            val qualityArg = options.inquire("quality")
+            val quality = parseQuality(qualityArg, defaultQuality)
             return PngQuantBridge.Options(
                 options.inquire("maxColors") { coerceIntNumber(it) }
                     ?: PngQuantBridge.Options.DEFAULT_MAX_COLORS,
                 options.inquire("speed") { coerceIntNumber(it) }
                     ?: PngQuantBridge.Options.DEFAULT_SPEED,
-                options.inquire("minQuality") { coerceIntNumber(it) } ?: quality,
+                options.inquire("minQuality") { coerceIntNumber(it) }
+                    ?: if (qualityArg.isJsNullish()) PngQuantBridge.Options.DEFAULT_MIN_QUALITY else quality,
                 options.inquire("maxQuality") { coerceIntNumber(it) } ?: quality,
                 options.inquire("ditheringLevel") { coerceFloatNumber(it) }
                     ?: PngQuantBridge.Options.DEFAULT_DITHERING_LEVEL,

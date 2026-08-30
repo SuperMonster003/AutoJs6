@@ -168,6 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ###### 2026/08/30
 
+* `新機能` `images.quantize` は PNG バイト列, サイズ, 実際の品質, 量子化誤差を返すようになりました; 最小品質を省略するとベストエフォート (`minQuality=0`) で処理し, 明示した下限を満たせない場合はコード `PNG_QUANTIZATION_QUALITY_TOO_LOW` の `PngQuantBridge.QualityTooLowException` を送出します; 結果 API には `OPTIONS_API_VERSION>=2` が必要です
 * `新機能` `images.save`, `images.saveImage`, `images.compress`, `images.compressToBytes` が PNG 量子化の名前付きオプションに対応し, パレット数, 速度, 独立した品質範囲, ディザリング, posterize を制御可能に; 数値 `quality` の後方互換性は維持され, オプションには `OPTIONS_API_VERSION>=1` を宣言する Image Quantization プラグインが必要
 * `新機能` `engines.execScript` による in-memory TypeScript 即時実行: `.ts/.tsx/.mts/.cts` source name は独立 compiler で処理され, file script と同じ diagnostics と Source Map stack mapping を維持し, Rhino は最終 expression value を返し, 完全な Log page と editor Log panel で 1 行 snippet を対話的に評価できます
 * `新機能` compiler-backed Node TypeScript project は実行中に作成された `.ts/.mts/.cts` をオンデマンドでコンパイルできるようになりました: Node は byte count と SHA-256 で拘束された PFD を介して source を host に渡し, host は resident project session を再利用し, type diagnostics と Source Map stack mapping を維持しながら path escape, symbolic link, ambiguous target を引き続き拒否します

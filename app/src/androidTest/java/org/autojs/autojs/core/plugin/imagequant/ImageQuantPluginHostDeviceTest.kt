@@ -101,6 +101,40 @@ class ImageQuantPluginHostDeviceTest {
             assertEquals("PNG must use indexed color", 3, encodedWithOptions[25].toInt() and 0xff)
             assertTrue(encodedWithOptions.readPngPaletteSize() in 1..4)
 
+            val result = PngQuantBridge.quantizeWithResult(
+                bitmap,
+                PngQuantBridge.Options(
+                    2,
+                    8,
+                    0,
+                    100,
+                    0.0F,
+                    0,
+                ),
+            )
+            assertTrue(result.bytes.isNotEmpty())
+            assertEquals(result.bytes.size, result.size)
+            assertTrue("Unexpected quantization quality ${result.quality}", result.quality in 0..100)
+            assertTrue(
+                "Unexpected quantization error ${result.quantizationError}",
+                result.quantizationError >= 0.0 && result.quantizationError.isFinite(),
+            )
+
+            val qualityError = runCatching {
+                PngQuantBridge.quantizeWithResult(
+                    bitmap,
+                    PngQuantBridge.Options(
+                        2,
+                        8,
+                        100,
+                        100,
+                        0.0F,
+                        0,
+                    ),
+                )
+            }.exceptionOrNull()
+            assertTrue(qualityError.toString(), qualityError is PngQuantBridge.QualityTooLowException)
+
             val decoded = BitmapFactory.decodeByteArray(encoded, 0, encoded.size)
             try {
                 assertEquals(3, decoded.width)
