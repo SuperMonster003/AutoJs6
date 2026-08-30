@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.explorer
 
+import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
@@ -130,7 +131,8 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
     }
 
     @Test
-    fun installedArchiveManagerRenamesAndDeletesZipEntriesThroughTheHostSession() = runBlocking {
+    fun installedArchiveManagerCreatesAddsRenamesAndDeletesZipEntriesThroughTheHostSession() =
+        runBlocking {
         assumeTrue("Archive Manager is not installed", pluginIsInstalled())
         assumeTrue(
             "Archive Manager is not trusted by this host build",
@@ -299,6 +301,7 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
             assertTrue(
                 reopenedProvider.getExplorerPage(reopenedProvider.rootPage).blockingGet().none(),
             )
+            exportEmptyArchiveIfRequested(archive)
         } finally {
             provider?.close()
             historyStore.removeAllForTarget(context.applicationInfo.uid, archive)
@@ -387,6 +390,30 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
         assertEquals(0L, bytes.readUnsignedIntLittleEndian(offset + 12))
     }
 
+    private fun exportEmptyArchiveIfRequested(archive: File) {
+        if (
+            InstrumentationRegistry.getArguments()
+                .getString(EXPORT_EMPTY_ARCHIVE_ARGUMENT)
+                ?.toBooleanStrictOrNull() != true
+        ) {
+            return
+        }
+        val externalFilesDirectory = requireNotNull(context.getExternalFilesDir(null)) {
+            "The host external files directory is unavailable"
+        }
+        val exportDirectory = File(externalFilesDirectory, EXPORT_DIRECTORY_NAME)
+        assertTrue(
+            "Unable to create the empty-archive export directory",
+            exportDirectory.isDirectory || exportDirectory.mkdirs(),
+        )
+        val exportedArchive = File(
+            exportDirectory,
+            "empty-api-${Build.VERSION.SDK_INT}.zip",
+        )
+        archive.copyTo(exportedArchive, overwrite = true)
+        assertLegalEmptyZip(exportedArchive)
+    }
+
     private fun ByteArray.hasZipEndRecordSignature(offset: Int): Boolean =
         offset >= 0 &&
             offset + ZIP_END_RECORD_MINIMUM_SIZE <= size &&
@@ -416,6 +443,8 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
         const val KEEP_ENTRY_NAME = "keep.txt"
         const val CREATED_DIRECTORY_NAME = "empty"
         const val RENAMED_ENTRY_NAME = "renamed.txt"
+        const val EXPORT_EMPTY_ARCHIVE_ARGUMENT = "archiveManagerExportEmptyZip"
+        const val EXPORT_DIRECTORY_NAME = "archive-manager-matrix"
         const val OPERATION_TIMEOUT_SECONDS = 30L
         const val ZIP_END_RECORD_MINIMUM_SIZE = 22
         const val ZIP_END_RECORD_MAXIMUM_SIZE = ZIP_END_RECORD_MINIMUM_SIZE + 0xffff
