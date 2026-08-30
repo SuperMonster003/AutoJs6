@@ -304,6 +304,20 @@ object ImageQuantPluginHost {
         return runtime
     }
 
+    /** Ensures the loaded runtime enforces pixel/memory budgets and cancellation. */
+    @JvmStatic
+    fun ensureResourceControlApi(context: Context): LoadedRuntime {
+        val runtime = ensureLoaded(context)
+        if (!ImageQuantOptionsApiPolicy.supportsResourceControl(runtime.optionsApiVersion)) {
+            throw buildLoadException(
+                context = context,
+                code = ImageQuantPluginLoadError.RESOURCE_CONTROL_API_UNSUPPORTED,
+                packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
+            )
+        }
+        return runtime
+    }
+
     private fun tryLoadBundledRuntime(): LoadedRuntime? {
         try {
             System.loadLibrary(ImageQuantPluginContract.NATIVE_LIBRARY_NAME)
@@ -567,6 +581,9 @@ object ImageQuantPluginHost {
             ImageQuantPluginLoadError.COLOR_IO_API_UNSUPPORTED ->
                 "Image Quantization runtime does not support color and file output API version " +
                         ImageQuantPluginContract.COLOR_IO_API_VERSION
+            ImageQuantPluginLoadError.RESOURCE_CONTROL_API_UNSUPPORTED ->
+                "Image Quantization runtime does not support resource control API version " +
+                        ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION
             ImageQuantPluginLoadError.PLUGIN_CHANGED_RESTART_REQUIRED ->
                 "Image Quantization plugin changed while its native runtime was loaded; restart AutoJs6 before using it again"
             else -> "Image Quantization plugin is incompatible or its native runtime is unavailable ($code)"

@@ -57,7 +57,8 @@ class ImageQuantPluginHostDeviceTest {
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_STL, runtime.nativeStl)
         assertEquals(ImageQuantPluginContract.OPTIONS_API_VERSION, runtime.optionsApiVersion)
-        assertEquals(ImageQuantPluginContract.COLOR_IO_API_VERSION, runtime.optionsApiVersion)
+        assertTrue(runtime.optionsApiVersion >= ImageQuantPluginContract.COLOR_IO_API_VERSION)
+        assertTrue(runtime.optionsApiVersion >= ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION)
         assertEquals(ImageQuantPluginContract.RUNTIME_PROBE_VALUE, runtime.runtimeProbe)
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
 
@@ -123,6 +124,38 @@ class ImageQuantPluginHostDeviceTest {
             assertTrue(
                 "Unexpected quantization error ${result.quantizationError}",
                 result.quantizationError >= 0.0 && result.quantizationError.isFinite(),
+            )
+            assertTrue("v4 must report accounted peak memory", result.peakWorkingMemoryBytes > 0L)
+
+            val resourceError = runCatching {
+                PngQuantBridge.quantizeWithResult(
+                    bitmap,
+                    PngQuantBridge.Options(
+                        256,
+                        8,
+                        0,
+                        100,
+                        0.0F,
+                        0,
+                        true,
+                        5L,
+                        PngQuantBridge.Options.DEFAULT_MAX_MEMORY_BYTES,
+                    ),
+                )
+            }.exceptionOrNull()
+            assertTrue(resourceError.toString(), resourceError is PngQuantBridge.ResourceLimitException)
+            resourceError as PngQuantBridge.ResourceLimitException
+            assertEquals(PngQuantBridge.ResourceLimitException.PIXEL_LIMIT, resourceError.reason)
+            assertEquals(6L, resourceError.actualPixels)
+            assertEquals(5L, resourceError.maxPixels)
+
+            val cancellationToken = PngQuantBridge.CancellationToken().apply { cancel() }
+            val cancellationError = runCatching {
+                PngQuantBridge.quantize(bitmap, 80, cancellationToken)
+            }.exceptionOrNull()
+            assertTrue(
+                cancellationError.toString(),
+                cancellationError is PngQuantBridge.QuantizationCancelledException,
             )
 
             val qualityError = runCatching {
@@ -210,13 +243,23 @@ class ImageQuantPluginHostDeviceTest {
                 rgb565.recycle()
             }
 
-            val outputFile = File.createTempFile("pngquant-host-m3-", ".png", context.cacheDir)
+            val outputFile = File.createTempFile("pngquant-host-m4-", ".png", context.cacheDir)
             try {
                 val outputResult = FileOutputStream(outputFile).use { output ->
                     PngQuantBridge.quantizeToFileDescriptor(
                         bitmap,
                         output.fd,
-                        PngQuantBridge.Options(256, 8, 0, 100, 0.0F, 0),
+                        PngQuantBridge.Options(
+                            256,
+                            8,
+                            0,
+                            100,
+                            0.0F,
+                            0,
+                            true,
+                            PngQuantBridge.Options.DEFAULT_MAX_PIXELS,
+                            PngQuantBridge.Options.DEFAULT_MAX_MEMORY_BYTES,
+                        ),
                     ).also {
                         assertTrue("Native code must leave the caller descriptor open", output.fd.valid())
                     }
@@ -225,6 +268,7 @@ class ImageQuantPluginHostDeviceTest {
                 assertTrue(outputResult.size > 8L)
                 assertTrue(outputResult.quality in 0..100)
                 assertTrue(outputResult.quantizationError >= 0.0 && outputResult.quantizationError.isFinite())
+                assertTrue("v4 FD output must report accounted peak memory", outputResult.peakWorkingMemoryBytes > 0L)
                 val streamedDecoded = BitmapFactory.decodeFile(outputFile.absolutePath)
                 try {
                     assertEquals(bitmap.width, streamedDecoded.width)

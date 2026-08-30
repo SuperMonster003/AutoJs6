@@ -42,6 +42,8 @@ class ImagesCompatibilityTest {
         assertEquals(0.0F, parsed.ditheringLevel, 0.0F)
         assertEquals(0, parsed.posterizeBits)
         assertTrue(parsed.isPreserveAlpha)
+        assertEquals(PngQuantBridge.Options.DEFAULT_MAX_PIXELS, parsed.maxPixels)
+        assertEquals(PngQuantBridge.Options.DEFAULT_MAX_MEMORY_BYTES, parsed.maxMemoryBytes)
     }
 
     @Test
@@ -55,6 +57,8 @@ class ImagesCompatibilityTest {
                 put("ditheringLevel", this, 0.75)
                 put("posterizeBits", this, 3)
                 put("preserveAlpha", this, false)
+                put("maxPixels", this, 1_234_567L)
+                put("maxMemoryBytes", this, 67_108_864L)
             },
             60,
         )
@@ -66,6 +70,8 @@ class ImagesCompatibilityTest {
         assertEquals(0.75F, parsed.ditheringLevel, 0.0F)
         assertEquals(3, parsed.posterizeBits)
         assertFalse(parsed.isPreserveAlpha)
+        assertEquals(1_234_567L, parsed.maxPixels)
+        assertEquals(67_108_864L, parsed.maxMemoryBytes)
     }
 
     @Test
@@ -102,25 +108,27 @@ class ImagesCompatibilityTest {
     @Test
     fun pngQuantizationResultExposesStableScriptFields() {
         val bytes = byteArrayOf(0x01, 0x02, 0x03)
-        val result = PngQuantizationResult(PngQuantBridge.Result(bytes, 73, 0.125))
+        val result = PngQuantizationResult(PngQuantBridge.Result(bytes, 73, 0.125, 8192L))
 
         assertArrayEquals(bytes, result.bytes)
         assertEquals(bytes.size, result.size)
         assertEquals(73, result.quality)
         assertEquals(0.125, result.quantizationError, 0.0)
+        assertEquals(8192L, result.peakWorkingMemoryBytes)
     }
 
     @Test
     fun pngQuantizationFileResultExposesStableScriptFields() {
         val result = PngQuantizationFileResult(
             "/tmp/quantized.png",
-            PngQuantBridge.OutputResult(4096L, 81, 0.0625),
+            PngQuantBridge.OutputResult(4096L, 81, 0.0625, 16384L),
         )
 
         assertEquals("/tmp/quantized.png", result.path)
         assertEquals(4096L, result.size)
         assertEquals(81, result.quality)
         assertEquals(0.0625, result.quantizationError, 0.0)
+        assertEquals(16384L, result.peakWorkingMemoryBytes)
     }
 
     private fun options(name: String, value: String) = NativeObject().apply {

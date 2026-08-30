@@ -78,6 +78,9 @@ internal object ImageQuantOptionsApiPolicy {
 
     fun supportsColorIo(optionsApiVersion: Int): Boolean =
         optionsApiVersion >= ImageQuantPluginContract.COLOR_IO_API_VERSION
+
+    fun supportsResourceControl(optionsApiVersion: Int): Boolean =
+        optionsApiVersion >= ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION
 }
 
 internal object ImageQuantRuntimeLifecyclePolicy {

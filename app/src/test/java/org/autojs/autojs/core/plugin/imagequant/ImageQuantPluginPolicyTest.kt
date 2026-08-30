@@ -159,6 +159,16 @@ class ImageQuantPluginPolicyTest {
                 ImageQuantPluginContract.COLOR_IO_API_VERSION,
             ),
         )
+        assertFalse(
+            ImageQuantOptionsApiPolicy.supportsResourceControl(
+                ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION - 1,
+            ),
+        )
+        assertTrue(
+            ImageQuantOptionsApiPolicy.supportsResourceControl(
+                ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION,
+            ),
+        )
     }
 
     @Test

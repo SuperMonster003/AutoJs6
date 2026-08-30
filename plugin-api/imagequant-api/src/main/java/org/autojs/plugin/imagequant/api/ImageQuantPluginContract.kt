@@ -39,7 +39,8 @@ object ImageQuantPluginContract {
     const val MIN_OPTIONS_API_VERSION = 1
     const val QUANTIZATION_RESULT_API_VERSION = 2
     const val COLOR_IO_API_VERSION = 3
-    const val OPTIONS_API_VERSION = COLOR_IO_API_VERSION
+    const val RESOURCE_CONTROL_API_VERSION = 4
+    const val OPTIONS_API_VERSION = RESOURCE_CONTROL_API_VERSION
 
     const val NATIVE_LIBRARY_NAME = "pngquant_bridge"
     const val NATIVE_LIBRARY_FILE_NAME = "libpngquant_bridge.so"

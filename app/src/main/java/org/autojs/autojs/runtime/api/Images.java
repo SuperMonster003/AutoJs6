@@ -38,6 +38,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ImageFeatureMatching.FeatureMatchingDescriptor;
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
@@ -62,6 +63,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static android.app.Activity.RESULT_OK;
 import static org.autojs.autojs.util.RhinoUtils.isMainThread;
@@ -116,6 +119,8 @@ public class Images {
 
     private final Context mContext;
     private final ScriptRuntime mScriptRuntime;
+    private final Set<PngQuantBridge.CancellationToken> mActiveQuantizations =
+            ConcurrentHashMap.newKeySet();
     private final ScreenMetrics mScreenMetrics;
     private volatile ScreenCapturer.OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private Image mPreCapture;
@@ -490,7 +495,7 @@ public class Images {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
 
         if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
-            byte[] compressed = PngQuantBridge.quantize(bitmap, quality);
+            byte[] compressed = quantizeBitmap(bitmap, quality);
             if (compressed != null) {
                 try (FileOutputStream fos = new FileOutputStream(path)) {
                     fos.write(compressed);
@@ -521,7 +526,7 @@ public class Images {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
         requirePngQuantizationFormat(compressFormat);
 
-        byte[] compressed = PngQuantBridge.quantize(bitmap, options);
+        byte[] compressed = quantizeBitmap(bitmap, options);
         if (compressed != null) {
             try (FileOutputStream fos = new FileOutputStream(path)) {
                 fos.write(compressed);
@@ -556,7 +561,7 @@ public class Images {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
 
         if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
-            byte[] compressed = PngQuantBridge.quantize(bitmap, quality);
+            byte[] compressed = quantizeBitmap(bitmap, quality);
             if (compressed != null) {
                 return compressed;
             }
@@ -583,7 +588,7 @@ public class Images {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
         requirePngQuantizationFormat(compressFormat);
 
-        byte[] compressed = PngQuantBridge.quantize(bitmap, options);
+        byte[] compressed = quantizeBitmap(bitmap, options);
         if (compressed != null) {
             return compressed;
         }
@@ -595,7 +600,7 @@ public class Images {
             @NotNull PngQuantBridge.Options options
     ) throws PngQuantBridge.QualityTooLowException {
         try {
-            return PngQuantBridge.quantizeWithResult(image.getBitmap(), options);
+            return quantizeBitmapWithResult(image.getBitmap(), options);
         } finally {
             shoot(image);
         }
@@ -607,7 +612,7 @@ public class Images {
             @NotNull PngQuantBridge.Options options
     ) throws PngQuantBridge.QualityTooLowException {
         try {
-            return PngQuantBridge.quantizeToFileDescriptor(image.getBitmap(), fileDescriptor, options);
+            return quantizeBitmapToFileDescriptor(image.getBitmap(), fileDescriptor, options);
         } finally {
             shoot(image);
         }
@@ -629,7 +634,7 @@ public class Images {
                 );
             }
             try (FileOutputStream output = new FileOutputStream(file)) {
-                return PngQuantBridge.quantizeToFileDescriptor(
+                return quantizeBitmapToFileDescriptor(
                         image.getBitmap(),
                         output.getFD(),
                         options
@@ -637,6 +642,78 @@ public class Images {
             }
         } finally {
             shoot(image);
+        }
+    }
+
+    /** Cancels native v4 quantization owned by this script runtime. */
+    public void cancelPendingQuantizations() {
+        mActiveQuantizations.forEach(PngQuantBridge.CancellationToken::cancel);
+    }
+
+    private PngQuantBridge.CancellationToken beginQuantization() {
+        var token = new PngQuantBridge.CancellationToken();
+        mActiveQuantizations.add(token);
+        if (mScriptRuntime.isExiting()) token.cancel();
+        return token;
+    }
+
+    private void finishQuantization(PngQuantBridge.CancellationToken token) {
+        mActiveQuantizations.remove(token);
+    }
+
+    private byte[] quantizeBitmap(Bitmap bitmap, int quality) {
+        var token = beginQuantization();
+        try {
+            return PngQuantBridge.quantizeForScriptRuntime(bitmap, quality, token);
+        } catch (PngQuantBridge.QuantizationCancelledException error) {
+            throw new ScriptInterruptedException(error);
+        } finally {
+            finishQuantization(token);
+        }
+    }
+
+    private byte[] quantizeBitmap(Bitmap bitmap, PngQuantBridge.Options options) {
+        var token = beginQuantization();
+        try {
+            return PngQuantBridge.quantizeForScriptRuntime(bitmap, options, token);
+        } catch (PngQuantBridge.QuantizationCancelledException error) {
+            throw new ScriptInterruptedException(error);
+        } finally {
+            finishQuantization(token);
+        }
+    }
+
+    private PngQuantBridge.Result quantizeBitmapWithResult(
+            Bitmap bitmap,
+            PngQuantBridge.Options options
+    ) throws PngQuantBridge.QualityTooLowException {
+        var token = beginQuantization();
+        try {
+            return PngQuantBridge.quantizeWithResultForScriptRuntime(bitmap, options, token);
+        } catch (PngQuantBridge.QuantizationCancelledException error) {
+            throw new ScriptInterruptedException(error);
+        } finally {
+            finishQuantization(token);
+        }
+    }
+
+    private PngQuantBridge.OutputResult quantizeBitmapToFileDescriptor(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            PngQuantBridge.Options options
+    ) throws PngQuantBridge.QualityTooLowException {
+        var token = beginQuantization();
+        try {
+            return PngQuantBridge.quantizeToFileDescriptorForScriptRuntime(
+                    bitmap,
+                    fileDescriptor,
+                    options,
+                    token
+            );
+        } catch (PngQuantBridge.QuantizationCancelledException error) {
+            throw new ScriptInterruptedException(error);
+        } finally {
+            finishQuantization(token);
         }
     }
 

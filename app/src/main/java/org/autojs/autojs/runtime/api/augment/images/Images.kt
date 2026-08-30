@@ -49,6 +49,7 @@ import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
+import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
@@ -1838,21 +1839,44 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ): PngQuantBridge.Options {
             val qualityArg = options.inquire("quality")
             val quality = parseQuality(qualityArg, defaultQuality)
-            return PngQuantBridge.Options(
-                options.inquire("maxColors") { coerceIntNumber(it) }
-                    ?: PngQuantBridge.Options.DEFAULT_MAX_COLORS,
-                options.inquire("speed") { coerceIntNumber(it) }
-                    ?: PngQuantBridge.Options.DEFAULT_SPEED,
-                options.inquire("minQuality") { coerceIntNumber(it) }
-                    ?: if (qualityArg.isJsNullish()) PngQuantBridge.Options.DEFAULT_MIN_QUALITY else quality,
-                options.inquire("maxQuality") { coerceIntNumber(it) } ?: quality,
-                options.inquire("ditheringLevel") { coerceFloatNumber(it) }
-                    ?: PngQuantBridge.Options.DEFAULT_DITHERING_LEVEL,
-                options.inquire("posterizeBits") { coerceIntNumber(it) }
-                    ?: PngQuantBridge.Options.DEFAULT_POSTERIZE_BITS,
-                options.inquire("preserveAlpha") { coerceBoolean(it) }
-                    ?: PngQuantBridge.Options.DEFAULT_PRESERVE_ALPHA,
-            )
+            val maxColors = options.inquire("maxColors") { coerceIntNumber(it) }
+                ?: PngQuantBridge.Options.DEFAULT_MAX_COLORS
+            val speed = options.inquire("speed") { coerceIntNumber(it) }
+                ?: PngQuantBridge.Options.DEFAULT_SPEED
+            val minQuality = options.inquire("minQuality") { coerceIntNumber(it) }
+                ?: if (qualityArg.isJsNullish()) PngQuantBridge.Options.DEFAULT_MIN_QUALITY else quality
+            val maxQuality = options.inquire("maxQuality") { coerceIntNumber(it) } ?: quality
+            val ditheringLevel = options.inquire("ditheringLevel") { coerceFloatNumber(it) }
+                ?: PngQuantBridge.Options.DEFAULT_DITHERING_LEVEL
+            val posterizeBits = options.inquire("posterizeBits") { coerceIntNumber(it) }
+                ?: PngQuantBridge.Options.DEFAULT_POSTERIZE_BITS
+            val preserveAlpha = options.inquire("preserveAlpha") { coerceBoolean(it) }
+                ?: PngQuantBridge.Options.DEFAULT_PRESERVE_ALPHA
+            val maxPixels = options.inquire("maxPixels") { coerceLongNumber(it) }
+            val maxMemoryBytes = options.inquire("maxMemoryBytes") { coerceLongNumber(it) }
+            return if (maxPixels == null && maxMemoryBytes == null) {
+                PngQuantBridge.Options(
+                    maxColors,
+                    speed,
+                    minQuality,
+                    maxQuality,
+                    ditheringLevel,
+                    posterizeBits,
+                    preserveAlpha,
+                )
+            } else {
+                PngQuantBridge.Options(
+                    maxColors,
+                    speed,
+                    minQuality,
+                    maxQuality,
+                    ditheringLevel,
+                    posterizeBits,
+                    preserveAlpha,
+                    maxPixels ?: PngQuantBridge.Options.DEFAULT_MAX_PIXELS,
+                    maxMemoryBytes ?: PngQuantBridge.Options.DEFAULT_MAX_MEMORY_BYTES,
+                )
+            }
         }
 
         private fun parseImageFormat(o: Any?): String = when {

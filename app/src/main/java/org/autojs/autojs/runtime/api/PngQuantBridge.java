@@ -6,10 +6,13 @@ import androidx.annotation.Keep;
 
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost;
+import org.autojs.plugin.imagequant.api.ImageQuantPluginContract;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PngQuantBridge {
 
@@ -21,6 +24,8 @@ public class PngQuantBridge {
         public static final float DEFAULT_DITHERING_LEVEL = 0.0F;
         public static final int DEFAULT_POSTERIZE_BITS = 0;
         public static final boolean DEFAULT_PRESERVE_ALPHA = true;
+        public static final long DEFAULT_MAX_PIXELS = 16_000_000L;
+        public static final long DEFAULT_MAX_MEMORY_BYTES = 256L * 1024L * 1024L;
 
         private final int maxColors;
         private final int speed;
@@ -29,6 +34,9 @@ public class PngQuantBridge {
         private final float ditheringLevel;
         private final int posterizeBits;
         private final boolean preserveAlpha;
+        private final long maxPixels;
+        private final long maxMemoryBytes;
+        private final boolean resourceLimitsRequired;
 
         /**
          * Creates an immutable options snapshot. Range normalization is performed at the native
@@ -49,7 +57,10 @@ public class PngQuantBridge {
                     maxQuality,
                     ditheringLevel,
                     posterizeBits,
-                    DEFAULT_PRESERVE_ALPHA
+                    DEFAULT_PRESERVE_ALPHA,
+                    DEFAULT_MAX_PIXELS,
+                    DEFAULT_MAX_MEMORY_BYTES,
+                    false
             );
         }
 
@@ -62,6 +73,58 @@ public class PngQuantBridge {
                 int posterizeBits,
                 boolean preserveAlpha
         ) {
+            this(
+                    maxColors,
+                    speed,
+                    minQuality,
+                    maxQuality,
+                    ditheringLevel,
+                    posterizeBits,
+                    preserveAlpha,
+                    DEFAULT_MAX_PIXELS,
+                    DEFAULT_MAX_MEMORY_BYTES,
+                    false
+            );
+        }
+
+        /** Creates options with explicit v4 pixel and additional working-memory budgets. */
+        public Options(
+                int maxColors,
+                int speed,
+                int minQuality,
+                int maxQuality,
+                float ditheringLevel,
+                int posterizeBits,
+                boolean preserveAlpha,
+                long maxPixels,
+                long maxMemoryBytes
+        ) {
+            this(
+                    maxColors,
+                    speed,
+                    minQuality,
+                    maxQuality,
+                    ditheringLevel,
+                    posterizeBits,
+                    preserveAlpha,
+                    maxPixels,
+                    maxMemoryBytes,
+                    true
+            );
+        }
+
+        private Options(
+                int maxColors,
+                int speed,
+                int minQuality,
+                int maxQuality,
+                float ditheringLevel,
+                int posterizeBits,
+                boolean preserveAlpha,
+                long maxPixels,
+                long maxMemoryBytes,
+                boolean resourceLimitsRequired
+        ) {
             this.maxColors = maxColors;
             this.speed = speed;
             this.minQuality = minQuality;
@@ -69,6 +132,9 @@ public class PngQuantBridge {
             this.ditheringLevel = ditheringLevel;
             this.posterizeBits = posterizeBits;
             this.preserveAlpha = preserveAlpha;
+            this.maxPixels = maxPixels;
+            this.maxMemoryBytes = maxMemoryBytes;
+            this.resourceLimitsRequired = resourceLimitsRequired;
         }
 
         public int getMaxColors() {
@@ -98,6 +164,18 @@ public class PngQuantBridge {
         public boolean isPreserveAlpha() {
             return preserveAlpha;
         }
+
+        public long getMaxPixels() {
+            return maxPixels;
+        }
+
+        public long getMaxMemoryBytes() {
+            return maxMemoryBytes;
+        }
+
+        private boolean requiresResourceControlApi() {
+            return resourceLimitsRequired;
+        }
     }
 
     /** Encoded PNG data together with the palette quality measured by libimagequant. */
@@ -107,12 +185,24 @@ public class PngQuantBridge {
         private final byte[] bytes;
         private final int quality;
         private final double quantizationError;
+        private final long peakWorkingMemoryBytes;
 
         /** Called from the optional result JNI entry point. */
         public Result(byte[] bytes, int quality, double quantizationError) {
+            this(bytes, quality, quantizationError, -1L);
+        }
+
+        /** Called from the v4 resource-control JNI entry point. */
+        public Result(
+                byte[] bytes,
+                int quality,
+                double quantizationError,
+                long peakWorkingMemoryBytes
+        ) {
             this.bytes = Objects.requireNonNull(bytes, "bytes");
             this.quality = quality;
             this.quantizationError = quantizationError;
+            this.peakWorkingMemoryBytes = peakWorkingMemoryBytes;
         }
 
         public byte[] getBytes() {
@@ -130,6 +220,11 @@ public class PngQuantBridge {
         public double getQuantizationError() {
             return quantizationError;
         }
+
+        /** Peak additional working memory accounted by v4, or {@code -1} on an older runtime. */
+        public long getPeakWorkingMemoryBytes() {
+            return peakWorkingMemoryBytes;
+        }
     }
 
     /** Metadata returned when encoded PNG bytes are streamed to a caller-owned descriptor. */
@@ -139,15 +234,27 @@ public class PngQuantBridge {
         private final long size;
         private final int quality;
         private final double quantizationError;
+        private final long peakWorkingMemoryBytes;
 
         /** Called from the optional file-descriptor JNI entry point. */
         public OutputResult(long size, int quality, double quantizationError) {
+            this(size, quality, quantizationError, -1L);
+        }
+
+        /** Called from the v4 resource-control JNI entry point. */
+        public OutputResult(
+                long size,
+                int quality,
+                double quantizationError,
+                long peakWorkingMemoryBytes
+        ) {
             if (size < 0L) {
                 throw new IllegalArgumentException("size must not be negative");
             }
             this.size = size;
             this.quality = quality;
             this.quantizationError = quantizationError;
+            this.peakWorkingMemoryBytes = peakWorkingMemoryBytes;
         }
 
         public long getSize() {
@@ -160,6 +267,11 @@ public class PngQuantBridge {
 
         public double getQuantizationError() {
             return quantizationError;
+        }
+
+        /** Peak additional working memory accounted by v4, or {@code -1} on an older runtime. */
+        public long getPeakWorkingMemoryBytes() {
+            return peakWorkingMemoryBytes;
         }
     }
 
@@ -175,6 +287,116 @@ public class PngQuantBridge {
 
         public String getCode() {
             return CODE;
+        }
+    }
+
+    /** A v4 pixel or additional working-memory budget rejected the operation safely. */
+    @Keep
+    public static final class ResourceLimitException extends RuntimeException {
+
+        public static final String CODE = "PNG_QUANTIZATION_RESOURCE_LIMIT";
+        public static final String PIXEL_LIMIT = "PIXEL_LIMIT";
+        public static final String MEMORY_LIMIT = "MEMORY_LIMIT";
+        public static final String ALLOCATION_FAILED = "ALLOCATION_FAILED";
+
+        private final String reason;
+        private final long actualPixels;
+        private final long maxPixels;
+        private final long requiredMemoryBytes;
+        private final long maxMemoryBytes;
+
+        /** Called from the v4 resource-control JNI entry point. */
+        public ResourceLimitException(
+                String reason,
+                long actualPixels,
+                long maxPixels,
+                long requiredMemoryBytes,
+                long maxMemoryBytes
+        ) {
+            super(buildMessage(reason, actualPixels, maxPixels, requiredMemoryBytes, maxMemoryBytes));
+            this.reason = Objects.requireNonNull(reason, "reason");
+            this.actualPixels = actualPixels;
+            this.maxPixels = maxPixels;
+            this.requiredMemoryBytes = requiredMemoryBytes;
+            this.maxMemoryBytes = maxMemoryBytes;
+        }
+
+        private static String buildMessage(
+                String reason,
+                long actualPixels,
+                long maxPixels,
+                long requiredMemoryBytes,
+                long maxMemoryBytes
+        ) {
+            if (PIXEL_LIMIT.equals(reason)) {
+                return "Image has " + actualPixels + " pixels; configured maximum is " + maxPixels;
+            }
+            if (MEMORY_LIMIT.equals(reason)) {
+                return "Image quantization requires at least " + requiredMemoryBytes +
+                        " bytes of additional working memory; configured maximum is " +
+                        maxMemoryBytes;
+            }
+            return "Image quantization could not allocate memory within the configured " +
+                    maxMemoryBytes + " byte working-memory budget";
+        }
+
+        public String getCode() {
+            return CODE;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+
+        public long getActualPixels() {
+            return actualPixels;
+        }
+
+        public long getMaxPixels() {
+            return maxPixels;
+        }
+
+        public long getRequiredMemoryBytes() {
+            return requiredMemoryBytes;
+        }
+
+        public long getMaxMemoryBytes() {
+            return maxMemoryBytes;
+        }
+    }
+
+    /** The caller, script lifecycle, or interrupted quantization thread requested cancellation. */
+    @Keep
+    public static final class QuantizationCancelledException extends CancellationException {
+
+        public static final String CODE = "PNG_QUANTIZATION_CANCELLED";
+
+        public QuantizationCancelledException(String message) {
+            super(message);
+        }
+
+        public String getCode() {
+            return CODE;
+        }
+    }
+
+    /** Thread-safe cancellation handle accepted by the v4 quantization overloads. */
+    public static final class CancellationToken {
+
+        private final AtomicBoolean cancelled = new AtomicBoolean();
+
+        public void cancel() {
+            cancelled.set(true);
+        }
+
+        public boolean isCancelled() {
+            return cancelled.get();
+        }
+
+        /** Called repeatedly from native code; an interrupted script thread also cancels work. */
+        @Keep
+        public boolean isCancellationRequested() {
+            return cancelled.get() || Thread.currentThread().isInterrupted();
         }
     }
 
@@ -210,15 +432,150 @@ public class PngQuantBridge {
      * @return palette-based PNG bytes (may contain transparency)
      */
     public static byte[] quantize(Bitmap bitmap, int quality) {
-        var context = GlobalAppContext.get();
-        ImageQuantPluginHost.ensureLoaded(context);
-        return nativeQuantize(bitmap, quality);
+        return quantizeLegacy(bitmap, quality, new CancellationToken(), false);
+    }
+
+    /** Quantizes with an explicit v4 cancellation handle. */
+    public static byte[] quantize(
+            Bitmap bitmap,
+            int quality,
+            CancellationToken cancellationToken
+    ) {
+        return quantizeLegacy(bitmap, quality, cancellationToken, true);
     }
 
     /** Quantizes a bitmap with the optional named-parameter API exposed by compatible runtimes. */
     public static byte[] quantize(Bitmap bitmap, Options options) {
-        Objects.requireNonNull(options, "options");
+        return quantizeOptions(bitmap, options, new CancellationToken(), false);
+    }
+
+    /** Quantizes named options with an explicit v4 cancellation handle. */
+    public static byte[] quantize(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken
+    ) {
+        return quantizeOptions(bitmap, options, cancellationToken, true);
+    }
+
+    /** Quantizes a bitmap and returns both encoded data and measured palette quality. */
+    public static Result quantizeWithResult(Bitmap bitmap, Options options) throws QualityTooLowException {
+        return quantizeResult(bitmap, options, new CancellationToken(), false);
+    }
+
+    /** Returns quality/resource metrics and accepts an explicit v4 cancellation handle. */
+    public static Result quantizeWithResult(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken
+    ) throws QualityTooLowException {
+        return quantizeResult(bitmap, options, cancellationToken, true);
+    }
+
+    /**
+     * Quantizes directly to the caller-owned descriptor without constructing a complete PNG byte
+     * array. The descriptor remains open and its current offset advances by {@link OutputResult#getSize()}.
+     */
+    public static OutputResult quantizeToFileDescriptor(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            Options options
+    ) throws QualityTooLowException {
+        return quantizeFileDescriptor(
+                bitmap,
+                fileDescriptor,
+                options,
+                new CancellationToken(),
+                false
+        );
+    }
+
+    /** Streams to a descriptor with an explicit v4 cancellation handle. */
+    public static OutputResult quantizeToFileDescriptor(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            Options options,
+            CancellationToken cancellationToken
+    ) throws QualityTooLowException {
+        return quantizeFileDescriptor(bitmap, fileDescriptor, options, cancellationToken, true);
+    }
+
+    static byte[] quantizeForScriptRuntime(
+            Bitmap bitmap,
+            int quality,
+            CancellationToken cancellationToken
+    ) {
+        return quantizeLegacy(bitmap, quality, cancellationToken, false);
+    }
+
+    static byte[] quantizeForScriptRuntime(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken
+    ) {
+        return quantizeOptions(bitmap, options, cancellationToken, false);
+    }
+
+    static Result quantizeWithResultForScriptRuntime(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken
+    ) throws QualityTooLowException {
+        return quantizeResult(bitmap, options, cancellationToken, false);
+    }
+
+    static OutputResult quantizeToFileDescriptorForScriptRuntime(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            Options options,
+            CancellationToken cancellationToken
+    ) throws QualityTooLowException {
+        return quantizeFileDescriptor(bitmap, fileDescriptor, options, cancellationToken, false);
+    }
+
+    private static byte[] quantizeLegacy(
+            Bitmap bitmap,
+            int quality,
+            CancellationToken cancellationToken,
+            boolean cancellationSupportRequired
+    ) {
+        Objects.requireNonNull(cancellationToken, "cancellationToken");
+        throwIfCancelled(cancellationToken);
         var context = GlobalAppContext.get();
+        var runtime = ImageQuantPluginHost.ensureLoaded(context);
+        if (supportsResourceControl(runtime)) {
+            var options = new Options(
+                    Options.DEFAULT_MAX_COLORS,
+                    Options.DEFAULT_SPEED,
+                    quality,
+                    quality,
+                    Options.DEFAULT_DITHERING_LEVEL,
+                    Options.DEFAULT_POSTERIZE_BITS,
+                    Options.DEFAULT_PRESERVE_ALPHA
+            );
+            return nativeQuantizeControlled(bitmap, options, cancellationToken).getBytes();
+        }
+        if (cancellationSupportRequired) ImageQuantPluginHost.ensureResourceControlApi(context);
+        return nativeQuantize(bitmap, quality);
+    }
+
+    private static byte[] quantizeOptions(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken,
+            boolean cancellationSupportRequired
+    ) {
+        Objects.requireNonNull(options, "options");
+        Objects.requireNonNull(cancellationToken, "cancellationToken");
+        throwIfCancelled(cancellationToken);
+        var context = GlobalAppContext.get();
+        var runtime = ImageQuantPluginHost.ensureLoaded(context);
+        if (supportsResourceControl(runtime)) {
+            return nativeQuantizeControlled(bitmap, options, cancellationToken).getBytes();
+        }
+        if (options.requiresResourceControlApi() || cancellationSupportRequired) {
+            ImageQuantPluginHost.ensureResourceControlApi(context);
+        }
         if (!options.preserveAlpha) {
             ImageQuantPluginHost.ensureColorIoApi(context);
             return nativeQuantizeWithColorOptions(
@@ -244,10 +601,23 @@ public class PngQuantBridge {
         );
     }
 
-    /** Quantizes a bitmap and returns both encoded data and measured palette quality. */
-    public static Result quantizeWithResult(Bitmap bitmap, Options options) throws QualityTooLowException {
+    private static Result quantizeResult(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken,
+            boolean cancellationSupportRequired
+    ) throws QualityTooLowException {
         Objects.requireNonNull(options, "options");
+        Objects.requireNonNull(cancellationToken, "cancellationToken");
+        throwIfCancelled(cancellationToken);
         var context = GlobalAppContext.get();
+        var runtime = ImageQuantPluginHost.ensureLoaded(context);
+        if (supportsResourceControl(runtime)) {
+            return nativeQuantizeControlled(bitmap, options, cancellationToken);
+        }
+        if (options.requiresResourceControlApi() || cancellationSupportRequired) {
+            ImageQuantPluginHost.ensureResourceControlApi(context);
+        }
         if (!options.preserveAlpha) {
             ImageQuantPluginHost.ensureColorIoApi(context);
             return nativeQuantizeWithColorOptions(
@@ -273,19 +643,38 @@ public class PngQuantBridge {
         );
     }
 
-    /**
-     * Quantizes directly to the caller-owned descriptor without constructing a complete PNG byte
-     * array. The descriptor remains open and its current offset advances by {@link OutputResult#getSize()}.
-     */
-    public static OutputResult quantizeToFileDescriptor(
+    private static OutputResult quantizeFileDescriptor(
             Bitmap bitmap,
             FileDescriptor fileDescriptor,
-            Options options
+            Options options,
+            CancellationToken cancellationToken,
+            boolean cancellationSupportRequired
     ) throws QualityTooLowException {
         Objects.requireNonNull(fileDescriptor, "fileDescriptor");
         Objects.requireNonNull(options, "options");
+        Objects.requireNonNull(cancellationToken, "cancellationToken");
+        throwIfCancelled(cancellationToken);
         var context = GlobalAppContext.get();
-        ImageQuantPluginHost.ensureColorIoApi(context);
+        var runtime = ImageQuantPluginHost.ensureColorIoApi(context);
+        if (supportsResourceControl(runtime)) {
+            return nativeQuantizeToFileDescriptorWithResourceControls(
+                    bitmap,
+                    fileDescriptor,
+                    options.maxColors,
+                    options.speed,
+                    options.minQuality,
+                    options.maxQuality,
+                    options.ditheringLevel,
+                    options.posterizeBits,
+                    options.preserveAlpha,
+                    options.maxPixels,
+                    options.maxMemoryBytes,
+                    cancellationToken
+            );
+        }
+        if (options.requiresResourceControlApi() || cancellationSupportRequired) {
+            ImageQuantPluginHost.ensureResourceControlApi(context);
+        }
         return nativeQuantizeToFileDescriptor(
                 bitmap,
                 fileDescriptor,
@@ -297,6 +686,36 @@ public class PngQuantBridge {
                 options.posterizeBits,
                 options.preserveAlpha
         );
+    }
+
+    private static Result nativeQuantizeControlled(
+            Bitmap bitmap,
+            Options options,
+            CancellationToken cancellationToken
+    ) {
+        return nativeQuantizeWithResourceControls(
+                bitmap,
+                options.maxColors,
+                options.speed,
+                options.minQuality,
+                options.maxQuality,
+                options.ditheringLevel,
+                options.posterizeBits,
+                options.preserveAlpha,
+                options.maxPixels,
+                options.maxMemoryBytes,
+                cancellationToken
+        );
+    }
+
+    private static boolean supportsResourceControl(ImageQuantPluginHost.LoadedRuntime runtime) {
+        return runtime.getOptionsApiVersion() >= ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION;
+    }
+
+    private static void throwIfCancelled(CancellationToken cancellationToken) {
+        if (cancellationToken.isCancellationRequested()) {
+            throw new QuantizationCancelledException("Image quantization was cancelled");
+        }
     }
 
     /** Called only after the host has loaded a policy-approved native runtime. */
@@ -348,6 +767,35 @@ public class PngQuantBridge {
             int posterizeBits,
             boolean preserveAlpha
     ) throws QualityTooLowException;
+
+    private static native Result nativeQuantizeWithResourceControls(
+            Bitmap bitmap,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits,
+            boolean preserveAlpha,
+            long maxPixels,
+            long maxMemoryBytes,
+            CancellationToken cancellationToken
+    );
+
+    private static native OutputResult nativeQuantizeToFileDescriptorWithResourceControls(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits,
+            boolean preserveAlpha,
+            long maxPixels,
+            long maxMemoryBytes,
+            CancellationToken cancellationToken
+    );
 
     private static native String nativeProbe();
 

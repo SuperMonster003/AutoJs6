@@ -16,4 +16,8 @@ class PngQuantizationFileResult(path: String, result: PngQuantBridge.OutputResul
 
     @JvmField
     val quantizationError: Double = result.quantizationError
+
+    /** Peak additional working memory in bytes, or -1 when an older runtime handled the call. */
+    @JvmField
+    val peakWorkingMemoryBytes: Long = result.peakWorkingMemoryBytes
 }

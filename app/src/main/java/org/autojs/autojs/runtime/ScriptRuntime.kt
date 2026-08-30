@@ -752,6 +752,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun onExit() {
         Log.d(TAG, "on exit")
         this.isExiting = true
+        ignoresException { images.cancelPendingQuantizations() }
 
         ignoresException {
             if (console.configurator.isExitOnClose) {
