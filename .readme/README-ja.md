@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 30 日 に更新されました.
+データは 2026 年 8 月 31 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,8 +166,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `新機能` `images.quantizeToFile` はインデックス PNG をディスクへ直接ストリーム書き込みし, サイズと品質指標を返します; Image Quantization オプションは `preserveAlpha`, 一般的な Bitmap 構成, ハードウェア入力, `OPTIONS_API_VERSION>=3` による sRGB 正規化済み広色域入力に対応しました
 * `新機能` `images.quantize` は PNG バイト列, サイズ, 実際の品質, 量子化誤差を返すようになりました; 最小品質を省略するとベストエフォート (`minQuality=0`) で処理し, 明示した下限を満たせない場合はコード `PNG_QUANTIZATION_QUALITY_TOO_LOW` の `PngQuantBridge.QualityTooLowException` を送出します; 結果 API には `OPTIONS_API_VERSION>=2` が必要です
 * `新機能` `images.save`, `images.saveImage`, `images.compress`, `images.compressToBytes` が PNG 量子化の名前付きオプションに対応し, パレット数, 速度, 独立した品質範囲, ディザリング, posterize を制御可能に; 数値 `quality` の後方互換性は維持され, オプションには `OPTIONS_API_VERSION>=1` を宣言する Image Quantization プラグインが必要
 * `新機能` `engines.execScript` による in-memory TypeScript 即時実行: `.ts/.tsx/.mts/.cts` source name は独立 compiler で処理され, file script と同じ diagnostics と Source Map stack mapping を維持し, Rhino は最終 expression value を返し, 完全な Log page と editor Log panel で 1 行 snippet を対話的に評価できます
@@ -737,7 +738,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 30 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 8 月 31 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

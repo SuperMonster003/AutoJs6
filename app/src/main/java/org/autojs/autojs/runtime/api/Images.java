@@ -52,6 +52,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -595,6 +596,45 @@ public class Images {
     ) throws PngQuantBridge.QualityTooLowException {
         try {
             return PngQuantBridge.quantizeWithResult(image.getBitmap(), options);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    public PngQuantBridge.OutputResult quantizeToFileDescriptor(
+            @NotNull ImageWrapper image,
+            @NotNull FileDescriptor fileDescriptor,
+            @NotNull PngQuantBridge.Options options
+    ) throws PngQuantBridge.QualityTooLowException {
+        try {
+            return PngQuantBridge.quantizeToFileDescriptor(image.getBitmap(), fileDescriptor, options);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    public PngQuantBridge.OutputResult quantizeToFile(
+            @NotNull ImageWrapper image,
+            @NotNull String path,
+            @NotNull PngQuantBridge.Options options
+    ) throws IOException {
+        try {
+            var nicePath = AnyExtensions.toRuntimePath(path, mScriptRuntime, true);
+            var file = new File(nicePath);
+            File parentFile = file.getParentFile();
+            if (parentFile != null && !parentFile.exists() && !parentFile.mkdirs()) {
+                throw new IOException(
+                        "Failed to create parent directory for quantized image: " +
+                                parentFile.getAbsolutePath()
+                );
+            }
+            try (FileOutputStream output = new FileOutputStream(file)) {
+                return PngQuantBridge.quantizeToFileDescriptor(
+                        image.getBitmap(),
+                        output.getFD(),
+                        options
+                );
+            }
         } finally {
             shoot(image);
         }

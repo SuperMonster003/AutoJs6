@@ -3,6 +3,8 @@ package org.autojs.autojs.runtime.api.augment.images
 import org.autojs.autojs.runtime.api.PngQuantBridge
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mozilla.javascript.NativeObject
 
@@ -39,6 +41,7 @@ class ImagesCompatibilityTest {
         assertEquals(60, parsed.maxQuality)
         assertEquals(0.0F, parsed.ditheringLevel, 0.0F)
         assertEquals(0, parsed.posterizeBits)
+        assertTrue(parsed.isPreserveAlpha)
     }
 
     @Test
@@ -51,6 +54,7 @@ class ImagesCompatibilityTest {
                 put("speed", this, 2)
                 put("ditheringLevel", this, 0.75)
                 put("posterizeBits", this, 3)
+                put("preserveAlpha", this, false)
             },
             60,
         )
@@ -61,6 +65,7 @@ class ImagesCompatibilityTest {
         assertEquals(90, parsed.maxQuality)
         assertEquals(0.75F, parsed.ditheringLevel, 0.0F)
         assertEquals(3, parsed.posterizeBits)
+        assertFalse(parsed.isPreserveAlpha)
     }
 
     @Test
@@ -103,6 +108,19 @@ class ImagesCompatibilityTest {
         assertEquals(bytes.size, result.size)
         assertEquals(73, result.quality)
         assertEquals(0.125, result.quantizationError, 0.0)
+    }
+
+    @Test
+    fun pngQuantizationFileResultExposesStableScriptFields() {
+        val result = PngQuantizationFileResult(
+            "/tmp/quantized.png",
+            PngQuantBridge.OutputResult(4096L, 81, 0.0625),
+        )
+
+        assertEquals("/tmp/quantized.png", result.path)
+        assertEquals(4096L, result.size)
+        assertEquals(81, result.quality)
+        assertEquals(0.0625, result.quantizationError, 0.0)
     }
 
     private fun options(name: String, value: String) = NativeObject().apply {

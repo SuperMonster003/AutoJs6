@@ -155,7 +155,7 @@ object ImageQuantPluginHost {
             .filter { discovered ->
                 discovered.error == null &&
                         discovered.candidate?.let { candidate ->
-                            ImageQuantOptionsApiPolicy.supportsQuantizationResult(candidate.optionsApiVersion)
+                            ImageQuantOptionsApiPolicy.supportsColorIo(candidate.optionsApiVersion)
                         } == true
             }
             .map { it.serviceInfo.packageName to it.serviceInfo.name }
@@ -284,6 +284,20 @@ object ImageQuantPluginHost {
             throw buildLoadException(
                 context = context,
                 code = ImageQuantPluginLoadError.QUANTIZATION_RESULT_API_UNSUPPORTED,
+                packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
+            )
+        }
+        return runtime
+    }
+
+    /** Ensures the loaded runtime supports sRGB input normalization, alpha policy, and FD output. */
+    @JvmStatic
+    fun ensureColorIoApi(context: Context): LoadedRuntime {
+        val runtime = ensureLoaded(context)
+        if (!ImageQuantOptionsApiPolicy.supportsColorIo(runtime.optionsApiVersion)) {
+            throw buildLoadException(
+                context = context,
+                code = ImageQuantPluginLoadError.COLOR_IO_API_UNSUPPORTED,
                 packageName = runtime.packageName ?: ImageQuantPluginContract.DEFAULT_PACKAGE_NAME,
             )
         }
@@ -550,6 +564,9 @@ object ImageQuantPluginHost {
             ImageQuantPluginLoadError.QUANTIZATION_RESULT_API_UNSUPPORTED ->
                 "Image Quantization runtime does not support quantization result API version " +
                         ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION
+            ImageQuantPluginLoadError.COLOR_IO_API_UNSUPPORTED ->
+                "Image Quantization runtime does not support color and file output API version " +
+                        ImageQuantPluginContract.COLOR_IO_API_VERSION
             ImageQuantPluginLoadError.PLUGIN_CHANGED_RESTART_REQUIRED ->
                 "Image Quantization plugin changed while its native runtime was loaded; restart AutoJs6 before using it again"
             else -> "Image Quantization plugin is incompatible or its native runtime is unavailable ($code)"

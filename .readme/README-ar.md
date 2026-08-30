@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 30 August 2026.
+تم تحديث البيانات في 31 August 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,8 +166,9 @@
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `إضافة جديدة` تكتب `images.quantizeToFile` ملف PNG مفهرسا مباشرة إلى القرص وتعيد الحجم ومقاييس الجودة; تدعم خيارات Image Quantization الآن `preserveAlpha` وتكوينات Bitmap الشائعة وإدخال العتاد وإدخال النطاق اللوني الواسع بعد تحويله إلى sRGB عبر `OPTIONS_API_VERSION>=3`
 * `إضافة جديدة` تعيد `images.quantize` الآن بايتات PNG والحجم والجودة المحققة وخطأ التكميم; يؤدي حذف الحد الأدنى للجودة إلى استخدام أفضل نتيجة ممكنة (`minQuality=0`), بينما يؤدي تعذر تحقيق حد أدنى صريح إلى طرح `PngQuantBridge.QualityTooLowException` مع الرمز `PNG_QUANTIZATION_QUALITY_TOO_LOW`; وتتطلب واجهة النتيجة `OPTIONS_API_VERSION>=2`
 * `إضافة جديدة` تدعم `images.save` و`images.saveImage` و`images.compress` و`images.compressToBytes` الآن خيارات مسماة لتكميم PNG تشمل حجم لوحة الألوان والسرعة وحدود الجودة المستقلة والتشويش وposterize; يبقى `quality` الرقمي متوافقا مع الإصدارات السابقة, وتتطلب الخيارات إضافة Image Quantization تعلن `OPTIONS_API_VERSION>=1`
 * `إضافة جديدة` تنفيذ TypeScript فوري من الذاكرة عبر `engines.execScript`: تستخدم أسماء `.ts/.tsx/.mts/.cts` المترجم المستقل مع تشخيصات وتعيين مكدس Source Map مماثلين للملفات, ويعيد Rhino قيمة التعبير الأخير, وتقيّم صفحة Log الكاملة ولوحة Log في المحرر مقاطع من سطر واحد تفاعليا
@@ -737,7 +738,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 30 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 31 August 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

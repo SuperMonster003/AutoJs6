@@ -6,8 +6,9 @@
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `新增` `images.quantizeToFile` 將索引 PNG 直接串流寫入磁碟並回傳大小與品質指標; Image Quantization 選項新增 `preserveAlpha`, 常見 Bitmap 配置, 硬體輸入與廣色域輸入透過 `OPTIONS_API_VERSION>=3` 統一正規化為 sRGB
 * `新增` `images.quantize` 現會回傳 PNG 位元組, 大小, 實際品質與量化誤差; 省略品質下限時採用盡力而為 (`minQuality=0`), 明確下限無法滿足時拋出帶錯誤碼 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 結果介面要求 `OPTIONS_API_VERSION>=2`
 * `新增` `images.save`, `images.saveImage`, `images.compress` 與 `images.compressToBytes` 現支援 PNG 量化具名選項, 可控制調色盤大小, 速度, 獨立品質範圍, 抖動和 posterize; 數字 `quality` 保持向後相容, 選項物件要求 Image Quantization 外掛程式宣告 `OPTIONS_API_VERSION>=1`
 * `新增` `engines.execScript` 記憶體 TypeScript 即時執行: `.ts/.tsx/.mts/.cts` 原始碼名稱經獨立編譯器處理, 診斷與 Source Map 堆疊對應和檔案指令碼一致, Rhino 回傳最終運算式值, 完整記錄頁及編輯器記錄面板可互動求值單行 TypeScript 片段

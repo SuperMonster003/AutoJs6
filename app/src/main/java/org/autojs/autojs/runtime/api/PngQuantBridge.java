@@ -7,6 +7,7 @@ import androidx.annotation.Keep;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -19,6 +20,7 @@ public class PngQuantBridge {
         public static final int DEFAULT_MIN_QUALITY = 0;
         public static final float DEFAULT_DITHERING_LEVEL = 0.0F;
         public static final int DEFAULT_POSTERIZE_BITS = 0;
+        public static final boolean DEFAULT_PRESERVE_ALPHA = true;
 
         private final int maxColors;
         private final int speed;
@@ -26,6 +28,7 @@ public class PngQuantBridge {
         private final int maxQuality;
         private final float ditheringLevel;
         private final int posterizeBits;
+        private final boolean preserveAlpha;
 
         /**
          * Creates an immutable options snapshot. Range normalization is performed at the native
@@ -39,12 +42,33 @@ public class PngQuantBridge {
                 float ditheringLevel,
                 int posterizeBits
         ) {
+            this(
+                    maxColors,
+                    speed,
+                    minQuality,
+                    maxQuality,
+                    ditheringLevel,
+                    posterizeBits,
+                    DEFAULT_PRESERVE_ALPHA
+            );
+        }
+
+        public Options(
+                int maxColors,
+                int speed,
+                int minQuality,
+                int maxQuality,
+                float ditheringLevel,
+                int posterizeBits,
+                boolean preserveAlpha
+        ) {
             this.maxColors = maxColors;
             this.speed = speed;
             this.minQuality = minQuality;
             this.maxQuality = maxQuality;
             this.ditheringLevel = ditheringLevel;
             this.posterizeBits = posterizeBits;
+            this.preserveAlpha = preserveAlpha;
         }
 
         public int getMaxColors() {
@@ -70,6 +94,10 @@ public class PngQuantBridge {
         public int getPosterizeBits() {
             return posterizeBits;
         }
+
+        public boolean isPreserveAlpha() {
+            return preserveAlpha;
+        }
     }
 
     /** Encoded PNG data together with the palette quality measured by libimagequant. */
@@ -93,6 +121,37 @@ public class PngQuantBridge {
 
         public int getSize() {
             return bytes.length;
+        }
+
+        public int getQuality() {
+            return quality;
+        }
+
+        public double getQuantizationError() {
+            return quantizationError;
+        }
+    }
+
+    /** Metadata returned when encoded PNG bytes are streamed to a caller-owned descriptor. */
+    @Keep
+    public static final class OutputResult {
+
+        private final long size;
+        private final int quality;
+        private final double quantizationError;
+
+        /** Called from the optional file-descriptor JNI entry point. */
+        public OutputResult(long size, int quality, double quantizationError) {
+            if (size < 0L) {
+                throw new IllegalArgumentException("size must not be negative");
+            }
+            this.size = size;
+            this.quality = quality;
+            this.quantizationError = quantizationError;
+        }
+
+        public long getSize() {
+            return size;
         }
 
         public int getQuality() {
@@ -160,6 +219,19 @@ public class PngQuantBridge {
     public static byte[] quantize(Bitmap bitmap, Options options) {
         Objects.requireNonNull(options, "options");
         var context = GlobalAppContext.get();
+        if (!options.preserveAlpha) {
+            ImageQuantPluginHost.ensureColorIoApi(context);
+            return nativeQuantizeWithColorOptions(
+                    bitmap,
+                    options.maxColors,
+                    options.speed,
+                    options.minQuality,
+                    options.maxQuality,
+                    options.ditheringLevel,
+                    options.posterizeBits,
+                    false
+            ).getBytes();
+        }
         ImageQuantPluginHost.ensureOptionsApi(context);
         return nativeQuantizeWithOptions(
                 bitmap,
@@ -176,6 +248,19 @@ public class PngQuantBridge {
     public static Result quantizeWithResult(Bitmap bitmap, Options options) throws QualityTooLowException {
         Objects.requireNonNull(options, "options");
         var context = GlobalAppContext.get();
+        if (!options.preserveAlpha) {
+            ImageQuantPluginHost.ensureColorIoApi(context);
+            return nativeQuantizeWithColorOptions(
+                    bitmap,
+                    options.maxColors,
+                    options.speed,
+                    options.minQuality,
+                    options.maxQuality,
+                    options.ditheringLevel,
+                    options.posterizeBits,
+                    false
+            );
+        }
         ImageQuantPluginHost.ensureQuantizationResultApi(context);
         return nativeQuantizeWithResult(
                 bitmap,
@@ -185,6 +270,32 @@ public class PngQuantBridge {
                 options.maxQuality,
                 options.ditheringLevel,
                 options.posterizeBits
+        );
+    }
+
+    /**
+     * Quantizes directly to the caller-owned descriptor without constructing a complete PNG byte
+     * array. The descriptor remains open and its current offset advances by {@link OutputResult#getSize()}.
+     */
+    public static OutputResult quantizeToFileDescriptor(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            Options options
+    ) throws QualityTooLowException {
+        Objects.requireNonNull(fileDescriptor, "fileDescriptor");
+        Objects.requireNonNull(options, "options");
+        var context = GlobalAppContext.get();
+        ImageQuantPluginHost.ensureColorIoApi(context);
+        return nativeQuantizeToFileDescriptor(
+                bitmap,
+                fileDescriptor,
+                options.maxColors,
+                options.speed,
+                options.minQuality,
+                options.maxQuality,
+                options.ditheringLevel,
+                options.posterizeBits,
+                options.preserveAlpha
         );
     }
 
@@ -213,6 +324,29 @@ public class PngQuantBridge {
             int maxQuality,
             float ditheringLevel,
             int posterizeBits
+    ) throws QualityTooLowException;
+
+    private static native Result nativeQuantizeWithColorOptions(
+            Bitmap bitmap,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits,
+            boolean preserveAlpha
+    );
+
+    private static native OutputResult nativeQuantizeToFileDescriptor(
+            Bitmap bitmap,
+            FileDescriptor fileDescriptor,
+            int maxColors,
+            int speed,
+            int minQuality,
+            int maxQuality,
+            float ditheringLevel,
+            int posterizeBits,
+            boolean preserveAlpha
     ) throws QualityTooLowException;
 
     private static native String nativeProbe();

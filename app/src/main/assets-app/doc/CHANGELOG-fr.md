@@ -6,8 +6,9 @@
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `Fonctionnalité` `images.quantizeToFile` diffuse un PNG indexe directement sur le disque avec sa taille et ses mesures de qualite; les options Image Quantization prennent maintenant en charge `preserveAlpha`, les configurations Bitmap courantes, les entrees materielles et les entrees a large gamut normalisees en sRGB via `OPTIONS_API_VERSION>=3`
 * `Fonctionnalité` `images.quantize` renvoie maintenant les octets PNG, la taille, la qualite obtenue et l'erreur de quantification; sans qualite minimale, le mode meilleur effort est utilise (`minQuality=0`), tandis qu'une limite inferieure explicite impossible a satisfaire leve `PngQuantBridge.QualityTooLowException` avec le code `PNG_QUANTIZATION_QUALITY_TOO_LOW`; l'API de resultat exige `OPTIONS_API_VERSION>=2`
 * `Fonctionnalité` `images.save`, `images.saveImage`, `images.compress` et `images.compressToBytes` acceptent maintenant des options nommees de quantification PNG pour la taille de palette, la vitesse, les bornes de qualite independantes, le tramage et posterize; le `quality` numerique reste compatible et les options exigent un plugin Image Quantization declarant `OPTIONS_API_VERSION>=1`
 * `Fonctionnalité` Exécution immédiate de TypeScript en mémoire via `engines.execScript`: les noms `.ts/.tsx/.mts/.cts` utilisent le compilateur indépendant avec des diagnostics et une remise en correspondance des piles Source Map équivalents aux fichiers, Rhino renvoie la valeur de la dernière expression et la page Log complète ainsi que le panneau Log de l'éditeur évaluent interactivement des extraits sur une ligne

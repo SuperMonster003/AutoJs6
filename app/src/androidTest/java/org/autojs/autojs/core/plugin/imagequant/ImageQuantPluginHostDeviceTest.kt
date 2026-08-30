@@ -12,6 +12,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import java.io.File
+import java.io.FileOutputStream
 
 /** Cross-APK JNI smoke tests for the external Image Quantization runtime. */
 class ImageQuantPluginHostDeviceTest {
@@ -55,6 +57,7 @@ class ImageQuantPluginHostDeviceTest {
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_STL, runtime.nativeStl)
         assertEquals(ImageQuantPluginContract.OPTIONS_API_VERSION, runtime.optionsApiVersion)
+        assertEquals(ImageQuantPluginContract.COLOR_IO_API_VERSION, runtime.optionsApiVersion)
         assertEquals(ImageQuantPluginContract.RUNTIME_PROBE_VALUE, runtime.runtimeProbe)
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
 
@@ -86,6 +89,8 @@ class ImageQuantPluginHostDeviceTest {
             assertEquals(2, encoded.readPngInt(20))
             assertEquals(8, encoded[24].toInt() and 0xff)
             assertEquals("PNG must use indexed color", 3, encoded[25].toInt() and 0xff)
+            assertTrue("PNG must advertise sRGB", encoded.hasPngChunk("sRGB"))
+            assertTrue("Transparent PNG must contain tRNS", encoded.hasPngChunk("tRNS"))
 
             val encodedWithOptions = PngQuantBridge.quantize(
                 bitmap,
@@ -149,16 +154,87 @@ class ImageQuantPluginHostDeviceTest {
                 decoded.recycle()
             }
 
-            val unsupported = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565)
+            val opaque = PngQuantBridge.quantizeWithResult(
+                bitmap,
+                PngQuantBridge.Options(
+                    256,
+                    8,
+                    0,
+                    100,
+                    0.0F,
+                    0,
+                    false,
+                ),
+            )
+            assertTrue("Opaque output must not contain tRNS", !opaque.bytes.hasPngChunk("tRNS"))
+            val opaqueDecoded = BitmapFactory.decodeByteArray(opaque.bytes, 0, opaque.bytes.size)
             try {
-                val error = runCatching { PngQuantBridge.quantize(unsupported, 80) }.exceptionOrNull()
-                assertTrue(error.toString(), error is IllegalArgumentException)
+                assertTrue(
+                    "preserveAlpha=false must produce opaque pixels",
+                    IntArray(opaqueDecoded.width * opaqueDecoded.height).also {
+                        opaqueDecoded.getPixels(it, 0, opaqueDecoded.width, 0, 0, opaqueDecoded.width, opaqueDecoded.height)
+                    }.all { it ushr 24 == 0xff },
+                )
             } finally {
-                unsupported.recycle()
+                opaqueDecoded.recycle()
             }
 
-            // A converted Java exception must not poison later JNI calls or terminate the process.
-            assertTrue(PngQuantBridge.quantize(bitmap, 80).isNotEmpty())
+            val rgb565 = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565).apply {
+                setPixels(
+                    intArrayOf(
+                        0xffff0000.toInt(),
+                        0xff00ff00.toInt(),
+                        0xff0000ff.toInt(),
+                        0xffffffff.toInt(),
+                    ),
+                    0,
+                    2,
+                    0,
+                    0,
+                    2,
+                    2,
+                )
+            }
+            try {
+                val converted = PngQuantBridge.quantize(rgb565, 80)
+                assertTrue(converted.isNotEmpty())
+                assertTrue("Converted PNG must advertise sRGB", converted.hasPngChunk("sRGB"))
+                val convertedDecoded = BitmapFactory.decodeByteArray(converted, 0, converted.size)
+                try {
+                    assertEquals(rgb565.width, convertedDecoded.width)
+                    assertEquals(rgb565.height, convertedDecoded.height)
+                } finally {
+                    convertedDecoded.recycle()
+                }
+            } finally {
+                rgb565.recycle()
+            }
+
+            val outputFile = File.createTempFile("pngquant-host-m3-", ".png", context.cacheDir)
+            try {
+                val outputResult = FileOutputStream(outputFile).use { output ->
+                    PngQuantBridge.quantizeToFileDescriptor(
+                        bitmap,
+                        output.fd,
+                        PngQuantBridge.Options(256, 8, 0, 100, 0.0F, 0),
+                    ).also {
+                        assertTrue("Native code must leave the caller descriptor open", output.fd.valid())
+                    }
+                }
+                assertEquals(outputFile.length(), outputResult.size)
+                assertTrue(outputResult.size > 8L)
+                assertTrue(outputResult.quality in 0..100)
+                assertTrue(outputResult.quantizationError >= 0.0 && outputResult.quantizationError.isFinite())
+                val streamedDecoded = BitmapFactory.decodeFile(outputFile.absolutePath)
+                try {
+                    assertEquals(bitmap.width, streamedDecoded.width)
+                    assertEquals(bitmap.height, streamedDecoded.height)
+                } finally {
+                    streamedDecoded.recycle()
+                }
+            } finally {
+                outputFile.delete()
+            }
         } finally {
             bitmap.recycle()
         }
@@ -195,5 +271,18 @@ class ImageQuantPluginHostDeviceTest {
             offset += 12 + length
         }
         throw AssertionError("PNG does not contain a PLTE chunk")
+    }
+
+    private fun ByteArray.hasPngChunk(expectedType: String): Boolean {
+        var offset = 8
+        while (offset + 12 <= size) {
+            val length = readPngInt(offset)
+            require(length >= 0 && offset + 12L + length <= size.toLong()) {
+                "PNG chunk at offset $offset is invalid"
+            }
+            if (String(this, offset + 4, 4, Charsets.US_ASCII) == expectedType) return true
+            offset += 12 + length
+        }
+        return false
     }
 }

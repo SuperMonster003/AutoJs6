@@ -6,8 +6,9 @@
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `إضافة جديدة` تكتب `images.quantizeToFile` ملف PNG مفهرسا مباشرة إلى القرص وتعيد الحجم ومقاييس الجودة; تدعم خيارات Image Quantization الآن `preserveAlpha` وتكوينات Bitmap الشائعة وإدخال العتاد وإدخال النطاق اللوني الواسع بعد تحويله إلى sRGB عبر `OPTIONS_API_VERSION>=3`
 * `إضافة جديدة` تعيد `images.quantize` الآن بايتات PNG والحجم والجودة المحققة وخطأ التكميم; يؤدي حذف الحد الأدنى للجودة إلى استخدام أفضل نتيجة ممكنة (`minQuality=0`), بينما يؤدي تعذر تحقيق حد أدنى صريح إلى طرح `PngQuantBridge.QualityTooLowException` مع الرمز `PNG_QUANTIZATION_QUALITY_TOO_LOW`; وتتطلب واجهة النتيجة `OPTIONS_API_VERSION>=2`
 * `إضافة جديدة` تدعم `images.save` و`images.saveImage` و`images.compress` و`images.compressToBytes` الآن خيارات مسماة لتكميم PNG تشمل حجم لوحة الألوان والسرعة وحدود الجودة المستقلة والتشويش وposterize; يبقى `quality` الرقمي متوافقا مع الإصدارات السابقة, وتتطلب الخيارات إضافة Image Quantization تعلن `OPTIONS_API_VERSION>=1`
 * `إضافة جديدة` تنفيذ TypeScript فوري من الذاكرة عبر `engines.execScript`: تستخدم أسماء `.ts/.tsx/.mts/.cts` المترجم المستقل مع تشخيصات وتعيين مكدس Source Map مماثلين للملفات, ويعيد Rhino قيمة التعبير الأخير, وتقيّم صفحة Log الكاملة ولوحة Log في المحرر مقاطع من سطر واحد تفاعليا

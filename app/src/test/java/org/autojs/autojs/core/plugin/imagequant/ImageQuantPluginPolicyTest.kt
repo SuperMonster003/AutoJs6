@@ -149,6 +149,16 @@ class ImageQuantPluginPolicyTest {
                 ImageQuantPluginContract.QUANTIZATION_RESULT_API_VERSION,
             ),
         )
+        assertFalse(
+            ImageQuantOptionsApiPolicy.supportsColorIo(
+                ImageQuantPluginContract.COLOR_IO_API_VERSION - 1,
+            ),
+        )
+        assertTrue(
+            ImageQuantOptionsApiPolicy.supportsColorIo(
+                ImageQuantPluginContract.COLOR_IO_API_VERSION,
+            ),
+        )
     }
 
     @Test

@@ -149,6 +149,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::isRecycled.name,
         ::recycle.name,
         ::quantize.name,
+        ::quantizeToFile.name,
         ::compress.name,
         ::compressToBytes.name,
         ::downsample.name,
@@ -1386,6 +1387,40 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun quantizeToFile(scriptRuntime: ScriptRuntime, args: Array<out Any?>): PngQuantizationFileResult =
+            ensureArgumentsLengthInRange(args, 2..3) {
+                val (o, pathArg, optionsArg) = it
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) {
+                    "Argument \"image\" ${image.jsBrief()} for images.quantizeToFile must be a ImageWrapper"
+                }
+                require(!pathArg.isJsNullish()) {
+                    "Argument \"path\" ${pathArg.jsBrief()} for images.quantizeToFile must be non-nullish"
+                }
+                val options = when {
+                    optionsArg.isJsNullish() -> NativeObject()
+                    optionsArg is NativeObject -> optionsArg
+                    else -> throw WrappedIllegalArgumentException(
+                        "Argument \"options\" ${optionsArg.jsBrief()} for images.quantizeToFile must be an object",
+                    )
+                }
+                val path = scriptRuntime.files.nonNullPath(coerceString(pathArg))
+                try {
+                    PngQuantizationFileResult(
+                        path,
+                        scriptRuntime.images.quantizeToFile(
+                            image,
+                            path,
+                            parseImageQuantizationOptions(options, DEFAULT_IMAGE_SAVE_QUALITY),
+                        ),
+                    )
+                } finally {
+                    image.shoot()
+                }
+            }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun compress(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 1..3) {
 
             // @Comment by SuperMonster003 on May 19, 2025.
@@ -1815,6 +1850,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     ?: PngQuantBridge.Options.DEFAULT_DITHERING_LEVEL,
                 options.inquire("posterizeBits") { coerceIntNumber(it) }
                     ?: PngQuantBridge.Options.DEFAULT_POSTERIZE_BITS,
+                options.inquire("preserveAlpha") { coerceBoolean(it) }
+                    ?: PngQuantBridge.Options.DEFAULT_PRESERVE_ALPHA,
             )
         }
 

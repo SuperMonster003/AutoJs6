@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 30 August 2026.
+Données mises à jour le 31 August 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,8 +166,9 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/08/30
+###### 2026/08/31
 
+* `Fonctionnalité` `images.quantizeToFile` diffuse un PNG indexe directement sur le disque avec sa taille et ses mesures de qualite; les options Image Quantization prennent maintenant en charge `preserveAlpha`, les configurations Bitmap courantes, les entrees materielles et les entrees a large gamut normalisees en sRGB via `OPTIONS_API_VERSION>=3`
 * `Fonctionnalité` `images.quantize` renvoie maintenant les octets PNG, la taille, la qualite obtenue et l'erreur de quantification; sans qualite minimale, le mode meilleur effort est utilise (`minQuality=0`), tandis qu'une limite inferieure explicite impossible a satisfaire leve `PngQuantBridge.QualityTooLowException` avec le code `PNG_QUANTIZATION_QUALITY_TOO_LOW`; l'API de resultat exige `OPTIONS_API_VERSION>=2`
 * `Fonctionnalité` `images.save`, `images.saveImage`, `images.compress` et `images.compressToBytes` acceptent maintenant des options nommees de quantification PNG pour la taille de palette, la vitesse, les bornes de qualite independantes, le tramage et posterize; le `quality` numerique reste compatible et les options exigent un plugin Image Quantization declarant `OPTIONS_API_VERSION>=1`
 * `Fonctionnalité` Exécution immédiate de TypeScript en mémoire via `engines.execScript`: les noms `.ts/.tsx/.mts/.cts` utilisent le compilateur indépendant avec des diagnostics et une remise en correspondance des piles Source Map équivalents aux fichiers, Rhino renvoie la valeur de la dernière expression et la page Log complète ainsi que le panneau Log de l'éditeur évaluent interactivement des extraits sur une ligne
@@ -737,7 +738,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 30 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 31 August 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
