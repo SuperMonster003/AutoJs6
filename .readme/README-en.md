@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Aug 31, 2026.
+Data updated on Sep 1, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/08/31
+###### 2026/09/01
 
 * `Feature` Image Quantization options add `maxPixels` and `maxMemoryBytes` with default 16000000-pixel and 256 MiB additional-working-memory budgets through `OPTIONS_API_VERSION>=4`; over-budget work fails with typed resource details, results report accounted peak memory, and stopping a script cancels its active native quantization
 * `Feature` `images.quantizeToFile` streams an indexed PNG directly to disk with size and quality metrics; Image Quantization options now support `preserveAlpha`, common Bitmap configurations, hardware input, and wide-gamut input normalized to sRGB through `OPTIONS_API_VERSION>=3`
@@ -298,6 +298,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
 * `Feature` Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback
 * `Feature` Code editor settings now show an Ace language support matrix and per-language semantic switches for TypeScript/JavaScript, Python, Lua, and Java; Kotlin remains visible as P2+ without a provider, and file-type customization clearly acts as a pre-routing allowlist rather than language reclassification
+* `Fix` Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay
 * `Fix` Enabling the TypeScript command row in the full Log page and editor bottom Log panel let a wrap-content navigation-bar spacer consume the entire remaining height, collapsing the log list to zero; the row now stays above a visible log viewport, and the Log page FAB uses its original bottom offset
 * `Fix` Archive entry Rename and Delete actions did not honor the current session's declared mutation capabilities, allowing read-only or unsupported sessions to expose operations the provider could not complete
 * `Fix` File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted
@@ -435,6 +436,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates
 * `Improvement` Moved offline project documentation inventory parsing and full SHA-256 verification on first load to a background thread to avoid blocking the UI
 * `Improvement` Moved the complete AXML/ARSC/parsing/signing/keystore/cryptography toolchain required for APK builds into the APK Builder Template plugin, with lightweight APK inspection in the host
+* `Improvement` Move the approximately 1.3 MiB full AutoJs6 completion index out of Ace's synchronous first-presentation path, loading it during idle time after the first visible code frame and seamlessly replacing the bootstrap index; all five Android 9-15 environments restored 400 globals and 80 modules
 * `Improvement` Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Reorganized the code editor action bar and menu hierarchy, making Log a persistent action while improving the placement of File encoding and Read-only mode
@@ -740,7 +742,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Aug 31, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 1, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

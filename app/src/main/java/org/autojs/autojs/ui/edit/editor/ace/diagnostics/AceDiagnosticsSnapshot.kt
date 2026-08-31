@@ -67,5 +67,10 @@ data class AceDiagnosticsSnapshot(
     val maxBridgeEventWindowCount: Int,
     val maxBridgeEventWindowStartedAtUptimeMillis: Long?,
     val runtimeEventHistory: List<String>,
+    val lastThemeAppliedAtUptimeMillis: Long? = null,
+    val lastPageLoadStartedAtUptimeMillis: Long? = null,
+    val lastHostDocumentLoadingStartedAtUptimeMillis: Long? = null,
+    val lastHostDocumentReadyAtUptimeMillis: Long? = null,
+    val lastDeferredStaticIndexReadyAtUptimeMillis: Long? = null,
     val createdAtEpochMillis: Long = System.currentTimeMillis(),
 )

@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 8 月 31 日.
+資料更新於 2026 年 9 月 1 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/08/31
+###### 2026/09/01
 
 * `新增` Image Quantization 選項透過 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 與 `maxMemoryBytes`, 預設限制 16000000 像素和 256 MiB 額外工作記憶體; 超出預算時回傳帶資源詳情的型別化例外, 結果報告計入預算的峰值記憶體, 停止腳本會取消其活動原生量化
 * `新增` `images.quantizeToFile` 將索引 PNG 直接串流寫入磁碟並回傳大小與品質指標; Image Quantization 選項新增 `preserveAlpha`, 常見 Bitmap 配置, 硬體輸入與廣色域輸入透過 `OPTIONS_API_VERSION>=3` 統一正規化為 sRGB
@@ -298,6 +298,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
 * `新增` 程式碼編輯器設定新增 Ace 語言支援矩陣, 並為 TypeScript/JavaScript, Python, Lua 與 Java 提供逐語言語意開關; Kotlin 以無 Provider 的 P2+ 狀態保持可見, 檔案類型自訂明確作為語意路由前置允許清單而非語言重新分類
+* `修復` Ace WebView 在主機端主題與首份文件生效前可能短暫顯示純白背景, 尤其會在深色編輯器主題下產生明顯閃爍; 首次畫面現在由主題已套用, 文件已提交與穩定繪製訊號共同放行, 不依賴固定延遲
 * `修復` 完整日誌頁面及編輯器底部日誌面板啟用 TypeScript 命令列後, wrap-content 導覽列預留檢視會占用全部剩餘高度並將日誌清單壓縮為零; 現將命令列置於可見日誌區域上方, 日誌頁 FAB 也恢復原有底部偏移
 * `修復` 壓縮檔案項目的重新命名/刪除操作未依目前工作階段宣告的修改能力收斂, 導致唯讀或不支援修改的工作階段仍可能顯示提供者無法完成的操作
 * `修復` 檔案管理員 Explorer 動作在外掛程式啟用、重新授權或更新後可能繼續使用過期快取或檔案列參照, 導致已辨識檔案在 AutoJs6 重新啟動前回退至系統應用程式選擇器
@@ -435,6 +436,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 專案離線文件完成外掛化, 降低宿主 APK 體積並支援獨立安裝及更新
 * `最佳化` 離線專案文件首次載入的檔案清單解析及完整 SHA-256 驗證移至背景執行緒, 避免阻塞介面
 * `最佳化` APK 建置所需的 AXML/ARSC/解析/簽章/金鑰儲存區及密碼學工具鏈全部遷入 APK Builder Template 外掛, 宿主改用輕量 APK 資訊檢查
+* `最佳化` 將約 1.3 MiB 的完整 AutoJs6 自動完成索引移出 Ace 首次畫面的同步路徑, 在第一個可見程式碼畫面後的閒置時段載入並無縫取代基礎索引; 五個 Android 9-15 環境均恢復 400 個全域項目與 80 個模組
 * `最佳化` 程式碼編輯器引擎選擇尊重使用者明確設定, Ace 無法使用時提供前往外掛中心的入口
 * `最佳化` 程式碼編輯器 "執行" 按鈕點選後變換為 "停止" 按鈕, 可便捷停止腳本
 * `最佳化` 調整程式碼編輯器操作列及選單層級, 將日誌設為常駐操作按鈕, 並重新整理檔案編碼與唯讀模式入口
@@ -740,7 +742,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 8 月 31 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 1 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

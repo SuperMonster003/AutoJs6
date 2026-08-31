@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 8 月 31 日 に更新されました.
+データは 2026 年 9 月 1 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/08/31
+###### 2026/09/01
 
 * `新機能` Image Quantization オプションは `OPTIONS_API_VERSION>=4` により `maxPixels` と `maxMemoryBytes` を追加し, 既定で 16000000 ピクセルと 256 MiB の追加作業メモリを上限にします; 予算超過はリソース詳細付きの型付き例外となり, 結果は計上済みピークメモリを返し, スクリプト停止時は実行中のネイティブ量子化をキャンセルします
 * `新機能` `images.quantizeToFile` はインデックス PNG をディスクへ直接ストリーム書き込みし, サイズと品質指標を返します; Image Quantization オプションは `preserveAlpha`, 一般的な Bitmap 構成, ハードウェア入力, `OPTIONS_API_VERSION>=3` による sRGB 正規化済み広色域入力に対応しました
@@ -298,6 +298,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` 開発者向けオプションが GitHub アクセストークン設定に対応, 更新確認とプラグインインデックスのリクエスト上限を拡張可能
 * `新機能` グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない
 * `新機能` コードエディタ設定に Ace 言語サポート matrix と TypeScript/JavaScript, Python, Lua, Java の言語別セマンティック switch を追加; Kotlin は Provider なしの P2+ として表示を保ち, ファイル種類は言語再分類ではなくルーティング前 allowlist と明記
+* `修正` ホストテーマと初期ドキュメントが反映される前に Ace WebView が純白ページを短時間表示し, ダークエディタテーマで目立つ点滅が発生する問題; 初回表示は固定遅延ではなく, テーマ適用済み, ドキュメント送信済み, 安定描画の明示的なシグナルを待機
 * `修正` 完全なログページとエディター下部ログパネルで TypeScript コマンド行を有効にすると、wrap-content のナビゲーションバー用スペーサーが残りの高さをすべて占有し、ログリストの高さが 0 になる問題。コマンド行を表示可能なログ領域の上に配置し、ログページの FAB も元の下端オフセットに復元
 * `修正` アーカイブ項目の名前変更と削除が現在のセッションで宣言された変更能力に従わず、読み取り専用または未対応のセッションでもプロバイダーが完了できない操作を表示することがある問題
 * `修正` プラグインを有効化、再承認、または更新した後もファイルマネージャーのExplorer Actionが古いキャッシュや行参照を使い続け, AutoJs6を再起動するまで認識済みファイルがシステムのアプリ候補へ戻る問題
@@ -435,6 +436,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` プロジェクトのオフラインドキュメントをプラグイン化し, ホスト APK のサイズを削減するとともに個別のインストールと更新に対応
 * `改善` オフラインプロジェクトドキュメントの初回読み込み時に行うファイル一覧解析と完全な SHA-256 検証をバックグラウンドスレッドへ移動, UI のブロックを回避
 * `改善` APK ビルドに必要な AXML/ARSC/解析/署名/キーストア/暗号化ツールチェーンを APK Builder Template プラグインへ完全移行, ホストは軽量な APK 情報検査を使用
+* `改善` 約 1.3 MiB の完全な AutoJs6 補完インデックスを Ace 初回表示の同期経路から外し, 最初のコード画面が表示された後のアイドル時間に読み込んでブートストラップインデックスをシームレスに置換; Android 9-15 の 5 環境すべてで 400 グローバル項目と 80 モジュールを復元
 * `改善` コードエディタエンジンの選択でユーザーの明示的な設定を尊重し, Ace が利用できない場合はプラグインセンターへの移動手段を提供
 * `改善` コードエディタの "実行" ボタンをタップ後に "停止" ボタンへ切り替え, スクリプトをすばやく停止可能
 * `改善` コードエディタの操作バーとメニュー階層を整理し, ログを常設アクションにするとともにファイルエンコーディングと読み取り専用モードの配置を改善
@@ -740,7 +742,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 8 月 31 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 1 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

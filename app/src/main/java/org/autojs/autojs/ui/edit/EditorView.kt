@@ -913,6 +913,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     init {
         mEditorAppBar.isVisible = !mFullscreenMode
         recordAcePluginUnavailableFallbackIfNeeded()
+        val immediatelyAvailableTheme = themeFontService.loadCurrentThemeImmediatelyAvailable()
+        immediatelyAvailableTheme?.let(::setTheme)
         attachEditorEngineView()
         setUpEditor()
         setUpInputMethodEnhancedBar()
@@ -932,9 +934,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             webView.settings.displayZoomControls = true
         }
         mDocsPaneController.start(getUrl(INDEX_URL_SUFFIX))
-        themeFontService.loadCurrentTheme()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { theme: Theme? -> setTheme(theme) }
+        if (immediatelyAvailableTheme == null) {
+            themeFontService.loadCurrentTheme()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { theme: Theme? -> setTheme(theme) }
+        }
         initNormalToolbar()
     }
 
@@ -999,6 +1003,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Initialize menu state early to avoid "first render" flicker.
         // zh-CN: 尽早初始化菜单状态, 避免首次渲染闪烁.
         mEditorLoading = true
+        editor.setLoadingText(true)
         showCursorStatusPlaceholder()
 
         // Do NOT reset dirty flags if we already restored a draft in this session.
@@ -1051,6 +1056,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 applyInitialPositionIfRequested(intent)
             }
             .doOnError {
+                editor.setLoadingText(false)
                 mEditorLoading = false
                 syncPrimaryMenuState()
                 scheduleCursorStatusAfterInitialLoad()
@@ -1987,6 +1993,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
             .doOnError {
                 if (mDestroyed || !isCurrentFileLoad(loadGeneration)) return@doOnError
+                editor.setLoadingText(false)
                 endEditorLoadingUi()
                 mEditorLoading = false
                 updateEncodingStatus()
@@ -2052,6 +2059,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                             loadGeneration = loadGeneration,
                         )
                     }.onFailure {
+                        editor.setLoadingText(false)
                         endEditorLoadingUi()
                         mEditorLoading = false
                         syncPrimaryMenuState()
@@ -2677,6 +2685,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         endLoadingUi: Boolean,
         preserveCurrentCursor: Boolean = false,
     ) {
+        editor.setLoadingText(false)
         mEditorLoading = false
         if (endLoadingUi) {
             endEditorLoadingUi()

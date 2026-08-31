@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/08/31",
+      "released_date": "2026/09/01",
       "feature": [
         "Les options Image Quantization ajoutent `maxPixels` et `maxMemoryBytes` via `OPTIONS_API_VERSION>=4`, avec des limites par defaut de 16000000 pixels et 256 MiB de memoire de travail supplementaire; un depassement echoue avec des details de ressource types, les resultats indiquent le pic de memoire comptabilise et l'arret du script annule sa quantification native active",
         "`images.quantizeToFile` diffuse un PNG indexe directement sur le disque avec sa taille et ses mesures de qualite; les options Image Quantization prennent maintenant en charge `preserveAlpha`, les configurations Bitmap courantes, les entrees materielles et les entrees a large gamut normalisees en sRGB via `OPTIONS_API_VERSION>=3`",
@@ -135,6 +135,7 @@
         "Les paramètres de l'éditeur de code affichent désormais la matrice des langages Ace et des commutateurs sémantiques pour TypeScript/JavaScript, Python, Lua et Java; Kotlin reste visible en P2+ sans fournisseur, et les types de fichiers sont clairement une liste d'autorisation avant routage plutôt qu'une reclassification du langage"
       ],
       "fix": [
+        "La WebView Ace pouvait afficher brièvement une page entièrement blanche avant l'application du thème hôte et du document initial, provoquant un flash marqué avec les thèmes sombres; la première présentation attend désormais des signaux explicites de thème appliqué, document soumis et rendu stable au lieu d'un délai fixe",
         "L'activation de la ligne de commande TypeScript dans la page Journal complète et le panneau Journal inférieur de l'éditeur permettait à un espaceur de barre de navigation en wrap-content d'occuper toute la hauteur restante et de réduire la liste des journaux à zéro ; la ligne reste désormais au-dessus d'une zone de journal visible et le FAB de la page Journal retrouve son décalage inférieur d'origine",
         "Les actions Renommer et Supprimer des entrées d'archive ne respectaient pas les capacités de modification déclarées par la session active, ce qui pouvait exposer dans une session en lecture seule ou non compatible des opérations que le fournisseur ne pouvait pas terminer",
         "Les actions Explorer du gestionnaire de fichiers pouvaient conserver un cache ou des références de ligne obsolètes après l'activation, la réautorisation ou la mise à jour d'un plugin, obligeant les fichiers reconnus à revenir au sélecteur d'applications système jusqu'au redémarrage d'AutoJs6",
@@ -274,6 +275,7 @@
         "Modularisation de la documentation hors ligne du projet sous forme de plugin, afin de réduire la taille de l'APK hôte et de permettre une installation et des mises à jour indépendantes",
         "Déplacement de l'analyse de l'inventaire et de la vérification SHA-256 complète de la documentation de projet hors ligne au premier chargement vers un thread d'arrière-plan afin de ne pas bloquer l'interface",
         "Migration de toute la chaîne d'outils AXML/ARSC/analyse/signature/stockage de clés/cryptographie nécessaire aux compilations APK vers le plugin APK Builder Template, avec une inspection APK légère dans l'hôte",
+        "Déplace l'index de complétion AutoJs6 complet d'environ 1.3 MiB hors du chemin synchrone de première présentation d'Ace, le charge pendant une période d'inactivité après la première image de code visible et remplace sans interruption l'index initial; les cinq environnements Android 9-15 ont restauré 400 éléments globaux et 80 modules",
         "La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible",
         "Le bouton \"Exécuter\" de l'éditeur de code devient \"Arrêter\" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts",
         "Réorganisation de la barre d'actions et de la hiérarchie des menus de l'éditeur de code, avec Journal comme action permanente et un meilleur emplacement pour Encodage du fichier et Mode lecture seule",

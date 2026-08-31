@@ -2,6 +2,8 @@ package org.autojs.autojs.ui.edit.theme;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.app.GlobalAppContext;
@@ -123,6 +125,37 @@ public class Themes {
             }
             return themes.get(0);
         });
+    }
+
+    /**
+     * Returns the current theme without scheduling asset IO when it is already available.
+     *
+     * <p>Ace themes are an in-memory catalog, so their saved selection can always be resolved
+     * synchronously. Applying that theme before the plugin view is attached keeps the WebView's
+     * first surface and the host editor chrome on the same palette. Native themes remain
+     * asynchronous until their asset catalog has been loaded.</p>
+     */
+    @Nullable
+    public static Theme getCurrentImmediatelyAvailable(Context context, EditorEngineType engineType) {
+        String currentTheme = getCurrentThemeName(context, engineType);
+        if (engineType == EditorEngineType.ACE) {
+            Theme aceTheme = AceEditorThemes.findByName(currentTheme);
+            if (aceTheme != null) {
+                return aceTheme;
+            }
+            boolean darkDefault = !isSeparateLightDarkMode() || ViewUtils.isNightModeYes(context);
+            return AceEditorThemes.getDefault(darkDefault);
+        }
+        if (sThemes == null) {
+            return null;
+        }
+        String nativeThemeName = resolveNativeThemeName(context, currentTheme);
+        for (Theme theme : sThemes) {
+            if (nativeThemeName.equals(theme.getName())) {
+                return theme;
+            }
+        }
+        return sThemes.get(0);
     }
 
     public static void setCurrent(String name) {

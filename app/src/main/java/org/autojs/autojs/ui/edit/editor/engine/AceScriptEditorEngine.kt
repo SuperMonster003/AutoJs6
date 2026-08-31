@@ -935,6 +935,13 @@ private fun EditorPluginDiagnostics.toAceDiagnosticsSnapshot(
         jsRevision = stringOrNull("jsRevision"),
         lastReadyAtUptimeMillis = longOrNull("lastReadyAtUptimeMillis"),
         lastFirstPaintAtUptimeMillis = longOrNull("lastFirstPaintAtUptimeMillis"),
+        lastThemeAppliedAtUptimeMillis = longOrNull("lastThemeAppliedAtUptimeMillis"),
+        lastPageLoadStartedAtUptimeMillis = longOrNull("lastPageLoadStartedAtUptimeMillis"),
+        lastHostDocumentLoadingStartedAtUptimeMillis =
+            longOrNull("lastHostDocumentLoadingStartedAtUptimeMillis"),
+        lastHostDocumentReadyAtUptimeMillis = longOrNull("lastHostDocumentReadyAtUptimeMillis"),
+        lastDeferredStaticIndexReadyAtUptimeMillis =
+            longOrNull("lastDeferredStaticIndexReadyAtUptimeMillis"),
         lastStateAtUptimeMillis = longOrNull("lastStateAtUptimeMillis"),
         lastHeartbeatAtUptimeMillis = longOrNull("lastHeartbeatAtUptimeMillis"),
         lastHeartbeatSuspendedAtUptimeMillis = longOrNull("lastHeartbeatSuspendedAtUptimeMillis"),

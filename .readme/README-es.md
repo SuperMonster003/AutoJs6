@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 31 de August de 2026.
+Datos actualizados el 1 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/08/31
+###### 2026/09/01
 
 * `Nuevo` Las opciones de Image Quantization anaden `maxPixels` y `maxMemoryBytes` mediante `OPTIONS_API_VERSION>=4`, con limites predeterminados de 16000000 pixeles y 256 MiB de memoria de trabajo adicional; el exceso de presupuesto falla con detalles tipados del recurso, los resultados informan la memoria maxima contabilizada y detener un script cancela su cuantizacion nativa activa
 * `Nuevo` `images.quantizeToFile` transmite un PNG indexado directamente al disco con tamano y metricas de calidad; las opciones de Image Quantization ahora admiten `preserveAlpha`, configuraciones Bitmap comunes, entrada de hardware y entrada de gama amplia normalizada a sRGB mediante `OPTIONS_API_VERSION>=3`
@@ -298,6 +298,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
 * `Nuevo` La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local
 * `Nuevo` Los ajustes del editor de código muestran ahora la matriz de lenguajes de Ace y los interruptores semánticos para TypeScript/JavaScript, Python, Lua y Java; Kotlin permanece visible como P2+ sin proveedor, y los tipos de archivo actúan claramente como lista de permitidos antes del enrutamiento en vez de reclasificar el lenguaje
+* `Corrección` La WebView de Ace podía mostrar brevemente una página totalmente blanca antes de aplicar el tema del host y el documento inicial, lo que producía un destello evidente con temas oscuros; la primera presentación ahora espera señales explícitas de tema aplicado, documento enviado y renderizado estable en lugar de un retraso fijo
 * `Corrección` Al activar la fila de comandos TypeScript en la página completa de Registro y en el panel inferior de Registro del editor, un separador de la barra de navegación con wrap-content podía consumir toda la altura restante y reducir la lista de registros a cero; ahora la fila queda sobre un área de registros visible y el FAB de la página de Registro recupera su desplazamiento inferior original
 * `Corrección` Las acciones Renombrar y Eliminar de entradas de archivo no respetaban las capacidades de modificación declaradas por la sesión actual, por lo que sesiones de solo lectura o no compatibles podían mostrar operaciones que el proveedor no podía completar
 * `Corrección` Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6
@@ -435,6 +436,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes
 * `Mejora` Trasladados el análisis del inventario y la verificación SHA-256 completa de la documentación del proyecto sin conexión durante la primera carga a un hilo en segundo plano para evitar bloquear la interfaz
 * `Mejora` Trasladada al plugin APK Builder Template toda la cadena de herramientas AXML/ARSC/análisis/firma/almacén de claves/criptografía necesaria para compilar APK, con una inspección ligera de APK en el host
+* `Mejora` Mueve el índice completo de autocompletado de AutoJs6 de aproximadamente 1.3 MiB fuera de la ruta síncrona de la primera presentación de Ace, lo carga durante el tiempo de inactividad posterior al primer fotograma de código visible y sustituye sin interrupciones el índice inicial; los cinco entornos Android 9-15 restauraron 400 elementos globales y 80 módulos
 * `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Reorganizadas la barra de acciones y la jerarquía de menús del editor de código, con Registro como acción permanente y una ubicación más clara para Codificación de archivo y Modo de solo lectura
@@ -740,7 +742,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 31 de August de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 1 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

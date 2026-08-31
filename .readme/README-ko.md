@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 8 월 31 일.
+데이터 갱신일: 2026 년 9 월 1 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/08/31
+###### 2026/09/01
 
 * `추가` Image Quantization 옵션은 `OPTIONS_API_VERSION>=4`를 통해 `maxPixels`와 `maxMemoryBytes`를 추가하고 기본 16000000 픽셀 및 256 MiB 추가 작업 메모리 예산을 적용합니다; 예산 초과는 리소스 세부 정보가 있는 형식화 예외로 실패하고, 결과는 계산된 최대 메모리를 보고하며, 스크립트 중지는 활성 네이티브 양자화를 취소합니다
 * `추가` `images.quantizeToFile`은 인덱스 PNG를 디스크에 직접 스트리밍하고 크기와 품질 지표를 반환합니다; Image Quantization 옵션은 이제 `preserveAlpha`, 일반 Bitmap 구성, 하드웨어 입력 및 `OPTIONS_API_VERSION>=3`을 통해 sRGB로 정규화된 광색역 입력을 지원합니다
@@ -298,6 +298,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
 * `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
 * `추가` 코드 편집기 설정에 Ace 언어 지원 matrix와 TypeScript/JavaScript, Python, Lua 및 Java의 언어별 의미 switch를 추가; Kotlin은 Provider 없는 P2+ 상태로 계속 표시되며 파일 형식은 언어 재분류가 아닌 라우팅 전 allowlist로 명확히 동작
+* `수정` 호스트 테마와 초기 문서가 적용되기 전에 Ace WebView가 잠시 순백색 페이지를 노출하여 어두운 편집기 테마에서 눈에 띄는 깜박임이 발생하는 문제; 최초 표시는 고정 지연 대신 테마 적용, 문서 제출 및 안정된 그리기 신호를 명시적으로 기다림
 * `수정` 전체 로그 페이지와 편집기 하단 로그 패널에서 TypeScript 명령 행을 활성화하면 wrap-content 내비게이션 바 스페이서가 남은 높이를 모두 차지해 로그 목록 높이가 0이 되던 문제. 이제 명령 행은 표시 가능한 로그 영역 위에 배치되고 로그 페이지 FAB도 원래 하단 오프셋으로 복원
 * `수정` 압축 파일 항목 이름 바꾸기 및 삭제 작업이 현재 세션에서 선언한 변경 기능을 따르지 않아 읽기 전용 또는 미지원 세션에서도 공급자가 완료할 수 없는 작업이 노출될 수 있던 문제
 * `수정` 플러그인을 활성화, 재승인 또는 업데이트한 뒤에도 파일 관리자의 Explorer Action이 오래된 캐시나 행 참조를 유지해 AutoJs6를 재시작할 때까지 인식된 파일이 시스템 앱 선택기로 돌아가던 문제
@@ -435,6 +436,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 프로젝트 오프라인 문서를 플러그인화하여 호스트 APK 크기를 줄이고 독립 설치 및 업데이트 지원
 * `개선` 오프라인 프로젝트 문서의 최초 로드 시 파일 목록 분석 및 전체 SHA-256 검증을 백그라운드 스레드로 이동하여 UI 차단 방지
 * `개선` APK 빌드에 필요한 AXML/ARSC/분석/서명/키 저장소/암호화 도구 체인을 APK Builder Template 플러그인으로 완전히 이전하고 호스트는 경량 APK 정보 검사 사용
+* `개선` 약 1.3 MiB의 전체 AutoJs6 자동 완성 인덱스를 Ace 최초 표시 동기 경로에서 분리하고 첫 코드 프레임이 표시된 뒤 유휴 시간에 로드하여 부트스트랩 인덱스를 끊김 없이 교체; Android 9-15의 5개 환경 모두에서 전역 항목 400개와 모듈 80개를 복원
 * `개선` 코드 편집기 엔진 선택에서 사용자의 명시적 설정을 존중하고 Ace를 사용할 수 없을 때 플러그인 센터 이동 경로 제공
 * `개선` 코드 편집기 "실행" 버튼을 누른 후 "중지" 버튼으로 전환하여 스크립트를 빠르게 중지 가능
 * `개선` 코드 편집기 작업 표시줄과 메뉴 계층을 정리하여 로그를 상시 작업으로 배치하고 파일 인코딩 및 읽기 전용 모드의 위치를 개선
@@ -740,7 +742,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 8 월 31 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 1 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

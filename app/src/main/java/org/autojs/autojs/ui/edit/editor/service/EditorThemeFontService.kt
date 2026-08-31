@@ -55,6 +55,9 @@ class EditorThemeFontService(
 
     fun loadCurrentTheme(): Observable<Theme?> = Themes.getCurrent(context, currentEditor().engineType)
 
+    fun loadCurrentThemeImmediatelyAvailable(): Theme? =
+        Themes.getCurrentImmediatelyAvailable(context, currentEditor().engineType)
+
     fun applyEditorPreferences() {
         applyPreferredTextSize()
         currentEditor().notifyDisplayPreferencesChanged()

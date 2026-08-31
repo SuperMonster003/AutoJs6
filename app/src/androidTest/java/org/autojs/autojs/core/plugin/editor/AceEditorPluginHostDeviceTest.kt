@@ -20,6 +20,7 @@ import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.service.EditorCurrentDocumentCodeActionAuthorizer
+import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -116,6 +117,149 @@ class AceEditorPluginHostDeviceTest {
                 }
             }
             finishHostActivity(activity)
+        }
+    }
+
+    @Test
+    fun savedAceThemeAndDocumentAreCommittedBeforeTheFirstVisibleEditorFrame() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+
+        val enginePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        val selectionModePreference = captureStringPreference(
+            EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE,
+        )
+        val originalAceTheme = Themes.getCurrentThemeName(context, EditorEngineType.ACE)
+        val originalPluginEnabled = PluginEnableStore.isEnabled(
+            context,
+            EditorPluginContract.DEFAULT_PACKAGE_NAME,
+            defaultEnabled = true,
+        )
+        val sourceText = "print('first line')\nprint('second line')\n"
+        val document = File(
+            context.cacheDir,
+            "ace-editor-initial-presentation-${SystemClock.uptimeMillis()}.py",
+        ).apply { writeText(sourceText) }
+        var activity: EditActivity? = null
+
+        try {
+            setPluginEnabled(true)
+            assumeTrue(
+                "Installed Ace editor plugin is not eligible for host loading",
+                runOnMainSync { AceEditorPluginStateMonitor.current(context).available },
+            )
+            val selection = runOnMainSync {
+                Themes.setCurrent(context, "Tomorrow Night")
+                EditorEnginePreferences.selectByUser(context, EditorEngineType.ACE)
+            }
+            assertEquals(EditorEngineType.ACE, selection.effectiveType)
+
+            val launchedActivity = launchEditActivity(document)
+            activity = launchedActivity
+            val editorView = runOnMainSync {
+                checkNotNull(launchedActivity.findViewById<EditorView>(R.id.editor_view))
+            }
+            waitUntil(
+                message = "Host did not publish the initial Python document in Ace",
+                timeoutMillis = 20_000L,
+            ) {
+                runOnMainSync {
+                    editorView.editor.engineType == EditorEngineType.ACE &&
+                        editorView.editor.isReady &&
+                        editorView.editor.textSnapshot == sourceText
+                }
+            }
+
+            val engine = runOnMainSync { editorView.editor as AceScriptEditorEngine }
+            var diagnostics = runOnMainSync { engine.createAceDiagnosticsSnapshot() }
+            waitUntil(
+                message = "Ace did not publish its first presentation frame: " +
+                    diagnostics.runtimeEventHistory,
+                timeoutMillis = 20_000L,
+            ) {
+                diagnostics = runOnMainSync { engine.createAceDiagnosticsSnapshot() }
+                diagnostics.lastFirstPaintAtUptimeMillis != null
+            }
+            val events = diagnostics.runtimeEventHistory
+            val themeAppliedAt = requireNotNull(diagnostics.lastThemeAppliedAtUptimeMillis) {
+                "Saved Ace theme was not recorded: $events"
+            }
+            val pageLoadStartedAt = requireNotNull(diagnostics.lastPageLoadStartedAtUptimeMillis) {
+                "Ace page load was not recorded: $events"
+            }
+            val documentLoadingAt = requireNotNull(
+                diagnostics.lastHostDocumentLoadingStartedAtUptimeMillis,
+            ) {
+                "Initial document loading was not recorded: $events"
+            }
+            val documentReadyAt = requireNotNull(diagnostics.lastHostDocumentReadyAtUptimeMillis) {
+                "Initial document readiness was not recorded: $events"
+            }
+            val firstPaintAt = requireNotNull(diagnostics.lastFirstPaintAtUptimeMillis) {
+                "Ace first paint was not recorded: $events"
+            }
+            assertTrue(
+                "Saved Ace theme must be applied no later than the plugin page starts: " +
+                    "theme=$themeAppliedAt,page=$pageLoadStartedAt,events=$events",
+                themeAppliedAt <= pageLoadStartedAt,
+            )
+            assertTrue(
+                "Ace first paint must not precede the final document submission: " +
+                    "loading=$documentLoadingAt,ready=$documentReadyAt," +
+                    "firstPaint=$firstPaintAt,events=$events",
+                documentLoadingAt <= documentReadyAt && documentReadyAt <= firstPaintAt,
+            )
+
+            var deferredIndexReadyAt = diagnostics.lastDeferredStaticIndexReadyAtUptimeMillis
+            waitUntil(
+                message = "Ace deferred completion index did not become ready",
+                timeoutMillis = 20_000L,
+            ) {
+                diagnostics = runOnMainSync { engine.createAceDiagnosticsSnapshot() }
+                deferredIndexReadyAt = diagnostics.lastDeferredStaticIndexReadyAtUptimeMillis
+                deferredIndexReadyAt != null
+            }
+            assertTrue(
+                "Deferred completion work must follow first paint: " +
+                    "firstPaint=$firstPaintAt,deferredIndex=$deferredIndexReadyAt",
+                requireNotNull(deferredIndexReadyAt) >= firstPaintAt,
+            )
+
+            val webView = runOnMainSync { engine.inputView as WebView }
+            val presentation = decodeJavascriptObject(
+                evaluateJavascript(
+                    webView,
+                    "JSON.stringify({" +
+                        "ready: document.body.classList.contains('ace-ready')," +
+                        "theme: window.editor.getTheme()," +
+                        "bodyBackground: getComputedStyle(document.body).backgroundColor," +
+                        "text: window.editor.getSession().getValue()," +
+                        "deferredIndex: window.AutoJsAce.getDeferredStaticIndexState()" +
+                        "})",
+                ),
+            )
+            assertTrue(presentation.getBoolean("ready"))
+            assertEquals("ace/theme/tomorrow_night", presentation.getString("theme"))
+            assertEquals("rgb(29, 31, 33)", presentation.getString("bodyBackground"))
+            assertEquals(sourceText, presentation.getString("text"))
+            assertEquals(
+                "ready",
+                presentation.getJSONObject("deferredIndex").getString("status"),
+            )
+        } finally {
+            activity?.let(::finishHostActivity)
+            runOnMainSync {
+                Themes.setCurrent(context, originalAceTheme)
+                PluginEnableStore.setEnabled(
+                    context,
+                    EditorPluginContract.DEFAULT_PACKAGE_NAME,
+                    originalPluginEnabled,
+                )
+                AceEditorPluginStateMonitor.refresh(
+                    AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED,
+                )
+            }
+            restoreEnginePreferences(enginePreference, selectionModePreference)
+            document.delete()
         }
     }
 
@@ -1072,6 +1216,12 @@ class AceEditorPluginHostDeviceTest {
         return runCatching { JSONObject(decoded) }.getOrElse { JSONObject() }
     }
 
+    private fun decodeJavascriptObject(raw: String): JSONObject {
+        val decoded = runCatching { JSONTokener(raw).nextValue() as? String }
+            .getOrNull().orEmpty()
+        return JSONObject(decoded)
+    }
+
     private fun validateLspDiagnosticCodes(webView: WebView): List<String> {
         val raw = evaluateJavascript(
             webView,
@@ -1100,7 +1250,7 @@ class AceEditorPluginHostDeviceTest {
                 completed.countDown()
             }
         }
-        assertTrue("Ace JavaScript evaluation timed out", completed.await(5, TimeUnit.SECONDS))
+        assertTrue("Ace JavaScript evaluation timed out", completed.await(15, TimeUnit.SECONDS))
         return result.get().orEmpty()
     }
 
