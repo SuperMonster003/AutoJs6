@@ -12,7 +12,7 @@ import java.util.Locale
 @SuppressLint("DiscouragedApi")
 object PluginResourceResolver {
 
-    private val STRING_RESOURCE_REFERENCE = Regex("""^@(?:([A-Za-z0-9_.]+):)?string/([A-Za-z0-9_.]+)$""")
+    private val RESOURCE_REFERENCE = Regex("""^@(?:([A-Za-z0-9_.]+):)?(string|raw)/([A-Za-z0-9_.]+)$""")
 
     fun resolve(
         context: Context,
@@ -39,17 +39,27 @@ object PluginResourceResolver {
             is Number -> fetchLocalizedStringResource(context, packageName, locale, value.toInt()) ?: fallback
             is CharSequence -> {
                 val text = value.toString().trim().takeIf { it.isNotBlank() } ?: return fallback
-                resolveStringResourceReference(context, packageName, locale, text) ?: text
+                resolveResourceReference(context, packageName, locale, text) ?: text
             }
             else -> fallback
         }
     }
 
-    private fun resolveStringResourceReference(context: Context, packageName: String, locale: Locale, value: String): String? {
-        val match = STRING_RESOURCE_REFERENCE.matchEntire(value.trim()) ?: return null
-        val targetPackage = match.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() } ?: packageName
-        val resName = match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() } ?: return null
-        return fetchLocalizedStringResource(context, targetPackage, locale, resName)
+    private fun resolveResourceReference(context: Context, packageName: String, locale: Locale, value: String): String? {
+        val reference = parseResourceReference(value) ?: return null
+        val targetPackage = reference.packageName ?: packageName
+        return when (reference.resType) {
+            ResType.STRING -> fetchLocalizedStringResource(context, targetPackage, locale, reference.resName)
+            ResType.RAW -> fetchLocalizedRawResource(context, targetPackage, locale, reference.resName)
+        }
+    }
+
+    internal fun parseResourceReference(value: String): ResourceReference? {
+        val match = RESOURCE_REFERENCE.matchEntire(value.trim()) ?: return null
+        val packageName = match.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() }
+        val resType = ResType.entries.firstOrNull { it.typeName == match.groupValues.getOrNull(2) } ?: return null
+        val resName = match.groupValues.getOrNull(3)?.takeIf { it.isNotBlank() } ?: return null
+        return ResourceReference(packageName, resType, resName)
     }
 
     private fun fetchLocalizedStringResource(context: Context, packageName: String, locale: Locale, resName: String): String? {
@@ -84,4 +94,10 @@ object PluginResourceResolver {
         STRING("string"),
         RAW("raw"),
     }
+
+    internal data class ResourceReference(
+        val packageName: String?,
+        val resType: ResType,
+        val resName: String,
+    )
 }

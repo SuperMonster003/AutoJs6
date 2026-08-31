@@ -15,4 +15,22 @@ object OpenccConversionTypes {
     const val TW2S = "TW2S"
     const val TW2T = "TW2T"
     const val TW2SP = "TW2SP"
+
+    @JvmField
+    val ALL = listOf(
+        HK2S,
+        HK2T,
+        JP2T,
+        S2HK,
+        S2T,
+        S2TW,
+        S2TWP,
+        T2HK,
+        T2S,
+        T2TW,
+        T2JP,
+        TW2S,
+        TW2T,
+        TW2SP,
+    )
 }
