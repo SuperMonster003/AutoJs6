@@ -131,7 +131,8 @@
         "La configuration des applications empaquetées permet d'afficher ou de masquer les raccourcis de lanceur \"Journal\" et \"Paramètres\" _[`issue #550`](http://issues.autojs6.com/550)_",
         "L'empaquetage d'applications prend en charge les compilations distantes à l'aide de plugins APK Builder Template",
         "Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins",
-        "L'intégration R8 JavaScript globale (Rhino) ajoute trois surcharges `runtime.loadJarWithR8` d'export vérifié et `runtime.retraceR8Stack` du protocole 1.1; mapping/seeds/usage/retrace metadata sont publiés atomiquement, retrace lie la provenance du mapping et un fournisseur absent ou invalide échoue sans repli D8/dx ou local"
+        "L'intégration R8 JavaScript globale (Rhino) ajoute trois surcharges `runtime.loadJarWithR8` d'export vérifié et `runtime.retraceR8Stack` du protocole 1.1; mapping/seeds/usage/retrace metadata sont publiés atomiquement, retrace lie la provenance du mapping et un fournisseur absent ou invalide échoue sans repli D8/dx ou local",
+        "Les paramètres de l'éditeur de code affichent désormais la matrice des langages Ace et des commutateurs sémantiques pour TypeScript/JavaScript, Python, Lua et Java; Kotlin reste visible en P2+ sans fournisseur, et les types de fichiers sont clairement une liste d'autorisation avant routage plutôt qu'une reclassification du langage"
       ],
       "fix": [
         "L'activation de la ligne de commande TypeScript dans la page Journal complète et le panneau Journal inférieur de l'éditeur permettait à un espaceur de barre de navigation en wrap-content d'occuper toute la hauteur restante et de réduire la liste des journaux à zéro ; la ligne reste désormais au-dessus d'une zone de journal visible et le FAB de la page Journal retrouve son décalage inférieur d'origine",

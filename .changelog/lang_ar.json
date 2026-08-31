@@ -131,7 +131,8 @@
         "اعدادات التطبيق المحزم تدعم اظهار او اخفاء اختصاري المشغل \"السجل\" و \"الاعدادات\" _[`issue #550`](http://issues.autojs6.com/550)_",
         "تحزيم التطبيقات يدعم البناء عن بعد باستخدام اضافات APK Builder Template",
         "خيارات المطور تدعم اعداد رمز وصول GitHub لزيادة حدود طلبات التحقق من التحديث وفهرس الاضافات",
-        "يضيف تكامل R8 العام في JavaScript (Rhino) ثلاثة تحميلات `runtime.loadJarWithR8` لتصدير النتائج بعد التحقق وواجهة `runtime.retraceR8Stack` للبروتوكول 1.1; تنشر mapping/seeds/usage/retrace metadata ذرياً, ويربط retrace مصدر mapping, ويفشل Provider المفقود أو غير الصالح دون fallback إلى D8/dx أو تنفيذ محلي"
+        "يضيف تكامل R8 العام في JavaScript (Rhino) ثلاثة تحميلات `runtime.loadJarWithR8` لتصدير النتائج بعد التحقق وواجهة `runtime.retraceR8Stack` للبروتوكول 1.1; تنشر mapping/seeds/usage/retrace metadata ذرياً, ويربط retrace مصدر mapping, ويفشل Provider المفقود أو غير الصالح دون fallback إلى D8/dx أو تنفيذ محلي",
+        "تعرض إعدادات محرر الشفرة الآن مصفوفة لغات Ace ومفاتيح دلالية مستقلة لـ TypeScript/JavaScript وPython وLua وJava; تبقى Kotlin ظاهرة كـ P2+ دون Provider وتعمل أنواع الملفات بوضوح كـ allowlist قبل التوجيه لا كإعادة تصنيف للغة"
       ],
       "fix": [
         "كان تفعيل صف أوامر TypeScript في صفحة السجل الكاملة ولوحة السجل السفلية للمحرر يسمح لفاصل شريط التنقل ذي wrap-content باستهلاك كل الارتفاع المتبقي وطي قائمة السجل إلى الصفر؛ أصبح الصف الآن أعلى مساحة سجل مرئية، وعاد زر FAB في صفحة السجل إلى إزاحته السفلية الأصلية",

@@ -131,7 +131,8 @@
         "Packaged app configuration supports showing or hiding the \"Log\" and \"Settings\" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_",
         "App packaging supports remote builds using APK Builder Template plugins",
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes",
-        "Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback"
+        "Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback",
+        "Code editor settings now show an Ace language support matrix and per-language semantic switches for TypeScript/JavaScript, Python, Lua, and Java; Kotlin remains visible as P2+ without a provider, and file-type customization clearly acts as a pre-routing allowlist rather than language reclassification"
       ],
       "fix": [
         "Enabling the TypeScript command row in the full Log page and editor bottom Log panel let a wrap-content navigation-bar spacer consume the entire remaining height, collapsing the log list to zero; the row now stays above a visible log viewport, and the Log page FAB uses its original bottom offset",

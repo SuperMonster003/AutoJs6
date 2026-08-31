@@ -107,7 +107,8 @@
         "插件中心支持在线安装插件及更新插件; 全局设置页面及使用说明页面; SDK 插件自动挂载功能; 多变体优先级排序功能; 启动页跳转/隐藏插件; 可用 ABI 交集检测及提示",
         "设置页面提供 \"运行后自动显示底部日志面板\", \"代码高亮阈值\" 等代码编辑器设置选项",
         "打包应用配置支持显示或隐藏 \"日志\" 及 \"设置\" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_",
-        "全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退"
+        "全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退",
+        "代码编辑器设置新增 Ace 语言支持矩阵, 并为 TypeScript/JavaScript, Python, Lua 与 Java 提供逐语言语义开关; Kotlin 以无 Provider 的 P2+ 状态保持可见, 文件类型自定义明确作为语义路由前置白名单而非语言重分类"
       ],
       "fix": [
         "完整日志页及编辑器底部日志面板启用 TypeScript 命令栏后, wrap-content 导航栏占位视图会吞占全部剩余高度并将日志列表压缩为零; 现将命令栏置于可见日志区域上方, 日志页 FAB 也恢复原底部偏移",

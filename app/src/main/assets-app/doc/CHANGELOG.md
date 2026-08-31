@@ -113,6 +113,7 @@
 * `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
 * `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
+* `新增` 代码编辑器设置新增 Ace 语言支持矩阵, 并为 TypeScript/JavaScript, Python, Lua 与 Java 提供逐语言语义开关; Kotlin 以无 Provider 的 P2+ 状态保持可见, 文件类型自定义明确作为语义路由前置白名单而非语言重分类
 * `修复` 完整日志页及编辑器底部日志面板启用 TypeScript 命令栏后, wrap-content 导航栏占位视图会吞占全部剩余高度并将日志列表压缩为零; 现将命令栏置于可见日志区域上方, 日志页 FAB 也恢复原底部偏移
 * `修复` 压缩档案条目的重命名/删除操作未按当前会话声明的修改能力收敛, 导致只读或不支持修改的会话仍可能显示提供方无法完成的操作的问题
 * `修复` 文件管理器 Explorer 动作在插件启用、重新授权或更新后可能继续使用过期缓存或文件行引用, 导致已识别文件在 AutoJs6 重启前回退至系统应用选择器

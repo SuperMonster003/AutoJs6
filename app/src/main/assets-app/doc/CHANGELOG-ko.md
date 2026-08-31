@@ -137,6 +137,7 @@
 * `추가` 앱 패키징에서 APK Builder Template 플러그인을 사용한 원격 빌드 지원
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
 * `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
+* `추가` 코드 편집기 설정에 Ace 언어 지원 matrix와 TypeScript/JavaScript, Python, Lua 및 Java의 언어별 의미 switch를 추가; Kotlin은 Provider 없는 P2+ 상태로 계속 표시되며 파일 형식은 언어 재분류가 아닌 라우팅 전 allowlist로 명확히 동작
 * `수정` 전체 로그 페이지와 편집기 하단 로그 패널에서 TypeScript 명령 행을 활성화하면 wrap-content 내비게이션 바 스페이서가 남은 높이를 모두 차지해 로그 목록 높이가 0이 되던 문제. 이제 명령 행은 표시 가능한 로그 영역 위에 배치되고 로그 페이지 FAB도 원래 하단 오프셋으로 복원
 * `수정` 압축 파일 항목 이름 바꾸기 및 삭제 작업이 현재 세션에서 선언한 변경 기능을 따르지 않아 읽기 전용 또는 미지원 세션에서도 공급자가 완료할 수 없는 작업이 노출될 수 있던 문제
 * `수정` 플러그인을 활성화, 재승인 또는 업데이트한 뒤에도 파일 관리자의 Explorer Action이 오래된 캐시나 행 참조를 유지해 AutoJs6를 재시작할 때까지 인식된 파일이 시스템 앱 선택기로 돌아가던 문제
