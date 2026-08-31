@@ -444,7 +444,7 @@ ownership. The current gates are 17 host DEX suites/166 tests and 12 plugin
 suites/65 tests, with no failure/error/skipped result and plugin lint at 0 errors.
 
 The representative R2 closeout package at
-`D:\idea-projects\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
+`D:\idea-projects\.bak\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
 passed real D8 failure/recovery, caller cancellation, and provider-process
 interruption on one authorized API 34 x86_64 target. Each scenario records its
 terminal observation, publication boundary, descriptor/workspace cleanup, and
@@ -461,7 +461,7 @@ R3 adds the public Rhino
 changing the legacy overloads. Host commit
 `2e439a9738f7334cd4750535a884e0d5dce2d1cf` passed 20 DEX suites/176 tests and
 built the Debug and AndroidTest APKs. The representative evidence package at
-`D:\idea-projects\AutoJs6-DEX-R3-Evidence-20260811\classpath-entry-api34-fa6c21a7-7dda-4bee-9485-bf78906ed83c\report.json`
+`D:\idea-projects\.bak\AutoJs6-DEX-R3-Evidence-20260811\classpath-entry-api34-fa6c21a7-7dda-4bee-9485-bf78906ed83c\report.json`
 records one real-provider method on the authorized `DEX_R1_API34_X64` API
 34/x86_64 target. It passed V1.1 compilation with a parent-visible fixture,
 final `DexClassLoader` execution, exclusion of the compile-only stub from the

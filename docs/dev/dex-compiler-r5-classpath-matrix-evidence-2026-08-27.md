@@ -53,7 +53,7 @@ accepted exactly these three reports and emitted `passed=true`, `cellCount=3`, w
 API 24/25 emulator, API 26+ emulator, and arm64 physical-device roles.
 
 - Aggregate Gate:
-  `D:\idea-projects\AutoJs6-DEX-R5-Evidence-20260827\matrix-gate-d9b97e77-84ad-41dd-a0f2-a8e08eef3fea.json`.
+  `D:\idea-projects\.bak\AutoJs6-DEX-R5-Evidence-20260827\matrix-gate-d9b97e77-84ad-41dd-a0f2-a8e08eef3fea.json`.
 - Aggregate Gate bytes / SHA-256: 2,378 /
   `e2f8c722e2c539e08dd119b39d56af7a2d79581c32c3f50136939ebe43e03a24`.
 - Cell runner SHA-256:
@@ -79,6 +79,6 @@ source commit.
   remained after postflight cleanup.
 
 Raw evidence is retained under
-`D:\idea-projects\AutoJs6-DEX-R5-Evidence-20260827\classpath-release-*`. Each cell directory contains
+`D:\idea-projects\.bak\AutoJs6-DEX-R5-Evidence-20260827\classpath-release-*`. Each cell directory contains
 the frozen APK copies, recorded command stdout/stderr, `report.json`, and a self-excluding
 `files.sha256.json` manifest.

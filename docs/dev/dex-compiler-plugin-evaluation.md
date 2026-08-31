@@ -406,7 +406,7 @@ gates are 17 host DEX suites/166 tests and 12 plugin suites/65 tests, with no
 failure/error/skipped result and plugin lint at 0 errors.
 
 The representative R2 closeout package at
-`D:\idea-projects\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
+`D:\idea-projects\.bak\AutoJs6-DEX-R2-Evidence-20260811\closeout-api34-dab3f857-650d-4107-a3b9-941a1f7e02c2\report.json`
 passed real D8 failure/recovery, caller cancellation, and provider-process
 interruption on one authorized API 34 x86_64 target. The 52-command run records
 terminal and publication state, descriptor/workspace cleanup, next-session
