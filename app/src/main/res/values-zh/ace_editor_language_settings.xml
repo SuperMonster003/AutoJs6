@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">此矩阵描述产品内置能力, 而非当前开关状态. 关闭语义服务后, 语法高亮, 关键字, 代码片段和本地补全仍保持此处所示级别.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">文件类型列表是语言服务的第一层白名单. 文件必须先匹配已选后缀, 才会考虑语义路由. 选择自定义后缀不会将它重新解释为另一种语言. 语义功能还要求语言可识别, 服务提供方可用, 且该语言的开关已开启.</string>
+    <string name="description_ace_semantic_languages_preference">每个开关只影响对应的已识别语言系列, 同时受全局 LSP 开关和文件类型白名单限制. 关闭服务不会移除语法能力和本地补全. Kotlin 仅提供 P2+ 本地补全且没有语义服务提供方, 因而保持可见但不可启用.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\n语法: %2$s; 关键字: %3$s; 代码片段: %4$s; 本地补全: %5$s; 语义: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - 不可用, 仅 P2+</string>
+    <string name="summary_ace_language_support_matrix">查看 %1$d 种语言模式的语法, 补全和语义支持</string>
+    <string name="summary_ace_semantic_languages">已启用 %1$d/%2$d 项可用语义服务</string>
+    <string name="text_ace_language_support_matrix">语言支持矩阵</string>
+    <string name="text_ace_semantic_languages">各语言语义服务</string>
+    <string name="text_ace_support_full">完整</string>
+    <string name="text_ace_support_none">无</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">部分</string>
+    <string name="text_ace_support_single_file_diagnostics">单文件诊断</string>
+    <string name="text_ace_support_supported">支持</string>
+    <string name="text_ace_support_syntax_diagnostics_only">仅语法诊断</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">La matrice décrit les capacités intégrées du produit, pas l\'état actuel des interrupteurs. La désactivation d\'un service sémantique conserve la coloration syntaxique, les mots-clés, les extraits et la complétion locale au niveau indiqué ici.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">La liste des types de fichiers est la première liste d\'autorisation des services de langage. Un fichier doit correspondre à un suffixe sélectionné avant que le routage sémantique soit envisagé. La sélection d\'un suffixe personnalisé ne le réinterprète pas comme un autre langage. Les fonctions sémantiques nécessitent également un langage reconnu, un fournisseur disponible et l\'activation de l\'interrupteur de ce langage.</string>
+    <string name="description_ace_semantic_languages_preference">Chaque interrupteur affecte uniquement sa famille de langages reconnue et dépend également de l\'interrupteur LSP global et de la liste des types de fichiers autorisés. La désactivation d\'un service conserve la syntaxe et la complétion locale. Kotlin reste visible mais désactivé, car il offre une complétion locale P2+ sans fournisseur sémantique.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\nSyntaxe: %2$s; mots-clés: %3$s; extraits: %4$s; complétion locale: %5$s; sémantique: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - indisponible, P2+ uniquement</string>
+    <string name="summary_ace_language_support_matrix">Afficher la prise en charge de la syntaxe, de la complétion et de la sémantique pour %1$d modes de langage</string>
+    <string name="summary_ace_semantic_languages">%1$d services sémantiques activés sur %2$d disponibles</string>
+    <string name="text_ace_language_support_matrix">Matrice de prise en charge des langages</string>
+    <string name="text_ace_semantic_languages">Services sémantiques par langage</string>
+    <string name="text_ace_support_full">Complet</string>
+    <string name="text_ace_support_none">Aucun</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">Partiel</string>
+    <string name="text_ace_support_single_file_diagnostics">Diagnostics sur un seul fichier</string>
+    <string name="text_ace_support_supported">Pris en charge</string>
+    <string name="text_ace_support_syntax_diagnostics_only">Diagnostics de syntaxe uniquement</string>
+</resources>

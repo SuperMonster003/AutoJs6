@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">このマトリックスは現在のスイッチ状態ではなく, 製品に組み込まれた機能を示します. セマンティックサービスをオフにしても, 構文強調, キーワード, スニペット, ローカル補完はここに示すレベルで維持されます.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">ファイル形式リストは言語サービスの最初の許可リストです. セマンティックルーティングを検討する前に, ファイルが選択された拡張子と一致する必要があります. カスタム拡張子を選択しても別の言語として再解釈されません. セマンティック機能にはさらに, 認識可能な言語, 利用可能なプロバイダー, その言語の有効なスイッチが必要です.</string>
+    <string name="description_ace_semantic_languages_preference">各スイッチは認識された言語ファミリーだけに作用し, グローバル LSP スイッチとファイル形式の許可リストにも制限されます. サービスをオフにしても構文とローカル補完は維持されます. Kotlin はセマンティックプロバイダーなしで P2+ ローカル補完を提供するため, 表示はされますが無効です.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\n構文: %2$s; キーワード: %3$s; スニペット: %4$s; ローカル補完: %5$s; セマンティック: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - 利用不可, P2+ のみ</string>
+    <string name="summary_ace_language_support_matrix">%1$d 個の言語モードの構文, 補完, セマンティック対応を表示</string>
+    <string name="summary_ace_semantic_languages">利用可能な %2$d 個のセマンティックサービスのうち %1$d 個が有効</string>
+    <string name="text_ace_language_support_matrix">言語サポートマトリックス</string>
+    <string name="text_ace_semantic_languages">言語別セマンティックサービス</string>
+    <string name="text_ace_support_full">完全</string>
+    <string name="text_ace_support_none">なし</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">一部</string>
+    <string name="text_ace_support_single_file_diagnostics">単一ファイル診断</string>
+    <string name="text_ace_support_supported">対応</string>
+    <string name="text_ace_support_syntax_diagnostics_only">構文診断のみ</string>
+</resources>

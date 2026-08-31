@@ -7,12 +7,51 @@ object AceEditorLspPreferences {
     const val KEY_ACE_LSP_FILE_TYPES = "key_\$_ace_lsp_file_types"
     const val KEY_ACE_LSP_FILE_TYPES_REVISION = "key_\$_ace_lsp_file_types_revision"
     const val KEY_ACE_LSP_DECLARATION_GROUPS = "key_\$_ace_lsp_declaration_groups"
+    const val KEY_ACE_SEMANTIC_TYPESCRIPT_ENABLED = "key_\$_ace_semantic_typescript_enabled"
+    const val KEY_ACE_SEMANTIC_PYTHON_ENABLED = "key_\$_ace_semantic_python_enabled"
+    const val KEY_ACE_SEMANTIC_LUA_ENABLED = "key_\$_ace_semantic_lua_enabled"
+    const val KEY_ACE_SEMANTIC_JAVA_ENABLED = "key_\$_ace_semantic_java_enabled"
+    const val KEY_ACE_SEMANTIC_KOTLIN_ENABLED = "key_\$_ace_semantic_kotlin_enabled"
     const val DEFAULT_ENABLED = true
+    const val SEMANTIC_LANGUAGE_TYPESCRIPT = "typescript"
+    const val SEMANTIC_LANGUAGE_PYTHON = "python"
+    const val SEMANTIC_LANGUAGE_LUA = "lua"
+    const val SEMANTIC_LANGUAGE_JAVA = "java"
+    const val SEMANTIC_LANGUAGE_KOTLIN = "kotlin"
     const val DECLARATION_GROUP_ANDROID = "android"
     const val DECLARATION_GROUP_LIBRARIES = "libraries"
     const val DECLARATION_GROUP_RESOURCES = "resources"
     const val DECLARATION_GROUP_MAIN_APP = "main-app"
     private val TYPE_SCRIPT_DECLARATION_EXTENSIONS = listOf(".d.ts", ".d.mts", ".d.cts")
+
+    enum class SyntaxSupport {
+        FULL,
+        PARTIAL,
+    }
+
+    enum class LocalCompletionSupport {
+        SUPPORTED,
+        P2_PLUS,
+        NONE,
+    }
+
+    enum class SemanticSupport {
+        FULL,
+        SYNTAX_DIAGNOSTICS_ONLY,
+        SINGLE_FILE_DIAGNOSTICS,
+        NONE,
+    }
+
+    data class LanguageSupport(
+        val id: String,
+        val fileTypes: List<String>,
+        val syntax: SyntaxSupport,
+        val keywordCompletion: Boolean,
+        val snippets: Boolean,
+        val localCompletion: LocalCompletionSupport,
+        val semantic: SemanticSupport,
+        val semanticLanguage: String?,
+    )
 
     val DEFAULT_FILE_TYPES = listOf(
         ".js",
@@ -29,9 +68,14 @@ object AceEditorLspPreferences {
         ".json",
         ".auto.js",
         ".node.js",
+        ".py",
+        ".lua",
+        ".java",
+        ".kt",
+        ".kts",
     )
 
-    private val LEGACY_DEFAULT_FILE_TYPES = listOf(
+    private val REVISION_1_DEFAULT_FILE_TYPES = listOf(
         ".js",
         ".mjs",
         ".cjs",
@@ -42,6 +86,139 @@ object AceEditorLspPreferences {
         ".json",
         ".auto.js",
         ".node.js",
+    )
+
+    private val REVISION_2_DEFAULT_FILE_TYPES = listOf(
+        ".js",
+        ".mjs",
+        ".cjs",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".d.ts",
+        ".d.mts",
+        ".d.cts",
+        ".json",
+        ".auto.js",
+        ".node.js",
+    )
+
+    val SUPPORTED_SEMANTIC_LANGUAGES = listOf(
+        SEMANTIC_LANGUAGE_TYPESCRIPT,
+        SEMANTIC_LANGUAGE_PYTHON,
+        SEMANTIC_LANGUAGE_LUA,
+        SEMANTIC_LANGUAGE_JAVA,
+        SEMANTIC_LANGUAGE_KOTLIN,
+    )
+
+    val AVAILABLE_SEMANTIC_LANGUAGES = listOf(
+        SEMANTIC_LANGUAGE_TYPESCRIPT,
+        SEMANTIC_LANGUAGE_PYTHON,
+        SEMANTIC_LANGUAGE_LUA,
+        SEMANTIC_LANGUAGE_JAVA,
+    )
+
+    val DEFAULT_SEMANTIC_LANGUAGES = linkedMapOf(
+        SEMANTIC_LANGUAGE_TYPESCRIPT to true,
+        SEMANTIC_LANGUAGE_PYTHON to true,
+        SEMANTIC_LANGUAGE_LUA to true,
+        SEMANTIC_LANGUAGE_JAVA to true,
+        SEMANTIC_LANGUAGE_KOTLIN to false,
+    )
+
+    val LANGUAGE_SUPPORT_MATRIX = listOf(
+        LanguageSupport(
+            id = "javascript",
+            fileTypes = listOf(".js", ".mjs", ".cjs", ".auto.js", ".node.js"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_TYPESCRIPT,
+        ),
+        LanguageSupport(
+            id = "jsx",
+            fileTypes = listOf(".jsx"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = false,
+            snippets = false,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_TYPESCRIPT,
+        ),
+        LanguageSupport(
+            id = "typescript",
+            fileTypes = listOf(".ts", ".mts", ".cts", ".d.ts", ".d.mts", ".d.cts"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_TYPESCRIPT,
+        ),
+        LanguageSupport(
+            id = "tsx",
+            fileTypes = listOf(".tsx"),
+            syntax = SyntaxSupport.PARTIAL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_TYPESCRIPT,
+        ),
+        LanguageSupport(
+            id = "json",
+            fileTypes = listOf(".json"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = false,
+            snippets = false,
+            localCompletion = LocalCompletionSupport.NONE,
+            semantic = SemanticSupport.SYNTAX_DIAGNOSTICS_ONLY,
+            semanticLanguage = null,
+        ),
+        LanguageSupport(
+            id = SEMANTIC_LANGUAGE_PYTHON,
+            fileTypes = listOf(".py"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_PYTHON,
+        ),
+        LanguageSupport(
+            id = SEMANTIC_LANGUAGE_LUA,
+            fileTypes = listOf(".lua"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.FULL,
+            semanticLanguage = SEMANTIC_LANGUAGE_LUA,
+        ),
+        LanguageSupport(
+            id = SEMANTIC_LANGUAGE_JAVA,
+            fileTypes = listOf(".java"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.SUPPORTED,
+            semantic = SemanticSupport.SINGLE_FILE_DIAGNOSTICS,
+            semanticLanguage = SEMANTIC_LANGUAGE_JAVA,
+        ),
+        LanguageSupport(
+            id = SEMANTIC_LANGUAGE_KOTLIN,
+            fileTypes = listOf(".kt", ".kts"),
+            syntax = SyntaxSupport.FULL,
+            keywordCompletion = true,
+            snippets = true,
+            localCompletion = LocalCompletionSupport.P2_PLUS,
+            semantic = SemanticSupport.NONE,
+            semanticLanguage = SEMANTIC_LANGUAGE_KOTLIN,
+        ),
     )
 
     val SUPPORTED_DECLARATION_GROUPS = listOf(
@@ -79,7 +256,12 @@ object AceEditorLspPreferences {
 
     internal fun resolveStoredFileTypes(raw: String?, revision: Int): List<String> {
         val fileTypes = normalizeFileTypes(raw)
-        return if (revision < FILE_TYPES_REVISION && fileTypes.toSet() == LEGACY_DEFAULT_FILE_TYPES.toSet()) {
+        val matchesHistoricalDefault = when (revision) {
+            1 -> fileTypes.toSet() == REVISION_1_DEFAULT_FILE_TYPES.toSet()
+            2 -> fileTypes.toSet() == REVISION_2_DEFAULT_FILE_TYPES.toSet()
+            else -> false
+        }
+        return if (revision < FILE_TYPES_REVISION && matchesHistoricalDefault) {
             DEFAULT_FILE_TYPES
         } else {
             fileTypes
@@ -120,6 +302,73 @@ object AceEditorLspPreferences {
     }
 
     @JvmStatic
+    fun isSemanticEnabled(language: String): Boolean {
+        if (!isEnabled()) return false
+        val normalized = normalizeSemanticLanguage(language) ?: return false
+        if (!isSemanticAvailable(normalized)) return false
+        return Pref.getBoolean(
+            semanticPreferenceKey(normalized),
+            DEFAULT_SEMANTIC_LANGUAGES.getValue(normalized),
+        )
+    }
+
+    @JvmStatic
+    fun setSemanticEnabled(language: String, enabled: Boolean) {
+        val normalized = requireNotNull(normalizeSemanticLanguage(language)) {
+            "Unsupported semantic language: $language"
+        }
+        require(!enabled || isSemanticAvailable(normalized)) {
+            "Semantic provider is unavailable for language: $language"
+        }
+        Pref.putBoolean(semanticPreferenceKey(normalized), enabled)
+    }
+
+    @JvmStatic
+    fun resetSemanticEnabled(language: String) {
+        val normalized = requireNotNull(normalizeSemanticLanguage(language)) {
+            "Unsupported semantic language: $language"
+        }
+        Pref.remove(semanticPreferenceKey(normalized))
+    }
+
+    @JvmStatic
+    fun getSemanticLanguages(): Map<String, Boolean> {
+        return SUPPORTED_SEMANTIC_LANGUAGES.associateWith(::isSemanticEnabled)
+    }
+
+    fun defaultSemanticEnabled(language: String): Boolean {
+        val normalized = normalizeSemanticLanguage(language) ?: return false
+        return isSemanticAvailable(normalized) && DEFAULT_SEMANTIC_LANGUAGES.getValue(normalized)
+    }
+
+    fun isSemanticAvailable(language: String): Boolean {
+        val normalized = normalizeSemanticLanguage(language) ?: return false
+        return normalized in AVAILABLE_SEMANTIC_LANGUAGES
+    }
+
+    fun semanticLanguageForDocument(documentPathOrName: String?): String? {
+        val fileName = documentPathOrName
+            ?.substringBefore('?')
+            ?.substringBefore('#')
+            ?.replace('\\', '/')
+            ?.substringAfterLast('/')
+            ?.lowercase()
+            ?.takeIf(String::isNotBlank)
+            ?: return null
+        return when {
+            listOf(
+                ".d.ts", ".d.mts", ".d.cts", ".auto.js", ".node.js",
+                ".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx", ".mts", ".cts",
+            ).any(fileName::endsWith) -> SEMANTIC_LANGUAGE_TYPESCRIPT
+            fileName.endsWith(".py") -> SEMANTIC_LANGUAGE_PYTHON
+            fileName.endsWith(".lua") -> SEMANTIC_LANGUAGE_LUA
+            fileName.endsWith(".java") -> SEMANTIC_LANGUAGE_JAVA
+            fileName.endsWith(".kt") || fileName.endsWith(".kts") -> SEMANTIC_LANGUAGE_KOTLIN
+            else -> null
+        }
+    }
+
+    @JvmStatic
     fun isEnabledForDocument(documentPathOrName: String?): Boolean {
         if (!isEnabled()) {
             return false
@@ -138,6 +387,13 @@ object AceEditorLspPreferences {
             ?.takeIf { it.isNotBlank() }
             ?: return false
         return matchesFileType(normalized, getFileTypes())
+    }
+
+    @JvmStatic
+    fun isSemanticEnabledForDocument(documentPathOrName: String?): Boolean {
+        if (!isEnabledForDocument(documentPathOrName)) return false
+        val language = semanticLanguageForDocument(documentPathOrName) ?: return false
+        return isSemanticEnabled(language)
     }
 
     fun matchesFileType(fileName: String, fileTypes: Collection<String>): Boolean {
@@ -185,5 +441,31 @@ object AceEditorLspPreferences {
         return SUPPORTED_DECLARATION_GROUPS.filter { it in selected }
     }
 
-    private const val FILE_TYPES_REVISION = 2
+    fun resolveDeclarationGroups(values: Collection<String>): List<String> {
+        val effective = normalizeDeclarationGroups(values).toMutableSet()
+        if (DECLARATION_GROUP_MAIN_APP in effective) {
+            effective += DECLARATION_GROUP_ANDROID
+            effective += DECLARATION_GROUP_LIBRARIES
+            effective += DECLARATION_GROUP_RESOURCES
+        }
+        if (DECLARATION_GROUP_LIBRARIES in effective) {
+            effective += DECLARATION_GROUP_ANDROID
+        }
+        return SUPPORTED_DECLARATION_GROUPS.filter { it in effective }
+    }
+
+    private fun normalizeSemanticLanguage(language: String): String? {
+        return language.trim().lowercase().takeIf { it in SUPPORTED_SEMANTIC_LANGUAGES }
+    }
+
+    private fun semanticPreferenceKey(language: String): String = when (language) {
+        SEMANTIC_LANGUAGE_TYPESCRIPT -> KEY_ACE_SEMANTIC_TYPESCRIPT_ENABLED
+        SEMANTIC_LANGUAGE_PYTHON -> KEY_ACE_SEMANTIC_PYTHON_ENABLED
+        SEMANTIC_LANGUAGE_LUA -> KEY_ACE_SEMANTIC_LUA_ENABLED
+        SEMANTIC_LANGUAGE_JAVA -> KEY_ACE_SEMANTIC_JAVA_ENABLED
+        SEMANTIC_LANGUAGE_KOTLIN -> KEY_ACE_SEMANTIC_KOTLIN_ENABLED
+        else -> error("Unsupported semantic language: $language")
+    }
+
+    internal const val FILE_TYPES_REVISION = 3
 }

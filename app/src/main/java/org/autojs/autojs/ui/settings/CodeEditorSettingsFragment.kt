@@ -255,9 +255,11 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     private fun syncAceLspPreferencesVisibility(aceSelected: Boolean) {
         val visible = aceSelected && AceEditorLspPreferences.isEnabled()
+        findPreference<Preference>(getString(R.string.key_ace_language_support_matrix))?.isVisible = aceSelected
         listOf(
             R.string.key_ace_lsp_declaration_groups,
             R.string.key_ace_lsp_file_types,
+            R.string.key_ace_semantic_languages,
         ).forEach { keyRes ->
             findPreference<Preference>(getString(keyRes))?.apply {
                 isVisible = visible

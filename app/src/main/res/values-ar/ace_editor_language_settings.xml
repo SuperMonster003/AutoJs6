@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">تصف المصفوفة إمكانات المنتج المضمنة, وليس حالة المفاتيح الحالية. يحافظ إيقاف خدمة دلالية على تمييز بناء الجملة والكلمات المفتاحية والمقتطفات والإكمال المحلي بالمستوى الموضح هنا.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">قائمة أنواع الملفات هي قائمة السماح الأولى لخدمات اللغة. يجب أن يطابق الملف لاحقة محددة قبل النظر في التوجيه الدلالي. لا يؤدي تحديد لاحقة مخصصة إلى إعادة تفسيرها كلغة أخرى. تتطلب الميزات الدلالية أيضا لغة معروفة وموفر خدمة متاحا وتشغيل مفتاح تلك اللغة.</string>
+    <string name="description_ace_semantic_languages_preference">يؤثر كل مفتاح في عائلة اللغة المعروفة الخاصة به فقط, ويخضع أيضا لمفتاح LSP العام وقائمة السماح لأنواع الملفات. يحافظ إيقاف الخدمة على بناء الجملة والإكمال المحلي. تظل Kotlin ظاهرة ولكن معطلة لأنها توفر إكمال P2+ محليا من دون موفر دلالي.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\nبناء الجملة: %2$s; الكلمات المفتاحية: %3$s; المقتطفات: %4$s; الإكمال المحلي: %5$s; الدلالات: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - غير متاح, P2+ فقط</string>
+    <string name="summary_ace_language_support_matrix">عرض دعم بناء الجملة والإكمال والدلالات لـ %1$d من أوضاع اللغة</string>
+    <string name="summary_ace_semantic_languages">تم تمكين %1$d من أصل %2$d من الخدمات الدلالية المتاحة</string>
+    <string name="text_ace_language_support_matrix">مصفوفة دعم اللغات</string>
+    <string name="text_ace_semantic_languages">الخدمات الدلالية حسب اللغة</string>
+    <string name="text_ace_support_full">كامل</string>
+    <string name="text_ace_support_none">لا يوجد</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">جزئي</string>
+    <string name="text_ace_support_single_file_diagnostics">تشخيص ملف واحد</string>
+    <string name="text_ace_support_supported">مدعوم</string>
+    <string name="text_ace_support_syntax_diagnostics_only">تشخيص بناء الجملة فقط</string>
+</resources>

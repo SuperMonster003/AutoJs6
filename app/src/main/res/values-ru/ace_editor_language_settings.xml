@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">Матрица описывает встроенные возможности продукта, а не текущее состояние переключателей. Отключение семантической службы сохраняет подсветку синтаксиса, ключевые слова, фрагменты и локальное дополнение на указанном здесь уровне.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">Список типов файлов является первым списком разрешений для языковых служб. Файл должен соответствовать выбранному расширению до рассмотрения семантической маршрутизации. Выбор пользовательского расширения не переопределяет его как другой язык. Для семантических функций дополнительно требуются распознанный язык, доступный поставщик и включенный переключатель этого языка.</string>
+    <string name="description_ace_semantic_languages_preference">Каждый переключатель влияет только на соответствующее распознанное семейство языков и также зависит от общего переключателя LSP и списка разрешенных типов файлов. Отключение службы сохраняет синтаксис и локальное дополнение. Kotlin остается видимым, но отключенным, поскольку предоставляет локальное дополнение P2+ без семантического поставщика.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\nСинтаксис: %2$s; ключевые слова: %3$s; фрагменты: %4$s; локальное дополнение: %5$s; семантика: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - недоступно, только P2+</string>
+    <string name="summary_ace_language_support_matrix">Показать поддержку синтаксиса, дополнения и семантики для %1$d языковых режимов</string>
+    <string name="summary_ace_semantic_languages">Включено доступных семантических служб: %1$d из %2$d</string>
+    <string name="text_ace_language_support_matrix">Матрица поддержки языков</string>
+    <string name="text_ace_semantic_languages">Семантические службы по языкам</string>
+    <string name="text_ace_support_full">Полная</string>
+    <string name="text_ace_support_none">Нет</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">Частичная</string>
+    <string name="text_ace_support_single_file_diagnostics">Диагностика одного файла</string>
+    <string name="text_ace_support_supported">Поддерживается</string>
+    <string name="text_ace_support_syntax_diagnostics_only">Только диагностика синтаксиса</string>
+</resources>

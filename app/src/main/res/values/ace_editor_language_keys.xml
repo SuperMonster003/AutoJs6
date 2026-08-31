@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="key_ace_language_support_matrix" translatable="false">key_$_ace_language_support_matrix</string>
+    <string name="key_ace_semantic_languages" translatable="false">key_$_ace_semantic_languages</string>
+</resources>

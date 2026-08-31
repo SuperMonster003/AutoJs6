@@ -144,12 +144,26 @@
             app:summary="@string/summary_ace_lsp_enabled"
             app:longClickPrompt="@string/description_ace_lsp_enabled_preference" />
 
+        <org.autojs.autojs.ui.settings.AceLanguageSupportMatrixPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_language_support_matrix"
+            app:title="@string/text_ace_language_support_matrix"
+            app:summary="@string/summary_ace_language_support_matrix"
+            app:longClickPrompt="@string/description_ace_language_support_matrix_preference" />
+
         <org.autojs.autojs.ui.settings.AceLspFileTypesPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_ace_lsp_file_types"
             app:title="@string/text_ace_lsp_file_types"
             app:summary="@string/summary_ace_lsp_file_types"
-            app:longClickPrompt="@string/description_ace_lsp_file_types_preference" />
+            app:longClickPrompt="@string/description_ace_lsp_file_types_semantic_preference" />
+
+        <org.autojs.autojs.ui.settings.AceSemanticLanguagesPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_semantic_languages"
+            app:title="@string/text_ace_semantic_languages"
+            app:summary="@string/summary_ace_semantic_languages"
+            app:longClickPrompt="@string/description_ace_semantic_languages_preference" />
 
         <org.autojs.autojs.ui.settings.AceLspDeclarationGroupsPreference
             app:layout="@layout/preference_custom"

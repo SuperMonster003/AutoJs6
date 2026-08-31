@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">이 매트릭스는 현재 스위치 상태가 아니라 제품에 내장된 기능을 설명합니다. 시맨틱 서비스를 꺼도 구문 강조, 키워드, 스니펫, 로컬 완성은 여기에 표시된 수준으로 유지됩니다.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">파일 형식 목록은 언어 서비스의 첫 번째 허용 목록입니다. 시맨틱 라우팅을 검토하기 전에 파일이 선택한 확장자와 일치해야 합니다. 사용자 지정 확장자를 선택해도 다른 언어로 재해석되지 않습니다. 시맨틱 기능에는 인식 가능한 언어, 사용 가능한 공급자, 활성화된 해당 언어 스위치가 추가로 필요합니다.</string>
+    <string name="description_ace_semantic_languages_preference">각 스위치는 인식된 해당 언어 계열에만 적용되며 전역 LSP 스위치와 파일 형식 허용 목록의 제한도 받습니다. 서비스를 꺼도 구문과 로컬 완성은 유지됩니다. Kotlin은 시맨틱 공급자 없이 P2+ 로컬 완성을 제공하므로 표시되지만 비활성화됩니다.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\n구문: %2$s; 키워드: %3$s; 스니펫: %4$s; 로컬 완성: %5$s; 시맨틱: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - 사용할 수 없음, P2+ 전용</string>
+    <string name="summary_ace_language_support_matrix">%1$d개 언어 모드의 구문, 완성, 시맨틱 지원 보기</string>
+    <string name="summary_ace_semantic_languages">사용 가능한 시맨틱 서비스 %2$d개 중 %1$d개 활성화됨</string>
+    <string name="text_ace_language_support_matrix">언어 지원 매트릭스</string>
+    <string name="text_ace_semantic_languages">언어별 시맨틱 서비스</string>
+    <string name="text_ace_support_full">전체</string>
+    <string name="text_ace_support_none">없음</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">부분</string>
+    <string name="text_ace_support_single_file_diagnostics">단일 파일 진단</string>
+    <string name="text_ace_support_supported">지원됨</string>
+    <string name="text_ace_support_syntax_diagnostics_only">구문 진단 전용</string>
+</resources>

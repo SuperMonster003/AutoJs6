@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">The matrix describes built-in product capabilities, not the current switch state. Turning a semantic service off keeps syntax highlighting, keywords, snippets, and local completion at the level shown here.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">The file-type list is the first language-service allowlist. A file must match a selected suffix before semantic routing is considered. Selecting a custom suffix does not reinterpret it as another language. Semantic features additionally require a recognized language, an available provider, and that language\'s switch to be on.</string>
+    <string name="description_ace_semantic_languages_preference">Each switch affects only its recognized language family and is also gated by the global LSP switch and file-type allowlist. Turning a service off preserves syntax and local completion. Kotlin remains visible but disabled because it provides P2+ local completion without a semantic provider.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\nSyntax: %2$s; keywords: %3$s; snippets: %4$s; local completion: %5$s; semantics: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - unavailable, P2+ only</string>
+    <string name="summary_ace_language_support_matrix">View syntax, completion, and semantic support for %1$d language modes</string>
+    <string name="summary_ace_semantic_languages">%1$d of %2$d available semantic services enabled</string>
+    <string name="text_ace_language_support_matrix">Language support matrix</string>
+    <string name="text_ace_semantic_languages">Semantic services by language</string>
+    <string name="text_ace_support_full">Full</string>
+    <string name="text_ace_support_none">None</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">Partial</string>
+    <string name="text_ace_support_single_file_diagnostics">Single-file diagnostics</string>
+    <string name="text_ace_support_supported">Supported</string>
+    <string name="text_ace_support_syntax_diagnostics_only">Syntax diagnostics only</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_ace_language_support_matrix_preference">La matriz describe las capacidades integradas del producto, no el estado actual de los interruptores. Desactivar un servicio semántico mantiene el resaltado de sintaxis, las palabras clave, los fragmentos y el completado local en el nivel que se muestra aquí.</string>
+    <string name="description_ace_lsp_file_types_semantic_preference">La lista de tipos de archivo es la primera lista de permitidos para los servicios de lenguaje. Un archivo debe coincidir con un sufijo seleccionado antes de considerar el enrutamiento semántico. Seleccionar un sufijo personalizado no lo reinterpreta como otro lenguaje. Las funciones semánticas también requieren un lenguaje reconocido, un proveedor disponible y que el interruptor de ese lenguaje esté activado.</string>
+    <string name="description_ace_semantic_languages_preference">Cada interruptor afecta solo a su familia de lenguajes reconocida y también depende del interruptor LSP global y de la lista de tipos de archivo permitidos. Desactivar un servicio conserva la sintaxis y el completado local. Kotlin permanece visible pero desactivado porque ofrece completado local P2+ sin un proveedor semántico.</string>
+    <string name="format_ace_language_support_matrix_row">%1$s\nSintaxis: %2$s; palabras clave: %3$s; fragmentos: %4$s; completado local: %5$s; semántica: %6$s</string>
+    <string name="format_ace_semantic_language_unavailable">%1$s - no disponible, solo P2+</string>
+    <string name="summary_ace_language_support_matrix">Ver la compatibilidad de sintaxis, completado y semántica para %1$d modos de lenguaje</string>
+    <string name="summary_ace_semantic_languages">%1$d de %2$d servicios semánticos disponibles activados</string>
+    <string name="text_ace_language_support_matrix">Matriz de compatibilidad de lenguajes</string>
+    <string name="text_ace_semantic_languages">Servicios semánticos por lenguaje</string>
+    <string name="text_ace_support_full">Completo</string>
+    <string name="text_ace_support_none">Ninguno</string>
+    <string name="text_ace_support_p2_plus">P2+</string>
+    <string name="text_ace_support_partial">Parcial</string>
+    <string name="text_ace_support_single_file_diagnostics">Diagnósticos de un solo archivo</string>
+    <string name="text_ace_support_supported">Compatible</string>
+    <string name="text_ace_support_syntax_diagnostics_only">Solo diagnósticos de sintaxis</string>
+</resources>
