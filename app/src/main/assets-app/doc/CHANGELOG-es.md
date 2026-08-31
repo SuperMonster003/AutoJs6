@@ -8,6 +8,8 @@
 
 ###### 2026/08/31
 
+* `Nuevo` El contrato de complemento OpenCC versión 2 incorpora descubrimiento dinámico de tipos de conversión, lotes de hasta 1024 textos y cadenas de hasta 32 etapas; los 16 métodos compuestos pasan de hasta 3 idas y vueltas de Binder a 1 con un complemento nuevo, mientras que los antiguos vuelven de forma transparente a las llamadas originales por elemento o etapa
+* `Nuevo` El metadato `instruction` del complemento admite recursos de instrucciones `@raw/...` localizados, y el resolutor compartido ahora puede leer referencias `@string/...` y `@raw/...` locales o calificadas por paquete
 * `Nuevo` Las opciones de Image Quantization anaden `maxPixels` y `maxMemoryBytes` mediante `OPTIONS_API_VERSION>=4`, con limites predeterminados de 16000000 pixeles y 256 MiB de memoria de trabajo adicional; el exceso de presupuesto falla con detalles tipados del recurso, los resultados informan la memoria maxima contabilizada y detener un script cancela su cuantizacion nativa activa
 * `Nuevo` `images.quantizeToFile` transmite un PNG indexado directamente al disco con tamano y metricas de calidad; las opciones de Image Quantization ahora admiten `preserveAlpha`, configuraciones Bitmap comunes, entrada de hardware y entrada de gama amplia normalizada a sRGB mediante `OPTIONS_API_VERSION>=3`
 * `Nuevo` `images.quantize` ahora devuelve los bytes PNG, el tamano, la calidad alcanzada y el error de cuantizacion; si se omite la calidad minima se usa el mejor esfuerzo (`minQuality=0`), mientras que un limite inferior explicito que no pueda cumplirse lanza `PngQuantBridge.QualityTooLowException` con el codigo `PNG_QUANTIZATION_QUALITY_TOO_LOW`; la API de resultados requiere `OPTIONS_API_VERSION>=2`

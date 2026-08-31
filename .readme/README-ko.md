@@ -168,6 +168,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/08/31
 
+* `추가` OpenCC 플러그인 계약 버전 2는 동적 변환 유형 검색, 최대 1024개 텍스트의 일괄 변환, 최대 32단계의 체인 변환을 추가합니다. 새 플러그인에서는 16개 조합 메서드가 최대 3회의 Binder 왕복에서 1회로 줄고, 이전 플러그인은 기존 항목별 또는 단계별 호출로 자동 폴백합니다
+* `추가` 플러그인 메타데이터 `instruction`은 현지화된 `@raw/...` 설명 리소스를 지원하며, 공용 플러그인 리소스 해석기는 로컬 또는 패키지 한정 `@string/...` 및 `@raw/...` 참조를 읽을 수 있습니다
 * `추가` Image Quantization 옵션은 `OPTIONS_API_VERSION>=4`를 통해 `maxPixels`와 `maxMemoryBytes`를 추가하고 기본 16000000 픽셀 및 256 MiB 추가 작업 메모리 예산을 적용합니다; 예산 초과는 리소스 세부 정보가 있는 형식화 예외로 실패하고, 결과는 계산된 최대 메모리를 보고하며, 스크립트 중지는 활성 네이티브 양자화를 취소합니다
 * `추가` `images.quantizeToFile`은 인덱스 PNG를 디스크에 직접 스트리밍하고 크기와 품질 지표를 반환합니다; Image Quantization 옵션은 이제 `preserveAlpha`, 일반 Bitmap 구성, 하드웨어 입력 및 `OPTIONS_API_VERSION>=3`을 통해 sRGB로 정규화된 광색역 입력을 지원합니다
 * `추가` `images.quantize`가 이제 PNG 바이트, 크기, 실제 품질 및 양자화 오차를 반환합니다; 최소 품질을 생략하면 최선 노력 방식 (`minQuality=0`)을 사용하고, 명시한 하한을 충족할 수 없으면 코드 `PNG_QUANTIZATION_QUALITY_TOO_LOW`의 `PngQuantBridge.QualityTooLowException`을 발생시킵니다; 결과 API에는 `OPTIONS_API_VERSION>=2`가 필요합니다

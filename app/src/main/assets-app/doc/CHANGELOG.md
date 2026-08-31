@@ -8,6 +8,8 @@
 
 ###### 2026/08/31
 
+* `新增` OpenCC 插件契约版本 2 新增动态转换类型发现, 最多 1024 段的批量转换与最多 32 阶段的链式转换; 16 个组合方法在新插件上从最多 3 次 Binder 往返降为 1 次, 旧插件透明回退原有逐项或逐阶段调用
+* `新增` 插件元数据 `instruction` 支持本地化 `@raw/...` 说明资源, 通用插件资源解析器现可读取本地或带包名的 `@string/...` 与 `@raw/...` 引用
 * `新增` Image Quantization 选项通过 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 与 `maxMemoryBytes`, 默认限制 16000000 像素和 256 MiB 附加工作内存; 超出预算时返回带资源详情的类型化异常, 结果报告计入预算的峰值内存, 停止脚本会取消其活动原生量化
 * `新增` `images.quantizeToFile` 将索引 PNG 直接流式写入磁盘并返回大小与质量指标; Image Quantization 选项新增 `preserveAlpha`, 常见 Bitmap 配置, 硬件输入与广色域输入通过 `OPTIONS_API_VERSION>=3` 统一归一化为 sRGB
 * `新增` `images.quantize` 现返回 PNG 字节, 大小, 实际质量与量化误差; 省略质量下限时采用尽力而为 (`minQuality=0`), 显式下限无法满足时抛出带错误码 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 结果接口要求 `OPTIONS_API_VERSION>=2`

@@ -8,6 +8,8 @@
 
 ###### 2026/08/31
 
+* `新機能` OpenCC プラグイン契約バージョン 2 は, 変換タイプの動的検出, 最大 1024 テキストの一括変換, 最大 32 ステージのチェーン変換を追加します. 新しいプラグインでは 16 個の組み合わせメソッドが最大 3 回の Binder 往復から 1 回になり, 古いプラグインでは従来の項目別またはステージ別呼び出しへ自動的にフォールバックします
+* `新機能` プラグインメタデータの `instruction` はローカライズされた `@raw/...` 説明リソースに対応し, 共通リソースリゾルバーはローカルまたはパッケージ修飾された `@string/...` と `@raw/...` 参照を読み取れるようになりました
 * `新機能` Image Quantization オプションは `OPTIONS_API_VERSION>=4` により `maxPixels` と `maxMemoryBytes` を追加し, 既定で 16000000 ピクセルと 256 MiB の追加作業メモリを上限にします; 予算超過はリソース詳細付きの型付き例外となり, 結果は計上済みピークメモリを返し, スクリプト停止時は実行中のネイティブ量子化をキャンセルします
 * `新機能` `images.quantizeToFile` はインデックス PNG をディスクへ直接ストリーム書き込みし, サイズと品質指標を返します; Image Quantization オプションは `preserveAlpha`, 一般的な Bitmap 構成, ハードウェア入力, `OPTIONS_API_VERSION>=3` による sRGB 正規化済み広色域入力に対応しました
 * `新機能` `images.quantize` は PNG バイト列, サイズ, 実際の品質, 量子化誤差を返すようになりました; 最小品質を省略するとベストエフォート (`minQuality=0`) で処理し, 明示した下限を満たせない場合はコード `PNG_QUANTIZATION_QUALITY_TOO_LOW` の `PngQuantBridge.QualityTooLowException` を送出します; 結果 API には `OPTIONS_API_VERSION>=2` が必要です

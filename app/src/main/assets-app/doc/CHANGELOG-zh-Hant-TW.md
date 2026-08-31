@@ -8,6 +8,8 @@
 
 ###### 2026/08/31
 
+* `新增` OpenCC 外掛契約版本 2 新增動態轉換類型探索, 最多 1024 段的批次轉換與最多 32 階段的鏈式轉換; 16 個組合方法在新外掛上從最多 3 次 Binder 往返降至 1 次, 舊外掛透明回退原有逐項或逐階段呼叫
+* `新增` 外掛中繼資料 `instruction` 支援本地化 `@raw/...` 說明資源, 通用外掛資源解析器現可讀取本地或帶套件名稱的 `@string/...` 與 `@raw/...` 引用
 * `新增` Image Quantization 選項透過 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 與 `maxMemoryBytes`, 預設限制 16000000 像素和 256 MiB 額外工作記憶體; 超出預算時回傳帶資源詳情的型別化例外, 結果報告計入預算的峰值記憶體, 停止腳本會取消其活動原生量化
 * `新增` `images.quantizeToFile` 將索引 PNG 直接串流寫入磁碟並回傳大小與品質指標; Image Quantization 選項新增 `preserveAlpha`, 常見 Bitmap 配置, 硬體輸入與廣色域輸入透過 `OPTIONS_API_VERSION>=3` 統一正規化為 sRGB
 * `新增` `images.quantize` 現會回傳 PNG 位元組, 大小, 實際品質與量化誤差; 省略品質下限時採用盡力而為 (`minQuality=0`), 明確下限無法滿足時拋出帶錯誤碼 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 結果介面要求 `OPTIONS_API_VERSION>=2`

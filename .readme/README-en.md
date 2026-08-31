@@ -168,6 +168,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ###### 2026/08/31
 
+* `Feature` OpenCC plugin contract version 2 adds dynamic conversion-type discovery, batches of up to 1024 texts, and chains of up to 32 stages; the 16 composed methods drop from as many as 3 Binder round trips to 1 with a new plugin, while older plugins transparently fall back to the original per-item or per-stage calls
+* `Feature` Plugin metadata `instruction` supports localized `@raw/...` instruction resources, and the shared plugin resource resolver can now read local or package-qualified `@string/...` and `@raw/...` references
 * `Feature` Image Quantization options add `maxPixels` and `maxMemoryBytes` with default 16000000-pixel and 256 MiB additional-working-memory budgets through `OPTIONS_API_VERSION>=4`; over-budget work fails with typed resource details, results report accounted peak memory, and stopping a script cancels its active native quantization
 * `Feature` `images.quantizeToFile` streams an indexed PNG directly to disk with size and quality metrics; Image Quantization options now support `preserveAlpha`, common Bitmap configurations, hardware input, and wide-gamut input normalized to sRGB through `OPTIONS_API_VERSION>=3`
 * `Feature` `images.quantize` now returns PNG bytes, size, achieved quality, and quantization error; omitting the minimum quality uses best effort (`minQuality=0`), while an explicit unmet lower bound throws `PngQuantBridge.QualityTooLowException` with code `PNG_QUANTIZATION_QUALITY_TOO_LOW`; the result API requires `OPTIONS_API_VERSION>=2`
