@@ -302,6 +302,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local
 * `Nuevo` Los ajustes del editor de código muestran ahora la matriz de lenguajes de Ace y los interruptores semánticos para TypeScript/JavaScript, Python, Lua y Java; Kotlin permanece visible como P2+ sin proveedor, y los tipos de archivo actúan claramente como lista de permitidos antes del enrutamiento en vez de reclasificar el lenguaje
 * `Nuevo` Los diálogos de actualización pueden mostrar en la aplicación el historial de versiones del complemento correspondiente
+* `Corrección` La información de descarga de Android Studio dejó de escribirse automáticamente en los datos comunes del README tras la migración de los scrapers
 * `Corrección` Se alineó la numeración de compilaciones remotas experimentales de un solo archivo con el compilador heredado y se añadió una comprobación previa y cerrada ante fallos del espacio de trabajo, basada en tamaños expandidos verificados, un límite de expansión de plantilla validado al compilar y una reserva de 256 MiB
 * `Corrección` La WebView de Ace podía mostrar brevemente una página totalmente blanca antes de aplicar el tema del host y el documento inicial, lo que producía un destello evidente con temas oscuros; la primera presentación ahora espera señales explícitas de tema aplicado, documento enviado y renderizado estable en lugar de un retraso fijo
 * `Corrección` APK Builder ahora conserva en el iniciador generado la directiva de modo de ejecución de Rhino de la entrada TypeScript/TSX (incluido `ui`), para que los proyectos de interfaz compilados se inicien en el modo Activity correcto
@@ -474,6 +475,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` La actualización de directorios del administrador de archivos aplica diferencias mínimas de lista, mantiene enlazadas las filas sin cambios y conserva la posición de desplazamiento durante las actualizaciones en el mismo lugar
 * `Mejora` Refactorización del administrador de archivos mediante componentes explícitos para el diseño de listas, la presentación de elementos, la barra de selección, el flujo de archivos comprimidos, las capacidades de entrada, la reserva de salidas y la recuperación, reduciendo las clases de vista y sesión sobredimensionadas y permitiendo probar por separado la navegación, los límites de seguridad y las políticas de acciones
 * `Mejora` El enlace y el arranque del compilador TypeScript ahora se realizan durante un precalentamiento acotado al iniciar, en vez de durante la primera compilación del usuario; las sesiones de proyecto revision 1 conservan un enlace activo tras abrir el editor o compilar, mientras que el vencimiento por inactividad inicial, la presión de memoria, los fallos y la salida de la aplicación vuelven de forma segura a la compilación en frío
+* `Mejora` La suite de scrapers recupera 9 tareas de versión independientes y 5 tareas exclusivas del host, más 1 tarea de sincronización entre repositorios; AutoJs6-Gradle-Platform-Versions exporta de forma centralizada metadatos JSON de la versión estable de Android Studio validados con los mapas de versiones
+* `Mejora` Actualización de Gradle 9 Wrapper versión 9.6.1 -> 9.7.1
 * `Mejora` Los datos de compatibilidad de la plataforma Gradle y sus tareas de actualización se trasladaron a AutoJs6-Gradle-Platform-Versions; AutoJs6 ahora consume directamente la versión 1.5.0 desde Maven Local, sin datos locales que la sobrescriban, scrapers duplicados ni la dependencia anterior de Puppeteer
 * `Mejora` Las vistas previas de HTML y Markdown se delegan en complementos Previewer específicos; la aplicación principal conserva la entrada y guía la instalación o activación si el complemento falta, está desactivado o no está disponible
 * `Mejora` Unificación de todas las llamadas Pinyin mediante el complemento correspondiente y eliminación del diccionario integrado y la implementación de conversión sin uso
@@ -701,13 +704,13 @@ Esta sección toma como ejemplo Android Studio para presentar los métodos de co
 
 #### Preparación de Android Studio
 
-Descarga la versión `Android Studio Quail 2 | 2026.1.2` (elige una según tus necesidades):
+Descarga la versión `Android Studio Quail 3 | 2026.1.3 Patch 1` (elige una según tus necesidades):
 
-- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
-- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
-- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
+- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
+- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
+- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
 
-> Nota: La fecha de lanzamiento de la versión anterior es el 14 de July de 2026. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Nota: La fecha de lanzamiento de la versión anterior es el 10 de August de 2026. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Instala o descomprime los archivos mencionados anteriormente y ejecuta el software Android Studio (por ejemplo, `"D:\android-studio\bin\studio64.exe"`).
 

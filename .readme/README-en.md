@@ -302,6 +302,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback
 * `Feature` Code editor settings now show an Ace language support matrix and per-language semantic switches for TypeScript/JavaScript, Python, Lua, and Java; Kotlin remains visible as P2+ without a provider, and file-type customization clearly acts as a pre-routing allowlist rather than language reclassification
 * `Feature` Plugin update dialogs can display the corresponding plugin release history in the app
+* `Fix` Android Studio download information was no longer written automatically to shared README data after the scraper migration
 * `Fix` Aligned experimental remote single-file build numbering with the legacy builder, and added fail-closed workspace storage preflight using cross-checked expanded input sizes, a build-verified template expansion bound, and a 256 MiB reserve
 * `Fix` Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay
 * `Fix` APK Builder now preserves a TypeScript/TSX entry's Rhino execution-mode directive (including `ui`) in the generated launcher, so compiled UI projects start in the correct Activity mode
@@ -474,6 +475,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` File manager directory refreshes dispatch minimal list diffs, keeping unchanged rows bound and preserving the live scroll position during in-place refreshes
 * `Improvement` Refactored the file manager around explicit list layout, row presentation, selection toolbar, archive workflow, input capability, output reservation, and recovery components, reducing oversized view/session classes and making navigation, security boundaries, and action policies independently testable
 * `Improvement` TypeScript compiler binding and bootstrap now run during a bounded startup prewarm instead of the first user compilation; revision-1 project sessions retain one live binding after editor or compile use, while idle startup expiry, memory pressure, failures, and app exit safely fall back to cold compilation
+* `Improvement` The scraper suite now restores 9 independent version tasks and 5 host-only tasks, plus 1 cross-repository sync task; AutoJs6-Gradle-Platform-Versions centrally exports version-map-validated JSON metadata for the stable Android Studio release
+* `Improvement` Upgraded Gradle 9 Wrapper version 9.6.1 -> 9.7.1
 * `Improvement` Gradle platform compatibility data and its updater tasks moved to AutoJs6-Gradle-Platform-Versions; AutoJs6 now consumes version 1.5.0 from Maven Local directly, without local data overrides, duplicate scrapers, or the former Puppeteer dependency
 * `Improvement` HTML and Markdown previews are delegated to dedicated Previewer plugins; the main app keeps the entry and guides installation or enabling when the plugin is missing, disabled, or unavailable
 * `Improvement` Consolidated all Pinyin calls through the corresponding plugin and removed the unused built-in dictionary and conversion implementation
@@ -701,13 +704,13 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Quail 2 | 2026.1.2` version (choose one as needed):
+Download `Android Studio Quail 3 | 2026.1.3 Patch 1` version (choose one as needed):
 
-- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
-- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
-- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
+- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
+- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
+- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
 
-> Note: The release date for the above version is Jul 14, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Aug 10, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 

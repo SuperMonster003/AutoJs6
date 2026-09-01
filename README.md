@@ -278,6 +278,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
 * `新增` 代码编辑器设置新增 Ace 语言支持矩阵, 并为 TypeScript/JavaScript, Python, Lua 与 Java 提供逐语言语义开关; Kotlin 以无 Provider 的 P2+ 状态保持可见, 文件类型自定义明确作为语义路由前置白名单而非语言重分类
 * `新增` 插件更新对话框支持在应用内显示对应插件的发行历史
+* `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
 * `修复` Ace WebView 在宿主主题与首份文档生效前可能短暂暴露纯白背景, 尤其会在深色编辑器主题下产生明显闪烁; 首屏现由主题已应用, 文档已提交及稳定绘制信号共同放行, 不依赖固定延迟
 * `修复` 修复 APK Builder 生成 TypeScript/TSX 启动器时丢失 Rhino 执行模式指令（包括 `ui`）的问题，编译后的 UI 项目现在能以正确的 Activity 模式启动
@@ -453,6 +454,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 文件管理器目录刷新采用最小差量更新, 未变化的行不再重新绑定, 原地刷新保持当前滚动位置
 * `优化` 重构文件管理器的列表布局, 条目呈现, 选择工具栏, 归档工作流, 输入能力, 输出预留及恢复组件, 缩减过大的视图与会话类, 并使导航, 安全边界及操作策略可独立测试
 * `优化` TypeScript 编译器绑定与启动改为在有界的应用启动预热中完成, 不再占用首次用户编译; revision 1 项目会话会在进入编辑器或真实编译后保留一个活动绑定, 启动空闲到期、内存压力、失败与应用退出时均安全回退到冷编译
+* `优化` Scrapers 工具恢复为 9 个独立版本任务与 5 个宿主专属任务, 并增加 1 个跨仓库同步任务; AutoJs6-Gradle-Platform-Versions 集中导出经版本映射校验的 Android Studio 稳定版 JSON 元数据
+* `优化` Gradle 9 Wrapper 版本升级 9.6.1 -> 9.7.1
 * `优化` Gradle 平台兼容数据及其更新任务已迁至 AutoJs6-Gradle-Platform-Versions; AutoJs6 现直接使用 Maven Local 中的 1.5.0 版本, 不再保留本地数据覆盖、重复抓取器及原有 Puppeteer 依赖
 * `优化` HTML 与 Markdown 预览改由专用 Previewer 插件提供; 主应用保留入口, 并在插件未安装, 未启用或不可用时提供安装与启用引导
 * `优化` 所有 Pinyin 调用统一由对应插件提供, 并移除未使用的内置词典与转换实现
@@ -680,13 +683,13 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Quail 2 | 2026.1.2` 版本 (按需选择其一):
+下载 `Android Studio Quail 3 | 2026.1.3 Patch 1` 版本 (按需选择其一):
 
-- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
-- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
-- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
+- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
+- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
+- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
 
-> 注: 上述版本发布时间为 2026 年 7 月 14 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2026 年 8 月 10 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 

@@ -1,6 +1,15 @@
 @ECHO OFF
+SETLOCAL ENABLEEXTENSIONS
+
+PUSHD "%~dp0" >NUL
+IF ERRORLEVEL 1 (
+  ECHO Failed to enter the scraper directory: "%~dp0"
+  EXIT /B 1
+)
+
 :RUN
-node "run-scrapers.mjs"
+node "run-scrapers.mjs" %*
+SET "SCRAPER_EXIT_CODE=%ERRORLEVEL%"
 ECHO.
 
 ECHO Press [R] to rerun, [Shift+R] to clear screen then rerun, or [ESC]/[Enter]/[Space] to exit...
@@ -28,4 +37,5 @@ GOTO RUN
 
 :EXIT
 ECHO.
-EXIT /B
+POPD
+EXIT /B %SCRAPER_EXIT_CODE%

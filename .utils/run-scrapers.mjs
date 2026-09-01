@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
 const SCRIPT_LIST = [
+    'sync-platform-version-data.mjs',
     'scrape-and-inject-rhino-engine-data.mjs',
     'scrape-and-inject-latest-gradle-wrapper.mjs',
     'scrape-and-update-foojay-resolver-version.mjs',
@@ -25,12 +26,13 @@ const cols = () => process.stdout.columns || 80;
  * Parse CLI arguments.<br>
  * zh-CN: 解析 CLI 参数.
  *
- * @returns {{ nodePath: string }}
+ * @returns {{ nodePath: string, platformVersionsDir: string | null }}
  */
 function parseArgs() {
     const argv = process.argv.slice(2);
     const opts = {
         nodePath: process.execPath,
+        platformVersionsDir: null,
     };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
@@ -38,7 +40,17 @@ function parseArgs() {
             opts.nodePath = argv[++i];
         } else if (a.startsWith('--node=')) {
             opts.nodePath = a.split('=').slice(1).join('=');
+        } else if (a === '--platform-versions-dir') {
+            opts.platformVersionsDir = argv[++i];
+        } else if (a.startsWith('--platform-versions-dir=')) {
+            opts.platformVersionsDir = a.split('=').slice(1).join('=');
+        } else {
+            throw new Error(`Unknown argument: ${a}`);
         }
+    }
+    if (!opts.nodePath) throw new Error('Missing value for --node');
+    if (opts.platformVersionsDir !== null && !opts.platformVersionsDir) {
+        throw new Error('Missing value for --platform-versions-dir');
     }
     return opts;
 }
@@ -101,9 +113,10 @@ function visualRowsOf(text) {
  * @param {string} options.nodePath
  * @param {string} options.scriptPath
  * @param {string | URL | undefined} options.cwd
+ * @param {NodeJS.ProcessEnv} options.env
  * @returns {Promise<{ code: number, signal: NodeJS.Signals | null, ms: number, error?: Error }>}
  */
-async function runOne({ nodePath, scriptPath, cwd }) {
+async function runOne({ nodePath, scriptPath, cwd, env }) {
     return new Promise((resolve) => {
         const start = Date.now();
         const child = spawn(nodePath, [ scriptPath ], {
@@ -111,7 +124,7 @@ async function runOne({ nodePath, scriptPath, cwd }) {
             // Capture child process output.
             // zh-CN: 捕获子进程输出.
             stdio: [ 'inherit', 'pipe', 'pipe' ],
-            env: process.env,
+            env,
         });
 
         child.stdout.on('data', (chunk) => {
@@ -134,6 +147,12 @@ async function runOne({ nodePath, scriptPath, cwd }) {
 
 async function main() {
     const opts = parseArgs();
+    const childEnv = {
+        ...process.env,
+        ...(opts.platformVersionsDir
+            ? { AUTOJS6_GRADLE_PLATFORM_VERSIONS_DIR: path.resolve(opts.platformVersionsDir) }
+            : {}),
+    };
 
     const utilsDir = path.dirname(fileURLToPath(import.meta.url));
     /** @type {ScriptItem[]} */
@@ -149,6 +168,7 @@ async function main() {
     const exhibition = {
         UTILS_DIR: utilsDir,
         NODE_EXE: opts.nodePath,
+        PLATFORM_VERSIONS_DIR: childEnv.AUTOJS6_GRADLE_PLATFORM_VERSIONS_DIR || '<sibling repository>',
     };
     const exhibitionItems = (/* @IIFE */ () => {
         const maxKeyLength = Math.max(...Object.keys(exhibition).map(k => k.length));
@@ -184,7 +204,12 @@ async function main() {
 
         process.stdout.write(`\r${startLine}\n`);
 
-        const res = await runOne({ nodePath: opts.nodePath, scriptPath: script.abs, cwd: utilsDir });
+        const res = await runOne({
+            nodePath: opts.nodePath,
+            scriptPath: script.abs,
+            cwd: utilsDir,
+            env: childEnv,
+        });
         const endLine = oneLineHeader(scripts, i, formatDuration(res.ms));
 
         const lineCountToMove = childProcessOutput.map(chunk => `${chunk}`).join('').split('\n').reduce((acc, line) => {

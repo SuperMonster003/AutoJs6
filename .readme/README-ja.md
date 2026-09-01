@@ -302,6 +302,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない
 * `新機能` コードエディタ設定に Ace 言語サポート matrix と TypeScript/JavaScript, Python, Lua, Java の言語別セマンティック switch を追加; Kotlin は Provider なしの P2+ として表示を保ち, ファイル種類は言語再分類ではなくルーティング前 allowlist と明記
 * `新機能` プラグイン更新ダイアログで対応するプラグインのリリース履歴をアプリ内に表示可能
+* `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
 * `修正` 実験的なリモート単一ファイルビルドのビルド番号を従来のビルダーと一致させ、照合済みの展開後入力サイズ、ビルド時に検証されたテンプレート展開上限、256 MiB の予約領域を用いるフェイルクローズなワークスペース容量事前検査を追加
 * `修正` ホストテーマと初期ドキュメントが反映される前に Ace WebView が純白ページを短時間表示し, ダークエディタテーマで目立つ点滅が発生する問題; 初回表示は固定遅延ではなく, テーマ適用済み, ドキュメント送信済み, 安定描画の明示的なシグナルを待機
 * `修正` APK Builder が生成するランチャーで TypeScript/TSX エントリの Rhino 実行モード指令（`ui` を含む）を保持するよう修正し、コンパイル済み UI プロジェクトが正しい Activity モードで起動するようにしました
@@ -474,6 +475,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` ファイルマネージャのディレクトリ更新は最小限のリスト差分を適用し, 変更のない行は再バインドせず, その場での更新時に現在のスクロール位置を維持
 * `改善` ファイルマネージャをリストレイアウト, 項目表示, 選択ツールバー, アーカイブ処理, 入力権限, 出力予約, 復旧の明確なコンポーネントへ再構成し, 肥大化したビュー/セッションクラスを縮小するとともに, ナビゲーション, セキュリティ境界, アクションポリシーを個別にテスト可能化
 * `改善` TypeScript コンパイラのバインドと起動を初回ユーザーコンパイルではなく上限付きアプリ起動プリウォームで実行; revision 1 のプロジェクトセッションはエディタ表示または実コンパイル後にライブバインドを 1 件保持し, 起動時のアイドル期限切れ, メモリ圧迫, 失敗, アプリ終了時は安全にコールドコンパイルへフォールバック
+* `改善` スクレイパーを 9 個の独立したバージョンタスクと 5 個のホスト専用タスクへ戻し, 1 個のリポジトリ間同期タスクを追加; AutoJs6-Gradle-Platform-Versions がバージョンマップで検証した Android Studio 安定版 JSON メタデータを一元的に出力
+* `改善` Gradle 9 Wrapper バージョン 9.6.1 -> 9.7.1 に更新
 * `改善` Gradle プラットフォーム互換データと更新タスクを AutoJs6-Gradle-Platform-Versions へ移行; AutoJs6 は Maven Local のバージョン 1.5.0 を直接利用し, ローカルデータ上書き, 重複スクレイパー, 従来の Puppeteer 依存を廃止
 * `改善` HTML と Markdown のプレビューを専用 Previewer プラグインに委譲; メインアプリは入口を維持し, プラグインが未インストール, 無効, または利用不可の場合はインストールや有効化を案内
 * `改善` すべての Pinyin 呼び出しを対応するプラグイン経由に統一し, 未使用の内蔵辞書と変換実装を削除
@@ -701,13 +704,13 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Quail 2 | 2026.1.2` バージョンをダウンロードしてください (いずれかを選択):
+`Android Studio Quail 3 | 2026.1.3 Patch 1` バージョンをダウンロードしてください (いずれかを選択):
 
-- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
-- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
-- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
+- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
+- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
+- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
 
-> 注: 上述バージョンのリリース日は 2026 年 7 月 14 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
+> 注: 上述バージョンのリリース日は 2026 年 8 月 10 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
 
 上記のファイルをインストールまたは解凍し, Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
