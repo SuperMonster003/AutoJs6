@@ -36,7 +36,7 @@ class NodeMediaBridgeInstrumentationTest {
                 NodeBridgePermissionManifest.requiredCapabilitiesFor("media", method),
             )
         }
-        listOf("read", "get").forEach { method ->
+        listOf("read", "get", "capabilities").forEach { method ->
             assertTrue(NodeBridgeModules.supports("mediainfo", method))
             assertEquals(
                 listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA),
@@ -67,6 +67,10 @@ class NodeMediaBridgeInstrumentationTest {
                     """{"schema":"autojs6-node-mediainfo-snapshot-v1","path":"sample.mp3","fileName":"sample.mp3","sizeBytes":4,"inform":"","sections":{}}""",
                 )
                 "mediainfo" to "get" -> NodeBridgeResponse.success(request.id, NodeMediaBridgeJsonValue.string("MPEG Audio"))
+                "mediainfo" to "capabilities" -> NodeBridgeResponse.success(
+                    request.id,
+                    """{"schema":"autojs6-node-mediainfo-capabilities-v1","snapshotSchemas":["autojs6-plugin-mediainfo-snapshot-v1","autojs6-plugin-mediainfo-snapshot-v2"],"defaultSnapshotSchema":"autojs6-plugin-mediainfo-snapshot-v1","engineVersion":"MediaInfoLib - v26.05"}""",
+                )
                 "recorder" to "getStatus" -> NodeBridgeResponse.success(
                     request.id,
                     """{"schema":"autojs6-node-recorder-status-v1","recording":false,"providerAvailable":false,"microphonePermissionRequired":true,"microphonePermissionGranted":false,"foregroundDisclosureRequired":true,"reason":"blocked_until_privacy_reviewed_recorder_provider"}""",
@@ -79,6 +83,7 @@ class NodeMediaBridgeInstrumentationTest {
             NodeBridgeRequest("media-volume", "media", "getAudioStreamVolume", """["music"]""", 1000L, listOf("media", "media.audio")),
             NodeBridgeRequest("media-info", "media", "getAudioStreamInfo", """["music"]""", 1000L, listOf("media", "media.audio")),
             NodeBridgeRequest("mediainfo-read", "mediainfo", "read", """["sample.mp3"]""", 1000L, listOf("media", "media.metadata")),
+            NodeBridgeRequest("mediainfo-capabilities", "mediainfo", "capabilities", "[]", 1000L, listOf("media", "media.metadata")),
             NodeBridgeRequest("recorder-status", "recorder", "getStatus", "[]", 1000L, listOf("media", "media.recording")),
         )
         val responses = mutableListOf<NodeBridgeResponse>()
@@ -92,18 +97,23 @@ class NodeMediaBridgeInstrumentationTest {
     }
 
     @Test
-    fun jsMediaModulesUseFakeTransportCompatFacadeAndBlockShadowing() {
+    fun jsMediaModulesUseFakeTransportAndCompatFacade() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node media bridge fake transport regression")
 
         val workDir = File(context.cacheDir, "node-bridge-media-shadow").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create media bridge working directory: $absolutePath" }
         }
-        listOf("media", "mediainfo", "recorder").forEach { name ->
-            File(workDir, "node_modules/$name").apply {
-                check(mkdirs()) { "Failed to create $name shadow module directory: $absolutePath" }
-            }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
-        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "permissions": ["media", "media.audio", "media.metadata", "media.recording"]
+              }
+            }
+            """.trimIndent(),
+        )
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -126,9 +136,14 @@ class NodeMediaBridgeInstrumentationTest {
                   } else if (request.module === "media" && request.method === "getAudioStreamInfo") {
                     result = { schema: "autojs6-node-media-audio-stream-v1", stream: "music", streamType: 3, volume: 3, maxVolume: 15, minVolume: 0, volumeFixed: false };
                   } else if (request.module === "mediainfo" && request.method === "read") {
-                    result = { schema: "autojs6-node-mediainfo-snapshot-v1", path: request.args[0], fileName: "sample.mp3", sizeBytes: 4, inform: "", sections: {} };
+                    const requestedSchema = request.args[1] && request.args[1].schema;
+                    result = requestedSchema === "autojs6-plugin-mediainfo-snapshot-v2"
+                      ? { schema: requestedSchema, file: { name: "sample.mp3", sizeBytes: 4 }, engine: { name: "MediaInfoLib", version: "26.05" }, inform: "", tracks: { audio: [{ fields: { Format: "MPEG Audio" } }] } }
+                      : { schema: "autojs6-node-mediainfo-snapshot-v1", path: request.args[0], fileName: "sample.mp3", sizeBytes: 4, inform: "", sections: {} };
                   } else if (request.module === "mediainfo" && request.method === "get") {
                     result = "MPEG Audio";
+                  } else if (request.module === "mediainfo" && request.method === "capabilities") {
+                    result = { schema: "autojs6-node-mediainfo-capabilities-v1", snapshotSchemas: ["autojs6-plugin-mediainfo-snapshot-v1", "autojs6-plugin-mediainfo-snapshot-v2"], defaultSnapshotSchema: "autojs6-plugin-mediainfo-snapshot-v1", engineVersion: "MediaInfoLib - v26.05" };
                   } else if (request.module === "recorder" && request.method === "getStatus") {
                     result = { schema: "autojs6-node-recorder-status-v1", recording: false, providerAvailable: false, microphonePermissionRequired: true, microphonePermissionGranted: false, foregroundDisclosureRequired: true, reason: "blocked_until_privacy_reviewed_recorder_provider" };
                   } else if (request.module === "recorder" && request.method === "start") {
@@ -147,6 +162,8 @@ class NodeMediaBridgeInstrumentationTest {
               const info = await media.getAudioStreamInfo("music", { timeoutMs: 1000 });
               const compatInfo = await compat.media.getAudioStreamInfo("music", { timeoutMs: 1000 });
               const snapshot = await mediainfo.read("sample.mp3", { includeInform: false, timeoutMs: 1000 });
+              const snapshotV2 = await mediainfo.read("sample.mp3", { schema: "autojs6-plugin-mediainfo-snapshot-v2", includeInform: false, timeoutMs: 1000 });
+              const capabilities = await mediainfo.capabilities({ timeoutMs: 1000 });
               const callable = await mediainfo("sample.mp3", { timeoutMs: 1000 });
               const format = await mediainfo.get("sample.mp3", "general", "Format", { timeoutMs: 1000 });
               const compatSnapshot = await compat.mediainfo.read("sample.mp3", { timeoutMs: 1000 });
@@ -168,8 +185,8 @@ class NodeMediaBridgeInstrumentationTest {
               console.log("media.resolve=" + [require.resolve("media"), require.resolve("mediainfo"), require.resolve("recorder")].join("|"));
               console.log("media.shadow=" + [media.shadow === true, mediainfo.shadow === true, recorder.shadow === true].join("|"));
               console.log("media.frozen=" + [Object.isFrozen(media), Object.isFrozen(mediainfo), Object.isFrozen(recorder), Object.isFrozen(compat.media), Object.isFrozen(compat.mediainfo), Object.isFrozen(compat.recorder)].join("|"));
-              console.log("media.methods=" + [typeof media.getAudioStreamInfo, typeof mediainfo.read, typeof mediainfo.get, typeof recorder.getStatus, typeof recorder.start, typeof recorder.stop].join("|"));
-              console.log("media.values=" + [volume, max, info.schema, compatInfo.schema, snapshot.schema, callable.schema, format, compatSnapshot.schema, status.schema, compatStatus.schema, startCode, invalidPath].join("|"));
+              console.log("media.methods=" + [typeof media.getAudioStreamInfo, typeof mediainfo.read, typeof mediainfo.get, typeof mediainfo.capabilities, typeof recorder.getStatus, typeof recorder.start, typeof recorder.stop].join("|"));
+              console.log("media.values=" + [volume, max, info.schema, compatInfo.schema, snapshot.schema, snapshotV2.schema, snapshotV2.tracks.audio[0].fields.Format, capabilities.schema, capabilities.engineVersion, callable.schema, format, compatSnapshot.schema, status.schema, compatStatus.schema, startCode, invalidPath].join("|"));
               console.log("media.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
               console.log("media.permissions=" + [
                 requests.filter((request) => request.module === "media").every((request) => request.permissions.join("|") === "media|media.audio"),
@@ -187,13 +204,13 @@ class NodeMediaBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("media.resolve=media|mediainfo|recorder"))
         assertTrue(result.stdout.contains("media.shadow=false|false|false"))
         assertTrue(result.stdout.contains("media.frozen=true|true|true|true|true|true"))
-        assertTrue(result.stdout.contains("media.methods=function|function|function|function|function|function"))
+        assertTrue(result.stdout.contains("media.methods=function|function|function|function|function|function|function"))
         assertTrue(
             result.stdout.contains(
-                "media.values=3|15|autojs6-node-media-audio-stream-v1|autojs6-node-media-audio-stream-v1|autojs6-node-mediainfo-snapshot-v1|autojs6-node-mediainfo-snapshot-v1|MPEG Audio|autojs6-node-mediainfo-snapshot-v1|autojs6-node-recorder-status-v1|autojs6-node-recorder-status-v1|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}",
+                "media.values=3|15|autojs6-node-media-audio-stream-v1|autojs6-node-media-audio-stream-v1|autojs6-node-mediainfo-snapshot-v1|autojs6-plugin-mediainfo-snapshot-v2|MPEG Audio|autojs6-node-mediainfo-capabilities-v1|MediaInfoLib - v26.05|autojs6-node-mediainfo-snapshot-v1|MPEG Audio|autojs6-node-mediainfo-snapshot-v1|autojs6-node-recorder-status-v1|autojs6-node-recorder-status-v1|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}",
             ),
         )
-        assertTrue(result.stdout.contains("media.requests=media.getAudioStreamVolume|media.getAudioStreamMaxVolume|media.getAudioStreamInfo|media.getAudioStreamInfo|mediainfo.read|mediainfo.read|mediainfo.get|mediainfo.read|recorder.getStatus|recorder.getStatus|recorder.start"))
+        assertTrue(result.stdout.contains("media.requests=media.getAudioStreamVolume|media.getAudioStreamMaxVolume|media.getAudioStreamInfo|media.getAudioStreamInfo|mediainfo.read|mediainfo.read|mediainfo.capabilities|mediainfo.read|mediainfo.get|mediainfo.read|recorder.getStatus|recorder.getStatus|recorder.start"))
         assertTrue(result.stdout.contains("media.permissions=true|true|true"))
         assertTrue(result.stdout.contains("media.pending=0"))
     }
@@ -255,7 +272,7 @@ class NodeMediaBridgeInstrumentationTest {
                 }
                 """.trimIndent(),
             )
-            resolve("sample.mp3").writeBytes(byteArrayOf(0, 1, 2, 3))
+            resolve("sample.wav").writeBytes(minimalPcmWave())
         }
         val provider = AndroidNodeBridgeCapabilityProvider(
             context,
@@ -271,14 +288,37 @@ class NodeMediaBridgeInstrumentationTest {
         assertTrue(audio.toString(), audio.ok)
         assertEquals("autojs6-node-media-audio-stream-v1", jsonObject(audio.resultJson.orEmpty()).getString("schema"))
 
-        val snapshot = dispatch(provider, "mediainfo", "read", """["sample.mp3",{"includeInform":false}]""")
+        val snapshot = dispatch(provider, "mediainfo", "read", """["sample.wav",{"includeInform":false}]""")
         assertTrue(snapshot.toString(), snapshot.ok)
         val snapshotJson = jsonObject(snapshot.resultJson.orEmpty())
         assertEquals("autojs6-node-mediainfo-snapshot-v1", snapshotJson.getString("schema"))
-        assertEquals("sample.mp3", snapshotJson.getString("path"))
+        assertEquals("sample.wav", snapshotJson.getString("path"))
         assertEquals("", snapshotJson.getString("inform"))
 
-        val format = dispatch(provider, "mediainfo", "get", """["sample.mp3","general","Format"]""")
+        val snapshotV2 = dispatch(
+            provider,
+            "mediainfo",
+            "read",
+            """["sample.wav",{"schema":"autojs6-plugin-mediainfo-snapshot-v2","includeInform":false}]""",
+        )
+        assertTrue(snapshotV2.toString(), snapshotV2.ok)
+        val snapshotV2Json = jsonObject(snapshotV2.resultJson.orEmpty())
+        assertEquals("autojs6-plugin-mediainfo-snapshot-v2", snapshotV2Json.getString("schema"))
+        assertEquals("sample.wav", snapshotV2Json.getJSONObject("file").getString("name"))
+        assertTrue(snapshotV2Json.getJSONObject("tracks").getJSONArray("audio").length() > 0)
+
+        val capabilities = dispatch(provider, "mediainfo", "capabilities", "[]")
+        assertTrue(capabilities.toString(), capabilities.ok)
+        val capabilitiesJson = jsonObject(capabilities.resultJson.orEmpty())
+        assertEquals("autojs6-node-mediainfo-capabilities-v1", capabilitiesJson.getString("schema"))
+        assertTrue(
+            capabilitiesJson.getJSONArray("snapshotSchemas")
+                .toString()
+                .contains("autojs6-plugin-mediainfo-snapshot-v2"),
+        )
+        assertTrue(capabilitiesJson.optString("engineVersion").isNotBlank())
+
+        val format = dispatch(provider, "mediainfo", "get", """["sample.wav","general","Format"]""")
         assertTrue(format.toString(), format.ok)
         assertTrue(format.resultJson != null)
 
@@ -320,6 +360,36 @@ class NodeMediaBridgeInstrumentationTest {
 
     private fun jsonObject(raw: String): JSONObject {
         return JSONTokener(raw).nextValue() as JSONObject
+    }
+
+    private fun minimalPcmWave(): ByteArray {
+        val pcm = byteArrayOf(0, 0, 0, 0)
+        return ByteArray(44 + pcm.size).also { bytes ->
+            fun putAscii(offset: Int, value: String) {
+                value.toByteArray(Charsets.US_ASCII).copyInto(bytes, offset)
+            }
+            fun putShortLe(offset: Int, value: Int) {
+                bytes[offset] = (value and 0xff).toByte()
+                bytes[offset + 1] = (value ushr 8 and 0xff).toByte()
+            }
+            fun putIntLe(offset: Int, value: Int) {
+                repeat(4) { index -> bytes[offset + index] = (value ushr (index * 8) and 0xff).toByte() }
+            }
+            putAscii(0, "RIFF")
+            putIntLe(4, 36 + pcm.size)
+            putAscii(8, "WAVE")
+            putAscii(12, "fmt ")
+            putIntLe(16, 16)
+            putShortLe(20, 1)
+            putShortLe(22, 1)
+            putIntLe(24, 8_000)
+            putIntLe(28, 16_000)
+            putShortLe(32, 2)
+            putShortLe(34, 16)
+            putAscii(36, "data")
+            putIntLe(40, pcm.size)
+            pcm.copyInto(bytes, 44)
+        }
     }
 }
 

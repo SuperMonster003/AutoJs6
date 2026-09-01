@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `Fonctionnalité` Ajout des API `snapshot`/`capabilities` versionnées et des constantes de schéma v1/v2 à `mediainfo`; Rhino conserve les résultats `read` historiques, Node.js garde le format v1 de l'hôte par défaut, et le format v2 du plugin avec les métadonnées moteur courtes n'est exposé qu'après annonce explicite de la capacité
 * `Fonctionnalité` La capacité v1 d'informations de fichier hôte d'Explorer Action permet aux plugins de confiance en lecture seule d'ajouter un résumé localisé, borné et lié au SHA-256 à la boîte de dialogue d'informations APK existante; si le plugin est absent, désactivé, incompatible ou en échec, ses champs d'origine, les actions d'installation/manifeste et la gestion des erreurs restent inchangés
 * `Fonctionnalité` `pinyin` ajoute les lectures `customDictionary` limitées à chaque appel, finalise `compare` et `compact`, et expose le même fournisseur du plugin externe à Node.js via `autojs6:bridge.callAutoJs` avec la capacité explicite `pinyin`
 * `Fonctionnalité` `pinyin4j` ajoute une matrice `readings` négociée par capacité pour toutes les lectures en Hanyu, Tongyong, Wade-Giles, MPS2, Yale et Gwoyeu Romatzyh; les anciens plugins se replient en toute sécurité uniquement pour Hanyu, tandis que le même fournisseur du plugin externe est exposé à Node.js via `autojs6:bridge.callAutoJs` avec la capacité explicite `pinyin4j`

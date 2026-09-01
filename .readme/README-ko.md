@@ -168,6 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/09/01
 
+* `추가` `mediainfo`에 명시적 버전의 `snapshot`/`capabilities` API와 v1/v2 schema 상수를 추가; Rhino는 기존 `read` 결과를 유지하고 Node.js는 호스트 v1을 기본값으로 유지하며, 플러그인이 기능을 명시적으로 광고한 경우에만 플러그인 v2와 짧은 엔진 정보를 노출
 * `추가` Explorer Action 호스트 파일 정보 capability v1을 통해 신뢰된 읽기 전용 플러그인이 기존 APK 정보 대화상자에 SHA-256으로 결합된 제한형 현지화 요약을 추가할 수 있습니다; 플러그인이 없거나 비활성화되거나 호환되지 않거나 실패하면 기존 필드, 설치/manifest 작업 및 실패 처리는 그대로 유지됩니다
 * `추가` `pinyin` 에 호출 단위 `customDictionary` 발음 재정의를 추가하고 `compare` 와 `compact` 를 완성하며, 명시적 `pinyin` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개
 * `추가` `pinyin4j` 에 capability 협상형 `readings` 전체 발음 행렬을 추가하고 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 및 Gwoyeu Romatzyh 를 지원합니다; 이전 플러그인은 Hanyu 에서만 안전하게 대체되며, 명시적 `pinyin4j` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개합니다

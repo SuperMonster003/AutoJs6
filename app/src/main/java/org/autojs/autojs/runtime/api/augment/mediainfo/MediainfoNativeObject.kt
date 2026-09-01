@@ -31,16 +31,7 @@ class MediainfoNativeObject(
 ) : NativeObject(), StringReadable {
 
     @JvmField
-    val path: String = when {
-        rawPath.isJsNullish() -> throw WrappedIllegalArgumentException("Argument path ${rawPath.jsBrief()} is invalid for mediainfo")
-        else -> {
-            val pathString = coerceString(rawPath)
-            require(pathString.isNotBlank()) {
-                "Argument \"path\" ${pathString.jsBrief()} for mediainfo cannot be empty"
-            }
-            scriptRuntime.files.nonNullPath(pathString)
-        }
-    }
+    val path: String = resolvePath(scriptRuntime, rawPath)
 
     private var informToPrint: String = ""
 
@@ -107,6 +98,17 @@ class MediainfoNativeObject(
     override fun toStringReadable() = toStringRhino(this)
 
     companion object : ArgumentGuards() {
+
+        internal fun resolvePath(scriptRuntime: ScriptRuntime, rawPath: Any?): String = when {
+            rawPath.isJsNullish() -> throw WrappedIllegalArgumentException("Argument path ${rawPath.jsBrief()} is invalid for mediainfo")
+            else -> {
+                val pathString = coerceString(rawPath)
+                require(pathString.isNotBlank()) {
+                    "Argument \"path\" ${pathString.jsBrief()} for mediainfo cannot be empty"
+                }
+                scriptRuntime.files.nonNullPath(pathString)
+            }
+        }
 
         private val STREAM_KINDS = listOf(
             "GENERAL",

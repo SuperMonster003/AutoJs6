@@ -75,6 +75,7 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
+import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -661,7 +662,7 @@ object NodeBridgeModules {
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
     val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo")
-    val mediainfoMethods = setOf("read", "get")
+    val mediainfoMethods = setOf("read", "get", "capabilities")
     val recorderMethods = setOf("getStatus", "start", "stop")
     val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
     val storageModules = setOf(STORAGE, STORAGES)
@@ -2285,6 +2286,15 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun dispatchMediainfo(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         runCatching {
+            if (request.method == "capabilities") {
+                val capabilities = runBlocking { MediainfoPluginHost.capabilities(appContext) }
+                val result = JSONObject()
+                    .put("schema", MEDIAINFO_CAPABILITIES_SCHEMA)
+                    .put("snapshotSchemas", JSONArray(capabilities.snapshotSchemas))
+                    .put("defaultSnapshotSchema", capabilities.defaultSnapshotSchema)
+                capabilities.engineVersion?.let { result.put("engineVersion", it) }
+                return callback(NodeBridgeResponse.success(request.id, result.toString()))
+            }
             val args = request.argsArray()
             val rawPath = args.optString(0, "")
             val file = resolveScopedProjectFile(rawPath)
@@ -2392,46 +2402,38 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun mediainfoSnapshot(requestedPath: String, file: File, options: JSONObject): JSONObject {
         val includeInform = options.optBoolean("includeInform", true)
         val includeSections = options.optBoolean("includeSections", true)
-        val inform = runBlocking { MediainfoPluginHost.inform(appContext, file) }.orEmpty()
-        return JSONObject()
-            .put("schema", "autojs6-node-mediainfo-snapshot-v1")
-            .put("path", requestedPath)
-            .put("fileName", file.name)
-            .put("sizeBytes", file.length())
-            .put("inform", if (includeInform) inform else "")
-            .put("sections", if (includeSections) mediaInfoSections(inform) else JSONObject())
-    }
-
-    private fun mediaInfoSections(inform: String): JSONObject {
-        val sections = JSONObject()
-        var current: JSONObject? = null
-        inform.lineSequence().forEach { raw ->
-            val line = raw.trimEnd()
-            if (line.isBlank()) return@forEach
-            if (!line.contains(':')) {
-                val sectionName = line.trim().lowercase(Locale.US)
-                val array = sections.optJSONArray(sectionName) ?: JSONArray().also { sections.put(sectionName, it) }
-                current = JSONObject().also { array.put(it) }
-            } else {
-                val target = current ?: return@forEach
-                val idx = line.indexOf(':')
-                val key = line.substring(0, idx).trim().toMediainfoCamel()
-                val value = line.substring(idx + 1).trim()
-                if (key.isNotBlank()) {
-                    target.put(key, value)
-                }
-            }
+        val requestedSchema = when (val rawSchema = options.opt("schema")) {
+            null, JSONObject.NULL -> null
+            is String -> rawSchema
+            else -> throw IllegalArgumentException("MediaInfo snapshot schema must be a string")
         }
-        return sections
+        val pluginSchema = requestedSchema?.takeUnless { it.isBlank() }
+        if (pluginSchema != null && pluginSchema !in MediainfoSnapshotSchemas.VALUES) {
+            throw IllegalArgumentException("Unsupported MediaInfo snapshot schema: $pluginSchema")
+        }
+        val rawSnapshot = runBlocking {
+            MediainfoPluginHost.snapshot(
+                context = appContext,
+                file = file,
+                includeInform = includeInform,
+                includeSections = includeSections,
+                schema = pluginSchema,
+            )
+        }
+        val snapshot = JSONObject(rawSnapshot)
+        if (pluginSchema != null) {
+            require(snapshot.optString("schema") == pluginSchema) {
+                "MediaInfo plugin returned an unexpected snapshot schema"
+            }
+            return snapshot
+        }
+        require(snapshot.optString("schema") == MediainfoSnapshotSchemas.V1) {
+            "MediaInfo plugin returned an unexpected default snapshot schema"
+        }
+        return snapshot
+            .put("schema", MEDIAINFO_NODE_SNAPSHOT_SCHEMA_V1)
+            .put("path", requestedPath)
     }
-
-    private fun String.toMediainfoCamel(): String = this
-        .replace(Regex("\\((s|es|ies)\\)"), "$1")
-        .split(Regex("[^A-Za-z0-9]+"))
-        .filter { it.isNotEmpty() }
-        .joinToString("") { part ->
-            part.lowercase(Locale.US).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        }.replaceFirstChar { it.lowercase() }
 
     private fun mediaInfoStreamKind(raw: String): String {
         val normalized = raw.trim().uppercase(Locale.US)
@@ -2440,6 +2442,8 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private val MEDIAINFO_STREAM_KINDS = setOf("GENERAL", "VIDEO", "AUDIO", "TEXT", "OTHER", "IMAGE", "MENU", "MAX")
+    private val MEDIAINFO_NODE_SNAPSHOT_SCHEMA_V1 = "autojs6-node-mediainfo-snapshot-v1"
+    private val MEDIAINFO_CAPABILITIES_SCHEMA = "autojs6-node-mediainfo-capabilities-v1"
 
     private fun recorderStatus(): JSONObject {
         val microphoneGranted = appContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

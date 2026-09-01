@@ -168,6 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/01
 
+* `Nuevo` Se agregaron APIs `snapshot`/`capabilities` versionadas y constantes de schema v1/v2 a `mediainfo`; Rhino conserva los resultados `read` heredados, Node.js mantiene v1 del host por defecto, y v2 del plugin junto con metadatos breves del motor solo se exponen tras el anuncio explícito de capacidad
 * `Nuevo` La capacidad v1 de información de archivos del host de Explorer Action permite que plugins de solo lectura y de confianza añadan un resumen localizado, acotado y vinculado a SHA-256 al diálogo existente de información APK; si el plugin falta, está desactivado, es incompatible o falla, sus campos originales, las acciones de instalación/manifiesto y el tratamiento de errores no cambian
 * `Nuevo` `pinyin` añade lecturas `customDictionary` válidas solo para cada llamada, completa `compare` y `compact`, y expone el mismo proveedor del plugin externo a Node.js mediante `autojs6:bridge.callAutoJs` con la capacidad explícita `pinyin`
 * `Nuevo` `pinyin4j` añade una matriz `readings` negociada por capacidad para todas las lecturas en Hanyu, Tongyong, Wade-Giles, MPS2, Yale y Gwoyeu Romatzyh; los plugins antiguos recurren de forma segura solo para Hanyu, mientras el mismo proveedor del plugin externo se expone a Node.js mediante `autojs6:bridge.callAutoJs` con la capacidad explícita `pinyin4j`

@@ -224,6 +224,8 @@ class NodeBridgeConformanceInstrumentationTest {
                       result = { schema: "autojs6-node-mediainfo-snapshot-v1", path: request.args[0], fileName: "sample.mp3", sizeBytes: 4, inform: "", sections: {} };
                     } else if (method === "get") {
                       result = "MPEG Audio";
+                    } else if (method === "capabilities") {
+                      result = { schema: "autojs6-node-mediainfo-capabilities-v1", snapshotSchemas: ["autojs6-plugin-mediainfo-snapshot-v1", "autojs6-plugin-mediainfo-snapshot-v2"], defaultSnapshotSchema: "autojs6-plugin-mediainfo-snapshot-v1", engineVersion: "MediaInfoLib - v26.05" };
                     }
                   } else if (moduleName === "recorder") {
                     if (method === "getStatus") {
@@ -496,7 +498,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("barcode", barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("media", media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
-              expectExports("mediainfo", mediainfo, ["read", "get"]);
+              expectExports("mediainfo", mediainfo, ["read", "get", "capabilities"]);
               expectExports("recorder", recorder, ["getStatus", "start", "stop"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
@@ -530,7 +532,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("autojs6:compat.barcode", compat.barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.qrcode", compat.qrcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.media", compat.media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
-              expectExports("autojs6:compat.mediainfo", compat.mediainfo, ["read", "get"]);
+              expectExports("autojs6:compat.mediainfo", compat.mediainfo, ["read", "get", "capabilities"]);
               expectExports("autojs6:compat.recorder", compat.recorder, ["getStatus", "start", "stop"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
               expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "addIntentTask", "removeTask", "queryTasks", "queryIntentTasks", "queryTimedTasks", "getIntentTask", "getTimedTask", "removeIntentTask", "removeTimedTask", "updateTask"]);
@@ -784,6 +786,7 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual((await expectPromise("media.getAudioStreamInfo", media.getAudioStreamInfo("music", { timeoutMs: 1056 }))).schema, "autojs6-node-media-audio-stream-v1");
               assert.strictEqual((await expectPromise("compat.media.getAudioStreamInfo", compat.media.getAudioStreamInfo("music", { timeoutMs: 1056 }))).schema, "autojs6-node-media-audio-stream-v1");
               assert.strictEqual((await expectPromise("mediainfo.read", mediainfo.read("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
+              assert.strictEqual((await expectPromise("mediainfo.capabilities", mediainfo.capabilities({ timeoutMs: 1056 }))).snapshotSchemas[1], "autojs6-plugin-mediainfo-snapshot-v2");
               assert.strictEqual((await expectPromise("mediainfo.call", mediainfo("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
               assert.strictEqual(await expectPromise("mediainfo.get", mediainfo.get("sample.mp3", "general", "Format", { timeoutMs: 1056 })), "MPEG Audio");
               assert.strictEqual((await expectPromise("compat.mediainfo.read", compat.mediainfo.read("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
@@ -1047,6 +1050,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "media.getAudioStreamMaxVolume",
                 "media.getAudioStreamInfo",
                 "mediainfo.read",
+                "mediainfo.capabilities",
                 "mediainfo.get",
                 "recorder.getStatus",
                 "recorder.start",
@@ -1290,7 +1294,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.BARCODE to setOf("detect", "detectAll", "recognizeText", "recognizeTexts"),
             NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"),
-            NodeBridgeModules.MEDIAINFO to setOf("read", "get"),
+            NodeBridgeModules.MEDIAINFO to setOf("read", "get", "capabilities"),
             NodeBridgeModules.RECORDER to setOf("getStatus", "start", "stop"),
             NodeBridgeModules.PINYIN to setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),

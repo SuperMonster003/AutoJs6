@@ -13,6 +13,7 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
+import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -397,7 +398,7 @@ object NodeBridgeProviderRegistry {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
-            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,mediainfo.read,mediainfo.get,recorder.getStatus",
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus",
             "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
@@ -406,6 +407,9 @@ object NodeBridgeProviderRegistry {
             "recordingAndroidPermissions" to NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.MEDIA_RECORDING)).joinToString(","),
             "audioStatusSchema" to "autojs6-node-media-audio-stream-v1",
             "mediainfoSchema" to "autojs6-node-mediainfo-snapshot-v1",
+            "mediainfoPluginSchemas" to MediainfoSnapshotSchemas.VALUES.joinToString(","),
+            "mediainfoCapabilitiesSchema" to "autojs6-node-mediainfo-capabilities-v1",
+            "mediainfoSchemaPolicy" to "legacy_node_v1_by_default; plugin_v2_only_when_advertised",
             "recorderStatusSchema" to "autojs6-node-recorder-status-v1",
             "phase13Promotion" to "P13-26 partial media/recorder/mediainfo provider evidence gate",
             "pathPolicy" to "mediainfo accepts only relative paths inside the scoped Node working directory",
