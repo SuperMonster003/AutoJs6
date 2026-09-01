@@ -33,6 +33,11 @@ class NodeCapabilityBrokerV2InstrumentationTest {
         assertEquals(listOf(NodeBridgePermissionManifest.PINYIN), pinyinConvert!!.requiredCapabilities)
         assertEquals(NodeCapabilityBrokerPolicy.PINYIN_CONVERT_MAX_ARGS_BYTES, pinyinConvert.maxArgsBytes)
 
+        val pinyin4jReadings = NodeCapabilityBrokerPolicy.declarationFor(NodeBridgeModules.PINYIN4J, "readings")
+        assertNotNull(pinyin4jReadings)
+        assertEquals(listOf(NodeBridgePermissionManifest.PINYIN4J), pinyin4jReadings!!.requiredCapabilities)
+        assertEquals(NodeCapabilityBrokerPolicy.DEFAULT_MAX_ARGS_BYTES, pinyin4jReadings.maxArgsBytes)
+
         val lifecycle = NodeCapabilityBrokerPolicy.declarationFor(
             NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME,
             NodeLifecycleCheckpointStore.METHOD_CHECKPOINT,

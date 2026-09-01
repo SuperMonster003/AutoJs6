@@ -192,6 +192,10 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "detectTextBounds"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.PINYIN4J),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("pinyin4j", "readings"),
+        )
         listOf("storage", "storages").forEach { module ->
             assertEquals(
                 listOf(NodeBridgePermissionManifest.STORAGE),

@@ -35,4 +35,17 @@ object Pinyin4jPluginHost {
         val target = host.selectOrThrow(context, engine = Pinyin4jPluginIds.ENGINE)
         return host.call(context, target) { proxy -> proxy.asTone(text) }
     }
+
+    suspend fun readings(context: Context, text: String, options: Bundle): List<List<String>> {
+        val target = host.selectOrThrow(context, engine = Pinyin4jPluginIds.ENGINE)
+        return host.call(context, target) { proxy ->
+            Pinyin4jReadingsNegotiator.read(
+                text = text,
+                options = options,
+                capabilities = target.pluginInfo?.capabilities,
+                nativeRead = { proxy.readings(text, options) },
+                legacyOf = { source, legacyOptions -> proxy.of(source, legacyOptions) },
+            )
+        }
+    }
 }

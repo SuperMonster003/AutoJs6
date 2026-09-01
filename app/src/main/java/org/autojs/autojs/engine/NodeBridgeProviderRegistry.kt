@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
@@ -131,6 +132,7 @@ object NodeBridgeProviderRegistry {
     private const val DATABASE_PROVIDER = "database"
     private const val MEDIA_PROVIDER = "media"
     private const val PINYIN_PROVIDER = "pinyin"
+    private const val PINYIN4J_PROVIDER = "pinyin4j"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
     private const val DEVICE_PROVIDER = "device"
     private const val SENSORS_PROVIDER = "sensors"
@@ -203,6 +205,12 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.PINYIN),
             capabilities = listOf(NodeBridgePermissionManifest.PINYIN),
             packagedSupport = packagedProviderDependent("requires the official Pinyin plugin and the packaged pinyin capability"),
+        ),
+        provider(
+            id = PINYIN4J_PROVIDER,
+            modules = listOf(NodeBridgeModules.PINYIN4J),
+            capabilities = listOf(NodeBridgePermissionManifest.PINYIN4J),
+            packagedSupport = packagedProviderDependent("requires the official Pinyin4j plugin and the packaged pinyin4j capability"),
         ),
         provider(
             id = NOTIFICATIONS_PROVIDER,
@@ -378,6 +386,7 @@ object NodeBridgeProviderRegistry {
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         MEDIA_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         PINYIN_PROVIDER -> if (PinyinPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
+        PINYIN4J_PROVIDER -> if (Pinyin4jPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
@@ -436,6 +445,14 @@ object NodeBridgeProviderRegistry {
             "customDictionaryPolicy" to "per_call_v1_64KiB_no_persistence",
             "rawObjectPolicy" to "JSON-only values cross the bridge; no Context, Binder, Bundle, database, or Java object is exposed",
             "statusReason" to "Pinyin conversion is supplied by the selected external Pinyin plugin through the host capability broker",
+        )
+        PINYIN4J_PROVIDER -> linkedMapOf(
+            "liveMethods" to NodeBridgeModules.pinyin4jMethods.sorted().joinToString(","),
+            "capability" to NodeBridgePermissionManifest.PINYIN4J,
+            "pluginServiceCount" to Pinyin4jPluginHost.queryServiceCount(context).toString(),
+            "readingsPolicy" to "capability_negotiated_v1_with_hanyu_legacy_fallback",
+            "rawObjectPolicy" to "JSON-only values cross the bridge; no Context, Binder, Bundle, or Java object is exposed",
+            "statusReason" to "Pinyin4j conversion is supplied by the selected external Pinyin4j plugin through the host capability broker",
         )
         NOTIFICATIONS_PROVIDER -> linkedMapOf(
             "liveMethods" to "notify,cancel,cancelAll,getPermissionStatus,openSettings",

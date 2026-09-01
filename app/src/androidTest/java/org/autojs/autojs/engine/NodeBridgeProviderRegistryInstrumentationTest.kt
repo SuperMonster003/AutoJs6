@@ -13,7 +13,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(21, definitions.size)
+        assertEquals(22, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -53,6 +53,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "pinyin",
             modules = listOf(NodeBridgeModules.PINYIN),
             capabilities = listOf(NodeBridgePermissionManifest.PINYIN),
+        )
+        assertProvider(
+            id = "pinyin4j",
+            modules = listOf(NodeBridgeModules.PINYIN4J),
+            capabilities = listOf(NodeBridgePermissionManifest.PINYIN4J),
         )
         assertProvider(
             id = "notifications",
@@ -102,6 +107,21 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     }
 
     @Test
+    fun pinyin4jHealthReflectsPluginAvailability() {
+        val health = NodeBridgeProviderRegistry.androidHealth(context)
+            .associateBy { it.definition.id }
+            .getValue("pinyin4j")
+
+        assertTrue(
+            health.status in setOf(
+                NodeBridgeProviderStatus.AVAILABLE,
+                NodeBridgeProviderStatus.UNAVAILABLE,
+            ),
+        )
+        assertTrue(health.details.getValue("liveMethods").contains("readings"))
+    }
+
+    @Test
     fun androidHealthReflectsCurrentProviderAvailabilityWithoutPromotingFutureProviders() {
         val healthById = NodeBridgeProviderRegistry.androidHealth(context).associateBy { it.definition.id }
 
@@ -139,6 +159,13 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             ),
         )
         assertTrue(healthById.getValue("pinyin").details.getValue("liveMethods").contains("convert"))
+        assertTrue(
+            healthById.getValue("pinyin4j").status in setOf(
+                NodeBridgeProviderStatus.AVAILABLE,
+                NodeBridgeProviderStatus.UNAVAILABLE,
+            ),
+        )
+        assertTrue(healthById.getValue("pinyin4j").details.getValue("liveMethods").contains("readings"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("device").status)
         assertTrue(healthById.getValue("notifications").details.getValue("liveMethods").contains("openSettings"))
         assertEquals(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS, healthById.getValue("notifications").details.getValue("settingsCapability"))
