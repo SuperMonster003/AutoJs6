@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屜工具分組在浮動按鈕與指標位置後加入可選的螢幕取色外掛, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
 * `新增` `mediainfo` 新增顯式版本化的 `snapshot`/`capabilities` API 與 v1/v2 schema 常數; Rhino 保持舊 `read` 結果不變, Node.js 保持宿主 v1 預設結果, 僅在外掛明確宣告支援時透傳外掛 v2 並公開簡短引擎版本

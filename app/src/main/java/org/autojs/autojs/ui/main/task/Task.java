@@ -169,6 +169,9 @@ public abstract class Task {
             if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
                 return AutoFileSource.ENGINE;
             }
+            if (JavaScriptSource.isQuickJsFileName(scriptPath)) {
+                return JavaScriptSource.ENGINE_QUICKJS;
+            }
             if (JavaScriptSource.isBunFileName(scriptPath)) {
                 return JavaScriptSource.ENGINE_BUN;
             }

@@ -57,6 +57,12 @@ public class SequenceScriptSource extends JavaScriptSource {
     @NonNull
     @Override
     public String getEngineName() {
+        if (ENGINE_QUICKJS.equals(mFirstScriptSource.getEngineName()) ||
+                ENGINE_QUICKJS.equals(mSecondScriptSource.getEngineName())) {
+            throw new IllegalArgumentException(
+                    "QuickJS launch source does not support AutoJs6 preExecuteScript"
+            );
+        }
         if (ENGINE_BUN.equals(mFirstScriptSource.getEngineName()) ||
                 ENGINE_BUN.equals(mSecondScriptSource.getEngineName())) {
             throw new IllegalArgumentException(
@@ -64,6 +70,11 @@ public class SequenceScriptSource extends JavaScriptSource {
             );
         }
         String resolved = super.getEngineName();
+        if (ENGINE_QUICKJS.equals(resolved)) {
+            throw new IllegalArgumentException(
+                    "QuickJS launch source does not support AutoJs6 preExecuteScript"
+            );
+        }
         if (ENGINE_BUN.equals(resolved)) {
             throw new IllegalArgumentException(
                     "Bun launch source does not support AutoJs6 preExecuteScript"

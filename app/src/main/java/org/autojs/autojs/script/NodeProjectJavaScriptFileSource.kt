@@ -119,6 +119,9 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
 
     override val engineName: String
         get() {
+            require(super.engineName != JavaScriptSource.ENGINE_QUICKJS) {
+                "A QuickJS entry cannot be launched through the Node project runtime"
+            }
             require(super.engineName != JavaScriptSource.ENGINE_BUN) {
                 "A Bun entry cannot be launched through the Node project runtime"
             }

@@ -39,6 +39,181 @@ class JavaScriptSourceTest {
         assertFalse(JavaScriptSource.isBunFileName("types.bun.d.ts"))
         assertFalse(JavaScriptSource.isBunFileName("main.bun.jsx"))
         assertFalse(JavaScriptSource.isBunFileName(null))
+
+        assertTrue(JavaScriptSource.isQuickJsFileName("main.quickjs.js"))
+        assertTrue(JavaScriptSource.isQuickJsFileName("module.QUICKJS.MJS"))
+        assertFalse(JavaScriptSource.isQuickJsFileName("main.quickjs.ts"))
+        assertFalse(JavaScriptSource.isQuickJsFileName("main.qjs"))
+        assertFalse(JavaScriptSource.isQuickJsFileName(null))
+    }
+
+    @Test
+    fun quickJsDirectiveAndMarkersSelectTheIndependentEngineWithoutChangingLegacyRoutes() {
+        val directed = StringScriptSource("\"QuIcKjS\";\nconsole.log('quickjs')")
+
+        assertTrue(
+            directed.executionMode and JavaScriptSource.EXECUTION_MODE_QUICKJS != 0,
+        )
+        assertEquals(JavaScriptSource.ENGINE_QUICKJS, directed.engineName)
+        assertEquals(
+            JavaScriptSource.ENGINE_QUICKJS,
+            JavaScriptSource.resolveEngineName(JavaScriptSource.EXECUTION_MODE_QUICKJS),
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE_QUICKJS,
+            StringScriptSource("module.mjs", "\"quickjs\"; export default 42").engineName,
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE_QUICKJS,
+            StringScriptSource("programmatic.quickjs.mjs", "export default 42").engineName,
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE_QUICKJS,
+            StringScriptSource("shared.quickjs.mjs", "export default 42").apply {
+                overriddenFullPath = File(System.getProperty("java.io.tmpdir"), "provider-cache.mjs").path
+            }.engineName,
+        )
+
+        listOf("entry.quickjs.js", "entry.quickjs.mjs").forEach { fileName ->
+            val sourceFile = File.createTempFile(
+                "autojs6-quickjs-route-",
+                fileName.removePrefix("entry"),
+            )
+            try {
+                sourceFile.writeText("console.log('quickjs')")
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(
+                    file = sourceFile,
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                )
+
+                assertEquals(JavaScriptSource.ENGINE_QUICKJS, launch.engineName)
+            } finally {
+                sourceFile.delete()
+            }
+        }
+    }
+
+    @Test
+    fun conflictingQuickJsEngineSelectorsFailClosed() {
+        listOf(
+            JavaScriptSource.EXECUTION_MODE_QUICKJS or JavaScriptSource.EXECUTION_MODE_NODEJS,
+            JavaScriptSource.EXECUTION_MODE_QUICKJS or JavaScriptSource.EXECUTION_MODE_RHINO,
+            JavaScriptSource.EXECUTION_MODE_QUICKJS or JavaScriptSource.EXECUTION_MODE_BUN,
+        ).forEach { mode ->
+            assertThrows(IllegalArgumentException::class.java) {
+                JavaScriptSource.resolveEngineName(mode)
+            }
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            StringScriptSource("\"quickjs,bun\";\n42").engineName
+        }
+
+        val quickJsMarkerWithNodeDirective = File.createTempFile(
+            "autojs6-quickjs-conflict-",
+            ".quickjs.mjs",
+        )
+        val nodeMarkerWithQuickJsDirective = File.createTempFile(
+            "autojs6-quickjs-conflict-",
+            ".node.js",
+        )
+        try {
+            quickJsMarkerWithNodeDirective.writeText("\"nodejs\";\n42")
+            nodeMarkerWithQuickJsDirective.writeText("\"quickjs\";\n42")
+
+            listOf(quickJsMarkerWithNodeDirective, nodeMarkerWithQuickJsDirective).forEach { file ->
+                assertThrows(IllegalArgumentException::class.java) {
+                    JavaScriptFileSource(file).engineName
+                }
+            }
+        } finally {
+            quickJsMarkerWithNodeDirective.delete()
+            nodeMarkerWithQuickJsDirective.delete()
+        }
+    }
+
+    @Test
+    fun encryptedHeadersMergeSemanticQuickJsSuffixesAndRejectEngineConflicts() {
+        val quickJsFile = File.createTempFile("autojs6-quickjs-encrypted-", ".quickjs.js")
+        val conflictFile = File.createTempFile("autojs6-quickjs-encrypted-conflict-", ".quickjs.mjs")
+        try {
+            FileOutputStream(quickJsFile).use { output ->
+                EncryptedScriptFileHeader.writeHeader(output)
+                output.write(byteArrayOf(1, 2, 3))
+            }
+            FileOutputStream(conflictFile).use { output ->
+                EncryptedScriptFileHeader.writeHeader(
+                    output,
+                    EncryptedScriptFileHeader.FLAG_EXECUTION_MODE_BUN,
+                )
+                output.write(byteArrayOf(1, 2, 3))
+            }
+
+            assertEquals(JavaScriptSource.ENGINE_QUICKJS, JavaScriptFileSource(quickJsFile).engineName)
+            assertThrows(IllegalArgumentException::class.java) {
+                JavaScriptFileSource(conflictFile).engineName
+            }
+        } finally {
+            quickJsFile.delete()
+            conflictFile.delete()
+        }
+    }
+
+    @Test
+    fun nodeProjectLaunchRejectsQuickJsEntriesInsteadOfForcingNode() {
+        val root = Files.createTempDirectory("autojs6-quickjs-node-project-").toFile()
+        val quickJsEntry = File(root, "main.quickjs.mjs").apply {
+            writeText("console.log('quickjs')")
+        }
+        try {
+            val source = NodeProjectJavaScriptFileSource(root, quickJsEntry)
+            val error = assertThrows(IllegalArgumentException::class.java) { source.engineName }
+            assertTrue(error.message.orEmpty().contains("QuickJS"))
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun quickJsLaunchRejectsJavaScriptPreExecuteInsteadOfChangingEngines() {
+        val sourceFile = File.createTempFile("autojs6-quickjs-prefix-", ".quickjs.js")
+        try {
+            sourceFile.writeText("console.log('quickjs')")
+
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                ScriptLaunchSourceFactory.createPathLaunch(
+                    path = sourceFile.path,
+                    preExecuteScript = "globalThis.beforeQuickJs = true;",
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                )
+            }
+
+            assertTrue(error.message.orEmpty().contains("QuickJS"))
+            assertTrue(error.message.orEmpty().contains("preExecuteScript"))
+        } finally {
+            sourceFile.delete()
+        }
+    }
+
+    @Test
+    fun quickJsDirectiveInsidePreExecuteScriptCannotRerouteAnOrdinaryEntry() {
+        val sourceFile = File.createTempFile("autojs6-quickjs-prefix-bypass-", ".js")
+        try {
+            sourceFile.writeText("console.log('ordinary')")
+
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                ScriptLaunchSourceFactory.createPathLaunch(
+                    path = sourceFile.path,
+                    preExecuteScript = "\"quickjs\";",
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                ).engineName
+            }
+
+            assertTrue(error.message.orEmpty().contains("QuickJS"))
+            assertTrue(error.message.orEmpty().contains("preExecuteScript"))
+        } finally {
+            sourceFile.delete()
+        }
     }
 
     @Test

@@ -437,7 +437,8 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                 String engineName = mTask.getEngineName();
                 if (JavaScriptFileSource.ENGINE.equals(engineName)
                         || JavaScriptSource.ENGINE_NODEJS.equals(engineName)
-                        || JavaScriptSource.ENGINE_BUN.equals(engineName)) {
+                        || JavaScriptSource.ENGINE_BUN.equals(engineName)
+                        || JavaScriptSource.ENGINE_QUICKJS.equals(engineName)) {
                     icon = FileUtils.TYPE.JAVASCRIPT.icon;
                 } else if (AutoFileSource.ENGINE.equals(engineName)) {
                     icon = FileUtils.TYPE.AUTO.icon;

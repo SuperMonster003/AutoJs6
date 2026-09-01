@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/09/01",
       "feature": [
+        "ローカルの単一ファイル JavaScript/ES module を対象に, \"quickjs\"/\"qjs\" ディレクティブまたは `.quickjs.js/.quickjs.mjs` マーカーでルーティングし, Rhino, Node.js, Bun にフォールバックしない独立 QuickJS Runtime プラグインエンジン",
         "ローカルの単一ファイル JavaScript/TypeScript を対象に, \"bun\" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン",
         "サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新",
         "`mediainfo` に明示的なバージョン付き `snapshot`/`capabilities` API と v1/v2 schema 定数を追加; Rhino は従来の `read` 結果を維持し, Node.js はホスト v1 を既定値とし, プラグインが能力を明示した場合にのみプラグイン v2 と短いエンジン情報を公開",

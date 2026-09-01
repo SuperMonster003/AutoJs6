@@ -48,6 +48,10 @@
             <category android:name="bun" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.quickjs.RUNTIME" />
+            <category android:name="quickjs" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.SCREEN_COLOR_PICKER" />
             <category android:name="screen-color-picker" />
         </intent>

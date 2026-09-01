@@ -358,13 +358,36 @@ object RemoteApkBuildRequestPreparer {
             } else {
                 flags.toInt()
             }
-            if (JavaScriptSource.isBunFileName(entry.name)) {
+            if (JavaScriptSource.isQuickJsFileName(entry.name)) {
+                mode = mode or JavaScriptSource.EXECUTION_MODE_QUICKJS
+            } else if (JavaScriptSource.isBunFileName(entry.name)) {
                 mode = mode or JavaScriptSource.EXECUTION_MODE_BUN
-            } else if (JavaScriptSource.isNodeJsFileName(entry.name)) {
+            } else if (
+                JavaScriptSource.isNodeJsFileName(entry.name) &&
+                (
+                    mode and JavaScriptSource.EXECUTION_MODE_QUICKJS == 0 ||
+                        !entry.name.endsWith(".mjs", ignoreCase = true)
+                )
+            ) {
                 mode = mode or JavaScriptSource.EXECUTION_MODE_NODEJS
             }
             JavaScriptSource.validateExclusiveEngineMode(mode)
             mode
+        }
+        if (
+            (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_QUICKJS != 0 ||
+            requestsExternalQuickJsRuntime(
+                projectType = projectConfig.projectType,
+                configuredEntryName = projectConfig.mainScriptFileName,
+                sourceName = source.name,
+                entryExecutionMode = entryExecutionMode,
+            )
+        ) {
+            throw IOException(
+                "QuickJS Runtime is provided by an external AutoJs6 plugin and cannot be embedded " +
+                    "in a packaged APK. Run QuickJS scripts from the AutoJs6 host with the " +
+                    "QuickJS Runtime plugin installed."
+            )
         }
         if ((entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_BUN != 0 || requestsExternalBunRuntime(
                 projectType = projectConfig.projectType,
@@ -395,6 +418,17 @@ object RemoteApkBuildRequestPreparer {
                     "from the AutoJs6 host with the runtime plugin installed."
         )
     }
+
+    internal fun requestsExternalQuickJsRuntime(
+        projectType: String?,
+        configuredEntryName: String?,
+        sourceName: String?,
+        entryExecutionMode: Int?,
+    ): Boolean =
+        projectType?.trim()?.equals("quickjs", ignoreCase = true) == true ||
+            JavaScriptSource.isQuickJsFileName(configuredEntryName) ||
+            JavaScriptSource.isQuickJsFileName(sourceName) ||
+            (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_QUICKJS != 0
 
     internal fun requestsExternalBunRuntime(
         projectType: String?,

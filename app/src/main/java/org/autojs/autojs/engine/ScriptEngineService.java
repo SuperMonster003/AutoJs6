@@ -192,7 +192,8 @@ public class ScriptEngineService {
         if (source instanceof JavaScriptSource src) {
             int mode = src.getExecutionMode();
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0
-                    && !JavaScriptSource.ENGINE_BUN.equals(src.getEngineName())) {
+                    && !JavaScriptSource.ENGINE_BUN.equals(src.getEngineName())
+                    && !JavaScriptSource.ENGINE_QUICKJS.equals(src.getEngineName())) {
                 return ScriptExecuteActivity.execute(mApplicationContext, mScriptEngineManager, task);
             }
         }

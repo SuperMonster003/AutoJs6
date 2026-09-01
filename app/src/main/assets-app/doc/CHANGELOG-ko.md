@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `추가` 로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, "quickjs"/"qjs" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
 * `추가` 사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨
 * `추가` `mediainfo`에 명시적 버전의 `snapshot`/`capabilities` API와 v1/v2 schema 상수를 추가; Rhino는 기존 `read` 결과를 유지하고 Node.js는 호스트 v1을 기본값으로 유지하며, 플러그인이 기능을 명시적으로 광고한 경우에만 플러그인 v2와 짧은 엔진 정보를 노출

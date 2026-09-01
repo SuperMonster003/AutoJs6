@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 1 September 2026.
+تم تحديث البيانات في 2 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,6 +168,7 @@
 
 ###### 2026/09/01
 
+* `إضافة جديدة` محرك إضافة QuickJS Runtime مستقل لملفات JavaScript المحلية المنفردة ووحدات ES, مع التوجيه باستخدام التعليمة "quickjs"/"qjs" أو العلامات `.quickjs.js/.quickjs.mjs`, ومن دون الرجوع إلى Rhino أو Node.js أو Bun
 * `إضافة جديدة` محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة "bun" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js
 * `إضافة جديدة` يضيف قسم الأدوات في الدرج الجانبي الآن إضافة منتقي ألوان الشاشة الاختيارية كأداة ثالثة متوقفة افتراضيا بعد الزر العائم وموضع المؤشر; يتم تحديث التثبيت والتمكين وحالة التشغيل والإزالة تلقائيا دون حظر واجهة المستخدم
 * `إضافة جديدة` تمت إضافة واجهتي `snapshot` و`capabilities` ذواتي الإصدار وثوابت مخططات v1/v2 إلى `mediainfo`; يحافظ Rhino على نتائج `read` القديمة, ويحافظ Node.js على v1 الخاص بالمضيف افتراضيا, ولا يتم كشف v2 الخاص بالملحق وبيانات المحرك المختصرة إلا بعد إعلان الملحق صراحة عن القدرة
@@ -772,7 +773,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 1 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 2 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

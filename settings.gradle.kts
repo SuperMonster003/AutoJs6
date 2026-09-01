@@ -103,6 +103,7 @@ private val pluginApi = listOf(
     "explorer-action-api",
     "lua-runtime-api",
     "bun-runtime-api",
+    "quickjs-runtime-api",
     "nodejs-api",
     "python-runtime-api",
     "typescript-api",

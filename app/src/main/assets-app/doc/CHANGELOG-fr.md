@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
 * `Fonctionnalité` Ajout des API `snapshot`/`capabilities` versionnées et des constantes de schéma v1/v2 à `mediainfo`; Rhino conserve les résultats `read` historiques, Node.js garde le format v1 de l'hôte par défaut, et le format v2 du plugin avec les métadonnées moteur courtes n'est exposé qu'après annonce explicite de la capacité
