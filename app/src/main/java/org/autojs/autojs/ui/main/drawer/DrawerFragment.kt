@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +22,10 @@ import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.app.tool.PointerLocationTool
+import org.autojs.autojs.app.tool.ScreenColorPickerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
+import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.external.foreground.AppForegroundService
@@ -70,6 +74,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
 import rikka.shizuku.Shizuku
 import java.lang.ref.WeakReference
 import java.util.Locale
@@ -118,6 +123,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
     private lateinit var mFloatingButtonItem: DrawerMenuToggleableItem
     private lateinit var mPointerLocationItem: DrawerMenuToggleableItem
+    private lateinit var mScreenColorPickerItem: DrawerMenuToggleableItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
@@ -141,6 +147,22 @@ open class DrawerFragment : Fragment() {
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
     private lateinit var mA11yTool: AccessibilityTool
+    private lateinit var mScreenColorPickerTool: ScreenColorPickerTool
+
+    private val screenColorPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult(),
+    ) {
+        if (::mScreenColorPickerTool.isInitialized) {
+            mScreenColorPickerTool.refreshAfterActivityResult()
+        }
+    }
+
+    private val screenColorPickerStateListener:
+        (ScreenColorPickerPluginStateMonitor.Change) -> Unit = { change ->
+            if (::mScreenColorPickerItem.isInitialized) {
+                applyScreenColorPickerState(change.current)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -252,6 +274,33 @@ open class DrawerFragment : Fragment() {
                 helper.config()
             }
         }
+
+        mScreenColorPickerTool = ScreenColorPickerTool(mContext) { pendingIntent ->
+            screenColorPickerLauncher.launch(
+                IntentSenderRequest.Builder(pendingIntent.intentSender).build(),
+            )
+        }
+        mScreenColorPickerItem = DrawerMenuToggleableItem(
+            helper = mScreenColorPickerTool,
+            icon = R.drawable.ic_eyedropper_black_48dp,
+            title = R.string.text_screen_color_picker,
+            descriptionRes = R.string.description_screen_color_picker,
+        ).also { item ->
+            item.isHidden = true
+            item.setOnLaunchManagerListener {
+                PluginCenterActivity.launch(
+                    context = mContext,
+                    initialQuery = ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
+                )
+            }
+        }
+        ScreenColorPickerPluginStateMonitor.addListener(
+            mContext,
+            screenColorPickerStateListener,
+        )
+        applyScreenColorPickerState(
+            ScreenColorPickerPluginStateMonitor.current(mContext),
+        )
 
         JsonSocketClientTool(mActivity).apply {
             val devPluginService = AutoJs.instance.devPluginService
@@ -781,6 +830,7 @@ open class DrawerFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        mScreenColorPickerTool.refresh()
         syncMenuItemStates()
     }
 
@@ -794,6 +844,8 @@ open class DrawerFragment : Fragment() {
         // Dispose drawer subtitle observers.
         // zh-CN: 释放抽屉子标题监听订阅.
         drawerStatsDisposables.clear()
+
+        ScreenColorPickerPluginStateMonitor.removeListener(screenColorPickerStateListener)
 
         EventBus.getDefault().unregister(this)
     }
@@ -821,6 +873,7 @@ open class DrawerFragment : Fragment() {
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerOpened(event: Event.OnDrawerOpened) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.hide(WindowInsets.Type.systemBars())
+        mScreenColorPickerTool.refresh()
         syncMenuItemStates()
     }
 
@@ -855,6 +908,7 @@ open class DrawerFragment : Fragment() {
             DrawerMenuGroup(R.string.text_tools),
             mFloatingButtonItem,
             mPointerLocationItem,
+            mScreenColorPickerItem,
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,
@@ -909,6 +963,7 @@ open class DrawerFragment : Fragment() {
         mForegroundServiceItem,
         mFloatingButtonItem,
         mPointerLocationItem,
+        mScreenColorPickerItem,
         mClientModeItem,
         mServerModeItem,
         mNotificationPostItem,
@@ -925,6 +980,29 @@ open class DrawerFragment : Fragment() {
         mShizukuAccessItem,
         mKeepScreenOnWhenInForegroundItem,
     ).forEach { it.sync() }
+
+    private fun applyScreenColorPickerState(
+        state: ScreenColorPickerPluginStateMonitor.State,
+    ) {
+        val shouldHide = !state.installed
+        val visibilityChanged = mScreenColorPickerItem.isHidden != shouldHide
+        mScreenColorPickerItem.isHidden = shouldHide
+
+        if (privateDrawerMenu != null && visibilityChanged) {
+            initMenuItems()
+        }
+        if (shouldHide) return
+
+        mScreenColorPickerItem.subtitle = when (state.status) {
+            ScreenColorPickerPluginStateMonitor.Status.DISABLED -> getString(R.string.text_disabled)
+            ScreenColorPickerPluginStateMonitor.Status.INELIGIBLE -> getString(R.string.text_unavailable)
+            else -> null
+        }
+        mScreenColorPickerItem.setCheckedIfNeeded(state.active)
+        mScreenColorPickerItem.isProgress = state.transitioning
+        (privateDrawerMenu?.adapter as? DrawerMenuAdapter)
+            ?.notifyItemChanged(mScreenColorPickerItem)
+    }
 
     companion object {
 

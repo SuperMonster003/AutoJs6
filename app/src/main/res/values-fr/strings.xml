@@ -148,6 +148,7 @@
     <string name="description_root_mode_preference">Si vous avez un accès exotique à la racine ou un état anormal pour l\'accès à la racine, vous pouvez forcer le réglage de la racine sur racine ou non-racine.</string>
     <string name="description_root_record_out_file_type_preference">Type binaire : non modifiable, avec l\'extension de fichier \"auto\".\nType JavaScript : peut être édité ou copié directement, avec l\'extension de fichier \"js\".</string>
     <string name="description_screen_capture_request_delay">Lors de la demande d\'autorisation de capture d\'écran, la fenêtre de demande affichée peut comporter une animation de fondu lors de sa disparition. Si `images.captureScreen` est appelé immédiatement, la capture obtenue peut contenir le contenu de cette fenêtre et être partiellement masquée.\n\nLa valeur de cette option ajoute un délai (en millisecondes) avant d\'effectuer la capture juste après l\'obtention de l\'autorisation, afin d\'éviter le problème de masquage ci-dessus.\n\nCette option ne s\'applique qu\'à la première capture après l\'obtention de l\'autorisation ; les captures suivantes ne seront plus affectées par cette valeur.</string>
+    <string name="description_screen_color_picker">Utilise le plugin Sélecteur de couleur d\'écran installé pour échantillonner et copier des couleurs partout sur l\'écran</string>
     <string name="description_server_mode">Le mode serveur permet à AutoJs6 de démarrer un service sur l\'appareil actuel et d\'attendre des connexions de clients externes afin d\'effectuer [ transfert de scripts / impression des journaux / contrôle à distance ].\n\nLe mode serveur d\'AutoJs6 prend en charge deux modes de connexion :\n1. Réseau local (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
     <string name="description_stable_mode">Le mode stable le rend plus stable lors de l\'obtention des limites de mise en page, mais certains résultats peuvent être ignorés.\nA11y service\'s restart required.</string>
@@ -1732,6 +1733,7 @@
     <string name="text_scheduled_restart_backend">Moteur</string>
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
+    <string name="text_screen_color_picker">Sélecteur de couleur d\'écran</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script en cours d\'exécution</string>
     <string name="text_search">Recherche</string>

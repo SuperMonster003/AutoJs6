@@ -58,6 +58,8 @@ public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<D
 
     public void notifyItemChanged(DrawerMenuItem item) {
         int pos = mDrawerMenuItems.indexOf(item);
-        notifyItemChanged(pos);
+        if (pos != RecyclerView.NO_POSITION) {
+            notifyItemChanged(pos);
+        }
     }
 }

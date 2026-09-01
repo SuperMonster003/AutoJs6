@@ -168,6 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ###### 2026/09/01
 
+* `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
 * `Feature` Added explicit versioned `snapshot`/`capabilities` APIs and v1/v2 schema constants to `mediainfo`; Rhino keeps legacy `read` results, Node.js keeps the host v1 default, and plugin v2 plus short engine metadata are exposed only after explicit plugin capability advertisement
 * `Feature` Explorer Action host file information capability v1 lets trusted read-only plugins append a bounded, SHA-256-bound localized summary to the existing APK information dialog; missing, disabled, incompatible, or failing plugins leave its original fields, installation and manifest actions, and failure handling unchanged
 * `Feature` `pinyin` adds per-call `customDictionary` reading overrides, completes `compare` and `compact`, and exposes the same external-plugin provider to Node.js through `autojs6:bridge.callAutoJs` with an explicit `pinyin` capability

@@ -28,6 +28,7 @@ import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
@@ -965,6 +966,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
             MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
             ExplorerActionPluginHost.ACTION_EXPLORER_ACTION -> ExplorerActionPluginHost.probe(contextRef, item.packageName)
+            ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER -> ScreenColorPickerPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)

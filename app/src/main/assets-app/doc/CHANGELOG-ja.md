@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
 * `新機能` `mediainfo` に明示的なバージョン付き `snapshot`/`capabilities` API と v1/v2 schema 定数を追加; Rhino は従来の `read` 結果を維持し, Node.js はホスト v1 を既定値とし, プラグインが能力を明示した場合にのみプラグイン v2 と短いエンジン情報を公開
 * `新機能` Explorer Action のホストファイル情報 capability v1 により, 信頼済みの読み取り専用プラグインは既存の APK 情報ダイアログへ SHA-256 に結び付いた上限付きローカライズ概要を追加できます; プラグインが未導入, 無効, 非互換, または失敗した場合, 元の項目, インストール/manifest 操作, 失敗処理は変わりません
 * `新機能` `pinyin` に呼び出し単位の `customDictionary` 読み上書きを追加し, `compare` と `compact` を完成させ, 明示的な `pinyin` capability を伴う `autojs6:bridge.callAutoJs` から同じ外部プラグイン provider を Node.js に公開

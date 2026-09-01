@@ -22,6 +22,7 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
@@ -30,6 +31,7 @@ import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
 import java.io.File
 import java.io.Serializable
 
@@ -173,6 +175,15 @@ class InstalledPluginRepository {
         ExplorerActionPluginHost.ACTION_EXPLORER_ACTION -> ExplorerActionPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = ExplorerActionPluginHost.ACTION_EXPLORER_ACTION)
         }
+        ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER -> {
+            if (packageName != ScreenColorPickerContract.DEFAULT_PACKAGE_NAME) {
+                listOf(preferred.copy(error = IllegalArgumentException("Unsupported Screen Color Picker package: $packageName")))
+            } else {
+                ScreenColorPickerPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER)
+                }
+            }
+        }
         else -> listOf(preferred)
     }
 
@@ -186,10 +197,15 @@ class InstalledPluginRepository {
             ServiceQuery(Pinyin4jPluginHost.ACTION_PINYIN4J),
             ServiceQuery(MediainfoPluginHost.ACTION_MEDIAINFO),
             ServiceQuery(ExplorerActionPluginHost.ACTION_EXPLORER_ACTION),
+            ServiceQuery(
+                action = ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
+                category = ScreenColorPickerContract.SERVICE_CATEGORY,
+                packageName = ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
+            ),
         )
         return specs.flatMap { spec ->
             runCatching {
-                queryIntentServices(context, spec.action).map { serviceInfo ->
+                queryIntentServices(context, spec).map { serviceInfo ->
                     Discovery(
                         serviceInfo = serviceInfo,
                         pluginInfo = null,
@@ -205,8 +221,12 @@ class InstalledPluginRepository {
         }
     }
 
-    private fun queryIntentServices(context: Context, action: String): List<ServiceInfo> {
-        val intent = Intent(action).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    private fun queryIntentServices(context: Context, spec: ServiceQuery): List<ServiceInfo> {
+        val intent = Intent(spec.action).apply {
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            spec.category?.takeIf { it.isNotBlank() }?.let(::addCategory)
+            spec.packageName?.takeIf { it.isNotBlank() }?.let(::setPackage)
+        }
         val resolved = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0L))
         } else {
@@ -443,6 +463,8 @@ class InstalledPluginRepository {
         val action: String,
         val isOcrService: Boolean = false,
         val isBarcodeService: Boolean = false,
+        val category: String? = null,
+        val packageName: String? = null,
     )
 
 }

@@ -148,6 +148,7 @@
     <string name="description_root_mode_preference">Si tiene una raíz exótica o un estado anormal para el acceso a la raíz, puede forzar el establecimiento de la raíz a raíz o no raíz.</string>
     <string name="description_root_record_out_file_type_preference">Tipo binario: no editable, con la extensión de archivo \"auto\"\nTipo JavaScript: se puede editar o copiar directamente, con la extensión de archivo \"js\"</string>
     <string name="description_screen_capture_request_delay">Al solicitar el permiso de captura de pantalla, la ventana de solicitud de permiso mostrada puede tener una animación de desvanecimiento al desaparecer. Si se llama a `images.captureScreen` inmediatamente, la captura obtenida puede incluir el contenido de dicha ventana y quedar obstruida.\n\nEl valor de esta opción añade un tiempo de espera (en milisegundos) antes de capturar la pantalla inmediatamente después de obtener el permiso, para evitar el problema de obstrucción descrito.\n\nEsta opción solo se aplica a la primera captura tras obtener el permiso; las capturas posteriores no se verán afectadas por este valor.</string>
+    <string name="description_screen_color_picker">Usa el complemento Selector de color de pantalla instalado para tomar muestras y copiar colores de cualquier punto de la pantalla</string>
     <string name="description_server_mode">El modo servidor permite que AutoJs6 inicie un servicio en el dispositivo actual y espere conexiones de clientes externos para realizar [ transferencia de scripts / impresión de registros / control remoto ].\n\nEl modo servidor de AutoJs6 admite dos métodos de conexión:\n1. Red de área local (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku te permite obtener privilegios ADB y acceso a las APIs del sistema</string>
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
@@ -1732,6 +1733,7 @@
     <string name="text_scheduled_restart_backend">Motor</string>
     <string name="text_scheduled_restart_start_delay">Retraso de inicio</string>
     <string name="text_screen_capture_request_delay">Retraso de solicitud del permiso de captura de pantalla</string>
+    <string name="text_screen_color_picker">Selector de color de pantalla</string>
     <string name="text_script_record">Grabación del script</string>
     <string name="text_script_running">Script en ejecución</string>
     <string name="text_search">Buscar en</string>

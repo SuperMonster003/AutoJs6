@@ -148,6 +148,7 @@
     <string name="description_root_mode_preference">Если у вас есть экзотический root или аномальное состояние для root-доступа, вы можете принудительно установить root на root или non-root.</string>
     <string name="description_root_record_out_file_type_preference">Бинарный тип: не редактируемый, с расширением файла \"auto\"\nТип JavaScript: может быть отредактирован или скопирован напрямую, с расширением файла \"js\".</string>
     <string name="description_screen_capture_request_delay">При запросе разрешения на захват экрана отображаемое окно запроса может иметь анимацию затухания при исчезновении. Если сразу вызвать `images.captureScreen`, полученный снимок может содержать содержимое этого окна и быть частично перекрыт.\n\nЗначение этой опции добавляет задержку (в миллисекундах) перед выполнением снимка экрана сразу после получения разрешения, что позволяет избежать описанной выше проблемы перекрытия.\n\nЭта опция применяется только к первому снимку после получения разрешения; последующие снимки не будут зависеть от этого значения.</string>
+    <string name="description_screen_color_picker">Используйте установленный плагин пипетки, чтобы выбирать и копировать цвета в любой точке экрана</string>
     <string name="description_server_mode">Серверный режим позволяет AutoJs6 запускать службу на текущем устройстве и ожидать подключения внешних клиентов для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nСерверный режим AutoJs6 поддерживает два способа подключения:\n1. Локальная сеть (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku позволяет получить привилегии ADB и доступ к системным API.</string>
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
@@ -1732,6 +1733,7 @@
     <string name="text_scheduled_restart_backend">Движок</string>
     <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
+    <string name="text_screen_color_picker">Пипетка цвета экрана</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
     <string name="text_search">Поиск</string>

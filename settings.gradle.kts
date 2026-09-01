@@ -118,6 +118,7 @@ private val pluginApi = listOf(
     "paddle-ocr-api",
     "paddle-ocr-engine",
     "rapid-ocr-engine",
+    "screen-color-picker-api",
 )
 
 private val plugins = listOf(

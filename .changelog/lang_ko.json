@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/09/01",
       "feature": [
+        "사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨",
         "`mediainfo`에 명시적 버전의 `snapshot`/`capabilities` API와 v1/v2 schema 상수를 추가; Rhino는 기존 `read` 결과를 유지하고 Node.js는 호스트 v1을 기본값으로 유지하며, 플러그인이 기능을 명시적으로 광고한 경우에만 플러그인 v2와 짧은 엔진 정보를 노출",
         "Explorer Action 호스트 파일 정보 capability v1을 통해 신뢰된 읽기 전용 플러그인이 기존 APK 정보 대화상자에 SHA-256으로 결합된 제한형 현지화 요약을 추가할 수 있습니다; 플러그인이 없거나 비활성화되거나 호환되지 않거나 실패하면 기존 필드, 설치/manifest 작업 및 실패 처리는 그대로 유지됩니다",
         "`pinyin` 에 호출 단위 `customDictionary` 발음 재정의를 추가하고 `compare` 와 `compact` 를 완성하며, 명시적 `pinyin` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개",

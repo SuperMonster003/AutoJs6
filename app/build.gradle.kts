@@ -675,6 +675,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: YOLO API
     implementation(project(":plugin-api:yolo-api"))
+
+    // Plugin API: Screen Color Picker API
+    implementation(project(":plugin-api:screen-color-picker-api"))
 }
 
 dependencies /* MIME */ {

@@ -168,6 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/09/01
 
+* `新增` 側拉抽屉工具分組在浮動按鈕與指針位置後加入可選的屏幕取色插件, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
 * `新增` `mediainfo` 新增顯式版本化的 `snapshot`/`capabilities` API 與 v1/v2 schema 常量; Rhino 保持舊 `read` 結果不變, Node.js 保持宿主 v1 預設結果, 僅在插件明確宣告支援時透傳插件 v2 並公開簡短引擎版本
 * `新增` Explorer Action 宿主檔案資訊能力 v1 允許已信任的唯讀插件在現有 APK 資訊對話框中附加有界、經 SHA-256 綁定的本地化摘要; 插件缺失、停用、不相容或失敗時, 原有欄位、安裝/清單操作與失敗處理均保持不變
 * `新增` `pinyin` 新增僅當前調用生效的 `customDictionary` 自訂讀音覆蓋, 完善 `compare` 與 `compact`, 並透過帶明確 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 開放同一外置外掛能力

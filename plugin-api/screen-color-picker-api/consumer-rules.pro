@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.screencolorpicker.api.** { *; }
+-dontwarn org.autojs.plugin.screencolorpicker.api.**

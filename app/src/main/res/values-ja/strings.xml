@@ -149,6 +149,7 @@
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
     <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間 (ミリ秒) を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
+    <string name="description_screen_color_picker">インストール済みの画面カラーピッカープラグインを使用して画面上の色を採取しコピーします</string>
     <string name="description_server_mode">サーバーモードは, AutoJs6 が端末上でサービスを起動して外部クライアントからの接続を待ち, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\nAutoJs6 のサーバーモードは 2 つの接続方式に対応しています:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku を使用すると, ADB 権限を取得し, システム API にアクセスできるようになります</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
@@ -1733,6 +1734,7 @@
     <string name="text_scheduled_restart_backend">エンジン</string>
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
+    <string name="text_screen_color_picker">画面カラーピッカー</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
     <string name="text_search">検索</string>

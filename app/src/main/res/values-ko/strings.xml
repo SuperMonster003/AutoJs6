@@ -150,6 +150,7 @@
     <string name="description_root_mode_preference">뿌리 접근을 위해 이국적인 뿌리 또는 비정상 상태가있는 경우 루트를 루트 또는 뿌리가 아닌 것으로 강제로 설정할 수 있습니다.</string>
     <string name="description_root_record_out_file_type_preference">바이너리 유형: 편집 불가능, 파일 확장자는 \"auto\"\nJavaScript 유형: 파일 확장자가 \"js\"인 경우 직접 편집하거나 복사할 수 있습니다.</string>
     <string name="description_screen_capture_request_delay">화면 캡처 권한을 요청할 때 표시되는 권한 요청 창은 사라질 때 페이드 등의 전환 애니메이션이 있을 수 있습니다. 이때 `images.captureScreen` 메서드를 즉시 호출하면, 얻은 스크린샷에 권한 요청 창의 내용이 포함되어 화면이 가려질 수 있습니다.\n\n이 설정 값은 권한을 획득한 직후 첫 스크린샷을 캡처하기 전에 지연 시간(밀리초)을 추가하여, 위와 같은 가림 문제를 방지하는 데 사용할 수 있습니다.\n\n이 설정은 권한 획득 후 첫 번째 캡처에만 적용되며, 이후 캡처에는 더 이상 영향을 주지 않습니다.</string>
+    <string name="description_screen_color_picker">설치된 화면 색상 선택기 플러그인으로 화면 어디서나 색상을 추출하고 복사합니다</string>
     <string name="description_server_mode">서버 모드는 AutoJs6 가 현재 기기에서 서비스를 실행하고 외부 클라이언트 연결을 대기하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\nAutoJs6 서버 모드는 두 가지 연결 방식을 지원합니다:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
@@ -1734,6 +1735,7 @@
     <string name="text_scheduled_restart_backend">엔진</string>
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
+    <string name="text_screen_color_picker">화면 색상 선택기</string>
     <string name="text_script_record">스크립트 녹음</string>
     <string name="text_script_running">스크립트 실행</string>
     <string name="text_search">검색</string>

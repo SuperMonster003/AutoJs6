@@ -23,6 +23,7 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHost
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
@@ -36,6 +37,7 @@ import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
 import org.autojs.plugin.yolo.api.YoloContract
 import java.util.Locale
 
@@ -1031,6 +1033,7 @@ class PluginCenterViewModel : ViewModel() {
             ImageQuantPluginContract.ENGINE to ImageQuantPluginContract.ACTION_RUNTIME,
             OfflineDocsPluginContract.ENGINE to OfflineDocsPluginContract.ACTION,
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
+            ScreenColorPickerContract.ENGINE to ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
         )

@@ -144,6 +144,7 @@
     <string name="description_root_mode_preference">如果设备使用非常规 Root 方式或 Root 权限检测结果异常, 可设置 \"强制 Root 模式\" 或 \"强制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二进制文件: 不可编辑, 文件扩展名为 \"auto\"\nJavaScript 文件: 可编辑或直接复制, 文件扩展名为 \"js\"</string>
     <string name="description_screen_capture_request_delay">申请屏幕捕获权限时, 弹出的权限申请窗口消失时可能存在渐变动画, 此时如果立即调用 `images.captureScreen` 方法, 获取的屏幕截图中会出现权限申请的窗口内容而造成遮挡.\n\n当前设置选项值用于在截图权限申请后立即获取屏幕截图前增加一个延迟时间 (单位为毫秒), 可用于避免上述遮挡问题.\n\n当前设置选项仅适用于获取截图权限后的首次截图操作, 后续截图操作不再受此设置值影响.</string>
+    <string name="description_screen_color_picker">使用已安装的屏幕取色插件在屏幕任意位置取样并复制颜色</string>
     <string name="description_server_mode">服务端模式用于让 AutoJs6 在当前设备开启服务并等待外部客户端连接, 以便进行 [ 脚本传输 / 打印日志 / 远程控制 ] 等.\n\nAutoJs6 服务端模式支持两种连接方式:\n1. 局域网 (LAN)\n2. 安卓调试桥 (ADB)</string>
     <string name="description_shizuku_access">通过 Shizuku 可以获得 ADB 特权并使用系统 API</string>
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
@@ -1729,6 +1730,7 @@
     <string name="text_scheduled_restart_backend">调度引擎</string>
     <string name="text_scheduled_restart_start_delay">启动延迟</string>
     <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
+    <string name="text_screen_color_picker">屏幕取色</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_running">脚本运行</string>
     <string name="text_search">搜索</string>
