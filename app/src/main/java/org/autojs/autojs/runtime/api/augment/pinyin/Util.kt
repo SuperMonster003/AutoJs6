@@ -1,12 +1,21 @@
 package org.autojs.autojs.runtime.api.augment.pinyin
 
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import java.text.Collator
 
 /**
  * 工具类 Util, 用于实现拼音转换时辅助功能.
  */
 @Suppress("SpellCheckingInspection")
 object Util {
+
+    /**
+     * Compare converted Pinyin using the same nested-array stringification and
+     * locale-aware ordering as JavaScript's String.localeCompare.
+     */
+    fun compare(a: List<List<String>>, b: List<List<String>>): Int {
+        return Collator.getInstance().compare(stringify(a), stringify(b))
+    }
 
     /**
      * 合并二维字符串数组为一维字符串数组.
@@ -49,7 +58,7 @@ object Util {
      */
     fun compact(arr: List<List<String>>): List<List<String>> = when {
         arr.isEmpty() -> emptyList()
-        arr.size == 1 -> arr.map { listOf(it).flatten() }
+        arr.size == 1 -> listOf(arr[0])
         else -> {
             var result = compact2array(arr[0], arr[1])
             for (i in 2 until arr.size) {
@@ -65,25 +74,27 @@ object Util {
      * @param a2 第二个拼音数组 eg: ["qian"]
      * @return 组合后的二维数组, 如 [["hai", "qian"], ["huan", "qian"]]
      */
-    private fun compact2array(a1: List<Any>, a2: List<String>): List<List<String>> = when {
-        a1.isEmpty() -> listOf(a2)
-        a2.isEmpty() -> a1.map { item1 ->
-            when (item1) {
-                is List<*> -> item1.map { coerceString(it) }
-                else -> listOf(item1.toString())
+    private fun compact2array(a1: List<*>, a2: List<String>): List<List<String>> {
+        return when {
+            a1.isEmpty() -> listOf(a2)
+            a2.isEmpty() -> a1.map { item1 ->
+                when (item1) {
+                    is List<*> -> item1.map { coerceString(it) }
+                    else -> listOf(coerceString(item1))
+                }
             }
-        }
-        else -> {
-            val result = mutableListOf<List<String>>()
-            a1.forEach { item1 ->
+            else -> a1.flatMap { item1 ->
                 val list1 = when (item1) {
                     is List<*> -> item1.map { coerceString(it) }
                     else -> listOf(coerceString(item1))
                 }
-                a2.mapTo(result) { list1 + it }
+                a2.map { item2 -> list1 + item2 }
             }
-            result
         }
+    }
+
+    private fun stringify(rows: List<List<String>>): String {
+        return rows.joinToString(",") { row -> row.joinToString(",") }
     }
 
 }

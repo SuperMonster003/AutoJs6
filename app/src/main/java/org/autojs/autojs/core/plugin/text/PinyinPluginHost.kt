@@ -6,6 +6,8 @@ import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.pinyin.api.IPinyinPlugin
 import org.autojs.plugin.pinyin.api.PinyinPluginActions
+import org.autojs.plugin.pinyin.api.PinyinOptionKeys
+import org.autojs.plugin.pinyin.api.PinyinPluginCapabilityKeys
 import org.autojs.plugin.pinyin.api.PinyinPluginIds
 
 object PinyinPluginHost {
@@ -28,6 +30,14 @@ object PinyinPluginHost {
 
     suspend fun convert(context: Context, text: String, options: Bundle): String {
         val target = host.selectOrThrow(context, engine = PinyinPluginIds.ENGINE)
+        if (options.containsKey(PinyinOptionKeys.CUSTOM_DICTIONARY_JSON)) {
+            val supportsCustomDictionary = target.pluginInfo
+                ?.capabilities
+                ?.getBoolean(PinyinPluginCapabilityKeys.CUSTOM_DICTIONARY_V1, false) == true
+            check(supportsCustomDictionary) {
+                "Selected Pinyin plugin does not support customDictionary v1; update the plugin or remove the option"
+            }
+        }
         return host.call(context, target) { proxy -> proxy.convert(text, options) }
     }
 

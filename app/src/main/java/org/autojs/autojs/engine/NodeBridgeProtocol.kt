@@ -590,6 +590,7 @@ object NodeBridgeModules {
     const val MEDIA = NodeBridgePermissionManifest.MEDIA
     const val MEDIAINFO = "mediainfo"
     const val RECORDER = "recorder"
+    const val PINYIN = NodeBridgePermissionManifest.PINYIN
     const val STORAGE = NodeBridgePermissionManifest.STORAGE
     const val STORAGES = "storages"
     const val DATABASE = NodeBridgePermissionManifest.DATABASE
@@ -662,6 +663,7 @@ object NodeBridgeModules {
     val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo")
     val mediainfoMethods = setOf("read", "get")
     val recorderMethods = setOf("getStatus", "start", "stop")
+    val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val databaseModules = setOf(DATABASE, SQLITE)
@@ -705,6 +707,7 @@ object NodeBridgeModules {
         MEDIA to mediaMethods,
         MEDIAINFO to mediainfoMethods,
         RECORDER to recorderMethods,
+        PINYIN to pinyinMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
         DATABASE to databaseMethods,
@@ -761,6 +764,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val engineInfo: NodeBridgeEngineInfo = NodeBridgeEngineInfo.fromContext(context),
     private val javaInteropEnabled: Boolean = true,
     private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
+    private val pinyinBackend: NodePinyinBackend = AndroidNodePinyinBackend(context),
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -839,6 +843,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaMethods -> dispatchMedia(request, auditedCallback)
             request.module == NodeBridgeModules.MEDIAINFO && request.method in NodeBridgeModules.mediainfoMethods -> dispatchMediainfo(request, auditedCallback)
             request.module == NodeBridgeModules.RECORDER && request.method in NodeBridgeModules.recorderMethods -> dispatchRecorder(request, auditedCallback)
+            request.module == NodeBridgeModules.PINYIN && request.method in NodeBridgeModules.pinyinMethods -> auditedCallback(NodePinyinBridge.dispatch(request, pinyinBackend))
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
             request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)

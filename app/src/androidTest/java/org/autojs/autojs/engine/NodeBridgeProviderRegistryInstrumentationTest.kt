@@ -13,7 +13,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(20, definitions.size)
+        assertEquals(21, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -50,6 +50,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             ),
         )
         assertProvider(
+            id = "pinyin",
+            modules = listOf(NodeBridgeModules.PINYIN),
+            capabilities = listOf(NodeBridgePermissionManifest.PINYIN),
+        )
+        assertProvider(
             id = "notifications",
             modules = listOf(NodeBridgeModules.NOTIFICATIONS),
             capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
@@ -79,6 +84,21 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             modules = listOf(NodeBridgeModules.SHELL),
             capabilities = listOf(NodeBridgePermissionManifest.SHELL),
         )
+    }
+
+    @Test
+    fun pinyinHealthReflectsPluginAvailability() {
+        val health = NodeBridgeProviderRegistry.androidHealth(context)
+            .associateBy { it.definition.id }
+            .getValue("pinyin")
+
+        assertTrue(
+            health.status in setOf(
+                NodeBridgeProviderStatus.AVAILABLE,
+                NodeBridgeProviderStatus.UNAVAILABLE,
+            ),
+        )
+        assertTrue(health.details.getValue("liveMethods").contains("convert"))
     }
 
     @Test
@@ -112,6 +132,13 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("media").status)
         assertTrue(healthById.getValue("media").details.getValue("liveMethods").contains("mediainfo.read"))
         assertEquals(NodeBridgePermissionManifest.MEDIA_RECORDING, healthById.getValue("media").details.getValue("recordingCapability"))
+        assertTrue(
+            healthById.getValue("pinyin").status in setOf(
+                NodeBridgeProviderStatus.AVAILABLE,
+                NodeBridgeProviderStatus.UNAVAILABLE,
+            ),
+        )
+        assertTrue(healthById.getValue("pinyin").details.getValue("liveMethods").contains("convert"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("device").status)
         assertTrue(healthById.getValue("notifications").details.getValue("liveMethods").contains("openSettings"))
         assertEquals(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS, healthById.getValue("notifications").details.getValue("settingsCapability"))

@@ -4,6 +4,7 @@ import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
@@ -28,6 +29,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
@@ -96,13 +98,13 @@ object Pinyin : Augmentable(), Invokable {
     }
 
     @RhinoSingletonFunctionInterface
-    fun compare(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) {
-        ""
+    fun compare(args: Array<out Any?>): Int = ensureArgumentsLength(args, 2) { argList ->
+        compareInternal(coerceString(argList[0], ""), coerceString(argList[1], ""))
     }
 
     @RhinoSingletonFunctionInterface
-    fun compact(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) {
-        ""
+    fun compact(args: Array<out Any?>): NativeArray = ensureArgumentsOnlyOne(args) { value ->
+        Util.compact(parseRhinoMatrix(value)).map { it.toNativeArray() }.toNativeArray()
     }
 
     @RhinoSingletonFunctionInterface
@@ -132,6 +134,17 @@ object Pinyin : Augmentable(), Invokable {
         PinyinPluginHost.fromCodePoint(globalContext, codePoint)
     }
 
+    internal fun compareInternal(hanA: String, hanB: String): Int {
+        val options = Bundle().apply {
+            putInt(PinyinOptionKeys.STYLE, PinyinStyle.TONE.value)
+        }
+        val (pinyinA, pinyinB) = runBlocking {
+            parseNestedStringArray(PinyinPluginHost.convert(globalContext, hanA, options)) to
+                    parseNestedStringArray(PinyinPluginHost.convert(globalContext, hanB, options))
+        }
+        return Util.compare(pinyinA, pinyinB)
+    }
+
     private fun fromPhraseInternal(phrase: String): List<List<String>> = parseNestedStringArray(runBlocking {
         PinyinPluginHost.fromPhrase(globalContext, phrase)
     })
@@ -143,6 +156,24 @@ object Pinyin : Augmentable(), Invokable {
             putBoolean(PinyinOptionKeys.SEGMENT, inquire("segment", ::coerceBoolean, DefaultOptions.SEGMENT))
             putBoolean(PinyinOptionKeys.HETERONYM, inquire("heteronym", ::coerceBoolean, DefaultOptions.HETERONYM))
             putBoolean(PinyinOptionKeys.GROUP, inquire("group", ::coerceBoolean, false))
+            if (this@toPluginOptions.has("customDictionary", this@toPluginOptions)) {
+                PinyinCustomDictionary.encodeRhino(this@toPluginOptions.get("customDictionary", this@toPluginOptions))
+                    ?.let { putString(PinyinOptionKeys.CUSTOM_DICTIONARY_JSON, it) }
+            }
+        }
+    }
+
+    private fun parseRhinoMatrix(value: Any?): List<List<String>> {
+        val matrix = value.jsUnwrapped() as? NativeArray
+            ?: throw IllegalArgumentException("pinyin.compact expects a two-dimensional array")
+        require(matrix.length <= Int.MAX_VALUE.toLong()) { "pinyin.compact input is too large" }
+        return (0 until matrix.length.toInt()).map { rowIndex ->
+            val row = ScriptableObject.getProperty(matrix, rowIndex).jsUnwrapped() as? NativeArray
+                ?: throw IllegalArgumentException("pinyin.compact row $rowIndex must be an array")
+            require(row.length <= Int.MAX_VALUE.toLong()) { "pinyin.compact row $rowIndex is too large" }
+            (0 until row.length.toInt()).map { itemIndex ->
+                coerceString(ScriptableObject.getProperty(row, itemIndex).jsUnwrapped())
+            }
         }
     }
 

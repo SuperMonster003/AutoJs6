@@ -31,6 +31,7 @@ object NodeBridgePermissionManifest {
     const val MEDIA_AUDIO = "media.audio"
     const val MEDIA_METADATA = "media.metadata"
     const val MEDIA_RECORDING = "media.recording"
+    const val PINYIN = "pinyin"
     const val STORAGE = "storage"
     const val DATABASE = "database"
     const val NOTIFICATIONS = "notifications"
@@ -92,6 +93,7 @@ object NodeBridgePermissionManifest {
         MEDIA_AUDIO,
         MEDIA_METADATA,
         MEDIA_RECORDING,
+        PINYIN,
         STORAGE,
         DATABASE,
         NOTIFICATIONS,
@@ -407,6 +409,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.MEDIA -> listOf(MEDIA, MEDIA_AUDIO)
             NodeBridgeModules.MEDIAINFO -> listOf(MEDIA, MEDIA_METADATA)
             NodeBridgeModules.RECORDER -> listOf(MEDIA, MEDIA_RECORDING)
+            NodeBridgeModules.PINYIN -> listOf(PINYIN)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)
             NodeBridgeModules.NOTIFICATIONS -> when (method) {

@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.pinyin.api.PinyinCustomDictionaryContract
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
@@ -12,8 +13,9 @@ object NodeCapabilityBrokerPolicy {
     const val SCHEMA = "autojs6-node-capability-broker-v2"
     const val VERSION = 2
     const val DEFAULT_MAX_AUDIT_ROWS = 64
-    const val DEFAULT_MAX_REQUEST_BYTES = 64 * 1024
+    const val DEFAULT_MAX_REQUEST_BYTES = 96 * 1024
     const val DEFAULT_MAX_ARGS_BYTES = 32 * 1024
+    const val PINYIN_CONVERT_MAX_ARGS_BYTES = PinyinCustomDictionaryContract.MAX_JSON_BYTES + 16 * 1024
 
     val operationDeclarations: List<OperationDeclaration> by lazy {
         val supportedMethods = NodeBridgeModules.supportedMethodsByModule.toMutableMap().apply {
@@ -34,6 +36,10 @@ object NodeCapabilityBrokerPolicy {
                         module = module,
                         method = method,
                         requiredCapabilities = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
+                        maxArgsBytes = when {
+                            module == NodeBridgeModules.PINYIN && method == "convert" -> PINYIN_CONVERT_MAX_ARGS_BYTES
+                            else -> DEFAULT_MAX_ARGS_BYTES
+                        },
                     )
                 }
             }

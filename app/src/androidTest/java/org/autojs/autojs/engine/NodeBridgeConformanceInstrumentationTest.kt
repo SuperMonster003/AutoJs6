@@ -37,6 +37,20 @@ class NodeBridgeConformanceInstrumentationTest {
     }
 
     @Test
+    fun pinyinStableBridgeRegistryMatchesConformanceSurface() {
+        val expectedMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
+        assertEquals(expectedMethods, stableDispatchMethods.getValue(NodeBridgeModules.PINYIN))
+        assertEquals(expectedMethods, NodeBridgeModules.supportedMethodsByModule.getValue(NodeBridgeModules.PINYIN))
+        expectedMethods.forEach { method ->
+            assertTrue(NodeBridgeModules.supports(NodeBridgeModules.PINYIN, method))
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.PINYIN),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor(NodeBridgeModules.PINYIN, method),
+            )
+        }
+    }
+
+    @Test
     fun jsStableBridgeModuleExportsAndPromiseContractsAreStable() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node bridge conformance suite")
 
@@ -1278,6 +1292,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"),
             NodeBridgeModules.MEDIAINFO to setOf("read", "get"),
             NodeBridgeModules.RECORDER to setOf("getStatus", "start", "stop"),
+            NodeBridgeModules.PINYIN to setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.DATABASE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),

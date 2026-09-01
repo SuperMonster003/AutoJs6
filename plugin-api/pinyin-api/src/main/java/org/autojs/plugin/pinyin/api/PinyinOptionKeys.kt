@@ -6,4 +6,5 @@ object PinyinOptionKeys {
     const val SEGMENT = "segment"
     const val HETERONYM = "heteronym"
     const val GROUP = "group"
+    const val CUSTOM_DICTIONARY_JSON = "custom_dictionary_json"
 }

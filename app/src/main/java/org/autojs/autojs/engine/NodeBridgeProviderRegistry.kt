@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
 import org.json.JSONArray
 import org.json.JSONObject
@@ -128,6 +129,7 @@ object NodeBridgeProviderRegistry {
     private const val STORAGE_PROVIDER = "storage"
     private const val DATABASE_PROVIDER = "database"
     private const val MEDIA_PROVIDER = "media"
+    private const val PINYIN_PROVIDER = "pinyin"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
     private const val DEVICE_PROVIDER = "device"
     private const val SENSORS_PROVIDER = "sensors"
@@ -194,6 +196,12 @@ object NodeBridgeProviderRegistry {
                 NodeBridgePermissionManifest.MEDIA_RECORDING,
             ),
             packagedSupport = packagedProviderDependent("P13-26 partial media provider exposes scoped metadata and read-only audio status; recording, playback, MediaStore, and foreground disclosure require separate packaged evidence"),
+        ),
+        provider(
+            id = PINYIN_PROVIDER,
+            modules = listOf(NodeBridgeModules.PINYIN),
+            capabilities = listOf(NodeBridgePermissionManifest.PINYIN),
+            packagedSupport = packagedProviderDependent("requires the official Pinyin plugin and the packaged pinyin capability"),
         ),
         provider(
             id = NOTIFICATIONS_PROVIDER,
@@ -368,6 +376,7 @@ object NodeBridgeProviderRegistry {
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         MEDIA_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        PINYIN_PROVIDER -> if (PinyinPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
@@ -415,6 +424,14 @@ object NodeBridgeProviderRegistry {
             "recorderPolicy" to "recorder exposes getStatus only; start/stop fail closed until foreground disclosure, permission, lifecycle, cleanup, and packaged smoke are promoted",
             "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
             "statusReason" to "P13-26 partial gate promotes JSON-safe scoped metadata and read-only audio status while recording/playback/MediaStore remain blocked",
+        )
+        PINYIN_PROVIDER -> linkedMapOf(
+            "liveMethods" to NodeBridgeModules.pinyinMethods.sorted().joinToString(","),
+            "capability" to NodeBridgePermissionManifest.PINYIN,
+            "pluginServiceCount" to PinyinPluginHost.queryServiceCount(context).toString(),
+            "customDictionaryPolicy" to "per_call_v1_64KiB_no_persistence",
+            "rawObjectPolicy" to "JSON-only values cross the bridge; no Context, Binder, Bundle, database, or Java object is exposed",
+            "statusReason" to "Pinyin conversion is supplied by the selected external Pinyin plugin through the host capability broker",
         )
         NOTIFICATIONS_PROVIDER -> linkedMapOf(
             "liveMethods" to "notify,cancel,cancelAll,getPermissionStatus,openSettings",
