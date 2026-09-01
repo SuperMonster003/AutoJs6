@@ -22,6 +22,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionHostFileInfoLoader
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
@@ -190,6 +191,24 @@ object ApkInfoDialogManager {
                     enabled = manifestAvailable,
                     enabledColor = R.color.dialog_button_hint,
                 )
+                scope.launch {
+                    val pluginInfo = try {
+                        ExplorerActionHostFileInfoLoader.load(
+                            context = context,
+                            sourceFile = packageFile,
+                            expectedSourceSha256 = info.sourceSha256,
+                        )
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (_: Exception) {
+                        null
+                    }
+                    pluginInfo?.let { details ->
+                        binding.pluginInfoLabel.text = details.title
+                        dialog.setCopyableTextIfAbsent(binding.pluginInfoValue, details.summary)
+                        binding.pluginInfoParent.isVisible = true
+                    }
+                }
             }.onFailure { error ->
                 if (error is CancellationException) throw error
                 val extension = packageFile.extension.uppercase(Locale.ROOT).ifBlank { "?" }

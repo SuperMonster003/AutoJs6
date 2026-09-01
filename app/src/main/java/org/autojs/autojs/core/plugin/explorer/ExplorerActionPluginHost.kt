@@ -33,6 +33,21 @@ object ExplorerActionPluginHost {
         target: AidlPluginHost.Discovered,
     ): Bundle = host.call(context, target) { proxy -> proxy.getActionCatalog() }
 
+    suspend fun getHostFileInfo(
+        context: Context,
+        target: AidlPluginHost.Discovered,
+        source: ParcelFileDescriptor,
+        request: Bundle,
+    ): Bundle = host.call(
+        context = context,
+        target = target,
+        retryOnRemoteException = false,
+    ) { proxy ->
+        requireNotNull(proxy.getHostFileInfo(source, request)) {
+            "Explorer Action plugin returned no host file information"
+        }
+    }
+
     suspend fun openArchive(
         context: Context,
         target: AidlPluginHost.Discovered,

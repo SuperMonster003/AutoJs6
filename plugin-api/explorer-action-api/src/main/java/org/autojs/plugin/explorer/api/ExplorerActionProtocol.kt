@@ -5,6 +5,11 @@ object ExplorerActionProtocol {
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
+    /** Optional capability revision, negotiated independently from the v1-v22 catalog protocol. */
+    const val HOST_FILE_INFO_VERSION = 1
+    const val MIN_HOST_FILE_INFO_VERSION = 1
+    const val MAX_HOST_FILE_INFO_VERSION = HOST_FILE_INFO_VERSION
+
     const val MAX_ACTIONS_PER_PLUGIN = 32
     const val MAX_ACTION_ID_LENGTH = 128
     const val MAX_LABEL_LENGTH = 160
@@ -55,6 +60,11 @@ object ExplorerActionProtocol {
     const val MAX_ARCHIVE_VOLUME_OPEN_REQUESTS = 512
     const val MAX_ARCHIVE_FILENAME_CHARSET_NAMES = 32
     const val MAX_ARCHIVE_FILENAME_CHARSET_NAME_LENGTH = 128
+    const val MAX_HOST_FILE_INFO_TITLE_LENGTH = 160
+    const val MAX_HOST_FILE_INFO_SUMMARY_LENGTH = 16_384
+    const val MAX_HOST_FILE_INFO_SUMMARY_LINES = 24
+    const val MAX_HOST_FILE_INFO_SUMMARY_LINE_LENGTH = 1_024
+    const val MAX_HOST_FILE_INFO_ERROR_MESSAGE_LENGTH = 240
     /** Protocol envelope. A host may advertise and enforce a smaller per-action runtime limit. */
     const val MAX_OUTPUT_BYTES = 4L * 1024L * 1024L * 1024L
 }

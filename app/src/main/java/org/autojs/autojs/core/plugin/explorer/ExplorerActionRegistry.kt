@@ -177,6 +177,27 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         if (items.isEmpty() || items.size > ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) return emptyList()
         if (!targetsShareCanonicalParent(items)) return emptyList()
         val targets = items.map { item -> targetFor(item) ?: return emptyList() }
+        return matchingActionsForTargets(targets)
+    }
+
+    internal fun matchingActionsForFile(file: File): List<ResolvedExplorerAction> {
+        val source = runCatching { file.canonicalFile }.getOrNull() ?: return emptyList()
+        if (!source.isFile || !source.canRead() || source.parentFile == null) return emptyList()
+        return matchingActionsForTargets(
+            listOf(
+                ExplorerActionTarget(
+                    mimeType = Mime.fromFileOrWildcard(source.path),
+                    extension = source.extension,
+                    kind = ExplorerActionValues.TARGET_FILE,
+                    fileName = source.name,
+                ),
+            ),
+        )
+    }
+
+    private fun matchingActionsForTargets(
+        targets: List<ExplorerActionTarget>,
+    ): List<ResolvedExplorerAction> {
         val actions = snapshot.get()
         val matchingIdsByPackage = actions.groupBy(ResolvedExplorerAction::packageName).mapValues {
             (_, packageActions) ->

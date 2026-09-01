@@ -19,4 +19,9 @@ interface IExplorerActionPlugin {
     // v11 structured result: session Binder on success, or a bounded ExplorerArchiveOpenValues
     // error. The transient request password must be erased by both peers after this call returns.
     Bundle openArchiveV11(in ParcelFileDescriptor source, in Bundle request);
+
+    // Optional hostFileInfoVersion=1 capability. This transaction is appended so every existing
+    // v1-v22 transaction number remains unchanged. Both peers retain ownership of their local
+    // descriptor instance; the plugin must finish reading its duplicate before returning.
+    Bundle getHostFileInfo(in ParcelFileDescriptor source, in Bundle request);
 }

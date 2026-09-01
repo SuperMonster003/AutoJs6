@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `新增` Explorer Action 宿主檔案資訊能力 v1 允許已信任的唯讀插件在現有 APK 資訊對話框中附加有界、經 SHA-256 綁定的本地化摘要; 插件缺失、停用、不相容或失敗時, 原有欄位、安裝/清單操作與失敗處理均保持不變
 * `新增` Image Quantization 選項透過 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 與 `maxMemoryBytes`, 預設限制 16000000 像素和 256 MiB 額外工作記憶體; 超出預算時傳回帶資源詳情的類型化異常, 結果報告計入預算的峰值記憶體, 停止腳本會取消其活動原生量化
 * `新增` `images.quantizeToFile` 將索引 PNG 直接串流寫入磁碟並傳回大小與品質指標; Image Quantization 選項新增 `preserveAlpha`, 常見 Bitmap 配置, 硬件輸入與廣色域輸入透過 `OPTIONS_API_VERSION>=3` 統一正規化為 sRGB
 * `新增` `images.quantize` 現會傳回 PNG 位元組, 大小, 實際品質與量化誤差; 省略品質下限時採用盡力而為 (`minQuality=0`), 明確下限無法滿足時拋出帶錯誤碼 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 結果介面要求 `OPTIONS_API_VERSION>=2`
