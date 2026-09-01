@@ -11,4 +11,6 @@ interface IPinyin4jPlugin {
     String of(String text, in Bundle options);
 
     String asTone(String text);
+
+    String readings(String text, in Bundle options);
 }

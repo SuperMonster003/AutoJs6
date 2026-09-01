@@ -28,3 +28,10 @@ android {
 dependencies {
     api(project(":plugin-api:common-plugin-api"))
 }
+
+kotlin {
+    compilerOptions {
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+    }
+}
