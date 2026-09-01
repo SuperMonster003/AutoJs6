@@ -143,6 +143,7 @@
         "Les boîtes de dialogue de mise à jour peuvent afficher dans l'application l'historique des versions du plugin correspondant"
       ],
       "fix": [
+        "L'exécution directe depuis le gestionnaire de fichiers ne respectait pas l'encodage UTF-8, UTF-16 ou UTF-32 indiqué par le BOM Unicode, si bien que des scripts exécutés normalement dans l'éditeur échouaient avec `Caractère non valide`",
         "Les informations de téléchargement d'Android Studio n'étaient plus écrites automatiquement dans les données README communes après la migration des scrapers",
         "Alignement de la numérotation des constructions distantes expérimentales à fichier unique sur le constructeur historique, et ajout d’un contrôle préalable de l’espace de travail à échec fermé fondé sur les tailles décompressées recoupées, une limite d’expansion du modèle vérifiée à la compilation et une réserve de 256 Mio",
         "La WebView Ace pouvait afficher brièvement une page entièrement blanche avant l'application du thème hôte et du document initial, provoquant un flash marqué avec les thèmes sombres; la première présentation attend désormais des signaux explicites de thème appliqué, document soumis et rendu stable au lieu d'un délai fixe",

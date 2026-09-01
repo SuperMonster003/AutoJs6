@@ -306,6 +306,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 전역 JavaScript (Rhino) R8 통합에 검증된 산출물 내보내기용 `runtime.loadJarWithR8` 오버로드 3개와 프로토콜 1.1 `runtime.retraceR8Stack`을 추가; mapping/seeds/usage/retrace metadata를 원자적으로 게시하고 retrace는 mapping 출처에 결합되며 Provider가 없거나 잘못되면 D8/dx 또는 로컬 fallback 없이 실패
 * `추가` 코드 편집기 설정에 Ace 언어 지원 matrix와 TypeScript/JavaScript, Python, Lua 및 Java의 언어별 의미 switch를 추가; Kotlin은 Provider 없는 P2+ 상태로 계속 표시되며 파일 형식은 언어 재분류가 아닌 라우팅 전 allowlist로 명확히 동작
 * `추가` 플러그인 업데이트 대화상자에서 해당 플러그인의 릴리스 기록을 앱 안에 표시 가능
+* `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
 * `수정` 호스트 테마와 초기 문서가 적용되기 전에 Ace WebView가 잠시 순백색 페이지를 노출하여 어두운 편집기 테마에서 눈에 띄는 깜박임이 발생하는 문제; 최초 표시는 고정 지연 대신 테마 적용, 문서 제출 및 안정된 그리기 신호를 명시적으로 기다림

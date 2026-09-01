@@ -6,12 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs6.R;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,7 +51,7 @@ public class JavaScriptFileSource extends JavaScriptSource {
     @Override
     public String getScript() {
         if (mScript == null)
-            mScript = PFiles.read(mFile);
+            mScript = ScriptFileEncoding.read(mFile);
         return mScript;
     }
 
@@ -97,11 +94,7 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     @Override
     public Reader getScriptReader() {
-        try {
-            return new FileReader(mFile);
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
-        }
+        return ScriptFileEncoding.openReader(mFile);
     }
 
     public File getFile() {

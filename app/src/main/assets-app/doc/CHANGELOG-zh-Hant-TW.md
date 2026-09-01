@@ -146,6 +146,7 @@
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
 * `新增` 程式碼編輯器設定新增 Ace 語言支援矩陣, 並為 TypeScript/JavaScript, Python, Lua 與 Java 提供逐語言語意開關; Kotlin 以無 Provider 的 P2+ 狀態保持可見, 檔案類型自訂明確作為語意路由前置允許清單而非語言重新分類
 * `新增` 外掛更新對話框支援在應用程式內顯示對應外掛的發行歷史
+* `修復` 帶 Unicode BOM 的腳本由檔案管理器直接執行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常執行卻於檔案管理器回報 `無效字元` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用資料的問題
 * `修復` 使實驗性遠端單檔案建置編號與舊建置器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓縮大小、使用建置期驗證的範本展開上限，並保留 256 MiB 空間
 * `修復` Ace WebView 在主機端主題與首份文件生效前可能短暫顯示純白背景, 尤其會在深色編輯器主題下產生明顯閃爍; 首次畫面現在由主題已套用, 文件已提交與穩定繪製訊號共同放行, 不依賴固定延遲
