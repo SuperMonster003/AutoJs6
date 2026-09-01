@@ -9,6 +9,20 @@ on:
       tag:
         description: AutoJs6 release tag, for example v6.7.1
         required: true
+        type: string
+      compatibility_min_host_version_code:
+        description: Optional minimum compatible host versionCode; blank keeps exact matching
+        required: false
+        type: string
+      compatibility_max_host_version_code:
+        description: Optional maximum compatible host versionCode; blank keeps exact matching
+        required: false
+        type: string
+      allow_patch_version_mismatch:
+        description: Explicitly allow non-exact hosts inside the declared closed interval
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,7 +63,21 @@ jobs:
         run: chmod +x gradlew
 
       - name: Generate Runtime Kit
-        run: ./gradlew :app:generateRuntimeKit -x :app:lintVitalAnalyzeInrtRelease
+        env:
+          COMPATIBILITY_MIN_HOST_VERSION_CODE: ${{ inputs.compatibility_min_host_version_code }}
+          COMPATIBILITY_MAX_HOST_VERSION_CODE: ${{ inputs.compatibility_max_host_version_code }}
+          ALLOW_PATCH_VERSION_MISMATCH: ${{ inputs.allow_patch_version_mismatch }}
+        run: |
+          args=(":app:generateRuntimeKit" "-x" ":app:lintVitalAnalyzeInrtRelease")
+          if [ -n "$COMPATIBILITY_MIN_HOST_VERSION_CODE" ]; then
+            args+=("--project-prop=autojs.runtimeKit.compatibility.minHostVersionCode=$COMPATIBILITY_MIN_HOST_VERSION_CODE")
+          fi
+          if [ -n "$COMPATIBILITY_MAX_HOST_VERSION_CODE" ]; then
+            args+=("--project-prop=autojs.runtimeKit.compatibility.maxHostVersionCode=$COMPATIBILITY_MAX_HOST_VERSION_CODE")
+          fi
+          allow_patch_version_mismatch="${ALLOW_PATCH_VERSION_MISMATCH:-false}"
+          args+=("--project-prop=autojs.runtimeKit.compatibility.allowPatchVersionMismatch=$allow_patch_version_mismatch")
+          ./gradlew "${args[@]}"
 
       - name: Upload Runtime Kit artifact
         uses: actions/upload-artifact@v4

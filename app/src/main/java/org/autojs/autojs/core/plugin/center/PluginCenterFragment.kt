@@ -157,7 +157,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
                     return
                 }
-                PluginAbiCompatibilityPrompt.runBeforeDownload(contextRef, item) {
+                PluginInstallCompatibilityPrompt.runBeforeDownload(contextRef, item) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         PluginInstaller.installFromUrlWithPrompt(contextRef, url, item.installableApkSha256)
                     }
@@ -879,8 +879,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                         val started = openIntent.startSafely(contextRef, true)
                         d.dismiss()
                         if (started) {
-                            item.activatedState = PluginActivatedState.DONE
-                            ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
+                            item.activatedState = PluginActivatedState.UNKNOWN
                             adapter.notifyDataSetChanged()
                             tryEnableAfterWake(item)
                         }
@@ -902,7 +901,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private fun tryEnableAfterWake(item: PluginCenterItem) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val delays = longArrayOf(300L, 800L, 1500L)
+            val delays = longArrayOf(300L, 700L, 1_500L, 3_000L, 5_000L)
+            var lastError: Throwable? = null
             for (delayMs in delays) {
                 delay(delayMs)
                 val error = runCatching {
@@ -914,13 +914,27 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                         item.isEnabled = true
                         item.enabledState = PluginEnabledState.READY
                         item.lastError = null
+                        item.activatedState = PluginActivatedState.DONE
                         adapter.notifyDataSetChanged()
+                        ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
                     }
                     return@launch
                 }
                 if (error is CancellationException) {
                     return@launch
                 }
+                lastError = error
+            }
+            val error = lastError ?: return@launch
+            if (isAdded && _binding != null) {
+                val mapped = PluginErrorMapper.fromThrowable(error)
+                vm.setEnabled(contextRef, item.packageName, false, mapped)
+                item.isEnabled = false
+                item.enabledState = PluginEnabledState.ERROR(mapped)
+                item.lastError = mapped
+                item.activatedState = PluginActivatedState.RECOMMENDED
+                adapter.notifyDataSetChanged()
+                showEnableErrorDialog(item, mapped, error)
             }
         }
     }

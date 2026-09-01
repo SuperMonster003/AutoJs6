@@ -97,6 +97,7 @@
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_ai_settings" translatable="false">key_$_ai_settings</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
+    <string name="key_apk_builder_remote_build_enabled" translatable="false">key_$_apk_builder_remote_build_enabled</string>
     <string name="key_app_language" translatable="false">key_$_app_language</string>
     <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>
     <string name="key_app_language_auto" translatable="false">key_$_app_language_auto</string>
@@ -271,6 +272,8 @@
     <string name="num_zero" translatable="false">0</string>
     <string name="original_developer_full_name" translatable="false">Stardust</string>
     <string name="original_developer_nickname" translatable="false">hyb1996</string>
+    <string name="plugin_html_previewer_name" translatable="false">HTML Previewer</string>
+    <string name="plugin_markdown_previewer_name" translatable="false">Markdown Previewer</string>
     <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
     <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
     <string name="symbol_colon" translatable="false">:</string>

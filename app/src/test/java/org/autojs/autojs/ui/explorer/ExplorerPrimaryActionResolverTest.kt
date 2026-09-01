@@ -10,7 +10,7 @@ import org.junit.Test
 class ExplorerPrimaryActionResolverTest {
 
     @Test
-    fun previewableDocumentsResolveToDocumentPreview() {
+    fun previewableDocumentsResolveToDocumentPreviewer() {
         listOf(
             FileUtils.TYPE.MARKDOWN,
             FileUtils.TYPE.MARKDOWN_LONG,
@@ -19,7 +19,7 @@ class ExplorerPrimaryActionResolverTest {
         ).forEach { type ->
             assertSame(
                 type.name,
-                ExplorerPrimaryAction.DOCUMENT_PREVIEW,
+                ExplorerPrimaryAction.DOCUMENT_PREVIEWER,
                 ExplorerPrimaryActionResolver.resolve(type),
             )
         }

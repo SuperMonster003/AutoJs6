@@ -706,16 +706,18 @@ class PluginCenterViewModel : ViewModel() {
         // zh-CN: 未安装时: installable 取 releases 最新 (第一个).
         val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
 
-        // When installed: updatable uses highest release greater than local and not ignored.
-        // zh-CN: 已安装时: updatable 取 "大于 installed 且未忽略" 的最高版本.
-        val targetUpdate = run {
-            if (!allowUpdateCheck || !isInstalled || versionCodeLocal == null) return@run null
-            val candidates = index?.releases
-                ?.filter { it.versionCode > versionCodeLocal }
-                ?.sortedByDescending { it.versionCode }
-                ?: emptyList()
-            candidates.firstOrNull { !UpdateIgnoreStore.isIgnored(packageName, it.versionCode) }
-        }
+        // Normal releases only surface versions newer than the installed one. A compatibility-
+        // matrix match may intentionally be lower after the host is downgraded; expose it as a
+        // destructive uninstall/reinstall action instead of an Android in-place update.
+        // zh-CN: 普通版本仅展示高于已安装版本的更新. 宿主降级后, 兼容矩阵可能命中更低的
+        // 配套版本; 此时展示卸载重装动作, 不将其作为 Android 覆盖更新处理.
+        val targetAction = PluginReleaseTargetPolicy.resolve(
+            releases = index?.releases.orEmpty(),
+            installedVersionCode = versionCodeLocal.takeIf { isInstalled },
+            allowUpdateCheck = allowUpdateCheck,
+            isIgnored = { versionCode -> UpdateIgnoreStore.isIgnored(packageName, versionCode) },
+        )
+        val targetUpdate = targetAction?.release
 
         val trustInfo = runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrElse {
             PluginTrustManager.TrustInfo(
@@ -801,6 +803,7 @@ class PluginCenterViewModel : ViewModel() {
             updatableApkSizeBytes = targetUpdate?.apkSizeBytes,
             updatableChangelogUrl = targetUpdate?.changelogUrl,
             updatableChangelogText = targetUpdate?.changelogText,
+            requiresDowngradeReinstall = targetAction?.requiresDowngradeReinstall == true,
 
             author = author ?: trustInfo.developer,
             collaborators = collaborators,
@@ -862,15 +865,13 @@ class PluginCenterViewModel : ViewModel() {
                 localVersionName = local.versionName,
             )
         val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
-        val targetUpdate = run {
-            val localVersionCode = local.versionCode
-            if (!allowUpdateCheck || localVersionCode == null) return@run null
-            val candidates = index?.releases
-                ?.filter { it.versionCode > localVersionCode }
-                ?.sortedByDescending { it.versionCode }
-                ?: emptyList()
-            candidates.firstOrNull { !UpdateIgnoreStore.isIgnored(packageName, it.versionCode) }
-        }
+        val targetAction = PluginReleaseTargetPolicy.resolve(
+            releases = index?.releases.orEmpty(),
+            installedVersionCode = local.versionCode,
+            allowUpdateCheck = allowUpdateCheck,
+            isIgnored = { versionCode -> UpdateIgnoreStore.isIgnored(packageName, versionCode) },
+        )
+        val targetUpdate = targetAction?.release
         val requiresHostVersion = index?.requiresHostVersion
         val hostVersionCode = currentHostVersionCode()
         val forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true
@@ -935,6 +936,7 @@ class PluginCenterViewModel : ViewModel() {
             updatableApkSizeBytes = targetUpdate?.apkSizeBytes,
             updatableChangelogUrl = targetUpdate?.changelogUrl,
             updatableChangelogText = targetUpdate?.changelogText,
+            requiresDowngradeReinstall = targetAction?.requiresDowngradeReinstall == true,
 
             author = local.author ?: index?.author ?: trustInfo.developer,
             collaborators = index?.collaborators ?: emptyList(),

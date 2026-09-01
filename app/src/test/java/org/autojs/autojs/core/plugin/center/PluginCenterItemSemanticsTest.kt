@@ -35,6 +35,7 @@ class PluginCenterItemSemanticsTest {
             "updatableApkSizeBytes" to base.copy(updatableApkSizeBytes = 2L),
             "updatableChangelogUrl" to base.copy(updatableChangelogUrl = "https://example.com/changelog"),
             "updatableChangelogText" to base.copy(updatableChangelogText = "Changed"),
+            "requiresDowngradeReinstall" to base.copy(requiresDowngradeReinstall = true),
             "author" to base.copy(author = "Author"),
             "collaborators" to base.copy(collaborators = listOf("Collaborator")),
             "description" to base.copy(description = "Description"),

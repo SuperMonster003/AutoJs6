@@ -73,6 +73,35 @@ class ReleaseHistoryRepository {
         }
     }
 
+    fun loadPluginReleaseHistoryFlow(
+        context: Context,
+        url: String,
+        languageTag: String,
+    ): Flow<ReleaseHistoryItem> = channelFlow {
+        var lastError: Throwable? = null
+        for (contentUrl in pluginChangelogContentUrls(url, languageTag)) {
+            val result = runCatching {
+                ProcessLogger.i(context.getString(R.string.logger_ver_history_start_raw_thread))
+                ProcessLogger.i("URL: $contentUrl")
+                val markdown = fetchStreamString(contentUrl)
+                val items = parseMarkdownFlow(markdown).toList()
+                check(items.isNotEmpty()) { "No release history entries at $contentUrl" }
+                items.forEach { send(it) }
+                ProcessLogger.i(context.getString(R.string.logger_ver_history_raw_thread_success))
+            }
+            if (result.isSuccess) {
+                return@channelFlow
+            }
+            lastError = result.exceptionOrNull()
+        }
+        lastError?.let { error ->
+            error.printStackTrace()
+            ProcessLogger.i(
+                "${context.getString(R.string.logger_ver_history_raw_thread_failure)}: ${error.message}",
+            )
+        }
+    }
+
     private suspend fun fetchStreamString(url: String): String {
         return withContext(Dispatchers.IO) {
             mOkHttpClient.newCall(Request.Builder().url(url).build()).execute().use { response ->
@@ -86,6 +115,30 @@ class ReleaseHistoryRepository {
         const val DEFAULT_VERSION_NAME = "0.0.0"
 
         private val regexValidMarkdownVersion = Regex("""^#\s+v[\d.]+\S*""")
+        private val regexGitHubReleaseUrl = Regex(
+            """^https://github\.com/([^/]+)/([^/]+)/releases(?:/.*)?$""",
+            RegexOption.IGNORE_CASE,
+        )
+
+        internal fun pluginChangelogContentUrls(url: String, languageTag: String): List<String> {
+            val cleanUrl = url.substringBefore('#').substringBefore('?')
+            regexGitHubReleaseUrl.matchEntire(cleanUrl)?.let { match ->
+                val (owner, repository) = match.destructured
+                val base = "https://raw.githubusercontent.com/$owner/$repository/HEAD/app/src/main/assets/doc"
+                return listOf(
+                    "$base/CHANGELOG-$languageTag.md",
+                    "$base/CHANGELOG.md",
+                ).distinct()
+            }
+            if (cleanUrl.startsWith("https://github.com/", ignoreCase = true) && cleanUrl.contains("/blob/")) {
+                return listOf(
+                    cleanUrl
+                        .replace("https://github.com/", "https://raw.githubusercontent.com/", ignoreCase = true)
+                        .replace("/blob/", "/"),
+                )
+            }
+            return listOf(url)
+        }
 
         enum class Category(val labelRes: Int, val priority: Int) {
             HINT(R.string.changelog_label_hint, -2),
@@ -161,7 +214,7 @@ class ReleaseHistoryRepository {
             File(context.filesDir, languageTag.toChangelogMarkdownCacheFile()).writeText(markdown)
         }
 
-        private fun parseMarkdownFlow(md: String): Flow<ReleaseHistoryItem> = channelFlow {
+        internal fun parseMarkdownFlow(md: String): Flow<ReleaseHistoryItem> = channelFlow {
             var curTitle = ""
             var curDate = ""
             val bodyLines = mutableListOf<String>()

@@ -11,4 +11,7 @@ data class PluginIndexRelease(
 
     val changelogUrl: String? = null,
     val changelogText: String? = null,
+
+    /** True when this release was selected from the APK Builder compatibility matrix. */
+    val compatibilityMatrixMatched: Boolean = false,
 )

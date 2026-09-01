@@ -3,8 +3,12 @@ package org.autojs.plugin.apkbuilder.template
 object ApkBuilderTemplateCapabilityKeys {
     const val BUILT_FOR_HOST_VERSION_NAME = "builtForHostVersionName"
     const val BUILT_FOR_HOST_VERSION_CODE = "builtForHostVersionCode"
+    const val COMPATIBILITY_MIN_HOST_VERSION_CODE = "apkBuilderCompatibilityMinHostVersionCode"
+    const val COMPATIBILITY_MAX_HOST_VERSION_CODE = "apkBuilderCompatibilityMaxHostVersionCode"
+    const val ALLOW_PATCH_VERSION_MISMATCH = "apkBuilderAllowPatchVersionMismatch"
     const val PROTOCOL_VERSION = "apkBuilderTemplateProtocolVersion"
     const val TEMPLATE_KIND = "apkBuilderTemplateKind"
+    const val TEMPLATE_SUPPORTED_ABIS = "apkBuilderTemplateSupportedAbis"
     const val TEMPLATE_PACKAGE_NAME = "apkBuilderTemplatePackageName"
     const val TEMPLATE_SHA256 = "apkBuilderTemplateSha256"
     const val RUNTIME_KIT_ID = "runtimeKitId"

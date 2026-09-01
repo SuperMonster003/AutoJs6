@@ -39,6 +39,7 @@ class AidlPluginHost<I : IInterface>(
     private val proxyFactory: (IBinder) -> I,
     private val infoReader: (I) -> PluginInfo,
     private val defaultEnabled: Boolean = true,
+    private val preBindValidator: ((Context, ServiceInfo) -> Unit)? = null,
 ) {
 
     private val defaultBindTimeoutMs = 60_000L
@@ -420,6 +421,7 @@ class AidlPluginHost<I : IInterface>(
         retryOnRemoteException: Boolean = true,
         block: (I) -> T,
     ): T {
+        preBindValidator?.invoke(context, serviceInfo)
         val appContext = context.applicationContext
         val entry = getOrCreateEntry(appContext, serviceInfo)
         val proxy = awaitProxy(entry, bindTimeoutMs)
@@ -443,6 +445,7 @@ class AidlPluginHost<I : IInterface>(
         retryOnRemoteException: Boolean,
         block: (I) -> T,
     ): LeasedCall<T> {
+        preBindValidator?.invoke(context, serviceInfo)
         var retriesRemaining = if (retryOnRemoteException) 1 else 0
         while (true) {
             val binding = awaitDedicatedServiceBinding(context.applicationContext, serviceInfo, bindTimeoutMs)
@@ -777,6 +780,14 @@ class AidlPluginHost<I : IInterface>(
         }
     }
 
+    private fun evictEntry(entry: PooledConnection) {
+        synchronized(poolLock) {
+            if (connectionPool[entry.component] === entry) {
+                connectionPool.remove(entry.component)
+            }
+        }
+    }
+
     private inner class PooledConnection(
         val appContext: Context,
         val serviceInfo: ServiceInfo,
@@ -874,6 +885,10 @@ class AidlPluginHost<I : IInterface>(
                 waiters.clear()
                 list
             }
+            // Android may deliver several terminal callbacks for the same binding. Retire this
+            // pooled entry by identity before posting any unbind, so a late callback from the old
+            // ServiceConnection cannot cancel a replacement binding created for the same component.
+            evictEntry(this)
             if (pending.isNotEmpty()) {
                 val error = IllegalStateException("$reason: $name")
                 pending.forEach { waiter ->

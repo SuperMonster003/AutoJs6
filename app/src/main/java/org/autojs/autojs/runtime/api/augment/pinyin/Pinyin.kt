@@ -4,18 +4,16 @@ import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCore.DefaultOptions
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCore.PinyinMode
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCore.PinyinStyle
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCore.parseStyle
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.DefaultOptions
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinMode
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinStyle
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.parseMode
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.parseStyle
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -140,7 +138,7 @@ object Pinyin : Augmentable(), Invokable {
 
     private fun NativeObject.toPluginOptions(): Bundle {
         return Bundle().apply {
-            putInt(PinyinOptionKeys.MODE, inquire("mode", { o, def -> PinyinCore.parseMode(o) ?: def }, DefaultOptions.MODE.value))
+            putInt(PinyinOptionKeys.MODE, inquire("mode", { o, def -> parseMode(o) ?: def }, DefaultOptions.MODE.value))
             putInt(PinyinOptionKeys.STYLE, inquire("style", { o, def -> parseStyle(o) ?: def }, DefaultOptions.STYLE.value))
             putBoolean(PinyinOptionKeys.SEGMENT, inquire("segment", ::coerceBoolean, DefaultOptions.SEGMENT))
             putBoolean(PinyinOptionKeys.HETERONYM, inquire("heteronym", ::coerceBoolean, DefaultOptions.HETERONYM))

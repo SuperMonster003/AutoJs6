@@ -11,9 +11,9 @@ import org.autojs.plugin.explorer.api.ExplorerActionValues
 /**
  * Resolves and dispatches file-manager plugin actions.
  *
- * The controller keeps provider/surface selection, official video routing, and host-presented
- * archive actions in one place. Explorer rows therefore consume the same policy at every entry
- * point instead of reproducing fallback decisions.
+ * The controller keeps provider/surface selection, official previewer/player routing, and
+ * host-presented archive actions in one place. Explorer rows therefore consume the same policy at
+ * every entry point instead of reproducing fallback decisions.
  */
 internal class ExplorerPluginActionController(
     private val openHostAction: (
@@ -72,6 +72,20 @@ internal class ExplorerPluginActionController(
         return true
     }
 
+    /** Returns true when the item requires a document Previewer plugin. */
+    fun launchDocumentPreviewerOrShowGuidance(
+        context: Context,
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+        preResolvedAction: ResolvedExplorerAction? = null,
+    ): Boolean {
+        if (!requiresDocumentPreviewer(item)) return false
+        val action = preResolvedAction ?: resolve(entryPoint, item)
+        val launched = action?.let { launch(context, entryPoint, it, item) } == true
+        if (!launched) ExplorerDocumentPreviewerPluginUi.showUnavailableDialog(context, item)
+        return true
+    }
+
     fun launch(
         context: Context,
         entryPoint: ExplorerActionEntryPoint,
@@ -106,6 +120,10 @@ internal class ExplorerPluginActionController(
 
     private fun requiresOfficialVideoPlayer(item: ExplorerItem): Boolean {
         return surface == ExplorerSurface.MAIN_FILES && item.type.isVideoFile()
+    }
+
+    private fun requiresDocumentPreviewer(item: ExplorerItem): Boolean {
+        return surface == ExplorerSurface.MAIN_FILES && item.type.isPreviewable()
     }
 
     private companion object {

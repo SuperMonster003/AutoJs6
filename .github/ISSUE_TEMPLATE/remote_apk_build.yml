@@ -1,0 +1,152 @@
+name: Remote APK build report
+description: Report an experimental host-to-plugin APK build failure with redacted diagnostics.
+title: "[Remote APK Build] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remote APK build is experimental and the official plugin capability is currently disabled by default. Attach only the smallest reproduction and a short diagnostic window. Never upload projects, scripts, keystores, passwords, private keys, tokens, or TypeScript staging keys.
+  - type: input
+    id: host_version
+    attributes:
+      label: AutoJs6 host version
+      description: Include version name, versionCode, package name, and release channel.
+      placeholder: 6.8.0 Alpha5 / 5277 / org.autojs.autojs6 / preview
+    validations:
+      required: true
+  - type: input
+    id: plugin_version
+    attributes:
+      label: APK Builder plugin identity
+      description: Include plugin version name/code, ABI variant, and APK SHA-256 when available.
+      placeholder: 1.0.0+autojs6-6.8.0-alpha5 / 520100 / inrt-arm64-v8a / sha256
+    validations:
+      required: true
+  - type: input
+    id: runtime_kit
+    attributes:
+      label: Runtime Kit and protocol
+      description: Include Runtime Kit ID, built-for/min/max host versionCode, and remote protocol version.
+      placeholder: runtimeKitId / 5277..5277 / protocol v3
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android
+      description: Model, Android version, API level, ABI, RAM, and whether this is a physical device or emulator.
+    validations:
+      required: true
+  - type: dropdown
+    id: source_kind
+    attributes:
+      label: Source kind
+      options:
+        - project directory
+        - single file
+        - both
+        - unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: feature_state
+    attributes:
+      label: Host switch and plugin capability
+      options:
+        - host on / plugin true
+        - host off / plugin true
+        - host on / plugin false
+        - host off / plugin false
+        - unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: terminal_status
+    attributes:
+      label: Terminal status
+      description: Use the structured diagnostic value, not free-form exception text.
+      options:
+        - NOT_AVAILABLE
+        - STATUS_UNSUPPORTED
+        - STATUS_FAILED
+        - STATUS_CANCELLED
+        - STATUS_OK with invalid output
+        - no terminal callback
+        - unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: terminal_step
+    attributes:
+      label: Last structured step
+      options:
+        - DISCOVERY
+        - PREPARE
+        - BUILD
+        - SIGN
+        - WAIT
+        - OUTPUT
+        - INSTALL_OR_LAUNCH
+        - unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: error_classification
+    attributes:
+      label: Redacted error classification
+      options:
+        - FEATURE_DISABLED
+        - PROVIDER_NOT_AVAILABLE
+        - COMPATIBILITY_OR_ABI
+        - PROTOCOL
+        - INPUT_INTEGRITY
+        - STORAGE
+        - BINDER_LOST
+        - TIMEOUT
+        - OUTPUT_REJECTED
+        - CANCELLED
+        - OTHER_REDACTED
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Describe steps and project shape without uploading private source, signing material, or secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and old-output state
+      description: State whether an older output existed, whether its bytes were preserved, and whether any install was attempted.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted structured diagnostics
+      description: Include only protocol/status/step/duration/size/error-class fields and the smallest relevant log window. Remove paths and all project or credential content.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Reporter checklist
+      options:
+        - label: I removed scripts, project contents, paths, keystores, passwords, keys, tokens, and other private data.
+          required: true
+        - label: I included host, plugin, Runtime Kit, protocol, API, and ABI identities.
+          required: true
+        - label: I included the structured status, step, and redacted error classification.
+          required: true
+        - label: I stated whether the old output was preserved and whether installation was attempted.
+          required: true

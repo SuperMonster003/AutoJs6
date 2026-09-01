@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCompatibilityPolicy
 import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
@@ -45,8 +46,23 @@ class ApkBuilderTemplatePluginService : Service() {
             if (request.hostVersionName.isNotBlank() && request.hostVersionName != info.hostVersionName) {
                 warnings += "Host versionName mismatch: plugin=${info.hostVersionName}, host=${request.hostVersionName}"
             }
-            if (request.hostVersionCode > 0L && request.hostVersionCode != info.hostVersionCode) {
-                warnings += "Host versionCode mismatch: plugin=${info.hostVersionCode}, host=${request.hostVersionCode}"
+            if (request.hostVersionCode > 0L) {
+                val decision = ApkBuilderTemplateCompatibilityPolicy.evaluate(info, request.hostVersionCode)
+                when (decision.level) {
+                    ApkBuilderTemplateCompatibilityPolicy.Level.EXACT -> Unit
+                    ApkBuilderTemplateCompatibilityPolicy.Level.PATCH_COMPATIBLE -> {
+                        warnings += decision.patchCompatibilityMessage()
+                    }
+                    ApkBuilderTemplateCompatibilityPolicy.Level.BLOCKED -> {
+                        errors += decision.blockedCompatibilityMessage()
+                        return ApkBuilderTemplateResult(
+                            info = info,
+                            compatibilityLevel = ApkBuilderTemplateResult.LEVEL_BLOCK,
+                            warnings = warnings,
+                            errors = errors,
+                        )
+                    }
+                }
             }
 
             val assetReadable = runCatching {
@@ -116,5 +132,18 @@ class ApkBuilderTemplatePluginService : Service() {
 
         override fun manageKeyStore(request: ApkKeyStoreRequest) =
             RemoteKeyStoreManager.execute(this@ApkBuilderTemplatePluginService, request)
+    }
+
+    private fun ApkBuilderTemplateCompatibilityPolicy.Decision.patchCompatibilityMessage(): String {
+        return "Host versionCode differs within the declared patch-compatible range: " +
+                "builtFor=${declaration.builtForHostVersionCode}, host=$actualHostVersionCode, " +
+                "range=${declaration.minHostVersionCode}..${declaration.maxHostVersionCode}"
+    }
+
+    private fun ApkBuilderTemplateCompatibilityPolicy.Decision.blockedCompatibilityMessage(): String {
+        return "Host versionCode is outside the declared compatibility contract: " +
+                "builtFor=${declaration.builtForHostVersionCode}, host=$actualHostVersionCode, " +
+                "range=${declaration.minHostVersionCode}..${declaration.maxHostVersionCode}, " +
+                "allowPatchVersionMismatch=${declaration.allowPatchVersionMismatch}, reason=$reason"
     }
 }

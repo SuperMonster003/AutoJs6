@@ -215,6 +215,7 @@
     <string name="dialog_button_use_default">デフォルトを使用</string>
     <string name="dialog_button_use_palette">パレットを使う</string>
     <string name="dialog_button_view_file">ファイルの表示</string>
+    <string name="dialog_button_view_matched_version">対応バージョンを表示</string>
     <string name="dialog_button_view_shortcuts">ショートカットを表示</string>
     <string name="dialog_button_view_update">更新を表示</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
@@ -285,6 +286,10 @@
     <string name="error_android_package_file_unavailable">Android パッケージファイルを利用できません</string>
     <string name="error_android_package_installation_failed">パッケージのインストールに失敗しました: %1$s</string>
     <string name="error_android_package_operation_in_progress">別の Android パッケージ操作がすでに進行中です</string>
+    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">AutoJs6 の開発者向けスイッチによりリモート APK ビルドは無効です.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">インストール済みの APK Builder プラグインは, 互換性のある実験的リモート APK ビルド機能を宣言していません. この機能を宣言する互換プラグインビルドをインストールするか, 開発者向けスイッチをオフにしてください.</string>
+    <string name="error_apk_builder_template_host_version_outside_range">インストール済みの APK Builder プラグインが対応する AutoJs6 ホスト versionCode は %1$d-%2$d ですが, 現在のホストは %3$d です. 対応するプラグイン版をインストールしてください.</string>
+    <string name="error_apk_builder_template_untrusted_signing_certificate">インストール済みの APK Builder プラグインは信頼された公式証明書で署名されていないため, ビルドをブロックしました. パッケージ: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
     <string name="error_archive_extraction_failed">アーカイブを展開できませんでした: %1$s</string>
@@ -316,7 +321,6 @@
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
-    <string name="error_custom_css_file_too_large">CSS ファイルがインポート上限 (%1$s) を超えています</string>
     <string name="error_document_preview_file_too_large">ファイルがプレビュー上限 (%1$s) を超えています</string>
     <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット 10 進数</string>
     <string name="error_download_interrupted">ダウンロードが中断される</string>
@@ -530,6 +534,7 @@
     <string name="format_editor_info" formatted="false">文字数: %d\n行数 %d\nサイズ: %s</string>
     <string name="format_file_downloaded" formatted="true">ファイルは %s にダウンロードされました</string>
     <string name="go_to_accessibility_settings"><![CDATA[設定 -> アクセシビリティサービス -> AutoJs6 [を有効にする]]></string>
+    <string name="hint_apk_builder_template_patch_compatible_host">この APK Builder Runtime Kit は AutoJs6 ホスト versionCode %1$d 用に構築され, 現在のホスト %2$d が互換範囲 %3$d-%4$d 内にあると宣言しています. パッケージ化は続行できますが, 生成された APK を検証してください.</string>
     <string name="hint_archive_password">アーカイブのパスワード</string>
     <string name="hint_find_with_regex">正規表現に対応しています. キャプチャしたグループには, \"$1\" から \"$9\" を使用します.</string>
     <string name="hint_github_token">GitHub パーソナルアクセストークンを貼り付けます</string>
@@ -605,6 +610,7 @@
     <string name="plugin_item_info_last_install_time">最終インストール</string>
     <string name="plugin_item_info_last_uninstall_time">最終アンインストール</string>
     <string name="plugin_item_info_last_update_time">最終更新</string>
+    <string name="plugin_item_info_matched_version">対応バージョン</string>
     <string name="plugin_item_info_mechanism">方式</string>
     <string name="plugin_item_info_package_size">パッケージサイズ</string>
     <string name="plugin_item_info_supported_abis">対応 ABI</string>
@@ -620,6 +626,7 @@
     <string name="prompt_plugin_abi_mismatch_before_download">プラグインの ABI リストと現在の端末の ABI リストに共通項目がありません.\n\nプラグイン ABI: %1$s\n端末 ABI: %2$s\n\nこのままダウンロードを続行しますか?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">プラグインの ABI リストと現在の端末の ABI リストに共通項目がありません.\n\nプラグイン ABI: %1$s\n端末 ABI: %2$s\n\nこのまま有効化を続行しますか?</string>
     <string name="prompt_plugin_hide_from_center">非表示にすると, このプラグインはプラグインセンターの一覧に表示されなくなります. 非表示のプラグインは, プラグインセンターの \"グローバル設定\" で管理できます.</string>
+    <string name="prompt_plugin_matched_version_requires_reinstall">この AutoJs6 ビルドに対応するプラグインバージョンは, インストール済みバージョンより低いものです. Android では既存アプリに低いバージョンを上書きインストールできません.\n\nインストール済み: %1$s\n対応バージョン: %2$s\n\n先にプラグインをアンインストールしてください. アンインストール後, プラグインセンターに戻って対応バージョンをインストールしてください. プラグインのアプリデータは削除されます.</string>
     <string name="prompt_plugin_mount_conflict_override">対象 \"%1$s\" は既に存在します (種類: %2$s). 続行するとこのオブジェクトは上書きされます. 続行しますか?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">対象 \"%1$s\" は既にプラグイン \"%2$s\" (%3$s) に使用されています. 先にそのプラグインの自動マウントを無効にするか, 現在のマウント対象を変更してください.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">新しい設定を適用するには, アプリの再起動が必要です</string>
@@ -640,6 +647,7 @@
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
+    <string name="summary_apk_builder_remote_build_r1">R1 の明示的な試用専用です. リモート処理の失敗時は現在のビルドを停止し, 既存の出力を保持します; ローカルへの自動フォールバックはまだ利用できません.</string>
     <string name="summary_clear_media_playback_history">ホストが保存したすべての再生位置を削除します</string>
     <string name="summary_code_editor_settings">コードエディターの全設定ページを開く</string>
     <string name="summary_dex_compiler_experimental_disabled">組み込み D8/dx のみ; AAR は常に組み込み経路</string>
@@ -799,7 +807,9 @@
     <string name="text_android_build_version">Android ビルドバージョン</string>
     <string name="text_android_release_version">Android リリースバージョン</string>
     <string name="text_android_sdk_version">Android SDK バージョン</string>
+    <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder は使用できません</string>
+    <string name="text_apk_builder_remote_build">実験的なリモート APK ビルドを有効化</string>
     <string name="text_apk_template_plugin_risk_prompt">インストールされている APK Builder テンプレートプラグインは, 現在の AutoJs6 バージョンと完全には互換性がありません. 続行すると, パッケージ化したアプリが起動できない, API が一致しない, 一部のモジュールが不足するなどの問題が発生する可能性があります.</string>
     <string name="text_apk_template_unavailable">APK Builder テンプレートを利用できません</string>
     <string name="text_apk_template_unavailable_prompt">使用可能な APK Builder テンプレートが見つかりません. この AutoJs6 ビルドには組み込みの template.apk が含まれておらず, 読み取り可能な APK Builder テンプレートプラグインもありません. バージョンが一致するテンプレートプラグインをインストールして有効にしてから, もう一度試してください.</string>
@@ -917,7 +927,6 @@
     <string name="text_cleaning_archive_extraction">未完了の出力を削除中</string>
     <string name="text_cleaning_workspace">ワークスペースをクリーン中</string>
     <string name="text_clear">クリア</string>
-    <string name="text_clear_custom_css">カスタム CSS をクリア</string>
     <string name="text_clear_file_selection">ファイル選択の解除</string>
     <string name="text_clear_media_playback_history">メディア再生履歴を消去</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
@@ -1006,8 +1015,6 @@
     <string name="text_current">現在</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
-    <string name="text_custom_css_cleared">カスタム CSS をクリアしました</string>
-    <string name="text_custom_css_imported">カスタム CSS をインポートしました</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
     <string name="text_day1">月</string>
@@ -1271,7 +1278,6 @@
     <string name="text_image_conversion_width">幅</string>
     <string name="text_import">インポート</string>
     <string name="text_import_color_library">カラーライブラリをインポート</string>
-    <string name="text_import_custom_css">カスタム CSS をインポート</string>
     <string name="text_import_name_conflict">同名のプロファイル \"%1$s\" が存在します. インポート方法を選択してください:</string>
     <string name="text_import_script">インポートスクリプト</string>
     <string name="text_import_strategy_auto_rename">自動リネーム</string>
@@ -1611,13 +1617,6 @@
     <string name="text_press_again_to_exit">もう一度押すと終了します</string>
     <string name="text_press_back_or_vol_down_to_close_window">閉じるには \"戻る\" または \"音量を下げる\" を押してください</string>
     <string name="text_preview">プレビュー</string>
-    <string name="text_preview_theme">プレビューテーマ</string>
-    <string name="text_preview_theme_custom">カスタム CSS</string>
-    <string name="text_preview_theme_github_auto">GitHub 自動</string>
-    <string name="text_preview_theme_github_dark">GitHub ダーク</string>
-    <string name="text_preview_theme_github_light">GitHub ライト</string>
-    <string name="text_preview_theme_paper">ペーパー</string>
-    <string name="text_preview_theme_sepia">セピア</string>
     <string name="text_process_log">プロセスログ</string>
     <string name="text_processing">処理中</string>
     <string name="text_processing_source">ソースを処理中</string>
@@ -1655,6 +1654,8 @@
     <string name="text_register">登録</string>
     <string name="text_register_succeed">登録に成功した</string>
     <string name="text_registering">登録中</string>
+    <string name="text_reinstall">再インストール</string>
+    <string name="text_reinstall_required">再インストールが必要</string>
     <string name="text_release_history">リリース履歴</string>
     <string name="text_release_notes">リリースノート</string>
     <string name="text_reload_or_convert_to_encoding">再読み込みまたは %1$s に変換</string>
@@ -1805,7 +1806,6 @@
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
     <string name="text_star">スター</string>
-    <string name="text_start_in_fullscreen_mode">全画面モードで起動</string>
     <string name="text_start_record">記録開始</string>
     <string name="text_start_running">実行中</string>
     <string name="text_state_or_province">州または省</string>

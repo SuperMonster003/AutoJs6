@@ -44,7 +44,6 @@ import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerProjectToolbar.OnOperateListener
-import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.util.ClipboardUtils
@@ -281,6 +280,16 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             item: ExplorerItem,
             preResolvedAction: ResolvedExplorerAction?,
         ): Boolean = this@ExplorerView.launchOfficialVideoOrShowGuidance(
+            entryPoint,
+            item,
+            preResolvedAction,
+        )
+
+        override fun launchDocumentPreviewerOrShowGuidance(
+            entryPoint: ExplorerActionEntryPoint,
+            item: ExplorerItem,
+            preResolvedAction: ResolvedExplorerAction?,
+        ): Boolean = this@ExplorerView.launchDocumentPreviewerOrShowGuidance(
             entryPoint,
             item,
             preResolvedAction,
@@ -903,6 +912,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         preResolvedAction,
     )
 
+    private fun launchDocumentPreviewerOrShowGuidance(
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+        preResolvedAction: ResolvedExplorerAction? = null,
+    ): Boolean = mPluginActions.launchDocumentPreviewerOrShowGuidance(
+        context,
+        entryPoint,
+        item,
+        preResolvedAction,
+    )
+
     private fun launchPluginAction(
         entryPoint: ExplorerActionEntryPoint,
         pluginAction: ResolvedExplorerAction,
@@ -1003,8 +1023,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         action: ExplorerPrimaryAction,
     ) {
         when (action) {
-            ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
-                DocumentPreviewActivity.launch(context, file.path, displayName)
+            ExplorerPrimaryAction.DOCUMENT_PREVIEWER -> {
+                launchDocumentPreviewerOrShowGuidance(
+                    ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                    ExplorerFileItem(file, null),
+                )
             }
             ExplorerPrimaryAction.IMAGE_VIEW,
             ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,

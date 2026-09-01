@@ -9,6 +9,7 @@ import android.util.Log
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCompatibilityPolicy
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
@@ -297,16 +298,42 @@ class RemoteApkBuildSession(
                 "Host requires newer remote build protocol: host=${request.requiredProtocolVersion}, plugin=${ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION}"
             )
         }
+        val compatibilityDecision = request.hostVersionCode
+            .takeIf { it > 0L }
+            ?.let { hostVersionCode ->
+                ApkBuilderTemplateCompatibilityPolicy.evaluate(info, hostVersionCode)
+            }
+        if (compatibilityDecision?.level == ApkBuilderTemplateCompatibilityPolicy.Level.BLOCKED) {
+            throw IllegalStateException(compatibilityDecision.blockedCompatibilityMessage())
+        }
         if (request.hostPackageName.isNotBlank() && request.hostPackageName != info.hostPackageName) {
             warnings += handleRiskyHostMismatch("Host package mismatch: plugin targets ${info.hostPackageName}, host=${request.hostPackageName}")
         }
         if (request.hostVersionName.isNotBlank() && request.hostVersionName != info.hostVersionName) {
-            warnings += handleRiskyHostMismatch("Host versionName mismatch: plugin=${info.hostVersionName}, host=${request.hostVersionName}")
+            val message = "Host versionName mismatch: plugin=${info.hostVersionName}, host=${request.hostVersionName}"
+            warnings += if (compatibilityDecision?.level == ApkBuilderTemplateCompatibilityPolicy.Level.PATCH_COMPATIBLE) {
+                message
+            } else {
+                handleRiskyHostMismatch(message)
+            }
         }
-        if (request.hostVersionCode > 0L && request.hostVersionCode != info.hostVersionCode) {
-            warnings += handleRiskyHostMismatch("Host versionCode mismatch: plugin=${info.hostVersionCode}, host=${request.hostVersionCode}")
+        if (compatibilityDecision?.level == ApkBuilderTemplateCompatibilityPolicy.Level.PATCH_COMPATIBLE) {
+            warnings += compatibilityDecision.patchCompatibilityMessage()
         }
         return warnings
+    }
+
+    private fun ApkBuilderTemplateCompatibilityPolicy.Decision.patchCompatibilityMessage(): String {
+        return "Host versionCode differs within the declared patch-compatible range: " +
+                "builtFor=${declaration.builtForHostVersionCode}, host=$actualHostVersionCode, " +
+                "range=${declaration.minHostVersionCode}..${declaration.maxHostVersionCode}"
+    }
+
+    private fun ApkBuilderTemplateCompatibilityPolicy.Decision.blockedCompatibilityMessage(): String {
+        return "Host versionCode is outside the declared compatibility contract: " +
+                "builtFor=${declaration.builtForHostVersionCode}, host=$actualHostVersionCode, " +
+                "range=${declaration.minHostVersionCode}..${declaration.maxHostVersionCode}, " +
+                "allowPatchVersionMismatch=${declaration.allowPatchVersionMismatch}, reason=$reason"
     }
 
     private fun handleRiskyHostMismatch(message: String): String {

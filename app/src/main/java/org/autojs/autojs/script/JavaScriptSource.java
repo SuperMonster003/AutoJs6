@@ -1,11 +1,8 @@
 package org.autojs.autojs.script;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.rhino.TokenStream;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.util.FileUtils;
@@ -34,8 +31,6 @@ public abstract class JavaScriptSource extends ScriptSource {
     public static final int EXECUTION_MODE_NODEJS = 0x0008;
     public static final int EXECUTION_MODE_UI_THREAD = 0x0010;
     public static final int EXECUTION_MODE_RHINO = 0x0020;
-
-    private static final String LOG_TAG = "JavaScriptSource";
 
     public static final Map<String, Integer> EXECUTION_MODES = new MapBuilder<String, Integer>()
             .put("ui", EXECUTION_MODE_UI)
@@ -110,9 +105,7 @@ public abstract class JavaScriptSource extends ScriptSource {
                     break;
                 }
                 String tokenString = script.substring(ts.getTokenBeg() + 1, ts.getTokenEnd() - 1);
-                Log.d(LOG_TAG, "token string: " + tokenString);
                 int nextToken = ts.getToken();
-                Log.d(LOG_TAG, "next token: " + nextToken);
                 if (nextToken != Token.SEMI && nextToken != Token.EOL) {
                     break;
                 }
@@ -123,8 +116,47 @@ public abstract class JavaScriptSource extends ScriptSource {
                         .setLineno(lineno)
                         .build();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
+            // Treat malformed or unreadable prologues as normal without exposing source text.
+        }
+        return new ExecutionInfo.Builder()
+                .setMode(EXECUTION_MODE_NORMAL)
+                .setLineno(0)
+                .build();
+    }
+
+    /**
+     * Streaming counterpart used by preflight checks that must not load an arbitrarily large
+     * script into memory. TokenStream retains only its lexer buffer and this parser stops after
+     * the same bounded token count as the String overload.
+     */
+    public static ExecutionInfo parseExecutionMode(Reader reader) {
+        TokenStream ts = new TokenStream(reader, null, 1);
+        int token;
+        int count = 0;
+        try {
+            while (count <= PARSING_MAX_TOKEN && (token = ts.getToken()) != Token.EOF) {
+                count++;
+                if (token == Token.EOL || token == Token.COMMENT) {
+                    continue;
+                }
+                if (token != Token.STRING || ts.getTokenLength() < 3) {
+                    break;
+                }
+                String tokenString = ts.getString();
+                int nextToken = ts.getToken();
+                if (nextToken != Token.SEMI && nextToken != Token.EOL) {
+                    break;
+                }
+                int mode = parseExecutionModeByModeStrings(tokenString.split("\\s*[,;|]\\s*|\\s+"));
+                int lineno = ts.getLineno();
+                return new ExecutionInfo.Builder()
+                        .setMode(mode)
+                        .setLineno(lineno)
+                        .build();
+            }
+        } catch (Exception ignored) {
+            // Treat malformed prologues as normal without logging source text.
         }
         return new ExecutionInfo.Builder()
                 .setMode(EXECUTION_MODE_NORMAL)
@@ -135,7 +167,7 @@ public abstract class JavaScriptSource extends ScriptSource {
     private static int parseExecutionModeByModeStrings(String[] modeStrings) {
         int mode = EXECUTION_MODE_NORMAL;
         for (String modeString : modeStrings) {
-            String niceModeString = modeString.toLowerCase(Language.getPrefLanguage().getLocale());
+            String niceModeString = modeString.toLowerCase(Locale.ROOT);
             Integer i = EXECUTION_MODES.get(niceModeString);
             if (i != null) {
                 mode |= i;

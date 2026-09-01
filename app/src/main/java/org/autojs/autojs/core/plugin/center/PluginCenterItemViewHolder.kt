@@ -161,6 +161,12 @@ class PluginCenterItemViewHolder(
         val showUpdate = item.isInstalled && item.isUpdatable
         updatableBadgeView.isVisible = showUpdate
         versionInfoForUpdateView.isVisible = showUpdate
+        updatableBadgeView.setText(
+            if (item.requiresDowngradeReinstall) R.string.text_reinstall_required else R.string.text_updatable,
+        )
+        btnUpdateView.setText(
+            if (item.requiresDowngradeReinstall) R.string.text_reinstall else R.string.text_update,
+        )
         if (showUpdate) {
             versionInfoForUpdateView.text = item.updatableVersionSummary
             btnUpdateView.setButtonState(true) {

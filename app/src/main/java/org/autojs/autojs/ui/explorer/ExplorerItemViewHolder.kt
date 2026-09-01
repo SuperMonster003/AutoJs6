@@ -34,7 +34,6 @@ import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
-import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.FirstCharView
 import org.autojs.autojs.util.ColorUtils
@@ -73,6 +72,11 @@ internal interface ExplorerItemViewHost {
     fun openArchiveEntry(item: ArchiveExplorerFileItem, action: ExplorerPrimaryAction?)
     fun notifyItemOperated(item: ExplorerItem)
     fun launchOfficialVideoOrShowGuidance(
+        entryPoint: ExplorerActionEntryPoint,
+        item: ExplorerItem,
+        preResolvedAction: ResolvedExplorerAction? = null,
+    ): Boolean
+    fun launchDocumentPreviewerOrShowGuidance(
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         preResolvedAction: ResolvedExplorerAction? = null,
@@ -334,6 +338,15 @@ internal class ExplorerItemViewHolder(
             host.notifyItemOperated(mExplorerItem)
             return
         }
+        if (
+            host.launchDocumentPreviewerOrShowGuidance(
+                ExplorerActionEntryPoint.DEFAULT_CLICK,
+                mExplorerItem,
+            )
+        ) {
+            host.notifyItemOperated(mExplorerItem)
+            return
+        }
         val pluginAction = host.resolvePluginAction(
             ExplorerActionEntryPoint.DEFAULT_CLICK,
             mExplorerItem,
@@ -382,8 +395,8 @@ internal class ExplorerItemViewHolder(
 
     private fun bindPrimaryViewer(action: ExplorerPrimaryAction) {
         val (iconRes, contentDescriptionRes) = when (action) {
-            ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
-                R.drawable.ic_preview_web_page to R.string.text_preview
+            ExplorerPrimaryAction.DOCUMENT_PREVIEWER -> {
+                R.drawable.ic_previewer_web_page to R.string.text_preview
             }
             ExplorerPrimaryAction.IMAGE_VIEW -> {
                 R.drawable.ic_eye to R.string.text_view
@@ -433,6 +446,16 @@ internal class ExplorerItemViewHolder(
             host.notifyItemOperated(mExplorerItem)
             return
         }
+        if (
+            host.launchDocumentPreviewerOrShowGuidance(
+                entryPoint = ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                item = mExplorerItem,
+                preResolvedAction = pluginAction,
+            )
+        ) {
+            host.notifyItemOperated(mExplorerItem)
+            return
+        }
         val fallback = { openHostPrimaryViewer(action) }
         if (pluginAction != null) {
             ExplorerActionExecution.withFallback(
@@ -453,8 +476,11 @@ internal class ExplorerItemViewHolder(
 
     private fun openHostPrimaryViewer(action: ExplorerPrimaryAction?) {
         when (action) {
-            ExplorerPrimaryAction.DOCUMENT_PREVIEW -> {
-                DocumentPreviewActivity.launch(host.context, mExplorerItem.path)
+            ExplorerPrimaryAction.DOCUMENT_PREVIEWER -> {
+                host.launchDocumentPreviewerOrShowGuidance(
+                    ExplorerActionEntryPoint.PRIMARY_BUTTON,
+                    mExplorerItem,
+                )
             }
             ExplorerPrimaryAction.IMAGE_VIEW,
             ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,

@@ -1,5 +1,6 @@
 package org.autojs.autojs.apkbuilder.template
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -51,5 +52,26 @@ class ApkBuilderPluginTrustPolicyTest {
                 hostFingerprints = listOf("host-certificate"),
             )
         )
+    }
+
+    @Test
+    fun `empty signer sets are rejected even in debug builds`() {
+        assertFalse(
+            ApkBuilderPluginTrustPolicy.acceptsSignature(
+                isDebugBuild = true,
+                isOfficial = false,
+                pluginFingerprints = emptyList(),
+                hostFingerprints = emptyList(),
+            )
+        )
+    }
+
+    @Test
+    fun `fingerprint summary is normalized deterministic and explicit when unavailable`() {
+        assertEquals(
+            "aa, bb",
+            ApkBuilderPluginTrustPolicy.formatFingerprints(listOf("BB", "aa", "BB")),
+        )
+        assertEquals("unavailable", ApkBuilderPluginTrustPolicy.formatFingerprints(emptyList()))
     }
 }

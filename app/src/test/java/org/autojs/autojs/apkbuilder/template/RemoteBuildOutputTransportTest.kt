@@ -137,6 +137,34 @@ class RemoteBuildOutputTransportTest {
         assertNoPublicationArtifacts(output)
     }
 
+    @Test
+    fun copyToFile_preservesExistingOutputWhenTemporaryFileValidatorRejects() {
+        val bytes = byteArrayOf(6, 5, 4, 3)
+        val previous = byteArrayOf(1, 2, 3)
+        val output = temporaryFolder.newFile("validator-rejected.apk").apply {
+            writeBytes(previous)
+        }
+        var validationCount = 0
+
+        assertThrows(IOException::class.java) {
+            RemoteBuildOutputTransport.copyToFile(
+                input = ByteArrayInputStream(bytes),
+                outputFile = output,
+                declaredSizeBytes = bytes.size.toLong(),
+                expectedSha256 = sha256(bytes),
+                validateTemporaryFile = { temporary ->
+                    validationCount++
+                    assertArrayEquals(bytes, temporary.readBytes())
+                    throw IOException("Rejected by test validator")
+                },
+            )
+        }
+
+        assertEquals(1, validationCount)
+        assertArrayEquals(previous, output.readBytes())
+        assertNoPublicationArtifacts(output)
+    }
+
     private fun assertNoPublicationArtifacts(output: java.io.File) {
         val prefix = ".${output.name}."
         assertFalse(

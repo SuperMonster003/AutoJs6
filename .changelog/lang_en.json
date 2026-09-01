@@ -89,6 +89,9 @@
         "Plugin Center supports online plugin installation and updates",
         "Plugin Center supports opening plugin launch pages and hiding plugins",
         "Plugin Center supports available ABI intersection detection and prompts",
+        "Plugin Center resolves official APK Builder Template releases through the host compatibility matrix, selects an exact device-ABI artifact with universal fallback, retains the existing release-index/tag fallback, and guides uninstall/reinstall when the matched version is lower than the installed plugin",
+        "APK Builder Runtime Kits can declare an explicitly authorized, verified closed host patch interval; exact built-for hosts proceed silently, non-exact in-range hosts receive a localized warning, and out-of-range or malformed declarations are blocked before template transfer",
+        "Developer options add a default-off R1 switch for experimental remote APK building; disabled state blocks provider discovery and session opening, failures stop the current build without automatic local fallback, existing output remains protected by atomic publication, and process-local diagnostics retain only bounded enum/number fields",
         "Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging",
         "Long-pressing the floating button on the Home Plugins tab opens the Plugin Center",
         "runtime.loadAar method, for dynamically loading AAR files",
@@ -132,10 +135,19 @@
         "App packaging supports remote builds using APK Builder Template plugins",
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes",
         "Global JavaScript (Rhino) R8 integration adds three verified artifact-export `runtime.loadJarWithR8` overloads and protocol 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata publish atomically, retrace binds mapping provenance, and missing or invalid providers fail without D8/dx or local fallback",
-        "Code editor settings now show an Ace language support matrix and per-language semantic switches for TypeScript/JavaScript, Python, Lua, and Java; Kotlin remains visible as P2+ without a provider, and file-type customization clearly acts as a pre-routing allowlist rather than language reclassification"
+        "Code editor settings now show an Ace language support matrix and per-language semantic switches for TypeScript/JavaScript, Python, Lua, and Java; Kotlin remains visible as P2+ without a provider, and file-type customization clearly acts as a pre-routing allowlist rather than language reclassification",
+        "Plugin update dialogs can display the corresponding plugin release history in the app"
       ],
       "fix": [
+        "Aligned experimental remote single-file build numbering with the legacy builder, and added fail-closed workspace storage preflight using cross-checked expanded input sizes, a build-verified template expansion bound, and a 256 MiB reserve",
         "Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay",
+        "APK Builder now preserves a TypeScript/TSX entry's Rhino execution-mode directive (including `ui`) in the generated launcher, so compiled UI projects start in the correct Activity mode",
+        "Embedded Node.js APK packaging requests now fail before staging or opening a remote session with external Runtime-plugin migration guidance; execution-mode parsing no longer logs source tokens or exception details",
+        "Remote APK builds cancelled before or during session startup could be reported as failed; cancellation now converges to exactly one `STATUS_CANCELLED` terminal result while preserving the previous output and completing cleanup",
+        "Android 9–11 could expose no modern archive signer for a valid V2/V3 remote APK and reject it before publication; the host now uses the validated legacy signer view only as a platform fallback while retaining mandatory `apksig` cryptographic verification",
+        "A cryptographically valid remote APK with the requested package and version but a different signing certificate could pass host output validation; the host now binds the verified single signer to the default or custom signing identity selected before opening the Binder session and rejects mismatches before replacing the previous output",
+        "After a plugin process died, multiple terminal Binder callbacks could let a delayed unbind cancel the immediately recreated service binding, blocking plugin rediscovery until the 60-second bind timeout",
+        "When the R1 developer switch was enabled but the installed APK Builder plugin explicitly advertised `supportsRemoteBuild=false`, provider discovery could stop without actionable guidance; the host now rejects it before preparation and explains how to install a capable build or turn off the switch",
         "Enabling the TypeScript command row in the full Log page and editor bottom Log panel let a wrap-content navigation-bar spacer consume the entire remaining height, collapsing the log list to zero; the row now stays above a visible log viewport, and the Log page FAB uses its original bottom offset",
         "Archive entry Rename and Delete actions did not honor the current session's declared mutation capabilities, allowing read-only or unsupported sessions to expose operations the provider could not complete",
         "File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted",
@@ -224,7 +236,8 @@
         "Explorer Action puzzle icons for ZIP/JAR and other plugin-handled files filled the entire action cell and appeared oversized",
         "The file manager could not reliably distinguish TypeScript `.ts/.mts` sources and declarations from MPEG-2 TS video with the same suffixes, and did not always treat `.d.ts/.d.mts/.d.cts` as declaration files",
         "Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action",
-        "Minimal script projects without APK packaging metadata fell back to `main.js` instead of launching the `main` entry declared in `project.json`"
+        "Minimal script projects without APK packaging metadata fell back to `main.js` instead of launching the `main` entry declared in `project.json`",
+        "Plugin activation entries could be resolved incorrectly for application ID suffix variants, and wake success could be reported before the service was available"
       ],
       "improvement": [
         "The `TypeScript console` now stays collapsed by default and appears on demand from the full Log page or editor Log panel overflow menu only when the compiler plugin is available, with visibility remembered independently; its green Run action becomes a red Stop action while a snippet is active, the full Log page shows the actual working directory, and the editor Log panel overflow menu also consolidates Copy, Send, and Export",
@@ -275,6 +288,7 @@
         "Modularized offline project documentation as a plugin, reducing the host APK size and supporting independent installation and updates",
         "Moved offline project documentation inventory parsing and full SHA-256 verification on first load to a background thread to avoid blocking the UI",
         "Moved the complete AXML/ARSC/parsing/signing/keystore/cryptography toolchain required for APK builds into the APK Builder Template plugin, with lightweight APK inspection in the host",
+        "APK Builder plugin discovery now validates the installed certificate SHA-256 before any Binder connection, blocks untrusted signers with the observed package and fingerprint, and keeps the official signer path unchanged",
         "Move the approximately 1.3 MiB full AutoJs6 completion index out of Ace's synchronous first-presentation path, loading it during idle time after the first visible code frame and seamlessly replacing the bootstrap index; all five Android 9-15 environments restored 400 globals and 80 modules",
         "Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable",
         "Code editor \"Run\" button changes to \"Stop\" after being tapped, allowing scripts to be stopped quickly",
@@ -299,7 +313,9 @@
         "File manager directory refreshes dispatch minimal list diffs, keeping unchanged rows bound and preserving the live scroll position during in-place refreshes",
         "Refactored the file manager around explicit list layout, row presentation, selection toolbar, archive workflow, input capability, output reservation, and recovery components, reducing oversized view/session classes and making navigation, security boundaries, and action policies independently testable",
         "TypeScript compiler binding and bootstrap now run during a bounded startup prewarm instead of the first user compilation; revision-1 project sessions retain one live binding after editor or compile use, while idle startup expiry, memory pressure, failures, and app exit safely fall back to cold compilation",
-        "Gradle platform compatibility data and its updater tasks moved to AutoJs6-Gradle-Platform-Versions; AutoJs6 now consumes version 1.5.0 from Maven Local directly, without local data overrides, duplicate scrapers, or the former Puppeteer dependency"
+        "Gradle platform compatibility data and its updater tasks moved to AutoJs6-Gradle-Platform-Versions; AutoJs6 now consumes version 1.5.0 from Maven Local directly, without local data overrides, duplicate scrapers, or the former Puppeteer dependency",
+        "HTML and Markdown previews are delegated to dedicated Previewer plugins; the main app keeps the entry and guides installation or enabling when the plugin is missing, disabled, or unavailable",
+        "Consolidated all Pinyin calls through the corresponding plugin and removed the unused built-in dictionary and conversion implementation"
       ],
       "dependency": [
         "Modularized Android AXML",

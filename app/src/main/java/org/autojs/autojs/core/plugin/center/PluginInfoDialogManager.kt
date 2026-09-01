@@ -28,13 +28,13 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DisplayUtils
-import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.TimeUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
@@ -87,7 +87,7 @@ object PluginInfoDialogManager {
             onNeutral { d, _ ->
                 d.dismiss()
                 val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
-                PluginAbiCompatibilityPrompt.runBeforeDownload(context, info.item) {
+                PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
                     CoroutineScope(Dispatchers.Main).launch {
                         PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
                     }
@@ -106,7 +106,13 @@ object PluginInfoDialogManager {
         )
         showPluginInfoDialogInternal(context, info) {
             if (item.isUpdatable) {
-                neutralText(R.string.dialog_button_view_update)
+                neutralText(
+                    if (item.requiresDowngradeReinstall) {
+                        R.string.dialog_button_view_matched_version
+                    } else {
+                        R.string.dialog_button_view_update
+                    },
+                )
                 neutralColorRes(R.color.dialog_button_attraction)
                 onNeutral { d, _ ->
                     showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(item), d)
@@ -351,30 +357,49 @@ object PluginInfoDialogManager {
 
         val dialog = MaterialDialog.Builder(context)
             .title(info.version ?: info.title)
-            .options(listOf(ignoreUpdateOption))
+            .apply {
+                if (!info.item.requiresDowngradeReinstall) {
+                    options(listOf(ignoreUpdateOption))
+                }
+            }
             .content(R.string.text_retrieving_release_notes)
             .neutralText(R.string.dialog_button_release_history)
             .neutralColor(
                 context.getColor(
-                    if (info.changelogUrl.isNullOrBlank()) R.color.dialog_button_unavailable else R.color.dialog_button_hint,
+                    if (info.changelogUrl.isNullOrBlank() && info.changelogText.isNullOrBlank()) {
+                        R.color.dialog_button_unavailable
+                    } else {
+                        R.color.dialog_button_hint
+                    },
                 ),
             )
             .onNeutral { d, _ ->
-                val changelogUrl = info.changelogUrl
-                if (changelogUrl.isNullOrBlank()) {
+                if (info.changelogUrl.isNullOrBlank() && info.changelogText.isNullOrBlank()) {
                     ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
                 } else {
-                    IntentUtils.browse(context, changelogUrl, IntentUtils.SnackExceptionHolder(d.view))
+                    DisplayReleaseHistoryActivity.launchPlugin(
+                        context = context,
+                        title = info.title,
+                        version = info.version,
+                        changelogText = info.changelogText,
+                        changelogUrl = info.changelogUrl,
+                    )
                 }
             }
             .negativeText(R.string.dialog_button_cancel)
             .negativeColor(context.getColor(R.color.dialog_button_default))
             .onNegative { d, _ -> d.dismiss() }
-            .positiveText(R.string.dialog_button_update_now)
+            .positiveText(
+                if (info.item.requiresDowngradeReinstall) {
+                    R.string.text_uninstall
+                } else {
+                    R.string.dialog_button_update_now
+                },
+            )
             .positiveColor(context.getColor(R.color.dialog_button_attraction))
             .onPositive { d, _ ->
                 d.dismiss()
-                PluginAbiCompatibilityPrompt.runBeforeDownload(context, info.item) {
+                PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
                     CoroutineScope(Dispatchers.Main).launch {
                         PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
                     }
@@ -480,6 +505,13 @@ object PluginInfoDialogManager {
             is PluginInfoInstalled -> {
                 info.updatableVersion?.let {
                     binding.versionLabel.text = context.getString(R.string.plugin_item_info_installed_version)
+                    binding.updatableVersionLabel.text = context.getString(
+                        if (info.item.requiresDowngradeReinstall) {
+                            R.string.plugin_item_info_matched_version
+                        } else {
+                            R.string.plugin_item_info_updatable_version
+                        },
+                    )
                     binding.updatableVersionValue.text = it
                     binding.updatableVersionParent.isVisible = true
                 }

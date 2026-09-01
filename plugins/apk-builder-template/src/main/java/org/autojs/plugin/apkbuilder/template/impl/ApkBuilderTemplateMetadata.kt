@@ -54,7 +54,9 @@ object ApkBuilderTemplateMetadata {
             ?: readTextAssetOrNull(context, TEMPLATE_SHA256_ASSET)?.trim()?.takeIf { it.isNotEmpty() }
         val runtimeApiLevel = contract.optIntOrDefault("runtimeApiLevel", hostVersionCode.toInt())
         val runtimeKitId = kit.optStringOrNull("runtimeKitId")
-        val requiresHostVersion = compatibility.optLongOrDefault("minHostVersionCode", hostVersionCode)
+        val minHostVersionCode = compatibility.optLongOrDefault("minHostVersionCode", hostVersionCode)
+        val maxHostVersionCode = compatibility.optLongOrDefault("maxHostVersionCode", hostVersionCode)
+        val allowPatchVersionMismatch = compatibility.optBooleanOrDefault("allowPatchVersionMismatch", false)
 
         return ApkBuilderTemplateInfo(
             id = ApkBuilderTemplatePluginIds.ID,
@@ -72,9 +74,12 @@ object ApkBuilderTemplateMetadata {
             templateSha256 = templateSha256,
             templateSizeBytes = templateSizeBytes(context),
             capabilities = Bundle().apply {
-                putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, requiresHostVersion)
+                putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, minHostVersionCode)
                 putString(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_NAME, hostVersionName)
                 putLong(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_CODE, hostVersionCode)
+                putLong(ApkBuilderTemplateCapabilityKeys.COMPATIBILITY_MIN_HOST_VERSION_CODE, minHostVersionCode)
+                putLong(ApkBuilderTemplateCapabilityKeys.COMPATIBILITY_MAX_HOST_VERSION_CODE, maxHostVersionCode)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.ALLOW_PATCH_VERSION_MISMATCH, allowPatchVersionMismatch)
                 putInt(ApkBuilderTemplateCapabilityKeys.PROTOCOL_VERSION, protocolVersion)
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_KIND, ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL)
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_PACKAGE_NAME, template.optStringOrDefault("packageName", BuildConfig.TEMPLATE_PACKAGE_NAME))
@@ -119,6 +124,10 @@ object ApkBuilderTemplateMetadata {
 
     private fun JSONObject?.optIntOrDefault(key: String, defaultValue: Int): Int {
         return this?.optInt(key, defaultValue) ?: defaultValue
+    }
+
+    private fun JSONObject?.optBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
+        return this?.optBoolean(key, defaultValue) ?: defaultValue
     }
 
     private fun readTextAssetOrNull(context: Context, assetPath: String): String? {

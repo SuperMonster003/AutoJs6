@@ -327,8 +327,8 @@ object FileUtils {
         val PROJECT = TypeData(IconData("✲", size = 22, toTop = 1.5), TYPE.IDENTITY_TEXT_EDITABLE)
         val TEXT = TypeData(IconData("✐", toTop = 1, toEnd = 0.5, degree = 121), TYPE.IDENTITY_TEXT_EDITABLE)
         val CREATION = TypeData(IconData("✎", toTop = 4, toEnd = 2, degree = 105), TYPE.IDENTITY_TEXT_EDITABLE)
-        val HTML_PREVIEW = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewType.HTML)
-        val MARKDOWN_PREVIEW = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewType.MARKDOWN)
+        val HTML_PREVIEWER = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewerType.HTML)
+        val MARKDOWN_PREVIEWER = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewerType.MARKDOWN)
         val CONFIG = TypeData(IconData("⚙", toStart = 0.5, toTop = 1), TYPE.IDENTITY_TEXT_EDITABLE)
         val DOCUMENT = TypeData(IconData("⌸", size = 24, toTop = 0.5, toEnd = 0.5), TYPE.IDENTITY_EXTERNAL_EDITABLE)
         val DISK_IMAGE = TypeData(IconData("⊚", size = 25, toTop = 1))
@@ -804,16 +804,16 @@ object FileUtils {
         SVG("svg", TypeDataHolder.CREATION),
 
         /** HTML file, standard markup language for web pages. */
-        HTML("html", TypeDataHolder.HTML_PREVIEW),
+        HTML("html", TypeDataHolder.HTML_PREVIEWER),
 
         /** Alternative HTML file extension. */
-        HTM("htm", TypeDataHolder.HTML_PREVIEW),
+        HTM("htm", TypeDataHolder.HTML_PREVIEWER),
 
         /** Alternative server-side include HTML file extension. */
-        SHTM("shtm", TypeDataHolder.HTML_PREVIEW),
+        SHTM("shtm", TypeDataHolder.HTML_PREVIEWER),
 
         /** Server-side include HTML file, used for dynamic webpages. */
-        SHTML("shtml", TypeDataHolder.HTML_PREVIEW),
+        SHTML("shtml", TypeDataHolder.HTML_PREVIEWER),
 
         /** MIME Encapsulation of Aggregate HTML documents. */
         HMTML("mhtml", TypeDataHolder.CREATION),
@@ -825,10 +825,10 @@ object FileUtils {
         HTA("hta", TypeDataHolder.CREATION),
 
         /** XHTML file, a more strict and XML-compatible HTML version. */
-        XHT("xht", TypeDataHolder.HTML_PREVIEW),
+        XHT("xht", TypeDataHolder.HTML_PREVIEWER),
 
         /** XHTML file with the canonical long extension. */
-        XHTML("xhtml", TypeDataHolder.HTML_PREVIEW),
+        XHTML("xhtml", TypeDataHolder.HTML_PREVIEWER),
 
         /** LaTeX file, used for high-quality typesetting. */
         LTX("ltx", TypeDataHolder.CREATION),
@@ -841,37 +841,37 @@ object FileUtils {
 
         /** Markdown file, used for simple document formatting. */
         MARKDOWN(
-            "md", TypeDataHolder.MARKDOWN_PREVIEW,
+            "md", TypeDataHolder.MARKDOWN_PREVIEWER,
             CandidateCriterion({ it.isMarkdownMDLike() }, 10),
             priority = 8,
         ),
 
         /** Markdown file with the canonical long extension. */
-        MARKDOWN_LONG("markdown", TypeDataHolder.MARKDOWN_PREVIEW),
+        MARKDOWN_LONG("markdown", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown file using a common alternative extension. */
-        MDOWN("mdown", TypeDataHolder.MARKDOWN_PREVIEW),
+        MDOWN("mdown", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown file using a short alternative extension. */
-        MKD("mkd", TypeDataHolder.MARKDOWN_PREVIEW),
+        MKD("mkd", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown file using an alternative extension. */
-        MKDN("mkdn", TypeDataHolder.MARKDOWN_PREVIEW),
+        MKDN("mkdn", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown file using an alternative extension. */
-        MDWN("mdwn", TypeDataHolder.MARKDOWN_PREVIEW),
+        MDWN("mdwn", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown text file using a long extension. */
-        MDTEXT("mdtext", TypeDataHolder.MARKDOWN_PREVIEW),
+        MDTEXT("mdtext", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Markdown text file using a compact extension. */
-        MDTXT("mdtxt", TypeDataHolder.MARKDOWN_PREVIEW),
+        MDTXT("mdtxt", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** R Markdown document. */
-        R_MARKDOWN("rmd", TypeDataHolder.MARKDOWN_PREVIEW),
+        R_MARKDOWN("rmd", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Quarto Markdown document. */
-        QUARTO_MARKDOWN("qmd", TypeDataHolder.MARKDOWN_PREVIEW),
+        QUARTO_MARKDOWN("qmd", TypeDataHolder.MARKDOWN_PREVIEWER),
 
         /** Browser configuration file. */
         BROWSER("browser", TypeDataHolder.CREATION),
@@ -3117,7 +3117,7 @@ object FileUtils {
         val identity: Int = typeData.identity
 
         @JvmField
-        val previewType: PreviewType? = typeData.previewType
+        val previewerType: PreviewerType? = typeData.previewerType
 
         val viewerType: ViewerType?
             get() = when (this) {
@@ -3158,7 +3158,7 @@ object FileUtils {
 
         fun isMediaPlayable() = identity and IDENTITY_MEDIA_PLAYABLE != 0
 
-        fun isPreviewable() = identity and IDENTITY_PREVIEWABLE != 0 && previewType != null
+        fun isPreviewable() = identity and IDENTITY_PREVIEWABLE != 0 && previewerType != null
 
         @Suppress("ArrayInDataClass")
         data class Icon(
@@ -3630,7 +3630,7 @@ object FileUtils {
         val excludeFontPadding: Boolean = false,
     )
 
-    enum class PreviewType {
+    enum class PreviewerType {
         MARKDOWN,
         HTML,
     }
@@ -3644,7 +3644,7 @@ object FileUtils {
     data class TypeData(
         val iconData: IconData,
         @JvmField val identity: Int = 0x0,
-        @JvmField val previewType: PreviewType? = null,
+        @JvmField val previewerType: PreviewerType? = null,
     )
 
     /**

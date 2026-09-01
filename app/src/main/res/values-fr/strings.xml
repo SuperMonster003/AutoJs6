@@ -214,6 +214,7 @@
     <string name="dialog_button_use_default">Par défaut</string>
     <string name="dialog_button_use_palette">Utiliser la palette</string>
     <string name="dialog_button_view_file">Voir le fichier</string>
+    <string name="dialog_button_view_matched_version">Voir la version compatible</string>
     <string name="dialog_button_view_shortcuts">Voir les raccourcis</string>
     <string name="dialog_button_view_update">Voir la mise à jour</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
@@ -284,6 +285,10 @@
     <string name="error_android_package_file_unavailable">Le fichier du package Android est indisponible</string>
     <string name="error_android_package_installation_failed">Échec de l\'installation du package: %1$s</string>
     <string name="error_android_package_operation_in_progress">Une autre opération de package Android est déjà en cours</string>
+    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">La construction distante d\'APK est désactivée par le commutateur développeur d\'AutoJs6.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Le plug-in APK Builder installé n\'annonce pas de construction distante expérimentale d\'APK compatible. Installez une version compatible du plug-in qui annonce cette capacité, ou désactivez le commutateur développeur.</string>
+    <string name="error_apk_builder_template_host_version_outside_range">Le plugin APK Builder installé prend en charge les versionCode d\'hôte AutoJs6 %1$d-%2$d, mais l\'hôte actuel est %3$d. Installez la version correspondante du plugin.</string>
+    <string name="error_apk_builder_template_untrusted_signing_certificate">Le plugin APK Builder installé n\'est pas signé avec un certificat officiel approuvé, la construction est donc bloquée. Package: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée</string>
     <string name="error_app_not_installed_with_name">L\'application n\'est pas installée : \"%s\"</string>
     <string name="error_archive_extraction_failed">Impossible d\'extraire l\'archive : %1$s</string>
@@ -315,7 +320,6 @@
     <string name="error_continuation_resume_called_without_suspend">La méthode resume() doit être appelée après suspend().</string>
     <string name="error_continuation_suspend_called_more_than_once">La méthode suspend() ne devrait être appelée qu\'une seule fois.</string>
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée.</string>
-    <string name="error_custom_css_file_too_large">Le fichier CSS dépasse la limite d\'importation (%1$s)</string>
     <string name="error_document_preview_file_too_large">Le fichier dépasse la limite d\'aperçu (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
     <string name="error_download_interrupted">Téléchargement interrompu</string>
@@ -529,6 +533,7 @@
     <string name="format_editor_info" formatted="false">Chars : %d\nLines : %d\nSize : %s</string>
     <string name="format_file_downloaded" formatted="true">Fichier téléchargé sur %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Ouvrir] Paramètres -> Services d\'accessibilité -> AutoJs6 [Activer]]]></string>
+    <string name="hint_apk_builder_template_patch_compatible_host">Ce Runtime Kit APK Builder a été créé pour le versionCode d\'hôte AutoJs6 %1$d et déclare l\'hôte actuel %2$d compatible dans l\'intervalle %3$d-%4$d. L\'empaquetage peut continuer, mais vérifiez l\'APK généré.</string>
     <string name="hint_archive_password">Mot de passe de l\'archive</string>
     <string name="hint_find_with_regex">La fonction Regex est prise en charge. Utilisez \"$1\" - \"$9\" pour les groupes capturés.</string>
     <string name="hint_github_token">Collez un jeton d\'accès personnel GitHub</string>
@@ -604,6 +609,7 @@
     <string name="plugin_item_info_last_install_time">Dern. inst.</string>
     <string name="plugin_item_info_last_uninstall_time">Dern. désinst.</string>
     <string name="plugin_item_info_last_update_time">Dern. maj</string>
+    <string name="plugin_item_info_matched_version">Version compatible</string>
     <string name="plugin_item_info_mechanism">Mecanisme</string>
     <string name="plugin_item_info_package_size">Taille du paquet</string>
     <string name="plugin_item_info_supported_abis">ABI prises en charge</string>
@@ -619,6 +625,7 @@
     <string name="prompt_plugin_abi_mismatch_before_download">La liste ABI du plugin n\'a aucune intersection avec la liste ABI de l\'appareil actuel.\n\nABI du plugin: %1$s\nABI de l\'appareil: %2$s\n\nContinuer le téléchargement quand même?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">La liste ABI du plugin n\'a aucune intersection avec la liste ABI de l\'appareil actuel.\n\nABI du plugin: %1$s\nABI de l\'appareil: %2$s\n\nContinuer l\'activation quand même?</string>
     <string name="prompt_plugin_hide_from_center">Après masquage, ce plugin n\'apparaîtra plus dans la liste du Centre des plugins. Vous pouvez gérer tous les plugins masqués dans les \"Paramètres globaux\" du Centre des plugins.</string>
+    <string name="prompt_plugin_matched_version_requires_reinstall">La version du plugin compatible avec cette version d\'AutoJs6 est antérieure à la version installée. Android ne peut pas installer une version antérieure par-dessus une application existante.\n\nInstallée: %1$s\nCompatible: %2$s\n\nDésinstallez d\'abord le plugin. Après la désinstallation, revenez au Centre des plugins et installez la version compatible. Les données de l\'application du plugin seront supprimées.</string>
     <string name="prompt_plugin_mount_conflict_override">La cible \"%1$s\" existe deja (type: %2$s). Si vous continuez, cet objet sera ecrase. Continuer?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">La cible \"%1$s\" est deja occupee par le plugin \"%2$s\" (%3$s). Desactivez d\'abord le montage automatique de ce plugin ou modifiez cette cible de montage.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Un redémarrage de l\'application est nécessaire pour appliquer les nouveaux paramètres.</string>
@@ -639,6 +646,7 @@
     <string name="summary_ace_word_wrap_enabled">Renvoyer les lignes longues dans la zone visible de l\'éditeur</string>
     <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
+    <string name="summary_apk_builder_remote_build_r1">Réservé à l\'activation explicite R1. Un échec distant arrête la construction en cours et préserve toute sortie existante; le repli local automatique n\'est pas encore disponible.</string>
     <string name="summary_clear_media_playback_history">Supprimer toutes les positions de lecture enregistrées par l\'hôte</string>
     <string name="summary_code_editor_settings">Ouvrir la page complète des paramètres de l\'éditeur de code</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx intégré uniquement; AAR reste toujours intégré</string>
@@ -798,7 +806,9 @@
     <string name="text_android_build_version">Version de construction Android</string>
     <string name="text_android_release_version">Version de la version Android</string>
     <string name="text_android_sdk_version">Version du SDK Android</string>
+    <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder est indisponible</string>
+    <string name="text_apk_builder_remote_build">Activer la construction distante expérimentale d\'APK</string>
     <string name="text_apk_template_plugin_risk_prompt">Le plugin de modèle APK Builder installé n\'est pas entièrement compatible avec la version actuelle d\'AutoJs6. Continuer peut empêcher l\'application empaquetée de démarrer, lui faire utiliser des API incompatibles ou omettre certains modules.</string>
     <string name="text_apk_template_unavailable">Le modèle APK Builder est indisponible</string>
     <string name="text_apk_template_unavailable_prompt">Aucun modèle APK Builder utilisable n\'a été trouvé. Cette version d\'AutoJs6 n\'inclut pas de fichier template.apk intégré et aucun plugin de modèle APK Builder lisible n\'est disponible. Installez et activez un plugin de modèle compatible, puis réessayez.</string>
@@ -916,7 +926,6 @@
     <string name="text_cleaning_archive_extraction">Nettoyage de la sortie incomplète</string>
     <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
     <string name="text_clear">Effacer</string>
-    <string name="text_clear_custom_css">Effacer le CSS personnalisé</string>
     <string name="text_clear_file_selection">Effacer la sélection de fichiers</string>
     <string name="text_clear_media_playback_history">Effacer l\'historique de lecture multimédia</string>
     <string name="text_clear_pre_execute_script">Effacer le script de pré-exécution</string>
@@ -1005,8 +1014,6 @@
     <string name="text_current">Actuel</string>
     <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
-    <string name="text_custom_css_cleared">Le CSS personnalisé a été effacé</string>
-    <string name="text_custom_css_imported">Le CSS personnalisé a été importé</string>
     <string name="text_daily_task">Tâche quotidienne</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Lun</string>
@@ -1270,7 +1277,6 @@
     <string name="text_image_conversion_width">Largeur</string>
     <string name="text_import">Importer</string>
     <string name="text_import_color_library">Importer une bibliothèque de couleurs</string>
-    <string name="text_import_custom_css">Importer un CSS personnalisé</string>
     <string name="text_import_name_conflict">Un profil nomme \"%1$s\" existe deja, choisissez une methode d\'import:</string>
     <string name="text_import_script">Importer un ou des scripts</string>
     <string name="text_import_strategy_auto_rename">Renommage auto</string>
@@ -1610,13 +1616,6 @@
     <string name="text_press_again_to_exit">Appuyez à nouveau pour quitter</string>
     <string name="text_press_back_or_vol_down_to_close_window">Pour fermer, appuyez sur \"Retour\" ou \"Volume bas\"</string>
     <string name="text_preview">Préview</string>
-    <string name="text_preview_theme">Thème de l\'aperçu</string>
-    <string name="text_preview_theme_custom">CSS personnalisé</string>
-    <string name="text_preview_theme_github_auto">GitHub Auto</string>
-    <string name="text_preview_theme_github_dark">GitHub Sombre</string>
-    <string name="text_preview_theme_github_light">GitHub Clair</string>
-    <string name="text_preview_theme_paper">Papier</string>
-    <string name="text_preview_theme_sepia">Sépia</string>
     <string name="text_process_log">Journal de processus</string>
     <string name="text_processing">Traitement</string>
     <string name="text_processing_source">Traitement du code source</string>
@@ -1654,6 +1653,8 @@
     <string name="text_register">S\'inscrire</string>
     <string name="text_register_succeed">Enregistrement réussi</string>
     <string name="text_registering">Register</string>
+    <string name="text_reinstall">Réinstaller</string>
+    <string name="text_reinstall_required">Réinstallation requise</string>
     <string name="text_release_history">Historique des versions</string>
     <string name="text_release_notes">Notes de version</string>
     <string name="text_reload_or_convert_to_encoding">Recharger ou convertir en %1$s</string>
@@ -1804,7 +1805,6 @@
     <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Étoile</string>
-    <string name="text_start_in_fullscreen_mode">Démarrer en mode plein écran</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_state_or_province">État ou province</string>

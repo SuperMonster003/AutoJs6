@@ -24,6 +24,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
@@ -80,6 +81,15 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
         }
 
         lifecycleScope.launch {
+            val pluginTitle = intent.getStringExtra(EXTRA_PLUGIN_TITLE)
+            if (!pluginTitle.isNullOrBlank()) {
+                loadPluginReleaseHistory(
+                    version = intent.getStringExtra(EXTRA_PLUGIN_VERSION).orEmpty(),
+                    changelogText = intent.getStringExtra(EXTRA_PLUGIN_CHANGELOG_TEXT).orEmpty(),
+                    changelogUrl = intent.getStringExtra(EXTRA_PLUGIN_CHANGELOG_URL).orEmpty(),
+                )
+                return@launch
+            }
             val language = getPrefLanguageOrNull() ?: Language.EN
             val languageTag = language.getLocalCompatibleLanguageTag()
             val urlSuffix = "app/src/main/assets-app/doc/CHANGELOG-$languageTag.md"
@@ -129,7 +139,50 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
             mAllDataHandled = true
         }
 
-        setToolbarAsBack(R.string.text_release_history)
+        val pluginTitle = intent.getStringExtra(EXTRA_PLUGIN_TITLE)
+        setToolbarAsBack(
+            pluginTitle
+                ?.takeIf(String::isNotBlank)
+                ?.let { "$it - ${getString(R.string.text_release_history)}" }
+                ?: getString(R.string.text_release_history),
+        )
+    }
+
+    private suspend fun loadPluginReleaseHistory(
+        version: String,
+        changelogText: String,
+        changelogUrl: String,
+    ) {
+        if (changelogText.isNotBlank()) {
+            val versionName = version
+                .trim()
+                .substringBefore(' ')
+                .trimStart('v', 'V')
+                .ifBlank { DEFAULT_VERSION_NAME }
+            val markdown = buildString {
+                append("# v")
+                append(versionName)
+                append("\n\n")
+                append(changelogText)
+            }
+            val localItems = ReleaseHistoryRepository.parseMarkdownFlow(markdown).toList()
+            if (localItems.isNotEmpty()) {
+                hideLoadingTextContainerIfNeeded()
+                mAdapter.submit(localItems.toMutableList())
+            }
+        }
+        if (changelogUrl.isNotBlank()) {
+            val languageTag = (getPrefLanguageOrNull() ?: Language.EN).getLocalCompatibleLanguageTag()
+            repo.loadPluginReleaseHistoryFlow(this, changelogUrl, languageTag).collectLatest { item ->
+                hideLoadingTextContainerIfNeeded()
+                mAdapter.addOrUpdate(item)
+            }
+        }
+        if (mAdapter.itemCount == 0) {
+            hideLoadingTextContainerIfNeeded()
+        }
+        ProcessLogger.i(getString(R.string.logger_ver_history_data_loaded))
+        mAllDataHandled = true
     }
 
     private suspend fun hideLoadingTextContainerIfNeeded() {
@@ -258,6 +311,31 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
             Intent(context, DisplayReleaseHistoryActivity::class.java)
                 .startSafely(context)
         }
+
+        @JvmStatic
+        fun launchPlugin(
+            context: Context,
+            title: String,
+            version: String?,
+            changelogText: String?,
+            changelogUrl: String?,
+        ) {
+            Intent(context, DisplayReleaseHistoryActivity::class.java)
+                .putExtra(EXTRA_PLUGIN_TITLE, title)
+                .putExtra(EXTRA_PLUGIN_VERSION, version)
+                .putExtra(EXTRA_PLUGIN_CHANGELOG_TEXT, changelogText)
+                .putExtra(EXTRA_PLUGIN_CHANGELOG_URL, changelogUrl)
+                .startSafely(context)
+        }
+
+        private const val EXTRA_PLUGIN_TITLE =
+            "org.autojs.autojs.ui.settings.extra.PLUGIN_TITLE"
+        private const val EXTRA_PLUGIN_VERSION =
+            "org.autojs.autojs.ui.settings.extra.PLUGIN_VERSION"
+        private const val EXTRA_PLUGIN_CHANGELOG_TEXT =
+            "org.autojs.autojs.ui.settings.extra.PLUGIN_CHANGELOG_TEXT"
+        private const val EXTRA_PLUGIN_CHANGELOG_URL =
+            "org.autojs.autojs.ui.settings.extra.PLUGIN_CHANGELOG_URL"
 
         class NoFadeItemAnimator : DefaultItemAnimator() {
             override fun animateAdd(holder: RecyclerView.ViewHolder): Boolean {

@@ -209,6 +209,7 @@
     <string name="dialog_button_use_default">Use default</string>
     <string name="dialog_button_use_palette">Use palette</string>
     <string name="dialog_button_view_file">View File</string>
+    <string name="dialog_button_view_matched_version">View matched version</string>
     <string name="dialog_button_view_shortcuts">View shortcuts</string>
     <string name="dialog_button_view_update">View update</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
@@ -279,6 +280,10 @@
     <string name="error_android_package_file_unavailable">Android package file is unavailable</string>
     <string name="error_android_package_installation_failed">Package installation failed: %1$s</string>
     <string name="error_android_package_operation_in_progress">Another Android package operation is already in progress</string>
+    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">Remote APK building is disabled by the AutoJs6 developer switch.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">The installed APK Builder plugin does not advertise compatible experimental remote APK building. Install a compatible plugin build that advertises this capability, or turn off the developer switch.</string>
+    <string name="error_apk_builder_template_host_version_outside_range">The installed APK Builder plugin supports AutoJs6 host versionCode %1$d-%2$d, but the current host is %3$d. Install the matching plugin version.</string>
+    <string name="error_apk_builder_template_untrusted_signing_certificate">The installed APK Builder plugin is not signed with a trusted official certificate, so building was blocked. Package: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">App is not installed</string>
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
     <string name="error_archive_extraction_failed">Could not extract archive: %1$s</string>
@@ -310,7 +315,6 @@
     <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
-    <string name="error_custom_css_file_too_large">The CSS file exceeds the import limit (%1$s)</string>
     <string name="error_document_preview_file_too_large">The file exceeds the preview limit (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
     <string name="error_download_interrupted">Download interrupted</string>
@@ -524,6 +528,7 @@
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
     <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
+    <string name="hint_apk_builder_template_patch_compatible_host">This APK Builder Runtime Kit was built for AutoJs6 host versionCode %1$d and declares the current host %2$d compatible within %3$d-%4$d. Packaging may continue, but verify the generated APK.</string>
     <string name="hint_archive_password">Archive password</string>
     <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
     <string name="hint_github_token">Paste a GitHub personal access token</string>
@@ -599,6 +604,7 @@
     <string name="plugin_item_info_last_install_time">Last install</string>
     <string name="plugin_item_info_last_uninstall_time">Last uninstall</string>
     <string name="plugin_item_info_last_update_time">Last update</string>
+    <string name="plugin_item_info_matched_version">Matched ver.</string>
     <string name="plugin_item_info_mechanism">Mechanism</string>
     <string name="plugin_item_info_package_size">Package size</string>
     <string name="plugin_item_info_supported_abis">Supported ABIs</string>
@@ -614,6 +620,7 @@
     <string name="prompt_plugin_abi_mismatch_before_download">The plugin ABI list has no intersection with the current device ABI list.\n\nPlugin ABIs: %1$s\nDevice ABIs: %2$s\n\nContinue downloading anyway?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">The plugin ABI list has no intersection with the current device ABI list.\n\nPlugin ABIs: %1$s\nDevice ABIs: %2$s\n\nContinue enabling anyway?</string>
     <string name="prompt_plugin_hide_from_center">After hiding, this plugin will no longer appear in Plugin Center list. You can manage hidden plugins in Plugin Center global settings.</string>
+    <string name="prompt_plugin_matched_version_requires_reinstall">The plugin version matched to this AutoJs6 build is lower than the installed version. Android cannot install a lower version over an existing app.\n\nInstalled: %1$s\nMatched: %2$s\n\nUninstall the plugin first. After uninstallation, return to Plugin Center and install the matched version. Plugin app data will be removed.</string>
     <string name="prompt_plugin_mount_conflict_override">Target \"%1$s\" already exists (type: %2$s). Continue to override it?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">Target \"%1$s\" is already occupied by plugin \"%2$s\" (%3$s). Disable that plugin\'s auto mount or change this mount target.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
@@ -634,6 +641,7 @@
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_apk_builder_remote_build_r1">R1 explicit opt-in only. A remote failure stops the current build and preserves any existing output; automatic local fallback is not available yet.</string>
     <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_dex_compiler_experimental_disabled">Built-in D8/dx only; AAR always stays built-in</string>
@@ -793,7 +801,9 @@
     <string name="text_android_build_version">Android build version</string>
     <string name="text_android_release_version">Android release version</string>
     <string name="text_android_sdk_version">Android SDK version</string>
+    <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder is unavailable</string>
+    <string name="text_apk_builder_remote_build">Enable experimental remote APK building</string>
     <string name="text_apk_template_plugin_risk_prompt">The installed APK Builder template plugin is not fully compatible with the current AutoJs6 version. Continuing may cause the packaged app to fail to start, use mismatched APIs, or miss some modules.</string>
     <string name="text_apk_template_unavailable">APK Builder template is unavailable</string>
     <string name="text_apk_template_unavailable_prompt">No usable APK Builder template was found. This AutoJs6 build does not include built-in template.apk, and no readable APK Builder template plugin is available. Install and enable a matching template plugin, then try again.</string>
@@ -911,7 +921,6 @@
     <string name="text_cleaning_archive_extraction">Cleaning up incomplete output</string>
     <string name="text_cleaning_workspace">Cleaning workspace</string>
     <string name="text_clear">Clear</string>
-    <string name="text_clear_custom_css">Clear custom CSS</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_media_playback_history">Clear media playback history</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
@@ -1001,8 +1010,6 @@
     <string name="text_current">Current</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
-    <string name="text_custom_css_cleared">Custom CSS has been cleared</string>
-    <string name="text_custom_css_imported">Custom CSS has been imported</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
@@ -1266,7 +1273,6 @@
     <string name="text_image_conversion_width">Width</string>
     <string name="text_import">Import</string>
     <string name="text_import_color_library">Import a color library</string>
-    <string name="text_import_custom_css">Import custom CSS</string>
     <string name="text_import_name_conflict">A profile named \"%1$s\" already exists, please choose an import strategy:</string>
     <string name="text_import_script">Import script(s)</string>
     <string name="text_import_strategy_auto_rename">Auto rename</string>
@@ -1606,13 +1612,6 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_press_back_or_vol_down_to_close_window">To close, press \"Back\" or \"Volume Down\"</string>
     <string name="text_preview">Preview</string>
-    <string name="text_preview_theme">Preview theme</string>
-    <string name="text_preview_theme_custom">Custom CSS</string>
-    <string name="text_preview_theme_github_auto">GitHub Auto</string>
-    <string name="text_preview_theme_github_dark">GitHub Dark</string>
-    <string name="text_preview_theme_github_light">GitHub Light</string>
-    <string name="text_preview_theme_paper">Paper</string>
-    <string name="text_preview_theme_sepia">Sepia</string>
     <string name="text_process_log">Process log</string>
     <string name="text_processing">Processing</string>
     <string name="text_processing_source">Processing source</string>
@@ -1650,6 +1649,8 @@
     <string name="text_register">Register</string>
     <string name="text_register_succeed">Register succeeded</string>
     <string name="text_registering">Registering</string>
+    <string name="text_reinstall">Reinstall</string>
+    <string name="text_reinstall_required">Reinstall required</string>
     <string name="text_release_history">Release history</string>
     <string name="text_release_notes">Release notes</string>
     <string name="text_reload_or_convert_to_encoding">Reload or convert to %1$s</string>
@@ -1800,7 +1801,6 @@
     <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_star">Star</string>
-    <string name="text_start_in_fullscreen_mode">Start in fullscreen mode</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
     <string name="text_state_or_province">State or Province</string>

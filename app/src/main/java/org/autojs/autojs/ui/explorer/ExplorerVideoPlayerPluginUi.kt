@@ -119,7 +119,7 @@ internal object ExplorerVideoPlayerPluginUi {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         return Intent.createChooser(target, context.getString(R.string.text_open_by_other_apps))
-            .putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, arrayOf(EXTERNAL_VIEW_COMPONENT))
+            .putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, arrayOf(EXTERNAL_VIEWER_COMPONENT))
             .startSafely(context, true) {
                 ToastExceptionHolder(
                     context,
@@ -147,8 +147,8 @@ internal object ExplorerVideoPlayerPluginUi {
 
     const val OFFICIAL_PACKAGE = "io.github.supermonster003.autojs6.plugin.videoplayer"
     private const val ACTION_ID = "play-video"
-    private val EXTERNAL_VIEW_COMPONENT = ComponentName(
+    private val EXTERNAL_VIEWER_COMPONENT = ComponentName(
         OFFICIAL_PACKAGE,
-        "$OFFICIAL_PACKAGE.ExternalViewActivity",
+        "$OFFICIAL_PACKAGE.ExternalViewerActivity",
     )
 }

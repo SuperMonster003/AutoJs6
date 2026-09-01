@@ -603,6 +603,9 @@ dependencies /* Unclassified */ {
     // R8
     implementation(libs.r8)
 
+    // APK Signature Verification
+    implementation(project(":modules:apk-signer"))
+
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))
 
@@ -1012,7 +1015,7 @@ android {
         abi {
             isEnable = !isInrtAssembleTaskRequested
             reset()
-            include("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
+            include("arm64-v8a", "x86_64", "armeabi-v7a", "x86")
             isUniversalApk = true
         }
     }
@@ -1139,6 +1142,32 @@ tasks.register("generateRuntimeKit") {
 
     val runtimeKitVersionName = versions.appVersionName
     val runtimeKitVersionCode = versions.appVersionCode
+    val runtimeKitCompatibilityMinHostVersionCode = providers
+        .gradleProperty("autojs.runtimeKit.compatibility.minHostVersionCode")
+        .map { value ->
+            value.toIntOrNull()
+                ?: throw IllegalArgumentException("Invalid Runtime Kit minimum host versionCode: $value")
+        }
+        .orElse(runtimeKitVersionCode)
+    val runtimeKitCompatibilityMaxHostVersionCode = providers
+        .gradleProperty("autojs.runtimeKit.compatibility.maxHostVersionCode")
+        .map { value ->
+            value.toIntOrNull()
+                ?: throw IllegalArgumentException("Invalid Runtime Kit maximum host versionCode: $value")
+        }
+        .orElse(runtimeKitVersionCode)
+    val runtimeKitAllowPatchVersionMismatch = providers
+        .gradleProperty("autojs.runtimeKit.compatibility.allowPatchVersionMismatch")
+        .map { value ->
+            when (value.trim().lowercase()) {
+                "true", "1", "yes", "on" -> true
+                "false", "0", "no", "off" -> false
+                else -> throw IllegalArgumentException(
+                    "Invalid Runtime Kit allowPatchVersionMismatch value: $value"
+                )
+            }
+        }
+        .orElse(false)
     val normalizedRuntimeKitVersion = normalizeRuntimeKitVersion(runtimeKitVersionName)
     val runtimeKitGitSha = providers.gradleProperty("autojs.git.sha")
         .orElse(providers.environmentVariable("GITHUB_SHA"))
@@ -1147,9 +1176,18 @@ tasks.register("generateRuntimeKit") {
         .orElse("local")
     val runtimeKitGithubRunId = providers.environmentVariable("GITHUB_RUN_ID")
         .orElse("")
-    val runtimeKitTemplateApk = layout.buildDirectory.file(
-        "outputs/apk/inrt/release/inrt-v$normalizedRuntimeKitVersion-universal.apk"
+    val runtimeKitVariants = linkedMapOf(
+        "universal" to listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86"),
+        "arm64-v8a" to listOf("arm64-v8a"),
+        "armeabi-v7a" to listOf("armeabi-v7a"),
+        "x86_64" to listOf("x86_64"),
+        "x86" to listOf("x86"),
     )
+    val runtimeKitTemplateApks = runtimeKitVariants.keys.associateWith { variant ->
+        layout.buildDirectory.file(
+            "outputs/apk/inrt/release/inrt-v$normalizedRuntimeKitVersion-$variant.apk"
+        )
+    }
     val runtimeApiSourceRoots = listOf(
         rootDir.resolve("app/src/main/assets/declarations"),
         rootDir.resolve("app/src/main/assets/modules"),
@@ -1162,23 +1200,38 @@ tasks.register("generateRuntimeKit") {
     outputs.dir(runtimeKitOutputDir)
     inputs.property("runtimeKitVersionName", runtimeKitVersionName)
     inputs.property("runtimeKitVersionCode", runtimeKitVersionCode)
+    inputs.property("runtimeKitCompatibilityMinHostVersionCode", runtimeKitCompatibilityMinHostVersionCode)
+    inputs.property("runtimeKitCompatibilityMaxHostVersionCode", runtimeKitCompatibilityMaxHostVersionCode)
+    inputs.property("runtimeKitAllowPatchVersionMismatch", runtimeKitAllowPatchVersionMismatch)
     inputs.property("runtimeKitGitSha", runtimeKitGitSha)
     inputs.property("runtimeKitSourceRepository", runtimeKitSourceRepository)
     inputs.property("runtimeKitGithubRunId", runtimeKitGithubRunId)
-    inputs.file(runtimeKitTemplateApk)
+    inputs.files(runtimeKitTemplateApks.values)
     inputs.files(runtimeApiSourceRoots)
     inputs.file(projectDir.resolve("src/main/assets/default_key_store.bks"))
 
     doLast {
         val versionName = runtimeKitVersionName
         val versionCode = runtimeKitVersionCode
+        val minHostVersionCode = runtimeKitCompatibilityMinHostVersionCode.get()
+        val maxHostVersionCode = runtimeKitCompatibilityMaxHostVersionCode.get()
+        val allowPatchVersionMismatch = runtimeKitAllowPatchVersionMismatch.get()
+        require(minHostVersionCode > 0) {
+            "Runtime Kit minimum host versionCode must be positive: $minHostVersionCode"
+        }
+        require(maxHostVersionCode >= minHostVersionCode) {
+            "Runtime Kit host compatibility range is invalid: $minHostVersionCode..$maxHostVersionCode"
+        }
+        require(versionCode in minHostVersionCode..maxHostVersionCode) {
+            "Runtime Kit built-for host $versionCode is outside its compatibility range " +
+                    "$minHostVersionCode..$maxHostVersionCode"
+        }
+        require(minHostVersionCode == maxHostVersionCode || allowPatchVersionMismatch) {
+            "A widened Runtime Kit host range requires allowPatchVersionMismatch=true: " +
+                    "$minHostVersionCode..$maxHostVersionCode"
+        }
         val normalizedVersion = normalizedRuntimeKitVersion
         val gitSha = runtimeKitGitSha.get()
-
-        val templateApk = runtimeKitTemplateApk.get().asFile
-        require(templateApk.isFile) {
-            "Missing INRT universal APK: $templateApk"
-        }
 
         val defaultKeyStore = projectDir.resolve("src/main/assets/default_key_store.bks")
         require(defaultKeyStore.isFile) {
@@ -1186,19 +1239,8 @@ tasks.register("generateRuntimeKit") {
         }
 
         val outputRoot = runtimeKitOutputDir.get().asFile
-        val kitDir = outputRoot.resolve("autojs6-runtime-kit-v$normalizedVersion+$versionCode")
-        project.delete(kitDir)
-        kitDir.mkdirs()
-
-        val templateOut = kitDir.resolve("template.apk")
-        templateApk.copyTo(templateOut, overwrite = true)
-        val templateSha256 = templateOut.sha256String()
-        kitDir.resolve("template.apk.sha256").writeText("$templateSha256\n", Charsets.UTF_8)
-
-        val defaultKeyStoreOut = kitDir.resolve("default_key_store.bks")
-        defaultKeyStore.copyTo(defaultKeyStoreOut, overwrite = true)
-        val defaultKeyStoreSha256 = defaultKeyStoreOut.sha256String()
-        kitDir.resolve("default_key_store.bks.sha256").writeText("$defaultKeyStoreSha256\n", Charsets.UTF_8)
+        project.delete(outputRoot)
+        outputRoot.mkdirs()
 
         val runtimeApiEntries = collectSourceDigestEntries(
             rootDir = rootDir,
@@ -1212,127 +1254,155 @@ tasks.register("generateRuntimeKit") {
             ),
         )
         val runtimeApiHash = combinedDigest(runtimeApiEntries)
-        writePublicApiText(kitDir.resolve("public-api.txt"), runtimeApiEntries)
 
-        val scriptEngineEntries = collectZipDigestEntries(templateOut) { name ->
-            name.matches(Regex("classes\\d*\\.dex")) ||
-                    name == "assets/init.js" ||
-                    name.startsWith("assets/modules/") ||
-                    name.startsWith("assets/declarations/")
+        runtimeKitVariants.forEach { (variantSlug, supportedAbis) ->
+            val templateApk = runtimeKitTemplateApks.getValue(variantSlug).get().asFile
+            require(templateApk.isFile) {
+                "Missing INRT $variantSlug APK: $templateApk"
+            }
+
+            val variantName = "inrt-$variantSlug"
+            val supportedAbisJson = supportedAbis.joinToString(prefix = "[", postfix = "]") {
+                it.toJsonLiteral()
+            }
+            val kitBaseName = "autojs6-runtime-kit-v$normalizedVersion+$versionCode-$variantSlug"
+            val kitDir = outputRoot.resolve(kitBaseName)
+            kitDir.mkdirs()
+
+            val templateOut = kitDir.resolve("template.apk")
+            templateApk.copyTo(templateOut, overwrite = true)
+            val templateSha256 = templateOut.sha256String()
+            kitDir.resolve("template.apk.sha256").writeText("$templateSha256\n", Charsets.UTF_8)
+
+            val defaultKeyStoreOut = kitDir.resolve("default_key_store.bks")
+            defaultKeyStore.copyTo(defaultKeyStoreOut, overwrite = true)
+            val defaultKeyStoreSha256 = defaultKeyStoreOut.sha256String()
+            kitDir.resolve("default_key_store.bks.sha256").writeText("$defaultKeyStoreSha256\n", Charsets.UTF_8)
+
+            writePublicApiText(kitDir.resolve("public-api.txt"), runtimeApiEntries)
+
+            val scriptEngineEntries = collectZipDigestEntries(templateOut) { name ->
+                name.matches(Regex("classes\\d*\\.dex")) ||
+                        name == "assets/init.js" ||
+                        name.startsWith("assets/modules/") ||
+                        name.startsWith("assets/declarations/")
+            }
+            val scriptEngineHash = combinedDigest(scriptEngineEntries)
+
+            val resourceContractEntries = collectZipDigestEntries(templateOut) { name ->
+                name == "AndroidManifest.xml" ||
+                        name == "resources.arsc" ||
+                        name == "assets/init.js" ||
+                        name.startsWith("res/")
+            }
+            val resourcesContractHash = combinedDigest(resourceContractEntries)
+
+            val assetEntries = collectZipDigestEntries(templateOut) { name ->
+                name.startsWith("assets/")
+            }
+            writeDigestManifestJson(kitDir.resolve("assets-manifest.json"), "template-assets", assetEntries)
+
+            val nativeLibEntries = collectZipDigestEntries(templateOut) { name ->
+                name.startsWith("lib/") && name.endsWith(".so")
+            }
+            val nativeLibManifestHash = combinedDigest(nativeLibEntries)
+            writeDigestManifestJson(kitDir.resolve("native-libs.json"), "template-native-libs", nativeLibEntries)
+
+            val apkBuilderProtocolVersion = 2
+            val remoteBuildProtocolVersion = 3
+            val runtimeKitId = "autojs6-runtime-v$versionName+$versionCode-$gitSha-$variantSlug"
+
+            kitDir.resolve("build-contract.json").writeText(
+                buildString {
+                    appendLine("{")
+                    appendLine("  \"schemaVersion\": 1,")
+                    appendLine("  \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
+                    appendLine("  \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
+                    appendLine("  \"runtimeApiLevel\": $versionCode,")
+                    appendLine("  \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
+                    appendLine("  \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
+                    appendLine("  \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                    appendLine("  \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
+                    appendLine("}")
+                },
+                Charsets.UTF_8,
+            )
+
+            kitDir.resolve("runtime-kit.json").writeText(
+                buildString {
+                    appendLine("{")
+                    appendLine("  \"schemaVersion\": 1,")
+                    appendLine("  \"runtimeKitId\": ${runtimeKitId.toJsonLiteral()},")
+                    appendLine("  \"host\": {")
+                    appendLine("    \"packageName\": ${globalApplicationId.toJsonLiteral()},")
+                    appendLine("    \"versionName\": ${versionName.toJsonLiteral()},")
+                    appendLine("    \"versionCode\": $versionCode,")
+                    appendLine("    \"gitSha\": ${gitSha.toJsonLiteral()}")
+                    appendLine("  },")
+                    appendLine("  \"template\": {")
+                    appendLine("    \"fileName\": \"template.apk\",")
+                    appendLine("    \"packageName\": ${("$globalApplicationId.$flavorNameInrt").toJsonLiteral()},")
+                    appendLine("    \"sha256\": ${templateSha256.toJsonLiteral()},")
+                    appendLine("    \"sizeBytes\": ${templateOut.length()},")
+                    appendLine("    \"variant\": ${variantName.toJsonLiteral()},")
+                    appendLine("    \"supportedAbis\": $supportedAbisJson")
+                    appendLine("  },")
+                    appendLine("  \"defaultKeyStore\": {")
+                    appendLine("    \"fileName\": \"default_key_store.bks\",")
+                    appendLine("    \"sha256\": ${defaultKeyStoreSha256.toJsonLiteral()},")
+                    appendLine("    \"sizeBytes\": ${defaultKeyStoreOut.length()}")
+                    appendLine("  },")
+                    appendLine("  \"contract\": {")
+                    appendLine("    \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
+                    appendLine("    \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
+                    appendLine("    \"runtimeApiLevel\": $versionCode,")
+                    appendLine("    \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
+                    appendLine("    \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
+                    appendLine("    \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                    appendLine("    \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
+                    appendLine("  },")
+                    appendLine("  \"compatibility\": {")
+                    appendLine("    \"minHostVersionCode\": $minHostVersionCode,")
+                    appendLine("    \"maxHostVersionCode\": $maxHostVersionCode,")
+                    appendLine("    \"allowPatchVersionMismatch\": $allowPatchVersionMismatch")
+                    appendLine("  }")
+                    appendLine("}")
+                },
+                Charsets.UTF_8,
+            )
+
+            kitDir.resolve("provenance.json").writeText(
+                buildString {
+                    appendLine("{")
+                    appendLine("  \"schemaVersion\": 1,")
+                    appendLine("  \"sourceRepository\": ${runtimeKitSourceRepository.get().toJsonLiteral()},")
+                    appendLine("  \"gitSha\": ${gitSha.toJsonLiteral()},")
+                    appendLine("  \"githubRunId\": ${runtimeKitGithubRunId.get().toJsonLiteral()},")
+                    appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()}")
+                    appendLine("}")
+                },
+                Charsets.UTF_8,
+            )
+
+            val zipFile = outputRoot.resolve("$kitBaseName.zip")
+            if (zipFile.exists()) {
+                zipFile.delete()
+            }
+            ZipOutputStream(zipFile.outputStream().buffered()).use { zip ->
+                kitDir.walkTopDown()
+                    .filter { it.isFile }
+                    .sortedBy { it.relativeTo(kitDir).invariantSeparatorsPath }
+                    .forEach { file ->
+                        val entryName = file.relativeTo(kitDir).invariantSeparatorsPath
+                        zip.putNextEntry(ZipEntry(entryName))
+                        file.inputStream().use { input -> input.copyTo(zip) }
+                        zip.closeEntry()
+                    }
+            }
+
+            println("Runtime Kit directory: $kitDir")
+            println("Runtime Kit archive: $zipFile")
         }
-        val scriptEngineHash = combinedDigest(scriptEngineEntries)
-
-        val resourceContractEntries = collectZipDigestEntries(templateOut) { name ->
-            name == "AndroidManifest.xml" ||
-                    name == "resources.arsc" ||
-                    name == "assets/init.js" ||
-                    name.startsWith("res/")
-        }
-        val resourcesContractHash = combinedDigest(resourceContractEntries)
-
-        val assetEntries = collectZipDigestEntries(templateOut) { name ->
-            name.startsWith("assets/")
-        }
-        writeDigestManifestJson(kitDir.resolve("assets-manifest.json"), "template-assets", assetEntries)
-
-        val nativeLibEntries = collectZipDigestEntries(templateOut) { name ->
-            name.startsWith("lib/") && name.endsWith(".so")
-        }
-        val nativeLibManifestHash = combinedDigest(nativeLibEntries)
-        writeDigestManifestJson(kitDir.resolve("native-libs.json"), "template-native-libs", nativeLibEntries)
-
-        val apkBuilderProtocolVersion = 2
-        val remoteBuildProtocolVersion = 3
-        val runtimeKitId = "autojs6-runtime-v$versionName+$versionCode-$gitSha"
-
-        kitDir.resolve("build-contract.json").writeText(
-            buildString {
-                appendLine("{")
-                appendLine("  \"schemaVersion\": 1,")
-                appendLine("  \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
-                appendLine("  \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
-                appendLine("  \"runtimeApiLevel\": $versionCode,")
-                appendLine("  \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
-                appendLine("  \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
-                appendLine("  \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
-                appendLine("  \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
-                appendLine("}")
-            },
-            Charsets.UTF_8,
-        )
-
-        kitDir.resolve("runtime-kit.json").writeText(
-            buildString {
-                appendLine("{")
-                appendLine("  \"schemaVersion\": 1,")
-                appendLine("  \"runtimeKitId\": ${runtimeKitId.toJsonLiteral()},")
-                appendLine("  \"host\": {")
-                appendLine("    \"packageName\": ${globalApplicationId.toJsonLiteral()},")
-                appendLine("    \"versionName\": ${versionName.toJsonLiteral()},")
-                appendLine("    \"versionCode\": $versionCode,")
-                appendLine("    \"gitSha\": ${gitSha.toJsonLiteral()}")
-                appendLine("  },")
-                appendLine("  \"template\": {")
-                appendLine("    \"fileName\": \"template.apk\",")
-                appendLine("    \"packageName\": ${("$globalApplicationId.$flavorNameInrt").toJsonLiteral()},")
-                appendLine("    \"sha256\": ${templateSha256.toJsonLiteral()},")
-                appendLine("    \"sizeBytes\": ${templateOut.length()}")
-                appendLine("  },")
-                appendLine("  \"defaultKeyStore\": {")
-                appendLine("    \"fileName\": \"default_key_store.bks\",")
-                appendLine("    \"sha256\": ${defaultKeyStoreSha256.toJsonLiteral()},")
-                appendLine("    \"sizeBytes\": ${defaultKeyStoreOut.length()}")
-                appendLine("  },")
-                appendLine("  \"contract\": {")
-                appendLine("    \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
-                appendLine("    \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
-                appendLine("    \"runtimeApiLevel\": $versionCode,")
-                appendLine("    \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
-                appendLine("    \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
-                appendLine("    \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
-                appendLine("    \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
-                appendLine("  },")
-                appendLine("  \"compatibility\": {")
-                appendLine("    \"minHostVersionCode\": $versionCode,")
-                appendLine("    \"maxHostVersionCode\": $versionCode,")
-                appendLine("    \"allowPatchVersionMismatch\": false")
-                appendLine("  }")
-                appendLine("}")
-            },
-            Charsets.UTF_8,
-        )
-
-        kitDir.resolve("provenance.json").writeText(
-            buildString {
-                appendLine("{")
-                appendLine("  \"schemaVersion\": 1,")
-                appendLine("  \"sourceRepository\": ${runtimeKitSourceRepository.get().toJsonLiteral()},")
-                appendLine("  \"gitSha\": ${gitSha.toJsonLiteral()},")
-                appendLine("  \"githubRunId\": ${runtimeKitGithubRunId.get().toJsonLiteral()},")
-                appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()}")
-                appendLine("}")
-            },
-            Charsets.UTF_8,
-        )
-
-        val zipFile = outputRoot.resolve("autojs6-runtime-kit-v$normalizedVersion+$versionCode.zip")
-        if (zipFile.exists()) {
-            zipFile.delete()
-        }
-        ZipOutputStream(zipFile.outputStream().buffered()).use { zip ->
-            kitDir.walkTopDown()
-                .filter { it.isFile }
-                .sortedBy { it.relativeTo(kitDir).invariantSeparatorsPath }
-                .forEach { file ->
-                    val entryName = file.relativeTo(kitDir).invariantSeparatorsPath
-                    zip.putNextEntry(ZipEntry(entryName))
-                    file.inputStream().use { input -> input.copyTo(zip) }
-                    zip.closeEntry()
-                }
-        }
-
-        println("Runtime Kit directory: $kitDir")
-        println("Runtime Kit archive: $zipFile")
     }
 }
 

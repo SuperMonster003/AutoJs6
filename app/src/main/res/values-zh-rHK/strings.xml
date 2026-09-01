@@ -211,6 +211,7 @@
     <string name="dialog_button_use_default">使用默認值</string>
     <string name="dialog_button_use_palette">使用調色盤</string>
     <string name="dialog_button_view_file">查看文件</string>
+    <string name="dialog_button_view_matched_version">查看配套版本</string>
     <string name="dialog_button_view_shortcuts">查看快捷方式</string>
     <string name="dialog_button_view_update">查看更新</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
@@ -281,6 +282,10 @@
     <string name="error_android_package_file_unavailable">Android 安裝包文件不可用</string>
     <string name="error_android_package_installation_failed">安裝包安裝失敗: %1$s</string>
     <string name="error_android_package_operation_in_progress">已有另一個 Android 安裝包操作正在進行</string>
+    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">AutoJs6 開發者開關已關閉遠程 APK 建置.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">已安裝的 APK Builder 插件未宣告相容的實驗性遠程 APK 建置能力. 請安裝宣告該能力的相容插件建置, 或關閉開發者開關.</string>
+    <string name="error_apk_builder_template_host_version_outside_range">已安裝的 APK 建置器外掛程式支援 AutoJs6 宿主 versionCode %1$d-%2$d, 目前宿主為 %3$d. 請安裝配套的外掛程式版本.</string>
+    <string name="error_apk_builder_template_untrusted_signing_certificate">已安裝的 APK 建置器外掛程式未使用受信任的官方憑證簽署, 已阻止建置. 套件: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
     <string name="error_archive_extraction_failed">無法解壓縮檔案: %1$s</string>
@@ -312,7 +317,6 @@
     <string name="error_continuation_resume_called_without_suspend">方法 resume() 調用前需先調用 suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">方法 suspend() 只能調用一次</string>
     <string name="error_corresponding_github_release_may_not_published">對應的 GitHub 發行版可能還未發佈</string>
-    <string name="error_custom_css_file_too_large">CSS 檔案超出匯入限制 (%1$s)</string>
     <string name="error_document_preview_file_too_large">檔案超出預覽限制 (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">點分十進制數超過 255</string>
     <string name="error_download_interrupted">下載中斷</string>
@@ -526,6 +530,7 @@
     <string name="format_editor_info" formatted="false">字符數: %d\n行數: %d\n大小: %s</string>
     <string name="format_file_downloaded" formatted="true">文件已下載至 %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[打開] 系統設置 -> 無障礙服務 -> AutoJs6 [啓用]]]></string>
+    <string name="hint_apk_builder_template_patch_compatible_host">此 APK 建置器 Runtime Kit 為 AutoJs6 宿主 versionCode %1$d 建置, 並宣告目前宿主 %2$d 位於相容區間 %3$d-%4$d. 可繼續封裝, 但應驗證產生的 APK.</string>
     <string name="hint_archive_password">壓縮檔密碼</string>
     <string name="hint_find_with_regex">支持正則表達式搜索, 可使用 \"$1\" - \"$9\" 表示分組捕獲</string>
     <string name="hint_github_token">貼上 GitHub Personal Access Token</string>
@@ -601,6 +606,7 @@
     <string name="plugin_item_info_last_install_time">最近安裝</string>
     <string name="plugin_item_info_last_uninstall_time">最近卸載</string>
     <string name="plugin_item_info_last_update_time">最近更新</string>
+    <string name="plugin_item_info_matched_version">配套版本</string>
     <string name="plugin_item_info_mechanism">機制</string>
     <string name="plugin_item_info_package_size">安裝包大小</string>
     <string name="plugin_item_info_supported_abis">支持 ABI</string>
@@ -616,6 +622,7 @@
     <string name="prompt_plugin_abi_mismatch_before_download">插件 ABI 列表與當前設備 ABI 列表沒有交集.\n\n插件 ABI: %1$s\n設備 ABI: %2$s\n\n是否仍繼續下載?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">插件 ABI 列表與當前設備 ABI 列表沒有交集.\n\n插件 ABI: %1$s\n設備 ABI: %2$s\n\n是否仍繼續開啓?</string>
     <string name="prompt_plugin_hide_from_center">插件隱藏後將不再出現在插件中心列表中. 可在插件中心 \"全局設置\" 中管理所有隱藏插件.</string>
+    <string name="prompt_plugin_matched_version_requires_reinstall">與當前 AutoJs6 版本配套的插件版本低於已安裝版本. Android 不允許用較低版本覆蓋已安裝應用.\n\n已安裝: %1$s\n配套版本: %2$s\n\n請先卸載插件. 卸載完成後返回插件中心, 再安裝配套版本. 插件應用數據將被刪除.</string>
     <string name="prompt_plugin_mount_conflict_override">目標 \"%1$s\" 已存在 (類型: %2$s). 繼續將覆蓋該對象, 是否繼續.</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">目標 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 佔用. 請先關閉該插件的自動掛載, 或修改當前掛載目標.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啓應用才能完成文檔源切換</string>
@@ -636,6 +643,7 @@
     <string name="summary_ace_word_wrap_enabled">在編輯器可視區域內對長行自動換行</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有文件, 包括外部存儲</string>
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
+    <string name="summary_apk_builder_remote_build_r1">僅供 R1 明確試用. 遠程失敗會終止本次建置並保留已有產物; 目前尚無自動本地後備.</string>
     <string name="summary_clear_media_playback_history">清除宿主儲存的全部媒體播放位置</string>
     <string name="summary_code_editor_settings">打開完整的代碼編輯器設置頁面</string>
     <string name="summary_dex_compiler_experimental_disabled">僅使用內置 D8/dx; AAR 始終使用內置路徑</string>
@@ -795,7 +803,9 @@
     <string name="text_android_build_version">安卓構建版本</string>
     <string name="text_android_release_version">安卓發行版本</string>
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
+    <string name="text_apk_builder">APK 建置器</string>
     <string name="text_apk_builder_plugin_unavailable">打包插件不可用</string>
+    <string name="text_apk_builder_remote_build">啓用實驗性遠程 APK 建置</string>
     <string name="text_apk_template_plugin_risk_prompt">檢測到打包應用模板插件與當前 AutoJs6 版本不完全匹配. 繼續使用可能導致打包後的應用啓動失敗, API 不一致或部分模塊不可用.</string>
     <string name="text_apk_template_unavailable">打包應用模板不可用</string>
     <string name="text_apk_template_unavailable_prompt">找不到可用的打包應用模板. 當前 AutoJs6 構建未內置 template.apk, 且沒有可讀取的打包應用模板插件. 請安裝並啓用匹配版本的模板插件後重試.</string>
@@ -913,7 +923,6 @@
     <string name="text_cleaning_archive_extraction">正在清理未完成的輸出</string>
     <string name="text_cleaning_workspace">正在清理工作區</string>
     <string name="text_clear">清空</string>
-    <string name="text_clear_custom_css">清除自訂 CSS</string>
     <string name="text_clear_file_selection">清空文件選擇</string>
     <string name="text_clear_media_playback_history">清除媒體播放歷史</string>
     <string name="text_clear_pre_execute_script">清空預執行腳本</string>
@@ -1002,8 +1011,6 @@
     <string name="text_current">當前</string>
     <string name="text_current_page_configuration">當前頁面配置</string>
     <string name="text_current_version">當前版本</string>
-    <string name="text_custom_css_cleared">自訂 CSS 已清除</string>
-    <string name="text_custom_css_imported">自訂 CSS 已導入</string>
     <string name="text_daily_task">每日任務</string>
     <string name="text_date">日期</string>
     <string name="text_day1">一</string>
@@ -1267,7 +1274,6 @@
     <string name="text_image_conversion_width">寬度</string>
     <string name="text_import">導入</string>
     <string name="text_import_color_library">導入顏色庫</string>
-    <string name="text_import_custom_css">導入自訂 CSS</string>
     <string name="text_import_name_conflict">已存在同名配置 \"%1$s\", 請選擇導入方式:</string>
     <string name="text_import_script">導入腳本文件</string>
     <string name="text_import_strategy_auto_rename">自動重命名</string>
@@ -1607,13 +1613,6 @@
     <string name="text_press_again_to_exit">再按一次退出</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需關閉窗口, 可按 \"返回鍵\" 或 \"音量減鍵\"</string>
     <string name="text_preview">預覽</string>
-    <string name="text_preview_theme">預覽主題</string>
-    <string name="text_preview_theme_custom">自訂 CSS</string>
-    <string name="text_preview_theme_github_auto">GitHub 自動</string>
-    <string name="text_preview_theme_github_dark">GitHub 深色</string>
-    <string name="text_preview_theme_github_light">GitHub 淺色</string>
-    <string name="text_preview_theme_paper">紙張</string>
-    <string name="text_preview_theme_sepia">棕褐色</string>
     <string name="text_process_log">流程日誌</string>
     <string name="text_processing">正在處理</string>
     <string name="text_processing_source">正在處理源代碼</string>
@@ -1651,6 +1650,8 @@
     <string name="text_register">註冊</string>
     <string name="text_register_succeed">註冊成功</string>
     <string name="text_registering">註冊中</string>
+    <string name="text_reinstall">重新安裝</string>
+    <string name="text_reinstall_required">需要重新安裝</string>
     <string name="text_release_history">發行歷史</string>
     <string name="text_release_notes">發行説明</string>
     <string name="text_reload_or_convert_to_encoding">重新加載或轉換為 %1$s</string>
@@ -1801,7 +1802,6 @@
     <string name="text_special_permissions">特殊權限</string>
     <string name="text_stable_mode">穩定模式</string>
     <string name="text_star">收藏</string>
-    <string name="text_start_in_fullscreen_mode">以全屏模式啟動</string>
     <string name="text_start_record">開始錄製</string>
     <string name="text_start_running">開始運行</string>
     <string name="text_state_or_province">州或省份</string>

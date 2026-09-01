@@ -2,14 +2,17 @@ package org.autojs.autojs.apkbuilder.template
 
 import android.content.Context
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.center.PluginAbiUtils
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
 import org.autojs.plugin.apkbuilder.template.ApkKeyStoreResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCompatibilityPolicy
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginActions
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
@@ -31,6 +34,9 @@ object ApkBuilderTemplatePluginHost {
         moduleLabel = "APK Builder Template plugin",
         proxyFactory = { binder -> IApkBuilderTemplatePlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> proxy.getInfo() },
+        preBindValidator = { context, serviceInfo ->
+            ApkBuilderPluginTrustPolicy.requireAccepted(context, serviceInfo.packageName)
+        },
     )
 
     data class OpenedTemplate(
@@ -58,7 +64,8 @@ object ApkBuilderTemplatePluginHost {
         val candidates = discover(appContext)
             .asSequence()
             .filter { isOfficialTemplatePlugin(appContext, it) }
-            .filter { isRequiredHostVersionCompatible(it.pluginInfo) }
+            .filter { isDeclaredHostVersionCompatible(it.pluginInfo) }
+            .filter { isDeviceAbiCompatible(it.pluginInfo) }
             .filter { supportsTemplateProtocol(it.pluginInfo, request.requiredProtocolVersion) }
             .sortedWith(
                 compareByDescending<AidlPluginHost.Discovered> { isExactHostVersionMatch(it.pluginInfo) }
@@ -94,6 +101,9 @@ object ApkBuilderTemplatePluginHost {
         requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
         preferredPackageName: String? = null,
     ): ResolvedRemoteBuilder? {
+        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
+            return null
+        }
         val appContext = context.applicationContext
         val target = remoteBuildCandidates(appContext, requiredProtocolVersion)
             .firstOrNull { preferredPackageName == null || it.serviceInfo.packageName == preferredPackageName }
@@ -110,6 +120,9 @@ object ApkBuilderTemplatePluginHost {
         callback: IApkBuildCallback?,
         preferredPackageName: String? = null,
     ): OpenedBuildSession? {
+        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
+            return null
+        }
         val appContext = context.applicationContext
         val requiredProtocolVersion = request.requiredProtocolVersion.takeIf { it > 0 }
             ?: ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION
@@ -144,7 +157,11 @@ object ApkBuilderTemplatePluginHost {
         preferredPackageName: String? = null,
     ): ApkKeyStoreResult? {
         val appContext = context.applicationContext
-        val target = remoteBuildCandidates(appContext, ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
+        val target = remoteBuildCandidates(
+            appContext,
+            ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+            enforceRuntimeGate = false,
+        )
             .firstOrNull { candidate ->
                 (preferredPackageName == null || candidate.serviceInfo.packageName == preferredPackageName) &&
                         supportsKeyStoreOperations(candidate.pluginInfo)
@@ -165,12 +182,18 @@ object ApkBuilderTemplatePluginHost {
     private suspend fun remoteBuildCandidates(
         context: Context,
         requiredProtocolVersion: Int,
+        enforceRuntimeGate: Boolean = true,
     ): List<AidlPluginHost.Discovered> {
+        val runtimeEnabled = !enforceRuntimeGate || RemoteApkBuildRuntimeGate.isEnabled()
+        if (!runtimeEnabled) {
+            return emptyList()
+        }
         return discover(context)
             .asSequence()
             .filter { isOfficialTemplatePlugin(context, it) }
-            .filter { isRequiredHostVersionCompatible(it.pluginInfo) }
-            .filter { supportsRemoteBuild(it.pluginInfo, requiredProtocolVersion) }
+            .filter { isDeclaredHostVersionCompatible(it.pluginInfo) }
+            .filter { isDeviceAbiCompatible(it.pluginInfo) }
+            .filter { supportsRemoteBuild(it.pluginInfo, requiredProtocolVersion, runtimeEnabled) }
             .sortedWith(
                 compareByDescending<AidlPluginHost.Discovered> { isExactHostVersionMatch(it.pluginInfo) }
                     .thenByDescending { remoteBuildProtocolVersion(it.pluginInfo) }
@@ -182,10 +205,27 @@ object ApkBuilderTemplatePluginHost {
 
     suspend fun unavailableWarnings(context: Context): List<String> {
         val appContext = context.applicationContext
+        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
+            return listOf(appContext.getString(R.string.error_apk_builder_remote_build_disabled_by_runtime_gate))
+        }
         val discovered = discover(appContext)
             .filter { it.serviceInfo.packageName == ApkBuilderTemplatePluginIds.PACKAGE_NAME }
         if (discovered.isEmpty()) {
             return emptyList()
+        }
+
+        val untrustedSignatureItems = discovered.filterNot { item ->
+            ApkBuilderPluginTrustPolicy.isAccepted(appContext, item.serviceInfo.packageName)
+        }
+        if (untrustedSignatureItems.isNotEmpty()) {
+            val packageName = untrustedSignatureItems.first().serviceInfo.packageName
+            return listOf(
+                appContext.getString(
+                    R.string.error_apk_builder_template_untrusted_signing_certificate,
+                    packageName,
+                    ApkBuilderPluginTrustPolicy.fingerprintSummary(appContext, packageName),
+                )
+            )
         }
 
         val infoErrors = discovered
@@ -232,6 +272,67 @@ object ApkBuilderTemplatePluginHost {
                     ).filter { it.isNotBlank() }.distinct()
         }
 
+        val abiIncompatibleItems = infoItems.filter {
+            PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) &&
+                    ApkBuilderPluginTrustPolicy.isAccepted(appContext, it.serviceInfo.packageName) &&
+                    !isDeviceAbiCompatible(it.pluginInfo)
+        }
+        if (abiIncompatibleItems.isNotEmpty()) {
+            val info = abiIncompatibleItems.first().pluginInfo
+            val pluginAbis = PluginAbiUtils.formatAbiListOrFallback(
+                info?.supportedAbis?.asList().orEmpty(),
+                "unknown",
+            )
+            val deviceAbis = PluginAbiUtils.formatAbiListOrFallback(
+                AndroidUtils.deviceFilteredAbiList,
+                "unknown",
+            )
+            return (
+                    infoErrors +
+                            "Installed APK Builder plugin variant ${info?.variant ?: "unknown"} is incompatible " +
+                            "with this device ABI: plugin=$pluginAbis, device=$deviceAbis"
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
+        val hostIncompatibleItems = infoItems.filter {
+            PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) &&
+                    ApkBuilderPluginTrustPolicy.isAccepted(appContext, it.serviceInfo.packageName) &&
+                    isDeviceAbiCompatible(it.pluginInfo) &&
+                    !isDeclaredHostVersionCompatible(it.pluginInfo)
+        }
+        if (hostIncompatibleItems.isNotEmpty()) {
+            val decision = hostCompatibilityDecision(hostIncompatibleItems.first().pluginInfo)
+            return (
+                    infoErrors +
+                            appContext.getString(
+                                R.string.error_apk_builder_template_host_version_outside_range,
+                                decision.declaration.minHostVersionCode,
+                                decision.declaration.maxHostVersionCode,
+                                BuildConfig.VERSION_CODE,
+                            )
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
+        val remoteBuildUnavailableItems = infoItems.filter {
+            PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) &&
+                    ApkBuilderPluginTrustPolicy.isAccepted(appContext, it.serviceInfo.packageName) &&
+                    isDeviceAbiCompatible(it.pluginInfo) &&
+                    isDeclaredHostVersionCompatible(it.pluginInfo) &&
+                    !supportsRemoteBuild(
+                        pluginInfo = it.pluginInfo,
+                        requiredProtocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+                        runtimeEnabled = true,
+                    )
+        }
+        if (remoteBuildUnavailableItems.isNotEmpty()) {
+            return (
+                    infoErrors +
+                            appContext.getString(
+                                R.string.error_apk_builder_remote_build_not_supported_by_plugin,
+                            )
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
         return infoErrors.filter { it.isNotBlank() }.distinct()
     }
 
@@ -259,16 +360,35 @@ object ApkBuilderTemplatePluginHost {
         check(isOfficialTemplatePlugin(context, candidate)) {
             "APK Builder plugin identity or signature changed before invocation."
         }
-        check(isRequiredHostVersionCompatible(candidate.pluginInfo)) {
-            "APK Builder plugin requires a newer AutoJs6 host version."
+        check(isDeclaredHostVersionCompatible(candidate.pluginInfo)) {
+            "APK Builder plugin is outside its declared AutoJs6 compatibility range."
+        }
+        check(isDeviceAbiCompatible(candidate.pluginInfo)) {
+            "APK Builder plugin variant is incompatible with this device ABI."
         }
     }
 
-    private fun isRequiredHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
-        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
-        return PluginCapabilityResolver.isHostVersionCompatible(
-            BuildConfig.VERSION_CODE.toLong(),
-            requiresHostVersion,
+    internal fun isDeviceAbiCompatible(
+        pluginInfo: PluginInfo?,
+        deviceAbis: Collection<String> = AndroidUtils.deviceFilteredAbiList,
+    ): Boolean {
+        return ApkBuilderTemplateAbiPolicy.isCompatible(pluginInfo?.supportedAbis?.asList(), deviceAbis)
+    }
+
+    private fun isDeclaredHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
+        return hostCompatibilityDecision(pluginInfo).isCompatible
+    }
+
+    private fun hostCompatibilityDecision(
+        pluginInfo: PluginInfo?,
+    ): ApkBuilderTemplateCompatibilityPolicy.Decision {
+        val declaration = ApkBuilderTemplateCompatibilityPolicy.declarationFromCapabilities(
+            capabilities = pluginInfo?.capabilities,
+            fallbackBuiltForHostVersionCode = 0L,
+        )
+        return ApkBuilderTemplateCompatibilityPolicy.evaluate(
+            declaration = declaration,
+            actualHostVersionCode = BuildConfig.VERSION_CODE.toLong(),
         )
     }
 
@@ -282,13 +402,22 @@ object ApkBuilderTemplatePluginHost {
         return protocolVersion >= requiredProtocolVersion
     }
 
-    private fun supportsRemoteBuild(pluginInfo: PluginInfo?, requiredProtocolVersion: Int): Boolean {
-        val capabilities = pluginInfo?.capabilities ?: return false
+    private fun supportsRemoteBuild(
+        pluginInfo: PluginInfo?,
+        requiredProtocolVersion: Int,
+        runtimeEnabled: Boolean,
+    ): Boolean {
+        val capabilities = pluginInfo?.capabilities
         @Suppress("DEPRECATION")
-        if (!coerceBoolean(capabilities.get(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD))) {
-            return false
-        }
-        return remoteBuildProtocolVersion(pluginInfo) >= requiredProtocolVersion
+        val capabilityAdvertised = coerceBoolean(
+            capabilities?.get(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD)
+        )
+        return RemoteApkBuildAdmissionPolicy.evaluate(
+            runtimeEnabled = runtimeEnabled,
+            capabilityAdvertised = capabilityAdvertised,
+            advertisedProtocolVersion = remoteBuildProtocolVersion(pluginInfo),
+            requiredProtocolVersion = requiredProtocolVersion,
+        ) == RemoteApkBuildAdmissionPolicy.Decision.ALLOW
     }
 
     private fun supportsKeyStoreOperations(pluginInfo: PluginInfo?): Boolean {
@@ -335,15 +464,16 @@ object ApkBuilderTemplatePluginHost {
 
     private fun hostCompatibilityWarnings(context: Context, pluginInfo: PluginInfo?): List<String> {
         val warnings = mutableListOf<String>()
-        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
-        if (!PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)) {
+        val decision = hostCompatibilityDecision(pluginInfo)
+        if (decision.level == ApkBuilderTemplateCompatibilityPolicy.Level.PATCH_COMPATIBLE) {
             warnings += context.getString(
-                R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
-                requiresHostVersion ?: 0L,
-                BuildConfig.VERSION_CODE.toLong(),
+                R.string.hint_apk_builder_template_patch_compatible_host,
+                decision.declaration.builtForHostVersionCode,
+                decision.actualHostVersionCode,
+                decision.declaration.minHostVersionCode,
+                decision.declaration.maxHostVersionCode,
             )
-        }
-        if (!isExactHostVersionMatch(pluginInfo)) {
+        } else if (!isExactHostVersionMatch(pluginInfo)) {
             warnings += "Plugin was not built for this AutoJs6 host version: plugin=${pluginInfo?.versionName}/${pluginInfo?.versionCode}, host=${BuildConfig.VERSION_NAME}/${BuildConfig.VERSION_CODE}"
         }
         return warnings

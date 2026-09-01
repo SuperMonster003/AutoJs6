@@ -21,7 +21,7 @@ internal object RemoteBuildOutputTransport {
     /**
      * Receives and validates an output APK in a same-directory temporary file, then publishes it
      * with a single rename. The caller-visible output is therefore left untouched on cancellation,
-     * transfer failure, size mismatch, or digest mismatch.
+     * transfer failure, size mismatch, digest mismatch, or staged-file validation failure.
      */
     fun copyToFile(
         input: InputStream,
@@ -30,6 +30,7 @@ internal object RemoteBuildOutputTransport {
         expectedSha256: String? = null,
         maxBytes: Long = MAX_OUTPUT_BYTES,
         isCancelled: () -> Boolean = { false },
+        validateTemporaryFile: (File) -> Unit = {},
     ): CopyResult {
         require(maxBytes > 0L) { "Remote output size limit must be positive." }
         validateDeclaredSize(declaredSizeBytes, maxBytes)
@@ -96,6 +97,8 @@ internal object RemoteBuildOutputTransport {
                     "Remote output APK SHA-256 mismatch: expected=$expectedSha256 actual=$actualSha256"
                 )
             }
+            ensureActive(isCancelled)
+            validateTemporaryFile(temporary)
             ensureActive(isCancelled)
             replaceAtomically(temporary, absoluteOutput)
             return CopyResult(copied, actualSha256)

@@ -8,9 +8,11 @@ import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs6.R
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -40,6 +42,16 @@ object RemoteApkBuildClient {
             get() = status == ApkBuildResult.STATUS_OK
     }
 
+    internal fun outcomeForCaughtFailure(
+        error: Throwable,
+        cancelRequested: Boolean,
+    ): BuildOutcome? =
+        if (error is CancellationException || cancelRequested) {
+            BuildOutcome(status = ApkBuildResult.STATUS_CANCELLED)
+        } else {
+            null
+        }
+
     @JvmStatic
     @Throws(Exception::class)
     fun buildBlocking(
@@ -51,7 +63,62 @@ object RemoteApkBuildClient {
         preferredPluginPackageName: String? = null,
     ): BuildOutcome {
         val buildStartedAtElapsedMillis = SystemClock.elapsedRealtime()
+        val diagnosticTracker = DiagnosticTracker(buildStartedAtElapsedMillis)
+        return try {
+            buildBlockingInternal(
+                context = context,
+                projectConfig = projectConfig,
+                outApk = outApk,
+                cancelSignal = cancelSignal,
+                progressListener = progressListener,
+                preferredPluginPackageName = preferredPluginPackageName,
+                buildStartedAtElapsedMillis = buildStartedAtElapsedMillis,
+                diagnosticTracker = diagnosticTracker,
+            ).also { outcome ->
+                diagnosticTracker.record(outcome.status)
+            }
+        } catch (error: Throwable) {
+            val cancellationOutcome = outcomeForCaughtFailure(
+                error = error,
+                cancelRequested = cancelSignal?.get() == true,
+            )
+            if (cancellationOutcome != null) {
+                diagnosticTracker.mark(RemoteApkBuildErrorCategory.CANCELLED)
+                diagnosticTracker.record(ApkBuildResult.STATUS_CANCELLED)
+                cancellationOutcome
+            } else {
+                diagnosticTracker.markUnhandledFailure()
+                diagnosticTracker.record(ApkBuildResult.STATUS_FAILED)
+                throw error
+            }
+        }
+    }
+
+    private fun buildBlockingInternal(
+        context: Context,
+        projectConfig: ProjectConfig,
+        outApk: File,
+        cancelSignal: AtomicBoolean?,
+        progressListener: ProgressListener?,
+        preferredPluginPackageName: String?,
+        buildStartedAtElapsedMillis: Long,
+        diagnosticTracker: DiagnosticTracker,
+    ): BuildOutcome {
+        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.GATE)
+        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.HOST_SWITCH_DISABLED)
+            return BuildOutcome(
+                status = STATUS_NOT_AVAILABLE,
+                warnings = listOf(
+                    context.applicationContext.getString(
+                        R.string.error_apk_builder_remote_build_disabled_by_runtime_gate,
+                    ),
+                ),
+            )
+        }
+
         val appContext = context.applicationContext
+        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.DISCOVERY)
         val hasRemoteBuildPlugin = runBlocking(Dispatchers.IO) {
             ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(
                 appContext,
@@ -59,12 +126,14 @@ object RemoteApkBuildClient {
             )
         }
         if (!hasRemoteBuildPlugin) {
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.PROVIDER_NOT_AVAILABLE)
             return BuildOutcome(
                 status = STATUS_NOT_AVAILABLE,
                 warnings = unavailableWarningsBlocking(appContext),
             )
         }
 
+        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.PREPARE)
         progressListener?.onProgress(
             ApkBuildProgress(
                 step = ApkBuildProgress.STEP_PREPARE,
@@ -83,6 +152,7 @@ object RemoteApkBuildClient {
         )
         try {
             val callback = Callback(progressListener, SystemClock::elapsedRealtime)
+            diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.OPEN_SESSION)
             val opened = runBlocking(Dispatchers.IO) {
                 ApkBuilderTemplatePluginHost.openBuildSession(
                     appContext,
@@ -90,10 +160,14 @@ object RemoteApkBuildClient {
                     callback,
                     preferredPluginPackageName,
                 )
-            } ?: return BuildOutcome(
-                status = STATUS_NOT_AVAILABLE,
-                warnings = unavailableWarningsBlocking(appContext),
-            )
+            }
+            if (opened == null) {
+                diagnosticTracker.mark(RemoteApkBuildErrorCategory.PROVIDER_NOT_AVAILABLE)
+                return BuildOutcome(
+                    status = STATUS_NOT_AVAILABLE,
+                    warnings = unavailableWarningsBlocking(appContext),
+                )
+            }
 
             val session = opened.session
             val sessionBinder = session.asBinder()
@@ -117,6 +191,7 @@ object RemoteApkBuildClient {
                     }
                 }
                 if (binderLost.get()) {
+                    diagnosticTracker.mark(RemoteApkBuildErrorCategory.BINDER_LOST)
                     return failedSessionOutcome(
                         "Remote APK build session was lost before it could start.",
                         opened.hostCompatibilityWarnings,
@@ -128,6 +203,13 @@ object RemoteApkBuildClient {
                         binderLost.set(true)
                     }
                 }.exceptionOrNull()?.let { error ->
+                    diagnosticTracker.mark(
+                        if (binderLost.get()) {
+                            RemoteApkBuildErrorCategory.BINDER_LOST
+                        } else {
+                            RemoteApkBuildErrorCategory.SESSION_OPEN_FAILED
+                        }
+                    )
                     return failedSessionOutcome(
                         if (binderLost.get()) {
                             "Remote APK build session was lost while starting."
@@ -138,6 +220,7 @@ object RemoteApkBuildClient {
                     )
                 }
 
+                diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.WAIT)
                 while (true) {
                     val terminalCallbackReceived = try {
                         callback.await(WAIT_SLICE_MILLIS)
@@ -145,6 +228,7 @@ object RemoteApkBuildClient {
                         Thread.currentThread().interrupt()
                         runCatching { session.cancel() }
                             .onFailure { Log.w(TAG, "Failed to cancel interrupted remote build session", it) }
+                        diagnosticTracker.mark(RemoteApkBuildErrorCategory.CANCELLED)
                         return BuildOutcome(status = ApkBuildResult.STATUS_CANCELLED)
                     }
                     if (terminalCallbackReceived) {
@@ -153,6 +237,7 @@ object RemoteApkBuildClient {
                     if (cancelSignal?.get() == true || Thread.currentThread().isInterrupted) {
                         runCatching { session.cancel() }
                             .onFailure { Log.w(TAG, "Failed to cancel remote build session", it) }
+                        diagnosticTracker.mark(RemoteApkBuildErrorCategory.CANCELLED)
                         return BuildOutcome(status = ApkBuildResult.STATUS_CANCELLED)
                     }
                     when (
@@ -165,6 +250,7 @@ object RemoteApkBuildClient {
                     ) {
                         RemoteBuildWaitPolicy.Decision.CONTINUE -> Unit
                         RemoteBuildWaitPolicy.Decision.BINDER_LOST -> {
+                            diagnosticTracker.mark(RemoteApkBuildErrorCategory.BINDER_LOST)
                             return failedSessionOutcome(
                                 "Remote APK build session was lost before completion.",
                                 opened.hostCompatibilityWarnings,
@@ -173,6 +259,7 @@ object RemoteApkBuildClient {
                         RemoteBuildWaitPolicy.Decision.NO_PROGRESS_TIMEOUT -> {
                             runCatching { session.cancel() }
                                 .onFailure { Log.w(TAG, "Failed to cancel stalled remote build session", it) }
+                            diagnosticTracker.mark(RemoteApkBuildErrorCategory.NO_PROGRESS_TIMEOUT)
                             return failedSessionOutcome(
                                 "Remote APK build made no progress for 12 minutes and was cancelled.",
                                 opened.hostCompatibilityWarnings,
@@ -181,6 +268,7 @@ object RemoteApkBuildClient {
                         RemoteBuildWaitPolicy.Decision.TOTAL_TIMEOUT -> {
                             runCatching { session.cancel() }
                                 .onFailure { Log.w(TAG, "Failed to cancel timed-out remote build session", it) }
+                            diagnosticTracker.mark(RemoteApkBuildErrorCategory.TOTAL_TIMEOUT)
                             return failedSessionOutcome(
                                 "Remote APK build exceeded the 30-minute total time limit and was cancelled.",
                                 opened.hostCompatibilityWarnings,
@@ -189,11 +277,13 @@ object RemoteApkBuildClient {
                     }
                 }
                 val result = callback.result ?: return if (binderLost.get() || !sessionBinder.isBinderAlive) {
+                    diagnosticTracker.mark(RemoteApkBuildErrorCategory.BINDER_LOST)
                     failedSessionOutcome(
                         "Remote APK build session was lost before returning a result.",
                         opened.hostCompatibilityWarnings,
                     )
                 } else {
+                    diagnosticTracker.mark(RemoteApkBuildErrorCategory.REMOTE_FAILED)
                     failedSessionOutcome(
                         "Remote APK build finished without a result.",
                         opened.hostCompatibilityWarnings,
@@ -203,9 +293,16 @@ object RemoteApkBuildClient {
                     context = context,
                     result = result,
                     outApk = outApk,
+                    expectedIdentity = RemoteBuildExpectedApkIdentity(
+                        packageName = projectConfig.packageName,
+                        versionName = projectConfig.versionName,
+                        versionCode = projectConfig.versionCode.toLong(),
+                        signerCertificateSha256 = prepared.expectedSignerCertificateSha256,
+                    ),
                     cancelSignal = cancelSignal,
                     progressListener = progressListener,
                     hostCompatibilityWarnings = opened.hostCompatibilityWarnings,
+                    diagnosticTracker = diagnosticTracker,
                 )
             } finally {
                 if (deathRecipientLinked) {
@@ -248,9 +345,11 @@ object RemoteApkBuildClient {
         context: Context,
         result: ApkBuildResult,
         outApk: File,
+        expectedIdentity: RemoteBuildExpectedApkIdentity,
         cancelSignal: AtomicBoolean?,
         progressListener: ProgressListener?,
         hostCompatibilityWarnings: List<String>,
+        diagnosticTracker: DiagnosticTracker,
     ): BuildOutcome {
         val warnings = (hostCompatibilityWarnings + result.warnings).filter { it.isNotBlank() }.distinct()
         if (result.status != ApkBuildResult.STATUS_OK) {
@@ -258,6 +357,14 @@ object RemoteApkBuildClient {
                 runCatching(outputFd::close)
                     .onFailure { Log.w(TAG, "Failed to close unexpected remote build output fd.", it) }
             }
+            diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.COMPLETE)
+            diagnosticTracker.mark(
+                when (result.status) {
+                    ApkBuildResult.STATUS_CANCELLED -> RemoteApkBuildErrorCategory.CANCELLED
+                    ApkBuildResult.STATUS_UNSUPPORTED -> RemoteApkBuildErrorCategory.REMOTE_UNSUPPORTED
+                    else -> RemoteApkBuildErrorCategory.REMOTE_FAILED
+                }
+            )
             return BuildOutcome(
                 status = result.status,
                 warnings = warnings,
@@ -266,16 +373,21 @@ object RemoteApkBuildClient {
             )
         }
 
-        val outputFd = result.outputApkFd ?: return BuildOutcome(
-            status = ApkBuildResult.STATUS_FAILED,
-            warnings = warnings,
-            errors = result.errors + "Remote APK build completed without an output APK.",
-            updatedProjectConfigJson = result.updatedProjectConfigJson,
-        )
+        val outputFd = result.outputApkFd
+        if (outputFd == null) {
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.OUTPUT_METADATA_INVALID)
+            return BuildOutcome(
+                status = ApkBuildResult.STATUS_FAILED,
+                warnings = warnings,
+                errors = result.errors + "Remote APK build completed without an output APK.",
+                updatedProjectConfigJson = result.updatedProjectConfigJson,
+            )
+        }
         val expectedSha256 = result.outputSha256
         if (expectedSha256 == null || !SHA_256_HEX.matches(expectedSha256)) {
             runCatching(outputFd::close)
                 .onFailure { Log.w(TAG, "Failed to close remote output with an invalid SHA-256.", it) }
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.OUTPUT_METADATA_INVALID)
             return BuildOutcome(
                 status = ApkBuildResult.STATUS_FAILED,
                 warnings = warnings,
@@ -284,6 +396,8 @@ object RemoteApkBuildClient {
             )
         }
 
+        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.TRANSFER)
+        diagnosticTracker.setOutputSizeBytes(result.outputSizeBytes)
         val transferError = try {
             progressListener?.onProgress(
                 ApkBuildProgress(
@@ -297,6 +411,8 @@ object RemoteApkBuildClient {
                 outApk = outApk,
                 declaredSizeBytes = result.outputSizeBytes,
                 expectedSha256 = expectedSha256,
+                context = context,
+                expectedIdentity = expectedIdentity,
                 cancelSignal = cancelSignal,
             )
             null
@@ -307,6 +423,7 @@ object RemoteApkBuildClient {
                 .onFailure { Log.w(TAG, "Failed to close remote build output fd.", it) }
         }
         if (transferError is CancellationException) {
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.CANCELLED)
             return BuildOutcome(
                 status = ApkBuildResult.STATUS_CANCELLED,
                 warnings = warnings,
@@ -315,6 +432,7 @@ object RemoteApkBuildClient {
             )
         }
         transferError?.let { error ->
+            diagnosticTracker.mark(RemoteApkBuildErrorCategory.OUTPUT_REJECTED)
             return BuildOutcome(
                 status = ApkBuildResult.STATUS_FAILED,
                 warnings = warnings,
@@ -331,6 +449,7 @@ object RemoteApkBuildClient {
             )
         )
 
+        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.COMPLETE)
         return BuildOutcome(
             status = ApkBuildResult.STATUS_OK,
             warnings = warnings,
@@ -344,6 +463,8 @@ object RemoteApkBuildClient {
         outApk: File,
         declaredSizeBytes: Long,
         expectedSha256: String?,
+        context: Context,
+        expectedIdentity: RemoteBuildExpectedApkIdentity,
         cancelSignal: AtomicBoolean?,
     ) {
         ParcelFileDescriptor.AutoCloseInputStream(outputFd).use { input ->
@@ -353,7 +474,83 @@ object RemoteApkBuildClient {
                 declaredSizeBytes = declaredSizeBytes,
                 expectedSha256 = expectedSha256,
                 isCancelled = { cancelSignal?.get() == true },
+                validateTemporaryFile = { temporaryFile ->
+                    RemoteBuildApkValidator.validate(context, temporaryFile, expectedIdentity)
+                },
             )
+        }
+    }
+
+    private class DiagnosticTracker(
+        private val startedAtElapsedMillis: Long,
+    ) {
+        private var phase = RemoteApkBuildDiagnosticPhase.GATE
+        private var errorCategory = RemoteApkBuildErrorCategory.NONE
+        private var outputSizeBytes = -1L
+        private val recorded = AtomicBoolean(false)
+
+        fun moveTo(nextPhase: RemoteApkBuildDiagnosticPhase) {
+            phase = nextPhase
+        }
+
+        fun mark(category: RemoteApkBuildErrorCategory) {
+            errorCategory = category
+        }
+
+        fun setOutputSizeBytes(sizeBytes: Long) {
+            outputSizeBytes = sizeBytes
+        }
+
+        fun markUnhandledFailure() {
+            if (errorCategory != RemoteApkBuildErrorCategory.NONE) {
+                return
+            }
+            errorCategory = when (phase) {
+                RemoteApkBuildDiagnosticPhase.GATE -> RemoteApkBuildErrorCategory.HOST_SWITCH_DISABLED
+                RemoteApkBuildDiagnosticPhase.DISCOVERY -> RemoteApkBuildErrorCategory.DISCOVERY_FAILED
+                RemoteApkBuildDiagnosticPhase.PREPARE -> RemoteApkBuildErrorCategory.PREPARATION_FAILED
+                RemoteApkBuildDiagnosticPhase.OPEN_SESSION -> RemoteApkBuildErrorCategory.SESSION_OPEN_FAILED
+                RemoteApkBuildDiagnosticPhase.WAIT,
+                RemoteApkBuildDiagnosticPhase.COMPLETE -> RemoteApkBuildErrorCategory.REMOTE_FAILED
+                RemoteApkBuildDiagnosticPhase.TRANSFER -> RemoteApkBuildErrorCategory.OUTPUT_REJECTED
+            }
+        }
+
+        fun record(status: Int) {
+            if (!recorded.compareAndSet(false, true)) {
+                return
+            }
+            val diagnosticStatus = when (status) {
+                STATUS_NOT_AVAILABLE -> RemoteApkBuildDiagnosticStatus.NOT_AVAILABLE
+                ApkBuildResult.STATUS_OK -> RemoteApkBuildDiagnosticStatus.SUCCEEDED
+                ApkBuildResult.STATUS_FAILED -> RemoteApkBuildDiagnosticStatus.FAILED
+                ApkBuildResult.STATUS_CANCELLED -> RemoteApkBuildDiagnosticStatus.CANCELLED
+                ApkBuildResult.STATUS_UNSUPPORTED -> RemoteApkBuildDiagnosticStatus.UNSUPPORTED
+                else -> RemoteApkBuildDiagnosticStatus.OTHER
+            }
+            if (errorCategory == RemoteApkBuildErrorCategory.NONE) {
+                errorCategory = when (diagnosticStatus) {
+                    RemoteApkBuildDiagnosticStatus.NOT_AVAILABLE ->
+                        RemoteApkBuildErrorCategory.PROVIDER_NOT_AVAILABLE
+                    RemoteApkBuildDiagnosticStatus.FAILED,
+                    RemoteApkBuildDiagnosticStatus.OTHER -> RemoteApkBuildErrorCategory.REMOTE_FAILED
+                    RemoteApkBuildDiagnosticStatus.CANCELLED -> RemoteApkBuildErrorCategory.CANCELLED
+                    RemoteApkBuildDiagnosticStatus.UNSUPPORTED -> RemoteApkBuildErrorCategory.REMOTE_UNSUPPORTED
+                    RemoteApkBuildDiagnosticStatus.SUCCEEDED -> RemoteApkBuildErrorCategory.NONE
+                }
+            }
+            if (diagnosticStatus == RemoteApkBuildDiagnosticStatus.SUCCEEDED) {
+                phase = RemoteApkBuildDiagnosticPhase.COMPLETE
+            }
+            val event = RemoteApkBuildDiagnostics.record(
+                protocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+                status = diagnosticStatus,
+                phase = phase,
+                elapsedMillis = SystemClock.elapsedRealtime() - startedAtElapsedMillis,
+                outputSizeBytes = outputSizeBytes,
+                errorCategory = errorCategory,
+            )
+            Log.i(TAG, event.safeLogLine())
         }
     }
 

@@ -35,7 +35,6 @@ import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConn
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
-import org.autojs.autojs.ui.preview.DocumentPreviewActivity
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -135,7 +134,8 @@ internal class ExplorerArchiveCoordinator(
             return
         }
         val maxBytes = when (action) {
-            ExplorerPrimaryAction.DOCUMENT_PREVIEW -> DocumentPreviewActivity.MAX_DOCUMENT_BYTES.toLong()
+            ExplorerPrimaryAction.DOCUMENT_PREVIEWER ->
+                ExplorerDocumentPreviewerPluginUi.maximumArchiveDocumentBytes()
             ExplorerPrimaryAction.IMAGE_VIEW,
             ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
             -> MAX_ARCHIVE_IMAGE_PREVIEW_BYTES

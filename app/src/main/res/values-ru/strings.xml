@@ -214,6 +214,7 @@
     <string name="dialog_button_use_default">Использовать по умолчанию</string>
     <string name="dialog_button_use_palette">Использовать палитру</string>
     <string name="dialog_button_view_file">Просмотр файла</string>
+    <string name="dialog_button_view_matched_version">Показать совместимую версию</string>
     <string name="dialog_button_view_shortcuts">Просмотреть ярлыки</string>
     <string name="dialog_button_view_update">Просмотреть обновление</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
@@ -284,6 +285,10 @@
     <string name="error_android_package_file_unavailable">Файл пакета Android недоступен</string>
     <string name="error_android_package_installation_failed">Не удалось установить пакет: %1$s</string>
     <string name="error_android_package_operation_in_progress">Другая операция с пакетом Android уже выполняется</string>
+    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">Удалённая сборка APK отключена переключателем для разработчиков AutoJs6.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Установленный плагин APK Builder не объявляет совместимую экспериментальную удалённую сборку APK. Установите совместимую сборку плагина с этой возможностью или отключите переключатель для разработчиков.</string>
+    <string name="error_apk_builder_template_host_version_outside_range">Установленный плагин APK Builder поддерживает versionCode хоста AutoJs6 %1$d-%2$d, но текущий хост имеет код %3$d. Установите соответствующую версию плагина.</string>
+    <string name="error_apk_builder_template_untrusted_signing_certificate">Установленный плагин APK Builder не подписан доверенным официальным сертификатом, поэтому сборка заблокирована. Пакет: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">Приложение не установлено</string>
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
     <string name="error_archive_extraction_failed">Не удалось извлечь архив: %1$s</string>
@@ -315,7 +320,6 @@
     <string name="error_continuation_resume_called_without_suspend">Метод resume() должен вызываться после suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Метод suspend() должен быть вызван только один раз</string>
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
-    <string name="error_custom_css_file_too_large">Файл CSS превышает ограничение импорта (%1$s)</string>
     <string name="error_document_preview_file_too_large">Файл превышает ограничение предпросмотра (%1$s)</string>
     <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
     <string name="error_download_interrupted">Загрузка прервана</string>
@@ -529,6 +533,7 @@
     <string name="format_editor_info" formatted="false">Заголовки: %d\nСтроки: %d\nРазмер: %s</string>
     <string name="format_file_downloaded" formatted="true">Файл загружен на %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Перейти к] Настройки -> Службы доступности -> AutoJs6 [Включить]]]></string>
+    <string name="hint_apk_builder_template_patch_compatible_host">Этот Runtime Kit APK Builder создан для versionCode хоста AutoJs6 %1$d и объявляет текущий хост %2$d совместимым в диапазоне %3$d-%4$d. Сборку пакета можно продолжить, но проверьте созданный APK.</string>
     <string name="hint_archive_password">Пароль архива</string>
     <string name="hint_find_with_regex">Поддерживается регекс. Используйте \"$1\" - \"$9\" для захваченных групп.</string>
     <string name="hint_github_token">Вставьте персональный токен доступа GitHub</string>
@@ -604,6 +609,7 @@
     <string name="plugin_item_info_last_install_time">Посл. устан.</string>
     <string name="plugin_item_info_last_uninstall_time">Посл. удал.</string>
     <string name="plugin_item_info_last_update_time">Посл. обновл.</string>
+    <string name="plugin_item_info_matched_version">Совместимая версия</string>
     <string name="plugin_item_info_mechanism">Механизм</string>
     <string name="plugin_item_info_package_size">Размер пакета</string>
     <string name="plugin_item_info_supported_abis">Поддерживаемые ABI</string>
@@ -619,6 +625,7 @@
     <string name="prompt_plugin_abi_mismatch_before_download">Список ABI плагина не пересекается со списком ABI текущего устройства.\n\nABI плагина: %1$s\nABI устройства: %2$s\n\nВсе равно продолжить загрузку?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">Список ABI плагина не пересекается со списком ABI текущего устройства.\n\nABI плагина: %1$s\nABI устройства: %2$s\n\nВсе равно продолжить включение?</string>
     <string name="prompt_plugin_hide_from_center">После скрытия этот плагин больше не будет отображаться в списке Центра плагинов. Управлять всеми скрытыми плагинами можно в \"Глобальных настройках\" Центра плагинов.</string>
+    <string name="prompt_plugin_matched_version_requires_reinstall">Версия плагина, совместимая с этой сборкой AutoJs6, ниже установленной. Android не позволяет установить более низкую версию поверх существующего приложения.\n\nУстановлена: %1$s\nСовместимая: %2$s\n\nСначала удалите плагин. После удаления вернитесь в Центр плагинов и установите совместимую версию. Данные приложения плагина будут удалены.</string>
     <string name="prompt_plugin_mount_conflict_override">Цель \"%1$s\" уже существует (тип: %2$s). При продолжении этот объект будет перезаписан. Продолжить?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">Цель \"%1$s\" уже занята плагином \"%2$s\" (%3$s). Сначала отключите автомонтирование этого плагина или измените текущую цель монтирования.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
@@ -639,6 +646,7 @@
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
+    <string name="summary_apk_builder_remote_build_r1">Только для явного участия в R1. Сбой удалённой сборки останавливает текущую сборку и сохраняет существующий результат; автоматический переход на локальную сборку пока недоступен.</string>
     <string name="summary_clear_media_playback_history">Удалить все позиции воспроизведения, сохранённые хостом</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
     <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
@@ -798,7 +806,9 @@
     <string name="text_android_build_version">Версия сборки Android</string>
     <string name="text_android_release_version">Версия релиза Android</string>
     <string name="text_android_sdk_version">Версия SDK для Android</string>
+    <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder недоступен</string>
+    <string name="text_apk_builder_remote_build">Включить экспериментальную удалённую сборку APK</string>
     <string name="text_apk_template_plugin_risk_prompt">Установленный плагин шаблона APK Builder не полностью совместим с текущей версией AutoJs6. Продолжение может привести к тому, что упакованное приложение не запустится, будет использовать несовместимые API или не будет содержать некоторые модули.</string>
     <string name="text_apk_template_unavailable">Шаблон APK Builder недоступен</string>
     <string name="text_apk_template_unavailable_prompt">Подходящий шаблон APK Builder не найден. Эта сборка AutoJs6 не содержит встроенный template.apk, и доступный для чтения плагин шаблона APK Builder отсутствует. Установите и включите совместимый плагин шаблона, затем повторите попытку.</string>
@@ -916,7 +926,6 @@
     <string name="text_cleaning_archive_extraction">Очистка незавершенного вывода</string>
     <string name="text_cleaning_workspace">Очистка рабочей области</string>
     <string name="text_clear">Очистить</string>
-    <string name="text_clear_custom_css">Очистить пользовательский CSS</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_media_playback_history">Очистить историю воспроизведения медиа</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
@@ -1005,8 +1014,6 @@
     <string name="text_current">Текущая</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
-    <string name="text_custom_css_cleared">Пользовательский CSS очищен</string>
-    <string name="text_custom_css_imported">Пользовательский CSS импортирован</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
     <string name="text_day1">Пн</string>
@@ -1270,7 +1277,6 @@
     <string name="text_image_conversion_width">Ширина</string>
     <string name="text_import">Импорт</string>
     <string name="text_import_color_library">Импортировать цветовую библиотеку</string>
-    <string name="text_import_custom_css">Импортировать пользовательский CSS</string>
     <string name="text_import_name_conflict">Профиль с именем \"%1$s\" уже существует. Выберите способ импорта:</string>
     <string name="text_import_script">Импорт скрипта(ов)</string>
     <string name="text_import_strategy_auto_rename">Автопереименовать</string>
@@ -1610,13 +1616,6 @@
     <string name="text_press_again_to_exit">Нажмите еще раз, чтобы выйти</string>
     <string name="text_press_back_or_vol_down_to_close_window">Чтобы закрыть, нажмите \"Назад\" или \"Уменьшение громкости\"</string>
     <string name="text_preview">Предварительный просмотр</string>
-    <string name="text_preview_theme">Тема предпросмотра</string>
-    <string name="text_preview_theme_custom">Пользовательский CSS</string>
-    <string name="text_preview_theme_github_auto">GitHub Авто</string>
-    <string name="text_preview_theme_github_dark">GitHub Темная</string>
-    <string name="text_preview_theme_github_light">GitHub Светлая</string>
-    <string name="text_preview_theme_paper">Бумага</string>
-    <string name="text_preview_theme_sepia">Сепия</string>
     <string name="text_process_log">Журнал процесса</string>
     <string name="text_processing">Обработка</string>
     <string name="text_processing_source">Обработка исходников</string>
@@ -1654,6 +1653,8 @@
     <string name="text_register">Регистрировать</string>
     <string name="text_register_succeed">Регистрация прошла успешно</string>
     <string name="text_registering">Регистрация</string>
+    <string name="text_reinstall">Переустановить</string>
+    <string name="text_reinstall_required">Требуется переустановка</string>
     <string name="text_release_history">История релизов</string>
     <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_reload_or_convert_to_encoding">Перезагрузить или преобразовать в %1$s</string>
@@ -1804,7 +1805,6 @@
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
     <string name="text_star">Звезда</string>
-    <string name="text_start_in_fullscreen_mode">Запускать в полноэкранном режиме</string>
     <string name="text_start_record">Начало записи</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_state_or_province">Штат или провинция</string>

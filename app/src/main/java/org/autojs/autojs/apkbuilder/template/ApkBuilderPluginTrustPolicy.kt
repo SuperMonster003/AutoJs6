@@ -27,6 +27,22 @@ internal object ApkBuilderPluginTrustPolicy {
         )
     }
 
+    fun requireAccepted(context: Context, pluginPackageName: String) {
+        if (isAccepted(context, pluginPackageName)) {
+            return
+        }
+        throw SecurityException(
+            "APK Builder plugin signing certificate is not trusted: " +
+                    "package=$pluginPackageName, sha256=${fingerprintSummary(context, pluginPackageName)}"
+        )
+    }
+
+    fun fingerprintSummary(context: Context, pluginPackageName: String): String {
+        return formatFingerprints(
+            PluginTrustManager.resolveTrustInfo(context, pluginPackageName).fingerprintsSha256
+        )
+    }
+
     internal fun acceptsSignature(
         isDebugBuild: Boolean,
         isOfficial: Boolean,
@@ -40,5 +56,14 @@ internal object ApkBuilderPluginTrustPolicy {
             return false
         }
         return pluginFingerprints.any(hostFingerprints.toSet()::contains)
+    }
+
+    internal fun formatFingerprints(fingerprints: Collection<String>): String {
+        return fingerprints
+            .map(String::lowercase)
+            .distinct()
+            .sorted()
+            .joinToString(", ")
+            .ifBlank { "unavailable" }
     }
 }

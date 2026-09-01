@@ -18,27 +18,44 @@ object KeyStoreHelper {
     @JvmStatic
     @Throws(Exception::class)
     fun loadJks(jksFile: File?, password: CharArray): KeyStore {
-        val keyStore: KeyStore
-        try {
-            keyStore = JksKeyStore()
-            keyStore.load(jksFile?.let { FileInputStream(it) }, password)
+        return try {
+            JksKeyStore().apply {
+                if (jksFile == null) {
+                    load(null, password)
+                } else {
+                    FileInputStream(jksFile).use { input -> load(input, password) }
+                }
+            }
         } catch (e: Exception) {
-            throw RuntimeException("Failed to load keystore: " + e.message)
+            throw RuntimeException("Failed to load JKS keystore.", e)
         }
-        return keyStore
     }
 
     @JvmStatic
     @Throws(Exception::class)
     fun loadBks(bksFile: File?, password: CharArray): KeyStore {
-        val keyStore: KeyStore
-        try {
-            keyStore = KeyStore.getInstance("BKS", "BC")
-            keyStore.load(bksFile?.let { FileInputStream(it) }, password)
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to load keystore: " + e.message)
+        return try {
+            loadBksWithProvider(bksFile, password, KeyStore.getInstance("BKS", "BC"))
+        } catch (primaryError: Exception) {
+            try {
+                loadBksWithProvider(bksFile, password, KeyStore.getInstance("BKS", provider))
+            } catch (fallbackError: Exception) {
+                primaryError.addSuppressed(fallbackError)
+                throw RuntimeException("Failed to load BKS keystore.", primaryError)
+            }
         }
-        return keyStore
+    }
+
+    private fun loadBksWithProvider(
+        bksFile: File?,
+        password: CharArray,
+        keyStore: KeyStore,
+    ): KeyStore = keyStore.apply {
+        if (bksFile == null) {
+            load(null, password)
+        } else {
+            FileInputStream(bksFile).use { input -> load(input, password) }
+        }
     }
 
     @JvmStatic

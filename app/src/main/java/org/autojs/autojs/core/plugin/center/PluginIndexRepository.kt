@@ -10,6 +10,7 @@ import org.autojs.autojs.network.GitHubTokenStore
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -27,12 +28,15 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v8.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v9.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_INDEX_REPO = "AutoJs6-Official-Plugins-Index"
         private const val OFFICIAL_INDEX_BRANCH = "main"
         private const val OFFICIAL_GENERATED_INDEX_PATH = "plugins.official.generated.json"
+        private const val APK_BUILDER_REPO = "AutoJs6-Plugin-APK-Builder-Template"
+        private const val APK_BUILDER_MATRIX_BRANCH = "master"
+        private const val APK_BUILDER_MATRIX_PATH = "compat-matrix.json"
         private const val THIRD_PARTY_OWNER = "SuperMonster003"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
@@ -311,13 +315,80 @@ class PluginIndexRepository {
             path = OFFICIAL_GENERATED_INDEX_PATH,
         )
         PluginCenterProcessLogger.i("Fetch official generated plugin index: $indexUrl")
-        return fetchGeneratedEntries(
+        val entries = fetchGeneratedEntries(
             context = context,
             languageTag = languageTag,
             indexUrl = indexUrl,
             source = PluginIndexSource.OFFICIAL,
             fallbackTag = "official",
         )
+        return overlayApkBuilderCompatibilityMatrix(context, entries)
+    }
+
+    private fun overlayApkBuilderCompatibilityMatrix(
+        context: Context,
+        entries: List<PluginIndexEntry>,
+    ): List<PluginIndexEntry> {
+        val targetIndex = entries.indexOfFirst {
+            it.packageName == ApkBuilderTemplatePluginIds.PACKAGE_NAME
+        }
+        if (targetIndex < 0) return entries
+
+        val matrixUrl = rawGithubUrl(
+            owner = OFFICIAL_OWNER,
+            repo = APK_BUILDER_REPO,
+            branch = APK_BUILDER_MATRIX_BRANCH,
+            path = APK_BUILDER_MATRIX_PATH,
+        )
+        val resolutionResult = runCatching {
+            val matrixJson = getText(
+                context = context,
+                url = matrixUrl,
+                accept = "application/json",
+                connectTimeoutMs = 6_000,
+                readTimeoutMs = 8_000,
+            )
+            ApkBuilderCompatibilityMatrixResolver.resolve(
+                json = matrixJson,
+                hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+                deviceAbis = AndroidUtils.deviceFilteredAbiList,
+            )
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to resolve APK Builder compatibility matrix; use release index.", error)
+            PluginCenterProcessLogger.i(
+                "APK Builder compatibility matrix unavailable; use release-index fallback: " +
+                        (error.message ?: error.javaClass.simpleName) + ".",
+            )
+        }
+        if (resolutionResult.isFailure) return entries
+        val resolution = resolutionResult.getOrNull()
+
+        if (resolution == null) {
+            PluginCenterProcessLogger.i(
+                "APK Builder compatibility matrix has no usable match for host " +
+                        "${BuildConfig.VERSION_CODE}; use release-index fallback.",
+            )
+            return entries
+        }
+
+        val targetEntry = entries[targetIndex]
+        val indexedRelease = targetEntry.releases.firstOrNull {
+            it.versionCode == resolution.release.versionCode
+        }
+        val resolvedRelease = resolution.release.copy(
+            versionDate = resolution.release.versionDate ?: indexedRelease?.versionDate,
+            changelogUrl = indexedRelease?.changelogUrl,
+            changelogText = indexedRelease?.changelogText,
+        )
+        val overlaid = targetEntry.copy(
+            releases = listOf(resolvedRelease),
+            supportedAbis = resolution.supportedAbis,
+        )
+        PluginCenterProcessLogger.i(
+            "APK Builder compatibility matrix matched host ${BuildConfig.VERSION_CODE}: " +
+                    "plugin=${resolvedRelease.versionCode}, variant=${resolution.artifactVariant}.",
+        )
+        return entries.toMutableList().apply { this[targetIndex] = overlaid }
     }
 
     private fun fetchThirdPartyEntries(
@@ -485,6 +556,8 @@ class PluginIndexRepository {
         context: Context,
         url: String,
         accept: String = "*/*",
+        connectTimeoutMs: Int = 12_000,
+        readTimeoutMs: Int = 15_000,
     ): String {
         val isGitHubApi = url.startsWith("https://api.github.com/")
         val githubToken = if (isGitHubApi) GitHubTokenStore.getToken(context) else null
@@ -503,8 +576,8 @@ class PluginIndexRepository {
 
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
-            connectTimeout = 12_000
-            readTimeout = 15_000
+            connectTimeout = connectTimeoutMs
+            readTimeout = readTimeoutMs
             setRequestProperty("Accept", accept)
             setRequestProperty("User-Agent", "${context.getString(R.string.app_name)}/${BuildConfig.VERSION_NAME} (PluginCenter)")
             if (isGitHubApi) {
@@ -612,6 +685,7 @@ class PluginIndexRepository {
                     rel.put("apkSizeBytes", release.apkSizeBytes)
                     rel.put("changelogUrl", release.changelogUrl)
                     rel.put("changelogText", release.changelogText)
+                    rel.put("compatibilityMatrixMatched", release.compatibilityMatrixMatched)
                     releaseArr.put(rel)
                 }
                 obj.put("releases", releaseArr)
@@ -757,6 +831,7 @@ class PluginIndexRepository {
                                 apkSizeBytes = selectedAsset?.size ?: rel.optLong("apkSizeBytes", -1L).takeIf { it > 0 },
                                 changelogUrl = rel.optString("changelogUrl").takeIf { it.isNotBlank() },
                                 changelogText = rel.optString("changelogText").takeIf { it.isNotBlank() },
+                                compatibilityMatrixMatched = rel.optBoolean("compatibilityMatrixMatched", false),
                             ),
                         )
                     }

@@ -26,6 +26,7 @@ import org.autojs.autojs.apkbuilder.ApkPluginLibraryVariant
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
@@ -130,6 +131,7 @@ object RemoteApkBuildRequestPreparer {
         val request: ApkBuildRequest,
         val archiveFile: File,
         val nativeLibrariesArchiveFile: File?,
+        val expectedSignerCertificateSha256: String,
     ) : Closeable {
         override fun close() {
             runCatching { request.projectArchiveFd?.close() }
@@ -160,6 +162,7 @@ object RemoteApkBuildRequestPreparer {
             throw IOException("Project source path does not exist: ${source.path}")
         }
         ensureNotCancelled(cancelSignal)
+        validateEmbeddedNodeBuildRequirements(projectConfig, source)
 
         notifyProgress(progressListener, "Preparing remote build workspace", source.path)
         val cacheDir = File(appContext.cacheDir, "apk-remote-build-input").apply {
@@ -178,7 +181,6 @@ object RemoteApkBuildRequestPreparer {
         try {
             notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
             val remoteConfig = cloneForRemoteRequest(projectConfig)
-            validateEmbeddedNodeBuildRequirements(projectConfig)
             typeScriptPlan = TypeScriptApkBuildCompiler.prepare(
                 context = appContext,
                 projectConfig = projectConfig,
@@ -222,10 +224,18 @@ object RemoteApkBuildRequestPreparer {
 
             notifyProgress(progressListener, "Verifying project archive", archiveFile.name)
             val projectArchiveSha256 = sha256(archiveFile, cancelSignal)
+            val projectArchiveUncompressedSizeBytes = zipUncompressedSizeBytes(
+                archiveFile,
+                "project archive",
+                cancelSignal,
+            )
             notifyProgress(progressListener, "Verifying remote build inputs", nativeLibrariesArchiveFile?.name)
             val nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let {
                 sha256(it, cancelSignal)
             }
+            val nativeLibrariesArchiveUncompressedSizeBytes = nativeLibrariesArchiveFile?.let {
+                zipUncompressedSizeBytes(it, "native build input archive", cancelSignal)
+            } ?: 0L
             val keyStoreSha256 = keyStoreFile?.let { file ->
                 notifyProgress(progressListener, "Preparing keystore", file.path)
                 sha256(file, cancelSignal)
@@ -236,6 +246,12 @@ object RemoteApkBuildRequestPreparer {
             val keyAliasPassword = keyStore?.aliasPassword
                 ?.takeIf { it.isNotBlank() }
                 ?.let(AESUtils::decrypt)
+            val expectedSignerCertificateSha256 = RemoteBuildExpectedSignerResolver.resolve(
+                context = appContext,
+                keyStoreFile = keyStoreFile,
+                keyStorePassword = keyStorePassword,
+                keyAlias = keyStore?.alias,
+            )
             ensureNotCancelled(cancelSignal)
             notifyProgress(progressListener, "Opening remote build request", outputFileName)
 
@@ -257,6 +273,14 @@ object RemoteApkBuildRequestPreparer {
                 )
                 putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, SOURCE_ROOT_ENTRY)
                 putString(ApkBuildRequestExtraKeys.SOURCE_PATH, archivedSource.path)
+                putLong(
+                    ApkBuildRequestExtraKeys.PROJECT_ARCHIVE_UNCOMPRESSED_SIZE_BYTES,
+                    projectArchiveUncompressedSizeBytes,
+                )
+                putLong(
+                    ApkBuildRequestExtraKeys.NATIVE_LIBRARIES_ARCHIVE_UNCOMPRESSED_SIZE_BYTES,
+                    nativeLibrariesArchiveUncompressedSizeBytes,
+                )
                 if (remoteConfig.iconPath == REMOTE_ICON_ENTRY) {
                     putString(ApkBuildRequestExtraKeys.ICON_PATH, REMOTE_ICON_ENTRY)
                 }
@@ -287,7 +311,12 @@ object RemoteApkBuildRequestPreparer {
                 allowRiskyBuild = true,
                 extras = requestExtras,
             )
-            return Prepared(request, archiveFile, nativeLibrariesArchiveFile)
+            return Prepared(
+                request = request,
+                archiveFile = archiveFile,
+                nativeLibrariesArchiveFile = nativeLibrariesArchiveFile,
+                expectedSignerCertificateSha256 = expectedSignerCertificateSha256,
+            )
         } catch (error: Throwable) {
             runCatching { projectArchiveFd?.close() }
             runCatching { nativeLibrariesArchiveFd?.close() }
@@ -317,8 +346,21 @@ object RemoteApkBuildRequestPreparer {
         return remoteConfigGson.toJson(projectConfig)
     }
 
-    private fun validateEmbeddedNodeBuildRequirements(projectConfig: ProjectConfig) {
-        if (!projectConfig.libs.contains(ApkBuildLibrary.EMBEDDED_NODE_JS.label)) {
+    private fun validateEmbeddedNodeBuildRequirements(projectConfig: ProjectConfig, source: File) {
+        val entryExecutionMode = resolveProjectEntry(source, projectConfig.mainScriptFileName)
+            ?.takeIf(File::isFile)
+            ?.reader(Charsets.UTF_8)
+            ?.use(JavaScriptSource::parseExecutionMode)
+            ?.mode
+        if (!requestsEmbeddedNodePackaging(
+                selectedLibraries = projectConfig.libs,
+                projectType = projectConfig.projectType,
+                hasNodeConfig = projectConfig.nodeConfig != null,
+                configuredEntryName = projectConfig.mainScriptFileName,
+                sourceName = source.name,
+                entryExecutionMode = entryExecutionMode,
+            )
+        ) {
             return
         }
         throw IOException(
@@ -326,6 +368,40 @@ object RemoteApkBuildRequestPreparer {
                     "Remove the Embedded Node.js library from this packaged project; run Node.js scripts " +
                     "from the AutoJs6 host with the runtime plugin installed."
         )
+    }
+
+    internal fun requestsEmbeddedNodePackaging(
+        selectedLibraries: List<String>,
+        projectType: String?,
+        hasNodeConfig: Boolean,
+        configuredEntryName: String?,
+        sourceName: String?,
+        entryExecutionMode: Int?,
+    ): Boolean {
+        val embeddedNode = ApkBuildLibrary.EMBEDDED_NODE_JS
+        val selectedAsLibrary = selectedLibraries.any { selected ->
+            val normalized = selected.trim()
+            normalized.equals(embeddedNode.label, ignoreCase = true) ||
+                    embeddedNode.aliases.any { alias -> normalized.equals(alias, ignoreCase = true) }
+        }
+        return selectedAsLibrary ||
+                projectType?.trim()?.equals("node", ignoreCase = true) == true ||
+                hasNodeConfig ||
+                JavaScriptSource.isNodeJsFileName(configuredEntryName) ||
+                JavaScriptSource.isNodeJsFileName(sourceName) ||
+                (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_NODEJS != 0
+    }
+
+    private fun resolveProjectEntry(source: File, configuredEntryName: String): File? {
+        if (!source.isDirectory) {
+            return source
+        }
+        val root = source.canonicalFile
+        val entry = File(root, configuredEntryName).canonicalFile
+        val rootPrefix = "${root.path}${File.separator}"
+        return entry.takeIf { candidate ->
+            candidate.path == root.path || candidate.path.startsWith(rootPrefix)
+        }
     }
 
     private fun writeProjectArchive(
@@ -1133,6 +1209,32 @@ object RemoteApkBuildRequestPreparer {
             }
         }
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    private fun zipUncompressedSizeBytes(
+        file: File,
+        label: String,
+        cancelSignal: AtomicBoolean?,
+    ): Long {
+        var total = 0L
+        ZipFile(file).use { zip ->
+            val entries = zip.entries()
+            while (entries.hasMoreElements()) {
+                ensureNotCancelled(cancelSignal)
+                val entry = entries.nextElement()
+                if (entry.isDirectory) continue
+                val size = entry.size
+                if (size < 0L) {
+                    throw IOException("Remote build $label contains an entry with unknown size.")
+                }
+                total = try {
+                    Math.addExact(total, size)
+                } catch (_: ArithmeticException) {
+                    throw IOException("Remote build $label uncompressed size is too large.")
+                }
+            }
+        }
+        return total
     }
 
     private fun deletePreparedFile(file: File) {

@@ -52,6 +52,7 @@ object PluginCenterItemSemantics {
                 && a.updatableApkSizeBytes == b.updatableApkSizeBytes
                 && a.updatableChangelogUrl == b.updatableChangelogUrl
                 && a.updatableChangelogText == b.updatableChangelogText
+                && a.requiresDowngradeReinstall == b.requiresDowngradeReinstall
                 && a.packageSize == b.packageSize
                 && a.installableApkUrl == b.installableApkUrl
                 && a.installableApkSha256 == b.installableApkSha256

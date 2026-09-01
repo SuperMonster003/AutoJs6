@@ -24,6 +24,7 @@ data class PluginCenterItem(
     val updatableApkSizeBytes: Long? = null,
     val updatableChangelogUrl: String? = null,
     val updatableChangelogText: String? = null,
+    val requiresDowngradeReinstall: Boolean = false,
 
     val author: String? = null,
     val collaborators: List<String> = emptyList(),

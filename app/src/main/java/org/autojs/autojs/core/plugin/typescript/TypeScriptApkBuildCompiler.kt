@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.EncryptedScriptFileHeader
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 
@@ -172,11 +173,21 @@ internal object TypeScriptApkBuildCompiler {
         } else {
             mainPath
         }
+        val launchEntry = if (mainKind == SourceKind.RHINO) {
+            entry
+        } else {
+            File(root, mainPath).canonicalFile.also { mainFile ->
+                require(mainFile.isFile && mainFile.isInsideOrSame(root)) {
+                    "APK entry does not exist inside the project: $mainPath"
+                }
+            }
+        }
         return createPlan(
             output = output,
             mainScriptPath = packagedMain,
             forceDirectorySource = false,
             singleFileTarget = null,
+            entryExecutionMode = readEntryExecutionMode(sourceReader, launchEntry),
             requiresEncryptedStaging = sourceReader.encounteredEncryptedSource,
         )
     }
@@ -222,6 +233,7 @@ internal object TypeScriptApkBuildCompiler {
             mainScriptPath = DEFAULT_PACKAGED_MAIN,
             forceDirectorySource = true,
             singleFileTarget = DEFAULT_PACKAGED_MAIN,
+            entryExecutionMode = readEntryExecutionMode(sourceReader, source),
             requiresEncryptedStaging = sourceReader.encounteredEncryptedSource,
         )
     }
@@ -249,6 +261,7 @@ internal object TypeScriptApkBuildCompiler {
         mainScriptPath: String,
         forceDirectorySource: Boolean,
         singleFileTarget: String?,
+        entryExecutionMode: Int,
         requiresEncryptedStaging: Boolean = false,
     ): TypeScriptApkBuildPlan {
         val modules = output.modules.sortedBy { module -> runtimeRelativeGeneratedPath(module) }
@@ -277,7 +290,7 @@ internal object TypeScriptApkBuildCompiler {
         }
         entries += TypeScriptApkBuildEntry(
             RHINO_LAUNCHER_PATH,
-            rhinoLauncher(mainScriptPath),
+            rhinoLauncher(mainScriptPath, entryExecutionMode),
         )
         val authority = output.authority
         val manifest = JsonObject().apply {
@@ -310,15 +323,59 @@ internal object TypeScriptApkBuildCompiler {
         )
     }
 
-    private fun rhinoLauncher(entryJavaScriptPath: String): ByteArray {
+    private fun rhinoLauncher(
+        entryJavaScriptPath: String,
+        entryExecutionMode: Int,
+    ): ByteArray {
         requireCanonicalProjectPath(entryJavaScriptPath)
         val pathLiteral = JsonObject().apply {
             addProperty("path", "./$entryJavaScriptPath")
         }.get("path").toString()
+        val executionDirective = canonicalRhinoExecutionDirective(entryExecutionMode)
         return TypeScriptUtf8.encode(
-            "\"use strict\";\nrequire(files.path($pathLiteral));\n",
+            executionDirective + "\"use strict\";\nrequire(files.path($pathLiteral));\n",
             "packaged TypeScript launcher",
         )
+    }
+
+    private fun readEntryExecutionMode(
+        sourceReader: TypeScriptSourceContentReader,
+        source: File,
+    ): Int {
+        val bytes = sourceReader.read(
+            source,
+            TypeScriptR2Contract.MAX_ORDINARY_COMPILATION_SINGLE_FILE_BYTES,
+        )
+        try {
+            val script = TypeScriptUtf8.decode(bytes, "TypeScript APK entry")
+            return requireRhinoExecutionMode(JavaScriptSource.parseExecutionMode(script).mode)
+        } finally {
+            bytes.fill(0)
+        }
+    }
+
+    private fun canonicalRhinoExecutionDirective(mode: Int): String {
+        requireRhinoExecutionMode(mode)
+        val names = buildList {
+            if (mode and JavaScriptSource.EXECUTION_MODE_UI != 0) add("ui")
+            if (mode and JavaScriptSource.EXECUTION_MODE_AUTO != 0) add("auto")
+            if (mode and JavaScriptSource.EXECUTION_MODE_JSOX != 0) add("jsox")
+            if (mode and JavaScriptSource.EXECUTION_MODE_UI_THREAD != 0) add("ui-thread")
+            if (mode and JavaScriptSource.EXECUTION_MODE_RHINO != 0) add("rhino")
+        }
+        return names.takeIf(List<String>::isNotEmpty)
+            ?.joinToString(prefix = "\"", postfix = "\";\n", separator = " ")
+            .orEmpty()
+    }
+
+    private fun requireRhinoExecutionMode(mode: Int): Int {
+        require(mode and JavaScriptSource.EXECUTION_MODE_NODEJS == 0) {
+            "Node TypeScript projects cannot be packaged without a Node Runtime."
+        }
+        require(mode and SUPPORTED_RHINO_EXECUTION_MODES.inv() == 0) {
+            "TypeScript APK entry has unsupported execution-mode flags."
+        }
+        return mode
     }
 
     private fun releaseJavaScript(javaScript: String, sourceMapName: String): String {
@@ -496,6 +553,12 @@ internal object TypeScriptApkBuildCompiler {
     }
 
     private const val MAX_REPORTED_DIAGNOSTICS = 20
+    private const val SUPPORTED_RHINO_EXECUTION_MODES =
+        JavaScriptSource.EXECUTION_MODE_UI or
+            JavaScriptSource.EXECUTION_MODE_AUTO or
+            JavaScriptSource.EXECUTION_MODE_JSOX or
+            JavaScriptSource.EXECUTION_MODE_UI_THREAD or
+            JavaScriptSource.EXECUTION_MODE_RHINO
     private val DECLARATION_SUFFIXES = listOf(".d.mts", ".d.cts", ".d.ts")
     private val RHINO_SUFFIXES = listOf(".tsx", ".ts")
     private val NODE_SUFFIXES = listOf(".mts", ".cts")

@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.typescript
 
 import java.nio.charset.StandardCharsets
 import com.google.gson.JsonParser
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.plugin.typescript.api.TypeScriptCompilerContract
 import org.autojs.plugin.typescript.api.TypeScriptR2Contract
 import org.junit.Assert.assertEquals
@@ -23,6 +24,7 @@ class TypeScriptApkBuildCompilerTest {
             mainScriptPath = "main.js",
             forceDirectorySource = false,
             singleFileTarget = null,
+            entryExecutionMode = JavaScriptSource.EXECUTION_MODE_NORMAL,
         )
         try {
             assertEquals(TypeScriptApkBuildCompiler.RHINO_LAUNCHER_PATH, plan.mainScriptPath)
@@ -82,6 +84,7 @@ class TypeScriptApkBuildCompilerTest {
             mainScriptPath = "main.js",
             forceDirectorySource = true,
             singleFileTarget = "main.js",
+            entryExecutionMode = JavaScriptSource.EXECUTION_MODE_NORMAL,
         )
         try {
             assertTrue(plan.forceDirectorySource)
@@ -110,11 +113,34 @@ class TypeScriptApkBuildCompilerTest {
             mainScriptPath = "main.js",
             forceDirectorySource = false,
             singleFileTarget = null,
+            entryExecutionMode = JavaScriptSource.EXECUTION_MODE_NORMAL,
             requiresEncryptedStaging = true,
         )
         try {
             assertTrue(plan.requiresEncryptedStaging)
             assertTrue("main.js" in plan.generatedPaths)
+        } finally {
+            plan.close()
+        }
+    }
+
+    @Test
+    fun carriesUiExecutionModeIntoTheGeneratedLauncher() {
+        val plan = TypeScriptApkBuildCompiler.createPlan(
+            output = emitted(
+                modules = listOf(module("main.tsx", "main.js")),
+                entryModulePath = "modules/main.js",
+            ),
+            mainScriptPath = "main.js",
+            forceDirectorySource = false,
+            singleFileTarget = null,
+            entryExecutionMode = JavaScriptSource.EXECUTION_MODE_UI,
+        )
+        try {
+            assertEquals(
+                "\"ui\";\n\"use strict\";\nrequire(files.path(\"./main.js\"));\n",
+                plan.text(TypeScriptApkBuildCompiler.RHINO_LAUNCHER_PATH),
+            )
         } finally {
             plan.close()
         }
