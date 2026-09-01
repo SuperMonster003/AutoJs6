@@ -12,6 +12,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
@@ -49,6 +50,7 @@ object ScreenColorPickerPluginStateMonitor {
 
     data class State(
         val status: Status,
+        val enabledInPluginCenter: Boolean,
         val runtimeState: Int = ScreenColorPickerStates.INACTIVE,
         val errorMessage: String? = null,
     ) {
@@ -57,6 +59,10 @@ object ScreenColorPickerPluginStateMonitor {
 
         val available: Boolean
             get() = status == Status.AVAILABLE
+
+        val visibleInDrawer: Boolean
+            get() = enabledInPluginCenter &&
+                    (status == Status.AVAILABLE || status == Status.INELIGIBLE)
 
         val active: Boolean
             get() = available && ScreenColorPickerStates.isOn(runtimeState)
@@ -93,8 +99,8 @@ object ScreenColorPickerPluginStateMonitor {
     }
 
     private val pluginStateChangedListener: (String) -> Unit = { packageName ->
-        if (packageName == ScreenColorPickerContract.DEFAULT_PACKAGE_NAME) {
-            refresh(Cause.PLUGIN_STATE_CHANGED)
+        if (ScreenColorPickerPluginStateChangePolicy.shouldRefresh(packageName)) {
+            refreshAfterPluginStateChange()
         }
     }
 
@@ -163,6 +169,23 @@ object ScreenColorPickerPluginStateMonitor {
         if (Looper.myLooper() == Looper.getMainLooper()) publish() else mainHandler.post(publish)
     }
 
+    private fun refreshAfterPluginStateChange() {
+        val context = appContext ?: return
+        // Invalidate an inspection that may already have read the old enablement value.
+        inspectionId.incrementAndGet()
+        val updateAndInspect = {
+            val previous = state
+            if (previous != null) {
+                val current = previous.withPluginCenterEnabled(isEnabledInPluginCenter(context))
+                if (current != previous) {
+                    publish(current, Cause.PLUGIN_STATE_CHANGED)
+                }
+            }
+            scheduleInspection(context, Cause.PLUGIN_STATE_CHANGED)
+        }
+        if (Looper.myLooper() == Looper.getMainLooper()) updateAndInspect() else mainHandler.post(updateAndInspect)
+    }
+
     private fun initialize(context: Context): State {
         state?.let { return it }
         val applicationContext = context.applicationContext
@@ -192,7 +215,10 @@ object ScreenColorPickerPluginStateMonitor {
             }.onFailure { error ->
                 Log.e(TAG, "Unable to register the Screen Color Picker package monitor", error)
             }
-            return State(Status.LOADING).also { initial ->
+            return State(
+                status = Status.LOADING,
+                enabledInPluginCenter = isEnabledInPluginCenter(applicationContext),
+            ).also { initial ->
                 state = initial
                 scheduleInspection(applicationContext, Cause.INITIALIZED)
             }
@@ -219,32 +245,43 @@ object ScreenColorPickerPluginStateMonitor {
         Log.w(TAG, "Unable to inspect the Screen Color Picker plugin", error)
         State(
             status = Status.INELIGIBLE,
+            enabledInPluginCenter = isEnabledInPluginCenter(context),
             errorMessage = error.message,
         )
     }
 
     private fun inspect(context: Context): State {
+        val enabledInPluginCenter = isEnabledInPluginCenter(context)
         val applicationInfo = getApplicationInfoOrNull(context.packageManager)
-            ?: return State(Status.NOT_INSTALLED)
-        if (!applicationInfo.enabled || !PluginEnableStore.isEnabled(
-                context,
-                ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
-                true,
+            ?: return State(
+                status = Status.NOT_INSTALLED,
+                enabledInPluginCenter = enabledInPluginCenter,
             )
-        ) {
-            return State(Status.DISABLED)
+        if (!applicationInfo.enabled || !enabledInPluginCenter) {
+            return State(
+                status = Status.DISABLED,
+                enabledInPluginCenter = enabledInPluginCenter,
+            )
         }
         if (ScreenColorPickerPluginHost.queryServiceCount(context) == 0) {
             return State(
                 status = Status.INELIGIBLE,
+                enabledInPluginCenter = true,
                 errorMessage = "Required plugin service is unavailable",
             )
         }
         return State(
             status = Status.AVAILABLE,
+            enabledInPluginCenter = true,
             runtimeState = runBlocking { ScreenColorPickerPluginHost.getState(context) },
         )
     }
+
+    private fun isEnabledInPluginCenter(context: Context): Boolean = PluginEnableStore.isEnabled(
+        context,
+        ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
+        PluginDefaultEnabledPolicy.isEnabledByDefault(ScreenColorPickerContract.ENGINE),
+    )
 
     private fun publish(current: State, cause: Cause) {
         val previous = state
@@ -285,6 +322,26 @@ object ScreenColorPickerPluginStateMonitor {
             )
         }
     }.getOrNull()
+}
+
+internal fun ScreenColorPickerPluginStateMonitor.State.withPluginCenterEnabled(
+    enabled: Boolean,
+): ScreenColorPickerPluginStateMonitor.State {
+    if (enabledInPluginCenter == enabled) return this
+    return when {
+        enabled -> copy(enabledInPluginCenter = true)
+        else -> copy(
+            status = if (installed) ScreenColorPickerPluginStateMonitor.Status.DISABLED else status,
+            enabledInPluginCenter = false,
+            runtimeState = ScreenColorPickerStates.INACTIVE,
+            errorMessage = null,
+        )
+    }
+}
+
+internal object ScreenColorPickerPluginStateChangePolicy {
+    fun shouldRefresh(packageName: String): Boolean =
+        packageName == ScreenColorPickerContract.DEFAULT_PACKAGE_NAME
 }
 
 internal object ScreenColorPickerPluginPackageEventPolicy {

@@ -984,7 +984,7 @@ open class DrawerFragment : Fragment() {
     private fun applyScreenColorPickerState(
         state: ScreenColorPickerPluginStateMonitor.State,
     ) {
-        val shouldHide = !state.installed
+        val shouldHide = !state.visibleInDrawer
         val visibilityChanged = mScreenColorPickerItem.isHidden != shouldHide
         mScreenColorPickerItem.isHidden = shouldHide
 
