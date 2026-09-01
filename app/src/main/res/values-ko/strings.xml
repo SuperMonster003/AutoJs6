@@ -744,6 +744,7 @@
     <string name="text_ace_editor_font_download_all_running">전체 다운로드가 이미 진행 중입니다</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">%1$s (%2$s)을(를) 다운로드할까요?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">글꼴 다운로드 실패: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">미리 보려면 이 글꼴을 다운로드하세요</string>
     <string name="text_ace_editor_font_download_to_use">이 글꼴을 사용하려면 다운로드하세요</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (중국어 간체)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (아이콘 글리프)</string>

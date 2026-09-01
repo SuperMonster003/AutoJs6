@@ -739,6 +739,7 @@
     <string name="text_ace_editor_font_download_all_running">全部字體下載任務已在進行中</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">下載 %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">字體下載失敗: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">下載此字體後方可預覽</string>
     <string name="text_ace_editor_font_download_to_use">下載後即可使用此字體</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (簡體中文)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (圖示字形)</string>

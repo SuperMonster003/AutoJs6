@@ -737,6 +737,7 @@
     <string name="text_ace_editor_font_download_all_running">Download all is already in progress</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">Download %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">Font download failed: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">Download this font to preview it</string>
     <string name="text_ace_editor_font_download_to_use">Download to use this font</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (Simplified Chinese)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (icon glyphs)</string>

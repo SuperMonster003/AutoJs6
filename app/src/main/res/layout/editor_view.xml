@@ -114,6 +114,21 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <TextView
+                android:id="@+id/font_preview_unavailable_hint"
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:importantForAccessibility="yes"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:singleLine="true"
+                android:text="@string/text_ace_editor_font_download_required_for_preview"
+                android:textSize="13sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <FrameLayout
                 android:id="@+id/input_method_enhance_bar"
                 android:layout_width="match_parent"

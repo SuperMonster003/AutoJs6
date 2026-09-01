@@ -742,6 +742,7 @@
     <string name="text_ace_editor_font_download_all_running">La descarga de todas las fuentes ya está en curso</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">¿Descargar %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">La descarga de la fuente falló: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">Descarga esta fuente para previsualizarla</string>
     <string name="text_ace_editor_font_download_to_use">Descarga esta fuente para usarla</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (chino simplificado)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glifos de iconos)</string>

@@ -742,6 +742,7 @@
     <string name="text_ace_editor_font_download_all_running">Загрузка всех шрифтов уже выполняется</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">Загрузить %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">Не удалось загрузить шрифт: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">Скачайте этот шрифт для предпросмотра</string>
     <string name="text_ace_editor_font_download_to_use">Загрузите этот шрифт, чтобы использовать его</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (упрощённый китайский)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (значки)</string>

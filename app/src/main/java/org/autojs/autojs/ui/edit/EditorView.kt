@@ -161,6 +161,7 @@ import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
 import org.autojs.autojs.ui.settings.AceEditorPluginUi
 import org.autojs.autojs.ui.widget.EWebView
+import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -624,6 +625,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mFontPreviewInfoType: TextView = binding.fontPreviewInfoType
     private val mFontPreviewInfoSeparator: TextView = binding.fontPreviewInfoSeparator
     private val mFontPreviewInfoSize: TextView = binding.fontPreviewInfoSize
+    private val mFontPreviewUnavailableHint: TextView = binding.fontPreviewUnavailableHint
     private val mFontPreviewProgress: ProgressBar = binding.fontPreviewProgress
 
     private var mCurrentCharsetConfidence: Int = 0
@@ -3161,6 +3163,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
         mThemePreviewActive = true
         mPreviewMode = PreviewMode.Theme
+        mFontPreviewUnavailableHint.isVisible = false
         mFontPreviewInfo.isVisible = false
         mFontPreviewProgress.visibility = View.INVISIBLE
         mThemePreviewUse.setImageResource(R.drawable.mt_ic_check_white_36dp)
@@ -3206,6 +3209,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun applyEditorPreviewColors(backgroundColor: Int, foregroundColor: Int) {
         mThemePreviewBar.setBackgroundColor(backgroundColor)
+        mFontPreviewUnavailableHint.setBackgroundColor(backgroundColor)
         themePreviewTextViews().forEach { it.setTextColor(foregroundColor) }
         themePreviewImageViews().forEach { it.imageTintList = ColorStateList.valueOf(foregroundColor) }
         val progressColors = themeFontService.editorPreviewProgressColors(backgroundColor)
@@ -3235,6 +3239,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFontPreviewInfoType,
         mFontPreviewInfoSeparator,
         mFontPreviewInfoSize,
+        mFontPreviewUnavailableHint,
     )
 
     private fun themePreviewImageViews(): List<ImageView> = listOf(
@@ -3650,6 +3655,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         val downloading = mFontPreviewDownloadId == option.id && mAceFontManager.isDownloading(option.id)
         val installed = isFontInstalledForPreview(option)
+        mFontPreviewUnavailableHint.isVisible = !installed
         when {
             downloading -> {
                 mThemePreviewUse.setImageResource(R.drawable.ic_stop_button_fill)
@@ -3719,6 +3725,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mPreviewMode = PreviewMode.None
         mThemePreviewUse.isEnabled = true
         mThemePreviewUse.alpha = 1f
+        mFontPreviewUnavailableHint.isVisible = false
         mThemePreviewBar.isVisible = false
         detachFontPreviewDownloadObserver()
         mFontPreviewCatalogRefreshSubscription?.cancel()
@@ -5588,7 +5595,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .negativeText(R.string.dialog_button_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .widgetThemeColor()
-        builder.show()
+        val dialog = builder.show()
+        dialog.inputEditText?.addTextChangedListener(
+            SimpleTextWatcher { input ->
+                jumpToLineUpperBoundCorrection(input, lineCount)?.let { maximum ->
+                    input.replace(0, input.length, maximum)
+                }
+            },
+        )
     }
 
     fun showEncodingDialog() {

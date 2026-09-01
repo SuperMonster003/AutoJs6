@@ -743,6 +743,7 @@
     <string name="text_ace_editor_font_download_all_running">すべてのフォントのダウンロードはすでに進行中です</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">%1$s (%2$s) をダウンロードしますか?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">フォントのダウンロードに失敗しました: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">プレビューするには、このフォントをダウンロードしてください</string>
     <string name="text_ace_editor_font_download_to_use">このフォントを使用するにはダウンロードしてください</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (簡体字中国語)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (アイコングリフ)</string>

@@ -742,6 +742,7 @@
     <string name="text_ace_editor_font_download_all_running">Le téléchargement de toutes les polices est déjà en cours</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">Télécharger %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">Échec du téléchargement de la police: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">Téléchargez cette police pour l’aperçu</string>
     <string name="text_ace_editor_font_download_to_use">Téléchargez cette police pour l\'utiliser</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (chinois simplifié)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glyphes d’icônes)</string>

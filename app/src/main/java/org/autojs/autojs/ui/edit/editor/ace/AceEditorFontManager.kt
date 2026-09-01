@@ -235,16 +235,22 @@ class AceEditorFontManager private constructor(context: Context) {
 
     fun installationState(option: AceEditorFontOption): FontInstallationState? {
         if (option.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return null
-        val installed = store.installedFont(option.id)
         return option.remoteFont?.let(::installationState)
-            ?: FontInstallationState(
-                if (installed == null) FontInstallationStatus.NOT_INSTALLED else FontInstallationStatus.INSTALLED,
-                installed,
-            )
+            ?: store.installedFont(option.id).let { installed ->
+                FontInstallationState(
+                    if (installed == null) {
+                        FontInstallationStatus.NOT_INSTALLED
+                    } else {
+                        FontInstallationStatus.INSTALLED
+                    },
+                    installed,
+                )
+            }
     }
 
     fun installationState(font: RemoteFont): FontInstallationState {
-        val installed = store.installedFont(font.id)
+        val state = store.installationState(font)
+        val installed = state.installed
         val catalog = catalog()
         if (catalog?.remoteArtifactsAllowed != true) {
             return FontInstallationState(FontInstallationStatus.REVOKED, installed)
@@ -252,7 +258,7 @@ class AceEditorFontManager private constructor(context: Context) {
         if (installed != null && installed.sha256 in catalog.revokedSha256) {
             return FontInstallationState(FontInstallationStatus.REVOKED, installed)
         }
-        return store.installationState(font)
+        return state
     }
 
     fun descriptor(fontId: String): AceFontDescriptor {

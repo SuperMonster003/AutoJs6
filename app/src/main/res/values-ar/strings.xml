@@ -744,6 +744,7 @@
     <string name="text_ace_editor_font_download_all_running">تنزيل جميع الخطوط قيد التنفيذ بالفعل</string>
     <string name="text_ace_editor_font_download_confirmation" formatted="true">هل تريد تنزيل %1$s (%2$s)?</string>
     <string name="text_ace_editor_font_download_failed" formatted="true">فشل تنزيل الخط: %1$s</string>
+    <string name="text_ace_editor_font_download_required_for_preview">نزّل هذا الخط لمعاينته</string>
     <string name="text_ace_editor_font_download_to_use">قم بتنزيل هذا الخط لاستخدامه</string>
     <string name="text_ace_editor_font_feature_cn">CN / SC (الصينية المبسطة)</string>
     <string name="text_ace_editor_font_feature_nerd">Nerd / NF (رموز أيقونية)</string>

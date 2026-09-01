@@ -3,6 +3,9 @@ package org.autojs.autojs.ui.edit.editor.ace.font
 import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
+import java.nio.channels.FileChannel
+import java.nio.channels.FileLock
+import java.nio.channels.OverlappingFileLockException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
@@ -23,7 +26,7 @@ internal object FontIo {
         try {
             if (processLock.holdCount > 1) return action()
             RandomAccessFile(lockFile, "rw").use { file ->
-                val systemLock = file.channel.lock()
+                val systemLock = acquireSystemLock(file.channel)
                 try {
                     return action()
                 } finally {
@@ -32,6 +35,27 @@ internal object FontIo {
             }
         } finally {
             processLock.unlock()
+        }
+    }
+
+    /**
+     * The host and ACE plugin each ship their own FontIo class but share this on-disk store in one
+     * JVM. Their private [PROCESS_LOCKS] maps cannot coordinate with each other, while the JVM-wide
+     * FileChannel lock table reports that contention by throwing instead of waiting. Retry only
+     * that condition so the lock retains its normal blocking semantics across both implementations.
+     */
+    private fun acquireSystemLock(channel: FileChannel): FileLock {
+        while (true) {
+            try {
+                return channel.lock()
+            } catch (_: OverlappingFileLockException) {
+                try {
+                    Thread.sleep(OVERLAPPING_FILE_LOCK_RETRY_MILLIS)
+                } catch (interrupted: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    throw interrupted
+                }
+            }
         }
     }
 
@@ -96,5 +120,6 @@ internal object FontIo {
     private fun resourceLockFile(rootDirectory: File, name: String): File =
         File(File(rootDirectory, ".locks"), name)
 
+    private const val OVERLAPPING_FILE_LOCK_RETRY_MILLIS = 10L
     private val PROCESS_LOCKS = ConcurrentHashMap<String, ReentrantLock>()
 }
