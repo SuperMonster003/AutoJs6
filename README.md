@@ -170,6 +170,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 * `新增` Explorer Action 宿主文件信息能力 v1 允许已信任的只读插件在现有 APK 信息对话框中追加有界、经 SHA-256 绑定的本地化摘要; 插件缺失、停用、不兼容或失败时, 原有字段、安装/清单操作与失败处理均保持不变
 * `新增` `pinyin` 新增仅当前调用生效的 `customDictionary` 自定义读音覆盖, 完善 `compare` 与 `compact`, 并通过带显式 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放同一外置插件能力
+* `新增` `pinyin4j` 新增经 capability 协商的 `readings` 全读音矩阵, 支持 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 与 Gwoyeu Romatzyh; 旧插件仅对 Hanyu 安全回退, 同一外置插件能力通过带显式 `pinyin4j` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放
 * `新增` Image Quantization 选项通过 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 与 `maxMemoryBytes`, 默认限制 16000000 像素和 256 MiB 附加工作内存; 超出预算时返回带资源详情的类型化异常, 结果报告计入预算的峰值内存, 停止脚本会取消其活动原生量化
 * `新增` `images.quantizeToFile` 将索引 PNG 直接流式写入磁盘并返回大小与质量指标; Image Quantization 选项新增 `preserveAlpha`, 常见 Bitmap 配置, 硬件输入与广色域输入通过 `OPTIONS_API_VERSION>=3` 统一归一化为 sRGB
 * `新增` `images.quantize` 现返回 PNG 字节, 大小, 实际质量与量化误差; 省略质量下限时采用尽力而为 (`minQuality=0`), 显式下限无法满足时抛出带错误码 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 结果接口要求 `OPTIONS_API_VERSION>=2`
