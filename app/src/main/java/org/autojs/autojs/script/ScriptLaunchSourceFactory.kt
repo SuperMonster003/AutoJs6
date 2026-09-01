@@ -688,6 +688,9 @@ object ScriptLaunchSourceFactory {
         val source = if (preExecuteScript == null) {
             fileSource
         } else {
+            require(fileSource.engineName != JavaScriptSource.ENGINE_BUN) {
+                "Bun launch source does not support AutoJs6 preExecuteScript"
+            }
             require(fileSource !is NodeProjectLaunchSource) {
                 "Node project launch source does not support preExecuteScript; " +
                         "run the project entry without preExecuteScript or run a concrete project file."

@@ -99,6 +99,33 @@ class EditorScriptRunPolicyTest {
     }
 
     @Test
+    fun bunMarkersKeepTheirCompoundExtensions() {
+        mapOf(
+            "worker.bun.js" to ".bun.js",
+            "worker.BUN.TS" to ".bun.ts",
+            "component.bun.tsx" to ".bun.tsx",
+        ).forEach { (fileName, expectedExtension) ->
+            assertEquals(
+                expectedExtension,
+                EditorScriptRunPolicy.temporaryExtensionWithDot(
+                    documentDisplayName = fileName,
+                    uriPath = null,
+                    editorName = null,
+                ),
+            )
+        }
+
+        assertEquals(
+            ".bun.ts",
+            EditorScriptRunPolicy.temporaryExtensionWithDot(
+                documentDisplayName = "document",
+                uriPath = "/storage/emulated/0/Scripts/worker.bun.ts",
+                editorName = "worker",
+            ),
+        )
+    }
+
+    @Test
     fun ordinaryJavaScriptKeepsItsExtension() {
         assertEquals(
             ".js",

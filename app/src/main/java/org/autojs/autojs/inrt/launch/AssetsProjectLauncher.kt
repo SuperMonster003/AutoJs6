@@ -91,6 +91,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             val launch = createMainScriptLaunch()
             val source = launch.source as JavaScriptSource
             val config = launch.createExecutionConfig()
+            check(source.engineName != JavaScriptSource.ENGINE_BUN) {
+                "Packaged apps do not support the external Bun Runtime plugin."
+            }
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
                 config.intentFlags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
             } else {

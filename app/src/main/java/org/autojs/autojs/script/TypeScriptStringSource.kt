@@ -18,10 +18,17 @@ internal class TypeScriptStringSource private constructor(
         get() = "autojs://string/$compilationSourceName"
 
     override val engineName: String
-        get() = if (JavaScriptSource.isNodeJsFileName(compilationSourceName)) {
-            ENGINE_NODEJS
-        } else {
-            ENGINE
+        get() {
+            var markerMode = EXECUTION_MODE_NORMAL
+            listOf(compilationSourceName, overriddenFullPath, originUri).forEach { semanticName ->
+                when {
+                    JavaScriptSource.isBunFileName(semanticName) -> markerMode = markerMode or EXECUTION_MODE_BUN
+                    JavaScriptSource.isNodeJsFileName(semanticName) -> markerMode = markerMode or EXECUTION_MODE_NODEJS
+                }
+            }
+            val resolvedMode = executionMode or markerMode
+            JavaScriptSource.validateExclusiveEngineMode(resolvedMode)
+            return JavaScriptSource.resolveEngineName(resolvedMode)
         }
 
     override fun toString(): String {

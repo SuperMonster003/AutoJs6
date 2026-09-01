@@ -74,7 +74,8 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
         }
 
         @VisibleForTesting
-        internal fun createExecScriptSource(name: String, script: String): JavaScriptSource {
+        @JvmStatic
+        fun createExecScriptSource(name: String, script: String): JavaScriptSource {
             return if (
                 JavaScriptSource.isCompilerBackedTypeScriptFileName(name) ||
                 JavaScriptSource.isTypeScriptDeclarationFileName(name)

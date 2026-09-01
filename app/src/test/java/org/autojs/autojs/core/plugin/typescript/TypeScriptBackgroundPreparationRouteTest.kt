@@ -10,6 +10,7 @@ import org.autojs.autojs.script.TypeScriptStringSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -28,6 +29,43 @@ class TypeScriptBackgroundPreparationRouteTest {
 
         assertTrue(TypeScriptExecutionCompiler.requiresPreparation(source))
         assertEquals(JavaScriptSource.ENGINE, source.engineName)
+    }
+
+    @Test
+    fun bunTypeScriptSkipsHostPreparationForMemoryFileAndSequenceSources() {
+        val inMemory = TypeScriptStringSource(
+            "inline.bun.ts",
+            "const answer: number = 42; answer",
+        )
+        val file = temporaryFolder.newFile("entry.bun.ts").apply {
+            writeText("export const answer: number = 42;\n")
+        }
+        val fileSource = org.autojs.autojs.script.NodeProjectScriptSourceFactory.create(file)
+        val sequence = SequenceScriptSource(
+            fileSource.name,
+            org.autojs.autojs.script.StringScriptSource("globalThis.beforeBun = true;\n"),
+            fileSource,
+        )
+
+        assertEquals(JavaScriptSource.ENGINE_BUN, inMemory.engineName)
+        assertEquals(JavaScriptSource.ENGINE_BUN, fileSource.engineName)
+        assertTrue(fileSource is TypeScriptFileSource)
+        assertFalse(TypeScriptExecutionCompiler.requiresPreparation(inMemory))
+        assertFalse(TypeScriptExecutionCompiler.requiresPreparation(fileSource))
+        assertFalse(TypeScriptExecutionCompiler.requiresPreparation(sequence))
+    }
+
+    @Test
+    fun bunPreExecutePrefixCannotBeCompiledAwayBeforeOrdinaryTypeScriptRouting() {
+        val sequence = SequenceScriptSource(
+            "entry.ts",
+            org.autojs.autojs.script.StringScriptSource("\"bun\";"),
+            TypeScriptStringSource("entry.ts", "const answer: number = 42"),
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            TypeScriptExecutionCompiler.requiresPreparation(sequence)
+        }
     }
 
     @Test

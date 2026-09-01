@@ -1,0 +1,345 @@
+package org.autojs.autojs.engine
+
+import android.content.Context
+import android.os.Binder
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.util.Log
+import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.plugin.bun.BunBinderCallException
+import org.autojs.autojs.core.plugin.bun.BunBinderCallFailure
+import org.autojs.autojs.core.plugin.bun.BunRuntimeBinderCallLane
+import org.autojs.autojs.core.plugin.bun.BunRuntimeCleanupBinderCallLane
+import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
+import org.autojs.autojs.engine.encryption.ScriptEncryption
+import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.script.EncryptedScriptFileHeader
+import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.TypeScriptStringSource
+import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
+import org.autojs.plugin.bun.runtime.api.IBunRuntimeCallback
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
+
+/** Independent JavaScript engine proxy whose source is evaluated only by the Bun plugin. */
+class BunPluginScriptEngine(
+    context: Context,
+    private val console: GlobalConsole,
+) : ScriptEngine.AbstractScriptEngine<JavaScriptSource>() {
+    private val appContext = context.applicationContext
+    private val stopped = AtomicBoolean(false)
+    private val selectedRuntime = AtomicReference<BunRuntimePluginClient.Selection?>()
+
+    private val activeExecutionId = AtomicReference<String?>()
+
+    override fun put(name: String, value: Any?) = Unit
+
+    override fun init() {
+        check(!isDestroyed) { "Bun engine is destroyed" }
+        if (stopped.get()) throw ScriptInterruptedException()
+        val selection = runRpc(SELECT_RPC_DEADLINE_MILLIS, "select") {
+            BunRuntimePluginClient.select(appContext)
+        }
+        val runtimeInfo = runRpc(PREWARM_RPC_DEADLINE_MILLIS, "prewarm") {
+            BunRuntimePluginClient.prewarm(appContext, selection)
+        }
+        check(runtimeInfo.getBoolean(BunRuntimeContract.KEY_RUNTIME_READY)) {
+            runtimeInfo.getString(BunRuntimeContract.KEY_ERROR_MESSAGE)
+                ?: "The selected Bun Runtime plugin is not ready."
+        }
+        pruneStaleSourceSnapshots()
+        selectedRuntime.set(selection)
+    }
+
+    override fun execute(scriptSource: JavaScriptSource): Any {
+        check(!isDestroyed) { "Bun engine is destroyed" }
+        if (stopped.get()) throw ScriptInterruptedException()
+        requireSupportedMode(scriptSource.executionMode)
+        val selection = selectedRuntime.get() ?: error("Bun engine was not initialized")
+        val executionId = "bun-engine-${id}-${UUID.randomUUID()}"
+        check(activeExecutionId.compareAndSet(null, executionId)) { "Bun engine already has an active execution" }
+        val timeoutMillis = executionTimeoutMillis()
+        val callback = OutputCallback(executionId, selection.providerUid)
+        var sourceFile: File? = null
+        try {
+            val snapshot = createSourceSnapshot(scriptSource)
+            sourceFile = snapshot
+            if (stopped.get() || isDestroyed) throw ScriptInterruptedException()
+            ParcelFileDescriptor.open(snapshot, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                check(snapshot.delete()) { "Unable to unlink the Bun source snapshot before dispatch" }
+                if (stopped.get() || isDestroyed) throw ScriptInterruptedException()
+                val result = try {
+                    runRpc(
+                        deadlineMillis = timeoutMillis + EXECUTION_RPC_GRACE_MILLIS,
+                        operation = "run-script",
+                        poisonOnAbandoned = true,
+                    ) {
+                        BunRuntimePluginClient.runScript(
+                            context = appContext,
+                            selection = selection,
+                            request = buildRequest(scriptSource, executionId, timeoutMillis),
+                            source = descriptor,
+                            callback = callback,
+                        )
+                    }
+                } catch (error: BunRpcTimeoutException) {
+                    requestCancellation(selection, executionId)
+                    throw BunRuntimeExecutionException(error.message ?: "Bun runtime RPC timed out")
+                }
+                if (stopped.get() || result.getBoolean(BunRuntimeContract.KEY_CANCELLED)) {
+                    throw ScriptInterruptedException()
+                }
+                if (!result.getBoolean(BunRuntimeContract.KEY_SUCCEEDED)) {
+                    val code = result.getString(BunRuntimeContract.KEY_ERROR_CODE).orEmpty()
+                    val message = result.getString(BunRuntimeContract.KEY_ERROR_MESSAGE)
+                        ?: "Bun runtime execution failed"
+                    throw BunRuntimeExecutionException("$code: $message".trimStart(':', ' '))
+                }
+                return result.getInt(BunRuntimeContract.KEY_EXIT_CODE, 0)
+            }
+        } finally {
+            callback.close()
+            activeExecutionId.compareAndSet(executionId, null)
+            sourceFile?.takeIf(File::exists)?.let { stale ->
+                if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun source snapshot: ${stale.name}")
+            }
+        }
+    }
+
+    override fun forceStop() {
+        stopped.set(true)
+        val selection = selectedRuntime.get() ?: return
+        val executionId = activeExecutionId.get() ?: return
+        requestCancellation(selection, executionId)
+    }
+
+    override fun destroy() {
+        if (!isDestroyed) {
+            forceStop()
+            selectedRuntime.set(null)
+            super.destroy()
+        }
+    }
+
+    override fun toString(): String =
+        "BunPluginScriptEngine@${Integer.toHexString(hashCode())}" +
+            "{id=$id,source='${getTag(TAG_SOURCE)}',cwd='${cwd()}'}"
+
+    private fun buildRequest(
+        source: JavaScriptSource,
+        executionId: String,
+        timeoutMillis: Long,
+    ): Bundle = Bundle().apply {
+        putInt(BunRuntimeContract.KEY_PROTOCOL_VERSION, BunRuntimeContract.PROTOCOL_VERSION)
+        putString(BunRuntimeContract.KEY_EXECUTION_ID, executionId)
+        putString(BunRuntimeContract.KEY_SOURCE_NAME, logicalSourceName(source))
+        putLong(BunRuntimeContract.KEY_TIMEOUT_MILLIS, timeoutMillis)
+        putLong(BunRuntimeContract.KEY_OUTPUT_BYTE_LIMIT, BunRuntimeContract.MAX_OUTPUT_BYTES)
+        putStringArrayList(BunRuntimeContract.KEY_ARGUMENTS, arrayListOf())
+        putBundle(BunRuntimeContract.KEY_ENVIRONMENT, Bundle())
+    }
+
+    private inner class OutputCallback(
+        private val executionId: String,
+        private val expectedProviderUid: Int,
+    ) : IBunRuntimeCallback.Stub() {
+        private val closed = AtomicBoolean(false)
+        private val acceptedOutputBytes = AtomicLong(0L)
+
+        fun close() {
+            closed.set(true)
+        }
+
+        override fun onEvent(event: Bundle?) {
+            if (closed.get() || Binder.getCallingUid() != expectedProviderUid) return
+            if (event?.getInt(BunRuntimeContract.KEY_PROTOCOL_VERSION, -1) != BunRuntimeContract.PROTOCOL_VERSION) return
+            if (event.getString(BunRuntimeContract.KEY_EXECUTION_ID) != executionId) return
+            if (event.getLong(BunRuntimeContract.KEY_SEQUENCE, -1L) < 0L) return
+            val level = when (event.getString(BunRuntimeContract.KEY_EVENT_TYPE)) {
+                BunRuntimeContract.EVENT_FINISHED -> {
+                    close()
+                    return
+                }
+                BunRuntimeContract.EVENT_STARTED -> return
+                BunRuntimeContract.EVENT_STDERR -> Log.ERROR
+                BunRuntimeContract.EVENT_STDOUT -> Log.INFO
+                else -> return
+            }
+            val text = event.getString(BunRuntimeContract.KEY_TEXT) ?: return
+            val byteCount = text.toByteArray(Charsets.UTF_8).size.toLong()
+            if (byteCount > BunRuntimeContract.MAX_CALLBACK_CHUNK_BYTES || !reserveOutputBytes(byteCount)) return
+            val identity = Binder.clearCallingIdentity()
+            try {
+                if (!closed.get()) console.println(level, text)
+            } finally {
+                Binder.restoreCallingIdentity(identity)
+            }
+        }
+
+        private fun reserveOutputBytes(byteCount: Long): Boolean {
+            while (!closed.get()) {
+                val current = acceptedOutputBytes.get()
+                if (byteCount > BunRuntimeContract.MAX_OUTPUT_BYTES - current) return false
+                if (acceptedOutputBytes.compareAndSet(current, current + byteCount)) return true
+            }
+            return false
+        }
+    }
+
+    private fun requestCancellation(selection: BunRuntimePluginClient.Selection, executionId: String) {
+        BunRuntimeCleanupBinderCallLane.tryDispatch("cancel-script") {
+            runCatching {
+                runBlocking { BunRuntimePluginClient.cancel(appContext, selection, executionId) }
+            }
+        }
+    }
+
+    private fun <T> runRpc(
+        deadlineMillis: Long,
+        operation: String,
+        poisonOnAbandoned: Boolean = false,
+        block: suspend () -> T,
+    ): T {
+        return try {
+            BunRuntimeBinderCallLane.call(
+                operationName = operation,
+                timeoutMillis = deadlineMillis,
+                onAbandoned = {
+                    if (poisonOnAbandoned) BunRuntimeBinderCallLane.poison()
+                },
+            ) { runBlocking { block() } }
+        } catch (error: BunBinderCallException) {
+            if (error.failure == BunBinderCallFailure.TIMEOUT) {
+                throw BunRpcTimeoutException("Timed out while attempting to ${operation.replace('-', ' ')}")
+            }
+            throw error
+        } catch (error: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw ScriptInterruptedException()
+        }
+    }
+
+    private fun createSourceSnapshot(source: JavaScriptSource): File {
+        val bytes = cleartextSource(source)
+        var snapshot: File? = null
+        try {
+            require(bytes.size <= BunRuntimeContract.MAX_SOURCE_BYTES) {
+                "Bun source exceeds ${BunRuntimeContract.MAX_SOURCE_BYTES} bytes"
+            }
+            val directory = sourceSnapshotDirectory()
+            check(directory.isDirectory || directory.mkdirs()) { "Unable to create the Bun snapshot directory" }
+            val extension = logicalSourceName(source).let { name ->
+                when {
+                    name.endsWith(".tsx", true) -> ".bun.tsx"
+                    name.endsWith(".ts", true) -> ".bun.ts"
+                    else -> ".bun.js"
+                }
+            }
+            snapshot = File.createTempFile("bun-source-", extension, directory)
+            FileOutputStream(snapshot).use { it.write(bytes) }
+            return snapshot
+        } catch (error: Throwable) {
+            snapshot?.delete()
+            throw error
+        } finally {
+            bytes.fill(0)
+        }
+    }
+
+    private fun cleartextSource(source: JavaScriptSource): ByteArray {
+        val file = (source as? JavaScriptFileSource)?.file
+        if (file == null) return source.script.toByteArray(Charsets.UTF_8)
+        val maximumStoredBytes = BunRuntimeContract.MAX_SOURCE_BYTES + EncryptedScriptFileHeader.BLOCK_SIZE + 16
+        require(file.isFile) { "Bun source is missing: ${file.path}" }
+        val bytes = readBounded(file, maximumStoredBytes)
+        if (bytes.size < EncryptedScriptFileHeader.BLOCK_SIZE || !EncryptedScriptFileHeader.isValidFile(bytes)) {
+            return bytes
+        }
+        return try {
+            ScriptEncryption.decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE)
+        } finally {
+            bytes.fill(0)
+        }
+    }
+
+    private fun readBounded(file: File, maximumBytes: Long): ByteArray {
+        val initialCapacity = file.length().coerceIn(0L, minOf(maximumBytes, 64L * 1024L)).toInt()
+        val output = ByteArrayOutputStream(initialCapacity)
+        FileInputStream(file).buffered().use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            var total = 0L
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                total += count
+                require(total <= maximumBytes) {
+                    "Bun source exceeds its stored size limit: ${file.path}"
+                }
+                output.write(buffer, 0, count)
+            }
+        }
+        return output.toByteArray()
+    }
+
+    private fun sourceSnapshotDirectory(): File = File(appContext.cacheDir, "bun-source-snapshots")
+
+    private fun pruneStaleSourceSnapshots() {
+        val cutoff = System.currentTimeMillis() - STALE_SNAPSHOT_MILLIS
+        sourceSnapshotDirectory().listFiles().orEmpty()
+            .filter { it.isFile && it.lastModified() < cutoff }
+            .forEach { stale ->
+                if (!stale.delete()) Log.w(TAG, "Unable to prune stale Bun source snapshot: ${stale.name}")
+            }
+    }
+
+    private fun logicalSourceName(source: JavaScriptSource): String {
+        if (source is TypeScriptStringSource) return source.compilationSourceName
+        source.overriddenFullPath
+            ?.takeIf(String::isNotBlank)
+            ?.let(::File)
+            ?.name
+            ?.takeIf(String::isNotBlank)
+            ?.let { return it }
+        val file = (source as? JavaScriptFileSource)?.file
+        return file?.name
+            ?: source.name.takeIf(JavaScriptSource::isJavaScriptFileName)
+            ?: source.fullName.takeIf(String::isNotBlank)
+            ?: "script.bun.js"
+    }
+
+    private fun executionTimeoutMillis(): Long {
+        val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
+        return (config?.getArgument("bun.timeoutMillis") as? Number)
+            ?.toLong()
+            ?.coerceIn(1L, BunRuntimeContract.MAX_TIMEOUT_MILLIS)
+            ?: BunRuntimeContract.DEFAULT_TIMEOUT_MILLIS
+    }
+
+    private fun requireSupportedMode(mode: Int) {
+        val unsupported = mode and JavaScriptSource.EXECUTION_MODE_BUN.inv()
+        require(unsupported == JavaScriptSource.EXECUTION_MODE_NORMAL) {
+            "Bun Runtime does not support AutoJs6 execution-mode flags: 0x${unsupported.toString(16)}"
+        }
+    }
+
+    private companion object {
+        const val TAG = "BunPluginScriptEngine"
+        const val STALE_SNAPSHOT_MILLIS = 60_000L
+        const val SELECT_RPC_DEADLINE_MILLIS = 70_000L
+        const val PREWARM_RPC_DEADLINE_MILLIS = 70_000L
+        const val EXECUTION_RPC_GRACE_MILLIS = 15_000L
+    }
+}
+
+private class BunRpcTimeoutException(message: String) : IllegalStateException(message)
+
+class BunRuntimeExecutionException(message: String) : IllegalStateException(message)

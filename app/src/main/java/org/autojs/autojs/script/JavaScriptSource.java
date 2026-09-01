@@ -20,6 +20,7 @@ public abstract class JavaScriptSource extends ScriptSource {
 
     public static final String ENGINE = JavaScriptSource.class.getName() + ".Engine";
     public static final String ENGINE_NODEJS = "nodejs";
+    public static final String ENGINE_BUN = "bun";
 
     public static final String EXECUTION_MODE_UI_PREFIX = "\"ui\";";
 
@@ -31,6 +32,7 @@ public abstract class JavaScriptSource extends ScriptSource {
     public static final int EXECUTION_MODE_NODEJS = 0x0008;
     public static final int EXECUTION_MODE_UI_THREAD = 0x0010;
     public static final int EXECUTION_MODE_RHINO = 0x0020;
+    public static final int EXECUTION_MODE_BUN = 0x0040;
 
     public static final Map<String, Integer> EXECUTION_MODES = new MapBuilder<String, Integer>()
             .put("ui", EXECUTION_MODE_UI)
@@ -39,6 +41,7 @@ public abstract class JavaScriptSource extends ScriptSource {
             .put("x", EXECUTION_MODE_JSOX)
             .put("nodejs", EXECUTION_MODE_NODEJS)
             .put("node", EXECUTION_MODE_NODEJS)
+            .put("bun", EXECUTION_MODE_BUN)
             .put("ui-thread", EXECUTION_MODE_UI_THREAD)
             .put("rhino", EXECUTION_MODE_RHINO)
             .build();
@@ -177,7 +180,38 @@ public abstract class JavaScriptSource extends ScriptSource {
     }
 
     public static String resolveEngineName(int executionMode) {
+        validateExclusiveEngineMode(executionMode);
+        if ((executionMode & EXECUTION_MODE_BUN) != 0) {
+            return ENGINE_BUN;
+        }
         return (executionMode & EXECUTION_MODE_NODEJS) != 0 ? ENGINE_NODEJS : ENGINE;
+    }
+
+    public static void validateExclusiveEngineMode(int executionMode) {
+        int engineModes = executionMode & (
+                EXECUTION_MODE_NODEJS |
+                        EXECUTION_MODE_RHINO |
+                        EXECUTION_MODE_BUN
+        );
+        if (Integer.bitCount(engineModes) > 1) {
+            throw new IllegalArgumentException(
+                    "A script cannot select more than one JavaScript engine: 0x" +
+                            Integer.toHexString(engineModes)
+            );
+        }
+    }
+
+    public static boolean isBunFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        if (isTypeScriptDeclarationFileName(lowerCaseName)) {
+            return false;
+        }
+        return lowerCaseName.endsWith(".bun.js") ||
+                lowerCaseName.endsWith(".bun.ts") ||
+                lowerCaseName.endsWith(".bun.tsx");
     }
 
     public static boolean isNodeJsFileName(String fileName) {

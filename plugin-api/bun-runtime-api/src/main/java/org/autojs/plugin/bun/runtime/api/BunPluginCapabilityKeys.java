@@ -1,0 +1,15 @@
+package org.autojs.plugin.bun.runtime.api;
+
+public final class BunPluginCapabilityKeys {
+    public static final String CONTRACT_VERSION = "org.autojs.plugin.bun.CONTRACT_VERSION";
+    public static final String RUNTIME_VERSION = "org.autojs.plugin.bun.RUNTIME_VERSION";
+    public static final String RUNTIME_REVISION = "org.autojs.plugin.bun.RUNTIME_REVISION";
+    public static final String SOURCE_TRANSPORT = "org.autojs.plugin.bun.SOURCE_TRANSPORT";
+    public static final String EXECUTION_MODEL = "org.autojs.plugin.bun.EXECUTION_MODEL";
+    public static final String SUPPORTS_TYPESCRIPT = "org.autojs.plugin.bun.SUPPORTS_TYPESCRIPT";
+    public static final String SUPPORTS_CANCELLATION = "org.autojs.plugin.bun.SUPPORTS_CANCELLATION";
+    public static final String SUPPORTS_STREAMING_OUTPUT = "org.autojs.plugin.bun.SUPPORTS_STREAMING_OUTPUT";
+
+    private BunPluginCapabilityKeys() {
+    }
+}

@@ -26,7 +26,9 @@ import org.autojs.autojs.apkbuilder.ApkPluginLibraryVariant
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.ScriptFileEncoding
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
@@ -347,11 +349,35 @@ object RemoteApkBuildRequestPreparer {
     }
 
     private fun validateEmbeddedNodeBuildRequirements(projectConfig: ProjectConfig, source: File) {
-        val entryExecutionMode = resolveProjectEntry(source, projectConfig.mainScriptFileName)
+        val resolvedEntry = resolveProjectEntry(source, projectConfig.mainScriptFileName)
             ?.takeIf(File::isFile)
-            ?.reader(Charsets.UTF_8)
-            ?.use(JavaScriptSource::parseExecutionMode)
-            ?.mode
+        val entryExecutionMode = resolvedEntry?.let { entry ->
+            val flags = EncryptedScriptFileHeader.getHeaderFlags(entry)
+            var mode = if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) {
+                ScriptFileEncoding.openReader(entry).use(JavaScriptSource::parseExecutionMode).mode
+            } else {
+                flags.toInt()
+            }
+            if (JavaScriptSource.isBunFileName(entry.name)) {
+                mode = mode or JavaScriptSource.EXECUTION_MODE_BUN
+            } else if (JavaScriptSource.isNodeJsFileName(entry.name)) {
+                mode = mode or JavaScriptSource.EXECUTION_MODE_NODEJS
+            }
+            JavaScriptSource.validateExclusiveEngineMode(mode)
+            mode
+        }
+        if ((entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_BUN != 0 || requestsExternalBunRuntime(
+                projectType = projectConfig.projectType,
+                configuredEntryName = projectConfig.mainScriptFileName,
+                sourceName = source.name,
+                entryExecutionMode = entryExecutionMode,
+            )
+        ) {
+            throw IOException(
+                "Bun Runtime is provided by an external AutoJs6 plugin and cannot be embedded " +
+                    "in a packaged APK. Run Bun scripts from the AutoJs6 host with the Bun Runtime plugin installed."
+            )
+        }
         if (!requestsEmbeddedNodePackaging(
                 selectedLibraries = projectConfig.libs,
                 projectType = projectConfig.projectType,
@@ -369,6 +395,17 @@ object RemoteApkBuildRequestPreparer {
                     "from the AutoJs6 host with the runtime plugin installed."
         )
     }
+
+    internal fun requestsExternalBunRuntime(
+        projectType: String?,
+        configuredEntryName: String?,
+        sourceName: String?,
+        entryExecutionMode: Int?,
+    ): Boolean =
+        projectType?.trim()?.equals("bun", ignoreCase = true) == true ||
+            JavaScriptSource.isBunFileName(configuredEntryName) ||
+            JavaScriptSource.isBunFileName(sourceName) ||
+            (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_BUN != 0
 
     internal fun requestsEmbeddedNodePackaging(
         selectedLibraries: List<String>,
@@ -392,16 +429,17 @@ object RemoteApkBuildRequestPreparer {
                 (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_NODEJS != 0
     }
 
-    private fun resolveProjectEntry(source: File, configuredEntryName: String): File? {
+    internal fun resolveProjectEntry(source: File, configuredEntryName: String): File? {
         if (!source.isDirectory) {
-            return source
+            return source.canonicalFile
         }
         val root = source.canonicalFile
         val entry = File(root, configuredEntryName).canonicalFile
         val rootPrefix = "${root.path}${File.separator}"
-        return entry.takeIf { candidate ->
-            candidate.path == root.path || candidate.path.startsWith(rootPrefix)
+        if (entry.path != root.path && !entry.path.startsWith(rootPrefix)) {
+            throw IOException("Project entry escapes the project source root: $configuredEntryName")
         }
+        return entry
     }
 
     private fun writeProjectArchive(

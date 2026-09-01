@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
  * Opens script files with Unicode BOM awareness while preserving the legacy default charset for
  * files without a BOM.
  */
-final class ScriptFileEncoding {
+public final class ScriptFileEncoding {
 
     private static final int MAX_BOM_SIZE = 4;
     private static final int READ_BUFFER_SIZE = 8 * 1024;
@@ -47,7 +47,7 @@ final class ScriptFileEncoding {
         }
     }
 
-    static Reader openReader(File file) {
+    public static Reader openReader(File file) {
         PushbackInputStream input = null;
         boolean opened = false;
         try {

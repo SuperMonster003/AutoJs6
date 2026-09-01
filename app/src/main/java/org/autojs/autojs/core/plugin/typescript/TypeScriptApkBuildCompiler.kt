@@ -369,6 +369,9 @@ internal object TypeScriptApkBuildCompiler {
     }
 
     private fun requireRhinoExecutionMode(mode: Int): Int {
+        require(mode and JavaScriptSource.EXECUTION_MODE_BUN == 0) {
+            "Bun TypeScript cannot be packaged without the external Bun Runtime plugin."
+        }
         require(mode and JavaScriptSource.EXECUTION_MODE_NODEJS == 0) {
             "Node TypeScript projects cannot be packaged without a Node Runtime."
         }

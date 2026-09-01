@@ -68,12 +68,15 @@ public class JavaScriptFileSource extends JavaScriptSource {
         int mode;
         if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) {
             mode = super.parseExecutionMode();
-            if (isNodeJsExtension()) {
-                mode |= EXECUTION_MODE_NODEJS;
-            }
         } else {
             mode = flags;
         }
+        if (isBunExtension()) {
+            mode |= EXECUTION_MODE_BUN;
+        } else if (isNodeJsExtension()) {
+            mode |= EXECUTION_MODE_NODEJS;
+        }
+        JavaScriptSource.validateExclusiveEngineMode(mode);
         return mode;
     }
 
@@ -83,6 +86,9 @@ public class JavaScriptFileSource extends JavaScriptSource {
             return mEngineName;
         }
         int executionMode = getExecutionMode();
+        if ((executionMode & EXECUTION_MODE_BUN) != 0) {
+            return mEngineName = ENGINE_BUN;
+        }
         if ((executionMode & EXECUTION_MODE_NODEJS) != 0) {
             return mEngineName = ENGINE_NODEJS;
         }
@@ -148,6 +154,10 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     private boolean isNodeJsExtension() {
         return JavaScriptSource.isNodeJsFileName(getSemanticFile().getName());
+    }
+
+    private boolean isBunExtension() {
+        return JavaScriptSource.isBunFileName(getSemanticFile().getName());
     }
 
     private boolean isNodeProjectType() {

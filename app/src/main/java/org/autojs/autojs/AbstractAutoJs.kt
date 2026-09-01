@@ -18,6 +18,7 @@ import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.LuaPluginScriptEngine
+import org.autojs.autojs.engine.BunPluginScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
 import org.autojs.autojs.engine.PythonPluginScriptEngine
 import org.autojs.autojs.engine.RemoteJvmScriptEngine
@@ -77,6 +78,11 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         if (PythonRuntimeChannelPolicy.isEnabledForCurrentBuild) {
             scriptEngineManager.registerEngine(PythonScriptSource.ENGINE) {
                 PythonPluginScriptEngine(applicationContext, globalConsole)
+            }
+        }
+        if (!isInrt) {
+            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_BUN) {
+                BunPluginScriptEngine(applicationContext, globalConsole)
             }
         }
         scriptEngineManager.registerEngine(LuaScriptSource.ENGINE) {

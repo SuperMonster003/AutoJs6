@@ -118,7 +118,12 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
         get() = nodeProjectLaunchOptions.processPoolSlotSource
 
     override val engineName: String
-        get() = JavaScriptSource.ENGINE_NODEJS
+        get() {
+            require(super.engineName != JavaScriptSource.ENGINE_BUN) {
+                "A Bun entry cannot be launched through the Node project runtime"
+            }
+            return JavaScriptSource.ENGINE_NODEJS
+        }
 
     override fun getNodeProjectRoot(): File = nodeProjectRootFile
 

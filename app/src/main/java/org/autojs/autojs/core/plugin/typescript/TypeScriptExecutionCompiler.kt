@@ -103,12 +103,15 @@ internal object TypeScriptExecutionCompiler {
 
     private fun preparationCandidate(source: ScriptSource): PreparationCandidate? {
         if (source is TypeScriptStringSource) {
-            return PreparationCandidate(source)
+            return PreparationCandidate(source).unlessBun()
         }
         if (source is JavaScriptFileSource && source.isCompilerBackedTypeScriptSource) {
-            return PreparationCandidate(source)
+            return PreparationCandidate(source).unlessBun()
         }
         if (source !is SequenceScriptSource) return null
+        if (source.firstScriptSource.engineName == JavaScriptSource.ENGINE_BUN) {
+            source.engineName
+        }
         val typeScriptSource = when (val candidate = source.secondScriptSource) {
             is TypeScriptStringSource -> candidate
             is JavaScriptFileSource -> candidate.takeIf(JavaScriptFileSource::isCompilerBackedTypeScriptSource)
@@ -117,8 +120,11 @@ internal object TypeScriptExecutionCompiler {
         return PreparationCandidate(
             source = typeScriptSource,
             preExecuteScript = source.firstScriptSource.script,
-        )
+        ).unlessBun()
     }
+
+    private fun PreparationCandidate.unlessBun(): PreparationCandidate? =
+        takeUnless { source.engineName == JavaScriptSource.ENGINE_BUN }
 
     private fun compile(
         context: Context,

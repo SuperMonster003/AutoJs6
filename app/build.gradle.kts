@@ -634,6 +634,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Lua Runtime API
     implementation(project(":plugin-api:lua-runtime-api"))
 
+    // Plugin API: Bun Runtime API
+    implementation(project(":plugin-api:bun-runtime-api"))
+
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 

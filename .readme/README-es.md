@@ -168,6 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/01
 
+* `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
 * `Nuevo` Se agregaron APIs `snapshot`/`capabilities` versionadas y constantes de schema v1/v2 a `mediainfo`; Rhino conserva los resultados `read` heredados, Node.js mantiene v1 del host por defecto, y v2 del plugin junto con metadatos breves del motor solo se exponen tras el anuncio explícito de capacidad
 * `Nuevo` La capacidad v1 de información de archivos del host de Explorer Action permite que plugins de solo lectura y de confianza añadan un resumen localizado, acotado y vinculado a SHA-256 al diálogo existente de información APK; si el plugin falta, está desactivado, es incompatible o falla, sus campos originales, las acciones de instalación/manifiesto y el tratamiento de errores no cambian

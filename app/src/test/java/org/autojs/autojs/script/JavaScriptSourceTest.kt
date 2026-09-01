@@ -1,10 +1,13 @@
 package org.autojs.autojs.script
 
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.Files
 
 class JavaScriptSourceTest {
 
@@ -29,6 +32,187 @@ class JavaScriptSourceTest {
         assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("component.tsx"))
         assertTrue(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("types.d.ts"))
         assertFalse(JavaScriptSource.isUnsupportedSingleFileTypeScriptFileName("main.ts"))
+
+        assertTrue(JavaScriptSource.isBunFileName("main.bun.js"))
+        assertTrue(JavaScriptSource.isBunFileName("main.BUN.TS"))
+        assertTrue(JavaScriptSource.isBunFileName("component.bun.tsx"))
+        assertFalse(JavaScriptSource.isBunFileName("types.bun.d.ts"))
+        assertFalse(JavaScriptSource.isBunFileName("main.bun.jsx"))
+        assertFalse(JavaScriptSource.isBunFileName(null))
+    }
+
+    @Test
+    fun bunDirectiveAndMarkersSelectTheIndependentEngineWithoutChangingLegacyRoutes() {
+        val directed = StringScriptSource("\"BuN\";\nconsole.log('bun')")
+
+        assertTrue(
+            directed.executionMode and JavaScriptSource.EXECUTION_MODE_BUN != 0,
+        )
+        assertEquals(JavaScriptSource.ENGINE_BUN, directed.engineName)
+        assertEquals(
+            JavaScriptSource.ENGINE_BUN,
+            JavaScriptSource.resolveEngineName(JavaScriptSource.EXECUTION_MODE_BUN),
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE_NODEJS,
+            JavaScriptSource.resolveEngineName(JavaScriptSource.EXECUTION_MODE_NODEJS),
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE,
+            JavaScriptSource.resolveEngineName(JavaScriptSource.EXECUTION_MODE_RHINO),
+        )
+        assertEquals(JavaScriptSource.ENGINE_NODEJS, StringScriptSource("\"nodejs\";\n42").engineName)
+        assertEquals(JavaScriptSource.ENGINE, StringScriptSource("\"rhino\";\n42").engineName)
+        assertEquals(
+            JavaScriptSource.ENGINE_BUN,
+            StringScriptSource("programmatic.bun.js", "console.log('bun')").engineName,
+        )
+        assertEquals(
+            JavaScriptSource.ENGINE_BUN,
+            StringScriptSource("shared.bun.js", "console.log('bun')").apply {
+                overriddenFullPath = File(System.getProperty("java.io.tmpdir"), "provider-cache.js").path
+            }.engineName,
+        )
+
+        listOf("entry.bun.js", "entry.bun.ts", "entry.bun.tsx").forEach { fileName ->
+            val sourceFile = File.createTempFile(
+                "autojs6-bun-route-",
+                fileName.removePrefix("entry"),
+            )
+            try {
+                sourceFile.writeText("console.log('bun')")
+                val launch = ScriptLaunchSourceFactory.createFileLaunch(
+                    file = sourceFile,
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                )
+
+                assertEquals(JavaScriptSource.ENGINE_BUN, launch.engineName)
+            } finally {
+                sourceFile.delete()
+            }
+        }
+    }
+
+    @Test
+    fun conflictingBunEngineSelectorsFailClosed() {
+        listOf(
+            JavaScriptSource.EXECUTION_MODE_BUN or JavaScriptSource.EXECUTION_MODE_NODEJS,
+            JavaScriptSource.EXECUTION_MODE_BUN or JavaScriptSource.EXECUTION_MODE_RHINO,
+        ).forEach { mode ->
+            assertThrows(IllegalArgumentException::class.java) {
+                JavaScriptSource.resolveEngineName(mode)
+            }
+        }
+
+        val conflictingDirective = StringScriptSource("\"bun,nodejs\";\n42")
+        assertThrows(IllegalArgumentException::class.java) {
+            conflictingDirective.engineName
+        }
+
+        val bunMarkerWithNodeDirective = File.createTempFile(
+            "autojs6-bun-conflict-",
+            ".bun.js",
+        )
+        val nodeMarkerWithBunDirective = File.createTempFile(
+            "autojs6-bun-conflict-",
+            ".node.js",
+        )
+        try {
+            bunMarkerWithNodeDirective.writeText("\"nodejs\";\n42")
+            nodeMarkerWithBunDirective.writeText("\"bun\";\n42")
+
+            listOf(bunMarkerWithNodeDirective, nodeMarkerWithBunDirective).forEach { file ->
+                val source = JavaScriptFileSource(file)
+                assertThrows(IllegalArgumentException::class.java) {
+                    source.engineName
+                }
+            }
+        } finally {
+            bunMarkerWithNodeDirective.delete()
+            nodeMarkerWithBunDirective.delete()
+        }
+    }
+
+    @Test
+    fun encryptedHeadersStillMergeSemanticBunSuffixesAndRejectEngineConflicts() {
+        val bunFile = File.createTempFile("autojs6-bun-encrypted-", ".bun.js")
+        val conflictFile = File.createTempFile("autojs6-bun-encrypted-conflict-", ".bun.ts")
+        try {
+            FileOutputStream(bunFile).use { output ->
+                EncryptedScriptFileHeader.writeHeader(output)
+                output.write(byteArrayOf(1, 2, 3))
+            }
+            FileOutputStream(conflictFile).use { output ->
+                EncryptedScriptFileHeader.writeHeader(
+                    output,
+                    EncryptedScriptFileHeader.FLAG_EXECUTION_MODE_NODEJS,
+                )
+                output.write(byteArrayOf(1, 2, 3))
+            }
+
+            assertEquals(JavaScriptSource.ENGINE_BUN, JavaScriptFileSource(bunFile).engineName)
+            assertThrows(IllegalArgumentException::class.java) {
+                JavaScriptFileSource(conflictFile).engineName
+            }
+        } finally {
+            bunFile.delete()
+            conflictFile.delete()
+        }
+    }
+
+    @Test
+    fun nodeProjectLaunchRejectsBunEntriesInsteadOfForcingNode() {
+        val root = Files.createTempDirectory("autojs6-bun-node-project-").toFile()
+        val bunEntry = File(root, "main.bun.js").apply { writeText("console.log('bun')") }
+        try {
+            val source = NodeProjectJavaScriptFileSource(root, bunEntry)
+            val error = assertThrows(IllegalArgumentException::class.java) { source.engineName }
+            assertTrue(error.message.orEmpty().contains("Bun"))
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun bunLaunchRejectsJavaScriptPreExecuteInsteadOfChangingEngines() {
+        val sourceFile = File.createTempFile("autojs6-bun-prefix-", ".bun.ts")
+        try {
+            sourceFile.writeText("const value: number = 42")
+
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                ScriptLaunchSourceFactory.createPathLaunch(
+                    path = sourceFile.path,
+                    preExecuteScript = "globalThis.beforeBun = true;",
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                )
+            }
+
+            assertTrue(error.message.orEmpty().contains("Bun"))
+            assertTrue(error.message.orEmpty().contains("preExecuteScript"))
+        } finally {
+            sourceFile.delete()
+        }
+    }
+
+    @Test
+    fun bunDirectiveInsidePreExecuteScriptCannotRerouteAnOrdinaryEntry() {
+        val sourceFile = File.createTempFile("autojs6-bun-prefix-bypass-", ".js")
+        try {
+            sourceFile.writeText("console.log('ordinary')")
+
+            val error = assertThrows(IllegalArgumentException::class.java) {
+                ScriptLaunchSourceFactory.createPathLaunch(
+                    path = sourceFile.path,
+                    preExecuteScript = "\"bun\";",
+                    defaultWorkingDirectory = sourceFile.parent.orEmpty(),
+                ).engineName
+            }
+
+            assertTrue(error.message.orEmpty().contains("Bun"))
+            assertTrue(error.message.orEmpty().contains("preExecuteScript"))
+        } finally {
+            sourceFile.delete()
+        }
     }
 
     @Test

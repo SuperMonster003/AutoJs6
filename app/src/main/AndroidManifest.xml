@@ -44,6 +44,10 @@
             <action android:name="org.autojs.plugin.lua.RUNTIME" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.bun.RUNTIME" />
+            <category android:name="bun" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.SCREEN_COLOR_PICKER" />
             <category android:name="screen-color-picker" />
         </intent>

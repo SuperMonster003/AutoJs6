@@ -8,6 +8,7 @@
 
 ###### 2026/09/01
 
+* `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
 * `Feature` Added explicit versioned `snapshot`/`capabilities` APIs and v1/v2 schema constants to `mediainfo`; Rhino keeps legacy `read` results, Node.js keeps the host v1 default, and plugin v2 plus short engine metadata are exposed only after explicit plugin capability advertisement
 * `Feature` Explorer Action host file information capability v1 lets trusted read-only plugins append a bounded, SHA-256-bound localized summary to the existing APK information dialog; missing, disabled, incompatible, or failing plugins leave its original fields, installation and manifest actions, and failure handling unchanged

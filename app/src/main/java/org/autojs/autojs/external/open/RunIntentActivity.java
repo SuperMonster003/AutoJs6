@@ -10,9 +10,10 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.runtime.api.Engines;
+import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.JvmFileSource;
 import org.autojs.autojs.script.JvmSourceKind;
-import org.autojs.autojs.script.StringScriptSource;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.ui.jvm.JvmSourcePluginUi;
 import org.autojs.autojs.util.IntentUtils;
@@ -95,14 +96,12 @@ public class RunIntentActivity extends Activity {
         JvmSourceKind.requireNoJavaScriptFallback(displayName);
         JvmSourceKind.requireNoJavaScriptFallback(originPath);
         JvmSourceKind.requireNoJavaScriptFallback(uri.getPath());
-        String sourceName = PFiles.getNameWithoutExtension(displayName);
-
         InputStream stream = getContentResolver().openInputStream(uri);
         if (stream == null) {
             throw new FileNotFoundException(uri.toString());
         }
 
-        StringScriptSource source = new StringScriptSource(sourceName, PFiles.read(stream));
+        JavaScriptSource source = Engines.createExecScriptSource(displayName, PFiles.read(stream));
         source.setOverriddenFullPath(originPath);
         source.setOriginUri(uri.toString());
 

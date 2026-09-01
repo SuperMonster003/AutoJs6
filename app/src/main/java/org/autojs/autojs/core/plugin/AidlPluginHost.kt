@@ -34,6 +34,7 @@ import kotlin.coroutines.resumeWithException
 
 class AidlPluginHost<I : IInterface>(
     val action: String,
+    private val category: String? = null,
     private val tag: String,
     private val moduleLabel: String,
     private val proxyFactory: (IBinder) -> I,
@@ -111,6 +112,7 @@ class AidlPluginHost<I : IInterface>(
         target: Discovered,
         enforceHostVersionCompatibility: Boolean = true,
         enforceAuthorization: Boolean = true,
+        enforcePreBindValidator: Boolean = true,
         retryOnRemoteException: Boolean = true,
         block: (I) -> T,
     ): T {
@@ -124,6 +126,7 @@ class AidlPluginHost<I : IInterface>(
             context = context,
             serviceInfo = target.serviceInfo,
             bindTimeoutMs = defaultBindTimeoutMs,
+            enforcePreBindValidator = enforcePreBindValidator,
             retryOnRemoteException = retryOnRemoteException,
             block = block,
         )
@@ -383,6 +386,7 @@ class AidlPluginHost<I : IInterface>(
 
     private fun queryServices(context: Context, packageName: String? = null): List<ServiceInfo> {
         val intent = Intent(action).apply {
+            category?.takeIf { it.isNotBlank() }?.let(::addCategory)
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             if (!packageName.isNullOrBlank()) {
                 setPackage(packageName)
@@ -418,10 +422,11 @@ class AidlPluginHost<I : IInterface>(
         context: Context,
         serviceInfo: ServiceInfo,
         bindTimeoutMs: Long = defaultBindTimeoutMs,
+        enforcePreBindValidator: Boolean = true,
         retryOnRemoteException: Boolean = true,
         block: (I) -> T,
     ): T {
-        preBindValidator?.invoke(context, serviceInfo)
+        if (enforcePreBindValidator) preBindValidator?.invoke(context, serviceInfo)
         val appContext = context.applicationContext
         val entry = getOrCreateEntry(appContext, serviceInfo)
         val proxy = awaitProxy(entry, bindTimeoutMs)
@@ -501,7 +506,10 @@ class AidlPluginHost<I : IInterface>(
 
         connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, service: IBinder) {
-                val proxy = proxyFactory(service)
+                val proxy = runCatching { proxyFactory(service) }.getOrElse { error ->
+                    fail(IllegalStateException("Plugin Binder proxy creation failed: $name", error))
+                    return
+                }
                 val deathRecipient = IBinder.DeathRecipient {
                     fail(IllegalStateException("Dedicated plugin binder died: $name"))
                 }
@@ -824,7 +832,11 @@ class AidlPluginHost<I : IInterface>(
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, service: IBinder) {
                 Log.i(tag, "onServiceConnected: $name")
-                val nextProxy = proxyFactory(service)
+                val nextProxy = runCatching { proxyFactory(service) }.getOrElse { error ->
+                    Log.w(tag, "Plugin Binder proxy creation failed: $name", error)
+                    handleDisconnect(name, "proxyFactory", shouldUnbind = true)
+                    return
+                }
                 val nextDeathRecipient = IBinder.DeathRecipient {
                     Log.w(tag, "binderDied: $name")
                     handleDisconnect(name, "binderDied", shouldUnbind = true)
