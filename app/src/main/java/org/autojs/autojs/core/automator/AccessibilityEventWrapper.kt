@@ -34,5 +34,9 @@ class AccessibilityEventWrapper(event: AccessibilityEvent) {
         }
         return index
     }
+
+    override fun toString(): String {
+        return "AccessibilityEventWrapper(packageName=$packageName, eventType=$eventType, eventTime=$eventTime, action=$action, isFullScreen=$isFullScreen, className=$className)"
+    }
 }
 
