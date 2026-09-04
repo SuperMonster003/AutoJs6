@@ -15,7 +15,7 @@
 
 ## 1. 固定决策
 
-以下决策已于 2026-09-04 确认, 后续阶段不再重新讨论:
+以下决策已由维护者确认 (D1-D5 于 2026-09-04, D6-D12 于 2026-09-05), 后续阶段不再重新讨论:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
@@ -23,7 +23,14 @@
 | D2 | 既有 JS 公开 API 完全兼容 | 所有现有 JS 函数 / 方法 / 属性 (含 `@Deprecated` 的 `idMatches` 系列, 无参 `findOne()`, `waitFor()`, `brother()` 等) 的签名与行为保持不变. 重构只发生在 Kotlin 内部, 或以新增 API 的形式出现. 明确的 bug (如 BFS 多返回一个结果) 可修复并记入 changelog `fix` 分类. |
 | D3 | Roadmap 位于 `docs/dev/` | 与仓库内既有 roadmap (如 `yolo-plugin-roadmap.md`) 的位置与风格一致. |
 | D4 | 2026-09-04 会话先产出本 Roadmap, 随后从 P0 开始落地 | 代码改动按阶段推进, 每阶段开始前先拍板附录 C 中对应的待决事项. |
-| D5 | `automator.isServiceRunning()` 的判定允许修正 | 现实现 (`SimpleActionAutomator.kt:216`) 只检查 `hasInstance()`, 与 `auto.service` / 抽屉开关等处的 "运行中" 语义不一致; P1.2 中统一为注册表的 `isRunning` 语义, 记入 changelog `fix`. 这是 D2 之外唯一被明确批准的既有行为调整. |
+| D5 | `automator.isServiceRunning()` 的判定允许修正 | 现实现 (`SimpleActionAutomator.kt:216`) 只检查 `hasInstance()`, 与 `auto.service` / 抽屉开关等处的 "运行中" 语义不一致; P1.2 中统一为注册表的 `isRunning` 语义, 记入 changelog `fix`. |
+| D6 | 罗盘 `k` 段范围内无可点击节点时返回 `null` | 此前返回节点自身 (仅当向上越过根节点时才返回 `null`). 已于 2026-09-05 随 P0 落地并记入 changelog `fix`. 与 D5 一样是 D2 之外被明确批准的既有行为调整. |
+| D7 | 建立独立的 `docs/dev/accessibility-architecture.md` | 承载分层图, 现有类映射, 线程模型, 事件流, 基准数据与已知平台行为; 每阶段结束时更新其 "现状" 与 "目标" 章节, 避免本 Roadmap 膨胀. (原 Q7) |
+| D8 | 核心 `org.autojs.autojs.core.accessibility.AccessibilityService` 不重命名 | `auto.service` 返回其实例, 脚本可能通过 FQN 引用; 仅重命名抽屉辅助类 `service/AccessibilityService.kt`. (原 Q5) |
+| D9 | `UiSelector` builder 方法先手写委托, 但自动生成是强烈期望 | P2.2 的 `SelectorRegistry` 必须以 "可生成" 为设计目标 (方法名, 别名, 参数类型, 过滤器工厂全部为数据); P2 结束时必须给出生成方案评估 (候选: KSP 处理器读取注册表生成 `UiSelector` 的 builder 与 d.ts 签名清单; 或 Gradle 任务 + 模板生成 Kotlin 源码), 评估通过即实施, 而非仅停留在评估. (原 Q6) |
+| D10 | toolkit 的同步表面提升为全局函数 | 除 `automator.*` 外, `smartClick` / `clickIfExists` / `clickAny` / `findAny` / `scrollUntil` / `typeInto` / `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `toggle` / `retry` 等同时注册为全局函数; 便捷性优先于命名空间膨胀. 落地前用当前全局名快照核对冲突 (如 `click` / `toggle` 等已存在或语义相近的名字须避让或统一). (原 Q3) |
+| D11 | `flow` 命名空间提供 `$flow` 别名 | 与其它 `Augmentable` 模块的 `$` 前缀别名保持一致. (原 Q2) |
+| D12 | Flow 动作步骤默认 `strict = true` | 动作返回 `false` 即 reject `ACTION_FAILED`; 可用 `flow.defaults({ strictActions: false })` 全局关闭. (原 Q1) |
 
 由 D2 派生的硬约束:
 
@@ -73,6 +80,8 @@
 | 窗口根节点获取逻辑在同一文件内重复 3 次, 且 `getRootInActiveWindow()` 静默丢弃了窗口过滤器分支; `windowRoots()` 可能返回含 `null` 的 `singletonList`, 迫使 Kotlin 调用方各自 `filterNotNull()` | `core/accessibility/AccessibilityBridge.java:98-150` |
 | 节点回收策略 4 套互不一致: 分配器仅在 API < 33 回收, 而 `recycleFastRootInActiveWindow` 与 DFS/BFS/Scroll* 内联 `.recycle()` 无 API 判断; `add()` 无条件为每个节点捕获完整线程堆栈字符串; 分配器使用非线程安全 `HashMap`. 另外, 分配器在生产路径中恒为 `null` (`ScriptRuntime.kt:552` -> `UiSelector(bridge)` -> `allocator = null`), `global` 与 `NONE` 无引用, 即分配器实际上是死代码, P1.5 可直接以 `NodeLifecycle` 取代而非适配 | `core/accessibility/AccessibilityNodeInfoAllocator.kt:16,41,54,65,115`, `core/accessibility/AccessibilityService.kt:56-61`, `core/automator/search/{DFS,BFS}.kt` |
 | `CloseableManager` 类的文件名拼写错误 (`CloaseableManager.kt`), 类本身被 `ScriptRuntime.closeableManager` 使用并有测试 | `core/accessibility/monitor/CloaseableManager.kt`, `runtime/ScriptRuntime.kt:212` |
+| `AccessibilityEventWrapper` 为投递给 JS 回调的每个事件急切解析 `source` 节点 (向上遍历整条父链求 depth, 再扫描父节点全部子节点求 index), 即使回调不使用 `source`; 索引查找原本无界 (节点树变化时会越界抛出或死循环, 2026-09-05 已加界). 急切解析的原因是 API < 33 上原始事件在回调返回后可能被框架回收 | `core/automator/AccessibilityEventWrapper.kt` |
+| 平台行为 (非 bug): 一次窗口切换通常收到 2 个以上 `TYPE_WINDOW_STATE_CHANGED` (eventTime 相差几十毫秒), 服务配置 `notificationTimeout="0"` 因此系统不合并; `auto.registerEvent` 目前不提供去重 / 去抖 | `res/xml/accessibility_service_config.xml`, `sample/accessibility/smoke-legacy-api.js` (含去重示例) |
 | 无障碍截图有 2 套实现 (Rhino 与 Python Host) | `core/accessibility/SimpleActionAutomator.kt:269-321`, `core/plugin/python/PythonHostImages.kt:875` |
 | 核心路径及其直接消费方中仍有 3 个承担关键角色的 Java 文件 | `core/accessibility/AccessibilityBridge.java` (189), `core/accessibility/AccessibilityBridgeImpl.java` (55, 其中 `:32-33` 重复声明基类已有的 `ensureServiceStarted()`), `codegeneration/ReadOnlyUiObject.java` (333, 从 Java 继承 960 行的 Kotlin `UiObject`, 覆盖约 50 个方法) |
 | 已知 Android 问题: `onServiceConnected` 有时不触发, 仅以 FIXME 注释记录 | `core/accessibility/AccessibilityService.kt:241-247` |
@@ -155,7 +164,7 @@ runtime/api/augment/
 
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
-| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 进行中 (2026-09-04: P0.1 除冒烟脚本外完成, P0.2 完成, 待真机验收) |
+| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 代码与文档完成 (2026-09-05), 仅剩真机运行 `smoke-legacy-api.js` 的 `DEVICE` 证据 |
 | P1 | 无障碍服务层重构 | P0 | 1 | 未开始 |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
@@ -176,8 +185,8 @@ runtime/api/augment/
 - [x] 建立确定性的节点树测试夹具. 结论修正: `UiObject(null)` 在 JVM 测试中可以构造 (androidx `AccessibilityNodeInfoCompat` 是真实库代码, 仅在调用 Android 桩方法时失败), 因此夹具 `app/src/test/.../core/automator/FakeUiObject.kt` 直接继承 `UiObject` 并只覆盖搜索与导航触及的成员 (`getChildCount` / `childCount` / `child` / `parent` / `clickable` / `recycle`), 以 `FakeUiObject.root { child("a") { ... } }` 构建树. 它已可驱动 `DFS` / `BFS` / `UiObject.compass` 的测试; P2.1 引入 `UiNode` 后再扩展为带属性的夹具. 随机行为的 `core/automator/test/TestUiObject.kt` (主源码集, 无引用) 留待 P2 清理. (JVM: `SearchAlgorithmTest`, `UiObjectCompassTest`)
 - [x] 为 `SelectorMethodResolver` 现有测试补充边界用例: `null` 到原始类型返回 `null` 而到对象类型可通过, `Double -> Long/Float/Double` 强制转换, 字符串不会被强制为数字. (JVM: `SelectorMethodResolverTest`, 8 用例)
 - [x] 为 `Global.wait` 抽出纯函数 `normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`internal`, 供 P3 Flow 复用同一真值规则与 limit 语义), `wait` 本体改为调用它们, 行为不变. (JVM: `GlobalWaitCompatibilityTest`, 8 用例, 含 `limit < 100` 视为次数, `interval >= timeout` 折叠为单次, `{then, else}` 重载识别)
-- [x] 抽出纯解析器 `core/automator/pick/CompassParser.kt` (`CompassStep` 密封类: `Up` / `Children` / `Sibling` / `Clickable`, 预编译正则), `UiObject.compass()` 改为 "解析后按步骤导航", 导航语义逐条保留 (含 `k` 段未命中时返回自身 / 越过根返回 `null` 的既有怪异行为, 已在源码注释与 `UiObjectCompassTest` 中标注). 顺带修复了多段连写 (`p4ppp12p`, `k2k3`) 仅计入首段的 bug (原因: `findAll` 配合 `^` 锚点只能命中首段), 记入 changelog. 语法错误现在在导航前整体抛出 (原先是边导航边解析, 前置步骤返回 `null` 时可能吞掉后段的语法错误). (JVM: `CompassParserTest` 8 用例, `UiObjectCompassTest` 6 用例)
-- [ ] 编写设备冒烟脚本 `sample/accessibility/smoke-legacy-api.js`, 覆盖 `text().findOne(timeout)`, `pickup`, `detect`, `wait`, `click(text)`, `scrollDown()`, `auto.registerEvent`, 作为每阶段结束时的人工回归清单.
+- [x] 抽出纯解析器 `core/automator/pick/CompassParser.kt` (`CompassStep` 密封类: `Up` / `Children` / `Sibling` / `Clickable`, 预编译正则), `UiObject.compass()` 改为 "解析后按步骤导航". 顺带修复了多段连写 (`p4ppp12p`, `k2k3`) 仅计入首段的 bug (原因: `findAll` 配合 `^` 锚点只能命中首段), 记入 changelog. 语法错误现在在导航前整体抛出 (原先是边导航边解析, 前置步骤返回 `null` 时可能吞掉后段的语法错误). 2026-09-05 按 D6 把 `k` 段 "范围内无可点击节点时返回自身" 改为返回 `null`, 记入 changelog. (JVM: `CompassParserTest` 8 用例, `UiObjectCompassTest` 6 用例)
+- [x] 编写设备冒烟脚本 `sample/accessibility/smoke-legacy-api.js` (基于维护者 2026-09-05 提供的草稿, 改为 `check()` 汇总并修正了未被调用的箭头函数断言), 覆盖 `text().findOne(timeout)`, `find(n)` 精确数量 (DFS / BFS / 0), `pickup`, `detect`, `compass` (`p` / `k9` / `c0`), `wait` 四种形态, `click(UiObject)`, `scrollDown()`, `auto.registerEvent` (含 `WINDOW_STATE_CHANGED` 多次投递的计数与去重示例). (SOURCE; 尚未在真机运行)
 
 ### P0.2 低风险修复 (记入 changelog `fix`)
 
@@ -191,7 +200,7 @@ runtime/api/augment/
 
 ### P0.3 基线文档
 
-- [ ] 在本文件第 3 节之外, 新增 `docs/dev/accessibility-architecture.md`, 以 "现状" 章节记录 4.1 分层图对应的现有类映射, 后续每阶段更新 "目标" 章节. (可选: 若维护者认为本 Roadmap 已足够, 跳过.)
+- [x] 新增 `docs/dev/accessibility-architecture.md` (D7): "现状" 章节记录分层与类映射, 服务生命周期与谓词, 事件流, 查找 / 拾取调用链, 线程模型, 节点生命周期, 已知平台行为, 测试基础设施, 基准数据占位; "目标" 章节含迁移映射表; "评估记录" 章节预留 D9 与 Q4. 每阶段结束时更新. (SOURCE, 2026-09-05)
 
 P0 验收: `:app:testAppDebugUnitTest` 通过 (注意任务名带 `App` 风味, `testDebugUnitTest` 会因 `Inrt` 风味而报 ambiguous); `sample/accessibility/smoke-legacy-api.js` 在至少一台真机上通过; changelog `fix` 条目已写入.
 
@@ -227,7 +236,9 @@ P0 当前证据 (2026-09-04): JVM 全量 `:app:testAppDebugUnitTest` 1877 tests 
 - [ ] 提供 `removeDelegate` / 按 ownerId 批量注销; `AbstractAutoJs.kt:143-145` 三个 delegate 注册改为经由总线.
 - [ ] `fastRootInActiveWindow` 的更新与 delegate 命中解耦: 在 `TYPE_WINDOW_STATE_CHANGED` / `TYPE_VIEW_FOCUSED` 时无条件更新 (`AccessibilityService.kt:141-143`), 并纳入 `NodeLifecycle` 回收策略.
 - [ ] 提供 Kotlin 侧的事件订阅 API (供 P3 的 `waitForIdle` / `waitForEvent` 使用), 支持 "安静窗口" 检测 (最近一次匹配事件时间戳).
-- [ ] JUnit4 测试: 订阅 / 派发 / 消费中断 / 按 ownerId 注销 / 回调抛异常不影响其它订阅者.
+- [ ] `auto.registerEvent(name, callback, options?)` 新增可选的去重 / 去抖: `{ distinct: 'window' | 'source' | fn(prev, next), within: 500 }` 或 `{ debounce: 100 }`, 默认关闭以保持既有行为; 用于消除一次窗口切换收到多个 `TYPE_WINDOW_STATE_CHANGED` 的平台行为 (见第 3.1 节). 同一能力作为总线订阅项的选项提供给 Kotlin 侧.
+- [ ] `AccessibilityEventWrapper` 的 `source` 解析成本: 保持在回调期间可用的前提下 (API < 33 事件会被回收), 改为 "首次访问时解析, 回调返回后置为不可用" 或 "仅当订阅项声明 `needsSource` 时解析"; `depth` / `indexInParent` 的计算改用 `NodeLifecycle` 管理父链节点.
+- [ ] JUnit4 测试: 订阅 / 派发 / 消费中断 / 按 ownerId 注销 / 回调抛异常不影响其它订阅者 / 去重与去抖.
 
 ### P1.4 窗口根节点 `WindowRootProvider`
 
@@ -264,7 +275,8 @@ P1 验收: JVM 单元测试 (registry / controller / event bus / window policy /
 ### P2.2 `SelectorRegistry`: 一处描述, 多处派生
 
 - [ ] 用声明式表 `SelectorRegistry` 描述每个选择器属性: 名称, 别名 (含 `@Deprecated` 的 `xMatches`), 参数类型集合 (string / regex / bool / int / double / double-range / bool+tolerance / app / action / filter), 对应的 `UiNode` 取值器, 过滤器工厂.
-- [ ] `UiSelector` 的约 200 个 builder 方法改为一行委托 `registry.apply(this, "text", args)` (方法本身保留, 以维持反射注册与 d.ts 生成); 评估 KSP 生成这些方法的可行性, 记录结论 (可选).
+- [ ] `UiSelector` 的约 200 个 builder 方法改为一行委托 `registry.apply(this, "text", args)` (方法本身保留, 以维持反射注册与 d.ts 生成). 按 D9, registry 的每一项都必须是纯数据 (名称, 别名, 参数类型集合, 取值器, 过滤器工厂), 使 builder 方法能够被生成.
+- [ ] 按 D9 评估并实施 builder 方法的自动生成: 候选方案 (a) KSP 处理器读取 registry 注解 / 常量表, 生成 `UiSelectorGenerated.kt` (builder 方法) 与 `selector-signatures.json` (供 d.ts 生成器与文档使用); (b) Gradle 任务 + Kotlin 模板生成源码并提交到仓库 (可读, 可 diff, 无编译期插件依赖); (c) 保持手写但用单元测试断言 registry 与手写方法集合一致 (兜底). 评估维度: 构建时间, IDE 索引与跳转, `@Deprecated` 别名与 KDoc 的表达, 与 `android-dts-generator` 的衔接. 结论与选择记录到 `docs/dev/accessibility-architecture.md`.
 - [ ] `Picker.Builder.checkSelectorMap` (`UiSelector.kt:1041-1185`) 与 `doubleTypes` 等 6 张手工表由 `SelectorMapParser` + registry 替代, 删除反射调用; 行为差异用测试锁定 (map 值为 `List` 时的各分支, `filter` / `action` 键, 未知键抛 `IllegalMapSelectorException`).
 - [ ] `augment/selector/Selector.kt:45-95` 的 "反射全部 public 方法" 改为 "反射 registry 声明的方法 + 显式白名单 (`find*`, `exists`, `untilFind*`, `algorithm`, `filter`, `action`, `performAction` 等)", 并保留黑名单 (`plus`, `append`); 用测试断言注册的全局函数集合与重构前完全一致 (以快照文件固化).
 - [ ] `SelectorMethodResolver` 与 `UiObject.Invoker/Interceptor` 的数值强制转换合并为一个 `JsArgumentCoercion` 工具, 三处共用.
@@ -356,7 +368,7 @@ P3 验收: 调度核心单元测试通过; 三个示例脚本真机通过; 脚�
 
 ### P4.2 JS 表面
 
-- [ ] 同步表面挂载到 `automator` 模块 (`automator.smartClick` / `scrollUntil` / `typeInto` / `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `toggle` / `clickIfExists` / `clickAny` / `findAny` / `retry`), 不提升为全局 (避免与用户脚本命名冲突); 是否提升为全局见附录 C 待决 Q3.
+- [ ] 同步表面同时挂载到 `automator` 模块与全局 (D10): `smartClick` / `scrollUntil` / `typeInto` / `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `toggle` / `clickIfExists` / `clickAny` / `findAny` / `retry`. 落地前先在真机上以 `Object.getOwnPropertyNames(global)` 生成全局名快照, 核对冲突与语义相近项 (已知: `click` / `longClick` / `scrollUp` / `scrollDown` 等为既有全局动作, 新名字须与之风格一致; `toggle` 若与既有名字冲突则改为 `setChecked`).
 - [ ] Flow 步骤对应项 (`.smartClick()`, `.scrollUntil()`, `.typeInto()`, `.dismissPopups()`, `.collectList()`, `.launchAndWait()`, `.backUntil()`, `.toggle()`) 与 `flow.*` 起点.
 - [ ] 每个工具的错误走 `FlowError` 体系 (同步表面抛出同类错误对象).
 
@@ -553,19 +565,33 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 
 ## 附录 C: 待决事项
 
-进入对应阶段前由维护者拍板, 结果回填第 1 节.
+进入对应阶段前由维护者拍板, 结果回填第 1 节. 已决事项: Q1 -> D12, Q2 -> D11, Q3 -> D10, Q5 -> D8, Q6 -> D9, Q7 -> D7.
 
-| 编号 | 阶段 | 问题 | 建议 |
-| --- | --- | --- | --- |
-| Q1 | P3 | 动作返回 `false` 时链默认 reject (`strict`) 还是 resolve 为 `false`? | 默认 `strict = true`, 因为自动化脚本通常希望 "点击失败" 进入错误分支; 可用 `flow.defaults({ strictActions: false })` 全局关闭. |
-| Q2 | P3 | `flow` 命名空间是否需要 `$flow` 别名 (其它 `Augmentable` 模块默认有 `$` 前缀别名)? | 沿用默认 (提供 `$flow`), 保持一致性. |
-| Q3 | P4 | toolkit 的同步表面是否提升为全局函数 (如 `smartClick` / `scrollUntil`)? | 不提升, 仅 `automator.*`; 全局函数只保留 Flow 起点 (`waitAsync` 等 6 个 + 别名), 控制全局命名空间膨胀. |
-| Q4 | P5 | 字符串选择器语法是否引入, 采用何种语法? | 暂缓, 待 P2 registry 稳定后再评估; 若引入, 优先兼容 `pickup` 现有的 string / regex 含义 (即 `content`), 新语法以显式前缀触发 (如 `sel('...')`). |
-| Q5 | P1 | `org.autojs.autojs.core.accessibility.AccessibilityService` 与 Android 同名类的冲突是否通过重命名解决? | 不重命名 (`auto.service` 返回其实例, 脚本可能通过 FQN 引用), 仅重命名 `service/AccessibilityService.kt` 辅助类. |
-| Q6 | P2 | 是否用 KSP 生成 `UiSelector` 的 builder 方法? | 先手写委托 (风险低), P2 结束后评估生成方案. |
-| Q7 | P0 | 是否建立独立的 `docs/dev/accessibility-architecture.md`? | 建立, 以承载分层图与基准数据, 避免本 Roadmap 膨胀. |
+### Q4 (P5.3): 是否引入 "字符串选择器语法"
 
----
+背景. 目前构造选择器有三种方式:
+
+1. 链式 builder: `text('登录').clickable(true).depth(5)`.
+2. 对象 (map) 选择器: `pickup({ text: '登录', clickable: true })`, 键名即 builder 方法名, 由 `Picker.Builder.checkSelectorMap` 反射转换.
+3. 字符串 / 正则的简写: `pickup('登录')` / `pickup(/登.+/)`, 含义固定为 "content 匹配" (content = text 或 desc). 这是 Python Host, Node Bridge 与 `wait('登录')` 共用的约定.
+
+"字符串选择器语法" 指的是第四种方式: 用一个紧凑的字符串描述多个条件, 例如 (语法仅为示意):
+
+- `sel('text=登录 clickable')`  等价于 `text('登录').clickable(true)`
+- `sel('id=btn_ok | desc~=^确.+$')`  用 `~=` 表示正则, `|` 表示 "或"
+- `sel('#btn_ok')`, `sel('.android.widget.Button')`  借用 CSS 的 id / class 记法
+
+它的价值在于: 日志与布局分析器可以直接输出可复制粘贴的单行选择器; `auto.explain` / `auto.dump` 等诊断工具可以用同一种记法描述节点; Python / Node 桥接只需传字符串即可复用 Rhino 侧的解析. 代价在于: 需要新增并长期维护一套语法 (解析器, 转义, 错误提示, 文档, d.ts 无法为字符串内容提供类型提示), 且与方式 3 存在歧义风险 (`pickup('text=登录')` 到底是 content 等于 `text=登录` 还是新语法? 因此新语法必须由独立入口触发, 不能复用 `pickup` 的字符串参数).
+
+可选项:
+
+| 选项 | 内容 | 影响 |
+| --- | --- | --- |
+| A | 不引入 | 零成本; 诊断输出改为输出方式 2 的对象字面量 (如 `{ text: '登录', clickable: true }`), 同样可复制粘贴, 且有 d.ts 提示. |
+| B | 引入, 独立入口 `sel('...')` (或 `selector('...')`), 语法为 "空格分隔的 `键=值` / `键~=正则` / 布尔键" | 与现有 API 无歧义; 解析器可基于 P2.2 的 registry 自动获得全部键名; 需要文档与错误提示. |
+| C | 引入 CSS 风格 (`#id`, `.className`, `[text=登录]`, 后代 / 子代组合子 `>`) | 表达力最强 (可描述层级关系), 但与 `compass` 的层级语义重叠, 实现成本最高. |
+
+建议: 选 A 或 B. 若维护者更看重 "日志里的选择器能直接粘贴回脚本", 选 A 即可满足 (对象字面量); 若更看重 "一行字符串跨 Rhino / Python / Node 通用", 选 B. 不建议 C. 本项不影响 P0-P4, 可在进入 P5 前决定.
 
 ## 附录 D: 证据等级与验收方式
 
@@ -590,4 +616,12 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P0.1 (除冒烟脚本) 与 P0.2 全部条目, 详见各条目后的证据标注. 发现并修正了本文档两处诊断错误: `CloseableManager` 并非无引用 (仅文件名拼写错误); `UiObject` 在 JVM 测试中可构造 (夹具因此无需等待 P2.1 的 `UiNode`).
 - 新增源码: `core/automator/pick/CompassParser.kt`; 新增测试: `FakeUiObject`, `SearchAlgorithmTest`, `UiObjectCompassTest`, `CompassParserTest`, `GlobalWaitCompatibilityTest`; 扩充 `SelectorMethodResolverTest`.
 - 未做: 真机冒烟 (P0.1 末项), `docs/dev/accessibility-architecture.md` (P0.3, 待决 Q7).
-- 下次会话建议起点: 先补 `sample/accessibility/smoke-legacy-api.js` 并在真机跑一遍以关闭 P0 (本次 `compass` 与搜索算法改动虽有 JVM 覆盖, 仍应在真机上过一次 `pickup` / `detect` / `compass` 路径); 然后进入 P1.1 (`A11yServiceRegistry`), 或按需先做 P3.1 (Android-free 的 `FlowScheduler` / `Stabilizer`, 可复用本次抽出的 `isWaitConditionSatisfied` 与 `WaitPolicy`). 进入 P1 前拍板 Q5 与 Q7.
+- 下次会话建议起点 (已被 2026-09-05 会话取代, 见下).
+
+### 2026-09-05
+
+- 追加决策 D6-D12 (罗盘 `k` 段返回 `null`, 建立架构文档, 核心服务类不重命名, builder 生成为强烈期望, toolkit 提升为全局, `$flow` 别名, 动作默认 strict); Q4 (字符串选择器语法) 改写为可决策的详细说明, 待 P5 前决定.
+- 落地: D6 (`compassClickable` 改写, `UiObjectCompassTest` 更新); `AccessibilityEventWrapper.getIndexInParent` 加界并捕获异常 (原实现在节点树变化时会越界抛出或死循环, 且异常会从 `onAccessibilityEvent` 逃逸); `sample/accessibility/smoke-legacy-api.js` (基于维护者草稿); `docs/dev/accessibility-architecture.md`; changelog `fix` 2 条 (10 语言) 并重新生成 README / CHANGELOG.
+- 排查结论: `auto.registerEvent("WINDOW_STATE_CHANGED")` 回调两次不是分发 bug (两个事件 `eventTime` 相差 48 ms, 系统各投递一次; `notificationTimeout="0"` 不合并; 注册为单槽). 处理方式: 冒烟脚本内给出去重示例, P1.3 增加 `auto.registerEvent` 的可选去重 / 去抖.
+- 未做: 真机运行冒烟脚本 (需要维护者在设备上执行并把结果回填到 P0 验收).
+- 下次会话建议起点: 维护者先在真机运行 `sample/accessibility/smoke-legacy-api.js` 并反馈 (若有失败项优先修复); 之后进入 P1.1 (`A11yServiceRegistry` + `A11yState`), P1.2 (含 D5 与 D8 的两处改名 / 改判定). P1 期间保持每个子项独立提交.
