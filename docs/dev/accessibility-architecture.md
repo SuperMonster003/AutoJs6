@@ -160,9 +160,9 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 
 待评估. 候选方案与评估维度见 Roadmap P2.2. 结论回填于此.
 
-### 3.2 字符串选择器语法 (Q4, 待 P5)
+### 3.2 字符串选择器语法 (Q4 -> D13, 2026-09-05)
 
-待维护者决定, 选项与建议见 Roadmap 附录 C.
+已决: 方案 B, 入口复用 `select`. 全局 `select('text=登录 clickable')` 返回 `UiSelector`; `UiSelector.select(String)` 追加解析出的过滤器; 无参 `select()` 保持 `ACTION_SELECT` 动作语义. 语法与约束见 Roadmap D13, 实现于 P5.3 (依赖 P2.2 的 `SelectorRegistry` 提供键名与别名).
 
 ---
 

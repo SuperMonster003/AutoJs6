@@ -31,6 +31,7 @@
 | D10 | toolkit 的同步表面提升为全局函数 | 除 `automator.*` 外, `smartClick` / `clickIfExists` / `clickAny` / `findAny` / `scrollUntil` / `typeInto` / `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `toggle` / `retry` 等同时注册为全局函数; 便捷性优先于命名空间膨胀. 落地前用当前全局名快照核对冲突 (如 `click` / `toggle` 等已存在或语义相近的名字须避让或统一). (原 Q3) |
 | D11 | `flow` 命名空间提供 `$flow` 别名 | 与其它 `Augmentable` 模块的 `$` 前缀别名保持一致. (原 Q2) |
 | D12 | Flow 动作步骤默认 `strict = true` | 动作返回 `false` 即 reject `ACTION_FAILED`; 可用 `flow.defaults({ strictActions: false })` 全局关闭. (原 Q1) |
+| D13 | 引入字符串选择器语法, 入口复用 `select` | 采用附录 C 的方案 B: `UiSelector` 新增 `select(String)` 重载 (解析字符串并追加过滤器, 返回自身), 因反射注册而自动成为全局函数 `select('...')` (返回 `UiSelector`, 可继续 `.findOne()` 等); 既有无参 `select()` (对找到的节点执行 `ACTION_SELECT`, 含反射出的全局 `select(): boolean`) 保持不变, 两者按参数类型区分. 语法: 空格分隔的条件, `key=value` (值含空格时用引号), `key~=regex` (或 `key=/regex/flags`), 布尔键 `clickable` / `!clickable`, 键名与别名来自 P2.2 的 `SelectorRegistry`; 不引入 `\|` 或层级组合子, 组合需求用 `pickup([...])` / `existsAll` / compass 表达. 落地于 P5.3, 依赖 P2.2. (原 Q4, 2026-09-05) |
 
 由 D2 派生的硬约束:
 
@@ -164,7 +165,7 @@ runtime/api/augment/
 
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
-| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 代码与文档完成 (2026-09-05), 仅剩真机运行 `smoke-legacy-api.js` 的 `DEVICE` 证据 |
+| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
 | P1 | 无障碍服务层重构 | P0 | 1 | 未开始 |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
@@ -186,7 +187,7 @@ runtime/api/augment/
 - [x] 为 `SelectorMethodResolver` 现有测试补充边界用例: `null` 到原始类型返回 `null` 而到对象类型可通过, `Double -> Long/Float/Double` 强制转换, 字符串不会被强制为数字. (JVM: `SelectorMethodResolverTest`, 8 用例)
 - [x] 为 `Global.wait` 抽出纯函数 `normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`internal`, 供 P3 Flow 复用同一真值规则与 limit 语义), `wait` 本体改为调用它们, 行为不变. (JVM: `GlobalWaitCompatibilityTest`, 8 用例, 含 `limit < 100` 视为次数, `interval >= timeout` 折叠为单次, `{then, else}` 重载识别)
 - [x] 抽出纯解析器 `core/automator/pick/CompassParser.kt` (`CompassStep` 密封类: `Up` / `Children` / `Sibling` / `Clickable`, 预编译正则), `UiObject.compass()` 改为 "解析后按步骤导航". 顺带修复了多段连写 (`p4ppp12p`, `k2k3`) 仅计入首段的 bug (原因: `findAll` 配合 `^` 锚点只能命中首段), 记入 changelog. 语法错误现在在导航前整体抛出 (原先是边导航边解析, 前置步骤返回 `null` 时可能吞掉后段的语法错误). 2026-09-05 按 D6 把 `k` 段 "范围内无可点击节点时返回自身" 改为返回 `null`, 记入 changelog. (JVM: `CompassParserTest` 8 用例, `UiObjectCompassTest` 6 用例)
-- [x] 编写设备冒烟脚本 `sample/accessibility/smoke-legacy-api.js` (基于维护者 2026-09-05 提供的草稿, 改为 `check()` 汇总并修正了未被调用的箭头函数断言), 覆盖 `text().findOne(timeout)`, `find(n)` 精确数量 (DFS / BFS / 0), `pickup`, `detect`, `compass` (`p` / `k9` / `c0`), `wait` 四种形态, `click(UiObject)`, `scrollDown()`, `auto.registerEvent` (含 `WINDOW_STATE_CHANGED` 多次投递的计数与去重示例). (SOURCE; 尚未在真机运行)
+- [x] 编写设备冒烟脚本 `sample/accessibility/smoke-legacy-api.js` (基于维护者 2026-09-05 提供的草稿, 改为 `check()` 汇总并修正了未被调用的箭头函数断言), 覆盖 `text().findOne(timeout)`, `find(n)` 精确数量 (DFS / BFS / 0), `pickup`, `detect`, `compass` (`p` / `k9` / `c0`), `wait` 四种形态, `click(UiObject)`, `scrollDown()`, `auto.registerEvent` (含 `WINDOW_STATE_CHANGED` 多次投递的计数与去重示例). (SOURCE; DEVICE: 5 台设备 30/30, 见 P0 证据)
 
 ### P0.2 低风险修复 (记入 changelog `fix`)
 
@@ -204,7 +205,14 @@ runtime/api/augment/
 
 P0 验收: `:app:testAppDebugUnitTest` 通过 (注意任务名带 `App` 风味, `testDebugUnitTest` 会因 `Inrt` 风味而报 ambiguous); `sample/accessibility/smoke-legacy-api.js` 在至少一台真机上通过; changelog `fix` 条目已写入.
 
-P0 当前证据 (2026-09-04): JVM 全量 `:app:testAppDebugUnitTest` 1877 tests / 0 failures (含本阶段新增 29 个用例); changelog `fix` 2 条已写入 10 种语言并重新生成 README / CHANGELOG; 冒烟脚本与真机验证尚未进行, 因此 P0 只声明 `JVM` 与 `ANDROID_BUILD` (单元测试任务已编译 app 模块), 不声明 `DEVICE`.
+P0 证据:
+
+- `JVM`: 全量 `:app:testAppDebugUnitTest` 1877 tests / 0 failures (含本阶段新增 29 个用例).
+- `ANDROID_BUILD`: 单元测试任务已编译 app 模块 (commit `48406313f` 及之前).
+- `DEVICE` (2026-09-05, 维护者执行 `sample/accessibility/smoke-legacy-api.js`, 5 台设备结果一致 `30/30 checks passed`): Xiaomi 23046RP50C (`968e9f18`, API 35), Sony G8441 (`BH900ASK9E`), Sony XQ-AT72 (`QV710AF65F`, API 31), Sony XQ-DQ72 (`QV770340J7`), Redmi 22120RN86C (`bek749scrwv4wo8h`). API 级别取自 `yolo-plugin-roadmap.md` 中已记录的设备, 其余待补.
+- `DOCS`: changelog `fix` 4 条已写入 10 种语言并重新生成 README / CHANGELOG. 本阶段无 JS API 变更, 无需同步 d.ts / 文档项目.
+
+P0 结论: 关闭. 冒烟脚本作为后续每阶段的回归清单继续使用.
 
 ---
 
@@ -399,7 +407,7 @@ P4 验收: 工具单元测试通过; 示例真机通过; changelog `feature` 条
 
 ### P5.3 选择器与节点能力
 
-- [ ] 字符串选择器语法 (可选): 如 `sel('text=登录 clickable')` / `'#id'` / `'.className'` / `'desc~=正则'`, 解析为 registry 过滤器; 需先在附录 C Q4 拍板语法.
+- [ ] 字符串选择器语法 (D13): `UiSelector.select(String)` 重载 + 全局 `select('text=登录 clickable')`, Android-free 的 `SelectorStringParser` 基于 P2.2 registry 解析 `key=value` / `key~=regex` / 布尔键, 语法错误给出位置与候选键名; `pickup` / `wait` / Flow 的 `cond` 参数不改变字符串的既有含义 (content 匹配), 需要新语法时显式传入 `select('...')`. 同步 d.ts (`select(selector: string): UiSelector` 重载) 与文档.
 - [ ] `UiObject.isStale()` (通过 `refresh()` 判断), `UiObject.waitForStable()` / `waitUntilGone()` 节点级便捷方法 (Flow 的节点级入口).
 - [ ] 多显示器 / 多窗口: `auto.windows` 的过滤 builder (按类型 / 标题 / 包名 / 显示器), `WindowRootProvider` 支持指定 `displayId`.
 - [ ] `UiObjectCollection` 的惰性查询与分页 (`find(max)` 已有, 补 `findIterator`), 减少大树的一次性遍历.
@@ -565,7 +573,7 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 
 ## 附录 C: 待决事项
 
-进入对应阶段前由维护者拍板, 结果回填第 1 节. 已决事项: Q1 -> D12, Q2 -> D11, Q3 -> D10, Q5 -> D8, Q6 -> D9, Q7 -> D7.
+进入对应阶段前由维护者拍板, 结果回填第 1 节. 已决事项: Q1 -> D12, Q2 -> D11, Q3 -> D10, Q4 -> D13, Q5 -> D8, Q6 -> D9, Q7 -> D7.
 
 ### Q4 (P5.3): 是否引入 "字符串选择器语法"
 
@@ -591,7 +599,9 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 | B | 引入, 独立入口 `sel('...')` (或 `selector('...')`), 语法为 "空格分隔的 `键=值` / `键~=正则` / 布尔键" | 与现有 API 无歧义; 解析器可基于 P2.2 的 registry 自动获得全部键名; 需要文档与错误提示. |
 | C | 引入 CSS 风格 (`#id`, `.className`, `[text=登录]`, 后代 / 子代组合子 `>`) | 表达力最强 (可描述层级关系), 但与 `compass` 的层级语义重叠, 实现成本最高. |
 
-建议: 选 A 或 B. 若维护者更看重 "日志里的选择器能直接粘贴回脚本", 选 A 即可满足 (对象字面量); 若更看重 "一行字符串跨 Rhino / Python / Node 通用", 选 B. 不建议 C. 本项不影响 P0-P4, 可在进入 P5 前决定.
+建议: 选 A 或 B. 若维护者更看重 "日志里的选择器能直接粘贴回脚本", 选 A 即可满足 (对象字面量); 若更看重 "一行字符串跨 Rhino / Python / Node 通用", 选 B. 不建议 C.
+
+结论 (2026-09-05): 选 B, 入口复用 `select` -> D13. 当前无待决事项.
 
 ## 附录 D: 证据等级与验收方式
 
@@ -624,4 +634,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地: D6 (`compassClickable` 改写, `UiObjectCompassTest` 更新); `AccessibilityEventWrapper.getIndexInParent` 加界并捕获异常 (原实现在节点树变化时会越界抛出或死循环, 且异常会从 `onAccessibilityEvent` 逃逸); `sample/accessibility/smoke-legacy-api.js` (基于维护者草稿); `docs/dev/accessibility-architecture.md`; changelog `fix` 2 条 (10 语言) 并重新生成 README / CHANGELOG.
 - 排查结论: `auto.registerEvent("WINDOW_STATE_CHANGED")` 回调两次不是分发 bug (两个事件 `eventTime` 相差 48 ms, 系统各投递一次; `notificationTimeout="0"` 不合并; 注册为单槽). 处理方式: 冒烟脚本内给出去重示例, P1.3 增加 `auto.registerEvent` 的可选去重 / 去抖.
 - 未做: 真机运行冒烟脚本 (需要维护者在设备上执行并把结果回填到 P0 验收).
-- 下次会话建议起点: 维护者先在真机运行 `sample/accessibility/smoke-legacy-api.js` 并反馈 (若有失败项优先修复); 之后进入 P1.1 (`A11yServiceRegistry` + `A11yState`), P1.2 (含 D5 与 D8 的两处改名 / 改判定). P1 期间保持每个子项独立提交.
+- 维护者反馈: 冒烟脚本在 5 台设备上 `30/30 checks passed` (设备见 P0 证据); Q4 选 B 并复用 `select` 作为入口 -> D13. P0 关闭.
+- 下次会话 (或本会话后续) 起点: P1.1 (`A11yServiceRegistry` + `A11yState`), 然后 P1.2 (含 D5 与 D8). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.
