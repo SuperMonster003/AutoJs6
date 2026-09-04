@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 4 일.
+데이터 갱신일: 2026 년 9 월 5 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,7 +166,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/04
+###### 2026/09/05
 
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
 * `추가` 사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨
@@ -355,6 +355,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` selector 모듈이 리플렉션으로 오버로드 메서드를 호출할 때 잘못된 메서드 시그니처를 선택할 수 있는 문제
 * `수정` BFS 알고리즘으로 컨트롤을 검색할 때 지정한 최대 결과 수보다 하나 더 반환되고, `find(0)`이 빈 컬렉션 대신 결과 하나를 반환하며, 최대 결과 수에 도달했을 때 이미 가져온 나머지 노드가 회수되지 않는 문제
 * `수정` `UiObject.compass`에 전달한 여러 세그먼트가 연결된 부모 또는 clickable 세그먼트(`p4ppp12p`, `k2k3` 등)가 첫 세그먼트만 계산되는 문제
+* `수정` `UiObject.compass`의 `k` 세그먼트가 범위 내에 clickable 노드가 없을 때 `null` 대신 노드 자신을 반환하는 문제
+* `수정` `auto.registerEvent` 콜백 이벤트의 `source` 노드 부모 인덱스를 계산할 때 노드 트리가 변경되면 무한 루프에 빠지거나 범위 초과 예외로 접근성 서비스가 중단될 수 있는 문제
 * `수정` Rhino 엔진 업데이트 후 스코프 API 호환성 회귀로 일부 런타임 보조 기능이 오작동하는 문제
 * `수정` Rhino 모듈 브리지가 null/undefined, Callable, 생성자, 프로토타입, realm 및 Kotlin 반환값을 잘못 처리하여 교차 realm 객체, 콜백 누락 또는 런타임 예외가 발생할 수 있는 문제
 * `수정` Proxy로 래핑된 함수를 dialogs, events, timers, UI, selector 및 automator 등의 기존 모듈에서 콜백으로 사용할 수 없고, TimerThread 콜백 인수가 중첩 배열로 전달될 수 있는 문제
@@ -774,7 +776,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 4 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 5 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

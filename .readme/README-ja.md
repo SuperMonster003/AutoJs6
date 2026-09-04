@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 4 日 に更新されました.
+データは 2026 年 9 月 5 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/04
+###### 2026/09/05
 
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
 * `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
@@ -355,6 +355,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` selector モジュールがリフレクションでオーバーロードメソッドを呼び出す際に誤ったメソッドシグネチャを選択する可能性がある問題
 * `修正` BFS アルゴリズムによるコントロール検索で指定した最大件数より 1 件多く返され, `find(0)` が空のコレクションではなく 1 件を返し, 最大件数到達時に取得済みの残りノードが回収されない問題
 * `修正` `UiObject.compass` に渡す複数セグメント連結の親方向または clickable セグメント (`p4ppp12p`, `k2k3` など) が先頭セグメントのみ計上される問題
+* `修正` `UiObject.compass` の `k` セグメントが範囲内に clickable なノードがない場合に `null` ではなくノード自身を返す問題
+* `修正` `auto.registerEvent` コールバックイベントの `source` ノードの親インデックス計算が, ノードツリー変化時に無限ループまたは範囲外例外となりアクセシビリティサービスがクラッシュする可能性がある問題
 * `修正` Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題
 * `修正` Rhino モジュールブリッジで null/undefined, Callable, コンストラクター, プロトタイプ, realm, Kotlin 戻り値が正しく処理されず, realm をまたぐオブジェクト, コールバック欠落, または実行時例外が発生する問題
 * `修正` Proxy でラップされた関数を dialogs, events, timers, UI, selector, automator などの旧モジュールでコールバックとして使用できず, TimerThread のコールバック引数がネストされた配列として渡されることがある問題
@@ -774,7 +776,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 4 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 5 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

@@ -14,7 +14,9 @@ class AccessibilityEventWrapper(event: AccessibilityEvent) {
     val action = event.action
     val isFullScreen = event.isFullScreen
     val className = event.className
-    val source = event.source?.let { UiObject(it, getDepth(it), getIndexInParent(it)) }
+    // Resolved eagerly because the raw event may be recycled by the framework once the callback returns (API < 33).
+    // zh-CN: 急切解析, 因为回调返回后原始事件可能被框架回收 (API < 33).
+    val source = runCatching { event.source?.let { UiObject(it, getDepth(it), getIndexInParent(it)) } }.getOrNull()
 
     private fun getDepth(node: AccessibilityNodeInfo): Int {
         var depth = 0
@@ -27,12 +29,16 @@ class AccessibilityEventWrapper(event: AccessibilityEvent) {
     }
 
     private fun getIndexInParent(node: AccessibilityNodeInfo): Int {
-        var index = 0
         val parent = node.parent ?: return 0
-        while (parent.getChild(index) != node) {
-            index++
+        // The tree may change between obtaining the parent and iterating its children,
+        // so the lookup must be bounded, otherwise getChild() throws or the loop never ends.
+        // zh-CN: 获取父节点与遍历其子节点之间节点树可能已变化, 因此查找必须有界, 否则 getChild() 会抛出异常或循环永不结束.
+        val childCount = runCatching { parent.childCount }.getOrDefault(0)
+        for (index in 0 until childCount) {
+            val child = runCatching { parent.getChild(index) }.getOrNull() ?: continue
+            if (child == node) return index
         }
-        return index
+        return -1
     }
 
     override fun toString(): String {

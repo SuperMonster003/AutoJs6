@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 4 de September de 2026.
+Datos actualizados el 5 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/04
+###### 2026/09/05
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
@@ -355,6 +355,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
 * `Corrección` La búsqueda de controles con el algoritmo BFS devolvía un resultado más que el máximo solicitado, `find(0)` devolvía un resultado en lugar de una colección vacía, y los nodos ya obtenidos al alcanzar el máximo no se reciclaban
 * `Corrección` Los segmentos de brújula de padre o clicable de varios tramos (como `p4ppp12p` o `k2k3`) pasados a `UiObject.compass` solo contaban el primer tramo
+* `Corrección` El segmento `k` de `UiObject.compass` devolvía el propio nodo en lugar de `null` cuando no existía ningún nodo clicable dentro del rango
+* `Corrección` El cálculo del índice del padre del nodo `source` de un callback de `auto.registerEvent` podía entrar en un bucle infinito o lanzar una excepción fuera de rango y bloquear el servicio de accesibilidad cuando el árbol de nodos había cambiado
 * `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
 * `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
 * `Corrección` Las funciones envueltas en Proxy no podían usarse como callbacks en módulos heredados como dialogs, events, timers, UI, selector y automator, y los argumentos de callback de TimerThread podían pasarse como un array anidado
@@ -774,7 +776,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 4 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 5 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

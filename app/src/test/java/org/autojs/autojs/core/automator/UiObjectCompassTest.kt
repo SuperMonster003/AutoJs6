@@ -76,10 +76,11 @@ class UiObjectCompassTest {
         assertSame(node("a"), node("a").compass("k"))
         assertSame(node("a"), node("a1").compass("k"))
         assertSame(node("a"), node("a1x").compass("k2"))
-        // Legacy quirk kept on purpose: out of range without reaching the root returns the node itself.
-        assertSame(node("a1x"), node("a1x").compass("k1"))
-        // Legacy quirk kept on purpose: walking past the root returns null.
+        // Nothing clickable within range yields null, whether or not the walk reaches the root.
+        assertNull(node("a1x").compass("k1"))
         assertNull(node("b0").compass("k2"))
+        assertNull(node("b0").compass("k0"))
+        assertNull(root.compass("k"))
     }
 
     @Test

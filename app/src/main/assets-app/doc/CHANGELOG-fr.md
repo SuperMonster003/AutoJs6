@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/04
+###### 2026/09/05
 
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
@@ -195,6 +195,8 @@
 * `Correction` Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion
 * `Correction` La recherche de contrôles avec l'algorithme BFS renvoyait un résultat de plus que le maximum demandé, `find(0)` renvoyait un résultat au lieu d'une collection vide, et les nœuds déjà récupérés lorsque le maximum était atteint n'étaient pas recyclés
 * `Correction` Les segments de boussole parent ou cliquable à plusieurs tronçons (comme `p4ppp12p` ou `k2k3`) passés à `UiObject.compass` ne comptaient que le premier tronçon
+* `Correction` Le segment `k` de `UiObject.compass` renvoyait le nœud lui-même au lieu de `null` lorsqu'aucun nœud cliquable n'existait dans la plage
+* `Correction` Le calcul de l'index parent du nœud `source` d'un rappel `auto.registerEvent` pouvait boucler indéfiniment ou lever une exception hors limites et faire planter le service d'accessibilité lorsque l'arbre des nœuds avait changé
 * `Correction` Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution
 * `Correction` Le pont des modules Rhino traitait incorrectement null/undefined, Callable, les constructeurs, les prototypes, les realms et les valeurs de retour Kotlin, ce qui pouvait produire des objets inter-realm, perdre des callbacks ou provoquer des exceptions d'exécution
 * `Correction` Les fonctions encapsulées dans un Proxy ne pouvaient pas être utilisées comme callbacks par les modules historiques tels que dialogs, events, timers, UI, selector et automator, et les arguments de callback de TimerThread pouvaient être transmis sous forme de tableau imbriqué

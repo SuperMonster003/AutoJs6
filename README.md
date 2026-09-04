@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 4 日.
+数据更新于 2026 年 9 月 5 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/04
+###### 2026/09/05
 
 * `新增` 独立 Bun Runtime 插件引擎, 用于本地单文件 JavaScript 和 TypeScript, 通过 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 标记路由, 且不会回退到 Rhino 或 Node.js
 * `新增` 侧拉抽屉工具分组在浮动按钮与指针位置后添加可选的屏幕取色插件, 作为第三个默认关闭的工具; 安装, 启用, 运行状态与卸载均会在不阻塞 UI 的情况下自动刷新
@@ -331,6 +331,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` selector 模块反射调用重载方法时可能选择错误方法签名的问题
 * `修复` 控件搜索使用 BFS 算法时在指定最大结果数后多返回一个结果, `find(0)` 返回一个结果而非空集合, 且命中最大结果数后已获取的剩余节点未被回收的问题
 * `修复` 控件罗盘 (`UiObject.compass`) 参数中多段连写的父级或可点击段 (如 `p4ppp12p`, `k2k3`) 仅计入首段的问题
+* `修复` 控件罗盘 (`UiObject.compass`) 的 `k` 段在范围内未找到可点击控件时返回控件自身而非 `null` 的问题
+* `修复` `auto.registerEvent` 回调事件的 `source` 节点在计算父级索引时, 若节点树已变化可能陷入死循环或抛出越界异常并导致无障碍服务崩溃的问题
 * `修复` Rhino 引擎更新后作用域 API 兼容性回归导致部分运行时辅助功能异常的问题
 * `修复` Rhino 模块桥接对 null/undefined, Callable, 构造器, 原型, realm 及 Kotlin 返回值的处理不正确, 可能导致跨 realm 对象, 回调丢失或运行时异常的问题
 * `修复` Proxy 包装函数无法作为 dialogs, events, timers, UI, selector 及 automator 等旧模块的回调, 且 TimerThread 回调参数可能被嵌套传递的问题
@@ -753,7 +755,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 4 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 5 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

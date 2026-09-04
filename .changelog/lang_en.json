@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/04",
+      "released_date": "2026/09/05",
       "feature": [
         "Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the \"bun\" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js",
         "The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI",
@@ -192,6 +192,8 @@
         "Selector module could choose the wrong method signature when invoking overloaded methods through reflection",
         "Widget search with the BFS algorithm returned one result more than the requested maximum, `find(0)` returned one result instead of an empty collection, and nodes already fetched when the maximum was reached were not recycled",
         "Multi-segment parent or clickable compass segments (such as `p4ppp12p` or `k2k3`) passed to `UiObject.compass` only counted the first segment",
+        "The `k` segment of `UiObject.compass` returned the node itself instead of `null` when no clickable node existed within range",
+        "Computing the parent index of the `source` node of an `auto.registerEvent` callback could loop forever or throw an out-of-bounds exception and crash the accessibility service when the node tree had changed",
         "A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction",
         "The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions",
         "Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array",

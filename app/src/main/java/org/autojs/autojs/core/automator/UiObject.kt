@@ -394,21 +394,17 @@ open class UiObject(
     // k/k1 : [ .clickable() || .parent().clickable() aka pk/p1k ]
     // k2 : [ .clickable() || .parent().clickable() || .p2.clickable() aka p2k ]
     // kn : [ .clickable() || .pn.clickable() aka pnk ]
-    // @Caution by SuperMonster003 on Sep 4, 2026.
-    //  ! Legacy semantics are kept on purpose: when no clickable node is found within range,
-    //  ! the node itself is returned, unless the walk runs past the root (then null).
-    //  ! Whether to normalize this is tracked in docs/dev/accessibility-automation-roadmap.md (P2.5).
-    //  ! zh-CN: 有意保留既有语义: 范围内未找到可点击节点时返回节点自身, 除非向上遍历越过根节点 (此时返回 null).
-    //  ! 是否规范化该行为记录于 docs/dev/accessibility-automation-roadmap.md (P2.5).
+    // Returns null when no clickable node exists within range (decided on Sep 5, 2026,
+    // previously the node itself was returned unless the walk ran past the root).
+    // zh-CN: 范围内不存在可点击节点时返回 null (2026-09-05 决定, 此前除非向上越过根节点, 否则返回节点自身).
     private fun compassClickable(maxLevels: Int): UiObject? {
-        var w: UiObject = this
-        var upMax = maxLevels
-        var wTmp: UiObject = this
-        while (upMax-- >= 0) when {
-            wTmp.clickable().also { if (it) w = wTmp } -> break
-            else -> wTmp = wTmp.parent() ?: return null
+        var w: UiObject? = this
+        repeat(maxLevels + 1) {
+            val node = w ?: return null
+            if (node.clickable()) return node
+            w = node.parent()
         }
-        return w
+        return null
     }
 
     override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
