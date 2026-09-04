@@ -91,10 +91,52 @@ class SelectorMethodResolverTest {
         assertArrayEquals(intArrayOf(1, 3), resolution?.arguments?.get(1) as IntArray)
     }
 
+    @Test
+    fun nullIsRejectedForPrimitivesButAcceptedForObjects() {
+        val primitiveMethod = Fixture::class.java.getMethod("boundsInside", Int::class.java)
+        val objectMethod = Fixture::class.java.getMethod("pick", String::class.java)
+
+        assertNull(SelectorMethodResolver.resolve(listOf(primitiveMethod), arrayOf<Any?>(null)))
+
+        val resolution = SelectorMethodResolver.resolve(listOf(objectMethod), arrayOf<Any?>(null))
+        assertSame(objectMethod, resolution?.method)
+        assertNull(resolution?.arguments?.single())
+    }
+
+    @Test
+    fun jsNumbersAreCoercedToTheDeclaredNumericParameterTypes() {
+        val longMethod = Fixture::class.java.getMethod("delay", Long::class.java)
+        val floatMethod = Fixture::class.java.getMethod("scale", Float::class.java)
+        val doubleMethod = Fixture::class.java.getMethod("ratio", Double::class.java)
+
+        assertEquals(3L, SelectorMethodResolver.resolve(listOf(longMethod), arrayOf<Any?>(2.5))?.arguments?.single())
+        assertEquals(1.5f, SelectorMethodResolver.resolve(listOf(floatMethod), arrayOf<Any?>(1.5))?.arguments?.single())
+        assertEquals(0.25, SelectorMethodResolver.resolve(listOf(doubleMethod), arrayOf<Any?>(0.25))?.arguments?.single())
+    }
+
+    @Test
+    fun nonNumericArgumentIsNotCoercedIntoNumericParameter() {
+        val longMethod = Fixture::class.java.getMethod("delay", Long::class.java)
+
+        assertNull(SelectorMethodResolver.resolve(listOf(longMethod), arrayOf<Any?>("3")))
+    }
+
     class Fixture {
 
         var stringCalls = 0
         var regexpCalls = 0
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun boundsInside(value: Int) = Unit
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun delay(value: Long) = Unit
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun scale(value: Float) = Unit
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun ratio(value: Double) = Unit
 
         @Suppress("unused")
         fun pick(value: String): String {

@@ -155,7 +155,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     @ScriptInterface
     fun desc(s: String) = also { addFilter(DescFilter.equals(s)) }
 
-     @ScriptInterface
+    @ScriptInterface
     fun desc(regex: NativeRegExp) = also { addFilter(DescFilter.equals(regex)) }
 
     @ScriptInterface
@@ -167,7 +167,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     @ScriptInterface
     fun descContains(s: String) = also { addFilter(DescFilter.contains(s)) }
 
-     @ScriptInterface
+    @ScriptInterface
     fun descContains(regex: NativeRegExp) = also { addFilter(DescFilter.contains(regex)) }
 
     @ScriptInterface
@@ -200,7 +200,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     @ScriptInterface
     fun contentContains(s: String) = also { addFilter(ContentFilter.contains(s)) }
 
-     @ScriptInterface
+    @ScriptInterface
     fun contentContains(regex: NativeRegExp) = also { addFilter(ContentFilter.contains(regex)) }
 
     @ScriptInterface
@@ -269,7 +269,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     @ScriptInterface
     fun packageNameContains(s: String) = also { addFilter(PackageNameFilter.contains(s)) }
 
-     @ScriptInterface
+    @ScriptInterface
     fun packageNameContains(regex: NativeRegExp) = also { addFilter(PackageNameFilter.contains(regex)) }
 
     @ScriptInterface

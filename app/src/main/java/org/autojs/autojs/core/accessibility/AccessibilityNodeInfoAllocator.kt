@@ -13,7 +13,9 @@ import java.util.*
  */
 open class AccessibilityNodeInfoAllocator {
 
-    private val mAccessibilityNodeInfoList = HashMap<AccessibilityNodeInfo, String?>()
+    // Values hold the allocation origin (stack trace) when [isTracingOrigin] is on, otherwise an empty string.
+    // zh-CN: 开启 [isTracingOrigin] 时值为分配来源 (堆栈), 否则为空字符串.
+    private val mAccessibilityNodeInfoList = Collections.synchronizedMap(HashMap<AccessibilityNodeInfo, String>())
 
     open fun getChild(parent: AccessibilityNodeInfo, i: Int) = add(parent.getChild(i))
 
@@ -21,7 +23,7 @@ open class AccessibilityNodeInfoAllocator {
 
     open fun getParent(n: AccessibilityNodeInfo) = add(n.parent)
 
-    open fun getParent(n: AccessibilityNodeInfoCompat): AccessibilityNodeInfoCompat = n.parent.apply { unwrap() }
+    open fun getParent(n: AccessibilityNodeInfoCompat): AccessibilityNodeInfoCompat? = n.parent?.also { add(it.unwrap()) }
 
     open fun findAccessibilityNodeInfosByText(root: AccessibilityNodeInfo, text: String): List<AccessibilityNodeInfo> =
         root.findAccessibilityNodeInfosByText(text).also { addAll(it) }
@@ -46,26 +48,27 @@ open class AccessibilityNodeInfoAllocator {
         recycle(nodeInfo.unwrap())
     }
 
-    open fun recycleAll(): Int = mAccessibilityNodeInfoList.run {
+    open fun recycleAll(): Int {
+        val snapshot = synchronized(mAccessibilityNodeInfoList) { mAccessibilityNodeInfoList.toMap() }
         var notRecycledCount = 0
-        forEach { (key, value) ->
+        snapshot.forEach { (key, origin) ->
             try {
                 @Suppress("DEPRECATION")
                 key.takeIf { SDK_INT < TIRAMISU }?.recycle()
                 notRecycledCount++
-                value?.let { Log.w(TAG, it) }
+                origin.takeIf { it.isNotEmpty() }?.let { Log.w(TAG, it) }
             } catch (_: IllegalStateException) {
                 /* Ignored. */
             }
         }
-        notRecycledCount.also { Log.v(TAG, "Total: ${this.size}; Not recycled: $it") }
+        return notRecycledCount.also { Log.v(TAG, "Total: ${snapshot.size}; Not recycled: $it") }
     }
 
     fun add(nodeInfo: AccessibilityNodeInfo?): AccessibilityNodeInfo? =
-        nodeInfo?.also { mAccessibilityNodeInfoList[it] = Thread.currentThread().stackTrace.contentToString() }
+        nodeInfo?.also { mAccessibilityNodeInfoList[it] = captureOrigin() }
 
     private fun addAll(nodeInfoList: Collection<*>) {
-        Thread.currentThread().stackTrace.contentToString().run {
+        captureOrigin().run {
             nodeInfoList.forEach {
                 when (it) {
                     is AccessibilityNodeInfo -> mAccessibilityNodeInfoList[it] = this
@@ -75,9 +78,16 @@ open class AccessibilityNodeInfoAllocator {
         }
     }
 
+    // Capturing a full stack trace for every node is expensive, so it is opt-in for leak diagnosis only.
+    // zh-CN: 为每个节点捕获完整堆栈开销很大, 因此仅在排查泄漏时按需开启.
+    private fun captureOrigin(): String = when {
+        isTracingOrigin -> Thread.currentThread().stackTrace.contentToString()
+        else -> ""
+    }
+
     private class NoOpAllocator : AccessibilityNodeInfoAllocator() {
 
-        override fun getParent(n: AccessibilityNodeInfoCompat): AccessibilityNodeInfoCompat = n.parent
+        override fun getParent(n: AccessibilityNodeInfoCompat): AccessibilityNodeInfoCompat? = n.parent
 
         override fun getParent(n: AccessibilityNodeInfo): AccessibilityNodeInfo? = n.parent
 
@@ -104,6 +114,14 @@ open class AccessibilityNodeInfoAllocator {
     companion object {
 
         private const val TAG = "AccessibilityAllocator"
+
+        /**
+         * Whether to record the allocation stack trace of every node for leak diagnosis. Off by default.
+         * zh-CN: 是否为每个节点记录分配堆栈以排查泄漏, 默认关闭.
+         */
+        @JvmStatic
+        @Volatile
+        var isTracingOrigin = false
 
         val NONE: AccessibilityNodeInfoAllocator = NoOpAllocator()
 

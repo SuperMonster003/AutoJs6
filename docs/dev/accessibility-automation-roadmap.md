@@ -19,10 +19,11 @@
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
-| D1 | 全局 `wait()` 保持同步语义, 新增异步链式入口 | `wait()` 的签名, 返回值, `wait(cond, {then, else})` 回调对象重载, `limit < 100` 视为次数等既有行为全部不变. 新增全局 `waitAsync()` (别名 `wait.async()`) 作为链式起点, `waitThenClick` / `waitForStable` 等全新函数默认返回链式对象, 链式对象提供 `.sync()` / `.await()` 同步桥接. |
+| D1 | 全局 `wait()` 保持同步语义, 新增异步链式入口 | `wait()` 的签名, 返回值, `wait(cond, {then, else})` 回调对象重载, `limit < 100` 视为次数等既有行为全部不变. 新增全局 `waitAsync()` (别名 `wait.async()` 与 `auto.wait()`) 作为链式起点, `waitThenClick` / `waitForStable` 等全新函数默认返回链式对象, 链式对象提供 `.sync()` / `.await()` 同步桥接. 注意 `auto.waitFor()` (既有, 同步等待服务就绪) 与 `auto.wait()` (新增, 异步等待条件) 相邻, 文档与 d.ts 必须明确区分. |
 | D2 | 既有 JS 公开 API 完全兼容 | 所有现有 JS 函数 / 方法 / 属性 (含 `@Deprecated` 的 `idMatches` 系列, 无参 `findOne()`, `waitFor()`, `brother()` 等) 的签名与行为保持不变. 重构只发生在 Kotlin 内部, 或以新增 API 的形式出现. 明确的 bug (如 BFS 多返回一个结果) 可修复并记入 changelog `fix` 分类. |
 | D3 | Roadmap 位于 `docs/dev/` | 与仓库内既有 roadmap (如 `yolo-plugin-roadmap.md`) 的位置与风格一致. |
-| D4 | 2026-09-04 会话仅产出本 Roadmap | 代码改动从下一次会话开始按阶段推进. |
+| D4 | 2026-09-04 会话先产出本 Roadmap, 随后从 P0 开始落地 | 代码改动按阶段推进, 每阶段开始前先拍板附录 C 中对应的待决事项. |
+| D5 | `automator.isServiceRunning()` 的判定允许修正 | 现实现 (`SimpleActionAutomator.kt:216`) 只检查 `hasInstance()`, 与 `auto.service` / 抽屉开关等处的 "运行中" 语义不一致; P1.2 中统一为注册表的 `isRunning` 语义, 记入 changelog `fix`. 这是 D2 之外唯一被明确批准的既有行为调整. |
 
 由 D2 派生的硬约束:
 
@@ -70,7 +71,8 @@
 | 生命周期入口 5 处: `AccessibilityService` 本体, `AccessibilityServiceUsher` (清单注册), `LayoutInspectService` (未注册, 死代码, 含永远为 null 的 `instance`), `service/AccessibilityService.kt` (抽屉开关辅助类, 与核心类同名), `AccessibilityServiceAutoStart` (每个 Activity 创建时触发) | `core/accessibility/LayoutInspectService.kt:19`, `service/AccessibilityService.kt:16-40`, `ui/BaseActivity.kt:71` |
 | `onAccessibilityEvent` 内串行跑 4 条流水线 (操作态标记, JS 回调盒, delegate 链, `fastRootInActiveWindow` 更新), 且 `fastRootInActiveWindow` 只在有 delegate 命中时才更新; 按键事件走静态 + 实例两个观察者, 手势走第三套 `EventDispatcher` | `core/accessibility/AccessibilityService.kt:106-164, 170-212` |
 | 窗口根节点获取逻辑在同一文件内重复 3 次, 且 `getRootInActiveWindow()` 静默丢弃了窗口过滤器分支; `windowRoots()` 可能返回含 `null` 的 `singletonList`, 迫使 Kotlin 调用方各自 `filterNotNull()` | `core/accessibility/AccessibilityBridge.java:98-150` |
-| 节点回收策略 4 套互不一致: 分配器仅在 API < 33 回收, 而 `recycleFastRootInActiveWindow` 与 DFS/BFS/Scroll* 内联 `.recycle()` 无 API 判断; `add()` 无条件为每个节点捕获完整线程堆栈字符串; 分配器使用非线程安全 `HashMap`; `CloaseableManager` (文件名拼写错误) 无任何引用 | `core/accessibility/AccessibilityNodeInfoAllocator.kt:16,41,54,65,115`, `core/accessibility/AccessibilityService.kt:56-61`, `core/automator/search/{DFS,BFS}.kt`, `core/accessibility/monitor/CloaseableManager.kt` |
+| 节点回收策略 4 套互不一致: 分配器仅在 API < 33 回收, 而 `recycleFastRootInActiveWindow` 与 DFS/BFS/Scroll* 内联 `.recycle()` 无 API 判断; `add()` 无条件为每个节点捕获完整线程堆栈字符串; 分配器使用非线程安全 `HashMap`. 另外, 分配器在生产路径中恒为 `null` (`ScriptRuntime.kt:552` -> `UiSelector(bridge)` -> `allocator = null`), `global` 与 `NONE` 无引用, 即分配器实际上是死代码, P1.5 可直接以 `NodeLifecycle` 取代而非适配 | `core/accessibility/AccessibilityNodeInfoAllocator.kt:16,41,54,65,115`, `core/accessibility/AccessibilityService.kt:56-61`, `core/automator/search/{DFS,BFS}.kt` |
+| `CloseableManager` 类的文件名拼写错误 (`CloaseableManager.kt`), 类本身被 `ScriptRuntime.closeableManager` 使用并有测试 | `core/accessibility/monitor/CloaseableManager.kt`, `runtime/ScriptRuntime.kt:212` |
 | 无障碍截图有 2 套实现 (Rhino 与 Python Host) | `core/accessibility/SimpleActionAutomator.kt:269-321`, `core/plugin/python/PythonHostImages.kt:875` |
 | 核心路径及其直接消费方中仍有 3 个承担关键角色的 Java 文件 | `core/accessibility/AccessibilityBridge.java` (189), `core/accessibility/AccessibilityBridgeImpl.java` (55, 其中 `:32-33` 重复声明基类已有的 `ensureServiceStarted()`), `codegeneration/ReadOnlyUiObject.java` (333, 从 Java 继承 960 行的 Kotlin `UiObject`, 覆盖约 50 个方法) |
 | 已知 Android 问题: `onServiceConnected` 有时不触发, 仅以 FIXME 注释记录 | `core/accessibility/AccessibilityService.kt:241-247` |
@@ -153,7 +155,7 @@ runtime/api/augment/
 
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
-| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 未开始 |
+| P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 进行中 (2026-09-04: P0.1 除冒烟脚本外完成, P0.2 完成, 待真机验收) |
 | P1 | 无障碍服务层重构 | P0 | 1 | 未开始 |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
@@ -171,27 +173,29 @@ runtime/api/augment/
 
 ### P0.1 回归安全网
 
-- [ ] 建立 Android-free 的节点树测试夹具 `FakeUiNode` (纯 Kotlin 树, 带 text / desc / id / className / bounds / 布尔属性 / 子节点), 替代随机行为的 `core/automator/test/TestUiObject.kt` 作为单元测试基础. 由于 `UiObject` 继承 `AccessibilityNodeInfoCompat`, 在 JVM 测试中不可构造, 夹具需实现 P2 引入的 `UiNode` 抽象; 在 P2 之前先以 `Filter` 与 `SearchAlgorithm` 的最小接口为目标.
-- [ ] 为 `SelectorMethodResolver` 现有测试补充边界用例 (vararg, `Double -> Int/Long/Float` 强制转换, `null` 到原始类型返回 `null`).
-- [ ] 为 `Global.wait` 的参数归一化逻辑 (limit / interval / times 推导, `{then, else}` 重载识别) 抽出纯函数并补 JUnit4 测试, 固化 D1 所要求的既有行为.
-- [ ] 为 `UiObject.compass` DSL 抽出纯解析器 (`CompassParser`: 字符串 -> 步骤列表) 并补测试, 覆盖 `p4ppp12p`, `c1>2>3>0>-1>1`, `s<2`, `k2`, 非法输入.
+- [x] 建立确定性的节点树测试夹具. 结论修正: `UiObject(null)` 在 JVM 测试中可以构造 (androidx `AccessibilityNodeInfoCompat` 是真实库代码, 仅在调用 Android 桩方法时失败), 因此夹具 `app/src/test/.../core/automator/FakeUiObject.kt` 直接继承 `UiObject` 并只覆盖搜索与导航触及的成员 (`getChildCount` / `childCount` / `child` / `parent` / `clickable` / `recycle`), 以 `FakeUiObject.root { child("a") { ... } }` 构建树. 它已可驱动 `DFS` / `BFS` / `UiObject.compass` 的测试; P2.1 引入 `UiNode` 后再扩展为带属性的夹具. 随机行为的 `core/automator/test/TestUiObject.kt` (主源码集, 无引用) 留待 P2 清理. (JVM: `SearchAlgorithmTest`, `UiObjectCompassTest`)
+- [x] 为 `SelectorMethodResolver` 现有测试补充边界用例: `null` 到原始类型返回 `null` 而到对象类型可通过, `Double -> Long/Float/Double` 强制转换, 字符串不会被强制为数字. (JVM: `SelectorMethodResolverTest`, 8 用例)
+- [x] 为 `Global.wait` 抽出纯函数 `normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`internal`, 供 P3 Flow 复用同一真值规则与 limit 语义), `wait` 本体改为调用它们, 行为不变. (JVM: `GlobalWaitCompatibilityTest`, 8 用例, 含 `limit < 100` 视为次数, `interval >= timeout` 折叠为单次, `{then, else}` 重载识别)
+- [x] 抽出纯解析器 `core/automator/pick/CompassParser.kt` (`CompassStep` 密封类: `Up` / `Children` / `Sibling` / `Clickable`, 预编译正则), `UiObject.compass()` 改为 "解析后按步骤导航", 导航语义逐条保留 (含 `k` 段未命中时返回自身 / 越过根返回 `null` 的既有怪异行为, 已在源码注释与 `UiObjectCompassTest` 中标注). 顺带修复了多段连写 (`p4ppp12p`, `k2k3`) 仅计入首段的 bug (原因: `findAll` 配合 `^` 锚点只能命中首段), 记入 changelog. 语法错误现在在导航前整体抛出 (原先是边导航边解析, 前置步骤返回 `null` 时可能吞掉后段的语法错误). (JVM: `CompassParserTest` 8 用例, `UiObjectCompassTest` 6 用例)
 - [ ] 编写设备冒烟脚本 `sample/accessibility/smoke-legacy-api.js`, 覆盖 `text().findOne(timeout)`, `pickup`, `detect`, `wait`, `click(text)`, `scrollDown()`, `auto.registerEvent`, 作为每阶段结束时的人工回归清单.
 
 ### P0.2 低风险修复 (记入 changelog `fix`)
 
-- [ ] 修复 BFS 越界: `core/automator/search/BFS.kt:20` `>` 改为 `>=`, 补测试 `find(1)` 在 BFS 下恰好返回 1 个.
-- [ ] 修复 DFS 命中 limit 后丢弃已压栈子节点不回收的问题 (`DFS.kt:21-28`), 或在 P1.5 引入 `NodeLifecycle` 后统一处理; 二选一, 记录选择.
-- [ ] `AccessibilityNodeInfoAllocator.kt:65` 的无条件堆栈捕获改为受调试开关控制 (默认关闭), 并将 `mAccessibilityNodeInfoList` 改为线程安全容器; `:24` 的 `Compat` 版 `getParent` 补上 `add()` 登记.
-- [ ] 删除无引用的 `core/accessibility/monitor/CloaseableManager.kt` 与未在清单注册的 `core/accessibility/LayoutInspectService.kt` (先全仓库确认无引用, 含 `com.stardust` 以外的 `Packages.*` 字符串).
-- [ ] `AccessibilityBridgeImpl.java:32-33` 移除对基类 `ensureServiceStarted()` 的重复声明.
-- [ ] `AccessibilityService.kt:46-47` 的 `eventExecutor` 惰性初始化改为原子操作, 避免竞态下泄漏线程池.
-- [ ] `UiSelector.kt:158,170,203,272` 的注解缩进修正 (纯格式).
+- [x] 修复 BFS 越界: `BFS.kt` `>` 改为 `>=`; 同时两种算法在 `limit <= 0` 时直接返回空集合 (原先 `find(0)` 会返回 1 个结果, 因为 limit 检查发生在 `add` 之后). (JVM: `SearchAlgorithmTest.limitIsRespectedExactly` / `zeroLimitFindsNothing`; changelog `fix` 已写入)
+- [x] 命中 limit 后回收已获取但未遍历的节点: 选择 "在 P0 直接修复" 而非等待 P1.5, 因为改动只有两处 `recycleRemaining` 且与 `NodeLifecycle` 的后续替换不冲突 (届时把内联 `recycle()` 改为策略调用即可). (JVM: `SearchAlgorithmTest.nodesAlreadyFetchedWhenLimitIsReachedAreRecycled`, 精确断言 DFS 回收 `a0/a1/b`, BFS 回收 `b`)
+- [x] `AccessibilityNodeInfoAllocator`: 堆栈捕获改为 `isTracingOrigin` 开关 (默认关闭), 容器改为 `Collections.synchronizedMap`, `recycleAll` 在快照上遍历, `Compat` 版 `getParent` 补上 `add()` 登记并改为可空返回. 注意分配器在生产路径中未被使用 (见第 3 节), 此项只是为 P1.5 保留一个正确的参考实现. (SOURCE; ANDROID_BUILD: 随单元测试任务编译通过)
+- [x] `CloaseableManager.kt` 重命名为 `CloseableManager.kt` (`git mv`); 删除 `LayoutInspectService.kt` (全仓库仅 `assets-app/sample/.idea/workspace.xml` 与冻结的 `com.stardust` 副本提及). (SOURCE)
+- [x] `AccessibilityBridgeImpl.java` 移除重复的 `ensureServiceStarted()`. (SOURCE)
+- [x] `AccessibilityService.kt` 的 `eventExecutor` 获取与销毁改为同一把锁下的操作. 说明: 该访问器目前只在主线程回调 (`onKeyEvent` / `onGesture` / `onUnbind`) 中使用, 竞态是理论上的, 改动仅为消除隐患. (SOURCE)
+- [x] `UiSelector.kt` 4 处注解缩进修正. (SOURCE)
 
 ### P0.3 基线文档
 
 - [ ] 在本文件第 3 节之外, 新增 `docs/dev/accessibility-architecture.md`, 以 "现状" 章节记录 4.1 分层图对应的现有类映射, 后续每阶段更新 "目标" 章节. (可选: 若维护者认为本 Roadmap 已足够, 跳过.)
 
-P0 验收: `:app:testDebugUnitTest` 通过; `sample/accessibility/smoke-legacy-api.js` 在至少一台真机上通过; changelog `fix` 条目已写入.
+P0 验收: `:app:testAppDebugUnitTest` 通过 (注意任务名带 `App` 风味, `testDebugUnitTest` 会因 `Inrt` 风味而报 ambiguous); `sample/accessibility/smoke-legacy-api.js` 在至少一台真机上通过; changelog `fix` 条目已写入.
+
+P0 当前证据 (2026-09-04): JVM 全量 `:app:testAppDebugUnitTest` 1877 tests / 0 failures (含本阶段新增 29 个用例); changelog `fix` 2 条已写入 10 种语言并重新生成 README / CHANGELOG; 冒烟脚本与真机验证尚未进行, 因此 P0 只声明 `JVM` 与 `ANDROID_BUILD` (单元测试任务已编译 app 模块), 不声明 `DEVICE`.
 
 ---
 
@@ -215,7 +219,7 @@ P0 验收: `:app:testDebugUnitTest` 通过; `sample/accessibility/smoke-legacy-a
 - [ ] `AccessibilityTool` 改为薄外壳, 全部方法委托到控制器, 标记 `@Deprecated` (仅 Kotlin 内部弃用, 不影响 JS); 12 处实例化改为注入共享实例 (`AutoJs` 持有, `ScriptRuntime` / UI / Tile 通过 `AutoJs.instance` 或构造参数获取).
 - [ ] 统一 `ensureServiceStarted` 的 9 个调用点全部经由 `AccessibilityBridge` -> 控制器, 删除 `UiSelector.kt:715` 与 `AutoJs.kt:89,95` 的绕行路径.
 - [ ] `service/AccessibilityService.kt` 重命名为 `AccessibilityServiceItemHelper` (内部类, 未暴露给 JS), 其 `isRunning` 改为消费 registry, 修正 `||` 判定; `AccessibilityServiceAutoStart` 改为调用控制器.
-- [ ] `SimpleActionAutomator.isServiceRunning` (`automator.isServiceRunning()` 的实现) 改为 registry 的 `isRunning` 语义. 注意: 这是对 D2 的一次 "行为修正", 需记入 changelog `fix` 并在文档标注.
+- [ ] `SimpleActionAutomator.isServiceRunning` (`automator.isServiceRunning()` 的实现) 改为 registry 的 `isRunning` 语义 (D5 已批准), 记入 changelog `fix` 并在文档标注.
 
 ### P1.3 事件总线 `A11yEventBus`
 
@@ -313,7 +317,7 @@ P2 验收: 全局函数集合快照测试通过; `SelectorMapParser` / 过滤器
 
 - [ ] `FlowExecutor`: 每个 `ScriptRuntime` 一个惰性创建的工作线程 (命名 `flow-<engineId>`), 脚本退出时中断并拒绝所有挂起 Flow (`CANCELLED`); 通过 `ScriptAsyncDispatcher` 回投用户回调; 每条链持有 `Loopers.waitWhenIdleToken` 直到终态, 保证非 UI 模式脚本不会提前退出.
 - [ ] `FlowNativeObject` (Kotlin `NativeObject`, 参照 `augment/ai/AiSessionNativeObject.kt`): 内部持有 polyfill `Promise`, 每个链式方法返回新的 `FlowNativeObject`; 实现附录 A.3 的全部方法与别名; `then` / `catch` / `finally` 直接委托内部 Promise 并包装返回值.
-- [ ] `augment/flow/Flow.kt` (`Augmentable`, `Invokable`): 注册 `flow` 命名空间 (`flow.wait` / `flow.sleep` / `flow.run` / `flow.of` / `flow.all` / `flow.race` / `flow.any` / `flow.defaults` / `flow.trace` / `flow.Flow`), 全局函数 `waitAsync`, `waitThenClick` (别名 `clickWait`), `waitForStable`, `waitForStableThenClick` (别名 `clickWhenStable`), `waitForVisible`, `waitForHidden` (别名 `waitForGone`); 在 `Global.kt` 的 `wait` 函数对象上挂 `async` 属性指向 `waitAsync`.
+- [ ] `augment/flow/Flow.kt` (`Augmentable`, `Invokable`): 注册 `flow` 命名空间 (`flow.wait` / `flow.sleep` / `flow.run` / `flow.of` / `flow.all` / `flow.race` / `flow.any` / `flow.defaults` / `flow.trace` / `flow.Flow`), 全局函数 `waitAsync`, `waitThenClick` (别名 `clickWait`), `waitForStable`, `waitForStableThenClick` (别名 `clickWhenStable`), `waitForVisible`, `waitForHidden` (别名 `waitForGone`); 在 `Global.kt` 的 `wait` 函数对象上挂 `async` 属性指向 `waitAsync`; 在 `augment/automator/Auto.kt` 注册 `auto.wait` 指向同一实现 (D1), 并与既有 `auto.waitFor` 在 KDoc 中互相引用以免混淆.
 - [ ] 参数解析复用 `Selector.pickup` 的选择器归一化 (string / regex / UiSelector / map / list / 函数 / UiObject / Flow / Promise), 新 API 使用 options 对象与位置参数 `(cond, timeout, interval)`, 不沿用 `limit < 100` 视为次数的规则 (仅 `times` 选项).
 - [ ] UI 线程 (UI 模式) 下可用: 阻塞步骤在工作线程, 回调回投主线程; `.sync()` 在 UI 线程抛出与 `sleep` 一致的错误.
 - [ ] 错误对象转换为 JS `Error` 实例 (带 `name` / `code` / `selector` / `elapsed` / `attempts` 属性), 与 `S13n.throwable` 的既有转换路径兼容.
@@ -430,7 +434,7 @@ P4 验收: 工具单元测试通过; 示例真机通过; changelog `feature` 条
 
 | 全局函数 | 等价 | 说明 |
 | --- | --- | --- |
-| `waitAsync(cond, timeout?, interval?)` / `waitAsync(cond, options?)` | `flow.wait(...)`, `wait.async(...)` | 轮询直到 `cond` 满足, resolve 为拾取结果 (默认 UiObject), 超时 reject `TIMEOUT` |
+| `waitAsync(cond, timeout?, interval?)` / `waitAsync(cond, options?)` | `flow.wait(...)`, `wait.async(...)`, `auto.wait(...)` | 轮询直到 `cond` 满足, resolve 为拾取结果 (默认 UiObject), 超时 reject `TIMEOUT` |
 | `waitThenClick(cond, timeout?, interval?)` | `clickWait(...)`, `waitAsync(cond, ...).click()` | 找到后点击, resolve 为被点击的 UiObject |
 | `waitForStable(cond, timeout?, interval?, options?)` | `flow.waitForStable(...)` | 找到且在 `stableFor` 毫秒内指纹无变化 |
 | `waitForStableThenClick(...)` | `clickWhenStable(...)` | 稳定后点击 |
@@ -581,6 +585,9 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 
 ### 2026-09-04
 
-- 完成: 三条线索 (无障碍服务层, UiSelector / UiObject / UiObjectCollection, 全局 `wait` 与 Promise 基础设施) 的代码探查; 固定决策 D1-D4; 本 Roadmap 初稿.
-- 未改动任何源码.
-- 下次会话建议起点: P0.1 (`FakeUiNode` 夹具与 `wait` 参数归一化测试) 与 P0.2 (BFS 越界等低风险修复), 二者可在同一会话完成并各自独立提交; 若希望尽早看到链式 API 的效果, 可在 P0 之后直接启动 P3.1 (Android-free 调度核心), 它不依赖 P1/P2 的完成.
+- 完成: 三条线索 (无障碍服务层, UiSelector / UiObject / UiObjectCollection, 全局 `wait` 与 Promise 基础设施) 的代码探查; 固定决策 D1-D4; 本 Roadmap 初稿 (commit `aafc9d46d`).
+- 追加决策: D1 增加 `auto.wait` 别名; D5 批准 `automator.isServiceRunning()` 判定修正.
+- 落地 P0.1 (除冒烟脚本) 与 P0.2 全部条目, 详见各条目后的证据标注. 发现并修正了本文档两处诊断错误: `CloseableManager` 并非无引用 (仅文件名拼写错误); `UiObject` 在 JVM 测试中可构造 (夹具因此无需等待 P2.1 的 `UiNode`).
+- 新增源码: `core/automator/pick/CompassParser.kt`; 新增测试: `FakeUiObject`, `SearchAlgorithmTest`, `UiObjectCompassTest`, `CompassParserTest`, `GlobalWaitCompatibilityTest`; 扩充 `SelectorMethodResolverTest`.
+- 未做: 真机冒烟 (P0.1 末项), `docs/dev/accessibility-architecture.md` (P0.3, 待决 Q7).
+- 下次会话建议起点: 先补 `sample/accessibility/smoke-legacy-api.js` 并在真机跑一遍以关闭 P0 (本次 `compass` 与搜索算法改动虽有 JVM 覆盖, 仍应在真机上过一次 `pickup` / `detect` / `compass` 路径); 然后进入 P1.1 (`A11yServiceRegistry`), 或按需先做 P3.1 (Android-free 的 `FlowScheduler` / `Stabilizer`, 可复用本次抽出的 `isWaitConditionSatisfied` 与 `WaitPolicy`). 进入 P1 前拍板 Q5 与 Q7.

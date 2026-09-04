@@ -42,9 +42,12 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
+    private val eventExecutorLock = Any()
     private var mEventExecutor: ExecutorService? = null
     private val eventExecutor: ExecutorService
-        get() = mEventExecutor ?: Executors.newSingleThreadExecutor().also { mEventExecutor = it }
+        get() = synchronized(eventExecutorLock) {
+            mEventExecutor ?: Executors.newSingleThreadExecutor().also { mEventExecutor = it }
+        }
 
     private fun updateFastRootInActiveWindow(root: AccessibilityNodeInfo) {
         if (fastRootInActiveWindow === root) return
@@ -261,8 +264,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             eventBox.clear()
         }
 
-        mEventExecutor?.shutdownNow()
-        mEventExecutor = null
+        synchronized(eventExecutorLock) {
+            mEventExecutor?.shutdownNow()
+            mEventExecutor = null
+        }
         if (wasCurrentInstance) {
             resetOperationalState()
             notifyDisconnected()

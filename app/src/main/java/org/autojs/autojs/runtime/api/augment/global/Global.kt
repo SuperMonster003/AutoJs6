@@ -62,6 +62,14 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
     internal data class SleepRange(val min: Double, val max: Double)
 
+    /**
+     * Polling plan resolved from the `limit` and `interval` arguments of `wait`.
+     * zh-CN: 由 `wait` 的 `limit` 与 `interval` 参数解析出的轮询计划.
+     */
+    internal data class WaitPolicy(val times: Long, val timeout: Long, val interval: Long) {
+        val isNoop get() = times <= 0
+    }
+
     override val selfAssignmentProperties = listOf(
         "isAutoJs6" to true,
     )
@@ -386,27 +394,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun wait(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..4) { argList ->
-            val (conditionArg, limitArg, intervalArg, callbackArg) = argList
-
-            if (limitArg is NativeObject) {
-                // @Overload wait(condition, callback): any
-                return@ensureArgumentsLengthInRange arrayOf(
-                    /* condition = */ conditionArg,
-                    /* limit = */ null,
-                    /* interval = */ null,
-                    /* callback = */ limitArg,
-                ).let { newArgList -> wait(scriptRuntime, newArgList) }
-            }
-
-            if (intervalArg is NativeObject) {
-                // @Overload wait(condition, limit, callback): any
-                return@ensureArgumentsLengthInRange arrayOf(
-                    /* condition = */ conditionArg,
-                    /* limit = */ limitArg,
-                    /* interval = */ null,
-                    /* callback = */ intervalArg,
-                ).let { newArgList -> wait(scriptRuntime, newArgList) }
-            }
+            val (conditionArg, limitArg, intervalArg, callbackArg) = normalizeWaitArguments(argList)
 
             var result: Any?
             val start = System.currentTimeMillis()
@@ -416,22 +404,12 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 "Argument callback ${callbackArg.jsBrief()} must be a ScriptableObject for wait"
             }
 
-            val limit = (coerceNumber(limitArg, Double.NaN).takeUnless { it.isNaN() } ?: 10000.0).also {
-                require(it >= 0) { "Limitation ($it) cannot be negative for wait" }
-            }.roundToLong()
+            val policy = resolveWaitPolicy(limitArg, intervalArg)
+            if (policy.isNoop) return@ensureArgumentsLengthInRange UNDEFINED
 
-            var (times, timeout) = when {
-                limit < 100 -> limit to Long.MAX_VALUE
-                else -> Long.MAX_VALUE to limit
-            }
-
-            val interval = (coerceNumber(intervalArg, Double.NaN).takeUnless { it.isNaN() } ?: 200.0).also {
-                require(it.isFinite()) { "Interval cannot be Infinity for wait" }
-                require(it >= 0) { "Interval ($it) cannot be negative for wait" }
-            }.roundToLong()
-
-            if (interval >= timeout) times = minOf(times, 1)
-            if (times <= 0) return@ensureArgumentsLengthInRange UNDEFINED
+            var times = policy.times
+            val timeout = policy.timeout
+            val interval = policy.interval
 
             require(conditionArg !is UiObject) { "UiObject cannot be used as the condition for wait" }
 
@@ -449,8 +427,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                     else -> Selector.pickup(scriptRuntime, arrayOf(conditionArg))
                 }
 
-                // Some falsy values [ 0, 0n, -0, "" (empty string) ] should pass the check.
-                result = !(checked.isJsNullish() || checked == false || checked is Double && checked.isNaN())
+                result = isWaitConditionSatisfied(checked)
 
                 times -= 1
 
@@ -478,6 +455,65 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             }
 
             result
+        }
+
+        /**
+         * Maps the positional arguments of `wait` onto (condition, limit, interval, callback).
+         * A callback object may be placed at the `limit` or `interval` slot:
+         * - wait(condition, callback)
+         * - wait(condition, limit, callback)
+         * In both cases, arguments after the callback object are discarded.
+         *
+         * zh-CN: 将 `wait` 的位置参数映射为 (condition, limit, interval, callback).
+         * 回调对象可以出现在 `limit` 或 `interval` 的位置, 此时其后的参数将被丢弃.
+         */
+        internal fun normalizeWaitArguments(argList: Array<out Any?>): Array<Any?> {
+            val (conditionArg, limitArg, intervalArg, callbackArg) = argList
+            return when {
+                limitArg is NativeObject -> arrayOf(conditionArg, null, null, limitArg)
+                intervalArg is NativeObject -> arrayOf(conditionArg, limitArg, null, intervalArg)
+                else -> arrayOf(conditionArg, limitArg, intervalArg, callbackArg)
+            }
+        }
+
+        /**
+         * Resolves the polling plan of `wait`.
+         * A limit less than 100 is treated as the maximum number of attempts,
+         * otherwise as a timeout in milliseconds (default 10000).
+         * The interval defaults to 200 milliseconds.
+         *
+         * zh-CN: 解析 `wait` 的轮询计划.
+         * 小于 100 的 limit 视为最大尝试次数, 否则视为毫秒超时 (默认 10000).
+         * 间隔默认为 200 毫秒.
+         */
+        internal fun resolveWaitPolicy(limitArg: Any?, intervalArg: Any?): WaitPolicy {
+            val limit = (coerceNumber(limitArg, Double.NaN).takeUnless { it.isNaN() } ?: 10000.0).also {
+                require(it >= 0) { "Limitation ($it) cannot be negative for wait" }
+            }.roundToLong()
+
+            var (times, timeout) = when {
+                limit < 100 -> limit to Long.MAX_VALUE
+                else -> Long.MAX_VALUE to limit
+            }
+
+            val interval = (coerceNumber(intervalArg, Double.NaN).takeUnless { it.isNaN() } ?: 200.0).also {
+                require(it.isFinite()) { "Interval cannot be Infinity for wait" }
+                require(it >= 0) { "Interval ($it) cannot be negative for wait" }
+            }.roundToLong()
+
+            if (interval >= timeout) times = minOf(times, 1)
+
+            return WaitPolicy(times, timeout, interval)
+        }
+
+        /**
+         * Truthiness rule of `wait`: only nullish values, `false` and `NaN` fail the check,
+         * so that falsy values like 0, -0 and "" (empty string) still pass.
+         *
+         * zh-CN: `wait` 的真值规则: 仅 nullish, `false` 与 `NaN` 视为不满足, 因此 0, -0 及空字符串等假值仍视为满足.
+         */
+        internal fun isWaitConditionSatisfied(checked: Any?): Boolean {
+            return !(checked.isJsNullish() || checked == false || checked is Double && checked.isNaN())
         }
 
         @JvmStatic

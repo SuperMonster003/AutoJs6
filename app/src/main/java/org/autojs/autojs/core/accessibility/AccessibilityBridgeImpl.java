@@ -29,10 +29,6 @@ public class AccessibilityBridgeImpl extends AccessibilityBridge {
         mA11yTool.ensureService();
     }
 
-    public void ensureServiceStarted() {
-        ensureServiceStarted(false);
-    }
-
     @Nullable
     @Override
     public AccessibilityService getService() {
