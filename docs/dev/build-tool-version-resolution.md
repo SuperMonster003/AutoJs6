@@ -1,6 +1,6 @@
 # Build Tool Version Resolution
 
-AutoJs6 resolves its Android build-tool versions from compatibility data bundled in the `org.autojs.build.platform-versions` plugin rather than from a single hard-coded version tuple.
+AutoJs6 resolves its Android build-tool versions from compatibility data bundled in the public `io.github.supermonster003.autojs6-platform-versions` plugin rather than from a single hard-coded version tuple.
 
 ## Constraint chain
 
@@ -19,7 +19,7 @@ The resolver applies these constraints together:
    - Plugin resource: `org/autojs/build/platform/data/kotlin-r8-compat.properties`
    - Source: the official Android Kotlin/D8/R8 compatibility table.
 
-AutoJs6 intentionally carries no same-named files under `gradle/data`, so these bundled resources are the single source used by its build. Other consumers can still provide a same-named `gradle/data` file when they need an explicit local override.
+AutoJs6 and the official AutoJs6 plugin repositories intentionally carry no compatibility files under consumer-side `gradle/data`. The resources bundled in the published platform plugin are their single compatibility-data source. They also do not repeat the platform's general AGP candidate floor in `MIN_SUPPORTED_ANDROID_GRADLE_PLUGIN_VERSION`, or its global IDE support floor in consumer `MIN_SUPPORTED_*_IDE_VERSION` properties. Project facts such as compile SDK and KSP requirements are resolved through the central constraint model; an IDE property is only appropriate when a project must deliberately require a newer IDE than the central floor.
 
 The selected AGP must satisfy both KSP and Gradle. The selected R8 must satisfy the resolved Kotlin family when the selected AGP embeds an older R8 release. When the selected AGP version line is already newer than the Kotlin-required R8 line, the build uses AGP's bundled R8 instead of adding an external `com.android.tools:r8` classpath entry.
 
@@ -40,6 +40,6 @@ npm --prefix .utils run update-data
 npm --prefix .utils run check-data
 ```
 
-After publishing the updated plugin to Maven Local, update its version in `settings.gradle.kts`. AutoJs6's own `.utils/run-scrapers.mjs` now contains only tasks that update AutoJs6-specific files.
+Compatibility corrections must be made and tested in the central repository. After publishing a new immutable stable plugin version to Maven Central and the Gradle Plugin Portal, update its version in `settings.gradle.kts` across the host and plugin fleet. Do not commit a consumer-side data override or use `mavenLocal()` for the platform plugin in an official build. AutoJs6's own `.utils/run-scrapers.mjs` now contains only tasks that update AutoJs6-specific files.
 
 A missing compatibility family is treated as an error instead of silently choosing a nearest older toolchain.
