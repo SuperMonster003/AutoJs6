@@ -357,6 +357,9 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 元件羅盤 (`UiObject.compass`) 參數中多段連寫的父層或可點擊段 (如 `p4ppp12p`, `k2k3`) 僅計入首段的問題
 * `修復` 元件羅盤 (`UiObject.compass`) 的 `k` 段在範圍內未找到可點擊元件時回傳元件自身而非 `null` 的問題
 * `修復` `auto.registerEvent` 回呼事件的 `source` 節點在計算父層索引時, 若節點樹已變更可能陷入無窮迴圈或擲回越界例外並導致無障礙服務當機的問題
+* `修復` 無障礙服務重新啟動後, 未指定根節點的 `pickup` 及 `new UiSelector()` 建立的選擇器可能始終回傳 `null` 或空集合, 直到新建指令碼執行時期才恢復的問題
+* `修復` `auto.stateListener` 為全域單一槽位, 多個指令碼設定時互相覆蓋, 且指令碼結束後監聽器未被移除的問題
+* `修復` 無障礙服務已開始投遞事件但系統未回呼 `onServiceConnected` 時, `auto.waitFor` 等待方法無法被喚醒並可能等待至逾時的問題
 * `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
 * `修復` Proxy 包裝函式無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模組的回呼, 且 TimerThread 回呼參數可能以巢狀陣列傳遞的問題

@@ -773,6 +773,10 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
         ignoresException { automator.removeAllEventsForThisRuntime() }
 
+        // Drop the accessibility state listener registered by this script (auto.stateListener).
+        // zh-CN: 移除当前脚本注册的无障碍状态监听器 (auto.stateListener).
+        ignoresException { accessibilityBridge.setAccessibilityListener(null) }
+
         ignoresException { RootUtils.resetRuntimeOverriddenRootModeState() }
 
         // Recycle all recorded ImageWrapper instances.

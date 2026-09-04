@@ -12,14 +12,14 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 ---
 
-## 1. 现状 (2026-09-05, P0 完成后)
+## 1. 现状 (2026-09-05, P1.1 完成后)
 
 ### 1.1 分层与类映射
 
 | 层 | 职责 | 现有类 (均位于 `app/src/main/java/org/autojs/autojs/`) |
 | --- | --- | --- |
 | JS 表面 | 参数解析, 返回值适配, 注册全局函数 / 命名空间 | `runtime/api/augment/automator/Auto.kt` (`auto` 对象与 `auto()` 调用), `runtime/api/augment/automator/Automator.kt` (`automator` 与全局动作 `click` / `swipe` / `back` 等), `runtime/api/augment/selector/Selector.kt` (`selector` 与反射注册的 `text()` / `id()` 等全局选择器函数, `pickup` / `detect` / `existsAll` / `existsOne`), `runtime/api/augment/global/Global.kt` (`wait` / `waitForActivity` / `waitForPackage` / `sleep`), `runtime/api/augment/global/Classes.kt` (把 `UiSelector` / `UiObject` / `UiObjectCollection` / `AccessibilityBridge` 作为 JS 类暴露) |
-| 服务与桥接 | 服务生命周期, 状态, 启停, 窗口根节点, 事件分发 | `core/accessibility/AccessibilityService.kt` (服务本体 + 伴生对象里的进程级状态), `core/accessibility/AccessibilityServiceUsher.kt` (清单中注册的子类, 负责 `serviceInfo` 标志), `core/accessibility/AccessibilityTool.kt` (启停与谓词, 12 处各自实例化), `core/accessibility/AccessibilityBridge.java` + `AccessibilityBridgeImpl.java` (每个 `ScriptRuntime` 一个, 持有模式 / 标志 / 窗口过滤器, 提供 `windowRoots()`), `core/accessibility/AccessibilityServiceAutoStart.kt` (Activity 创建时的自动恢复), `service/AccessibilityService.kt` (抽屉开关辅助类, 待按 D8 重命名) |
+| 服务与桥接 | 服务生命周期, 状态, 启停, 窗口根节点, 事件分发 | `core/accessibility/registry/A11yServiceRegistry.kt` (P1.1 新增, Android-free: 绑定实例, 3 态状态, 状态监听者, `await`; 进程单例为 `AccessibilityService.registry`), `core/accessibility/registry/ConnectionListeners.kt` (旧 `AccessibilityServiceCallback` 形态的适配器), `core/accessibility/AccessibilityService.kt` (服务本体; 伴生对象只剩对注册表的兼容外壳, delegate 表, 默认 bridge, 静态按键观察者), `core/accessibility/AccessibilityServiceUsher.kt` (清单中注册的子类, 负责 `serviceInfo` 标志), `core/accessibility/AccessibilityTool.kt` (启停与谓词, 12 处各自实例化), `core/accessibility/AccessibilityBridge.java` + `AccessibilityBridgeImpl.java` (每个 `ScriptRuntime` 一个, 持有模式 / 标志 / 窗口过滤器, 提供 `windowRoots()`; 构造函数已无全局副作用), `core/accessibility/AccessibilityServiceAutoStart.kt` (Activity 创建时的自动恢复), `service/AccessibilityService.kt` (抽屉开关辅助类, 待按 D8 重命名) |
 | 动作 | 节点动作, 全局动作, 手势, 截图 | `core/accessibility/SimpleActionAutomator.kt` (每个 `ScriptRuntime` 一个; 含 `registerEvent` / `removeEvent` 的 ownerId 语义与 `captureScreen`), `core/automator/GlobalActionAutomator.kt` (手势与全局动作, 使用 servant Looper), `core/automator/UiObjectActions.kt`, `core/automator/action/**` (滚动等复合动作) |
 | 查询 | 选择器构建, 搜索, 拾取, 导航 | `core/accessibility/UiSelector.kt` (builder + `find*` + `pickup` 的 `Picker`), `core/automator/UiObject.kt` (`AccessibilityNodeInfoCompat` 包装 + 导航 + `detect` 的 `Detector` / `Invoker` / `Interceptor`), `core/automator/UiObjectCollection.kt`, `core/automator/filter/**` (39 个过滤器), `core/automator/search/{DFS,BFS}.kt`, `core/automator/pick/CompassParser.kt` (Android-free, P0 新增) |
 | 事件消费方 (框架内部) | 以 `AccessibilityDelegate` 形式挂在服务上 | `core/activity/ActivityInfoProvider` (优先级 100, 维护当前包名 / Activity), `core/accessibility/AccessibilityNotificationObserver` (200, 通知与 Toast), `core/record/accessibility/AccessibilityActionRecorder` (300, 录制), 注册点 `AbstractAutoJs.kt` |
@@ -33,25 +33,34 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 ```
 系统设置启用服务 ──> 进程内 onServiceConnected ──> 首个 onAccessibilityEvent
    (hasService)          (hasInstance / isRunning)        (isOperational)
+   [Settings.Secure]     [registry: CONNECTED]            [registry: OPERATIONAL]
 ```
+
+进程内状态 (P1.1 起) 由 `A11yServiceRegistry` 统一持有, 3 态: `UNBOUND` (无绑定实例) / `CONNECTED` (已绑定, 未收到事件) / `OPERATIONAL` (已收到事件). "系统设置中已启用" 不是进程内可观测的状态 (只能读 `Settings.Secure`), 因此不并入枚举, 仍由 `AccessibilityTool.hasService()` 提供; P1.2 的控制器负责把两者组合成失败原因.
+
+迁移入口: `onServiceConnected -> registry.onConnected(this)` (置 `CONNECTED`, 重置操作态); `onAccessibilityEvent -> registry.onEvent(this)` (置 `OPERATIONAL`, 并在必要时采纳实例); `onUnbind / onDestroy / stop() -> disposeService -> registry.onDisposed(this)` (仅当它是当前绑定实例时置 `UNBOUND`). 状态监听者按 owner 注册: 抽屉状态事件 (`AccessibilityServiceStateChangedEvent`, 仅绑定关系变化时投递), 每个脚本运行时的 `auto.stateListener` (owner = 其 `AccessibilityBridge`, 脚本退出时注销), Node Bridge 的断开回调.
 
 | 谓词 (`AccessibilityTool`) | 含义 | 数据来源 |
 | --- | --- | --- |
 | `hasService()` | 系统 `ENABLED_ACCESSIBILITY_SERVICES` 中包含本服务 | `Settings.Secure` |
-| `hasInstance()` | 进程内存在服务实例 | `AccessibilityService.instance` (静态) |
+| `hasInstance()` | 进程内存在服务实例 | `registry.isBound` |
 | `isRunning()` | `hasService() && hasInstance()` | 组合 |
 | `isMalfunctioning()` | `hasService() && !hasInstance()` (已启用但进程内无实例, 常见于进程被杀后) | 组合 |
-| `isOperational()` | `isRunning()` 且已收到首个事件 | 组合 + `AccessibilityService.hasOperationalState` (静态) |
+| `isOperational()` | `isRunning()` 且已收到首个事件 | 组合 + `registry.isOperational` |
 
-启动方式 (`AccessibilityTool.startService`): Root (`settings put secure ...`), `WRITE_SECURE_SETTINGS` 权限, 否则跳转系统设置页由用户手动开启. "确保可用" 有 4 个近似变体 (`startServiceAndWaitFor` / `startServiceAndWaitForOperational` / `ensureService` / `ensureServiceOperational`), 默认等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000 ms`.
+等待: `AccessibilityService.waitForStarted(timeout)` = `registry.await(CONNECTED, timeout)`, `waitForOperational(timeout)` = `registry.await(OPERATIONAL, timeout)`; 单一 `Condition`, 任何迁移都会 `signalAll`, 负超时无限等待, 中断时返回 `false` 并保留中断标志.
 
-已知平台问题: `onServiceConnected` 偶尔不回调但事件照常到达 (`AccessibilityService.kt` 中的 FIXME); 因此 `onAccessibilityEvent` 里有 `instance = this` 的兜底赋值.
+启动方式 (`AccessibilityTool.startService`): Root (`settings put secure ...`), `WRITE_SECURE_SETTINGS` 权限, 否则跳转系统设置页由用户手动开启. "确保可用" 有 4 个近似变体 (`startServiceAndWaitFor` / `startServiceAndWaitForOperational` / `ensureService` / `ensureServiceOperational`), 默认等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000 ms`. (P1.2 合并)
+
+已知平台问题: `onServiceConnected` 偶尔不回调但事件照常到达; 注册表的 `onEvent` 会直接采纳实例并置 `OPERATIONAL`, 等待方与状态监听者 (含 `auto.stateListener` 的 `onConnected`) 在这条路径上同样被唤醒 / 通知.
+
+默认 bridge: `AccessibilityService.bridge` 是伴生对象级的 `defaultBridge`, 由 `AbstractAutoJs.createRuntime()` 在创建每个脚本运行时时登记为最近一次创建的 bridge, 供无参 `UiSelector()` (脚本中的 `new UiSelector()`) 使用, 与服务实例的生死无关. `pickup` / `detect` 的 `Picker.Builder` 则直接绑定调用方 `scriptRuntime.accessibilityBridge`.
 
 ### 1.3 事件流
 
 `AccessibilityService.onAccessibilityEvent(event)` 在服务主线程串行执行 4 步:
 
-1. `markOperationalStateIfNeeded()`: 首个事件把状态标为 operational.
+1. `registry.onEvent(this)`: 首个事件把状态置为 `OPERATIONAL` (并在 `onServiceConnected` 未回调时采纳实例); 已是 `OPERATIONAL` 的同一实例不产生迁移.
 2. JS 回调盒 `eventBox[type][ownerId]`: 每个脚本 (`ownerId` = `SimpleActionAutomator.mA11yEventOwnerId`) 每种事件类型一个槽; 有回调时创建 `AccessibilityEventWrapper` 并逐个调用, 异常被捕获记录.
 3. `delegates` (按优先级排序的 `AccessibilityDelegate`): 仅当有 delegate 关心该事件类型时执行; 先在 `TYPE_WINDOW_STATE_CHANGED` / `TYPE_VIEW_FOCUSED` 时更新 `fastRootInActiveWindow`, 然后按优先级调用, 返回 `true` 的 delegate 会中断链.
 4. (无第 4 步; `fastRootInActiveWindow` 的更新与第 3 步耦合是 Roadmap P1.3 要解耦的点.)
@@ -139,7 +148,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 
 | 现有 | 目标 | 阶段 |
 | --- | --- | --- |
-| `AccessibilityService` 伴生对象的静态状态 | `A11yServiceRegistry` (`A11yState` 枚举 + 多监听者), 伴生对象保留同名成员作为外壳 | P1.1 |
+| `AccessibilityService` 伴生对象的静态状态 | `A11yServiceRegistry` (3 态 `State` + 多监听者 + `await`), 伴生对象保留同名成员作为外壳 | P1.1 (已完成 2026-09-05) |
 | `AccessibilityTool` (12 处实例) | `A11yServiceController` 单例 + `ServiceStartStrategy`; `AccessibilityTool` 变薄并 `@Deprecated` | P1.2 |
 | `eventBox` / `delegates` / 按键观察者 / 手势分发 | `A11yEventBus` (ownerId, 类型集合, 优先级, 可消费, 去重 / 去抖选项) | P1.3 |
 | `AccessibilityBridge.java` 的 3 处根节点逻辑 | `WindowRootProvider` + `WindowRootPolicy`, `AccessibilityBridge` 转 Kotlin 保留 FQN | P1.4 |

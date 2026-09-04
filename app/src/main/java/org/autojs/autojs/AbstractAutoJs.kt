@@ -132,7 +132,7 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
         .setConsole(globalConsole)
         .setUiHandler(uiHandler)
-        .setAccessibilityBridge(createAccessibilityBridge())
+        .setAccessibilityBridge(createAccessibilityBridge().also { AccessibilityService.bridge = it })
         .setAppUtils(appUtils)
         .setShellSupplier { Shell(applicationContext, true) }
         .build()

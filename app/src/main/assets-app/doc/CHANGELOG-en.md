@@ -197,6 +197,9 @@
 * `Fix` Multi-segment parent or clickable compass segments (such as `p4ppp12p` or `k2k3`) passed to `UiObject.compass` only counted the first segment
 * `Fix` The `k` segment of `UiObject.compass` returned the node itself instead of `null` when no clickable node existed within range
 * `Fix` Computing the parent index of the `source` node of an `auto.registerEvent` callback could loop forever or throw an out-of-bounds exception and crash the accessibility service when the node tree had changed
+* `Fix` After the accessibility service restarted, `pickup` without a root node and selectors created by `new UiSelector()` could keep returning `null` or an empty collection until a new script runtime was created
+* `Fix` `auto.stateListener` was a single global slot, so listeners set by multiple scripts overwrote each other and were not removed when a script ended
+* `Fix` Waiting methods such as `auto.waitFor` could not be woken up and could wait until timeout when the accessibility service had started delivering events but the system never invoked `onServiceConnected`
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array

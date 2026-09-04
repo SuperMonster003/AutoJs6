@@ -828,7 +828,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     }
 
     fun plus(selector: UiSelector?) = selector?.let { paramSel ->
-        UiSelector().also { newSel ->
+        UiSelector(mAccessibilityBridge, mAllocator).also { newSel ->
             newSel.selector.filters.addAll(this.selector.filters + paramSel.selector.filters)
             newSel.searchAlgorithm = paramSel.searchAlgorithm
         }
@@ -846,7 +846,7 @@ open class UiSelector : UiObjectActions, StringReadable {
             compass: CharSequence?,
             resultType: Any?,
             callback: Callable? = null,
-        ): Any? = Picker.Builder()
+        ): Any? = Picker.Builder(scriptRuntime.accessibilityBridge)
             .setRoot(root)
             .setCompass(compass)
             .setResultType(resultType)
@@ -879,10 +879,13 @@ open class UiSelector : UiObjectActions, StringReadable {
 
             }, callback, selector).detect(scriptRuntime)
 
-            internal class Builder {
+            // The picker searches with the bridge of the calling script runtime, so that its window
+            // filter and blacklist apply and the search keeps working after the service restarts.
+            // zh-CN: 拾取器使用调用方脚本运行时的 bridge 进行搜索, 使其窗口过滤器与黑名单生效, 且服务重启后仍可搜索.
+            internal class Builder(accessibilityBridge: AccessibilityBridge? = null) {
 
                 private var mRoot: UiObject? = null
-                private var mSelector = UiSelector()
+                private var mSelector = UiSelector(accessibilityBridge)
                 private var mCompass: CharSequence? = COMPASS_PASS_ON
                 private var mResultType: Any = RESULT_TYPE_WIDGET
                 private var mCallback: Callable? = null

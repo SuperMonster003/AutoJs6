@@ -144,7 +144,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 
 ```
 core/accessibility/
-  registry/    A11yServiceRegistry, A11yState, A11yStateListener
+  registry/    A11yServiceRegistry (含嵌套 State / Snapshot / StateListener), ConnectionListeners  [P1.1 已落地]
   control/     A11yServiceController, ServiceStartStrategy (Root / SecureSettings / SettingsUi)
   event/       A11yEventBus, A11yEventSubscription, AccessibilityDelegate (迁入)
   window/      WindowRootProvider, WindowRootPolicy (mode / flags / filter)
@@ -166,7 +166,7 @@ runtime/api/augment/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 未开始 |
+| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 完成 2026-09-05, 真机复跑待回填) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -220,19 +220,26 @@ P0 结论: 关闭. 冒烟脚本作为后续每阶段的回归清单继续使用.
 
 目标: 服务状态与生命周期收敛为单一事实来源, 消除 12 处工具实例, 4 套 "确保服务" 实现与 5 种 "是否运行" 判定, 事件分发与窗口根节点获取各只剩一套实现. JS API 不变.
 
-### P1.1 状态注册表 `A11yServiceRegistry`
+### P1.1 状态注册表 `A11yServiceRegistry` (完成, 2026-09-05)
 
-- [ ] 定义 `A11yState` 枚举: `DISABLED` (系统设置未启用), `ENABLED_NOT_BOUND` (已启用但进程内无实例, 即现在的 `isMalfunctioning`), `CONNECTED` (`onServiceConnected` 已回调), `OPERATIONAL` (已收到首个事件). 保留现有 4 个谓词 (`hasInstance` / `hasService` / `isRunning` / `isOperational`) 作为派生属性, 定义与 `AccessibilityTool.kt:67-88` 完全一致.
-- [ ] 实现 `A11yServiceRegistry` (进程单例, 但通过接口注入, 测试可替换): 持有 `instance`, `state`, 状态变更监听 (多监听者, 按 ownerId 注册 / 注销), `awaitState(target, timeout)` (替代 `waitForStarted` / `waitForOperational` 的两个 `Condition`).
-- [ ] `AccessibilityService` 伴生对象中的 `instance` / `hasOperationalState` / `LOCK` / `ENABLED` / `OPERATIONAL` / `callback` / `disconnectCallbacks` / `bridge` 全部委托到 registry; 伴生对象保留同名 public 成员作为兼容外壳 (`auto.service` 等 JS getter 间接依赖).
-- [ ] `auto.stateListener` 由 "单槽覆盖" 改为按脚本 ownerId 注册, 脚本退出时自动注销 (与 `SimpleActionAutomator.removeAllEventsForThisRuntime` 同一时机), 修复多个脚本互相覆盖监听器的问题. JS 签名不变.
-- [ ] 移除 `AccessibilityBridge` 构造函数中的 `setBridge(this)` 全局副作用; `UiSelector` 无参构造改为从当前 `ScriptRuntime` (若有) 或 registry 提供的默认 `WindowRootProvider` 获取根节点.
-- [ ] JUnit4 测试: 状态迁移表 (含 `onServiceConnected` 未触发但事件已到达的异常序列, 对应 `AccessibilityService.kt:241-247` 的已知 Android 问题), 多监听者注册 / 注销, `awaitState` 超时.
+- [x] 状态枚举收敛为 3 态而非原计划的 4 态: `A11yServiceRegistry.State { UNBOUND, CONNECTED, OPERATIONAL }` (嵌套在注册表内, 未单独建 `A11yState` 文件). 原因: "系统设置中已启用" 只能读 `Settings.Secure` 得到, 无法在进程内观测到其变化, 并入枚举会让注册表依赖 Android 且状态可能与设置不同步; 因此它保留在 `AccessibilityTool.hasService()`, 由 P1.2 的控制器把 "已启用" 与注册表状态组合成 `EnsureResult` 的失败原因 (未启用 / 已启用未绑定 / 已绑定未操作). 4 个谓词 (`hasInstance` / `hasService` / `isRunning` / `isOperational`) 定义未变: `hasInstance = registry.isBound`, `isOperational = isRunning && registry.isOperational`. (SOURCE: `core/accessibility/registry/A11yServiceRegistry.kt`)
+- [x] `A11yServiceRegistry<S>` 为泛型且 Android-free: `Snapshot(state, instance)` 不可变快照 (`@Volatile`), 迁移入口 `onConnected` / `onEvent` (采纳实例并置 `OPERATIONAL`, 覆盖 `onServiceConnected` 不触发的平台问题) / `onDisposed` (仅当前实例生效, 过期实例的销毁不改变状态) / `markOperational` / `resetOperational`; `await(target, timeout)` 以单一 `Condition` 替代原 `ENABLED` / `OPERATIONAL` 两个条件, 负超时无限等待, 中断时返回 `false` 并保留中断标志; 监听者按 owner 注册 (同 owner 覆盖), 在锁外通知, 异常隔离并交给构造参数 `onListenerError`. `ConnectionListeners.kt` 把旧的 `AccessibilityServiceCallback` (`onConnected` / `onDisconnected`) 适配为状态监听者. 未采用 "接口注入": 注册表本身可构造多个实例用于测试, 生产路径是 `AccessibilityService.registry` 单例. (SOURCE)
+- [x] `AccessibilityService` 伴生对象: `instance` / `hasOperationalState` / `hasInstance` / `waitForStarted` / `waitForOperational` / `setCallback` / `addDisconnectCallback` / `removeDisconnectCallback` / `stop` 全部委托到 `registry`; `LOCK` / `ENABLED` / `OPERATIONAL` / `callback` / `disconnectCallbacks` 删除; `onServiceConnected` / `onAccessibilityEvent` / `disposeService` 只调用 `registry.onConnected` / `onEvent` / `onDisposed`; 抽屉状态事件 (`AccessibilityServiceStateChangedEvent`) 改为注册表监听者 (仅绑定关系变化时投递). 顺带修复: 实例被首个事件采纳时 `waitForStarted` 现在也会被唤醒 (原先只有 `onServiceConnected` 会 `signalAll`, 等待方在该平台问题下会一直等到超时), 记入 changelog `fix`. (SOURCE; 调用方 `AccessibilityTool` / `NodeBridgeProtocol` / `PythonHostCapabilityBroker` 无需改动)
+- [x] `auto.stateListener`: `AccessibilityBridge.setAccessibilityListener` 以 bridge (每个脚本运行时一个) 为 owner 调用 `setCallback(owner, listener)`; `ScriptRuntime` 退出时 `setAccessibilityListener(null)` 注销 (紧随 `removeAllEventsForThisRuntime`). Kotlin 侧无 owner 的 `setCallback(listener)` 保留为固定 owner 的兼容入口. 记入 changelog `fix`. 行为差异 (有意): 原先 `onConnected` 只在 `onServiceConnected` 时触发, 现在实例被首个事件采纳时也触发, 与 `waitForStarted` 一致. (SOURCE)
+- [x] `AccessibilityBridge` 构造函数的 `setBridge(this)` 副作用移除. `AccessibilityService.bridge` 改为伴生对象级 `defaultBridge` (不再是服务实例的字段), 由 `AbstractAutoJs.createRuntime()` 在创建脚本运行时时登记, 因此服务重启后仍然有效; `UiSelector.pickup` 的 `Picker.Builder` 改为绑定调用方 `scriptRuntime.accessibilityBridge` (窗口过滤器与黑名单随之生效), `UiSelector.plus` 沿用自身 bridge 与分配器. 修复了服务重启后 `pickup()` (未指定 root) 与 `new UiSelector()` 静默返回 `null` / 空集合直到新建脚本运行时的问题 (原因: 旧的静态 `bridge` 是服务实例字段, 只在 "服务存活期间构造 bridge" 时被赋值, 重启后的新实例上为 `null`), 记入 changelog `fix`. "无参 `UiSelector` 从 `WindowRootProvider` 取根节点" 推迟到 P1.4 一并处理. (SOURCE)
+- [x] JUnit4: `A11yServiceRegistryTest` 14 用例: 初始态; 连接 -> 事件 -> 重复事件不产生迁移; 无 `onConnected` 直接来事件的采纳序列; 重连重置操作态; 实例替换与过期实例销毁; 销毁解绑; `markOperational` / `resetOperational` 仅在绑定态生效; `await` 立即返回 / 超时 / 跨线程唤醒 / 负超时 / 中断; 监听者按 owner 覆盖 / 移除 / 异常隔离; 两种回调适配器的映射. (JVM)
+
+P1.1 证据:
+
+- `JVM`: 全量 `:app:testAppDebugUnitTest` 1891 tests / 0 failures (含新增 14 个用例).
+- `ANDROID_BUILD`: 单元测试任务已编译 app 模块.
+- `DEVICE`: 待维护者重跑 `sample/accessibility/smoke-legacy-api.js`. 脚本新增第 7 节 "服务重启" (仅在 AutoJs6 已配置 root 或安全设置启动方式且可用时执行, 否则打印 `[SKIP]` 并跳过): `restartService(false)` 后 10 s 内 `auto.isRunning()`, `auto.stateListener` 依次收到 `disconnected` / `connected`, `pickup(/.+/)`, `new UiSelector().textMatches(/.+/).findOne(3000)`, `textMatches(/.+/).findOne(3000)` 均仍有结果. 不可无人值守重启的设备预期仍为 `30/30`, 可重启的设备预期 `36/36`.
+- `DOCS`: changelog `fix` 3 条 (10 语言) 已写入并重新生成 README / CHANGELOG. JS 签名无变化, 无需同步 d.ts / 文档项目.
 
 ### P1.2 服务控制器 `A11yServiceController`
 
 - [ ] 将 `AccessibilityTool` 的启停逻辑迁入 `A11yServiceController`, 启动方式抽象为 `ServiceStartStrategy` 列表 (Root, SecureSettings, SettingsUi), 按偏好顺序尝试; 每种策略可单测 (以接口替代 `ProcessShell` / `Settings.Secure`).
-- [ ] 将 4 个 "确保 / 等待" 变体合并为一个 `ensure(level: A11yState, timeout: Long, launchSettingsIfNeeded: Boolean): EnsureResult`, 错误文案按失败原因区分 (未启用 / 已启用未绑定 / 已绑定未操作), 消除 `AccessibilityTool.kt:182,195,196` 三处同文案.
+- [ ] 将 4 个 "确保 / 等待" 变体合并为一个 `ensure(level: A11yServiceRegistry.State, timeout: Long, launchSettingsIfNeeded: Boolean): EnsureResult`, 失败原因由 "设置中是否已启用" (`hasService()`, 见 P1.1 对 3 态枚举的说明) 与注册表状态组合得出 (未启用 / 已启用未绑定 / 已绑定未操作), 错误文案按原因区分, 消除 `AccessibilityTool.kt:182,195,196` 三处同文案.
 - [ ] `AccessibilityTool` 改为薄外壳, 全部方法委托到控制器, 标记 `@Deprecated` (仅 Kotlin 内部弃用, 不影响 JS); 12 处实例化改为注入共享实例 (`AutoJs` 持有, `ScriptRuntime` / UI / Tile 通过 `AutoJs.instance` 或构造参数获取).
 - [ ] 统一 `ensureServiceStarted` 的 9 个调用点全部经由 `AccessibilityBridge` -> 控制器, 删除 `UiSelector.kt:715` 与 `AutoJs.kt:89,95` 的绕行路径.
 - [ ] `service/AccessibilityService.kt` 重命名为 `AccessibilityServiceItemHelper` (内部类, 未暴露给 JS), 其 `isRunning` 改为消费 registry, 修正 `||` 判定; `AccessibilityServiceAutoStart` 改为调用控制器.
@@ -635,4 +642,6 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 排查结论: `auto.registerEvent("WINDOW_STATE_CHANGED")` 回调两次不是分发 bug (两个事件 `eventTime` 相差 48 ms, 系统各投递一次; `notificationTimeout="0"` 不合并; 注册为单槽). 处理方式: 冒烟脚本内给出去重示例, P1.3 增加 `auto.registerEvent` 的可选去重 / 去抖.
 - 未做: 真机运行冒烟脚本 (需要维护者在设备上执行并把结果回填到 P0 验收).
 - 维护者反馈: 冒烟脚本在 5 台设备上 `30/30 checks passed` (设备见 P0 证据); Q4 选 B 并复用 `select` 作为入口 -> D13. P0 关闭.
-- 下次会话 (或本会话后续) 起点: P1.1 (`A11yServiceRegistry` + `A11yState`), 然后 P1.2 (含 D5 与 D8). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.
+- 落地 P1.1: 新增 `core/accessibility/registry/{A11yServiceRegistry,ConnectionListeners}.kt` 与 `A11yServiceRegistryTest` (14 用例); `AccessibilityService` 生命周期与伴生对象委托到注册表; `auto.stateListener` 按脚本运行时注册并在退出时注销; `AccessibilityBridge` 构造副作用移除, 默认 bridge 改由 `AbstractAutoJs.createRuntime()` 登记, `pickup` 绑定调用方 bridge. 全量 JVM 1891 / 0 失败. changelog `fix` 3 条. 设计偏离: 状态枚举 3 态 (`UNBOUND / CONNECTED / OPERATIONAL`), "设置中已启用" 留给 P1.2 控制器 (理由见 P1.1 首条).
+- 冒烟脚本新增第 7 节 (服务重启, 仅 root / 安全设置可用时执行), 待维护者复跑并回填 P1.1 的 `DEVICE` 证据.
+- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.

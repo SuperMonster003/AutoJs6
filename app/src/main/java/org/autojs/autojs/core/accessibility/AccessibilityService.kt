@@ -9,6 +9,10 @@ import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_START_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
+import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
+import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
+import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
+import org.autojs.autojs.core.accessibility.registry.ConnectionListeners
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.event.EventDispatcher
@@ -17,13 +21,10 @@ import org.greenrobot.eventbus.EventBus
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Created by Stardust on May 2, 2017.
- * Modified by SuperMonster003 as of Jan 7, 2026.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
 
@@ -31,7 +32,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
         private set
-    var bridge: AccessibilityBridge? = null
 
     @Volatile
     private var isDisposed = false
@@ -108,12 +108,12 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (isDisposed) return
-        instance = this
         val type = event.eventType
 
-        // Mark service as operational when we receive the first accessibility event.
-        // zh-CN: 当收到首个无障碍事件时, 将服务标记为可工作状态.
-        markOperationalStateIfNeeded()
+        // Adopts this instance and marks it operational on the first event,
+        // which also covers the case where onServiceConnected was never invoked.
+        // zh-CN: 采纳当前实例并在首个事件时标记为可工作状态, 同时覆盖 onServiceConnected 未被调用的情况.
+        registry.onEvent(this)
 
         // Snapshot callbacks to avoid holding lock while invoking user code.
         // zh-CN: 为回调建立快照, 以避免在调用用户代码时持锁.
@@ -232,21 +232,11 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         super.onServiceConnected()
         Log.d(TAG, "onServiceConnected: $serviceInfo")
         isDisposed = false
-        resetOperationalState()
-        instance = this
-        notifyConnected()
-        LOCK.lock()
-        try {
-            ENABLED.signalAll()
-        } finally {
-            LOCK.unlock()
-        }
-        // FIXME by Stardust on Feb 12, 2017.
-        //  ! 有时在无障碍中开启服务后这里不会调用服务也不会运行, 安卓的 BUG ???
-        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
-        //  ! Sometimes, when accessibility service of AutoJs6 started,
-        //  ! `onServiceConnected` won't be triggered here.
-        //  ! Is this an Android bug?
+        // @Hint by Stardust on Feb 12, 2017 (rephrased by SuperMonster003 on Sep 5, 2026).
+        //  ! Sometimes this callback is never triggered although the service is started and events flow.
+        //  ! The registry therefore also adopts the instance from onAccessibilityEvent.
+        //  ! zh-CN: 有时服务已启动且事件照常到达, 但此回调不会被触发, 因此注册表也会在 onAccessibilityEvent 中采纳实例.
+        registry.onConnected(this)
     }
 
     private fun disposeService(reason: String) {
@@ -254,11 +244,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         isDisposed = true
         Log.v(TAG, "$reason: $this")
 
-        val wasCurrentInstance = instance === this
-        if (wasCurrentInstance) {
-            instance = null
-        }
-        bridge = null
         recycleFastRootInActiveWindow()
         synchronized(eventBoxLock) {
             eventBox.clear()
@@ -268,93 +253,60 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             mEventExecutor?.shutdownNow()
             mEventExecutor = null
         }
-        if (wasCurrentInstance) {
-            resetOperationalState()
-            notifyDisconnected()
-        }
-    }
-
-    private fun notifyConnected() {
-        try {
-            callback?.onConnected()
-        } catch (e: Throwable) {
-            Log.e(TAG, "Unhandled exception in accessibility connected callback", e)
-        }
-        postServiceStateChanged()
-    }
-
-    private fun notifyDisconnected() {
-        try {
-            callback?.onDisconnected()
-        } catch (e: Throwable) {
-            Log.e(TAG, "Unhandled exception in accessibility disconnected callback", e)
-        }
-        notifyDisconnectCallbacks()
-        postServiceStateChanged()
-    }
-
-    private fun postServiceStateChanged() {
-        try {
-            EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
-        } catch (e: Throwable) {
-            Log.e(TAG, "Unable to post accessibility service state changed event", e)
-        }
+        // Listeners (state callbacks, drawer event) are notified by the registry when this was the bound instance.
+        // zh-CN: 若本实例是当前绑定实例, 注册表会通知各监听者 (状态回调, 抽屉事件).
+        registry.onDisposed(this)
     }
 
     companion object {
 
         private const val TAG = "AccessibilityService"
 
+        private const val LEGACY_CALLBACK_OWNER = "AccessibilityService.callback"
+        private const val STATE_CHANGED_EVENT_OWNER = "AccessibilityService.stateChangedEvent"
+
+        /**
+         * Process-wide state of the service (bound instance, operational flag, state listeners).
+         * The companion members below are compatibility shells over it.
+         * zh-CN: 服务的进程级状态 (绑定实例, 可操作标志, 状态监听者). 下方伴生成员均为其兼容外壳.
+         */
+        val registry = A11yServiceRegistry<AccessibilityService> { message, error -> Log.e(TAG, message, error) }
+
+        init {
+            registry.addListener(STATE_CHANGED_EVENT_OWNER, StateListener { previous, current ->
+                if (ConnectionListeners.isBindingChanged(previous, current)) postServiceStateChanged()
+            })
+        }
+
         private val delegates = TreeMap<Int, AccessibilityDelegate>()
         private val delegatesLock = Any()
         private var containsAllEventTypes = false
         private val eventTypes = HashSet<Int>()
 
-        private val LOCK = ReentrantLock()
-        private val ENABLED = LOCK.newCondition()
-        private val OPERATIONAL = LOCK.newCondition()
+        var hasOperationalState: Boolean
+            get() = registry.isOperational
+            set(value) = if (value) registry.markOperational() else registry.resetOperational()
 
-        @Volatile
-        private var callback: AccessibilityServiceCallback? = null
-        private val disconnectCallbacks = CopyOnWriteArrayList<AccessibilityServiceCallback>()
+        val instance: AccessibilityService?
+            get() = registry.instance
 
+        // The bridge used by the no-arg UiSelector constructor (e.g. `new UiSelector()` in scripts).
+        // It is the bridge of the most recently created script runtime and no longer depends on
+        // a service instance being alive, so it survives service restarts.
+        // zh-CN: 供无参 UiSelector 构造函数 (如脚本中的 `new UiSelector()`) 使用的 bridge.
+        // 它是最近创建的脚本运行时的 bridge, 不再依赖服务实例存活, 因此服务重启后依然可用.
         @Volatile
-        var hasOperationalState = false
-
-        @Volatile
-        var instance: AccessibilityService? = null
-            private set
+        private var defaultBridge: AccessibilityBridge? = null
 
         var bridge: AccessibilityBridge?
-            get() = instance?.takeUnless { it.isDisposed }?.bridge
+            get() = defaultBridge
             set(value) {
-                instance?.takeUnless { it.isDisposed }?.bridge = value
+                defaultBridge = value
             }
 
         val stickOnKeyObserver = OnKeyListener.Observer()
 
-        fun hasInstance() = instance?.isDisposed == false
-
-        private fun markOperationalStateIfNeeded() {
-            if (hasOperationalState) return
-            LOCK.lock()
-            try {
-                if (hasOperationalState) return
-                hasOperationalState = true
-                OPERATIONAL.signalAll()
-            } finally {
-                LOCK.unlock()
-            }
-        }
-
-        private fun resetOperationalState() {
-            LOCK.lock()
-            try {
-                hasOperationalState = false
-            } finally {
-                LOCK.unlock()
-            }
-        }
+        fun hasInstance() = registry.isBound
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
             // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
@@ -375,7 +327,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         fun stop(): Boolean {
             val service = instance
             if (service == null) {
-                resetOperationalState()
+                registry.resetOperational()
                 return true
             }
             val disabled = runCatching {
@@ -390,50 +342,16 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             return disabled
         }
 
+        // A timeout of -1 waits forever.
+        // zh-CN: 超时为 -1 时无限等待.
         fun waitForStarted(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT): Boolean {
-            if (hasInstance()) {
-                return true
-            }
-            LOCK.lock()
-            try {
-                if (hasInstance()) {
-                    return true
-                }
-                if (timeout == -1L) {
-                    ENABLED.await()
-                    return true
-                }
-                return ENABLED.await(timeout, TimeUnit.MILLISECONDS)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-                return false
-            } finally {
-                LOCK.unlock()
-            }
+            return registry.await(State.CONNECTED, timeout)
         }
 
         // Wait until the service becomes operational (not only connected).
         // zh-CN: 等待服务进入可工作状态 (不只是已连接).
         fun waitForOperational(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT): Boolean {
-            if (hasInstance() && hasOperationalState) {
-                return true
-            }
-            LOCK.lock()
-            try {
-                if (hasInstance() && hasOperationalState) {
-                    return true
-                }
-                if (timeout == -1L) {
-                    OPERATIONAL.await()
-                    return true
-                }
-                return OPERATIONAL.await(timeout, TimeUnit.MILLISECONDS)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-                return false
-            } finally {
-                LOCK.unlock()
-            }
+            return registry.await(State.OPERATIONAL, timeout)
         }
 
         @JvmStatic
@@ -445,25 +363,41 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             }
         }
 
+        /**
+         * Legacy single-slot callback, kept for Kotlin callers.
+         * Script runtimes register through [setCallback] with their bridge as owner (see [AccessibilityBridge.setAccessibilityListener]).
+         * zh-CN: 旧的单槽回调, 供 Kotlin 调用方使用. 脚本运行时以其 bridge 为 owner 通过 [setCallback] 注册.
+         */
         fun setCallback(listener: AccessibilityServiceCallback?) {
-            callback = listener
+            setCallback(LEGACY_CALLBACK_OWNER, listener)
+        }
+
+        /**
+         * Registers (or with a null [listener] removes) the connection callback of [owner].
+         * Each owner holds at most one callback; owners do not affect each other.
+         * zh-CN: 注册 (或以 null [listener] 移除) [owner] 的连接回调. 每个 owner 至多一个回调, owner 之间互不影响.
+         */
+        fun setCallback(owner: Any, listener: AccessibilityServiceCallback?) {
+            if (listener == null) {
+                registry.removeListener(owner)
+            } else {
+                registry.addListener(owner, ConnectionListeners.connectionCallback(listener))
+            }
         }
 
         fun addDisconnectCallback(listener: AccessibilityServiceCallback) {
-            disconnectCallbacks.addIfAbsent(listener)
+            registry.addListener(listener, ConnectionListeners.disconnectCallback(listener))
         }
 
         fun removeDisconnectCallback(listener: AccessibilityServiceCallback): Boolean {
-            return disconnectCallbacks.remove(listener)
+            return registry.removeListener(listener)
         }
 
-        private fun notifyDisconnectCallbacks() {
-            disconnectCallbacks.forEach { listener ->
-                runCatching {
-                    listener.onDisconnected()
-                }.onFailure { error ->
-                    Log.w(TAG, "Error notifying accessibility disconnect callback", error)
-                }
+        private fun postServiceStateChanged() {
+            try {
+                EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
+            } catch (e: Throwable) {
+                Log.e(TAG, "Unable to post accessibility service state changed event", e)
             }
         }
 

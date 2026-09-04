@@ -50,7 +50,6 @@ public abstract class AccessibilityBridge {
         mConfig.seal();
         mContext = context;
         mUsageStatsPerm = new UsageStatsPermission(mContext);
-        AccessibilityService.Companion.setBridge(this);
     }
 
     public abstract void ensureServiceStarted(boolean isForcibleRestart);
@@ -182,8 +181,13 @@ public abstract class AccessibilityBridge {
         return mConfig;
     }
 
+    /**
+     * Registers the connection callback of the script runtime owning this bridge (null removes it).
+     * Each runtime keeps its own callback, so scripts no longer overwrite each other's listener.
+     * zh-CN: 注册持有此 bridge 的脚本运行时的连接回调 (null 表示移除). 每个运行时各自持有回调, 脚本之间不再互相覆盖.
+     */
     @ScriptInterface
     public void setAccessibilityListener(AccessibilityServiceCallback listener) {
-        AccessibilityService.Companion.setCallback(listener);
+        AccessibilityService.Companion.setCallback(this, listener);
     }
 }

@@ -4,12 +4,15 @@
  * Run this on a real device before and after each phase of
  * docs/dev/accessibility-automation-roadmap.md. It covers the entry points that
  * must keep their behavior: text().findOne(timeout), find(n), pickup, detect,
- * compass, wait, click(UiObject), scrollDown(), auto.registerEvent.
+ * compass, wait, click(UiObject), scrollDown(), auto.registerEvent, and (when the
+ * service can be restarted unattended) auto.stateListener plus selectors across a
+ * service restart.
  *
  * zh-CN: 传统 (同步) 无障碍自动化 API 的冒烟测试.
  * 在 docs/dev/accessibility-automation-roadmap.md 的每个阶段前后于真机运行一次.
  * 覆盖必须保持行为不变的入口: text().findOne(timeout), find(n), pickup, detect,
- * compass, wait, click(UiObject), scrollDown(), auto.registerEvent.
+ * compass, wait, click(UiObject), scrollDown(), auto.registerEvent, 以及 (服务可无人值守重启时)
+ * 服务重启前后的 auto.stateListener 与选择器.
  */
 
 "use strict";
@@ -147,6 +150,49 @@ check("wait(cond, {then, else}) callback object form", () => {
 
 check("click(UiObject) does not throw", () => doesNotThrow(() => click(anchor)));
 check("scrollDown() does not throw", () => doesNotThrow(() => scrollDown()));
+
+/*
+ * 7. Service restart (roadmap P1.1): selectors and auto.stateListener across a service restart.
+ *
+ * Only runs when the service can be restarted without user interaction, i.e. AutoJs6 is
+ * configured to start the service with root or secure settings and that way is available.
+ * Otherwise the checks are skipped (not failed), because bringing the service back would
+ * require the user to toggle it in system settings.
+ *
+ * zh-CN: 服务重启 (路线图 P1.1): 服务重启前后的选择器与 auto.stateListener.
+ * 仅当服务可以无人值守地重启 (AutoJs6 已配置以 root 或安全设置方式启动服务且该方式可用) 时运行,
+ * 否则跳过 (不计失败), 因为恢复服务需要用户在系统设置中手动开关.
+ */
+
+const stateLog = [];
+
+auto.stateListener({
+    onConnected: () => stateLog.push("connected"),
+    onDisconnected: () => stateLog.push("disconnected"),
+});
+
+function canRestartServiceUnattended() {
+    const Pref = Packages.org.autojs.autojs.core.pref.Pref.INSTANCE;
+    const RootUtils = Packages.org.autojs.autojs.util.RootUtils;
+    const SecureSettings = Packages.org.autojs.autojs.util.SettingsUtils.SecureSettings;
+    return Boolean(Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
+        || Pref.shouldStartA11yServiceWithSecureSettings() && SecureSettings.isGranted(context));
+}
+
+if (canRestartServiceUnattended()) {
+    const tool = new Packages.org.autojs.autojs.core.accessibility.AccessibilityTool(context);
+    check("restartService(false) succeeds", () => tool.restartService(false) === true);
+    check("service is running again within 10 s", () => wait(() => auto.isRunning(), 10000) === true);
+    check("stateListener saw disconnected followed by connected", () => {
+        const disconnected = stateLog.indexOf("disconnected");
+        return disconnected >= 0 && stateLog.lastIndexOf("connected") > disconnected;
+    });
+    check("pickup(/.+/) still finds something after restart", () => pickup(/.+/) !== null);
+    check("new UiSelector() still finds something after restart", () => new UiSelector().textMatches(/.+/).findOne(3000) !== null);
+    check("text().findOne(timeout) still works after restart", () => textMatches(/.+/).findOne(3000) !== null);
+} else {
+    console.warn("[SKIP] service restart checks: no unattended start strategy (enable root or secure-settings start in AutoJs6 settings)");
+}
 
 /* Summary. */
 
