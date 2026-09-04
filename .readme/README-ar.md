@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 1 September 2026.
+تم تحديث البيانات في 4 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `إضافة جديدة` محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة "bun" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js
 * `إضافة جديدة` يضيف قسم الأدوات في الدرج الجانبي الآن إضافة منتقي ألوان الشاشة الاختيارية كأداة ثالثة متوقفة افتراضيا بعد الزر العائم وموضع المؤشر; يتم تحديث التثبيت والتمكين وحالة التشغيل والإزالة تلقائيا دون حظر واجهة المستخدم
@@ -353,6 +353,8 @@
 * `تصليح` تحويل نتيجة التحديد المتعدد التي تعيدها dialogs.multiChoice الى سلسلة نصية بشكل خاطئ _[`issue #518`](http://issues.autojs6.com/518)_
 * `تصليح` احتمال انهيار التطبيق عند إغلاق مربع حوار لنص برمجي أثناء خروج Looper الخاص بخيطه بسبب تعذر جدولة استدعاء timer الراجع
 * `تصليح` احتمال اختيار وحدة selector توقيع طريقة غير صحيح عند استدعاء طرق محملة بشكل زائد عبر الانعكاس
+* `تصليح` كان البحث عن العناصر بخوارزمية BFS يعيد نتيجة واحدة زائدة عن الحد الاقصى المطلوب, وكان `find(0)` يعيد نتيجة واحدة بدلا من مجموعة فارغة, ولم يتم اعادة تدوير العقد التي تم جلبها بالفعل عند بلوغ الحد الاقصى
+* `تصليح` كانت مقاطع البوصلة المتعددة للاب او القابل للنقر (مثل `p4ppp12p` او `k2k3`) الممررة الى `UiObject.compass` تحتسب المقطع الاول فقط
 * `تصليح` تسبب تراجع توافق API النطاق بعد تحديث محرك Rhino في تعطل بعض ادوات بيئة التشغيل المساعدة
 * `تصليح` كان جسر وحدات Rhino يعالج null/undefined و Callable والمنشئات والنماذج الاولية و realm وقيم ارجاع Kotlin بشكل غير صحيح, مما قد يسبب كائنات عبر realm او فقدان الاستدعاءات الراجعة او استثناءات وقت التشغيل
 * `تصليح` تعذر استخدام الدوال المغلفة بواسطة Proxy كاستدعاءات راجعة في الوحدات القديمة مثل dialogs و events و timers و UI و selector و automator, كما كان من الممكن تمرير وسائط الاستدعاء الراجع في TimerThread كمصفوفة متداخلة
@@ -715,13 +717,13 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Quail 3 | 2026.1.3 Patch 1` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Quail 4 | 2026.1.4` (حدد أحدها حسب الحاجة):
 
-- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
-- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
-- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
+- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
+- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
+- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 10 August 2026. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 1 September 2026. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -772,7 +774,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 1 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 4 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -11,6 +11,9 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.automator.pick.CompassParser
+import org.autojs.autojs.core.automator.pick.CompassStep
+import org.autojs.autojs.core.automator.pick.CompassSyntaxException
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
@@ -30,7 +33,6 @@ import org.mozilla.javascript.VarScope
 import org.opencv.core.Point
 import org.opencv.core.Size
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Mar 9, 2017.
@@ -328,83 +330,84 @@ open class UiObject(
     @Throws(IllegalArgumentException::class)
     fun compass(compassArg: CharSequence?): UiObject? {
         var w: UiObject = this
-        var compass = compassArg?.takeUnless { it == COMPASS_PASS_ON }?.also { ensureCompass(it) } ?: return w
+        val compass = compassArg?.takeUnless { it == COMPASS_PASS_ON }?.also { ensureCompass(it) } ?: return w
 
-        while (compass.isNotEmpty()) {
-            // p2 : [ .parent().parent() ]
-            // p : [ p1 ]
-            // ppp : [ p3 ]
-            // p4ppp12p : [ p4, pp, p12, p -> 4, 2, 12, 1 -> p19 ]
-            val mP = "^p[p\\d]*".toRegex().find(compass)
-            if (mP != null) {
-                var upMax: Int = "^p\\d+|^p+(?!\\d)".toRegex().findAll(compass).fold(0) { acc: Int, result ->
-                    result.value.let { acc + if (it.contains("\\d".toRegex())) it.substring(1).toInt() else it.length }
-                }
-                while (upMax-- > 0) {
-                    w = w.parent() ?: return null
-                }
-                compass.substring(mP.value.length).also { compass = it }
-                continue
-            }
-
-            // c0c2c0c1 : [ .child(0).child(2).child(0).child(1) ]
-            // c0>2>0>1 : [ .child(0).child(2).child(0).child(1) ]
-            // c-3 : [ .child(childCount()-3) ]
-            // c-3c2c-1 : [ .child(childCount()-3).child(2).child(childCount()-1) ]
-            // c1>2>3>0>-1>1 : [ c1 c2 c3 c0 c-1 c1 ]
-            val mC = "^c-?\\d+([>c]?-?\\d+)*".toRegex().find(compass)
-            if (mC != null) {
-                val numbers = mC.value.split("[>c]".toRegex()).filterNot { it.isEmpty() }
-                for (s in numbers) {
-                    val cc = w.childCount().takeIf { it > 0 } ?: return null
-                    val i = s.toInt().let { if (it < 0) it + cc else it }.takeIf { it in 0.until(cc) } ?: return null
-                    w = w.child(i) ?: return null
-                }
-                compass.substring(mC.value.length).also { compass = it }
-                continue
-            }
-
-            // s2 : [ .parent().child(2) ]
-            // s-2 : [ .parent().child(childCount() - 2) ]
-            // s>2 : [ .parent().child(idxInParent() + 2) ]
-            // s<2 : [ .parent().child(idxInParent() - 2) ]
-            val mS = "^s[<>]?-?\\d+".toRegex().find(compass)
-            if (mS != null) {
-                val parent = w.parent() ?: return null
-                var idx = w.indexInParent().takeIf { it >= 0 } ?: return null
-                val str = mS.value
-                val offset: Int = "-?\\d+".toRegex().find(str)?.value?.toDouble()?.roundToInt() ?: return null
-                val cc by lazy { parent.childCount() }
-                when {
-                    str.contains('>') -> idx += offset
-                    str.contains('<') -> idx -= offset
-                    else -> offset.let { if (it < 0) it + cc else it }.also { idx = it }
-                }
-                idx.takeIf { it in 0.until(cc) }?.let { parent.child(it) }?.also { w = it } ?: return null
-                compass.substring(mS.value.length).also { compass = it }
-                continue
-            }
-
-            // k/k1 : [ .clickable() || .parent().clickable() aka pk/p1k ]
-            // k2 : [ .clickable() || .parent().clickable() || .p2.clickable() aka p2k ]
-            // kn : [ .clickable() || .pn.clickable() aka pnk ]
-            val mK = "^k[k\\d]*".toRegex().find(compass)
-            if (mK != null) {
-                var upMax = "^k(\\d*)".toRegex().findAll(compass)
-                    .map { "\\d+".toRegex().find(it.value)?.value ?: "1" }
-                    .fold(0) { acc: Int, n -> acc + n.toInt() }
-                var wTmp: UiObject = w
-                while (upMax-- >= 0) when {
-                    wTmp.clickable().also { if (it) w = wTmp } -> break
-                    else -> wTmp = wTmp.parent() ?: return null
-                }
-                compass.substring(mK.value.length).also { compass = it }
-                continue
-            }
-
-            throw IllegalArgumentException(str(R.string.error_invalid_rest_compass, compass))
+        val steps = try {
+            CompassParser.parse(compass)
+        } catch (e: CompassSyntaxException) {
+            throw IllegalArgumentException(str(R.string.error_invalid_rest_compass, e.rest))
         }
 
+        for (step in steps) {
+            w = when (step) {
+                is CompassStep.Up -> w.compassUp(step.levels)
+                is CompassStep.Children -> w.compassChildren(step.indices)
+                is CompassStep.Sibling -> w.compassSibling(step)
+                is CompassStep.Clickable -> w.compassClickable(step.maxLevels)
+            } ?: return null
+        }
+
+        return w
+    }
+
+    // p2 : [ .parent().parent() ]
+    // p : [ p1 ]
+    // ppp : [ p3 ]
+    // p4ppp12p : [ p4, pp, p12, p -> 4, 2, 12, 1 -> p19 ]
+    private fun compassUp(levels: Int): UiObject? {
+        var w: UiObject = this
+        repeat(levels) { w = w.parent() ?: return null }
+        return w
+    }
+
+    // c0c2c0c1 : [ .child(0).child(2).child(0).child(1) ]
+    // c0>2>0>1 : [ .child(0).child(2).child(0).child(1) ]
+    // c-3 : [ .child(childCount()-3) ]
+    // c-3c2c-1 : [ .child(childCount()-3).child(2).child(childCount()-1) ]
+    // c1>2>3>0>-1>1 : [ c1 c2 c3 c0 c-1 c1 ]
+    private fun compassChildren(indices: List<Int>): UiObject? {
+        var w: UiObject = this
+        for (index in indices) {
+            val cc = w.childCount().takeIf { it > 0 } ?: return null
+            val i = index.let { if (it < 0) it + cc else it }.takeIf { it in 0.until(cc) } ?: return null
+            w = w.child(i) ?: return null
+        }
+        return w
+    }
+
+    // s2 : [ .parent().child(2) ]
+    // s-2 : [ .parent().child(childCount() - 2) ]
+    // s>2 : [ .parent().child(idxInParent() + 2) ]
+    // s<2 : [ .parent().child(idxInParent() - 2) ]
+    private fun compassSibling(step: CompassStep.Sibling): UiObject? {
+        val parent = parent() ?: return null
+        val idx = indexInParent().takeIf { it >= 0 } ?: return null
+        val cc = parent.childCount()
+        val target = when (step.mode) {
+            CompassStep.Sibling.Mode.FORWARD -> idx + step.value
+            CompassStep.Sibling.Mode.BACKWARD -> idx - step.value
+            CompassStep.Sibling.Mode.ABSOLUTE -> step.value.let { if (it < 0) it + cc else it }
+        }
+        return target.takeIf { it in 0.until(cc) }?.let { parent.child(it) }
+    }
+
+    // k/k1 : [ .clickable() || .parent().clickable() aka pk/p1k ]
+    // k2 : [ .clickable() || .parent().clickable() || .p2.clickable() aka p2k ]
+    // kn : [ .clickable() || .pn.clickable() aka pnk ]
+    // @Caution by SuperMonster003 on Sep 4, 2026.
+    //  ! Legacy semantics are kept on purpose: when no clickable node is found within range,
+    //  ! the node itself is returned, unless the walk runs past the root (then null).
+    //  ! Whether to normalize this is tracked in docs/dev/accessibility-automation-roadmap.md (P2.5).
+    //  ! zh-CN: 有意保留既有语义: 范围内未找到可点击节点时返回节点自身, 除非向上遍历越过根节点 (此时返回 null).
+    //  ! 是否规范化该行为记录于 docs/dev/accessibility-automation-roadmap.md (P2.5).
+    private fun compassClickable(maxLevels: Int): UiObject? {
+        var w: UiObject = this
+        var upMax = maxLevels
+        var wTmp: UiObject = this
+        while (upMax-- >= 0) when {
+            wTmp.clickable().also { if (it) w = wTmp } -> break
+            else -> wTmp = wTmp.parent() ?: return null
+        }
         return w
     }
 
@@ -616,7 +619,7 @@ open class UiObject(
 
         @JvmStatic
         fun isCompass(s: Any?): Boolean {
-            return s is CharSequence && (s == COMPASS_PASS_ON || s.isEmpty() || s.contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()))
+            return s is CharSequence && (s == COMPASS_PASS_ON || CompassParser.isCompass(s))
         }
 
         @JvmStatic

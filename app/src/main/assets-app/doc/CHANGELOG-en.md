@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
@@ -193,6 +193,8 @@
 * `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
 * `Fix` The app could crash when a script dialog was dismissed while its thread Looper was exiting because a timer callback could no longer be scheduled
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
+* `Fix` Widget search with the BFS algorithm returned one result more than the requested maximum, `find(0)` returned one result instead of an empty collection, and nodes already fetched when the maximum was reached were not recycled
+* `Fix` Multi-segment parent or clickable compass segments (such as `p4ppp12p` or `k2k3`) passed to `UiObject.compass` only counted the first segment
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array

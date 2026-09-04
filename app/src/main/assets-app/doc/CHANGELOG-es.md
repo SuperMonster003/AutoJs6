@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
@@ -193,6 +193,8 @@
 * `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
 * `Corrección` La aplicación podía cerrarse inesperadamente al cerrar un diálogo de script mientras el Looper de su hilo estaba terminando porque no se podía programar un callback de timer
 * `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
+* `Corrección` La búsqueda de controles con el algoritmo BFS devolvía un resultado más que el máximo solicitado, `find(0)` devolvía un resultado en lugar de una colección vacía, y los nodos ya obtenidos al alcanzar el máximo no se reciclaban
+* `Corrección` Los segmentos de brújula de padre o clicable de varios tramos (como `p4ppp12p` o `k2k3`) pasados a `UiObject.compass` solo contaban el primer tramo
 * `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
 * `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
 * `Corrección` Las funciones envueltas en Proxy no podían usarse como callbacks en módulos heredados como dialogs, events, timers, UI, selector y automator, y los argumentos de callback de TimerThread podían pasarse como un array anidado

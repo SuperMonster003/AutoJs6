@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屉工具分組在浮動按鈕與指針位置後加入可選的屏幕取色插件, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
@@ -193,6 +193,8 @@
 * `修復` dialogs.multiChoice 方法返回的多選結果被錯誤轉換為字符串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修復` 腳本對話框在線程 Looper 退出時關閉, 因無法調度 timer 回調而導致應用崩潰的問題
 * `修復` selector 模塊反射調用重載方法時可能選擇錯誤方法簽名的問題
+* `修復` 控件搜索使用 BFS 算法時在指定最大結果數後多返回一個結果, `find(0)` 返回一個結果而非空集合, 且命中最大結果數後已獲取的剩餘節點未被回收的問題
+* `修復` 控件羅盤 (`UiObject.compass`) 參數中多段連寫的父級或可點擊段 (如 `p4ppp12p`, `k2k3`) 僅計入首段的問題
 * `修復` Rhino 引擎更新後作用域 API 兼容性回歸導致部分運行時輔助功能異常的問題
 * `修復` Rhino 模塊橋接對 null/undefined, Callable, 構造器, 原型, realm 及 Kotlin 返回值的處理不正確, 可能導致跨 realm 對象, 回調丟失或運行時異常的問題
 * `修復` Proxy 包裝函數無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模塊的回調, 且 TimerThread 回調參數可能被嵌套傳遞的問題

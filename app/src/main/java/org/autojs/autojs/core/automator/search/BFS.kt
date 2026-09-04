@@ -10,6 +10,7 @@ object BFS : SearchAlgorithm {
     @Suppress("DEPRECATION")
     override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
+        if (limit <= 0) return result
         val queue = ArrayDeque<UiObject>()
         queue.add(root)
         while (!queue.isEmpty()) {
@@ -17,7 +18,8 @@ object BFS : SearchAlgorithm {
             val isTarget = filter.filter(top)
             if (isTarget) {
                 result.add(top)
-                if (result.size > limit) {
+                if (result.size >= limit) {
+                    recycleRemaining(queue, root)
                     return result
                 }
             }
@@ -30,4 +32,15 @@ object BFS : SearchAlgorithm {
         }
         return result
     }
+
+    @Suppress("DEPRECATION")
+    private fun recycleRemaining(queue: Queue<UiObject>, root: UiObject) {
+        while (!queue.isEmpty()) {
+            val node = queue.poll() ?: continue
+            if (node !== root) {
+                node.recycle()
+            }
+        }
+    }
+
 }

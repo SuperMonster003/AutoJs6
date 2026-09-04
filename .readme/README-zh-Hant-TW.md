@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 1 日.
+資料更新於 2026 年 9 月 4 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屜工具分組在浮動按鈕與指標位置後加入可選的螢幕取色外掛, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
@@ -353,6 +353,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` dialogs.multiChoice 方法傳回的多選結果被錯誤轉換為字串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修復` 腳本對話框在執行緒 Looper 結束時關閉, 因無法排程 timer 回呼而導致應用程式當機的問題
 * `修復` selector 模組反射呼叫多載方法時可能選擇錯誤方法簽名的問題
+* `修復` 元件搜尋使用 BFS 演算法時在指定最大結果數後多回傳一個結果, `find(0)` 回傳一個結果而非空集合, 且命中最大結果數後已取得的剩餘節點未被回收的問題
+* `修復` 元件羅盤 (`UiObject.compass`) 參數中多段連寫的父層或可點擊段 (如 `p4ppp12p`, `k2k3`) 僅計入首段的問題
 * `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
 * `修復` Proxy 包裝函式無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模組的回呼, 且 TimerThread 回呼參數可能以巢狀陣列傳遞的問題
@@ -715,13 +717,13 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 #### Android Studio 準備
 
-下載 `Android Studio Quail 3 | 2026.1.3 Patch 1` 版本 (按需選擇其一):
+下載 `Android Studio Quail 4 | 2026.1.4` 版本 (按需選擇其一):
 
-- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
-- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
-- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
+- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
+- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
+- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 注: 上述版本釋出時間為 2026 年 8 月 10 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
+> 注: 上述版本釋出時間為 2026 年 9 月 1 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
 
 安裝或解壓上述檔案, 執行 Android Studio 軟體 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -772,7 +774,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 1 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 4 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

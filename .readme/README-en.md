@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 1, 2026.
+Data updated on Sep 4, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -166,7 +166,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
@@ -353,6 +353,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
 * `Fix` The app could crash when a script dialog was dismissed while its thread Looper was exiting because a timer callback could no longer be scheduled
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
+* `Fix` Widget search with the BFS algorithm returned one result more than the requested maximum, `find(0)` returned one result instead of an empty collection, and nodes already fetched when the maximum was reached were not recycled
+* `Fix` Multi-segment parent or clickable compass segments (such as `p4ppp12p` or `k2k3`) passed to `UiObject.compass` only counted the first segment
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array
@@ -715,13 +717,13 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Quail 3 | 2026.1.3 Patch 1` version (choose one as needed):
+Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 
-- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
-- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
-- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
+- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
+- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
+- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Aug 10, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -772,7 +774,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 1, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 4, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

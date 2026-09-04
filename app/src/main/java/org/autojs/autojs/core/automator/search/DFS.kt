@@ -14,6 +14,7 @@ object DFS : SearchAlgorithm {
     @Suppress("DEPRECATION")
     override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
+        if (limit <= 0) return result
         val stack = LinkedList<UiObject>()
         stack.push(root)
         while (stack.isNotEmpty()) {
@@ -25,6 +26,7 @@ object DFS : SearchAlgorithm {
             if (filter.filter(parent)) {
                 result.add(parent)
                 if (result.size >= limit) {
+                    recycleRemaining(stack, root)
                     break
                 }
             } else {
@@ -34,6 +36,16 @@ object DFS : SearchAlgorithm {
             }
         }
         return result
+    }
+
+    @Suppress("DEPRECATION")
+    private fun recycleRemaining(stack: LinkedList<UiObject>, root: UiObject) {
+        while (stack.isNotEmpty()) {
+            val node = stack.pop()
+            if (node !== root) {
+                node.recycle()
+            }
+        }
     }
 
 }

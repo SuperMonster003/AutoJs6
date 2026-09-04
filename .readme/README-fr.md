@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 1 September 2026.
+Données mises à jour le 4 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,7 +166,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
@@ -353,6 +353,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les résultats de sélection multiple renvoyés par dialogs.multiChoice étaient convertis à tort en chaînes _[`issue #518`](http://issues.autojs6.com/518)_
 * `Correction` L'application pouvait planter lorsqu'une boîte de dialogue de script était fermée pendant l'arrêt du Looper de son thread, car un callback de timer ne pouvait plus être planifié
 * `Correction` Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion
+* `Correction` La recherche de contrôles avec l'algorithme BFS renvoyait un résultat de plus que le maximum demandé, `find(0)` renvoyait un résultat au lieu d'une collection vide, et les nœuds déjà récupérés lorsque le maximum était atteint n'étaient pas recyclés
+* `Correction` Les segments de boussole parent ou cliquable à plusieurs tronçons (comme `p4ppp12p` ou `k2k3`) passés à `UiObject.compass` ne comptaient que le premier tronçon
 * `Correction` Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution
 * `Correction` Le pont des modules Rhino traitait incorrectement null/undefined, Callable, les constructeurs, les prototypes, les realms et les valeurs de retour Kotlin, ce qui pouvait produire des objets inter-realm, perdre des callbacks ou provoquer des exceptions d'exécution
 * `Correction` Les fonctions encapsulées dans un Proxy ne pouvaient pas être utilisées comme callbacks par les modules historiques tels que dialogs, events, timers, UI, selector et automator, et les arguments de callback de TimerThread pouvaient être transmis sous forme de tableau imbriqué
@@ -715,13 +717,13 @@ Cette section présente la méthode de compilation et de construction du projet 
 
 #### Préparation de Android Studio
 
-Téléchargez la version `Android Studio Quail 3 | 2026.1.3 Patch 1` (choisissez-en une selon vos besoins):
+Téléchargez la version `Android Studio Quail 4 | 2026.1.4` (choisissez-en une selon vos besoins):
 
-- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
-- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
-- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
+- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
+- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
+- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note : La version mentionnée ci-dessus a été publiée le 10 August 2026. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Note : La version mentionnée ci-dessus a été publiée le 1 September 2026. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exemple `"D:\android-studio\bin\studio64.exe"`).
 
@@ -772,7 +774,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 1 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 4 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

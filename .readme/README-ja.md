@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 1 日 に更新されました.
+データは 2026 年 9 月 4 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/01
+###### 2026/09/04
 
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
 * `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
@@ -353,6 +353,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` dialogs.multiChoice メソッドが返す複数選択結果が誤って文字列に変換される問題 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修正` スレッドの Looper 終了中にスクリプトダイアログを閉じると timer コールバックをスケジュールできずアプリがクラッシュする問題
 * `修正` selector モジュールがリフレクションでオーバーロードメソッドを呼び出す際に誤ったメソッドシグネチャを選択する可能性がある問題
+* `修正` BFS アルゴリズムによるコントロール検索で指定した最大件数より 1 件多く返され, `find(0)` が空のコレクションではなく 1 件を返し, 最大件数到達時に取得済みの残りノードが回収されない問題
+* `修正` `UiObject.compass` に渡す複数セグメント連結の親方向または clickable セグメント (`p4ppp12p`, `k2k3` など) が先頭セグメントのみ計上される問題
 * `修正` Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題
 * `修正` Rhino モジュールブリッジで null/undefined, Callable, コンストラクター, プロトタイプ, realm, Kotlin 戻り値が正しく処理されず, realm をまたぐオブジェクト, コールバック欠落, または実行時例外が発生する問題
 * `修正` Proxy でラップされた関数を dialogs, events, timers, UI, selector, automator などの旧モジュールでコールバックとして使用できず, TimerThread のコールバック引数がネストされた配列として渡されることがある問題
@@ -715,13 +717,13 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Quail 3 | 2026.1.3 Patch 1` バージョンをダウンロードしてください (いずれかを選択):
+`Android Studio Quail 4 | 2026.1.4` バージョンをダウンロードしてください (いずれかを選択):
 
-- [android-studio-quail3-patch1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.3.8/android-studio-quail3-patch1-windows.exe) (1.40 GiB)
-- [android-studio-quail3-patch1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-windows.zip) (1.41 GiB)
-- [android-studio-quail3-patch1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.8/android-studio-quail3-patch1-linux.tar.gz) (1.45 GiB)
+- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
+- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
+- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 注: 上述バージョンのリリース日は 2026 年 8 月 10 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
+> 注: 上述バージョンのリリース日は 2026 年 9 月 1 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
 
 上記のファイルをインストールまたは解凍し, Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -772,7 +774,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 1 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 4 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
