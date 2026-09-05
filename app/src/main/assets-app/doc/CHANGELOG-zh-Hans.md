@@ -338,6 +338,7 @@
 * `优化` `auto.registerEvent` 回调收到的事件对象的 `source` 改为首次访问时解析 (原先每个事件都急切遍历父链求深度与索引), 降低未读取 `source` 的回调的开销; API 33 以下在回调返回后未读取的 `source` 为 null
 * `优化` 无障碍窗口根节点的获取逻辑合一 (`AccessibilityBridge` 转为 Kotlin, 三处重复逻辑由 `WindowRootPolicy` / `WindowRootProvider` 统一实现, 布局分析器同样经由此处取窗口): 设置了窗口过滤器时 `auto.root` 在首个通过过滤的窗口没有根节点时继续查看后续窗口 (原先直接返回 `null`); `auto.windowRoots` 与节点动作不再可能遇到 `null` 根节点; `auto.rootInActiveWindow` 不受窗口过滤器影响这一差异已在源码中明确
 * `优化` 无障碍节点的回收统一由 `NodeLifecycle` / `NodeRecyclePolicy` 决定 (Android 13 起节点无需回收, 不再逐个调用空操作的 `recycle()`; 此前散布在搜索算法, 滚动动作, 服务缓存根节点与分配器中的内联回收全部经由此处, 回收失败只记录日志, 不再中断查找)
+* `优化` 无障碍截图 (`automator.captureScreen()`) 抽出为 `A11yScreenshotter`: 截图后的硬件缓冲现在总会被关闭 (原先只回收了包装位图); 系统限频错误的重试改为至多 60 次 (3 s), 之后与其它失败一样以 `null` 兑现 (原先系统持续限频时 promise 永远不会兑现)
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

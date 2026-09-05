@@ -359,6 +359,7 @@
 * `最佳化` `auto.registerEvent` 回呼收到的事件物件的 `source` 改為首次存取時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回呼的開銷; API 33 以下在回呼返回後未讀取的 `source` 為 null
 * `最佳化` 無障礙視窗根節點的取得邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實作, 版面分析器同樣經由此處取視窗): 設定了視窗過濾器時 `auto.root` 在首個通過過濾的視窗沒有根節點時繼續查看後續視窗 (原先直接回傳 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受視窗過濾器影響這一差異已在原始碼中明確
 * `最佳化` 無障礙節點的回收統一由 `NodeLifecycle` / `NodeRecyclePolicy` 決定 (Android 13 起節點無需回收, 不再逐個呼叫空操作的 `recycle()`; 此前散佈在搜尋演算法, 捲動動作, 服務快取根節點與配置器中的內聯回收全部經由此處, 回收失敗只記錄日誌, 不再中斷查找)
+* `最佳化` 無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬體緩衝現在總會被關閉 (原先只回收了包裝點陣圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

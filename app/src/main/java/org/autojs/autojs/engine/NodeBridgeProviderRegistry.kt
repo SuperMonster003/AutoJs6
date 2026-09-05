@@ -770,9 +770,7 @@ object NodeBridgeProviderRegistry {
     }
 
     private fun accessibilityOperational(): Boolean {
-        return AutoJsAccessibilityService.hasInstance() &&
-                AutoJsAccessibilityService.hasOperationalState &&
-                AutoJsAccessibilityService.instance != null
+        return AutoJsAccessibilityService.registry.isOperational
     }
 
     private fun packageDeclaresPermission(context: Context, permission: String): Boolean {

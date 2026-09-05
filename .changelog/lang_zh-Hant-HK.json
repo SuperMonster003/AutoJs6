@@ -357,7 +357,8 @@
         "浮動按鈕及其對話框, 佈局分析器等懸浮窗口的文字語言與夜間模式跟隨 AutoJs6 自身的設置而非系統設置",
         "`auto.registerEvent` 回調收到的事件對象的 `source` 改為首次訪問時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回調的開銷; API 33 以下在回調返回後未讀取的 `source` 為 null",
         "無障礙窗口根節點的獲取邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實現, 佈局分析器同樣經由此處取窗口): 設置了窗口過濾器時 `auto.root` 在首個通過過濾的窗口沒有根節點時繼續查看後續窗口 (原先直接返回 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受窗口過濾器影響這一差異已在源碼中明確",
-        "無障礙節點的回收統一由 `NodeLifecycle` / `NodeRecyclePolicy` 決定 (Android 13 起節點無需回收, 不再逐個調用空操作的 `recycle()`; 此前散佈在搜索算法, 滾動動作, 服務緩存根節點與分配器中的內聯回收全部經由此處, 回收失敗只記錄日誌, 不再中斷查找)"
+        "無障礙節點的回收統一由 `NodeLifecycle` / `NodeRecyclePolicy` 決定 (Android 13 起節點無需回收, 不再逐個調用空操作的 `recycle()`; 此前散佈在搜索算法, 滾動動作, 服務緩存根節點與分配器中的內聯回收全部經由此處, 回收失敗只記錄日誌, 不再中斷查找)",
+        "無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬件緩衝現在總會被關閉 (原先只回收了包裝位圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)"
       ],
       "dependency": [
         "模塊化 Android AXML",

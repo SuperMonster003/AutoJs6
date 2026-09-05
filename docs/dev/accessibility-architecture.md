@@ -12,7 +12,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 ---
 
-## 1. 现状 (2026-09-05, P1.1 / P1.2 / P1.3 / P1.7 完成后)
+## 1. 现状 (2026-09-05, P1.1 ~ P1.7 完成后)
 
 ### 1.1 分层与类映射
 
@@ -21,7 +21,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 | JS 表面 | 参数解析, 返回值适配, 注册全局函数 / 命名空间 | `runtime/api/augment/automator/Auto.kt` (`auto` 对象与 `auto()` 调用), `runtime/api/augment/automator/Automator.kt` (`automator` 与全局动作 `click` / `swipe` / `back` 等), `runtime/api/augment/selector/Selector.kt` (`selector` 与反射注册的 `text()` / `id()` 等全局选择器函数, `pickup` / `detect` / `existsAll` / `existsOne`), `runtime/api/augment/global/Global.kt` (`wait` / `waitForActivity` / `waitForPackage` / `sleep`), `runtime/api/augment/global/Classes.kt` (把 `UiSelector` / `UiObject` / `UiObjectCollection` / `AccessibilityBridge` 作为 JS 类暴露) |
 | 服务与桥接 | 服务生命周期, 状态, 启停, 窗口根节点, 事件分发 | `core/accessibility/registry/A11yServiceRegistry.kt` (P1.1 新增, Android-free: 绑定实例, 3 态状态, 状态监听者, `await`; 进程单例为 `AccessibilityService.registry`), `core/accessibility/registry/ConnectionListeners.kt` (旧 `AccessibilityServiceCallback` 形态的适配器), `core/accessibility/AccessibilityService.kt` (服务本体; 伴生对象持有注册表的兼容外壳, 三个事件总线实例 `eventBus` / `keyBus` / `gestureBus` 及其上的兼容外壳 (`addDelegate` / `removeDelegate`, `addAccessibilityEventCallback` 等脚本回调槽, `addEventObserver`, `keyObserver` / `keyInterceptors`), 默认 bridge, 实例级事件计数), `core/accessibility/event/A11yEventBus.kt` (P1.3 新增, Android-free 泛型: owner 键, 类型集合, 优先级, 可消费, 去重 / 去抖选项, 时间戳), `core/accessibility/event/A11yEvent.kt` (总线上的信封: 原始事件 + 按需的 `wrapper` / `record`, `seal` / `copied`), `core/accessibility/event/AccessibilityDelegate.kt` (框架内部消费方接口, P1.3 迁入), `core/accessibility/A11yEventRecord.kt` (P1.7 新增, 事件字段的普通拷贝), `core/accessibility/AccessibilityServiceUsher.kt` (清单中注册的子类, 负责 `serviceInfo` 标志), `core/accessibility/control/A11yServiceController.kt` (P1.2 新增, Android-free 泛型: 谓词, `start` / `stop` / `restart` / `ensure(level, timeout, launchSettings, forceRestart)` / `restoreIfMalfunctioning`, 失败原因 `FailureReason`; 进程单例为 `AccessibilityTool.controller`), `core/accessibility/control/ServiceStartStrategy.kt` (策略接口, `EnabledServicesStore`, `SettingsStoreStartStrategy`), `core/accessibility/control/EnabledServicesStores.kt` (Root / Secure / Shizuku 三种 store), `core/accessibility/control/EnabledA11yServices.kt` (启用列表的纯操作), `core/accessibility/AccessibilityTool.kt` (控制器的 Android 门面: `launchSettings` / `clearCache` / 错误文案 / UI 触发点用的 `ensureServiceAsync` + `explainFailure`, 其余全部委托; 共享实例 `AbstractAutoJs.accessibilityTool`, 需要 Activity context 做 toast 的 UI 类各自持有一个无状态实例), `core/accessibility/AccessibilityBridge.kt` + `AccessibilityBridgeImpl.kt` (P1.4 转为 Kotlin, FQN 与 public 签名不变; 每个 `ScriptRuntime` 一个, 持有单个不可变 `windowRootPolicy` (模式 / 过滤器 / 兜底, 由 `setMode` / `setWindowFilter` / `flags` 重建) 与标志, 三个根节点查询全部委托 provider; 构造函数已无全局副作用), `core/accessibility/window/WindowRootPolicy.kt` (P1.4 新增, Android-free 数据类), `core/accessibility/window/WindowRootResolver.kt` (P1.4 新增, Android-free 唯一实现: `roots` / `currentRoot` / `activeRoot` / `windows`, 访问器经 `Source` 注入并逐个隔离异常), `core/accessibility/window/WindowRootProvider.kt` (Android 绑定, 每次查询取当前服务实例; `WindowRootProvider.default`, 布局分析器使用), `core/accessibility/AccessibilityServiceAutoStart.kt` (Activity 创建时的自动恢复), `service/AccessibilityServiceItemHelper.kt` (抽屉开关辅助类, D8 已重命名; 开关反映 `controller.isRunning()`, 故障服务显示为关闭并带副标题) |
 | 诊断与管理 (P1.7 新增) | 状态行, 诊断文本, 自检, 服务管理器 UI | `core/accessibility/diagnostics/A11yServiceDiagnostics.kt` (派生状态 `NOT_ENABLED / MALFUNCTIONING / CONNECTED / OPERATIONAL`, 16 个状态行, `Report.toText()`), `core/accessibility/diagnostics/A11yServiceSelfCheck.kt` (有界节点遍历 + 等待事件), `core/accessibility/diagnostics/A11yServiceInfoFormat.kt` (Android-free 位掩码与时长格式化), `ui/accessibility/A11yServiceManagerDialog.kt` (抽屉 "无障碍服务" 条目的管理器对话框: 状态 / 控制 / 设置; 状态与控制区各有持久化的详略等级 `StatusLevel` (4 级) / `ControlLevel` (3 级), 由标题行图标按钮切换; 状态行按字段固定行数以免高度抖动), `ui/accessibility/A11yEventMonitorDialog.kt` (实时事件监视器, 消费伴生级事件观察者) |
-| 动作 | 节点动作, 全局动作, 手势, 截图 | `core/accessibility/SimpleActionAutomator.kt` (每个 `ScriptRuntime` 一个; 含 `registerEvent` / `removeEvent` 的 ownerId 语义与 `captureScreen`), `core/automator/GlobalActionAutomator.kt` (手势与全局动作, 使用 servant Looper), `core/automator/UiObjectActions.kt`, `core/automator/action/**` (滚动等复合动作) |
+| 动作 | 节点动作, 全局动作, 手势, 截图 | `core/accessibility/SimpleActionAutomator.kt` (每个 `ScriptRuntime` 一个; 含 `registerEvent` / `removeEvent` 的 ownerId 语义与 `captureScreen`), `core/accessibility/A11yScreenshotter.kt` (P1.6 新增, API 30+: 单次 `take` 转软件位图并关闭硬件缓冲, `takeWithRetry` 对限频错误重试至多 60 x 50 ms; `captureScreen` 消费它, Python Host 待 P5.4), `core/automator/GlobalActionAutomator.kt` (手势与全局动作, 使用 servant Looper), `core/automator/UiObjectActions.kt`, `core/automator/action/**` (滚动等复合动作) |
 | 查询 | 选择器构建, 搜索, 拾取, 导航 | `core/accessibility/UiSelector.kt` (builder + `find*` + `pickup` 的 `Picker`), `core/automator/UiObject.kt` (`AccessibilityNodeInfoCompat` 包装 + 导航 + `detect` 的 `Detector` / `Invoker` / `Interceptor`), `core/automator/UiObjectCollection.kt`, `core/automator/filter/**` (39 个过滤器), `core/automator/search/{DFS,BFS}.kt`, `core/automator/pick/CompassParser.kt` (Android-free, P0 新增) |
 | 事件消费方 (框架内部) | 以 `AccessibilityDelegate` 形式挂在服务上 | `core/activity/ActivityInfoProvider` (优先级 100, 维护当前包名 / Activity), `core/accessibility/AccessibilityNotificationObserver` (200, 通知与 Toast), `core/record/accessibility/AccessibilityActionRecorder` (300, 录制), 注册点 `AbstractAutoJs.kt` |
 | 事件包装 | 投递给 JS 回调的事件对象 | `core/automator/AccessibilityEventWrapper.kt` (`source` 首次访问时解析, `seal()` 后 API < 33 上未解析的为 null, 见 1.3) |
@@ -165,11 +165,13 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
 JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow / global(wait*)
     |  仅做参数解析与返回值适配, 不含业务逻辑
 核心层 (core/accessibility, core/automator)  Android 相关, 但业务逻辑依赖抽象接口
-    |  A11yServiceRegistry / A11yServiceController / A11yEventBus / WindowRootProvider / NodeLifecycle
+    |  A11yServiceRegistry / A11yServiceController / A11yEventBus / WindowRootProvider / NodeLifecycle / A11yScreenshotter  [P1 已落地]
     |  UiSelector / UiObject / UiObjectCollection / filter / search / pick / flow / toolkit
-纯 Kotlin 逻辑 (Android-free)                 PollPolicy / Stabilizer / FlowScheduler / SelectorRegistry / 过滤器谓词 / CompassParser
+纯 Kotlin 逻辑 (Android-free)                 A11yServiceRegistry / A11yServiceController / A11yEventBus / WindowRootPolicy + WindowRootResolver / NodeRecyclePolicy + NodeLifecycle + NodeRegistry (P1, 已落地) / PollPolicy / Stabilizer / FlowScheduler / SelectorRegistry / 过滤器谓词 / CompassParser
     |  JUnit4 直接测试
 ```
+
+P1 的组件均为 "Android-free 核心 + 薄 Android 绑定" 的形态: 注册表 / 控制器 / 总线 / 解析器 / 生命周期对象是泛型或以注入的访问器工作, `AccessibilityService` 伴生对象, `AccessibilityTool`, `WindowRootProvider`, `NodeLifecycles.kt` 是它们的 Android 绑定.
 
 设计原则 (与 Roadmap 第 4.1 节一致): 单一事实来源; 依赖注入而非静态查找; Android-free 核心; 显式注册表替代反射表 (且注册表必须可驱动代码生成, D9); 兼容外壳 (JS 可见类保留 FQN 与 public 签名).
 
@@ -189,6 +191,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 | `UiObject` 中的 `compass` / `Detector` / `summary` | `core/automator/pick/**` (P0 已迁出解析器) + `UiObjectSummary.kt` | P2.5 |
 | 无 | `core/automator/flow/**` (`FlowScheduler` / `Stabilizer` / `FlowExecutor`) + `runtime/api/augment/flow/**` (`waitAsync` / `flow` / `$flow` / `auto.wait`) | P3 |
 | 无 | `core/automator/toolkit/**` + `automator.*` 与全局函数 (D10) + Flow 步骤 | P4 |
+| `SimpleActionAutomator.captureScreen` 内联的截图回调; Node Bridge / Python Host 各自的 `hasOperationalState` 三元判定 | `A11yScreenshotter`; `registry.isOperational` | P1.6 (已完成 2026-09-05) |
 
 ---
 

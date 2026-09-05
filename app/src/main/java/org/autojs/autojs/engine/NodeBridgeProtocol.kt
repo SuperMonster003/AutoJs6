@@ -1515,14 +1515,12 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun accessibilityBridgeOperational(): Boolean {
-        return AutoJsAccessibilityService.hasInstance() &&
-                AutoJsAccessibilityService.hasOperationalState &&
-                AutoJsAccessibilityService.instance != null
+        return AutoJsAccessibilityService.registry.isOperational
     }
 
     private fun dispatchAccessibilityOperation(request: NodeBridgeRequest): NodeBridgeResponse {
         val service = AutoJsAccessibilityService.instance
-        if (service == null || !AutoJsAccessibilityService.hasOperationalState) {
+        if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
             return NodeBridgeResponse.failure(
                 request.id,
                 NodeBridgeError.capabilityProviderMissing(
@@ -3415,7 +3413,7 @@ class AndroidNodeBridgeCapabilityProvider(
         subscription: ControlledInputObserverSubscription,
     ): Boolean {
         val service = AutoJsAccessibilityService.instance
-        if (service == null || !AutoJsAccessibilityService.hasOperationalState) {
+        if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
             return false
         }
         val listener = object : OnKeyListener {

@@ -170,7 +170,7 @@ ui/accessibility/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 ~ P1.5, P1.7 完成 2026-09-05; 下一项 P1.6 收尾) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 代码完成 (P1.1 ~ P1.7 全部落地 2026-09-05); 待维护者以最终构建重跑冒烟脚本与手动验证清单后关闭 |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -324,11 +324,18 @@ P1.5 证据:
 - `DOCS`: changelog `improvement` 1 条 (回收统一) + `fix` 1 条 (分配器递归) (10 语言), README / CHANGELOG 重新生成; 无新增字符串; JS API 无变化.
 - `DEVICE` (本机 adb): 冒烟脚本 AVD API 24 `53/53 checks passed` (回收平台, 覆盖 DFS / BFS / 滚动动作). 分配器探针 `build/smoke/allocator-probe.js` (以临时接入运行时的构建, 对 `auto.root` 与 `findOne` 结果调用 4 个 compat 访问器, 再 `recycle()`): API 24 与 Xiaomi 23046RP50C (API 35) 均无递归 (递归修复有效); API 35 登记数恒为 0 (NO_OP 平台不记录); API 24 上暴露了上述池化复用问题, 据此决定不接入运行时 (最终构建中 `runtime.nodeAllocator` 不存在, compat 访问器行为与重构前相同). 另: AVD API 24 上第二次 `adb install -r` 后无障碍管理器不再绑定本服务 (`dumpsys accessibility` 的 `services:{}` 为空, 设置中仍列出, 应用报 "已启用但未运行"), 改写 / 删除并重写设置项与启动应用均无效, 需重启模拟器; 与本项无关, 记入架构文档 1.7.
 
-### P1.6 收尾
+### P1.6 收尾 (完成 2026-09-05)
 
-- [ ] 无障碍截图: 抽出 `A11yScreenshotter` (含 `ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT` 重试), `SimpleActionAutomator.captureScreen` 改为消费; Python Host 的 `PythonHostAccessibilityScreenCapture` 是否切换见 P5.4.
-- [ ] Node Bridge / Python Host 中 3 处 `hasOperationalState` 三元表达式改为 `registry.state >= OPERATIONAL` (仅替换判定, 不改其它逻辑).
-- [ ] 更新 `docs/dev/accessibility-architecture.md` (若 P0.3 已建立) 的 "目标" 章节.
+- [x] 无障碍截图: 抽出 `A11yScreenshotter` (含 `ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT` 重试), `SimpleActionAutomator.captureScreen` 改为消费; Python Host 的 `PythonHostAccessibilityScreenCapture` 是否切换见 P5.4. 落地: `core/accessibility/A11yScreenshotter` (API 30+): `take(displayId, mutable, executor, callback)` 单次尝试并把硬件缓冲转为软件 ARGB_8888 位图 (转换异常记为 `ERROR_INTERNAL = -1`), `takeWithRetry(..., maxAttempts = 60, retryDelayMillis = 50)` 只对限频错误在主 looper 上重试; `Result.Success(bitmap)` / `Failure(errorCode)`. `captureScreen` 改为消费, 并发调用仍共享同一 promise. 两处顺带改进 (记入 changelog `improvement`): 硬件缓冲 (`ScreenshotResult.hardwareBuffer`) 现在总会被 `close()` (原先只回收了包装位图, 缓冲泄漏到 GC); 限频重试从无上限改为最多 60 次 (3 s), 之后与其它失败一样以 `null` 兑现 (原先系统持续限频时 promise 永远不兑现). Python Host 未切换 (其同步 + 截止时间的版本可在 P5.4 改为消费 `take()`). (SOURCE)
+- [x] Node Bridge / Python Host 中 3 处 `hasOperationalState` 三元表达式改为 `registry.state >= OPERATIONAL` (仅替换判定, 不改其它逻辑). 落地: 实际 5 处 (`NodeBridgeProtocol` 3 处, `NodeBridgeProviderRegistry` 1 处, `PythonHostCapabilityBroker` 1 处) 均改为 `AccessibilityService.registry.isOperational` (`OPERATIONAL` 蕴含已绑定且实例非空, 因此 `hasInstance() && hasOperationalState && instance != null` 三段合一); `hasOperationalState` 伴生属性保留为兼容外壳. (SOURCE)
+- [x] 更新 `docs/dev/accessibility-architecture.md` (若 P0.3 已建立) 的 "目标" 章节. 落地: 第 1 章标题与 1.1 表更新为 P1 完成后的现状 (bridge / window / node / 截图), 2.1 分层图标注 P1 已落地的组件, 2.2 迁移映射的 P1 各行标记完成日期 (P1.4 / P1.5 已在各自提交中更新), 新增 P1.6 行. (DOCS)
+
+P1.6 证据:
+
+- `JVM`: 无新增纯逻辑 (截图与判定替换均为 Android 侧); 全量 `:app:testAppDebugUnitTest` 1968 / 0 失败 (5 skipped).
+- `ANDROID_BUILD`: `:app:assembleAppDebug` 通过 (2026-09-05).
+- `DOCS`: changelog `improvement` 1 条 (10 语言), README / CHANGELOG 重新生成; 无新增字符串; JS API 无变化 (`automator.captureScreen()` 签名与成功路径不变).
+- `DEVICE`: `build/smoke/capture-probe.js` (三次 `automator.captureScreen()`: 连续两次以触发限频重试, 停 1 s 后第三次) 在 Xiaomi 23046RP50C (API 35) 全部得到 2880x1800 位图, 耗时 138 / 286 / 68 ms (第二次的 286 ms 即限频重试所致, 原先此路径同样重试但无上限); 同机冒烟脚本 `42/42` (无人值守偏好均关闭, 重启段按设计跳过). API < 30 的设备 `captureScreen` 本就返回 `null` (`@RequiresApi(R)` 路径不变), 探针在 AVD API 24 按设计跳过.
 
 ### P1.7 服务管理器对话框 (D14, 完成 2026-09-05)
 
@@ -355,6 +362,8 @@ P1.7 证据:
 - `DEVICE`: 维护者 2026-09-05 反馈管理器对话框 "全部正常" (上方最后一条); 同日确认 root 设备显式关闭后不再自动启动 (P1.2 提前落地项的真机证据).
 
 P1 验收: JVM 单元测试 (registry / controller / event bus / window policy / node lifecycle) 全部通过; `sample/accessibility/smoke-legacy-api.js` 真机通过; 手动验证: 抽屉开关, 悬浮菜单状态文案, Tile, 布局分析器, 脚本内 `auto()` / `auto.waitFor()` / `auto.stateListener` / `auto.registerEvent` 行为与重构前一致; changelog `improvement` 条目已写入.
+
+P1 验收状态 (2026-09-05): JVM 五组测试均在 (`A11yServiceRegistryTest` / `A11yServiceControllerTest` / `A11yEventBusTest` / `WindowRootResolverTest` / `NodeLifecycleTest`), 全量通过; 冒烟脚本 (53 项) 本机 adb 在 AVD API 24 与 Xiaomi API 35 通过, 维护者最近一次 8 设备复跑为 48 项版本 (P1.3 关闭时); changelog 条目齐备. **待维护者**: 以 P1.6 后的构建重跑 53 项冒烟脚本 (含 root / WSS / Shizuku 的重启段) 并做上述手动验证清单, 通过后 P1 关闭.
 
 ---
 
@@ -745,4 +754,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 维护者反馈 (同日): Shizuku 策略真机验证 "功能逻辑正常" (P1.2 跟进项 DEVICE 证据). 维护者要求: 单次会话可完成多个 Roadmap 小节 (除非单个小节已足够繁杂), 兼顾质量与进度.
 - 落地 P1.4: `core/accessibility/window/{WindowRootPolicy,WindowRootResolver,WindowRootProvider}.kt`, `AccessibilityBridge` / `AccessibilityBridgeImpl` 转 Kotlin (FQN 与签名不变), `UiSelector.findImpl` / `SimpleActionAutomator.performAction` 去掉 `filterNotNull()`, `LayoutInspector` 经 provider, `auto.setFlags(['appWindowsFallback'])` (默认关闭, 依据: AVD API 26 上 12 轮重启探针未能复现持续 `null` 的活动窗口根节点, 详见 P1.4 第 3 条). 冒烟脚本第 1 节新增 5 项 (共 53 项). changelog `feature` 1 + `improvement` 1 (10 语言). 证据: `JVM` `WindowRootResolverTest` 13/13, 全量见下条; `ANDROID_BUILD` `assembleAppDebug` 通过 (22:03); `DEVICE` (本机 adb, 新 APK): AVD API 24 `53/53 checks passed`; Xiaomi 23046RP50C (API 35) `42/42` (该机三种无人值守方式的偏好均关闭, 重启段按设计跳过; 首次运行时服务因重装被系统关闭, `auto()` 报 "无障碍服务未启用" 属预期, 经 adb 写入启用列表后复跑). 未在 P1.4 处理: 布局分析器以外的诊断 (`A11yServiceDiagnostics` / `A11yServiceSelfCheck`) 仍直接读 `rootInActiveWindow`, 因为它们展示的是服务的原始状态.
 - 落地 P1.5: `core/accessibility/node/{NodeRecyclePolicy,NodeLifecycle,NodeLifecycles,NodeRegistry}.kt`, 9 处内联 `recycle()` 改为经 `NodeLifecycle` (含 P1.7 诊断的两处), `SearchAlgorithm.search` 增加可注入的 `lifecycle` 参数, `AccessibilityNodeInfoAllocator` 以 lifecycle + 同一性登记表重写并修复 compat 重载的无限递归. 偏离: 分配器不接入 `ScriptRuntime` (原因与探针证据见 P1.5 第 2 条: API < 33 的进程级节点池会让退出时的批量回收命中已被复用的实例). changelog `improvement` 1 + `fix` 1 (10 语言). 证据: `JVM` `NodeLifecycleTest` 5 / `NodeRegistryTest` 2 / `SearchAlgorithmTest` 9, 全量 1968 / 0 (含临时接入运行时的版本); `ANDROID_BUILD` 通过; `DEVICE` AVD API 24 冒烟 53/53, 分配器探针 API 24 / 35 无递归. 顺带记录: AVD API 24 重装后无障碍管理器不再绑定服务的现象与 `settings put` 空值报错 (架构文档 1.7).
-- 下次起点: P1.6 收尾 (`A11yScreenshotter`, Node Bridge / Python Host 的 3 处 `hasOperationalState` 三元判定, 架构文档 "目标" 章节), 然后 P1 验收 (真机重跑冒烟脚本, 手动验证清单), 进入 P2. P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行; 本机 adb 可用 `build/smoke/run-smoke.js` 一类的包装脚本把控制台输出镜像到 `/sdcard/smoke-result.txt`).
+- 落地 P1.6: `core/accessibility/A11yScreenshotter.kt` (API 30+; `take` 单次 + `takeWithRetry` 限频重试至多 60 x 50 ms), `SimpleActionAutomator.captureScreen` 改为消费; `NodeBridgeProtocol` (3 处) / `NodeBridgeProviderRegistry` (1 处) / `PythonHostCapabilityBroker` (1 处) 的可操作判定改为 `AccessibilityService.registry.isOperational` (原条目写 3 处, 实为 5 处); 架构文档 "现状" 章节改为 P1 完成后的形态 (1.1 表加截图行, 2.1 分层图标注 P1 已落地组件, 2.2 新增 P1.6 行). 顺带改进两处并记入 changelog `improvement` (10 语言): 截图硬件缓冲总会 `close()` (原先只回收包装位图); 限频重试有上限, 超限以 `null` 兑现 (原先永不兑现). 证据: `JVM` 全量 1968 / 0; `ANDROID_BUILD` `assembleAppDebug` 通过; `DEVICE` 截图探针 Xiaomi API 35 三次成功 (138 / 286 / 68 ms), 同机冒烟 42/42; 详见 P1.6 证据. P1 全部子项 (P1.1 ~ P1.7) 代码完成.
+- 下次起点: P1 验收待维护者 (以 P1.6 后的构建重跑 53 项冒烟脚本, 含 root / WSS / Shizuku 设备的重启段; 手动验证清单见 P1 验收段), 通过后 P1 关闭; 代码线索转入 P2.1 (`UiNode` 抽象与 `UiObject` 适配). P2 期间沿用 P1 的节奏: 每个子项独立提交, 完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行; 本机 adb 可用 `build/smoke/run-smoke.js` 一类的包装脚本把控制台输出镜像到 `/sdcard/smoke-result.txt`).

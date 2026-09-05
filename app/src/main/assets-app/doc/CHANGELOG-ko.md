@@ -359,6 +359,7 @@
 * `개선` `auto.registerEvent` 콜백이 받는 이벤트 객체의 `source`를 첫 접근 시 해석하도록 변경 (이전에는 모든 이벤트마다 깊이와 인덱스를 위해 부모 체인을 미리 순회), `source`를 읽지 않는 콜백의 비용 절감; API 33 미만에서는 콜백 중 읽지 않은 `source`가 이후 null
 * `개선` 접근성 창 루트 취득 로직을 하나로 통합 (`AccessibilityBridge` 를 Kotlin 으로 재작성, 중복된 세 코드 경로를 `WindowRootPolicy` / `WindowRootProvider` 로 통합, 레이아웃 검사기도 여기서 창을 가져옴): 창 필터가 설정된 경우 필터를 통과한 첫 창에 루트가 없으면 `auto.root` 가 다음 창으로 넘어감 (이전에는 바로 `null` 반환); `auto.windowRoots` 와 노드 동작이 더 이상 `null` 루트를 만나지 않음; `auto.rootInActiveWindow` 가 창 필터를 무시한다는 차이를 소스에 명시
 * `개선` 접근성 노드 재활용을 `NodeLifecycle` / `NodeRecyclePolicy` 한 곳에서 결정하도록 변경 (Android 13 부터 노드는 재활용이 필요 없으므로 효과 없는 `recycle()` 을 개별 호출하지 않음; 검색 알고리즘, 스크롤 동작, 서비스의 캐시된 루트, 할당기에 흩어져 있던 인라인 재활용이 모두 이곳을 거치며, 재활용 실패는 검색을 중단하지 않고 로그로 기록됨)
+* `개선` 접근성 스크린샷 (`automator.captureScreen()`) 을 새 `A11yScreenshotter` 가 담당: 스크린샷의 하드웨어 버퍼가 이제 항상 닫힘 (이전에는 감싼 비트맵만 재활용); 시스템의 빈도 제한 오류에 대한 재시도는 최대 60회 (3초) 로 제한하고, 이후에는 다른 실패와 마찬가지로 `null` 로 해결됨 (이전에는 시스템이 계속 제한하는 동안 promise 가 영원히 해결되지 않았음)
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

@@ -5,13 +5,10 @@ package org.autojs.autojs.core.accessibility
 import android.accessibilityservice.AccessibilityService.GestureResultCallback
 import android.accessibilityservice.GestureDescription
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
@@ -34,7 +31,6 @@ import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.util.DeveloperUtils
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
-import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 
 /**
  * Created by Stardust on Apr 2, 2017.
@@ -279,53 +275,24 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
         ensureService()
 
+        // A capture already in flight is shared by concurrent callers through the same promise.
+        // zh-CN: 已在进行的截图经同一个 promise 与并发调用方共享.
         val promiseAdapter = mPromiseAdapter ?: ScriptPromiseAdapter().also { mPromiseAdapter = it }
         val service = accessibilityBridge.service ?: run {
             promiseAdapter.resolve(null)
             mPromiseAdapter = null
             return promiseAdapter
         }
-        val executor = service.mainExecutor
-        val callback = object : AndroidAccessibilityService.TakeScreenshotCallback {
-            override fun onSuccess(screenshot: AndroidAccessibilityService.ScreenshotResult) {
-                Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)?.let { hardwareBuffer ->
-                    // @Hint by SuperMonster003 on Jun 9, 2023.
-                    //  ! To avoid the exception as below.
-                    //  # java.lang.IllegalStateException: unable to getPixel(), pixel access is not supported on Config#HARDWARE bitmaps.
-                    //  ! Reference: https://stackoverflow.com/questions/60462841/.
-                    //  ! zh-CN:
-                    //  ! 用于避免以下异常发生.
-                    //  # java.lang.IllegalStateException: 无法调用 getPixel(), Config#HARDWARE 位图不支持像素访问.
-                    //  ! 参阅: https://stackoverflow.com/questions/60462841/.
-                    val bitmap = hardwareBuffer.copy(Bitmap.Config.ARGB_8888, true)
-
-                    hardwareBuffer.recycle()
-                    promiseAdapter.resolve(ImageWrapper.ofBitmap(scriptRuntime, bitmap))
-                }
-                mPromiseAdapter = null
-            }
-
-            override fun onFailure(errorCode: Int) {
-                if (errorCode == AndroidAccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT) {
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        captureScreen()
-                    }, 50)
-                } else {
-                    Log.w(TAG, "onFailure: $errorCode")
+        A11yScreenshotter(service).takeWithRetry { result ->
+            when (result) {
+                is A11yScreenshotter.Result.Success -> promiseAdapter.resolve(ImageWrapper.ofBitmap(scriptRuntime, result.bitmap))
+                is A11yScreenshotter.Result.Failure -> {
+                    Log.w(TAG, "captureScreen failed: ${result.errorCode}")
                     promiseAdapter.resolve(null)
-                    mPromiseAdapter = null
                 }
             }
-        }
-
-        runCatching {
-            service.takeScreenshot(Display.DEFAULT_DISPLAY, executor, callback)
-        }.onFailure {
-            Log.w(TAG, "takeScreenshot failed", it)
-            promiseAdapter.resolve(null)
             mPromiseAdapter = null
         }
-
         return promiseAdapter
     }
 

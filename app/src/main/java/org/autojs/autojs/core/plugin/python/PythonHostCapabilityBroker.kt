@@ -945,7 +945,7 @@ internal class AndroidPythonHostCapabilityActions(
     }
 
     private fun requireAccessibilityService(): AutoJsAccessibilityService {
-        if (!AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState) {
+        if (!AutoJsAccessibilityService.registry.isOperational) {
             throw PythonHostCapabilityAccessibilityUnavailableException()
         }
         return AutoJsAccessibilityService.instance
