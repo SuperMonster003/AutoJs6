@@ -157,6 +157,25 @@ class A11yServiceRegistryTest {
     }
 
     @Test
+    fun awaitUnboundReturnsOnceTheInstanceIsGone() {
+        assertTrue("nothing bound yet", registry.awaitUnbound(0))
+
+        registry.onEvent(service)
+        assertFalse(registry.awaitUnbound(20))
+
+        var result = false
+        val waiter = thread { result = registry.awaitUnbound(5000) }
+        Thread.sleep(50)
+        registry.onDisposed(FakeService("stale"))
+        assertTrue("disposing a stale instance does not wake the waiter", waiter.isAlive)
+        registry.onDisposed(service)
+        waiter.join(5000)
+
+        assertFalse(waiter.isAlive)
+        assertTrue(result)
+    }
+
+    @Test
     fun interruptedAwaitReturnsFalseAndKeepsTheInterruptFlag() {
         var result = true
         var interrupted = false

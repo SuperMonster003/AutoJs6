@@ -200,6 +200,10 @@
 * `Fix` After the accessibility service restarted, `pickup` without a root node and selectors created by `new UiSelector()` could keep returning `null` or an empty collection until a new script runtime was created
 * `Fix` `auto.stateListener` was a single global slot, so listeners set by multiple scripts overwrote each other and were not removed when a script ended
 * `Fix` Waiting methods such as `auto.waitFor` could not be woken up and could wait until timeout when the accessibility service had started delivering events but the system never invoked `onServiceConnected`
+* `Fix` Stopping the accessibility service with root silently did nothing yet reported success when AutoJs6 was the only enabled accessibility service, so the service could not be stopped or appeared to "restart automatically" right away
+* `Fix` Creating an app screen automatically re-enabled an accessibility service that the user had explicitly stopped (through root or secure settings); now only a service that is enabled in system settings but not running is restored, everything else is started on demand by scripts, the layout inspector and other entry points
+* `Fix` `auto.start` and `auto.enable` re-enabled the accessibility service through root or secure settings even when it was already running, needlessly restarting it
+* `Fix` Restarting the accessibility service re-enabled it before the system had unbound the previous instance, which some systems (e.g. Android 8.0) coalesced into "still enabled" so that no restart actually happened
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array

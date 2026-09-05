@@ -50,7 +50,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 等待: `AccessibilityService.waitForStarted(timeout)` = `registry.await(CONNECTED, timeout)`, `waitForOperational(timeout)` = `registry.await(OPERATIONAL, timeout)`; 单一 `Condition`, 任何迁移都会 `signalAll`, 负超时无限等待, 中断时返回 `false` 并保留中断标志.
 
-启动方式 (`AccessibilityTool.startService`): Root (`settings put secure ...`), `WRITE_SECURE_SETTINGS` 权限, 否则跳转系统设置页由用户手动开启. "确保可用" 有 4 个近似变体 (`startServiceAndWaitFor` / `startServiceAndWaitForOperational` / `ensureService` / `ensureServiceOperational`), 默认等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000 ms`. (P1.2 合并)
+启动方式 (`AccessibilityTool.startService`): 已运行则直接返回; 否则 Root (`settings put secure ...`, 值加单引号以允许空列表), `WRITE_SECURE_SETTINGS` 权限, 否则跳转系统设置页由用户手动开启. root / 安全设置的启停以 `hasService()` 回读为准. `restartService` 在禁用后先 `waitForStopped()` (注册表 `awaitUnbound`, 2000 ms) 再启用, 避免被系统合并为 "仍然启用". `AccessibilityServiceAutoStart` (每个 `BaseActivity` 创建时) 只恢复 `isMalfunctioning()` 的服务, 不会重新启用用户显式关闭的服务. "确保可用" 有 4 个近似变体 (`startServiceAndWaitFor` / `startServiceAndWaitForOperational` / `ensureService` / `ensureServiceOperational`), 默认等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000 ms`. (P1.2 合并)
 
 已知平台问题: `onServiceConnected` 偶尔不回调但事件照常到达; 注册表的 `onEvent` 会直接采纳实例并置 `OPERATIONAL`, 等待方与状态监听者 (含 `auto.stateListener` 的 `onConnected`) 在这条路径上同样被唤醒 / 通知.
 

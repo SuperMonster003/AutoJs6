@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_START_TIMEOUT
+import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_STOP_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
@@ -352,6 +353,12 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         // zh-CN: 等待服务进入可工作状态 (不只是已连接).
         fun waitForOperational(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT): Boolean {
             return registry.await(State.OPERATIONAL, timeout)
+        }
+
+        // Wait until the bound instance has gone away (the system has unbound the service).
+        // zh-CN: 等待绑定实例消失 (系统已解绑服务).
+        fun waitForStopped(timeout: Long = DEFAULT_A11Y_SERVICE_STOP_TIMEOUT): Boolean {
+            return registry.awaitUnbound(timeout)
         }
 
         @JvmStatic

@@ -22,7 +22,7 @@ import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Jan 26, 2017.
- * Modified by SuperMonster003 as of Jan 28, 2026.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 class AccessibilityTool(private val context: Context? = null) {
 
@@ -90,14 +90,20 @@ class AccessibilityTool(private val context: Context? = null) {
     @JvmOverloads
     @ScriptInterface
     fun startService(withLaunchSettings: Boolean = true): Boolean {
-        var result = false
+        // A running service is left alone; the root / secure-settings ways below re-enable the service
+        // (disable + enable), which would needlessly restart it.
+        // zh-CN: 已运行的服务不做处理; 下方的 root / 安全设置方式会重新启用服务 (先禁用再启用), 相当于无谓的重启.
+        if (isRunning()) {
+            return true.also { Log.d(TAG, "Accessibility service is running") }
+        }
         if (startServiceWithConvenientWaysIfPossible()) {
-            result = true.also { Log.d(TAG, "Accessibility service enabled successfully by a certain \"convenient way\"") }
+            return true.also { Log.d(TAG, "Accessibility service enabled successfully by a certain \"convenient way\"") }
         }
         if (isRunning()) {
-            result = true.also { Log.d(TAG, "Accessibility service is running") }
+            return true.also { Log.d(TAG, "Accessibility service is running") }
         }
-        return result || false.also { if (withLaunchSettings) launchSettings() }
+        if (withLaunchSettings) launchSettings()
+        return false
     }
 
     @JvmOverloads
@@ -126,8 +132,13 @@ class AccessibilityTool(private val context: Context? = null) {
     @JvmOverloads
     @ScriptInterface
     fun restartService(withLaunchSettings: Boolean = false): Boolean {
-        var result = true
-        result = stopService(false) && result
+        var result = stopService(false)
+        // The system unbinds asynchronously. Re-enabling the service before that happened is coalesced
+        // into "still enabled" by the settings observer and no restart takes place at all.
+        // zh-CN: 系统的解绑是异步的. 若在解绑完成前重新启用, 设置观察者会把两次写入合并为 "仍然启用", 实际不会重启.
+        if (result && !AccessibilityService.waitForStopped()) {
+            Log.w(TAG, "Accessibility service was not unbound within $DEFAULT_A11Y_SERVICE_STOP_TIMEOUT ms after being disabled")
+        }
         result = startService(withLaunchSettings) && result
         return result
     }
@@ -202,21 +213,18 @@ class AccessibilityTool(private val context: Context? = null) {
 
     private fun isRootAccessible() = Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
 
+    // The root and secure-settings ways report whether the enabled-services setting really changed
+    // (read back through hasService), not merely whether the commands ran without throwing.
+    // zh-CN: root 与安全设置方式以 hasService 回读结果为准, 而不是仅以 "命令未抛异常" 作为成功.
+
     private fun startServiceWithRoot(timeout: Long? = null): Boolean = when (timeout != null) {
         true -> startServiceWithRoot() && AccessibilityService.waitForStarted(timeout)
         else -> runCatching {
             stopServiceWithRoot()
-
-            val services = getServicesWithRoot(true)
-
-            val cmdServices = "settings put secure enabled_accessibility_services $services"
-            val resultServices = ProcessShell.execCommand(cmdServices, true)
-
-            val cmdState = "settings put secure accessibility_enabled 1"
-            val resultState = ProcessShell.execCommand(cmdState, true)
-
-            TextUtils.isEmpty(resultServices.error) && TextUtils.isEmpty(resultState.error)
-        }.isSuccess
+            putSecureSettingWithRoot(Secure.ENABLED_ACCESSIBILITY_SERVICES, getServicesWithRoot(true))
+            putSecureSettingWithRoot(Secure.ACCESSIBILITY_ENABLED, "1")
+            hasService()
+        }.getOrDefault(false)
     }
 
     private fun startServiceWithRootIfPossible(timeout: Long? = null) = isRootAccessible() && startServiceWithRoot(timeout)
@@ -231,22 +239,16 @@ class AccessibilityTool(private val context: Context? = null) {
             Secure.putInt(mApplicationContext.contentResolver, Secure.ACCESSIBILITY_ENABLED, 1)
 
             hasService()
-        }.isSuccess
+        }.getOrDefault(false)
     }
 
     private fun startServiceWithSecureIfPossible(timeout: Long? = null) = isSecureAccessible() && startServiceWithSecure(timeout)
 
     private fun stopServiceWithRoot() = runCatching {
-        val services = getServicesWithRoot(false)
-
-        val cmdServices = "settings put secure enabled_accessibility_services $services"
-        val resultServices = ProcessShell.execCommand(cmdServices, true)
-
-        val cmdState = "settings put secure accessibility_enabled 0"
-        val resultState = ProcessShell.execCommand(cmdState, true)
-
-        TextUtils.isEmpty(resultServices.error) && TextUtils.isEmpty(resultState.error)
-    }.isSuccess
+        putSecureSettingWithRoot(Secure.ENABLED_ACCESSIBILITY_SERVICES, getServicesWithRoot(false))
+        putSecureSettingWithRoot(Secure.ACCESSIBILITY_ENABLED, "0")
+        !hasService()
+    }.getOrDefault(false)
 
     private fun stopServiceWithSecure() = runCatching {
         val services = getServicesWithSecure(false)
@@ -255,7 +257,20 @@ class AccessibilityTool(private val context: Context? = null) {
         Secure.putInt(mApplicationContext.contentResolver, Secure.ACCESSIBILITY_ENABLED, 0)
 
         !hasService()
-    }.isSuccess
+    }.getOrDefault(false)
+
+    // The value is single-quoted so that an empty string (AutoJs6 was the only enabled service)
+    // is still passed as an argument; an unquoted empty value used to be dropped by the shell,
+    // "settings put" then rejected the command and the service silently stayed enabled.
+    // zh-CN: 值以单引号包裹, 使空字符串 (AutoJs6 是唯一启用的服务) 仍能作为参数传递;
+    // 未加引号的空值会被 shell 丢弃, "settings put" 因而拒绝执行, 服务静默地保持启用状态.
+    private fun putSecureSettingWithRoot(name: String, value: String) {
+        val quoted = "'${value.replace("'", "'\\''")}'"
+        val result = ProcessShell.execCommand("settings put secure $name $quoted", true)
+        if (!TextUtils.isEmpty(result.error)) {
+            Log.w(TAG, "settings put secure $name: ${result.error.trim()}")
+        }
+    }
 
     private fun getServicesWithRoot(withAutoJs: Boolean? = null): String = when (withAutoJs) {
         true -> attachAutoJsService(getServicesWithRoot(false))
@@ -288,6 +303,9 @@ class AccessibilityTool(private val context: Context? = null) {
 
         @JvmStatic
         val DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000L
+
+        @JvmStatic
+        val DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = 2000L
 
         @JvmStatic
         val SERVICES_DELIMITER = ":"

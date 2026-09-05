@@ -233,10 +233,24 @@ P1.1 证据:
 
 - `JVM`: 全量 `:app:testAppDebugUnitTest` 1891 tests / 0 failures (含新增 14 个用例).
 - `ANDROID_BUILD`: 单元测试任务已编译 app 模块.
-- `DEVICE`: 待维护者重跑 `sample/accessibility/smoke-legacy-api.js`. 脚本新增第 7 节 "服务重启" (仅在 AutoJs6 已配置 root 或安全设置启动方式且可用时执行, 否则打印 `[SKIP]` 并跳过): `restartService(false)` 后 10 s 内 `auto.isRunning()`, `auto.stateListener` 依次收到 `disconnected` / `connected`, `pickup(/.+/)`, `new UiSelector().textMatches(/.+/).findOne(3000)`, `textMatches(/.+/).findOne(3000)` 均仍有结果. 不可无人值守重启的设备预期仍为 `30/30`, 可重启的设备预期 `36/36`.
+- `DEVICE` (2026-09-05, 维护者, 脚本含第 7 节 "服务重启"; WSS = `WRITE_SECURE_SETTINGS`): 基础 30 项在 AVD API 24 / 25 / 26 / 36 (16K) 与 Xiaomi 23046RP50C, Sony G8441, Sony XQ-AT72, Redmi 22120RN86C 全部通过; 重启段 36/36: AVD 24 / 25 / 36 (WSS), 23046RP50C (WSS), G8441 (WSS 与 Root), XQ-AT72 (WSS), 22120RN86C (WSS). 两处例外及处理:
+  - AVD API 26: WSS 34/36 (`stateListener` 未见 disconnected -> connected; `pickup` 重启后单次未命中), Root 35/36 (`stateListener`). 原因: 脚本原先调用 `restartService(false)` = 禁用后立即启用, API 26 的设置观察者把两次写入合并为 "仍然启用", 实际未重启 (Root 路径还叠加了下述 "空参数" bug); `pickup` 的单次尝试落在重新绑定后的瞬时空窗. 处理 (见 P1.2 提前落地项): `AccessibilityTool.restartService` 改为等待解绑后再启用; 脚本改为 stop -> 观测解绑 (5 s) -> start, 重启后的查找改为最长 5 s 轮询. 预期复跑后 API 26 为 38/38.
+  - Sony XQ-DQ72 (QV770340J7): 21/30, 全部 "屏幕上能找到内容" 的检查失败 (`auto.service` 与事件投递正常), 无权限 / WSS / Root 三种配置结果一致; P0 阶段同一设备为 30/30. 尚无该设备的控制台输出, 暂不能定位. 候选原因: (a) 运行时熄屏或锁屏 (远程运行脚本不会点亮屏幕, `home()` / `app.launch` 无可见效果, 但事件仍会投递); (b) 该设备为 root 设备, 若此前经历过 "root 关闭失效" (见 P1.2 提前落地项) 而处于 `accessibility_enabled=0` 但仍在启用列表的不一致状态, 部分系统在该状态下不提供窗口信息. 脚本已增加环境快照 (屏幕 / 锁屏 / 当前包名 / 窗口根节点数 / `accessibility_enabled` / 启用列表) 与两项前置检查 (`screen is on and unlocked`, `auto.windowRoots is not empty`), 并在失败时把每项的 `returned` / `threw` 细节写进最终错误; 待复跑后按输出判定.
 - `DOCS`: changelog `fix` 3 条 (10 语言) 已写入并重新生成 README / CHANGELOG. JS 签名无变化, 无需同步 d.ts / 文档项目.
 
+P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段的两处例外已归因并处理, XQ-DQ72 待复跑定位. 关闭 (XQ-DQ72 的结果作为 P1.2 复跑的一部分跟踪).
+
 ### P1.2 服务控制器 `A11yServiceController`
+
+提前落地 (2026-09-05, 因维护者真机反馈, 仍在 `AccessibilityTool` 内; 迁入控制器时保持这些语义并补单测):
+
+- [x] Root 关闭失效: `stopServiceWithRoot` 以 `settings put secure enabled_accessibility_services $services` 拼接命令, 当 AutoJs6 是唯一启用的服务时 `$services` 为空, shell 丢弃空参数, `settings put` 报 "Bad arguments" 而不写入; 同时 `runCatching {}.isSuccess` 把命令失败当作成功. 表现为 "root 设备上显式关闭后服务总是自动恢复" (实际从未关闭; 540 ms 后抽屉 `sync()` 读回仍在运行). 修复: 值以单引号包裹 (`putSecureSettingWithRoot`), root / 安全设置的启停一律以 `hasService()` 回读作为结果 (`getOrDefault(false)`), 失败时回落到 `disableSelf()`. 记入 changelog `fix`. (SOURCE)
+- [x] 尊重显式关闭: `AccessibilityServiceAutoStart` (每个 `BaseActivity` 创建时) 原先 `!isRunning()` 即通过 root / 安全设置启动, 会重新启用用户显式关闭的服务. 改为仅在 `isMalfunctioning()` (设置中已启用但进程内未绑定) 且等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT` 后仍未绑定时恢复; 未启用的服务由脚本 / 布局分析器 / 悬浮菜单 / Tile 等显式入口按需启动. 记入 changelog `fix`. (SOURCE)
+- [x] `startService()` 在服务已运行时直接返回, 不再先走 root / 安全设置的 "禁用 + 启用" (原先 `auto.start()` 会重启正在运行的服务). 记入 changelog `fix`. (SOURCE)
+- [x] `restartService()` 在 `stopService(false)` 之后等待 `AccessibilityService.waitForStopped()` (注册表 `awaitUnbound`, 默认 `DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = 2000 ms`) 再启动; 否则部分系统 (AVD API 26 实测) 把 "禁用后立即启用" 合并为无变化, 实际不重启. 记入 changelog `fix`. (SOURCE; JVM: `A11yServiceRegistryTest.awaitUnboundReturnsOnceTheInstanceIsGone`)
+- [ ] 遗留: `stopServiceWithSecure` / `stopServiceWithRoot` 会把 `accessibility_enabled` 置 0, 在旧系统上等同于关闭全部无障碍服务 (含第三方); 现代系统由框架自行推导该值. 控制器迁入时评估是否只维护启用列表而不再写 `accessibility_enabled`.
+
+原计划条目:
 
 - [ ] 将 `AccessibilityTool` 的启停逻辑迁入 `A11yServiceController`, 启动方式抽象为 `ServiceStartStrategy` 列表 (Root, SecureSettings, SettingsUi), 按偏好顺序尝试; 每种策略可单测 (以接口替代 `ProcessShell` / `Settings.Secure`).
 - [ ] 将 4 个 "确保 / 等待" 变体合并为一个 `ensure(level: A11yServiceRegistry.State, timeout: Long, launchSettingsIfNeeded: Boolean): EnsureResult`, 失败原因由 "设置中是否已启用" (`hasService()`, 见 P1.1 对 3 态枚举的说明) 与注册表状态组合得出 (未启用 / 已启用未绑定 / 已绑定未操作), 错误文案按原因区分, 消除 `AccessibilityTool.kt:182,195,196` 三处同文案.
@@ -643,5 +657,7 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 未做: 真机运行冒烟脚本 (需要维护者在设备上执行并把结果回填到 P0 验收).
 - 维护者反馈: 冒烟脚本在 5 台设备上 `30/30 checks passed` (设备见 P0 证据); Q4 选 B 并复用 `select` 作为入口 -> D13. P0 关闭.
 - 落地 P1.1: 新增 `core/accessibility/registry/{A11yServiceRegistry,ConnectionListeners}.kt` 与 `A11yServiceRegistryTest` (14 用例); `AccessibilityService` 生命周期与伴生对象委托到注册表; `auto.stateListener` 按脚本运行时注册并在退出时注销; `AccessibilityBridge` 构造副作用移除, 默认 bridge 改由 `AbstractAutoJs.createRuntime()` 登记, `pickup` 绑定调用方 bridge. 全量 JVM 1891 / 0 失败. changelog `fix` 3 条. 设计偏离: 状态枚举 3 态 (`UNBOUND / CONNECTED / OPERATIONAL`), "设置中已启用" 留给 P1.2 控制器 (理由见 P1.1 首条).
-- 冒烟脚本新增第 7 节 (服务重启, 仅 root / 安全设置可用时执行), 待维护者复跑并回填 P1.1 的 `DEVICE` 证据.
-- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.
+- 冒烟脚本新增第 7 节 (服务重启, 仅 root / 安全设置可用时执行), 维护者在 4 台 AVD 与 5 台实体机上复跑, 结果与归因见 P1.1 `DEVICE` 证据.
+- 维护者反馈 "root 设备上显式关闭无障碍服务后总是自动启动, WSS 不会": 定位为 root 关闭命令的空参数 bug (关闭从未生效) 叠加 `AccessibilityServiceAutoStart` 对显式关闭的无差别恢复. 修复 4 项 (见 P1.2 "提前落地"), changelog `fix` 4 条; 冒烟脚本改为 stop -> 观测解绑 -> start 并增加环境快照. 待维护者复跑: 预期可重启设备 38/38, 其余 32/32 (新增 2 项前置检查), 并确认 root 设备显式关闭后不再自动恢复, XQ-DQ72 的环境快照输出.
+- 维护者提出: 抽屉 "无障碍服务" 对话框的 "管理器" 按钮尚未实现 (`DrawerFragment.kt:210` 目前弹 "开发中"), 希望做成对话框形式的服务管理器 (信息展示 / 调试 / 测试 / 开关 / 控制), 兼作本 Roadmap 各阶段的真机调试面板, 文案与 UI 风格须与现有对话框一致. 设计待确认后作为 P1 子项加入.
+- 下次起点: 管理器对话框 (设计确认后), 然后 P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.

@@ -53,13 +53,44 @@ events.on("exit", function () {
     auto.removeEvent("WINDOW_STATE_CHANGED");
 });
 
+device.wakeUpIfNeeded();
 home();
 sleep(1000);
 app.launch(autojs.packageName);
 sleep(1500);
 
+/*
+ * Environment snapshot. When the "finds something on screen" checks below fail, this is what
+ * explains it (screen off, keyguard, no window roots, service enabled but not operational, ...).
+ *
+ * zh-CN: 环境快照. 下方 "屏幕上能找到内容" 的检查失败时, 由这里解释原因
+ * (熄屏, 锁屏, 无窗口根节点, 服务已启用但不可操作等).
+ */
+function describeEnvironment() {
+    const safely = (body) => {
+        try {
+            return String(body());
+        } catch (e) {
+            return `error: ${e}`;
+        }
+    };
+    const Secure = android.provider.Settings.Secure;
+    const resolver = context.getContentResolver();
+    return [
+        `device=${device.brand} ${device.model} api=${device.sdkInt}`,
+        `hasService=${safely(() => auto.hasService())} hasInstance=${safely(() => auto.hasInstance())} isRunning=${safely(() => auto.isRunning())} isOperational=${safely(() => auto.isOperational())}`,
+        `screenOn=${safely(() => device.isScreenOn())} keyguardLocked=${safely(() => context.getSystemService(context.KEYGUARD_SERVICE).isKeyguardLocked())} currentPackage=${safely(() => currentPackage())}`,
+        `windowRoots=${safely(() => auto.windowRoots.length)} rootInActiveWindow=${safely(() => auto.rootInActiveWindow !== null)} windows=${safely(() => auto.windows.length)}`,
+        `accessibility_enabled=${safely(() => Secure.getInt(resolver, "accessibility_enabled", -1))} enabled_accessibility_services=${safely(() => Secure.getString(resolver, "enabled_accessibility_services"))}`,
+    ].join("\n  ");
+}
+
+console.log(`environment:\n  ${describeEnvironment()}`);
+
 check("auto.service is available after auto()", () => auto.service !== null);
 check("WINDOW_STATE_CHANGED events were delivered", () => windowEvents.length > 0);
+check("screen is on and unlocked", () => device.isScreenOn() && !context.getSystemService(context.KEYGUARD_SERVICE).isKeyguardLocked());
+check("auto.windowRoots is not empty", () => auto.windowRoots.length > 0);
 
 /*
  * Android usually emits more than one WINDOW_STATE_CHANGED event per window transition
@@ -181,15 +212,32 @@ function canRestartServiceUnattended() {
 
 if (canRestartServiceUnattended()) {
     const tool = new Packages.org.autojs.autojs.core.accessibility.AccessibilityTool(context);
-    check("restartService(false) succeeds", () => tool.restartService(false) === true);
+    const serviceBefore = auto.service;
+
+    // Stop and start are issued separately with the unbind observed in between. Re-enabling the
+    // service before the system has unbound it is coalesced into "still enabled" on some platforms
+    // (seen on API 26), in which case nothing restarts and the listener never fires.
+    // AccessibilityTool.restartService() applies the same wait internally.
+    // zh-CN: 停止与启动分开执行, 中间观测解绑. 若在系统解绑前重新启用, 部分平台 (API 26 上观察到)
+    // 会把两次写入合并为 "仍然启用", 实际不会重启, 监听器也不会触发. AccessibilityTool.restartService() 内部有同样的等待.
+    check("stopService(false) succeeds", () => tool.stopService(false) === true);
+    check("service is unbound within 5 s after stopService", () => wait(() => !auto.hasInstance(), 5000) === true);
+    check("service is not listed in enabled_accessibility_services after stopService", () => auto.hasService() === false);
+    check("startService(false) succeeds", () => tool.startService(false) === true);
     check("service is running again within 10 s", () => wait(() => auto.isRunning(), 10000) === true);
+    check("a new service instance is bound", () => auto.service !== null && auto.service !== serviceBefore);
     check("stateListener saw disconnected followed by connected", () => {
         const disconnected = stateLog.indexOf("disconnected");
         return disconnected >= 0 && stateLog.lastIndexOf("connected") > disconnected;
     });
-    check("pickup(/.+/) still finds something after restart", () => pickup(/.+/) !== null);
+
+    // Window content can take a moment to become available again after a rebind.
+    // zh-CN: 重新绑定后窗口内容可能需要片刻才能再次可用.
+    check("window roots are available again within 5 s", () => wait(() => auto.windowRoots.length > 0, 5000) === true);
+    check("pickup(/.+/) still finds something after restart", () => wait(() => pickup(/.+/) !== null, 5000) === true);
     check("new UiSelector() still finds something after restart", () => new UiSelector().textMatches(/.+/).findOne(3000) !== null);
     check("text().findOne(timeout) still works after restart", () => textMatches(/.+/).findOne(3000) !== null);
+    console.log(`stateListener log: ${JSON.stringify(stateLog)}`);
 } else {
     console.warn("[SKIP] service restart checks: no unattended start strategy (enable root or secure-settings start in AutoJs6 settings)");
 }
@@ -199,5 +247,6 @@ if (canRestartServiceUnattended()) {
 const failed = results.filter((result) => !result.passed);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
 if (failed.length > 0) {
-    throw new Error(`${failed.length} smoke check(s) failed: ${failed.map((result) => result.name).join("; ")}`);
+    console.error(`environment at the end of the run:\n  ${describeEnvironment()}`);
+    throw new Error(`${failed.length} smoke check(s) failed: ${failed.map((result) => `${result.name}${result.detail ? ` (${result.detail})` : ""}`).join("; ")}`);
 }

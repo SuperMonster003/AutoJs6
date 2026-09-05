@@ -11,11 +11,19 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Restores the accessibility service without making Activity creation wait for root or
  * secure-settings I/O.
  *
+ * Only a malfunctioning service is restored, i.e. one that is enabled in system settings but has
+ * no bound instance in this process (typically after the app was updated or its process was killed).
+ * A service that is not enabled is left alone: the user may have stopped it deliberately, and it is
+ * started on demand by scripts, the layout inspector and the other explicit entry points.
+ *
  * Every [org.autojs.autojs.ui.BaseActivity] requests this check while it is being created.
  * A process-wide single-flight guard prevents adjacent Activity launches from running the
  * same shell/settings sequence concurrently.
  *
  * zh-CN: 在不阻塞 Activity 创建的前提下自动恢复无障碍服务.
+ *
+ * 仅恢复 "故障" 状态的服务, 即系统设置中已启用但进程内没有绑定实例 (通常出现在应用更新或进程被杀之后).
+ * 未启用的服务不做处理: 用户可能是有意关闭的, 脚本, 布局分析器等显式入口会在需要时按需启动.
  *
  * 每个 [org.autojs.autojs.ui.BaseActivity] 创建时都会请求一次检查. 进程级单飞门控可避免
  * 相邻 Activity 启动时并发执行相同的 shell/settings 操作.
@@ -29,7 +37,12 @@ internal object AccessibilityServiceAutoStart {
         coordinator.submit {
             try {
                 AccessibilityTool(applicationContext).apply {
-                    if (!isRunning()) startService(false)
+                    // Right after a process start the system may still be about to bind the service;
+                    // give it a moment before forcing a re-enable through root / secure settings.
+                    // zh-CN: 进程刚启动时系统可能正要绑定服务, 先稍等片刻, 再通过 root / 安全设置强制重新启用.
+                    if (isMalfunctioning() && !AccessibilityService.waitForStarted() && isMalfunctioning()) {
+                        startService(false)
+                    }
                 }
             } catch (error: Exception) {
                 Log.w(TAG, "Unable to restore the accessibility service automatically.", error)

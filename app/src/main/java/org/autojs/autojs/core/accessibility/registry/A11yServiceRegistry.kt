@@ -115,16 +115,25 @@ open class A11yServiceRegistry<S : Any>(
      * zh-CN: 阻塞直到状态达到 [target] 或更高. [timeoutMillis] 为负表示无限等待.
      * 超时或被中断时返回 false, 中断标志会被保留, 以便依赖中断停止脚本的调用方仍能感知.
      */
-    fun await(target: State, timeoutMillis: Long): Boolean {
-        if (state >= target) return true
+    fun await(target: State, timeoutMillis: Long): Boolean = awaitSnapshot(timeoutMillis) { it.state >= target }
+
+    /**
+     * Blocks until no instance is bound, with the same timeout and interruption rules as [await].
+     * Used to let the system finish unbinding before the service is enabled again.
+     * zh-CN: 阻塞直到没有绑定实例, 超时与中断规则同 [await]. 用于在重新启用服务前等待系统完成解绑.
+     */
+    fun awaitUnbound(timeoutMillis: Long): Boolean = awaitSnapshot(timeoutMillis) { !it.isBound }
+
+    private inline fun awaitSnapshot(timeoutMillis: Long, satisfied: (Snapshot<S>) -> Boolean): Boolean {
+        if (satisfied(snapshot)) return true
         lock.lock()
         try {
             if (timeoutMillis < 0) {
-                while (state < target) stateChanged.await()
+                while (!satisfied(snapshot)) stateChanged.await()
                 return true
             }
             var remainingNanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
-            while (state < target) {
+            while (!satisfied(snapshot)) {
                 if (remainingNanos <= 0L) return false
                 remainingNanos = stateChanged.awaitNanos(remainingNanos)
             }
