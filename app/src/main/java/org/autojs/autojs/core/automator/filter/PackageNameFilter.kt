@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -11,7 +11,7 @@ object PackageNameFilter {
 
     private val PACKAGE_NAME_GETTER = object : KeyGetter {
 
-        override fun getKey(nodeInfo: UiObject) = nodeInfo.packageName?.toString()
+        override fun getKey(nodeInfo: UiNode<*>) = nodeInfo.packageName()
 
         override fun toString() = "packageName"
 

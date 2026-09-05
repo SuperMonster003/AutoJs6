@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -11,7 +11,7 @@ object ContentFilter {
 
     private val CONTENT_GETTER = object : KeysGetter {
 
-        override fun getKeys(nodeInfo: UiObject) = listOf(nodeInfo.contentDescription, nodeInfo.text)
+        override fun getKeys(nodeInfo: UiNode<*>) = listOf(nodeInfo.desc(), nodeInfo.text())
 
         override fun toString() = "content"
 

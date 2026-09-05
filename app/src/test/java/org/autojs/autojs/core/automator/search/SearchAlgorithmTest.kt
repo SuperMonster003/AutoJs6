@@ -2,8 +2,8 @@ package org.autojs.autojs.core.automator.search
 
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.NodeRecyclePolicy
-import org.autojs.autojs.core.automator.FakeUiObject
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.FakeUiNode
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.Filter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -19,7 +19,7 @@ class SearchAlgorithmTest {
     //  a0  a1   b0   b1
     //             \
     //             b1x
-    private fun tree() = FakeUiObject.root {
+    private fun tree() = FakeUiNode.root {
         child("a") {
             child("a0")
             child("a1")
@@ -33,14 +33,14 @@ class SearchAlgorithmTest {
     }
 
     private fun named(vararg names: String) = object : Filter {
-        override fun filter(node: UiObject) = (node as FakeUiObject).name() in names
+        override fun filter(node: UiNode<*>) = (node as FakeUiNode).name in names
     }
 
     private val all = object : Filter {
-        override fun filter(node: UiObject) = true
+        override fun filter(node: UiNode<*>) = true
     }
 
-    private fun names(nodes: List<UiObject>) = nodes.map { (it as FakeUiObject).name() }
+    private fun names(nodes: List<FakeUiNode>) = nodes.map { it.name }
 
     // The recycling assertions below describe platforms that recycle nodes (API < 33); the search
     // is handed that policy explicitly rather than relying on the JVM's Build.VERSION.SDK_INT.
@@ -91,7 +91,7 @@ class SearchAlgorithmTest {
             assertEquals(algorithm.toString(), listOf("a1", "b1"), names(found))
             assertFalse(algorithm.toString(), root.isRecycled)
             root.descendantsAndSelf().filter { it !== root }.forEach { node ->
-                assertEquals("$algorithm: ${node.name()}", node !in found, node.isRecycled)
+                assertEquals("$algorithm: ${node.name}", node !in found, node.isRecycled)
             }
         }
     }
@@ -125,13 +125,13 @@ class SearchAlgorithmTest {
     fun aFailingRecycleDoesNotAbortTheSearch() {
         // `a` throws when recycled (as an already recycled framework node would); the search still completes.
         val root = tree()
-        (root.child(0) as FakeUiObject).recycle()
+        root.child(0)!!.recycle()
         val logs = mutableListOf<String>()
         val found = DFS.search(root, named("b1x"), lifecycle = NodeLifecycle(NodeRecyclePolicy.RECYCLE) { message, _ -> logs += message })
         assertEquals(listOf("b1x"), names(found))
         assertEquals(listOf("Unable to recycle accessibility node"), logs)
     }
 
-    private fun recycledNames(root: FakeUiObject) = root.descendantsAndSelf().filter { it.isRecycled }.map { it.name() }.toSet()
+    private fun recycledNames(root: FakeUiNode) = root.descendantsAndSelf().filter { it.isRecycled }.map { it.name }.toSet()
 
 }

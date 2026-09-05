@@ -152,6 +152,7 @@
 * `新增` `auto.registerEvent(name, listener, options?)` 新增可選的去重與去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口內丟棄鍵相同的重複事件 (如一次窗口切換收到的多個 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安靜給定時長後只投遞最後一個; 默認關閉
 * `新增` 無障礙服務的無人值守啓用方式新增 Shizuku (與 root 及修改安全設置權限並列, 在兩者均不可用時經 Shizuku 用戶服務寫入系統設置): 設置頁及無障礙服務管理器的設置區新增 "使用 Shizuku 自動啓用無障礙服務" 開關 (默認開啓), 管理器狀態區新增 "Shizuku 權限" 行
 * `新增` `auto.setFlags()` 新增標誌 `appWindowsFallback`: 系統尚未提供活動窗口根節點時 (無障礙服務剛綁定後; Android 8.0 上可能持續到下一次窗口變化), 選擇器與 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的應用窗口 (焦點窗口優先) 的根節點代替, 默認關閉
+* `新增` `UiObject` 新增 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 方法 (與 `clickable()` 等布爾屬性方法風格一致, 對應既有的 `isContentInvalid` 等 compat 訪問器)
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
 * `修復` 使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間
@@ -274,6 +275,7 @@
 * `修復` 缺少 APK 打包中繼資料的最小腳本專案會退回 `main.js`, 而非啟動 `project.json` 宣告的 `main` 入口
 * `修復` 帶應用 ID 後綴的插件無法正確解析激活入口, 且喚醒成功與服務可用狀態可能不一致的問題
 * `修復` `UiObject` 在帶有節點分配器時調用 `getChild()` / `getParent()` 等 compat 訪問器會無限遞歸 (分配器回調了包裝對象自身的訪問器); 修復後分配器在原始節點上操作, 登記按對象同一性而非節點相等性 (指向同一視圖的兩個實例不再只回收其一). 分配器仍未接入腳本運行時: Android 13 以下節點按進程池化, 退出時批量回收可能回收到已被其它腳本複用的實例
+* `修復` 選擇器 `contextClickable()` 條件在選擇器的字符串表示 (如 `selector().toString()` 與錯誤信息) 中誤顯示為 `checkable`
 * `優化` `TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `優化` Ace 字體預覽在目前字體尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字體或下載完成後自動隱藏
@@ -360,6 +362,7 @@
 * `優化` 無障礙窗口根節點的獲取邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實現, 佈局分析器同樣經由此處取窗口): 設置了窗口過濾器時 `auto.root` 在首個通過過濾的窗口沒有根節點時繼續查看後續窗口 (原先直接返回 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受窗口過濾器影響這一差異已在源碼中明確
 * `優化` 無障礙節點的回收統一由 `NodeLifecycle` / `NodeRecyclePolicy` 決定 (Android 13 起節點無需回收, 不再逐個調用空操作的 `recycle()`; 此前散佈在搜索算法, 滾動動作, 服務緩存根節點與分配器中的內聯回收全部經由此處, 回收失敗只記錄日誌, 不再中斷查找)
 * `優化` 無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬件緩衝現在總會被關閉 (原先只回收了包裝位圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)
+* `優化` 選擇器過濾器, 搜索算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 接口 (`UiObject` 實現它), 三者可在 JVM 單元測試中以內存節點樹覆蓋; 腳本可見的 API 與行為不變
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

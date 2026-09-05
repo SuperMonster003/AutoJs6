@@ -1,8 +1,7 @@
 package org.autojs.autojs.core.automator.search
 
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
-import org.autojs.autojs.core.accessibility.node.release
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.*
 import kotlin.collections.ArrayList
@@ -12,10 +11,10 @@ import kotlin.collections.ArrayList
  */
 object BFS : SearchAlgorithm {
 
-    override fun search(root: UiObject, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<UiObject> {
-        val result = ArrayList<UiObject>()
+    override fun <N : UiNode<N>> search(root: N, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<N> {
+        val result = ArrayList<N>()
         if (limit <= 0) return result
-        val queue = ArrayDeque<UiObject>()
+        val queue = ArrayDeque<N>()
         queue.add(root)
         while (!queue.isEmpty()) {
             val top = queue.poll()!!
@@ -27,21 +26,21 @@ object BFS : SearchAlgorithm {
                     return result
                 }
             }
-            for (i in 0 until top.childCount) {
+            for (i in 0 until top.childCount()) {
                 queue.add(top.child(i) ?: continue)
             }
             if (!isTarget && top !== root) {
-                lifecycle.release(top)
+                lifecycle.release { top.recycle() }
             }
         }
         return result
     }
 
-    private fun recycleRemaining(queue: Queue<UiObject>, root: UiObject, lifecycle: NodeLifecycle) {
+    private fun <N : UiNode<N>> recycleRemaining(queue: Queue<N>, root: N, lifecycle: NodeLifecycle) {
         while (!queue.isEmpty()) {
             val node = queue.poll() ?: continue
             if (node !== root) {
-                lifecycle.release(node)
+                lifecycle.release { node.recycle() }
             }
         }
     }

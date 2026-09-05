@@ -1,10 +1,14 @@
-package org.autojs.autojs.core.automator
+package org.autojs.autojs.core.automator.pick
 
+import org.autojs.autojs.core.automator.FakeUiNode
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class UiObjectCompassTest {
+class CompassTest {
 
     //             root
     //          /        \
@@ -13,7 +17,7 @@ class UiObjectCompassTest {
     //   a0   a1   a2      b0
     //         |
     //        a1x
-    private val root = FakeUiObject.root {
+    private val root = FakeUiNode.root {
         child("a", clickable = true) {
             child("a0")
             child("a1") {
@@ -28,11 +32,13 @@ class UiObjectCompassTest {
 
     private fun node(name: String) = root.find(name)
 
+    private fun FakeUiNode.compass(compass: CharSequence?) = Compass.navigate(this, compass)
+
     @Test
     fun passOnAndEmptyCompassReturnTheNodeItself() {
         assertSame(node("a1"), node("a1").compass(null))
         assertSame(node("a1"), node("a1").compass(""))
-        assertSame(node("a1"), node("a1").compass("%"))
+        assertSame(node("a1"), node("a1").compass(Compass.PASS_ON))
     }
 
     @Test
@@ -88,6 +94,29 @@ class UiObjectCompassTest {
         assertSame(node("b0"), node("a1x").compass("p2s>1c0"))
         assertSame(node("a"), node("a1x").compass("pk"))
         assertSame(node("a2"), node("a1x").compass("ps-1"))
+    }
+
+    @Test
+    fun parsedStepsCanBeWalkedDirectly() {
+        val steps = CompassParser.parse("p2s>1c0")
+        assertSame(node("b0"), Compass.navigate(node("a1x"), steps))
+        assertSame(node("a1x"), Compass.navigate(node("a1x"), emptyList()))
+    }
+
+    @Test
+    fun invalidCompassIsReportedWithItsUnparsableRest() {
+        val e = assertThrows(CompassSyntaxException::class.java) { root.compass("c0x1") }
+        assertEquals("x1", e.rest)
+    }
+
+    @Test
+    fun isCompassAcceptsPassOnEmptyAndGrammarStringsOnly() {
+        assertTrue(Compass.isCompass(Compass.PASS_ON))
+        assertTrue(Compass.isCompass(""))
+        assertTrue(Compass.isCompass("p2s>1c0k"))
+        assertEquals(false, Compass.isCompass("x"))
+        assertEquals(false, Compass.isCompass(null))
+        assertEquals(false, Compass.isCompass(1))
     }
 
 }

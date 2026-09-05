@@ -14,8 +14,8 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
+import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
-import org.autojs.autojs.core.automator.pick.CompassStep
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
@@ -38,8 +38,14 @@ import org.opencv.core.Size
 import kotlin.math.abs
 
 /**
+ * The platform node as scripts see it: an [AccessibilityNodeInfoCompat] with the navigation,
+ * property and action methods of [UiNode] (filters, search algorithms and the compass walk face
+ * that interface, so they can be unit-tested over an in-memory tree).
+ * zh-CN: 脚本所见的平台节点: 带有 [UiNode] 的导航, 属性与动作方法的 [AccessibilityNodeInfoCompat] (过滤器, 搜索算法与
+ * 罗盘导航面向该接口, 因而可以在内存节点树上做单元测试).
+ *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of May 26, 2022.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 @Suppress("unused", "DEPRECATION", "MemberVisibilityCanBePrivate")
 open class UiObject(
@@ -47,7 +53,7 @@ open class UiObject(
     private val allocator: AccessibilityNodeInfoAllocator?,
     private val depth: Int,
     private val indexInParent: Int,
-) : AccessibilityNodeInfoCompat(info), UiObjectActions {
+) : AccessibilityNodeInfoCompat(info), UiObjectActions, UiNode<UiObject> {
 
     private val accessibilityBridge by lazy { AutoJs.instance.createAccessibilityBridge() }
 
@@ -64,7 +70,7 @@ open class UiObject(
         indexInParent: Int = -1,
     ) : this(info, null, depth, indexInParent)
 
-    open fun parent(): UiObject? = runCatching {
+    override fun parent(): UiObject? = runCatching {
         super.getParent()?.let { node ->
             UiObject(node.unwrap(), allocator, depth - 1, node.parent?.run {
                 // @Dubious by SuperMonster003 on May 26, 2022.
@@ -83,7 +89,7 @@ open class UiObject(
         return compass("p$i")
     }
 
-    open fun child(i: Int): UiObject? = when {
+    override fun child(i: Int): UiObject? = when {
         i >= childCount -> {
             null
         }
@@ -137,9 +143,9 @@ open class UiObject(
 
     open fun previousSibling() = offset(-1)
 
-    open fun childCount() = childCount
+    override fun childCount() = childCount
 
-    fun hasChildren() = childCount > 0
+    override fun hasChildren() = childCount > 0
 
     fun firstChild() = child(0)
 
@@ -149,7 +155,7 @@ open class UiObject(
 
     fun siblings() = List(siblingCount()) { sibling(it) }.let { UiObjectCollection.of(it) }
 
-    fun indexInParent() = indexInParent
+    override fun indexInParent() = indexInParent
 
     @JvmOverloads
     fun find(selector: UiSelector? = UiSelector()): UiObjectCollection = (selector ?: UiSelector()).findOf(this)
@@ -162,31 +168,31 @@ open class UiObject(
 
     fun boundsLeft() = bounds().left
 
-    fun left() = boundsLeft()
+    override fun left() = boundsLeft()
 
     fun boundsTop() = bounds().top
 
-    fun top() = boundsTop()
+    override fun top() = boundsTop()
 
     fun boundsRight() = bounds().right
 
-    fun right() = boundsRight()
+    override fun right() = boundsRight()
 
     fun boundsBottom() = bounds().bottom
 
-    fun bottom() = boundsBottom()
+    override fun bottom() = boundsBottom()
 
     fun boundsWidth() = bounds().width()
 
-    fun width() = boundsWidth()
+    override fun width() = boundsWidth()
 
     fun boundsHeight() = bounds().height()
 
-    fun height() = boundsHeight()
+    override fun height() = boundsHeight()
 
     fun boundsCenterX() = bounds().centerX()
 
-    fun centerX() = boundsCenterX()
+    override fun centerX() = boundsCenterX()
 
     fun boundsExactCenterX() = bounds().exactCenterX()
 
@@ -194,7 +200,7 @@ open class UiObject(
 
     fun boundsCenterY() = bounds().centerY()
 
-    fun centerY() = boundsCenterY()
+    override fun centerY() = boundsCenterY()
 
     fun boundsExactCenterY() = bounds().exactCenterY()
 
@@ -225,11 +231,11 @@ open class UiObject(
     @Deprecated("Deprecated in Java", ReplaceWith("boundsInScreen() or bounds()"))
     open fun boundsInParent() = AccessibilityNodeInfoHelper.getBoundsInParent(this)
 
-    open fun drawingOrder() = drawingOrder
+    override fun drawingOrder() = drawingOrder
 
     fun fullId(): String? = viewIdResourceName
 
-    open fun id(): String? = fullId()
+    override fun id(): String? = fullId()
 
     fun idEntry() = fullId()?.let {
         when (it.contains(UiSelector.ID_IDENTIFIER)) {
@@ -241,7 +247,7 @@ open class UiObject(
     fun simpleId(): String? = idEntry()
 
     @SuppressLint("DiscouragedApi")
-    fun idHex(): String? {
+    override fun idHex(): String? {
         val pkg = packageName() ?: return null
         val fullId = viewIdResourceName ?: return null
         val resources = try {
@@ -253,62 +259,70 @@ open class UiObject(
         return "0x${Integer.toHexString(resources.getIdentifier(fullId, null, null))}"
     }
 
-    open fun text() = text?.toString() ?: ""
+    override fun text() = text?.toString() ?: ""
 
     override fun getText(): CharSequence? = takeUnless { isPassword }?.let { super.getText() } ?: ""
 
-    open fun desc(): String? = contentDescription?.toString()
+    override fun desc(): String? = contentDescription?.toString()
 
-    fun content(): String = desc() ?: text()
+    override fun content(): String = desc() ?: text()
 
-    open fun className(): String? = className?.toString()
+    override fun className(): String? = className?.toString()
 
-    open fun packageName(): String? = packageName?.toString()
+    override fun packageName(): String? = packageName?.toString()
 
-    open fun depth() = depth
+    override fun depth() = depth
 
-    open fun checkable() = isCheckable
+    override fun checkable() = isCheckable
 
-    open fun checked() = isChecked
+    override fun checked() = isChecked
 
-    open fun focusable() = isFocusable
+    override fun focusable() = isFocusable
 
-    open fun focused() = isFocused
+    override fun focused() = isFocused
 
-    open fun visibleToUser() = isVisibleToUser
+    override fun visibleToUser() = isVisibleToUser
 
-    open fun accessibilityFocused() = isAccessibilityFocused
+    override fun accessibilityFocused() = isAccessibilityFocused
 
-    open fun selected() = isSelected
+    override fun selected() = isSelected
 
-    open fun clickable() = isClickable
+    override fun clickable() = isClickable
 
-    open fun longClickable() = isLongClickable
+    override fun longClickable() = isLongClickable
 
-    open fun enabled() = isEnabled
+    override fun enabled() = isEnabled
 
-    fun password() = isPassword
+    override fun password() = isPassword
 
-    open fun scrollable() = isScrollable
+    override fun scrollable() = isScrollable
 
-    fun editable() = isEditable
+    override fun editable() = isEditable
 
-    open fun row() = collectionItemInfo?.rowIndex ?: -1
+    override fun contentInvalid() = isContentInvalid
 
-    open fun column() = collectionItemInfo?.columnIndex ?: -1
+    override fun contextClickable() = isContextClickable
 
-    open fun rowSpan() = collectionItemInfo?.rowSpan ?: -1
+    override fun multiLine() = isMultiLine
 
-    open fun columnSpan() = collectionItemInfo?.columnSpan ?: -1
+    override fun dismissable() = isDismissable
 
-    open fun rowCount() = collectionInfo?.rowCount ?: 0
+    override fun row() = collectionItemInfo?.rowIndex ?: -1
 
-    open fun columnCount() = collectionInfo?.columnCount ?: 0
+    override fun column() = collectionItemInfo?.columnIndex ?: -1
+
+    override fun rowSpan() = collectionItemInfo?.rowSpan ?: -1
+
+    override fun columnSpan() = collectionItemInfo?.columnSpan ?: -1
+
+    override fun rowCount() = collectionInfo?.rowCount ?: 0
+
+    override fun columnCount() = collectionInfo?.columnCount ?: 0
 
     @ScriptInterface
-    fun actionNames() = actionList.map { action ->
-        getActionSymbolicName(action.id).let { actionName ->
-            if (actionName == "ACTION_UNKNOWN" && action.label != null) {
+    override fun actionNames() = actionList.map { action ->
+        UiNodeActions.symbolicName(action.id).let { actionName ->
+            if (actionName == UiNodeActions.UNKNOWN && action.label != null) {
                 action.label.toString()
             } else {
                 actionName
@@ -317,97 +331,19 @@ open class UiObject(
     }
 
     @ScriptInterface
-    fun hasAction(vararg actions: Any): Boolean {
-        return actionNames().let { actionNames ->
-            actions.all {
-                when (it) {
-                    is Int -> hasAction(getActionSymbolicName(it))
-                    is Double -> hasAction(getActionSymbolicName(it.toInt()))
-                    is String -> actionNames.contains(if (it.startsWith("ACTION_")) it else "ACTION_$it")
-                    else -> false
-                }
-            }
-        }
-    }
+    override fun hasAction(vararg actions: Any): Boolean = UiNodeActions.hasAll(actionNames(), actions)
 
+    // The walk itself is Compass (Android-free); this wrapper adds the localized error messages.
+    // zh-CN: 行走本身在 Compass 中 (不依赖 Android); 此包装只补充本地化的错误信息.
     @Throws(IllegalArgumentException::class)
     fun compass(compassArg: CharSequence?): UiObject? {
-        var w: UiObject = this
-        val compass = compassArg?.takeUnless { it == COMPASS_PASS_ON }?.also { ensureCompass(it) } ?: return w
-
+        val compass = compassArg?.takeUnless { it == COMPASS_PASS_ON }?.also { ensureCompass(it) } ?: return this
         val steps = try {
             CompassParser.parse(compass)
         } catch (e: CompassSyntaxException) {
             throw IllegalArgumentException(str(R.string.error_invalid_rest_compass, e.rest))
         }
-
-        for (step in steps) {
-            w = when (step) {
-                is CompassStep.Up -> w.compassUp(step.levels)
-                is CompassStep.Children -> w.compassChildren(step.indices)
-                is CompassStep.Sibling -> w.compassSibling(step)
-                is CompassStep.Clickable -> w.compassClickable(step.maxLevels)
-            } ?: return null
-        }
-
-        return w
-    }
-
-    // p2 : [ .parent().parent() ]
-    // p : [ p1 ]
-    // ppp : [ p3 ]
-    // p4ppp12p : [ p4, pp, p12, p -> 4, 2, 12, 1 -> p19 ]
-    private fun compassUp(levels: Int): UiObject? {
-        var w: UiObject = this
-        repeat(levels) { w = w.parent() ?: return null }
-        return w
-    }
-
-    // c0c2c0c1 : [ .child(0).child(2).child(0).child(1) ]
-    // c0>2>0>1 : [ .child(0).child(2).child(0).child(1) ]
-    // c-3 : [ .child(childCount()-3) ]
-    // c-3c2c-1 : [ .child(childCount()-3).child(2).child(childCount()-1) ]
-    // c1>2>3>0>-1>1 : [ c1 c2 c3 c0 c-1 c1 ]
-    private fun compassChildren(indices: List<Int>): UiObject? {
-        var w: UiObject = this
-        for (index in indices) {
-            val cc = w.childCount().takeIf { it > 0 } ?: return null
-            val i = index.let { if (it < 0) it + cc else it }.takeIf { it in 0.until(cc) } ?: return null
-            w = w.child(i) ?: return null
-        }
-        return w
-    }
-
-    // s2 : [ .parent().child(2) ]
-    // s-2 : [ .parent().child(childCount() - 2) ]
-    // s>2 : [ .parent().child(idxInParent() + 2) ]
-    // s<2 : [ .parent().child(idxInParent() - 2) ]
-    private fun compassSibling(step: CompassStep.Sibling): UiObject? {
-        val parent = parent() ?: return null
-        val idx = indexInParent().takeIf { it >= 0 } ?: return null
-        val cc = parent.childCount()
-        val target = when (step.mode) {
-            CompassStep.Sibling.Mode.FORWARD -> idx + step.value
-            CompassStep.Sibling.Mode.BACKWARD -> idx - step.value
-            CompassStep.Sibling.Mode.ABSOLUTE -> step.value.let { if (it < 0) it + cc else it }
-        }
-        return target.takeIf { it in 0.until(cc) }?.let { parent.child(it) }
-    }
-
-    // k/k1 : [ .clickable() || .parent().clickable() aka pk/p1k ]
-    // k2 : [ .clickable() || .parent().clickable() || .p2.clickable() aka p2k ]
-    // kn : [ .clickable() || .pn.clickable() aka pnk ]
-    // Returns null when no clickable node exists within range (decided on Sep 5, 2026,
-    // previously the node itself was returned unless the walk ran past the root).
-    // zh-CN: 范围内不存在可点击节点时返回 null (2026-09-05 决定, 此前除非向上越过根节点, 否则返回节点自身).
-    private fun compassClickable(maxLevels: Int): UiObject? {
-        var w: UiObject? = this
-        repeat(maxLevels + 1) {
-            val node = w ?: return null
-            if (node.clickable()) return node
-            w = node.parent()
-        }
-        return null
+        return Compass.navigate(this, steps)
     }
 
     override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
@@ -622,7 +558,7 @@ open class UiObject(
     companion object {
 
         internal const val ACTION_APPEND_TEXT = 0x00200001
-        internal const val COMPASS_PASS_ON = "%"
+        internal const val COMPASS_PASS_ON = Compass.PASS_ON
         internal const val RESULT_TYPE_WIDGET = "widget"
 
         private val RESULT_GROUP_WIDGET by lazy { arrayOf("#", "w", RESULT_TYPE_WIDGET) }
@@ -636,9 +572,7 @@ open class UiObject(
         private val RESULT_GROUP_EXISTENCE by lazy { arrayOf("?", "exists") }
 
         @JvmStatic
-        fun isCompass(s: Any?): Boolean {
-            return s is CharSequence && (s == COMPASS_PASS_ON || CompassParser.isCompass(s))
-        }
+        fun isCompass(s: Any?): Boolean = Compass.isCompass(s)
 
         @JvmStatic
         @Throws(IllegalArgumentException::class)
@@ -681,55 +615,6 @@ open class UiObject(
         private fun listAliases(symbol: String, vararg others: String) = arrayOf(
             "$symbol{}", "{$symbol}",
         ) + others.map { listOf("$it{}", "{$it}") }.flatten()
-
-        // @Hint Copied by SuperMonster003 on Nov 5, 2022.
-        //  ! androidx.core.view.accessibility.AccessibilityNodeInfoCompat.getActionSymbolicName
-        private fun getActionSymbolicName(action: Int) = when (action) {
-            ACTION_FOCUS -> "ACTION_FOCUS"
-            ACTION_CLEAR_FOCUS -> "ACTION_CLEAR_FOCUS"
-            ACTION_SELECT -> "ACTION_SELECT"
-            ACTION_CLEAR_SELECTION -> "ACTION_CLEAR_SELECTION"
-            ACTION_CLICK -> "ACTION_CLICK"
-            ACTION_LONG_CLICK -> "ACTION_LONG_CLICK"
-            ACTION_ACCESSIBILITY_FOCUS -> "ACTION_ACCESSIBILITY_FOCUS"
-            ACTION_CLEAR_ACCESSIBILITY_FOCUS -> "ACTION_CLEAR_ACCESSIBILITY_FOCUS"
-            ACTION_NEXT_AT_MOVEMENT_GRANULARITY -> "ACTION_NEXT_AT_MOVEMENT_GRANULARITY"
-            ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY -> "ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY"
-            ACTION_NEXT_HTML_ELEMENT -> "ACTION_NEXT_HTML_ELEMENT"
-            ACTION_PREVIOUS_HTML_ELEMENT -> "ACTION_PREVIOUS_HTML_ELEMENT"
-            ACTION_SCROLL_FORWARD -> "ACTION_SCROLL_FORWARD"
-            ACTION_SCROLL_BACKWARD -> "ACTION_SCROLL_BACKWARD"
-            ACTION_CUT -> "ACTION_CUT"
-            ACTION_COPY -> "ACTION_COPY"
-            ACTION_PASTE -> "ACTION_PASTE"
-            ACTION_SET_SELECTION -> "ACTION_SET_SELECTION"
-            ACTION_EXPAND -> "ACTION_EXPAND"
-            ACTION_COLLAPSE -> "ACTION_COLLAPSE"
-            ACTION_SET_TEXT -> "ACTION_SET_TEXT"
-            ACTION_DISMISS -> "ACTION_DISMISS"
-            android.R.id.accessibilityActionDragStart -> "ACTION_DRAG_START"
-            android.R.id.accessibilityActionDragDrop -> "ACTION_DRAG_DROP"
-            android.R.id.accessibilityActionDragCancel -> "ACTION_DRAG_CANCEL"
-            android.R.id.accessibilityActionScrollUp -> "ACTION_SCROLL_UP"
-            android.R.id.accessibilityActionScrollLeft -> "ACTION_SCROLL_LEFT"
-            android.R.id.accessibilityActionScrollDown -> "ACTION_SCROLL_DOWN"
-            android.R.id.accessibilityActionScrollRight -> "ACTION_SCROLL_RIGHT"
-            android.R.id.accessibilityActionPageDown -> "ACTION_PAGE_DOWN"
-            android.R.id.accessibilityActionPageUp -> "ACTION_PAGE_UP"
-            android.R.id.accessibilityActionPageLeft -> "ACTION_PAGE_LEFT"
-            android.R.id.accessibilityActionPageRight -> "ACTION_PAGE_RIGHT"
-            android.R.id.accessibilityActionShowOnScreen -> "ACTION_SHOW_ON_SCREEN"
-            android.R.id.accessibilityActionScrollToPosition -> "ACTION_SCROLL_TO_POSITION"
-            android.R.id.accessibilityActionContextClick -> "ACTION_CONTEXT_CLICK"
-            android.R.id.accessibilityActionSetProgress -> "ACTION_SET_PROGRESS"
-            android.R.id.accessibilityActionMoveWindow -> "ACTION_MOVE_WINDOW"
-            android.R.id.accessibilityActionShowTextSuggestions -> "ACTION_SHOW_TEXT_SUGGESTIONS"
-            android.R.id.accessibilityActionShowTooltip -> "ACTION_SHOW_TOOLTIP"
-            android.R.id.accessibilityActionHideTooltip -> "ACTION_HIDE_TOOLTIP"
-            android.R.id.accessibilityActionPressAndHold -> "ACTION_PRESS_AND_HOLD"
-            android.R.id.accessibilityActionImeEnter -> "ACTION_IME_ENTER"
-            else -> "ACTION_UNKNOWN"
-        }
 
         internal class Detector(
             private val compass: CharSequence? = COMPASS_PASS_ON,

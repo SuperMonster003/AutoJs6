@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 
 /**
  * Created by Stardust on Mar 9, 2017.
@@ -8,7 +8,7 @@ import org.autojs.autojs.core.automator.UiObject
  */
 class StringEndsWithFilter(private val mSuffix: String, private val mKeyGetter: KeyGetter) : Filter {
 
-    override fun filter(node: UiObject) = mKeyGetter.getKey(node)?.endsWith(mSuffix) ?: false
+    override fun filter(node: UiNode<*>) = mKeyGetter.getKey(node)?.endsWith(mSuffix) ?: false
 
     override fun toString() = "${mKeyGetter}EndsWith(\"$mSuffix\")"
 

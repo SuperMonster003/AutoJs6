@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.util.StringUtils.formatDouble
 
@@ -10,10 +10,10 @@ import org.autojs.autojs.util.StringUtils.formatDouble
 class DoubleMinFilter(private val mDoubleMinProperty: DoubleMinProperty, private val mMin: Double? = null) : Filter {
 
     interface DoubleMinProperty {
-        operator fun get(o: UiObject): Double
+        operator fun get(o: UiNode<*>): Double
     }
 
-    override fun filter(node: UiObject) = mDoubleMinProperty[node] >= (mMin ?: DEFAULT)
+    override fun filter(node: UiNode<*>) = mDoubleMinProperty[node] >= (mMin ?: DEFAULT)
 
     override fun toString() = "$mDoubleMinProperty(${mMin?.let { formatDouble(it) } ?: ""})"
 
@@ -22,7 +22,7 @@ class DoubleMinFilter(private val mDoubleMinProperty: DoubleMinProperty, private
         const val DEFAULT = 0.948
 
         val SCREEN_COVERAGE = object : DoubleMinProperty {
-            override fun get(o: UiObject): Double {
+            override fun get(o: UiNode<*>): Double {
                 val w = ScreenMetrics.deviceScreenWidth
                 val h = ScreenMetrics.deviceScreenHeight
                 val validLeft = o.left().coerceIn(0..w)

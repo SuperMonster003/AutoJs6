@@ -8,6 +8,7 @@ import androidx.annotation.FloatRange
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.automator.ActionArgument
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObject.Companion.COMPASS_PASS_ON
 import org.autojs.autojs.core.automator.UiObject.Companion.Detector
@@ -535,7 +536,7 @@ open class UiSelector : UiObjectActions, StringReadable {
     @ScriptInterface
     fun filter(filter: BooleanFilter.BooleanSupplier) = also {
         addFilter(object : Filter {
-            override fun filter(node: UiObject) = filter[node]
+            override fun filter(node: UiNode<*>) = filter[node]
         })
     }
 
@@ -1054,7 +1055,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                                     else -> tmp.action(value)
                                 }
                                 "filter" -> tmp.filter(object : BooleanFilter.BooleanSupplier {
-                                    override fun get(node: UiObject): Boolean {
+                                    override fun get(node: UiNode<*>): Boolean {
                                         val func = (if (value is NativeArray) value[0] else value) as Callable
                                         return RhinoUtils.callFunction(
                                             scriptRuntime,
@@ -1092,7 +1093,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                                     is Callable -> tmp::class.java
                                         .getMethod(key, cBooleanSupplier)
                                         .invoke(tmp, object : BooleanFilter.BooleanSupplier {
-                                            override fun get(node: UiObject) = RhinoUtils.callFunction(
+                                            override fun get(node: UiNode<*>) = RhinoUtils.callFunction(
                                                 scriptRuntime,
                                                 value,
                                                 null as VarScope?,

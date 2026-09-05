@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -12,7 +12,7 @@ class StringEqualsFilter : RegexFilter {
     constructor(s: String, keyGetter: KeyGetter) : super(s, keyGetter)
     constructor(regex: NativeRegExp, keyGetter: KeyGetter) : super(regex, keyGetter)
 
-    override fun filter(node: UiObject) = when {
+    override fun filter(node: UiNode<*>) = when {
         isRegexSource -> keyGetter.getKey(node)?.matches(compiledRegex) == true
         else -> keyGetter.getKey(node)?.contentEquals(input) == true
     }

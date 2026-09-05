@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.util.App
 
 /**
@@ -20,7 +20,7 @@ class AppFilter(private val arbitraryName: String) : Filter {
         mApp = app
     }
 
-    override fun filter(node: UiObject) = node.packageName?.toString()?.let { it == mName } ?: false
+    override fun filter(node: UiNode<*>) = node.packageName() == mName
 
     override fun toString() = "currentApp(${mApp?.name ?: mName})"
 

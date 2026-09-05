@@ -1,8 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import android.graphics.Rect
-import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.util.DisplayUtils.toCeilIntX
 import org.autojs.autojs.util.DisplayUtils.toCeilIntY
 import org.autojs.autojs.util.DisplayUtils.toFloorIntX
@@ -15,11 +13,11 @@ import org.autojs.autojs.util.StringUtils.formatDouble
  */
 class BoundsFilter(private val left: Double, private val top: Double, private val right: Double, private val bottom: Double, private val type: Int) : Filter {
 
-    override fun filter(node: UiObject) = AccessibilityNodeInfoHelper.getBoundsInScreen(node).let {
+    override fun filter(node: UiNode<*>) = DesirableRect(node).let {
         when (type) {
-            TYPE_INSIDE -> DesirableRect(it).inside(left, top, right, bottom)
-            TYPE_CONTAINS -> DesirableRect(it).contains(left, top, right, bottom)
-            else /* EQUALS */ -> DesirableRect(it).equals(left, top, right, bottom)
+            TYPE_INSIDE -> it.inside(left, top, right, bottom)
+            TYPE_CONTAINS -> it.contains(left, top, right, bottom)
+            else /* EQUALS */ -> it.equals(left, top, right, bottom)
         }
     }
 
@@ -40,7 +38,7 @@ class BoundsFilter(private val left: Double, private val top: Double, private va
 
         private class DesirableRect(left: Double, top: Double, right: Double, bottom: Double) {
 
-            constructor(rect: Rect) : this(rect.left.toDouble(), rect.top.toDouble(), rect.right.toDouble(), rect.bottom.toDouble())
+            constructor(node: UiNode<*>) : this(node.left().toDouble(), node.top().toDouble(), node.right().toDouble(), node.bottom().toDouble())
 
             val intLeft = toFloorIntX(left)
             val intTop = toFloorIntY(top)

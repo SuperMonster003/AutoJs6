@@ -1,8 +1,7 @@
 package org.autojs.autojs.core.automator.search
 
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
-import org.autojs.autojs.core.accessibility.node.release
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.*
 
@@ -14,14 +13,14 @@ import kotlin.collections.ArrayList
  */
 object DFS : SearchAlgorithm {
 
-    override fun search(root: UiObject, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<UiObject> {
-        val result = ArrayList<UiObject>()
+    override fun <N : UiNode<N>> search(root: N, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<N> {
+        val result = ArrayList<N>()
         if (limit <= 0) return result
-        val stack = LinkedList<UiObject>()
+        val stack = LinkedList<N>()
         stack.push(root)
         while (stack.isNotEmpty()) {
             val parent = stack.pop()
-            for (i in parent.childCount - 1 downTo 0) {
+            for (i in parent.childCount() - 1 downTo 0) {
                 val child = parent.child(i) ?: continue
                 stack.push(child)
             }
@@ -33,18 +32,18 @@ object DFS : SearchAlgorithm {
                 }
             } else {
                 if (parent !== root) {
-                    lifecycle.release(parent)
+                    lifecycle.release { parent.recycle() }
                 }
             }
         }
         return result
     }
 
-    private fun recycleRemaining(stack: LinkedList<UiObject>, root: UiObject, lifecycle: NodeLifecycle) {
+    private fun <N : UiNode<N>> recycleRemaining(stack: LinkedList<N>, root: N, lifecycle: NodeLifecycle) {
         while (stack.isNotEmpty()) {
             val node = stack.pop()
             if (node !== root) {
-                lifecycle.release(node)
+                lifecycle.release { node.recycle() }
             }
         }
     }

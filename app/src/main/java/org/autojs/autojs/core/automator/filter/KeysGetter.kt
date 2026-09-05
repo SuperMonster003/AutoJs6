@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 
 /**
  * Created by SuperMonster003 on Jun 10, 2022.
@@ -8,6 +8,6 @@ import org.autojs.autojs.core.automator.UiObject
  
 interface KeysGetter {
 
-    fun getKeys(nodeInfo: UiObject): List<CharSequence?>
+    fun getKeys(nodeInfo: UiNode<*>): List<CharSequence?>
     
 }

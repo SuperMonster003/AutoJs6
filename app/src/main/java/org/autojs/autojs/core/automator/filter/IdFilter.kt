@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -12,7 +12,7 @@ object IdFilter {
 
     private val ID_GETTER = object : KeyGetter {
 
-        override fun getKey(nodeInfo: UiObject) = nodeInfo.viewIdResourceName
+        override fun getKey(nodeInfo: UiNode<*>) = nodeInfo.id()
 
         override fun toString() = "id"
 
@@ -22,7 +22,7 @@ object IdFilter {
     fun equals(s: String) = when (s.contains(ID_IDENTIFIER)) {
         true -> StringEqualsFilter(s, ID_GETTER)
         else -> object : Filter {
-            override fun filter(node: UiObject) = node.id()?.let { id ->
+            override fun filter(node: UiNode<*>) = node.id()?.let { id ->
                 when (id.contains(ID_IDENTIFIER)) {
                     true -> id.split(ID_IDENTIFIER).last() == s
                     else -> id == s
@@ -46,7 +46,7 @@ object IdFilter {
     fun startsWith(prefix: String) = when (prefix.contains(ID_IDENTIFIER)) {
         true -> StringStartsWithFilter(prefix, ID_GETTER)
         else -> object : Filter {
-            override fun filter(node: UiObject) = node.id()?.let { id ->
+            override fun filter(node: UiNode<*>) = node.id()?.let { id ->
                 when (id.contains(ID_IDENTIFIER)) {
                     true -> id.split(ID_IDENTIFIER).last().startsWith(prefix)
                     else -> id.startsWith(prefix)

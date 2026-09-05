@@ -128,6 +128,7 @@
 * `新增` `auto.registerEvent(name, listener, options?)` 新增可选的去重与去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口内丢弃键相同的重复事件 (如一次窗口切换收到的多个 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安静给定时长后只投递最后一个; 默认关闭
 * `新增` 无障碍服务的无人值守启用方式新增 Shizuku (与 root 及修改安全设置权限并列, 在两者均不可用时经 Shizuku 用户服务写入系统设置): 设置页及无障碍服务管理器的设置区新增 "使用 Shizuku 自动启用无障碍服务" 开关 (默认开启), 管理器状态区新增 "Shizuku 权限" 行
 * `新增` `auto.setFlags()` 新增标志 `appWindowsFallback`: 系统尚未提供活动窗口根节点时 (无障碍服务刚绑定后; Android 8.0 上可能持续到下一次窗口变化), 选择器与 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的应用窗口 (焦点窗口优先) 的根节点代替, 默认关闭
+* `新增` `UiObject` 新增 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 方法 (与 `clickable()` 等布尔属性方法风格一致, 对应既有的 `isContentInvalid` 等 compat 访问器)
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
@@ -250,6 +251,7 @@
 * `修复` 缺少 APK 打包元数据的最小脚本项目会回退到 `main.js`, 而不是启动 `project.json` 声明的 `main` 入口
 * `修复` 带应用 ID 后缀的插件无法正确解析激活入口, 且唤醒成功与服务可用状态可能不一致的问题
 * `修复` `UiObject` 在带有节点分配器时调用 `getChild()` / `getParent()` 等 compat 访问器会无限递归 (分配器回调了包装对象自身的访问器); 修复后分配器在原始节点上操作, 登记按对象同一性而非节点相等性 (指向同一视图的两个实例不再只回收其一). 分配器仍未接入脚本运行时: Android 13 以下节点按进程池化, 退出时批量回收可能回收到已被其它脚本复用的实例
+* `修复` 选择器 `contextClickable()` 条件在选择器的字符串表示 (如 `selector().toString()` 与错误信息) 中误显示为 `checkable`
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
@@ -339,6 +341,7 @@
 * `优化` 无障碍窗口根节点的获取逻辑合一 (`AccessibilityBridge` 转为 Kotlin, 三处重复逻辑由 `WindowRootPolicy` / `WindowRootProvider` 统一实现, 布局分析器同样经由此处取窗口): 设置了窗口过滤器时 `auto.root` 在首个通过过滤的窗口没有根节点时继续查看后续窗口 (原先直接返回 `null`); `auto.windowRoots` 与节点动作不再可能遇到 `null` 根节点; `auto.rootInActiveWindow` 不受窗口过滤器影响这一差异已在源码中明确
 * `优化` 无障碍节点的回收统一由 `NodeLifecycle` / `NodeRecyclePolicy` 决定 (Android 13 起节点无需回收, 不再逐个调用空操作的 `recycle()`; 此前散布在搜索算法, 滚动动作, 服务缓存根节点与分配器中的内联回收全部经由此处, 回收失败只记录日志, 不再中断查找)
 * `优化` 无障碍截图 (`automator.captureScreen()`) 抽出为 `A11yScreenshotter`: 截图后的硬件缓冲现在总会被关闭 (原先只回收了包装位图); 系统限频错误的重试改为至多 60 次 (3 s), 之后与其它失败一样以 `null` 兑现 (原先系统持续限频时 promise 永远不会兑现)
+* `优化` 选择器过滤器, 搜索算法 (DFS / BFS) 与罗盘导航 (`compass`) 改为面向不依赖 Android 的 `UiNode` 接口 (`UiObject` 实现它), 三者可在 JVM 单元测试中以内存节点树覆盖; 脚本可见的 API 与行为不变
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

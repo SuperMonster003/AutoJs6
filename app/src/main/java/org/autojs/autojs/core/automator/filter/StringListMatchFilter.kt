@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -14,7 +14,7 @@ class StringListMatchFilter : RegexListFilter {
     constructor(s: String, keysGetter: KeysGetter) : super(s, keysGetter)
     constructor(regex: NativeRegExp, keysGetter: KeysGetter) : super(regex, keysGetter)
 
-    override fun filter(node: UiObject) = keysGetter.getKeys(node).any {
+    override fun filter(node: UiNode<*>) = keysGetter.getKeys(node).any {
         it?.contains(compiledRegex) == true
     }
 

@@ -1,6 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.util.StringUtils.formatDouble
 import kotlin.math.abs
@@ -11,10 +11,10 @@ import kotlin.math.abs
 class ToleranceFilter(private val mToleranceSupplier: ToleranceSupplier, private val mExceptedValue: Boolean? = null, private val mTolerance: Double? = null) : Filter {
 
     interface ToleranceSupplier {
-        operator fun get(node: UiObject, tolerance: Double): Boolean
+        operator fun get(node: UiNode<*>, tolerance: Double): Boolean
     }
 
-    override fun filter(node: UiObject) = mToleranceSupplier[node, mTolerance ?: DEFAULT_TOLERANCE] == (mExceptedValue ?: DEFAULT_EXPECTED)
+    override fun filter(node: UiNode<*>) = mToleranceSupplier[node, mTolerance ?: DEFAULT_TOLERANCE] == (mExceptedValue ?: DEFAULT_EXPECTED)
 
     override fun toString() = when (mExceptedValue != null) {
         true -> "$mToleranceSupplier($mExceptedValue${mTolerance?.let { ", ${formatDouble(mTolerance)}" } ?: ""})"
@@ -28,7 +28,7 @@ class ToleranceFilter(private val mToleranceSupplier: ToleranceSupplier, private
         const val DEFAULT_TOLERANCE = 0.016
 
         val SCREEN_CENTER_X = object : ToleranceSupplier {
-            override fun get(node: UiObject, tolerance: Double): Boolean {
+            override fun get(node: UiNode<*>, tolerance: Double): Boolean {
                 val w = ScreenMetrics.deviceScreenWidth
                 val x = node.centerX().toDouble()
                 return abs(x - w / 2) / w <= tolerance
@@ -38,7 +38,7 @@ class ToleranceFilter(private val mToleranceSupplier: ToleranceSupplier, private
         }
 
         val SCREEN_CENTER_Y = object : ToleranceSupplier {
-            override fun get(node: UiObject, tolerance: Double): Boolean {
+            override fun get(node: UiNode<*>, tolerance: Double): Boolean {
                 val h = ScreenMetrics.deviceScreenHeight
                 val y = node.centerY().toDouble()
                 return abs(y - h / 2) / h <= tolerance
