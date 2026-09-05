@@ -17,6 +17,7 @@ import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
+import org.autojs.autojs.rhino.JsArgumentCoercion
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
@@ -758,14 +759,7 @@ open class UiObject(
                     if (has(name)) {
                         classes = interceptedMap[name]!!.args
                         args = params.mapIndexed { i, param ->
-                            param.also {
-                                if (it is Double) {
-                                    when (classes[i]) {
-                                        cIntPrim -> return@mapIndexed it.toInt()
-                                        cFloatPrim -> return@mapIndexed it.toFloat()
-                                    }
-                                }
-                            }
+                            classes.getOrNull(i)?.let { JsArgumentCoercion.coerce(it, param) } ?: param
                         }.toTypedArray()
                     } else {
                         classes = params.map { params.javaClass }.toTypedArray()

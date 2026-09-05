@@ -3,6 +3,9 @@ package org.autojs.autojs.runtime.api.augment.selector
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.filter.BooleanFilter
+import org.autojs.autojs.core.automator.selector.SelectorRegistry
+import org.autojs.autojs.rhino.JsArgumentCoercion
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -14,6 +17,7 @@ import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -22,11 +26,11 @@ import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import java.lang.reflect.Array as JavaArray
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import kotlin.reflect.full.declaredMembers
 
 class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -43,9 +47,11 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
     )
 
     init {
-        val selectorObj = scriptRuntime.selector()
-        for (method in selectorObj.javaClass.methods) {
-            val methodName = method.name
+        // Registry properties (text, clickable, ...) go straight to the registry; the whitelisted
+        // query and action methods (find, findOne, click, ...) are resolved reflectively as before.
+        // zh-CN: 注册表属性 (text, clickable, ...) 直接进入注册表; 白名单中的查询与动作方法 (find, findOne, click, ...) 仍按反射解析.
+        val queryMethods = UiSelector::class.java.methods.groupBy { it.name }
+        for (methodName in SelectorGlobals.names) {
             if (!isGlobalAugmentTarget(methodName)) {
                 // @Caution by SuperMonster003 as of Oct 23, 2022.
                 //  ! The following methods have been assigned by 'automator' module,
@@ -64,23 +70,15 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                     val methodKey = coerceString(argList[0])
                     newBaseFunction(global, methodKey, { arguments ->
                         runCatching {
-                            val availableMethods = selectorObj.javaClass.methods.filter { method -> method.name == methodName }
-                            require(availableMethods.isNotEmpty()) { "Method $methodKey doesn't exist on global selector" }
-                            val resolved = SelectorMethodResolver.resolve(availableMethods, arguments)
-                                ?: throw WrappedIllegalArgumentException(
-                                    "Invalid arguments (${arguments.size}) for method UiSelector$$methodKey",
-                                )
-
                             // @Caution by SuperMonster003 on Oct 28, 2024.
-                            //  ! Do NOT use `selectorObj` as a new global selector
+                            //  ! Do NOT reuse one selector object as a new global selector
                             //  ! will APPEND on the old one (e.g., text('a') -> text('a').desc('b')).
                             //  ! zh-CN:
-                            //  ! 不要使用 `selectorObj`, 因为新的全局选择器将附加到旧选择器之上
+                            //  ! 不要复用同一个选择器对象, 因为新的全局选择器将附加到旧选择器之上
                             //  ! (例如 text('a') -> text('a').desc('b')).
-                            try {
-                                resolved.method.invoke(scriptRuntime.selector(), *resolved.arguments)
-                            } catch (e: InvocationTargetException) {
-                                throw e.targetException
+                            when {
+                                SelectorGlobals.isRegistryProperty(methodKey) -> applyRegistryProperty(methodKey, arguments)
+                                else -> invokeQueryMethod(queryMethods[methodKey].orEmpty(), methodKey, arguments)
                             }
                         }.getOrElse { e ->
                             if (ScriptInterruptedException.causedByInterrupt(e)) throw e
@@ -94,12 +92,39 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         }
     }
 
+    private fun applyRegistryProperty(name: String, arguments: Array<out Any?>): UiSelector {
+        val selector = scriptRuntime.selector()
+        val args = arguments.map { argument ->
+            when (val unwrapped = argument.jsUnwrapped()) {
+                is Callable -> BooleanFilter.BooleanSupplier { node ->
+                    coerceBoolean(RhinoUtils.callFunction(scriptRuntime, unwrapped, null as VarScope?, Undefined.SCRIPTABLE_UNDEFINED, arrayOf(node)))
+                }
+                else -> unwrapped
+            }
+        }
+        if (SelectorRegistry.apply(selector, name, args) != SelectorRegistry.Outcome.APPLIED) {
+            throw WrappedIllegalArgumentException("Invalid arguments (${arguments.size}) for method UiSelector$$name")
+        }
+        return selector
+    }
+
+    private fun invokeQueryMethod(availableMethods: List<Method>, name: String, arguments: Array<out Any?>): Any? {
+        require(availableMethods.isNotEmpty()) { "Method $name doesn't exist on global selector" }
+        val resolved = SelectorMethodResolver.resolve(availableMethods, arguments)
+            ?: throw WrappedIllegalArgumentException("Invalid arguments (${arguments.size}) for method UiSelector$$name")
+        return try {
+            resolved.method.invoke(scriptRuntime.selector(), *resolved.arguments)
+        } catch (e: InvocationTargetException) {
+            throw e.targetException
+        }
+    }
+
     override fun invoke(vararg args: Any?): Scriptable = ensureArgumentsIsEmpty(args) {
         Context.javaToJS(scriptRuntime.selector(), scriptRuntime.topLevelScope) as Scriptable
     }
 
     private fun isGlobalAugmentTarget(key: String): Boolean {
-        return !isInJavaObject(key) && !isInGlobal(key) && !isInScopeAugmentMethodBlacklist(key)
+        return !isInJavaObject(key) && !isInGlobal(key) && key !in SelectorGlobals.excluded
     }
 
     private fun isInGlobal(key: String): Boolean {
@@ -110,17 +135,8 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         return Object::class.declaredMembers.find { it.name == key } != null
     }
 
-    private fun isInScopeAugmentMethodBlacklist(key: String): Boolean {
-        return scopeAugmentMethodBlacklist.contains(key)
-    }
-
     @Suppress("SameParameterValue")
     companion object : ArgumentGuards() {
-
-        private val scopeAugmentMethodBlacklist = listOf(
-            UiSelector::plus.name,
-            UiSelector::append.name,
-        )
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -509,16 +525,7 @@ internal object SelectorMethodResolver {
     }
 
     private fun convertArgument(parameterType: Class<*>, arg: Any?): ConvertedArgument? {
-        val converted = when {
-            arg !is Double -> arg
-            parameterType == Double::class.java || parameterType == Double::class.javaObjectType -> arg
-            parameterType == Float::class.java || parameterType == Float::class.javaObjectType -> arg.toFloat()
-            parameterType == Long::class.java || parameterType == Long::class.javaObjectType -> arg.roundToLong()
-            parameterType == Int::class.java || parameterType == Int::class.javaObjectType -> arg.roundToInt()
-            parameterType == Short::class.java || parameterType == Short::class.javaObjectType -> arg.toInt().toShort()
-            parameterType == Byte::class.java || parameterType == Byte::class.javaObjectType -> arg.toInt().toByte()
-            else -> arg
-        }
+        val converted = JsArgumentCoercion.coerce(parameterType, arg)
         if (converted == null) {
             return if (parameterType.isPrimitive) null else ConvertedArgument(null)
         }

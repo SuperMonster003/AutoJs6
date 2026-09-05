@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 5 日.
+数据更新于 2026 年 9 月 6 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -412,6 +412,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 带应用 ID 后缀的插件无法正确解析激活入口, 且唤醒成功与服务可用状态可能不一致的问题
 * `修复` `UiObject` 在带有节点分配器时调用 `getChild()` / `getParent()` 等 compat 访问器会无限递归 (分配器回调了包装对象自身的访问器); 修复后分配器在原始节点上操作, 登记按对象同一性而非节点相等性 (指向同一视图的两个实例不再只回收其一). 分配器仍未接入脚本运行时: Android 13 以下节点按进程池化, 退出时批量回收可能回收到已被其它脚本复用的实例
 * `修复` 选择器 `contextClickable()` 条件在选择器的字符串表示 (如 `selector().toString()` 与错误信息) 中误显示为 `checkable`
+* `修复` 全局函数形式的 `filter(fn)` 调用失败 (报 "Invalid arguments"), 以及集合选择器数组中的正则不被接受 (如 `pickup({text: [/regex/]})`)
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
@@ -502,6 +503,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 无障碍节点的回收统一由 `NodeLifecycle` / `NodeRecyclePolicy` 决定 (Android 13 起节点无需回收, 不再逐个调用空操作的 `recycle()`; 此前散布在搜索算法, 滚动动作, 服务缓存根节点与分配器中的内联回收全部经由此处, 回收失败只记录日志, 不再中断查找)
 * `优化` 无障碍截图 (`automator.captureScreen()`) 抽出为 `A11yScreenshotter`: 截图后的硬件缓冲现在总会被关闭 (原先只回收了包装位图); 系统限频错误的重试改为至多 60 次 (3 s), 之后与其它失败一样以 `null` 兑现 (原先系统持续限频时 promise 永远不会兑现)
 * `优化` 选择器过滤器, 搜索算法 (DFS / BFS) 与罗盘导航 (`compass`) 改为面向不依赖 Android 的 `UiNode` 接口 (`UiObject` 实现它), 三者可在 JVM 单元测试中以内存节点树覆盖; 脚本可见的 API 与行为不变
+* `优化` 选择器属性改由声明式注册表 `SelectorRegistry` 统一描述: `UiSelector` 的 builder 方法据此生成, 集合选择器 (如 `pickup({...})`) 按注册表解析而非反射, 全局选择器函数按注册表与显式白名单导出 (`toStringReadable` 与 `internal` 成员的混淆名不再暴露为全局函数); 全局函数与集合选择器的数值参数统一按四舍五入转换为整数 (集合选择器此前为截断)
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -783,7 +785,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 5 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 6 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

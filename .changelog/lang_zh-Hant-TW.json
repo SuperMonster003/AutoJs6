@@ -272,7 +272,8 @@
         "缺少 APK 封裝中繼資料的最小腳本專案會退回 `main.js`, 而非啟動 `project.json` 宣告的 `main` 進入點",
         "帶應用程式 ID 後綴的外掛無法正確解析啟用入口, 且喚醒成功與服務可用狀態可能不一致的問題",
         "`UiObject` 在帶有節點配置器時呼叫 `getChild()` / `getParent()` 等 compat 存取器會無限遞迴 (配置器回呼了包裝物件自身的存取器); 修復後配置器在原始節點上操作, 登記按物件同一性而非節點相等性 (指向同一檢視的兩個實例不再只回收其一). 配置器仍未接入指令碼執行時: Android 13 以下節點按程序池化, 退出時批次回收可能回收到已被其它指令碼複用的實例",
-        "選擇器 `contextClickable()` 條件在選擇器的字串表示 (如 `selector().toString()` 與錯誤訊息) 中誤顯示為 `checkable`"
+        "選擇器 `contextClickable()` 條件在選擇器的字串表示 (如 `selector().toString()` 與錯誤訊息) 中誤顯示為 `checkable`",
+        "全域函式形式的 `filter(fn)` 呼叫失敗 (報 \"Invalid arguments\"), 以及集合選擇器陣列中的正規表示式不被接受 (如 `pickup({text: [/regex/]})`)"
       ],
       "improvement": [
         "`TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作",
@@ -361,7 +362,8 @@
         "無障礙視窗根節點的取得邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實作, 版面分析器同樣經由此處取視窗): 設定了視窗過濾器時 `auto.root` 在首個通過過濾的視窗沒有根節點時繼續查看後續視窗 (原先直接回傳 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受視窗過濾器影響這一差異已在原始碼中明確",
         "無障礙節點的回收統一由 `NodeLifecycle` / `NodeRecyclePolicy` 決定 (Android 13 起節點無需回收, 不再逐個呼叫空操作的 `recycle()`; 此前散佈在搜尋演算法, 捲動動作, 服務快取根節點與配置器中的內聯回收全部經由此處, 回收失敗只記錄日誌, 不再中斷查找)",
         "無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬體緩衝現在總會被關閉 (原先只回收了包裝點陣圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)",
-        "選擇器過濾器, 搜尋演算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 介面 (`UiObject` 實作它), 三者可在 JVM 單元測試中以記憶體節點樹覆蓋; 指令碼可見的 API 與行為不變"
+        "選擇器過濾器, 搜尋演算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 介面 (`UiObject` 實作它), 三者可在 JVM 單元測試中以記憶體節點樹覆蓋; 指令碼可見的 API 與行為不變",
+        "選擇器屬性改由宣告式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此產生, 集合選擇器 (如 `pickup({...})`) 依註冊表解析而非反射, 全域選擇器函式依註冊表與明確白名單匯出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全域函式); 全域函式與集合選擇器的數值參數統一依四捨五入轉換為整數 (集合選擇器此前為截斷)"
       ],
       "dependency": [
         "模組化 Android AXML",

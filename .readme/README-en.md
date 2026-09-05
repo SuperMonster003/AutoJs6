@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 5, 2026.
+Data updated on Sep 6, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -436,6 +436,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Plugin activation entries could be resolved incorrectly for application ID suffix variants, and wake success could be reported before the service was available
 * `Fix` Calling the compat accessors `getChild()` / `getParent()` etc. on a `UiObject` that carried a node allocator recursed endlessly (the allocator called back into the wrapper's own accessors); the allocator now works on the raw node and registers by object identity rather than node equality (two instances of the same view are no longer released as one). It is still not wired into script runtimes: below Android 13 nodes are pooled per process, so a batch release at exit could recycle an instance already reused by another script
 * `Fix` The selector condition `contextClickable()` showed up as `checkable` in the selector's string form (`selector().toString()`, error messages)
+* `Fix` The global function form `filter(fn)` failed with "Invalid arguments", and a regex inside a map selector array (`pickup({text: [/regex/]})`) was rejected
 * `Improvement` The `TypeScript console` now stays collapsed by default and appears on demand from the full Log page or editor Log panel overflow menu only when the compiler plugin is available, with visibility remembered independently; its green Run action becomes a red Stop action while a snippet is active, the full Log page shows the actual working directory, and the editor Log panel overflow menu also consolidates Copy, Send, and Export
 * `Improvement` TypeScript TSX runtime validation messages now follow the app language across all 10 supported locales instead of exposing hardcoded English
 * `Improvement` Ace font preview now shows a download-required hint above the multifunction keyboard while the selected font is unavailable, and hides it after download or when switching to an available font
@@ -523,6 +524,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Accessibility node recycling is now decided in one place, `NodeLifecycle` / `NodeRecyclePolicy` (nodes need no recycling from Android 13 on, so the no-op `recycle()` is no longer called for each of them; the inline recycling formerly scattered over the search algorithms, scroll actions, the service's cached root and the allocator all goes through it, and a failing recycle is logged instead of aborting a search)
 * `Improvement` Accessibility screenshots (`automator.captureScreen()`) are taken by the new `A11yScreenshotter`: the hardware buffer behind a screenshot is now always closed (only the wrapping bitmap used to be recycled), and the retry on the system's rate-limit error is capped at 60 attempts (3 s), after which the promise resolves to `null` like for any other failure (it used to never resolve while the system kept rate limiting)
 * `Improvement` Selector filters, the search algorithms (DFS / BFS) and the compass walk (`compass`) now work against the Android-free `UiNode` interface (implemented by `UiObject`), so all three are covered by JVM unit tests over an in-memory node tree; the script-facing API and behaviour are unchanged
+* `Improvement` Selector properties are now described once in the declarative `SelectorRegistry`: the `UiSelector` builder methods are generated from it, map selectors (`pickup({...})` etc.) are parsed by it instead of by reflection, and the global selector functions are exported from it plus an explicit whitelist (`toStringReadable` and the mangled names of `internal` members are no longer exposed as globals); numeric arguments of global functions and map selectors are uniformly rounded to integers (map selectors used to truncate)
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -804,7 +806,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 5, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 6, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

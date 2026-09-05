@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 5 일.
+데이터 갱신일: 2026 년 9 월 6 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -436,6 +436,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 애플리케이션 ID 접미사가 있는 변형에서 활성화 진입점을 잘못 해석하고 서비스가 준비되기 전에 깨우기 성공을 표시할 수 있는 문제
 * `수정` 노드 할당기가 있는 `UiObject` 에서 compat 접근자 `getChild()` / `getParent()` 등을 호출하면 무한 재귀가 발생하던 문제 (할당기가 래퍼 자신의 접근자를 되불렀음) 를 수정; 할당기는 원시 노드에서 동작하고 등록은 노드 동등성이 아닌 객체 동일성 기준 (같은 뷰를 가리키는 두 인스턴스가 하나로 해제되지 않음). 스크립트 런타임에는 여전히 연결하지 않음: Android 13 미만에서는 노드가 프로세스 단위로 풀링되어 종료 시 일괄 해제가 다른 스크립트가 이미 재사용 중인 인스턴스를 재활용할 수 있음
 * `수정` 선택자 조건 `contextClickable()` 이 선택자의 문자열 표현 (`selector().toString()`, 오류 메시지) 에서 `checkable` 로 표시되던 문제
+* `수정` 전역 함수 형식의 `filter(fn)` 호출이 "Invalid arguments" 로 실패하고, 맵 형식 선택자 배열 안의 정규식 (`pickup({text: [/regex/]})`) 이 거부되던 문제
 * `개선` `TypeScript 콘솔`은 기본적으로 접힌 상태를 유지하고 컴파일러 플러그인을 사용할 수 있을 때만 전체 로그 페이지 또는 편집기 로그 패널의 더보기 메뉴에서 필요에 따라 표시되며 표시 상태를 각각 기억함; 스니펫 실행 중에는 녹색 실행 동작이 빨간색 중지 동작으로 전환되고 전체 로그 페이지에 실제 작업 디렉터리가 표시되며 편집기 로그 패널의 더보기 메뉴에 복사, 보내기 및 내보내기도 통합됨
 * `개선` TypeScript TSX 런타임 검증 메시지가 하드코딩된 영어 대신 지원되는 10개 언어 모두에서 앱 언어를 따르도록 개선
 * `개선` 선택한 글꼴을 아직 다운로드하지 않은 경우 Ace 글꼴 미리보기가 다기능 키보드 위에 다운로드 안내를 표시하고, 다운로드 완료 또는 사용 가능한 글꼴로 전환하면 자동으로 숨김
@@ -523,6 +524,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 접근성 노드 재활용을 `NodeLifecycle` / `NodeRecyclePolicy` 한 곳에서 결정하도록 변경 (Android 13 부터 노드는 재활용이 필요 없으므로 효과 없는 `recycle()` 을 개별 호출하지 않음; 검색 알고리즘, 스크롤 동작, 서비스의 캐시된 루트, 할당기에 흩어져 있던 인라인 재활용이 모두 이곳을 거치며, 재활용 실패는 검색을 중단하지 않고 로그로 기록됨)
 * `개선` 접근성 스크린샷 (`automator.captureScreen()`) 을 새 `A11yScreenshotter` 가 담당: 스크린샷의 하드웨어 버퍼가 이제 항상 닫힘 (이전에는 감싼 비트맵만 재활용); 시스템의 빈도 제한 오류에 대한 재시도는 최대 60회 (3초) 로 제한하고, 이후에는 다른 실패와 마찬가지로 `null` 로 해결됨 (이전에는 시스템이 계속 제한하는 동안 promise 가 영원히 해결되지 않았음)
 * `개선` 선택자 필터, 검색 알고리즘 (DFS / BFS), 나침반 이동 (`compass`) 이 Android 에 의존하지 않는 `UiNode` 인터페이스 (`UiObject` 가 구현) 를 대상으로 동작하도록 변경되어 세 가지 모두 메모리 노드 트리 기반 JVM 단위 테스트로 검증됨; 스크립트에 보이는 API 와 동작은 변함없음
+* `개선` 선택자 속성을 선언적 레지스트리 `SelectorRegistry` 에서 한 번에 기술하도록 변경: `UiSelector` 의 builder 메서드는 여기서 생성되고, 맵 형식 선택자 (`pickup({...})` 등) 는 리플렉션 대신 레지스트리로 해석되며, 전역 선택자 함수는 레지스트리와 명시적 허용 목록에 따라 내보내짐 (`toStringReadable` 과 `internal` 멤버의 맹글링된 이름은 더 이상 전역 함수로 노출되지 않음); 전역 함수와 맵 형식 선택자의 숫자 인수는 일괄적으로 반올림하여 정수로 변환됨 (맵 형식 선택자는 이전에 버림 처리)
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -804,7 +806,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 5 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 6 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

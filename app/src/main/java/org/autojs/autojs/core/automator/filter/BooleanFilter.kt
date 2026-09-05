@@ -8,7 +8,7 @@ import org.autojs.autojs.core.automator.UiNode
  */
 class BooleanFilter(private val mBooleanSupplier: BooleanSupplier, private val mExceptedValue: Boolean? = null) : Filter {
 
-    interface BooleanSupplier {
+    fun interface BooleanSupplier {
         operator fun get(node: UiNode<*>): Boolean
     }
 

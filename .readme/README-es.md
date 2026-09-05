@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 5 de September de 2026.
+Datos actualizados el 6 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -436,6 +436,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Las entradas de activación podían resolverse de forma incorrecta en variantes con sufijo del ID de aplicación, y el éxito del despertar podía anunciarse antes de que el servicio estuviera disponible
 * `Corrección` Llamar a los accesores compat `getChild()` / `getParent()` etc. en un `UiObject` con asignador de nodos recurría sin fin (el asignador volvía a llamar a los accesores del propio envoltorio); ahora el asignador trabaja sobre el nodo bruto y registra por identidad de objeto y no por igualdad de nodos (dos instancias de la misma vista ya no se liberan como una sola). Sigue sin integrarse en los tiempos de ejecución de script: por debajo de Android 13 los nodos se agrupan por proceso, por lo que una liberación en lote al salir podría reciclar una instancia ya reutilizada por otro script
 * `Corrección` La condición de selector `contextClickable()` aparecía como `checkable` en la forma de cadena del selector (`selector().toString()`, mensajes de error)
+* `Corrección` La forma de función global `filter(fn)` fallaba con "Invalid arguments", y se rechazaba una expresión regular dentro de un array de selector de mapa (`pickup({text: [/regex/]})`)
 * `Mejora` La `consola TypeScript` permanece contraída de forma predeterminada y solo puede mostrarse bajo demanda desde el menú de opciones de la página de registro completa o del panel de registro del editor cuando está disponible el plugin compilador, con estados recordados por separado; mientras se ejecuta un fragmento, la acción verde Ejecutar se convierte en la acción roja Detener, la página de registro completa muestra el directorio de trabajo real y el menú del panel también reúne Copiar, Enviar y Exportar
 * `Mejora` Los mensajes de validación del runtime TypeScript TSX ahora siguen el idioma de la aplicación en los 10 idiomas compatibles en lugar de mostrar inglés codificado de forma fija
 * `Mejora` La vista previa de fuentes de Ace ahora muestra sobre el teclado multifunción un aviso de descarga mientras la fuente seleccionada no está disponible, y lo oculta tras descargarla o cambiar a una fuente disponible
@@ -523,6 +524,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El reciclaje de nodos de accesibilidad se decide ahora en un solo lugar, `NodeLifecycle` / `NodeRecyclePolicy` (desde Android 13 los nodos no necesitan reciclarse, por lo que ya no se llama al `recycle()` sin efecto para cada uno; el reciclaje en línea que antes estaba repartido entre los algoritmos de búsqueda, las acciones de desplazamiento, la raíz en caché del servicio y el asignador pasa todo por ahí, y un reciclaje fallido se registra en lugar de abortar una búsqueda)
 * `Mejora` Las capturas de pantalla de accesibilidad (`automator.captureScreen()`) las toma el nuevo `A11yScreenshotter`: el búfer de hardware de una captura ahora se cierra siempre (antes solo se reciclaba el mapa de bits envolvente), y el reintento ante el error de limitación de frecuencia del sistema se limita a 60 intentos (3 s), tras los cuales la promesa se resuelve con `null` como en cualquier otro fallo (antes nunca se resolvía mientras el sistema seguía limitando)
 * `Mejora` Los filtros de selector, los algoritmos de búsqueda (DFS / BFS) y la navegación por brújula (`compass`) trabajan ahora sobre la interfaz `UiNode`, independiente de Android (implementada por `UiObject`), de modo que los tres quedan cubiertos por pruebas unitarias JVM sobre un árbol de nodos en memoria; la API visible para los scripts y su comportamiento no cambian
+* `Mejora` Las propiedades de selector se describen ahora una sola vez en el registro declarativo `SelectorRegistry`: los métodos builder de `UiSelector` se generan a partir de él, los selectores de mapa (`pickup({...})`, etc.) se analizan con él en lugar de por reflexión, y las funciones globales de selector se exportan a partir de él más una lista blanca explícita (`toStringReadable` y los nombres decorados de los miembros `internal` ya no se exponen como globales); los argumentos numéricos de las funciones globales y de los selectores de mapa se redondean uniformemente a enteros (los selectores de mapa antes truncaban)
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -804,7 +806,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 5 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 6 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

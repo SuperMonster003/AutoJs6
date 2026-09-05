@@ -4,11 +4,9 @@ package org.autojs.autojs.core.accessibility
 
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.annotation.FloatRange
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.automator.ActionArgument
-import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObject.Companion.COMPASS_PASS_ON
 import org.autojs.autojs.core.automator.UiObject.Companion.Detector
@@ -18,35 +16,18 @@ import org.autojs.autojs.core.automator.UiObjectActions
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.EMPTY
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
-import org.autojs.autojs.core.automator.filter.ActionFilter
-import org.autojs.autojs.core.automator.filter.AppFilter
 import org.autojs.autojs.core.automator.filter.BooleanFilter
-import org.autojs.autojs.core.automator.filter.BoundsFilter
-import org.autojs.autojs.core.automator.filter.ClassNameFilter
-import org.autojs.autojs.core.automator.filter.ContentFilter
-import org.autojs.autojs.core.automator.filter.DescFilter
-import org.autojs.autojs.core.automator.filter.DoubleMinFilter
 import org.autojs.autojs.core.automator.filter.Filter
-import org.autojs.autojs.core.automator.filter.IdFilter
-import org.autojs.autojs.core.automator.filter.IdHexFilter
-import org.autojs.autojs.core.automator.filter.IntFilter
-import org.autojs.autojs.core.automator.filter.MaxIntFilter
-import org.autojs.autojs.core.automator.filter.MetricsFilter
-import org.autojs.autojs.core.automator.filter.MetricsMaxFilter
-import org.autojs.autojs.core.automator.filter.MetricsMinFilter
-import org.autojs.autojs.core.automator.filter.MetricsRangeFilter
-import org.autojs.autojs.core.automator.filter.MinIntFilter
-import org.autojs.autojs.core.automator.filter.PackageNameFilter
 import org.autojs.autojs.core.automator.filter.Selector
-import org.autojs.autojs.core.automator.filter.TextFilter
-import org.autojs.autojs.core.automator.filter.ToleranceFilter
+import org.autojs.autojs.core.automator.selector.SelectorMapException
+import org.autojs.autojs.core.automator.selector.SelectorMapParser
+import org.autojs.autojs.core.automator.selector.SelectorRegistry
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
 import org.autojs.autojs.core.automator.search.SearchAlgorithm
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.autojs.autojs.util.App
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.str
@@ -60,10 +41,16 @@ import org.mozilla.javascript.regexp.NativeRegExp
 import java.math.BigInteger
 
 /**
+ * The script-facing selector: the builder methods are generated from [SelectorRegistry] into
+ * [UiSelectorBuilders] and routed back here through [applyEntry]; this class keeps the queries
+ * (`find*`, `exists`, `untilFind*`), the search settings and the `pickup` machinery.
+ * zh-CN: 面向脚本的选择器: builder 方法由 [SelectorRegistry] 生成到 [UiSelectorBuilders] 并经 [applyEntry] 转回此处;
+ * 本类保留查询 (`find*`, `exists`, `untilFind*`), 搜索设置与 `pickup` 机制.
+ *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Jun 11, 2022.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
-open class UiSelector : UiObjectActions, StringReadable {
+open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     internal var selector = Selector()
 
@@ -77,612 +64,18 @@ open class UiSelector : UiObjectActions, StringReadable {
 
     constructor(accessibilityBridge: AccessibilityBridge?) : this(accessibilityBridge, null)
 
-    constructor(accessibilityBridge: AccessibilityBridge?, allocator: AccessibilityNodeInfoAllocator?) {
+    constructor(accessibilityBridge: AccessibilityBridge?, allocator: AccessibilityNodeInfoAllocator?) : super() {
         mAccessibilityBridge = accessibilityBridge
         mAllocator = allocator
     }
 
-    @ScriptInterface
-    fun id(s: String) = also { addFilter(IdFilter.equals(s)) }
-
-    @ScriptInterface
-    fun id(regex: NativeRegExp) = also { addFilter(IdFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun idStartsWith(prefix: String) = also { addFilter(IdFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun idEndsWith(suffix: String) = also { addFilter(IdFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun idContains(s: String) = also { addFilter(IdFilter.contains(s)) }
-
-    @ScriptInterface
-    fun idContains(regex: NativeRegExp) = also { addFilter(IdFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("idMatch(s)"))
-    fun idMatches(s: String) = also { addFilter(IdFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("idMatch(regex)"))
-    fun idMatches(regex: NativeRegExp) = also { addFilter(IdFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun idMatch(s: String) = also { addFilter(IdFilter.match(s)) }
-
-    @ScriptInterface
-    fun idMatch(regex: NativeRegExp) = also { addFilter(IdFilter.match(regex)) }
-
-    @ScriptInterface
-    fun idHex(str: String) = also { addFilter(IdHexFilter.equals(str)) }
-
-    @ScriptInterface
-    fun text(s: String) = also { addFilter(TextFilter.equals(s)) }
-
-    @ScriptInterface
-    fun text(regex: NativeRegExp) = also { addFilter(TextFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun textStartsWith(prefix: String) = also { addFilter(TextFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun textEndsWith(suffix: String) = also { addFilter(TextFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun textContains(s: String) = also { addFilter(TextFilter.contains(s)) }
-
-    @ScriptInterface
-    fun textContains(regex: NativeRegExp) = also { addFilter(TextFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("textMatch(s)"))
-    fun textMatches(s: String) = also { addFilter(TextFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("textMatch(regex)"))
-    fun textMatches(regex: NativeRegExp) = also { addFilter(TextFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun textMatch(s: String) = also { addFilter(TextFilter.match(s)) }
-
-    @ScriptInterface
-    fun textMatch(regex: NativeRegExp) = also { addFilter(TextFilter.match(regex)) }
-
-    @ScriptInterface
-    fun desc(s: String) = also { addFilter(DescFilter.equals(s)) }
-
-    @ScriptInterface
-    fun desc(regex: NativeRegExp) = also { addFilter(DescFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun descStartsWith(prefix: String) = also { addFilter(DescFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun descEndsWith(suffix: String) = also { addFilter(DescFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun descContains(s: String) = also { addFilter(DescFilter.contains(s)) }
-
-    @ScriptInterface
-    fun descContains(regex: NativeRegExp) = also { addFilter(DescFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("descMatch(s)"))
-    fun descMatches(s: String) = also { addFilter(DescFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("descMatch(regex)"))
-    fun descMatches(regex: NativeRegExp) = also { addFilter(DescFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun descMatch(s: String) = also { addFilter(DescFilter.match(s)) }
-
-    @ScriptInterface
-    fun descMatch(regex: NativeRegExp) = also { addFilter(DescFilter.match(regex)) }
-
-    @ScriptInterface
-    fun content(s: String) = also { addFilter(ContentFilter.equals(s)) }
-
-    @ScriptInterface
-    fun content(regex: NativeRegExp) = also { addFilter(ContentFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun contentStartsWith(prefix: String) = also { addFilter(ContentFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun contentEndsWith(suffix: String) = also { addFilter(ContentFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun contentContains(s: String) = also { addFilter(ContentFilter.contains(s)) }
-
-    @ScriptInterface
-    fun contentContains(regex: NativeRegExp) = also { addFilter(ContentFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("contentMatch(s)"))
-    fun contentMatches(s: String) = also { addFilter(ContentFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("contentMatch(regex)"))
-    fun contentMatches(regex: NativeRegExp) = also { addFilter(ContentFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun contentMatch(s: String) = also { addFilter(ContentFilter.match(s)) }
-
-    @ScriptInterface
-    fun contentMatch(regex: NativeRegExp) = also { addFilter(ContentFilter.match(regex)) }
-
-    @ScriptInterface
-    fun className(s: String) = also { addFilter(ClassNameFilter.equals(s)) }
-
-    @ScriptInterface
-    fun className(regex: NativeRegExp) = also { addFilter(ClassNameFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun classNameStartsWith(prefix: String) = also { addFilter(ClassNameFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun classNameEndsWith(suffix: String) = also { addFilter(ClassNameFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun classNameContains(s: String) = also { addFilter(ClassNameFilter.contains(s)) }
-
-    @ScriptInterface
-    fun classNameContains(regex: NativeRegExp) = also { addFilter(ClassNameFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("classNameMatch(s)"))
-    fun classNameMatches(s: String) = also { addFilter(ClassNameFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("classNameMatch(regex)"))
-    fun classNameMatches(regex: NativeRegExp) = also { addFilter(ClassNameFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun classNameMatch(s: String) = also { addFilter(ClassNameFilter.match(s)) }
-
-    @ScriptInterface
-    fun classNameMatch(regex: NativeRegExp) = also { addFilter(ClassNameFilter.match(regex)) }
-
-    @ScriptInterface
-    fun packageName(s: String) = also { addFilter(PackageNameFilter.equals(s)) }
-
-    @ScriptInterface
-    fun packageName(regex: NativeRegExp) = also { addFilter(PackageNameFilter.equals(regex)) }
-
-    @ScriptInterface
-    fun packageName(app: App) = also { addFilter(PackageNameFilter.equals(app.packageName)) }
-
-    @ScriptInterface
-    fun packageNameStartsWith(prefix: String) = also { addFilter(PackageNameFilter.startsWith(prefix)) }
-
-    @ScriptInterface
-    fun packageNameEndsWith(suffix: String) = also { addFilter(PackageNameFilter.endsWith(suffix)) }
-
-    @ScriptInterface
-    fun packageNameContains(s: String) = also { addFilter(PackageNameFilter.contains(s)) }
-
-    @ScriptInterface
-    fun packageNameContains(regex: NativeRegExp) = also { addFilter(PackageNameFilter.contains(regex)) }
-
-    @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("packageNameMatch(s)"))
-    fun packageNameMatches(s: String) = also { addFilter(PackageNameFilter.matches(s)) }
-
-    @ScriptInterface
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java", ReplaceWith("packageNameMatch(regex)"))
-    fun packageNameMatches(regex: NativeRegExp) = also { addFilter(PackageNameFilter.matches(regex)) }
-
-    @ScriptInterface
-    fun packageNameMatch(s: String) = also { addFilter(PackageNameFilter.match(s)) }
-
-    @ScriptInterface
-    fun packageNameMatch(regex: NativeRegExp) = also { addFilter(PackageNameFilter.match(regex)) }
-
-    @ScriptInterface
-    fun currentApp(app: App) = also { addFilter(AppFilter(app)) }
-
-    @ScriptInterface
-    fun currentApp(name: String) = also { addFilter(AppFilter(name)) }
-
-    @ScriptInterface
-    fun bounds(l: Double, t: Double, r: Double, b: Double) = also { addFilter(BoundsFilter(l, t, r, b, BoundsFilter.TYPE_EQUALS)) }
-
-    @ScriptInterface
-    fun boundsInside(l: Double, t: Double, r: Double, b: Double) = also { addFilter(BoundsFilter(l, t, r, b, BoundsFilter.TYPE_INSIDE)) }
-
-    @ScriptInterface
-    fun boundsContains(l: Double, t: Double, r: Double, b: Double) = also { addFilter(BoundsFilter(l, t, r, b, BoundsFilter.TYPE_CONTAINS)) }
-
-    @ScriptInterface
-    fun boundsLeft(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_LEFT, value)) }
-
-    @ScriptInterface
-    fun boundsLeft(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_LEFT, min, max)) }
-
-    @ScriptInterface
-    fun boundsTop(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_TOP, value)) }
-
-    @ScriptInterface
-    fun boundsTop(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_TOP, min, max)) }
-
-    @ScriptInterface
-    fun boundsRight(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_RIGHT, value)) }
-
-    @ScriptInterface
-    fun boundsRight(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_RIGHT, min, max)) }
-
-    @ScriptInterface
-    fun boundsBottom(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_BOTTOM, value)) }
-
-    @ScriptInterface
-    fun boundsBottom(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_BOTTOM, min, max)) }
-
-    @ScriptInterface
-    fun boundsWidth(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_WIDTH, value)) }
-
-    @ScriptInterface
-    fun boundsWidth(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_WIDTH, min, max)) }
-
-    @ScriptInterface
-    fun boundsHeight(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_HEIGHT, value)) }
-
-    @ScriptInterface
-    fun boundsHeight(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_HEIGHT, min, max)) }
-
-    @ScriptInterface
-    fun boundsCenterX(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_CENTER_X, value)) }
-
-    @ScriptInterface
-    fun boundsCenterX(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_CENTER_X, min, max)) }
-
-    @ScriptInterface
-    fun boundsCenterY(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOUNDS_CENTER_Y, value)) }
-
-    @ScriptInterface
-    fun boundsCenterY(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOUNDS_CENTER_Y, min, max)) }
-
-    @ScriptInterface
-    fun boundsMinLeft(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_LEFT, min)) }
-
-    @ScriptInterface
-    fun boundsMinTop(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_TOP, min)) }
-
-    @ScriptInterface
-    fun boundsMinRight(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_RIGHT, min)) }
-
-    @ScriptInterface
-    fun boundsMinBottom(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_BOTTOM, min)) }
-
-    @ScriptInterface
-    fun boundsMinWidth(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_WIDTH, min)) }
-
-    @ScriptInterface
-    fun boundsMinHeight(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_HEIGHT, min)) }
-
-    @ScriptInterface
-    fun boundsMinCenterX(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_CENTER_X, min)) }
-
-    @ScriptInterface
-    fun boundsMinCenterY(min: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOUNDS_CENTER_Y, min)) }
-
-    @ScriptInterface
-    fun boundsMaxLeft(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_LEFT, max)) }
-
-    @ScriptInterface
-    fun boundsMaxTop(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_TOP, max)) }
-
-    @ScriptInterface
-    fun boundsMaxRight(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_RIGHT, max)) }
-
-    @ScriptInterface
-    fun boundsMaxBottom(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_BOTTOM, max)) }
-
-    @ScriptInterface
-    fun boundsMaxWidth(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_WIDTH, max)) }
-
-    @ScriptInterface
-    fun boundsMaxHeight(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_HEIGHT, max)) }
-
-    @ScriptInterface
-    fun boundsMaxCenterX(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_CENTER_X, max)) }
-
-    @ScriptInterface
-    fun boundsMaxCenterY(max: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOUNDS_CENTER_Y, max)) }
-
-    @ScriptInterface
-    fun left(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.LEFT, value)) }
-
-    @ScriptInterface
-    fun left(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.LEFT, min, max)) }
-
-    @ScriptInterface
-    fun top(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.TOP, value)) }
-
-    @ScriptInterface
-    fun top(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.TOP, min, max)) }
-
-    @ScriptInterface
-    fun right(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.RIGHT, value)) }
-
-    @ScriptInterface
-    fun right(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.RIGHT, min, max)) }
-
-    @ScriptInterface
-    fun bottom(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.BOTTOM, value)) }
-
-    @ScriptInterface
-    fun bottom(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.BOTTOM, min, max)) }
-
-    @ScriptInterface
-    fun width(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.WIDTH, value)) }
-
-    @ScriptInterface
-    fun width(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.WIDTH, min, max)) }
-
-    @ScriptInterface
-    fun height(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.HEIGHT, value)) }
-
-    @ScriptInterface
-    fun height(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.HEIGHT, min, max)) }
-
-    @ScriptInterface
-    fun centerX(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.CENTER_X, value)) }
-
-    @ScriptInterface
-    fun centerX(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.CENTER_X, min, max)) }
-
-    @ScriptInterface
-    fun centerY(value: Double) = also { addFilter(MetricsFilter(MetricsFilter.CENTER_Y, value)) }
-
-    @ScriptInterface
-    fun centerY(min: Double, max: Double) = also { addFilter(MetricsRangeFilter(MetricsRangeFilter.CENTER_Y, min, max)) }
-
-    @ScriptInterface
-    fun minLeft(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.LEFT, value)) }
-
-    @ScriptInterface
-    fun minTop(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.TOP, value)) }
-
-    @ScriptInterface
-    fun minRight(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.RIGHT, value)) }
-
-    @ScriptInterface
-    fun minBottom(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.BOTTOM, value)) }
-
-    @ScriptInterface
-    fun minWidth(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.WIDTH, value)) }
-
-    @ScriptInterface
-    fun minHeight(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.HEIGHT, value)) }
-
-    @ScriptInterface
-    fun minCenterX(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.CENTER_X, value)) }
-
-    @ScriptInterface
-    fun minCenterY(value: Double) = also { addFilter(MetricsMinFilter(MetricsMinFilter.CENTER_Y, value)) }
-
-    @ScriptInterface
-    fun maxLeft(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.LEFT, value)) }
-
-    @ScriptInterface
-    fun maxTop(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.TOP, value)) }
-
-    @ScriptInterface
-    fun maxRight(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.RIGHT, value)) }
-
-    @ScriptInterface
-    fun maxBottom(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.BOTTOM, value)) }
-
-    @ScriptInterface
-    fun maxWidth(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.WIDTH, value)) }
-
-    @ScriptInterface
-    fun maxHeight(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.HEIGHT, value)) }
-
-    @ScriptInterface
-    fun maxCenterX(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.CENTER_X, value)) }
-
-    @ScriptInterface
-    fun maxCenterY(value: Double) = also { addFilter(MetricsMaxFilter(MetricsMaxFilter.CENTER_Y, value)) }
-
-    @ScriptInterface
-    fun screenCenterX(b: Boolean, @FloatRange(0.0, 0.5) tolerance: Double) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X, b, tolerance)) }
-
-    @ScriptInterface
-    fun screenCenterX(b: Boolean) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X, b)) }
-
-    @ScriptInterface
-    fun screenCenterX(@FloatRange(0.0, 0.5) tolerance: Double) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X, null, tolerance)) }
-
-    @ScriptInterface
-    fun screenCenterX() = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X)) }
-
-    @ScriptInterface
-    fun screenCenterY(b: Boolean, @FloatRange(0.0, 0.5) tolerance: Double) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_Y, b, tolerance)) }
-
-    @ScriptInterface
-    fun screenCenterY(b: Boolean) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_Y, b)) }
-
-    @ScriptInterface
-    fun screenCenterY(@FloatRange(0.0, 0.5) tolerance: Double) = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_Y, null, tolerance)) }
-
-    @ScriptInterface
-    fun screenCenterY() = also { addFilter(ToleranceFilter(ToleranceFilter.SCREEN_CENTER_Y)) }
-
-    @ScriptInterface
-    fun screenCoverage(@FloatRange(0.0, 1.0) min: Double) = also { addFilter(DoubleMinFilter(DoubleMinFilter.SCREEN_COVERAGE, min)) }
-
-    @ScriptInterface
-    fun screenCoverage() = also { addFilter(DoubleMinFilter(DoubleMinFilter.SCREEN_COVERAGE)) }
-
-    @ScriptInterface
-    fun algorithm(str: String) = when {
-        str.equals("BFS", true) -> also { searchAlgorithm = BFS }
-        str.equals("DFS", true) -> also { searchAlgorithm = DFS }
-        else -> throw IllegalArgumentException(str(R.string.error_unknown_algorithm_selector_param, str))
+    override fun applyEntry(name: String, vararg args: Any?): UiSelector = also {
+        when (SelectorRegistry.apply(this, name, args.asList())) {
+            SelectorRegistry.Outcome.APPLIED -> Unit
+            SelectorRegistry.Outcome.NO_SUCH_PROPERTY -> throw IllegalStateException("Selector property $name is not registered")
+            SelectorRegistry.Outcome.NO_MATCHING_OVERLOAD -> throw IllegalArgumentException("Arguments ${args.contentToString()} do not fit selector property $name")
+        }
     }
-
-    @ScriptInterface
-    fun action(vararg actions: Any) = also { addFilter(ActionFilter(actions)) }
-
-    @ScriptInterface
-    fun filter(filter: BooleanFilter.BooleanSupplier) = also {
-        addFilter(object : Filter {
-            override fun filter(node: UiNode<*>) = filter[node]
-        })
-    }
-
-    @ScriptInterface
-    fun hasChildren() = also { addFilter(BooleanFilter(BooleanFilter.HAS_CHILDREN)) }
-
-    @ScriptInterface
-    fun hasChildren(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.HAS_CHILDREN, b)) }
-
-    @ScriptInterface
-    fun checkable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.CHECKABLE, b)) }
-
-    @ScriptInterface
-    fun checkable() = also { addFilter(BooleanFilter(BooleanFilter.CHECKABLE)) }
-
-    @ScriptInterface
-    fun checked(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.CHECKED, b)) }
-
-    @ScriptInterface
-    fun checked() = also { addFilter(BooleanFilter(BooleanFilter.CHECKED)) }
-
-    @ScriptInterface
-    fun focusable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.FOCUSABLE, b)) }
-
-    @ScriptInterface
-    fun focusable() = also { addFilter(BooleanFilter(BooleanFilter.FOCUSABLE)) }
-
-    @ScriptInterface
-    fun focused(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.FOCUSED, b)) }
-
-    @ScriptInterface
-    fun focused() = also { addFilter(BooleanFilter(BooleanFilter.FOCUSED)) }
-
-    @ScriptInterface
-    fun visibleToUser(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.VISIBLE_TO_USER, b)) }
-
-    @ScriptInterface
-    fun visibleToUser() = also { addFilter(BooleanFilter(BooleanFilter.VISIBLE_TO_USER)) }
-
-    @ScriptInterface
-    fun accessibilityFocused(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.ACCESSIBILITY_FOCUSED, b)) }
-
-    @ScriptInterface
-    fun accessibilityFocused() = also { addFilter(BooleanFilter(BooleanFilter.ACCESSIBILITY_FOCUSED)) }
-
-    @ScriptInterface
-    fun selected(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.SELECTED, b)) }
-
-    @ScriptInterface
-    fun selected() = also { addFilter(BooleanFilter(BooleanFilter.SELECTED)) }
-
-    @ScriptInterface
-    fun clickable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.CLICKABLE, b)) }
-
-    @ScriptInterface
-    fun clickable() = also { addFilter(BooleanFilter(BooleanFilter.CLICKABLE)) }
-
-    @ScriptInterface
-    fun longClickable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.LONG_CLICKABLE, b)) }
-
-    @ScriptInterface
-    fun longClickable() = also { addFilter(BooleanFilter(BooleanFilter.LONG_CLICKABLE)) }
-
-    @ScriptInterface
-    fun enabled(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.ENABLED, b)) }
-
-    @ScriptInterface
-    fun enabled() = also { addFilter(BooleanFilter(BooleanFilter.ENABLED)) }
-
-    @ScriptInterface
-    fun password(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.PASSWORD, b)) }
-
-    @ScriptInterface
-    fun password() = also { addFilter(BooleanFilter(BooleanFilter.PASSWORD)) }
-
-    @ScriptInterface
-    fun scrollable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.SCROLLABLE, b)) }
-
-    @ScriptInterface
-    fun scrollable() = also { addFilter(BooleanFilter(BooleanFilter.SCROLLABLE)) }
-
-    @ScriptInterface
-    fun editable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.EDITABLE, b)) }
-
-    @ScriptInterface
-    fun editable() = also { addFilter(BooleanFilter(BooleanFilter.EDITABLE)) }
-
-    @ScriptInterface
-    fun contentInvalid(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.CONTENT_INVALID, b)) }
-
-    @ScriptInterface
-    fun contentInvalid() = also { addFilter(BooleanFilter(BooleanFilter.CONTENT_INVALID)) }
-
-    @ScriptInterface
-    fun contextClickable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.CONTEXT_CLICKABLE, b)) }
-
-    @ScriptInterface
-    fun contextClickable() = also { addFilter(BooleanFilter(BooleanFilter.CONTEXT_CLICKABLE)) }
-
-    @ScriptInterface
-    fun multiLine(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.MULTI_LINE, b)) }
-
-    @ScriptInterface
-    fun multiLine() = also { addFilter(BooleanFilter(BooleanFilter.MULTI_LINE)) }
-
-    @ScriptInterface
-    fun dismissable(b: Boolean) = also { addFilter(BooleanFilter(BooleanFilter.DISMISSABLE, b)) }
-
-    @ScriptInterface
-    fun dismissable() = also { addFilter(BooleanFilter(BooleanFilter.DISMISSABLE)) }
-
-    @ScriptInterface
-    fun depth(d: Int) = also { addFilter(IntFilter(IntFilter.DEPTH, d)) }
-
-    @ScriptInterface
-    fun row(d: Int) = also { addFilter(IntFilter(IntFilter.ROW, d)) }
-
-    @ScriptInterface
-    fun rowCount(d: Int) = also { addFilter(IntFilter(IntFilter.ROW_COUNT, d)) }
-
-    @ScriptInterface
-    fun rowSpan(d: Int) = also { addFilter(IntFilter(IntFilter.ROW_SPAN, d)) }
-
-    @ScriptInterface
-    fun column(d: Int) = also { addFilter(IntFilter(IntFilter.COLUMN, d)) }
-
-    @ScriptInterface
-    fun columnCount(d: Int) = also { addFilter(IntFilter(IntFilter.COLUMN_COUNT, d)) }
-
-    @ScriptInterface
-    fun columnSpan(d: Int) = also { addFilter(IntFilter(IntFilter.COLUMN_SPAN, d)) }
-
-    @ScriptInterface
-    fun drawingOrder(order: Int) = also { addFilter(IntFilter(IntFilter.DRAWING_ORDER, order)) }
-
-    @ScriptInterface
-    fun indexInParent(index: Int) = also { addFilter(IntFilter(IntFilter.INDEX_IN_PARENT, index)) }
-
-    @ScriptInterface
-    fun childCount(count: Int) = also { addFilter(IntFilter(IntFilter.CHILD_COUNT, count)) }
-
-    @ScriptInterface
-    fun minChildCount(min: Int) = also { addFilter(MinIntFilter(MinIntFilter.CHILD_COUNT, min)) }
-
-    @ScriptInterface
-    fun maxChildCount(max: Int) = also { addFilter(MaxIntFilter(MaxIntFilter.CHILD_COUNT, max)) }
 
     @ScriptInterface
     fun findOnce(): UiObject? = findOnce(0)
@@ -821,7 +214,15 @@ open class UiSelector : UiObjectActions, StringReadable {
 
     private fun findOf(root: UiObject, max: Int): UiObjectCollection = of(findAndReturnList(root, max))
 
-    private fun addFilter(filter: Filter) = also { selector.add(filter) }
+    internal fun addFilter(filter: Filter) = also { selector.add(filter) }
+
+    internal fun useAlgorithm(name: String) {
+        searchAlgorithm = when {
+            name.equals("BFS", true) -> BFS
+            name.equals("DFS", true) -> DFS
+            else -> throw IllegalArgumentException(str(R.string.error_unknown_algorithm_selector_param, name))
+        }
+    }
 
     fun append(selector: UiSelector?) = also {
         selector?.let {
@@ -893,114 +294,6 @@ open class UiSelector : UiObjectActions, StringReadable {
                 private var mResultType: Any = RESULT_TYPE_WIDGET
                 private var mCallback: Callable? = null
 
-                private val cString = String::class.java
-                private val cBoolean = Boolean::class.java
-                private val cInt = Int::class.java
-                private val cDouble = Double::class.java
-                private val cBooleanSupplier = BooleanFilter.BooleanSupplier::class.java
-                private val cNativeRegExp = NativeRegExp::class.java
-                private val cApp = App::class.java
-
-                /* cDouble */
-                private val doubleTypes = hashMapOf(
-                    "bounds" to arrayOf(cDouble, cDouble, cDouble, cDouble),
-                    "boundsContains" to arrayOf(cDouble, cDouble, cDouble, cDouble),
-                    "boundsInside" to arrayOf(cDouble, cDouble, cDouble, cDouble),
-                    "boundsLeft" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsTop" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsRight" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsBottom" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsWidth" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsHeight" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsCenterX" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsCenterY" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "boundsMinLeft" to cDouble,
-                    "boundsMinTop" to cDouble,
-                    "boundsMinRight" to cDouble,
-                    "boundsMinBottom" to cDouble,
-                    "boundsMinWidth" to cDouble,
-                    "boundsMinHeight" to cDouble,
-                    "boundsMinCenterX" to cDouble,
-                    "boundsMinCenterY" to cDouble,
-                    "boundsMaxLeft" to cDouble,
-                    "boundsMaxTop" to cDouble,
-                    "boundsMaxRight" to cDouble,
-                    "boundsMaxBottom" to cDouble,
-                    "boundsMaxWidth" to cDouble,
-                    "boundsMaxHeight" to cDouble,
-                    "boundsMaxCenterX" to cDouble,
-                    "boundsMaxCenterY" to cDouble,
-                    "left" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "top" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "right" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "bottom" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "width" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "height" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "centerX" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "centerY" to arrayOf(arrayOf(cDouble, cDouble), cDouble),
-                    "minLeft" to cDouble,
-                    "minTop" to cDouble,
-                    "minRight" to cDouble,
-                    "minBottom" to cDouble,
-                    "minWidth" to cDouble,
-                    "minHeight" to cDouble,
-                    "minCenterX" to cDouble,
-                    "minCenterY" to cDouble,
-                    "maxLeft" to cDouble,
-                    "maxTop" to cDouble,
-                    "maxRight" to cDouble,
-                    "maxBottom" to cDouble,
-                    "maxWidth" to cDouble,
-                    "maxHeight" to cDouble,
-                    "maxCenterX" to cDouble,
-                    "maxCenterY" to cDouble,
-                    "screenCenterX" to arrayOf(arrayOf(cBoolean, cDouble), cDouble),
-                    "screenCenterY" to arrayOf(arrayOf(cBoolean, cDouble), cDouble),
-                    "screenCoverage" to cDouble,
-                )
-
-                /* cBoolean / null */
-                private val nullableBoolTypes = listOf(
-                    "accessibilityFocused", "checkable", "checked", "clickable",
-                    "contentInvalid", "contextClickable", "dismissable", "editable",
-                    "enabled", "focusable", "focused", "longClickable", "multiLine",
-                    "password", "scrollable", "selected", "visibleToUser", "hasChildren",
-                )
-
-                /* cString */
-                private val stringTypes = listOf(
-                    "algorithm", "idHex",
-                    "id", "idContains", "idEndsWith", "idStartsWith",
-                    "desc", "descContains", "descEndsWith", "descStartsWith",
-                    "text", "textContains", "textEndsWith", "textStartsWith",
-                    "content", "contentContains", "contentEndsWith", "contentStartsWith",
-                    "packageNameContains", "packageNameEndsWith", "packageNameStartsWith",
-                    "className", "classNameContains", "classNameEndsWith", "classNameStartsWith",
-                )
-
-                /* cString / cNativeRegExp */
-                private val regexTypes = listOf(
-                    "idMatches", "idMatch",
-                    "descMatches", "descMatch",
-                    "textMatches", "textMatch",
-                    "contentMatches", "contentMatch",
-                    "packageNameMatches", "packageNameMatch",
-                    "classNameMatches", "classNameMatch",
-                )
-
-                /* cInt */
-                private val intTypes = listOf(
-                    "row", "rowCount", "rowSpan",
-                    "column", "columnCount", "columnSpan",
-                    "depth", "drawingOrder", "indexInParent",
-                    "childCount", "minChildCount", "maxChildCount",
-                )
-
-                /* cApp / cString */
-                private val appTypes = listOf(
-                    "currentApp", "packageName",
-                )
-
                 fun setRoot(root: UiObject?) = also { mRoot = root }
 
                 fun setSelector(scriptRuntime: ScriptRuntime, selector: Any?) = also {
@@ -1035,159 +328,20 @@ open class UiSelector : UiObjectActions, StringReadable {
                 }
 
                 private fun setSelector(scriptRuntime: ScriptRuntime, selector: Map<*, *>) = also {
-                    mSelector.append(checkSelectorMap(scriptRuntime, selector))
-                }
-
-                // FIXME by SuperMonster003 on Nov 23, 2022.
-                //  ! A more elegant way is needed.
-                //  ! Especially for list<*> typed value handling.
-                //  ! zh-CN:
-                //  ! 需要一种更优雅的方式.
-                //  ! 尤其是对于 list<*> 类型值的处理.
-                private fun checkSelectorMap(scriptRuntime: ScriptRuntime, selector: Map<*, *>) = UiSelector().also { tmp ->
-                    selector.entries.forEach { (key, value) ->
-                        try {
-                            when (key) {
-                                !is String -> return@forEach
-                                "action" -> when (value) {
-                                    null -> return@forEach
-                                    is NativeArray -> tmp.action(*value.filterNotNull().toTypedArray())
-                                    else -> tmp.action(value)
-                                }
-                                "filter" -> tmp.filter(object : BooleanFilter.BooleanSupplier {
-                                    override fun get(node: UiNode<*>): Boolean {
-                                        val func = (if (value is NativeArray) value[0] else value) as Callable
-                                        return RhinoUtils.callFunction(
-                                            scriptRuntime,
-                                            func,
-                                            null as VarScope?,
-                                            Undefined.SCRIPTABLE_UNDEFINED,
-                                            arrayOf(node),
-                                        ) as Boolean
-                                    }
-                                })
-                                else -> when (value) {
-                                    null -> tmp::class.java
-                                        .getMethod(key)
-                                        .invoke(tmp)
-                                    is String -> tmp::class.java
-                                        .getMethod(key, cString)
-                                        .invoke(tmp, value)
-                                    is NativeRegExp -> tmp::class.java
-                                        .getMethod(key, cNativeRegExp)
-                                        .invoke(tmp, value)
-                                    is Boolean -> tmp::class.java
-                                        .getMethod(key, cBoolean)
-                                        .invoke(tmp, value)
-                                    is Double -> when (doubleTypes.containsKey(key)) {
-                                        true -> tmp::class.java
-                                            .getMethod(key, cDouble)
-                                            .invoke(tmp, value)
-                                        else -> tmp::class.java
-                                            .getMethod(key, cInt)
-                                            .invoke(tmp, value.toInt())
-                                    }
-                                    is BigInteger -> tmp::class.java
-                                        .getMethod(key, cInt)
-                                        .invoke(tmp, value.toInt())
-                                    is Callable -> tmp::class.java
-                                        .getMethod(key, cBooleanSupplier)
-                                        .invoke(tmp, object : BooleanFilter.BooleanSupplier {
-                                            override fun get(node: UiNode<*>) = RhinoUtils.callFunction(
-                                                scriptRuntime,
-                                                value,
-                                                null as VarScope?,
-                                                Undefined.SCRIPTABLE_UNDEFINED,
-                                                arrayOf(node),
-                                            ) as Boolean
-                                        })
-                                    is List<*> -> when {
-                                        doubleTypes.containsKey(key) -> when (val types = doubleTypes.getValue(key)) {
-                                            cDouble -> tmp::class.java
-                                                .getMethod(key, cDouble)
-                                                .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
-                                            is Array<*> -> when ( /* isOverloaded */ types.any { it is Array<*> }) {
-                                                true -> when (value.size) {
-                                                    1 -> types.find { it == cDouble }?.let {
-                                                        tmp::class.java
-                                                            .getMethod(key, cDouble)
-                                                            .invoke(tmp, value[0].toString().toDouble())
-                                                    } ?: throw Exception("UiSelector: $key($value)")
-                                                    2 -> types.find { it is Array<*> }?.let { type: Any ->
-                                                        val t = type as Array<*>
-                                                        when {
-                                                            t[0] == cDouble && t[1] == cDouble -> {
-                                                                val doubleArg0 = value[0].toString().toDouble()
-                                                                val doubleArg1 = value[1].toString().toDouble()
-                                                                tmp::class.java
-                                                                    .getMethod(key, cDouble, cDouble)
-                                                                    .invoke(tmp, doubleArg0, doubleArg1)
-                                                            }
-                                                            t[0] == cBoolean && t[1] == cDouble -> {
-                                                                val booleanArg0 = value[0].toString().toBoolean()
-                                                                val doubleArg1 = value[1].toString().toDouble()
-                                                                tmp::class.java
-                                                                    .getMethod(key, cBoolean, cDouble)
-                                                                    .invoke(tmp, booleanArg0, doubleArg1)
-                                                            }
-                                                            else -> throw Exception("UiSelector: $key($value)")
-                                                        }
-                                                    } ?: throw Exception("UiSelector: $key($value)")
-                                                    else -> throw Exception("UiSelector: $key($value)")
-                                                }
-                                                else -> @Suppress("UNCHECKED_CAST") tmp::class.java
-                                                    .getMethod(key, *(types as Array<out Class<*>>))
-                                                    .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
-                                            }
-                                            else -> throw Exception("UiSelector: $key($value)")
-                                        }
-                                        intTypes.contains(key) -> tmp::class.java
-                                            .getMethod(key, cInt)
-                                            .invoke(tmp, value[0].toString().toInt())
-                                        stringTypes.contains(key) -> tmp::class.java
-                                            .getMethod(key, cString)
-                                            .invoke(tmp, value[0])
-                                        regexTypes.contains(key) -> when (value[0]) {
-                                            is NativeRegExp -> tmp::class.java
-                                                .getMethod(key, cNativeRegExp)
-                                                .invoke(tmp, value[0])
-                                            is String -> tmp::class.java
-                                                .getMethod(key, cString)
-                                                .invoke(tmp, value[0])
-                                            else -> throw Exception("UiSelector: $key($value)")
-                                        }
-                                        appTypes.contains(key) -> when (value[0]) {
-                                            is App -> tmp::class.java
-                                                .getMethod(key, cApp)
-                                                .invoke(tmp, value[0])
-                                            is String -> tmp::class.java
-                                                .getMethod(key, cString)
-                                                .invoke(tmp, value[0])
-                                            else -> throw Exception("UiSelector: $key($value)")
-                                        }
-                                        nullableBoolTypes.contains(key) -> when (value.size) {
-                                            0 -> tmp::class.java
-                                                .getMethod(key)
-                                                .invoke(tmp)
-                                            1 -> tmp::class.java
-                                                .getMethod(key, cBoolean)
-                                                .invoke(tmp, value[0].toString().toBoolean())
-                                            else -> throw Exception("UiSelector: $key($value)")
-                                        }
-                                        else -> throw Exception("UiSelector: $key($value)")
-                                    }
-                                    else -> throw Exception("UiSelector: $key($value)")
-                                }
+                    val parser = SelectorMapParser(SelectorRegistry) { value ->
+                        (value as? Callable)?.let { func ->
+                            BooleanFilter.BooleanSupplier { node ->
+                                RhinoUtils.coerceBoolean(RhinoUtils.callFunction(scriptRuntime, func, null as VarScope?, Undefined.SCRIPTABLE_UNDEFINED, arrayOf(node)))
                             }
-                        } catch (e: NoSuchMethodException) {
-                            e.printStackTrace()
-                            val s = str(R.string.error_no_such_selector_method, key.toString(), value.toString(), value?.let { it::class.java } ?: "null")
-                            throw IllegalArgumentException(s)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            throw IllegalMapSelectorException(key.toString(), value ?: "null")
                         }
                     }
+                    try {
+                        parser.parse(selector, UiSelector())
+                    } catch (e: SelectorMapException.NoSuchProperty) {
+                        throw IllegalArgumentException(str(R.string.error_no_such_selector_method, e.key, e.value.toString(), e.value?.let { it::class.java } ?: "null"))
+                    } catch (e: SelectorMapException.IllegalValue) {
+                        throw IllegalMapSelectorException(e.key, e.value ?: "null")
+                    }.let { mSelector.append(it) }
                 }
 
                 fun setCompass(compass: CharSequence?) = also { compass?.let { mCompass = it } }
