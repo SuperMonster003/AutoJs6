@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 
+import org.autojs.autojs.core.accessibility.event.AccessibilityDelegate
 import org.autojs.autojs.core.notification.Notification
 
 import java.util.ArrayList

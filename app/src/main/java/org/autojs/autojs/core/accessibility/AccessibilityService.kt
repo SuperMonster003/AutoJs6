@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.accessibility
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
@@ -11,18 +13,16 @@ import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_START_TIMEOUT
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_STOP_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
+import org.autojs.autojs.core.accessibility.event.A11yEvent
+import org.autojs.autojs.core.accessibility.event.A11yEventBus
+import org.autojs.autojs.core.accessibility.event.AccessibilityDelegate
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
 import org.autojs.autojs.core.accessibility.registry.ConnectionListeners
-import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.pref.Language
-import org.autojs.autojs.event.EventDispatcher
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.AccessibilityServiceStateChangedEvent
 import org.greenrobot.eventbus.EventBus
-import java.util.*
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -31,8 +31,11 @@ import java.util.concurrent.atomic.AtomicLong
  */
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
 
-    val onKeyObserver = OnKeyListener.Observer()
-    val keyInterrupterObserver = KeyInterceptor.Observer()
+    // Compatibility shells: both live in the companion (see there) and survive service restarts.
+    // zh-CN: 兼容外壳: 两者均位于伴生对象 (见下), 在服务重启后依然存在.
+    val onKeyObserver: OnKeyListener.Observer get() = keyObserver
+    val keyInterrupterObserver: KeyInterceptor.Observer get() = keyInterceptors
+
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
         private set
 
@@ -64,23 +67,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     @Volatile
     private var isDisposed = false
 
-    // eventType -> (ownerId -> callback)
-    private val eventBox = HashMap<Int, MutableMap<String, AccessibilityEventCallback?>>()
-    private val eventBoxLock = Any()
-
-    /** Number of registered script event callbacks over all event types. zh-CN: 全部事件类型下已注册的脚本事件回调数. */
-    val eventCallbackCount: Int
-        get() = synchronized(eventBoxLock) { eventBox.values.sumOf { bucket -> bucket.values.count { it != null } } }
-
-    private val gestureEventDispatcher = EventDispatcher<GestureListener>()
-
-    private val eventExecutorLock = Any()
-    private var mEventExecutor: ExecutorService? = null
-    private val eventExecutor: ExecutorService
-        get() = synchronized(eventExecutorLock) {
-            mEventExecutor ?: Executors.newSingleThreadExecutor().also { mEventExecutor = it }
-        }
-
     private fun updateFastRootInActiveWindow(root: AccessibilityNodeInfo) {
         if (fastRootInActiveWindow === root) return
         recycleFastRootInActiveWindow()
@@ -93,49 +79,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             runCatching { root.recycle() }
         }
         fastRootInActiveWindow = null
-    }
-
-    private fun eventNameToType(event: String): Int {
-        return try {
-            AccessibilityEvent::class.java.getField(
-                "TYPE_${event.uppercase(Language.getPrefLanguage().locale)}"
-            ).get(null) as Int
-        } catch (_: NoSuchFieldException) {
-            throw IllegalArgumentException("Unknown event: $event")
-        }
-    }
-
-    fun addAccessibilityEventCallback(ownerId: String, name: String, callback: AccessibilityEventCallback?) {
-        val type = eventNameToType(name)
-        synchronized(eventBoxLock) {
-            val bucket = eventBox.getOrPut(type) { HashMap() }
-            if (callback == null) {
-                bucket.remove(ownerId)
-                if (bucket.isEmpty()) eventBox.remove(type)
-            } else {
-                bucket[ownerId] = callback
-            }
-        }
-    }
-
-    fun removeAccessibilityEventCallback(ownerId: String, name: String) {
-        val type = eventNameToType(name)
-        synchronized(eventBoxLock) {
-            val bucket = eventBox[type] ?: return
-            bucket.remove(ownerId)
-            if (bucket.isEmpty()) eventBox.remove(type)
-        }
-    }
-
-    fun removeAllAccessibilityEventCallbacks(ownerId: String) {
-        synchronized(eventBoxLock) {
-            val it = eventBox.entries.iterator()
-            while (it.hasNext()) {
-                val entry = it.next()
-                entry.value.remove(ownerId)
-                if (entry.value.isEmpty()) it.remove()
-            }
-        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -153,68 +96,21 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         lastEventElapsedRealtime = now
         if (boundAtElapsedRealtime == 0L) boundAtElapsedRealtime = now
 
-        // Lock-free read of the volatile observer snapshot; only field values are handed out.
-        // zh-CN: 无锁读取 volatile 的观察者快照; 只向外传递字段值.
-        val observers = eventObservers
-        if (observers.isNotEmpty()) {
-            val record = A11yEventRecord.of(event)
-            observers.forEach { (owner, observer) ->
-                try {
-                    observer(record)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Unhandled exception in accessibility event observer: $owner", e)
-                }
-            }
+        // Kept fresh regardless of who is subscribed (it used to depend on a delegate wanting the
+        // event), and before dispatch so that callbacks in MODE_FAST already see the new window.
+        // zh-CN: 无论是否有订阅者都保持更新 (原先取决于是否有 delegate 关心该事件), 且在分发之前, 使 MODE_FAST 的回调已能看到新窗口.
+        if (type == TYPE_WINDOW_STATE_CHANGED || type == TYPE_VIEW_FOCUSED) {
+            rootInActiveWindow?.let { updateFastRootInActiveWindow(it) }
         }
 
-        // Snapshot callbacks to avoid holding lock while invoking user code.
-        // zh-CN: 为回调建立快照, 以避免在调用用户代码时持锁.
-        val callbacks: List<AccessibilityEventCallback> = synchronized(eventBoxLock) {
-            val bucket = eventBox[type] ?: return@synchronized emptyList()
-            bucket.values.filterNotNull().toList()
-        }
-
-        if (callbacks.isNotEmpty()) {
-            val wrapper = AccessibilityEventWrapper(event)
-            callbacks.forEach { cb ->
-                try {
-                    cb.onAccessibilityEvent(wrapper)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Unhandled exception in accessibility event callback", e)
-                }
-            }
-        }
-
-        val delegateSnapshot = synchronized(delegatesLock) {
-            if (containsAllEventTypes || eventTypes.contains(type)) {
-                delegates.values.toList()
-            } else {
-                emptyList()
-            }
-        }
-        if (delegateSnapshot.isNotEmpty()) {
-            if (type == TYPE_WINDOW_STATE_CHANGED || type == TYPE_VIEW_FOCUSED) {
-                rootInActiveWindow?.let { updateFastRootInActiveWindow(it) }
-            }
-            for (delegate in delegateSnapshot) {
-                val types = try {
-                    delegate.eventTypes
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Unhandled exception while reading accessibility delegate event types: $delegate", e)
-                    continue
-                }
-                if (types == null || types.contains(type)) {
-                    val consumed = try {
-                        delegate.onAccessibilityEvent(this@AccessibilityService, event)
-                    } catch (e: Throwable) {
-                        Log.e(TAG, "Unhandled exception in accessibility delegate: $delegate", e)
-                        false
-                    }
-                    if (consumed) {
-                        break
-                    }
-                }
-            }
+        if (!eventBus.hasSubscribers(type)) return
+        val a11yEvent = A11yEvent(this, event)
+        try {
+            eventBus.dispatch(a11yEvent)
+        } finally {
+            // The framework may recycle the event from here on (API < 33).
+            // zh-CN: 从此刻起框架可能回收该事件 (API < 33).
+            a11yEvent.seal()
         }
     }
 
@@ -222,46 +118,23 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         Log.d(TAG, "onInterrupt")
     }
 
+    /**
+     * Observers (non-consuming) and interceptors (consuming) share [keyBus]; the return value is
+     * whether an interceptor consumed the key. Handlers run on this thread and are expected to hand
+     * the event off (the script side posts to its own looper).
+     * zh-CN: 观察者 (非消费) 与拦截器 (消费) 共用 [keyBus]; 返回值为是否有拦截器消费了该按键.
+     * 处理器在本线程运行, 应尽快转交事件 (脚本侧会 post 到自己的 looper).
+     */
     override fun onKeyEvent(event: KeyEvent): Boolean {
-        if (!isDisposed) {
-            try {
-                eventExecutor.execute {
-                    try {
-                        stickOnKeyObserver.onKeyEvent(event.keyCode, event)
-                        onKeyObserver.onKeyEvent(event.keyCode, event)
-                    } catch (e: Throwable) {
-                        Log.e(TAG, "Unhandled exception in accessibility key observer", e)
-                    }
-                }
-            } catch (e: Throwable) {
-                Log.e(TAG, "Unable to dispatch accessibility key event", e)
-            }
-        }
-        return try {
-            keyInterrupterObserver.onInterceptKeyEvent(event)
-        } catch (e: Throwable) {
-            Log.e(TAG, "Unhandled exception in accessibility key interceptor", e)
-            false
-        }
+        if (isDisposed) return false
+        return keyBus.dispatch(event)
     }
 
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java")
     override fun onGesture(gestureId: Int): Boolean {
         if (!isDisposed) {
-            try {
-                eventExecutor.execute {
-                    try {
-                        gestureEventDispatcher.dispatchEvent {
-                            onGesture(gestureId)
-                        }
-                    } catch (e: Throwable) {
-                        Log.e(TAG, "Unhandled exception in accessibility gesture observer", e)
-                    }
-                }
-            } catch (e: Throwable) {
-                Log.e(TAG, "Unable to dispatch accessibility gesture", e)
-            }
+            gestureBus.dispatch(gestureId)
         }
         return false
     }
@@ -298,14 +171,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         Log.v(TAG, "$reason: $this")
 
         recycleFastRootInActiveWindow()
-        synchronized(eventBoxLock) {
-            eventBox.clear()
-        }
+        // Subscriptions (script callbacks, delegates, observers, key listeners) live in the companion
+        // buses and deliberately outlive this instance.
+        // zh-CN: 订阅 (脚本回调, delegate, 观察者, 按键监听) 位于伴生对象的总线中, 有意不随本实例消亡.
 
-        synchronized(eventExecutorLock) {
-            mEventExecutor?.shutdownNow()
-            mEventExecutor = null
-        }
         // Listeners (state callbacks, drawer event) are notified by the registry when this was the bound instance.
         // zh-CN: 若本实例是当前绑定实例, 注册表会通知各监听者 (状态回调, 抽屉事件).
         registry.onDisposed(this)
@@ -318,6 +187,28 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         private const val LEGACY_CALLBACK_OWNER = "AccessibilityService.callback"
         private const val STATE_CHANGED_EVENT_OWNER = "AccessibilityService.stateChangedEvent"
 
+        /* Dispatch order on the accessibility event bus, lowest first. zh-CN: 无障碍事件总线上的分发顺序, 数值小者先. */
+
+        /** Lightweight observers (event monitor). zh-CN: 轻量观察者 (事件监视器). */
+        const val PRIORITY_OBSERVER = -100
+
+        /** Script callbacks of `auto.registerEvent`, before the framework delegates as before. zh-CN: `auto.registerEvent` 的脚本回调, 一如既往先于框架内部 delegate. */
+        const val PRIORITY_SCRIPT = 0
+
+        /** Key observers run before key interceptors so that they also see intercepted keys. zh-CN: 按键观察者先于拦截器, 因此也能看到被拦截的按键. */
+        const val PRIORITY_KEY_OBSERVER = 0
+        const val PRIORITY_KEY_INTERCEPTOR = 100
+
+        private val busLog: (String, Throwable?) -> Unit = { message, error -> Log.e(TAG, message, error) }
+
+        // Debounced deliveries run on the main looper, the thread onAccessibilityEvent itself runs on.
+        // zh-CN: 去抖投递在主 looper 上执行, 即 onAccessibilityEvent 自身所在的线程.
+        private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+        private val mainScheduler = A11yEventBus.DeferredScheduler { delayMillis, task ->
+            mainHandler.postDelayed(task, delayMillis)
+            A11yEventBus.DeferredScheduler.Cancellable { mainHandler.removeCallbacks(task) }
+        }
+
         /**
          * Process-wide state of the service (bound instance, operational flag, state listeners).
          * The companion members below are compatibility shells over it.
@@ -325,29 +216,50 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
          */
         val registry = A11yServiceRegistry<AccessibilityService> { message, error -> Log.e(TAG, message, error) }
 
+        /**
+         * Every accessibility event of the bound instance goes through here: observers
+         * ([PRIORITY_OBSERVER]), script callbacks ([PRIORITY_SCRIPT]) and framework delegates (their
+         * own priorities, consuming) are all subscriptions. Held here so that subscriptions survive
+         * service restarts.
+         * zh-CN: 绑定实例的每个无障碍事件都经由此处: 观察者 ([PRIORITY_OBSERVER]), 脚本回调 ([PRIORITY_SCRIPT]) 与框架内部
+         * delegate (各自的优先级, 可消费) 都是订阅项. 放在此处使订阅在服务重启后依然存在.
+         */
+        val eventBus = A11yEventBus<A11yEvent>(
+            typeOf = { it.type },
+            scheduler = mainScheduler,
+            retain = { it.copied() },
+            log = busLog,
+        )
+
+        /** Key events, typed by key code; see [onKeyEvent]. zh-CN: 按键事件, 以 keyCode 为类型; 见 [onKeyEvent]. */
+        val keyBus = A11yEventBus<KeyEvent>(typeOf = { it.keyCode }, log = busLog)
+
+        /** Gesture ids of the deprecated `onGesture` callback. zh-CN: 已弃用的 `onGesture` 回调的手势 id. */
+        val gestureBus = A11yEventBus<Int>(typeOf = { it }, log = busLog)
+
+        val keyObserver = OnKeyListener.Observer(keyBus, PRIORITY_KEY_OBSERVER)
+
+        val keyInterceptors = KeyInterceptor.Observer(keyBus, PRIORITY_KEY_INTERCEPTOR)
+
+        /** Legacy name of [keyObserver]. zh-CN: [keyObserver] 的旧名称. */
+        val stickOnKeyObserver: OnKeyListener.Observer get() = keyObserver
+
         init {
             registry.addListener(STATE_CHANGED_EVENT_OWNER, StateListener { previous, current ->
                 if (ConnectionListeners.isBindingChanged(previous, current)) postServiceStateChanged()
             })
         }
 
-        private val delegates = TreeMap<Int, AccessibilityDelegate>()
-        private val delegatesLock = Any()
-        private var containsAllEventTypes = false
-        private val eventTypes = HashSet<Int>()
-
         /** Number of registered framework delegates. zh-CN: 已注册的框架内部 delegate 数. */
         val delegateCount: Int
-            get() = synchronized(delegatesLock) { delegates.size }
+            get() = eventBus.count { it.owner is AccessibilityDelegate }
 
-        // Lightweight event observers (owner -> callback), kept in the companion so that they survive
-        // service restarts. Copy-on-write: the map is replaced under the lock and read without it.
-        // This is the seed of the Kotlin-side subscription API of the P1.3 event bus.
-        // zh-CN: 轻量事件观察者 (owner -> 回调), 放在伴生对象中以跨服务重启存活. 写时复制: 持锁替换整个映射, 读取时无锁.
-        // 这是 P1.3 事件总线 Kotlin 侧订阅 API 的雏形.
-        @Volatile
-        private var eventObservers: Map<Any, (A11yEventRecord) -> Unit> = emptyMap()
-        private val eventObserversLock = Any()
+        /** Number of registered script event callbacks over all event types. zh-CN: 全部事件类型下已注册的脚本事件回调数. */
+        val scriptCallbackCount: Int
+            get() = eventBus.count { it.priority == PRIORITY_SCRIPT }
+
+        val eventObserverCount: Int
+            get() = eventBus.count { it.priority == PRIORITY_OBSERVER }
 
         /**
          * Registers [observer] for [owner], replacing the observer previously registered by the same owner.
@@ -355,21 +267,14 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
          * zh-CN: 为 [owner] 注册 [observer], 同一 owner 之前的观察者会被替换. 观察者在服务主线程上于每个事件到达时被调用, 先于脚本回调.
          */
         fun addEventObserver(owner: Any, observer: (A11yEventRecord) -> Unit) {
-            synchronized(eventObserversLock) {
-                eventObservers = LinkedHashMap(eventObservers).apply { put(owner, observer) }
+            eventBus.unsubscribeAll(owner)
+            eventBus.subscribe(owner = owner, priority = PRIORITY_OBSERVER) { event ->
+                observer(event.record)
+                false
             }
         }
 
-        fun removeEventObserver(owner: Any): Boolean {
-            synchronized(eventObserversLock) {
-                if (!eventObservers.containsKey(owner)) return false
-                eventObservers = LinkedHashMap(eventObservers).apply { remove(owner) }
-                return true
-            }
-        }
-
-        val eventObserverCount: Int
-            get() = eventObservers.size
+        fun removeEventObserver(owner: Any): Boolean = eventBus.unsubscribeAll(owner) > 0
 
         var hasOperationalState: Boolean
             get() = registry.isOperational
@@ -392,25 +297,70 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                 defaultBridge = value
             }
 
-        val stickOnKeyObserver = OnKeyListener.Observer()
-
         fun hasInstance() = registry.isBound
 
-        fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
-            // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
-            //  ! 用于记录 eventTypes 中的事件 id.
-            //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
-            //  ! To record the event id in eventTypes.
-            synchronized(delegatesLock) {
-                delegates[uniquePriority] = delegate
-                val set = delegate.eventTypes
-                if (set == null) {
-                    containsAllEventTypes = true
-                } else {
-                    eventTypes.addAll(set)
-                }
+        /**
+         * The `AccessibilityEvent.TYPE_*` constant named by [name] (case-insensitive, without the prefix),
+         * e.g. `"window_state_changed"`.
+         * zh-CN: 以 [name] 命名的 `AccessibilityEvent.TYPE_*` 常量 (不区分大小写, 不含前缀), 如 `"window_state_changed"`.
+         */
+        @JvmStatic
+        fun eventTypeOf(name: String): Int {
+            return try {
+                AccessibilityEvent::class.java.getField(
+                    "TYPE_${name.uppercase(Language.getPrefLanguage().locale)}"
+                ).get(null) as Int
+            } catch (_: NoSuchFieldException) {
+                throw IllegalArgumentException("Unknown event: $name")
             }
         }
+
+        /**
+         * Framework delegate: a consuming subscription at [priority] (delegates return `true` to
+         * stop the chain). Its [AccessibilityDelegate.eventTypes] is read once, here.
+         * zh-CN: 框架内部 delegate: 优先级为 [priority] 的消费型订阅项 (delegate 返回 `true` 即终止链). 其 [AccessibilityDelegate.eventTypes] 在此读取一次.
+         */
+        fun addDelegate(priority: Int, delegate: AccessibilityDelegate) {
+            eventBus.subscribe(owner = delegate, types = delegate.eventTypes, priority = priority, consumable = true) { event ->
+                delegate.onAccessibilityEvent(event.service, event.raw)
+            }
+        }
+
+        fun removeDelegate(delegate: AccessibilityDelegate): Boolean = eventBus.unsubscribeAll(delegate) > 0
+
+        /**
+         * Script callback slot: one per ([ownerId], event type), a new registration replaces the
+         * previous one; a null [callback] only removes. [options] thins out repeated events.
+         * zh-CN: 脚本回调槽: 每个 ([ownerId], 事件类型) 一个, 新注册替换旧的; [callback] 为 null 时仅移除. [options] 用于稀释重复事件.
+         */
+        @JvmOverloads
+        fun addAccessibilityEventCallback(
+            ownerId: String,
+            name: String,
+            callback: AccessibilityEventCallback?,
+            options: A11yEventBus.Options<A11yEvent> = A11yEventBus.Options(),
+        ) {
+            val type = eventTypeOf(name)
+            removeAccessibilityEventCallback(ownerId, type)
+            callback ?: return
+            eventBus.subscribe(owner = ownerId, types = setOf(type), priority = PRIORITY_SCRIPT, options = options) { event ->
+                callback.onAccessibilityEvent(event.wrapper)
+                false
+            }
+        }
+
+        fun removeAccessibilityEventCallback(ownerId: String, name: String) {
+            removeAccessibilityEventCallback(ownerId, eventTypeOf(name))
+        }
+
+        private fun removeAccessibilityEventCallback(ownerId: String, type: Int) {
+            eventBus.subscriptionsOf(ownerId)
+                .filter { it.priority == PRIORITY_SCRIPT && it.types == setOf(type) }
+                .forEach { eventBus.unsubscribe(it) }
+        }
+
+        /** Removes every script callback of [ownerId]; returns how many. zh-CN: 移除 [ownerId] 的全部脚本回调, 返回数量. */
+        fun removeAllAccessibilityEventCallbacks(ownerId: String): Int = eventBus.unsubscribeAll(ownerId)
 
         fun stop(): Boolean {
             val service = instance
@@ -446,15 +396,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         // zh-CN: 等待绑定实例消失 (系统已解绑服务).
         fun waitForStopped(timeout: Long = DEFAULT_A11Y_SERVICE_STOP_TIMEOUT): Boolean {
             return registry.awaitUnbound(timeout)
-        }
-
-        @JvmStatic
-        fun clearAccessibilityEventCallback() {
-            instance?.let { svc ->
-                synchronized(svc.eventBoxLock) {
-                    svc.eventBox.clear()
-                }
-            }
         }
 
         /**

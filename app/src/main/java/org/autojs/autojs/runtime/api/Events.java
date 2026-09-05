@@ -131,6 +131,8 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mLoopers.waitWhenIdle(true);
         mListeningKey = true;
         mAccessibilityBridge.ensureServiceStarted();
+        // The observer lives in the companion (process-wide key bus), so listening survives a service restart.
+        // zh-CN: 观察者位于伴生对象 (进程级按键总线), 因此服务重启后监听依然有效.
         service.getOnKeyObserver().addListener(this);
     }
 
@@ -329,11 +331,10 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
     public void recycle() {
         broadcast.unregister();
         if (mListeningKey) {
-            AccessibilityService service = mAccessibilityBridge.getService();
-            if (service != null) {
-                service.getOnKeyObserver().removeListener(this);
-                mListeningKey = false;
-            }
+            // Companion-level shells: removable whether or not a service instance is alive right now.
+            // zh-CN: 伴生对象级外壳: 无论当前是否有服务实例都可移除.
+            AccessibilityService.Companion.getKeyObserver().removeListener(this);
+            mListeningKey = false;
         }
         if (mTouchObserver != null) {
             mTouchObserver.stop();
@@ -345,10 +346,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
             removeToastObserver();
         }
         if (mKeyInterceptor != null) {
-            AccessibilityService service = mAccessibilityBridge.getService();
-            if (service != null) {
-                service.getKeyInterrupterObserver().removeKeyInterrupter(mKeyInterceptor);
-            }
+            AccessibilityService.Companion.getKeyInterceptors().removeKeyInterrupter(mKeyInterceptor);
             mKeyInterceptor = null;
         }
         mLoopers.waitWhenIdle(false);

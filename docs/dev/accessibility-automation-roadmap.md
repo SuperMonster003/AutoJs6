@@ -148,7 +148,7 @@ core/accessibility/
   registry/    A11yServiceRegistry (含嵌套 State / Snapshot / StateListener), ConnectionListeners  [P1.1 已落地]
   diagnostics/ A11yServiceDiagnostics (状态行与诊断文本), A11yServiceSelfCheck, A11yServiceInfoFormat (Android-free)  [P1.7 已落地]
   control/     A11yServiceController (含嵌套 FailureReason / EnsureResult), ServiceStartStrategy + SettingsStoreStartStrategy, EnabledServicesStore (Root / Secure 实现), EnabledA11yServices (Android-free 列表操作)  [P1.2 已落地; 设置页为控制器兜底而非策略]
-  event/       A11yEventBus, A11yEventSubscription, AccessibilityDelegate (迁入)
+  event/       A11yEventBus (含嵌套 Subscription / Options / Handler / DeferredScheduler), A11yEvent (信封), AccessibilityDelegate (已迁入)  [P1.3 已落地]
   window/      WindowRootProvider, WindowRootPolicy (mode / flags / filter)
   node/        NodeLifecycle, NodeRecyclePolicy, AccessibilityNodeInfoAllocator (适配为 NodeLifecycle 的实现)
   (原文件保留原位置: AccessibilityService, AccessibilityServiceUsher, AccessibilityBridge, UiSelector, ...)
@@ -170,7 +170,7 @@ ui/accessibility/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1, P1.2, P1.7 完成 2026-09-05, 真机证据齐备; 下一项 P1.3) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1, P1.2, P1.3, P1.7 完成 2026-09-05; P1.3 真机复跑待回填; 下一项 P1.4) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -277,15 +277,22 @@ P1.2 证据:
 
 跟进证据: `JVM` 无新增纯逻辑 (均为 Android 侧), 无障碍相关 58 用例 0 失败; `ANDROID_BUILD` `:app:assembleAppDebug` 通过 (2026-09-05); `DOCS` 字符串 `error_active_window_root_unavailable` x 11 (经 `build/check-strings.py`), changelog `fix` 1 条 + `improvement` 1 条 (10 语言), README / CHANGELOG 重新生成; `DEVICE` 待维护者 (见会话记录).
 
-### P1.3 事件总线 `A11yEventBus`
+### P1.3 事件总线 `A11yEventBus` (完成 2026-09-05)
 
-- [ ] 将 `eventBox` (JS 回调, 按 ownerId), `delegates` (框架内部, 按优先级, 可消费), 按键观察者 (静态 + 实例), 手势 `EventDispatcher` 统一为 `A11yEventBus`: 订阅项 = (ownerId, 事件类型集合, 优先级, 是否可消费, 回调). 派发顺序保持现状 (JS 回调先于内部 delegate, delegate 按优先级且可消费中断, `AccessibilityService.kt:117-163`), 并以测试锁定.
-- [ ] 提供 `removeDelegate` / 按 ownerId 批量注销; `AbstractAutoJs.kt:143-145` 三个 delegate 注册改为经由总线.
-- [ ] `fastRootInActiveWindow` 的更新与 delegate 命中解耦: 在 `TYPE_WINDOW_STATE_CHANGED` / `TYPE_VIEW_FOCUSED` 时无条件更新 (`AccessibilityService.kt:141-143`), 并纳入 `NodeLifecycle` 回收策略.
-- [ ] 提供 Kotlin 侧的事件订阅 API (供 P3 的 `waitForIdle` / `waitForEvent` 使用), 支持 "安静窗口" 检测 (最近一次匹配事件时间戳).
-- [ ] `auto.registerEvent(name, callback, options?)` 新增可选的去重 / 去抖: `{ distinct: 'window' | 'source' | fn(prev, next), within: 500 }` 或 `{ debounce: 100 }`, 默认关闭以保持既有行为; 用于消除一次窗口切换收到多个 `TYPE_WINDOW_STATE_CHANGED` 的平台行为 (见第 3.1 节). 同一能力作为总线订阅项的选项提供给 Kotlin 侧.
-- [ ] `AccessibilityEventWrapper` 的 `source` 解析成本: 保持在回调期间可用的前提下 (API < 33 事件会被回收), 改为 "首次访问时解析, 回调返回后置为不可用" 或 "仅当订阅项声明 `needsSource` 时解析"; `depth` / `indexInParent` 的计算改用 `NodeLifecycle` 管理父链节点.
-- [ ] JUnit4 测试: 订阅 / 派发 / 消费中断 / 按 ownerId 注销 / 回调抛异常不影响其它订阅者 / 去重与去抖.
+- [x] `core/accessibility/event/A11yEventBus<E>` (Android-free 泛型, 时钟 / 延迟调度器 / 事件保留方式均注入): 订阅项 = (owner, 事件类型集合或 null, 优先级, 是否可消费, 选项, 处理器), 按优先级升序 (相同优先级按注册顺序) 分发, 可消费订阅项返回 `true` 终止链, 处理器异常隔离并记录, 订阅表写时复制 (处理器内订阅 / 退订安全). `AccessibilityService` 伴生对象持有三个实例: `eventBus` (`A11yEvent` 信封: 原始事件 + 按需构建的 `wrapper` / `record`), `keyBus` (`KeyEvent`, 类型 = keyCode), `gestureBus` (手势 id). 原 `eventBox` (JS 回调) = `PRIORITY_SCRIPT` (0) 的非消费订阅, 每个 (ownerId, 类型) 一槽 (重注册即替换); 原 `delegates` = 各自优先级 (100 / 200 / 300) 的消费订阅; P1.7 的事件观察者 = `PRIORITY_OBSERVER` (-100); 按键观察者 (`OnKeyListener.Observer`, 0) 与拦截器 (`KeyInterceptor.Observer`, 100, 消费) 成为 `keyBus` 上的兼容外壳 (方法名不变), 实例属性 `onKeyObserver` / `keyInterrupterObserver` 委托到伴生对象, 因此订阅在服务重启后依然存在 (原先随实例丢失: `auto.registerEvent` 回调与 `events.observeKey()` 均失效, 记入 changelog `fix`); 原 `stickOnKeyObserver` 为 `keyObserver` 的别名; 原手势 `EventDispatcher` (私有且从未有监听者) 以 `gestureBus` 替代; `eventExecutor` 删除 (按键 / 手势改为同步分发, 现有消费方均只做转投). 派发顺序 观察者 -> 脚本回调 -> delegate (按优先级, 可消费) 由 `A11yEventBusTest.serviceDispatchOrderIsObserversThenScriptsThenDelegates` 锁定. 偏离: 订阅项为总线的嵌套类 `Subscription` 而非独立文件 `A11yEventSubscription`; 按键 / 手势不与无障碍事件共用一个实例 (载荷类型不同), 共用的是同一个类与语义. (SOURCE; JVM: `A11yEventBusTest` 16 用例)
+- [x] `AccessibilityService.addDelegate(priority, delegate)` 即 `eventBus.subscribe(owner = delegate, consumable = true)`, 新增 `removeDelegate(delegate)`; `removeAllAccessibilityEventCallbacks(ownerId)` = `eventBus.unsubscribeAll(ownerId)`; `AbstractAutoJs` 的三个注册未改调用方式 (经 `addDelegate` 即经总线). `AccessibilityDelegate` 迁入 `core/accessibility/event/` (`git mv`, 3 个实现类改 import). 删除无调用方的 `clearAccessibilityEventCallback()`. (SOURCE)
+- [x] `fastRootInActiveWindow` 在 `TYPE_WINDOW_STATE_CHANGED` / `TYPE_VIEW_FOCUSED` 时无条件更新, 且移到分发之前 (MODE_FAST 的回调已能看到新窗口; 原先在 JS 回调之后, delegate 之前). 回收策略纳入 `NodeLifecycle` 留给 P1.5. (SOURCE)
+- [x] Kotlin 侧订阅 API 即 `AccessibilityService.eventBus.subscribe(owner, types, priority, consumable, options, handler)` 返回 `Subscription` 句柄 (`unsubscribe` / `unsubscribeAll(owner)`); 安静窗口检测: `eventBus.lastDispatchAtMillis` 与 `Subscription.lastMatchedAtMillis` (匹配类型即记录, 在去重之前); P1.7 的 `addEventObserver` 改为其薄封装. `A11yEvent.copied()` (拷贝原始事件) 供延迟投递. (SOURCE; JVM: `timestampsRecordMatchesBeforeFiltering`)
+- [x] `auto.registerEvent(name, callback, options?)`: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` (前沿去重: 键与上次投递相同且在窗口内则丢弃; 无键函数为纯节流, 无窗口则相同键持续丢弃) 与 `{ debounce: ms }` (后沿: 安静该时长后只投递这一串的最后一个, 投递内容为原始事件的拷贝, 在主 looper 上执行), 默认关闭. 偏离: `distinct` 的函数形态为键函数 `(event) => key` 而非比较器 `fn(prev, next)` (可与 `within` 正交组合, 实现与测试更简单). 同一能力即总线的 `Options(distinctKey, distinctWithinMillis, debounceMillis)`. `'source'` 需读取来源节点 (每个事件一次节点查询), 文档需标注. 冒烟脚本新增 1b 节 (3 项检查, 现在可重启设备 48 项, 其余 37 项). 记入 changelog `feature`. (SOURCE; JVM: `distinct*` / `debounce*` 6 用例; DEVICE 待维护者)
+- [x] `AccessibilityEventWrapper.source` 改为首次访问时解析并缓存; `A11yEvent.seal()` 在 `onAccessibilityEvent` 返回前调用, 此后 API < 33 上未解析的 `source` 为 null (API >= 33 事件不回收, 仍可解析). 去抖投递使用事件拷贝, 不受影响. 记入 changelog `improvement`. `depth` / `indexInParent` 经 `NodeLifecycle` 管理父链留给 P1.5. (SOURCE)
+- [x] JUnit4: `A11yEventBusTest` 16 用例 (优先级与注册顺序, 类型过滤与 null, 消费中断仅对可消费项生效, 句柄 / owner 注销, 异常隔离, 处理器内改订阅表, 去重的窗口 / 键变化 / 纯节流 / 无窗口, 键函数异常放行, 去抖只投递最后一个且可取消, 无调度器时拒绝去抖, 时间戳, 保留函数默认恒等, 服务分发顺序). (JVM)
+
+P1.3 证据:
+
+- `JVM`: `A11yEventBusTest` 16 / 0 失败; 全量 `:app:testAppDebugUnitTest` 见会话记录.
+- `ANDROID_BUILD`: 见会话记录.
+- `DOCS`: changelog `fix` 1 条 + `feature` 1 条 + `improvement` 1 条 (10 语言), README / CHANGELOG 重新生成; 无新增字符串; d.ts / API 文档的 `auto.registerEvent` 第三参数待 P6 同步.
+- `DEVICE`: 待维护者复跑冒烟脚本 (新增 1b 节: `distinct` / `debounce`), 并顺带验证服务重启后 `auto.registerEvent` 回调仍然触发 (脚本第 7 节重启后的选择器检查已隐含, 事件回调需人工观察或后续补检查).
 
 ### P1.4 窗口根节点 `WindowRootProvider`
 
@@ -709,4 +716,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 维护者反馈 (同日, 45 项版本脚本): AVD API 26 普通 / Root / WSS 均全部通过; XQ-DQ72 关闭保护模式后 普通 / Root / WSS 均全部通过. P1.1 与 P1.7 的真机证据齐备.
 - 落地 P1.2: `core/accessibility/control/{A11yServiceController,ServiceStartStrategy,EnabledServicesStores,EnabledA11yServices}.kt` 与 3 个测试类 (29 用例); `AccessibilityTool` 改为薄门面 (共享控制器在其伴生对象, 共享工具在 `AbstractAutoJs.accessibilityTool`); 4 个 "确保 / 等待" 变体合并为 `ensure`; D5 / D8 落实; 提前落地的 4 项修复迁入并补测; 决定不再写 `accessibility_enabled`; 修复文案颠倒, `auto.services` 空数组, 抽屉开关对故障服务的显示. 偏离两处 (设置页非策略; `AccessibilityTool` 不弃用) 已写入条目. changelog `fix` 4 条 + `improvement` 1 条. 证据见 P1.2 证据.
 - 维护者反馈 (同日): AVD API 24 / 25 冒烟脚本全部通过 (P1.2 `DEVICE` 证据); 强制停止实验结果与解读见 P1.2 `DEVICE` 证据, 派生待决 Q8 (附录 C). 维护者提出两处细节: (A) 悬浮按钮的窗口文字与暗色主题跟随系统而非宿主应用; (B) 服务自动启动后触发点应立即接续功能 (布局范围分析需触发两次). 两项均已落地, 见 P1.2 "跟进" 两条: `ContextUtils.withHostConfiguration()`, `AccessibilityTool.ensureServiceAsync` / `explainFailure`, `LayoutInspector.captureCurrentWindowWithRetry`, 字符串 `error_active_window_root_unavailable` x 11; changelog `fix` 1 条 + `improvement` 1 条. 待维护者真机确认: 悬浮菜单 / 磁贴 / `app.startActivity` 布局分析广播在服务关闭 + WSS/Root 可用时一次触发即出结果; 应用切换语言 / 夜间模式后悬浮菜单的对话框与布局分析器随之变化.
-- 下次起点: P1.3 (`A11yEventBus`: 统一 `eventBox` / `delegates` / 按键 / 手势, Kotlin 侧订阅 API 以 P1.7 的 `addEventObserver` 为雏形, `registerEvent` 可选去重 / 去抖). P1.4 需吸收本日输入 (活动窗口未知时的兜底: 现有 `captureCurrentWindowWithRetry` 只是 UI 侧的重试, 脚本侧兜底仍待 `WindowRootPolicy`; 保护模式的文档化). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行).
+- 落地 P1.3: `core/accessibility/event/{A11yEventBus,A11yEvent,AccessibilityDelegate}.kt` 与 `A11yEventBusTest` (16 用例); `AccessibilityService` 伴生对象持有 `eventBus` / `keyBus` / `gestureBus`, 脚本回调 / delegate / 观察者 / 按键观察者与拦截器全部成为订阅项并在服务重启后存活; `auto.registerEvent` 第三参数 `options` (`distinct` / `within` / `debounce`); `AccessibilityEventWrapper.source` 惰性解析 + `seal()`; `fastRootInActiveWindow` 无条件更新并前移. changelog `fix` 1 + `feature` 1 + `improvement` 1. 偏离三处已写入条目 (嵌套 `Subscription`; 按键 / 手势为独立总线实例; `distinct` 为键函数). 证据见 P1.3 证据.
+- 下次起点: P1.4 (`WindowRootProvider` / `WindowRootPolicy`: `AccessibilityBridge` 转 Kotlin 保留 FQN, 三处根节点逻辑合一, 非空列表, API 26 重绑后活动窗口未知的兜底选项, `getRootInActiveWindow` 是否应用过滤器的文档化, 保护模式文档化, `LayoutInspector` 经 provider 取窗口). 待维护者: 复跑冒烟脚本 (48 / 37 项) 并确认悬浮菜单 / 磁贴的一次触发接续与悬浮 UI 跟随宿主语言 / 夜间模式. P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行).

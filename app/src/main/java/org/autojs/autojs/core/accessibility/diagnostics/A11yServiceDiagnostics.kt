@@ -168,7 +168,7 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
         )
         add(
             Field.LISTENERS, "state ${AccessibilityService.registry.listenerCount}" +
-                    " | event ${service?.eventCallbackCount ?: 0}" +
+                    " | event ${AccessibilityService.scriptCallbackCount}" +
                     " | delegate ${AccessibilityService.delegateCount}" +
                     " | observer ${AccessibilityService.eventObserverCount}",
         )

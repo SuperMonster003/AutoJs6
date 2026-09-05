@@ -11,7 +11,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import org.autojs.autojs.app.AppOps.isUsageStatsPermissionGranted
-import org.autojs.autojs.core.accessibility.AccessibilityDelegate
+import org.autojs.autojs.core.accessibility.event.AccessibilityDelegate
 import org.autojs.autojs.runtime.api.Shell
 import java.util.regex.Pattern
 

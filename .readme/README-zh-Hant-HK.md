@@ -309,6 +309,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出嘅 `runtime.loadJarWithR8` 多載及協議 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發佈, retrace 綁定 mapping 來源, 提供者缺失或無效時禁止 D8/dx 或本地回退
 * `新增` 程式碼編輯器設定新增 Ace 語言支援矩陣, 並為 TypeScript/JavaScript, Python, Lua 與 Java 提供逐語言語義開關; Kotlin 以無 Provider 的 P2+ 狀態保持可見, 文件類型自訂明確作為語義路由前置白名單而非語言重新分類
 * `新增` 插件更新對話框支援在應用內顯示對應插件的發行歷史
+* `新增` `auto.registerEvent(name, listener, options?)` 新增可選的去重與去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口內丟棄鍵相同的重複事件 (如一次窗口切換收到的多個 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安靜給定時長後只投遞最後一個; 默認關閉
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
 * `修復` 使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間
@@ -371,6 +372,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `auto.services` 在未配置 root 或安全設置自動啓用方式時總是返回空數組的問題 (讀取已啓用服務列表並不需要這些權限)
 * `修復` 側拉抽屜的無障礙服務開關對 "已啓用但未運行" 的服務顯示為開啓的問題 (現顯示為關閉並帶 "故障" 副標題, 打開開關即重新啓用)
 * `修復` 浮動按鈕的 "佈局範圍分析" / "佈局層次分析" 在無障礙服務未啓用但可自動啓動 (root 或安全設置) 時需要觸發兩次的問題 (第一次僅啓動服務, 第二次才執行分析; 現服務啓動後立即接續分析, 快捷設置磁貼與佈局分析廣播同理, 且啓動過程不再阻塞主線程)
+* `修復` 無障礙服務重啓 (含被系統解綁後重新綁定) 後, 腳本此前通過 `auto.registerEvent` 註冊的事件回調與 `events.observeKey()` 的按鍵監聽全部失效的問題 (訂閱現由進程級事件總線持有, 不再隨服務實例消亡)
 * `修復` Rhino 引擎更新後作用域 API 兼容性回歸導致部分運行時輔助功能異常的問題
 * `修復` Rhino 模塊橋接對 null/undefined, Callable, 構造器, 原型, realm 及 Kotlin 返回值的處理不正確, 可能導致跨 realm 對象, 回調丟失或運行時異常的問題
 * `修復` Proxy 包裝函數無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模塊的回調, 且 TimerThread 回調參數可能被嵌套傳遞的問題
@@ -511,6 +513,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 所有 Pinyin 調用統一由對應插件提供, 並移除未使用的內置詞典與轉換實現
 * `優化` 以 root 或安全設置方式啓停無障礙服務時不再寫入系統的 `accessibility_enabled` 值 (Android 7.0 起由系統根據已綁定的服務自行維護), 避免關閉本服務時在其它無障礙服務仍啓用的情況下殘留過期的 0
 * `優化` 浮動按鈕及其對話框, 佈局分析器等懸浮窗口的文字語言與夜間模式跟隨 AutoJs6 自身的設置而非系統設置
+* `優化` `auto.registerEvent` 回調收到的事件對象的 `source` 改為首次訪問時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回調的開銷; API 33 以下在回調返回後未讀取的 `source` 為 null
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

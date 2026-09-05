@@ -6,7 +6,7 @@ import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
 
 import org.autojs.autojs.core.record.Recorder;
-import org.autojs.autojs.core.accessibility.AccessibilityDelegate;
+import org.autojs.autojs.core.accessibility.event.AccessibilityDelegate;
 
 import java.util.Arrays;
 import java.util.HashSet;

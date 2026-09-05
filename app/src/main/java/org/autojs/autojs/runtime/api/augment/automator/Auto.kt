@@ -9,6 +9,9 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge.WindowFilter
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
+import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.EventKeyFunction
+import org.autojs.autojs.core.accessibility.event.A11yEvent
+import org.autojs.autojs.core.accessibility.event.A11yEventBus
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
@@ -17,9 +20,11 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -121,6 +126,9 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
     companion object : ArgumentGuards() {
 
+        /** Default `within` window of a `distinct` option of `auto.registerEvent`. zh-CN: `auto.registerEvent` 的 `distinct` 选项默认的 `within` 窗口. */
+        const val DEFAULT_DISTINCT_WITHIN_MILLIS = 500L
+
         /** The shared tool held by AutoJs; all JS entry points go through the same controller. zh-CN: AutoJs 持有的共享工具; 全部 JS 入口经同一个控制器. */
         val accessibilityTool: AccessibilityTool get() = AutoJs.instance.accessibilityTool
 
@@ -212,10 +220,20 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             UNDEFINED
         }
 
+        /**
+         * `auto.registerEvent(name, listener, options?)`. Options thin out repeated events and are off by default:
+         * `distinct: 'window' | 'source' | true | (event) => key` drops an event whose key equals that of the
+         * last delivered one within `within` ms (default 500; `'window'` = package + class, `'source'` adds the
+         * source node, `true` = `'window'`); `debounce: ms` delivers only the last event of a burst once no
+         * further event arrived for that long.
+         * zh-CN: `auto.registerEvent(name, listener, options?)`. 选项用于稀释重复事件, 默认关闭:
+         * `distinct: 'window' | 'source' | true | (event) => key` 在 `within` 毫秒内 (默认 500) 丢弃键与上次投递相同的事件
+         * (`'window'` = 包名 + 类名, `'source'` 另加来源节点, `true` 即 `'window'`); `debounce: ms` 在该时长内没有新事件后只投递这一串中的最后一个.
+         */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun registerEvent(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLength(args, 2) {
-            val (name, listener) = it
+        fun registerEvent(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 2..3) {
+            val (name, listener, options) = it
             require(!name.isJsNullish()) { "Argument \"name\" for auto.registerEvent cannot be nullish" }
             scriptRuntime.automator.registerEvent(
                 Context.toString(name), when {
@@ -230,8 +248,44 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                         }
                     }
                     else -> throw WrappedIllegalArgumentException("Argument listener ($listener) is invalid for auto.registerEvent")
-                })
+                },
+                parseEventOptions(options),
+            )
         }
+
+        private fun parseEventOptions(options: Any?): A11yEventBus.Options<A11yEvent> {
+            if (options.isJsNullish()) return A11yEventBus.Options()
+            require(options is ScriptableObject) { "Argument \"options\" for auto.registerEvent must be an object instead of ${options.jsBrief()}" }
+            val distinct = options.prop("distinct")
+            val within = options.prop("within")
+            val debounce = options.prop("debounce")
+            val distinctKey: ((A11yEvent) -> Any?)? = when {
+                distinct.isJsNullish() || distinct == false -> null
+                distinct == true -> { event -> windowKeyOf(event) }
+                distinct is CharSequence -> when (val mode = distinct.toString()) {
+                    "window" -> { event -> windowKeyOf(event) }
+                    // Reading the source costs a node lookup per event; documented as such.
+                    // zh-CN: 读取 source 每个事件多一次节点查询; 文档已说明.
+                    "source" -> { event -> "${windowKeyOf(event)}#${event.wrapper.source?.hashCode()}" }
+                    else -> throw WrappedIllegalArgumentException("Option \"distinct\" (\"$mode\") is invalid for auto.registerEvent")
+                }
+                distinct is ScriptableObject && distinct is Callable -> {
+                    val adapter = NativeJavaObject.createInterfaceAdapter(EventKeyFunction::class.java, distinct) as EventKeyFunction
+                    ({ event -> adapter.keyOf(event.wrapper) })
+                }
+                else -> throw WrappedIllegalArgumentException("Option \"distinct\" (${distinct.jsBrief()}) is invalid for auto.registerEvent")
+            }
+            val withinMillis = when {
+                !within.isJsNullish() -> Context.toNumber(within).toLong()
+                distinctKey != null -> DEFAULT_DISTINCT_WITHIN_MILLIS
+                else -> 0L
+            }
+            val debounceMillis = if (debounce.isJsNullish()) 0L else Context.toNumber(debounce).toLong()
+            require(withinMillis >= 0 && debounceMillis >= 0) { "Options \"within\" and \"debounce\" for auto.registerEvent cannot be negative" }
+            return A11yEventBus.Options(distinctKey, withinMillis, debounceMillis)
+        }
+
+        private fun windowKeyOf(event: A11yEvent) = "${event.raw.packageName}/${event.raw.className}"
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

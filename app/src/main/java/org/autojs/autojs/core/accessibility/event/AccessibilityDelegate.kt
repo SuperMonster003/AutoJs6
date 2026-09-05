@@ -1,4 +1,4 @@
-package org.autojs.autojs.core.accessibility
+package org.autojs.autojs.core.accessibility.event
 
 import android.accessibilityservice.AccessibilityService
 import android.view.accessibility.AccessibilityEvent

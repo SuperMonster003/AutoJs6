@@ -125,6 +125,7 @@
 * `新增` 全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退
 * `新增` 代码编辑器设置新增 Ace 语言支持矩阵, 并为 TypeScript/JavaScript, Python, Lua 与 Java 提供逐语言语义开关; Kotlin 以无 Provider 的 P2+ 状态保持可见, 文件类型自定义明确作为语义路由前置白名单而非语言重分类
 * `新增` 插件更新对话框支持在应用内显示对应插件的发行历史
+* `新增` `auto.registerEvent(name, listener, options?)` 新增可选的去重与去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口内丢弃键相同的重复事件 (如一次窗口切换收到的多个 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安静给定时长后只投递最后一个; 默认关闭
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
@@ -187,6 +188,7 @@
 * `修复` `auto.services` 在未配置 root 或安全设置自动启用方式时总是返回空数组的问题 (读取已启用服务列表并不需要这些权限)
 * `修复` 侧拉抽屉的无障碍服务开关对 "已启用但未运行" 的服务显示为开启的问题 (现显示为关闭并带 "故障" 副标题, 打开开关即重新启用)
 * `修复` 浮动按钮的 "布局范围分析" / "布局层次分析" 在无障碍服务未启用但可自动启动 (root 或安全设置) 时需要触发两次的问题 (第一次仅启动服务, 第二次才执行分析; 现服务启动后立即接续分析, 快捷设置磁贴与布局分析广播同理, 且启动过程不再阻塞主线程)
+* `修复` 无障碍服务重启 (含被系统解绑后重新绑定) 后, 脚本此前通过 `auto.registerEvent` 注册的事件回调与 `events.observeKey()` 的按键监听全部失效的问题 (订阅现由进程级事件总线持有, 不再随服务实例消亡)
 * `修复` Rhino 引擎更新后作用域 API 兼容性回归导致部分运行时辅助功能异常的问题
 * `修复` Rhino 模块桥接对 null/undefined, Callable, 构造器, 原型, realm 及 Kotlin 返回值的处理不正确, 可能导致跨 realm 对象, 回调丢失或运行时异常的问题
 * `修复` Proxy 包装函数无法作为 dialogs, events, timers, UI, selector 及 automator 等旧模块的回调, 且 TimerThread 回调参数可能被嵌套传递的问题
@@ -330,6 +332,7 @@
 * `优化` 所有 Pinyin 调用统一由对应插件提供, 并移除未使用的内置词典与转换实现
 * `优化` 以 root 或安全设置方式启停无障碍服务时不再写入系统的 `accessibility_enabled` 值 (Android 7.0 起由系统根据已绑定的服务自行维护), 避免关闭本服务时在其它无障碍服务仍启用的情况下残留过期的 0
 * `优化` 浮动按钮及其对话框, 布局分析器等悬浮窗口的文字语言与夜间模式跟随 AutoJs6 自身的设置而非系统设置
+* `优化` `auto.registerEvent` 回调收到的事件对象的 `source` 改为首次访问时解析 (原先每个事件都急切遍历父链求深度与索引), 降低未读取 `source` 的回调的开销; API 33 以下在回调返回后未读取的 `source` 为 null
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

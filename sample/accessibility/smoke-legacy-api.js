@@ -153,6 +153,43 @@ windowEvents.forEach((event, index) => {
     console.log(`  #${index + 1} ${delta < 0 ? "" : "+"}${delta}ms ${event.packageName}/${event.className}`);
 });
 
+/*
+ * 1b. The same de-duplication is available as registerEvent options (one callback slot per
+ * event type and script, so re-registering replaces the raw callback above):
+ * distinct drops a repeated (package, class) within the window, debounce delivers only the
+ * last event of a burst once it has been quiet for the given time.
+ *
+ * zh-CN: 同样的去重可作为 registerEvent 的选项 (每种事件类型每个脚本一个回调槽, 重新注册即替换上面的原始回调):
+ * distinct 在窗口内丢弃重复的 (包名, 类名), debounce 在一串事件安静给定时长后只投递最后一个.
+ */
+function transitionWindows() {
+    home();
+    sleep(1000);
+    app.launch(autojs.packageName);
+    sleep(1500);
+}
+
+function recordWindowEvents(target) {
+    return function (event) {
+        target.push({ packageName: String(event.packageName), className: String(event.className), eventTime: event.eventTime });
+    };
+}
+
+const distinctEvents = [];
+auto.registerEvent("WINDOW_STATE_CHANGED", recordWindowEvents(distinctEvents), { distinct: "window", within: 500 });
+transitionWindows();
+check("registerEvent({ distinct: 'window' }) delivered events", () => distinctEvents.length > 0);
+// eventTime is stamped at send time while the option works on the delivery clock, hence the slightly smaller window here.
+// zh-CN: eventTime 在发送时打点而选项按投递时刻计时, 因此这里用略小的窗口校验.
+check("registerEvent({ distinct: 'window' }) delivered no repeated window within 400 ms", () => distinctWindows(distinctEvents, 400).length === distinctEvents.length);
+console.log(`WINDOW_STATE_CHANGED with { distinct: "window", within: 500 }: ${distinctEvents.length} delivered`);
+
+const debouncedEvents = [];
+auto.registerEvent("WINDOW_STATE_CHANGED", recordWindowEvents(debouncedEvents), { debounce: 300 });
+transitionWindows();
+check("registerEvent({ debounce: 300 }) delivered at least one and no more than the raw events", () => debouncedEvents.length > 0 && debouncedEvents.length <= windowEvents.length);
+console.log(`WINDOW_STATE_CHANGED with { debounce: 300 }: ${debouncedEvents.length} delivered`);
+
 /* 2. Global entry points exist. */
 
 check("text() is defined", () => typeof text === "function");

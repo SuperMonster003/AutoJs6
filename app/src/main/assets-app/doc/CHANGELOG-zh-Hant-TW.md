@@ -149,6 +149,7 @@
 * `新增` 全域 JavaScript (Rhino) R8 整合新增 3 個驗證產物匯出的 `runtime.loadJarWithR8` 多載及通訊協定 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子發布, retrace 綁定 mapping 溯源, 提供者缺失或無效時禁止 D8/dx 或本機回退
 * `新增` 程式碼編輯器設定新增 Ace 語言支援矩陣, 並為 TypeScript/JavaScript, Python, Lua 與 Java 提供逐語言語意開關; Kotlin 以無 Provider 的 P2+ 狀態保持可見, 檔案類型自訂明確作為語意路由前置允許清單而非語言重新分類
 * `新增` 外掛更新對話框支援在應用程式內顯示對應外掛的發行歷史
+* `新增` `auto.registerEvent(name, listener, options?)` 新增可選的去重與去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在視窗內丟棄鍵相同的重複事件 (如一次視窗切換收到的多個 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安靜給定時長後只投遞最後一個; 預設關閉
 * `修復` 帶 Unicode BOM 的腳本由檔案管理器直接執行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常執行卻於檔案管理器回報 `無效字元` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用資料的問題
 * `修復` 使實驗性遠端單檔案建置編號與舊建置器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓縮大小、使用建置期驗證的範本展開上限，並保留 256 MiB 空間
@@ -211,6 +212,7 @@
 * `修復` `auto.services` 在未設定 root 或安全設定自動啟用方式時總是回傳空陣列的問題 (讀取已啟用服務清單並不需要這些權限)
 * `修復` 側拉抽屜的無障礙服務開關對 "已啟用但未執行" 的服務顯示為開啟的問題 (現顯示為關閉並帶 "故障" 副標題, 開啟開關即重新啟用)
 * `修復` 浮動按鈕的 "佈局範圍分析" / "佈局層次分析" 在無障礙服務未啟用但可自動啟動 (root 或安全設定) 時需要觸發兩次的問題 (第一次僅啟動服務, 第二次才執行分析; 現服務啟動後立即接續分析, 快速設定磚與佈局分析廣播同理, 且啟動過程不再阻塞主執行緒)
+* `修復` 無障礙服務重新啟動 (含被系統解除繫結後重新繫結) 後, 指令碼此前透過 `auto.registerEvent` 註冊的事件回呼與 `events.observeKey()` 的按鍵監聽全部失效的問題 (訂閱現由程序級事件匯流排持有, 不再隨服務實例消亡)
 * `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
 * `修復` Proxy 包裝函式無法作為 dialogs, events, timers, UI, selector 及 automator 等舊模組的回呼, 且 TimerThread 回呼參數可能以巢狀陣列傳遞的問題
@@ -351,6 +353,7 @@
 * `最佳化` 所有 Pinyin 呼叫統一由對應外掛提供, 並移除未使用的內建詞典與轉換實作
 * `最佳化` 以 root 或安全設定方式啟停無障礙服務時不再寫入系統的 `accessibility_enabled` 值 (Android 7.0 起由系統根據已繫結的服務自行維護), 避免關閉本服務時在其它無障礙服務仍啟用的情況下殘留過期的 0
 * `最佳化` 浮動按鈕及其對話方塊, 佈局分析器等懸浮視窗的文字語言與夜間模式跟隨 AutoJs6 自身的設定而非系統設定
+* `最佳化` `auto.registerEvent` 回呼收到的事件物件的 `source` 改為首次存取時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回呼的開銷; API 33 以下在回呼返回後未讀取的 `source` 為 null
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

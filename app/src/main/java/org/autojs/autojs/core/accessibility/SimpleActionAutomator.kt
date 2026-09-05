@@ -17,6 +17,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.core.accessibility.event.A11yEvent
+import org.autojs.autojs.core.accessibility.event.A11yEventBus
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.automator.UiObject
@@ -229,20 +231,24 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     // TODO by SuperMonster003 on Jul 12, 2023.
     //  ! Ref to Auto.js Pro.
     //  ! zh-CN: 参考 Auto.js Pro.
-    fun registerEvent(eventName: String, callback: AccessibilityEventCallback?) {
+    /**
+     * Registers (or with a null [callback] removes) this script's callback for [eventName]; one slot
+     * per event type and script. The subscription lives on the process-wide
+     * [AccessibilityService.eventBus], so it also survives a service restart. [options] optionally
+     * thins out repeated events (`distinct` / `debounce` of `auto.registerEvent`).
+     * zh-CN: 注册 (或以 null [callback] 移除) 本脚本对 [eventName] 的回调; 每种事件类型每个脚本一个槽.
+     * 订阅位于进程级的 [AccessibilityService.eventBus], 因此服务重启后依然存在. [options] 可选地稀释重复事件
+     * (`auto.registerEvent` 的 `distinct` / `debounce`).
+     */
+    @JvmOverloads
+    fun registerEvent(eventName: String, callback: AccessibilityEventCallback?, options: A11yEventBus.Options<A11yEvent> = A11yEventBus.Options()) {
         ensureService()
-        val service = AccessibilityService.instance ?: return
-
-        if (callback == null) {
-            service.removeAccessibilityEventCallback(mA11yEventOwnerId, eventName)
-            return
-        }
-        service.addAccessibilityEventCallback(mA11yEventOwnerId, eventName, callback)
+        AccessibilityService.addAccessibilityEventCallback(mA11yEventOwnerId, eventName, callback, options)
     }
 
     // @Created by 抠脚本人 on Jul 10, 2023.
     fun removeEvent(eventName: String) {
-        AccessibilityService.instance?.removeAccessibilityEventCallback(mA11yEventOwnerId, eventName)
+        AccessibilityService.removeAccessibilityEventCallback(mA11yEventOwnerId, eventName)
     }
 
     /**
@@ -251,7 +257,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
      * zh-CN: 脚本退出时调用, 只清理由当前脚本注册的无障碍事件监听.
      */
     fun removeAllEventsForThisRuntime() {
-        AccessibilityService.instance?.removeAllAccessibilityEventCallbacks(mA11yEventOwnerId)
+        AccessibilityService.removeAllAccessibilityEventCallbacks(mA11yEventOwnerId)
     }
 
     private fun performAction(simpleAction: SimpleAction): Boolean {
@@ -333,6 +339,11 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
          */
         interface AccessibilityEventCallback {
             fun onAccessibilityEvent(event: AccessibilityEventWrapper)
+        }
+
+        /** The `distinct` key function of `auto.registerEvent` options (a JS function adapted to this interface). zh-CN: `auto.registerEvent` 选项中的 `distinct` 键函数 (JS 函数适配为本接口). */
+        interface EventKeyFunction {
+            fun keyOf(event: AccessibilityEventWrapper): Any?
         }
 
     }
