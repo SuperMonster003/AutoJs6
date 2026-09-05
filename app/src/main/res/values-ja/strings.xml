@@ -675,6 +675,7 @@
     <string name="summary_editor_word_wrap_indent_style">折り返された継続表示行のインデント方法を選択</string>
     <string name="summary_enable_a11y_service_with_root_access">必要なときに自動的に root 権限でアクセシビリティサービスを有効にする</string>
     <string name="summary_enable_a11y_service_with_secure_settings">必要なときに自動的にセキュアな設定のアクセシビリティサービスを有効にする</string>
+    <string name="summary_enable_a11y_service_with_shizuku">必要なときに自動的に Shizuku でアクセシビリティサービスを有効にする</string>
     <string name="summary_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張することで, コードの柔軟性を高め, より豊かな機能を実現します</string>
     <string name="summary_foreground_service_inrt">フォアグラウンドサービスは, バックグラウンドでアプリとスクリプトの実行をより安定して維持します</string>
     <string name="summary_github_token_not_set">未設定です. GitHub API リクエストは匿名で行われます.</string>
@@ -1146,6 +1147,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">ルートアクセスがタイムアウトした状態でアクセシビリティサービスを有効にする</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">セキュアな設定でアクセシビリティサービスを自動的に有効にする</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">セキュアな設定でアクセシビリティサービスを有効化するとタイムアウトする</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">Shizuku でアクセシビリティサービスを自動的に有効にする</string>
     <string name="text_enable_plugin">プラグインを有効化</string>
     <string name="text_enabled">有効</string>
     <string name="text_encoding_cannot_decode_file">ファイルをデコードできません</string>
@@ -1454,6 +1456,7 @@
     <string name="text_none">なし</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_installed">未インストール</string>
+    <string name="text_not_running">実行されていません</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_access_permission">通知へのアクセス</string>

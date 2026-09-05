@@ -14,6 +14,7 @@
     <bool name="pref_auto_check_for_updates">true</bool>
     <bool name="pref_enable_a11y_service_with_root_access">true</bool>
     <bool name="pref_enable_a11y_service_with_secure_settings">true</bool>
+    <bool name="pref_enable_a11y_service_with_shizuku">true</bool>
     <bool name="pref_editor_auto_show_log_bottom_sheet_on_run">true</bool>
     <bool name="pref_editor_fullscreen_mode">false</bool>
     <bool name="pref_editor_pinch_to_zoom_change_text_size_enabled">true</bool>

@@ -144,7 +144,8 @@
         "グローバル JavaScript (Rhino) R8 連携に検証済み成果物を出力する 3 つの `runtime.loadJarWithR8` オーバーロードとプロトコル 1.1 `runtime.retraceR8Stack` を追加; mapping/seeds/usage/retrace metadata を原子的に公開し, retrace は mapping の来歴を結合, Provider 不在または不正時は D8/dx やローカル実装へフォールバックしない",
         "コードエディタ設定に Ace 言語サポート matrix と TypeScript/JavaScript, Python, Lua, Java の言語別セマンティック switch を追加; Kotlin は Provider なしの P2+ として表示を保ち, ファイル種類は言語再分類ではなくルーティング前 allowlist と明記",
         "プラグイン更新ダイアログで対応するプラグインのリリース履歴をアプリ内に表示可能",
-        "`auto.registerEvent(name, listener, options?)` に任意の重複除去とデバウンスを追加: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` はウィンドウ内で同じキーの重複イベント (1 回のウィンドウ遷移で届く複数の `WINDOW_STATE_CHANGED` など) を捨て, `{ debounce: ms }` は一連のイベントがその時間静止した後に最後の 1 つだけを配信; いずれもデフォルトでは無効"
+        "`auto.registerEvent(name, listener, options?)` に任意の重複除去とデバウンスを追加: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` はウィンドウ内で同じキーの重複イベント (1 回のウィンドウ遷移で届く複数の `WINDOW_STATE_CHANGED` など) を捨て, `{ debounce: ms }` は一連のイベントがその時間静止した後に最後の 1 つだけを配信; いずれもデフォルトでは無効",
+        "アクセシビリティサービスの無人有効化手段に Shizuku を追加 (root およびセキュア設定権限と並列で, 両者とも使えないときに Shizuku ユーザーサービス経由でシステム設定を書き込む): 設定ページとアクセシビリティサービスマネージャーの設定欄に \"Shizuku でアクセシビリティサービスを自動的に有効にする\" スイッチ (デフォルトでオン) を追加し, マネージャーのステータス欄に \"Shizuku アクセス\" 行を追加"
       ],
       "fix": [
         "Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題",

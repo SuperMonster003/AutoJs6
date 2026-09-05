@@ -670,6 +670,7 @@
     <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式</string>
     <string name="summary_enable_a11y_service_with_root_access">自动尝试使用 root 权限启用无障碍服务</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自动尝试使用修改安全设置权限启用无障碍服务</string>
+    <string name="summary_enable_a11y_service_with_shizuku">自动尝试使用 Shizuku 启用无障碍服务</string>
     <string name="summary_extending_js_build_in_objects">扩展 JavaScript 内置对象以增加代码灵活性</string>
     <string name="summary_foreground_service_inrt">前台服务用于在后台更稳定地保持应用及脚本运行</string>
     <string name="summary_github_token_not_set">未设置. GitHub API 请求将匿名发起.</string>
@@ -1142,6 +1143,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">使用 root 权限启用无障碍服务超时</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">使用修改安全设置权限自动启用无障碍服务</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">使用修改安全设置权限启用无障碍服务超时</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">使用 Shizuku 自动启用无障碍服务</string>
     <string name="text_enable_plugin">启用插件</string>
     <string name="text_enabled">已启用</string>
     <string name="text_encoding_cannot_decode_file">无法解码文件</string>
@@ -1450,6 +1452,7 @@
     <string name="text_none">无</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安装</string>
+    <string name="text_not_running">未运行</string>
     <string name="text_not_showing_main_activity">不显示主界面</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_access_permission">通知读取权限</string>

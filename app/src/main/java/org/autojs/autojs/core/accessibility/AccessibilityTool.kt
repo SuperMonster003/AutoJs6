@@ -19,8 +19,10 @@ import org.autojs.autojs.core.accessibility.control.EnabledA11yServices
 import org.autojs.autojs.core.accessibility.control.RootEnabledServicesStore
 import org.autojs.autojs.core.accessibility.control.SecureEnabledServicesStore
 import org.autojs.autojs.core.accessibility.control.SettingsStoreStartStrategy
+import org.autojs.autojs.core.accessibility.control.ShizukuEnabledServicesStore
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.service.AccessibilityInteractionClient
@@ -248,6 +250,16 @@ class AccessibilityTool(private val context: Context? = null) {
                         serviceName = serviceName,
                         store = SecureEnabledServicesStore(resolver),
                         available = { Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context) },
+                        readBack = readEnabledServices,
+                        log = log,
+                    ),
+                    // Last because it involves another process (the Shizuku user service) and a shell round trip.
+                    // zh-CN: 排在最后, 因为它经过另一个进程 (Shizuku 用户服务) 与一次 shell 往返.
+                    SettingsStoreStartStrategy(
+                        name = "shizuku",
+                        serviceName = serviceName,
+                        store = ShizukuEnabledServicesStore(context, log),
+                        available = { Pref.shouldStartA11yServiceWithShizuku() && WrappedShizuku.isOperational() },
                         readBack = readEnabledServices,
                         log = log,
                     ),

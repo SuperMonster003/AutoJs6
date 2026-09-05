@@ -200,6 +200,13 @@
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
+            app:key="@string/key_enable_a11y_service_with_shizuku"
+            app:defaultValue="@bool/pref_enable_a11y_service_with_shizuku"
+            app:title="@string/text_enable_a11y_service_with_shizuku_automatically"
+            app:summary="@string/summary_enable_a11y_service_with_shizuku" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
             app:key="@string/key_stable_mode"
             app:defaultValue="@bool/pref_stable_mode"
             app:title="@string/text_stable_mode"

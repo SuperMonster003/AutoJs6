@@ -299,6 +299,12 @@ object Pref {
         resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)
     )
 
+    @JvmStatic
+    fun shouldStartA11yServiceWithShizuku() = getBoolean(
+        R.string.key_enable_a11y_service_with_shizuku,
+        resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku),
+    )
+
     private fun updateTimestamp(@KeyRes keyRes: Int) = putLong(keyRes, System.currentTimeMillis())
 
     @JvmStatic

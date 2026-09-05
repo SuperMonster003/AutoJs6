@@ -289,8 +289,10 @@ function canRestartServiceUnattended() {
     const Pref = Packages.org.autojs.autojs.core.pref.Pref.INSTANCE;
     const RootUtils = Packages.org.autojs.autojs.util.RootUtils;
     const SecureSettings = Packages.org.autojs.autojs.util.SettingsUtils.SecureSettings;
+    const WrappedShizuku = Packages.org.autojs.autojs.runtime.api.WrappedShizuku.INSTANCE;
     return Boolean(Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
-        || Pref.shouldStartA11yServiceWithSecureSettings() && SecureSettings.isGranted(context));
+        || Pref.shouldStartA11yServiceWithSecureSettings() && SecureSettings.isGranted(context)
+        || Pref.shouldStartA11yServiceWithShizuku() && WrappedShizuku.isOperational());
 }
 
 if (canRestartServiceUnattended()) {
@@ -332,7 +334,7 @@ if (canRestartServiceUnattended()) {
     check("text().findOne(timeout) still works after restart", () => textMatches(/.+/).findOne(3000) !== null);
     console.log(`stateListener log: ${JSON.stringify(stateLog)}`);
 } else {
-    console.warn("[SKIP] service restart checks: no unattended start strategy (enable root or secure-settings start in AutoJs6 settings)");
+    console.warn("[SKIP] service restart checks: no unattended start strategy (enable root, secure-settings or Shizuku start in AutoJs6 settings)");
 }
 
 /* Summary. */

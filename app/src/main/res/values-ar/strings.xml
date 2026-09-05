@@ -676,6 +676,7 @@
     <string name="summary_editor_word_wrap_indent_style">اختيار طريقة إزاحة أسطر الاستمرار المرئية الملتفة</string>
     <string name="summary_enable_a11y_service_with_root_access">تمكين خدمة إمكانية الوصول مع الوصول إلى الجذر تلقائيًا عند الحاجة</string>
     <string name="summary_enable_a11y_service_with_secure_settings">تمكين خدمة إمكانية الوصول مع إعدادات آمنة تلقائيًا عند الحاجة</string>
+    <string name="summary_enable_a11y_service_with_shizuku">تمكين خدمة إمكانية الوصول عبر Shizuku تلقائيًا عند الحاجة</string>
     <string name="summary_extending_js_build_in_objects">قم بزيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً من خلال توسيع كائنات JavaScript المضمنة</string>
     <string name="summary_foreground_service_inrt">تتيح خدمة المقدمة الحفاظ على تشغيل التطبيق والبرامج النصية بشكل أكثر استقرارًا في الخلفية</string>
     <string name="summary_github_token_not_set">غير معين. طلبات GitHub API مجهولة.</string>
@@ -1147,6 +1148,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">تمكين خدمة إمكانية الوصول مع توقيت الوصول إلى الجذر</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">تمكين خدمة إمكانية الوصول مع إعدادات آمنة تلقائيًا</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">تمكين خدمة إمكانية الوصول عبر Shizuku تلقائيًا</string>
     <string name="text_enable_plugin">تفعيل الملحق</string>
     <string name="text_enabled">مفعّل</string>
     <string name="text_encoding_cannot_decode_file">لا يمكن فك ترميز الملف</string>
@@ -1455,6 +1457,7 @@
     <string name="text_none">لا يوجد</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_installed">غير مثبّت</string>
+    <string name="text_not_running">غير قيد التشغيل</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
     <string name="text_notification">تنبيه</string>
     <string name="text_notification_access_permission">الوصول إلى الإخطار</string>

@@ -14,6 +14,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.util.SettingsUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -66,6 +67,7 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
         CONFIG(R.string.text_config),
         ROOT_ACCESS(R.string.text_root_access),
         WRITE_SECURE_SETTINGS(R.string.text_write_secure_settings),
+        SHIZUKU(R.string.text_shizuku_access),
         LISTENERS(R.string.text_listeners),
         SELF_CHECK(R.string.text_self_check),
     }
@@ -164,6 +166,14 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
             Field.WRITE_SECURE_SETTINGS, "${enabledText(Pref.shouldStartA11yServiceWithSecureSettings())} | " + when {
                 SettingsUtils.SecureSettings.isGranted(context) -> string(R.string.text_granted)
                 else -> string(R.string.text_not_granted)
+            },
+        )
+        add(
+            Field.SHIZUKU, "${enabledText(Pref.shouldStartA11yServiceWithShizuku())} | " + when {
+                !WrappedShizuku.isInstalled(context) -> string(R.string.text_not_installed)
+                !WrappedShizuku.isRunning() -> string(R.string.text_not_running)
+                !WrappedShizuku.hasPermission() -> string(R.string.text_not_granted)
+                else -> string(R.string.text_available)
             },
         )
         add(

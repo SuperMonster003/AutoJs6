@@ -674,6 +674,7 @@
     <string name="summary_editor_word_wrap_indent_style">Choisir l\'indentation des lignes visuelles de continuation renvoyées</string>
     <string name="summary_enable_a11y_service_with_root_access">Activer le service d\'accessibilité avec accès root automatiquement lorsque cela est nécessaire.</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement lorsque cela est nécessaire.</string>
+    <string name="summary_enable_a11y_service_with_shizuku">Activer le service d\'accessibilité avec Shizuku automatiquement lorsque cela est nécessaire.</string>
     <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
     <string name="summary_foreground_service_inrt">Le service au premier plan permet de maintenir l\'application et les scripts en cours d\'exécution de manière plus stable en arrière-plan</string>
     <string name="summary_github_token_not_set">Non défini. Les requêtes à l\'API GitHub sont anonymes.</string>
@@ -1145,6 +1146,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">Activation du service d\'accessibilité avec accès root temporisé</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement.</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Délai d\'activation du service d\'accessibilité avec les paramètres sécurisés dépassé</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">Activer le service d\'accessibilité avec Shizuku automatiquement.</string>
     <string name="text_enable_plugin">Activer le plugin</string>
     <string name="text_enabled">Activé</string>
     <string name="text_encoding_cannot_decode_file">Impossible de décoder le fichier</string>
@@ -1453,6 +1455,7 @@
     <string name="text_none">Aucun</string>
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_installed">Non installé</string>
+    <string name="text_not_running">Non démarré</string>
     <string name="text_not_showing_main_activity">Activité principale non affichée</string>
     <string name="text_notification">Notification</string>
     <string name="text_notification_access_permission">Accès à la notification</string>

@@ -669,6 +669,7 @@
     <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
     <string name="summary_enable_a11y_service_with_root_access">Enable accessibility service with root access automatically when needed</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Enable accessibility service with secure settings automatically when needed</string>
+    <string name="summary_enable_a11y_service_with_shizuku">Enable accessibility service with Shizuku automatically when needed</string>
     <string name="summary_extending_js_build_in_objects">Increase code flexibility and enable richer functionality by extending JavaScript built-in objects</string>
     <string name="summary_foreground_service_inrt">The foreground service helps keep the app and scripts running more reliably in the background</string>
     <string name="summary_github_token_not_set">Not set. GitHub API requests are anonymous.</string>
@@ -1141,6 +1142,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">Enable accessibility service with root access timed out</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Enable accessibility service with secure settings automatically</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Enable accessibility service with secure settings timed out</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">Enable accessibility service with Shizuku automatically</string>
     <string name="text_enable_plugin">Enable plugin</string>
     <string name="text_enabled">Enabled</string>
     <string name="text_encoding_cannot_decode_file">Cannot decode the file</string>
@@ -1449,6 +1451,7 @@
     <string name="text_none">None</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
+    <string name="text_not_running">Not running</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
     <string name="text_notification_access_permission">Notification access</string>

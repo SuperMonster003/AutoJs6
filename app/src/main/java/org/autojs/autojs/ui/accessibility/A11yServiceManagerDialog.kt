@@ -121,6 +121,12 @@ class A11yServiceManagerDialog private constructor(
             R.string.key_enable_a11y_service_with_secure_settings,
             R.bool.pref_enable_a11y_service_with_secure_settings,
         )
+        createSwitchRow(
+            R.string.text_enable_a11y_service_with_shizuku_automatically,
+            R.string.summary_enable_a11y_service_with_shizuku,
+            R.string.key_enable_a11y_service_with_shizuku,
+            R.bool.pref_enable_a11y_service_with_shizuku,
+        )
 
         dialog = MaterialDialog.Builder(context)
             .title(R.string.text_a11y_service_manager)
@@ -303,9 +309,9 @@ class A11yServiceManagerDialog private constructor(
         }
     }
 
-    // Convenient ways (root / secure settings) first; when the service is simply not enabled the user
-    // finishes in system settings, an enabled-but-unbound service is reported as a failure (restart helps).
-    // zh-CN: 优先走便捷方式 (root / 安全设置); 服务只是未启用时交给用户在系统设置中完成, 已启用但未绑定则报告失败 (可用重启处理).
+    // Convenient ways (root / secure settings / Shizuku) first; when the service is simply not enabled the
+    // user finishes in system settings, an enabled-but-unbound service is reported as a failure (restart helps).
+    // zh-CN: 优先走便捷方式 (root / 安全设置 / Shizuku); 服务只是未启用时交给用户在系统设置中完成, 已启用但未绑定则报告失败 (可用重启处理).
     private fun start(): Outcome = when {
         tool.startService(false) -> Outcome(context.getString(R.string.text_a11y_service_started))
         !tool.hasService() -> Outcome(launchSettings = true)

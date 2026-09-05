@@ -674,6 +674,7 @@
     <string name="summary_editor_word_wrap_indent_style">Выбрать отступ для визуального продолжения перенесённых строк</string>
     <string name="summary_enable_a11y_service_with_root_access">Автоматическое включение службы доступности с корневым доступом при необходимости</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Автоматическое включение службы доступности с безопасными настройками при необходимости</string>
+    <string name="summary_enable_a11y_service_with_shizuku">Автоматическое включение службы доступности через Shizuku при необходимости</string>
     <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
     <string name="summary_foreground_service_inrt">Служба на переднем плане позволяет более стабильно поддерживать работу приложения и скриптов в фоновом режиме</string>
     <string name="summary_github_token_not_set">Не задан. Запросы к GitHub API выполняются анонимно.</string>
@@ -1145,6 +1146,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">Включить службу доступности с корневым доступом по таймеру</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Автоматическое включение службы доступности с безопасными настройками</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Включить службу доступа с безопасными настройками по таймеру</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">Включить службу доступности через Shizuku автоматически</string>
     <string name="text_enable_plugin">Включить плагин</string>
     <string name="text_enabled">Включено</string>
     <string name="text_encoding_cannot_decode_file">Невозможно декодировать файл</string>
@@ -1453,6 +1455,7 @@
     <string name="text_none">Нет</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
+    <string name="text_not_running">Не запущено</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
     <string name="text_notification">Уведомление</string>
     <string name="text_notification_access_permission">Доступ к уведомлениям</string>

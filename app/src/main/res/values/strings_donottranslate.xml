@@ -166,6 +166,7 @@
     <string name="key_editor_word_wrap_indent_style_continuation" translatable="false">continuation</string>
     <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
     <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_$_enable_a11y_service_with_secure_settings</string>
+    <string name="key_enable_a11y_service_with_shizuku" translatable="false">key_$_enable_a11y_service_with_shizuku</string>
     <string name="key_enable_observe_key" translatable="false">key_$_enable_observe_key</string>
     <string name="key_explorer_file_default_prefix" translatable="false">key_$_explorer_file_default_prefix</string>
     <string name="key_explorer_playback_history" translatable="false">key_$_explorer_playback_history</string>

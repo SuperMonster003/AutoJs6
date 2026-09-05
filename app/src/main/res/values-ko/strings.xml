@@ -676,6 +676,7 @@
     <string name="summary_editor_word_wrap_indent_style">줄 바꿈된 연속 표시 줄의 들여쓰기 방식 선택</string>
     <string name="summary_enable_a11y_service_with_root_access">필요할 때 루트 액세스로 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="summary_enable_a11y_service_with_secure_settings">필요할 때 안전한 설정으로 접근성 서비스를 활성화하십시오</string>
+    <string name="summary_enable_a11y_service_with_shizuku">필요할 때 Shizuku로 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="summary_extending_js_build_in_objects">JavaScript 내장 개체를 확장하여 코드 유연성을 높이고 더 풍부한 기능을 활성화합니다.</string>
     <string name="summary_foreground_service_inrt">포그라운드 서비스는 백그라운드에서 앱과 스크립트 실행을 더 안정적으로 유지합니다</string>
     <string name="summary_github_token_not_set">설정되지 않았습니다. GitHub API 요청은 익명으로 전송됩니다.</string>
@@ -1147,6 +1148,7 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">루트 액세스 시간이 초과 된 접근성 서비스를 활성화하십시오</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">안전한 설정을 통해 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">안전한 설정 시간이 초과되는 접근성 서비스를 활성화하십시오</string>
+    <string name="text_enable_a11y_service_with_shizuku_automatically">Shizuku를 통해 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="text_enable_plugin">플러그인 활성화</string>
     <string name="text_enabled">활성화됨</string>
     <string name="text_encoding_cannot_decode_file">파일을 디코딩할 수 없음</string>
@@ -1455,6 +1457,7 @@
     <string name="text_none">없음</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
+    <string name="text_not_running">실행 중이 아님</string>
     <string name="text_not_showing_main_activity">주요 활동을 보여주지 않습니다</string>
     <string name="text_notification">공고</string>
     <string name="text_notification_access_permission">알림 액세스</string>

@@ -120,7 +120,8 @@
         "全局 JavaScript (Rhino) R8 集成新增 3 个校验产物导出的 `runtime.loadJarWithR8` 重载及协议 1.1 `runtime.retraceR8Stack`; mapping/seeds/usage/retrace metadata 原子发布, retrace 绑定 mapping 溯源, 提供者缺失或无效时禁止 D8/dx 或本地回退",
         "代码编辑器设置新增 Ace 语言支持矩阵, 并为 TypeScript/JavaScript, Python, Lua 与 Java 提供逐语言语义开关; Kotlin 以无 Provider 的 P2+ 状态保持可见, 文件类型自定义明确作为语义路由前置白名单而非语言重分类",
         "插件更新对话框支持在应用内显示对应插件的发行历史",
-        "`auto.registerEvent(name, listener, options?)` 新增可选的去重与去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口内丢弃键相同的重复事件 (如一次窗口切换收到的多个 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安静给定时长后只投递最后一个; 默认关闭"
+        "`auto.registerEvent(name, listener, options?)` 新增可选的去重与去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口内丢弃键相同的重复事件 (如一次窗口切换收到的多个 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安静给定时长后只投递最后一个; 默认关闭",
+        "无障碍服务的无人值守启用方式新增 Shizuku (与 root 及修改安全设置权限并列, 在两者均不可用时经 Shizuku 用户服务写入系统设置): 设置页及无障碍服务管理器的设置区新增 \"使用 Shizuku 自动启用无障碍服务\" 开关 (默认开启), 管理器状态区新增 \"Shizuku 权限\" 行"
       ],
       "fix": [
         "文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题",
