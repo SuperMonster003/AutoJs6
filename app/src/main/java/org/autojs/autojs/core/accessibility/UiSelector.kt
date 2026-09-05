@@ -803,11 +803,13 @@ open class UiSelector : UiObjectActions, StringReadable {
 
     protected fun findImpl(node: AccessibilityNodeInfo, max: Int): UiObjectCollection = findImpl(listOf(node), max)
 
-    protected fun findImpl(roots: List<AccessibilityNodeInfo?>, max: Int): UiObjectCollection {
+    // Roots of blacklisted packages (guard mode, AccessibilityConfig) are skipped here, not by the bridge.
+    // zh-CN: 黑名单包名 (保护模式, AccessibilityConfig) 的根节点在此跳过, 而非由 bridge 过滤.
+    protected fun findImpl(roots: List<AccessibilityNodeInfo>, max: Int): UiObjectCollection {
         mAccessibilityBridge ?: return of(emptyList())
         fun isInWhitelist(node: AccessibilityNodeInfo) = !mAccessibilityBridge.config.isInBlacklist("${node.packageName}")
         val result = mutableListOf<UiObject?>()
-        for (root in roots.filterNotNull()) {
+        for (root in roots) {
             if (isInWhitelist(root)) {
                 result.addAll(findAndReturnList(UiObject.createRoot(root, mAllocator), max - result.size))
                 if (result.size >= max) break

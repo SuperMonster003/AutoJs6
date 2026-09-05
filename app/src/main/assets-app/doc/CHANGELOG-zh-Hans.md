@@ -127,6 +127,7 @@
 * `新增` 插件更新对话框支持在应用内显示对应插件的发行历史
 * `新增` `auto.registerEvent(name, listener, options?)` 新增可选的去重与去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口内丢弃键相同的重复事件 (如一次窗口切换收到的多个 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安静给定时长后只投递最后一个; 默认关闭
 * `新增` 无障碍服务的无人值守启用方式新增 Shizuku (与 root 及修改安全设置权限并列, 在两者均不可用时经 Shizuku 用户服务写入系统设置): 设置页及无障碍服务管理器的设置区新增 "使用 Shizuku 自动启用无障碍服务" 开关 (默认开启), 管理器状态区新增 "Shizuku 权限" 行
+* `新增` `auto.setFlags()` 新增标志 `appWindowsFallback`: 系统尚未提供活动窗口根节点时 (无障碍服务刚绑定后; Android 8.0 上可能持续到下一次窗口变化), 选择器与 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的应用窗口 (焦点窗口优先) 的根节点代替, 默认关闭
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
@@ -334,6 +335,7 @@
 * `优化` 以 root 或安全设置方式启停无障碍服务时不再写入系统的 `accessibility_enabled` 值 (Android 7.0 起由系统根据已绑定的服务自行维护), 避免关闭本服务时在其它无障碍服务仍启用的情况下残留过期的 0
 * `优化` 浮动按钮及其对话框, 布局分析器等悬浮窗口的文字语言与夜间模式跟随 AutoJs6 自身的设置而非系统设置
 * `优化` `auto.registerEvent` 回调收到的事件对象的 `source` 改为首次访问时解析 (原先每个事件都急切遍历父链求深度与索引), 降低未读取 `source` 的回调的开销; API 33 以下在回调返回后未读取的 `source` 为 null
+* `优化` 无障碍窗口根节点的获取逻辑合一 (`AccessibilityBridge` 转为 Kotlin, 三处重复逻辑由 `WindowRootPolicy` / `WindowRootProvider` 统一实现, 布局分析器同样经由此处取窗口): 设置了窗口过滤器时 `auto.root` 在首个通过过滤的窗口没有根节点时继续查看后续窗口 (原先直接返回 `null`); `auto.windowRoots` 与节点动作不再可能遇到 `null` 根节点; `auto.rootInActiveWindow` 不受窗口过滤器影响这一差异已在源码中明确
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

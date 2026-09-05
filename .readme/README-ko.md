@@ -311,6 +311,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 플러그인 업데이트 대화상자에서 해당 플러그인의 릴리스 기록을 앱 안에 표시 가능
 * `추가` `auto.registerEvent(name, listener, options?)`에 선택적 중복 제거와 디바운스 추가: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }`는 창 내에서 같은 키의 반복 이벤트 (한 번의 창 전환에서 오는 여러 `WINDOW_STATE_CHANGED` 등) 를 버리고, `{ debounce: ms }`는 일련의 이벤트가 그 시간 동안 조용해진 후 마지막 하나만 전달; 둘 다 기본적으로 꺼짐
 * `추가` 접근성 서비스의 무인 활성화 방식에 Shizuku 추가 (root 및 보안 설정 권한과 나란히, 둘 다 사용할 수 없을 때 Shizuku 사용자 서비스를 통해 시스템 설정을 기록): 설정 페이지와 접근성 서비스 관리자의 설정 영역에 "Shizuku를 통해 접근성 서비스를 자동으로 활성화" 스위치 (기본 켜짐) 를 추가하고, 관리자 상태 영역에 "Shizuku 액세스" 행을 추가
+* `추가` `auto.setFlags()` 에 플래그 `appWindowsFallback` 추가: 시스템이 아직 활성 창의 루트를 제공하지 않는 동안 (접근성 서비스가 바인딩된 직후; Android 8.0 에서는 다음 창 변화까지 지속될 수 있음), 선택기와 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 가 창 목록의 애플리케이션 창 (포커스된 창 우선) 루트로 대체함. 기본값은 꺼짐
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
@@ -515,6 +516,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` root 또는 보안 설정으로 접근성 서비스를 시작하거나 중지할 때 더 이상 시스템의 `accessibility_enabled` 값을 쓰지 않음 (Android 7.0부터 시스템이 바인딩된 서비스를 바탕으로 직접 유지), 따라서 이 서비스를 중지해도 다른 접근성 서비스가 활성화된 상태에서 오래된 0이 남지 않음
 * `개선` 플로팅 버튼과 그 대화상자, 레이아웃 검사기 등의 플로팅 창의 표시 언어와 야간 모드가 시스템 설정 대신 AutoJs6 자체 설정을 따르도록 개선
 * `개선` `auto.registerEvent` 콜백이 받는 이벤트 객체의 `source`를 첫 접근 시 해석하도록 변경 (이전에는 모든 이벤트마다 깊이와 인덱스를 위해 부모 체인을 미리 순회), `source`를 읽지 않는 콜백의 비용 절감; API 33 미만에서는 콜백 중 읽지 않은 `source`가 이후 null
+* `개선` 접근성 창 루트 취득 로직을 하나로 통합 (`AccessibilityBridge` 를 Kotlin 으로 재작성, 중복된 세 코드 경로를 `WindowRootPolicy` / `WindowRootProvider` 로 통합, 레이아웃 검사기도 여기서 창을 가져옴): 창 필터가 설정된 경우 필터를 통과한 첫 창에 루트가 없으면 `auto.root` 가 다음 창으로 넘어감 (이전에는 바로 `null` 반환); `auto.windowRoots` 와 노드 동작이 더 이상 `null` 루트를 만나지 않음; `auto.rootInActiveWindow` 가 창 필터를 무시한다는 차이를 소스에 명시
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

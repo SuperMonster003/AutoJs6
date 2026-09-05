@@ -139,6 +139,64 @@ if (!check("guard mode is off (it makes selectors ignore AutoJs6's own windows, 
 check("auto.rootInActiveWindow is available", () => auto.rootInActiveWindow !== null);
 check("auto.windowRoots is not empty", () => auto.windowRoots.length > 0);
 
+// Root queries and their settings (roadmap P1.4, WindowRootPolicy): a window filter selects from
+// auto.windows, auto.root honours it while auto.rootInActiveWindow does not; setMode('fast') reads the
+// root cached from the latest window event; the 'appWindowsFallback' flag only matters while the
+// system does not know the active window, so here it must simply not change the result.
+// auto.setWindowFilter(null) installs an accept-all filter (every window), so the default
+// "active window only" state is restored through the bridge, whose filter is nullable.
+// zh-CN: 根节点查询及其设置 (路线图 P1.4, WindowRootPolicy): 窗口过滤器从 auto.windows 中选取, auto.root 遵循它而
+// auto.rootInActiveWindow 不遵循; setMode('fast') 读取最近一次窗口事件缓存的根节点; 'appWindowsFallback' 标志只在系统
+// 不知道活动窗口时起作用, 因此这里它不应改变结果. auto.setWindowFilter(null) 装的是 "接受全部窗口" 的过滤器,
+// 因此默认的 "仅活动窗口" 状态经 bridge (其过滤器可为 null) 恢复.
+function clearWindowFilter() {
+    runtime.accessibilityBridge.setWindowFilter(null);
+}
+check("auto.windowRoots with a rejecting window filter is empty", () => {
+    auto.setWindowFilter(() => false);
+    try {
+        return auto.windowRoots.length === 0 && auto.root === null;
+    } finally {
+        clearWindowFilter();
+    }
+});
+check("auto.rootInActiveWindow ignores the window filter", () => {
+    auto.setWindowFilter(() => false);
+    try {
+        return auto.rootInActiveWindow !== null;
+    } finally {
+        clearWindowFilter();
+    }
+});
+check("auto.windowRoots with a package window filter yields only that package", () => {
+    auto.setWindowFilter((window) => {
+        const root = window.getRoot();
+        return root !== null && String(root.getPackageName()) === autojs.packageName;
+    });
+    try {
+        const roots = auto.windowRoots;
+        return roots.length > 0 && roots.every((root) => String(root.packageName()) === autojs.packageName);
+    } finally {
+        clearWindowFilter();
+    }
+});
+check("auto.setMode('fast') provides a root after a window event", () => {
+    auto.setMode("fast");
+    try {
+        return auto.rootInActiveWindow !== null && auto.windowRoots.length > 0;
+    } finally {
+        auto.setMode("normal");
+    }
+});
+check("auto.setFlags(['appWindowsFallback']) leaves the roots unchanged while the active window is known", () => {
+    auto.setFlags(["appWindowsFallback"]);
+    try {
+        return auto.windowRoots.length === 1 && auto.rootInActiveWindow !== null;
+    } finally {
+        auto.setFlags([]);
+    }
+});
+
 /*
  * Android usually emits more than one WINDOW_STATE_CHANGED event per window transition
  * (distinct eventTime values a few dozen milliseconds apart), and the service is configured

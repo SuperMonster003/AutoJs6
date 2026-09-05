@@ -265,7 +265,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         if (AccessibilityConfig.isUnintendedGuardEnabled() && isRunningPackageSelf) {
             return false
         }
-        return accessibilityBridge.windowRoots().filterNotNull().let { roots ->
+        return accessibilityBridge.windowRoots().let { roots ->
             roots.isNotEmpty() && roots.map { root -> simpleAction.perform(UiObject.createRoot(root)) }.all { it /* == true */ }
         }
     }

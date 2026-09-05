@@ -5,14 +5,25 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
+import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 /**
  * Created by Stardust on Mar 10, 2017.
- * Modified by SuperMonster003 as of May 26, 2022.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 class LayoutInspector(private val mContext: Context, private val mA11yTool: AccessibilityTool) {
+
+    // The inspector looks at whatever is on screen: no script window filter, and when the system
+    // does not provide the active window root yet, the last window that got focus (fast root), then
+    // the application windows of the window list.
+    // zh-CN: 布局分析器看的是屏幕上的一切: 不用脚本的窗口过滤器; 系统尚未提供活动窗口根节点时, 依次退到最近获得焦点的窗口 (fast root) 与窗口列表中的应用窗口.
+    private val mRootProvider = WindowRootProvider.default
+    private val mActiveWindowPolicy: A11yWindowRootPolicy = WindowRootPolicy()
+    private val mFallbackPolicy = mActiveWindowPolicy.copy(mode = WindowRootPolicy.Mode.FAST, fallback = WindowRootPolicy.Fallback.APPLICATION_WINDOWS)
 
     @Volatile
     var capture: Capture? = null
@@ -33,18 +44,14 @@ class LayoutInspector(private val mContext: Context, private val mA11yTool: Acce
             return false
         }
         mA11yTool.clearCache()
-        val root = getRootInActiveWindow(service)
+        val root = getRootInActiveWindow()
         if (root == null) {
             Log.d(LOG_TAG, "captureCurrentWindow: root = null")
             capture = null
             return false
         }
         mExecutor.execute {
-            val windowInfoList = runCatching {
-                service.windows
-            }.onFailure {
-                Log.w(LOG_TAG, "captureCurrentWindow: failed to get windows", it)
-            }.getOrDefault(emptyList()).mapNotNull { window ->
+            val windowInfoList = mRootProvider.windows().mapNotNull { window ->
                 runCatching {
                     WindowInfo.create(mContext, window)
                 }.onFailure {
@@ -111,8 +118,8 @@ class LayoutInspector(private val mContext: Context, private val mA11yTool: Acce
         return mCaptureAvailableListeners.remove(l)
     }
 
-    private fun getRootInActiveWindow(service: AccessibilityService): AccessibilityNodeInfo? {
-        return service.rootInActiveWindow ?: service.fastRootInActiveWindow
+    private fun getRootInActiveWindow(): AccessibilityNodeInfo? {
+        return mRootProvider.activeRoot(mActiveWindowPolicy) ?: mRootProvider.activeRoot(mFallbackPolicy)
     }
 
     private fun refreshChildList(root: AccessibilityNodeInfo?) {

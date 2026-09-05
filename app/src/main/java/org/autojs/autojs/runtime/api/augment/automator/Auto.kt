@@ -141,6 +141,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             "findOnUiThread" to AccessibilityBridge.FLAG_FIND_ON_UI_THREAD,
             "useUsageStats" to AccessibilityBridge.FLAG_USE_USAGE_STATS,
             "useShell" to AccessibilityBridge.FLAG_USE_SHELL,
+            "appWindowsFallback" to AccessibilityBridge.FLAG_APP_WINDOWS_FALLBACK,
         )
 
         @JvmStatic
@@ -346,7 +347,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 val flag = flags[s] ?: throw WrappedIllegalArgumentException("Unknown flag ($s) for auto.setFlags")
                 flagsInt = flagsInt or flag
             }
-            scriptRuntime.accessibilityBridge.setFlags(flagsInt)
+            scriptRuntime.accessibilityBridge.flags = flagsInt
         }
 
         @JvmStatic

@@ -311,6 +311,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 插件更新對話框支援在應用內顯示對應插件的發行歷史
 * `新增` `auto.registerEvent(name, listener, options?)` 新增可選的去重與去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在窗口內丟棄鍵相同的重複事件 (如一次窗口切換收到的多個 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安靜給定時長後只投遞最後一個; 默認關閉
 * `新增` 無障礙服務的無人值守啓用方式新增 Shizuku (與 root 及修改安全設置權限並列, 在兩者均不可用時經 Shizuku 用戶服務寫入系統設置): 設置頁及無障礙服務管理器的設置區新增 "使用 Shizuku 自動啓用無障礙服務" 開關 (默認開啓), 管理器狀態區新增 "Shizuku 權限" 行
+* `新增` `auto.setFlags()` 新增標誌 `appWindowsFallback`: 系統尚未提供活動窗口根節點時 (無障礙服務剛綁定後; Android 8.0 上可能持續到下一次窗口變化), 選擇器與 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的應用窗口 (焦點窗口優先) 的根節點代替, 默認關閉
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
 * `修復` 使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間
@@ -515,6 +516,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 以 root 或安全設置方式啓停無障礙服務時不再寫入系統的 `accessibility_enabled` 值 (Android 7.0 起由系統根據已綁定的服務自行維護), 避免關閉本服務時在其它無障礙服務仍啓用的情況下殘留過期的 0
 * `優化` 浮動按鈕及其對話框, 佈局分析器等懸浮窗口的文字語言與夜間模式跟隨 AutoJs6 自身的設置而非系統設置
 * `優化` `auto.registerEvent` 回調收到的事件對象的 `source` 改為首次訪問時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回調的開銷; API 33 以下在回調返回後未讀取的 `source` 為 null
+* `優化` 無障礙窗口根節點的獲取邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實現, 佈局分析器同樣經由此處取窗口): 設置了窗口過濾器時 `auto.root` 在首個通過過濾的窗口沒有根節點時繼續查看後續窗口 (原先直接返回 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受窗口過濾器影響這一差異已在源碼中明確
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

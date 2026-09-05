@@ -151,6 +151,7 @@
 * `新增` 外掛更新對話框支援在應用程式內顯示對應外掛的發行歷史
 * `新增` `auto.registerEvent(name, listener, options?)` 新增可選的去重與去抖: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` 在視窗內丟棄鍵相同的重複事件 (如一次視窗切換收到的多個 `WINDOW_STATE_CHANGED`), `{ debounce: ms }` 在一串事件安靜給定時長後只投遞最後一個; 預設關閉
 * `新增` 無障礙服務的無人值守啟用方式新增 Shizuku (與 root 及修改安全設定許可權並列, 在兩者均不可用時經 Shizuku 使用者服務寫入系統設定): 設定頁及無障礙服務管理器的設定區新增 "使用 Shizuku 自動啟用無障礙服務" 開關 (預設開啟), 管理器狀態區新增 "Shizuku 許可權" 列
+* `新增` `auto.setFlags()` 新增旗標 `appWindowsFallback`: 系統尚未提供活動視窗根節點時 (無障礙服務剛繫結後; Android 8.0 上可能持續到下一次視窗變化), 選擇器與 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以視窗清單中的應用視窗 (焦點視窗優先) 的根節點代替, 預設關閉
 * `修復` 帶 Unicode BOM 的腳本由檔案管理器直接執行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常執行卻於檔案管理器回報 `無效字元` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用資料的問題
 * `修復` 使實驗性遠端單檔案建置編號與舊建置器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓縮大小、使用建置期驗證的範本展開上限，並保留 256 MiB 空間
@@ -355,6 +356,7 @@
 * `最佳化` 以 root 或安全設定方式啟停無障礙服務時不再寫入系統的 `accessibility_enabled` 值 (Android 7.0 起由系統根據已繫結的服務自行維護), 避免關閉本服務時在其它無障礙服務仍啟用的情況下殘留過期的 0
 * `最佳化` 浮動按鈕及其對話方塊, 佈局分析器等懸浮視窗的文字語言與夜間模式跟隨 AutoJs6 自身的設定而非系統設定
 * `最佳化` `auto.registerEvent` 回呼收到的事件物件的 `source` 改為首次存取時解析 (原先每個事件都急切遍歷父鏈求深度與索引), 降低未讀取 `source` 的回呼的開銷; API 33 以下在回呼返回後未讀取的 `source` 為 null
+* `最佳化` 無障礙視窗根節點的取得邏輯合一 (`AccessibilityBridge` 轉為 Kotlin, 三處重複邏輯由 `WindowRootPolicy` / `WindowRootProvider` 統一實作, 版面分析器同樣經由此處取視窗): 設定了視窗過濾器時 `auto.root` 在首個通過過濾的視窗沒有根節點時繼續查看後續視窗 (原先直接回傳 `null`); `auto.windowRoots` 與節點動作不再可能遇到 `null` 根節點; `auto.rootInActiveWindow` 不受視窗過濾器影響這一差異已在原始碼中明確
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer
