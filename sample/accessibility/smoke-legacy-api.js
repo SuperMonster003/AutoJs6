@@ -53,11 +53,25 @@ events.on("exit", function () {
     auto.removeEvent("WINDOW_STATE_CHANGED");
 });
 
+// Go home, then bring AutoJs6 back so that every run starts from the same window transition.
+// On API <= 28 the HOME key that home() injects starts the system's 5 s app-switch lock
+// ("Activity start request from <uid> stopped" in logcat), so a launch requested by a
+// background app inside that window is only executed once the lock expires: wait for the
+// package to actually come to the front instead of sleeping a fixed time.
+// zh-CN: 先回到桌面再拉起 AutoJs6, 使每次运行都从同一次窗口切换开始. API <= 28 上 home() 注入的 HOME 键
+// 会开启系统 5 s 的应用切换锁 (logcat 中为 "Activity start request from <uid> stopped"), 后台应用在该窗口内
+// 发起的启动要等锁过期后才会执行, 因此这里等待包名真正前置, 而非固定时长的 sleep.
+function bringAutoJs6ToFront() {
+    home();
+    sleep(1000);
+    app.launch(autojs.packageName);
+    const landed = wait(() => currentPackage() === autojs.packageName, 8000);
+    sleep(landed ? 1000 : 500);
+    return landed;
+}
+
 device.wakeUpIfNeeded();
-home();
-sleep(1000);
-app.launch(autojs.packageName);
-sleep(1500);
+bringAutoJs6ToFront();
 
 /*
  * Environment snapshot. When the "finds something on screen" checks below fail, this is what
@@ -163,10 +177,7 @@ windowEvents.forEach((event, index) => {
  * distinct 在窗口内丢弃重复的 (包名, 类名), debounce 在一串事件安静给定时长后只投递最后一个.
  */
 function transitionWindows() {
-    home();
-    sleep(1000);
-    app.launch(autojs.packageName);
-    sleep(1500);
+    bringAutoJs6ToFront();
 }
 
 function recordWindowEvents(target) {
