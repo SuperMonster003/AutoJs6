@@ -1,9 +1,11 @@
 package org.autojs.autojs.core.accessibility.diagnostics
 
-import android.os.Build
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import java.util.Locale
 
 /**
@@ -120,11 +122,8 @@ object A11yServiceSelfCheck {
         return Walk(count, truncated)
     }
 
-    @Suppress("DEPRECATION")
     private fun recycle(node: AccessibilityNodeInfo) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            runCatching { node.recycle() }
-        }
+        NodeLifecycle.default.release(node)
     }
 
     private fun awaitEvent(service: AccessibilityService, eventsBefore: Long, start: Long, deadline: Long): Long? {

@@ -16,6 +16,9 @@ import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.Acce
 import org.autojs.autojs.core.accessibility.event.A11yEvent
 import org.autojs.autojs.core.accessibility.event.A11yEventBus
 import org.autojs.autojs.core.accessibility.event.AccessibilityDelegate
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
@@ -73,11 +76,8 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         fastRootInActiveWindow = root
     }
 
-    @Suppress("DEPRECATION")
     private fun recycleFastRootInActiveWindow() {
-        fastRootInActiveWindow?.let { root ->
-            runCatching { root.recycle() }
-        }
+        NodeLifecycle.default.release(fastRootInActiveWindow)
         fastRootInActiveWindow = null
     }
 

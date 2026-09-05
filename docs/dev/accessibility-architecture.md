@@ -25,7 +25,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 | 查询 | 选择器构建, 搜索, 拾取, 导航 | `core/accessibility/UiSelector.kt` (builder + `find*` + `pickup` 的 `Picker`), `core/automator/UiObject.kt` (`AccessibilityNodeInfoCompat` 包装 + 导航 + `detect` 的 `Detector` / `Invoker` / `Interceptor`), `core/automator/UiObjectCollection.kt`, `core/automator/filter/**` (39 个过滤器), `core/automator/search/{DFS,BFS}.kt`, `core/automator/pick/CompassParser.kt` (Android-free, P0 新增) |
 | 事件消费方 (框架内部) | 以 `AccessibilityDelegate` 形式挂在服务上 | `core/activity/ActivityInfoProvider` (优先级 100, 维护当前包名 / Activity), `core/accessibility/AccessibilityNotificationObserver` (200, 通知与 Toast), `core/record/accessibility/AccessibilityActionRecorder` (300, 录制), 注册点 `AbstractAutoJs.kt` |
 | 事件包装 | 投递给 JS 回调的事件对象 | `core/automator/AccessibilityEventWrapper.kt` (`source` 首次访问时解析, `seal()` 后 API < 33 上未解析的为 null, 见 1.3) |
-| 节点生命周期 | 回收策略 | `core/accessibility/AccessibilityNodeInfoAllocator.kt` (生产路径未使用, 见 1.6), DFS / BFS / Scroll* 内联 `recycle()` |
+| 节点生命周期 (P1.5) | 回收策略, 登记与批量释放 | `core/accessibility/node/NodeRecyclePolicy.kt` (Android-free: `RECYCLE` / `NO_OP`, `forSdk`), `core/accessibility/node/NodeLifecycle.kt` (Android-free: `release` / `releaseAll`, 异常隔离), `core/accessibility/node/NodeLifecycles.kt` (Android 侧 `NodeLifecycle.default` 与框架节点类型的扩展), `core/accessibility/node/NodeRegistry.kt` (Android-free 同一性登记表), `core/accessibility/AccessibilityNodeInfoAllocator.kt` (每个 `ScriptRuntime` 一个, 见 1.6) |
 | 布局分析器与代码生成 (非目标, 消费方) | | `core/accessibility/LayoutInspector.kt`, `core/accessibility/NodeInfo.kt`, `codegeneration/{ReadOnlyUiObject,CodeGenerator}.java` |
 | 冻结 | 二进制兼容包, 不修改 | `com/stardust/**` |
 
@@ -122,9 +122,9 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
 
 ### 1.6 节点生命周期
 
-- API >= 33: `AccessibilityNodeInfo.recycle()` 为 no-op, 一切回收调用无效果.
-- API < 33: DFS / BFS 对非命中且非根的节点内联 `recycle()`, 命中上限后对已获取未遍历的节点也回收 (P0); `ScrollAction` / `ScrollMaxAction` / `UiObject.recycle` / `recycleFastRootInActiveWindow` 各自内联回收.
-- `AccessibilityNodeInfoAllocator` 设计为 "登记 + 批量回收" 的分配器, 但生产路径中 `UiSelector` 的 `allocator` 恒为 `null` (`ScriptRuntime.selector()` -> `UiSelector(bridge)`), `global` / `NONE` 无引用. P0 修正了它的 `getParent(Compat)` 登记与线程安全问题, 并把堆栈捕获改为 `isTracingOrigin` 开关, 仅作为 P1.5 `NodeLifecycle` 的参考实现.
+- 策略 (P1.5 起唯一出处): `NodeRecyclePolicy.forSdk(Build.VERSION.SDK_INT)`, API >= 33 为 `NO_OP` (`AccessibilityNodeInfo.recycle()` 本就是空操作, 现在连调用都省去), API < 33 为 `RECYCLE`. `NodeLifecycle.default` 是进程级实例; `release` 只在策略要求时执行回收, 抛出的异常 (节点已回收等) 记 `Log.w` 并吞掉, 不再打印堆栈也不中断查找.
+- 回收点: DFS / BFS 对非命中且非根的节点 `lifecycle.release`, 命中上限后对已获取未遍历的节点也释放 (P0 加入, P1.5 改为经生命周期对象; `SearchAlgorithm.search` 的末位参数 `lifecycle` 供测试注入); `ScrollAction` / `ScrollMaxAction` / `UiObject.isShifted` 的探针 / `AccessibilityService.recycleFastRootInActiveWindow` / 诊断 (`A11yServiceDiagnostics`, `A11yServiceSelfCheck`) 同样经此. `UiObject.recycle()` 重写是回收本身 (有分配器时转 `allocator.recycle(this)`, 顺带从登记表移除).
+- `AccessibilityNodeInfoAllocator`: 仍不接入生产路径 (`ScriptRuntime.selector()` 与 `auto.root` 等的 `allocator` 恒为 `null`), 但已是可用的参考实现: 以 `NodeLifecycle` 决定回收, 登记表 `NodeRegistry` 按对象同一性 (原 `HashMap` 按节点 id 相等去重, 指向同一视图的两个实例只回收其一), 无需回收的平台上不登记; compat 重载改在 `unwrap()` 后的原始节点上操作 (原先调用包装对象自身的访问器, 与 `UiObject` 的重写互相回调而无限递归, 这也是它此前无人使用的原因); `global` 已删除, `NONE` 保留 (不登记). 不接入的原因 (P1.5 评估, 见 KDoc): API < 33 节点按进程池化, 脚本自行回收过的实例可能已被其它脚本的 `obtain()` 复用, 退出时的批量回收会回收到别人的活节点 (API 24 模拟器实测); 不回收只是失去池化, 回收错误会跨脚本损坏状态.
 
 ### 1.7 已知平台行为与已知问题
 
@@ -140,13 +140,15 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
 | 强制停止 AutoJs6 后服务变为 "未启用" (抽屉开关关闭, 无 "故障" 副标题) | 平台行为 (`AccessibilityManagerService` 的 `PackageMonitor.onHandleForceStop` 把被强制停止的包的服务移出启用列表) | 与用户显式关闭同等对待, 不自动重新启用 (Roadmap Q8 待决, 建议保持); 偶见的一次性 "故障" 副标题是抽屉同步读到系统尚未更新的列表 |
 | 由 application / service context 构建的悬浮 UI (悬浮按钮的菜单 / 对话框 / toast, 布局分析器窗口) 语言与夜间模式跟随系统 | 平台行为 (AppCompat 的应用内语言与夜间模式只应用于其 Activity) | `ContextUtils.withHostConfiguration()`: 空 `Configuration` 仅覆盖 `uiMode` 夜间位 (按 `AppCompatDelegate.getDefaultNightMode()`) 与 locale (`Language` 偏好非 AUTO 时), 其余字段跟随 base; 接入 `CircularMenu`, `LayoutFloatyWindow.onCreate`, `AutoJs.kt` 与磁贴传给布局分析窗口的 context. 应用内切换语言 / 夜间模式时 `MainActivity` 重建并重建悬浮菜单 |
 | `find()` 的黑名单只检查窗口根节点的包名 | 设计限制 | P2.4 可配置 |
+| API < 33 上 `AccessibilityNodeInfo` 按进程池化: `recycle()` 过的实例会被后续任何 `obtain()` 复用 (AutoJs6 全部脚本同进程), 因此 "记住实例, 稍后批量回收" 的方案会回收到已被复用的活节点 (AVD API 24 实测: 脚本自行回收后, 退出时的第二次回收不报 "已回收" 而是成功) | 平台行为 | 不做退出时的批量回收 (P1.5 决定); 回收只在明确拥有节点的位置进行 (DFS / BFS 的非命中节点, 滚动动作的临时节点, 探针) 且经 `NodeLifecycle` |
+| AVD API 24 上对已启用本服务的应用再次 `adb install -r` 后, 无障碍管理器不再绑定本服务 (`dumpsys accessibility` 为 `services:{}`, 设置项仍列出本服务, 应用报 "已启用但未运行"); 改写 / 删除并重写 `enabled_accessibility_services`, 启动应用, `am force-stop` 均无效 | 平台行为 (2026-09-05 观察到一次, 同一天更早的一次重装未触发; 原因未查) | 重启模拟器; 真机未见. 注意 API 24 的 `settings put secure ... ""` 会报用法错误 (空值), 清空须用 `settings delete` (与 P1.2 root store 的引号处理是同一类问题) |
 | 无参 `findOne()` / `untilFind()` / `UiSelector.performAction` 无界阻塞 | 既有 API 语义 (D2 保持) | 文档标注; P3 提供带超时的链式替代 |
 
 ### 1.8 测试基础设施
 
 - JVM 单元测试为纯 JUnit4 (无 Robolectric). 任务名 `:app:testAppDebugUnitTest`.
 - `UiObject(null)` 可在 JVM 中构造 (androidx `AccessibilityNodeInfoCompat` 是真实库代码, 仅调用 Android 桩方法时失败). 夹具 `app/src/test/java/org/autojs/autojs/core/automator/FakeUiObject.kt` 以 `FakeUiObject.root { child("a", clickable = true) { child("a0") } }` 构建确定性树, 覆盖 `getChildCount` / `childCount` / `child` / `parent` / `clickable` / `recycle`, 用于 `SearchAlgorithmTest` 与 `UiObjectCompassTest`.
-- Android-free 的纯逻辑及其测试: `CompassParser` (`CompassParserTest`), `Global.normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`GlobalWaitCompatibilityTest`), `SelectorMethodResolver` (`SelectorMethodResolverTest`), `A11yServiceRegistry` (`A11yServiceRegistryTest`), `A11yServiceController` 及策略 (`A11yServiceControllerTest` 以假策略模拟系统的绑定 / 解绑, `SettingsStoreStartStrategyTest` 以内存 store, `EnabledA11yServicesTest`), `A11yEventBus` (`A11yEventBusTest`: 假时钟 + 假延迟调度器, 含锁定服务分发顺序的用例), `A11yServiceInfoFormat` (`A11yServiceInfoFormatTest`), `WindowRootResolver` (`WindowRootResolverTest`: 以可脚本化的假 `Source` 覆盖模式 / 过滤器 / 兜底 / 异常隔离).
+- Android-free 的纯逻辑及其测试: `CompassParser` (`CompassParserTest`), `Global.normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`GlobalWaitCompatibilityTest`), `SelectorMethodResolver` (`SelectorMethodResolverTest`), `A11yServiceRegistry` (`A11yServiceRegistryTest`), `A11yServiceController` 及策略 (`A11yServiceControllerTest` 以假策略模拟系统的绑定 / 解绑, `SettingsStoreStartStrategyTest` 以内存 store, `EnabledA11yServicesTest`), `A11yEventBus` (`A11yEventBusTest`: 假时钟 + 假延迟调度器, 含锁定服务分发顺序的用例), `A11yServiceInfoFormat` (`A11yServiceInfoFormatTest`), `WindowRootResolver` (`WindowRootResolverTest`: 以可脚本化的假 `Source` 覆盖模式 / 过滤器 / 兜底 / 异常隔离), `NodeRecyclePolicy` / `NodeLifecycle` / `NodeRegistry` (`NodeLifecycleTest`, `NodeRegistryTest`; `SearchAlgorithmTest` 显式注入 `NodeLifecycle(RECYCLE / NO_OP)`).
 - 真机冒烟: `sample/accessibility/smoke-legacy-api.js` (53 项, 无无人值守启动方式时 42 项). 通过 adb 运行时控制台不可见, 可用一个包装脚本在同一引擎内 `eval` 冒烟脚本并把 `console` 输出镜像到 `/sdcard` 的文件 (2026-09-05 用此方式在 8 台设备上复跑); 注意 Rhino 把循环体内直接声明的 `const` 视为只赋值一次, 探针脚本的逐轮读取应放在函数里.
 
 ### 1.9 基准数据
@@ -179,7 +181,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 | `AccessibilityTool` (12 处实例) | `A11yServiceController` 单例 + `ServiceStartStrategy`; `AccessibilityTool` 变薄为 Android 门面 (未弃用, 实例 7 处) | P1.2 (已完成 2026-09-05) |
 | `eventBox` / `delegates` / 按键观察者 / 手势分发 | `A11yEventBus` (ownerId, 类型集合, 优先级, 可消费, 去重 / 去抖选项); 三个实例 `eventBus` / `keyBus` / `gestureBus` | P1.3 (已完成 2026-09-05) |
 | `AccessibilityBridge.java` 的 3 处根节点逻辑 | `WindowRootPolicy` (数据) + `WindowRootResolver` (Android-free 实现) + `WindowRootProvider` (Android 绑定), `AccessibilityBridge` 转 Kotlin 保留 FQN | P1.4 (已完成 2026-09-05) |
-| 内联 `recycle()` 与 `AccessibilityNodeInfoAllocator` | `NodeLifecycle` / `NodeRecyclePolicy` (API >= 33 全 no-op) | P1.5 |
+| 内联 `recycle()` 与 `AccessibilityNodeInfoAllocator` | `NodeLifecycle` / `NodeRecyclePolicy` (API >= 33 全 no-op), 分配器按 `ScriptRuntime` 作用域并以 `NodeRegistry` 登记 | P1.5 (已完成 2026-09-05) |
 | `service/AccessibilityService.kt` | `AccessibilityServiceItemHelper` (仅抽屉使用) | P1.2 (D8, 已完成 2026-09-05) |
 | `UiSelector` 手写 builder + `checkSelectorMap` 手工表 + `Selector.kt` 反射注册 | `SelectorRegistry` (数据) -> 生成 builder (D9) + `SelectorMapParser` + 白名单注册 | P2.2 |
 | 复制粘贴的过滤器族 | `StringPropertyFilter` / `MetricsFilter` 泛化 | P2.3 |

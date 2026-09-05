@@ -1,27 +1,26 @@
 package org.autojs.autojs.core.automator.action
 
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
+import org.autojs.autojs.core.accessibility.node.releaseAll
 import org.autojs.autojs.core.automator.UiObject
 
 import java.util.ArrayList
 
 /**
  * Created by Stardust on Feb 12, 2017.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAction() {
+
+    private val lifecycle = NodeLifecycle.default
 
     override fun perform(root: UiObject): Boolean {
         val scrollableNodes = findScrollableNodes(root)
         val result = mIndex < scrollableNodes.size && scrollableNodes[mIndex].performAction(mAction)
-        recycle(scrollableNodes, root)
+        lifecycle.releaseAll(scrollableNodes, except = root)
         return result
-    }
-
-    @Suppress("DEPRECATION")
-    private fun recycle(list: List<UiObject>, root: UiObject) {
-        for (nodeInfo in list) {
-            if (nodeInfo !== root)
-                nodeInfo.recycle()
-        }
     }
 
     private fun findScrollableNodes(root: UiObject?): List<UiObject> {
@@ -35,7 +34,6 @@ class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAc
         return list
     }
 
-    @Suppress("DEPRECATION")
     private fun findScrollableNodes(node: UiObject?, list: MutableList<UiObject>) {
         if (node == null) {
             return
@@ -46,7 +44,7 @@ class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAc
             if (child.isScrollable) {
                 list.add(child)
             } else {
-                child.recycle()
+                lifecycle.release(child)
             }
         }
     }

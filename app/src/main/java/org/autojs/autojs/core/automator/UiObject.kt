@@ -11,6 +11,9 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassStep
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
@@ -63,7 +66,7 @@ open class UiObject(
 
     open fun parent(): UiObject? = runCatching {
         super.getParent()?.let { node ->
-            UiObject(node.unwrap(), depth - 1, node.parent?.run {
+            UiObject(node.unwrap(), allocator, depth - 1, node.parent?.run {
                 // @Dubious by SuperMonster003 on May 26, 2022.
                 //  ! May lead to poor performance?
                 //  ! zh-CN: 可能导致性能不佳?
@@ -95,7 +98,7 @@ open class UiObject(
             // @Dubious by SuperMonster003 on Jun 19, 2025.
             //  ! It seems that the situation above only happens on API Level 29 (Android 10) [Q] ?
             //  ! zh-CN: 似乎上述情况只发生在 API Level 29 (Android 10) [Q] ?
-            super.getChild(i)?.let { UiObject(it.unwrap(), depth + 1, i) }
+            super.getChild(i)?.let { UiObject(it.unwrap(), allocator, depth + 1, i) }
         }.onFailure {
             // FIXME by Stardust on May 5, 2017.
             it.printStackTrace()
@@ -428,28 +431,47 @@ open class UiObject(
         false.also { e.printStackTrace() }
     }
 
-    override fun getChild(index: Int): AccessibilityNodeInfoCompat {
-        return allocator?.getChild(this, index) ?: super.getChild(index)
+    // The compat accessors register what they hand out with the runtime's allocator (which works on
+    // the raw node, so this does not recurse); the navigation helpers above do not, see NodeLifecycle.
+    // zh-CN: compat 访问器把交出的节点登记到运行时的分配器 (它在原始节点上操作, 因此不会递归); 上方的导航方法不登记, 见 NodeLifecycle.
+    override fun getChild(index: Int): AccessibilityNodeInfoCompat? {
+        return when (val allocator = allocator) {
+            null -> super.getChild(index)
+            else -> allocator.getChild(this, index)
+        }
     }
 
     override fun getParent(): AccessibilityNodeInfoCompat? {
-        return allocator?.getParent(this) ?: super.getParent()
+        return when (val allocator = allocator) {
+            null -> super.getParent()
+            else -> allocator.getParent(this)
+        }
     }
 
     override fun findAccessibilityNodeInfosByText(text: String): List<AccessibilityNodeInfoCompat> {
-        return allocator?.findAccessibilityNodeInfosByText(this, text)
-            ?: super.findAccessibilityNodeInfosByText(text)
+        return when (val allocator = allocator) {
+            null -> super.findAccessibilityNodeInfosByText(text)
+            else -> allocator.findAccessibilityNodeInfosByText(this, text)
+        }
     }
 
     override fun findAccessibilityNodeInfosByViewId(viewId: String): List<AccessibilityNodeInfoCompat> {
-        return allocator?.findAccessibilityNodeInfosByViewId(this, viewId)
-            ?: super.findAccessibilityNodeInfosByViewId(viewId)
+        return when (val allocator = allocator) {
+            null -> super.findAccessibilityNodeInfosByViewId(viewId)
+            else -> allocator.findAccessibilityNodeInfosByViewId(this, viewId)
+        }
     }
 
+    // With an allocator the node is released through the runtime's lifecycle and forgotten by the
+    // allocator, so that the script's exit pass does not try again.
+    // zh-CN: 有分配器时节点经运行时的生命周期对象释放并从分配器中移除, 脚本退出时的释放过程不会再次尝试.
     @Deprecated("Deprecated in Java")
     override fun recycle() {
         try {
-            super.recycle()
+            when (val allocator = allocator) {
+                null -> super.recycle()
+                else -> allocator.recycle(this)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -593,7 +615,7 @@ open class UiObject(
                 }
             }
         } finally {
-            probe.recycle()
+            NodeLifecycle.default.release(probe)
         }
     }
 

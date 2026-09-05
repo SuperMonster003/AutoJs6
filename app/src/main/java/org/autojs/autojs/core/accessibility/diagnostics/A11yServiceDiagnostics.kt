@@ -11,6 +11,9 @@ import androidx.annotation.StringRes
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.accessibility.A11yEventRecord
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.pref.Pref
@@ -233,11 +236,8 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
 
     private fun string(@StringRes res: Int) = context.getString(res)
 
-    @Suppress("DEPRECATION")
     private fun recycle(node: AccessibilityNodeInfo) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            runCatching { node.recycle() }
-        }
+        NodeLifecycle.default.release(node)
     }
 
 }

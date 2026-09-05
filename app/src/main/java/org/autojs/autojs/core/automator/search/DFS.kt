@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.automator.search
 
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.*
@@ -8,11 +10,11 @@ import kotlin.collections.ArrayList
 
 /**
  * Created by Stardust on Mar 9, 2017.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 object DFS : SearchAlgorithm {
 
-    @Suppress("DEPRECATION")
-    override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
+    override fun search(root: UiObject, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
         if (limit <= 0) return result
         val stack = LinkedList<UiObject>()
@@ -26,24 +28,23 @@ object DFS : SearchAlgorithm {
             if (filter.filter(parent)) {
                 result.add(parent)
                 if (result.size >= limit) {
-                    recycleRemaining(stack, root)
+                    recycleRemaining(stack, root, lifecycle)
                     break
                 }
             } else {
                 if (parent !== root) {
-                    parent.recycle()
+                    lifecycle.release(parent)
                 }
             }
         }
         return result
     }
 
-    @Suppress("DEPRECATION")
-    private fun recycleRemaining(stack: LinkedList<UiObject>, root: UiObject) {
+    private fun recycleRemaining(stack: LinkedList<UiObject>, root: UiObject, lifecycle: NodeLifecycle) {
         while (stack.isNotEmpty()) {
             val node = stack.pop()
             if (node !== root) {
-                node.recycle()
+                lifecycle.release(node)
             }
         }
     }

@@ -1,14 +1,18 @@
 package org.autojs.autojs.core.automator.search
 
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * Modified by SuperMonster003 as of Sep 5, 2026.
+ */
 object BFS : SearchAlgorithm {
 
-    @Suppress("DEPRECATION")
-    override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
+    override fun search(root: UiObject, filter: Filter, limit: Int, lifecycle: NodeLifecycle): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
         if (limit <= 0) return result
         val queue = ArrayDeque<UiObject>()
@@ -19,7 +23,7 @@ object BFS : SearchAlgorithm {
             if (isTarget) {
                 result.add(top)
                 if (result.size >= limit) {
-                    recycleRemaining(queue, root)
+                    recycleRemaining(queue, root, lifecycle)
                     return result
                 }
             }
@@ -27,18 +31,17 @@ object BFS : SearchAlgorithm {
                 queue.add(top.child(i) ?: continue)
             }
             if (!isTarget && top !== root) {
-                top.recycle()
+                lifecycle.release(top)
             }
         }
         return result
     }
 
-    @Suppress("DEPRECATION")
-    private fun recycleRemaining(queue: Queue<UiObject>, root: UiObject) {
+    private fun recycleRemaining(queue: Queue<UiObject>, root: UiObject, lifecycle: NodeLifecycle) {
         while (!queue.isEmpty()) {
             val node = queue.poll() ?: continue
             if (node !== root) {
-                node.recycle()
+                lifecycle.release(node)
             }
         }
     }

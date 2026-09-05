@@ -549,6 +549,9 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun shell(cmd: String, withRoot: Int): AbstractShell.Result = ProcessShell.execCommand(cmd, withRoot != 0)
 
     @ScriptInterface
+    // No node allocator: releasing script-held nodes at exit is unsafe below API 33, see
+    // AccessibilityNodeInfoAllocator.
+    // zh-CN: 不带节点分配器: API 33 以下在脚本退出时释放脚本持有的节点并不安全, 见 AccessibilityNodeInfoAllocator.
     fun selector() = CoreUiSelector(accessibilityBridge)
 
     fun load(vararg path: String) {

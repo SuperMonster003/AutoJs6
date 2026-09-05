@@ -3,17 +3,22 @@ package org.autojs.autojs.core.automator.action
 import android.graphics.Rect
 import android.util.Log
 
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.UiObject
 
 import java.util.HashSet
 
 /**
  * Created by Stardust on Jan 27, 2017.
+ * Modified by SuperMonster003 as of Sep 5, 2026.
  */
 class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
     private var mMaxScrollableNode: UiObject? = null
     private var mRootNode: UiObject? = null
     private val mRecycledMaxUiObjects = HashSet<UiObject>()
+    private val mLifecycle = NodeLifecycle.default
 
     override fun perform(root: UiObject): Boolean {
         reset()
@@ -24,11 +29,10 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
         return result
     }
 
-    @Suppress("DEPRECATION")
     private fun reset() {
         mMaxScrollableNode?.let {
-            if(it != mRootNode){
-                it.recycle()
+            if (it !== mRootNode) {
+                mLifecycle.release(it)
             }
         }
         mRootNode = null
@@ -47,8 +51,7 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
             } else if (getAreaInScreen(maxScrollableNode) < getAreaInScreen(nodeInfo)) {
                 if (maxScrollableNode !== mRootNode) {
                     mRecycledMaxUiObjects.add(maxScrollableNode)
-                    @Suppress("DEPRECATION")
-                    maxScrollableNode.recycle()
+                    mLifecycle.release(maxScrollableNode)
                 }
                 mMaxScrollableNode = nodeInfo
             }
@@ -58,8 +61,7 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
             if (child != null) {
                 findMaxScrollableNodeInfo(child)
                 if (mMaxScrollableNode !== child && !mRecycledMaxUiObjects.contains(child)) {
-                    @Suppress("DEPRECATION")
-                    child.recycle()
+                    mLifecycle.release(child)
                 }
             }
         }
