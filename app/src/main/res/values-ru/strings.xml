@@ -364,6 +364,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">Сохранение заблокировано, поскольку недопустимые исходные байты были заменены. Откройте кодировку файла и явно выполните перезагрузку или преобразование.</string>
     <string name="error_file_in_path_does_not_exist">Файл в пути \"%1$s\" не существует</string>
     <string name="error_file_state_unknown_reload_required">Состояние исходного файла неизвестно. Перезагрузите файл перед продолжением.</string>
+    <string name="error_find_on_ui_thread_timeout">Поиск, отправленный в поток пользовательского интерфейса (флаг \"findOnUiThread\"), не завершился за %1$d мс. Возможно, поток пользовательского интерфейса заблокирован</string>
     <string name="error_function_called_in_ui_thread">Поток пользовательского интерфейса не может быть заблокирован. Попробуйте запустить %s() в подпотоке или подскрипте</string>
     <string name="error_function_called_more_than_once">%s() вызывается более одного раза</string>
     <string name="error_get_github_latest_release">\"Не удается получить последний релиз GitHub\".</string>

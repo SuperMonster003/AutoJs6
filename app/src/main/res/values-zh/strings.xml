@@ -360,6 +360,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">由于无效源字节已被替换, 保存已被阻止. 请打开文件编码并明确使用重新加载或转换.</string>
     <string name="error_file_in_path_does_not_exist">路径 \"%1$s\" 对应文件不存在</string>
     <string name="error_file_state_unknown_reload_required">原始文件状态未知. 请先重新加载文件再继续.</string>
+    <string name="error_find_on_ui_thread_timeout">投递到 UI 线程的查找 (标志 \"findOnUiThread\") 未在 %1$d 毫秒内完成. UI 线程可能已阻塞</string>
     <string name="error_function_called_in_ui_thread">UI 线程内无法执行阻塞操作. 可尝试在子线程或子脚本中执行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 调用不能超过一次</string>
     <string name="error_get_github_latest_release">无法获取最新的 GitHub 发行版</string>

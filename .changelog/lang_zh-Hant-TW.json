@@ -275,7 +275,8 @@
         "選擇器 `contextClickable()` 條件在選擇器的字串表示 (如 `selector().toString()` 與錯誤訊息) 中誤顯示為 `checkable`",
         "全域函式形式的 `filter(fn)` 呼叫失敗 (報 \"Invalid arguments\"), 以及集合選擇器陣列中的正規表示式不被接受 (如 `pickup({text: [/regex/]})`)",
         "選擇器字串形式 (如 `selector().toString()` 與錯誤訊息) 中的小數在以逗號為小數點的介面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號",
-        "全域函式形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 擲出的 Java 例外無法被指令碼的 `try / catch` 捕捉, 並會直接終止指令碼; 現在作為可捕捉的指令碼錯誤擲出"
+        "全域函式形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 擲出的 Java 例外無法被指令碼的 `try / catch` 捕捉, 並會直接終止指令碼; 現在作為可捕捉的指令碼錯誤擲出",
+        "設定 `findOnUiThread` 旗標時, 投遞到 UI 執行緒的查詢可能因喚醒訊號遺失 (UI 執行緒先於指令碼執行緒進入等待完成查詢) 而永久停滯, 且 UI 執行緒阻塞時 `findOne(timeout)` 不會逾時; 現在以查詢逾時為上限等待, 喚醒不再遺失"
       ],
       "improvement": [
         "`TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作",
@@ -366,7 +367,8 @@
         "無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬體緩衝現在總會被關閉 (原先只回收了包裝點陣圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)",
         "選擇器過濾器, 搜尋演算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 介面 (`UiObject` 實作它), 三者可在 JVM 單元測試中以記憶體節點樹覆蓋; 指令碼可見的 API 與行為不變",
         "選擇器屬性改由宣告式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此產生, 集合選擇器 (如 `pickup({...})`) 依註冊表解析而非反射, 全域選擇器函式依註冊表與明確白名單匯出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全域函式); 全域函式與集合選擇器的數值參數統一依四捨五入轉換為整數 (集合選擇器此前為截斷)",
-        "選擇器過濾器去重: 字串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 螢幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的螢幕尺寸求值並納入 JVM 單元測試; 選擇器求值走訪過濾器清單的快照, 多執行緒共享同一選擇器時安全; 指令碼可見的 API 與行為不變"
+        "選擇器過濾器去重: 字串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 螢幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的螢幕尺寸求值並納入 JVM 單元測試; 選擇器求值走訪過濾器清單的快照, 多執行緒共享同一選擇器時安全; 指令碼可見的 API 與行為不變",
+        "選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計畫 (`PollPolicy`: 逾時, 間隔, 次數, 退避) 執行, 預設行為不變 (間隔 50 毫秒, 逾時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 \"可能永久阻塞\"; 設定 `findOnUiThread` 旗標時投遞到 UI 執行緒的查詢以查詢逾時為等待上限, 逾時擲出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止指令碼中斷的等待"
       ],
       "dependency": [
         "模組化 Android AXML",

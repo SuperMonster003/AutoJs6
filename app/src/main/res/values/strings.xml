@@ -359,6 +359,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">Saving is blocked because invalid source bytes were replaced. Use File encoding to Reload or Convert explicitly.</string>
     <string name="error_file_in_path_does_not_exist">File in path \"%1$s\" does not exist</string>
     <string name="error_file_state_unknown_reload_required">The original file state is unknown. Reload the file before continuing.</string>
+    <string name="error_find_on_ui_thread_timeout">The search posted to the UI thread (flag \"findOnUiThread\") did not finish within %1$d ms. The UI thread may be blocked</string>
     <string name="error_function_called_in_ui_thread">UI thread cannot be blocked. Try running %s() in sub-thread or sub-script</string>
     <string name="error_function_called_more_than_once">%s() called more than once</string>
     <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>

@@ -361,6 +361,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">由於無效來源位元組已被取代, 儲存已被阻止. 請開啟檔案編碼並明確使用重新載入或轉換.</string>
     <string name="error_file_in_path_does_not_exist">路徑 \"%1$s\" 對應檔案不存在</string>
     <string name="error_file_state_unknown_reload_required">原始檔案狀態未知. 請先重新載入檔案再繼續.</string>
+    <string name="error_find_on_ui_thread_timeout">投遞到 UI 執行緒的查詢 (旗標 \"findOnUiThread\") 未在 %1$d 毫秒內完成. UI 執行緒可能已阻塞</string>
     <string name="error_function_called_in_ui_thread">UI 執行緒內無法執行阻塞操作. 可嘗試在子執行緒或子指令碼中執行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 呼叫不能超過一次</string>
     <string name="error_get_github_latest_release">無法獲取最新的 GitHub 發行版</string>

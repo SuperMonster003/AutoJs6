@@ -2,10 +2,8 @@
 
 package org.autojs.autojs.core.accessibility
 
-import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.automator.ActionArgument
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObject.Companion.COMPASS_PASS_ON
@@ -19,6 +17,7 @@ import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
 import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.Selector
+import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.selector.SelectorMapException
 import org.autojs.autojs.core.automator.selector.SelectorMapParser
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
@@ -39,16 +38,21 @@ import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.regexp.NativeRegExp
 import java.math.BigInteger
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * The script-facing selector: the builder methods are generated from [SelectorRegistry] into
  * [UiSelectorBuilders] and routed back here through [applyEntry]; this class keeps the queries
- * (`find*`, `exists`, `untilFind*`), the search settings and the `pickup` machinery.
+ * (`find*`, `exists`, `untilFind*`; the polling ones run as a [UiSelectorQuery]), the search
+ * settings and the `pickup` machinery.
  * zh-CN: 面向脚本的选择器: builder 方法由 [SelectorRegistry] 生成到 [UiSelectorBuilders] 并经 [applyEntry] 转回此处;
- * 本类保留查询 (`find*`, `exists`, `untilFind*`), 搜索设置与 `pickup` 机制.
+ * 本类保留查询 (`find*`, `exists`, `untilFind*`; 轮询的查询以 [UiSelectorQuery] 执行), 搜索设置与 `pickup` 机制.
  *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Sep 5, 2026.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
 open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
@@ -102,85 +106,131 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     @ScriptInterface
     fun find(): UiObjectCollection = find(Int.MAX_VALUE)
 
+    /**
+     * A single search over the current window roots; no polling. A negative [max] keeps the last
+     * `-max` nodes. zh-CN: 对当前窗口根节点的单次搜索, 不轮询. 负数 [max] 保留最后 `-max` 个节点.
+     */
     @ScriptInterface
-    fun find(max: Int): UiObjectCollection {
-        // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
-        // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
-        mAccessibilityBridge?.ensureServiceStarted()
-        return when {
-            max >= 0 -> findInternal(max)
-            else -> findInternal(Int.MAX_VALUE).let { found ->
-                val foundSize = found.size()
-                when (val startIndex = foundSize + max) {
-                    in 0 until foundSize -> {
-                        of(found.nodes.slice(startIndex until foundSize))
-                    }
-                    else -> EMPTY
+    fun find(max: Int): UiObjectCollection = when {
+        max >= 0 -> findWithin(max, PollPolicy.UNBOUNDED)
+        else -> findWithin(Int.MAX_VALUE, PollPolicy.UNBOUNDED).let { found ->
+            val foundSize = found.size()
+            when (val startIndex = foundSize + max) {
+                in 0 until foundSize -> {
+                    of(found.nodes.slice(startIndex until foundSize))
                 }
+                else -> EMPTY
             }
         }
     }
 
-    private fun findInternal(max: Int) = when {
-        mAccessibilityBridge == null -> findImpl(max)
-        isMainThread() -> findImpl(max)
-        mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max)
-        else -> VolatileBox<UiObjectCollection>().run {
-            mAccessibilityBridge.post { unblock(findImpl(max)) }
-            blockedGet()
+    /**
+     * One attempt of a query: a single search, where a search posted to the UI thread under
+     * [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] is waited for at most [budget] milliseconds
+     * ([PollPolicy.UNBOUNDED]: interruptibly, without limit).
+     * zh-CN: 查询的一次尝试: 单次搜索; [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] 下投递到 UI 线程的搜索至多等待
+     * [budget] 毫秒 ([PollPolicy.UNBOUNDED]: 可中断地无限等待).
+     */
+    internal fun findWithin(max: Int, budget: Long): UiObjectCollection {
+        // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
+        // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
+        mAccessibilityBridge?.ensureServiceStarted()
+        return when {
+            mAccessibilityBridge == null -> findImpl(max)
+            isMainThread() -> findImpl(max)
+            mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max)
+            else -> findOnUiThread(mAccessibilityBridge, max, budget)
         }
     }
 
+    // A FutureTask instead of the former VolatileBox.blockedGet(): the wait is bounded when the query
+    // is, interruptible otherwise, and a search that never ran cannot be waited for forever.
+    // zh-CN: 以 FutureTask 取代原先的 VolatileBox.blockedGet(): 查询有超时则等待有界, 否则可中断; 从未执行的搜索不会被无限等待.
+    private fun findOnUiThread(bridge: AccessibilityBridge, max: Int, budget: Long): UiObjectCollection {
+        val task = FutureTask { findImpl(max) }
+        bridge.post(task)
+        try {
+            return when (budget) {
+                PollPolicy.UNBOUNDED -> task.get()
+                else -> task.get(budget, TimeUnit.MILLISECONDS)
+            }
+        } catch (e: TimeoutException) {
+            task.cancel(false)
+            throw IllegalStateException(str(R.string.error_find_on_ui_thread_timeout, budget))
+        } catch (e: InterruptedException) {
+            task.cancel(false)
+            throw ScriptInterruptedException()
+        } catch (e: ExecutionException) {
+            throw e.cause ?: e
+        }
+    }
+
+    /** A query over this selector; see [UiSelectorQuery]. zh-CN: 对本选择器的查询; 见 [UiSelectorQuery]. */
+    internal fun query(policy: PollPolicy = PollPolicy.ONCE, max: Int = Int.MAX_VALUE) = UiSelectorQuery(this, policy, max)
+
+    /**
+     * Polls every 50 ms until a node is found or more than [timeout] milliseconds have passed.
+     * A [timeout] of 0 or less polls until found and so may block the script thread forever.
+     * zh-CN: 每 50 毫秒轮询一次, 直到找到节点或经过的时间超过 [timeout] 毫秒. [timeout] 为 0 或负数时轮询直到找到,
+     * 因此可能永久阻塞脚本线程.
+     */
     @ScriptInterface
     fun findOne(timeout: Long): UiObject? {
-        if (isMainThread()) {
-            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "findOne"))
-        }
-        val start = SystemClock.uptimeMillis()
-        fun timedOut() = timeout > 0 && SystemClock.uptimeMillis() - start > timeout
-        do {
-            find(1).takeIf { it.isNotEmpty() }?.let { return it[0] }
-            if (timedOut()) return null else intermission()
-        } while (true)
+        ensureNotMainThread("findOne")
+        return query(PollPolicy.within(timeout), 1).one()
     }
 
+    /** May block the script thread forever; see [untilFindOne]. zh-CN: 可能永久阻塞脚本线程; 见 [untilFindOne]. */
     @ScriptInterface
     @Deprecated("Deprecated in Java", ReplaceWith("untilFindOne()"))
-    fun findOne(): UiObject = findOne(-1)!!
+    fun findOne(): UiObject {
+        ensureNotMainThread("findOne")
+        return query(PollPolicy.FOREVER, 1).one()!!
+    }
 
+    /**
+     * Polls every 50 ms until a node is found; may block the script thread forever (stopping the
+     * script interrupts the wait). zh-CN: 每 50 毫秒轮询一次直到找到节点; 可能永久阻塞脚本线程 (停止脚本会中断等待).
+     */
     @ScriptInterface
     fun untilFindOne(): UiObject {
-        if (isMainThread()) {
-            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "untilFindOne"))
-        }
-        return findOne(-1)!!
+        ensureNotMainThread("untilFindOne")
+        return query(PollPolicy.FOREVER, 1).one()!!
     }
 
+    /**
+     * Polls every 50 ms until at least one node is found; may block the script thread forever
+     * (stopping the script interrupts the wait).
+     * zh-CN: 每 50 毫秒轮询一次直到至少找到一个节点; 可能永久阻塞脚本线程 (停止脚本会中断等待).
+     */
     @ScriptInterface
     fun untilFind(): UiObjectCollection {
-        if (isMainThread()) {
-            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "untilFind"))
-        }
-        do {
-            find().takeIf { it.isNotEmpty() }?.let { return it } ?: intermission()
-        } while (true)
+        ensureNotMainThread("untilFind")
+        return query(PollPolicy.FOREVER).collection()
     }
 
+    /** May block the script thread forever; see [untilFind]. zh-CN: 可能永久阻塞脚本线程; 见 [untilFind]. */
     @ScriptInterface
     @Deprecated("Deprecated in Java", ReplaceWith("untilFind()"))
     fun waitFor(): UiObjectCollection {
-        if (isMainThread()) {
-            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "waitFor"))
-        }
+        ensureNotMainThread("waitFor")
         return untilFind()
     }
 
+    /** Waits for the nodes as [untilFind] does, so may block forever. zh-CN: 如 [untilFind] 一样等待节点, 因此可能永久阻塞. */
     @ScriptInterface
     fun performAction(action: Int) = performAction(action, *emptyArray())
 
+    /** Waits for the nodes as [untilFind] does, so may block forever. zh-CN: 如 [untilFind] 一样等待节点, 因此可能永久阻塞. */
     @ScriptInterface
     override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
         return untilFind().performAction(action, *arguments)
+    }
+
+    private fun ensureNotMainThread(function: String) {
+        if (isMainThread()) {
+            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, function))
+        }
     }
 
     override fun toString() = selector.toString()
@@ -368,17 +418,6 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         internal class SelectorMethodWithoutCallingException(selector: NativeJavaMethod) : IllegalArgumentException(
             str(R.string.error_selector_method_without_calling, selector.toString())
         )
-
-        private fun intermission() {
-            if (Thread.currentThread().isInterrupted) {
-                throw ScriptInterruptedException()
-            }
-            try {
-                Thread.sleep(50)
-            } catch (e: InterruptedException) {
-                throw ScriptInterruptedException()
-            }
-        }
 
     }
 

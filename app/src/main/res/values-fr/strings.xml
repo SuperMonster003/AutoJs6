@@ -364,6 +364,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">L\'enregistrement est bloqué car des octets source non valides ont été remplacés. Ouvrez l\'encodage du fichier et utilisez explicitement Recharger ou Convertir.</string>
     <string name="error_file_in_path_does_not_exist">Le fichier dans le chemin \"%1$s\" n\'existe pas</string>
     <string name="error_file_state_unknown_reload_required">L\'état du fichier d\'origine est inconnu. Rechargez le fichier avant de continuer.</string>
+    <string name="error_find_on_ui_thread_timeout">La recherche envoyée au thread d\'interface utilisateur (indicateur \"findOnUiThread\") ne s\'est pas terminée en %1$d ms. Le thread d\'interface utilisateur est peut-être bloqué</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un thread secondaire ou un sous-script.</string>
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
     <string name="error_get_github_latest_release">Impossible d\'obtenir la dernière version GitHub</string>

@@ -364,6 +364,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">El guardado está bloqueado porque se reemplazaron bytes de origen no válidos. Abra Codificación del archivo y use Recargar o Convertir explícitamente.</string>
     <string name="error_file_in_path_does_not_exist">El archivo en la ruta \"%1$s\" no existe</string>
     <string name="error_file_state_unknown_reload_required">Se desconoce el estado del archivo original. Recargue el archivo antes de continuar.</string>
+    <string name="error_find_on_ui_thread_timeout">La búsqueda enviada al hilo de la interfaz de usuario (indicador \"findOnUiThread\") no terminó en %1$d ms. Es posible que el hilo de la interfaz de usuario esté bloqueado</string>
     <string name="error_function_called_in_ui_thread">El hilo de la interfaz de usuario no se puede bloquear. Intenta ejecutar %s() en un subhilo o subguión</string>
     <string name="error_function_called_more_than_once">%s() se ha llamado más de una vez</string>
     <string name="error_get_github_latest_release">No se puede obtener la última versión de GitHub</string>

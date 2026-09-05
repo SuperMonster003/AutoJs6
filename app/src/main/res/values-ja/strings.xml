@@ -365,6 +365,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">無効なソースバイトが置換されたため, 保存はブロックされました. ファイルエンコーディングを開き, 再読み込みまたは変換を明示的に実行してください.</string>
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
     <string name="error_file_state_unknown_reload_required">元のファイルの状態が不明です. 続行する前にファイルを再読み込みしてください.</string>
+    <string name="error_find_on_ui_thread_timeout">UI スレッドに投入した検索 (フラグ \"findOnUiThread\") が %1$d ミリ秒以内に完了しませんでした. UI スレッドがブロックされている可能性があります</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
     <string name="error_function_called_more_than_once">%s() が複数回呼び出されました</string>
     <string name="error_get_github_latest_release">最新の GitHub リリースを取得できません</string>

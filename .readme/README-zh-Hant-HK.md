@@ -439,6 +439,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 全局函數形式的 `filter(fn)` 調用失敗 (報 "Invalid arguments"), 以及集合選擇器數組中的正則不被接受 (如 `pickup({text: [/regex/]})`)
 * `修復` 選擇器字符串形式 (如 `selector().toString()` 與錯誤信息) 中的小數在以逗號為小數點的界面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號
 * `修復` 全局函數形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 拋出的 Java 異常無法被腳本的 `try / catch` 捕獲, 並會直接終止腳本; 現在作為可捕獲的腳本錯誤拋出
+* `修復` 設置 `findOnUiThread` 標誌時, 投遞到 UI 線程的查找可能因喚醒信號丟失 (UI 線程先於腳本線程進入等待完成查找) 而永久掛起, 且 UI 線程阻塞時 `findOne(timeout)` 不會超時; 現在以查詢超時為上限等待, 喚醒不再丟失
 * `優化` `TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `優化` Ace 字體預覽在目前字體尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字體或下載完成後自動隱藏
@@ -528,6 +529,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 選擇器過濾器, 搜索算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 接口 (`UiObject` 實現它), 三者可在 JVM 單元測試中以內存節點樹覆蓋; 腳本可見的 API 與行為不變
 * `優化` 選擇器屬性改由聲明式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此生成, 集合選擇器 (如 `pickup({...})`) 按註冊表解析而非反射, 全局選擇器函數按註冊表與顯式白名單導出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全局函數); 全局函數與集合選擇器的數值參數統一按四捨五入轉換為整數 (集合選擇器此前為截斷)
 * `優化` 選擇器過濾器去重: 字符串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 屏幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的屏幕尺寸求值並納入 JVM 單元測試; 選擇器求值遍歷過濾器列表的快照, 多線程共享同一選擇器時安全; 腳本可見的 API 與行為不變
+* `優化` 選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計劃 (`PollPolicy`: 超時, 間隔, 次數, 退避) 執行, 默認行為不變 (間隔 50 毫秒, 超時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 "可能永久阻塞"; 設置 `findOnUiThread` 標誌時投遞到 UI 線程的查找以查詢超時為等待上限, 超時拋出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止腳本中斷的等待
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

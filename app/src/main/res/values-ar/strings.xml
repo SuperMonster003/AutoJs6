@@ -366,6 +366,7 @@
     <string name="error_file_contains_unaccepted_decoding_replacements">تم منع الحفظ لأن وحدات بايت المصدر غير الصالحة قد استبدلت. افتح ترميز الملف واستخدم إعادة التحميل أو التحويل بشكل صريح.</string>
     <string name="error_file_in_path_does_not_exist">الملف في المسار \"%1$s\" غير موجود</string>
     <string name="error_file_state_unknown_reload_required">حالة الملف الأصلي غير معروفة. أعد تحميل الملف قبل المتابعة.</string>
+    <string name="error_find_on_ui_thread_timeout">لم يكتمل البحث المرسل إلى مؤشر ترابط واجهة المستخدم (العلامة \"findOnUiThread\") خلال %1$d مللي ثانية. قد يكون مؤشر ترابط واجهة المستخدم محظورا</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
     <string name="error_function_called_more_than_once">%s() دعا أكثر من مرة</string>
     <string name="error_get_github_latest_release">لا يمكن الحصول على أحدث إصدار من GitHub</string>
