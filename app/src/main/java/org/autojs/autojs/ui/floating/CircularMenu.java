@@ -20,6 +20,7 @@ import org.autojs.autojs.app.tool.PointerLocationTool;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.Capture;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
+import org.autojs.autojs.core.accessibility.control.A11yServiceController.EnsureResult;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
@@ -54,6 +55,8 @@ import org.jetbrains.annotations.NotNull;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
+
+import static org.autojs.autojs.util.ContextUtils.withHostConfiguration;
 
 /**
  * Created by Stardust on Oct 18, 2017.
@@ -101,9 +104,10 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     };
 
     public CircularMenu(Context context) {
-        // Use application context as base to avoid being treated as Activity context.
-        // zh-CN: 使用 application context 作为 base, 避免被识别为 Activity context.
-        mContext = new ContextThemeWrapper(context.getApplicationContext(), R.style.AppTheme);
+        // Use application context as base to avoid being treated as Activity context, and let it
+        // follow the host app's language and night mode rather than the system's.
+        // zh-CN: 使用 application context 作为 base, 避免被识别为 Activity context, 并使其跟随宿主应用的语言与夜间模式而非系统设置.
+        mContext = new ContextThemeWrapper(withHostConfiguration(context.getApplicationContext()), R.style.AppTheme);
         initFloaty();
         setupWindowListeners();
         mRecorder = GlobalActionRecorder.getSingleton(context);
@@ -359,14 +363,14 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         mWindow = new CircularMenuWindow(new CircularMenuFloaty() {
             @Override
             public CircularActionView inflateActionView(FloatyService service, CircularMenuWindow window) {
-                CircularActionView actionView = (CircularActionView) View.inflate(service, R.layout.circular_action_view, null);
+                CircularActionView actionView = (CircularActionView) View.inflate(withHostConfiguration(service), R.layout.circular_action_view, null);
                 mActionViewIcon = actionView.findViewById(R.id.icon);
                 return actionView;
             }
 
             @Override
             public CircularActionMenu inflateMenuItems(FloatyService service, CircularMenuWindow window) {
-                CircularActionMenu menu = (CircularActionMenu) View.inflate(new ContextThemeWrapper(service, R.style.AppTheme), R.layout.circular_action_menu, null);
+                CircularActionMenu menu = (CircularActionMenu) View.inflate(new ContextThemeWrapper(withHostConfiguration(service), R.style.AppTheme), R.layout.circular_action_menu, null);
                 binding = CircularActionMenuBinding.bind(menu);
                 setupBindingListeners();
                 return menu;
@@ -426,16 +430,36 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
             mLayoutInspectDialog.dismiss();
             mLayoutInspectDialog = null;
         }
-        if (!mA11yTool.isRunning()) {
-            if (!mA11yTool.startService(false)) {
-                ViewUtils.showToast(mContext, mContext.getString(R.string.error_no_accessibility_permission_to_capture));
-                mA11yTool.launchSettings();
-            }
-        } else {
-            mCaptureDeferred.promise().then(capture -> {
-                mActionViewIcon.post(() -> FloatyService.addWindow(windowCreator.call(capture)));
-            });
+        if (mA11yTool.isRunning()) {
+            showWindowOnceCaptured(mCaptureDeferred, windowCreator);
+            return;
         }
+        // Start the service unattended (root / secure settings) off the main thread and carry on
+        // with the inspection as soon as it is bound, so that a single tap is enough; ask the user
+        // to enable it by hand only when no unattended way is available.
+        // zh-CN: 在非主线程以无人值守方式 (root / 安全设置) 启动服务, 绑定后立即接续布局分析, 使一次点击即可完成;
+        // 仅在没有无人值守方式时才请用户手动开启.
+        mA11yTool.ensureServiceAsync(result -> {
+            if (result instanceof EnsureResult.Failed failed) {
+                mA11yTool.explainFailure(failed.getReason());
+                return;
+            }
+            Deferred<Capture, Void, Void> deferred = new DeferredObject<>();
+            mCaptureDeferred = deferred;
+            showWindowOnceCaptured(deferred, windowCreator);
+            AutoJs.getInstance().getLayoutInspector().captureCurrentWindowWithRetry(() -> {
+                if (deferred.isPending()) {
+                    deferred.reject(null);
+                    ViewUtils.showToast(mContext, R.string.error_active_window_root_unavailable);
+                }
+            });
+        });
+    }
+
+    private void showWindowOnceCaptured(Deferred<Capture, Void, Void> deferred, Func1<Capture, FloatyWindow> windowCreator) {
+        deferred.promise().then(capture -> {
+            mActionViewIcon.post(() -> FloatyService.addWindow(windowCreator.call(capture)));
+        });
     }
 
     public void closeAndSaveState(boolean state) {

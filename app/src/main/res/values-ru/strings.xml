@@ -280,6 +280,7 @@
     <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
     <string name="error_ace_editor_unavailable">Редактор Ace недоступен; JsDroidEditor остаётся активным</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">Операция \"%1$s\" не может быть завершена, так как параметр содержит отрицательные значения координат (%2$d, %3$d)</string>
+    <string name="error_active_window_root_unavailable">Корневой узел активного окна пока недоступен, повторите попытку чуть позже</string>
     <string name="error_activity_is_required_for_ui_exec_mode">Требуется активность, которую можно предоставить, выполняя в режиме выполнения \"ui\"</string>
     <string name="error_an_error_occurred">Произошла ошибка</string>
     <string name="error_an_operation_is_not_implemented">Операция не выполняется</string>

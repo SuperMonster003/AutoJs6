@@ -281,6 +281,7 @@
     <string name="error_abandoned_method">メソッド %s は放棄されたので, 使用しないでください</string>
     <string name="error_ace_editor_unavailable">Ace エディターを利用できないため, JsDroidEditor が引き続き有効です</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">\"%1$s\" 操作はパラメータに負の座標値 (%2$d, %3$d) が含まれているため, 完了できません</string>
+    <string name="error_active_window_root_unavailable">アクティブウィンドウのルートノードはまだ利用できません. しばらくしてから再試行してください</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 実行モードに必要なアクティビティが不足しています</string>
     <string name="error_an_error_occurred">エラーが発生しました</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>

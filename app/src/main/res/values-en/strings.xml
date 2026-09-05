@@ -276,6 +276,7 @@
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
     <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
+    <string name="error_active_window_root_unavailable">The active window root is not available yet, please try again in a moment</string>
     <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
     <string name="error_an_error_occurred">An error occurred</string>
     <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>

@@ -210,6 +210,7 @@
 * `Fix` Entry points such as `auto()` threw "enabled but not running" when the accessibility service was not enabled, and "service is disabled" when it was enabled but not running, i.e. the two messages were swapped (the reason is now one of not enabled / enabled but not bound / bound but not operational yet)
 * `Fix` `auto.services` always returned an empty array unless automatic enabling through root or secure settings was configured (reading the enabled services list needs neither)
 * `Fix` The accessibility service switch in the drawer showed a service that was "enabled but not running" as on (it is now off with a "malfunctioning" subtitle, and switching it on re-enables the service)
+* `Fix` "Inspect layout bounds" / "Inspect layout hierarchy" in the floating button had to be triggered twice when the accessibility service was not enabled but could be started automatically (root or secure settings): the first tap only started the service and the second one inspected (the inspection now continues right after the service has started, likewise for the quick settings tiles and the layout inspection broadcasts, and starting no longer blocks the main thread)
 * `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
 * `Fix` The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions
 * `Fix` Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array
@@ -349,6 +350,7 @@
 * `Improvement` HTML and Markdown previews are delegated to dedicated Previewer plugins; the main app keeps the entry and guides installation or enabling when the plugin is missing, disabled, or unavailable
 * `Improvement` Consolidated all Pinyin calls through the corresponding plugin and removed the unused built-in dictionary and conversion implementation
 * `Improvement` Starting or stopping the accessibility service through root or secure settings no longer writes the system's `accessibility_enabled` value (maintained by the system itself from the bound services since Android 7.0), so stopping this service no longer leaves a stale 0 behind while other accessibility services stay enabled
+* `Improvement` Floating windows such as the floating button with its dialogs and the layout inspector now follow AutoJs6's own language and night mode settings instead of the system's
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

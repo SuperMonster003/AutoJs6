@@ -6,6 +6,10 @@ import android.os.Build
 import android.provider.Settings
 import android.provider.Settings.Secure
 import android.util.Log
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.control.A11yServiceController
@@ -25,6 +29,7 @@ import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SettingsUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import java.util.function.Consumer
 
 /**
  * Android-side facade of the process-wide [controller]: every predicate and start / stop / wait
@@ -150,6 +155,45 @@ class AccessibilityTool(private val context: Context? = null) {
     private fun throwUnlessSatisfied(result: EnsureResult) {
         if (result is EnsureResult.Failed) {
             throw ScriptException(mContext.getString(messageResOf(result.reason)))
+        }
+    }
+
+    /**
+     * [A11yServiceController.ensure] run off the main thread (a root shell or the wait for the bind
+     * must not block the UI), with the outcome delivered to [onResult] on the main thread. For UI
+     * trigger points (floating menu, tiles, layout inspect broadcasts) that want to carry on with
+     * their own feature right after the service has come up.
+     *
+     * zh-CN: 在非主线程运行 [A11yServiceController.ensure] (root shell 与等待绑定不应阻塞 UI), 结果在主线程投递给 [onResult].
+     * 供 UI 触发点 (悬浮菜单, 磁贴, 布局分析广播) 在服务启动后立即接续自身功能.
+     */
+    @JvmOverloads
+    fun ensureServiceAsync(
+        level: State = State.CONNECTED,
+        timeoutMillis: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT,
+        launchSettingsIfNeeded: Boolean = false,
+        onResult: Consumer<EnsureResult>,
+    ): Disposable = Single
+        .fromCallable { controller.ensure(level, timeoutMillis, launchSettingsIfNeeded) }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe({ onResult.accept(it) }, {
+            Log.w(TAG, "ensureServiceAsync failed", it)
+            onResult.accept(EnsureResult.Failed(controller.failureReason()))
+        })
+
+    /**
+     * Explains a failed [ensureServiceAsync] to the user: a service that is not enabled at all gets
+     * the settings page (with the guide toast), any other reason a toast naming it.
+     * zh-CN: 向用户说明 [ensureServiceAsync] 的失败: 完全未启用时打开设置页 (带引导 toast), 其它原因则 toast 说明.
+     */
+    fun explainFailure(reason: FailureReason) {
+        when (reason) {
+            FailureReason.NOT_ENABLED -> {
+                ViewUtils.showToast(mContext, R.string.error_no_accessibility_permission_to_capture)
+                launchSettings()
+            }
+            else -> ViewUtils.showToast(mContext, messageResOf(reason))
         }
     }
 

@@ -276,6 +276,7 @@
     <string name="error_abandoned_method">方法 %s 已被废弃, 应避免使用</string>
     <string name="error_ace_editor_unavailable">Ace 编辑器不可用; JsDroidEditor 仍在运行</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">无法完成 \"%1$s\" 操作, 因为参数中包含负数坐标值 (%2$d,%3$d)</string>
+    <string name="error_active_window_root_unavailable">活动窗口根节点尚不可用, 请稍后重试</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 对象, 可通过 \"ui\" 执行模式来提供</string>
     <string name="error_an_error_occurred">发生错误</string>
     <string name="error_an_operation_is_not_implemented">操作尚未实现</string>

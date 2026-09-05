@@ -282,6 +282,7 @@
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
     <string name="error_ace_editor_unavailable">Ace 편집기를 사용할 수 없어 JsDroidEditor가 계속 활성화됩니다</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">매개 변수에 음수 좌표 값 (%2$d, %3$d)이 포함되어 있으므로 \"%1$s\" 작업을 완료할 수 없습니다</string>
+    <string name="error_active_window_root_unavailable">활성 창의 루트 노드를 아직 사용할 수 없습니다. 잠시 후 다시 시도하세요</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 실행 모드를 위한 활동이 필요합니다</string>
     <string name="error_an_error_occurred">오류가 발생했습니다</string>
     <string name="error_an_operation_is_not_implemented">작업이 구현되지 않았습니다</string>

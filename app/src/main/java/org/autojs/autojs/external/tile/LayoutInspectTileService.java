@@ -13,11 +13,14 @@ import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.Capture;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
+import org.autojs.autojs.core.accessibility.control.A11yServiceController.EnsureResult;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.NotNull;
+
+import static org.autojs.autojs.util.ContextUtils.withHostConfiguration;
 
 public abstract class LayoutInspectTileService extends TileService implements LayoutInspector.CaptureAvailableListener {
 
@@ -78,20 +81,31 @@ public abstract class LayoutInspectTileService extends TileService implements La
         if (mA11yTool.isRunning()) {
             mCapturing = true;
             captureCurrentWindowDelayed();
-        } else {
-            if (mA11yTool.startService(false)) {
-                mCapturing = true;
-                captureCurrentWindowDelayed();
-            } else {
-                ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
-                mA11yTool.launchSettings();
-                updateTile();
-            }
+            return;
         }
+        // Start the service unattended (root / secure settings) off the main thread and carry on
+        // with the capture once it is bound, so that one tap on the tile is enough.
+        // zh-CN: 在非主线程以无人值守方式 (root / 安全设置) 启动服务, 绑定后接续捕获, 使磁贴一次点击即可完成.
+        mA11yTool.ensureServiceAsync(result -> {
+            if (result instanceof EnsureResult.Failed failed) {
+                mA11yTool.explainFailure(failed.getReason());
+                updateTile();
+                return;
+            }
+            mCapturing = true;
+            captureCurrentWindowDelayed();
+        });
     }
 
-    private static void captureCurrentWindowDelayed() {
-        GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
+    // The delay leaves the quick settings panel time to collapse, so that the window behind it is
+    // captured; the retry covers an active window root that is not available right after the bind.
+    // zh-CN: 延迟是为了给快速设置面板留出折叠时间, 以捕获其后的窗口; 重试覆盖服务刚绑定后活动窗口根节点尚不可用的情况.
+    private void captureCurrentWindowDelayed() {
+        GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindowWithRetry(() -> {
+            mCapturing = false;
+            ViewUtils.showToast(this, R.string.error_active_window_root_unavailable);
+            updateTile();
+        }), 1000);
     }
 
     // FIXME by SuperMonster003 on Oct 8, 2022.
@@ -132,7 +146,7 @@ public abstract class LayoutInspectTileService extends TileService implements La
         }
         mCapturing = false;
         GlobalAppContext.post(() -> {
-            FullScreenFloatyWindow window = onCreateWindow(capture, context);
+            FullScreenFloatyWindow window = onCreateWindow(capture, withHostConfiguration(context));
             if (!FloatyWindowManger.addWindow(context, window)) {
                 updateTile();
             }

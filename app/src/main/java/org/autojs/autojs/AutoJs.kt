@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
+import org.autojs.autojs.core.accessibility.control.A11yServiceController.EnsureResult
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.execution.ScriptExecutionGlobalListener
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -25,7 +26,9 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
-import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
+import org.autojs.autojs.util.ContextUtils.withHostConfiguration
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.R
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -80,31 +83,33 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
         //  # })
 
         LayoutInspectEventBus.events.onEach { event ->
-            try {
-                when (event) {
-                    LayoutInspectEvent.ShowLayoutBounds -> {
-                        accessibilityTool.ensureService()
-                        capture(object : LayoutInspectFloatyWindow {
-                            override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, appContext, true)
-                        })
-                    }
-                    LayoutInspectEvent.ShowLayoutHierarchy -> {
-                        accessibilityTool.ensureService()
-                        capture(object : LayoutInspectFloatyWindow {
-                            override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, appContext, true)
-                        })
-                    }
-                }
-            } catch (e: Exception) {
-                if (isBackgroundThread()) {
-                    throw e
-                }
+            when (event) {
+                LayoutInspectEvent.ShowLayoutBounds -> inspectLayout(object : LayoutInspectFloatyWindow {
+                    override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, appContext.withHostConfiguration(), true)
+                })
+                LayoutInspectEvent.ShowLayoutHierarchy -> inspectLayout(object : LayoutInspectFloatyWindow {
+                    override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, appContext.withHostConfiguration(), true)
+                })
             }
         }.launchIn(mScope)
     }
 
     private interface LayoutInspectFloatyWindow {
         fun create(capture: Capture): FullScreenFloatyWindow
+    }
+
+    /**
+     * Starts the service unattended if needed (off the main thread, this flow runs on it) and
+     * carries on with the capture once it is bound, so that one broadcast is enough.
+     * zh-CN: 必要时以无人值守方式启动服务 (在非主线程, 本流运行于主线程), 绑定后接续捕获, 使一次广播即可完成.
+     */
+    private fun inspectLayout(window: LayoutInspectFloatyWindow) {
+        accessibilityTool.ensureServiceAsync { result ->
+            when (result) {
+                is EnsureResult.Failed -> accessibilityTool.explainFailure(result.reason)
+                is EnsureResult.Satisfied -> capture(window)
+            }
+        }
     }
 
     private fun capture(window: LayoutInspectFloatyWindow) {
@@ -116,8 +121,9 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
             }
         }
         inspector.addCaptureAvailableListener(listener)
-        if (!inspector.captureCurrentWindow()) {
+        inspector.captureCurrentWindowWithRetry {
             inspector.removeCaptureAvailableListener(listener)
+            ViewUtils.showToast(applicationContext, R.string.error_active_window_root_unavailable)
         }
     }
 

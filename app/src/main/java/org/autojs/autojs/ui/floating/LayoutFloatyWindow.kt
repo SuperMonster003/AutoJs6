@@ -20,6 +20,7 @@ import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
+import org.autojs.autojs.util.ContextUtils.withHostConfiguration
 import org.autojs.autojs6.R
 import kotlin.reflect.KFunction0
 
@@ -58,7 +59,9 @@ abstract class LayoutFloatyWindow(
     }
 
     fun onCreate(floatyService: FloatyService) {
-        mServiceContext = if (isServiceRelied) ContextThemeWrapper(floatyService, R.style.AppTheme) else context
+        // The service context follows the system's language and night mode; the host app's settings are wanted here.
+        // zh-CN: service context 跟随系统的语言与夜间模式, 此处需要的是宿主应用的设置.
+        mServiceContext = if (isServiceRelied) ContextThemeWrapper(floatyService.withHostConfiguration(), R.style.AppTheme) else context
     }
 
     fun setLayoutSelectedNode(selectedNode: NodeInfo?) {

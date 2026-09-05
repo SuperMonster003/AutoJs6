@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.accessibility
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import java.util.concurrent.CopyOnWriteArrayList
@@ -71,6 +73,36 @@ class LayoutInspector(private val mContext: Context, private val mA11yTool: Acce
         return true
     }
 
+    /**
+     * [captureCurrentWindow] retried on the main thread every [intervalMillis] while the active
+     * window root is not available yet, which is common right after the service has been bound;
+     * [onUnavailable] runs once all [attempts] have failed. Listeners are notified as usual when a
+     * capture succeeds.
+     *
+     * zh-CN: [captureCurrentWindow] 的重试版: 活动窗口根节点尚不可用时 (服务刚绑定后常见) 每 [intervalMillis] 在主线程重试,
+     * [attempts] 次全部失败后调用 [onUnavailable]. 捕获成功时照常通知监听者.
+     */
+    @JvmOverloads
+    fun captureCurrentWindowWithRetry(
+        attempts: Int = DEFAULT_CAPTURE_ATTEMPTS,
+        intervalMillis: Long = DEFAULT_CAPTURE_INTERVAL_MILLIS,
+        onUnavailable: Runnable?,
+    ) {
+        val handler = Handler(Looper.getMainLooper())
+        var remaining = attempts
+        handler.post(object : Runnable {
+            override fun run() {
+                if (captureCurrentWindow()) return
+                if (--remaining > 0) {
+                    handler.postDelayed(this, intervalMillis)
+                } else {
+                    Log.d(LOG_TAG, "captureCurrentWindowWithRetry: root still unavailable after $attempts attempts")
+                    onUnavailable?.run()
+                }
+            }
+        })
+    }
+
     fun addCaptureAvailableListener(l: CaptureAvailableListener) {
         mCaptureAvailableListeners.add(l)
     }
@@ -96,6 +128,13 @@ class LayoutInspector(private val mContext: Context, private val mA11yTool: Acce
     }
 
     companion object {
+
         private val LOG_TAG = LayoutInspector::class.java.simpleName
+
+        /** Retry budget of [captureCurrentWindowWithRetry]: 10 x 300 ms = 3 s. zh-CN: [captureCurrentWindowWithRetry] 的重试预算: 10 x 300 ms = 3 s. */
+        const val DEFAULT_CAPTURE_ATTEMPTS = 10
+
+        const val DEFAULT_CAPTURE_INTERVAL_MILLIS = 300L
+
     }
 }
