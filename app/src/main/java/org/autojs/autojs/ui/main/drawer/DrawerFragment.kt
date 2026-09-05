@@ -46,7 +46,7 @@ import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.service.AccessibilityService
+import org.autojs.autojs.service.AccessibilityServiceItemHelper
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
 import org.autojs.autojs.storage.history.HistoryDatabase
@@ -188,18 +188,16 @@ open class DrawerFragment : Fragment() {
         mA11yTool = AccessibilityTool(mContext)
 
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
-            helper = object : AccessibilityService(mContext) {
+            helper = object : AccessibilityServiceItemHelper(mContext) {
 
+                // The switch shows the running state, so a malfunctioning service (enabled in system
+                // settings but not bound) is off; the subtitle is what tells it apart from a stopped one.
+                // zh-CN: 开关显示运行状态, 因此故障 (系统设置中已启用但未绑定) 的服务为关闭; 副标题用于区分它与已停止的服务.
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mAccessibilityServiceItem.subtitle
-                    if (aimState) {
-                        if (mA11yTool.isMalfunctioning()) {
-                            mAccessibilityServiceItem.subtitle = context.getString(R.string.text_malfunctioning)
-                        } else {
-                            mAccessibilityServiceItem.subtitle = null
-                        }
-                    } else {
-                        mAccessibilityServiceItem.subtitle = null
+                    mAccessibilityServiceItem.subtitle = when {
+                        mA11yTool.isMalfunctioning() -> context.getString(R.string.text_malfunctioning)
+                        else -> null
                     }
                     if (mAccessibilityServiceItem.subtitle != oldSubtitle) {
                         /* To refresh subtitle view. */

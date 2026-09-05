@@ -212,8 +212,11 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     @ScriptInterface
     fun paste(target: ActionTarget) = performAction(target.createAction(AccessibilityNodeInfo.ACTION_PASTE))
 
+    // "Running" means enabled in system settings with an instance bound in this process, the same
+    // notion as auto.isRunning() and the drawer switch; it used to check the instance alone (D5).
+    // zh-CN: "运行中" 指系统设置中已启用且进程内已绑定实例, 与 auto.isRunning() 及抽屉开关一致; 原先只检查实例 (D5).
     @ScriptInterface
-    fun isServiceRunning() = AccessibilityService.hasInstance()
+    fun isServiceRunning() = AccessibilityTool.controller.isRunning()
 
     @ScriptInterface
     fun ensureService() = accessibilityBridge.ensureServiceStarted()

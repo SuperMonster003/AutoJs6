@@ -9,6 +9,7 @@ import org.autojs.autojs.app.SimpleActivityLifecycleCallbacks
 import org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl
 import org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
@@ -59,7 +60,9 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     val appUtils by lazy { createAppUtils(applicationContext) }
     val globalConsole by lazy { createGlobalConsole() }
 
-    val layoutInspector = LayoutInspector(applicationContext)
+    /** The shared accessibility tool for callers without a context of their own (bridges, selectors, the layout inspector). zh-CN: 供没有自身 context 的调用方 (bridge, 选择器, 布局分析器) 共享的无障碍工具. */
+    val accessibilityTool = AccessibilityTool(applicationContext)
+    val layoutInspector = LayoutInspector(applicationContext, accessibilityTool)
     val uiHandler = UiHandler(applicationContext)
     val infoProvider = ActivityInfoProvider(applicationContext)
     val scriptEngineService: ScriptEngineService = run {

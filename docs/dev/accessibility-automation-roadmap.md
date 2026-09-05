@@ -139,7 +139,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 2. 依赖注入而非静态查找: 每个 `ScriptRuntime` 持有自己的 `AccessibilityBridge` (已有), bridge 从 registry 读取; `UiSelector` / `UiObject` 通过构造参数或 `ScriptRuntime` 获取 `WindowRootProvider` 与手势分发器, 不再自行 `new` 工具类.
 3. Android-free 核心: 过滤器, 搜索, 轮询策略, 稳定检测, Flow 调度器面向接口 (`UiNode` 抽象或纯数据快照) 编程, 保证 JVM 单元测试可覆盖.
 4. 显式注册表替代反射表: 选择器方法由 `SelectorRegistry` 描述一次, 派生出 builder 分发, map 选择器解析, 全局函数注册与 d.ts 生成所需的签名清单.
-5. 兼容外壳: 被 JS 暴露的类 (`UiSelector`, `UiObject`, `UiObjectCollection`, `AccessibilityBridge`) 保留原包名与 public 签名, 内部委托到新组件; `AccessibilityTool` 保留为薄外壳并标记 `@Deprecated`.
+5. 兼容外壳: 被 JS 暴露的类 (`UiSelector`, `UiObject`, `UiObjectCollection`, `AccessibilityBridge`) 保留原包名与 public 签名, 内部委托到新组件; `AccessibilityTool` 保留为薄门面 (P1.2 决定不标记 `@Deprecated`: 它承担控制器的 Android 触点, 见 P1.2 条目).
 
 ### 4.2 目标包结构 (新增部分)
 
@@ -147,7 +147,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 core/accessibility/
   registry/    A11yServiceRegistry (含嵌套 State / Snapshot / StateListener), ConnectionListeners  [P1.1 已落地]
   diagnostics/ A11yServiceDiagnostics (状态行与诊断文本), A11yServiceSelfCheck, A11yServiceInfoFormat (Android-free)  [P1.7 已落地]
-  control/     A11yServiceController, ServiceStartStrategy (Root / SecureSettings / SettingsUi)
+  control/     A11yServiceController (含嵌套 FailureReason / EnsureResult), ServiceStartStrategy + SettingsStoreStartStrategy, EnabledServicesStore (Root / Secure 实现), EnabledA11yServices (Android-free 列表操作)  [P1.2 已落地; 设置页为控制器兜底而非策略]
   event/       A11yEventBus, A11yEventSubscription, AccessibilityDelegate (迁入)
   window/      WindowRootProvider, WindowRootPolicy (mode / flags / filter)
   node/        NodeLifecycle, NodeRecyclePolicy, AccessibilityNodeInfoAllocator (适配为 NodeLifecycle 的实现)
@@ -170,7 +170,7 @@ ui/accessibility/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 与 P1.7 完成 2026-09-05, 含真机验证; 下一项 P1.2) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1, P1.2, P1.7 完成 2026-09-05; P1.2 真机复跑待回填; 下一项 P1.3) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -244,24 +244,31 @@ P1.1 证据:
 
 P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段的两处例外已归因并处理, XQ-DQ72 定位为保护模式 (关闭后全部通过). 关闭.
 
-### P1.2 服务控制器 `A11yServiceController`
+### P1.2 服务控制器 `A11yServiceController` (完成 2026-09-05)
 
-提前落地 (2026-09-05, 因维护者真机反馈, 仍在 `AccessibilityTool` 内; 迁入控制器时保持这些语义并补单测):
+提前落地 (2026-09-05, 因维护者真机反馈; 同日迁入控制器, 语义保持不变并补了单测, 见各条末尾的 JVM 标注):
 
-- [x] Root 关闭失效: `stopServiceWithRoot` 以 `settings put secure enabled_accessibility_services $services` 拼接命令, 当 AutoJs6 是唯一启用的服务时 `$services` 为空, shell 丢弃空参数, `settings put` 报 "Bad arguments" 而不写入; 同时 `runCatching {}.isSuccess` 把命令失败当作成功. 表现为 "root 设备上显式关闭后服务总是自动恢复" (实际从未关闭; 540 ms 后抽屉 `sync()` 读回仍在运行). 修复: 值以单引号包裹 (`putSecureSettingWithRoot`), root / 安全设置的启停一律以 `hasService()` 回读作为结果 (`getOrDefault(false)`), 失败时回落到 `disableSelf()`. 记入 changelog `fix`. (SOURCE)
-- [x] 尊重显式关闭: `AccessibilityServiceAutoStart` (每个 `BaseActivity` 创建时) 原先 `!isRunning()` 即通过 root / 安全设置启动, 会重新启用用户显式关闭的服务. 改为仅在 `isMalfunctioning()` (设置中已启用但进程内未绑定) 且等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT` 后仍未绑定时恢复; 未启用的服务由脚本 / 布局分析器 / 悬浮菜单 / Tile 等显式入口按需启动. 记入 changelog `fix`. (SOURCE)
-- [x] `startService()` 在服务已运行时直接返回, 不再先走 root / 安全设置的 "禁用 + 启用" (原先 `auto.start()` 会重启正在运行的服务). 记入 changelog `fix`. (SOURCE)
-- [x] `restartService()` 在 `stopService(false)` 之后等待 `AccessibilityService.waitForStopped()` (注册表 `awaitUnbound`, 默认 `DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = 2000 ms`) 再启动; 否则部分系统 (AVD API 26 实测) 把 "禁用后立即启用" 合并为无变化, 实际不重启. 记入 changelog `fix`. (SOURCE; JVM: `A11yServiceRegistryTest.awaitUnboundReturnsOnceTheInstanceIsGone`)
-- [ ] 遗留: `stopServiceWithSecure` / `stopServiceWithRoot` 会把 `accessibility_enabled` 置 0, 在旧系统上等同于关闭全部无障碍服务 (含第三方); 现代系统由框架自行推导该值. 控制器迁入时评估是否只维护启用列表而不再写 `accessibility_enabled`.
+- [x] Root 关闭失效: `stopServiceWithRoot` 以 `settings put secure enabled_accessibility_services $services` 拼接命令, 当 AutoJs6 是唯一启用的服务时 `$services` 为空, shell 丢弃空参数, `settings put` 报 "Bad arguments" 而不写入; 同时 `runCatching {}.isSuccess` 把命令失败当作成功. 表现为 "root 设备上显式关闭后服务总是自动恢复" (实际从未关闭; 540 ms 后抽屉 `sync()` 读回仍在运行). 修复: 值以单引号包裹 (现为 `RootEnabledServicesStore.write`), root / 安全设置的启停一律以 `hasService()` 回读作为结果 (`SettingsStoreStartStrategy` 的 `readBack`), 失败时回落到 `disableSelf()`. 记入 changelog `fix`. (SOURCE; JVM: `SettingsStoreStartStrategyTest.resultsComeFromReadingBackNotFromTheWrites` / `disableRemovesTheServiceEvenWhenItIsTheOnlyOne`)
+- [x] 尊重显式关闭: `AccessibilityServiceAutoStart` (每个 `BaseActivity` 创建时) 原先 `!isRunning()` 即通过 root / 安全设置启动, 会重新启用用户显式关闭的服务. 改为仅在 `isMalfunctioning()` (设置中已启用但进程内未绑定) 且等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT` 后仍未绑定时恢复; 未启用的服务由脚本 / 布局分析器 / 悬浮菜单 / Tile 等显式入口按需启动. 记入 changelog `fix`. (SOURCE: `A11yServiceController.restoreIfMalfunctioning`; JVM: `A11yServiceControllerTest.restoreOnlyTouchesAMalfunctioningService` / `restoreGivesTheSystemAMomentToBindByItself`)
+- [x] `startService()` 在服务已运行时直接返回, 不再先走 root / 安全设置的 "禁用 + 启用" (原先 `auto.start()` 会重启正在运行的服务). 记入 changelog `fix`. (SOURCE: `A11yServiceController.start`; JVM: `A11yServiceControllerTest.startLeavesARunningServiceAlone`)
+- [x] `restartService()` 在 `stopService(false)` 之后等待 `AccessibilityService.waitForStopped()` (注册表 `awaitUnbound`, 默认 `DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = 2000 ms`) 再启动; 否则部分系统 (AVD API 26 实测) 把 "禁用后立即启用" 合并为无变化, 实际不重启. 记入 changelog `fix`. (SOURCE: `A11yServiceController.restart`, `auto(true)` 的强制重启同样等待解绑; JVM: `A11yServiceRegistryTest.awaitUnboundReturnsOnceTheInstanceIsGone`, `A11yServiceControllerTest.restartWaitsForTheUnbindBeforeEnablingAgain` / `ensureWithForceRestartStopsFirstAndWaitsForTheUnbind`)
+- [x] 遗留 (已决): 不再写 `accessibility_enabled`. 依据: minSdk 24, 而 Android 7.0 起 `AccessibilityManagerService.updateAccessibilityEnabledSetting` 根据已绑定 / 绑定中的服务自行维护该值 (N 同时移除了设置里的无障碍总开关), 且 `readConfigurationForUserStateLocked` 不再读取它; 原先关闭本服务时写入的 0 会在其它服务仍启用时残留 (系统只在下一次用户状态变化时重算). 记入 changelog `improvement`. 风险: 仅影响 root / 安全设置的启停路径, 由冒烟脚本第 7 节在 AVD 24 / 25 上覆盖 (待复跑确认). (SOURCE: `SettingsStoreStartStrategy` 只写服务列表)
 
 原计划条目:
 
-- [ ] 将 `AccessibilityTool` 的启停逻辑迁入 `A11yServiceController`, 启动方式抽象为 `ServiceStartStrategy` 列表 (Root, SecureSettings, SettingsUi), 按偏好顺序尝试; 每种策略可单测 (以接口替代 `ProcessShell` / `Settings.Secure`).
-- [ ] 将 4 个 "确保 / 等待" 变体合并为一个 `ensure(level: A11yServiceRegistry.State, timeout: Long, launchSettingsIfNeeded: Boolean): EnsureResult`, 失败原因由 "设置中是否已启用" (`hasService()`, 见 P1.1 对 3 态枚举的说明) 与注册表状态组合得出 (未启用 / 已启用未绑定 / 已绑定未操作), 错误文案按原因区分, 消除 `AccessibilityTool.kt:182,195,196` 三处同文案.
-- [ ] `AccessibilityTool` 改为薄外壳, 全部方法委托到控制器, 标记 `@Deprecated` (仅 Kotlin 内部弃用, 不影响 JS); 12 处实例化改为注入共享实例 (`AutoJs` 持有, `ScriptRuntime` / UI / Tile 通过 `AutoJs.instance` 或构造参数获取).
-- [ ] 统一 `ensureServiceStarted` 的 9 个调用点全部经由 `AccessibilityBridge` -> 控制器, 删除 `UiSelector.kt:715` 与 `AutoJs.kt:89,95` 的绕行路径.
-- [ ] `service/AccessibilityService.kt` 重命名为 `AccessibilityServiceItemHelper` (内部类, 未暴露给 JS), 其 `isRunning` 改为消费 registry, 修正 `||` 判定; `AccessibilityServiceAutoStart` 改为调用控制器.
-- [ ] `SimpleActionAutomator.isServiceRunning` (`automator.isServiceRunning()` 的实现) 改为 registry 的 `isRunning` 语义 (D5 已批准), 记入 changelog `fix` 并在文档标注.
+- [x] `core/accessibility/control/A11yServiceController<S>` (Android-free, 泛型同注册表): 谓词 (`hasService` / `hasInstance` / `isRunning` / `isOperational` / `isMalfunctioning` / `isSatisfied(level)` / `failureReason()`), `start` / `stop` / `restart` / `ensure` / `restoreIfMalfunctioning` / `waitFor*`; 依赖全部注入: 注册表, 启用列表读取 (`Settings.Secure`, 无需权限), `ServiceStartStrategy` 列表, `disableSelf`, 设置页启动器, 日志. 策略: `SettingsStoreStartStrategy(name, serviceName, store, available, readBack)` 以 `EnabledServicesStore` (Root: `settings get / put secure` 经 `ProcessShell`; Secure: `Settings.Secure` 直写) 改写列表, 结果以回读为准; 已列出但未绑定的服务先移出再写回以触发重新绑定. 偏离: 设置页不是策略 (无法报告成功), 而是控制器的最终兜底 `settingsUi`; 策略只有 Root 与 SecureSettings 两个. 纯列表操作抽为 `EnabledA11yServices` (`parse` / `contains` / `attach` / `detach`, 忽略空白与 "null"). (SOURCE; JVM: `A11yServiceControllerTest` 18 用例, `SettingsStoreStartStrategyTest` 7 用例, `EnabledA11yServicesTest` 4 用例)
+- [x] `ensure(level, timeoutMillis, launchSettingsIfNeeded, forceRestart): EnsureResult` (`Satisfied(via)` / `Failed(reason)`): 已满足直接返回; 已绑定只差状态 (首个事件) 时只等待, 不经策略重启; 否则按顺序尝试策略 (每个给 `startTimeout` = 2 s 完成绑定, 调用方超时更短时取其值), 绑定后再等 `level` 至 `timeoutMillis` (负数无限); 策略均失败且允许时打开设置页并等待用户. 失败原因 `NOT_ENABLED` / `ENABLED_BUT_UNBOUND` / `BOUND_BUT_NOT_OPERATIONAL` 由 `hasService()` 与注册表组合得出. `AccessibilityTool` 的 4 个变体全部改为 `ensure` 的薄封装: `ensureService()` / `ensureServiceOperational()` 失败抛 `ScriptException` (文案按原因: `error_no_accessibility_permission` / `text_a11y_service_enabled_but_not_running` / 新增 `error_a11y_service_not_operational`), `startServiceAndWaitFor*()` 失败抛 `ScriptInterruptedException` (原语义). 顺带修复原 `ensureService` 的文案颠倒 (未启用时报 "已启用但未运行", 已启用未绑定时报 "服务已禁用"), 记入 changelog `fix`. (SOURCE; JVM: `ensure*` 8 用例)
+- [x] `AccessibilityTool` 改为薄门面: 全部谓词与启停 / 等待方法委托到进程级 `AccessibilityTool.controller` (伴生对象惰性装配), 自身只保留需要 `Context` 的 `launchSettings` / `clearCache` / 错误文案. 偏离: 未标记 `@Deprecated` (它是控制器的 Android 门面而非过渡外壳; 实例除文案 context 外无状态). 实例化 12 处 -> 7 处: 共享实例 `AbstractAutoJs.accessibilityTool` 供 `AutoJs` (布局分析事件), `AccessibilityBridgeImpl`, `LayoutInspector` (构造注入), `Auto.accessibilityTool` (改为读取共享实例) 使用; `UiSelector` / `AccessibilityServiceAutoStart` / `SimpleActionAutomator` 不再持有工具 (分别经 bridge / 控制器); 保留自建实例的是需要 Activity / Service context 做 toast 的 `MainActivity`, `DrawerFragment`, `CircularMenu`, `LayoutInspectTileService`, `AccessibilityServiceItemHelper`. (SOURCE)
+- [x] `ensureServiceStarted` 的调用点全部经 `AccessibilityBridgeImpl` -> `AccessibilityTool.ensureService(isForcibleRestart)` -> 控制器; `UiSelector.find` 改为 `mAccessibilityBridge?.ensureServiceStarted()` (无 bridge 时无从查找, 不再单独确保); `AutoJs.kt` 的布局分析事件改用共享实例. `auto(true)` 的强制重启改为 `ensure(forceRestart = true)`: 先 `stop` 并等待解绑再启用 (原先立即 `ensureService`, 与 `restartService` 原来的合并问题相同). (SOURCE)
+- [x] `service/AccessibilityService.kt` -> `service/AccessibilityServiceItemHelper.kt` (`git mv`, D8). `isRunning` 改为 `controller.isRunning()` (原 `hasService() || isRunning()` 等价于 `hasService()`, 使已启用但未运行的服务显示为开启): 抽屉开关现在反映真实运行状态, 故障服务显示为关闭并带 "故障" 副标题 (`DrawerFragment.refreshSubtitle` 改为只看 `isMalfunctioning()`), 打开开关即经策略重新启用; `start()` 在 `startService(true)` 后等待 `waitForStarted()` (最多 2 s), 避免抽屉 540 ms 后的 `sync()` 在系统尚未绑定时把开关跳回. `restart()` 改为 `restartService(true)`. `AccessibilityServiceAutoStart` 改为 `controller.restoreIfMalfunctioning()`. 记入 changelog `fix` (开关状态). (SOURCE)
+- [x] `SimpleActionAutomator.isServiceRunning` 改为 `AccessibilityTool.controller.isRunning()` (D5), 记入 changelog `fix`. 顺带: `auto.services` (`AccessibilityTool.getServices`) 改为直接读取 `Settings.Secure` 的启用列表, 不再要求 root / 安全设置方式可用 (原先无这两种方式时恒为空数组), 记入 changelog `fix`. 文档 / d.ts: 签名均无变化, 无需同步; `automator.isServiceRunning()` 的语义变化待 P6 在 API 文档中标注.
+
+P1.2 证据:
+
+- `JVM`: 新增 `A11yServiceControllerTest` (18) / `SettingsStoreStartStrategyTest` (7) / `EnabledA11yServicesTest` (4), 连同 `A11yServiceRegistryTest` (15) 与 `AccessibilityServiceAutoStartCoordinatorTest` (3) 共 47 / 0 失败; 全量 `:app:testAppDebugUnitTest` 1930 tests / 0 failures (2026-09-05).
+- `ANDROID_BUILD`: `:app:assembleAppDebug` 通过, 产出 `app/build/outputs/apk/app/debug/autojs6-v6.8.0-*.apk` (2026-09-05).
+- `DOCS`: 字符串 `error_a11y_service_not_operational` x 11 文件 (经 `build/check-strings.py` 校验); changelog `fix` 4 条 + `improvement` 1 条 (10 语言), README / CHANGELOG 已重新生成.
+- `DEVICE`: 待维护者复跑冒烟脚本 (重点: AVD 24 / 25 的 root / WSS 重启段, 验证不写 `accessibility_enabled` 的决定) 并检查抽屉开关对故障服务的新表现 (关闭 + "故障" 副标题, 打开即恢复).
 
 ### P1.3 事件总线 `A11yEventBus`
 
@@ -687,4 +694,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P1.7 (D14): `ui/accessibility/{A11yServiceManagerDialog,A11yEventMonitorDialog}.kt`, `core/accessibility/diagnostics/{A11yServiceDiagnostics,A11yServiceSelfCheck,A11yServiceInfoFormat}.kt`, `core/accessibility/A11yEventRecord.kt`, 5 个布局, `AccessibilityService` 事件计数与伴生级事件观察者, `PrefSwitch.setPrefKey(key, default)`, `DrawerFragment` 接入; 字符串 32 条 x 11 文件; changelog `feature` 1 条. 证据: 全量 JVM 1901 / 0, `assembleAppDebug` 通过 (见 P1.7 证据). 待维护者真机验证 (P1.7 最后一条清单) 并顺带回填 P1.1 / P1.2 的复跑结果 (冒烟脚本 38/38 或 32/32, root 显式关闭不再自动恢复, XQ-DQ72 环境快照) — 管理器的 "复制" 文本可直接作为回填内容.
 - 维护者反馈 (同日): root 设备显式关闭后不再自动启动 (已修复); 管理器对话框全部正常 (P1.7 `DEVICE` 关闭); 冒烟脚本复跑两份输出: XQ-DQ72 31/43, AVD API 26 40/43. 归因: XQ-DQ72 为保护模式开启 (按设计, 脚本以 AutoJs6 自身为目标时选择器一律为空; 待维护者确认设置项), AVD API 26 为重绑后活动窗口未知 (`rootInActiveWindow` 持续 `null`, 平台行为, 兜底留给 P1.4); 详见 P1.1 `DEVICE` 证据. 顺带修复 `AccessibilityBridge.windowRoots()` 返回 `[null]` (`auto.windowRoots` 得到 `UiObject(null)`), changelog `fix` 1 条. 冒烟脚本: 环境快照增加 `guardMode=` 与每个窗口的 类型 / 包名 / active / focused, 新增前置检查 `guard mode is off` 与 `auto.rootInActiveWindow is available`, 重启段改为等待真实根节点并在失败时制造一次窗口变化以验证归因, 事件间隔为负时不再显示 `+-`; 现在可重启设备 45 项, 其余 34 项.
 - 维护者反馈 (同日, 45 项版本脚本): AVD API 26 普通 / Root / WSS 均全部通过; XQ-DQ72 关闭保护模式后 普通 / Root / WSS 均全部通过. P1.1 与 P1.7 的真机证据齐备.
-- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名; 提前落地的 4 项启停修复迁入控制器时保持语义并补单测). P1.4 需吸收本日两条输入 (活动窗口未知时的兜底, 保护模式的文档化). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行).
+- 落地 P1.2: `core/accessibility/control/{A11yServiceController,ServiceStartStrategy,EnabledServicesStores,EnabledA11yServices}.kt` 与 3 个测试类 (29 用例); `AccessibilityTool` 改为薄门面 (共享控制器在其伴生对象, 共享工具在 `AbstractAutoJs.accessibilityTool`); 4 个 "确保 / 等待" 变体合并为 `ensure`; D5 / D8 落实; 提前落地的 4 项修复迁入并补测; 决定不再写 `accessibility_enabled`; 修复文案颠倒, `auto.services` 空数组, 抽屉开关对故障服务的显示. 偏离两处 (设置页非策略; `AccessibilityTool` 不弃用) 已写入条目. changelog `fix` 4 条 + `improvement` 1 条. 证据见 P1.2 证据.
+- 下次起点: P1.3 (`A11yEventBus`: 统一 `eventBox` / `delegates` / 按键 / 手势, Kotlin 侧订阅 API 以 P1.7 的 `addEventObserver` 为雏形, `registerEvent` 可选去重 / 去抖). 待维护者: 复跑冒烟脚本 (重点 AVD 24 / 25 的 root / WSS 重启段) 并试一次 "进程被杀后打开应用" 的故障恢复与抽屉开关表现. P1.4 需吸收本日两条输入 (活动窗口未知时的兜底, 保护模式的文档化). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行).

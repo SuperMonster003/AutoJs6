@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.automator
 
 import android.view.accessibility.AccessibilityWindowInfo
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.AccessibilityBridge
@@ -120,7 +121,8 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
     companion object : ArgumentGuards() {
 
-        val accessibilityTool by lazy { AccessibilityTool(globalContext) }
+        /** The shared tool held by AutoJs; all JS entry points go through the same controller. zh-CN: AutoJs 持有的共享工具; 全部 JS 入口经同一个控制器. */
+        val accessibilityTool: AccessibilityTool get() = AutoJs.instance.accessibilityTool
 
         private val modes = hashMapOf(
             "normal" to AccessibilityBridge.MODE_NORMAL,

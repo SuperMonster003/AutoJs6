@@ -12,14 +12,14 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 ---
 
-## 1. 现状 (2026-09-05, P1.1 与 P1.7 完成后)
+## 1. 现状 (2026-09-05, P1.1 / P1.2 / P1.7 完成后)
 
 ### 1.1 分层与类映射
 
 | 层 | 职责 | 现有类 (均位于 `app/src/main/java/org/autojs/autojs/`) |
 | --- | --- | --- |
 | JS 表面 | 参数解析, 返回值适配, 注册全局函数 / 命名空间 | `runtime/api/augment/automator/Auto.kt` (`auto` 对象与 `auto()` 调用), `runtime/api/augment/automator/Automator.kt` (`automator` 与全局动作 `click` / `swipe` / `back` 等), `runtime/api/augment/selector/Selector.kt` (`selector` 与反射注册的 `text()` / `id()` 等全局选择器函数, `pickup` / `detect` / `existsAll` / `existsOne`), `runtime/api/augment/global/Global.kt` (`wait` / `waitForActivity` / `waitForPackage` / `sleep`), `runtime/api/augment/global/Classes.kt` (把 `UiSelector` / `UiObject` / `UiObjectCollection` / `AccessibilityBridge` 作为 JS 类暴露) |
-| 服务与桥接 | 服务生命周期, 状态, 启停, 窗口根节点, 事件分发 | `core/accessibility/registry/A11yServiceRegistry.kt` (P1.1 新增, Android-free: 绑定实例, 3 态状态, 状态监听者, `await`; 进程单例为 `AccessibilityService.registry`), `core/accessibility/registry/ConnectionListeners.kt` (旧 `AccessibilityServiceCallback` 形态的适配器), `core/accessibility/AccessibilityService.kt` (服务本体; 伴生对象只剩对注册表的兼容外壳, delegate 表, 默认 bridge, 静态按键观察者, P1.7 起另有实例级事件计数与伴生级轻量事件观察者 `addEventObserver` / `removeEventObserver`), `core/accessibility/A11yEventRecord.kt` (P1.7 新增, 事件字段的普通拷贝), `core/accessibility/AccessibilityServiceUsher.kt` (清单中注册的子类, 负责 `serviceInfo` 标志), `core/accessibility/AccessibilityTool.kt` (启停与谓词, 12 处各自实例化), `core/accessibility/AccessibilityBridge.java` + `AccessibilityBridgeImpl.java` (每个 `ScriptRuntime` 一个, 持有模式 / 标志 / 窗口过滤器, 提供 `windowRoots()`; 构造函数已无全局副作用), `core/accessibility/AccessibilityServiceAutoStart.kt` (Activity 创建时的自动恢复), `service/AccessibilityService.kt` (抽屉开关辅助类, 待按 D8 重命名) |
+| 服务与桥接 | 服务生命周期, 状态, 启停, 窗口根节点, 事件分发 | `core/accessibility/registry/A11yServiceRegistry.kt` (P1.1 新增, Android-free: 绑定实例, 3 态状态, 状态监听者, `await`; 进程单例为 `AccessibilityService.registry`), `core/accessibility/registry/ConnectionListeners.kt` (旧 `AccessibilityServiceCallback` 形态的适配器), `core/accessibility/AccessibilityService.kt` (服务本体; 伴生对象只剩对注册表的兼容外壳, delegate 表, 默认 bridge, 静态按键观察者, P1.7 起另有实例级事件计数与伴生级轻量事件观察者 `addEventObserver` / `removeEventObserver`), `core/accessibility/A11yEventRecord.kt` (P1.7 新增, 事件字段的普通拷贝), `core/accessibility/AccessibilityServiceUsher.kt` (清单中注册的子类, 负责 `serviceInfo` 标志), `core/accessibility/control/A11yServiceController.kt` (P1.2 新增, Android-free 泛型: 谓词, `start` / `stop` / `restart` / `ensure(level, timeout, launchSettings, forceRestart)` / `restoreIfMalfunctioning`, 失败原因 `FailureReason`; 进程单例为 `AccessibilityTool.controller`), `core/accessibility/control/ServiceStartStrategy.kt` (策略接口, `EnabledServicesStore`, `SettingsStoreStartStrategy`), `core/accessibility/control/EnabledServicesStores.kt` (Root / Secure 两种 store), `core/accessibility/control/EnabledA11yServices.kt` (启用列表的纯操作), `core/accessibility/AccessibilityTool.kt` (控制器的 Android 门面: `launchSettings` / `clearCache` / 错误文案, 其余全部委托; 共享实例 `AbstractAutoJs.accessibilityTool`, 需要 Activity context 做 toast 的 UI 类各自持有一个无状态实例), `core/accessibility/AccessibilityBridge.java` + `AccessibilityBridgeImpl.java` (每个 `ScriptRuntime` 一个, 持有模式 / 标志 / 窗口过滤器, 提供 `windowRoots()`; 构造函数已无全局副作用), `core/accessibility/AccessibilityServiceAutoStart.kt` (Activity 创建时的自动恢复), `service/AccessibilityServiceItemHelper.kt` (抽屉开关辅助类, D8 已重命名; 开关反映 `controller.isRunning()`, 故障服务显示为关闭并带副标题) |
 | 诊断与管理 (P1.7 新增) | 状态行, 诊断文本, 自检, 服务管理器 UI | `core/accessibility/diagnostics/A11yServiceDiagnostics.kt` (派生状态 `NOT_ENABLED / MALFUNCTIONING / CONNECTED / OPERATIONAL`, 15 个状态行, `Report.toText()`), `core/accessibility/diagnostics/A11yServiceSelfCheck.kt` (有界节点遍历 + 等待事件), `core/accessibility/diagnostics/A11yServiceInfoFormat.kt` (Android-free 位掩码与时长格式化), `ui/accessibility/A11yServiceManagerDialog.kt` (抽屉 "无障碍服务" 条目的管理器对话框: 状态 / 控制 / 设置), `ui/accessibility/A11yEventMonitorDialog.kt` (实时事件监视器, 消费伴生级事件观察者) |
 | 动作 | 节点动作, 全局动作, 手势, 截图 | `core/accessibility/SimpleActionAutomator.kt` (每个 `ScriptRuntime` 一个; 含 `registerEvent` / `removeEvent` 的 ownerId 语义与 `captureScreen`), `core/automator/GlobalActionAutomator.kt` (手势与全局动作, 使用 servant Looper), `core/automator/UiObjectActions.kt`, `core/automator/action/**` (滚动等复合动作) |
 | 查询 | 选择器构建, 搜索, 拾取, 导航 | `core/accessibility/UiSelector.kt` (builder + `find*` + `pickup` 的 `Picker`), `core/automator/UiObject.kt` (`AccessibilityNodeInfoCompat` 包装 + 导航 + `detect` 的 `Detector` / `Invoker` / `Interceptor`), `core/automator/UiObjectCollection.kt`, `core/automator/filter/**` (39 个过滤器), `core/automator/search/{DFS,BFS}.kt`, `core/automator/pick/CompassParser.kt` (Android-free, P0 新增) |
@@ -51,7 +51,14 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 等待: `AccessibilityService.waitForStarted(timeout)` = `registry.await(CONNECTED, timeout)`, `waitForOperational(timeout)` = `registry.await(OPERATIONAL, timeout)`; 单一 `Condition`, 任何迁移都会 `signalAll`, 负超时无限等待, 中断时返回 `false` 并保留中断标志.
 
-启动方式 (`AccessibilityTool.startService`): 已运行则直接返回; 否则 Root (`settings put secure ...`, 值加单引号以允许空列表), `WRITE_SECURE_SETTINGS` 权限, 否则跳转系统设置页由用户手动开启. root / 安全设置的启停以 `hasService()` 回读为准. `restartService` 在禁用后先 `waitForStopped()` (注册表 `awaitUnbound`, 2000 ms) 再启用, 避免被系统合并为 "仍然启用". `AccessibilityServiceAutoStart` (每个 `BaseActivity` 创建时) 只恢复 `isMalfunctioning()` 的服务, 不会重新启用用户显式关闭的服务. "确保可用" 有 4 个近似变体 (`startServiceAndWaitFor` / `startServiceAndWaitForOperational` / `ensureService` / `ensureServiceOperational`), 默认等待 `DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000 ms`. (P1.2 合并)
+启停 (P1.2 起由 `A11yServiceController` 统一, `AccessibilityTool` 只是门面):
+
+- `start(launchSettingsIfNeeded)`: 已运行直接返回 (不重启); 否则按顺序尝试 `ServiceStartStrategy` (Root: `settings put secure` 经 root shell, 值加单引号以允许空列表; SecureSettings: `Settings.Secure` 直写, 需 `WRITE_SECURE_SETTINGS`), 每个策略只改写 `enabled_accessibility_services` 列表 (不再写 `accessibility_enabled`, Android 7.0 起由系统自行维护), 结果以回读为准; 已列出但未绑定的服务先移出再写回以触发重新绑定; 策略均不可用或失败时按需打开系统设置页.
+- `stop(launchSettingsIfNeeded)`: 策略 -> `disableSelf()` 兜底 (仅当回读已不在列表中才算成功) -> 按需设置页. 系统的解绑是异步的, `waitForStopped()` (注册表 `awaitUnbound`, 2000 ms) 等待它.
+- `restart()`: `stop` -> 等待解绑 -> `start`; 不等待会被部分系统 (AVD API 26 实测) 合并为 "仍然启用". `auto(true)` 的强制重启走 `ensure(forceRestart = true)`, 同样等待解绑.
+- `ensure(level, timeoutMillis, launchSettingsIfNeeded, forceRestart): EnsureResult`: 已满足直接返回; 已绑定只差首个事件时只等待; 否则策略 (每个给 2 s 完成绑定) -> 设置页, 然后等待 `level` 至 `timeoutMillis` (负数无限). 失败原因 `NOT_ENABLED` / `ENABLED_BUT_UNBOUND` / `BOUND_BUT_NOT_OPERATIONAL` = "设置中是否启用" x 注册表状态. `AccessibilityTool` 的 `ensureService()` / `ensureServiceOperational()` 失败抛带原因文案的 `ScriptException`, `startServiceAndWaitFor()` / `startServiceAndWaitForOperational()` (`auto.waitFor(timeout)`) 失败抛 `ScriptInterruptedException`.
+- `restoreIfMalfunctioning()` (`AccessibilityServiceAutoStart`, 每个 `BaseActivity` 创建时): 只恢复 `isMalfunctioning()` 且等 2 s 后仍未绑定的服务, 不会重新启用用户显式关闭的服务.
+- 策略写入串行化 (`writeLock`), 等待在锁外, 因此等待用户的脚本不会阻塞其它地方的停止请求.
 
 已知平台问题: `onServiceConnected` 偶尔不回调但事件照常到达; 注册表的 `onEvent` 会直接采纳实例并置 `OPERATIONAL`, 等待方与状态监听者 (含 `auto.stateListener` 的 `onConnected`) 在这条路径上同样被唤醒 / 通知.
 
@@ -125,7 +132,7 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
 
 - JVM 单元测试为纯 JUnit4 (无 Robolectric). 任务名 `:app:testAppDebugUnitTest`.
 - `UiObject(null)` 可在 JVM 中构造 (androidx `AccessibilityNodeInfoCompat` 是真实库代码, 仅调用 Android 桩方法时失败). 夹具 `app/src/test/java/org/autojs/autojs/core/automator/FakeUiObject.kt` 以 `FakeUiObject.root { child("a", clickable = true) { child("a0") } }` 构建确定性树, 覆盖 `getChildCount` / `childCount` / `child` / `parent` / `clickable` / `recycle`, 用于 `SearchAlgorithmTest` 与 `UiObjectCompassTest`.
-- Android-free 的纯逻辑及其测试: `CompassParser` (`CompassParserTest`), `Global.normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`GlobalWaitCompatibilityTest`), `SelectorMethodResolver` (`SelectorMethodResolverTest`).
+- Android-free 的纯逻辑及其测试: `CompassParser` (`CompassParserTest`), `Global.normalizeWaitArguments` / `resolveWaitPolicy` / `isWaitConditionSatisfied` (`GlobalWaitCompatibilityTest`), `SelectorMethodResolver` (`SelectorMethodResolverTest`), `A11yServiceRegistry` (`A11yServiceRegistryTest`), `A11yServiceController` 及策略 (`A11yServiceControllerTest` 以假策略模拟系统的绑定 / 解绑, `SettingsStoreStartStrategyTest` 以内存 store, `EnabledA11yServicesTest`), `A11yServiceInfoFormat` (`A11yServiceInfoFormatTest`).
 - 真机冒烟: `sample/accessibility/smoke-legacy-api.js`.
 
 ### 1.9 基准数据
@@ -155,11 +162,11 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 | 现有 | 目标 | 阶段 |
 | --- | --- | --- |
 | `AccessibilityService` 伴生对象的静态状态 | `A11yServiceRegistry` (3 态 `State` + 多监听者 + `await`), 伴生对象保留同名成员作为外壳 | P1.1 (已完成 2026-09-05) |
-| `AccessibilityTool` (12 处实例) | `A11yServiceController` 单例 + `ServiceStartStrategy`; `AccessibilityTool` 变薄并 `@Deprecated` | P1.2 |
+| `AccessibilityTool` (12 处实例) | `A11yServiceController` 单例 + `ServiceStartStrategy`; `AccessibilityTool` 变薄为 Android 门面 (未弃用, 实例 7 处) | P1.2 (已完成 2026-09-05) |
 | `eventBox` / `delegates` / 按键观察者 / 手势分发 | `A11yEventBus` (ownerId, 类型集合, 优先级, 可消费, 去重 / 去抖选项) | P1.3 |
 | `AccessibilityBridge.java` 的 3 处根节点逻辑 | `WindowRootProvider` + `WindowRootPolicy`, `AccessibilityBridge` 转 Kotlin 保留 FQN | P1.4 |
 | 内联 `recycle()` 与 `AccessibilityNodeInfoAllocator` | `NodeLifecycle` / `NodeRecyclePolicy` (API >= 33 全 no-op) | P1.5 |
-| `service/AccessibilityService.kt` | `AccessibilityServiceItemHelper` (仅抽屉使用) | P1.2 (D8) |
+| `service/AccessibilityService.kt` | `AccessibilityServiceItemHelper` (仅抽屉使用) | P1.2 (D8, 已完成 2026-09-05) |
 | `UiSelector` 手写 builder + `checkSelectorMap` 手工表 + `Selector.kt` 反射注册 | `SelectorRegistry` (数据) -> 生成 builder (D9) + `SelectorMapParser` + 白名单注册 | P2.2 |
 | 复制粘贴的过滤器族 | `StringPropertyFilter` / `MetricsFilter` 泛化 | P2.3 |
 | `findOne` / `untilFind*` 各自的轮询 | `PollPolicy` + `UiSelectorQuery`, 有界 UI 线程跳转 | P2.4 |

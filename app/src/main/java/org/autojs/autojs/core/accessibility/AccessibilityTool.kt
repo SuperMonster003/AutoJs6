@@ -5,12 +5,18 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.provider.Settings.Secure
-import android.text.TextUtils
 import android.util.Log
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.accessibility.control.A11yServiceController
+import org.autojs.autojs.core.accessibility.control.A11yServiceController.EnsureResult
+import org.autojs.autojs.core.accessibility.control.A11yServiceController.FailureReason
+import org.autojs.autojs.core.accessibility.control.EnabledA11yServices
+import org.autojs.autojs.core.accessibility.control.RootEnabledServicesStore
+import org.autojs.autojs.core.accessibility.control.SecureEnabledServicesStore
+import org.autojs.autojs.core.accessibility.control.SettingsStoreStartStrategy
+import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.service.AccessibilityInteractionClient
@@ -21,6 +27,15 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 /**
+ * Android-side facade of the process-wide [controller]: every predicate and start / stop / wait
+ * method delegates to it, this class only adds what needs a [Context] (toasts, the system settings
+ * page, error messages) and the node cache. Instances are stateless apart from the context used
+ * for messages, so creating one per call site is fine.
+ *
+ * zh-CN: 进程级 [controller] 的 Android 侧门面: 全部谓词与启动 / 停止 / 等待方法都委托给它,
+ * 本类只补充需要 [Context] 的部分 (toast, 系统设置页, 错误文案) 与节点缓存.
+ * 除用于文案的 context 外实例无状态, 因此各调用点各自创建一个实例是可以的.
+ *
  * Created by Stardust on Jan 26, 2017.
  * Modified by SuperMonster003 as of Sep 5, 2026.
  */
@@ -29,9 +44,6 @@ class AccessibilityTool(private val context: Context? = null) {
     private val mApplicationContext = GlobalAppContext.get()
     private val mContext: Context
         get() = context ?: mApplicationContext
-    private val mServiceNamePrefix = mApplicationContext.packageName
-    private val mServiceNameSuffix = AccessibilityServiceUsher::class.java.name
-    private val mServiceName = "$mServiceNamePrefix/$mServiceNameSuffix"
 
     @ScriptInterface
     fun clearCache(): Boolean = runCatching {
@@ -56,100 +68,50 @@ class AccessibilityTool(private val context: Context? = null) {
         }
     }
 
+    /** Every accessibility service enabled in system settings. zh-CN: 系统设置中已启用的全部无障碍服务. */
     @ScriptInterface
-    fun getServices() = when {
-        isSecureAccessible() -> getServicesWithSecure().split(SERVICES_DELIMITER).toTypedArray()
-        isRootAccessible() -> getServicesWithRoot().split(SERVICES_DELIMITER).toTypedArray()
-        else -> emptyArray()
-    }
+    fun getServices(): Array<String> = controller.enabledServices().toTypedArray()
 
     @ScriptInterface
-    fun hasInstance() = AccessibilityService.hasInstance()
+    fun hasInstance() = controller.hasInstance()
 
     // Means the service is enabled in system settings.
     // zh-CN: 表示服务在系统设置中处于已启用状态.
     @ScriptInterface
-    fun hasService(): Boolean {
-        val services = Secure.getString(
-            mApplicationContext.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-        return services.split(SERVICES_DELIMITER).any { it.trim() == mServiceName }
-    }
+    fun hasService() = controller.hasService()
 
     @ScriptInterface
-    fun isRunning() = hasService() && hasInstance()
+    fun isRunning() = controller.isRunning()
 
     // Means the service is enabled and confirmed workable in current process.
     // zh-CN: 表示服务已启用, 且在当前进程中已确认可用.
     @ScriptInterface
-    fun isOperational() = isRunning() && AccessibilityService.hasOperationalState
+    fun isOperational() = controller.isOperational()
 
     @ScriptInterface
-    fun isMalfunctioning() = hasService() && !hasInstance()
+    fun isMalfunctioning() = controller.isMalfunctioning()
 
     @JvmOverloads
     @ScriptInterface
-    fun startService(withLaunchSettings: Boolean = true): Boolean {
-        // A running service is left alone; the root / secure-settings ways below re-enable the service
-        // (disable + enable), which would needlessly restart it.
-        // zh-CN: 已运行的服务不做处理; 下方的 root / 安全设置方式会重新启用服务 (先禁用再启用), 相当于无谓的重启.
-        if (isRunning()) {
-            return true.also { Log.d(TAG, "Accessibility service is running") }
-        }
-        if (startServiceWithConvenientWaysIfPossible()) {
-            return true.also { Log.d(TAG, "Accessibility service enabled successfully by a certain \"convenient way\"") }
-        }
-        if (isRunning()) {
-            return true.also { Log.d(TAG, "Accessibility service is running") }
-        }
-        if (withLaunchSettings) launchSettings()
-        return false
-    }
+    fun startService(withLaunchSettings: Boolean = true): Boolean = controller.start(withLaunchSettings)
 
     @JvmOverloads
     @ScriptInterface
-    fun stopService(withLaunchSettings: Boolean = true): Boolean {
-        var result = false
-
-        when {
-            isRootAccessible() && stopServiceWithRoot() -> {
-                result = true.also { Log.d(TAG, "Accessibility service disabled successfully by \"root\"") }
-            }
-            isSecureAccessible() && stopServiceWithSecure() -> {
-                result = true.also { Log.d(TAG, "Accessibility service disabled successfully by \"secure settings\"") }
-            }
-        }
-
-        if (!result) {
-            if (AccessibilityService.stop() && !hasService()) {
-                result = true.also { Log.d(TAG, "Accessibility service disabled successfully by \"disableSelf\"") }
-            }
-        }
-
-        return result || false.also { if (withLaunchSettings) launchSettings() }
-    }
+    fun stopService(withLaunchSettings: Boolean = true): Boolean = controller.stop(withLaunchSettings)
 
     @JvmOverloads
     @ScriptInterface
-    fun restartService(withLaunchSettings: Boolean = false): Boolean {
-        var result = stopService(false)
-        // The system unbinds asynchronously. Re-enabling the service before that happened is coalesced
-        // into "still enabled" by the settings observer and no restart takes place at all.
-        // zh-CN: 系统的解绑是异步的. 若在解绑完成前重新启用, 设置观察者会把两次写入合并为 "仍然启用", 实际不会重启.
-        if (result && !AccessibilityService.waitForStopped()) {
-            Log.w(TAG, "Accessibility service was not unbound within $DEFAULT_A11Y_SERVICE_STOP_TIMEOUT ms after being disabled")
-        }
-        result = startService(withLaunchSettings) && result
-        return result
-    }
+    fun restartService(withLaunchSettings: Boolean = false): Boolean = controller.restart(withLaunchSettings)
 
+    /**
+     * Starts the service and waits until it is bound; the script is interrupted when the user does
+     * not enable it within [timeout] (negative waits forever).
+     * zh-CN: 启动服务并等待绑定; 用户未在 [timeout] 内启用时中断脚本 (负数为无限等待).
+     */
     @JvmOverloads
     @ScriptInterface
     fun startServiceAndWaitFor(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT) {
-        if (isRunning()) return
-        if (startServiceWithConvenientWaysIfPossibleAndWaitFor()) return
-        launchSettings()
-        if (!AccessibilityService.waitForStarted(timeout)) {
+        if (!controller.ensure(State.CONNECTED, timeout).isSatisfied) {
             throw ScriptInterruptedException()
         }
     }
@@ -159,156 +121,100 @@ class AccessibilityTool(private val context: Context? = null) {
     @JvmOverloads
     @ScriptInterface
     fun startServiceAndWaitForOperational(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT) {
-        if (isOperational()) return
-        if (startServiceWithConvenientWaysIfPossibleAndWaitFor(timeout)) {
-            AccessibilityService.waitForOperational(timeout)
-            if (isOperational()) return
-        } else {
-            launchSettings()
-        }
-        if (!AccessibilityService.waitForOperational(timeout)) {
+        if (!controller.ensure(State.OPERATIONAL, timeout).isSatisfied) {
             throw ScriptInterruptedException()
         }
     }
 
-    private fun startServiceWithConvenientWaysIfPossible() = when {
-        startServiceWithRootIfPossible() -> true
-        startServiceWithSecureIfPossible() -> true
-        else -> false
-    }
-
-    private fun startServiceWithConvenientWaysIfPossibleAndWaitFor(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT) = when {
-        startServiceWithRootIfPossible(timeout) -> true
-        startServiceWithSecureIfPossible(timeout) -> true
-        else -> false
-    }
-
+    /** Ensures the service is running, otherwise throws with the concrete reason. zh-CN: 确保服务运行中, 否则以具体原因抛出. */
     @ScriptInterface
-    fun ensureService() {
-        if (isRunning()) return
-        if (startServiceWithConvenientWaysIfPossibleAndWaitFor()) return
-        launchSettings()
-        if (AccessibilityService.waitForStarted()) return
-        when {
-            !hasService() -> throw ScriptException(mContext.getString(R.string.text_a11y_service_enabled_but_not_running))
-            else -> throw ScriptException(mContext.getString(R.string.error_no_accessibility_permission))
-        }
+    fun ensureService() = ensureService(false)
+
+    /**
+     * [ensureService] that first stops a service enabled in system settings when [isForcibleRestart]
+     * is set (`auto(true)` in scripts), waiting for the unbind so that the restart really happens.
+     * zh-CN: [isForcibleRestart] 为 true 时 (脚本中的 `auto(true)`) 先停止已在系统设置中启用的服务并等待解绑,
+     * 使重启真正发生, 然后同 [ensureService].
+     */
+    fun ensureService(isForcibleRestart: Boolean) {
+        throwUnlessSatisfied(controller.ensure(State.CONNECTED, forceRestart = isForcibleRestart))
     }
 
     // Ensure service is operational, otherwise throw a concrete error.
     // zh-CN: 确保服务处于可工作状态, 否则抛出明确的错误信息.
     @ScriptInterface
     fun ensureServiceOperational(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT) {
-        if (isOperational()) return
-        startServiceAndWaitForOperational(timeout)
-        if (isOperational()) return
-        when {
-            !hasService() -> throw ScriptException(mContext.getString(R.string.text_a11y_service_enabled_but_not_running))
-            !hasInstance() -> throw ScriptException(mContext.getString(R.string.text_a11y_service_enabled_but_not_running))
-            else -> throw ScriptException(mContext.getString(R.string.error_no_accessibility_permission))
+        throwUnlessSatisfied(controller.ensure(State.OPERATIONAL, timeout))
+    }
+
+    private fun throwUnlessSatisfied(result: EnsureResult) {
+        if (result is EnsureResult.Failed) {
+            throw ScriptException(mContext.getString(messageResOf(result.reason)))
         }
     }
-
-    private fun isSecureAccessible() = Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(mApplicationContext)
-
-    private fun isRootAccessible() = Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
-
-    // The root and secure-settings ways report whether the enabled-services setting really changed
-    // (read back through hasService), not merely whether the commands ran without throwing.
-    // zh-CN: root 与安全设置方式以 hasService 回读结果为准, 而不是仅以 "命令未抛异常" 作为成功.
-
-    private fun startServiceWithRoot(timeout: Long? = null): Boolean = when (timeout != null) {
-        true -> startServiceWithRoot() && AccessibilityService.waitForStarted(timeout)
-        else -> runCatching {
-            stopServiceWithRoot()
-            putSecureSettingWithRoot(Secure.ENABLED_ACCESSIBILITY_SERVICES, getServicesWithRoot(true))
-            putSecureSettingWithRoot(Secure.ACCESSIBILITY_ENABLED, "1")
-            hasService()
-        }.getOrDefault(false)
-    }
-
-    private fun startServiceWithRootIfPossible(timeout: Long? = null) = isRootAccessible() && startServiceWithRoot(timeout)
-
-    private fun startServiceWithSecure(timeout: Long? = null): Boolean = when (timeout != null) {
-        true -> startServiceWithSecure() && AccessibilityService.waitForStarted(timeout)
-        else -> runCatching {
-            stopServiceWithSecure()
-
-            val services = getServicesWithSecure(true)
-            Secure.putString(mApplicationContext.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, services)
-            Secure.putInt(mApplicationContext.contentResolver, Secure.ACCESSIBILITY_ENABLED, 1)
-
-            hasService()
-        }.getOrDefault(false)
-    }
-
-    private fun startServiceWithSecureIfPossible(timeout: Long? = null) = isSecureAccessible() && startServiceWithSecure(timeout)
-
-    private fun stopServiceWithRoot() = runCatching {
-        putSecureSettingWithRoot(Secure.ENABLED_ACCESSIBILITY_SERVICES, getServicesWithRoot(false))
-        putSecureSettingWithRoot(Secure.ACCESSIBILITY_ENABLED, "0")
-        !hasService()
-    }.getOrDefault(false)
-
-    private fun stopServiceWithSecure() = runCatching {
-        val services = getServicesWithSecure(false)
-
-        Secure.putString(mApplicationContext.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, services)
-        Secure.putInt(mApplicationContext.contentResolver, Secure.ACCESSIBILITY_ENABLED, 0)
-
-        !hasService()
-    }.getOrDefault(false)
-
-    // The value is single-quoted so that an empty string (AutoJs6 was the only enabled service)
-    // is still passed as an argument; an unquoted empty value used to be dropped by the shell,
-    // "settings put" then rejected the command and the service silently stayed enabled.
-    // zh-CN: 值以单引号包裹, 使空字符串 (AutoJs6 是唯一启用的服务) 仍能作为参数传递;
-    // 未加引号的空值会被 shell 丢弃, "settings put" 因而拒绝执行, 服务静默地保持启用状态.
-    private fun putSecureSettingWithRoot(name: String, value: String) {
-        val quoted = "'${value.replace("'", "'\\''")}'"
-        val result = ProcessShell.execCommand("settings put secure $name $quoted", true)
-        if (!TextUtils.isEmpty(result.error)) {
-            Log.w(TAG, "settings put secure $name: ${result.error.trim()}")
-        }
-    }
-
-    private fun getServicesWithRoot(withAutoJs: Boolean? = null): String = when (withAutoJs) {
-        true -> attachAutoJsService(getServicesWithRoot(false))
-        false -> detachAutoJsService(getServicesWithRoot())
-        else -> {
-            val cmd = "settings get secure enabled_accessibility_services"
-            ProcessShell.execCommand(cmd, true).result.takeUnless { it == "null" }?.replace("\n", "") ?: ""
-        }
-    }
-
-    private fun getServicesWithSecure(withAutoJs: Boolean? = null): String = when (withAutoJs) {
-        true -> attachAutoJsService(getServicesWithSecure(false))
-        false -> detachAutoJsService(getServicesWithSecure())
-        else -> Secure.getString(mApplicationContext.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES)?.replace("\n", "") ?: ""
-    }
-
-    private fun attachAutoJsService(services: String) = when (services.isEmpty()) {
-        true -> mServiceName
-        else -> "$services$SERVICES_DELIMITER$mServiceName"
-    }
-
-    private fun detachAutoJsService(services: String) = services
-        .split(SERVICES_DELIMITER)
-        .filterNot { it.startsWith(mServiceNamePrefix) || it.matches(Regex("(null)?\\s*")) }
-        .joinToString(SERVICES_DELIMITER)
 
     companion object {
 
         private val TAG = AccessibilityTool::class.java.simpleName
 
         @JvmStatic
-        val DEFAULT_A11Y_SERVICE_START_TIMEOUT = 2000L
+        val DEFAULT_A11Y_SERVICE_START_TIMEOUT = A11yServiceController.DEFAULT_START_TIMEOUT_MILLIS
 
         @JvmStatic
-        val DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = 2000L
+        val DEFAULT_A11Y_SERVICE_STOP_TIMEOUT = A11yServiceController.DEFAULT_STOP_TIMEOUT_MILLIS
 
         @JvmStatic
-        val SERVICES_DELIMITER = ":"
+        val SERVICES_DELIMITER = EnabledA11yServices.DELIMITER
+
+        /**
+         * The process-wide controller every tool instance delegates to; the only holder of start /
+         * stop logic. Built lazily from the application context.
+         * zh-CN: 所有工具实例共同委托的进程级控制器, 启停逻辑的唯一持有者. 以应用上下文惰性构建.
+         */
+        @JvmStatic
+        val controller: A11yServiceController<AccessibilityService> by lazy { createController(GlobalAppContext.get()) }
+
+        @JvmStatic
+        fun messageResOf(reason: FailureReason): Int = when (reason) {
+            FailureReason.NOT_ENABLED -> R.string.error_no_accessibility_permission
+            FailureReason.ENABLED_BUT_UNBOUND -> R.string.text_a11y_service_enabled_but_not_running
+            FailureReason.BOUND_BUT_NOT_OPERATIONAL -> R.string.error_a11y_service_not_operational
+        }
+
+        private fun createController(context: Context): A11yServiceController<AccessibilityService> {
+            val serviceName = "${context.packageName}/${AccessibilityServiceUsher::class.java.name}"
+            val resolver = context.contentResolver
+            val readEnabledServices = { Secure.getString(resolver, Secure.ENABLED_ACCESSIBILITY_SERVICES) }
+            val log: (String) -> Unit = { Log.d(TAG, it) }
+            return A11yServiceController(
+                serviceName = serviceName,
+                registry = AccessibilityService.registry,
+                enabledServicesReader = readEnabledServices,
+                strategies = listOf(
+                    SettingsStoreStartStrategy(
+                        name = "root",
+                        serviceName = serviceName,
+                        store = RootEnabledServicesStore(log),
+                        available = { Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable() },
+                        readBack = readEnabledServices,
+                        log = log,
+                    ),
+                    SettingsStoreStartStrategy(
+                        name = "secure settings",
+                        serviceName = serviceName,
+                        store = SecureEnabledServicesStore(resolver),
+                        available = { Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context) },
+                        readBack = readEnabledServices,
+                        log = log,
+                    ),
+                ),
+                disableSelf = { AccessibilityService.stop() },
+                settingsUi = { AccessibilityTool(context).launchSettings() },
+                startTimeoutMillis = A11yServiceController.DEFAULT_START_TIMEOUT_MILLIS,
+                stopTimeoutMillis = A11yServiceController.DEFAULT_STOP_TIMEOUT_MILLIS,
+                log = log,
+            )
+        }
 
     }
 

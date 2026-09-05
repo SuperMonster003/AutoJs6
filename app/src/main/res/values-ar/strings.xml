@@ -277,6 +277,7 @@
     <string name="entry_root_mode_force_root">وضع الجذر تعيين القوة</string>
     <string name="entry_root_record_out_file_type_binary">النوع الثنائي (غير قابل للتطبيق)</string>
     <string name="entry_root_record_out_file_type_js">نوع JavaScript (قابل للتحرير)</string>
+    <string name="error_a11y_service_not_operational">خدمة امكانية الوصول متصلة لكنها ليست جاهزة للعمل بعد (لم يتم استلام اي حدث)</string>
     <string name="error_a_runtime_has_been_set">تم تعيين وقت التشغيل</string>
     <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
     <string name="error_ace_editor_unavailable">محرر Ace غير متاح; لا يزال JsDroidEditor نشطا</string>

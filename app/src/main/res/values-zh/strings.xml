@@ -271,6 +271,7 @@
     <string name="entry_root_mode_force_root">强制 Root 模式</string>
     <string name="entry_root_record_out_file_type_binary">二进制文件 (不可编辑)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript 文件 (可编辑)</string>
+    <string name="error_a11y_service_not_operational">无障碍服务已连接但尚未可操作 (未收到任何事件)</string>
     <string name="error_a_runtime_has_been_set">运行时已存在</string>
     <string name="error_abandoned_method">方法 %s 已被废弃, 应避免使用</string>
     <string name="error_ace_editor_unavailable">Ace 编辑器不可用; JsDroidEditor 仍在运行</string>

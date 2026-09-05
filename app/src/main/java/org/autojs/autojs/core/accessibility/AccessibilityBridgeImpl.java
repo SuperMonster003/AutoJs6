@@ -1,7 +1,5 @@
 package org.autojs.autojs.core.accessibility;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -12,8 +10,6 @@ import org.autojs.autojs.runtime.accessibility.AccessibilityConfig;
 public class AccessibilityBridgeImpl extends AccessibilityBridge {
 
     private final AbstractAutoJs mAutoJs;
-    private final AccessibilityTool mA11yTool = new AccessibilityTool();
-    private final String TAG = AccessibilityBridgeImpl.class.getSimpleName();
 
     public AccessibilityBridgeImpl(AbstractAutoJs autoJs) {
         super(autoJs.getApplicationContext(), new AccessibilityConfig(), autoJs.getUiHandler());
@@ -22,11 +18,7 @@ public class AccessibilityBridgeImpl extends AccessibilityBridge {
 
     @Override
     public void ensureServiceStarted(boolean isForcibleRestart) {
-        if (isForcibleRestart && mA11yTool.hasService()) {
-            mA11yTool.stopService(true);
-            Log.d(TAG, "isForcibleRestart");
-        }
-        mA11yTool.ensureService();
+        mAutoJs.getAccessibilityTool().ensureService(isForcibleRestart);
     }
 
     @Nullable

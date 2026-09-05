@@ -203,6 +203,10 @@
         "`auto.start` and `auto.enable` re-enabled the accessibility service through root or secure settings even when it was already running, needlessly restarting it",
         "Restarting the accessibility service re-enabled it before the system had unbound the previous instance, which some systems (e.g. Android 8.0) coalesced into \"still enabled\" so that no restart actually happened",
         "`auto.windowRoots` returned an array holding a null node instead of an empty array while the system had not yet determined the active window (e.g. right after the accessibility service was rebound), so calling methods on its element threw an exception",
+        "`automator.isServiceRunning()` only checked whether an accessibility service instance existed in the process, which disagreed with the \"running\" notion of `auto.isRunning()` and the drawer switch (enabled in system settings and bound in the process)",
+        "Entry points such as `auto()` threw \"enabled but not running\" when the accessibility service was not enabled, and \"service is disabled\" when it was enabled but not running, i.e. the two messages were swapped (the reason is now one of not enabled / enabled but not bound / bound but not operational yet)",
+        "`auto.services` always returned an empty array unless automatic enabling through root or secure settings was configured (reading the enabled services list needs neither)",
+        "The accessibility service switch in the drawer showed a service that was \"enabled but not running\" as on (it is now off with a \"malfunctioning\" subtitle, and switching it on re-enables the service)",
         "A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction",
         "The Rhino module bridge handled null/undefined, Callable objects, constructors, prototypes, realms, and Kotlin return values incorrectly, potentially causing cross-realm objects, lost callbacks, or runtime exceptions",
         "Proxy-wrapped functions could not be used as callbacks by legacy modules such as dialogs, events, timers, UI, selector, and automator, and TimerThread callback arguments could be passed as a nested array",
@@ -342,7 +346,8 @@
         "Upgraded Gradle 9 Wrapper version 9.6.1 -> 9.7.1",
         "Gradle platform compatibility data and its updater tasks moved to AutoJs6-Gradle-Platform-Versions; AutoJs6 now consumes version 1.5.0 from Maven Local directly, without local data overrides, duplicate scrapers, or the former Puppeteer dependency",
         "HTML and Markdown previews are delegated to dedicated Previewer plugins; the main app keeps the entry and guides installation or enabling when the plugin is missing, disabled, or unavailable",
-        "Consolidated all Pinyin calls through the corresponding plugin and removed the unused built-in dictionary and conversion implementation"
+        "Consolidated all Pinyin calls through the corresponding plugin and removed the unused built-in dictionary and conversion implementation",
+        "Starting or stopping the accessibility service through root or secure settings no longer writes the system's `accessibility_enabled` value (maintained by the system itself from the bound services since Android 7.0), so stopping this service no longer leaves a stale 0 behind while other accessibility services stay enabled"
       ],
       "dependency": [
         "Modularized Android AXML",

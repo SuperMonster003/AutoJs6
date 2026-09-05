@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
  * Created by Stardust on Mar 10, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
-class LayoutInspector(private val mContext: Context) {
+class LayoutInspector(private val mContext: Context, private val mA11yTool: AccessibilityTool) {
 
     @Volatile
     var capture: Capture? = null
@@ -18,7 +18,6 @@ class LayoutInspector(private val mContext: Context) {
 
     private val mCaptureAvailableListeners = CopyOnWriteArrayList<CaptureAvailableListener>()
     private val mExecutor = Executors.newSingleThreadExecutor()
-    private val mA11yTool = AccessibilityTool(mContext)
 
     interface CaptureAvailableListener {
         fun onCaptureAvailable(capture: Capture, context: Context)

@@ -72,8 +72,6 @@ open class UiSelector : UiObjectActions, StringReadable {
 
     private val mAllocator: AccessibilityNodeInfoAllocator?
 
-    private val mA11yTool = AccessibilityTool()
-
     constructor() : this(AccessibilityService.bridge)
 
     constructor(accessibilityBridge: AccessibilityBridge?) : this(accessibilityBridge, null)
@@ -712,7 +710,9 @@ open class UiSelector : UiObjectActions, StringReadable {
 
     @ScriptInterface
     fun find(max: Int): UiObjectCollection {
-        mA11yTool.ensureService()
+        // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
+        // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
+        mAccessibilityBridge?.ensureServiceStarted()
         return when {
             max >= 0 -> findInternal(max)
             else -> findInternal(Int.MAX_VALUE).let { found ->

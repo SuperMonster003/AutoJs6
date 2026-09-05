@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
 import org.autojs.autojs.core.console.GlobalConsole
@@ -56,8 +55,6 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
         ThreadPoolExecutor.DiscardOldestPolicy(),
     )
 
-    private val mA11yTool = AccessibilityTool(appContext)
-
     private val mJob = Job()
     private val mScope = CoroutineScope(Dispatchers.Main.immediate + mJob)
 
@@ -86,13 +83,13 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
             try {
                 when (event) {
                     LayoutInspectEvent.ShowLayoutBounds -> {
-                        mA11yTool.ensureService()
+                        accessibilityTool.ensureService()
                         capture(object : LayoutInspectFloatyWindow {
                             override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, appContext, true)
                         })
                     }
                     LayoutInspectEvent.ShowLayoutHierarchy -> {
-                        mA11yTool.ensureService()
+                        accessibilityTool.ensureService()
                         capture(object : LayoutInspectFloatyWindow {
                             override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, appContext, true)
                         })

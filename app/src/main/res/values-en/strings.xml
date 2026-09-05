@@ -271,6 +271,7 @@
     <string name="entry_root_mode_force_root">Force set root mode</string>
     <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
+    <string name="error_a11y_service_not_operational">Accessibility service is connected but not operational yet (no event has been received)</string>
     <string name="error_a_runtime_has_been_set">A runtime has been set</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
     <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>

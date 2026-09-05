@@ -11,7 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Restores the accessibility service without making Activity creation wait for root or
  * secure-settings I/O.
  *
- * Only a malfunctioning service is restored, i.e. one that is enabled in system settings but has
+ * The policy itself lives in [org.autojs.autojs.core.accessibility.control.A11yServiceController.restoreIfMalfunctioning]:
+ * only a malfunctioning service is restored, i.e. one that is enabled in system settings but has
  * no bound instance in this process (typically after the app was updated or its process was killed).
  * A service that is not enabled is left alone: the user may have stopped it deliberately, and it is
  * started on demand by scripts, the layout inspector and the other explicit entry points.
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * zh-CN: 在不阻塞 Activity 创建的前提下自动恢复无障碍服务.
  *
+ * 策略本身位于 [org.autojs.autojs.core.accessibility.control.A11yServiceController.restoreIfMalfunctioning]:
  * 仅恢复 "故障" 状态的服务, 即系统设置中已启用但进程内没有绑定实例 (通常出现在应用更新或进程被杀之后).
  * 未启用的服务不做处理: 用户可能是有意关闭的, 脚本, 布局分析器等显式入口会在需要时按需启动.
  *
@@ -32,18 +34,11 @@ internal object AccessibilityServiceAutoStart {
 
     private val coordinator = AccessibilityServiceAutoStartCoordinator(Dispatchers.IO.asExecutor())
 
+    @Suppress("UNUSED_PARAMETER")
     fun request(context: Context) {
-        val applicationContext = context.applicationContext
         coordinator.submit {
             try {
-                AccessibilityTool(applicationContext).apply {
-                    // Right after a process start the system may still be about to bind the service;
-                    // give it a moment before forcing a re-enable through root / secure settings.
-                    // zh-CN: 进程刚启动时系统可能正要绑定服务, 先稍等片刻, 再通过 root / 安全设置强制重新启用.
-                    if (isMalfunctioning() && !AccessibilityService.waitForStarted() && isMalfunctioning()) {
-                        startService(false)
-                    }
-                }
+                AccessibilityTool.controller.restoreIfMalfunctioning()
             } catch (error: Exception) {
                 Log.w(TAG, "Unable to restore the accessibility service automatically.", error)
             }

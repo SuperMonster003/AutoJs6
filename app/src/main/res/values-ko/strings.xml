@@ -277,6 +277,7 @@
     <string name="entry_root_mode_force_root">강제 설정 루트 모드</string>
     <string name="entry_root_record_out_file_type_binary">이진 유형 (편집 할 수없는)</string>
     <string name="entry_root_record_out_file_type_js">자바 스크립트 유형 (편집 가능)</string>
+    <string name="error_a11y_service_not_operational">접근성 서비스가 연결되었지만 아직 동작 가능 상태가 아닙니다 (이벤트를 받지 못했습니다)</string>
     <string name="error_a_runtime_has_been_set">런타임이 설정되었습니다</string>
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
     <string name="error_ace_editor_unavailable">Ace 편집기를 사용할 수 없어 JsDroidEditor가 계속 활성화됩니다</string>

@@ -275,6 +275,7 @@
     <string name="entry_root_mode_force_root">Принудительно установить режим root</string>
     <string name="entry_root_record_out_file_type_binary">Бинарный тип (нередактируемый)</string>
     <string name="entry_root_record_out_file_type_js">Тип JavaScript (редактируемый)</string>
+    <string name="error_a11y_service_not_operational">Служба специальных возможностей подключена, но ещё не готова к работе (события не получены)</string>
     <string name="error_a_runtime_has_been_set">Установлено время выполнения</string>
     <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
     <string name="error_ace_editor_unavailable">Редактор Ace недоступен; JsDroidEditor остаётся активным</string>

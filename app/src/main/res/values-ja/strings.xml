@@ -276,6 +276,7 @@
     <string name="entry_root_mode_force_root">強制的にルートモードにする</string>
     <string name="entry_root_record_out_file_type_binary">バイナリ形式 (編集不可)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript タイプ (編集可能)</string>
+    <string name="error_a11y_service_not_operational">アクセシビリティサービスは接続済みですがまだ動作可能ではありません (イベントを受信していません)</string>
     <string name="error_a_runtime_has_been_set">ランタイムが設定されている</string>
     <string name="error_abandoned_method">メソッド %s は放棄されたので, 使用しないでください</string>
     <string name="error_ace_editor_unavailable">Ace エディターを利用できないため, JsDroidEditor が引き続き有効です</string>

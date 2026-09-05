@@ -203,6 +203,10 @@
         "`auto.start` et `auto.enable` réactivaient le service d'accessibilité via root ou les paramètres sécurisés même lorsqu'il était déjà en cours d'exécution, le redémarrant inutilement",
         "Le redémarrage du service d'accessibilité le réactivait avant que le système n'ait détaché l'instance précédente, ce que certains systèmes (par ex. Android 8.0) fusionnaient en \"toujours activé\", de sorte qu'aucun redémarrage n'avait lieu",
         "`auto.windowRoots` renvoyait un tableau contenant un nœud nul au lieu d'un tableau vide tant que le système n'avait pas encore déterminé la fenêtre active (par ex. juste après le rattachement du service d'accessibilité), si bien que l'appel de méthodes sur son élément levait une exception",
+        "`automator.isServiceRunning()` vérifiait seulement l'existence d'une instance du service d'accessibilité dans le processus, ce qui ne correspondait pas à la notion d'\"en cours d'exécution\" de `auto.isRunning()` et de l'interrupteur du tiroir latéral (activé dans les paramètres système et lié dans le processus)",
+        "Des points d'entrée tels que `auto()` levaient \"activé mais non en cours d'exécution\" lorsque le service d'accessibilité n'était pas activé, et \"le service est désactivé\" lorsqu'il était activé mais non en cours d'exécution, autrement dit les deux messages étaient inversés (la raison est désormais l'une de non activé / activé mais non lié / lié mais pas encore opérationnel)",
+        "`auto.services` renvoyait toujours un tableau vide sauf si l'activation automatique via root ou les paramètres sécurisés était configurée (la lecture de la liste des services activés n'a besoin ni de l'un ni de l'autre)",
+        "L'interrupteur du service d'accessibilité du tiroir latéral affichait comme activé un service \"activé mais non en cours d'exécution\" (il apparaît désormais désactivé avec le sous-titre \"défaillant\", et l'activer réactive le service)",
         "Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution",
         "Le pont des modules Rhino traitait incorrectement null/undefined, Callable, les constructeurs, les prototypes, les realms et les valeurs de retour Kotlin, ce qui pouvait produire des objets inter-realm, perdre des callbacks ou provoquer des exceptions d'exécution",
         "Les fonctions encapsulées dans un Proxy ne pouvaient pas être utilisées comme callbacks par les modules historiques tels que dialogs, events, timers, UI, selector et automator, et les arguments de callback de TimerThread pouvaient être transmis sous forme de tableau imbriqué",
@@ -342,7 +346,8 @@
         "Mise à niveau de Gradle 9 Wrapper version 9.6.1 -> 9.7.1",
         "Les données de compatibilité de la plateforme Gradle et leurs tâches de mise à jour ont été déplacées vers AutoJs6-Gradle-Platform-Versions; AutoJs6 consomme désormais directement la version 1.5.0 depuis Maven Local, sans surcharge locale des données, scrapers dupliqués ni ancienne dépendance à Puppeteer",
         "Les aperçus HTML et Markdown sont délégués à des plugins Previewer dédiés; l'application principale conserve l'entrée et guide l'installation ou l'activation lorsque le plugin est absent, désactivé ou indisponible",
-        "Centralisation de tous les appels Pinyin via le plugin correspondant et suppression du dictionnaire intégré et de l'implémentation de conversion inutilisés"
+        "Centralisation de tous les appels Pinyin via le plugin correspondant et suppression du dictionnaire intégré et de l'implémentation de conversion inutilisés",
+        "Le démarrage ou l'arrêt du service d'accessibilité via root ou les paramètres sécurisés n'écrit plus la valeur système `accessibility_enabled` (maintenue par le système lui-même à partir des services liés depuis Android 7.0), de sorte que l'arrêt de ce service ne laisse plus un 0 obsolète alors que d'autres services d'accessibilité restent activés"
       ],
       "dependency": [
         "Android AXML modularise",
