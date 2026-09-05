@@ -170,7 +170,7 @@ ui/accessibility/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 与 P1.7 完成 2026-09-05, 真机复跑待回填) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 与 P1.7 完成 2026-09-05, 含真机验证; 下一项 P1.2) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -238,8 +238,8 @@ P1.1 证据:
 - `JVM`: 全量 `:app:testAppDebugUnitTest` 1891 tests / 0 failures (含新增 14 个用例).
 - `ANDROID_BUILD`: 单元测试任务已编译 app 模块.
 - `DEVICE` (2026-09-05, 维护者, 脚本含第 7 节 "服务重启"; WSS = `WRITE_SECURE_SETTINGS`): 基础 30 项在 AVD API 24 / 25 / 26 / 36 (16K) 与 Xiaomi 23046RP50C, Sony G8441, Sony XQ-AT72, Redmi 22120RN86C 全部通过; 重启段 36/36: AVD 24 / 25 / 36 (WSS), 23046RP50C (WSS), G8441 (WSS 与 Root), XQ-AT72 (WSS), 22120RN86C (WSS). 两处例外及处理:
-  - AVD API 26: WSS 34/36 (`stateListener` 未见 disconnected -> connected; `pickup` 重启后单次未命中), Root 35/36 (`stateListener`). 原因: 脚本原先调用 `restartService(false)` = 禁用后立即启用, API 26 的设置观察者把两次写入合并为 "仍然启用", 实际未重启 (Root 路径还叠加了下述 "空参数" bug); `pickup` 的单次尝试落在重新绑定后的瞬时空窗. 处理 (见 P1.2 提前落地项): `AccessibilityTool.restartService` 改为等待解绑后再启用; 脚本改为 stop -> 观测解绑 (5 s) -> start, 重启后的查找改为最长 5 s 轮询. 预期复跑后 API 26 为 38/38.
-  - Sony XQ-DQ72 (QV770340J7): 21/30, 全部 "屏幕上能找到内容" 的检查失败 (`auto.service` 与事件投递正常), 无权限 / WSS / Root 三种配置结果一致; P0 阶段同一设备为 30/30. 尚无该设备的控制台输出, 暂不能定位. 候选原因: (a) 运行时熄屏或锁屏 (远程运行脚本不会点亮屏幕, `home()` / `app.launch` 无可见效果, 但事件仍会投递); (b) 该设备为 root 设备, 若此前经历过 "root 关闭失效" (见 P1.2 提前落地项) 而处于 `accessibility_enabled=0` 但仍在启用列表的不一致状态, 部分系统在该状态下不提供窗口信息. 脚本已增加环境快照 (屏幕 / 锁屏 / 当前包名 / 窗口根节点数 / `accessibility_enabled` / 启用列表) 与两项前置检查 (`screen is on and unlocked`, `auto.windowRoots is not empty`), 并在失败时把每项的 `returned` / `threw` 细节写进最终错误; 待复跑后按输出判定.
+  - AVD API 26: WSS 34/36 (`stateListener` 未见 disconnected -> connected; `pickup` 重启后单次未命中), Root 35/36 (`stateListener`). 原因: 脚本原先调用 `restartService(false)` = 禁用后立即启用, API 26 的设置观察者把两次写入合并为 "仍然启用", 实际未重启 (Root 路径还叠加了下述 "空参数" bug); `pickup` 的单次尝试落在重新绑定后的瞬时空窗. 处理 (见 P1.2 提前落地项): `AccessibilityTool.restartService` 改为等待解绑后再启用; 脚本改为 stop -> 观测解绑 (5 s) -> start, 重启后的查找改为最长 5 s 轮询. 复跑 (2026-09-05 13:16) 40/43: 停止 / 解绑 / 启动 / 新实例 / `stateListener` disconnected -> connected 全部通过 (真正的重启已发生); 剩余 3 项失败均为重绑后 `getRootInActiveWindow()` 持续为 `null` (运行结束时快照 `rootInActiveWindow=false`, `windows=3`, 至少 11 s 未恢复) 所致. 归因 (AOSP 8.0 `AccessibilityManagerService`): 服务重绑后系统重新计算窗口列表时, 尚未重新注册无障碍连接的应用窗口被丢弃, 焦点窗口不在列表中则 `mActiveWindowId` 保持无效, 且带 `FLAG_RETRIEVE_INTERACTIVE_WINDOWS` 的服务不会因 `TYPE_WINDOW_STATE_CHANGED` 更新活动窗口, 直到下一次窗口变化 (`updateWindowsLocked`). 现代系统与有其它无障碍服务常驻的真机不受影响 (连接不会断). 顺带发现 `AccessibilityBridge.windowRoots()` 在此状态下返回 `[null]`, `auto.windowRoots` 因而得到 `[UiObject(null)]`, 使脚本的 "窗口根节点已恢复" 检查误判为通过: 已改为返回空列表 (P1.4 第二条提前落地, 记入 changelog `fix`). 脚本改为等待 `auto.rootInActiveWindow !== null`, 失败时打印窗口列表 (类型 / 包名 / active / focused) 并 `app.launch` 制造一次窗口变化后再探测, 以验证上述归因; 兜底策略留给 P1.4.
+  - Sony XQ-DQ72 (QV770340J7): 21/30, 全部 "屏幕上能找到内容" 的检查失败 (`auto.service` 与事件投递正常), 无权限 / WSS / Root 三种配置结果一致; P0 阶段同一设备为 30/30. 尚无该设备的控制台输出, 暂不能定位. 候选原因: (a) 运行时熄屏或锁屏 (远程运行脚本不会点亮屏幕, `home()` / `app.launch` 无可见效果, 但事件仍会投递); (b) 该设备为 root 设备, 若此前经历过 "root 关闭失效" (见 P1.2 提前落地项) 而处于 `accessibility_enabled=0` 但仍在启用列表的不一致状态, 部分系统在该状态下不提供窗口信息. 脚本已增加环境快照 (屏幕 / 锁屏 / 当前包名 / 窗口根节点数 / `accessibility_enabled` / 启用列表) 与两项前置检查 (`screen is on and unlocked`, `auto.windowRoots is not empty`), 并在失败时把每项的 `returned` / `threw` 细节写进最终错误. 复跑 (2026-09-05 12:25, 31/43, 重启段 8/11) 排除了 (a) 与 (b): 快照显示亮屏未锁, 四个谓词全 true, `rootInActiveWindow` 可用, `windows=3`, 当前包名为 AutoJs6 自身 (脚本刻意 `app.launch` 自身以取得稳定锚点), 而连空选择器 `textMatches(/.+/).find(1)` 也为空. 空选择器匹配根节点自身, 因此根节点只能是在 `UiSelector.findImpl` 被黑名单跳过, 即 **保护模式** (设置 > 脚本运行 > 保护模式, `AccessibilityConfig` 把自身包名加入黑名单) 在该设备上开启; 其它设备通过是因为保护模式关闭. 属按设计行为, 非缺陷 (P0 阶段 30/30 时该设备的保护模式应为关闭). 脚本已增加 `guardMode=` 快照字段与前置检查 `guard mode is off`, 失败时打印提示; 待维护者确认设置项后关闭.
 - `DOCS`: changelog `fix` 3 条 (10 语言) 已写入并重新生成 README / CHANGELOG. JS 签名无变化, 无需同步 d.ts / 文档项目.
 
 P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段的两处例外已归因并处理, XQ-DQ72 待复跑定位. 关闭 (XQ-DQ72 的结果作为 P1.2 复跑的一部分跟踪).
@@ -276,8 +276,9 @@ P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段�
 ### P1.4 窗口根节点 `WindowRootProvider`
 
 - [ ] `AccessibilityBridge.java` 转为 Kotlin (保留 FQN, public 签名与 `@ScriptInterface`), 将 `windowRoots` / `getRootInCurrentWindow` / `getRootInActiveWindow` 三处重复逻辑抽为 `WindowRootPolicy.resolve(service, mode, flags, filter)`, 一处实现.
-- [ ] 返回值改为非空列表 (内部过滤 `null`), 调用方 `UiSelector.kt:810` 与 `SimpleActionAutomator.kt:259` 移除各自的 `filterNotNull()`; `Auto.kt:88` (`auto.windowRoots()`) 不再可能把 `null` 传入 `UiObject.createRoot`.
-- [ ] 明确并文档化 `getRootInActiveWindow()` 是否应用窗口过滤器 (现状不应用, 与 `getRootInCurrentWindow()` 不同); 保持现状 (D2), 在 KDoc 与 API 文档中标注差异.
+- [ ] 返回值改为非空列表 (内部过滤 `null`), 调用方 `UiSelector.kt:810` 与 `SimpleActionAutomator.kt:259` 移除各自的 `filterNotNull()`. 提前落地 (2026-09-05): `AccessibilityBridge.windowRoots()` 的 `MODE_NORMAL` / `MODE_FAST` 分支已改为根节点为 `null` 时返回空列表 (`singletonOrEmpty`), `auto.windowRoots` 不再得到 `UiObject(null)`; 两处 `filterNotNull()` 待本项迁移时移除. (SOURCE; changelog `fix`)
+- [ ] 活动窗口未知时的兜底: API 26 上服务重绑后 `getRootInActiveWindow()` 可持续为 `null` 直到下一次窗口变化 (归因见 P1.1 证据的 AVD API 26 条目), 此时 `find*` / `pickup` 全部为空. 候选: (a) 回落到 `windows` 中 `TYPE_APPLICATION` 窗口的根节点 (需确认该状态下 `windows` 是否含焦点窗口, 以冒烟脚本新增的 "windows after restart" 输出为依据); (b) `fastRootInActiveWindow` (同样为 `null`, 无效); (c) 服务连接后若根节点在 N ms 内不可用, 由应用侧制造一次窗口变化 (如添加并移除 1 px 不可见窗口) 促使系统重算. 以 `WindowRootPolicy` 的一个选项实现, 默认行为经真机数据决定.
+- [ ] 明确并文档化 `getRootInActiveWindow()` 是否应用窗口过滤器 (现状不应用, 与 `getRootInCurrentWindow()` 不同); 保持现状 (D2), 在 KDoc 与 API 文档中标注差异. 同时文档化保护模式 (`AccessibilityConfig` 黑名单) 对 `find*` / `pickup` / 节点动作的影响: AutoJs6 自身前置时一律为空 / `false`, 这是按设计的行为 (冒烟脚本已把它作为前置检查).
 - [ ] `LayoutInspector.kt:42` 改为经由 `WindowRootProvider` 获取窗口列表 (可选: 若布局分析器希望忽略脚本过滤器, 传入 `filter = null`).
 
 ### P1.5 节点生命周期 `NodeLifecycle`
@@ -302,14 +303,14 @@ P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段�
 - [x] `ui/accessibility/A11yEventMonitorDialog`: 以自身为 owner 注册观察者 (回调在服务主线程 = 应用主线程, 其它线程 post), 每 100 ms 批量 `notifyItemRangeInserted`, 最多保留 500 条 (环形丢弃, 过滤后的显示列表同步裁剪), 在底部时自动滚动 (用户上滑时不强制); 行显示与上一条所列事件的 `eventTime` 间隔 (`+48 ms  WINDOW_STATE_CHANGED`) 与 `包名 / 类名 | window N [| changes 0x..]`, 点击复制一行; 按钮 关闭 / 暂停-继续 (暂停期间丢弃并计数, 状态行显示) / 复制全部; overflow 清空 与 "仅窗口状态变化" 开关 (只显示 `TYPE_WINDOW_STATE_CHANGED`, 用于排查一次切换多次投递). (SOURCE)
 - [x] JUnit4: `A11yServiceInfoFormatTest` 9 用例 (位拆分含符号位, 前缀剥离, 未知位十六进制, 空白名视为未知, 空掩码, 时长单位). (JVM)
 - [x] 字符串 32 条 x 11 个 `strings.xml` (按 name 升序插入, 无全角标点; `values` 与 `values-en` 一致), changelog `feature` 1 条 (10 语言), README / CHANGELOG 重新生成. (DOCS)
-- [ ] 真机 (维护者; 一台 API < 33, 一台 >= 33): 说明对话框 "管理器" 与长按条目均能打开; 状态行在系统设置 / 抽屉开关切换后 1 s 内更新; 启动 / 停止 / 重启 (root 或 WSS 可用时) 的 snack 与状态迁移 (重启后实例 hash 变化, 事件计数归零), 无 root / WSS 时 "启动" 跳系统设置; 清除缓存与自检结果合理 (windows >= 1, nodes > 0); 复制文本完整; 设置开关与设置页互通; 事件监视器: 切换窗口能看到多条 `WINDOW_STATE_CHANGED` 及间隔, 暂停 / 继续 / 清空 / 仅窗口状态变化 / 复制可用; 夜间模式与主题色下可读; 关闭后 `registry.listenerCount` 回落 (状态区 "监听者" 行的 `state` 计数), 旋转与销毁 MainActivity 时无 WindowLeaked; 最后重跑 `sample/accessibility/smoke-legacy-api.js`. (DEVICE, 待回填)
+- [x] 真机 (维护者; 一台 API < 33, 一台 >= 33): 说明对话框 "管理器" 与长按条目均能打开; 状态行在系统设置 / 抽屉开关切换后 1 s 内更新; 启动 / 停止 / 重启 (root 或 WSS 可用时) 的 snack 与状态迁移 (重启后实例 hash 变化, 事件计数归零), 无 root / WSS 时 "启动" 跳系统设置; 清除缓存与自检结果合理 (windows >= 1, nodes > 0); 复制文本完整; 设置开关与设置页互通; 事件监视器: 切换窗口能看到多条 `WINDOW_STATE_CHANGED` 及间隔, 暂停 / 继续 / 清空 / 仅窗口状态变化 / 复制可用; 夜间模式与主题色下可读; 关闭后 `registry.listenerCount` 回落 (状态区 "监听者" 行的 `state` 计数), 旋转与销毁 MainActivity 时无 WindowLeaked; 最后重跑 `sample/accessibility/smoke-legacy-api.js`. (DEVICE 2026-09-05, 维护者反馈 "测试管理器对话框, 全部正常"; 冒烟脚本复跑结果见 P1.1 证据)
 
 P1.7 证据:
 
 - `JVM`: `A11yServiceInfoFormatTest` 9/9, `A11yServiceRegistryTest` 15/15; 全量 `:app:testAppDebugUnitTest` 1901 tests / 0 failures (2026-09-05).
 - `ANDROID_BUILD`: `:app:assembleAppDebug` 通过, 产出 `app/build/outputs/apk/app/debug/autojs6-v6.8.0-*.apk` (2026-09-05).
 - `DOCS`: 32 条字符串 x 11 文件经 `build/check-strings.py` 校验 (全部在位, 相对邻居有序, `values` 与 `values-en` 一致, 无全角标点); changelog `feature` 1 条 (10 语言, 位于抽屉屏幕取色条目之后), README / CHANGELOG 已重新生成.
-- `DEVICE`: 待维护者回填 (上方最后一条).
+- `DEVICE`: 维护者 2026-09-05 反馈管理器对话框 "全部正常" (上方最后一条); 同日确认 root 设备显式关闭后不再自动启动 (P1.2 提前落地项的真机证据).
 
 P1 验收: JVM 单元测试 (registry / controller / event bus / window policy / node lifecycle) 全部通过; `sample/accessibility/smoke-legacy-api.js` 真机通过; 手动验证: 抽屉开关, 悬浮菜单状态文案, Tile, 布局分析器, 脚本内 `auto()` / `auto.waitFor()` / `auto.stateListener` / `auto.registerEvent` 行为与重构前一致; changelog `improvement` 条目已写入.
 
@@ -684,4 +685,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 维护者反馈 "root 设备上显式关闭无障碍服务后总是自动启动, WSS 不会": 定位为 root 关闭命令的空参数 bug (关闭从未生效) 叠加 `AccessibilityServiceAutoStart` 对显式关闭的无差别恢复. 修复 4 项 (见 P1.2 "提前落地"), changelog `fix` 4 条; 冒烟脚本改为 stop -> 观测解绑 -> start 并增加环境快照. 待维护者复跑: 预期可重启设备 38/38, 其余 32/32 (新增 2 项前置检查), 并确认 root 设备显式关闭后不再自动恢复, XQ-DQ72 的环境快照输出.
 - 维护者提出: 抽屉 "无障碍服务" 对话框的 "管理器" 按钮尚未实现 (`DrawerFragment.kt:210` 目前弹 "开发中"), 希望做成对话框形式的服务管理器 (信息展示 / 调试 / 测试 / 开关 / 控制), 兼作本 Roadmap 各阶段的真机调试面板, 文案与 UI 风格须与现有对话框一致. 维护者选定范围 "标准版 + 事件监视器" -> D14.
 - 落地 P1.7 (D14): `ui/accessibility/{A11yServiceManagerDialog,A11yEventMonitorDialog}.kt`, `core/accessibility/diagnostics/{A11yServiceDiagnostics,A11yServiceSelfCheck,A11yServiceInfoFormat}.kt`, `core/accessibility/A11yEventRecord.kt`, 5 个布局, `AccessibilityService` 事件计数与伴生级事件观察者, `PrefSwitch.setPrefKey(key, default)`, `DrawerFragment` 接入; 字符串 32 条 x 11 文件; changelog `feature` 1 条. 证据: 全量 JVM 1901 / 0, `assembleAppDebug` 通过 (见 P1.7 证据). 待维护者真机验证 (P1.7 最后一条清单) 并顺带回填 P1.1 / P1.2 的复跑结果 (冒烟脚本 38/38 或 32/32, root 显式关闭不再自动恢复, XQ-DQ72 环境快照) — 管理器的 "复制" 文本可直接作为回填内容.
-- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名; 提前落地的 4 项启停修复迁入控制器时保持语义并补单测). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.
+- 维护者反馈 (同日): root 设备显式关闭后不再自动启动 (已修复); 管理器对话框全部正常 (P1.7 `DEVICE` 关闭); 冒烟脚本复跑两份输出: XQ-DQ72 31/43, AVD API 26 40/43. 归因: XQ-DQ72 为保护模式开启 (按设计, 脚本以 AutoJs6 自身为目标时选择器一律为空; 待维护者确认设置项), AVD API 26 为重绑后活动窗口未知 (`rootInActiveWindow` 持续 `null`, 平台行为, 兜底留给 P1.4); 详见 P1.1 `DEVICE` 证据. 顺带修复 `AccessibilityBridge.windowRoots()` 返回 `[null]` (`auto.windowRoots` 得到 `UiObject(null)`), changelog `fix` 1 条. 冒烟脚本: 环境快照增加 `guardMode=` 与每个窗口的 类型 / 包名 / active / focused, 新增前置检查 `guard mode is off` 与 `auto.rootInActiveWindow is available`, 重启段改为等待真实根节点并在失败时制造一次窗口变化以验证归因, 事件间隔为负时不再显示 `+-`; 现在可重启设备 45 项, 其余 34 项.
+- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名; 提前落地的 4 项启停修复迁入控制器时保持语义并补单测). P1.4 需吸收本日两条输入 (活动窗口未知时的兜底, 保护模式的文档化). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行).

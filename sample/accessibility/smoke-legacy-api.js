@@ -66,21 +66,50 @@ sleep(1500);
  * zh-CN: 环境快照. 下方 "屏幕上能找到内容" 的检查失败时, 由这里解释原因
  * (熄屏, 锁屏, 无窗口根节点, 服务已启用但不可操作等).
  */
-function describeEnvironment() {
-    const safely = (body) => {
-        try {
-            return String(body());
-        } catch (e) {
-            return `error: ${e}`;
+function safely(body) {
+    try {
+        return String(body());
+    } catch (e) {
+        return `error: ${e}`;
+    }
+}
+
+// Guard mode (AutoJs6 settings > Script running > Guard mode) blacklists AutoJs6's own windows
+// for selectors and node actions. This script deliberately runs against AutoJs6's main screen,
+// so with guard mode on every "finds something on screen" check fails by design.
+// zh-CN: 保护模式 (AutoJs6 设置 > 脚本运行 > 保护模式) 会让选择器与节点动作忽略 AutoJs6 自身的窗口.
+// 本脚本刻意以 AutoJs6 主界面为目标, 因此保护模式开启时所有 "屏幕上能找到内容" 的检查都会按设计失败.
+function isGuardModeEnabled() {
+    return Boolean(Packages.org.autojs.autojs.runtime.accessibility.AccessibilityConfig.isUnintendedGuardEnabled());
+}
+
+// One entry per accessibility window: type, package of its root, active / focused flags.
+// zh-CN: 每个无障碍窗口一项: 类型, 根节点所属包名, 活动 / 焦点标志.
+function describeWindows() {
+    const typeNames = { 1: "APPLICATION", 2: "INPUT_METHOD", 3: "SYSTEM", 4: "ACCESSIBILITY_OVERLAY", 5: "SPLIT_SCREEN_DIVIDER", 6: "MAGNIFICATION_OVERLAY" };
+    return auto.windows.map((window) => {
+        const root = window.getRoot();
+        const packageName = root === null ? "no-root" : String(root.getPackageName());
+        if (root !== null && device.sdkInt < 33) {
+            try {
+                root.recycle();
+            } catch (e) {
+                // Already recycled or unsupported; nothing to release.
+            }
         }
-    };
+        const flags = `${window.isActive() ? " active" : ""}${window.isFocused() ? " focused" : ""}`;
+        return `[${typeNames[window.getType()] || window.getType()} ${packageName}${flags}]`;
+    }).join(" ") || "(none)";
+}
+
+function describeEnvironment() {
     const Secure = android.provider.Settings.Secure;
     const resolver = context.getContentResolver();
     return [
         `device=${device.brand} ${device.model} api=${device.sdkInt}`,
         `hasService=${safely(() => auto.hasService())} hasInstance=${safely(() => auto.hasInstance())} isRunning=${safely(() => auto.isRunning())} isOperational=${safely(() => auto.isOperational())}`,
-        `screenOn=${safely(() => device.isScreenOn())} keyguardLocked=${safely(() => context.getSystemService(context.KEYGUARD_SERVICE).isKeyguardLocked())} currentPackage=${safely(() => currentPackage())}`,
-        `windowRoots=${safely(() => auto.windowRoots.length)} rootInActiveWindow=${safely(() => auto.rootInActiveWindow !== null)} windows=${safely(() => auto.windows.length)}`,
+        `screenOn=${safely(() => device.isScreenOn())} keyguardLocked=${safely(() => context.getSystemService(context.KEYGUARD_SERVICE).isKeyguardLocked())} currentPackage=${safely(() => currentPackage())} guardMode=${safely(isGuardModeEnabled)}`,
+        `windowRoots=${safely(() => auto.windowRoots.length)} rootInActiveWindow=${safely(() => auto.rootInActiveWindow !== null)} windows=${safely(() => auto.windows.length)} ${safely(describeWindows)}`,
         `accessibility_enabled=${safely(() => Secure.getInt(resolver, "accessibility_enabled", -1))} enabled_accessibility_services=${safely(() => Secure.getString(resolver, "enabled_accessibility_services"))}`,
     ].join("\n  ");
 }
@@ -90,6 +119,10 @@ console.log(`environment:\n  ${describeEnvironment()}`);
 check("auto.service is available after auto()", () => auto.service !== null);
 check("WINDOW_STATE_CHANGED events were delivered", () => windowEvents.length > 0);
 check("screen is on and unlocked", () => device.isScreenOn() && !context.getSystemService(context.KEYGUARD_SERVICE).isKeyguardLocked());
+if (!check("guard mode is off (it makes selectors ignore AutoJs6's own windows, which this script searches)", () => !isGuardModeEnabled())) {
+    console.warn("[HINT] disable guard mode in AutoJs6 settings (Script running > Guard mode) and rerun; the checks that search the screen are expected to fail below");
+}
+check("auto.rootInActiveWindow is available", () => auto.rootInActiveWindow !== null);
 check("auto.windowRoots is not empty", () => auto.windowRoots.length > 0);
 
 /*
@@ -114,8 +147,10 @@ function distinctWindows(events, windowMillis) {
 
 console.log(`WINDOW_STATE_CHANGED: ${windowEvents.length} raw, ${distinctWindows(windowEvents, 500).length} distinct`);
 windowEvents.forEach((event, index) => {
+    // eventTime is stamped by the sending window, so it is not monotonic across windows.
+    // zh-CN: eventTime 由发送事件的窗口打点, 跨窗口时不保证单调.
     const delta = index === 0 ? 0 : event.eventTime - windowEvents[index - 1].eventTime;
-    console.log(`  #${index + 1} +${delta}ms ${event.packageName}/${event.className}`);
+    console.log(`  #${index + 1} ${delta < 0 ? "" : "+"}${delta}ms ${event.packageName}/${event.className}`);
 });
 
 /* 2. Global entry points exist. */
@@ -231,9 +266,19 @@ if (canRestartServiceUnattended()) {
         return disconnected >= 0 && stateLog.lastIndexOf("connected") > disconnected;
     });
 
-    // Window content can take a moment to become available again after a rebind.
-    // zh-CN: 重新绑定后窗口内容可能需要片刻才能再次可用.
-    check("window roots are available again within 5 s", () => wait(() => auto.windowRoots.length > 0, 5000) === true);
+    // Window content can take a moment to become available again after a rebind. On API 26 (AVD)
+    // the system does not know the active window after the rebind at all until the next window
+    // change, so when the root stays unavailable the window list is dumped and a window change is
+    // provoked to tell that case apart from a dead service (roadmap P1.4 decides on a fallback).
+    // zh-CN: 重新绑定后窗口内容可能需要片刻才能再次可用. API 26 (AVD) 上系统在重新绑定后完全不知道活动窗口,
+    // 直到下一次窗口变化; 因此根节点持续不可用时打印窗口列表并主动制造一次窗口变化, 以区分 "服务已死" 的情况
+    // (路线图 P1.4 决定兜底策略).
+    if (!check("rootInActiveWindow is available again within 5 s", () => wait(() => auto.rootInActiveWindow !== null, 5000) === true)) {
+        console.warn(`windows after restart: ${safely(describeWindows)}`);
+        app.launch(autojs.packageName);
+        const recovered = wait(() => auto.rootInActiveWindow !== null, 5000);
+        console.warn(`rootInActiveWindow after a window change (re-launching AutoJs6): ${recovered ? "available" : "still unavailable"}`);
+    }
     check("pickup(/.+/) still finds something after restart", () => wait(() => pickup(/.+/) !== null, 5000) === true);
     check("new UiSelector() still finds something after restart", () => new UiSelector().textMatches(/.+/).findOne(3000) !== null);
     check("text().findOne(timeout) still works after restart", () => textMatches(/.+/).findOne(3000) !== null);

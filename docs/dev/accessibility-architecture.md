@@ -12,7 +12,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 ---
 
-## 1. 现状 (2026-09-05, P1.1 完成后)
+## 1. 现状 (2026-09-05, P1.1 与 P1.7 完成后)
 
 ### 1.1 分层与类映射
 
@@ -82,6 +82,9 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
         -> searchAlgorithm.search(UiObject.createRoot(root), selector, max)   DFS (默认) 或 BFS
 ```
 
+- `bridge.windowRoots()`: 有窗口过滤器时为通过过滤的 `windows[*].root`; 否则 `MODE_FAST` 取 `fastRootInActiveWindow`, `MODE_NORMAL` 取 `rootInActiveWindow`; 根节点为 `null` 时返回空列表 (2026-09-05 起, 原先返回 `[null]`, `auto.windowRoots` 因而得到 `UiObject(null)`).
+- 黑名单 = 保护模式 (设置 > 脚本运行 > 保护模式, `Pref.isGuardModeEnabled`): `AccessibilityConfig` 构造时把自身包名加入黑名单并封印, 每个 bridge 一个实例 (脚本启动时读取, 运行中改设置不影响已启动的脚本). 开启后 AutoJs6 自身前置时 `find*` / `pickup` 一律为空, `SimpleActionAutomator.performAction` (`scrollDown()` 等节点动作) 直接返回 `false`; 全局动作 (`home()` / `back()`) 不受影响. 这是按设计的行为, 冒烟脚本以它为前置检查.
+
 - `Selector` (`core/automator/filter/Selector.kt`) 是过滤器列表的 AND 组合; `UiSelector.append` 原地追加 (因此 `Selector.kt` 的全局函数每次都新建选择器, 见其 `@Caution` 注释).
 - `pickup(root?, selector, compass?, resultType?, callback?)`: `selector` 可为字符串 / 正则 (content 匹配), `UiSelector`, 对象 (键 = builder 方法名, 由 `Picker.Builder.checkSelectorMap` 反射转换), 数组 (组合); 找到后按 `compass` 导航, 按 `resultType` (`#` widget, `{}` collection, `[]` widgets, `$` content, `.` point, `@` selector, `?` existence) 转换.
 - `detect(w, compass?, resultType?, callback?)` 是 `pickup` 的节点版.
@@ -113,6 +116,8 @@ UiSelector.findOne(timeout)        主线程禁止; 循环 find(1), 间隔 inter
 | 一次窗口切换收到 2 个以上 `TYPE_WINDOW_STATE_CHANGED`, `eventTime` 相差几十毫秒, 包名 / 类名相同 | 平台行为 (窗口添加与获得焦点 / 标题变化各发一次); 服务配置 `notificationTimeout="0"`, 系统不合并 | 脚本侧按 (包名, 类名, 时间窗口) 去重 (见 `sample/accessibility/smoke-legacy-api.js`); P1.3 为 `auto.registerEvent` 增加可选去重 / 去抖 |
 | `AccessibilityEventWrapper` 急切解析 `source` (父链求 depth + 扫描兄弟求 index) | 成本问题; 急切是因为 API < 33 事件在回调返回后可能被回收 | P0 已给索引查找加界并捕获异常; P1.3 改为按需解析 |
 | `onServiceConnected` 偶尔不触发 | 平台问题 | 事件到达即视为已连接 (现有兜底), P1.1 纳入状态表 |
+| 服务重绑后 `rootInActiveWindow` 持续为 `null` 直到下一次窗口变化 (AVD API 26 实测 > 11 s; `windows` 仍有 3 项) | 平台行为 (AOSP 8.0 `AccessibilityManagerService`: 重算窗口列表时丢弃尚未重新注册连接的应用窗口, 焦点窗口缺失则活动窗口保持无效, 且带 `FLAG_RETRIEVE_INTERACTIVE_WINDOWS` 时 `TYPE_WINDOW_STATE_CHANGED` 不更新活动窗口); 有其它无障碍服务常驻的设备与现代系统未见 | 此状态下 `find*` / `pickup` 为空; `windowRoots()` 已改为返回空列表而非 `[null]`; 兜底策略 (回落 `windows` / 主动制造窗口变化) 由 P1.4 `WindowRootPolicy` 决定, 冒烟脚本在失败时打印窗口列表并制造一次窗口变化以收集数据 |
+| 保护模式开启且 AutoJs6 前置时选择器全部为空 | 按设计 (黑名单, 见 1.4) | 文档化 (P1.4); 冒烟脚本前置检查 `guard mode is off` |
 | `find()` 的黑名单只检查窗口根节点的包名 | 设计限制 | P2.4 可配置 |
 | 无参 `findOne()` / `untilFind()` / `UiSelector.performAction` 无界阻塞 | 既有 API 语义 (D2 保持) | 文档标注; P3 提供带超时的链式替代 |
 

@@ -112,9 +112,16 @@ public abstract class AccessibilityBridge {
             return roots;
         }
         if ((mMode & MODE_FAST) != 0) {
-            return Collections.singletonList(service.getFastRootInActiveWindow());
+            return singletonOrEmpty(service.getFastRootInActiveWindow());
         }
-        return Collections.singletonList(service.getRootInActiveWindow());
+        return singletonOrEmpty(service.getRootInActiveWindow());
+    }
+
+    // The active window can be unknown to the system (seen on API 26 right after the service is
+    // rebound, until the next window change); callers get an empty list rather than a null entry.
+    // zh-CN: 系统可能不知道活动窗口 (API 26 上服务刚重新绑定后直到下一次窗口变化时可观察到); 调用方得到空列表而非含 null 的列表.
+    private static List<AccessibilityNodeInfo> singletonOrEmpty(@Nullable AccessibilityNodeInfo root) {
+        return root == null ? Collections.emptyList() : Collections.singletonList(root);
     }
 
     @Nullable
