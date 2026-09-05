@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -52,6 +53,7 @@ import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
+import org.autojs.autojs.ui.accessibility.A11yServiceManagerDialog
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
@@ -149,6 +151,11 @@ open class DrawerFragment : Fragment() {
     private lateinit var mA11yTool: AccessibilityTool
     private lateinit var mScreenColorPickerTool: ScreenColorPickerTool
 
+    // Held weakly so that it can be dismissed with the Activity (its 1 s refresh timer and registry
+    // listener stop with the dismiss) without keeping a finished dialog alive.
+    // zh-CN: 弱引用持有, 以便随 Activity 一起关闭 (其 1 s 刷新定时器与注册表监听者随 dismiss 停止), 且不延长已关闭对话框的生命周期.
+    private var mA11yServiceManagerDialog: WeakReference<MaterialDialog>? = null
+
     private val screenColorPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
     ) {
@@ -208,11 +215,10 @@ open class DrawerFragment : Fragment() {
             prefKey = R.string.key_a11y_service,
         ).also { item ->
             item.setOnLaunchManagerListener { d ->
-                if (d != null) {
-                    ViewUtils.showSnack(d.view, R.string.text_under_development, 1_200)
-                } else {
-                    ViewUtils.showToast(mContext, R.string.text_under_development)
-                }
+                // The description dialog is closed first, the manager takes its place.
+                // zh-CN: 先关闭说明对话框, 由管理器取而代之.
+                d?.dismiss()
+                showA11yServiceManager()
             }
             item.setOnLaunchSettingsListener {
                 Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -839,6 +845,8 @@ open class DrawerFragment : Fragment() {
         mClientModeItem.dispose()
         mServerModeItem.dispose()
 
+        dismissA11yServiceManager()
+
         // mActivity.unregisterReceiver(mReceiver)
 
         // Dispose drawer subtitle observers.
@@ -898,6 +906,23 @@ open class DrawerFragment : Fragment() {
     private fun updateThemeColorSubtitle() {
         mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
         (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mThemeColorItem)
+    }
+
+    private fun showA11yServiceManager() {
+        dismissA11yServiceManager()
+        // The context is captured here, once; the dialog never reads the fragment's weak context later.
+        // zh-CN: 上下文在此一次性捕获; 对话框之后不再读取 Fragment 的弱引用上下文.
+        val dialog = A11yServiceManagerDialog.show(mContext, mA11yTool) {
+            if (::mAccessibilityServiceItem.isInitialized) mAccessibilityServiceItem.sync()
+        }
+        mA11yServiceManagerDialog = WeakReference(dialog)
+    }
+
+    private fun dismissA11yServiceManager() {
+        mA11yServiceManagerDialog?.get()?.let { dialog ->
+            if (dialog.isShowing) runCatching { dialog.dismiss() }
+        }
+        mA11yServiceManagerDialog = null
     }
 
     private fun initMenuItems() {

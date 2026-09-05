@@ -32,6 +32,7 @@
 | D11 | `flow` 命名空间提供 `$flow` 别名 | 与其它 `Augmentable` 模块的 `$` 前缀别名保持一致. (原 Q2) |
 | D12 | Flow 动作步骤默认 `strict = true` | 动作返回 `false` 即 reject `ACTION_FAILED`; 可用 `flow.defaults({ strictActions: false })` 全局关闭. (原 Q1) |
 | D13 | 引入字符串选择器语法, 入口复用 `select` | 采用附录 C 的方案 B: `UiSelector` 新增 `select(String)` 重载 (解析字符串并追加过滤器, 返回自身), 因反射注册而自动成为全局函数 `select('...')` (返回 `UiSelector`, 可继续 `.findOne()` 等); 既有无参 `select()` (对找到的节点执行 `ACTION_SELECT`, 含反射出的全局 `select(): boolean`) 保持不变, 两者按参数类型区分. 语法: 空格分隔的条件, `key=value` (值含空格时用引号), `key~=regex` (或 `key=/regex/flags`), 布尔键 `clickable` / `!clickable`, 键名与别名来自 P2.2 的 `SelectorRegistry`; 不引入 `\|` 或层级组合子, 组合需求用 `pickup([...])` / `existsAll` / compass 表达. 落地于 P5.3, 依赖 P2.2. (原 Q4, 2026-09-05) |
+| D14 | 无障碍服务管理器以对话框实现, 范围为 "标准版 + 事件监视器" | 抽屉 "无障碍服务" 条目的 "管理器" 按钮 (及长按条目) 打开 `MaterialDialog` 形式的管理器 (非 Activity), 三个区块: 状态 (逐行可复制, 1 s 刷新 + 注册表监听), 控制 (启动 / 停止 / 重启 / 清除节点缓存 / 自检 / 事件监视器), 设置 (root 与安全设置自动启用开关); 完整诊断文本可复制, 作为本 Roadmap 各阶段的真机调试面板. 事件监视器为子对话框, 数据源是 `AccessibilityService` 伴生对象的轻量事件观察者 (`addEventObserver` / `removeEventObserver`, 跨服务重启存活), 即 P1.3 事件总线 Kotlin 侧订阅 API 的雏形. 文案与 UI 与既有对话框一致. 落地于 P1.7. (2026-09-05) |
 
 由 D2 派生的硬约束:
 
@@ -145,6 +146,7 @@ JS 表面层 (runtime/api/augment/**)         auto / automator / selector / flow
 ```
 core/accessibility/
   registry/    A11yServiceRegistry (含嵌套 State / Snapshot / StateListener), ConnectionListeners  [P1.1 已落地]
+  diagnostics/ A11yServiceDiagnostics (状态行与诊断文本), A11yServiceSelfCheck, A11yServiceInfoFormat (Android-free)  [P1.7 已落地]
   control/     A11yServiceController, ServiceStartStrategy (Root / SecureSettings / SettingsUi)
   event/       A11yEventBus, A11yEventSubscription, AccessibilityDelegate (迁入)
   window/      WindowRootProvider, WindowRootPolicy (mode / flags / filter)
@@ -157,6 +159,8 @@ core/automator/
   toolkit/     SmartClick, ScrollSearch, TextEntry, PopupDismisser, ListCollector, AppLauncher
 runtime/api/augment/
   flow/        Flow (命名空间 `flow`), FlowNativeObject (链式对象), 全局函数 waitAsync / waitThenClick / ...
+ui/accessibility/
+  A11yServiceManagerDialog, A11yEventMonitorDialog (服务管理器与事件监视器对话框)  [P1.7 已落地]
 ```
 
 ---
@@ -166,7 +170,7 @@ runtime/api/augment/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 完成 2026-09-05, 真机复跑待回填) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 进行中 (P1.1 与 P1.7 完成 2026-09-05, 真机复跑待回填) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 未开始 |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
@@ -287,6 +291,25 @@ P1.1 结论: 代码与 JVM 证据齐备, 真机基础项全部通过; 重启段�
 - [ ] 无障碍截图: 抽出 `A11yScreenshotter` (含 `ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT` 重试), `SimpleActionAutomator.captureScreen` 改为消费; Python Host 的 `PythonHostAccessibilityScreenCapture` 是否切换见 P5.4.
 - [ ] Node Bridge / Python Host 中 3 处 `hasOperationalState` 三元表达式改为 `registry.state >= OPERATIONAL` (仅替换判定, 不改其它逻辑).
 - [ ] 更新 `docs/dev/accessibility-architecture.md` (若 P0.3 已建立) 的 "目标" 章节.
+
+### P1.7 服务管理器对话框 (D14, 完成 2026-09-05)
+
+抽屉 "无障碍服务" 条目的 "管理器" 按钮此前只弹 "开发中"; 现为对话框形式的服务管理器, 同时是本 Roadmap 后续阶段 (P1.2 控制器, P1.3 事件总线, P1.4 窗口根节点) 的真机调试面板: 状态行与诊断文本直接给出注册表状态, 事件计数, 窗口与根节点, `serviceInfo` 标志, 监听者数量与自检结果, 可复制后回填到各阶段的 `DEVICE` 证据.
+
+- [x] `ui/accessibility/A11yServiceManagerDialog`: `MaterialDialog` + 自定义 `ThemeColorScrollView` (不用 `wrapInScrollView`, 以保留整行 ripple), 三个区块标题按 `ThemeColorPreferenceCategory` 的对比度规则着色. 状态区 15 行 (服务状态 / 系统设置 / 进程内实例 / 运行时长 / 事件 / 最近事件 / 窗口 / 活动窗口根节点 / 最近包名 / 最近活动 / 配置 / root 权限 / 修改安全设置 / 监听者 / 自检), 点击复制 `label: value`; 每 1 s 刷新并监听注册表迁移 (回调统一切回主线程, 检查 `isShowing`), 收集在 `Schedulers.io()` 进行且不重叠. 控制区 6 行 (`operation_dialog_item`): 启动 / 停止 / 重启 走 `AccessibilityTool`, 与抽屉开关共用 `Schedulers.single()` 避免交错; 服务未启用时跳系统设置, 已启用未绑定时报告失败 (提示用重启); 清除节点缓存; 自检 (`Schedulers.io()`); 事件监视器. 执行期间全部动作行禁用 (alpha 0.58, 副标题 "处理中"), 完成后 snack 结果, 刷新并同步抽屉条目. 设置区 2 行复用 `PrefSwitch` 绑定 `key_enable_a11y_service_with_{root_access,secure_settings}` (`PrefSwitch.setPrefKey(key, default)` 新重载, 否则 `@bool` 默认值为 true 的偏好会显示为关闭). 按钮: 关闭 / 复制 (头部 + `== 状态 ==` 各行) / 系统设置; overflow: 刷新. 生命周期: `DrawerFragment` 弱引用持有, 打开前关闭说明对话框, `onDestroy` 时 dismiss; dismiss 时移除定时器, 注册表监听者与 disposables; root 可用性只在 worker 线程探测一次并缓存. (SOURCE)
+- [x] `core/accessibility/diagnostics/A11yServiceDiagnostics`: 派生状态枚举 `NOT_ENABLED` (`!hasService()`) / `MALFUNCTIONING` (`hasService && !bound`) / `CONNECTED` / `OPERATIONAL`; `collect(probes)` 每次重新读取 `registry.snapshot` 与实例 (不缓存), `serviceInfo` / `windows` / `rootInActiveWindow` 全部 `runCatching`, API < 33 回收取得的根节点; `Report.toText()` 为 UI 语言的诊断文本 (应用版本, 机型, API, 时间 + 各行). `A11yServiceInfoFormat` (Android-free): `bits` / `format(mask, prefix, nameOf)` (去 `FLAG_` / `CAPABILITY_` / `TYPE_` / `FEEDBACK_` 前缀, 未知位 `0x..`) / `formatElapsed`. `A11yServiceSelfCheck`: 以 `windows[*].root` (兜底 `rootInActiveWindow`) 为根做原生节点迭代 DFS, 上限 1000 节点 / 1500 ms, API < 33 按 `DFS.kt` 规则回收 (子节点入栈后回收父节点, 中止时回收剩余, 根各回收一次, 不碰 `fastRootInActiveWindow`), 随后轮询 `eventCount` 最多 2000 ms; 结果 `windows N, roots N, nodes N(+), walk N ms, event N ms | none, total N s`, 无事件不算失败. (SOURCE)
+- [x] `AccessibilityService`: 实例级 `eventCount` / `lastEventType` / `lastEventElapsedRealtime` / `boundAtElapsedRealtime` (`onServiceConnected` 设置, 首个事件补设) / `eventCallbackCount`; 伴生 `delegateCount` 与事件观察者 API `addEventObserver(owner, observer)` / `removeEventObserver(owner)` / `eventObserverCount` (写时复制的 volatile 映射, 无锁读; 在 `registry.onEvent` 之后, 脚本回调之前逐个调用, 异常隔离). `A11yEventRecord` 只复制事件字段 (type / eventTime / receivedAt / packageName / className / windowId / contentChangeTypes), 事件对象不外泄. 未改 registry `Snapshot` (加时间戳会破坏 `transition` 的相等短路). (SOURCE)
+- [x] `ui/accessibility/A11yEventMonitorDialog`: 以自身为 owner 注册观察者 (回调在服务主线程 = 应用主线程, 其它线程 post), 每 100 ms 批量 `notifyItemRangeInserted`, 最多保留 500 条 (环形丢弃, 过滤后的显示列表同步裁剪), 在底部时自动滚动 (用户上滑时不强制); 行显示与上一条所列事件的 `eventTime` 间隔 (`+48 ms  WINDOW_STATE_CHANGED`) 与 `包名 / 类名 | window N [| changes 0x..]`, 点击复制一行; 按钮 关闭 / 暂停-继续 (暂停期间丢弃并计数, 状态行显示) / 复制全部; overflow 清空 与 "仅窗口状态变化" 开关 (只显示 `TYPE_WINDOW_STATE_CHANGED`, 用于排查一次切换多次投递). (SOURCE)
+- [x] JUnit4: `A11yServiceInfoFormatTest` 9 用例 (位拆分含符号位, 前缀剥离, 未知位十六进制, 空白名视为未知, 空掩码, 时长单位). (JVM)
+- [x] 字符串 32 条 x 11 个 `strings.xml` (按 name 升序插入, 无全角标点; `values` 与 `values-en` 一致), changelog `feature` 1 条 (10 语言), README / CHANGELOG 重新生成. (DOCS)
+- [ ] 真机 (维护者; 一台 API < 33, 一台 >= 33): 说明对话框 "管理器" 与长按条目均能打开; 状态行在系统设置 / 抽屉开关切换后 1 s 内更新; 启动 / 停止 / 重启 (root 或 WSS 可用时) 的 snack 与状态迁移 (重启后实例 hash 变化, 事件计数归零), 无 root / WSS 时 "启动" 跳系统设置; 清除缓存与自检结果合理 (windows >= 1, nodes > 0); 复制文本完整; 设置开关与设置页互通; 事件监视器: 切换窗口能看到多条 `WINDOW_STATE_CHANGED` 及间隔, 暂停 / 继续 / 清空 / 仅窗口状态变化 / 复制可用; 夜间模式与主题色下可读; 关闭后 `registry.listenerCount` 回落 (状态区 "监听者" 行的 `state` 计数), 旋转与销毁 MainActivity 时无 WindowLeaked; 最后重跑 `sample/accessibility/smoke-legacy-api.js`. (DEVICE, 待回填)
+
+P1.7 证据:
+
+- `JVM`: `A11yServiceInfoFormatTest` 9/9, `A11yServiceRegistryTest` 15/15; 全量 `:app:testAppDebugUnitTest` 1901 tests / 0 failures (2026-09-05).
+- `ANDROID_BUILD`: `:app:assembleAppDebug` 通过, 产出 `app/build/outputs/apk/app/debug/autojs6-v6.8.0-*.apk` (2026-09-05).
+- `DOCS`: 32 条字符串 x 11 文件经 `build/check-strings.py` 校验 (全部在位, 相对邻居有序, `values` 与 `values-en` 一致, 无全角标点); changelog `feature` 1 条 (10 语言, 位于抽屉屏幕取色条目之后), README / CHANGELOG 已重新生成.
+- `DEVICE`: 待维护者回填 (上方最后一条).
 
 P1 验收: JVM 单元测试 (registry / controller / event bus / window policy / node lifecycle) 全部通过; `sample/accessibility/smoke-legacy-api.js` 真机通过; 手动验证: 抽屉开关, 悬浮菜单状态文案, Tile, 布局分析器, 脚本内 `auto()` / `auto.waitFor()` / `auto.stateListener` / `auto.registerEvent` 行为与重构前一致; changelog `improvement` 条目已写入.
 
@@ -659,5 +682,6 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P1.1: 新增 `core/accessibility/registry/{A11yServiceRegistry,ConnectionListeners}.kt` 与 `A11yServiceRegistryTest` (14 用例); `AccessibilityService` 生命周期与伴生对象委托到注册表; `auto.stateListener` 按脚本运行时注册并在退出时注销; `AccessibilityBridge` 构造副作用移除, 默认 bridge 改由 `AbstractAutoJs.createRuntime()` 登记, `pickup` 绑定调用方 bridge. 全量 JVM 1891 / 0 失败. changelog `fix` 3 条. 设计偏离: 状态枚举 3 态 (`UNBOUND / CONNECTED / OPERATIONAL`), "设置中已启用" 留给 P1.2 控制器 (理由见 P1.1 首条).
 - 冒烟脚本新增第 7 节 (服务重启, 仅 root / 安全设置可用时执行), 维护者在 4 台 AVD 与 5 台实体机上复跑, 结果与归因见 P1.1 `DEVICE` 证据.
 - 维护者反馈 "root 设备上显式关闭无障碍服务后总是自动启动, WSS 不会": 定位为 root 关闭命令的空参数 bug (关闭从未生效) 叠加 `AccessibilityServiceAutoStart` 对显式关闭的无差别恢复. 修复 4 项 (见 P1.2 "提前落地"), changelog `fix` 4 条; 冒烟脚本改为 stop -> 观测解绑 -> start 并增加环境快照. 待维护者复跑: 预期可重启设备 38/38, 其余 32/32 (新增 2 项前置检查), 并确认 root 设备显式关闭后不再自动恢复, XQ-DQ72 的环境快照输出.
-- 维护者提出: 抽屉 "无障碍服务" 对话框的 "管理器" 按钮尚未实现 (`DrawerFragment.kt:210` 目前弹 "开发中"), 希望做成对话框形式的服务管理器 (信息展示 / 调试 / 测试 / 开关 / 控制), 兼作本 Roadmap 各阶段的真机调试面板, 文案与 UI 风格须与现有对话框一致. 设计待确认后作为 P1 子项加入.
-- 下次起点: 管理器对话框 (设计确认后), 然后 P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.
+- 维护者提出: 抽屉 "无障碍服务" 对话框的 "管理器" 按钮尚未实现 (`DrawerFragment.kt:210` 目前弹 "开发中"), 希望做成对话框形式的服务管理器 (信息展示 / 调试 / 测试 / 开关 / 控制), 兼作本 Roadmap 各阶段的真机调试面板, 文案与 UI 风格须与现有对话框一致. 维护者选定范围 "标准版 + 事件监视器" -> D14.
+- 落地 P1.7 (D14): `ui/accessibility/{A11yServiceManagerDialog,A11yEventMonitorDialog}.kt`, `core/accessibility/diagnostics/{A11yServiceDiagnostics,A11yServiceSelfCheck,A11yServiceInfoFormat}.kt`, `core/accessibility/A11yEventRecord.kt`, 5 个布局, `AccessibilityService` 事件计数与伴生级事件观察者, `PrefSwitch.setPrefKey(key, default)`, `DrawerFragment` 接入; 字符串 32 条 x 11 文件; changelog `feature` 1 条. 证据: 全量 JVM 1901 / 0, `assembleAppDebug` 通过 (见 P1.7 证据). 待维护者真机验证 (P1.7 最后一条清单) 并顺带回填 P1.1 / P1.2 的复跑结果 (冒烟脚本 38/38 或 32/32, root 显式关闭不再自动恢复, XQ-DQ72 环境快照) — 管理器的 "复制" 文本可直接作为回填内容.
+- 下次起点: P1.2 (`A11yServiceController`, 含 D5 `isServiceRunning` 修正与 D8 `service/AccessibilityService.kt` 重命名; 提前落地的 4 项启停修复迁入控制器时保持语义并补单测). P1 期间保持每个子项独立提交, 每个子项完成后在真机重跑冒烟脚本.

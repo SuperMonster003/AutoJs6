@@ -629,6 +629,8 @@
     <string name="screen_capturer_foreground_notification_channel_name">Screen capturer foreground service</string>
     <string name="screen_capturer_foreground_notification_text">This notification is being displayed for capturing screen</string>
     <string name="screen_capturer_foreground_notification_title">Screen capturer foreground service</string>
+    <string name="summary_a11y_event_monitor">Live list of the latest accessibility events</string>
+    <string name="summary_a11y_service_self_check">Count window roots and nodes, then wait for an event</string>
     <string name="summary_about_app_tips">Better user experience</string>
     <string name="summary_ace_font_ligatures_enabled">Render supported operator combinations as code-font ligatures</string>
     <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
@@ -703,10 +705,15 @@
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
     <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">Internal Storage</string>
+    <string name="text_a11y_event_monitor">Accessibility event monitor</string>
     <string name="text_a11y_service">Accessibility service</string>
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
+    <string name="text_a11y_service_manager">Accessibility service manager</string>
     <string name="text_a11y_service_may_be_needed">Accessibility service may be needed</string>
+    <string name="text_a11y_service_restarted">Accessibility service restarted</string>
+    <string name="text_a11y_service_started">Accessibility service started</string>
+    <string name="text_a11y_service_stopped">Accessibility service stopped</string>
     <string name="text_aborting" tools:ignore="TypographyEllipsis">Aborting...</string>
     <string name="text_about">About</string>
     <string name="text_about_all_files_access">About all files access</string>
@@ -777,6 +784,7 @@
     <string name="text_act_by_set_text">Set text (setText)</string>
     <string name="text_action">Action</string>
     <string name="text_activated_successfully">Activated successfully</string>
+    <string name="text_active_window_root">Active window root</string>
     <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
     <string name="text_add_bom">Add BOM</string>
@@ -860,6 +868,7 @@
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
     <string name="text_auto_night_mode">Auto night mode</string>
     <string name="text_auto_rename">Auto rename</string>
+    <string name="text_available">Available</string>
     <string name="text_available_windows">Available windows</string>
     <string name="text_back">Back</string>
     <string name="text_background_color">Background color</string>
@@ -925,6 +934,7 @@
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_media_playback_history">Clear media playback history</string>
+    <string name="text_clear_node_cache">Clear node cache</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_trash">Clear trash</string>
     <string name="text_clear_trash_confirm">Clear all items in trash?</string>
@@ -976,6 +986,7 @@
     <string name="text_content">Content</string>
     <string name="text_continue">Continue</string>
     <string name="text_continue_with_plugin_template">Continue with plugin template</string>
+    <string name="text_control">Control</string>
     <string name="text_copy">Copy</string>
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_all">Copy all</string>
@@ -1142,6 +1153,8 @@
     <string name="text_error_copy_file" formatted="true">Failed to copy file: %s</string>
     <string name="text_error_report">Bug report</string>
     <string name="text_estimated">Estimated</string>
+    <string name="text_events">Events</string>
+    <string name="text_events_dropped_while_paused">%d event(s) dropped while paused</string>
     <string name="text_exception_info">Exception info</string>
     <string name="text_execute">Execute</string>
     <string name="text_execute_code">Execute code</string>
@@ -1166,10 +1179,12 @@
     <string name="text_extracting_template_apk">Extracting template APK</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
+    <string name="text_failed_to_clear_node_cache">Failed to clear node cache</string>
     <string name="text_failed_to_create_key_store">Failed to create signature key</string>
     <string name="text_failed_to_delete">Failed to delete</string>
     <string name="text_failed_to_disable_a11y_service">Failed to disable accessibility service</string>
     <string name="text_failed_to_download">Failed to download</string>
+    <string name="text_failed_to_enable_a11y_service">Failed to enable accessibility service</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Failed to enable accessibility service with root access</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Failed to enable accessibility service with secure settings</string>
     <string name="text_failed_to_export_log_entries">Failed to export log entries</string>
@@ -1183,6 +1198,7 @@
     <string name="text_failed_to_login">Failed to login</string>
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
+    <string name="text_failed_to_restart_a11y_service">Failed to restart accessibility service</string>
     <string name="text_failed_to_retrieve">Failed to retrieve</string>
     <string name="text_failed_to_save_project_json">Failed to save project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Failed to save remote project to local storage</string>
@@ -1282,6 +1298,7 @@
     <string name="text_import_strategy_overwrite">Overwrite existing profile</string>
     <string name="text_import_succeed">Import succeeded</string>
     <string name="text_import_to_my_scripts">Import to \"my scripts\"</string>
+    <string name="text_in_process_instance">In-process instance</string>
     <string name="text_in_progress">In progress</string>
     <string name="text_info">Information</string>
     <string name="text_insist_on_record">Record</string>
@@ -1321,6 +1338,7 @@
     <string name="text_key_store_password">Key Store Password</string>
     <string name="text_label_name">Label</string>
     <string name="text_label_state">State</string>
+    <string name="text_last_event">Last event</string>
     <string name="text_last_updates_checked_time">Last checked: %s</string>
     <string name="text_latest_activity">Latest activity</string>
     <string name="text_latest_package">Latest package</string>
@@ -1339,6 +1357,7 @@
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Switching launcher icons on some devices may cause all existing AutoJs6 shortcuts to be lost, please proceed with caution</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
+    <string name="text_listeners">Listeners</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_completed">Loading completed</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
@@ -1418,6 +1437,7 @@
     <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
     <string name="text_no_version_history">No version history</string>
+    <string name="text_node_cache_cleared">Node cache cleared</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Node.js Doctor</string>
     <string name="text_nodejs_doctor_export_json">JSON report</string>
@@ -1446,6 +1466,7 @@
     <string name="text_operation_aborted">Aborted</string>
     <string name="text_operation_completed">Completed</string>
     <string name="text_operation_is_completed">Operation is completed</string>
+    <string name="text_operational">Operational</string>
     <string name="text_options">Options</string>
     <string name="text_organization">Organization Name</string>
     <string name="text_organizational_unit">Organizational Unit</string>
@@ -1464,6 +1485,7 @@
     <string name="text_paste">Paste</string>
     <string name="text_path_colon_value">Path: %1$s</string>
     <string name="text_path_is_empty">Path is empty</string>
+    <string name="text_pause">Pause</string>
     <string name="text_pc_server_address">PC server address</string>
     <string name="text_percentage_colon_value">Usage: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">Allow the app to access approximate location via network</string>
@@ -1691,11 +1713,13 @@
     <string name="text_restore_to_specified_path">Restore to specified path</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>
     <string name="text_result">Result</string>
+    <string name="text_resume">Resume</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
+    <string name="text_root_access">Root access</string>
     <string name="text_root_mode_title">Root access check</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
@@ -1749,11 +1773,13 @@
     <string name="text_select_image">Select an image</string>
     <string name="text_selected_items" formatted="true">%1$d selected</string>
     <string name="text_selected_plugin">Selected plugin</string>
+    <string name="text_self_check">Self-check</string>
     <string name="text_send">Send</string>
     <string name="text_send_shortcut">Create shortcut</string>
     <string name="text_server_mode">Server mode</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Service management</string>
+    <string name="text_service_status">Service status</string>
     <string name="text_set_a_name_for_the_new_configuration">Set a name for the new configuration</string>
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
@@ -1804,6 +1830,7 @@
     <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_star">Star</string>
+    <string name="text_start">Start</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
     <string name="text_state_or_province">State or Province</string>
@@ -1832,6 +1859,7 @@
     <string name="text_symbols_profile_name_hint">Profile name</string>
     <string name="text_symbols_profile_name_invalid">Profile name cannot be empty</string>
     <string name="text_symbols_settings">Shortcut symbol settings</string>
+    <string name="text_system_settings">System settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Text size</string>
@@ -1872,6 +1900,7 @@
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
+    <string name="text_unbound">Unbound</string>
     <string name="text_under_development">Under development</string>
     <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
     <string name="text_under_development_title">@string/text_under_development</string>
@@ -1893,6 +1922,7 @@
     <string name="text_updates_snack_bar_act_later">Later</string>
     <string name="text_updates_snack_bar_act_view">View</string>
     <string name="text_updating_project_config">Updating project config</string>
+    <string name="text_uptime">Uptime</string>
     <string name="text_usage_instructions">Usage</string>
     <string name="text_usage_stats_permission">Usage stats access</string>
     <string name="text_use_android_n_shortcut">Use Android 7.0 shortcut</string>
@@ -1936,6 +1966,8 @@
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
+    <string name="text_window_state_changes_only">Window state changes only</string>
+    <string name="text_windows">Windows</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_working_dir_path_with_value">Working directory: %1$s</string>
     <string name="text_write_secure_settings">Write security settings</string>

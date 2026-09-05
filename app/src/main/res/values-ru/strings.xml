@@ -634,6 +634,8 @@
     <string name="screen_capturer_foreground_notification_channel_name">Служба захвата экрана на переднем плане</string>
     <string name="screen_capturer_foreground_notification_text">Это уведомление отображается для захвата экрана</string>
     <string name="screen_capturer_foreground_notification_title">Служба захвата экрана на переднем плане</string>
+    <string name="summary_a11y_event_monitor">Список последних событий специальных возможностей в реальном времени</string>
+    <string name="summary_a11y_service_self_check">Подсчитать корневые узлы окон и узлы, затем дождаться события</string>
     <string name="summary_about_app_tips">Лучший пользовательский опыт</string>
     <string name="summary_ace_font_ligatures_enabled">Отображать поддерживаемые комбинации операторов как лигатуры шрифта</string>
     <string name="summary_ace_font_styles_enabled">Разрешить полужирное, курсивное и другое начертание шрифта кода</string>
@@ -708,10 +710,15 @@
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
     <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">Внутреннее хранилище</string>
+    <string name="text_a11y_event_monitor">Монитор событий специальных возможностей</string>
     <string name="text_a11y_service">Служба доступности</string>
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Служба доступности включена, но не работает (Включите или перезагрузите устройство)</string>
+    <string name="text_a11y_service_manager">Менеджер службы специальных возможностей</string>
     <string name="text_a11y_service_may_be_needed">Может потребоваться служба доступности</string>
+    <string name="text_a11y_service_restarted">Служба специальных возможностей перезапущена</string>
+    <string name="text_a11y_service_started">Служба специальных возможностей запущена</string>
+    <string name="text_a11y_service_stopped">Служба специальных возможностей остановлена</string>
     <string name="text_aborting" tools:ignore="TypographyEllipsis">Прерывание...</string>
     <string name="text_about">Об</string>
     <string name="text_about_all_files_access">О доступе ко всем файлам</string>
@@ -782,6 +789,7 @@
     <string name="text_act_by_set_text">Установить текст (setText)</string>
     <string name="text_action">Действие</string>
     <string name="text_activated_successfully">Активация выполнена</string>
+    <string name="text_active_window_root">Корневой узел активного окна</string>
     <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
     <string name="text_add_bom">Добавить BOM</string>
@@ -865,6 +873,7 @@
     <string name="text_auto_check_for_updates_and_show_snackbar">Автоматическая проверка обновлений и отображение закуски на домашней странице</string>
     <string name="text_auto_night_mode">Автоматический ночной режим</string>
     <string name="text_auto_rename">Автопереименование</string>
+    <string name="text_available">Доступно</string>
     <string name="text_available_windows">Доступные окна</string>
     <string name="text_back">Назад</string>
     <string name="text_background_color">Цвет фона</string>
@@ -930,6 +939,7 @@
     <string name="text_clear">Очистить</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_media_playback_history">Очистить историю воспроизведения медиа</string>
+    <string name="text_clear_node_cache">Очистить кэш узлов</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
     <string name="text_clear_trash">Очистить корзину</string>
     <string name="text_clear_trash_confirm">Очистить все элементы в корзине?</string>
@@ -980,6 +990,7 @@
     <string name="text_content">Содержимое</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_continue_with_plugin_template">Продолжить с шаблоном плагина</string>
+    <string name="text_control">Управление</string>
     <string name="text_copy">Скопировать</string>
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
     <string name="text_copy_all">Скопировать все</string>
@@ -1146,6 +1157,8 @@
     <string name="text_error_copy_file" formatted="true">Не удалось скопировать файл: %s</string>
     <string name="text_error_report">Отчет об ошибке</string>
     <string name="text_estimated">Оценка</string>
+    <string name="text_events">События</string>
+    <string name="text_events_dropped_while_paused">Отброшено событий во время паузы: %d</string>
     <string name="text_exception_info">Сведения об исключении</string>
     <string name="text_execute">Выполнить</string>
     <string name="text_execute_code">Код выполнения</string>
@@ -1170,10 +1183,12 @@
     <string name="text_extracting_template_apk">Извлечение шаблонного APK</string>
     <string name="text_failed">Не удалось</string>
     <string name="text_failed_to_build">Не удалось создать</string>
+    <string name="text_failed_to_clear_node_cache">Не удалось очистить кэш узлов</string>
     <string name="text_failed_to_create_key_store">Не удалось создать ключ подписи</string>
     <string name="text_failed_to_delete">Не удалось удалить</string>
     <string name="text_failed_to_disable_a11y_service">Не удалось отключить службу доступности</string>
     <string name="text_failed_to_download">Не удалось загрузить</string>
+    <string name="text_failed_to_enable_a11y_service">Не удалось включить службу специальных возможностей</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Не удалось включить службу доступности с доступом root</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Не удалось включить службу доступности с безопасными настройками</string>
     <string name="text_failed_to_export_log_entries">Не удалось экспортировать записи журнала</string>
@@ -1187,6 +1202,7 @@
     <string name="text_failed_to_login">Не удалось войти в систему</string>
     <string name="text_failed_to_register">Не удалось зарегистрироваться</string>
     <string name="text_failed_to_report">Не удалось отправить</string>
+    <string name="text_failed_to_restart_a11y_service">Не удалось перезапустить службу специальных возможностей</string>
     <string name="text_failed_to_retrieve">Не удалось получить</string>
     <string name="text_failed_to_save_project_json">Не удалось сохранить project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
@@ -1286,6 +1302,7 @@
     <string name="text_import_strategy_overwrite">Перезаписать существующий профиль</string>
     <string name="text_import_succeed">Импорт удался</string>
     <string name="text_import_to_my_scripts">Импорт в \"мои скрипты\"</string>
+    <string name="text_in_process_instance">Экземпляр в процессе</string>
     <string name="text_in_progress">В процессе выполнения</string>
     <string name="text_info">Информация</string>
     <string name="text_insist_on_record">Запись</string>
@@ -1325,6 +1342,7 @@
     <string name="text_key_store_password">Пароль хранилища ключей</string>
     <string name="text_label_name">Метка</string>
     <string name="text_label_state">Состояние</string>
+    <string name="text_last_event">Последнее событие</string>
     <string name="text_last_updates_checked_time">Последняя проверка: %s</string>
     <string name="text_latest_activity">Последняя активность</string>
     <string name="text_latest_package">Последний пакет</string>
@@ -1343,6 +1361,7 @@
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Смена значков запуска на некоторых устройствах может привести к потере всех существующих ярлыков AutoJs6, действуйте с осторожностью</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
+    <string name="text_listeners">Слушатели</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
     <string name="text_loading_completed">Загрузка завершена</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
@@ -1422,6 +1441,7 @@
     <string name="text_no_search_results_for_keyword">Ничего не найдено по запросу:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Текущая конфигурация пуста.\nНажмите здесь, чтобы создать символ.</string>
     <string name="text_no_version_history">Нет истории версий</string>
+    <string name="text_node_cache_cleared">Кэш узлов очищен</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Диагностика Node.js</string>
     <string name="text_nodejs_doctor_export_json">Отчёт JSON</string>
@@ -1450,6 +1470,7 @@
     <string name="text_operation_aborted">Прервано</string>
     <string name="text_operation_completed">Завершено</string>
     <string name="text_operation_is_completed">Операция завершена</string>
+    <string name="text_operational">Работоспособна</string>
     <string name="text_options">Опции</string>
     <string name="text_organization">Название организации</string>
     <string name="text_organizational_unit">Организационная единица</string>
@@ -1468,6 +1489,7 @@
     <string name="text_paste">Вставить</string>
     <string name="text_path_colon_value">Путь: %1$s</string>
     <string name="text_path_is_empty">Путь пуст</string>
+    <string name="text_pause">Пауза</string>
     <string name="text_pc_server_address">Адрес сервера ПК</string>
     <string name="text_percentage_colon_value">Использовано: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">Разрешить приложению получать приблизительную геолокацию через сеть</string>
@@ -1695,11 +1717,13 @@
     <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Восстановление...</string>
     <string name="text_result">Результат</string>
+    <string name="text_resume">Продолжить</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Отмена привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
+    <string name="text_root_access">Root-доступ</string>
     <string name="text_root_mode_title">Проверка прав root</string>
     <string name="text_run">Запустить</string>
     <string name="text_run_on_battery_change">При смене батареи</string>
@@ -1753,11 +1777,13 @@
     <string name="text_select_image">Выбрать изображение</string>
     <string name="text_selected_items" formatted="true">Выбрано: %1$d</string>
     <string name="text_selected_plugin">Выбранный плагин</string>
+    <string name="text_self_check">Самопроверка</string>
     <string name="text_send">Отправить</string>
     <string name="text_send_shortcut">Создать ярлык</string>
     <string name="text_server_mode">Режим сервера</string>
     <string name="text_service">Сервис</string>
     <string name="text_service_management">Управление службами</string>
+    <string name="text_service_status">Состояние службы</string>
     <string name="text_set_a_name_for_the_new_configuration">Задайте имя для новой конфигурации</string>
     <string name="text_set_as_working_dir">Как рабочий каталог</string>
     <string name="text_set_breakpoint">Установить точку останова</string>
@@ -1808,6 +1834,7 @@
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
     <string name="text_star">Звезда</string>
+    <string name="text_start">Запустить</string>
     <string name="text_start_record">Начало записи</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_state_or_province">Штат или провинция</string>
@@ -1836,6 +1863,7 @@
     <string name="text_symbols_profile_name_hint">Имя профиля</string>
     <string name="text_symbols_profile_name_invalid">Имя профиля не может быть пустым</string>
     <string name="text_symbols_settings">Настройки быстрых символов</string>
+    <string name="text_system_settings">Системные настройки</string>
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
     <string name="text_text_size">Размер текста</string>
@@ -1876,6 +1904,7 @@
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">Выбранный ABI \"%s\" не может быть использован для создания упакованного приложения, поскольку текущая версия AutoJs6 не включает указанный ABI.</string>
     <string name="text_unavailable">Недоступно</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" недоступен</string>
+    <string name="text_unbound">Не привязана</string>
     <string name="text_under_development">В стадии разработки</string>
     <string name="text_under_development_content">Функция будет готова к использованию в ближайших обновлениях</string>
     <string name="text_under_development_title">@string/text_under_development</string>
@@ -1897,6 +1926,7 @@
     <string name="text_updates_snack_bar_act_later">Позже</string>
     <string name="text_updates_snack_bar_act_view">Просмотр</string>
     <string name="text_updating_project_config">Обновление конфигурации проекта</string>
+    <string name="text_uptime">Время работы</string>
     <string name="text_usage_instructions">Использование</string>
     <string name="text_usage_stats_permission">Доступ к статистике использования</string>
     <string name="text_use_android_n_shortcut">Использовать ярлык Android 7.0</string>
@@ -1940,6 +1970,8 @@
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
+    <string name="text_window_state_changes_only">Только изменения состояния окна</string>
+    <string name="text_windows">Окна</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
     <string name="text_working_dir_path_with_value">Рабочий каталог: %1$s</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>

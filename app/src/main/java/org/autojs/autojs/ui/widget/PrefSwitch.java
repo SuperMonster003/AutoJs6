@@ -78,7 +78,19 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
     }
 
     public void setPrefKey(String prefKey) {
+        setPrefKey(prefKey, mDefaultChecked);
+    }
+
+    /**
+     * Binds the switch to a preference whose default is not false, e.g. one declared with a
+     * `@bool` default in a preference XML; the no-default overload would show an untouched
+     * preference as unchecked.
+     * zh-CN: 绑定默认值不为 false 的偏好 (如在偏好 XML 中以 `@bool` 声明默认值的偏好);
+     * 无默认值的重载会把未改动过的偏好显示为关闭.
+     */
+    public void setPrefKey(String prefKey, boolean defaultChecked) {
         mPrefKey = prefKey;
+        mDefaultChecked = defaultChecked;
         registerOnSharedPreferenceChangeListenerIfNeeded();
         if (mPrefKey != null) {
             setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);

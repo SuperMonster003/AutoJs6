@@ -634,6 +634,8 @@
     <string name="screen_capturer_foreground_notification_channel_name">Service de capture d\'écran en avant-plan</string>
     <string name="screen_capturer_foreground_notification_text">Cette notification s\'affiche pour la capture d\'écran.</string>
     <string name="screen_capturer_foreground_notification_title">Service de capture d\'écran en avant-plan</string>
+    <string name="summary_a11y_event_monitor">Liste en direct des derniers événements d\'accessibilité</string>
+    <string name="summary_a11y_service_self_check">Compter les nœuds racines des fenêtres et les nœuds, puis attendre un événement</string>
     <string name="summary_about_app_tips">Meilleure expérience utilisateur</string>
     <string name="summary_ace_font_ligatures_enabled">Afficher les combinaisons d\'opérateurs compatibles comme des ligatures de police de code</string>
     <string name="summary_ace_font_styles_enabled">Autoriser le gras, l\'italique et d\'autres styles de police de code</string>
@@ -708,10 +710,15 @@
     <string name="summary_use_volume_key_to_stop_running_scripts">Appuyez sur la touche \"Volume fort\" pour arrêter tous les scripts en cours d\'exécution.</string>
     <string name="symbol_colon_with_blank">" : "</string>
     <string name="term_internal_strorage">Stockage interne</string>
+    <string name="text_a11y_event_monitor">Moniteur d\'événements d\'accessibilité</string>
     <string name="text_a11y_service">Service d\'accessibilité</string>
     <string name="text_a11y_service_description">Requise par le fonctionnement automatique du script (clic, appui long, glissement, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Service d\'accessibilité activé mais non exécuté (réactivation ou redémarrage du périphérique).</string>
+    <string name="text_a11y_service_manager">Gestionnaire du service d\'accessibilité</string>
     <string name="text_a11y_service_may_be_needed">Un service d\'accessibilité peut être nécessaire</string>
+    <string name="text_a11y_service_restarted">Service d\'accessibilité redémarré</string>
+    <string name="text_a11y_service_started">Service d\'accessibilité démarré</string>
+    <string name="text_a11y_service_stopped">Service d\'accessibilité arrêté</string>
     <string name="text_aborting" tools:ignore="TypographyEllipsis">Interruption...</string>
     <string name="text_about">A propos</string>
     <string name="text_about_all_files_access">A propos de l\'accès à tous les fichiers</string>
@@ -782,6 +789,7 @@
     <string name="text_act_by_set_text">Définir le texte (setText)</string>
     <string name="text_action">Action</string>
     <string name="text_activated_successfully">Activation reussie</string>
+    <string name="text_active_window_root">Nœud racine de la fenêtre active</string>
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
     <string name="text_add_bom">Ajouter un BOM</string>
@@ -865,6 +873,7 @@
     <string name="text_auto_check_for_updates_and_show_snackbar">Vérification automatique des mises à jour et affichage d\'un snackbar sur la page d\'accueil</string>
     <string name="text_auto_night_mode">Mode nuit automatique</string>
     <string name="text_auto_rename">Renommer automatiquement</string>
+    <string name="text_available">Disponible</string>
     <string name="text_available_windows">Fenêtres disponibles</string>
     <string name="text_back">Retour</string>
     <string name="text_background_color">Couleur d\'arrière-plan</string>
@@ -930,6 +939,7 @@
     <string name="text_clear">Effacer</string>
     <string name="text_clear_file_selection">Effacer la sélection de fichiers</string>
     <string name="text_clear_media_playback_history">Effacer l\'historique de lecture multimédia</string>
+    <string name="text_clear_node_cache">Vider le cache des nœuds</string>
     <string name="text_clear_pre_execute_script">Effacer le script de pré-exécution</string>
     <string name="text_clear_trash">Vider la corbeille</string>
     <string name="text_clear_trash_confirm">Vider tous les elements de la corbeille?</string>
@@ -980,6 +990,7 @@
     <string name="text_content">Contenu</string>
     <string name="text_continue">Continuer</string>
     <string name="text_continue_with_plugin_template">Continuer avec le modèle du plugin</string>
+    <string name="text_control">Contrôle</string>
     <string name="text_copy">Copie</string>
     <string name="text_copy_ace_diagnostics">Copier les diagnostics Ace</string>
     <string name="text_copy_all">Copier tout</string>
@@ -1146,6 +1157,8 @@
     <string name="text_error_copy_file" formatted="true">Failed to copy file : %s</string>
     <string name="text_error_report">Rapport de bug</string>
     <string name="text_estimated">Estimé</string>
+    <string name="text_events">Événements</string>
+    <string name="text_events_dropped_while_paused">%d événement(s) ignoré(s) pendant la pause</string>
     <string name="text_exception_info">Infos de l\'exception</string>
     <string name="text_execute">Exécuter</string>
     <string name="text_execute_code">Exécuter le code</string>
@@ -1170,10 +1183,12 @@
     <string name="text_extracting_template_apk">Extraction de l\'APK modele</string>
     <string name="text_failed">Échec</string>
     <string name="text_failed_to_build">Échec de la compilation</string>
+    <string name="text_failed_to_clear_node_cache">Impossible de vider le cache des nœuds</string>
     <string name="text_failed_to_create_key_store">Échec de la création de la clé de signature</string>
     <string name="text_failed_to_delete">Échec de la suppression</string>
     <string name="text_failed_to_disable_a11y_service">Échec de la désactivation du service d\'accessibilité</string>
     <string name="text_failed_to_download">Fail to download</string>
+    <string name="text_failed_to_enable_a11y_service">Impossible d\'activer le service d\'accessibilité</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Échec de l\'activation du service d\'accessibilité avec l\'accès root</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Échec de l\'activation du service d\'accessibilité avec les paramètres sécurisés</string>
     <string name="text_failed_to_export_log_entries">Échec de l\'exportation des entrées de journal</string>
@@ -1187,6 +1202,7 @@
     <string name="text_failed_to_login">Fail to login</string>
     <string name="text_failed_to_register">Échec de l\'inscription</string>
     <string name="text_failed_to_report">Échec de l\'envoi</string>
+    <string name="text_failed_to_restart_a11y_service">Impossible de redémarrer le service d\'accessibilité</string>
     <string name="text_failed_to_retrieve">Échec de la récupération</string>
     <string name="text_failed_to_save_project_json">Echec de l\'enregistrement de project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
@@ -1286,6 +1302,7 @@
     <string name="text_import_strategy_overwrite">Ecraser le profil existant</string>
     <string name="text_import_succeed">Importation réussie</string>
     <string name="text_import_to_my_scripts">Importation vers \"mes scripts\"</string>
+    <string name="text_in_process_instance">Instance dans le processus</string>
     <string name="text_in_progress">En cours</string>
     <string name="text_info">Information</string>
     <string name="text_insist_on_record">Enregistrer</string>
@@ -1325,6 +1342,7 @@
     <string name="text_key_store_password">Mot de passe du magasin de clés</string>
     <string name="text_label_name">Étiquette</string>
     <string name="text_label_state">État</string>
+    <string name="text_last_event">Dernier événement</string>
     <string name="text_last_updates_checked_time">Dernière vérification : %s</string>
     <string name="text_latest_activity">Dernière activité</string>
     <string name="text_latest_package">Dernier paquet</string>
@@ -1343,6 +1361,7 @@
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Le changement de l\'icône du lanceur sur certains appareils peut entraîner la perte de tous les raccourcis AutoJs6 existants, veuillez procéder avec prudence</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
     <string name="text_licenses">Licences Open Sources</string>
+    <string name="text_listeners">Écouteurs</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
     <string name="text_loading_completed">Chargement termine</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
@@ -1422,6 +1441,7 @@
     <string name="text_no_search_results_for_keyword">Aucun resultat pour:\n\n%1$s</string>
     <string name="text_no_symbols_hint">La config actuelle est vide.\nAppuyez ici pour creer un symbole.</string>
     <string name="text_no_version_history">Aucun historique des versions</string>
+    <string name="text_node_cache_cleared">Cache des nœuds vidé</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Diagnostic Node.js</string>
     <string name="text_nodejs_doctor_export_json">Rapport JSON</string>
@@ -1450,6 +1470,7 @@
     <string name="text_operation_aborted">Interrompu</string>
     <string name="text_operation_completed">Termine</string>
     <string name="text_operation_is_completed">L\'opération est terminée</string>
+    <string name="text_operational">Opérationnel</string>
     <string name="text_options">Options</string>
     <string name="text_organization">Nom de l\'organisation</string>
     <string name="text_organizational_unit">Unité organisationnelle</string>
@@ -1468,6 +1489,7 @@
     <string name="text_paste">Coller</string>
     <string name="text_path_colon_value">Chemin : %1$s</string>
     <string name="text_path_is_empty">Le chemin est vide</string>
+    <string name="text_pause">Pause</string>
     <string name="text_pc_server_address">Adresse du serveur du PC</string>
     <string name="text_percentage_colon_value">Utilisation: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">Autoriser l\'application à accéder à une localisation approximative via le réseau</string>
@@ -1695,11 +1717,13 @@
     <string name="text_restore_to_specified_path">Restaurer vers un chemin specifique</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restauration...</string>
     <string name="text_result">Résultat</string>
+    <string name="text_resume">Reprendre</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Encapsulation des types primitifs Java</string>
+    <string name="text_root_access">Accès root</string>
     <string name="text_root_mode_title">Vérification de l\'accès root</string>
     <string name="text_run">Exécuter</string>
     <string name="text_run_on_battery_change">Sur changement de batterie</string>
@@ -1753,11 +1777,13 @@
     <string name="text_select_image">Sélectionner une image</string>
     <string name="text_selected_items" formatted="true">%1$d sélectionnés</string>
     <string name="text_selected_plugin">Plugin selectionne</string>
+    <string name="text_self_check">Autovérification</string>
     <string name="text_send">Envoyer</string>
     <string name="text_send_shortcut">Créer un raccourci</string>
     <string name="text_server_mode">Mode serveur</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Gestion des services</string>
+    <string name="text_service_status">État du service</string>
     <string name="text_set_a_name_for_the_new_configuration">Nommer la nouvelle config</string>
     <string name="text_set_as_working_dir">Comme répertoire de travail</string>
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
@@ -1808,6 +1834,7 @@
     <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Étoile</string>
+    <string name="text_start">Démarrer</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_state_or_province">État ou province</string>
@@ -1836,6 +1863,7 @@
     <string name="text_symbols_profile_name_hint">Nom du profil</string>
     <string name="text_symbols_profile_name_invalid">Le nom du profil ne peut pas etre vide</string>
     <string name="text_symbols_settings">Paramètres des symboles rapides</string>
+    <string name="text_system_settings">Paramètres système</string>
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Tâche</string>
     <string name="text_text_size">Taille du texte</string>
@@ -1876,6 +1904,7 @@
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">L\'ABI sélectionné \"%s\" ne peut pas être utilisé pour créer une application packagée, car la version actuelle d\'AutoJs6 n\'inclut pas l\'ABI ci-dessus.</string>
     <string name="text_unavailable">Indisponible</string>
     <string name="text_unavailable_abi_for">L\'ABI \"%s\" n\'est pas disponible</string>
+    <string name="text_unbound">Non lié</string>
     <string name="text_under_development">En cours de développement</string>
     <string name="text_under_development_content">La fonctionnalité sera prête à être utilisée dans les prochaines mises à jour.</string>
     <string name="text_under_development_title">@string/text_under_development</string>
@@ -1897,6 +1926,7 @@
     <string name="text_updates_snack_bar_act_later">Plus tard</string>
     <string name="text_updates_snack_bar_act_view">Voir</string>
     <string name="text_updating_project_config">Mise a jour de la config du projet</string>
+    <string name="text_uptime">Durée de fonctionnement</string>
     <string name="text_usage_instructions">Utilisation</string>
     <string name="text_usage_stats_permission">Utilisation de l\'accès aux statistiques</string>
     <string name="text_use_android_n_shortcut">Utiliser le raccourci Android 7.0</string>
@@ -1940,6 +1970,8 @@
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
+    <string name="text_window_state_changes_only">Changements d\'état de fenêtre uniquement</string>
+    <string name="text_windows">Fenêtres</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail.</string>
     <string name="text_working_dir_path_with_value">Chemin du répertoire de travail: %1$s</string>
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité.</string>

@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.accessibility
 
 import android.content.Intent
+import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
@@ -22,6 +23,7 @@ import org.greenrobot.eventbus.EventBus
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Created by Stardust on May 2, 2017.
@@ -34,12 +36,41 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
         private set
 
+    // Per-instance counters read by the service manager dialog; a restarted service starts over.
+    // zh-CN: 供服务管理器对话框读取的实例级计数; 服务重启后从零开始.
+
+    /** Number of events delivered to this instance. zh-CN: 本实例收到的事件数. */
+    val eventCount = AtomicLong()
+
+    /** Type of the most recent event, meaningful only when [eventCount] > 0. zh-CN: 最近一个事件的类型, 仅在 [eventCount] > 0 时有意义. */
+    @Volatile
+    var lastEventType = 0
+        private set
+
+    /** [SystemClock.elapsedRealtime] at which the most recent event arrived. zh-CN: 最近一个事件到达时的 [SystemClock.elapsedRealtime]. */
+    @Volatile
+    var lastEventElapsedRealtime = 0L
+        private set
+
+    /**
+     * [SystemClock.elapsedRealtime] at which this instance was connected; set by `onServiceConnected`
+     * and, as that callback is not always invoked, by the first event otherwise. 0 until then.
+     * zh-CN: 本实例连接时的 [SystemClock.elapsedRealtime]; 由 `onServiceConnected` 设置, 因该回调并不总会触发, 否则由首个事件补设. 此前为 0.
+     */
+    @Volatile
+    var boundAtElapsedRealtime = 0L
+        private set
+
     @Volatile
     private var isDisposed = false
 
     // eventType -> (ownerId -> callback)
     private val eventBox = HashMap<Int, MutableMap<String, AccessibilityEventCallback?>>()
     private val eventBoxLock = Any()
+
+    /** Number of registered script event callbacks over all event types. zh-CN: 全部事件类型下已注册的脚本事件回调数. */
+    val eventCallbackCount: Int
+        get() = synchronized(eventBoxLock) { eventBox.values.sumOf { bucket -> bucket.values.count { it != null } } }
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
@@ -115,6 +146,26 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         // which also covers the case where onServiceConnected was never invoked.
         // zh-CN: 采纳当前实例并在首个事件时标记为可工作状态, 同时覆盖 onServiceConnected 未被调用的情况.
         registry.onEvent(this)
+
+        val now = SystemClock.elapsedRealtime()
+        eventCount.incrementAndGet()
+        lastEventType = type
+        lastEventElapsedRealtime = now
+        if (boundAtElapsedRealtime == 0L) boundAtElapsedRealtime = now
+
+        // Lock-free read of the volatile observer snapshot; only field values are handed out.
+        // zh-CN: 无锁读取 volatile 的观察者快照; 只向外传递字段值.
+        val observers = eventObservers
+        if (observers.isNotEmpty()) {
+            val record = A11yEventRecord.of(event)
+            observers.forEach { (owner, observer) ->
+                try {
+                    observer(record)
+                } catch (e: Throwable) {
+                    Log.e(TAG, "Unhandled exception in accessibility event observer: $owner", e)
+                }
+            }
+        }
 
         // Snapshot callbacks to avoid holding lock while invoking user code.
         // zh-CN: 为回调建立快照, 以避免在调用用户代码时持锁.
@@ -233,6 +284,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         super.onServiceConnected()
         Log.d(TAG, "onServiceConnected: $serviceInfo")
         isDisposed = false
+        boundAtElapsedRealtime = SystemClock.elapsedRealtime()
         // @Hint by Stardust on Feb 12, 2017 (rephrased by SuperMonster003 on Sep 5, 2026).
         //  ! Sometimes this callback is never triggered although the service is started and events flow.
         //  ! The registry therefore also adopts the instance from onAccessibilityEvent.
@@ -283,6 +335,41 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         private val delegatesLock = Any()
         private var containsAllEventTypes = false
         private val eventTypes = HashSet<Int>()
+
+        /** Number of registered framework delegates. zh-CN: 已注册的框架内部 delegate 数. */
+        val delegateCount: Int
+            get() = synchronized(delegatesLock) { delegates.size }
+
+        // Lightweight event observers (owner -> callback), kept in the companion so that they survive
+        // service restarts. Copy-on-write: the map is replaced under the lock and read without it.
+        // This is the seed of the Kotlin-side subscription API of the P1.3 event bus.
+        // zh-CN: 轻量事件观察者 (owner -> 回调), 放在伴生对象中以跨服务重启存活. 写时复制: 持锁替换整个映射, 读取时无锁.
+        // 这是 P1.3 事件总线 Kotlin 侧订阅 API 的雏形.
+        @Volatile
+        private var eventObservers: Map<Any, (A11yEventRecord) -> Unit> = emptyMap()
+        private val eventObserversLock = Any()
+
+        /**
+         * Registers [observer] for [owner], replacing the observer previously registered by the same owner.
+         * Observers are invoked on the service's main thread for every delivered event, before script callbacks.
+         * zh-CN: 为 [owner] 注册 [observer], 同一 owner 之前的观察者会被替换. 观察者在服务主线程上于每个事件到达时被调用, 先于脚本回调.
+         */
+        fun addEventObserver(owner: Any, observer: (A11yEventRecord) -> Unit) {
+            synchronized(eventObserversLock) {
+                eventObservers = LinkedHashMap(eventObservers).apply { put(owner, observer) }
+            }
+        }
+
+        fun removeEventObserver(owner: Any): Boolean {
+            synchronized(eventObserversLock) {
+                if (!eventObservers.containsKey(owner)) return false
+                eventObservers = LinkedHashMap(eventObservers).apply { remove(owner) }
+                return true
+            }
+        }
+
+        val eventObserverCount: Int
+            get() = eventObservers.size
 
         var hasOperationalState: Boolean
             get() = registry.isOperational
