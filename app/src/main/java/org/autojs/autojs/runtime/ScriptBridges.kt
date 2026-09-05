@@ -5,7 +5,6 @@ import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
-import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Callable
@@ -13,6 +12,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
 /**
@@ -67,11 +67,16 @@ class ScriptBridges : IScriptBridges {
             val arr = toArray(listLike.nodes)
             val scope = arr.parentScope ?: engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
             val boundThis = Context.javaToJS(listLike, scope) as Scriptable
-            listLike::class.java.methods.forEach {
-                val name = it.name
-                val method = newNativeJavaMethod(scope, it, name)
-                val bound = BoundFunction(cx, scope, method, boundThis, emptyArray())
-                arr.put(name, arr, bound)
+            // The members of the wrapped collection carry every overload of a name (the former
+            // per-Method binding kept only the last overload, so `slice(1)` next to `slice(1, 3)`
+            // or `performAction(a)` next to `performAction(a, ...args)` would resolve to one of them).
+            // zh-CN: 被包装集合的成员带有同名的全部重载 (原先逐 Method 绑定只保留最后一个重载, `slice(1)` 与 `slice(1, 3)`,
+            // `performAction(a)` 与 `performAction(a, ...args)` 只会剩下其一).
+            listLike::class.java.methods.map { it.name }.distinct().forEach { name ->
+                val member = ScriptableObject.getProperty(boundThis, name)
+                if (member is Callable) {
+                    arr.put(name, arr, BoundFunction(cx, scope, member, boundThis, emptyArray()))
+                }
             }
             return@useJsContext arr
         }

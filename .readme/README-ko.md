@@ -313,6 +313,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 접근성 서비스의 무인 활성화 방식에 Shizuku 추가 (root 및 보안 설정 권한과 나란히, 둘 다 사용할 수 없을 때 Shizuku 사용자 서비스를 통해 시스템 설정을 기록): 설정 페이지와 접근성 서비스 관리자의 설정 영역에 "Shizuku를 통해 접근성 서비스를 자동으로 활성화" 스위치 (기본 켜짐) 를 추가하고, 관리자 상태 영역에 "Shizuku 액세스" 행을 추가
 * `추가` `auto.setFlags()` 에 플래그 `appWindowsFallback` 추가: 시스템이 아직 활성 창의 루트를 제공하지 않는 동안 (접근성 서비스가 바인딩된 직후; Android 8.0 에서는 다음 창 변화까지 지속될 수 있음), 선택기와 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 가 창 목록의 애플리케이션 창 (포커스된 창 우선) 루트로 대체함. 기본값은 꺼짐
 * `추가` `UiObject` 에 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 메서드 추가 (`clickable()` 등 불리언 속성 메서드와 같은 형식이며 기존 compat 접근자 `isContentInvalid` 등에 대응)
+* `추가` 위젯 컬렉션 (`find()` / `untilFind()` / `children()` / `siblings()` 등이 반환하는 배열) 에 새 메서드 추가: `at(i)` (음수는 끝에서부터, 범위 밖은 null), `first()` / `last()` (비어 있으면 null), `nonNull()` (null 항목 제거), `slice(start?, end?)` (`Array.prototype.slice` 와 같은 인덱스 규칙, 결과도 컬렉션 메서드를 가짐), 그리고 노드별 결과를 반환하는 `performActionEach(action, ...args)` / `clickEach()` / `longClickEach()` / `scrollForwardEach()` / `scrollBackwardEach()` / `setTextEach(text)` (boolean 배열, 모든 노드를 시도; 기존 `performAction` / `click()` 등의 논리곱 의미는 변함없음); `filter` / `map` / `forEach` / `some` / `every` / `indexOf` / `for...of` 는 배열 자체의 연산으로 이전처럼 사용 가능
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
@@ -443,6 +444,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` `UiObject.clickBounds()` 가 스크립트 스레드에서 Looper 를 준비하고 제스처가 끝나면 `quit()` 을 호출하여 스크립트 스레드 자체의 이벤트 루프를 종료시켰고, 이후 `setTimeout` 등 콜백이 실행되지 않고 스크립트가 일찍 끝나던 문제; 쿼리로 얻은 노드는 이제 스크립트의 제스처 디스패처 (servant Looper) 를 통해 탭하며, 다른 출처의 노드는 기존 경로를 유지함
 * `수정` `pickup` / `detect` 의 결과 유형 `['compass', 'p']` 가 항상 "알 수 없는 결과 유형" 으로 실패하던 문제 (인터셉터 표에 `compass` 가 `String` 매개변수로 등록되어 있었으나 실제 시그니처는 `CharSequence`); 이제 동작함
 * `수정` 레이아웃 검사기가 동작을 선택하지 않은 채 컬렉션 컨트롤의 자식 항목 코드를 생성하면 생성된 `forEach` 블록에 잘못된 문장 `target.;` 이 포함되던 문제; 이제 해당 줄을 생략함
+* `수정` 위젯 컬렉션 배열에서 같은 이름의 여러 오버로드 중 마지막 하나만 남아 (예: `performAction(action)` 과 `performAction(action, ...args)`), 다른 인수 개수로 호출하면 매개변수 불일치로 실패하던 문제; 이제 이름별로 모든 오버로드를 바인딩함
 * `개선` `TypeScript 콘솔`은 기본적으로 접힌 상태를 유지하고 컴파일러 플러그인을 사용할 수 있을 때만 전체 로그 페이지 또는 편집기 로그 패널의 더보기 메뉴에서 필요에 따라 표시되며 표시 상태를 각각 기억함; 스니펫 실행 중에는 녹색 실행 동작이 빨간색 중지 동작으로 전환되고 전체 로그 페이지에 실제 작업 디렉터리가 표시되며 편집기 로그 패널의 더보기 메뉴에 복사, 보내기 및 내보내기도 통합됨
 * `개선` TypeScript TSX 런타임 검증 메시지가 하드코딩된 영어 대신 지원되는 10개 언어 모두에서 앱 언어를 따르도록 개선
 * `개선` 선택한 글꼴을 아직 다운로드하지 않은 경우 Ace 글꼴 미리보기가 다기능 키보드 위에 다운로드 안내를 표시하고, 다운로드 완료 또는 사용 가능한 글꼴로 전환하면 자동으로 숨김

@@ -153,6 +153,7 @@
 * `新增` 無障礙服務的無人值守啓用方式新增 Shizuku (與 root 及修改安全設置權限並列, 在兩者均不可用時經 Shizuku 用戶服務寫入系統設置): 設置頁及無障礙服務管理器的設置區新增 "使用 Shizuku 自動啓用無障礙服務" 開關 (默認開啓), 管理器狀態區新增 "Shizuku 權限" 行
 * `新增` `auto.setFlags()` 新增標誌 `appWindowsFallback`: 系統尚未提供活動窗口根節點時 (無障礙服務剛綁定後; Android 8.0 上可能持續到下一次窗口變化), 選擇器與 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的應用窗口 (焦點窗口優先) 的根節點代替, 默認關閉
 * `新增` `UiObject` 新增 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 方法 (與 `clickable()` 等布爾屬性方法風格一致, 對應既有的 `isContentInvalid` 等 compat 訪問器)
+* `新增` 控件集合 (`find()` / `untilFind()` / `children()` / `siblings()` 等返回的數組) 新增方法: `at(i)` (負數從末尾計, 越界為 null), `first()` / `last()` (空集合為 null), `nonNull()` (去掉 null 項), `slice(start?, end?)` (序號規則同 `Array.prototype.slice`, 結果仍帶集合方法), 以及逐節點返回結果的 `performActionEach(action, ...args)` / `clickEach()` / `longClickEach()` / `scrollForwardEach()` / `scrollBackwardEach()` / `setTextEach(text)` (返回 boolean 數組, 每個節點都會嘗試; 既有 `performAction` / `click()` 等的布爾與語義不變); `filter` / `map` / `forEach` / `some` / `every` / `indexOf` / `for...of` 為數組自身的操作, 一如既往可用
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
 * `修復` 使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間
@@ -283,6 +284,7 @@
 * `修復` `UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑
 * `修復` `pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 "未知結果類型", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用
 * `修復` 佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行
+* `修復` 控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載
 * `優化` `TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `優化` Ace 字體預覽在目前字體尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字體或下載完成後自動隱藏

@@ -129,6 +129,7 @@
 * `新增` 无障碍服务的无人值守启用方式新增 Shizuku (与 root 及修改安全设置权限并列, 在两者均不可用时经 Shizuku 用户服务写入系统设置): 设置页及无障碍服务管理器的设置区新增 "使用 Shizuku 自动启用无障碍服务" 开关 (默认开启), 管理器状态区新增 "Shizuku 权限" 行
 * `新增` `auto.setFlags()` 新增标志 `appWindowsFallback`: 系统尚未提供活动窗口根节点时 (无障碍服务刚绑定后; Android 8.0 上可能持续到下一次窗口变化), 选择器与 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 以窗口列表中的应用窗口 (焦点窗口优先) 的根节点代替, 默认关闭
 * `新增` `UiObject` 新增 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 方法 (与 `clickable()` 等布尔属性方法风格一致, 对应既有的 `isContentInvalid` 等 compat 访问器)
+* `新增` 控件集合 (`find()` / `untilFind()` / `children()` / `siblings()` 等返回的数组) 新增方法: `at(i)` (负数从末尾计, 越界为 null), `first()` / `last()` (空集合为 null), `nonNull()` (去掉 null 项), `slice(start?, end?)` (序号规则同 `Array.prototype.slice`, 结果仍带集合方法), 以及逐节点返回结果的 `performActionEach(action, ...args)` / `clickEach()` / `longClickEach()` / `scrollForwardEach()` / `scrollBackwardEach()` / `setTextEach(text)` (返回 boolean 数组, 每个节点都会尝试; 既有 `performAction` / `click()` 等的布尔与语义不变); `filter` / `map` / `forEach` / `some` / `every` / `indexOf` / `for...of` 为数组自身的操作, 一如既往可用
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
@@ -259,6 +260,7 @@
 * `修复` `UiObject.clickBounds()` 在脚本线程上临时准备 Looper 并在手势完成后 `quit()`, 实际退出的是脚本线程自身的事件循环, 此后 `setTimeout` 等回调不再执行且脚本提前结束; 现在由查询得到的节点经脚本的手势派发器 (servant Looper) 点按, 其它来源的节点保持原路径
 * `修复` `pickup` / `detect` 的结果类型 `['compass', 'p']` 一律报 "未知结果类型", 因 `compass` 在拦截表中登记为 `String` 参数而其签名为 `CharSequence`; 现在可用
 * `修复` 布局分析器为集合控件的子项生成代码且未选择动作时, 生成的 `forEach` 代码块含无效语句 `target.;`; 现在省略该行
+* `修复` 控件集合数组上同名的多个重载只保留最后一个 (如 `performAction(action)` 与 `performAction(action, ...args)`), 以另一种参数个数调用会报参数不匹配; 现在按名称绑定全部重载
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
