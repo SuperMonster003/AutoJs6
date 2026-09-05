@@ -24,8 +24,11 @@ class A11yServiceControllerTest {
      * simulate the system binding / unbinding the service after a write.
      */
     private inner class System {
+        @Volatile
         var enabled: String? = null
         val registry = A11yServiceRegistry<FakeService>()
+
+        @Volatile
         var nextInstance = FakeService("instance-1")
         private var instances = 1
 
@@ -38,8 +41,10 @@ class A11yServiceControllerTest {
         }
 
         fun unbind() {
-            registry.instance?.let { registry.onDisposed(it) }
+            // Prepare the next instance before the registry reports the unbind: a controller waiting
+            // for the unbind on another thread binds again as soon as the registry is unbound.
             nextInstance = FakeService("instance-${++instances}")
+            registry.instance?.let { registry.onDisposed(it) }
         }
     }
 
