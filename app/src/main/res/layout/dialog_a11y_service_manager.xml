@@ -12,17 +12,46 @@
         android:orientation="vertical"
         android:paddingBottom="8dp">
 
-        <TextView
-            android:id="@+id/status_title"
+        <!-- Section header: title plus icon-only buttons (refresh, show less, show more). -->
+        <!-- zh-CN: 区块标题: 标题文字加纯图标按钮 (刷新, 显示更少, 显示更多). -->
+        <LinearLayout
+            android:id="@+id/status_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:minHeight="36dp"
+            android:orientation="horizontal"
             android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:text="@string/text_label_state"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/status_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/text_label_state"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/status_refresh"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_refresh"
+                android:src="@drawable/ic_refresh_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/status_less"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_less"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/status_more"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_more"
+                android:src="@drawable/ic_add_white_48dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/status_container"
@@ -30,18 +59,77 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <TextView
-            android:id="@+id/control_title"
+        <LinearLayout
+            android:id="@+id/control_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:minHeight="36dp"
+            android:orientation="horizontal"
             android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:text="@string/text_control"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/control_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/text_control"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Start / stop / restart move up here when the control rows are hidden. -->
+            <!-- zh-CN: 控制行全部隐藏时, 启动 / 停止 / 重启移到这里. -->
+            <LinearLayout
+                android:id="@+id/control_header_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/control_start"
+                    style="@style/A11yServiceManagerHeaderButton"
+                    android:contentDescription="@string/text_start"
+                    android:src="@drawable/ic_play_arrow_white_48dp" />
+
+                <ImageButton
+                    android:id="@+id/control_stop"
+                    style="@style/A11yServiceManagerHeaderButton"
+                    android:contentDescription="@string/text_stop"
+                    android:src="@drawable/ic_stop_button_fill" />
+
+                <ImageButton
+                    android:id="@+id/control_restart"
+                    style="@style/A11yServiceManagerHeaderButton"
+                    android:contentDescription="@string/text_restart"
+                    android:src="@drawable/ic_refresh_white_24dp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:alpha="0.24"
+                    android:background="@color/day_night" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/control_less"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_less"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/control_more"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_more"
+                android:src="@drawable/ic_add_white_48dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/control_container"

@@ -275,4 +275,14 @@
         <item name="android:itemBackground">@color/md_blue_gray_50</item>
     </style>
 
+    <!-- Icon-only buttons in the section headers of the accessibility service manager dialog. -->
+    <!-- zh-CN: 无障碍服务管理器对话框区块标题中的纯图标按钮. -->
+    <style name="A11yServiceManagerHeaderButton">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
 </resources>

@@ -1797,6 +1797,8 @@
     <string name="text_show">Show</string>
     <string name="text_show_layout_bounds">View in layout bounds</string>
     <string name="text_show_layout_hierarchy">View in layout hierarchy</string>
+    <string name="text_show_less">Show less</string>
+    <string name="text_show_more">Show more</string>
     <string name="text_show_widget_information">Show widget information</string>
     <string name="text_sign">Sign</string>
     <string name="text_sign_completed">Sign completed</string>

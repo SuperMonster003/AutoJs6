@@ -1798,6 +1798,8 @@
     <string name="text_show">显示</string>
     <string name="text_show_layout_bounds">在布局范围中查看</string>
     <string name="text_show_layout_hierarchy">在布局层次中查看</string>
+    <string name="text_show_less">显示更少</string>
+    <string name="text_show_more">显示更多</string>
     <string name="text_show_widget_information">显示控件信息</string>
     <string name="text_sign">签名</string>
     <string name="text_sign_completed">签名完成</string>

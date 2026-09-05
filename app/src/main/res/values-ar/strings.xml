@@ -1803,6 +1803,8 @@
     <string name="text_show">إظهار</string>
     <string name="text_show_layout_bounds">عرض في حدود التصميم</string>
     <string name="text_show_layout_hierarchy">عرض في التسلسل الهرمي للتخطيط</string>
+    <string name="text_show_less">عرض اقل</string>
+    <string name="text_show_more">عرض المزيد</string>
     <string name="text_show_widget_information">إظهار معلومات القطعة</string>
     <string name="text_sign">توقيع</string>
     <string name="text_sign_completed">اكتمل التوقيع</string>

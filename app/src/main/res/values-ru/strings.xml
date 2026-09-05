@@ -1801,6 +1801,8 @@
     <string name="text_show">Показать</string>
     <string name="text_show_layout_bounds">Вид в границах макета</string>
     <string name="text_show_layout_hierarchy">Вид в иерархии макета</string>
+    <string name="text_show_less">Показать меньше</string>
+    <string name="text_show_more">Показать больше</string>
     <string name="text_show_widget_information">Показать информацию о виджете</string>
     <string name="text_sign">Подписать</string>
     <string name="text_sign_completed">Подпись завершена</string>

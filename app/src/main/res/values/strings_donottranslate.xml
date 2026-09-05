@@ -73,6 +73,8 @@
     <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
+    <string name="key_a11y_service_manager_control_level" translatable="false">key_$_a11y_service_manager_control_level</string>
+    <string name="key_a11y_service_manager_status_level" translatable="false">key_$_a11y_service_manager_status_level</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>

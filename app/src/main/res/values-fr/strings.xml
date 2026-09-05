@@ -1801,6 +1801,8 @@
     <string name="text_show">Afficher</string>
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
     <string name="text_show_layout_hierarchy">Afficher la hiérarchie de la disposition</string>
+    <string name="text_show_less">Afficher moins</string>
+    <string name="text_show_more">Afficher plus</string>
     <string name="text_show_widget_information">Afficher les informations du widget</string>
     <string name="text_sign">Signer</string>
     <string name="text_sign_completed">Signature terminee</string>

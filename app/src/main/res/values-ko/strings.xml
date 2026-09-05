@@ -1803,6 +1803,8 @@
     <string name="text_show">표시</string>
     <string name="text_show_layout_bounds">레이아웃 경계보기</string>
     <string name="text_show_layout_hierarchy">레이아웃 계층 구조보기</string>
+    <string name="text_show_less">간략히 보기</string>
+    <string name="text_show_more">더 보기</string>
     <string name="text_show_widget_information">위젯 정보를 보여줍니다</string>
     <string name="text_sign">서명</string>
     <string name="text_sign_completed">서명 완료</string>

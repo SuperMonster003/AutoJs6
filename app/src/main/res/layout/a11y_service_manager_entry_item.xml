@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_weight="1.4"
+        android:ellipsize="end"
         android:textColor="@color/day_night"
         android:textSize="13sp"
         tools:text="@string/text_operational" />

@@ -53,7 +53,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 启停 (P1.2 起由 `A11yServiceController` 统一, `AccessibilityTool` 只是门面):
 
-- `start(launchSettingsIfNeeded)`: 已运行直接返回 (不重启); 否则按顺序尝试 `ServiceStartStrategy` (Root: `settings put secure` 经 root shell, 值加单引号以允许空列表; SecureSettings: `Settings.Secure` 直写, 需 `WRITE_SECURE_SETTINGS`), 每个策略只改写 `enabled_accessibility_services` 列表 (不再写 `accessibility_enabled`, Android 7.0 起由系统自行维护), 结果以回读为准; 已列出但未绑定的服务先移出再写回以触发重新绑定; 策略均不可用或失败时按需打开系统设置页.
+- `start(launchSettingsIfNeeded)`: 已运行直接返回 (不重启); 否则按顺序尝试 `ServiceStartStrategy` (Root: `settings put secure` 经 root shell, 值加单引号以允许空列表; SecureSettings: `Settings.Secure` 直写, 需 `WRITE_SECURE_SETTINGS`; Shizuku: 同样的 `settings` 命令经 Shizuku 用户服务执行, 需 Shizuku 运行且已授权, 排在最后因为经另一进程往返), 每个策略只改写 `enabled_accessibility_services` 列表 (不再写 `accessibility_enabled`, Android 7.0 起由系统自行维护), 结果以回读为准; 已列出但未绑定的服务先移出再写回以触发重新绑定; 策略均不可用或失败时按需打开系统设置页.
 - `stop(launchSettingsIfNeeded)`: 策略 -> `disableSelf()` 兜底 (仅当回读已不在列表中才算成功) -> 按需设置页. 系统的解绑是异步的, `waitForStopped()` (注册表 `awaitUnbound`, 2000 ms) 等待它.
 - `restart()`: `stop` -> 等待解绑 -> `start`; 不等待会被部分系统 (AVD API 26 实测) 合并为 "仍然启用". `auto(true)` 的强制重启走 `ensure(forceRestart = true)`, 同样等待解绑.
 - `ensure(level, timeoutMillis, launchSettingsIfNeeded, forceRestart): EnsureResult`: 已满足直接返回; 已绑定只差首个事件时只等待; 否则策略 (每个给 2 s 完成绑定) -> 设置页, 然后等待 `level` 至 `timeoutMillis` (负数无限). 失败原因 `NOT_ENABLED` / `ENABLED_BUT_UNBOUND` / `BOUND_BUT_NOT_OPERATIONAL` = "设置中是否启用" x 注册表状态. `AccessibilityTool` 的 `ensureService()` / `ensureServiceOperational()` 失败抛带原因文案的 `ScriptException`, `startServiceAndWaitFor()` / `startServiceAndWaitForOperational()` (`auto.waitFor(timeout)`) 失败抛 `ScriptInterruptedException`.

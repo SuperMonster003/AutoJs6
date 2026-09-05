@@ -1801,6 +1801,8 @@
     <string name="text_show">Mostrar</string>
     <string name="text_show_layout_bounds">Vista en los límites del diseño</string>
     <string name="text_show_layout_hierarchy">Vista en la jerarquía del diseño</string>
+    <string name="text_show_less">Mostrar menos</string>
+    <string name="text_show_more">Mostrar más</string>
     <string name="text_show_widget_information">Mostrar información del widget</string>
     <string name="text_sign">Firmar</string>
     <string name="text_sign_completed">Firma completada</string>

@@ -1802,6 +1802,8 @@
     <string name="text_show">表示</string>
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
     <string name="text_show_layout_hierarchy">レイアウト階層内の表示</string>
+    <string name="text_show_less">表示を減らす</string>
+    <string name="text_show_more">もっと見る</string>
     <string name="text_show_widget_information">ウィジェット情報を表示する</string>
     <string name="text_sign">署名</string>
     <string name="text_sign_completed">署名完了</string>

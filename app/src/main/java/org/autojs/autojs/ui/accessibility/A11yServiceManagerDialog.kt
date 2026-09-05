@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageButton
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.MaterialDialog
@@ -22,6 +23,7 @@ import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.P
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.Report
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceSelfCheck
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
@@ -45,8 +47,14 @@ import kotlin.math.roundToInt
  * actions and the auto-enable preferences, plus a copy of the whole diagnostics text. It doubles as the
  * on-device debugging panel of the accessibility automation roadmap.
  *
+ * The status and control sections have a persisted verbosity level stepped by the header buttons;
+ * row heights are fixed per field so that values changing length (last event, latest activity, ...)
+ * do not move the control rows under the user's finger.
+ *
  * zh-CN: 无障碍服务管理器, 由抽屉条目的 "管理器" 按钮或长按条目打开. 对话框形式 (非 Activity), 含三个区块:
  * 实时状态行 (逐行可复制), 控制动作, 自动启用偏好, 并可复制完整诊断文本. 兼作无障碍自动化 Roadmap 的真机调试面板.
+ * 状态与控制区各有一个由标题按钮逐级切换并持久化的详略等级; 各行高度按字段固定, 使长度变化的数值 (最近事件, 最近活动等)
+ * 不会让控制行在用户手指下移动.
  *
  * Created by SuperMonster003 on Sep 5, 2026.
  */
@@ -65,6 +73,36 @@ class A11yServiceManagerDialog private constructor(
         EVENT_MONITOR(R.string.text_a11y_event_monitor, R.string.summary_a11y_event_monitor, R.drawable.ic_list_thicker),
     }
 
+    /**
+     * Verbosity of the status section, from nothing (the title then carries the service status) to
+     * every field. Stored by ordinal. zh-CN: 状态区的详略等级, 从不显示 (标题此时附带服务状态) 到全部字段. 按序号存储.
+     */
+    private enum class StatusLevel(val fields: Set<Field>) {
+        NONE(emptySet()),
+        BASIC(setOf(Field.SERVICE_STATUS, Field.SYSTEM_SETTINGS, Field.IN_PROCESS_INSTANCE, Field.EVENTS, Field.SELF_CHECK)),
+        IMPORTANT(
+            BASIC.fields + setOf(
+                Field.UPTIME, Field.LAST_EVENT, Field.WINDOWS, Field.ACTIVE_WINDOW_ROOT, Field.LATEST_PACKAGE, Field.LATEST_ACTIVITY,
+                Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU,
+            ),
+        ),
+        ALL(Field.entries.toSet());
+
+        fun shows(field: Field) = field in fields
+    }
+
+    /**
+     * Verbosity of the control section; at [NONE] start / stop / restart live in the header instead.
+     * zh-CN: 控制区的详略等级; [NONE] 时启动 / 停止 / 重启改为放在标题行.
+     */
+    private enum class ControlLevel(val actions: Set<Action>) {
+        NONE(emptySet()),
+        START_STOP(setOf(Action.START, Action.STOP, Action.RESTART)),
+        ALL(Action.entries.toSet());
+
+        fun shows(action: Action) = action in actions
+    }
+
     /** Result of a control action; [launchSettings] asks the user to finish the job in system settings. */
     private class Outcome(val message: String? = null, val launchSettings: Boolean = false, val selfCheck: String? = null)
 
@@ -75,9 +113,12 @@ class A11yServiceManagerDialog private constructor(
     private val disposables = CompositeDisposable()
     private val statusRows = EnumMap<Field, A11yServiceManagerEntryItemBinding>(Field::class.java)
     private val actionRows = EnumMap<Action, OperationDialogItemBinding>(Action::class.java)
+    private val headerActions = EnumMap<Action, ImageButton>(Action::class.java)
     private val isCollecting = AtomicBoolean(false)
     private var isActionRunning = false
     private var latestReport: Report? = null
+    private var statusLevel = StatusLevel.entries[Pref.getInt(R.string.key_a11y_service_manager_status_level, StatusLevel.BASIC.ordinal).coerceIn(StatusLevel.entries.indices)]
+    private var controlLevel = ControlLevel.entries[Pref.getInt(R.string.key_a11y_service_manager_control_level, ControlLevel.START_STOP.ordinal).coerceIn(ControlLevel.entries.indices)]
 
     // Probed once on a worker thread (may spawn a root shell); never read from the 1 s timer.
     // zh-CN: 只在 worker 线程探测一次 (可能会起 root shell); 不在 1 s 定时器中读取.
@@ -105,10 +146,28 @@ class A11yServiceManagerDialog private constructor(
 
     init {
         val sectionTitleColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 3.2)
+        val headerTint = ColorStateList.valueOf(sectionTitleColor)
         listOf(binding.statusTitle, binding.controlTitle, binding.settingsTitle).forEach { it.setTextColor(sectionTitleColor) }
+        listOf(
+            binding.statusRefresh, binding.statusLess, binding.statusMore,
+            binding.controlStart, binding.controlStop, binding.controlRestart, binding.controlLess, binding.controlMore,
+        ).forEach { it.imageTintList = headerTint }
 
         Field.entries.forEach { field -> statusRows[field] = createStatusRow(field) }
         Action.entries.forEach { action -> actionRows[action] = createActionRow(action) }
+        headerActions[Action.START] = binding.controlStart
+        headerActions[Action.STOP] = binding.controlStop
+        headerActions[Action.RESTART] = binding.controlRestart
+        headerActions.forEach { (action, button) -> button.setOnClickListener { runAction(action) } }
+
+        binding.statusRefresh.setOnClickListener { refresh() }
+        binding.statusLess.setOnClickListener { stepStatusLevel(-1) }
+        binding.statusMore.setOnClickListener { stepStatusLevel(+1) }
+        binding.controlLess.setOnClickListener { stepControlLevel(-1) }
+        binding.controlMore.setOnClickListener { stepControlLevel(+1) }
+        applyStatusLevel()
+        applyControlLevel()
+
         createSwitchRow(
             R.string.text_enable_a11y_service_with_root_access_automatically,
             R.string.summary_enable_a11y_service_with_root_access,
@@ -130,11 +189,6 @@ class A11yServiceManagerDialog private constructor(
 
         dialog = MaterialDialog.Builder(context)
             .title(R.string.text_a11y_service_manager)
-            .options(
-                listOf(
-                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_refresh)) { refresh() },
-                ),
-            )
             // Not wrapInScrollView: the library pads the inner view horizontally, which would cut the row ripples short.
             // zh-CN: 不使用 wrapInScrollView: 库会给内部视图加水平内边距, 使整行 ripple 被截断.
             .customView(binding.root, false)
@@ -200,14 +254,69 @@ class A11yServiceManagerDialog private constructor(
         val present = report.entries.associateBy { it.field }
         statusRows.forEach { (field, row) ->
             val entry = present[field]
-            row.root.visibility = if (entry != null) View.VISIBLE else View.GONE
+            row.root.visibility = if (entry != null && statusLevel.shows(field)) View.VISIBLE else View.GONE
             if (entry != null) row.value.text = entry.value
         }
+        applyStatusTitle()
+    }
+
+    // At level NONE the title carries the service status, e.g. "State [Operational]".
+    // zh-CN: 等级为 NONE 时标题附带服务状态, 如 "状态 [可操作]".
+    private fun applyStatusTitle() {
+        val title = context.getString(R.string.text_label_state)
+        val status = latestReport?.status
+        binding.statusTitle.text = when {
+            statusLevel == StatusLevel.NONE && status != null -> "$title [${context.getString(status.textRes)}]"
+            else -> title
+        }
+    }
+
+    private fun stepStatusLevel(delta: Int) {
+        val next = StatusLevel.entries.getOrNull(statusLevel.ordinal + delta) ?: return
+        statusLevel = next
+        Pref.putInt(R.string.key_a11y_service_manager_status_level, next.ordinal)
+        applyStatusLevel()
+    }
+
+    private fun applyStatusLevel() {
+        // Rows stay hidden until the first report has given them a value.
+        // zh-CN: 首份报告给出数值之前各行保持隐藏.
+        val present = latestReport?.entries?.associateBy { it.field }.orEmpty()
+        statusRows.forEach { (field, row) ->
+            row.root.visibility = if (field in present && statusLevel.shows(field)) View.VISIBLE else View.GONE
+        }
+        applyStatusTitle()
+        setStepEnabled(binding.statusLess, statusLevel.ordinal > 0)
+        setStepEnabled(binding.statusMore, statusLevel.ordinal < StatusLevel.entries.lastIndex)
+    }
+
+    private fun stepControlLevel(delta: Int) {
+        val next = ControlLevel.entries.getOrNull(controlLevel.ordinal + delta) ?: return
+        controlLevel = next
+        Pref.putInt(R.string.key_a11y_service_manager_control_level, next.ordinal)
+        applyControlLevel()
+    }
+
+    private fun applyControlLevel() {
+        actionRows.forEach { (action, row) ->
+            row.root.visibility = if (controlLevel.shows(action)) View.VISIBLE else View.GONE
+        }
+        binding.controlHeaderActions.visibility = if (controlLevel == ControlLevel.NONE) View.VISIBLE else View.GONE
+        setStepEnabled(binding.controlLess, controlLevel.ordinal > 0)
+        setStepEnabled(binding.controlMore, controlLevel.ordinal < ControlLevel.entries.lastIndex)
+    }
+
+    // A step button at its limit stays visible but fades, so the row keeps its shape.
+    // zh-CN: 到达边界的等级按钮保持可见但变淡, 使标题行形状不变.
+    private fun setStepEnabled(button: ImageButton, enabled: Boolean) {
+        button.isEnabled = enabled
+        button.alpha = if (enabled) 1f else STEP_LIMIT_ALPHA
     }
 
     private fun createStatusRow(field: Field): A11yServiceManagerEntryItemBinding {
         return A11yServiceManagerEntryItemBinding.inflate(inflater, binding.statusContainer, true).apply {
             name.setText(field.labelRes)
+            reserveLines(this, field)
             root.visibility = View.GONE
             root.setOnClickListener {
                 val entry = latestReport?.entries?.firstOrNull { it.field == field } ?: return@setOnClickListener
@@ -217,6 +326,24 @@ class A11yServiceManagerDialog private constructor(
         }
     }
 
+    /**
+     * Fixes the height of a row so that the dialog does not jump while values change: fields whose
+     * length varies on every refresh get a constant line count (the copy still holds the full text),
+     * fields that change rarely only get a cap, and the static or user-triggered ones stay free.
+     * zh-CN: 固定行高, 避免数值变化时对话框跳动: 每次刷新长度都可能变化的字段使用固定行数 (复制内容仍是全文),
+     * 很少变化的字段只设上限, 静态或由用户触发的字段不限制.
+     */
+    private fun reserveLines(row: A11yServiceManagerEntryItemBinding, field: Field) {
+        val (min, max) = when (field) {
+            Field.SERVICE_STATUS, Field.SYSTEM_SETTINGS, Field.UPTIME, Field.EVENTS, Field.WINDOWS -> 1 to 1
+            Field.IN_PROCESS_INSTANCE, Field.LAST_EVENT, Field.ACTIVE_WINDOW_ROOT, Field.LATEST_PACKAGE, Field.LATEST_ACTIVITY, Field.LISTENERS -> 2 to 2
+            Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU -> 1 to 2
+            Field.CONFIG, Field.SELF_CHECK -> return
+        }
+        row.value.minLines = min
+        row.value.maxLines = max
+    }
+
     private fun createActionRow(action: Action): OperationDialogItemBinding {
         return OperationDialogItemBinding.inflate(inflater, binding.controlContainer, true).apply {
             val verticalPadding = DisplayUtils.dpToPx(10f).roundToInt()
@@ -224,18 +351,12 @@ class A11yServiceManagerDialog private constructor(
             icon.setImageResource(action.iconRes)
             icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
             title.setText(action.titleRes)
-            restoreSubtitle(this, action)
+            action.summaryRes?.let { summaryRes ->
+                subtitle.setText(summaryRes)
+                subtitle.visibility = View.VISIBLE
+            }
+            usageCount.setText(R.string.text_in_progress)
             root.setOnClickListener { runAction(action) }
-        }
-    }
-
-    private fun restoreSubtitle(row: OperationDialogItemBinding, action: Action) {
-        val summaryRes = action.summaryRes
-        if (summaryRes != null) {
-            row.subtitle.setText(summaryRes)
-            row.subtitle.visibility = View.VISIBLE
-        } else {
-            row.subtitle.visibility = View.GONE
         }
     }
 
@@ -293,19 +414,18 @@ class A11yServiceManagerDialog private constructor(
         refresh()
     }
 
+    // The in-progress marker sits at the end of the row (not in the subtitle slot) so the row keeps its height.
+    // zh-CN: "进行中" 标记放在行尾 (而非副标题位置), 使行高不变.
     private fun setActionsEnabled(enabled: Boolean, running: Action) {
         isActionRunning = !enabled
         actionRows.forEach { (action, row) ->
             row.root.isEnabled = enabled
             row.root.alpha = if (enabled) 1f else DISABLED_ALPHA
-            if (action == running) {
-                if (enabled) {
-                    restoreSubtitle(row, action)
-                } else {
-                    row.subtitle.setText(R.string.text_in_progress)
-                    row.subtitle.visibility = View.VISIBLE
-                }
-            }
+            row.usageCount.visibility = if (!enabled && action == running) View.VISIBLE else View.GONE
+        }
+        headerActions.values.forEach { button ->
+            button.isEnabled = enabled
+            button.alpha = if (enabled) 1f else DISABLED_ALPHA
         }
     }
 
@@ -358,6 +478,7 @@ class A11yServiceManagerDialog private constructor(
 
         private const val REFRESH_INTERVAL_MILLIS = 1_000L
         private const val DISABLED_ALPHA = 0.58f
+        private const val STEP_LIMIT_ALPHA = 0.3f
 
         /**
          * Shows the manager. [context] must be an Activity context; the caller keeps the returned dialog
