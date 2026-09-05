@@ -440,6 +440,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 선택자의 문자열 표현 (`selector().toString()`, 오류 메시지) 의 소수가 소수점으로 쉼표를 쓰는 UI 언어 (프랑스어, 러시아어 등) 에서 `boundsLeft(0,5)` 로 표시되던 문제; 이제 항상 점을 사용함
 * `수정` 선택자 메서드의 전역 함수 형식 (`algorithm('xyz')`, `textMatch('(')` 등) 이 던지는 Java 예외를 스크립트의 `try / catch` 로 잡을 수 없고 스크립트가 종료되던 문제; 이제 잡을 수 있는 스크립트 오류로 던져짐
 * `수정` `findOnUiThread` 플래그가 설정된 경우 UI 스레드에 게시된 검색이 깨우기 신호를 놓치면 (스크립트 스레드가 대기에 들어가기 전에 UI 스레드가 검색을 끝냄) 영원히 멈추고, UI 스레드가 차단된 동안 `findOne(timeout)` 이 시간 초과되지 않던 문제; 이제 대기는 쿼리의 제한 시간으로 제한되며 깨우기 신호를 놓치지 않음
+* `수정` `UiObject.clickBounds()` 가 스크립트 스레드에서 Looper 를 준비하고 제스처가 끝나면 `quit()` 을 호출하여 스크립트 스레드 자체의 이벤트 루프를 종료시켰고, 이후 `setTimeout` 등 콜백이 실행되지 않고 스크립트가 일찍 끝나던 문제; 쿼리로 얻은 노드는 이제 스크립트의 제스처 디스패처 (servant Looper) 를 통해 탭하며, 다른 출처의 노드는 기존 경로를 유지함
+* `수정` `pickup` / `detect` 의 결과 유형 `['compass', 'p']` 가 항상 "알 수 없는 결과 유형" 으로 실패하던 문제 (인터셉터 표에 `compass` 가 `String` 매개변수로 등록되어 있었으나 실제 시그니처는 `CharSequence`); 이제 동작함
+* `수정` 레이아웃 검사기가 동작을 선택하지 않은 채 컬렉션 컨트롤의 자식 항목 코드를 생성하면 생성된 `forEach` 블록에 잘못된 문장 `target.;` 이 포함되던 문제; 이제 해당 줄을 생략함
 * `개선` `TypeScript 콘솔`은 기본적으로 접힌 상태를 유지하고 컴파일러 플러그인을 사용할 수 있을 때만 전체 로그 페이지 또는 편집기 로그 패널의 더보기 메뉴에서 필요에 따라 표시되며 표시 상태를 각각 기억함; 스니펫 실행 중에는 녹색 실행 동작이 빨간색 중지 동작으로 전환되고 전체 로그 페이지에 실제 작업 디렉터리가 표시되며 편집기 로그 패널의 더보기 메뉴에 복사, 보내기 및 내보내기도 통합됨
 * `개선` TypeScript TSX 런타임 검증 메시지가 하드코딩된 영어 대신 지원되는 10개 언어 모두에서 앱 언어를 따르도록 개선
 * `개선` 선택한 글꼴을 아직 다운로드하지 않은 경우 Ace 글꼴 미리보기가 다기능 키보드 위에 다운로드 안내를 표시하고, 다운로드 완료 또는 사용 가능한 글꼴로 전환하면 자동으로 숨김
@@ -530,6 +533,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 선택자 속성을 선언적 레지스트리 `SelectorRegistry` 에서 한 번에 기술하도록 변경: `UiSelector` 의 builder 메서드는 여기서 생성되고, 맵 형식 선택자 (`pickup({...})` 등) 는 리플렉션 대신 레지스트리로 해석되며, 전역 선택자 함수는 레지스트리와 명시적 허용 목록에 따라 내보내짐 (`toStringReadable` 과 `internal` 멤버의 맹글링된 이름은 더 이상 전역 함수로 노출되지 않음); 전역 함수와 맵 형식 선택자의 숫자 인수는 일괄적으로 반올림하여 정수로 변환됨 (맵 형식 선택자는 이전에 버림 처리)
 * `개선` 선택자 필터 중복 제거: 문자열 속성 (text / desc / content / id / className / packageName 및 그 변형) 은 `StringPropertyFilter` 를, 경계 메트릭 (left / boundsLeft / minLeft / maxLeft 등) 은 `MetricsFilter` 를, 정수 속성은 `IntFilter` 를 공유함; 화면 상대 필터 (bounds / 메트릭 / screenCenter / screenCoverage) 는 주입 가능한 화면 크기로 평가되며 JVM 단위 테스트로 검증됨; 선택자는 필터 목록의 스냅샷을 평가하므로 하나의 선택자를 스레드 간에 공유해도 안전함; 스크립트에 보이는 API 와 동작은 변함없음
 * `개선` 선택자 쿼리 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 및 사용 중단된 `findOne()` / `waitFor()`) 가 폴링 계획 (`PollPolicy`: 제한 시간, 간격, 횟수, 백오프) 으로 실행되며 기본 동작은 변함없음 (간격 50 ms, 제한 시간 0 이하는 무기한 대기); 무제한으로 대기하는 메서드는 KDoc 에 "영원히 차단될 수 있음" 을 명시; `findOnUiThread` 플래그가 설정된 경우 UI 스레드에 게시된 검색은 쿼리의 제한 시간까지만 기다리고 초과 시 읽기 쉬운 오류로 실패함 (`findOne(timeout)`); 무제한 쿼리 (`untilFind` 등) 는 중단 가능한 대기로 바뀌어 스크립트를 중지하면 종료됨
+* `개선` `UiObject` 분할: `pickup` / `detect` 결과 유형의 별칭 표, 피커, 이름으로 노드 메서드를 호출하는 인터셉터를 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`) 으로, `summary()` / `toString()` / `isSimilar()` 을 `UiObjectSummary` 로 이동; `UiObject.fingerprint()` 추가 (경계, 텍스트, 설명, 클래스명, 자식 수와 주요 불리언 속성의 해시, 형제나 자식은 순회하지 않음); `parent()` 로 도달한 노드의 `indexInParent()` 는 처음 사용할 때 계산; 레이아웃 검사기의 코드 생성기 (`CodeGenerator` / `ReadOnlyUiObject`) 를 Kotlin 으로 변환, 후자는 `UiNode` 를 직접 구현하는 스냅숏 뷰가 됨; 스크립트에 보이는 API 와 동작은 변함없음
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

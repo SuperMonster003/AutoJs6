@@ -5,21 +5,16 @@ package org.autojs.autojs.core.accessibility
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.automator.ActionArgument
+import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.core.automator.UiObject.Companion.COMPASS_PASS_ON
-import org.autojs.autojs.core.automator.UiObject.Companion.Detector
-import org.autojs.autojs.core.automator.UiObject.Companion.Detector.Result
-import org.autojs.autojs.core.automator.UiObject.Companion.RESULT_TYPE_WIDGET
 import org.autojs.autojs.core.automator.UiObjectActions
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.EMPTY
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
-import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.Selector
+import org.autojs.autojs.core.automator.pick.Picker
 import org.autojs.autojs.core.automator.query.PollPolicy
-import org.autojs.autojs.core.automator.selector.SelectorMapException
-import org.autojs.autojs.core.automator.selector.SelectorMapParser
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
@@ -27,17 +22,10 @@ import org.autojs.autojs.core.automator.search.SearchAlgorithm
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Callable
-import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.NativeJavaMethod
-import org.mozilla.javascript.Undefined
-import org.mozilla.javascript.VarScope
-import org.mozilla.javascript.regexp.NativeRegExp
-import java.math.BigInteger
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
@@ -46,10 +34,11 @@ import java.util.concurrent.TimeoutException
 /**
  * The script-facing selector: the builder methods are generated from [SelectorRegistry] into
  * [UiSelectorBuilders] and routed back here through [applyEntry]; this class keeps the queries
- * (`find*`, `exists`, `untilFind*`; the polling ones run as a [UiSelectorQuery]), the search
- * settings and the `pickup` machinery.
+ * (`find*`, `exists`, `untilFind*`; the polling ones run as a [UiSelectorQuery]) and the search
+ * settings; `pickup` is the entry to the [Picker] of `core/automator/pick`.
  * zh-CN: 面向脚本的选择器: builder 方法由 [SelectorRegistry] 生成到 [UiSelectorBuilders] 并经 [applyEntry] 转回此处;
- * 本类保留查询 (`find*`, `exists`, `untilFind*`; 轮询的查询以 [UiSelectorQuery] 执行), 搜索设置与 `pickup` 机制.
+ * 本类保留查询 (`find*`, `exists`, `untilFind*`; 轮询的查询以 [UiSelectorQuery] 执行) 与搜索设置; `pickup` 是
+ * `core/automator/pick` 中 [Picker] 的入口.
  *
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Sep 6, 2026.
@@ -243,6 +232,14 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     internal fun findAndReturnList(root: UiObject, max: Int = Int.MAX_VALUE): List<UiObject> = searchAlgorithm.search(root, selector, max)
 
+    /**
+     * The search over any [UiNode] tree (the code generator's captured tree); nodes not matched are
+     * released through [org.autojs.autojs.core.accessibility.node.NodeLifecycle.default], a no-op for
+     * in-memory nodes. zh-CN: 对任意 [UiNode] 树 (代码生成器捕获的树) 的搜索; 未命中的节点经
+     * [org.autojs.autojs.core.accessibility.node.NodeLifecycle.default] 释放, 对内存节点为空操作.
+     */
+    internal fun <N : UiNode<N>> searchIn(root: N, max: Int = Int.MAX_VALUE): List<N> = searchAlgorithm.search(root, selector, max)
+
     protected fun findImpl(max: Int): UiObjectCollection = findImpl(mAccessibilityBridge?.windowRoots() ?: emptyList(), max)
 
     protected fun findImpl(node: AccessibilityNodeInfo, max: Int): UiObjectCollection = findImpl(listOf(node), max)
@@ -255,7 +252,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         val result = mutableListOf<UiObject?>()
         for (root in roots) {
             if (isInWhitelist(root)) {
-                result.addAll(findAndReturnList(UiObject.createRoot(root, mAllocator), max - result.size))
+                result.addAll(findAndReturnList(UiObject.createRoot(root, mAllocator, mAccessibilityBridge), max - result.size))
                 if (result.size >= max) break
             }
         }
@@ -292,6 +289,11 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
         internal const val ID_IDENTIFIER = ":id/"
 
+        /**
+         * `pickup(root?, selector, compass?, resultType?, callback?)`: searches with the bridge of
+         * [scriptRuntime]; see [Picker]. zh-CN: `pickup(root?, selector, compass?, resultType?, callback?)`:
+         * 以 [scriptRuntime] 的 bridge 搜索; 见 [Picker].
+         */
         @JvmStatic
         fun pickup(
             scriptRuntime: ScriptRuntime,
@@ -308,116 +310,6 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
             .setCallback(callback)
             .build()
             .pick(scriptRuntime)
-
-        internal class Picker private constructor(
-            val root: UiObject?,
-            val selector: UiSelector?,
-            val compass: CharSequence?,
-            val resultType: Any?,
-            val callback: Callable? = null,
-        ) {
-
-            internal fun pick(scriptRuntime: ScriptRuntime) = Detector(compass, object : Result(resultType) {
-
-                override fun byOne(): UiObject? {
-                    return selector?.let { sel ->
-                        root?.let { return sel.findOneOf(it) } ?: sel.findOnce()
-                    }
-                }
-
-                override fun byAll(): UiObjectCollection {
-                    return selector?.let { sel ->
-                        root?.let { return sel.findOf(it) } ?: sel.find()
-                    } ?: EMPTY
-                }
-
-            }, callback, selector).detect(scriptRuntime)
-
-            // The picker searches with the bridge of the calling script runtime, so that its window
-            // filter and blacklist apply and the search keeps working after the service restarts.
-            // zh-CN: 拾取器使用调用方脚本运行时的 bridge 进行搜索, 使其窗口过滤器与黑名单生效, 且服务重启后仍可搜索.
-            internal class Builder(accessibilityBridge: AccessibilityBridge? = null) {
-
-                private var mRoot: UiObject? = null
-                private var mSelector = UiSelector(accessibilityBridge)
-                private var mCompass: CharSequence? = COMPASS_PASS_ON
-                private var mResultType: Any = RESULT_TYPE_WIDGET
-                private var mCallback: Callable? = null
-
-                fun setRoot(root: UiObject?) = also { mRoot = root }
-
-                fun setSelector(scriptRuntime: ScriptRuntime, selector: Any?) = also {
-                    when (selector) {
-                        null -> return@also
-                        is String -> setSelector(selector)
-                        is NativeRegExp -> setSelector(selector)
-                        is UiSelector -> setSelector(selector)
-                        is Map<*, *> -> setSelector(scriptRuntime, selector)
-                        is List<*> -> setSelector(scriptRuntime, selector)
-                        is BigInteger -> setSelector(selector.toString())
-                        is Double -> setSelector(selector.toInt().toString())
-                        is NativeJavaMethod -> throw SelectorMethodWithoutCallingException(selector)
-                        else -> throw IllegalArgumentException(str(R.string.error_unknown_picker_selector_type, selector.toString(), selector::class.java))
-                    }
-                }
-
-                private fun setSelector(selector: UiSelector) = also {
-                    mSelector.append(selector)
-                }
-
-                private fun setSelector(selector: String) = also {
-                    mSelector.append(UiSelector().content(selector))
-                }
-
-                private fun setSelector(selector: NativeRegExp) = also {
-                    mSelector.append(UiSelector().contentMatch(selector))
-                }
-
-                private fun setSelector(scriptRuntime: ScriptRuntime, selector: List<*>): Builder = also {
-                    selector.filterNotNull().forEach { setSelector(scriptRuntime, it) }
-                }
-
-                private fun setSelector(scriptRuntime: ScriptRuntime, selector: Map<*, *>) = also {
-                    val parser = SelectorMapParser(SelectorRegistry) { value ->
-                        (value as? Callable)?.let { func ->
-                            BooleanFilter.BooleanSupplier { node ->
-                                RhinoUtils.coerceBoolean(RhinoUtils.callFunction(scriptRuntime, func, null as VarScope?, Undefined.SCRIPTABLE_UNDEFINED, arrayOf(node)))
-                            }
-                        }
-                    }
-                    try {
-                        parser.parse(selector, UiSelector())
-                    } catch (e: SelectorMapException.NoSuchProperty) {
-                        throw IllegalArgumentException(str(R.string.error_no_such_selector_method, e.key, e.value.toString(), e.value?.let { it::class.java } ?: "null"))
-                    } catch (e: SelectorMapException.IllegalValue) {
-                        throw IllegalMapSelectorException(e.key, e.value ?: "null")
-                    }.let { mSelector.append(it) }
-                }
-
-                fun setCompass(compass: CharSequence?) = also { compass?.let { mCompass = it } }
-
-                fun setResultType(resultType: Any?) = also { resultType?.let { mResultType = it } }
-
-                fun setCallback(callback: Callable?) = also { callback?.let { mCallback = it } }
-
-                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback)
-
-            }
-
-        }
-
-        internal class IllegalMapSelectorException(key: String, value: Any) : IllegalArgumentException(
-            str(R.string.error_invalid_selector_map_element, key, value.run {
-                when (this) {
-                    is NativeArray -> "[${joinToString { it.toString() }}]"
-                    else -> toString()
-                }
-            }, value::class.java)
-        )
-
-        internal class SelectorMethodWithoutCallingException(selector: NativeJavaMethod) : IllegalArgumentException(
-            str(R.string.error_selector_method_without_calling, selector.toString())
-        )
 
     }
 

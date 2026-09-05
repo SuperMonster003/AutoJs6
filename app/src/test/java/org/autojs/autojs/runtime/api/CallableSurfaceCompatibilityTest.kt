@@ -2,6 +2,8 @@ package org.autojs.autojs.runtime.api
 
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.pick.Detector
+import org.autojs.autojs.core.automator.pick.Picker
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.looper.MainThreadProxy
 import org.autojs.autojs.core.looper.Timer
@@ -76,11 +78,11 @@ class CallableSurfaceCompatibilityTest {
             ScriptBridges::class.java,
             UiSelector::class.java,
             UiSelector.Companion::class.java,
-            UiSelector.Companion.Picker::class.java,
-            UiSelector.Companion.Picker.Builder::class.java,
+            Picker::class.java,
+            Picker.Builder::class.java,
             UiObject::class.java,
             UiObject.Companion::class.java,
-            UiObject.Companion.Detector::class.java,
+            Detector::class.java,
             RhinoUtils::class.java,
         )
 

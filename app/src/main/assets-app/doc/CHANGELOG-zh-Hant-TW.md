@@ -280,6 +280,9 @@
 * `修復` 選擇器字串形式 (如 `selector().toString()` 與錯誤訊息) 中的小數在以逗號為小數點的介面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號
 * `修復` 全域函式形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 擲出的 Java 例外無法被指令碼的 `try / catch` 捕捉, 並會直接終止指令碼; 現在作為可捕捉的指令碼錯誤擲出
 * `修復` 設定 `findOnUiThread` 旗標時, 投遞到 UI 執行緒的查詢可能因喚醒訊號遺失 (UI 執行緒先於指令碼執行緒進入等待完成查詢) 而永久停滯, 且 UI 執行緒阻塞時 `findOne(timeout)` 不會逾時; 現在以查詢逾時為上限等待, 喚醒不再遺失
+* `修復` `UiObject.clickBounds()` 在指令碼執行緒上臨時準備 Looper 並在手勢完成後 `quit()`, 實際結束的是指令碼執行緒自身的事件迴圈, 此後 `setTimeout` 等回呼不再執行且指令碼提前結束; 現在由查詢得到的節點經指令碼的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑
+* `修復` `pickup` / `detect` 的結果型別 `['compass', 'p']` 一律回報 "未知結果型別", 因 `compass` 在攔截表中登記為 `String` 參數而其簽章為 `CharSequence`; 現在可用
+* `修復` 版面配置分析器為集合控制項的子項產生程式碼且未選擇動作時, 產生的 `forEach` 程式碼區塊含無效敘述 `target.;`; 現在省略該行
 * `最佳化` `TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `最佳化` TypeScript TSX 執行階段驗證提示現在會跟隨應用程式語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `最佳化` Ace 字型預覽在目前字型尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字型或下載完成後自動隱藏
@@ -370,6 +373,7 @@
 * `最佳化` 選擇器屬性改由宣告式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此產生, 集合選擇器 (如 `pickup({...})`) 依註冊表解析而非反射, 全域選擇器函式依註冊表與明確白名單匯出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全域函式); 全域函式與集合選擇器的數值參數統一依四捨五入轉換為整數 (集合選擇器此前為截斷)
 * `最佳化` 選擇器過濾器去重: 字串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 螢幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的螢幕尺寸求值並納入 JVM 單元測試; 選擇器求值走訪過濾器清單的快照, 多執行緒共享同一選擇器時安全; 指令碼可見的 API 與行為不變
 * `最佳化` 選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計畫 (`PollPolicy`: 逾時, 間隔, 次數, 退避) 執行, 預設行為不變 (間隔 50 毫秒, 逾時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 "可能永久阻塞"; 設定 `findOnUiThread` 旗標時投遞到 UI 執行緒的查詢以查詢逾時為等待上限, 逾時擲出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止指令碼中斷的等待
+* `最佳化` `UiObject` 拆分: `pickup` / `detect` 的結果型別別名表, 拾取器與按名稱呼叫節點方法的攔截器遷入 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` 遷入 `UiObjectSummary`; 新增 `UiObject.fingerprint()` (邊界, 文字, 描述, 類別名稱, 子節點數與關鍵布林屬性的雜湊, 不走訪兄弟與子節點); 經 `parent()` 到達的節點的 `indexInParent()` 改為首次使用時計算; 版面配置分析器的程式碼產生器 (`CodeGenerator` / `ReadOnlyUiObject`) 轉為 Kotlin, 後者改為直接實作 `UiNode` 的快照檢視; 指令碼可見的 API 與行為不變
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

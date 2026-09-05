@@ -1,14 +1,20 @@
 package org.autojs.autojs.codegeneration
 
 import org.autojs.autojs.core.accessibility.UiSelector
-import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.tool.Consumer
 
 /**
+ * Builds the shortest selector that singles [mTarget] out under [mRoot] (a captured layout, see
+ * [ReadOnlyUiObject]): properties are added in order of preference (id, class name, text,
+ * description, the boolean properties that are set, depth) until the search under the root
+ * yields exactly the target.
+ * zh-CN: 构建在 [mRoot] (捕获的布局, 见 [ReadOnlyUiObject]) 下唯一确定 [mTarget] 的最短选择器: 按优先级 (id, 类名, 文本,
+ * 描述, 已置位的布尔属性, 深度) 逐个添加属性, 直到根节点下的搜索恰好得到目标.
+ *
  * Created by Stardust on Dec 7, 2017.
- * Modified by SuperMonster003 as of Sep 2, 2022.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
-class UiSelectorGenerator(private val mRoot: UiObject, private val mTarget: UiObject) {
+class UiSelectorGenerator(private val mRoot: ReadOnlyUiObject, private val mTarget: ReadOnlyUiObject) {
 
     private var mUsingId = true
     private var mUsingDesc = true
@@ -94,8 +100,8 @@ class UiSelectorGenerator(private val mRoot: UiObject, private val mTarget: UiOb
     }
 
     private fun shouldStopGeneration(selector: UiSelector) = when (mSearchMode) {
-        CodeGenerator.UNTIL_FIND -> selector.findAndReturnList(mRoot, 1).isNotEmpty()
-        else -> selector.findAndReturnList(mRoot, 2).size == 1
+        CodeGenerator.UNTIL_FIND -> selector.searchIn(mRoot, 1).isNotEmpty()
+        else -> selector.searchIn(mRoot, 2).size == 1
     }
 
     private fun tryWithIntCondition(selector: UiSelector, value: Int, condition: Consumer<Int>): Boolean {

@@ -51,6 +51,17 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     private val mGlobalActionAutomatorForGesture
         get() = mGlobalActionAutomatorForGestureRaw.apply { setScreenMetrics(mScreenMetrics) }
 
+    // Device-pixel taps for UiObject.clickBounds(): the script's servant Looper, but no
+    // ScreenMetrics, as node bounds are device pixels already.
+    // zh-CN: 供 UiObject.clickBounds() 使用的设备像素点按: 走脚本的 servant Looper, 但不带 ScreenMetrics, 因为节点边界已是设备像素.
+    private val mGlobalActionAutomatorForDevicePixels by lazy {
+        createGlobalActionAutomator(Handler(scriptRuntime.loopers.servantLooper))
+    }
+
+    init {
+        accessibilityBridge.tap = AccessibilityBridge.Tap { x, y -> mGlobalActionAutomatorForDevicePixels.click(x, y) }
+    }
+
     private val isRunningPackageSelf
         get() = DeveloperUtils.isSelfPackage(Global.currentPackage(scriptRuntime, emptyArray()))
 

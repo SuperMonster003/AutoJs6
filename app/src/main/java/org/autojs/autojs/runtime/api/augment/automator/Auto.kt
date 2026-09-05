@@ -85,13 +85,13 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 ?: newNativeArray(scriptRuntime.topLevelScope)
         },
         "root" to Supplier {
-            scriptRuntime.accessibilityBridge.getRootInCurrentWindow()?.let { UiObject.createRoot(it) }
+            scriptRuntime.accessibilityBridge.getRootInCurrentWindow()?.let { UiObject.createRoot(it, null, scriptRuntime.accessibilityBridge) }
         },
         "rootInActiveWindow" to Supplier {
-            scriptRuntime.accessibilityBridge.getRootInActiveWindow()?.let { UiObject.createRoot(it) }
+            scriptRuntime.accessibilityBridge.getRootInActiveWindow()?.let { UiObject.createRoot(it, null, scriptRuntime.accessibilityBridge) }
         },
         "windowRoots" to Supplier {
-            scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it) }.toNativeArray()
+            scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it, null, scriptRuntime.accessibilityBridge) }.toNativeArray()
         },
         "state" to Supplier {
             newNativeObject(scriptRuntime.topLevelScope).also { o ->
@@ -357,7 +357,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             require(windowInfo is AccessibilityWindowInfo) {
                 "Argument \"window\" ${window.jsBrief()} for auto.getWindowRoot must be an AccessibilityWindowInfo"
             }
-            windowInfo.root?.let { UiObject.createRoot(it) }
+            windowInfo.root?.let { UiObject.createRoot(it, null, scriptRuntime.accessibilityBridge) }
         }
 
         @JvmStatic

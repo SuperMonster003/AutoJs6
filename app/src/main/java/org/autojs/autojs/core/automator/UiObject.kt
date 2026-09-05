@@ -8,6 +8,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
@@ -17,23 +18,16 @@ import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
-import org.autojs.autojs.rhino.JsArgumentCoercion
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
+import org.autojs.autojs.core.automator.pick.Detector
+import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
-import org.autojs.autojs.util.RhinoUtils
-import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Callable
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.Undefined
-import org.mozilla.javascript.VarScope
 import org.opencv.core.Point
 import org.opencv.core.Size
 import kotlin.math.abs
@@ -41,22 +35,41 @@ import kotlin.math.abs
 /**
  * The platform node as scripts see it: an [AccessibilityNodeInfoCompat] with the navigation,
  * property and action methods of [UiNode] (filters, search algorithms and the compass walk face
- * that interface, so they can be unit-tested over an in-memory tree).
+ * that interface, so they can be unit-tested over an in-memory tree). The pick machinery
+ * (`detect`, result types) lives in `core/automator/pick`, the summary / fingerprint in
+ * [UiObjectSummary]; this class keeps the platform binding.
  * zh-CN: 脚本所见的平台节点: 带有 [UiNode] 的导航, 属性与动作方法的 [AccessibilityNodeInfoCompat] (过滤器, 搜索算法与
- * 罗盘导航面向该接口, 因而可以在内存节点树上做单元测试).
+ * 罗盘导航面向该接口, 因而可以在内存节点树上做单元测试). 拾取机制 (`detect`, 结果类型) 在 `core/automator/pick`,
+ * 摘要 / 指纹在 [UiObjectSummary]; 本类保留平台绑定.
  *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Sep 5, 2026.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
 @Suppress("unused", "DEPRECATION", "MemberVisibilityCanBePrivate")
-open class UiObject(
+open class UiObject private constructor(
     info: Any?,
     private val allocator: AccessibilityNodeInfoAllocator?,
     private val depth: Int,
-    private val indexInParent: Int,
+    // The bridge of the query the node came from (null for nodes created elsewhere); it lends
+    // clickBounds() the script's gesture dispatcher.
+    // zh-CN: 节点所来自查询的 bridge (其它途径创建的节点为 null); 为 clickBounds() 提供脚本的手势派发器.
+    private val bridge: AccessibilityBridge?,
+    indexInParentSupplier: (UiObject) -> Int,
 ) : AccessibilityNodeInfoCompat(info), UiObjectActions, UiNode<UiObject> {
 
-    private val accessibilityBridge by lazy { AutoJs.instance.createAccessibilityBridge() }
+    // Computed on first use: a node reached through parent() would otherwise scan its
+    // grandparent's children on every step up.
+    // zh-CN: 首次使用时计算: 否则经 parent() 到达的节点每上溯一级都要扫描祖父节点的全部子节点.
+    private val indexInParent: Int by lazy(LazyThreadSafetyMode.PUBLICATION) { indexInParentSupplier(this) }
+
+    private val standaloneBridge by lazy { AutoJs.instance.createAccessibilityBridge() }
+
+    constructor(
+        info: Any?,
+        allocator: AccessibilityNodeInfoAllocator?,
+        depth: Int,
+        indexInParent: Int,
+    ) : this(info, allocator, depth, null, { indexInParent })
 
     constructor(
         info: Any?,
@@ -73,17 +86,24 @@ open class UiObject(
 
     override fun parent(): UiObject? = runCatching {
         super.getParent()?.let { node ->
-            UiObject(node.unwrap(), allocator, depth - 1, node.parent?.run {
-                // @Dubious by SuperMonster003 on May 26, 2022.
-                //  ! May lead to poor performance?
-                //  ! zh-CN: 可能导致性能不佳?
-                (0 until childCount).firstOrNull { getChild(it) == node } ?: -1
-            } ?: 0)
+            UiObject(node.unwrap(), allocator, depth - 1, bridge, ::indexAmongSiblings)
         }
     }.onFailure {
         // FIXME by Stardust on May 5, 2017.
         it.printStackTrace()
     }.getOrNull()
+
+    // The index of [node] among its parent's children: -1 when not found, 0 without a parent, -1
+    // when the platform refuses (a recycled node).
+    // zh-CN: [node] 在其父节点的子节点中的序号: 找不到为 -1, 无父节点为 0, 平台拒绝 (已回收的节点) 为 -1.
+    private fun indexAmongSiblings(node: UiObject): Int = runCatching {
+        // Compared as platform nodes: AccessibilityNodeInfoCompat.equals also requires the same class.
+        // zh-CN: 以平台节点比较: AccessibilityNodeInfoCompat.equals 还要求类相同.
+        val info = node.unwrap()
+        node.getParent()?.run {
+            (0 until childCount).firstOrNull { getChild(it)?.unwrap() == info } ?: -1
+        } ?: 0
+    }.getOrDefault(-1)
 
     fun parent(i: Int): UiObject? {
         require(i >= 0) { "Index for UiObject#parent cannot be negative ($i)" }
@@ -105,7 +125,7 @@ open class UiObject(
             // @Dubious by SuperMonster003 on Jun 19, 2025.
             //  ! It seems that the situation above only happens on API Level 29 (Android 10) [Q] ?
             //  ! zh-CN: 似乎上述情况只发生在 API Level 29 (Android 10) [Q] ?
-            super.getChild(i)?.let { UiObject(it.unwrap(), allocator, depth + 1, i) }
+            super.getChild(i)?.let { UiObject(it.unwrap(), allocator, depth + 1, bridge) { i } }
         }.onFailure {
             // FIXME by Stardust on May 5, 2017.
             it.printStackTrace()
@@ -213,19 +233,26 @@ open class UiObject(
 
     fun size() = Size(width().toDouble(), height().toDouble())
 
+    /**
+     * A tap gesture at the centre plus the offsets (each a fraction of the screen side when in
+     * (-1, 1), pixels otherwise). Dispatched through the script's gesture dispatcher when the node
+     * came from a query of a script (see [AccessibilityBridge.tap]); the node's own bounds are
+     * device pixels, so the script's `setScreenMetrics` scaling is deliberately not applied.
+     * zh-CN: 在中心加偏移处 (各偏移在 (-1, 1) 内为屏幕边长的比例, 否则为像素) 做点按手势. 节点来自脚本的查询时经脚本的手势
+     * 派发器派发 (见 [AccessibilityBridge.tap]); 节点边界本身是设备像素, 因此有意不应用脚本 `setScreenMetrics` 的缩放.
+     */
     @JvmOverloads
     fun clickBounds(offsetX: Double = 0.0, offsetY: Double = 0.0): Boolean {
-        // @Hint by SuperMonster003 on Jul 10, 2024.
-        //  ! Without ScreenMetrics info related to ScriptRuntime.
-        //  ! 未包含 "脚本运行时" 相关联的 ScreenMetrics 信息.
+        val x = centerX() + toRoundIntX(offsetX, false)
+        val y = centerY() + toRoundIntY(offsetY, false)
+        bridge?.tap?.let { return it.tap(x, y) }
+        // Without a script's dispatcher: a standalone one on the calling thread's Looper.
+        // zh-CN: 没有脚本的派发器时: 在调用线程的 Looper 上的独立派发器.
         val automatorTmp = GlobalActionAutomator(ScriptRuntime.applicationContext, null) {
-            accessibilityBridge.ensureServiceStarted()
-            accessibilityBridge.service
+            standaloneBridge.ensureServiceStarted()
+            standaloneBridge.service
         }
-        return automatorTmp.click(
-            centerX() + toRoundIntX(offsetX, false),
-            centerY() + toRoundIntY(offsetY, false),
-        )
+        return automatorTmp.click(x, y)
     }
 
     @Suppress("DEPRECATION")
@@ -414,117 +441,27 @@ open class UiObject(
         }
     }
 
-    fun summary(): String = listOf(
+    /** The property listing of [UiObjectSummary.summary]. zh-CN: [UiObjectSummary.summary] 的属性列表. */
+    fun summary(): String = UiObjectSummary.summary(this)
 
-        /* Common */
+    override fun toString(): String = UiObjectSummary.describe(this, UiObject::class.java.simpleName)
 
-        "packageName" to { packageName() },
-        "parent" to { parent?.className },
-        "id" to { id() },
-        "fullId" to { fullId() },
-        "idHex" to { idHex() },
-        "desc" to { desc() },
-        "text" to { text() },
-        "bounds" to { bounds() },
-        "center" to { center() },
-        "className" to { className() },
-        "clickable" to { clickable() },
-        "longClickable" to { longClickable() },
-        "scrollable" to { scrollable() },
-        "indexInParent" to { indexInParent() },
-        "childCount" to { childCount() },
-        "depth" to { depth() },
+    /** The exhaustive comparison of [UiObjectSummary.isSimilar]. zh-CN: [UiObjectSummary.isSimilar] 的详尽比较. */
+    fun isSimilar(other: Any?): Boolean = UiObjectSummary.isSimilar(this, other)
 
-        /* Regular */
-
-        "checked" to { checked() },
-        "enabled" to { enabled() },
-        "editable" to { editable() },
-        "focusable" to { focusable() },
-        "checkable" to { checkable() },
-        "selected" to { selected() },
-        "dismissable" to { isDismissable },
-        "visibleToUser" to { visibleToUser() },
-
-        /* Rare */
-
-        "contextClickable" to { isContextClickable },
-        "focused" to { focused() },
-        "accessibilityFocused" to { isAccessibilityFocused },
-        "rowCount" to { rowCount() },
-        "columnCount" to { columnCount() },
-        "row" to { row() },
-        "column" to { column() },
-        "rowSpan" to { rowSpan() },
-        "columnSpan" to { columnSpan() },
-        "drawingOrder" to { drawingOrder },
-
-        /* List */
-
-        "actions" to { actionNames() },
-    ).let { StringUtils.toFormattedSummary(it) }
-
-    override fun toString(): String {
-        val simpledClassName = "$className".substringAfterLast(".")
-        return "[${UiObject::class.java.simpleName}] $simpledClassName ${summary()}"
-    }
-
-    fun isSimilar(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is UiObject) return false
-
-        // @Reference to Hunter1023 (https://github.com/Hunter1023) by SuperMonster003 on Mar 28, 2025.
-        //  ! http://issues.autojs6.com/288#issuecomment-2692248348
-        val info = unwrap() ?: return false
-
-        return info == other.unwrap() &&
-                bounds() == other.bounds() &&
-                packageName() == other.packageName() &&
-                parent == other.parent &&
-                id() == other.id() &&
-                fullId() == other.fullId() &&
-                idHex() == other.idHex() &&
-                desc() == other.desc() &&
-                text() == other.text() &&
-                className() == other.className() &&
-                clickable() == other.clickable() &&
-                longClickable() == other.longClickable() &&
-                scrollable() == other.scrollable() &&
-                indexInParent() == other.indexInParent() &&
-                childCount() == other.childCount() &&
-                depth() == other.depth() &&
-                checked() == other.checked() &&
-                enabled() == other.enabled() &&
-                editable() == other.editable() &&
-                focusable() == other.focusable() &&
-                checkable() == other.checkable() &&
-                selected() == other.selected() &&
-                isDismissable == other.isDismissable &&
-                visibleToUser() == other.visibleToUser() &&
-                isContextClickable == other.isContextClickable &&
-                focused() == other.focused() &&
-                isAccessibilityFocused == other.isAccessibilityFocused &&
-                rowCount() == other.rowCount() &&
-                columnCount() == other.columnCount() &&
-                row() == other.row() &&
-                column() == other.column() &&
-                rowSpan() == other.rowSpan() &&
-                columnSpan() == other.columnSpan() &&
-                drawingOrder == other.drawingOrder &&
-                actionNames() == other.actionNames() &&
-                isSingleton() == other.isSingleton() &&
-                "${firstSibling() ?: ""}" == "${other.firstSibling()}" &&
-                "${lastSibling() ?: ""}" == "${other.lastSibling()}" &&
-                "${firstChild() ?: ""}" == "${other.firstChild()}" &&
-                "${lastChild() ?: ""}" == "${other.lastChild()}"
-    }
+    /**
+     * A cheap hash of the node's own state (bounds, text, description, class name, child count,
+     * key boolean properties); see [UiObjectSummary.fingerprint].
+     * zh-CN: 节点自身状态 (边界, 文本, 描述, 类名, 子节点数, 关键布尔属性) 的廉价哈希; 见 [UiObjectSummary.fingerprint].
+     */
+    fun fingerprint(): Int = UiObjectSummary.fingerprint(this)
 
     // Captures current state; refreshing it won't affect the original.
     // zh-CN: 捕获当前状态; 刷新它不会影响原始对象.
     fun snapshot(): UiObject {
         val raw = unwrap()
         val rawCopy = AccessibilityNodeInfo.obtain(raw)
-        return UiObject(rawCopy, allocator, depth, indexInParent)
+        return UiObject(rawCopy, allocator, depth, bridge) { indexInParent }
     }
 
     @JvmOverloads
@@ -560,17 +497,7 @@ open class UiObject(
 
         internal const val ACTION_APPEND_TEXT = 0x00200001
         internal const val COMPASS_PASS_ON = Compass.PASS_ON
-        internal const val RESULT_TYPE_WIDGET = "widget"
-
-        private val RESULT_GROUP_WIDGET by lazy { arrayOf("#", "w", RESULT_TYPE_WIDGET) }
-        private val RESULT_GROUP_WIDGET_COLLECTION by lazy { arrayOf("{}", "wc", "collection", "list").plus(listAliases("#", "w")) }
-        private val RESULT_GROUP_WIDGETS by lazy { arrayOf("[]", "ws", "widgets").plus(arrayAliases("#", "w")) }
-        private val RESULT_GROUP_CONTENT by lazy { arrayOf("$", "txt", "content") }
-        private val RESULT_GROUP_CONTENTS by lazy { arrayOf("contents").plus(arrayAliases("$", "txt", "content")) }
-        private val RESULT_GROUP_POINT by lazy { arrayOf(".", "pt", "point") }
-        private val RESULT_GROUP_POINTS by lazy { arrayOf("points", "pts").plus(arrayAliases(".", "point", "pt")) }
-        private val RESULT_GROUP_SELECTOR by lazy { arrayOf("@", "selector", "sel") }
-        private val RESULT_GROUP_EXISTENCE by lazy { arrayOf("?", "exists") }
+        internal const val RESULT_TYPE_WIDGET = PickResultType.WIDGET
 
         @JvmStatic
         fun isCompass(s: Any?): Boolean = Compass.isCompass(s)
@@ -582,15 +509,10 @@ open class UiObject(
             require(isCompass(s)) { str(R.string.error_invalid_compass, s) }
         }
 
+        /** `detect(w, compass, resultType, callback)`; see [Detector.detect]. zh-CN: `detect(w, compass, resultType, callback)`; 见 [Detector.detect]. */
         @JvmStatic
         fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: Callable? = null): Any? {
-            return Detector(compass, object : Detector.Result(resultType) {
-
-                override fun byOne() = w
-
-                override fun byAll() = throw IllegalResultTypeException(resultType.toString())
-
-            }, callback).detect(scriptRuntime)
+            return Detector.detect(scriptRuntime, w, compass, resultType, callback)
         }
 
         // @Hint by SuperMonster003 on May 12, 2022.
@@ -605,255 +527,15 @@ open class UiObject(
         @JvmStatic
         fun createRoot(root: AccessibilityNodeInfo?) = UiObject(root, null, 0, -1)
 
-        internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?) =
-            UiObject(root, allocator, 0, -1)
-
-        private fun arrayAliases(symbol: String, vararg others: String) = arrayOf(
-            "$symbol$symbol", "$symbol[]", "[$symbol]",
-        ) + others.map { listOf("$it[]", "[$it]") }.flatten()
-
-        @Suppress("SameParameterValue")
-        private fun listAliases(symbol: String, vararg others: String) = arrayOf(
-            "$symbol{}", "{$symbol}",
-        ) + others.map { listOf("$it{}", "{$it}") }.flatten()
-
-        internal class Detector(
-            private val compass: CharSequence? = COMPASS_PASS_ON,
-            private val result: Result,
-            val callback: Callable? = null,
-            private val selector: UiSelector? = UiSelector(),
-        ) {
-
-            fun detect(scriptRuntime: ScriptRuntime): Any? {
-                val resultType = result.type.takeUnless { it == "" } ?: return null
-                return when (resultType) {
-                    in RESULT_GROUP_WIDGET -> getUiObject()
-                    in RESULT_GROUP_WIDGET_COLLECTION -> getUiObjectCollection { it?.compass(compass) }
-                    in RESULT_GROUP_WIDGETS -> getUiObjectArray { it?.compass(compass) }
-
-                    in RESULT_GROUP_CONTENT -> getUiObject()?.content() ?: ""
-                    in RESULT_GROUP_CONTENTS -> getUiObjectArray { it?.compass(compass)?.content() }
-
-                    in RESULT_GROUP_POINT -> getUiObject()?.point()
-                    in RESULT_GROUP_POINTS -> getUiObjectArray { it?.compass(compass)?.point() }
-
-                    in RESULT_GROUP_SELECTOR -> when (compass) {
-                        null, COMPASS_PASS_ON -> selector
-                        else -> throw IllegalArgumentException(str(R.string.error_selector_result_type_with_compass))
-                    }
-
-                    in RESULT_GROUP_EXISTENCE -> when (compass) {
-                        null, COMPASS_PASS_ON -> selector?.exists() == true
-                        else -> getUiObject() != null
-                    }
-
-                    is List<*> -> when {
-                        resultType.isEmpty() /* taken as widgets */ -> getUiObjectArray { it?.compass(compass) }
-                        else -> invoke(resultType)
-                    }
-
-                    else -> invoke(resultType)
-                }.let { result ->
-                    if (callback.isJsNullish()) result else {
-                        detectWithCallback(scriptRuntime, callback, result).let {
-                            if (it.isJsUndefined()) result else it
-                        }
-                    }
-                }.let { Context.javaToJS(it, scriptRuntime.topLevelScope) }
-            }
-
-            private fun invoke(resultType: Any?, args: Array<Any?> = emptyArray()) = (resultType as? String)?.let {
-                Invoker(getUiObject(), it, args).invoke()
-            }
-
-            private fun invoke(dataList: List<*> /* [ funcName | resultType, ...args[] ] */) = try {
-                invoke(dataList[0], dataList.takeLast(dataList.size - 1).toTypedArray())
-            } catch (e: Exception) {
-                when (dataList.size) {
-                    1 -> invokeAsUiObjectArray(dataList[0], e)
-                    else -> throw e
-                }
-            }
-
-            private fun invokeAsUiObjectArray(resultType: Any?, e: Exception) = when (resultType) {
-                in RESULT_GROUP_WIDGET -> getUiObjectArray { it?.compass(compass) }
-                in RESULT_GROUP_CONTENT -> getUiObjectArray { it?.compass(compass)?.content() }
-                in RESULT_GROUP_POINT -> getUiObjectArray { it?.compass(compass)?.point() }
-                else -> throw e
-            }
-
-            internal abstract class Result(val type: Any? = RESULT_TYPE_WIDGET) {
-
-                abstract fun byOne(): UiObject?
-
-                abstract fun byAll(): UiObjectCollection
-
-            }
-
-            private fun getUiObject() = result.byOne()?.compass(compass)
-
-            private fun getUiObjectCollection(transformer: (UiObject?) -> UiObject?) = UiObjectCollection
-                .transform(result.byAll(), transformer)
-                .let { RhinoUtils.wrap(it) }
-
-            private fun getUiObjectArray(transformer: (UiObject?) -> Any?) = UiObjectCollection
-                .mapNotNull(result.byAll(), transformer)
-                .toNativeArray()
-
-            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: Callable?, args: Array<Any?>) = callback?.let {
-                RhinoUtils.callFunction(
-                    scriptRuntime,
-                    it,
-                    null as VarScope?,
-                    Undefined.SCRIPTABLE_UNDEFINED,
-                    args,
-                )
-            }
-
-            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: Callable?, arg: Any?) = callback?.let {
-                detectWithCallback(scriptRuntime, it, arrayOf(arg))
-            }
-
-        }
-
-        private class Invoker(val w: UiObject?, val name: String, val params: Array<Any?>?) {
-
-            fun invoke(): Any? = when {
-                w == null -> null
-                name.isEmpty() -> null
-                else -> Interceptor(name, params).let { interceptor ->
-                    try {
-                        invokeMethod(w, interceptor.name, interceptor)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        if (isIgnoredException(e)) return null
-                        try {
-                            val getterName = "get${interceptor.name.replaceFirstChar { s -> s.uppercase() }}"
-                            invokeMethod(w, getterName, interceptor)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            if (isIgnoredException(e)) return null
-                            throw IllegalResultTypeException(name, params)
-                        }
-                    }
-                }
-            }
-
-            private fun invokeMethod(w: UiObject, getterName: String, interceptor: Interceptor): Any? = w.javaClass.getMethod(getterName, *interceptor.classes).invoke(w, *interceptor.args)
-
-            private fun isIgnoredException(e: Exception): Boolean {
-                return e.cause is NullPointerException ||
-                        e.cause is InterruptedException ||
-                        e.cause?.cause is InterruptedException
-            }
-
-        }
-
-        private class Interceptor(val name: String, params: Array<Any?>?) {
-
-            var classes: Array<out Class<*>> = emptyArray()
-            var args: Array<Any?> = emptyArray()
-
-            init {
-                if (params != null) {
-                    if (has(name)) {
-                        classes = interceptedMap[name]!!.args
-                        args = params.mapIndexed { i, param ->
-                            classes.getOrNull(i)?.let { JsArgumentCoercion.coerce(it, param) } ?: param
-                        }.toTypedArray()
-                    } else {
-                        classes = params.map { params.javaClass }.toTypedArray()
-                        args = params
-                    }
-                }
-            }
-
-            companion object {
-
-                private val cFloatPrim = Float::class.javaPrimitiveType!!
-                private val cIntPrim: Class<Int> = Int::class.javaPrimitiveType!!
-                private val cString = String::class.java
-                private val cBoolean = Boolean::class.java
-
-                val interceptedMap: Map<String, Intercepted> by lazy {
-                    val numberClassMap: Map<Array<out Class<*>>, Array<String>> = mapOf(
-                        arrayOf(cIntPrim) to arrayOf(
-                            "child", "getChild", "performAction", "setDrawingOrder", "setInputType",
-                            "setLiveRegion", "setMaxTextLength", "setMovementGranularities",
-                        ),
-                        arrayOf(cString) to arrayOf(
-                            "compass",
-                            "findAccessibilityNodeInfosByText",
-                            "findAccessibilityNodeInfosByViewId",
-                            "setClassName",
-                            "setContentDescription",
-                            "setError",
-                            "setHintText",
-                            "setPackageName",
-                            "setPaneTitle",
-                            "setRoleDescription",
-                            "setStateDescription",
-                            "setText",
-                            "setTooltipText",
-                            "setViewIdResourceName",
-                        ),
-                        arrayOf(cBoolean) to arrayOf(
-                            "setAccessibilityFocused",
-                            "setCanOpenPopup",
-                            "setCheckable",
-                            "setChecked",
-                            "setClickable",
-                            "setEditable",
-                            "setEnabled",
-                            "setFocusable",
-                            "setFocused",
-                            "setHeading",
-                            "setImportantForAccessibility",
-                            "setLongClickable",
-                            "setMultiLine",
-                            "setPassword",
-                            "setScreenReaderFocusable",
-                            "setScrollable",
-                            "setSelected",
-                            "setShowingHintText",
-                            "setTextEntryKey",
-                            "setVisibleToUser",
-                            "setContentInvalid",
-                            "setContextClickable",
-                            "setDismissable",
-                        ),
-                        arrayOf(cFloatPrim) to arrayOf("setProgress"),
-                        arrayOf(cIntPrim, cIntPrim) to arrayOf("setTextSelection", "setSelection", "scrollTo"),
-                    )
-                    numberClassMap.entries.map { entry: Map.Entry<Array<out Class<*>>, Array<String>> ->
-                        entry.value.map { Intercepted(it, *entry.key) }
-                    }.flatten().associateBy { it.name }
-                }
-
-                fun has(name: String) = interceptedMap.containsKey(name)
-
-            }
-
-        }
-
-        private class Intercepted(val name: String, vararg val args: Class<*>)
-
-        private class IllegalResultTypeException : IllegalArgumentException {
-
-            constructor(s: String) : super(str(R.string.error_illegal_ui_object_result_type, s))
-
-            constructor(resultType: String, resultParams: Array<Any?>?) : super(
-                when (resultParams?.isNotEmpty()) {
-                    true -> str(
-                        R.string.error_unknown_picker_result_type_with_params,
-                        resultType,
-                        "[${resultParams.joinToString { it.toString() }}]"
-                    )
-                    else -> str(R.string.error_unknown_picker_result_type, resultType)
-                }
-            )
-
-        }
+        /**
+         * A root node of a script's query: [allocator] registers what the node hands out, [bridge]
+         * lends `clickBounds()` the script's gesture dispatcher; both are inherited by the nodes
+         * reached from it.
+         * zh-CN: 脚本查询的根节点: [allocator] 登记节点交出的内容, [bridge] 为 `clickBounds()` 提供脚本的手势派发器;
+         * 二者都被由此到达的节点继承.
+         */
+        internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?, bridge: AccessibilityBridge? = null) =
+            UiObject(root, allocator, 0, bridge) { -1 }
 
     }
 

@@ -5,6 +5,8 @@ import android.content.ContextWrapper
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.pick.Detector
+import org.autojs.autojs.core.automator.pick.Picker
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -191,9 +193,11 @@ class CallableModuleCompatibilityTest {
                 method.name == "detect\$default" && Callable::class.java in method.parameterTypes
             },
         )
-        val pickerClass = Class.forName("${UiSelector::class.java.name}\$Companion\$Picker")
-        val pickerBuilderClass = Class.forName("${pickerClass.name}\$Builder")
-        val detectorClass = Class.forName("${UiObject::class.java.name}\$Companion\$Detector")
+        // The pick machinery moved to core/automator/pick (roadmap P2.5); the callback surface stays Callable-only.
+        // zh-CN: 拾取机制已迁至 core/automator/pick (Roadmap P2.5); 回调表面仍只接受 Callable.
+        val pickerClass = Picker::class.java
+        val pickerBuilderClass = Picker.Builder::class.java
+        val detectorClass = Detector::class.java
         pickerBuilderClass.getMethod("setCallback", Callable::class.java)
         assertEquals(
             Callable::class.java,

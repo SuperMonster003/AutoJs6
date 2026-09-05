@@ -49,6 +49,21 @@ abstract class AccessibilityBridge(
         fun filter(info: AccessibilityWindowInfo): Boolean
     }
 
+    /** A tap gesture at device pixels. zh-CN: 设备像素坐标上的点按手势. */
+    fun interface Tap {
+        fun tap(x: Int, y: Int): Boolean
+    }
+
+    /**
+     * The owning script's gesture dispatcher, installed by `SimpleActionAutomator`; the nodes a
+     * query of this bridge finds use it for `UiObject.clickBounds()`, so that the tap goes through
+     * the script's servant Looper instead of a Looper improvised on the calling thread.
+     * zh-CN: 所属脚本的手势派发器, 由 `SimpleActionAutomator` 安装; 本 bridge 的查询找到的节点以它执行
+     * `UiObject.clickBounds()`, 使点按经脚本的 servant Looper 派发, 而非在调用线程上临时准备的 Looper.
+     */
+    @Volatile
+    var tap: Tap? = null
+
     private val usageStatsPermission = UsageStatsPermission(context)
 
     // Looks the service up on every query, so a bridge survives service restarts.

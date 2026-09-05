@@ -276,7 +276,10 @@
         "全局函數形式的 `filter(fn)` 調用失敗 (報 \"Invalid arguments\"), 以及集合選擇器數組中的正則不被接受 (如 `pickup({text: [/regex/]})`)",
         "選擇器字符串形式 (如 `selector().toString()` 與錯誤信息) 中的小數在以逗號為小數點的界面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號",
         "全局函數形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 拋出的 Java 異常無法被腳本的 `try / catch` 捕獲, 並會直接終止腳本; 現在作為可捕獲的腳本錯誤拋出",
-        "設置 `findOnUiThread` 標誌時, 投遞到 UI 線程的查找可能因喚醒信號丟失 (UI 線程先於腳本線程進入等待完成查找) 而永久掛起, 且 UI 線程阻塞時 `findOne(timeout)` 不會超時; 現在以查詢超時為上限等待, 喚醒不再丟失"
+        "設置 `findOnUiThread` 標誌時, 投遞到 UI 線程的查找可能因喚醒信號丟失 (UI 線程先於腳本線程進入等待完成查找) 而永久掛起, 且 UI 線程阻塞時 `findOne(timeout)` 不會超時; 現在以查詢超時為上限等待, 喚醒不再丟失",
+        "`UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑",
+        "`pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 \"未知結果類型\", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用",
+        "佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行"
       ],
       "improvement": [
         "`TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作",
@@ -368,7 +371,8 @@
         "選擇器過濾器, 搜索算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 接口 (`UiObject` 實現它), 三者可在 JVM 單元測試中以內存節點樹覆蓋; 腳本可見的 API 與行為不變",
         "選擇器屬性改由聲明式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此生成, 集合選擇器 (如 `pickup({...})`) 按註冊表解析而非反射, 全局選擇器函數按註冊表與顯式白名單導出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全局函數); 全局函數與集合選擇器的數值參數統一按四捨五入轉換為整數 (集合選擇器此前為截斷)",
         "選擇器過濾器去重: 字符串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 屏幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的屏幕尺寸求值並納入 JVM 單元測試; 選擇器求值遍歷過濾器列表的快照, 多線程共享同一選擇器時安全; 腳本可見的 API 與行為不變",
-        "選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計劃 (`PollPolicy`: 超時, 間隔, 次數, 退避) 執行, 默認行為不變 (間隔 50 毫秒, 超時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 \"可能永久阻塞\"; 設置 `findOnUiThread` 標誌時投遞到 UI 線程的查找以查詢超時為等待上限, 超時拋出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止腳本中斷的等待"
+        "選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計劃 (`PollPolicy`: 超時, 間隔, 次數, 退避) 執行, 默認行為不變 (間隔 50 毫秒, 超時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 \"可能永久阻塞\"; 設置 `findOnUiThread` 標誌時投遞到 UI 線程的查找以查詢超時為等待上限, 超時拋出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止腳本中斷的等待",
+        "`UiObject` 拆分: `pickup` / `detect` 的結果類型別名表, 拾取器與按名稱調用節點方法的攔截器遷入 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` 遷入 `UiObjectSummary`; 新增 `UiObject.fingerprint()` (邊界, 文本, 描述, 類名, 子節點數與關鍵布爾屬性的哈希, 不遍歷兄弟與子節點); 經 `parent()` 到達的節點的 `indexInParent()` 改為首次使用時計算; 佈局分析器的代碼生成器 (`CodeGenerator` / `ReadOnlyUiObject`) 轉為 Kotlin, 後者改為直接實現 `UiNode` 的快照視圖; 腳本可見的 API 與行為不變"
       ],
       "dependency": [
         "模塊化 Android AXML",

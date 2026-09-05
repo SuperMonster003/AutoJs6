@@ -256,6 +256,9 @@
 * `修复` 选择器字符串形式 (如 `selector().toString()` 与错误信息) 中的小数在以逗号为小数点的界面语言下 (如法语, 俄语) 显示为 `boundsLeft(0,5)`; 现在一律使用点号
 * `修复` 全局函数形式的选择器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 抛出的 Java 异常无法被脚本的 `try / catch` 捕获, 并会直接终止脚本; 现在作为可捕获的脚本错误抛出
 * `修复` 设置 `findOnUiThread` 标志时, 投递到 UI 线程的查找可能因唤醒信号丢失 (UI 线程先于脚本线程进入等待完成查找) 而永久挂起, 且 UI 线程阻塞时 `findOne(timeout)` 不会超时; 现在以查询超时为上限等待, 唤醒不再丢失
+* `修复` `UiObject.clickBounds()` 在脚本线程上临时准备 Looper 并在手势完成后 `quit()`, 实际退出的是脚本线程自身的事件循环, 此后 `setTimeout` 等回调不再执行且脚本提前结束; 现在由查询得到的节点经脚本的手势派发器 (servant Looper) 点按, 其它来源的节点保持原路径
+* `修复` `pickup` / `detect` 的结果类型 `['compass', 'p']` 一律报 "未知结果类型", 因 `compass` 在拦截表中登记为 `String` 参数而其签名为 `CharSequence`; 现在可用
+* `修复` 布局分析器为集合控件的子项生成代码且未选择动作时, 生成的 `forEach` 代码块含无效语句 `target.;`; 现在省略该行
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
@@ -349,6 +352,7 @@
 * `优化` 选择器属性改由声明式注册表 `SelectorRegistry` 统一描述: `UiSelector` 的 builder 方法据此生成, 集合选择器 (如 `pickup({...})`) 按注册表解析而非反射, 全局选择器函数按注册表与显式白名单导出 (`toStringReadable` 与 `internal` 成员的混淆名不再暴露为全局函数); 全局函数与集合选择器的数值参数统一按四舍五入转换为整数 (集合选择器此前为截断)
 * `优化` 选择器过滤器去重: 字符串属性 (text / desc / content / id / className / packageName 及其变体) 统一为 `StringPropertyFilter`, 边界度量 (left / boundsLeft / minLeft / maxLeft 等) 统一为 `MetricsFilter`, 整数属性统一为 `IntFilter`; 屏幕相关过滤器 (bounds / 度量 / screenCenter / screenCoverage) 经可注入的屏幕尺寸求值并纳入 JVM 单元测试; 选择器求值遍历过滤器列表的快照, 多线程共享同一选择器时安全; 脚本可见的 API 与行为不变
 * `优化` 选择器查询 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已弃用的 `findOne()` / `waitFor()`) 统一按轮询计划 (`PollPolicy`: 超时, 间隔, 次数, 退避) 执行, 默认行为不变 (间隔 50 毫秒, 超时 0 或负数表示一直等待); 无上限等待的方法在 KDoc 中标注 "可能永久阻塞"; 设置 `findOnUiThread` 标志时投递到 UI 线程的查找以查询超时为等待上限, 超时抛出可读错误 (`findOne(timeout)`), 无上限的查询 (`untilFind` 等) 改为可被停止脚本中断的等待
+* `优化` `UiObject` 拆分: `pickup` / `detect` 的结果类型别名表, 拾取器与按名称调用节点方法的拦截器迁入 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` 迁入 `UiObjectSummary`; 新增 `UiObject.fingerprint()` (边界, 文本, 描述, 类名, 子节点数与关键布尔属性的哈希, 不遍历兄弟与子节点); 经 `parent()` 到达的节点的 `indexInParent()` 改为首次使用时计算; 布局分析器的代码生成器 (`CodeGenerator` / `ReadOnlyUiObject`) 转为 Kotlin, 后者改为直接实现 `UiNode` 的快照视图; 脚本可见的 API 与行为不变
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
