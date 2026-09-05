@@ -7,21 +7,15 @@ import org.autojs.autojs.core.automator.filter.AppFilter
 import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.ClassNameFilter
-import org.autojs.autojs.core.automator.filter.ContentFilter
-import org.autojs.autojs.core.automator.filter.DescFilter
 import org.autojs.autojs.core.automator.filter.DoubleMinFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.IdFilter
-import org.autojs.autojs.core.automator.filter.IdHexFilter
 import org.autojs.autojs.core.automator.filter.IntFilter
-import org.autojs.autojs.core.automator.filter.MaxIntFilter
 import org.autojs.autojs.core.automator.filter.MetricsFilter
-import org.autojs.autojs.core.automator.filter.MetricsMaxFilter
-import org.autojs.autojs.core.automator.filter.MetricsMinFilter
-import org.autojs.autojs.core.automator.filter.MetricsRangeFilter
-import org.autojs.autojs.core.automator.filter.MinIntFilter
-import org.autojs.autojs.core.automator.filter.PackageNameFilter
-import org.autojs.autojs.core.automator.filter.TextFilter
+import org.autojs.autojs.core.automator.filter.MetricsFilter.Spelling
+import org.autojs.autojs.core.automator.filter.StringMatcher
+import org.autojs.autojs.core.automator.filter.StringProperty
+import org.autojs.autojs.core.automator.filter.StringPropertyFilter
 import org.autojs.autojs.core.automator.filter.ToleranceFilter
 import org.autojs.autojs.core.automator.selector.SelectorArgType.ACTIONS
 import org.autojs.autojs.core.automator.selector.SelectorArgType.APP
@@ -124,69 +118,61 @@ object SelectorRegistry {
 
     /**
      * The six builders of a string property (`text`, `textStartsWith`, `textEndsWith`, `textContains`,
-     * `textMatches` (deprecated for `textMatch`), `textMatch`) over the filter object of that property.
-     * zh-CN: 字符串属性的六个 builder, 建立在该属性的过滤器对象之上.
+     * `textMatches` (deprecated for `textMatch`), `textMatch`), each a [StringPropertyFilter] over
+     * [property]; `id` and `className` replace the plain-string `equals` / `startsWith` factories with
+     * their argument rules.
+     * zh-CN: 字符串属性的六个 builder, 每个都是 [property] 上的 [StringPropertyFilter]; `id` 与 `className` 以各自的参数规则
+     * 替换普通字符串的 `equals` / `startsWith` 工厂.
      */
-    private class StringFamily(
-        val equals: (String) -> Filter,
-        val equalsRegex: (NativeRegExp) -> Filter,
-        val startsWith: (String) -> Filter,
-        val endsWith: (String) -> Filter,
-        val contains: (String) -> Filter,
-        val containsRegex: (NativeRegExp) -> Filter,
-        val matches: (String) -> Filter,
-        val matchesRegex: (NativeRegExp) -> Filter,
-        val match: (String) -> Filter,
-        val matchRegex: (NativeRegExp) -> Filter,
-    )
-
-    private fun Entries.stringFamily(name: String, getter: (UiNode<*>) -> Any?, family: StringFamily, extra: EntryBuilder.() -> Unit = {}) {
+    private fun Entries.stringFamily(
+        name: String,
+        property: StringProperty,
+        getter: (UiNode<*>) -> Any?,
+        equals: (String) -> Filter = { StringPropertyFilter(property, StringMatcher.equals(it)) },
+        startsWith: (String) -> Filter = { StringPropertyFilter(property, StringMatcher.startsWith(it)) },
+        extra: EntryBuilder.() -> Unit = {},
+    ) {
         entry(name, getter = getter) {
-            f1(string("s"), family.equals)
-            f1(regex(), family.equalsRegex)
+            f1(string("s"), equals)
+            f1<NativeRegExp>(regex()) { StringPropertyFilter(property, StringMatcher.equals(it)) }
             extra()
         }
-        entry("${name}StartsWith", getter = getter) { f1(string("prefix"), family.startsWith) }
-        entry("${name}EndsWith", getter = getter) { f1(string("suffix"), family.endsWith) }
+        entry("${name}StartsWith", getter = getter) { f1(string("prefix"), startsWith) }
+        entry("${name}EndsWith", getter = getter) { f1<String>(string("suffix")) { StringPropertyFilter(property, StringMatcher.endsWith(it)) } }
         entry("${name}Contains", getter = getter) {
-            f1(string("s"), family.contains)
-            f1(regex(), family.containsRegex)
+            f1<String>(string("s")) { StringPropertyFilter(property, StringMatcher.contains(it)) }
+            f1<NativeRegExp>(regex()) { StringPropertyFilter(property, StringMatcher.contains(it)) }
         }
         entry("${name}Matches", deprecatedFor = "${name}Match", getter = getter) {
-            f1(string("s"), family.matches)
-            f1(regex(), family.matchesRegex)
+            f1<String>(string("s")) { StringPropertyFilter(property, StringMatcher.matches(it)) }
+            f1<NativeRegExp>(regex()) { StringPropertyFilter(property, StringMatcher.matches(it)) }
         }
         entry("${name}Match", getter = getter) {
-            f1(string("s"), family.match)
-            f1(regex(), family.matchRegex)
+            f1<String>(string("s")) { StringPropertyFilter(property, StringMatcher.match(it)) }
+            f1<NativeRegExp>(regex()) { StringPropertyFilter(property, StringMatcher.match(it)) }
         }
     }
 
-    /** One of the eight screen metrics with its four filter property objects, in both spellings. zh-CN: 八个屏幕度量之一及其四种过滤器属性对象, 两种拼写. */
-    private class Metric(
-        val name: String,
-        val capitalized: String,
-        val getter: (UiNode<*>) -> Int,
-        val equals: MetricsFilter.MetricsProperty,
-        val range: MetricsRangeFilter.IntRangeProperty,
-        val min: MetricsMinFilter.IntMinProperty,
-        val max: MetricsMaxFilter.IntMaxProperty,
-        val boundsEquals: MetricsFilter.MetricsProperty,
-        val boundsRange: MetricsRangeFilter.IntRangeProperty,
-        val boundsMin: MetricsMinFilter.IntMinProperty,
-        val boundsMax: MetricsMaxFilter.IntMaxProperty,
-    )
+    /** `left(value)` / `left(min, max)` or `boundsLeft(...)`, per [MetricsFilter.Property]. zh-CN: 按 [MetricsFilter.Property] 生成 `left(value)` / `left(min, max)` 或 `boundsLeft(...)`. */
+    private fun Entries.metric(m: MetricsFilter.Property, spelling: Spelling) {
+        val name = if (spelling == Spelling.PLAIN) m.toString() else "bounds${m.capitalized}"
+        entry(name, getter = { m[it] }) {
+            f1<Double>(double("value")) { MetricsFilter(m, MetricsFilter.Comparison.Equals(it), spelling) }
+            f2<Double, Double>(double("min"), double("max")) { min, max -> MetricsFilter(m, MetricsFilter.Comparison.Range(min, max), spelling) }
+        }
+    }
 
-    private fun metrics() = listOf(
-        Metric("left", "Left", { it.left() }, MetricsFilter.LEFT, MetricsRangeFilter.LEFT, MetricsMinFilter.LEFT, MetricsMaxFilter.LEFT, MetricsFilter.BOUNDS_LEFT, MetricsRangeFilter.BOUNDS_LEFT, MetricsMinFilter.BOUNDS_LEFT, MetricsMaxFilter.BOUNDS_LEFT),
-        Metric("top", "Top", { it.top() }, MetricsFilter.TOP, MetricsRangeFilter.TOP, MetricsMinFilter.TOP, MetricsMaxFilter.TOP, MetricsFilter.BOUNDS_TOP, MetricsRangeFilter.BOUNDS_TOP, MetricsMinFilter.BOUNDS_TOP, MetricsMaxFilter.BOUNDS_TOP),
-        Metric("right", "Right", { it.right() }, MetricsFilter.RIGHT, MetricsRangeFilter.RIGHT, MetricsMinFilter.RIGHT, MetricsMaxFilter.RIGHT, MetricsFilter.BOUNDS_RIGHT, MetricsRangeFilter.BOUNDS_RIGHT, MetricsMinFilter.BOUNDS_RIGHT, MetricsMaxFilter.BOUNDS_RIGHT),
-        Metric("bottom", "Bottom", { it.bottom() }, MetricsFilter.BOTTOM, MetricsRangeFilter.BOTTOM, MetricsMinFilter.BOTTOM, MetricsMaxFilter.BOTTOM, MetricsFilter.BOUNDS_BOTTOM, MetricsRangeFilter.BOUNDS_BOTTOM, MetricsMinFilter.BOUNDS_BOTTOM, MetricsMaxFilter.BOUNDS_BOTTOM),
-        Metric("width", "Width", { it.width() }, MetricsFilter.WIDTH, MetricsRangeFilter.WIDTH, MetricsMinFilter.WIDTH, MetricsMaxFilter.WIDTH, MetricsFilter.BOUNDS_WIDTH, MetricsRangeFilter.BOUNDS_WIDTH, MetricsMinFilter.BOUNDS_WIDTH, MetricsMaxFilter.BOUNDS_WIDTH),
-        Metric("height", "Height", { it.height() }, MetricsFilter.HEIGHT, MetricsRangeFilter.HEIGHT, MetricsMinFilter.HEIGHT, MetricsMaxFilter.HEIGHT, MetricsFilter.BOUNDS_HEIGHT, MetricsRangeFilter.BOUNDS_HEIGHT, MetricsMinFilter.BOUNDS_HEIGHT, MetricsMaxFilter.BOUNDS_HEIGHT),
-        Metric("centerX", "CenterX", { it.centerX() }, MetricsFilter.CENTER_X, MetricsRangeFilter.CENTER_X, MetricsMinFilter.CENTER_X, MetricsMaxFilter.CENTER_X, MetricsFilter.BOUNDS_CENTER_X, MetricsRangeFilter.BOUNDS_CENTER_X, MetricsMinFilter.BOUNDS_CENTER_X, MetricsMaxFilter.BOUNDS_CENTER_X),
-        Metric("centerY", "CenterY", { it.centerY() }, MetricsFilter.CENTER_Y, MetricsRangeFilter.CENTER_Y, MetricsMinFilter.CENTER_Y, MetricsMaxFilter.CENTER_Y, MetricsFilter.BOUNDS_CENTER_Y, MetricsRangeFilter.BOUNDS_CENTER_Y, MetricsMinFilter.BOUNDS_CENTER_Y, MetricsMaxFilter.BOUNDS_CENTER_Y),
-    )
+    /** `minLeft(value)` or `boundsMinLeft(min)`. zh-CN: `minLeft(value)` 或 `boundsMinLeft(min)`. */
+    private fun Entries.metricMin(m: MetricsFilter.Property, spelling: Spelling) {
+        val (name, param) = if (spelling == Spelling.PLAIN) "min${m.capitalized}" to "value" else "boundsMin${m.capitalized}" to "min"
+        entry(name, getter = { m[it] }) { f1<Double>(double(param)) { MetricsFilter(m, MetricsFilter.Comparison.Min(it), spelling) } }
+    }
+
+    /** `maxLeft(value)` or `boundsMaxLeft(max)`. zh-CN: `maxLeft(value)` 或 `boundsMaxLeft(max)`. */
+    private fun Entries.metricMax(m: MetricsFilter.Property, spelling: Spelling) {
+        val (name, param) = if (spelling == Spelling.PLAIN) "max${m.capitalized}" to "value" else "boundsMax${m.capitalized}" to "max"
+        entry(name, getter = { m[it] }) { f1<Double>(double(param)) { MetricsFilter(m, MetricsFilter.Comparison.Max(it), spelling) } }
+    }
 
     private fun Entries.booleanProperty(name: String, supplier: BooleanFilter.BooleanSupplier, noArgFirst: Boolean = false) {
         entry(name, getter = { supplier[it] }) {
@@ -196,67 +182,19 @@ object SelectorRegistry {
         }
     }
 
-    private fun Entries.intProperty(name: String, paramName: String, property: IntFilter.IntProperty) {
+    private fun Entries.intProperty(name: String, paramName: String, property: IntFilter.Property) {
         entry(name, getter = { property[it] }) { f1<Int>(int(paramName)) { IntFilter(property, it) } }
     }
 
     private fun buildEntries(): List<SelectorEntry> = Entries().apply {
-        stringFamily(
-            "id", { it.id() }, StringFamily(
-                { IdFilter.equals(it) }, { IdFilter.equals(it) },
-                { IdFilter.startsWith(it) }, { IdFilter.endsWith(it) },
-                { IdFilter.contains(it) }, { IdFilter.contains(it) },
-                { IdFilter.matches(it) }, { IdFilter.matches(it) },
-                { IdFilter.match(it) }, { IdFilter.match(it) },
-            ),
-        )
-        entry("idHex", getter = { it.idHex() }) { f1<String>(string("str")) { IdHexFilter.equals(it) } }
-        stringFamily(
-            "text", { it.text() }, StringFamily(
-                { TextFilter.equals(it) }, { TextFilter.equals(it) },
-                { TextFilter.startsWith(it) }, { TextFilter.endsWith(it) },
-                { TextFilter.contains(it) }, { TextFilter.contains(it) },
-                { TextFilter.matches(it) }, { TextFilter.matches(it) },
-                { TextFilter.match(it) }, { TextFilter.match(it) },
-            ),
-        )
-        stringFamily(
-            "desc", { it.desc() }, StringFamily(
-                { DescFilter.equals(it) }, { DescFilter.equals(it) },
-                { DescFilter.startsWith(it) }, { DescFilter.endsWith(it) },
-                { DescFilter.contains(it) }, { DescFilter.contains(it) },
-                { DescFilter.matches(it) }, { DescFilter.matches(it) },
-                { DescFilter.match(it) }, { DescFilter.match(it) },
-            ),
-        )
-        stringFamily(
-            "content", { it.content() }, StringFamily(
-                { ContentFilter.equals(it) }, { ContentFilter.equals(it) },
-                { ContentFilter.startsWith(it) }, { ContentFilter.endsWith(it) },
-                { ContentFilter.contains(it) }, { ContentFilter.contains(it) },
-                { ContentFilter.matches(it) }, { ContentFilter.matches(it) },
-                { ContentFilter.match(it) }, { ContentFilter.match(it) },
-            ),
-        )
-        stringFamily(
-            "className", { it.className() }, StringFamily(
-                { ClassNameFilter.equals(it) }, { ClassNameFilter.equals(it) },
-                { ClassNameFilter.startsWith(it) }, { ClassNameFilter.endsWith(it) },
-                { ClassNameFilter.contains(it) }, { ClassNameFilter.contains(it) },
-                { ClassNameFilter.matches(it) }, { ClassNameFilter.matches(it) },
-                { ClassNameFilter.match(it) }, { ClassNameFilter.match(it) },
-            ),
-        )
-        stringFamily(
-            "packageName", { it.packageName() }, StringFamily(
-                { PackageNameFilter.equals(it) }, { PackageNameFilter.equals(it) },
-                { PackageNameFilter.startsWith(it) }, { PackageNameFilter.endsWith(it) },
-                { PackageNameFilter.contains(it) }, { PackageNameFilter.contains(it) },
-                { PackageNameFilter.matches(it) }, { PackageNameFilter.matches(it) },
-                { PackageNameFilter.match(it) }, { PackageNameFilter.match(it) },
-            ),
-        ) {
-            f1<App>(app()) { PackageNameFilter.equals(it.packageName) }
+        stringFamily("id", StringProperty.ID, { it.id() }, equals = { IdFilter.equals(it) }, startsWith = { IdFilter.startsWith(it) })
+        entry("idHex", getter = { it.idHex() }) { f1<String>(string("str")) { StringPropertyFilter(StringProperty.ID_HEX, StringMatcher.equals(it)) } }
+        stringFamily("text", StringProperty.TEXT, { it.text() })
+        stringFamily("desc", StringProperty.DESC, { it.desc() })
+        stringFamily("content", StringProperty.CONTENT, { it.content() })
+        stringFamily("className", StringProperty.CLASS_NAME, { it.className() }, equals = { ClassNameFilter.equals(it) }, startsWith = { ClassNameFilter.startsWith(it) })
+        stringFamily("packageName", StringProperty.PACKAGE_NAME, { it.packageName() }) {
+            f1<App>(app()) { StringPropertyFilter(StringProperty.PACKAGE_NAME, StringMatcher.equals(it.packageName)) }
         }
         entry("currentApp", getter = { it.packageName() }) {
             f1<App>(app()) { AppFilter(it) }
@@ -266,30 +204,12 @@ object SelectorRegistry {
         entry("bounds") { f4(double("l"), double("t"), double("r"), double("b")) { l, t, r, b -> BoundsFilter(l, t, r, b, BoundsFilter.TYPE_EQUALS) } }
         entry("boundsInside") { f4(double("l"), double("t"), double("r"), double("b")) { l, t, r, b -> BoundsFilter(l, t, r, b, BoundsFilter.TYPE_INSIDE) } }
         entry("boundsContains") { f4(double("l"), double("t"), double("r"), double("b")) { l, t, r, b -> BoundsFilter(l, t, r, b, BoundsFilter.TYPE_CONTAINS) } }
-        for (m in metrics()) {
-            entry("bounds${m.capitalized}", getter = m.getter) {
-                f1<Double>(double("value")) { MetricsFilter(m.boundsEquals, it) }
-                f2<Double, Double>(double("min"), double("max")) { min, max -> MetricsRangeFilter(m.boundsRange, min, max) }
-            }
-        }
-        for (m in metrics()) {
-            entry("boundsMin${m.capitalized}", getter = m.getter) { f1<Double>(double("min")) { MetricsMinFilter(m.boundsMin, it) } }
-        }
-        for (m in metrics()) {
-            entry("boundsMax${m.capitalized}", getter = m.getter) { f1<Double>(double("max")) { MetricsMaxFilter(m.boundsMax, it) } }
-        }
-        for (m in metrics()) {
-            entry(m.name, getter = m.getter) {
-                f1<Double>(double("value")) { MetricsFilter(m.equals, it) }
-                f2<Double, Double>(double("min"), double("max")) { min, max -> MetricsRangeFilter(m.range, min, max) }
-            }
-        }
-        for (m in metrics()) {
-            entry("min${m.capitalized}", getter = m.getter) { f1<Double>(double("value")) { MetricsMinFilter(m.min, it) } }
-        }
-        for (m in metrics()) {
-            entry("max${m.capitalized}", getter = m.getter) { f1<Double>(double("value")) { MetricsMaxFilter(m.max, it) } }
-        }
+        for (m in MetricsFilter.Property.entries) metric(m, Spelling.BOUNDS)
+        for (m in MetricsFilter.Property.entries) metricMin(m, Spelling.BOUNDS)
+        for (m in MetricsFilter.Property.entries) metricMax(m, Spelling.BOUNDS)
+        for (m in MetricsFilter.Property.entries) metric(m, Spelling.PLAIN)
+        for (m in MetricsFilter.Property.entries) metricMin(m, Spelling.PLAIN)
+        for (m in MetricsFilter.Property.entries) metricMax(m, Spelling.PLAIN)
         entry("screenCenterX", getter = { it.centerX() }) {
             f2<Boolean, Double>(boolean(), double("tolerance", 0.0..0.5)) { b, tolerance -> ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X, b, tolerance) }
             f1<Boolean>(boolean()) { ToleranceFilter(ToleranceFilter.SCREEN_CENTER_X, it) }
@@ -337,18 +257,18 @@ object SelectorRegistry {
         booleanProperty("multiLine", BooleanFilter.MULTI_LINE)
         booleanProperty("dismissable", BooleanFilter.DISMISSABLE)
 
-        intProperty("depth", "d", IntFilter.DEPTH)
-        intProperty("row", "d", IntFilter.ROW)
-        intProperty("rowCount", "d", IntFilter.ROW_COUNT)
-        intProperty("rowSpan", "d", IntFilter.ROW_SPAN)
-        intProperty("column", "d", IntFilter.COLUMN)
-        intProperty("columnCount", "d", IntFilter.COLUMN_COUNT)
-        intProperty("columnSpan", "d", IntFilter.COLUMN_SPAN)
-        intProperty("drawingOrder", "order", IntFilter.DRAWING_ORDER)
-        intProperty("indexInParent", "index", IntFilter.INDEX_IN_PARENT)
-        intProperty("childCount", "count", IntFilter.CHILD_COUNT)
-        entry("minChildCount", getter = { it.childCount() }) { f1<Int>(int("min")) { MinIntFilter(MinIntFilter.CHILD_COUNT, it) } }
-        entry("maxChildCount", getter = { it.childCount() }) { f1<Int>(int("max")) { MaxIntFilter(MaxIntFilter.CHILD_COUNT, it) } }
+        intProperty("depth", "d", IntFilter.Property.DEPTH)
+        intProperty("row", "d", IntFilter.Property.ROW)
+        intProperty("rowCount", "d", IntFilter.Property.ROW_COUNT)
+        intProperty("rowSpan", "d", IntFilter.Property.ROW_SPAN)
+        intProperty("column", "d", IntFilter.Property.COLUMN)
+        intProperty("columnCount", "d", IntFilter.Property.COLUMN_COUNT)
+        intProperty("columnSpan", "d", IntFilter.Property.COLUMN_SPAN)
+        intProperty("drawingOrder", "order", IntFilter.Property.DRAWING_ORDER)
+        intProperty("indexInParent", "index", IntFilter.Property.INDEX_IN_PARENT)
+        intProperty("childCount", "count", IntFilter.Property.CHILD_COUNT)
+        entry("minChildCount", getter = { it.childCount() }) { f1<Int>(int("min")) { IntFilter(IntFilter.Property.CHILD_COUNT, IntFilter.Comparison.Min(it)) } }
+        entry("maxChildCount", getter = { it.childCount() }) { f1<Int>(int("max")) { IntFilter(IntFilter.Property.CHILD_COUNT, IntFilter.Comparison.Max(it)) } }
     }.list
 
 }

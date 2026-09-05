@@ -17,6 +17,7 @@ import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
@@ -25,6 +26,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
@@ -84,7 +86,12 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                             if (ScriptInterruptedException.causedByInterrupt(e)) throw e
                             scriptRuntime.console.warn("${e.message}\n${e.stackTraceToString()}")
                             scriptRuntime.console.warn("method: ${methodKey}, arguments: [${arguments.joinToString(",") { coerceString(it) }}]")
-                            throw e
+                            // A Java exception thrown from a BaseFunction is not a JS error and would bypass
+                            // the script's try / catch; a Rhino exception (already carrying the script
+                            // position) is rethrown as is.
+                            // zh-CN: BaseFunction 抛出的 Java 异常不是 JS 错误, 会绕过脚本的 try / catch; Rhino 异常 (已带脚本
+                            // 位置) 原样重抛.
+                            throw if (e is RhinoException) e else WrappedRuntimeException(e)
                         }
                     }, NOT_CONSTRUCTABLE)
                 }, NOT_CONSTRUCTABLE).call(cx, global, global.globalThis, arrayOf(methodName)))

@@ -9,9 +9,7 @@ import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.DoubleMinFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.MetricsFilter
-import org.autojs.autojs.core.automator.filter.MetricsMaxFilter
-import org.autojs.autojs.core.automator.filter.MetricsMinFilter
-import org.autojs.autojs.core.automator.filter.MetricsRangeFilter
+import org.autojs.autojs.core.automator.filter.ScreenScale
 import org.autojs.autojs.core.automator.filter.ToleranceFilter
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
@@ -26,10 +24,10 @@ import org.junit.Test
 
 /**
  * [SelectorRegistry] applied to a bridge-less [UiSelector]: overload resolution, coercion, and the
- * filters each property builds, evaluated over [FakeUiNode]. Screen-relative properties are only
- * checked for the filter they produce (their evaluation needs the device metrics).
+ * filters each property builds, evaluated over [FakeUiNode]; screen-relative properties are
+ * evaluated against a fixed [ScreenScale] installed as the default for the duration of the test.
  * zh-CN: 在无 bridge 的 [UiSelector] 上施加 [SelectorRegistry]: 重载解析, 参数转换, 以及各属性构建的过滤器在 [FakeUiNode]
- * 上的求值. 屏幕相关属性只检查它们产生的过滤器 (求值需要设备尺寸).
+ * 上的求值; 屏幕相关属性以测试期间安装为默认值的固定 [ScreenScale] 求值.
  */
 class SelectorRegistryTest {
 
@@ -98,29 +96,61 @@ class SelectorRegistryTest {
 
     @Test
     fun metricsOverloadsAreChosenByArgumentCount() {
+        assertEquals("boundsLeft(10)", filterOf("boundsLeft", 10.0).toString())
+        assertEquals("boundsLeft(0, 20)", filterOf("boundsLeft", 0.0, 20.0).toString())
+        assertEquals("boundsMinLeft(10)", filterOf("boundsMinLeft", 10.0).toString())
+        assertEquals("boundsMaxLeft(10)", filterOf("boundsMaxLeft", 10.0).toString())
+        assertEquals("left(10)", filterOf("left", 10).toString())
+        assertEquals("centerY(0, 100)", filterOf("centerY", 0.0, 100.0).toString())
+        assertEquals("minWidth(10)", filterOf("minWidth", 10.0).toString())
+        assertEquals("maxHeight(10)", filterOf("maxHeight", 10.0).toString())
+        assertEquals("bounds(10, 20, 110, 70)", filterOf("bounds", 10.0, 20.0, 110.0, 70.0).toString())
+        assertEquals("boundsInside(0, 0, 200, 200)", filterOf("boundsInside", 0, 0, 200, 200).toString())
         assertTrue(filterOf("boundsLeft", 10.0) is MetricsFilter)
-        assertTrue(filterOf("boundsLeft", 0.0, 20.0) is MetricsRangeFilter)
-        assertTrue(filterOf("boundsMinLeft", 10.0) is MetricsMinFilter)
-        assertTrue(filterOf("boundsMaxLeft", 10.0) is MetricsMaxFilter)
-        assertTrue(filterOf("left", 10) is MetricsFilter)
-        assertTrue(filterOf("centerY", 0.0, 100.0) is MetricsRangeFilter)
-        assertTrue(filterOf("minWidth", 10.0) is MetricsMinFilter)
-        assertTrue(filterOf("maxHeight", 10.0) is MetricsMaxFilter)
         assertTrue(filterOf("bounds", 10.0, 20.0, 110.0, 70.0) is BoundsFilter)
-        assertTrue(filterOf("boundsInside", 0, 0, 200, 200) is BoundsFilter)
         assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("bounds", 10.0, 20.0))
         assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("boundsLeft", 1.0, 2.0, 3.0))
     }
 
     @Test
     fun screenPropertiesAcceptEveryDocumentedShape() {
-        assertTrue(filterOf("screenCenterX", true, 0.1) is ToleranceFilter)
-        assertTrue(filterOf("screenCenterX", false) is ToleranceFilter)
-        assertTrue(filterOf("screenCenterX", 0.2) is ToleranceFilter)
-        assertTrue(filterOf("screenCenterY") is ToleranceFilter)
-        assertTrue(filterOf("screenCoverage", 0.5) is DoubleMinFilter)
+        assertEquals("screenCenterX(true, 0.1)", filterOf("screenCenterX", true, 0.1).toString())
+        assertEquals("screenCenterX(false)", filterOf("screenCenterX", false).toString())
+        assertEquals("screenCenterX(0.2)", filterOf("screenCenterX", 0.2).toString())
+        assertEquals("screenCenterY()", filterOf("screenCenterY").toString())
+        assertEquals("screenCoverage(0.5)", filterOf("screenCoverage", 0.5).toString())
+        assertEquals("screenCoverage()", filterOf("screenCoverage").toString())
+        assertTrue(filterOf("screenCenterX") is ToleranceFilter)
         assertTrue(filterOf("screenCoverage") is DoubleMinFilter)
         assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("screenCenterX", "left"))
+    }
+
+    @Test
+    fun screenRelativePropertiesEvaluateAgainstTheDefaultScreenScale() {
+        val previous = ScreenScale.Source.default
+        ScreenScale.Source.default = ScreenScale.Source.fixed(1080, 1920)
+        try {
+            // login: bounds (10, 20, 110, 70); a second node fills the screen.
+            val full = FakeUiNode.root { bounds(0, 0, 1080, 1920) }
+            assertTrue(filterOf("boundsLeft", 10.0).filter(login))
+            assertTrue(filterOf("left", 0.0, 0.5).filter(login))
+            assertTrue(filterOf("boundsRight", -1.0).filter(full))
+            assertTrue(filterOf("width", -1.0).filter(full))
+            assertTrue(filterOf("minWidth", 0.5).filter(full))
+            assertFalse(filterOf("minWidth", 0.5).filter(login))
+            assertTrue(filterOf("maxHeight", 50.0).filter(login))
+            assertTrue(filterOf("boundsInside", 0, 0, -1, -1).filter(login))
+            assertTrue(filterOf("boundsContains", 20, 30, 40, 50).filter(login))
+            assertTrue(filterOf("bounds", 10, 20, 110, 70).filter(login))
+            assertTrue(filterOf("screenCenterX").filter(full))
+            assertFalse(filterOf("screenCenterX").filter(login))
+            assertTrue(filterOf("screenCenterY", false).filter(login))
+            assertTrue(filterOf("screenCoverage").filter(full))
+            assertFalse(filterOf("screenCoverage").filter(login))
+            assertTrue(filterOf("screenCoverage", 0.0).filter(login))
+        } finally {
+            ScreenScale.Source.default = previous
+        }
     }
 
     @Test

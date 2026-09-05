@@ -437,6 +437,8 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `UiObject` 在帶有節點分配器時調用 `getChild()` / `getParent()` 等 compat 訪問器會無限遞歸 (分配器回調了包裝對象自身的訪問器); 修復後分配器在原始節點上操作, 登記按對象同一性而非節點相等性 (指向同一視圖的兩個實例不再只回收其一). 分配器仍未接入腳本運行時: Android 13 以下節點按進程池化, 退出時批量回收可能回收到已被其它腳本複用的實例
 * `修復` 選擇器 `contextClickable()` 條件在選擇器的字符串表示 (如 `selector().toString()` 與錯誤信息) 中誤顯示為 `checkable`
 * `修復` 全局函數形式的 `filter(fn)` 調用失敗 (報 "Invalid arguments"), 以及集合選擇器數組中的正則不被接受 (如 `pickup({text: [/regex/]})`)
+* `修復` 選擇器字符串形式 (如 `selector().toString()` 與錯誤信息) 中的小數在以逗號為小數點的界面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號
+* `修復` 全局函數形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 拋出的 Java 異常無法被腳本的 `try / catch` 捕獲, 並會直接終止腳本; 現在作為可捕獲的腳本錯誤拋出
 * `優化` `TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `優化` Ace 字體預覽在目前字體尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字體或下載完成後自動隱藏
@@ -525,6 +527,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 無障礙截圖 (`automator.captureScreen()`) 抽出為 `A11yScreenshotter`: 截圖後的硬件緩衝現在總會被關閉 (原先只回收了包裝位圖); 系統限頻錯誤的重試改為至多 60 次 (3 s), 之後與其它失敗一樣以 `null` 兌現 (原先系統持續限頻時 promise 永遠不會兌現)
 * `優化` 選擇器過濾器, 搜索算法 (DFS / BFS) 與羅盤導航 (`compass`) 改為面向不依賴 Android 的 `UiNode` 接口 (`UiObject` 實現它), 三者可在 JVM 單元測試中以內存節點樹覆蓋; 腳本可見的 API 與行為不變
 * `優化` 選擇器屬性改由聲明式註冊表 `SelectorRegistry` 統一描述: `UiSelector` 的 builder 方法據此生成, 集合選擇器 (如 `pickup({...})`) 按註冊表解析而非反射, 全局選擇器函數按註冊表與顯式白名單導出 (`toStringReadable` 與 `internal` 成員的混淆名不再暴露為全局函數); 全局函數與集合選擇器的數值參數統一按四捨五入轉換為整數 (集合選擇器此前為截斷)
+* `優化` 選擇器過濾器去重: 字符串屬性 (text / desc / content / id / className / packageName 及其變體) 統一為 `StringPropertyFilter`, 邊界度量 (left / boundsLeft / minLeft / maxLeft 等) 統一為 `MetricsFilter`, 整數屬性統一為 `IntFilter`; 屏幕相關過濾器 (bounds / 度量 / screenCenter / screenCoverage) 經可注入的屏幕尺寸求值並納入 JVM 單元測試; 選擇器求值遍歷過濾器列表的快照, 多線程共享同一選擇器時安全; 腳本可見的 API 與行為不變
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

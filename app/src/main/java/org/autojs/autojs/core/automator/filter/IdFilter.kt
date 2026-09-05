@@ -1,71 +1,24 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
-import org.autojs.autojs.core.automator.UiNode
-import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
+ * The argument rule of `id(s)` and `idStartsWith(prefix)`: an argument without `:id/` is compared
+ * with the entry name of the resource id (`login` of `com.example:id/login`), one with it against
+ * the full id. The other id builders are plain [StringPropertyFilter]s over [StringProperty.ID].
+ * zh-CN: `id(s)` 与 `idStartsWith(prefix)` 的参数规则: 不含 `:id/` 的参数与资源 id 的条目名 (`com.example:id/login` 中的
+ * `login`) 比较, 含它的与完整 id 比较. 其余 id builder 是 [StringProperty.ID] 上的普通 [StringPropertyFilter].
+ *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Dec 27, 2025.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
 object IdFilter {
 
-    private val ID_GETTER = object : KeyGetter {
-
-        override fun getKey(nodeInfo: UiNode<*>) = nodeInfo.id()
-
-        override fun toString() = "id"
-
-    }
-
     @Suppress("CovariantEquals")
-    fun equals(s: String) = when (s.contains(ID_IDENTIFIER)) {
-        true -> StringEqualsFilter(s, ID_GETTER)
-        else -> object : Filter {
-            override fun filter(node: UiNode<*>) = node.id()?.let { id ->
-                when (id.contains(ID_IDENTIFIER)) {
-                    true -> id.split(ID_IDENTIFIER).last() == s
-                    else -> id == s
-                }
-            } ?: false
+    fun equals(s: String) = StringPropertyFilter(propertyFor(s), StringMatcher.equals(s))
 
-            override fun toString() = "${ID_GETTER}(\"$s\")"
-        }
-    }
+    fun startsWith(prefix: String) = StringPropertyFilter(propertyFor(prefix), StringMatcher.startsWith(prefix))
 
-    @Suppress("CovariantEquals")
-    fun equals(regex: NativeRegExp): Filter {
-        return object : StringMatchesFilter(regex, ID_GETTER) {
-            override fun toString(): String {
-                val literal = JsRegexUtils.formatAsJsRegexLiteral(regex.toString())
-                return "${ID_GETTER}($literal)"
-            }
-        }
-    }
-
-    fun startsWith(prefix: String) = when (prefix.contains(ID_IDENTIFIER)) {
-        true -> StringStartsWithFilter(prefix, ID_GETTER)
-        else -> object : Filter {
-            override fun filter(node: UiNode<*>) = node.id()?.let { id ->
-                when (id.contains(ID_IDENTIFIER)) {
-                    true -> id.split(ID_IDENTIFIER).last().startsWith(prefix)
-                    else -> id.startsWith(prefix)
-                }
-            } ?: false
-
-            override fun toString() = "${ID_GETTER}StartsWith(\"$prefix\")"
-        }
-    }
-
-    fun endsWith(suffix: String) = StringEndsWithFilter(suffix, ID_GETTER)
-
-    fun contains(s: String) = StringContainsFilter(s, ID_GETTER)
-    fun contains(regex: NativeRegExp) = StringContainsFilter(regex, ID_GETTER)
-
-    fun matches(s: String) = StringMatchesFilter(s, ID_GETTER)
-    fun matches(regex: NativeRegExp) = StringMatchesFilter(regex, ID_GETTER)
-
-    fun match(s: String) = StringMatchFilter(s, ID_GETTER)
-    fun match(regex: NativeRegExp) = StringMatchFilter(regex, ID_GETTER)
+    private fun propertyFor(argument: String) = if (argument.contains(ID_IDENTIFIER)) StringProperty.ID else StringProperty.ID_ENTRY
 
 }

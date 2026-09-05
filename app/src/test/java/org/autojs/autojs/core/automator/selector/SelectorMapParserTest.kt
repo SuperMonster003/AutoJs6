@@ -8,7 +8,6 @@ import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.MetricsFilter
-import org.autojs.autojs.core.automator.filter.MetricsRangeFilter
 import org.autojs.autojs.core.automator.filter.ToleranceFilter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -61,8 +60,8 @@ class SelectorMapParserTest {
 
     @Test
     fun arraysAreSpreadIntoArguments() {
-        assertTrue(parse("boundsLeft" to listOf(10.0, 20.0)).single() is MetricsRangeFilter)
-        assertTrue(parse("boundsLeft" to listOf(10.0)).single() is MetricsFilter)
+        assertEquals("boundsLeft(10, 20)", parse("boundsLeft" to listOf(10.0, 20.0)).single().toString())
+        assertEquals("boundsLeft(10)", parse("boundsLeft" to listOf(10.0)).single().toString())
         assertTrue(parse("bounds" to listOf(0, 0, 100, 100)).single() is BoundsFilter)
         assertTrue(parse("screenCenterX" to listOf(true, 0.1)).single() is ToleranceFilter)
         assertTrue(parse("screenCenterX" to listOf(0.1)).single() is ToleranceFilter)
@@ -76,6 +75,7 @@ class SelectorMapParserTest {
     fun arrayElementsAreParsedLeniently() {
         assertTrue(parse("depth" to listOf("1")).single().filter(login.find("icon")))
         assertTrue(parse("clickable" to listOf("true")).single().filter(login))
+        assertEquals("left(10)", parse("left" to listOf("10")).single().toString())
         assertTrue(parse("left" to listOf("10")).single() is MetricsFilter)
         assertTrue(parse("screenCenterX" to listOf("true", "0.1")).single() is ToleranceFilter)
     }

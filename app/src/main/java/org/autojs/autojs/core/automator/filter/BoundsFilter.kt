@@ -1,23 +1,36 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiNode
-import org.autojs.autojs.util.DisplayUtils.toCeilIntX
-import org.autojs.autojs.util.DisplayUtils.toCeilIntY
-import org.autojs.autojs.util.DisplayUtils.toFloorIntX
-import org.autojs.autojs.util.DisplayUtils.toFloorIntY
-import org.autojs.autojs.util.StringUtils.formatDouble
+import org.autojs.autojs.core.automator.filter.ScreenScale.Axis
 
 /**
+ * `bounds(l, t, r, b)` / `boundsInside(...)` / `boundsContains(...)`: the node's bounds equal, lie
+ * inside, or contain the given rectangle. Both rectangles are normalised (left <= right, top <= bottom)
+ * with the left / top floored and the right / bottom ceiled, so fractional and inverted arguments
+ * behave (issue #49); `-1` and fractions are screen-relative, see [ScreenScale].
+ * zh-CN: `bounds(l, t, r, b)` / `boundsInside(...)` / `boundsContains(...)`: 节点边界等于, 位于, 或包含给定矩形. 两个矩形都会
+ * 规范化 (left <= right, top <= bottom), left / top 向下取整, right / bottom 向上取整, 因此小数与颠倒的参数也能工作
+ * (issue #49); `-1` 与比例值相对于屏幕, 见 [ScreenScale].
+ *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Nov 19, 2022.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
-class BoundsFilter(private val left: Double, private val top: Double, private val right: Double, private val bottom: Double, private val type: Int) : Filter {
+class BoundsFilter(
+    private val left: Double,
+    private val top: Double,
+    private val right: Double,
+    private val bottom: Double,
+    private val type: Int,
+    private val scale: ScreenScale.Source = ScreenScale.Source.default,
+) : Filter {
 
-    override fun filter(node: UiNode<*>) = DesirableRect(node).let {
-        when (type) {
-            TYPE_INSIDE -> it.inside(left, top, right, bottom)
-            TYPE_CONTAINS -> it.contains(left, top, right, bottom)
-            else /* EQUALS */ -> it.equals(left, top, right, bottom)
+    override fun filter(node: UiNode<*>): Boolean {
+        val s = scale.scale()
+        val actual = DesirableRect(s, node.left().toDouble(), node.top().toDouble(), node.right().toDouble(), node.bottom().toDouble())
+        return when (type) {
+            TYPE_INSIDE -> actual.inside(s, left, top, right, bottom)
+            TYPE_CONTAINS -> actual.contains(s, left, top, right, bottom)
+            else /* EQUALS */ -> actual.equals(s, left, top, right, bottom)
         }
     }
 
@@ -27,7 +40,7 @@ class BoundsFilter(private val left: Double, private val top: Double, private va
             TYPE_CONTAINS -> "boundsContains"
             else /* EQUALS */ -> "bounds"
         }
-        return "$name(${formatDouble(left)}, ${formatDouble(top)}, ${formatDouble(right)}, ${formatDouble(bottom)})"
+        return "$name(${FilterFormat.number(left)}, ${FilterFormat.number(top)}, ${FilterFormat.number(right)}, ${FilterFormat.number(bottom)})"
     }
 
     companion object {
@@ -36,14 +49,12 @@ class BoundsFilter(private val left: Double, private val top: Double, private va
         const val TYPE_INSIDE = 1
         const val TYPE_CONTAINS = 2
 
-        private class DesirableRect(left: Double, top: Double, right: Double, bottom: Double) {
+        private class DesirableRect(scale: ScreenScale, left: Double, top: Double, right: Double, bottom: Double) {
 
-            constructor(node: UiNode<*>) : this(node.left().toDouble(), node.top().toDouble(), node.right().toDouble(), node.bottom().toDouble())
-
-            val intLeft = toFloorIntX(left)
-            val intTop = toFloorIntY(top)
-            val intRight = toCeilIntX(right)
-            val intBottom = toCeilIntY(bottom)
+            val intLeft = scale.floor(Axis.X, left)
+            val intTop = scale.floor(Axis.Y, top)
+            val intRight = scale.ceil(Axis.X, right)
+            val intBottom = scale.ceil(Axis.Y, bottom)
 
             val niceLeft = minOf(intLeft, intRight)
             val niceTop = minOf(intTop, intBottom)
@@ -57,15 +68,15 @@ class BoundsFilter(private val left: Double, private val top: Double, private va
                        niceBottom >= r.niceBottom
             }
 
-            fun contains(left: Double, top: Double, right: Double, bottom: Double) = contains(DesirableRect(left, top, right, bottom))
+            fun contains(scale: ScreenScale, left: Double, top: Double, right: Double, bottom: Double) = contains(DesirableRect(scale, left, top, right, bottom))
 
-            fun inside(left: Double, top: Double, right: Double, bottom: Double) = DesirableRect(left, top, right, bottom).contains(this)
+            fun inside(scale: ScreenScale, left: Double, top: Double, right: Double, bottom: Double) = DesirableRect(scale, left, top, right, bottom).contains(this)
 
-            fun equals(left: Double, top: Double, right: Double, bottom: Double): Boolean {
-                return this.niceLeft in toFloorIntX(left)..toCeilIntX(left) &&
-                       this.niceTop in toFloorIntY(top)..toCeilIntY(top) &&
-                       this.niceRight in toFloorIntX(right)..toCeilIntX(right) &&
-                       this.niceBottom in toFloorIntY(bottom)..toCeilIntY(bottom)
+            fun equals(scale: ScreenScale, left: Double, top: Double, right: Double, bottom: Double): Boolean {
+                return this.niceLeft in scale.floor(Axis.X, left)..scale.ceil(Axis.X, left) &&
+                       this.niceTop in scale.floor(Axis.Y, top)..scale.ceil(Axis.Y, top) &&
+                       this.niceRight in scale.floor(Axis.X, right)..scale.ceil(Axis.X, right) &&
+                       this.niceBottom in scale.floor(Axis.Y, bottom)..scale.ceil(Axis.Y, bottom)
             }
 
         }

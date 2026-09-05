@@ -1,21 +1,16 @@
 package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.UiNode
-import org.mozilla.javascript.regexp.NativeRegExp
-
 /**
+ * The argument rule of `className(name)` and `classNameStartsWith(prefix)`: a bare widget name is
+ * expanded to its framework or androidx / material class. The other className builders are plain
+ * [StringPropertyFilter]s over [StringProperty.CLASS_NAME].
+ * zh-CN: `className(name)` 与 `classNameStartsWith(prefix)` 的参数规则: 不带包名的控件名扩展为框架或 androidx / material
+ * 的类名. 其余 className builder 是 [StringProperty.CLASS_NAME] 上的普通 [StringPropertyFilter].
+ *
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Dec 27, 2025.
+ * Modified by SuperMonster003 as of Sep 6, 2026.
  */
 object ClassNameFilter {
-
-    private val CLASS_NAME_GETTER = object : KeyGetter {
-
-        override fun getKey(nodeInfo: UiNode<*>) = nodeInfo.className()
-
-        override fun toString() = "className"
-
-    }
 
     val extendedClassNameMap = mapOf(
         "CardView" to "androidx.cardview.widget.CardView",
@@ -54,29 +49,15 @@ object ClassNameFilter {
         "TimePickerView" to "com.google.android.material.timepicker.TimePickerView",
     )
 
-    @Suppress("CovariantEquals")
-    fun equals(text: String) = when (text.contains(".")) {
-        true -> text
-        else -> extendedClassNameMap[text] ?: "android.widget.$text"
-    }.let { StringEqualsFilter(it, CLASS_NAME_GETTER) }
+    /** `Button` -> `android.widget.Button`, `RecyclerView` -> its androidx name; a dotted name is taken as is. zh-CN: `Button` -> `android.widget.Button`, `RecyclerView` -> 其 androidx 全名; 含点的名称原样使用. */
+    fun expand(name: String): String = when (name.contains(".")) {
+        true -> name
+        else -> extendedClassNameMap[name] ?: "android.widget.$name"
+    }
 
     @Suppress("CovariantEquals")
-    fun equals(regex: NativeRegExp) = StringEqualsFilter(regex, CLASS_NAME_GETTER)
+    fun equals(text: String) = StringPropertyFilter(StringProperty.CLASS_NAME, StringMatcher.equals(expand(text)))
 
-    fun contains(s: String) = StringContainsFilter(s, CLASS_NAME_GETTER)
-    fun contains(regex: NativeRegExp) = StringContainsFilter(regex, CLASS_NAME_GETTER)
-
-    fun startsWith(prefix: String) = when (prefix.contains(".")) {
-        true -> prefix
-        else -> extendedClassNameMap[prefix] ?: "android.widget.$prefix"
-    }.let { StringStartsWithFilter(it, CLASS_NAME_GETTER) }
-
-    fun endsWith(suffix: String) = StringEndsWithFilter(suffix, CLASS_NAME_GETTER)
-
-    fun matches(s: String) = StringMatchesFilter(s, CLASS_NAME_GETTER)
-    fun matches(regex: NativeRegExp) = StringMatchesFilter(regex, CLASS_NAME_GETTER)
-
-    fun match(s: String) = StringMatchFilter(s, CLASS_NAME_GETTER)
-    fun match(regex: NativeRegExp) = StringMatchFilter(regex, CLASS_NAME_GETTER)
+    fun startsWith(prefix: String) = StringPropertyFilter(StringProperty.CLASS_NAME, StringMatcher.startsWith(expand(prefix)))
 
 }

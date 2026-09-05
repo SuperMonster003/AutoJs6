@@ -20,15 +20,6 @@ class BooleanFilter(private val mBooleanSupplier: BooleanSupplier, private val m
 
         const val DEFAULT = true
 
-        private val cache = HashMap<BooleanSupplier, Array<BooleanFilter>>()
-
-        operator fun get(supplier: BooleanSupplier, b: Boolean): BooleanFilter {
-            val booleanFilters: Array<BooleanFilter> = cache[supplier] ?: Array(2) {
-                BooleanFilter(supplier, it != 0)
-            }.also { cache[supplier] = it }
-            return booleanFilters[if (b) 1 else 0]
-        }
-
         val CHECKABLE = object : BooleanSupplier {
             override fun get(node: UiNode<*>) = node.checkable()
             override fun toString() = "checkable"

@@ -253,6 +253,8 @@
 * `修复` `UiObject` 在带有节点分配器时调用 `getChild()` / `getParent()` 等 compat 访问器会无限递归 (分配器回调了包装对象自身的访问器); 修复后分配器在原始节点上操作, 登记按对象同一性而非节点相等性 (指向同一视图的两个实例不再只回收其一). 分配器仍未接入脚本运行时: Android 13 以下节点按进程池化, 退出时批量回收可能回收到已被其它脚本复用的实例
 * `修复` 选择器 `contextClickable()` 条件在选择器的字符串表示 (如 `selector().toString()` 与错误信息) 中误显示为 `checkable`
 * `修复` 全局函数形式的 `filter(fn)` 调用失败 (报 "Invalid arguments"), 以及集合选择器数组中的正则不被接受 (如 `pickup({text: [/regex/]})`)
+* `修复` 选择器字符串形式 (如 `selector().toString()` 与错误信息) 中的小数在以逗号为小数点的界面语言下 (如法语, 俄语) 显示为 `boundsLeft(0,5)`; 现在一律使用点号
+* `修复` 全局函数形式的选择器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 抛出的 Java 异常无法被脚本的 `try / catch` 捕获, 并会直接终止脚本; 现在作为可捕获的脚本错误抛出
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
@@ -344,6 +346,7 @@
 * `优化` 无障碍截图 (`automator.captureScreen()`) 抽出为 `A11yScreenshotter`: 截图后的硬件缓冲现在总会被关闭 (原先只回收了包装位图); 系统限频错误的重试改为至多 60 次 (3 s), 之后与其它失败一样以 `null` 兑现 (原先系统持续限频时 promise 永远不会兑现)
 * `优化` 选择器过滤器, 搜索算法 (DFS / BFS) 与罗盘导航 (`compass`) 改为面向不依赖 Android 的 `UiNode` 接口 (`UiObject` 实现它), 三者可在 JVM 单元测试中以内存节点树覆盖; 脚本可见的 API 与行为不变
 * `优化` 选择器属性改由声明式注册表 `SelectorRegistry` 统一描述: `UiSelector` 的 builder 方法据此生成, 集合选择器 (如 `pickup({...})`) 按注册表解析而非反射, 全局选择器函数按注册表与显式白名单导出 (`toStringReadable` 与 `internal` 成员的混淆名不再暴露为全局函数); 全局函数与集合选择器的数值参数统一按四舍五入转换为整数 (集合选择器此前为截断)
+* `优化` 选择器过滤器去重: 字符串属性 (text / desc / content / id / className / packageName 及其变体) 统一为 `StringPropertyFilter`, 边界度量 (left / boundsLeft / minLeft / maxLeft 等) 统一为 `MetricsFilter`, 整数属性统一为 `IntFilter`; 屏幕相关过滤器 (bounds / 度量 / screenCenter / screenCoverage) 经可注入的屏幕尺寸求值并纳入 JVM 单元测试; 选择器求值遍历过滤器列表的快照, 多线程共享同一选择器时安全; 脚本可见的 API 与行为不变
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
