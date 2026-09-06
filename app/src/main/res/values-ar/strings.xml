@@ -1779,6 +1779,9 @@
     <string name="text_select_by_find_one">حتى تجد واحدة (Findone)</string>
     <string name="text_select_by_until_find">حتى تجد كل (توتيد)</string>
     <string name="text_select_by_wait_for">انتظر الظهور (Waitfor)</string>
+    <string name="text_code_style">نمط الكود</string>
+    <string name="text_code_style_classic">كلاسيكي (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">حدد ملف للاستيراد</string>
     <string name="text_select_file_to_upload">حدد ملف للتحميل</string>
     <string name="text_select_icon">حدد أيقونة</string>

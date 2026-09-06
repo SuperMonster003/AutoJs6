@@ -28,7 +28,14 @@ class UiSelectorQuery internal constructor(
 
     /** The nodes of the first attempt that found any, or an empty collection. zh-CN: 首次找到节点的尝试的结果, 或空集合. */
     fun collection(): UiObjectCollection {
-        return poller.poll(policy) { selector.findWithin(max, policy.timeout).takeIf { it.isNotEmpty() } } ?: UiObjectCollection.EMPTY
+        val start = SystemClock.uptimeMillis()
+        var attempts = 0L
+        val found = poller.poll(policy) { progress ->
+            attempts = progress.round
+            selector.findWithin(max, policy.timeout).takeIf { it.isNotEmpty() }
+        }
+        selector.bridge?.stats?.recordQuery(selector.toString(), SystemClock.uptimeMillis() - start, attempts, found != null)
+        return found ?: UiObjectCollection.EMPTY
     }
 
     /** The first node found, or `null`. zh-CN: 找到的首个节点, 或 `null`. */

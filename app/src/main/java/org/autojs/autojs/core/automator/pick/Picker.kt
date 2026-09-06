@@ -63,6 +63,9 @@ internal class Picker private constructor(
 
         private var mRoot: UiObject? = null
         private var mSelector = UiSelector(accessibilityBridge)
+
+        /** The selector built so far (for `auto.explain`). zh-CN: 目前为止构建的选择器 (供 `auto.explain`). */
+        internal val selector: UiSelector get() = mSelector
         private var mCompass: CharSequence? = Compass.PASS_ON
         private var mResultType: Any = PickResultType.WIDGET
         private var mCallback: Callable? = null

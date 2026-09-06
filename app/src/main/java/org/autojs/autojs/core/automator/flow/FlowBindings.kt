@@ -79,3 +79,29 @@ interface FlowListener {
     fun onStepEnd(node: FlowNode, state: FlowNode.State, elapsed: Long) {}
 
 }
+
+/**
+ * Fans every step notification out to several listeners in order, so that the stats recorder of
+ * `auto.stats` and the trace of `flow.trace(true)` can both watch one scheduler.
+ * zh-CN: 把每个步骤通知按顺序分发给多个监听器, 使 `auto.stats` 的统计记录器与 `flow.trace(true)` 的追踪可以同时观察一个调度器.
+ */
+class FlowListeners(private val listeners: List<FlowListener>) : FlowListener {
+
+    override fun onStepStart(node: FlowNode) = listeners.forEach { it.onStepStart(node) }
+
+    override fun onStepEnd(node: FlowNode, state: FlowNode.State, elapsed: Long) = listeners.forEach { it.onStepEnd(node, state, elapsed) }
+
+    companion object {
+
+        /** `null` without a listener, the listener itself when it is alone, else the fan-out. zh-CN: 没有监听器时为 `null`, 只有一个时为其本身, 否则为分发器. */
+        fun of(vararg listeners: FlowListener?): FlowListener? = listeners.filterNotNull().let {
+            when (it.size) {
+                0 -> null
+                1 -> it[0]
+                else -> FlowListeners(it)
+            }
+        }
+
+    }
+
+}

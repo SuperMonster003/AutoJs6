@@ -6,6 +6,7 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.flow.FlowError
 import org.autojs.autojs.core.automator.flow.FlowLane
 import org.autojs.autojs.core.automator.flow.FlowListener
+import org.autojs.autojs.core.automator.flow.FlowListeners
 import org.autojs.autojs.core.automator.flow.FlowNode
 import org.autojs.autojs.core.automator.flow.FlowScheduler
 import org.autojs.autojs.core.automator.flow.FlowScope
@@ -72,8 +73,21 @@ internal class FlowExecutor(val scriptRuntime: ScriptRuntime) : Closeable {
     var listener: FlowListener? = null
         set(value) {
             field = value
-            synchronized(entries) { entries.values.forEach { it.scheduler.listener = value } }
+            val effective = effectiveListener()
+            synchronized(entries) { entries.values.forEach { it.scheduler.listener = effective } }
         }
+
+    /** Feeds every settled step to `auto.stats` (see `A11yStats.recordStep`). zh-CN: 把每个已结算的步骤送入 `auto.stats` (见 `A11yStats.recordStep`). */
+    private val statsListener = object : FlowListener {
+
+        override fun onStepEnd(node: FlowNode, state: FlowNode.State, elapsed: Long) {
+            scriptRuntime.accessibilityBridge.stats.recordStep(node.step.name, elapsed, state is FlowNode.State.Rejected)
+        }
+
+    }
+
+    /** The stats listener plus the trace listener when tracing. zh-CN: 统计监听器, 追踪开启时再加上追踪监听器. */
+    private fun effectiveListener(): FlowListener? = FlowListeners.of(statsListener, listener)
 
     /** `flow.trace(on)`: whether every step is logged to the console through [FlowTrace]. zh-CN: `flow.trace(on)`: 是否经 [FlowTrace] 把每个步骤记录到控制台. */
     var tracing: Boolean = false
@@ -104,7 +118,7 @@ internal class FlowExecutor(val scriptRuntime: ScriptRuntime) : Closeable {
             entries.getOrPut(timer) {
                 val lane = FlowScriptLane(scriptRuntime, timer)
                 val scheduler = FlowScheduler(pool.newLane(), lane, bindings, clock = { SystemClock.uptimeMillis() }, sleep = { Thread.sleep(it) }, workerFactory = { pool.newLane() })
-                scheduler.listener = listener
+                scheduler.listener = effectiveListener()
                 Entry(scheduler, lane)
             }
         }

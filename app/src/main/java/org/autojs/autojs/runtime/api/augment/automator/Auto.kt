@@ -40,6 +40,7 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaObject
+import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
@@ -74,6 +75,8 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::currentPackage.name,
         ::currentActivity.name,
         ::currentComponent.name,
+        ::explain.name,
+        ::dump.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -95,6 +98,9 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         },
         "windowRoots" to Supplier {
             scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it, null, scriptRuntime.accessibilityBridge) }.toNativeArray()
+        },
+        "stats" to Supplier {
+            A11yDiagnosticsApi(scriptRuntime).stats()
         },
         "state" to Supplier {
             newNativeObject(scriptRuntime.topLevelScope).also { o ->
@@ -418,6 +424,28 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @RhinoRuntimeFunctionInterface
         fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
             scriptRuntime.info.latestActivity
+        }
+
+        /**
+         * `auto.explain(selector, root?)`: the per-filter tallies of a selector over the window roots
+         * (or under `root`); the result's `toString()` is the text report. See [A11yDiagnosticsApi].
+         * zh-CN: `auto.explain(selector, root?)`: 选择器在各窗口根 (或 `root` 之下) 的逐过滤器计数; 结果的 `toString()` 为文本报告. 见 [A11yDiagnosticsApi].
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun explain(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..2) {
+            A11yDiagnosticsApi(scriptRuntime).explain(it.getOrNull(0), it.getOrNull(1))
+        }
+
+        /**
+         * `auto.dump(options?)`: the window roots (or `options.root`) as text / JSON / XML. See
+         * [A11yDiagnosticsApi] and [DumpArguments].
+         * zh-CN: `auto.dump(options?)`: 各窗口根 (或 `options.root`) 的文本 / JSON / XML. 见 [A11yDiagnosticsApi] 与 [DumpArguments].
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun dump(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) {
+            A11yDiagnosticsApi(scriptRuntime).dump(it.getOrNull(0))
         }
 
         @JvmStatic

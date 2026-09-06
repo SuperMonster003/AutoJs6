@@ -2,6 +2,7 @@
 
 package org.autojs.autojs.core.accessibility
 
+import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.automator.ActionArgument
@@ -50,6 +51,9 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     internal var searchAlgorithm: SearchAlgorithm = DFS
 
     private val mAccessibilityBridge: AccessibilityBridge?
+
+    /** The bridge of the script the selector belongs to, whose `stats` count its searches. zh-CN: 选择器所属脚本的 bridge, 其 `stats` 统计它的搜索. */
+    internal val bridge: AccessibilityBridge? get() = mAccessibilityBridge
 
     private val mAllocator: AccessibilityNodeInfoAllocator?
 
@@ -121,6 +125,15 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
      * [budget] 毫秒 ([PollPolicy.UNBOUNDED]: 可中断地无限等待).
      */
     internal fun findWithin(max: Int, budget: Long): UiObjectCollection {
+        val start = SystemClock.uptimeMillis()
+        try {
+            return findWithinUntimed(max, budget)
+        } finally {
+            mAccessibilityBridge?.stats?.recordSearch(toString(), SystemClock.uptimeMillis() - start)
+        }
+    }
+
+    private fun findWithinUntimed(max: Int, budget: Long): UiObjectCollection {
         // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
         // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
         mAccessibilityBridge?.ensureServiceStarted()
@@ -259,7 +272,14 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         return of(result)
     }
 
-    private fun findOf(root: UiObject, max: Int): UiObjectCollection = of(findAndReturnList(root, max))
+    private fun findOf(root: UiObject, max: Int): UiObjectCollection {
+        val start = SystemClock.uptimeMillis()
+        try {
+            return of(findAndReturnList(root, max))
+        } finally {
+            mAccessibilityBridge?.stats?.recordSearch(toString(), SystemClock.uptimeMillis() - start)
+        }
+    }
 
     internal fun addFilter(filter: Filter) = also { selector.add(filter) }
 

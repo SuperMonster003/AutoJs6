@@ -8,6 +8,7 @@ import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.activity.ActivityInfoProvider
+import org.autojs.autojs.core.automator.diagnostics.A11yStats
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.tool.UiHandler
@@ -63,6 +64,13 @@ abstract class AccessibilityBridge(
      */
     @Volatile
     var tap: Tap? = null
+
+    /**
+     * The tallies behind `auto.stats`: every search and polled query of the selectors bound to
+     * this bridge (one bridge per script runtime) and the script's Flow steps.
+     * zh-CN: `auto.stats` 背后的计数: 绑定到本 bridge (每个脚本运行时一个) 的选择器的每次搜索与轮询查询, 以及脚本的 Flow 步骤.
+     */
+    val stats: A11yStats = A11yStats()
 
     private val usageStatsPermission = UsageStatsPermission(context)
 

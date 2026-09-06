@@ -26,6 +26,9 @@ class CodeGenerator(private val root: ReadOnlyUiObject, private val target: Read
     var searchMode = FIND_ONE
     var action = -1
 
+    /** The style of the code: classic or Flow, see [CodeStyle]. zh-CN: 代码风格: 经典或 Flow, 见 [CodeStyle]. */
+    var style = CodeStyle.CLASSIC
+
     fun generateCode(): String? {
         val collection = getCollectionParent(target)
         if (collection != null) {
@@ -40,6 +43,12 @@ class CodeGenerator(private val root: ReadOnlyUiObject, private val target: Read
             it.setUsingDesc(usingDesc)
             it.setUsingId(usingId)
             it.setUsingText(usingText)
+        }
+        if (style == CodeStyle.FLOW) {
+            // The Flow form only for a target its own selector singles out; anything refined through
+            // parents or children falls back to the classic code.
+            // zh-CN: 只对能由自身选择器唯一确定的目标给出 Flow 形式; 需经父 / 子节点细化的一律回退到经典代码.
+            generator.generateSelector()?.let { selector -> FlowCodeStyle.render(selector.toString(), searchMode, getAction())?.let { return it } }
         }
         val selector = generateCode(generator, root, target, 2, 2, true) ?: return null
         return generateAction(selector)

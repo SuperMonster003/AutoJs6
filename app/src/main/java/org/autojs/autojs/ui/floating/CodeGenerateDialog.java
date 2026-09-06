@@ -22,6 +22,7 @@ import com.bignerdranch.expandablerecyclerview.model.Parent;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.codegeneration.CodeGenerator;
+import org.autojs.autojs.codegeneration.CodeStyle;
 import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.theme.util.ListBuilder;
 import org.autojs.autojs.core.ui.widget.JsCheckBox;
@@ -55,6 +56,9 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
                     .addOption(R.string.text_act_by_set_text)
                     .addOption(R.string.text_act_by_scroll_forward)
                     .addOption(R.string.text_act_by_scroll_backward))
+            .add(new OptionGroup(R.string.text_code_style)
+                    .addOption(R.string.text_code_style_classic, true)
+                    .addOption(R.string.text_code_style_flow))
             .build();
 
     private final NodeInfo mRootNode;
@@ -115,6 +119,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
         generator.setUsingText(settings.getOption(R.string.text_using_text_selector).checked);
         generator.setUsingDesc(settings.getOption(R.string.text_using_desc_selector).checked);
         generator.setSearchMode(getSearchMode());
+        generator.setStyle(getOptionGroup(R.string.text_code_style).getOption(R.string.text_code_style_flow).checked ? CodeStyle.FLOW : CodeStyle.CLASSIC);
         setAction(generator);
         return generator.generateCode();
     }

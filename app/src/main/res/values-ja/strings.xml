@@ -1778,6 +1778,9 @@
     <string name="text_select_by_find_one">1 つ見つけるまで (findOne)</string>
     <string name="text_select_by_until_find">すべて見つけるまで (untilFind)</string>
     <string name="text_select_by_wait_for">表示されるのを待つ (waitFor)</string>
+    <string name="text_code_style">コードスタイル</string>
+    <string name="text_code_style_classic">クラシック (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">インポートするファイルを選択</string>
     <string name="text_select_file_to_upload">アップロードするファイルを選択します</string>
     <string name="text_select_icon">アイコンを選択する</string>

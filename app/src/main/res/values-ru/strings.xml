@@ -1777,6 +1777,9 @@
     <string name="text_select_by_find_one">Пока не найдется один (findOne)</string>
     <string name="text_select_by_until_find">Пока не найдем все (untilFind)</string>
     <string name="text_select_by_wait_for">Дождаться появления (waitFor)</string>
+    <string name="text_code_style">Стиль кода</string>
+    <string name="text_code_style_classic">Классический (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">Выберите файл для импорта</string>
     <string name="text_select_file_to_upload">Выберите файл для загрузки</string>
     <string name="text_select_icon">Выбрать значок</string>

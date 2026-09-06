@@ -1773,6 +1773,9 @@
     <string name="text_select_by_find_one">Until find one (findOne)</string>
     <string name="text_select_by_until_find">Until find all (untilFind)</string>
     <string name="text_select_by_wait_for">Wait for showing up (waitFor)</string>
+    <string name="text_code_style">Code style</string>
+    <string name="text_code_style_classic">Classic (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">Select file to import</string>
     <string name="text_select_file_to_upload">Select file to upload</string>
     <string name="text_select_icon">Select icon</string>

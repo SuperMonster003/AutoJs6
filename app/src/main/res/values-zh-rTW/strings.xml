@@ -1774,6 +1774,9 @@
     <string name="text_select_by_find_one">直到找到一個 (findOne)</string>
     <string name="text_select_by_until_find">直到找到所有 (untilFind)</string>
     <string name="text_select_by_wait_for">等待控制元件出現 (waitFor)</string>
+    <string name="text_code_style">程式碼風格</string>
+    <string name="text_code_style_classic">經典 (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">選擇要匯入的檔案</string>
     <string name="text_select_file_to_upload">選擇要上傳的檔案</string>
     <string name="text_select_icon">選擇圖示</string>

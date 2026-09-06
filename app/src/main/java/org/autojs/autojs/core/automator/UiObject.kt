@@ -15,6 +15,7 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
+import org.autojs.autojs.core.automator.diagnostics.NodeDump
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
@@ -22,9 +23,11 @@ import org.autojs.autojs.core.automator.pick.Detector
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.automator.DumpArguments
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Callable
@@ -455,6 +458,24 @@ open class UiObject private constructor(
      * zh-CN: 节点自身状态 (边界, 文本, 描述, 类名, 子节点数, 关键布尔属性) 的廉价哈希; 见 [UiObjectSummary.fingerprint].
      */
     fun fingerprint(): Int = UiObjectSummary.fingerprint(this)
+
+    /**
+     * The node's own properties as a JavaScript object (`JSON.stringify(node)` calls this; the
+     * children are not included, see [dumpSubtree]): the [NodeDump.DEFAULT_JSON] set.
+     * zh-CN: 节点自身属性构成的 JavaScript 对象 (`JSON.stringify(node)` 会调用它; 不含子节点, 见 [dumpSubtree]): 即 [NodeDump.DEFAULT_JSON] 集合.
+     */
+    @JvmOverloads
+    fun toJSON(key: Any? = null): Any? = RhinoUtils.withRhinoContext { cx ->
+        with(RhinoUtils) { toJsValue(cx.getCurrentTopCallScopeOrDefault(), NodeDump.properties(this@UiObject, NodeDump.DEFAULT_JSON)) }
+    }
+
+    /**
+     * The subtree under this node as text / JSON / XML, with the options of `auto.dump`
+     * (`format`, `maxDepth`, `properties`, `visibleOnly`, `maxNodes`, `indent`; see [NodeDump]).
+     * zh-CN: 以本节点为根的子树的文本 / JSON / XML, 选项同 `auto.dump` (`format`, `maxDepth`, `properties`, `visibleOnly`, `maxNodes`, `indent`; 见 [NodeDump]).
+     */
+    @JvmOverloads
+    fun dumpSubtree(options: Any? = null): String = NodeDump.dump(this, DumpArguments.parse(options, allowRoot = false).options).text
 
     // Captures current state; refreshing it won't affect the original.
     // zh-CN: 捕获当前状态; 刷新它不会影响原始对象.

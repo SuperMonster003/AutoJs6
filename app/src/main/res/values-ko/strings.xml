@@ -1779,6 +1779,9 @@
     <string name="text_select_by_find_one">하나를 찾을 때까지 (findOne)</string>
     <string name="text_select_by_until_find">모든 것을 찾을 때까지 (untilFind)</string>
     <string name="text_select_by_wait_for">나타나기를 기다리기 (waitFor)</string>
+    <string name="text_code_style">코드 스타일</string>
+    <string name="text_code_style_classic">클래식 (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">가져올 파일을 선택하십시오</string>
     <string name="text_select_file_to_upload">업로드 할 파일을 선택하십시오</string>
     <string name="text_select_icon">아이콘을 선택하십시오</string>

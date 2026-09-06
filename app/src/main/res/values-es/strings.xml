@@ -1777,6 +1777,9 @@
     <string name="text_select_by_find_one">Hasta encontrar uno (findOne)</string>
     <string name="text_select_by_until_find">Hasta encontrar todos (untilFind)</string>
     <string name="text_select_by_wait_for">Esperar a que aparezca (waitFor)</string>
+    <string name="text_code_style">Estilo de código</string>
+    <string name="text_code_style_classic">Clásico (findOne / click)</string>
+    <string name="text_code_style_flow">Flow (waitAsync / waitThenClick)</string>
     <string name="text_select_file_to_import">Seleccionar archivo para importar</string>
     <string name="text_select_file_to_upload">Seleccionar el archivo a cargar</string>
     <string name="text_select_icon">Seleccionar un icono</string>
