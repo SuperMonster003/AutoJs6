@@ -51,6 +51,15 @@ interface FlowBindings {
      */
     fun adopt(value: Any?): FlowNode? = value as? FlowNode
 
+    /**
+     * Waits at most [timeoutMillis] for the accessibility service to be available again after a
+     * probe failed with `A11Y_UNAVAILABLE` (roadmap P5.5, `recoverService`); returns whether it
+     * is. The default assumes it is and lets the next probe tell. Interruptible: a cancelled chain
+     * interrupts the worker. zh-CN: 探测以 `A11Y_UNAVAILABLE` 失败后, 至多等待 [timeoutMillis] 毫秒让无障碍服务恢复可用
+     * (Roadmap P5.5, `recoverService`); 返回它是否可用. 缺省实现假定可用, 交给下一次探测判断. 可中断: 取消链会中断工作线程.
+     */
+    fun awaitService(timeoutMillis: Long): Boolean = true
+
 }
 
 /**

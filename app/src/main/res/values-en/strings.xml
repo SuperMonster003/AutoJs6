@@ -1296,6 +1296,7 @@
     <string name="text_import_succeed">Import succeeded</string>
     <string name="text_import_to_my_scripts">Import to \"my scripts\"</string>
     <string name="text_in_process_instance">In-process instance</string>
+    <string name="text_adopted_by_first_event">adopted from its first event (onServiceConnected not invoked)</string>
     <string name="text_in_progress">In progress</string>
     <string name="text_info">Information</string>
     <string name="text_insist_on_record">Record</string>

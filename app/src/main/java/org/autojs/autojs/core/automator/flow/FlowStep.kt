@@ -47,6 +47,8 @@ sealed class FlowStep {
         val policy: PollPolicy,
         val negate: Boolean = false,
         val within: Boolean = false,
+        /** Keep waiting through an accessibility service outage instead of failing at once (roadmap P5.5). zh-CN: 无障碍服务中断期间继续等待而非立即失败 (Roadmap P5.5). */
+        val recoverService: Boolean = false,
     ) : FlowStep() {
         override val name get() = when {
             within -> "within"
@@ -68,6 +70,8 @@ sealed class FlowStep {
         val policy: PollPolicy,
         val stability: Stability = Stability(),
         val mode: StableMode = StableMode.STABLE,
+        /** As [Wait.recoverService]. zh-CN: 同 [Wait.recoverService]. */
+        val recoverService: Boolean = false,
     ) : FlowStep() {
         override val name get() = when (mode) {
             StableMode.STABLE -> "waitForStable"

@@ -2,7 +2,9 @@ package org.autojs.autojs.core.accessibility.event
 
 import android.os.SystemClock
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
 import org.autojs.autojs.core.automator.event.EventGate
+import org.autojs.autojs.core.automator.event.EventWaitAborted
 import org.autojs.autojs.core.automator.event.EventWaiter
 import org.autojs.autojs.core.automator.event.IdleWaiter
 import org.autojs.autojs.core.automator.query.Poller
@@ -16,7 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * `waitForEvent`, and an [EventGate] that cuts the sleeps of event-assisted polling short. The
  * handler runs on the service's main thread and does no script work: it stamps the idle waiter,
  * copies the event once when a waiter accepts its type, and signals the gate. The subscription
- * is dropped by [close] when the script exits.
+ * is dropped by [close] when the script exits. The service going away (roadmap P5.5) aborts the
+ * pending waits with [EventWaitAborted] rather than letting them time out.
  * zh-CN: 一个脚本眼中的无障碍事件流 (Roadmap P5.2): 在 [AccessibilityService.eventBus] 上的一个观察者优先级订阅 (首次使用时建立,
  * 全部事件类型, 不消费) 喂给一个 [IdleWaiter] (`waitForIdle`), `waitForEvent` 注册的各 [EventWaiter], 以及一个让事件辅助轮询的休眠
  * 提前结束的 [EventGate]. 处理器在服务主线程上运行且不做脚本工作: 记录空闲检测的时间戳, 有等待者接受该类型时复制一次事件, 再触发闩.
@@ -26,6 +29,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class A11yEventPulse(
     private val bus: A11yEventBus<A11yEvent>,
+    /** Watched for the service going away, which aborts the pending waits (roadmap P5.5); `null` never aborts. zh-CN: 监视服务的消失, 届时中止待定的等待 (Roadmap P5.5); `null` 则从不中止. */
+    private val registry: A11yServiceRegistry<AccessibilityService>? = null,
     private val clock: () -> Long = { SystemClock.uptimeMillis() },
 ) : AutoCloseable {
 
@@ -39,6 +44,13 @@ class A11yEventPulse(
     val idle = IdleWaiter(clock)
 
     private val waiters = CopyOnWriteArrayList<Registered>()
+
+    /** Waiters fed by other sources (toasts, notifications), aborted together with [waiters]. zh-CN: 由其它来源喂事件的等待者 (toast, 通知), 与 [waiters] 一同中止. */
+    private val abortables = CopyOnWriteArrayList<EventWaiter<*>>()
+
+    private val serviceWatch = A11yServiceRegistry.StateListener<AccessibilityService> { previous, current ->
+        if (previous.isBound && !current.isBound) onServiceLost()
+    }
 
     private val lock = Any()
 
@@ -59,6 +71,37 @@ class A11yEventPulse(
                 onEvent(event)
                 false
             }
+            registry?.addListener(this, serviceWatch)
+        }
+    }
+
+    /**
+     * The bound service instance went away: the pending waits can neither succeed nor honestly
+     * time out, so they end with [EventWaitAborted] (the JS surface maps it to `A11Y_UNAVAILABLE`),
+     * and an event-assisted poll is woken so that its next probe reports the outage.
+     * zh-CN: 绑定的服务实例消失: 待定的等待既不能成功也不能诚实地超时, 因此以 [EventWaitAborted] 结束 (JS 表面映射为
+     * `A11Y_UNAVAILABLE`), 事件辅助的轮询被唤醒, 使其下一次探测报告中断.
+     */
+    private fun onServiceLost() {
+        val cause = EventWaitAborted("The accessibility service was unbound while waiting for its events")
+        waiters.forEach { it.waiter.abort(cause) }
+        abortables.forEach { it.abort(cause) }
+        idle.abort(cause)
+        gate.signal()
+    }
+
+    /**
+     * Runs [block] while [waiter], fed by another source (the notification observer), is aborted
+     * along with the pulse's own waiters should the service go away.
+     * zh-CN: 运行 [block], 期间由其它来源 (通知观察者) 喂事件的 [waiter] 在服务消失时与本脉冲自己的等待者一同被中止.
+     */
+    fun <T> abortingOnServiceLoss(waiter: EventWaiter<*>, block: () -> T): T {
+        ensureSubscribed()
+        abortables += waiter
+        try {
+            return block()
+        } finally {
+            abortables -= waiter
         }
     }
 
@@ -113,7 +156,9 @@ class A11yEventPulse(
     override fun close() = synchronized(lock) {
         subscription?.let { bus.unsubscribe(it) }
         subscription = null
+        registry?.removeListener(this)
         waiters.clear()
+        abortables.clear()
     }
 
     companion object {

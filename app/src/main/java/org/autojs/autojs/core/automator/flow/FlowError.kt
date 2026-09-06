@@ -55,8 +55,8 @@ sealed class FlowError(
     )
 
     /** The accessibility service is not available for the step; [cause] says why when known. zh-CN: 无障碍服务对该步骤不可用; [cause] 为已知的原因. */
-    class A11yUnavailable(step: String, selector: String? = null, cause: Throwable? = null) : FlowError(
-        Code.A11Y_UNAVAILABLE, step, selector, 0, 0, null,
+    class A11yUnavailable(step: String, selector: String? = null, cause: Throwable? = null, elapsed: Long = 0, attempts: Long = 0) : FlowError(
+        Code.A11Y_UNAVAILABLE, step, selector, elapsed, attempts, null,
         "Accessibility service unavailable for step \"$step\"" + (cause?.message?.takeIf { it.isNotBlank() }?.let { ": $it" } ?: ""),
         cause,
     )

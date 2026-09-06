@@ -70,6 +70,11 @@ class FakeBindings : FlowBindings {
 
     var globalResult = true
 
+    /** What `awaitService` answers; the timeouts asked for are recorded. zh-CN: `awaitService` 的回答; 请求的超时被记录. */
+    var onAwaitService: (Long) -> Boolean = { true }
+
+    val serviceWaits = ArrayList<Long>()
+
     /** The result of a node action, or `null` for a target the action does not apply to. zh-CN: 节点动作的结果, 或对不适用目标为 `null`. */
     var perform: (action: String, target: Any?, args: List<Any?>) -> Boolean? = { _, target, _ ->
         (target as? FakeUiNode)?.performAction(0)
@@ -102,6 +107,11 @@ class FakeBindings : FlowBindings {
     override fun performGlobal(action: String, args: List<Any?>): Boolean {
         globalActions += action
         return globalResult
+    }
+
+    override fun awaitService(timeoutMillis: Long): Boolean {
+        serviceWaits += timeoutMillis
+        return onAwaitService(timeoutMillis)
     }
 
 }

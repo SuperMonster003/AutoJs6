@@ -1310,6 +1310,7 @@
     <string name="text_import_succeed">수입이 성공했습니다</string>
     <string name="text_import_to_my_scripts">\"내 스크립트\"로 가져 오기</string>
     <string name="text_in_process_instance">프로세스 내 인스턴스</string>
+    <string name="text_adopted_by_first_event">첫 이벤트에서 채택됨 (onServiceConnected 미호출)</string>
     <string name="text_in_progress">진행 중</string>
     <string name="text_info">정보</string>
     <string name="text_insist_on_record">기록</string>

@@ -63,6 +63,17 @@ class FlowArgumentsTest {
     private fun fn(): Callable = js("(function () {})") as Callable
 
     @Test
+    fun recoverServiceComesFromTheOptionOrTheDefaults() {
+        assertFalse(arguments.wait("t", arrayOf<Any?>("text")).recoverService)
+        assertTrue(arguments.wait("t", arrayOf<Any?>("text", js("({ recoverService: true })"))).recoverService)
+
+        arguments.applyDefaults(js("({ recoverService: true })") as ScriptableObject, "flow.defaults")
+        assertTrue(defaults.recoverService)
+        assertTrue(arguments.wait("t", arrayOf<Any?>("text")).recoverService)
+        assertFalse(arguments.wait("t", arrayOf<Any?>("text", js("({ recoverService: false })"))).recoverService)
+    }
+
+    @Test
     fun positionalNumbersAreTimeoutAndIntervalAndTrailingFunctionsTheCallbacks() {
         val ok = fn()
         val err = fn()

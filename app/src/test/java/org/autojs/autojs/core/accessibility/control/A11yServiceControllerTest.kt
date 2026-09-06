@@ -111,6 +111,49 @@ class A11yServiceControllerTest {
         system.bind()
     }
 
+    /* Quiet recovery (roadmap P5.5). */
+
+    @Test
+    fun awaitAvailableIsImmediateWhileBound() {
+        enabledAndBound()
+        val strategy = FakeStrategy("root")
+        assertTrue(controller(strategy).awaitAvailable(0))
+        assertTrue(strategy.calls.isEmpty())
+        assertEquals(0, settingsUiLaunches)
+    }
+
+    @Test
+    fun awaitAvailableReEnablesAMalfunctioningServiceThroughTheStrategies() {
+        system.enabled = self
+        val strategy = FakeStrategy("root")
+        val controller = controller(strategy)
+        assertTrue(controller.awaitAvailable(200))
+        assertTrue(controller.isRunning())
+        assertEquals(listOf("enable"), strategy.calls)
+        assertEquals(0, settingsUiLaunches)
+    }
+
+    @Test
+    fun awaitAvailableOnlyWaitsForAServiceThatIsNotEnabled() {
+        val strategy = FakeStrategy("root")
+        val controller = controller(strategy)
+        thread {
+            Thread.sleep(50)
+            enabledAndBound()
+        }
+        assertTrue(controller.awaitAvailable(2000))
+        assertTrue("a service that is not enabled is not re-enabled behind the user's back (D16)", strategy.calls.isEmpty())
+        assertEquals(0, settingsUiLaunches)
+    }
+
+    @Test
+    fun awaitAvailableGivesUpQuietlyAfterTheTimeout() {
+        assertFalse(controller().awaitAvailable(50))
+        system.enabled = self
+        assertFalse("no strategy can re-enable it", controller().awaitAvailable(50))
+        assertEquals(0, settingsUiLaunches)
+    }
+
     /* Predicates. */
 
     @Test

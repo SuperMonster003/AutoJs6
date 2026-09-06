@@ -45,6 +45,10 @@ internal class FlowDefaults {
     @Volatile
     var humanize: Humanize = Humanize.NONE
 
+    /** P5.5: waits keep waiting through an accessibility service outage. zh-CN: P5.5: 等待在无障碍服务中断期间继续等待. */
+    @Volatile
+    var recoverService: Boolean = false
+
     companion object {
         const val DEFAULT_TIMEOUT = 10_000L
         const val DEFAULT_INTERVAL = 200L
@@ -58,6 +62,8 @@ internal class WaitSpec(
     val policy: PollPolicy,
     val stability: Stability,
     val strict: Boolean,
+    /** Roadmap P5.5: ride out an accessibility service outage. zh-CN: Roadmap P5.5: 度过无障碍服务的中断. */
+    val recoverService: Boolean,
     /** The `delay` of the `*After` forms. zh-CN: `*After` 形式的 `delay`. */
     val delay: FlowStep.Sleep?,
     val onOk: Callable?,
@@ -69,11 +75,11 @@ internal class WaitSpec(
  * `(cond, timeout?, interval?)` or `(cond, options)`, with trailing functions as `onOk` / `onErr`
  * and, for the `*After` forms, further numbers as the delay; the options object carries `timeout`,
  * `interval`, `times`, `root`, `compass`, `resultType`, `stableFor`, `compare`, `missing`,
- * `strict` and `delay`. The `limit < 100` rule of the synchronous `wait` is not carried over: a
+ * `strict`, `delay` and `recoverService` (P5.5). The `limit < 100` rule of the synchronous `wait` is not carried over: a
  * number of attempts is only ever the `times` option.
  * zh-CN: 把 Flow API 的 JavaScript 参数转换为步骤 (Roadmap 附录 A.2): 位置参数 `(cond, timeout?, interval?)` 或 `(cond, options)`,
  * 尾随的函数为 `onOk` / `onErr`, `*After` 形式再以后续数字为延迟; 选项对象携带 `timeout`, `interval`, `times`, `root`, `compass`,
- * `resultType`, `stableFor`, `compare`, `missing`, `strict` 与 `delay`. 同步 `wait` 的 `limit < 100` 规则不沿用: 尝试次数只来自
+ * `resultType`, `stableFor`, `compare`, `missing`, `strict`, `delay` 与 `recoverService` (P5.5). 同步 `wait` 的 `limit < 100` 规则不沿用: 尝试次数只来自
  * `times` 选项.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
@@ -116,13 +122,14 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
             missing = options?.prop("missing").takeUnless { it.isJsNullish() }?.let { missing(it, name) } ?: MissingPolicy.RESET,
         )
         val strict = options?.prop("strict").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) } ?: defaults.strictActions
+        val recoverService = options?.prop("recoverService").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) } ?: defaults.recoverService
         val delay = when {
             withDelay && numbers.size > 2 -> sleep(name, numbers.drop(2).toTypedArray<Any?>())
             else -> options?.prop("delay").takeUnless { it.isJsNullish() }?.let { delay(it, name) }
         }
         val scope = options?.let { scope(it, name) } ?: FlowScope.NONE
         val condition = cond as? FlowCondition ?: conditions.of(cond, name, scope)
-        return WaitSpec(condition, policy, stability, strict, delay, parsed.callbacks.getOrNull(0), parsed.callbacks.getOrNull(1))
+        return WaitSpec(condition, policy, stability, strict, recoverService, delay, parsed.callbacks.getOrNull(0), parsed.callbacks.getOrNull(1))
     }
 
     /**
@@ -165,11 +172,12 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
 
     /**
      * `flow.defaults(options)` (roadmap P3.3): writes the given keys into the defaults (`timeout`
-     * with `Infinity` for none, `interval`, `stableFor`, `strictActions`, and `humanize` (P4.2:
-     * `{ offset, delay }` or `false`)); returns the `trace` option when present. Unknown keys are
-     * an error, and nothing is written when any value is invalid.
+     * with `Infinity` for none, `interval`, `stableFor`, `strictActions`, `humanize` (P4.2:
+     * `{ offset, delay }` or `false`) and `recoverService` (P5.5)); returns the `trace` option when
+     * present. Unknown keys are an error, and nothing is written when any value is invalid.
      * zh-CN: `flow.defaults(options)` (Roadmap P3.3): 把给定的键写入默认值 (`timeout` 以 `Infinity` 为不限, `interval`, `stableFor`,
-     * `strictActions`, 以及 `humanize` (P4.2: `{ offset, delay }` 或 `false`)); 存在 `trace` 时返回它. 未知的键报错, 任一值无效时什么都不写入.
+     * `strictActions`, `humanize` (P4.2: `{ offset, delay }` 或 `false`) 与 `recoverService` (P5.5)); 存在 `trace` 时返回它. 未知的键报错,
+     * 任一值无效时什么都不写入.
      */
     fun applyDefaults(options: ScriptableObject, name: String): Boolean? {
         options.ids.forEach { key -> require(key.toString() in DEFAULT_KEYS) { "Unknown option \"$key\" for $name; expected one of ${DEFAULT_KEYS.joinToString(", ")}" } }
@@ -178,12 +186,14 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         val stableFor = options.number("stableFor", name)?.let { nonNegativeMillis(it, "stableFor", name) }
         val strict = options.prop("strictActions").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
         val humanize = options.prop("humanize").takeUnless { it.isJsNullish() }?.let { ToolkitArguments.humanize(it, name, defaults.humanize) }
+        val recoverService = options.prop("recoverService").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
         val trace = options.prop("trace").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
         timeout?.let { defaults.timeout = it }
         interval?.let { defaults.interval = it }
         stableFor?.let { defaults.stableFor = it }
         strict?.let { defaults.strictActions = it }
         humanize?.let { defaults.humanize = it }
+        recoverService?.let { defaults.recoverService = it }
         return trace
     }
 
@@ -303,7 +313,7 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
 
     companion object {
 
-        val DEFAULT_KEYS = listOf("timeout", "interval", "stableFor", "strictActions", "humanize", "trace")
+        val DEFAULT_KEYS = listOf("timeout", "interval", "stableFor", "strictActions", "humanize", "recoverService", "trace")
 
         /** A settled state, or `null` while pending: the form [FlowCondition.Settling] reads. zh-CN: 已结算的状态, 待定时为 `null`: [FlowCondition.Settling] 读取的形式. */
         fun settledOrNull(node: FlowNode): FlowNode.State? = node.state.takeUnless { it is FlowNode.State.Pending }

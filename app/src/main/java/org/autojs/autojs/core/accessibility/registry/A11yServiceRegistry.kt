@@ -34,7 +34,12 @@ open class A11yServiceRegistry<S : Any>(
     }
 
     /** Immutable view of the registry at one point in time. zh-CN: 注册表某一时刻的不可变快照. */
-    data class Snapshot<S : Any>(val state: State, val instance: S?) {
+    data class Snapshot<S : Any>(
+        val state: State,
+        val instance: S?,
+        /** Whether [instance] was adopted from its first event, `onServiceConnected` never having been seen (roadmap P5.5). zh-CN: [instance] 是否由其首个事件采纳, 而 `onServiceConnected` 从未到来 (Roadmap P5.5). */
+        val adoptedByEvent: Boolean = false,
+    ) {
         val isBound get() = state != State.UNBOUND
         val isOperational get() = state == State.OPERATIONAL
     }
@@ -61,6 +66,9 @@ open class A11yServiceRegistry<S : Any>(
 
     val isOperational: Boolean get() = snapshot.isOperational
 
+    /** Whether the bound instance was adopted from an event without `onServiceConnected` (the platform issue of roadmap P5.5). zh-CN: 已绑定实例是否由事件采纳而未经 `onServiceConnected` (Roadmap P5.5 所指的平台问题). */
+    val adoptedByEvent: Boolean get() = snapshot.adoptedByEvent
+
     /**
      * Called from `onServiceConnected`. Operational state is reset because a freshly connected
      * instance has not delivered any event yet.
@@ -76,7 +84,8 @@ open class A11yServiceRegistry<S : Any>(
     fun onEvent(service: S) = transition { current ->
         when {
             current.state == State.OPERATIONAL && current.instance === service -> current
-            else -> Snapshot(State.OPERATIONAL, service)
+            current.instance === service -> current.copy(state = State.OPERATIONAL)
+            else -> Snapshot(State.OPERATIONAL, service, adoptedByEvent = true)
         }
     }
 
@@ -100,12 +109,12 @@ open class A11yServiceRegistry<S : Any>(
 
     /** Drops the operational flag while keeping the bound instance. zh-CN: 撤销可操作态, 保留绑定实例. */
     fun resetOperational() = transition { current ->
-        if (current.state == State.OPERATIONAL) Snapshot(State.CONNECTED, current.instance) else current
+        if (current.state == State.OPERATIONAL) current.copy(state = State.CONNECTED) else current
     }
 
     /** Marks the bound instance operational without an event (compatibility path). zh-CN: 不经事件直接标记可操作 (兼容路径). */
     fun markOperational() = transition { current ->
-        if (current.state == State.CONNECTED) Snapshot(State.OPERATIONAL, current.instance) else current
+        if (current.state == State.CONNECTED) current.copy(state = State.OPERATIONAL) else current
     }
 
     /**

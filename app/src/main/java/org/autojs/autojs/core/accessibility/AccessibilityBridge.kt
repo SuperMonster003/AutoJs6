@@ -73,7 +73,7 @@ abstract class AccessibilityBridge(
      */
     val stats: A11yStats = A11yStats()
 
-    private val pulseDelegate = lazy { A11yEventPulse(AccessibilityService.eventBus) }
+    private val pulseDelegate = lazy { A11yEventPulse(AccessibilityService.eventBus, AccessibilityService.registry) }
 
     /**
      * The script's view of the accessibility event stream (roadmap P5.2): `waitForIdle` /
@@ -124,6 +124,14 @@ abstract class AccessibilityBridge(
     }
 
     abstract fun ensureServiceStarted(isForcibleRestart: Boolean)
+
+    /**
+     * Waits up to [timeoutMillis] for the service to be bound again without asking the user
+     * (roadmap P5.5, the Flow `recoverService` option): see `A11yServiceController.awaitAvailable`.
+     * zh-CN: 至多等待 [timeoutMillis] 毫秒让服务重新绑定, 不询问用户 (Roadmap P5.5, Flow 的 `recoverService` 选项): 见
+     * `A11yServiceController.awaitAvailable`.
+     */
+    abstract fun awaitServiceAvailable(timeoutMillis: Long): Boolean
 
     fun ensureServiceStarted() {
         ensureServiceStarted(false)

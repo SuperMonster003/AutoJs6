@@ -17,6 +17,8 @@ class AccessibilityBridgeImpl(private val autoJs: AbstractAutoJs) : Accessibilit
         autoJs.accessibilityTool.ensureService(isForcibleRestart)
     }
 
+    override fun awaitServiceAvailable(timeoutMillis: Long): Boolean = AccessibilityTool.controller.awaitAvailable(timeoutMillis)
+
     // The registry's instance is null exactly when no service is bound.
     // zh-CN: 注册表的实例恰在无服务绑定时为 null.
     override val service: AccessibilityService?

@@ -67,6 +67,25 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     var boundAtElapsedRealtime = 0L
         private set
 
+    /**
+     * Whether `onServiceConnected` was invoked for this instance. When the callback never comes,
+     * the registry adopts the instance from its first event instead (roadmap P5.5).
+     * zh-CN: 本实例是否收到过 `onServiceConnected`. 该回调不来时, 注册表改由首个事件采纳实例 (Roadmap P5.5).
+     */
+    @Volatile
+    var isConnectedCallbackSeen = false
+        private set
+
+    @Volatile
+    private var adoptionReported = false
+
+    /**
+     * Whether this instance is the bound one and was adopted from its first event,
+     * `onServiceConnected` never having been invoked (roadmap P5.5).
+     * zh-CN: 本实例是否为当前绑定实例且由其首个事件采纳, `onServiceConnected` 从未被调用 (Roadmap P5.5).
+     */
+    val isAdoptedByEvent: Boolean get() = registry.adoptedByEvent && registry.instance === this
+
     @Volatile
     private var isDisposed = false
 
@@ -89,6 +108,11 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         // which also covers the case where onServiceConnected was never invoked.
         // zh-CN: 采纳当前实例并在首个事件时标记为可工作状态, 同时覆盖 onServiceConnected 未被调用的情况.
         registry.onEvent(this)
+        if (!isConnectedCallbackSeen && !adoptionReported) {
+            adoptionReported = true
+            Log.w(TAG, "onServiceConnected was not invoked for $this; adopted from its first event (type $type)")
+            onAdoptedWithoutConnectedCallback()
+        }
 
         val now = SystemClock.elapsedRealtime()
         eventCount.incrementAndGet()
@@ -157,6 +181,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         super.onServiceConnected()
         Log.d(TAG, "onServiceConnected: $serviceInfo")
         isDisposed = false
+        isConnectedCallbackSeen = true
         boundAtElapsedRealtime = SystemClock.elapsedRealtime()
         // @Hint by Stardust on Feb 12, 2017 (rephrased by SuperMonster003 on Sep 5, 2026).
         //  ! Sometimes this callback is never triggered although the service is started and events flow.
@@ -164,6 +189,15 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         //  ! zh-CN: 有时服务已启动且事件照常到达, 但此回调不会被触发, 因此注册表也会在 onAccessibilityEvent 中采纳实例.
         registry.onConnected(this)
     }
+
+    /**
+     * Called once, from the first event, when the platform skipped `onServiceConnected` for this
+     * instance (roadmap P5.5). The registry has adopted the instance by then; subclasses redo here
+     * what they would have done in the callback (the service info preferences).
+     * zh-CN: 平台跳过了本实例的 `onServiceConnected` 时, 由首个事件调用一次 (Roadmap P5.5). 此时注册表已采纳该实例; 子类在此补做
+     * 本应在回调中做的事 (服务信息偏好).
+     */
+    protected open fun onAdoptedWithoutConnectedCallback() = Unit
 
     private fun disposeService(reason: String) {
         if (isDisposed) return

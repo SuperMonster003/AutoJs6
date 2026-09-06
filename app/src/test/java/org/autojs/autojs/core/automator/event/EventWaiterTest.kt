@@ -3,6 +3,7 @@ package org.autojs.autojs.core.automator.event
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -53,6 +54,29 @@ class EventWaiterTest {
         val result = waiter.await(5_000) { true }
         assertEquals("late", result.event)
         assertTrue(result.elapsed < 4_000)
+    }
+
+    @Test
+    fun anAbortFromAnotherThreadEndsThePendingWaitWithTheCause() {
+        val waiter = EventWaiter<String>(clock)
+        val cause = EventWaitAborted("service gone")
+        thread {
+            Thread.sleep(40)
+            waiter.abort(cause)
+        }
+        val thrown = assertThrows(EventWaitAborted::class.java) { waiter.await(5_000) { true } }
+        assertSame(cause, thrown)
+        assertTrue(waiter.isAborted)
+    }
+
+    @Test
+    fun anAbortedWaiterStillHandsOutTheEventsQueuedBefore() {
+        val waiter = EventWaiter<String>(clock)
+        waiter.offer("queued")
+        waiter.abort(EventWaitAborted("service gone"))
+        assertEquals("queued", waiter.await(0) { true }.event)
+        assertThrows(EventWaitAborted::class.java) { waiter.await(0) { true } }
+        assertThrows("later waits are refused", EventWaitAborted::class.java) { waiter.await(1_000) { true } }
     }
 
     @Test

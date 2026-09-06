@@ -1308,6 +1308,7 @@
     <string name="text_import_succeed">Импорт удался</string>
     <string name="text_import_to_my_scripts">Импорт в \"мои скрипты\"</string>
     <string name="text_in_process_instance">Экземпляр в процессе</string>
+    <string name="text_adopted_by_first_event">принят по первому событию (onServiceConnected не вызван)</string>
     <string name="text_in_progress">В процессе выполнения</string>
     <string name="text_info">Информация</string>
     <string name="text_insist_on_record">Запись</string>

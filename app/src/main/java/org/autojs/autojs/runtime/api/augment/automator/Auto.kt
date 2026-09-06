@@ -6,6 +6,7 @@ import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.AccessibilityBridge.WindowFilter
+import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
@@ -111,6 +112,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 o.defineProp("hasService", accessibilityTool.hasService())
                 o.defineProp("isRunning", accessibilityTool.isRunning())
                 o.defineProp("isOperational", accessibilityTool.isOperational())
+                o.defineProp("adoptedByEvent", AccessibilityService.registry.adoptedByEvent)
             }
         }
     )

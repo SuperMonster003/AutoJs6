@@ -130,7 +130,10 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
             State.CONNECTED -> string(R.string.text_connected)
             State.OPERATIONAL -> string(R.string.text_operational)
         }
-        add(Field.IN_PROCESS_INSTANCE, service?.let { "$instanceState | ${identityOf(it)}" } ?: instanceState)
+        add(
+            Field.IN_PROCESS_INSTANCE,
+            service?.let { "$instanceState | ${identityOf(it)}" + (if (it.isAdoptedByEvent) " | ${string(R.string.text_adopted_by_first_event)}" else "") } ?: instanceState,
+        )
         add(
             Field.UPTIME, service?.boundAtElapsedRealtime?.takeIf { it > 0L }
                 ?.let { DateUtils.formatElapsedTime((now - it) / 1000L) } ?: none,

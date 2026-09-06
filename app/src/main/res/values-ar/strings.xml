@@ -1310,6 +1310,7 @@
     <string name="text_import_succeed">نجح الاستيراد</string>
     <string name="text_import_to_my_scripts">استيراد إلى \"نصوص بلدي\"</string>
     <string name="text_in_process_instance">مثيل داخل العملية</string>
+    <string name="text_adopted_by_first_event">تم اعتماده من أول حدث (لم يتم استدعاء onServiceConnected)</string>
     <string name="text_in_progress">في تَقَدم</string>
     <string name="text_info">معلومة</string>
     <string name="text_insist_on_record">سجل</string>

@@ -257,6 +257,38 @@ class A11yServiceRegistryTest {
         assertFalse(ConnectionListeners.isBindingChanged(Snapshot(State.CONNECTED, service), Snapshot(State.OPERATIONAL, service)))
     }
 
+    @Test
+    fun adoptionFromAnEventIsFlaggedUntilTheCallbackArrives() {
+        assertFalse(registry.adoptedByEvent)
+        registry.onEvent(service)
+        assertTrue("adopted without onServiceConnected", registry.adoptedByEvent)
+        registry.onEvent(service)
+        assertTrue("further events keep the flag", registry.adoptedByEvent)
+        registry.resetOperational()
+        registry.markOperational()
+        assertTrue("the operational toggles keep the flag", registry.adoptedByEvent)
+
+        registry.onConnected(service)
+        assertFalse("the late callback clears the flag", registry.adoptedByEvent)
+        registry.onEvent(service)
+        assertFalse("events after the callback do not set it", registry.adoptedByEvent)
+    }
+
+    @Test
+    fun theAdoptionFlagFollowsTheInstance() {
+        registry.onConnected(service)
+        registry.onEvent(service)
+        assertFalse(registry.adoptedByEvent)
+
+        val replacement = FakeService("replacement")
+        registry.onEvent(replacement)
+        assertSame(replacement, registry.instance)
+        assertTrue("a replacement adopted from an event is flagged", registry.adoptedByEvent)
+
+        assertTrue(registry.onDisposed(replacement))
+        assertFalse("unbinding clears the flag", registry.adoptedByEvent)
+    }
+
     private fun Pair<Snapshot<FakeService>, Snapshot<FakeService>>.states() = first.state to second.state
 
 }

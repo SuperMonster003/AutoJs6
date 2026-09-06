@@ -1305,6 +1305,7 @@
     <string name="text_import_succeed">匯入成功</string>
     <string name="text_import_to_my_scripts">匯入到 \"我的指令碼\"</string>
     <string name="text_in_process_instance">處理程序內執行個體</string>
+    <string name="text_adopted_by_first_event">由首個事件採納 (onServiceConnected 未回呼)</string>
     <string name="text_in_progress">處理中</string>
     <string name="text_info">資訊</string>
     <string name="text_insist_on_record">錄製</string>

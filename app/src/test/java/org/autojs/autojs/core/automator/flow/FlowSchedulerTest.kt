@@ -69,6 +69,94 @@ class FlowSchedulerTest {
         assertEquals(1, rig.worker.executed)
     }
 
+    // Service outages (roadmap P5.5). zh-CN: 服务中断 (Roadmap P5.5).
+
+    private fun outage(cause: Throwable? = null): FlowError = FlowError.A11yUnavailable("wait", "text(\"x\")", cause)
+
+    @Test
+    fun aWaitWithoutRecoveryRejectsAtTheFirstOutage() {
+        var calls = 0
+        val cond: () -> Any? = { calls += 1; throw outage() }
+        val node = s.start(Wait(cond, policy(1000)))
+        rig.drain()
+        assertEquals(FlowError.Code.A11Y_UNAVAILABLE, error(node).code)
+        assertEquals(1, calls)
+        assertTrue(b.serviceWaits.isEmpty())
+    }
+
+    @Test
+    fun aRecoveringWaitRidesOutTheOutageAndFindsTheTargetAfterwards() {
+        val target = FakeUiNode.root("t")
+        var calls = 0
+        val cond: () -> Any? = {
+            calls += 1
+            when {
+                calls <= 2 -> throw outage()
+                calls == 3 -> null
+                else -> target
+            }
+        }
+        b.onAwaitService = { rig.clock.advance(it); true }
+        val node = s.start(Wait(cond, policy(5000), recoverService = true))
+        rig.drain()
+        assertSame(target, node.value)
+        assertEquals(4, calls)
+        assertEquals("one slice per failed probe, capped at the recovery slice", listOf(1000L, 1000L), b.serviceWaits)
+        // Probes at 0 (outage, 1000 ms of recovery), 1100 (outage, 1000 ms), 2200 (missing) and 2300 ms.
+        assertEquals(2300, rig.clock.now)
+        assertEquals(listOf(100L, 100L, 100L), rig.sleeps)
+    }
+
+    @Test
+    fun aRecoveringWaitReportsTheOutageWhenTheServiceNeverReturns() {
+        val cause = IllegalStateException("service gone")
+        val cond: () -> Any? = { throw outage(cause) }
+        b.onAwaitService = { rig.clock.advance(it); false }
+        val node = s.start(Wait(cond, policy(2500), recoverService = true))
+        rig.drain()
+        val e = error(node) as FlowError.A11yUnavailable
+        assertEquals(FlowError.Code.A11Y_UNAVAILABLE, e.code)
+        assertEquals("wait", e.step)
+        assertEquals("fn", e.selector)
+        assertSame(cause, e.cause)
+        // Recovery slices of 1000, 1000 and 300 ms (what was left of the wait); the poll gives up after 2600 ms.
+        assertEquals(listOf(1000L, 1000L, 300L), b.serviceWaits)
+        assertEquals(2600, e.elapsed)
+        assertEquals(4, e.attempts)
+    }
+
+    @Test
+    fun aCancelDuringTheRecoveryWaitEndsTheWaitAsCancelled() {
+        val cond: () -> Any? = { throw outage() }
+        lateinit var node: FlowNode
+        b.onAwaitService = { s.cancel(node); false }
+        node = s.start(Wait(cond, policy(5000), recoverService = true))
+        rig.drain()
+        assertEquals(FlowError.Code.CANCELLED, error(node).code)
+        assertEquals(1, b.serviceWaits.size)
+    }
+
+    @Test
+    fun aRecoveringStableWaitSkipsTheOutageSamples() {
+        val target = FakeUiNode.root("t")
+        var calls = 0
+        val cond: () -> Any? = { calls += 1; if (calls == 2) throw outage() else target }
+        b.onAwaitService = { rig.clock.advance(it); true }
+        val node = s.start(WaitStable(cond, policy(5000), Stability(stableFor = 300), StableMode.STABLE, recoverService = true))
+        rig.drain()
+        assertSame(target, node.value)
+        assertEquals(listOf(1000L), b.serviceWaits)
+    }
+
+    @Test
+    fun aStableWaitWithoutRecoveryRejectsAtTheFirstOutage() {
+        val cond: () -> Any? = { throw outage() }
+        val node = s.start(WaitStable(cond, policy(1000)))
+        rig.drain()
+        assertEquals(FlowError.Code.A11Y_UNAVAILABLE, error(node).code)
+        assertTrue(b.serviceWaits.isEmpty())
+    }
+
     @Test
     fun waitTimesOutWithSelectorElapsedAndAttempts() {
         val node = s.start(Wait("login", policy(300)))

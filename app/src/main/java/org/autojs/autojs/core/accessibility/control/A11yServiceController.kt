@@ -217,6 +217,22 @@ class A11yServiceController<S : Any>(
         return start(false)
     }
 
+    /**
+     * Waits up to [timeoutMillis] for the service to be bound again without involving the user
+     * (roadmap P5.5, Flow `recoverService`): a malfunctioning service (enabled but unbound) is
+     * re-enabled through the strategies, as [restoreIfMalfunctioning] would; a service that is
+     * not enabled is only waited for, in case the user or the system brings it back (D16: a
+     * deliberate stop is respected). Never opens the settings page.
+     * zh-CN: 至多等待 [timeoutMillis] 毫秒让服务重新绑定, 不牵涉用户 (Roadmap P5.5, Flow 的 `recoverService`): 故障状态的服务
+     * (已启用但未绑定) 经策略重新启用, 同 [restoreIfMalfunctioning]; 未启用的服务只是等待, 以防用户或系统把它带回来 (D16: 尊重有意的
+     * 关闭). 从不打开设置页.
+     */
+    fun awaitAvailable(timeoutMillis: Long): Boolean {
+        if (isSatisfied(State.CONNECTED)) return true
+        if (isMalfunctioning() && ensure(State.CONNECTED, timeoutMillis, launchSettingsIfNeeded = false).isSatisfied) return true
+        return registry.await(State.CONNECTED, timeoutMillis)
+    }
+
     fun waitForStarted(timeoutMillis: Long = startTimeoutMillis): Boolean = registry.await(State.CONNECTED, timeoutMillis)
 
     fun waitForOperational(timeoutMillis: Long = startTimeoutMillis): Boolean = registry.await(State.OPERATIONAL, timeoutMillis)

@@ -147,12 +147,12 @@ internal class FlowApi(val executor: FlowExecutor) {
     }
 
     private fun stepOf(kind: WaitKind, spec: WaitSpec): FlowStep = when (kind) {
-        WaitKind.WAIT, WaitKind.UNTIL, WaitKind.ACTIVITY, WaitKind.PACKAGE -> FlowStep.Wait(spec.cond, spec.policy)
-        WaitKind.WHILE -> FlowStep.Wait(spec.cond, spec.policy, negate = true)
-        WaitKind.WITHIN -> FlowStep.Wait(spec.cond, spec.policy, within = true)
-        WaitKind.STABLE -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.STABLE)
-        WaitKind.VISIBLE -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.VISIBLE)
-        WaitKind.HIDDEN -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.HIDDEN)
+        WaitKind.WAIT, WaitKind.UNTIL, WaitKind.ACTIVITY, WaitKind.PACKAGE -> FlowStep.Wait(spec.cond, spec.policy, recoverService = spec.recoverService)
+        WaitKind.WHILE -> FlowStep.Wait(spec.cond, spec.policy, negate = true, recoverService = spec.recoverService)
+        WaitKind.WITHIN -> FlowStep.Wait(spec.cond, spec.policy, within = true, recoverService = spec.recoverService)
+        WaitKind.STABLE -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.STABLE, spec.recoverService)
+        WaitKind.VISIBLE -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.VISIBLE, spec.recoverService)
+        WaitKind.HIDDEN -> FlowStep.WaitStable(spec.cond, spec.policy, spec.stability, StableMode.HIDDEN, spec.recoverService)
     }
 
     // Actions. zh-CN: 动作.

@@ -33,6 +33,27 @@ class IdleWaiter(private val clock: () -> Long) {
 
     private val all = Stamp(NEVER, 0)
 
+    private var abortSerial = 0L
+
+    private var abortCause: Throwable? = null
+
+    /**
+     * Ends the [await]s pending right now by throwing [cause] from them (roadmap P5.5); the waiter
+     * stays usable, so a wait started afterwards is not affected. zh-CN: 让此刻待定的各 [await] 抛出 [cause] 结束
+     * (Roadmap P5.5); 等待器仍可使用, 之后开始的等待不受影响.
+     */
+    fun abort(cause: Throwable) {
+        synchronized(lock) {
+            abortSerial += 1
+            abortCause = cause
+        }
+        gate.signal()
+    }
+
+    private fun abortedSince(serial: Long): Throwable? = synchronized(lock) {
+        if (abortSerial != serial) abortCause else null
+    }
+
     /** Records an event of [type] at the current time. zh-CN: 记录当前时刻的一个 [type] 事件. */
     fun onEvent(type: Int) {
         val now = clock()
@@ -74,7 +95,9 @@ class IdleWaiter(private val clock: () -> Long) {
         require(timeout >= 0) { "timeout ($timeout) cannot be negative" }
         val start = clock()
         val countBefore = count(types)
+        val serial = synchronized(lock) { abortSerial }
         while (true) {
+            abortedSince(serial)?.let { throw it }
             val now = clock()
             val last = lastEventAt(types)
             val quiet = now - (if (last == NEVER) origin else last)

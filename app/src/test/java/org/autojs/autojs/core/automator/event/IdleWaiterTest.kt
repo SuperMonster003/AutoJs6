@@ -3,6 +3,7 @@ package org.autojs.autojs.core.automator.event
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -54,6 +55,27 @@ class IdleWaiterTest {
         assertTrue(result.quiet)
         assertTrue(result.elapsed >= 150)
         assertEquals(3L, result.events)
+    }
+
+    @Test
+    fun anAbortEndsThePendingWaitOnlyAndLeavesTheWaiterUsable() {
+        val waiter = IdleWaiter(clock)
+        val cause = EventWaitAborted("service gone")
+        val poster = thread {
+            repeat(10) {
+                Thread.sleep(20)
+                waiter.onEvent(1)
+            }
+        }
+        thread {
+            Thread.sleep(60)
+            waiter.abort(cause)
+        }
+        val thrown = assertThrows(EventWaitAborted::class.java) { waiter.await(quietFor = 500, timeout = 5_000) }
+        assertSame(cause, thrown)
+        poster.join()
+        Thread.sleep(40)
+        assertTrue("a wait started after the abort is not affected", waiter.await(quietFor = 20, timeout = 5_000).quiet)
     }
 
     @Test

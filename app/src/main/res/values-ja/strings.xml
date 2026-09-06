@@ -1309,6 +1309,7 @@
     <string name="text_import_succeed">インポートに成功しました</string>
     <string name="text_import_to_my_scripts">インポート先: 作業ディレクトリ</string>
     <string name="text_in_process_instance">プロセス内インスタンス</string>
+    <string name="text_adopted_by_first_event">最初のイベントから採用 (onServiceConnected 未呼び出し)</string>
     <string name="text_in_progress">進行中</string>
     <string name="text_info">インフォメーション</string>
     <string name="text_insist_on_record">記録</string>

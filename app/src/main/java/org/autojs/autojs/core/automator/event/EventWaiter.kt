@@ -46,6 +46,23 @@ class EventWaiter<E : Any>(private val clock: () -> Long, val capacity: Int = DE
     /** Whether events are queued. zh-CN: 是否有排队的事件. */
     val hasPending: Boolean get() = synchronized(lock) { queue.isNotEmpty() }
 
+    @Volatile
+    private var abortCause: Throwable? = null
+
+    /** Whether [abort] was called. zh-CN: 是否已调用 [abort]. */
+    val isAborted: Boolean get() = abortCause != null
+
+    /**
+     * Ends a pending [await] (and refuses later ones) by throwing [cause] from it, once the
+     * events already queued have been offered to the predicate: the source of the events is gone
+     * (roadmap P5.5). zh-CN: 让待定的 [await] (以及之后的调用) 抛出 [cause] 结束, 已排队的事件仍先交给谓词: 事件的来源已消失
+     * (Roadmap P5.5).
+     */
+    fun abort(cause: Throwable) {
+        abortCause = cause
+        gate.signal()
+    }
+
     /** Queues [event] and wakes the waiting thread. zh-CN: 将 [event] 入队并唤醒等待线程. */
     fun offer(event: E) {
         synchronized(lock) {
@@ -76,6 +93,7 @@ class EventWaiter<E : Any>(private val clock: () -> Long, val capacity: Int = DE
                 if (accept(next)) return Result(next, clock() - start, seen)
                 next = synchronized(lock) { queue.removeFirstOrNull() }
             }
+            abortCause?.let { throw it }
             val elapsed = clock() - start
             if (timeout != UNBOUNDED && elapsed >= timeout) return Result(null, elapsed, seen)
             gate.await(if (timeout == UNBOUNDED) UNBOUNDED else timeout - elapsed)

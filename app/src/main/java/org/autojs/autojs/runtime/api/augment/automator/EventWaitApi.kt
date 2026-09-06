@@ -7,6 +7,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.NotificationListener
 import org.autojs.autojs.core.accessibility.event.A11yEvent
+import org.autojs.autojs.core.automator.event.EventWaitAborted
 import org.autojs.autojs.core.automator.event.EventWaiter
 import org.autojs.autojs.core.automator.flow.FlowError
 import org.autojs.autojs.core.automator.flow.FlowStep
@@ -50,7 +51,12 @@ internal class EventWaitApi(private val scriptRuntime: ScriptRuntime) {
 
     /** A parsed wait: [detail] for traces and errors; [run] blocks the calling thread. zh-CN: 解析后的等待: [detail] 用于追踪与错误; [run] 阻塞调用线程. */
     class Prepared(val name: String, val detail: String, private val block: () -> Any?) {
-        fun run(): Any? = block()
+        /** Runs the wait; one aborted by the service going away (roadmap P5.5) is the script's `A11Y_UNAVAILABLE`. zh-CN: 运行等待; 因服务消失而中止的等待 (Roadmap P5.5) 即脚本的 `A11Y_UNAVAILABLE`. */
+        fun run(): Any? = try {
+            block()
+        } catch (e: EventWaitAborted) {
+            throw FlowError.A11yUnavailable(name, detail, e)
+        }
     }
 
     fun prepare(name: String, args: Array<out Any?>): Prepared = when (name) {
@@ -131,7 +137,7 @@ internal class EventWaitApi(private val scriptRuntime: ScriptRuntime) {
         }
         observer.addToastListener(listener)
         val result = try {
-            waiter.await(a.timeout) { toast ->
+            waiter.awaitUnlessServiceLost(a.timeout) { toast ->
                 accepts(a.filter, toast) { key ->
                     when (key) {
                         EventWaitArguments.KEY_PACKAGE_NAME -> toast.packageName
@@ -155,7 +161,7 @@ internal class EventWaitApi(private val scriptRuntime: ScriptRuntime) {
         }
         observer.addNotificationListener(listener)
         val result = try {
-            waiter.await(a.timeout) { notification ->
+            waiter.awaitUnlessServiceLost(a.timeout) { notification ->
                 accepts(a.filter, notification) { key ->
                     when (key) {
                         EventWaitArguments.KEY_PACKAGE_NAME -> notification.packageName
@@ -170,6 +176,10 @@ internal class EventWaitApi(private val scriptRuntime: ScriptRuntime) {
         }
         return result.event ?: throw FlowError.Timeout(STEP_NOTIFICATION, a.detail, result.elapsed, result.seen.toLong(), "no matching notification")
     }
+
+    /** [EventWaiter.await] that the service going away aborts (roadmap P5.5). zh-CN: 服务消失即中止的 [EventWaiter.await] (Roadmap P5.5). */
+    private fun <E : Any> EventWaiter<E>.awaitUnlessServiceLost(timeout: Long, accept: (E) -> Boolean) =
+        bridge.pulse.abortingOnServiceLoss(this) { await(timeout, accept) }
 
     private fun accepts(filter: Filter?, candidate: Any, property: (String) -> String?): Boolean = when (filter) {
         null -> true

@@ -1305,6 +1305,7 @@
     <string name="text_import_succeed">導入成功</string>
     <string name="text_import_to_my_scripts">導入到 \"我的腳本\"</string>
     <string name="text_in_process_instance">進程內實例</string>
+    <string name="text_adopted_by_first_event">由首個事件採納 (onServiceConnected 未回調)</string>
     <string name="text_in_progress">處理中</string>
     <string name="text_info">信息</string>
     <string name="text_insist_on_record">錄製</string>

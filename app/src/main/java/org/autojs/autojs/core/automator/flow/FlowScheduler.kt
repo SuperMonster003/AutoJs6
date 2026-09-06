@@ -291,10 +291,17 @@ class FlowScheduler(
         val selector = bindings.describe(step.cond)
         val (policy, clipped) = clipToDeadline(step.policy, ctx, step.name, selector)
         var progress: Poller.Progress? = null
+        var outage: FlowError? = null
         val found = poller.poll(policy) { p ->
             progress = p
             ensureNotCancelled(node, step.name, selector, p.elapsed, p.round)
-            val probed = bindings.probe(step.cond, ctx.scope)
+            val probed = try {
+                bindings.probe(step.cond, ctx.scope).also { outage = null }
+            } catch (e: FlowError) {
+                outage = recoverable(e, step.recoverService) ?: throw e
+                awaitService(node, step.name, selector, p.remaining, p.elapsed, p.round)
+                return@poll null
+            }
             when {
                 step.negate -> if (probed == null) SATISFIED else null
                 else -> probed
@@ -303,6 +310,7 @@ class FlowScheduler(
         val attempts = progress?.round ?: 0
         val elapsed = clock() - start
         if (found == null) {
+            outage?.let { return Outcome(State.Rejected(FlowError.A11yUnavailable(step.name, selector, it.cause, elapsed, attempts)), ctx) }
             val reason = if (clipped && policy.timeout != PollPolicy.UNBOUNDED && elapsed > policy.timeout) "chain" else null
             return Outcome(State.Rejected(FlowError.Timeout(step.name, selector, elapsed, attempts, reason)), ctx)
         }
@@ -318,27 +326,41 @@ class FlowScheduler(
         if (policy.isNoop) return Outcome(State.Rejected(FlowError.Timeout(step.name, selector, 0, 0, "missing")), ctx)
         val stabilizer = stabilizerFor(step.stability)
         var attempts = 0L
+        var outage: FlowError? = null
+        var sample: Any? = null
         while (true) {
             attempts += 1
             ensureNotCancelled(node, step.name, selector, clock() - start, attempts)
-            val probed = bindings.probe(step.cond, ctx.scope)
-            val sample: Any? = when (step.mode) {
-                StableMode.STABLE -> probed
-                StableMode.VISIBLE -> probed?.takeIf { Stabilizer.isVisible(it) }
-                StableMode.HIDDEN -> if (probed != null && Stabilizer.isVisible(probed)) null else HIDDEN
+            // An outage yields no observation: the target is neither seen nor known to be missing.
+            // zh-CN: 中断期间没有观察: 目标既未看到, 也不能断定缺失.
+            val probed = try {
+                bindings.probe(step.cond, ctx.scope).also { outage = null }
+            } catch (e: FlowError) {
+                outage = recoverable(e, step.recoverService) ?: throw e
+                val soFar = clock() - start
+                awaitService(node, step.name, selector, remainingOf(policy, soFar), soFar, attempts)
+                NO_PROBE
             }
-            when (val verdict = stabilizer.observe(sample, clock())) {
-                is Stabilizer.Verdict.Stable -> return Outcome(State.Fulfilled(if (step.mode == StableMode.HIDDEN) true else verdict.sample), ctx)
-                Stabilizer.Verdict.Missing -> {
-                    val reason = if (step.mode == StableMode.HIDDEN) "reappeared" else "missing"
-                    return Outcome(State.Rejected(FlowError.InvalidTarget(step.name, selector, reason, clock() - start, attempts)), ctx)
+            if (probed !== NO_PROBE) {
+                sample = when (step.mode) {
+                    StableMode.STABLE -> probed
+                    StableMode.VISIBLE -> probed?.takeIf { Stabilizer.isVisible(it) }
+                    StableMode.HIDDEN -> if (probed != null && Stabilizer.isVisible(probed)) null else HIDDEN
                 }
-                Stabilizer.Verdict.Pending -> Unit
+                when (val verdict = stabilizer.observe(sample, clock())) {
+                    is Stabilizer.Verdict.Stable -> return Outcome(State.Fulfilled(if (step.mode == StableMode.HIDDEN) true else verdict.sample), ctx)
+                    Stabilizer.Verdict.Missing -> {
+                        val reason = if (step.mode == StableMode.HIDDEN) "reappeared" else "missing"
+                        return Outcome(State.Rejected(FlowError.InvalidTarget(step.name, selector, reason, clock() - start, attempts)), ctx)
+                    }
+                    Stabilizer.Verdict.Pending -> Unit
+                }
             }
             val elapsed = clock() - start
             val exhausted = policy.times != PollPolicy.UNBOUNDED && attempts >= policy.times
             val timedOut = policy.timeout != PollPolicy.UNBOUNDED && elapsed > policy.timeout
             if (exhausted || timedOut) {
+                outage?.let { return Outcome(State.Rejected(FlowError.A11yUnavailable(step.name, selector, it.cause, elapsed, attempts)), ctx) }
                 val reason = when {
                     clipped && timedOut -> "chain"
                     step.mode == StableMode.HIDDEN -> if (sample == null) "visible" else "unstable"
@@ -575,6 +597,25 @@ class FlowScheduler(
         if (synchronized(lock) { node.cancelRequested }) throw FlowError.Cancelled(step, selector, elapsed, attempts)
     }
 
+    /** [error] when it is an `A11Y_UNAVAILABLE` a recovering wait rides out, else `null`. zh-CN: 当 [error] 是 `A11Y_UNAVAILABLE` 且等待要度过中断时为该错误, 否则 `null`. */
+    private fun recoverable(error: FlowError, recoverService: Boolean): FlowError? =
+        error.takeIf { recoverService && it.code == FlowError.Code.A11Y_UNAVAILABLE }
+
+    private fun remainingOf(policy: PollPolicy, elapsed: Long): Long =
+        if (policy.timeout == PollPolicy.UNBOUNDED) PollPolicy.UNBOUNDED else (policy.timeout - elapsed).coerceAtLeast(0)
+
+    /**
+     * Gives the bindings up to [SERVICE_RECOVERY_SLICE] (or what is left of the wait) to bring the
+     * accessibility service back, then checks for a cancellation that arrived meanwhile (a cancel
+     * interrupts the worker, which ends the bindings' wait early). zh-CN: 给 bindings 至多 [SERVICE_RECOVERY_SLICE]
+     * (或等待所剩的时间) 让无障碍服务恢复, 然后检查其间到达的取消 (取消会中断工作线程, 使 bindings 的等待提前结束).
+     */
+    private fun awaitService(node: FlowNode, step: String, selector: String?, remaining: Long, elapsed: Long, attempts: Long) {
+        val slice = if (remaining == PollPolicy.UNBOUNDED) SERVICE_RECOVERY_SLICE else minOf(remaining, SERVICE_RECOVERY_SLICE)
+        if (slice > 0) bindings.awaitService(slice)
+        ensureNotCancelled(node, step, selector, elapsed, attempts)
+    }
+
     /**
      * [policy] shortened to the chain deadline of [ctx]; a deadline already passed fails at once
      * (`TIMEOUT`, reason `chain`). The flag tells whether the deadline is the tighter bound.
@@ -623,6 +664,12 @@ class FlowScheduler(
 
         /** The value a negated wait yields when the probe finds nothing. zh-CN: 取反等待在探测无所得时产生的值. */
         val SATISFIED = Any()
+
+        /** A probe that could not run (service outage). zh-CN: 未能进行的探测 (服务中断). */
+        private val NO_PROBE = Any()
+
+        /** How long one recovery wait blocks the worker before the cancellation flag is looked at again. zh-CN: 一次恢复等待阻塞工作线程多久后再次查看取消标志. */
+        const val SERVICE_RECOVERY_SLICE = 1_000L
 
         /** The sample of a hidden target in `waitForHidden`. zh-CN: `waitForHidden` 中目标隐藏时的样本. */
         val HIDDEN = Any()

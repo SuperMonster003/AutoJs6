@@ -28,7 +28,8 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * promises); callbacks are script calls whose exceptions propagate untouched; node actions go to
  * the `UiObject` methods of [FlowActions] (or to the gesture automator for a point), global actions
  * to the `automator` module; a flow or thenable returned by a callback is adopted. An accessibility
- * service that cannot be started fails a probe or an action with `A11Y_UNAVAILABLE`.
+ * service that cannot be started fails a probe or an action with `A11Y_UNAVAILABLE`; a wait with
+ * `recoverService` (roadmap P5.5) then waits quietly for the service through [awaitService].
  * zh-CN: 脚本的 [FlowBindings] (Roadmap P3.2): 条件以 `UiSelector.pickup` (选择器形式), 脚本调用 (断言函数), `refresh()` (节点)
  * 或结算结果 (Flow 与 Promise) 探测; 回调为脚本调用, 其异常原样传播; 节点动作交给 [FlowActions] 的 `UiObject` 方法 (坐标点则交给手势
  * 派发器), 全局动作交给 `automator` 模块; 回调返回的 Flow 或 thenable 被采纳. 无法启动的无障碍服务使探测或动作以 `A11Y_UNAVAILABLE`
@@ -88,6 +89,9 @@ internal class RuntimeFlowBindings(private val scriptRuntime: ScriptRuntime, pri
         else -> null
     }
 
+    /** Roadmap P5.5 (`recoverService`): the quiet wait of the service controller, never the settings page. zh-CN: Roadmap P5.5 (`recoverService`): 服务控制器的安静等待, 从不打开设置页. */
+    override fun awaitService(timeoutMillis: Long): Boolean = scriptRuntime.accessibilityBridge.awaitServiceAvailable(timeoutMillis)
+
     /** The JavaScript value of [value]: errors per [FlowJsErrors], collections as bound arrays, the rest as usual. zh-CN: [value] 的 JavaScript 值: 错误按 [FlowJsErrors], 集合为绑定的数组, 其余照常. */
     fun toJs(cx: Context, scope: VarScope, value: Any?): Any? = when (value) {
         is Throwable -> FlowJsErrors.toJs(cx, scope, value)
@@ -117,15 +121,32 @@ internal class RuntimeFlowBindings(private val scriptRuntime: ScriptRuntime, pri
         else -> null
     }
 
+    /**
+     * Whether the loud path (the strategies, then the settings page for the user) already failed
+     * during the current outage: a recovering wait probes again and again, and the user is asked
+     * at most once per outage; the quiet attempts in between are [awaitService].
+     * zh-CN: 当前中断期间 "响亮" 路径 (策略, 然后为用户打开设置页) 是否已失败过: 恢复中的等待会反复探测, 每次中断至多询问用户一次;
+     * 其间的安静尝试是 [awaitService].
+     */
+    @Volatile
+    private var loudEnsureFailed = false
+
     private fun ensureService(step: String, selector: String?) {
+        val bridge = scriptRuntime.accessibilityBridge
+        if (bridge.service != null) {
+            loudEnsureFailed = false
+            return
+        }
+        if (loudEnsureFailed) throw FlowError.A11yUnavailable(step, selector)
         try {
-            scriptRuntime.accessibilityBridge.ensureServiceStarted()
+            bridge.ensureServiceStarted()
         } catch (e: ScriptInterruptedException) {
             throw e
         } catch (e: ScriptException) {
+            loudEnsureFailed = true
             throw FlowError.A11yUnavailable(step, selector, e)
         }
-        if (scriptRuntime.accessibilityBridge.service == null) throw FlowError.A11yUnavailable(step, selector)
+        if (bridge.service == null) throw FlowError.A11yUnavailable(step, selector)
     }
 
     /** A script call on the calling thread, inside its Rhino context; exceptions propagate as thrown. zh-CN: 在调用线程的 Rhino 上下文内的脚本调用; 异常原样传播. */

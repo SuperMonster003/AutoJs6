@@ -10,7 +10,24 @@ class AccessibilityServiceUsher : CoreAccessibilityService() {
 
     override fun onServiceConnected() {
         Log.d(TAG, "onServiceConnected")
-        val serviceInfo = serviceInfo
+        applyServiceInfoPreferences()
+        super.onServiceConnected()
+    }
+
+    /**
+     * Roadmap P5.5: when the platform skipped `onServiceConnected`, the preferences are applied from
+     * the first event instead, so that an adopted instance behaves like a connected one.
+     * zh-CN: Roadmap P5.5: 平台跳过 `onServiceConnected` 时改由首个事件应用偏好, 使被采纳的实例与正常连接的实例行为一致.
+     */
+    override fun onAdoptedWithoutConnectedCallback() {
+        super.onAdoptedWithoutConnectedCallback()
+        runCatching { applyServiceInfoPreferences() }
+            .onFailure { Log.w(TAG, "Applying the service info preferences after the adoption failed", it) }
+    }
+
+    /** The stable-mode and gesture-observing preferences, written into the service info. zh-CN: 稳定模式与手势观察偏好, 写入服务信息. */
+    private fun applyServiceInfoPreferences() {
+        val serviceInfo = serviceInfo ?: return
         if (Pref.isStableModeEnabled) {
             serviceInfo.flags = serviceInfo.flags and AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
         } else {
@@ -24,7 +41,6 @@ class AccessibilityServiceUsher : CoreAccessibilityService() {
             }
         }
         setServiceInfo(serviceInfo)
-        super.onServiceConnected()
     }
 
     companion object {
