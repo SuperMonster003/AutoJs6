@@ -174,7 +174,7 @@ ui/accessibility/
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
 | P1 | 无障碍服务层重构 | P0 | 1 | 完成 (P1.1 ~ P1.7 落地 2026-09-05; 维护者验收 2026-09-06, 未发现已知问题) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 完成 (P2.1 / P2.2 落地 2026-09-05, P2.3 ~ P2.6 落地 2026-09-06; 维护者验收 2026-09-06, 未发现已知问题, `UiObject.kt` 542 行经验收接受) |
-| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 进行中 (P3.1 ~ P3.3 完成 2026-09-06; 下一项 P3.4) |
+| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 待验收 (P3.1 ~ P3.4 落地 2026-09-06; 文档与 d.ts 同步按计划留 P6) |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
 | P5 | 能力扩展 (诊断, 事件驱动等待, 跨运行时复用) | P1-P4 | PS | 未开始 |
 | P6 | 文档, 声明, 示例与发布 gate | 各阶段 | 全部 | 未开始 |
@@ -517,12 +517,26 @@ P3.3 证据:
 - `DEVICE`: 探针 `build/smoke/flow-p33-probe.js` (默认值读写与生效, `Infinity` 往返, 未知键报错, `trace` 开关与 `defaults().trace`, `sleep(100, "±30")`, `delay`, `else`, 系统设置页上的 `clickAfter` / `longClickAfter` / `clickWhenStableAfter` (位置参数与 `options.delay` 范围) / `flow.waitThenLongClick` / 链上的 `clickWhenStable`, strict 下带回调的 `clickAfter`): AVD API 24 24/24, Xiaomi API 35 24/24; 两机 logcat 均可见 `[flow] >` / `[flow] <` 行; 冒烟 `smoke-legacy-api.js` 两机 53/53.
 
 
-### P3.4 示例与测试
+### P3.4 示例与测试 (完成 2026-09-06)
 
-- [ ] `sample/accessibility/flow-basics.js` (附录 A.6 的全部示例可运行), `flow-ui-mode.js` (UI 模式下不阻塞主线程), `flow-cancel-and-timeout.js`.
-- [ ] 真机验证清单: 找到 / 超时 / 目标消失 / 稳定检测 / 脚本中途停止 (Flow 被取消, 无线程泄漏) / UI 模式.
+- [x] `sample/accessibility/flow-basics.js` (附录 A.6 的全部示例可运行), `flow-ui-mode.js` (UI 模式下不阻塞主线程), `flow-cancel-and-timeout.js`. 落地: 三个脚本在 `sample/accessibility/` (与 `smoke-legacy-api.js` 同在开发用示例目录; 应用内 "示例代码" (`app/src/main/assets-app/sample`, 按语言命名) 的收录留 P6). `flow-basics.js`: 附录 A.6 的每个示例以系统设置页为目标, 通用选择器 (`className("android.widget.TextView")` / `clickable()` / `scrollable()`, 均限定设置的包名, 以免匹配到 AutoJs6 的悬浮控制台), 每例先以 `then` / `catch` 异步写法给出, 再以 `sync()` 收尾使其顺序运行; 另加 `race` / `all`, `FlowError` 字段, Promise 互操作 (`Promise.resolve(flow)` 采纳与 `toPromise()`), 别名与命名空间 (`waitAsync` / `wait.async` / `auto.wait` / `flow.wait`, `clickWait`, `waitForGone`, `$flow`), 共 11 组. 点击一行会打开页面 (或搜索), 示例以 `then(reopenSettings)` 重启设置主页而不是猜测 `back()` 的次数; 助手返回 `flow.sleep(1200)` (`then` 回调返回 Flow 即被采纳) 以跳过新旧窗口交替期 (旧窗口仍被上报时找到的节点, 点击会 `ACTION_FAILED`; 两机各出现一次). `flow-ui-mode.js`: `"ui"` 布局 + `setInterval` 计数证明主线程未阻塞; 三个按钮分别演示 `waitForVisible` -> `waitForHidden` 链 (回调在 `main`), UI 线程 `sync()` 被拒绝 (与 `sleep` 同一错误字符串), 子线程内 `sync()`; 启动 2 s 后自动依次触发, 便于无人值守验证. `flow-cancel-and-timeout.js`: 单步超时的错误字段, `timeout(ms)` 链超时 (reason `chain`), `sync(timeout)` (reason `sync`, 链继续) 后 `cancel()`, `home()` 后 `waitForHidden(list)`, `waitForStable` 的默认 `missing: 'reset'` 与 `'fail'` (`INVALID_TARGET` reason `missing`), 从另一条链 `cancel()` (`CANCELLED`, `elapsed` 约 500 ms), `flow.cancelAll()`, 以及带待定链 `exit()`. 写示例时确认的两个事实已写进脚本注释: `sync()` 阻塞脚本线程期间该线程的定时器不触发 (只排空 Flow 的 script lane), "等待期间做动作" 要用另一条链 (`flow.sleep(400).then(...)`) 而非 `setTimeout`; 设置的包名取自 `PackageManager.resolveActivity(ACTION_SETTINGS)`, 不能用启动后的 `currentPackage()` (输入法在前台时取到的是输入法的包名, AVD 上复现). (SOURCE; DEVICE)
+- [x] 真机验证清单: 找到 / 超时 / 目标消失 / 稳定检测 / 脚本中途停止 (Flow 被取消, 无线程泄漏) / UI 模式. 落地: 逐项见 P3.4 证据. 运行方式 `build/smoke/run-sample.sh <serial> <sample.js> [wait-seconds]` (推送后以 `run-sample.js` 在同一引擎 `eval` 示例并把 `console` 镜像到 `/sdcard/sample-result.txt`; `"ui"` 脚本的 UI 模式由文件首行决定, 不能经 `eval`, 直接 `am start` 运行并从 logcat 的 `GlobalConsole` 读取), 其后 `flow-threads.js` 检查线程. (DEVICE)
 
-P3 验收: 调度核心单元测试通过; 三个示例脚本真机通过; 脚本停止后 `flow-*` 线程不存活 (以 `threads` 快照或日志证明); changelog `feature` 条目, 文档与 d.ts 同步 (P6) 完成.
+P3.4 证据:
+
+- `JVM`: 无代码变更; 全量 `:app:testAppDebugUnitTest` 仍为 2124 / 0 失败 (5 skipped, P3.3 的运行).
+- `ANDROID_BUILD`: 无代码变更, 使用 P3.3 的 APK (2026-09-06).
+- `DOCS`: 无 changelog 条目 (开发用示例目录, 与 `smoke-legacy-api.js` 相同; 应用内示例代码留 P6); 架构文档 1.8 / 2.2 更新.
+- `DEVICE` (AVD API 24 x86 与 Xiaomi 23046RP50C API 35 arm64, 2026-09-06, 每机三个示例各连跑至输出与预期逐行一致):
+  - 找到: `flow-basics.js` 11 组示例两机全部按预期输出 (示例 1 找到 "Settings" / "搜索系统设置项", 示例 2 ~ 5 的 8 次点击均成功, 示例 6 `sync()` 返回 `TextView`, 示例 7 工作线程 `findOne` 命中, 示例 8 `race` 得 `TextView` / `all` 得 2 个值, 示例 10 两种互操作各得 42 / `RecyclerView`, 结束时 `flow.pending` 为 0).
+  - 超时: `flow-basics.js` 示例 9 (`TIMEOUT`, 600 ms 超时实测 625 ~ 678 ms, 7 次尝试) 与 `flow-cancel-and-timeout.js` 示例 1 ~ 3 (单步 `TIMEOUT` 带 `step` / `selector` / `elapsed` / `attempts`; 链超时 reason `chain`; `sync(300)` reason `sync` 且链仍 `pending`, `cancel()` 后 `cancelled` / `CANCELLED`).
+  - 目标消失: `flow-cancel-and-timeout.js` 示例 4 (`home()` 后 `waitForHidden(list, { stableFor: 300 })` 兑现) 与示例 5 后半 (`missing: 'fail'` 在列表消失后以 `INVALID_TARGET` reason `missing` 拒绝).
+  - 稳定检测: `flow-basics.js` 示例 4 / 5 (`waitForStable` / `waitForStableThenClick` / `clickWhenStable` / `clickWhenStableAfter`, 共 6 次点击成功), `flow-cancel-and-timeout.js` 示例 5 前半 (`waitForStable(list, { stableFor: 300 })` 得 `RecyclerView`), `flow-ui-mode.js` (`waitForVisible` / `waitForHidden` 各带 `stableFor: 200`).
+  - 脚本中途停止: `flow-cancel-and-timeout.js` 示例 6 (另一条链 `cancel()`, 502 ~ 506 ms 后 `CANCELLED`), 示例 7 (`flow.cancelAll()` 取消 2 条, `pending` 归 0), 示例 8 (带 2 条待定链 `exit()`); 其后 `flow-threads.js` 两机 `FLOW_THREADS 0`.
+  - UI 模式: `flow-ui-mode.js` 两机 (UI 线程 `sync()` 被拒绝 (本地化消息), `Visible: ... (callback on main)`, `Hidden again.`, 子线程 `sync()` 返回 `UI ticks: 26`, 期间计数持续增长).
+  - 冒烟: APK 未变, 沿用 P3.3 的两机 53/53.
+
+P3 验收: 调度核心单元测试通过; 三个示例脚本真机通过; 脚本停止后 `flow-*` 线程不存活 (以 `threads` 快照或日志证明); changelog `feature` 条目, 文档与 d.ts 同步 (P6) 完成. 状态 (2026-09-06): 前三项与 changelog 条目已具备 (`FlowSchedulerTest` 42 / `StabilizerTest` 8 / `FlowArgumentsTest` 14 / `FlowTraceTest` 2; 三个示例两机通过; `flow-threads.js` 两机 `FLOW_THREADS 0`; changelog `feature` 1), 文档与 d.ts 同步按原计划留 P6; 待维护者验收.
 
 ---
 
@@ -669,6 +683,8 @@ P4 验收: 工具单元测试通过; 示例真机通过; changelog `feature` 条
 5. `waitForVisible` 在步骤 2 之前额外要求 `visibleToUser()` 且 bounds 非空; `waitForHidden` 的 "稳定" 条件反转 (连续 `stableFor` 毫秒找不到或不可见).
 
 ### A.6 示例 (用户给定示例的最终形态)
+
+可运行形态见 `sample/accessibility/flow-basics.js` (P3.4; 以系统设置页为目标, 每例先异步写法再以 `sync()` 收尾).
 
 ```js
 waitAsync(/something.+/i, 3000, 200)
@@ -851,4 +867,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P3.1: `core/automator/flow/{FlowStep,FlowNode,FlowScheduler,FlowBindings,Stabilizer,FlowError}.kt` 新增 (Android-free 的 Flow 核心: 步骤为数据, 节点树 + 一次性结算, 两条 lane, 附录 A.4 的取值规则, 取消 / 全链超时 / 重试 / 组合器, 稳定检测状态机, 密封错误类); 测试替身 `FlowTestSupport.kt` 与 `FlowSchedulerTest` (34) / `StabilizerTest` (8). 与计划的形态差异 (节点树而非步骤序列, `FlowLane` 统一 Executor / Marshaller, `FlowNode` 即 `FlowHandle`) 与各项语义决定记在 P3.1 各条. 无 changelog 条目. 证据: `JVM` 全量 2100 / 0; `ANDROID_BUILD` 通过; 详见 P3.1 证据.
 - 落地 P3.2: `runtime/api/augment/flow/{Flow,FlowExecutor,FlowNativeObject,FlowArguments,FlowCondition,RuntimeFlowBindings,FlowWorkerPool,FlowScriptLane,FlowJsErrors}.kt` 新增 (命名空间与全局起点, 每脚本执行器 + 线程池 + 每脚本线程的调度器与脚本 lane, 句柄 / 原型 / API, 参数与条件, bindings, 错误转换), `Auto.kt` 新增 `auto.wait`, `ScriptRuntime.augment` 注册 `Flow`; 核心补 `Adopted` 根 (`defer` / `fulfill` / `reject`, 供 Promise 采纳), `FlowNode.hasContinuation`, 跨调度器取消路由, `A11yUnavailable(cause)`, 以及 `workerFactory` (每根一条 lane). 与计划的三处偏离 (线程池而非单线程, `FlowScriptLane` + `sync()` 自排空而非 `ScriptAsyncDispatcher`, 句柄级令牌) 记在 P3.2 第 1 条. 测试: `FlowSchedulerTest` +8, `FlowArgumentsTest` 13 (新). changelog `feature` 1 (10 语言). 证据: `JVM` 全量 2121 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 107/107, Xiaomi API 35 107/107, 退出后 `flow-*` 线程 0, 冒烟 两机 53/53; 详见 P3.2 证据.
 - 落地 P3.3: `runtime/api/augment/flow/FlowTrace.kt` 新增 (`FlowTrace` 监听器 + Android-free 的 `FlowTraceFormat`), `FlowArguments.applyDefaults`, `FlowApi.defaults` / `trace`, `FlowExecutor.tracing`, `flow.defaults` / `flow.trace` 注册; 其余四条便携步骤已随 P3.2 落地, 本次补真机证据. 测试: `FlowArgumentsTest` +1, `FlowTraceTest` 2 (新). changelog: 扩写 P3.2 的 `feature` 条目 (10 语言). 证据: `JVM` 全量 2124 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 24/24, Xiaomi API 35 24/24, 冒烟两机 53/53; 详见 P3.3 证据.
-- 下次起点: P3.4 示例与测试 (`sample/accessibility/flow-basics.js` 覆盖附录 A.6 的全部示例并可运行 (以 `sync()` 与 `then` 两种写法), `flow-ui-mode.js` ("ui" 模式下不阻塞主线程: 按钮触发 `waitAsync(...).then(...)`, 演示 `sync()` 在 UI 线程被拒绝), `flow-cancel-and-timeout.js` (超时 / 目标消失 / 稳定检测 / `cancel()` / `flow.cancelAll()` / 脚本中途 `exit()`); 真机验证清单 (找到 / 超时 / 目标消失 / 稳定检测 / 脚本中途停止无线程泄漏 / UI 模式) 逐项记入 P3.4 证据; 示例入库前先按 P3.2 / P3.3 的探针方式在两机跑通), 其后 P3 验收 (核心测试 + 三个示例 + `flow-*` 线程不存活 + changelog 已有), 再 P4. 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh` / `run-legacy-smoke.sh`).
+- 落地 P3.4: `sample/accessibility/{flow-basics,flow-ui-mode,flow-cancel-and-timeout}.js` 新增 (无代码变更); 两机各跑三轮才收敛的示例问题 (通用选择器匹配到悬浮控制台, 首个 `clickable()` 是搜索栏且 `back()` 次数不可预知, `sync()` 期间 `setTimeout` 不触发, `currentPackage()` 取到输入法, 重启活动后旧窗口的节点点击失败) 均以脚本写法解决并记在 P3.4 第 1 条; 运行包装 `build/smoke/run-sample.sh` / `run-sample.js`. 证据: `DEVICE` 三个示例 AVD API 24 与 Xiaomi API 35 全部按预期输出, `flow-threads.js` 两机 `FLOW_THREADS 0`; `JVM` / `ANDROID_BUILD` 沿用 P3.3 (2124 / 0, APK 未变); 详见 P3.4 证据. P3 验收行已更新为 "待维护者验收".
+- 下次起点: P3 验收 (维护者确认; 已具备的证据见 P3 验收行, 文档与 d.ts 同步按计划留 P6), 其后 P4.1 核心实现 (Android-free 逻辑 + 薄 Android 适配, 附录 B), 再 P4.2 JS 表面与 P4.3 示例. 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh` / `run-legacy-smoke.sh`, 示例用 `run-sample.sh`).
