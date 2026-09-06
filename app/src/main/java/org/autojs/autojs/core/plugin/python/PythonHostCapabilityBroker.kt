@@ -24,7 +24,12 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.automator.GlobalActionAutomator
+import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ExecutionConfig
@@ -620,9 +625,30 @@ internal class AndroidPythonHostCapabilityActions(
     private val accessibilityAutomator = GlobalActionAutomator(appContext, mainHandler) {
         AutoJsAccessibilityService.instance
     }
-    private val selector = PythonHostSelectorScope {
-        requireAccessibilityService().rootInActiveWindow
-    }
+    // Roadmap P5.4: the selector scope walks UiObject (a UiNode) with the runtime's registry
+    // filters and node lifecycle; this adapter supplies the active window root (the same
+    // rootInActiveWindow as before, through the window root provider), the refresh, the two
+    // node actions and the wire values, restoring the null text the protocol distinguishes from
+    // an empty one (UiNode.text() folds it).
+    // zh-CN: Roadmap P5.4: 选择器作用域以运行时的 registry 过滤器与节点生命周期遍历 UiObject (即 UiNode); 本适配器提供活动窗口根节点
+    // (仍是 rootInActiveWindow, 经窗口根节点 provider 取得), 刷新, 两个节点动作与线协议值, 并补回协议区分于空文本的 null 文本
+    // (UiNode.text() 会把它折叠为空串).
+    private val selector = PythonHostSelectorScope(
+        object : PythonHostSelectorScope.Platform<UiObject> {
+            override fun activeRoot(): UiObject? =
+                WindowRootProvider.default.activeRoot(A11yWindowRootPolicy())?.let(UiObject::createRoot)
+
+            override fun refresh(node: UiObject): Boolean = node.refresh()
+
+            override fun click(node: UiObject): Boolean = node.click()
+
+            override fun setText(node: UiObject, text: String): Boolean = node.setText(text)
+
+            override fun capture(node: UiObject): PythonHostSelectorValues =
+                PythonHostSelectorValues.of(node).copy(text = node.text?.toString())
+        },
+        NodeLifecycle.default,
+    )
     private val screenImages = PythonHostScreenImageScope { format, quality ->
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             throw PythonHostCapabilityScreenCaptureUnavailableException()
