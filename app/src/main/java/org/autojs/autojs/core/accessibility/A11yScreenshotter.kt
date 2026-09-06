@@ -16,12 +16,14 @@ import java.util.concurrent.Executor
  * Screenshots through the accessibility service (API 30+), the one place that turns the
  * framework's hardware buffer into a software bitmap and that retries the rate-limit error
  * (`ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT`: the system allows one screenshot every few
- * hundred milliseconds). `automator.captureScreen()` consumes it; the Python host keeps its own
- * synchronous variant until roadmap P5.4 decides.
+ * hundred milliseconds). `automator.captureScreen()` consumes it through [takeWithRetry]; the
+ * Python host (`PythonHostAccessibilityScreenCapture`, roadmap P5.4) drives single [take] attempts
+ * under its own bounded retry policy and per-call deadline.
  *
  * zh-CN: 经无障碍服务截图 (API 30+), 把框架的硬件缓冲转成软件位图并重试限频错误
  * (`ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT`: 系统每几百毫秒只允许一次截图) 的唯一位置.
- * `automator.captureScreen()` 消费它; Python Host 在路线图 P5.4 决定前保留自己的同步版本.
+ * `automator.captureScreen()` 经 [takeWithRetry] 消费它; Python Host (`PythonHostAccessibilityScreenCapture`, Roadmap P5.4)
+ * 在自己的有界重试策略与每次调用的期限下驱动单次 [take] 尝试.
  *
  * Created by SuperMonster003 on Sep 5, 2026.
  */

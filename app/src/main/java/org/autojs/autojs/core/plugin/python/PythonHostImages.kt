@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Looper
-import android.view.Display
 import androidx.annotation.RequiresApi
 import com.google.gson.JsonObject
 import java.io.ByteArrayOutputStream
@@ -15,6 +14,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import org.autojs.autojs.core.accessibility.A11yScreenshotter
 import kotlin.math.abs
 
 /** Fixed bounds for execution-local Python screenshot transfer. */
@@ -871,10 +871,18 @@ internal object PythonHostScreenshotRetryPolicy {
             remainingNanos > TimeUnit.MILLISECONDS.toNanos(RETRY_DELAY_MILLIS)
 }
 
-/** Android 11+ accessibility screenshot capture with a fixed deadline and bounded encoded output. */
+/**
+ * Android 11+ accessibility screenshot capture with a fixed deadline and bounded encoded output.
+ * Each attempt goes through the shared [A11yScreenshotter] (roadmap P5.4), which converts the
+ * framework's hardware buffer into a software bitmap; the bounded retry of the rate-limit error
+ * ([PythonHostScreenshotRetryPolicy]) and the per-call deadline stay here, because the Python
+ * protocol answers synchronously on a worker thread within [CAPTURE_TIMEOUT_MILLIS].
+ * zh-CN: Android 11+ 的无障碍截图, 带固定期限与编码大小上限. 每次尝试经共享的 [A11yScreenshotter] (Roadmap P5.4) 完成,
+ * 由它把框架的硬件缓冲转为软件位图; 限频错误的有界重试 ([PythonHostScreenshotRetryPolicy]) 与每次调用的期限留在此处,
+ * 因为 Python 协议要在工作线程上于 [CAPTURE_TIMEOUT_MILLIS] 内同步应答.
+ */
 internal object PythonHostAccessibilityScreenCapture {
     private const val CAPTURE_TIMEOUT_MILLIS = 4_000L
-    private const val INTERNAL_FAILURE = -1
     private const val TIMEOUT_FAILURE = -2
 
     fun capture(
@@ -908,17 +916,18 @@ internal object PythonHostAccessibilityScreenCapture {
         service: org.autojs.autojs.core.accessibility.AccessibilityService,
         action: (Bitmap) -> T,
     ): T {
+        val screenshotter = A11yScreenshotter(service)
         val deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(CAPTURE_TIMEOUT_MILLIS)
         var bitmap: Bitmap? = null
         for (attempt in 1..PythonHostScreenshotRetryPolicy.MAX_ATTEMPTS) {
             val remainingNanos = deadlineNanos - System.nanoTime()
             if (remainingNanos <= 0L) throw PythonHostCapabilityScreenCaptureFailedException()
-            when (val result = takeScreenshot(service, remainingNanos)) {
-                is ScreenshotResult.Success -> {
+            when (val result = takeScreenshot(screenshotter, remainingNanos)) {
+                is A11yScreenshotter.Result.Success -> {
                     bitmap = result.bitmap
                     break
                 }
-                is ScreenshotResult.Failure -> {
+                is A11yScreenshotter.Result.Failure -> {
                     val canRetry = PythonHostScreenshotRetryPolicy.canRetry(
                         errorCode = result.errorCode,
                         attempt = attempt,
@@ -943,61 +952,36 @@ internal object PythonHostAccessibilityScreenCapture {
         }
     }
 
+    /**
+     * One attempt through [screenshotter]: the framework delivers on the service's main executor
+     * while this worker waits up to [timeoutNanos]; a bitmap arriving after the wait is recycled
+     * here rather than leaked. Failures after the wait carry [TIMEOUT_FAILURE], which the retry
+     * policy never retries.
+     * zh-CN: 经 [screenshotter] 尝试一次: 框架在服务的主执行器上投递, 本工作线程至多等待 [timeoutNanos]; 等待结束后才到达的位图在此回收
+     * 而非泄漏. 等待结束后的失败带 [TIMEOUT_FAILURE], 重试策略不会重试它.
+     */
     @RequiresApi(Build.VERSION_CODES.R)
     private fun takeScreenshot(
-        service: org.autojs.autojs.core.accessibility.AccessibilityService,
+        screenshotter: A11yScreenshotter,
         timeoutNanos: Long,
-    ): ScreenshotResult {
-        val result = CompletableFuture<ScreenshotResult>()
-        val callback = object : AndroidAccessibilityService.TakeScreenshotCallback {
-            override fun onSuccess(screenshot: AndroidAccessibilityService.ScreenshotResult) {
-                val decoded = runCatching { copySoftwareBitmap(screenshot) }
-                    .fold(
-                        onSuccess = ScreenshotResult::Success,
-                        onFailure = { ScreenshotResult.Failure(INTERNAL_FAILURE) },
-                    )
-                if (!result.complete(decoded) && decoded is ScreenshotResult.Success) {
-                    decoded.bitmap.recycle()
-                }
+    ): A11yScreenshotter.Result {
+        val result = CompletableFuture<A11yScreenshotter.Result>()
+        screenshotter.take(mutable = false) { delivered ->
+            if (!result.complete(delivered) && delivered is A11yScreenshotter.Result.Success) {
+                delivered.bitmap.recycle()
             }
-
-            override fun onFailure(errorCode: Int) {
-                result.complete(ScreenshotResult.Failure(errorCode))
-            }
-        }
-        runCatching {
-            service.takeScreenshot(Display.DEFAULT_DISPLAY, service.mainExecutor, callback)
-        }.onFailure {
-            result.complete(ScreenshotResult.Failure(INTERNAL_FAILURE))
         }
         return try {
             result.get(timeoutNanos, TimeUnit.NANOSECONDS)
         } catch (_: TimeoutException) {
-            result.complete(ScreenshotResult.Failure(TIMEOUT_FAILURE))
+            result.complete(A11yScreenshotter.Result.Failure(TIMEOUT_FAILURE))
             result.get()
         } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
-            result.complete(ScreenshotResult.Failure(TIMEOUT_FAILURE))
-            result.getNow(ScreenshotResult.Failure(TIMEOUT_FAILURE))
+            result.complete(A11yScreenshotter.Result.Failure(TIMEOUT_FAILURE))
+            result.getNow(A11yScreenshotter.Result.Failure(TIMEOUT_FAILURE))
         } catch (_: ExecutionException) {
-            ScreenshotResult.Failure(INTERNAL_FAILURE)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun copySoftwareBitmap(screenshot: AndroidAccessibilityService.ScreenshotResult): Bitmap {
-        val hardwareBuffer = screenshot.hardwareBuffer
-        try {
-            val hardwareBitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, screenshot.colorSpace)
-                ?: throw IllegalStateException("Accessibility screenshot could not be decoded")
-            try {
-                return hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
-                    ?: throw IllegalStateException("Accessibility screenshot could not be copied")
-            } finally {
-                hardwareBitmap.recycle()
-            }
-        } finally {
-            hardwareBuffer.close()
+            A11yScreenshotter.Result.Failure(A11yScreenshotter.ERROR_INTERNAL)
         }
     }
 
@@ -1035,11 +1019,6 @@ internal object PythonHostAccessibilityScreenCapture {
         } finally {
             output.clearBytes()
         }
-    }
-
-    private sealed interface ScreenshotResult {
-        data class Success(val bitmap: Bitmap) : ScreenshotResult
-        data class Failure(val errorCode: Int) : ScreenshotResult
     }
 
     private class BoundedByteArrayOutputStream(
