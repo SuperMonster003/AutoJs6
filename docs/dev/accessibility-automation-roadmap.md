@@ -158,9 +158,10 @@ core/automator/
   selector/    SelectorRegistry, SelectorMapParser, PollPolicy, UiSelectorQuery
   pick/        Picker, Detector, Compass (从 UiSelector / UiObject 迁出)
   flow/        FlowStep, FlowScheduler, FlowExecutor, Stabilizer, FlowErrors
-  toolkit/     SmartClick, ScrollSearch, TextEntry, PopupDismisser, ListCollector, AppLauncher
+  toolkit/     ToolkitBindings + ActionPerformer (接口), Toolkit (门面: 定位计划, findAny / clickAny / clickIfExists / retry, 容器解析), Humanize, UiNodes + NodeFingerprints, SmartClick, Scroller, ScrollSearch, TextEntry, PopupDismisser (含 Guard), ListCollector, AppLauncher, Toggle  [P4.1 已落地]
 runtime/api/augment/
   flow/        Flow (命名空间 `flow`), FlowNativeObject (链式对象), 全局函数 waitAsync / waitThenClick / ...
+  toolkit/     RuntimeToolkit (每脚本一个, 守护线程 toolkit-<engineId>) + RuntimeToolkitBindings + RuntimeActionPerformer (薄 Android 适配)  [P4.1 已落地; JS 表面留 P4.2]
 ui/accessibility/
   A11yServiceManagerDialog, A11yEventMonitorDialog (服务管理器与事件监视器对话框)  [P1.7 已落地]
 ```
@@ -174,8 +175,8 @@ ui/accessibility/
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
 | P1 | 无障碍服务层重构 | P0 | 1 | 完成 (P1.1 ~ P1.7 落地 2026-09-05; 维护者验收 2026-09-06, 未发现已知问题) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 完成 (P2.1 / P2.2 落地 2026-09-05, P2.3 ~ P2.6 落地 2026-09-06; 维护者验收 2026-09-06, 未发现已知问题, `UiObject.kt` 542 行经验收接受) |
-| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 待验收 (P3.1 ~ P3.4 落地 2026-09-06; 文档与 d.ts 同步按计划留 P6) |
-| P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
+| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 完成 (P3.1 ~ P3.4 落地 2026-09-06; 维护者验收 2026-09-06, 未发现已知问题; 文档与 d.ts 同步按计划留 P6) |
+| P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 进行中 (P4.1 核心与薄 Android 适配落地 2026-09-06; P4.2 JS 表面与 P4.3 示例未开始) |
 | P5 | 能力扩展 (诊断, 事件驱动等待, 跨运行时复用) | P1-P4 | PS | 未开始 |
 | P6 | 文档, 声明, 示例与发布 gate | 各阶段 | 全部 | 未开始 |
 
@@ -538,23 +539,35 @@ P3.4 证据:
 
 P3 验收: 调度核心单元测试通过; 三个示例脚本真机通过; 脚本停止后 `flow-*` 线程不存活 (以 `threads` 快照或日志证明); changelog `feature` 条目, 文档与 d.ts 同步 (P6) 完成. 状态 (2026-09-06): 前三项与 changelog 条目已具备 (`FlowSchedulerTest` 42 / `StabilizerTest` 8 / `FlowArgumentsTest` 14 / `FlowTraceTest` 2; 三个示例两机通过; `flow-threads.js` 两机 `FLOW_THREADS 0`; changelog `feature` 1), 文档与 d.ts 同步按原计划留 P6; 待维护者验收.
 
+P3 验收结果 (2026-09-06): 维护者验收通过, 未发现已知问题. P3 关闭 (文档与 d.ts 同步按计划留 P6).
+
 ---
 
 ## P4: 高阶自动化封装 (toolkit)
 
 目标: 把脚本作者反复手写的 "查找 + 等待 + 动作 + 校验" 组合固化为一处实现 (`core/automator/toolkit/**`), 同时提供同步 (`automator.*`) 与链式 (Flow 步骤 / `flow.*`) 两种表面. 具体签名见附录 B.
 
-### P4.1 核心实现 (Android-free 逻辑 + 薄 Android 适配)
+### P4.1 核心实现 (Android-free 逻辑 + 薄 Android 适配) (完成 2026-09-06)
 
-- [ ] `SmartClick`: 目标不可点击时按策略上溯到可点击祖先 (复用 compass `k`), 仍不可点击时回退为手势点击 (`clickBounds`), 可选点击后校验条件; 返回 `ClickOutcome(method = node / ancestor / gesture, target)`.
-- [ ] `ScrollSearch`: 在指定可滚动容器 (或自动探测) 内按方向滚动直到目标出现或达到最大次数 / 到达末尾 (连续两次指纹无变化视为到底), 支持 `pageUp / pageDown` 与手势两种滚动方式.
-- [ ] `TextEntry`: 定位可编辑控件 (选择器 / 索引 / 当前焦点), 可选先清空, 设置或追加文本, 可选 IME Enter (`imeEnter`) 与结果校验 (`text()` 等于期望).
-- [ ] `PopupDismisser`: 给定候选选择器列表 (如 `['允许', '同意', '跳过', '关闭', /^(取消|知道了)$/]`), 存在即点击, 支持一次性与后台守护 (基于 P1.3 事件总线的窗口状态变化触发, 而非轮询).
-- [ ] `ListCollector`: 对列表容器按方向滚动并采集每项内容 (`pickup` resultType), 按指纹去重, 直到到底或达到上限.
-- [ ] `AppLauncher`: 启动应用 (包名 / 应用名 / `App`) 并等待 `currentPackage()` 切换, 已在前台时可选 `bringToFront`; `backUntil(cond, maxTimes)` 与 `backToApp(pkg)`.
-- [ ] `Toggle`: 对 `checkable` 控件按期望状态点击 (状态已一致时不点击), 点击后校验.
-- [ ] `Humanize` 选项集: 点击坐标随机偏移, 动作间随机延迟, 供上述工具与 Flow 动作步骤共用.
-- [ ] JUnit4 测试: 以 `FakeUiNode` 树 + 可编程的 `FakeActionPerformer` 覆盖每个工具的决策路径.
+- [x] `SmartClick` (`core/automator/toolkit/SmartClick.kt`): 可点击则 `click`; 否则经 `UiNodes.clickableAncestorOrSelf` (即 `Compass` 的 `k` 步骤, `CompassStep.Clickable`) 上溯至多 `maxClimb` (默认 5) 级到可点击祖先; 没有祖先或 `click` 返回 `false` 时按 `gestureFallback` 在节点中心 (加 `offsetX` / `offsetY` 与拟人偏移) 走 `ActionPerformer.tap` (运行时为脚本的手势派发器, 与 `clickBounds` 同一通道); `verify` 条件在点击后以 `verifyTimeout` / `verifyInterval` 轮询. 返回 `Outcome(method = NODE / ANCESTOR / GESTURE, target, verified)`; 失败为 `ACTION_FAILED` (reason `click` / `gesture` / `verify`) 或 `INVALID_TARGET` (reason `notClickable`). (SOURCE; JVM: `SmartClickTest` 16, 2026-09-06)
+- [x] `ScrollSearch` (`ScrollSearch.kt`, 一步滚动在共用的 `Scroller.kt`): 容器为指定的选择器 / 节点 (按 `locate` 计划等待) 或作用域内面积最大的可滚动节点 (`UiNodes.largestScrollable`); 每轮先 `find` 目标, 未找到则滚动一步 (`ACTION`: `ActionPerformer.scroll`, 运行时优先方向动作 `SCROLL_*`, 其次 `PAGE_*`, 最后 `scrollForward` / `scrollBackward`; `GESTURE`: 沿滚动轴从区域 80 % 处滑到 20 % 处, 区域为容器 / 根 / 活动窗口 / 屏幕), 停顿 `settleMillis` 并刷新容器; 到底 = 动作返回 `false` 或区域的 `NodeFingerprints.subtree` 连续两次滚动无变化 (不锁定, `stopAtEnd = false` 时继续滚动直到 `maxSteps`); 最后一次滚动后再查找一次. 失败为 `TIMEOUT` (reason `maxSteps` / `end`), `INVALID_TARGET` (reason `container` / `noScrollable` / `containerGone`) 或 `ACTION_FAILED` (reason `swipe`). (SOURCE; JVM: `ScrollSearchTest` 20, 2026-09-06)
+- [x] `TextEntry` (`TextEntry.kt`): 目标为选择器 / 节点 (匹配项不可编辑时取其首个可编辑后代), `Int` 索引 (作用域内可编辑节点的先序序号, 负数从末尾计) 或 `null` (当前焦点所在的可编辑节点); `clear = true` 替换, 否则追加 (`setText(text() + s)`); `verify` 重读节点直到 `text()` 等于期望 (密码框跳过); `submit` 时未聚焦先 `focus` 再 `imeEnter`. 失败为 `INVALID_TARGET` (reason `noFocus` / `noEditable` / `notEditable`) 或 `ACTION_FAILED` (reason `setText` / `verify` / `submit`). (SOURCE; JVM: `TextEntryTest` 17, 2026-09-06)
+- [x] `PopupDismisser` (`PopupDismisser.kt`): `dismissOnce` 按列表顺序点击首个存在的候选项 (`Toolkit.findAny`, 可按 `locate` 等待第一个弹窗; 不存在返回 `null` 而非报错), `dismissAll` 重复直到没有剩余 (`maxRounds` 为界, 轮间 `settleMillis`); `watch` 返回 `Guard`: 经 `ToolkitBindings.watchWindows` 订阅窗口变化 (运行时为 `AccessibilityService.eventBus` 的 `TYPE_WINDOW_STATE_CHANGED` / `TYPE_WINDOW_CONTENT_CHANGED`, `PRIORITY_OBSERVER`, 按 `debounceMillis` 去抖), 启动时与每次变化时在工具集的工作线程上跑一轮 `dismissAll` (同时只跑一轮, 记录 `dismissed`, 错误交 `onError`, `Toolkit.fatal` 判定的错误 (运行时为 `ScriptInterruptedException`) 停止守护并重新抛出), `stop()` 退订. (SOURCE; JVM: `PopupDismisserTest` 14, 2026-09-06)
+- [x] `ListCollector` (`ListCollector.kt`): 容器同 `ScrollSearch`; 每轮 `findAll(item, container)` 的每个节点按 `NodeFingerprints.content` (类名 / 文本 / 描述 / 状态 / 结构, 不含几何) 去重后以 `pick(node, resultType)` 呈现 (运行时为 `Detector.detect`, 默认 `"$"`), 然后滚动一步; 停止原因 `END` / `MAX_STEPS` / `MAX_ITEMS` / `UNTIL` 记在 `Outcome.stop`. (SOURCE; JVM: `ListCollectorTest` 15, 2026-09-06)
+- [x] `AppLauncher` (`AppLauncher.kt`): `launchAndWait` 经 `resolvePackage` (运行时: `App` 值 / 别名 / 已安装包名 / 应用名) 解析包名, 已在前台且 `bringToFront = false` 时直接返回, 否则 `launch` 后按 `timeout` / `interval` 轮询 `currentPackage()`; `backUntil(cond)` 先查后按, 至多 `maxTimes` 次, 每次后 `delay`; `backToApp(app)` 以 "该包在前台" 为条件. 失败为 `INVALID_TARGET` (reason `unknownApp`), `ACTION_FAILED` (reason `launch` / `back`) 或 `TIMEOUT` (reason `package` / `maxTimes`). (SOURCE; JVM: `AppLauncherTest` 14, 2026-09-06)
+- [x] `Toggle` (`Toggle.kt`): 目标 (或其首个 `checkable` 后代) 已是期望状态时不点击 (`changed = false`), 否则 `SmartClick` (可上溯到包着开关的行) 后重读直到 `checked()` 等于期望. 失败为 `INVALID_TARGET` (reason `notCheckable`) 或 `ACTION_FAILED` (点击的 reason 或 `verify`). (SOURCE; JVM: `ToggleTest` 10, 2026-09-06)
+- [x] `Humanize` (`Humanize.kt`): `offsetX` / `offsetY` (均匀分布的像素偏移, 用于手势点击) 与 `minDelay` / `maxDelay` (每个动作前的均匀随机暂停, `Toolkit.pause`); 各工具选项均带 `humanize`, 随机源为 `Toolkit.random` (测试注入固定种子). Flow 动作步骤的接入 (经 `flow.defaults({ humanize })`) 留 P4.2 与 JS 表面一并落地. (SOURCE; JVM: `HumanizeTest` 5, 2026-09-06)
+- [x] JUnit4 测试 (`app/src/test/java/org/autojs/autojs/core/automator/toolkit/`): `ToolkitTestSupport.kt` 提供 `FakeToolkitBindings` ("屏幕" 映射: 目标 -> 节点 / 节点列表 / 产生二者的函数, 按根节点过滤, `gone` 集合与 `onRefresh` 钩子, `packageSupplier`, 手动触发的 `FakeWatch`), `FakeActionPerformer` (每个动作一个可编程 lambda, 记录 `calls` / `taps` / `swipes`; `setText` 默认写回节点文本) 与 `ToolkitRig` (`FakeClock` + 记录式休眠 + 固定种子随机); 各工具一个测试类, 另有 `ToolkitTest` (定位计划, `findAny` / `clickAny` / `clickIfExists`, `retry`, 容器解析) 与 `UiNodesTest` (遍历与两种指纹). (JVM: 10 个测试类 135 个用例, 全量 2259 / 0 (5 skipped), 2026-09-06)
+
+设计与计划的差异 (P4.1): (1) 核心以 `Toolkit<N : UiNode<N>>` 门面持有两个接口: 查询侧 `ToolkitBindings<N>` (`find` / `findAll` / `probe` / `describe` / `activeRoot` / `refresh` / `pick` / `currentPackage` / `resolvePackage` / 屏幕尺寸 / `watchWindows`) 与副作用侧 `ActionPerformer<N>` (节点动作 / 手势 / `back` / `launch`), 而非单一 bindings, 使测试能独立于节点树编排动作结果 (即计划中的 `FakeActionPerformer`); 时钟 / 休眠 / 随机源 / `fatal` 判定注入. (2) 附录 B 的 `findAny` / `clickAny` / `clickIfExists` / `retry` 也在核心 (`Toolkit` 的方法; `retry` 的 `times` 为首次失败后的重跑次数, 与 Flow 的 `retry` 步骤一致, 取消 / `fatal` / `Error` / 中断不重试), P4.2 只做参数解析. (3) 定位计划 `Toolkit.Locate`: `timeout = 0` (默认) 为单次查找, 否则经 `Poller` 轮询; 找不到为 `TIMEOUT` (附目标描述 / 耗时 / 次数). (4) 树遍历用 `UiNodes` 自己的有界先序 (`walk` / `firstDescendant` / `descendants` / `largestScrollable`, 不回收节点), 不复用会沿途释放节点的 `DFS.search` (工具仍持有的节点会失效; 假节点树也拒绝二次回收). (5) `FlowError.ActionFailed` 新增可选 `reason`. (6) 薄 Android 适配 `runtime/api/augment/toolkit/RuntimeToolkit.kt`: `RuntimeToolkit.of(scriptRuntime)` (属性键 `toolkit.runtime`, 注册到 `closeableManager`) 持有 `Toolkit<UiObject>` (uptime 时钟, 可中断休眠, `fatal = ScriptInterruptedException`), `RuntimeToolkitBindings` (目标: `UiObject` 以 `refresh()`, 脚本函数无参调用, `pickup` 选择器形式 (`WIDGET` / `{}` 结果类型, 服务不可用抛 `A11yUnavailable`); `describe` 复用 `FlowCondition.describeSelector`; 窗口观察经事件总线交给守护工作线程 `toolkit-<engineId>` (单线程, 首次使用时创建, 空闲 10 s 消亡, 进入引擎的 Rhino Context)) 与 `RuntimeActionPerformer` (`UiObject` 方法 + `automator` 的手势 / `back` + `app.launchPackage`); 尚未接 JS 表面 (P4.2), 因此本项的真机证据随 P4.2 / P4.3 提供.
+
+P4.1 证据 (2026-09-06):
+
+- `SOURCE`: `core/automator/toolkit/{ToolkitBindings,Toolkit,Humanize,UiNodes,SmartClick,Scroller,ScrollSearch,TextEntry,PopupDismisser,ListCollector,AppLauncher,Toggle}.kt` 新增 (Android-free), `runtime/api/augment/toolkit/RuntimeToolkit.kt` 新增 (`RuntimeToolkit` / `RuntimeToolkitBindings` / `RuntimeActionPerformer`), `core/automator/flow/FlowError.kt` 的 `ActionFailed` 增 `reason`.
+- `JVM`: `:app:testAppDebugUnitTest` 全量 2259 / 0 (5 skipped); toolkit 10 个测试类 135 个用例 (`SmartClickTest` 16 / `ScrollSearchTest` 20 / `TextEntryTest` 17 / `PopupDismisserTest` 14 / `ListCollectorTest` 15 / `AppLauncherTest` 14 / `ToggleTest` 10 / `ToolkitTest` 15 / `HumanizeTest` 5 / `UiNodesTest` 9).
+- `ANDROID_BUILD`: `:app:assembleAppDebug` 通过.
+- `DOCS`: 无 changelog 条目 (无脚本可见变更, 同 P3.1); 架构文档 1 (标题), 1.1, 1.4, 1.5, 1.8, 2.1, 2.2 更新.
+- `DEVICE`: 无 (无脚本入口; 冒烟脚本不受影响, 真机证据随 P4.2 / P4.3).
 
 ### P4.2 JS 表面
 
@@ -868,4 +881,6 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P3.2: `runtime/api/augment/flow/{Flow,FlowExecutor,FlowNativeObject,FlowArguments,FlowCondition,RuntimeFlowBindings,FlowWorkerPool,FlowScriptLane,FlowJsErrors}.kt` 新增 (命名空间与全局起点, 每脚本执行器 + 线程池 + 每脚本线程的调度器与脚本 lane, 句柄 / 原型 / API, 参数与条件, bindings, 错误转换), `Auto.kt` 新增 `auto.wait`, `ScriptRuntime.augment` 注册 `Flow`; 核心补 `Adopted` 根 (`defer` / `fulfill` / `reject`, 供 Promise 采纳), `FlowNode.hasContinuation`, 跨调度器取消路由, `A11yUnavailable(cause)`, 以及 `workerFactory` (每根一条 lane). 与计划的三处偏离 (线程池而非单线程, `FlowScriptLane` + `sync()` 自排空而非 `ScriptAsyncDispatcher`, 句柄级令牌) 记在 P3.2 第 1 条. 测试: `FlowSchedulerTest` +8, `FlowArgumentsTest` 13 (新). changelog `feature` 1 (10 语言). 证据: `JVM` 全量 2121 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 107/107, Xiaomi API 35 107/107, 退出后 `flow-*` 线程 0, 冒烟 两机 53/53; 详见 P3.2 证据.
 - 落地 P3.3: `runtime/api/augment/flow/FlowTrace.kt` 新增 (`FlowTrace` 监听器 + Android-free 的 `FlowTraceFormat`), `FlowArguments.applyDefaults`, `FlowApi.defaults` / `trace`, `FlowExecutor.tracing`, `flow.defaults` / `flow.trace` 注册; 其余四条便携步骤已随 P3.2 落地, 本次补真机证据. 测试: `FlowArgumentsTest` +1, `FlowTraceTest` 2 (新). changelog: 扩写 P3.2 的 `feature` 条目 (10 语言). 证据: `JVM` 全量 2124 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 24/24, Xiaomi API 35 24/24, 冒烟两机 53/53; 详见 P3.3 证据.
 - 落地 P3.4: `sample/accessibility/{flow-basics,flow-ui-mode,flow-cancel-and-timeout}.js` 新增 (无代码变更); 两机各跑三轮才收敛的示例问题 (通用选择器匹配到悬浮控制台, 首个 `clickable()` 是搜索栏且 `back()` 次数不可预知, `sync()` 期间 `setTimeout` 不触发, `currentPackage()` 取到输入法, 重启活动后旧窗口的节点点击失败) 均以脚本写法解决并记在 P3.4 第 1 条; 运行包装 `build/smoke/run-sample.sh` / `run-sample.js`. 证据: `DEVICE` 三个示例 AVD API 24 与 Xiaomi API 35 全部按预期输出, `flow-threads.js` 两机 `FLOW_THREADS 0`; `JVM` / `ANDROID_BUILD` 沿用 P3.3 (2124 / 0, APK 未变); 详见 P3.4 证据. P3 验收行已更新为 "待维护者验收".
-- 下次起点: P3 验收 (维护者确认; 已具备的证据见 P3 验收行, 文档与 d.ts 同步按计划留 P6), 其后 P4.1 核心实现 (Android-free 逻辑 + 薄 Android 适配, 附录 B), 再 P4.2 JS 表面与 P4.3 示例. 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh` / `run-legacy-smoke.sh`, 示例用 `run-sample.sh`).
+- 维护者反馈 (同日): P3 验收完成, 未发现已知问题 ("非常好"). P3 关闭; 文档与 d.ts 同步按计划留 P6.
+- 落地 P4.1: `core/automator/toolkit/{ToolkitBindings,Toolkit,Humanize,UiNodes,SmartClick,Scroller,ScrollSearch,TextEntry,PopupDismisser,ListCollector,AppLauncher,Toggle}.kt` 新增 (Android-free 工具核心: 查询侧 `ToolkitBindings` + 副作用侧 `ActionPerformer` 双接口, `Toolkit` 门面含定位计划 / `findAny` / `clickAny` / `clickIfExists` / `retry` / 容器解析, `Scroller` 为两个滚动工具共用), `runtime/api/augment/toolkit/RuntimeToolkit.kt` 新增 (薄 Android 适配: 每脚本一个, 弹窗守护的工作线程 `toolkit-<engineId>`; 尚无 JS 入口), `FlowError.ActionFailed` 增 `reason`. 与计划的六处差异记在 P4.1 末尾. 测试: `ToolkitTestSupport.kt` 替身 + 10 个测试类 135 个用例. 无 changelog 条目 (无脚本可见变更). 证据: `JVM` 全量 2259 / 0 (5 skipped); `ANDROID_BUILD` 通过; 详见 P4.1 证据.
+- 下次起点: P4.2 JS 表面 (同步表面挂到 `automator` 模块与全局 (D10; 先在真机以 `Object.getOwnPropertyNames(global)` 做全局名快照核对冲突, `toggle` 冲突则改 `setChecked`), Flow 步骤对应项与 `flow.*` 起点, 错误走 `FlowError`, `Humanize` 接入 `flow.defaults`; 入口为 `RuntimeToolkit.of(scriptRuntime).toolkit`), 再 P4.3 示例 (`sample/accessibility/toolkit-*.js`, 真机) 与 P4 验收. 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh` / `run-legacy-smoke.sh`, 示例用 `run-sample.sh`).

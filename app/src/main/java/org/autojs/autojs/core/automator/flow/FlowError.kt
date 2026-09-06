@@ -37,10 +37,15 @@ sealed class FlowError(
         "Timed out after $elapsed ms and $attempts attempt(s) in step \"$step\"" + (selector?.let { " waiting for $it" } ?: "") + (reason?.let { " ($it)" } ?: ""),
     )
 
-    /** A strict action reported `false`. zh-CN: 严格模式的动作返回了 `false`. */
-    class ActionFailed(step: String, selector: String? = null, elapsed: Long = 0, attempts: Long = 1) : FlowError(
-        Code.ACTION_FAILED, step, selector, elapsed, attempts, null,
-        "Action \"$step\" failed",
+    /**
+     * A strict action reported `false`; the toolkit (P4) adds a [reason] naming the part that
+     * failed (`click` / `gesture` / `verify` / `setText` / `submit` / `launch` / `back` / `swipe`).
+     * zh-CN: 严格模式的动作返回了 `false`; 工具集 (P4) 以 [reason] 指明失败的环节 (`click` / `gesture` / `verify` / `setText` / `submit` /
+     * `launch` / `back` / `swipe`).
+     */
+    class ActionFailed(step: String, selector: String? = null, elapsed: Long = 0, attempts: Long = 1, reason: String? = null) : FlowError(
+        Code.ACTION_FAILED, step, selector, elapsed, attempts, reason,
+        "Action \"$step\" failed" + (reason?.let { " ($it)" } ?: ""),
     )
 
     /** The chain was cancelled before or while the step ran. zh-CN: 链在步骤执行前或执行中被取消. */
