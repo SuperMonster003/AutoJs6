@@ -49,6 +49,24 @@ class HumanizeTest {
     }
 
     @Test
+    fun unitDrawsCoverTheRangesAndClamp() {
+        val h = Humanize(offsetX = 2, offsetY = 1, minDelay = 100, maxDelay = 103)
+        assertEquals(-2, h.offsetX(0.0))
+        assertEquals(0, h.offsetX(0.5))
+        assertEquals(2, h.offsetX(0.999))
+        assertEquals(2, h.offsetX(1.0))
+        assertEquals(-1, h.offsetY(0.0))
+        assertEquals(1, h.offsetY(0.99))
+        assertEquals(100L, h.delay(0.0))
+        assertEquals(101L, h.delay(0.3))
+        assertEquals(103L, h.delay(0.999))
+        assertEquals(103L, h.delay(1.0))
+        assertEquals(0, Humanize.NONE.offsetX(0.7))
+        assertEquals(0L, Humanize.NONE.delay(0.7))
+        assertEquals(50L, Humanize(minDelay = 50).delay(0.9))
+    }
+
+    @Test
     fun argumentsAreValidated() {
         assertThrows(IllegalArgumentException::class.java) { Humanize(offsetX = -1) }
         assertThrows(IllegalArgumentException::class.java) { Humanize(offsetX = 1, offsetY = -1) }

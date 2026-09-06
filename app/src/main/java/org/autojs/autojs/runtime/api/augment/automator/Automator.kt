@@ -20,6 +20,8 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.toolkit.RuntimeToolkit
+import org.autojs.autojs.runtime.api.augment.toolkit.ToolkitApi
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -42,6 +44,9 @@ import org.opencv.core.Point as OpencvPoint
 
 @Suppress("unused", "SameParameterValue", "UNUSED_PARAMETER")
 class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+
+    /** The toolkit's synchronous functions throw the script's `FlowError` object as it is (roadmap P4.2). zh-CN: 工具集的同步函数原样抛出脚本的 `FlowError` 对象 (Roadmap P4.2). */
+    override val scriptErrorPassThroughFunctions: Set<String> = ToolkitApi.SYNC_NAMES
 
     override val selfAssignmentFunctions = listOf(
         ::click.name to AS_GLOBAL,
@@ -77,9 +82,99 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::quickSettings.name to AS_GLOBAL,
         ::recents.name to AS_GLOBAL,
         ::splitScreen.name to AS_GLOBAL,
+        // The toolkit (roadmap P4.2, D10): on the module and global alike; the Flow forms live in `flow`.
+        // zh-CN: 工具集 (Roadmap P4.2, D10): 模块与全局同时挂载; Flow 形式在 `flow` 中.
+        ::smartClick.name to AS_GLOBAL,
+        ::clickIfExists.name to AS_GLOBAL,
+        ::clickAny.name to AS_GLOBAL,
+        ::findAny.name to AS_GLOBAL,
+        ::scrollUntil.name to AS_GLOBAL,
+        ::typeInto.name to AS_GLOBAL,
+        ::dismissPopups.name to AS_GLOBAL,
+        ::collectList.name to AS_GLOBAL,
+        ::launchAndWait.name to AS_GLOBAL,
+        ::backUntil.name to AS_GLOBAL,
+        ::backToApp.name to AS_GLOBAL,
+        ::toggle.name to AS_GLOBAL,
+        ::retry.name to AS_GLOBAL,
     )
 
     companion object : ArgumentGuards() {
+
+        // The toolkit (roadmap P4.2, Appendix B). Every call is `(positionals..., options?)`; the target of a
+        // search is any `pickup` selector form, a `UiObject` or a function; `options.timeout` (default 0, a
+        // single look) / `interval` / `root` / `humanize` are common; a failure throws a `FlowError`
+        // (`code` / `step` / `selector` / `reason`). The UI thread is refused (the tools may block).
+        // zh-CN: 工具集 (Roadmap P4.2, 附录 B). 每个调用形如 `(位置参数..., options?)`; 搜索目标为 `pickup` 任一选择器形式, `UiObject` 或函数;
+        // `options.timeout` (默认 0, 单次查找) / `interval` / `root` / `humanize` 为公共选项; 失败抛出 `FlowError` (`code` / `step` /
+        // `selector` / `reason`). 拒绝在 UI 线程调用 (工具可能阻塞).
+
+        private fun toolkit(scriptRuntime: ScriptRuntime): ToolkitApi = RuntimeToolkit.of(scriptRuntime).api
+
+        /** `smartClick(target, options?)`: click, or a clickable ancestor, or a tap; `{ ok, method, target, verified }`. zh-CN: `smartClick(target, options?)`: 点击, 或可点击祖先, 或点按手势; `{ ok, method, target, verified }`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun smartClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).smartClick(args)
+
+        /** `clickIfExists(target, options? | timeout?)`: whether it was there and got clicked. zh-CN: `clickIfExists(target, options? | timeout?)`: 目标是否存在并被点击. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickIfExists(args)
+
+        /** `clickAny(targets, options? | timeout?)`: the first present, clicked; `{ index, target, node, method }` or `null`. zh-CN: `clickAny(targets, options? | timeout?)`: 点击首个存在的; `{ index, target, node, method }` 或 `null`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickAny(args)
+
+        /** `findAny(targets, options? | timeout?)`: `{ index, target, node }` of the first present, or `null`. zh-CN: `findAny(targets, options? | timeout?)`: 首个存在的 `{ index, target, node }`, 或 `null`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun findAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).findAny(args)
+
+        /** `scrollUntil(target, options?)`: scrolls a container until the target shows; the node. zh-CN: `scrollUntil(target, options?)`: 滚动容器直到目标出现; 返回节点. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun scrollUntil(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).scrollUntil(args)
+
+        /** `typeInto(target, text, options?)`: types into a field (selector / node / index / `null` for the focused one); the node. zh-CN: `typeInto(target, text, options?)`: 向输入框 (选择器 / 节点 / 索引 / `null` 为焦点所在) 输入; 返回节点. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun typeInto(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).typeInto(args)
+
+        /** `dismissPopups(targets, options? | timeout?)`: closes popups once, all, or as a guard (`watch: true`). zh-CN: `dismissPopups(targets, options? | timeout?)`: 关闭弹窗一次, 全部, 或作为守护 (`watch: true`). */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun dismissPopups(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).dismissPopups(args)
+
+        /** `collectList(container, item, options?)`: scrolls a list and collects its items; an array. zh-CN: `collectList(container, item, options?)`: 滚动列表并采集各项; 返回数组. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun collectList(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).collectList(args)
+
+        /** `launchAndWait(app, options?)`: launches and waits for the package in front; `{ packageName, launched, elapsed, attempts }`. zh-CN: `launchAndWait(app, options?)`: 启动并等待其包名到前台; `{ packageName, launched, elapsed, attempts }`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun launchAndWait(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).launchAndWait(args)
+
+        /** `backUntil(cond, options? | maxTimes?)`: presses back until the condition holds; what it yielded. zh-CN: `backUntil(cond, options? | maxTimes?)`: 反复返回直到条件满足; 返回条件的值. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun backUntil(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).backUntil(args)
+
+        /** `backToApp(app, options? | maxTimes?)`: presses back until the app is in front; its package name. zh-CN: `backToApp(app, options? | maxTimes?)`: 反复返回直到该应用在前台; 返回其包名. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun backToApp(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).backToApp(args)
+
+        /** `toggle(target, checked, options?)`: clicks a checkable only when its state differs, then verifies; `{ node, changed, checked, method }`. zh-CN: `toggle(target, checked, options?)`: 仅在状态不一致时点击可勾选控件, 然后校验; `{ node, changed, checked, method }`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun toggle(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).toggle(args)
+
+        /** `retry(fn, options? | times?)`: reruns `fn(attempt)` on failure (`times` reruns, `delay` x `backoff`); its result. zh-CN: `retry(fn, options? | times?)`: 失败时重跑 `fn(attempt)` (`times` 次, `delay` 按 `backoff` 递增); 返回其结果. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun retry(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).retry(args)
 
         /**
          * TypeScript Declarations:

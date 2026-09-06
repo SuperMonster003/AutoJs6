@@ -8,11 +8,13 @@ import org.autojs.autojs.core.automator.flow.MissingPolicy
 import org.autojs.autojs.core.automator.flow.Stability
 import org.autojs.autojs.core.automator.flow.StabilityCompare
 import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.core.automator.toolkit.Humanize
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.global.Global
+import org.autojs.autojs.runtime.api.augment.toolkit.ToolkitArguments
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
@@ -38,6 +40,10 @@ internal class FlowDefaults {
     /** D12: an action reporting `false` rejects `ACTION_FAILED`. zh-CN: D12: 动作返回 `false` 时以 `ACTION_FAILED` 拒绝. */
     @Volatile
     var strictActions: Boolean = true
+
+    /** P4.2: the pause before every action step and the default `humanize` of the toolkit. zh-CN: P4.2: 每个动作步骤前的暂停, 以及工具集 `humanize` 的默认值. */
+    @Volatile
+    var humanize: Humanize = Humanize.NONE
 
     companion object {
         const val DEFAULT_TIMEOUT = 10_000L
@@ -159,11 +165,11 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
 
     /**
      * `flow.defaults(options)` (roadmap P3.3): writes the given keys into the defaults (`timeout`
-     * with `Infinity` for none, `interval`, `stableFor`, `strictActions`); returns the `trace`
-     * option when present. Unknown keys are an error, and nothing is written when any value is
-     * invalid.
+     * with `Infinity` for none, `interval`, `stableFor`, `strictActions`, and `humanize` (P4.2:
+     * `{ offset, delay }` or `false`)); returns the `trace` option when present. Unknown keys are
+     * an error, and nothing is written when any value is invalid.
      * zh-CN: `flow.defaults(options)` (Roadmap P3.3): 把给定的键写入默认值 (`timeout` 以 `Infinity` 为不限, `interval`, `stableFor`,
-     * `strictActions`); 存在 `trace` 时返回它. 未知的键报错, 任一值无效时什么都不写入.
+     * `strictActions`, 以及 `humanize` (P4.2: `{ offset, delay }` 或 `false`)); 存在 `trace` 时返回它. 未知的键报错, 任一值无效时什么都不写入.
      */
     fun applyDefaults(options: ScriptableObject, name: String): Boolean? {
         options.ids.forEach { key -> require(key.toString() in DEFAULT_KEYS) { "Unknown option \"$key\" for $name; expected one of ${DEFAULT_KEYS.joinToString(", ")}" } }
@@ -171,11 +177,13 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         val interval = options.number("interval", name)?.let { nonNegativeMillis(it, "interval", name) }
         val stableFor = options.number("stableFor", name)?.let { nonNegativeMillis(it, "stableFor", name) }
         val strict = options.prop("strictActions").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
+        val humanize = options.prop("humanize").takeUnless { it.isJsNullish() }?.let { ToolkitArguments.humanize(it, name, defaults.humanize) }
         val trace = options.prop("trace").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
         timeout?.let { defaults.timeout = it }
         interval?.let { defaults.interval = it }
         stableFor?.let { defaults.stableFor = it }
         strict?.let { defaults.strictActions = it }
+        humanize?.let { defaults.humanize = it }
         return trace
     }
 
@@ -295,7 +303,7 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
 
     companion object {
 
-        val DEFAULT_KEYS = listOf("timeout", "interval", "stableFor", "strictActions", "trace")
+        val DEFAULT_KEYS = listOf("timeout", "interval", "stableFor", "strictActions", "humanize", "trace")
 
         /** A settled state, or `null` while pending: the form [FlowCondition.Settling] reads. zh-CN: 已结算的状态, 待定时为 `null`: [FlowCondition.Settling] 读取的形式. */
         fun settledOrNull(node: FlowNode): FlowNode.State? = node.state.takeUnless { it is FlowNode.State.Pending }

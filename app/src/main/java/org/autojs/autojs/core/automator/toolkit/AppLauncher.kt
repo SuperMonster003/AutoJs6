@@ -58,14 +58,17 @@ class AppLauncher<N : UiNode<N>> internal constructor(private val kit: Toolkit<N
 
     data class BackOptions(
         val maxTimes: Int = DEFAULT_MAX_TIMES,
-        /** The pause after every press. zh-CN: 每次按下后的停顿. */
+        /** How long the condition is polled for after every press before the next one. zh-CN: 每次按下后, 下一次按下前, 轮询条件的时长. */
         val delay: Long = DEFAULT_DELAY,
+        /** The polling interval within [delay]. zh-CN: [delay] 内的轮询间隔. */
+        val interval: Long = DEFAULT_INTERVAL,
         val humanize: Humanize = Humanize.NONE,
     ) {
 
         init {
             require(maxTimes >= 0) { "maxTimes ($maxTimes) cannot be negative" }
             require(delay >= 0) { "delay ($delay) cannot be negative" }
+            require(interval > 0) { "interval ($interval) must be positive" }
         }
 
         companion object {
@@ -73,6 +76,8 @@ class AppLauncher<N : UiNode<N>> internal constructor(private val kit: Toolkit<N
             const val DEFAULT_MAX_TIMES = 10
 
             const val DEFAULT_DELAY = 500L
+
+            const val DEFAULT_INTERVAL = 100L
 
         }
 
@@ -83,8 +88,11 @@ class AppLauncher<N : UiNode<N>> internal constructor(private val kit: Toolkit<N
 
     /**
      * Presses back until [cond] (probed under [root]) holds, at most [BackOptions.maxTimes] times;
-     * the condition is checked before the first press and after the last.
-     * zh-CN: 反复按返回直到 [cond] (在 [root] 下探测) 成立, 至多 [BackOptions.maxTimes] 次; 第一次按下前与最后一次按下后都检查条件.
+     * the condition is checked before the first press and, after every press, polled for up to
+     * [BackOptions.delay] milliseconds (every [BackOptions.interval]) so that a slow page transition
+     * is not mistaken for "not there" and answered with one press too many.
+     * zh-CN: 反复按返回直到 [cond] (在 [root] 下探测) 成立, 至多 [BackOptions.maxTimes] 次; 第一次按下前检查条件, 之后每次按下后在至多
+     * [BackOptions.delay] 毫秒内 (每 [BackOptions.interval]) 轮询条件, 以免把缓慢的页面切换误判为 "不在" 而多按一次.
      *
      * @throws FlowError `TIMEOUT` (reason `maxTimes`), `ACTION_FAILED` (reason `back`).
      */
@@ -99,14 +107,25 @@ class AppLauncher<N : UiNode<N>> internal constructor(private val kit: Toolkit<N
 
     private fun backWhile(step: String, selector: String?, options: BackOptions, satisfied: () -> Any?): BackOutcome {
         val start = kit.clock()
+        satisfied()?.let { return BackOutcome(it, 0) }
         var presses = 0
         while (true) {
-            satisfied()?.let { return BackOutcome(it, presses) }
             if (presses >= options.maxTimes) throw FlowError.Timeout(step, selector, kit.clock() - start, presses + 1L, REASON_MAX_TIMES)
             kit.pause(options.humanize)
             if (!kit.actions.back()) throw FlowError.ActionFailed(step, selector, kit.clock() - start, presses + 1L, REASON_BACK)
             presses += 1
-            if (options.delay > 0) kit.sleep(options.delay)
+            settle(options, satisfied)?.let { return BackOutcome(it, presses) }
+        }
+    }
+
+    /** [satisfied] polled right after a press and then every [BackOptions.interval] until [BackOptions.delay] has passed. zh-CN: 按下后立即探测 [satisfied], 然后每 [BackOptions.interval] 探测一次, 直到 [BackOptions.delay] 用尽. */
+    private fun settle(options: BackOptions, satisfied: () -> Any?): Any? {
+        val start = kit.clock()
+        while (true) {
+            satisfied()?.let { return it }
+            val elapsed = kit.clock() - start
+            if (elapsed >= options.delay) return null
+            kit.sleep(minOf(options.interval, options.delay - elapsed))
         }
     }
 

@@ -13,6 +13,7 @@ import org.autojs.autojs.core.automator.flow.FlowStep.Timeout
 import org.autojs.autojs.core.automator.flow.FlowStep.Wait
 import org.autojs.autojs.core.automator.flow.FlowStep.WaitStable
 import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.core.automator.toolkit.Humanize
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -156,6 +157,77 @@ class FlowSchedulerTest {
         halfway.scheduler.of("v").next(Sleep(100, 300))
         halfway.drain()
         assertEquals(listOf(200L), halfway.sleeps)
+    }
+
+    // Tool steps and humanized actions (roadmap P4.2). zh-CN: 工具步骤与拟人化动作 (Roadmap P4.2).
+
+    @Test
+    fun toolStepsRunOnTheWorkerWithTheValueAndTheScope() {
+        val root = FakeUiNode.root("root")
+        val seen = ArrayList<Pair<Any?, FlowScope>>()
+        val node = s.of("v").next(Scope(FlowScope(root = root))).next(FlowStep.Tool("smartClick", "text(\"x\")") { value, scope ->
+            seen += value to scope
+            "clicked"
+        })
+        assertTrue(node.state is State.Pending)
+        rig.drain()
+        assertEquals("clicked", node.value)
+        assertEquals(listOf<Pair<Any?, FlowScope>>("v" to FlowScope(root = root)), seen)
+        assertEquals(1, rig.worker.executed)
+        assertEquals(0, rig.script.executed)
+    }
+
+    @Test
+    fun toolStepsRejectWithWhatTheyThrowAndAreSkippedAfterARejection() {
+        val failing = s.of(1).next(FlowStep.Tool("typeInto") { _, _ -> throw FlowError.ActionFailed("typeInto", null, reason = "setText") })
+        var ran = false
+        val skipped = failing.next(FlowStep.Tool("toggle") { _, _ ->
+            ran = true
+            2
+        })
+        rig.drain()
+        assertEquals(FlowError.Code.ACTION_FAILED, error(failing).code)
+        assertEquals("setText", error(failing).reason)
+        assertFalse(ran)
+        assertSame(failing.error, skipped.error)
+    }
+
+    @Test
+    fun retryRerunsAToolStep() {
+        var calls = 0
+        val tool = s.of(1).next(FlowStep.Tool("scrollUntil") { _, _ -> if (++calls < 3) throw FlowError.Timeout("scrollUntil", null, 0, 0, "end") else "found" })
+        val retried = tool.next(Retry(3))
+        rig.drain()
+        assertEquals("found", retried.value)
+        assertEquals(3, calls)
+    }
+
+    @Test
+    fun actionsPauseByTheirHumanizeBeforePerforming() {
+        val halfway = FlowRig(random = 0.5)
+        val target = FakeUiNode.root("ok")
+        var performedAt = -1L
+        halfway.bindings.perform = { _, node, _ ->
+            performedAt = halfway.clock.now
+            (node as FakeUiNode).performAction(0)
+        }
+        val humanize = Humanize(minDelay = 100, maxDelay = 300)
+        val clicked = halfway.scheduler.of(target).next(Action("click", humanize = humanize))
+        halfway.drain()
+        assertSame(target, clicked.value)
+        assertEquals(200L, performedAt)
+        val backed = halfway.scheduler.of("v").next(GlobalAction("back", humanize = humanize))
+        halfway.drain()
+        assertEquals("v", backed.value)
+        assertEquals(listOf(200L, 200L), halfway.sleeps)
+        // Clipped to the chain deadline, like a sleep. zh-CN: 同休眠一样截短到链的截止.
+        halfway.scheduler.of(target).next(Timeout(50)).next(Action("click", humanize = humanize))
+        halfway.drain()
+        assertEquals(listOf(200L, 200L, 50L), halfway.sleeps)
+        val plain = halfway.scheduler.of(target).next(Action("click"))
+        halfway.drain()
+        assertSame(target, plain.value)
+        assertEquals(3, halfway.sleeps.size)
     }
 
     // Rejections and callbacks. zh-CN: 拒绝与回调.

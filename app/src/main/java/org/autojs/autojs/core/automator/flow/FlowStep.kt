@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.automator.flow
 
 import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.core.automator.toolkit.Humanize
 
 /**
  * One step of a Flow chain (roadmap Appendix A.3), as data: what to do, not how. Conditions
@@ -78,21 +79,36 @@ sealed class FlowStep {
     /**
      * Performs the node action [action] on the current value (`click`, `setText`, ...). The value must
      * be an actionable target, else `INVALID_TARGET`; `false` rejects `ACTION_FAILED` when [strict]
-     * (D12) and resolves `false` otherwise; success resolves the target itself.
+     * (D12) and resolves `false` otherwise; success resolves the target itself. The random pause of
+     * [humanize] (P4.2, `flow.defaults({ humanize })`) precedes the action.
      * zh-CN: 对当前值执行节点动作 [action] (`click`, `setText`, ...). 值须是可作用的目标, 否则 `INVALID_TARGET`; 返回 `false` 时
-     * [strict] (D12) 则以 `ACTION_FAILED` 拒绝, 否则 resolve 为 `false`; 成功 resolve 为目标自身.
+     * [strict] (D12) 则以 `ACTION_FAILED` 拒绝, 否则 resolve 为 `false`; 成功 resolve 为目标自身. 动作前先做 [humanize] 的随机暂停
+     * (P4.2, `flow.defaults({ humanize })`).
      */
-    data class Action(val action: String, val args: List<Any?> = emptyList(), val strict: Boolean = true) : FlowStep() {
+    data class Action(val action: String, val args: List<Any?> = emptyList(), val strict: Boolean = true, val humanize: Humanize = Humanize.NONE) : FlowStep() {
         override val name get() = action
     }
 
     /**
      * Performs a global action (`back`, `home`, `swipe`, ...) and passes the current value through;
-     * `false` rejects `ACTION_FAILED` when [strict].
-     * zh-CN: 执行全局动作 (`back`, `home`, `swipe`, ...) 并透传当前值; 返回 `false` 时 [strict] 则以 `ACTION_FAILED` 拒绝.
+     * `false` rejects `ACTION_FAILED` when [strict]. The random pause of [humanize] precedes the action.
+     * zh-CN: 执行全局动作 (`back`, `home`, `swipe`, ...) 并透传当前值; 返回 `false` 时 [strict] 则以 `ACTION_FAILED` 拒绝. 动作前先做
+     * [humanize] 的随机暂停.
      */
-    data class GlobalAction(val action: String, val args: List<Any?> = emptyList(), val strict: Boolean = true) : FlowStep() {
+    data class GlobalAction(val action: String, val args: List<Any?> = emptyList(), val strict: Boolean = true, val humanize: Humanize = Humanize.NONE) : FlowStep() {
         override val name get() = action
+    }
+
+    /**
+     * A toolkit call (roadmap P4.2: `smartClick`, `scrollUntil`, `typeInto`, ...): [block] runs on the
+     * worker lane with the current value and the scope of the chain, and what it returns becomes the
+     * value (passing the input through is the block's choice); an exception rejects (the tools throw
+     * `FlowError`s). [detail] is what a trace shows after the [name].
+     * zh-CN: 工具调用 (Roadmap P4.2: `smartClick`, `scrollUntil`, `typeInto`, ...): [block] 在工作 lane 上以当前值与链的作用域运行,
+     * 其返回值成为新值 (是否透传输入由 block 决定); 异常即拒绝 (工具抛出的是 `FlowError`). [detail] 为追踪输出在 [name] 之后显示的内容.
+     */
+    class Tool(override val name: String, val detail: String? = null, val block: (value: Any?, scope: FlowScope) -> Any?) : FlowStep() {
+        override fun toString(): String = "Tool($name${detail?.let { " $it" } ?: ""})"
     }
 
     /** Sleeps a random duration in [min]..[max] milliseconds and passes the value through. zh-CN: 休眠 [min]..[max] 毫秒中的随机时长并透传当前值. */

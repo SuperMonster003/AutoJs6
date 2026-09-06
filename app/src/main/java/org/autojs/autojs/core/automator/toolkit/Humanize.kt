@@ -37,6 +37,23 @@ data class Humanize(
     /** A random pause in milliseconds, 0 when none is configured. zh-CN: 随机的暂停时长 (毫秒), 未配置时为 0. */
     fun delay(random: Random): Long = if (maxDelay == 0L) 0L else random.nextLong(minDelay, maxDelay + 1)
 
+    // The same draws from a unit random number in `[0, 1)`, for a caller with its own random source
+    // (the Flow scheduler). zh-CN: 同样的抽取, 但基于 `[0, 1)` 的单位随机数, 供自带随机源的调用方 (Flow 调度器) 使用.
+
+    fun offsetX(unit: Double): Int = spread(offsetX, unit)
+
+    fun offsetY(unit: Double): Int = spread(offsetY, unit)
+
+    fun delay(unit: Double): Long = when (maxDelay) {
+        0L -> 0L
+        else -> (minDelay + (unit.coerceIn(0.0, 1.0) * (maxDelay - minDelay + 1)).toLong()).coerceAtMost(maxDelay)
+    }
+
+    private fun spread(extent: Int, unit: Double): Int = when (extent) {
+        0 -> 0
+        else -> (-extent + (unit.coerceIn(0.0, 1.0) * (2 * extent + 1)).toInt()).coerceAtMost(extent)
+    }
+
     companion object {
 
         val NONE = Humanize()

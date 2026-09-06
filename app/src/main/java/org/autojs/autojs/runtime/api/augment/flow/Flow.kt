@@ -23,12 +23,17 @@ import java.util.function.Supplier
  * `clickWhenStable`, `waitForVisible`, `waitForHidden` / `waitForGone` and `clickWhenStableAfter`;
  * plus, in the namespace only, `waitUntil`, `waitWhile`, `waitForActivity`, `waitForPackage`,
  * `waitThenLongClick`, `sleep` / `delay`, `run`, `of`, `all`, `race`, `any`, `cancelAll`,
- * `defaults` / `trace` (P3.3), the `Flow` constructor and the `pending` / `workers` counts. The synchronous global `wait` is untouched.
+ * `defaults` / `trace` (P3.3), the toolkit roots `smartClick` / `clickIfExists` / `clickAny` / `findAny` /
+ * `scrollUntil` / `typeInto` / `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `backToApp` /
+ * `toggle` (P4.2; the target is the first argument, waited for by the defaults), the `Flow` constructor and
+ * the `pending` / `workers` counts. The synchronous global `wait` is untouched.
  * zh-CN: `flow` (别名 `$flow`) 命名空间与异步链式等待的全局入口 (Roadmap P3.2, 附录 A.2): `waitAsync` (亦即 `wait.async`,
  * `auto.wait` 与 `flow.wait`, D1), `waitThenClick` / `clickWait`, `waitForStable`, `waitForStableThenClick` / `clickWhenStable`,
  * `waitForVisible`, `waitForHidden` / `waitForGone` 与 `clickWhenStableAfter`; 命名空间内另有 `waitUntil`, `waitWhile`,
  * `waitForActivity`, `waitForPackage`, `waitThenLongClick`, `sleep` / `delay`, `run`, `of`, `all`, `race`, `any`, `cancelAll`,
- * `defaults` / `trace` (P3.3), `Flow` 构造器与 `pending` / `workers` 计数. 同步的全局 `wait` 不变.
+ * `defaults` / `trace` (P3.3), 工具起点 `smartClick` / `clickIfExists` / `clickAny` / `findAny` / `scrollUntil` / `typeInto` /
+ * `dismissPopups` / `collectList` / `launchAndWait` / `backUntil` / `backToApp` / `toggle` (P4.2; 目标为首个参数, 按默认值等待),
+ * `Flow` 构造器与 `pending` / `workers` 计数. 同步的全局 `wait` 不变.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -59,6 +64,20 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::cancelAll.name,
         ::defaults.name,
         ::trace.name,
+        // Toolkit roots (roadmap P4.2); the synchronous forms are the globals of Automator (D10).
+        // zh-CN: 工具起点 (Roadmap P4.2); 同步形式为 Automator 的全局函数 (D10).
+        ::smartClick.name,
+        ::clickIfExists.name,
+        ::clickAny.name,
+        ::findAny.name,
+        ::scrollUntil.name,
+        ::typeInto.name,
+        ::dismissPopups.name,
+        ::collectList.name,
+        ::launchAndWait.name,
+        ::backUntil.name,
+        ::backToApp.name,
+        ::toggle.name,
     )
 
     override val globalAssignmentFunctions = listOf(
@@ -183,6 +202,58 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cancelAll(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsIsEmpty(args) { FlowExecutor.of(scriptRuntime).cancelAll() }
+
+        // Toolkit roots (roadmap P4.2): `flow.smartClick(target, options?)` and the like; each waits for its
+        // target by the flow defaults and resolves the tool's result. zh-CN: 工具起点 (Roadmap P4.2): `flow.smartClick(target, options?)`
+        // 等; 各按 flow 默认值等待目标并 resolve 为工具的结果.
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun smartClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "smartClick", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickIfExists", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickAny", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun findAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "findAny", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun scrollUntil(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "scrollUntil", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun typeInto(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "typeInto", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun dismissPopups(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "dismissPopups", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun collectList(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "collectList", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun launchAndWait(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "launchAndWait", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun backUntil(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "backUntil", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun backToApp(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "backToApp", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun toggle(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "toggle", args)
 
     }
 

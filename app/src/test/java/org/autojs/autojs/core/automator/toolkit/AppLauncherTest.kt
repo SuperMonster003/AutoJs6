@@ -95,12 +95,29 @@ class AppLauncherTest {
     fun backUntilPressesBackUntilTheConditionHolds() {
         val home = FakeUiNode.root("home")
         var looks = 0
-        b.show("home") { if (++looks >= 3) home else null }
+        // Look 1 before any press; press 1 is followed by looks 2..7 (0, 100, ..., 500 ms); press 2 by look 8 and, 100 ms later, look 9.
+        // zh-CN: 第 1 次探测在按下前; 第 1 次按下后为第 2 ~ 7 次探测 (0, 100, ..., 500 ms); 第 2 次按下后为第 8 次与 100 ms 后的第 9 次.
+        b.show("home") { if (++looks >= 9) home else null }
         val outcome = kit.apps.backUntil("home")
         assertSame(home, outcome.value)
         assertEquals(2, outcome.presses)
         assertEquals(listOf("back", "back"), actions.calls)
-        assertEquals(listOf(500L, 500L), rig.sleeps)
+        assertEquals(List(6) { 100L }, rig.sleeps)
+        assertEquals(9, looks)
+    }
+
+    @Test
+    fun backUntilPollsAfterAPressInsteadOfPressingAgainTooEarly() {
+        val home = FakeUiNode.root("home")
+        var looks = 0
+        b.show("home") { if (++looks >= 4) home else null }
+        val outcome = kit.apps.backUntil("home", BackOptions(delay = 1000, interval = 250))
+        assertEquals(1, outcome.presses)
+        assertEquals(listOf(250L, 250L), rig.sleeps)
+        // The last poll is clipped to the delay. zh-CN: 最后一次轮询截短到 delay.
+        looks = -100
+        assertThrows(FlowError::class.java) { kit.apps.backUntil("home", BackOptions(maxTimes = 1, delay = 130, interval = 50)) }
+        assertEquals(listOf(250L, 250L, 50L, 50L, 30L), rig.sleeps)
     }
 
     @Test
@@ -168,6 +185,7 @@ class AppLauncherTest {
         assertThrows(IllegalArgumentException::class.java) { LaunchOptions(timeout = -1) }
         assertThrows(IllegalArgumentException::class.java) { BackOptions(maxTimes = -1) }
         assertThrows(IllegalArgumentException::class.java) { BackOptions(delay = -1) }
+        assertThrows(IllegalArgumentException::class.java) { BackOptions(interval = 0) }
     }
 
 }

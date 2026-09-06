@@ -14,6 +14,8 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.toJsPromise
+import org.autojs.autojs.runtime.api.augment.toolkit.RuntimeToolkit
+import org.autojs.autojs.runtime.api.augment.toolkit.ToolkitApi
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
@@ -115,7 +117,7 @@ internal class FlowApi(val executor: FlowExecutor) {
         val spec = specOf(kind, name, args, withDelay = after)
         var flow = start(stepOf(kind, spec), parent)
         if (after) flow = start(spec.delay ?: throw WrappedIllegalArgumentException("Argument \"delay\" is required for $name"), flow)
-        flow = start(FlowStep.Action(action, emptyList(), spec.strict), flow)
+        flow = start(FlowStep.Action(action, emptyList(), spec.strict, executor.defaults.humanize), flow)
         return withCallbacks(flow, spec.onOk, spec.onErr)
     }
 
@@ -139,21 +141,35 @@ internal class FlowApi(val executor: FlowExecutor) {
     fun action(parent: FlowNativeObject, name: String, args: Array<out Any?>): FlowNativeObject {
         val (actionArgs, callbacks) = arguments.actionArguments(name, args)
         checkArity(name, actionArgs.size, FlowActions.NODE_ACTIONS.getValue(name))
-        return withCallbacks(start(FlowStep.Action(name, actionArgs, executor.defaults.strictActions), parent), callbacks.first, callbacks.second)
+        return withCallbacks(start(FlowStep.Action(name, actionArgs, executor.defaults.strictActions, executor.defaults.humanize), parent), callbacks.first, callbacks.second)
     }
 
     /** `clickAfter(min, max?)` and the like: a sleep, then [action]. zh-CN: `clickAfter(min, max?)` 一类: 先休眠再 [action]. */
     fun actionAfter(parent: FlowNativeObject, name: String, action: String, args: Array<out Any?>): FlowNativeObject {
         val (sleepArgs, callbacks) = arguments.actionArguments(name, args)
         val sleep = arguments.sleep(name, sleepArgs.toTypedArray())
-        val flow = start(FlowStep.Action(action, emptyList(), executor.defaults.strictActions), start(sleep, parent))
+        val flow = start(FlowStep.Action(action, emptyList(), executor.defaults.strictActions, executor.defaults.humanize), start(sleep, parent))
         return withCallbacks(flow, callbacks.first, callbacks.second)
     }
 
     fun globalAction(parent: FlowNativeObject?, name: String, args: Array<out Any?>): FlowNativeObject {
         val (actionArgs, callbacks) = arguments.actionArguments(name, args)
         checkArity(name, actionArgs.size, FlowActions.GLOBAL_ACTIONS.getValue(name))
-        return withCallbacks(start(FlowStep.GlobalAction(name, actionArgs, executor.defaults.strictActions), parent), callbacks.first, callbacks.second)
+        return withCallbacks(start(FlowStep.GlobalAction(name, actionArgs, executor.defaults.strictActions, executor.defaults.humanize), parent), callbacks.first, callbacks.second)
+    }
+
+    // Toolkit steps (roadmap P4.2). zh-CN: 工具步骤 (Roadmap P4.2).
+
+    /**
+     * A tool as a step: after [parent] the current value is its target (`.smartClick(options?)`), as a
+     * root (`flow.smartClick(target, options?)`) the target is the first argument and is waited for by
+     * the defaults; trailing functions are `onOk` / `onErr`.
+     * zh-CN: 作为步骤的工具: 在 [parent] 之后以当前值为目标 (`.smartClick(options?)`), 作为根 (`flow.smartClick(target, options?)`) 以首个
+     * 参数为目标并按默认值等待; 尾随的函数为 `onOk` / `onErr`.
+     */
+    fun tool(parent: FlowNativeObject?, name: String, args: Array<out Any?>): FlowNativeObject {
+        val (step, callbacks) = RuntimeToolkit.of(scriptRuntime).api.step(name, args, chained = parent != null)
+        return withCallbacks(start(step, parent), callbacks.first, callbacks.second)
     }
 
     private fun checkArity(name: String, count: Int, range: IntRange) {
@@ -232,6 +248,7 @@ internal class FlowApi(val executor: FlowExecutor) {
             put("interval", this, d.interval.toDouble())
             put("stableFor", this, d.stableFor.toDouble())
             put("strictActions", this, d.strictActions)
+            put("humanize", this, ToolkitApi.humanizeSnapshot(scriptRuntime.topLevelScope, d.humanize))
             put("trace", this, executor.tracing)
         }
     }
@@ -357,6 +374,8 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
         method("clickAfter") { self, args -> api.actionAfter(self, "clickAfter", "click", args) }
         method("longClickAfter") { self, args -> api.actionAfter(self, "longClickAfter", "longClick", args) }
         FlowActions.GLOBAL_ACTIONS.keys.forEach { name -> method(name) { self, args -> api.globalAction(self, name, args) } }
+
+        ToolkitApi.CHAIN_STEPS.forEach { name -> method(name) { self, args -> api.tool(self, name, args) } }
 
         method("sleep", "delay") { self, args -> api.sleep(self, "sleep", args) }
         method("timeout") { self, args -> api.timeout(self, args) }

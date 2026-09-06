@@ -7,6 +7,7 @@ import org.autojs.autojs.core.automator.flow.MissingPolicy
 import org.autojs.autojs.core.automator.flow.Stability
 import org.autojs.autojs.core.automator.flow.StabilityCompare
 import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.core.automator.toolkit.Humanize
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -132,6 +133,24 @@ class FlowArgumentsTest {
         assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ timeOut: 1 })") as ScriptableObject, "flow.defaults") }
         assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ interval: -1 })") as ScriptableObject, "flow.defaults") }
         assertEquals(250L, defaults.timeout)
+    }
+
+    @Test
+    fun applyDefaultsAcceptsHumanize() {
+        assertEquals(Humanize.NONE, defaults.humanize)
+        arguments.applyDefaults(js("({ humanize: { offset: [3, 4], delay: [10, 20] } })") as ScriptableObject, "flow.defaults")
+        assertEquals(Humanize(offsetX = 3, offsetY = 4, minDelay = 10, maxDelay = 20), defaults.humanize)
+        arguments.applyDefaults(js("({ humanize: { delay: 5 } })") as ScriptableObject, "flow.defaults")
+        assertEquals(Humanize(minDelay = 5, maxDelay = 5), defaults.humanize)
+        arguments.applyDefaults(js("({ humanize: true, interval: 9 })") as ScriptableObject, "flow.defaults")
+        assertEquals(Humanize(minDelay = 5, maxDelay = 5), defaults.humanize)
+        assertEquals(9L, defaults.interval)
+        arguments.applyDefaults(js("({ humanize: false })") as ScriptableObject, "flow.defaults")
+        assertEquals(Humanize.NONE, defaults.humanize)
+        assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ humanize: { offset: -1 } })") as ScriptableObject, "flow.defaults") }
+        assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ humanize: { delay: [20, 10] } })") as ScriptableObject, "flow.defaults") }
+        assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ humanize: { jitter: 1 } })") as ScriptableObject, "flow.defaults") }
+        assertThrows(WrappedIllegalArgumentException::class.java) { arguments.applyDefaults(js("({ humanize: 'yes' })") as ScriptableObject, "flow.defaults") }
     }
 
     @Test

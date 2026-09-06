@@ -37,6 +37,8 @@ class FlowTraceTest {
         assertEquals("retry x3 / 50 ms", withoutId(FlowTraceFormat.label(rig.scheduler.of(1).next(FlowStep.Retry(3, 50)))))
         assertEquals("race 2 source(s)", withoutId(FlowTraceFormat.label(rig.scheduler.start(FlowStep.Combinator(CombinatorKind.RACE, listOf("a", "b"), PollPolicy(timeout = 100, interval = 10))))))
         assertEquals("of", withoutId(FlowTraceFormat.label(rig.scheduler.of(1))))
+        assertEquals("smartClick text(\"x\")", withoutId(FlowTraceFormat.label(rig.scheduler.of(1).next(FlowStep.Tool("smartClick", "text(\"x\")") { v, _ -> v }))))
+        assertEquals("typeInto", withoutId(FlowTraceFormat.label(rig.scheduler.of(1).next(FlowStep.Tool("typeInto") { v, _ -> v }))))
     }
 
     @Test

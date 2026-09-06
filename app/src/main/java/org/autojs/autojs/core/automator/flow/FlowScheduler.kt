@@ -3,12 +3,13 @@ package org.autojs.autojs.core.automator.flow
 import org.autojs.autojs.core.automator.flow.FlowNode.State
 import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.query.Poller
+import org.autojs.autojs.core.automator.toolkit.Humanize
 import kotlin.math.ceil
 
 /**
  * Runs Flow chains (roadmap Appendix A): starts a [FlowNode] per step, settles it once its parent
  * has settled, and hands the settlement down. Blocking steps (waits, stability waits, sleeps,
- * actions) run on the [worker] lane, user callbacks on the [script] lane, bookkeeping steps
+ * actions, tool calls) run on the [worker] lane, user callbacks on the [script] lane, bookkeeping steps
  * (`of`, `scope`, `timeout`, combinators, `retry`) inline on whichever thread settles the parent.
  * The value rules are those of Appendix A.4: a wait resolves to what it found, an action to its
  * target, a global action / sleep / scope / timeout passes the value through, a rejection skips
@@ -271,6 +272,7 @@ class FlowScheduler(
             is FlowStep.WaitStable -> done(if (input is State.Fulfilled) runWaitStable(node, step, ctx) else passThrough)
             is FlowStep.Action -> done(if (input is State.Fulfilled) runAction(step, input.value, ctx) else passThrough)
             is FlowStep.GlobalAction -> done(if (input is State.Fulfilled) runGlobalAction(step, input, ctx) else passThrough)
+            is FlowStep.Tool -> done(if (input is State.Fulfilled) runTool(step, input.value, ctx) else passThrough)
             is FlowStep.Sleep -> done(if (input is State.Fulfilled) runSleep(node, step, input, ctx) else passThrough)
             is FlowStep.Callback -> runCallback(node, step, input, ctx, done)
             is FlowStep.Combinator -> if (input is State.Fulfilled) runCombinator(node, step, ctx, done) else done(passThrough)
@@ -343,6 +345,7 @@ class FlowScheduler(
     }
 
     private fun runAction(step: FlowStep.Action, target: Any?, ctx: FlowContext): Outcome {
+        pause(step.humanize, ctx)
         val result = bindings.perform(step.action, target, step.args)
             ?: return Outcome(State.Rejected(FlowError.InvalidTarget(step.name, null, "not an actionable target")), ctx)
         return when {
@@ -353,12 +356,22 @@ class FlowScheduler(
     }
 
     private fun runGlobalAction(step: FlowStep.GlobalAction, input: State, ctx: FlowContext): Outcome {
+        pause(step.humanize, ctx)
         val result = bindings.performGlobal(step.action, step.args)
         return when {
             !result && step.strict -> Outcome(State.Rejected(FlowError.ActionFailed(step.name)), ctx)
             else -> Outcome(input, ctx)
         }
     }
+
+    /** The random pause of [humanize] before an action, clipped to the chain deadline. zh-CN: 动作前 [humanize] 的随机暂停, 截短到链的截止. */
+    private fun pause(humanize: Humanize, ctx: FlowContext) {
+        val delay = humanize.delay(random())
+        if (delay > 0) sleep(minOf(delay, ctx.remainingUntilDeadline(clock()).coerceAtLeast(0)))
+    }
+
+    /** A tool call: its result is the value; the tool's own `FlowError`s (or anything else it throws) reject through [execute]. zh-CN: 工具调用: 结果即新值; 工具自身的 `FlowError` (或任何其它异常) 经 [execute] 成为拒绝. */
+    private fun runTool(step: FlowStep.Tool, value: Any?, ctx: FlowContext): Outcome = Outcome(State.Fulfilled(step.block(value, ctx.scope)), ctx)
 
     private fun runSleep(node: FlowNode, step: FlowStep.Sleep, input: State, ctx: FlowContext): Outcome {
         val millis = (step.min + ceil(random() * (step.max - step.min))).toLong().coerceIn(step.min, step.max)
@@ -515,7 +528,7 @@ class FlowScheduler(
     }
 
     private fun isRerunnable(step: FlowStep): Boolean = when (step) {
-        is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Sleep, is FlowStep.Callback, is FlowStep.Combinator -> true
+        is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool, is FlowStep.Sleep, is FlowStep.Callback, is FlowStep.Combinator -> true
         is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Retry -> false
     }
 
@@ -573,7 +586,7 @@ class FlowScheduler(
         val fulfilled = input is State.Fulfilled
         return when (step) {
             is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Combinator, is FlowStep.Retry -> null
-            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction -> if (fulfilled) node.worker else null
+            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool -> if (fulfilled) node.worker else null
             is FlowStep.Callback -> {
                 val runs = when (step.kind) {
                     CallbackKind.FINALLY -> step.onOk != null

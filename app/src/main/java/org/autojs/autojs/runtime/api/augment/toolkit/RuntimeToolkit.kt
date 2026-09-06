@@ -29,6 +29,7 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Undefined
 import java.io.Closeable
+import java.util.Collections
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.ThreadPoolExecutor
@@ -41,11 +42,11 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * `UiObject` with the uptime clock and the interruptible sleep of the script thread, plus the
  * single daemon worker thread (`toolkit-<engineId>`, started on first use, idle ones die) on
  * which the popup guard runs its passes. Created on first use and closed with the runtime
- * through its closeable manager, which stops the worker. The JavaScript surfaces (P4.2) reach
- * it through [of].
+ * through its closeable manager, which stops the running popup guards and the worker. The
+ * JavaScript surface (P4.2) is [api].
  * zh-CN: 一个 [ScriptRuntime] 的工具集 (Roadmap P4.1 的薄 Android 侧): 基于 `UiObject` 的 [Toolkit], 使用 uptime 时钟与脚本线程的可中断休眠,
  * 外加弹窗守护跑各轮所用的单条守护工作线程 (`toolkit-<engineId>`, 首次使用时启动, 空闲即消亡). 首次使用时创建, 随运行时经其 closeable
- * 管理器关闭 (停止工作线程). JavaScript 表面 (P4.2) 经 [of] 取得它.
+ * 管理器关闭 (停止运行中的弹窗守护与工作线程). JavaScript 表面 (P4.2) 为 [api].
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -63,7 +64,13 @@ internal class RuntimeToolkit private constructor(val scriptRuntime: ScriptRunti
         fatal = { it is ScriptInterruptedException },
     )
 
+    /** The JavaScript surface (roadmap P4.2). zh-CN: JavaScript 表面 (Roadmap P4.2). */
+    val api: ToolkitApi by lazy { ToolkitApi(this) }
+
     private val closed = AtomicBoolean(false)
+
+    /** The running popup guards, closed with the runtime. zh-CN: 运行中的弹窗守护, 随运行时关闭. */
+    private val guards: MutableSet<AutoCloseable> = Collections.synchronizedSet(LinkedHashSet())
 
     private val executorLazy = lazy {
         ThreadPoolExecutor(0, 1, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, LinkedBlockingQueue()) { r ->
@@ -100,8 +107,23 @@ internal class RuntimeToolkit private constructor(val scriptRuntime: ScriptRunti
         }
     }
 
+    /** Tracks a guard so that [close] stops it; a guard registered after closing is stopped at once. zh-CN: 登记守护以便 [close] 停止它; 关闭后登记的守护立即停止. */
+    fun register(guard: AutoCloseable) {
+        guards += guard
+        if (closed.get()) {
+            guards -= guard
+            guard.close()
+        }
+    }
+
+    fun unregister(guard: AutoCloseable) {
+        guards -= guard
+    }
+
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
+        synchronized(guards) { guards.toList() }.forEach { guard -> runCatching { guard.close() } }
+        guards.clear()
         if (executorLazy.isInitialized()) executor.shutdownNow()
     }
 
@@ -200,7 +222,11 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
 
     override fun pick(node: UiObject, resultType: Any?): Any? = RhinoUtils.unwrap(Detector.detect(scriptRuntime, node, null, resultType ?: PickResultType.WIDGET, null))
 
-    override fun currentPackage(): String? = scriptRuntime.info.latestPackage.takeIf { it.isNotEmpty() }
+    /** The package in front per the activity info the service feeds, so the service is started first (a fresh install has it idle). zh-CN: 服务喂给活动信息的前台包名, 因此先启动服务 (新安装时服务尚未运行). */
+    override fun currentPackage(): String? {
+        ensureService(STEP_PACKAGE, null)
+        return scriptRuntime.info.latestPackage.takeIf { it.isNotEmpty() }
+    }
 
     override fun resolvePackage(app: Any?): String? = when (val a = RhinoUtils.unwrap(app)) {
         is App -> a.packageName
@@ -285,20 +311,22 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
         if (scriptRuntime.accessibilityBridge.service == null) throw FlowError.A11yUnavailable(step, selector)
     }
 
-    /** A script call without arguments on the calling thread, inside its Rhino context; exceptions propagate as thrown. zh-CN: 在调用线程的 Rhino 上下文内的无参脚本调用; 异常原样传播. */
-    private fun callScript(fn: Callable): Any? = RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
+    /** A script call on the calling thread, inside its Rhino context; exceptions propagate as thrown. zh-CN: 在调用线程的 Rhino 上下文内的脚本调用; 异常原样传播. */
+    fun callScript(fn: Callable, args: List<Any?> = emptyList()): Any? = RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
         val scope = scriptRuntime.topLevelScope
         val thisObj = Undefined.SCRIPTABLE_UNDEFINED
-        val args = emptyArray<Any?>()
+        val array = args.toTypedArray()
         when {
-            RhinoScriptRuntime.hasTopCall(cx) -> fn.call(cx, scope, thisObj, args)
-            else -> RhinoScriptRuntime.doTopCall(fn, cx, scope, thisObj, args, false)
+            RhinoScriptRuntime.hasTopCall(cx) -> fn.call(cx, scope, thisObj, array)
+            else -> RhinoScriptRuntime.doTopCall(fn, cx, scope, thisObj, array, false)
         }
     }
 
     companion object {
 
         private const val STEP_FIND = "find"
+
+        private const val STEP_PACKAGE = "currentPackage"
 
         private val COLLECTION = PickResultType.spellings(PickResultType.WidgetCollection).first()
 

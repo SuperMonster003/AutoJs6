@@ -24,6 +24,7 @@ import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs6.R
+import org.mozilla.javascript.JavaScriptException
 import org.mozilla.javascript.NativeJavaClass
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -146,6 +147,16 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
      * - <6> - name to aliasList to flag
      */
     open val globalAssignmentFunctions = listOf<Any>()
+
+    /**
+     * Names of the assigned functions whose thrown script errors (a [JavaScriptException], that is
+     * an error object thrown by or into the script, such as the toolkit's `FlowError`) reach the
+     * caller as they are instead of being wrapped into a "failed to call method" error; every other
+     * exception is still wrapped.
+     * zh-CN: 所赋函数中, 抛出的脚本错误 ([JavaScriptException], 即脚本抛出或抛入脚本的错误对象, 如工具集的 `FlowError`) 原样到达调用方而不被
+     * 包装为 "方法调用失败" 错误的函数名; 其它异常仍被包装.
+     */
+    open val scriptErrorPassThroughFunctions: Set<String> = emptySet()
 
     /**
      * List element cases: <br>
@@ -621,6 +632,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
 
                     if (ScriptInterruptedException.causedByInterrupt(e)) {
                         throw ScriptInterruptedException(e)
+                    }
+                    if (e is JavaScriptException && funcName in scriptErrorPassThroughFunctions) {
+                        throw e
                     }
                     val funcNameSuffix = if (funcName != funcNameAlias) " (${globalContext.getString(R.string.text_alias)}: $funcNameAlias)" else ""
                     val methodDescription = "$key.$funcName$funcNameSuffix"

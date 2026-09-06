@@ -75,6 +75,7 @@ internal object FlowTraceFormat {
         is FlowStep.Timeout -> "${step.millis} ms"
         is FlowStep.Retry -> "x${step.times}" + if (step.delay > 0) " / ${step.delay} ms" else ""
         is FlowStep.Combinator -> "${step.sources.size} source(s)"
+        is FlowStep.Tool -> step.detail
         else -> null
     }
 
