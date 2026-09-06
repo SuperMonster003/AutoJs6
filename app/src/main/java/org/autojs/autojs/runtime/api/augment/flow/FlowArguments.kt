@@ -157,6 +157,28 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         return FlowStep.Retry(times.toInt(), delay)
     }
 
+    /**
+     * `flow.defaults(options)` (roadmap P3.3): writes the given keys into the defaults (`timeout`
+     * with `Infinity` for none, `interval`, `stableFor`, `strictActions`); returns the `trace`
+     * option when present. Unknown keys are an error, and nothing is written when any value is
+     * invalid.
+     * zh-CN: `flow.defaults(options)` (Roadmap P3.3): 把给定的键写入默认值 (`timeout` 以 `Infinity` 为不限, `interval`, `stableFor`,
+     * `strictActions`); 存在 `trace` 时返回它. 未知的键报错, 任一值无效时什么都不写入.
+     */
+    fun applyDefaults(options: ScriptableObject, name: String): Boolean? {
+        options.ids.forEach { key -> require(key.toString() in DEFAULT_KEYS) { "Unknown option \"$key\" for $name; expected one of ${DEFAULT_KEYS.joinToString(", ")}" } }
+        val timeout = options.number("timeout", name)?.let { unboundedOr(it, "timeout", name) }
+        val interval = options.number("interval", name)?.let { nonNegativeMillis(it, "interval", name) }
+        val stableFor = options.number("stableFor", name)?.let { nonNegativeMillis(it, "stableFor", name) }
+        val strict = options.prop("strictActions").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
+        val trace = options.prop("trace").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) }
+        timeout?.let { defaults.timeout = it }
+        interval?.let { defaults.interval = it }
+        stableFor?.let { defaults.stableFor = it }
+        strict?.let { defaults.strictActions = it }
+        return trace
+    }
+
     /** `scope({ root, compass, resultType })`. */
     fun scope(options: Any?, name: String): FlowScope {
         require(options is ScriptableObject && !options.isJsArray() && options !is Callable) { "Argument \"options\" must be an object for $name, got ${options.jsBrief()}" }
@@ -272,6 +294,8 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
     }
 
     companion object {
+
+        val DEFAULT_KEYS = listOf("timeout", "interval", "stableFor", "strictActions", "trace")
 
         /** A settled state, or `null` while pending: the form [FlowCondition.Settling] reads. zh-CN: 已结算的状态, 待定时为 `null`: [FlowCondition.Settling] 读取的形式. */
         fun settledOrNull(node: FlowNode): FlowNode.State? = node.state.takeUnless { it is FlowNode.State.Pending }

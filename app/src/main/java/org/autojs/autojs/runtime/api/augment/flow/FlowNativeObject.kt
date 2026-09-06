@@ -7,6 +7,8 @@ import org.autojs.autojs.core.automator.flow.FlowNode
 import org.autojs.autojs.core.automator.flow.FlowScope
 import org.autojs.autojs.core.automator.flow.FlowStep
 import org.autojs.autojs.core.automator.flow.StableMode
+import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -212,6 +214,33 @@ internal class FlowApi(val executor: FlowExecutor) {
             executor.isThenable(value) -> executor.wrap(executor.adoptThenable(value as Scriptable))
             else -> of(value)
         }
+    }
+
+    // Defaults and tracing (roadmap P3.3). zh-CN: 默认值与追踪 (Roadmap P3.3).
+
+    /** `flow.defaults()` reads, `flow.defaults(options)` writes; both return a snapshot object. zh-CN: `flow.defaults()` 读取, `flow.defaults(options)` 写入; 都返回快照对象. */
+    fun defaults(args: Array<out Any?>): Scriptable {
+        require(args.size <= 1) { "Too many arguments (${args.size}) for flow.defaults" }
+        val options = args.getOrNull(0)
+        if (!options.isJsNullish()) {
+            require(options is ScriptableObject && !options.isJsArray() && options !is Callable) { "Argument \"options\" must be an object for flow.defaults, got ${options.jsBrief()}" }
+            arguments.applyDefaults(options, "flow.defaults")?.let { executor.tracing = it }
+        }
+        val d = executor.defaults
+        return RhinoUtils.newNativeObject(scriptRuntime.topLevelScope).apply {
+            put("timeout", this, if (d.timeout == PollPolicy.UNBOUNDED) Double.POSITIVE_INFINITY else d.timeout.toDouble())
+            put("interval", this, d.interval.toDouble())
+            put("stableFor", this, d.stableFor.toDouble())
+            put("strictActions", this, d.strictActions)
+            put("trace", this, executor.tracing)
+        }
+    }
+
+    /** `flow.trace(on?)`: switches the console trace; returns whether it is on. zh-CN: `flow.trace(on?)`: 开关控制台追踪; 返回是否开启. */
+    fun trace(args: Array<out Any?>): Boolean {
+        require(args.size <= 1) { "Too many arguments (${args.size}) for flow.trace" }
+        args.getOrNull(0).takeUnless { it.isJsNullish() }?.let { executor.tracing = Context.toBoolean(it) }
+        return executor.tracing
     }
 
     // Terminals. zh-CN: 终结.

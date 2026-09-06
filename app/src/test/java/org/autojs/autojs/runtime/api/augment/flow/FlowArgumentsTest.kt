@@ -120,6 +120,21 @@ class FlowArgumentsTest {
     }
 
     @Test
+    fun applyDefaultsWritesTheGivenKeysAndReturnsTheTraceOption() {
+        assertEquals(true, arguments.applyDefaults(js("({ timeout: Infinity, interval: 5, stableFor: 7, strictActions: false, trace: true })") as ScriptableObject, "flow.defaults"))
+        assertEquals(PollPolicy.UNBOUNDED, defaults.timeout)
+        assertEquals(5L, defaults.interval)
+        assertEquals(7L, defaults.stableFor)
+        assertFalse(defaults.strictActions)
+        assertNull(arguments.applyDefaults(js("({ timeout: 250 })") as ScriptableObject, "flow.defaults"))
+        assertEquals(250L, defaults.timeout)
+        assertEquals(5L, defaults.interval)
+        assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ timeOut: 1 })") as ScriptableObject, "flow.defaults") }
+        assertThrows(IllegalArgumentException::class.java) { arguments.applyDefaults(js("({ interval: -1 })") as ScriptableObject, "flow.defaults") }
+        assertEquals(250L, defaults.timeout)
+    }
+
+    @Test
     fun aZeroTimeoutMeansASingleAttempt() {
         val spec = arguments.wait("t", arrayOf<Any?>("x", 0))
         assertEquals(0L, spec.policy.timeout)

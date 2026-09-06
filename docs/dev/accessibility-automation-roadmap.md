@@ -174,7 +174,7 @@ ui/accessibility/
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
 | P1 | 无障碍服务层重构 | P0 | 1 | 完成 (P1.1 ~ P1.7 落地 2026-09-05; 维护者验收 2026-09-06, 未发现已知问题) |
 | P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 完成 (P2.1 / P2.2 落地 2026-09-05, P2.3 ~ P2.6 落地 2026-09-06; 维护者验收 2026-09-06, 未发现已知问题, `UiObject.kt` 542 行经验收接受) |
-| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 进行中 (P3.1 / P3.2 完成 2026-09-06; 下一项 P3.3) |
+| P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 进行中 (P3.1 ~ P3.3 完成 2026-09-06; 下一项 P3.4) |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
 | P5 | 能力扩展 (诊断, 事件驱动等待, 跨运行时复用) | P1-P4 | PS | 未开始 |
 | P6 | 文档, 声明, 示例与发布 gate | 各阶段 | 全部 | 未开始 |
@@ -502,12 +502,20 @@ P3.2 证据:
 - `DEVICE`: 探针 `build/smoke/flow-probe.js` (表面 / 取值与链 / 等待与计时 / 组合器与取消 / UI 线程规则 / 无障碍 (系统设置页) / Promise 互操作, 逐项写 `/sdcard/flow-probe.txt`): AVD API 24 107/107, Xiaomi 23046RP50C API 35 107/107; 其后 `flow-threads.js` 两机 `FLOW_THREADS 0` (探针以 `exit()` 结束时仍有一条 60 s 的待定链, 由 `FlowExecutor.close()` 取消, 线程池 `shutdownNow`); 冒烟 `smoke-legacy-api.js` 两机 53/53. 首轮真机暴露并修复的四个问题: `map(f).sync()` 死锁, `instanceof flow.Flow` 恒假, 原型上调用方法时无限递归, 单工作线程下 `race` 选错; 首轮亦纠正了探针的四个错误预期 (`of` 的 `step` 名为 `of`, `run` 在工作线程, `waitWhile(() => 0)` 按真值规则不结束, `timeout(ms)` 只约束其后的步骤, 全局动作透传输入值).
 
 
-### P3.3 便携函数与别名
+### P3.3 便携函数与别名 (完成 2026-09-06)
 
-- [ ] `sleep(min, max?)` 步骤 (含 `"±delta"` 字符串形式, 与全局 `sleep` 的 `resolveSleepRange` 共用).
-- [ ] `clickAfter(min, max?)`, `clickWhenStable(...)`, `clickWhenStableAfter(...)`, `longClickAfter`, `waitThenLongClick`; `else(fn)` 作为 `catch` 别名 (衔接同步 `wait` 的 `{then, else}` 习惯).
-- [ ] `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` 每脚本一份, 影响后续新建的链.
-- [ ] `flow.trace(true)` 在控制台输出每步的开始 / 结束 / 耗时 / 结果摘要 (用于排查脚本).
+- [x] `sleep(min, max?)` 步骤 (含 `"±delta"` 字符串形式, 与全局 `sleep` 的 `resolveSleepRange` 共用). 落地 (随 P3.2): `FlowArguments.sleep` -> `Global.resolveSleepRange` -> `FlowStep.Sleep(min, max)`; `flow.sleep` / `flow.delay` 根与链上的 `sleep` / `delay`. (SOURCE; JVM: `FlowArgumentsTest`; DEVICE)
+- [x] `clickAfter(min, max?)`, `clickWhenStable(...)`, `clickWhenStableAfter(...)`, `longClickAfter`, `waitThenLongClick`; `else(fn)` 作为 `catch` 别名 (衔接同步 `wait` 的 `{then, else}` 习惯). 落地 (随 P3.2): `FlowApi.actionAfter` (休眠步骤 + 动作步骤, 尾随 `onOk` / `onErr`), `FlowApi.waitThen(..., after = true)` (`clickWhenStableAfter(cond, timeout?, interval?, delayMin?, delayMax?)` 或 `options.delay` 为数字 / `[min, max]`), `waitThenLongClick` 为等待 + `longClick`; 原型与命名空间 / 全局函数均有. (SOURCE; DEVICE)
+- [x] `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` 每脚本一份, 影响后续新建的链. 落地: `FlowArguments.applyDefaults` 写入 `FlowDefaults` (`timeout` 以 `Infinity` 为不限, 未知键报错, 任一值无效则不写入), `FlowApi.defaults` 返回快照对象 (无参数时只读), `trace` 键转发到 `FlowExecutor.tracing`. (SOURCE; JVM: `FlowArgumentsTest` 14; DEVICE)
+- [x] `flow.trace(true)` 在控制台输出每步的开始 / 结束 / 耗时 / 结果摘要 (用于排查脚本). 落地: `FlowTrace.kt` (`FlowTrace : FlowListener` 挂到 `FlowExecutor.listener`, 以 `console.verbose` 输出 `[flow] > wait content("x") #1a2b` 与 `[flow] < wait content("x") #1a2b 312 ms -> fulfilled: ...` / `rejected: TIMEOUT (...)` / `cancelled`; 短节点 id 区分并发的链; 格式化在 Android-free 的 `FlowTraceFormat`), `flow.trace(on?)` 返回当前开关. (SOURCE; JVM: `FlowTraceTest` 2; DEVICE: logcat 的 `GlobalConsole` 可见 `[flow]` 行)
+
+P3.3 证据:
+
+- `JVM`: `FlowArgumentsTest` 14 (+1 `applyDefaults`) / `FlowTraceTest` 2 (新增) 通过; 全量 `:app:testAppDebugUnitTest` 2124 / 0 失败 (5 skipped).
+- `ANDROID_BUILD`: `:app:assembleAppDebug` 通过 (2026-09-06).
+- `DOCS`: changelog: P3.2 的 `feature` 条目扩写 (10 语言); 架构文档 1.1 / 1.4 / 1.8 更新.
+- `DEVICE`: 探针 `build/smoke/flow-p33-probe.js` (默认值读写与生效, `Infinity` 往返, 未知键报错, `trace` 开关与 `defaults().trace`, `sleep(100, "±30")`, `delay`, `else`, 系统设置页上的 `clickAfter` / `longClickAfter` / `clickWhenStableAfter` (位置参数与 `options.delay` 范围) / `flow.waitThenLongClick` / 链上的 `clickWhenStable`, strict 下带回调的 `clickAfter`): AVD API 24 24/24, Xiaomi API 35 24/24; 两机 logcat 均可见 `[flow] >` / `[flow] <` 行; 冒烟 `smoke-legacy-api.js` 两机 53/53.
+
 
 ### P3.4 示例与测试
 
@@ -842,4 +850,5 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 D15: `StringMatcher.contains(String)` 改为字面子串 (新增 `Contains` 匹配器; `matches` / `match` 的普通字符串仍编译为模式), `FilterTest` / `SelectorRegistryTest` 断言调整并补充 `"."` / `"("` / `"1+1"` 用例. changelog `fix` 1 (10 语言). 证据: `JVM` 全量 2058 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 `build/smoke/contains-probe.js` AVD API 24 与 Xiaomi API 35 均 12/12 (`textContains("(")` 不报错, `textContains(".")` 只匹配含点号文本, 字符串形式 `"/re/i"` 为字面, 正则参数 / `textMatch` / `textMatches` 不变, 集合选择器同样字面), 冒烟两机 53/53.
 - 落地 P3.1: `core/automator/flow/{FlowStep,FlowNode,FlowScheduler,FlowBindings,Stabilizer,FlowError}.kt` 新增 (Android-free 的 Flow 核心: 步骤为数据, 节点树 + 一次性结算, 两条 lane, 附录 A.4 的取值规则, 取消 / 全链超时 / 重试 / 组合器, 稳定检测状态机, 密封错误类); 测试替身 `FlowTestSupport.kt` 与 `FlowSchedulerTest` (34) / `StabilizerTest` (8). 与计划的形态差异 (节点树而非步骤序列, `FlowLane` 统一 Executor / Marshaller, `FlowNode` 即 `FlowHandle`) 与各项语义决定记在 P3.1 各条. 无 changelog 条目. 证据: `JVM` 全量 2100 / 0; `ANDROID_BUILD` 通过; 详见 P3.1 证据.
 - 落地 P3.2: `runtime/api/augment/flow/{Flow,FlowExecutor,FlowNativeObject,FlowArguments,FlowCondition,RuntimeFlowBindings,FlowWorkerPool,FlowScriptLane,FlowJsErrors}.kt` 新增 (命名空间与全局起点, 每脚本执行器 + 线程池 + 每脚本线程的调度器与脚本 lane, 句柄 / 原型 / API, 参数与条件, bindings, 错误转换), `Auto.kt` 新增 `auto.wait`, `ScriptRuntime.augment` 注册 `Flow`; 核心补 `Adopted` 根 (`defer` / `fulfill` / `reject`, 供 Promise 采纳), `FlowNode.hasContinuation`, 跨调度器取消路由, `A11yUnavailable(cause)`, 以及 `workerFactory` (每根一条 lane). 与计划的三处偏离 (线程池而非单线程, `FlowScriptLane` + `sync()` 自排空而非 `ScriptAsyncDispatcher`, 句柄级令牌) 记在 P3.2 第 1 条. 测试: `FlowSchedulerTest` +8, `FlowArgumentsTest` 13 (新). changelog `feature` 1 (10 语言). 证据: `JVM` 全量 2121 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 107/107, Xiaomi API 35 107/107, 退出后 `flow-*` 线程 0, 冒烟 两机 53/53; 详见 P3.2 证据.
-- 下次起点: P3.3 便携函数与别名 (已在 P3.2 顺带落地并经真机探针验证的: `sleep(min, max?)` 步骤含 `"±delta"` (复用 `resolveSleepRange`), `clickAfter` / `longClickAfter` / `clickWhenStable` / `clickWhenStableAfter` / `waitThenLongClick` / `else`; 待做: `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` (写入 `FlowDefaults`, 一次性 `trace` 选项), `flow.trace(true)` (`FlowListener` 实现, 控制台输出步骤开始 / 结束 / 耗时 / 结果摘要, 挂到 `FlowExecutor.listener`), 并把 P3.3 各条以真机探针验证后勾选), 其后 P3.4 (三个示例脚本 + 真机清单; 示例可以 `sync()` 与 `then` 两种写法各展示一遍). 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh <serial> <apk>` 一类包装脚本安装 + 推送 + 运行 + 回读 `/sdcard` 结果).
+- 落地 P3.3: `runtime/api/augment/flow/FlowTrace.kt` 新增 (`FlowTrace` 监听器 + Android-free 的 `FlowTraceFormat`), `FlowArguments.applyDefaults`, `FlowApi.defaults` / `trace`, `FlowExecutor.tracing`, `flow.defaults` / `flow.trace` 注册; 其余四条便携步骤已随 P3.2 落地, 本次补真机证据. 测试: `FlowArgumentsTest` +1, `FlowTraceTest` 2 (新). changelog: 扩写 P3.2 的 `feature` 条目 (10 语言). 证据: `JVM` 全量 2124 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 AVD API 24 24/24, Xiaomi API 35 24/24, 冒烟两机 53/53; 详见 P3.3 证据.
+- 下次起点: P3.4 示例与测试 (`sample/accessibility/flow-basics.js` 覆盖附录 A.6 的全部示例并可运行 (以 `sync()` 与 `then` 两种写法), `flow-ui-mode.js` ("ui" 模式下不阻塞主线程: 按钮触发 `waitAsync(...).then(...)`, 演示 `sync()` 在 UI 线程被拒绝), `flow-cancel-and-timeout.js` (超时 / 目标消失 / 稳定检测 / `cancel()` / `flow.cancelAll()` / 脚本中途 `exit()`); 真机验证清单 (找到 / 超时 / 目标消失 / 稳定检测 / 脚本中途停止无线程泄漏 / UI 模式) 逐项记入 P3.4 证据; 示例入库前先按 P3.2 / P3.3 的探针方式在两机跑通), 其后 P3 验收 (核心测试 + 三个示例 + `flow-*` 线程不存活 + changelog 已有), 再 P4. 当前无待决事项. 节奏不变: 每个子项独立提交, 完成后真机重跑冒烟 (`build/smoke/run-flow-probe.sh` / `run-legacy-smoke.sh`).

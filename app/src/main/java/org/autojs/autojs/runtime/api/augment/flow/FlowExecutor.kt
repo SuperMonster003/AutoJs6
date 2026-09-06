@@ -75,6 +75,13 @@ internal class FlowExecutor(val scriptRuntime: ScriptRuntime) : Closeable {
             synchronized(entries) { entries.values.forEach { it.scheduler.listener = value } }
         }
 
+    /** `flow.trace(on)`: whether every step is logged to the console through [FlowTrace]. zh-CN: `flow.trace(on)`: 是否经 [FlowTrace] 把每个步骤记录到控制台. */
+    var tracing: Boolean = false
+        set(value) {
+            field = value
+            listener = if (value) FlowTrace(scriptRuntime.console) else null
+        }
+
     /** Live worker threads of the pool, for diagnostics (`flow.workers`). zh-CN: 线程池的存活工作线程数, 供诊断 (`flow.workers`). */
     val workerCount: Int get() = if (poolLazy.isInitialized()) pool.threadCount else 0
 

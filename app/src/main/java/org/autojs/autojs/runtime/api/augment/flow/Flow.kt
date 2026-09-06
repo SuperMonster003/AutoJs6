@@ -22,13 +22,13 @@ import java.util.function.Supplier
  * D1), `waitThenClick` / `clickWait`, `waitForStable`, `waitForStableThenClick` /
  * `clickWhenStable`, `waitForVisible`, `waitForHidden` / `waitForGone` and `clickWhenStableAfter`;
  * plus, in the namespace only, `waitUntil`, `waitWhile`, `waitForActivity`, `waitForPackage`,
- * `waitThenLongClick`, `sleep` / `delay`, `run`, `of`, `all`, `race`, `any`, `cancelAll`, the
- * `Flow` constructor and the `pending` count. The synchronous global `wait` is untouched.
+ * `waitThenLongClick`, `sleep` / `delay`, `run`, `of`, `all`, `race`, `any`, `cancelAll`,
+ * `defaults` / `trace` (P3.3), the `Flow` constructor and the `pending` / `workers` counts. The synchronous global `wait` is untouched.
  * zh-CN: `flow` (别名 `$flow`) 命名空间与异步链式等待的全局入口 (Roadmap P3.2, 附录 A.2): `waitAsync` (亦即 `wait.async`,
  * `auto.wait` 与 `flow.wait`, D1), `waitThenClick` / `clickWait`, `waitForStable`, `waitForStableThenClick` / `clickWhenStable`,
  * `waitForVisible`, `waitForHidden` / `waitForGone` 与 `clickWhenStableAfter`; 命名空间内另有 `waitUntil`, `waitWhile`,
  * `waitForActivity`, `waitForPackage`, `waitThenLongClick`, `sleep` / `delay`, `run`, `of`, `all`, `race`, `any`, `cancelAll`,
- * `Flow` 构造器与 `pending` 计数. 同步的全局 `wait` 不变.
+ * `defaults` / `trace` (P3.3), `Flow` 构造器与 `pending` / `workers` 计数. 同步的全局 `wait` 不变.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -57,6 +57,8 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::race.name,
         ::any.name,
         ::cancelAll.name,
+        ::defaults.name,
+        ::trace.name,
     )
 
     override val globalAssignmentFunctions = listOf(
@@ -166,6 +168,16 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun any(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).combinator(CombinatorKind.ANY, "flow.any", args)
+
+        /** `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` (P3.3): per-script defaults for the chains created afterwards; without arguments a read. zh-CN: `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` (P3.3): 每脚本一份, 影响其后新建的链; 无参数时为读取. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun defaults(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).defaults(args)
+
+        /** `flow.trace(on?)` (P3.3): logs every step's start / end / elapsed / outcome to the console. zh-CN: `flow.trace(on?)` (P3.3): 把每个步骤的开始 / 结束 / 耗时 / 结果记录到控制台. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun trace(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = api(scriptRuntime).trace(args)
 
         /** Cancels every pending flow of the script; returns how many. zh-CN: 取消脚本的全部待定 Flow; 返回个数. */
         @JvmStatic
