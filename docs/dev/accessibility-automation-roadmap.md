@@ -15,7 +15,7 @@
 
 ## 1. 固定决策
 
-以下决策已由维护者确认 (D1-D5 于 2026-09-04, D6-D12 于 2026-09-05), 后续阶段不再重新讨论:
+以下决策已由维护者确认 (D1-D5 于 2026-09-04, D6-D14 于 2026-09-05, D15-D16 于 2026-09-06), 后续阶段不再重新讨论:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
@@ -33,6 +33,8 @@
 | D12 | Flow 动作步骤默认 `strict = true` | 动作返回 `false` 即 reject `ACTION_FAILED`; 可用 `flow.defaults({ strictActions: false })` 全局关闭. (原 Q1) |
 | D13 | 引入字符串选择器语法, 入口复用 `select` | 采用附录 C 的方案 B: `UiSelector` 新增 `select(String)` 重载 (解析字符串并追加过滤器, 返回自身), 因反射注册而自动成为全局函数 `select('...')` (返回 `UiSelector`, 可继续 `.findOne()` 等); 既有无参 `select()` (对找到的节点执行 `ACTION_SELECT`, 含反射出的全局 `select(): boolean`) 保持不变, 两者按参数类型区分. 语法: 空格分隔的条件, `key=value` (值含空格时用引号), `key~=regex` (或 `key=/regex/flags`), 布尔键 `clickable` / `!clickable`, 键名与别名来自 P2.2 的 `SelectorRegistry`; 不引入 `\|` 或层级组合子, 组合需求用 `pickup([...])` / `existsAll` / compass 表达. 落地于 P5.3, 依赖 P2.2. (原 Q4, 2026-09-05) |
 | D14 | 无障碍服务管理器以对话框实现, 范围为 "标准版 + 事件监视器" | 抽屉 "无障碍服务" 条目的 "管理器" 按钮 (及长按条目) 打开 `MaterialDialog` 形式的管理器 (非 Activity), 三个区块: 状态 (逐行可复制, 1 s 刷新 + 注册表监听), 控制 (启动 / 停止 / 重启 / 清除节点缓存 / 自检 / 事件监视器), 设置 (root 与安全设置自动启用开关); 完整诊断文本可复制, 作为本 Roadmap 各阶段的真机调试面板. 事件监视器为子对话框, 数据源是 `AccessibilityService` 伴生对象的轻量事件观察者 (`addEventObserver` / `removeEventObserver`, 跨服务重启存活), 即 P1.3 事件总线 Kotlin 侧订阅 API 的雏形. 文案与 UI 与既有对话框一致. 落地于 P1.7. (2026-09-05) |
+| D15 | `contains` 系列的普通字符串参数恢复为字面子串 | 6.7.0 Alpha13 让 `contains` 系列接受正则参数时, 普通字符串也被编译为模式 (`textContains(".")` 匹配任意非空文本, `textContains("(")` 报错), 系实现副作用. 改回字面子串, 与 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 字符串形式的 JS 字面量 (`"/re/flags"`) 在 `contains` 中也不再视为正则; 正则需求经正则参数 (`textContains(/re/i)`) 或 `textMatch` / `textMatches` 表达 (两者的普通字符串仍编译为模式). 与 D5 / D6 一样是 D2 之外被明确批准的既有行为调整, 记入 changelog `fix`. 已于 2026-09-06 落地 (`StringMatcher.contains(String)`; Node Bridge / Python Host 走同一 builder, 随之一致). (原 Q9) |
+| D16 | 强制停止后不自动重新启用无障碍服务 | 用户强制停止 AutoJs6 时系统同时把本服务移出 `enabled_accessibility_services`, 冷启动后服务为 "未启用" 而非 "故障"; 保持与用户显式关闭同等对待, 不自动恢复 (`restoreIfMalfunctioning` 只处理 "已启用但未绑定"). 需要自动化的场景用脚本 / 悬浮菜单 / 磁贴的显式入口. 日后若要做, 只能以 "进程上次被强制停止且服务此前启用" 的持久化标记为条件. (原 Q8, 2026-09-06) |
 
 由 D2 派生的硬约束:
 
@@ -170,8 +172,8 @@ ui/accessibility/
 | 阶段 | 主题 | 依赖 | 对应用户目标 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 安全网与低风险修复 | 无 | 1, 2 | 完成 (2026-09-05, JVM + ANDROID_BUILD + DEVICE x5) |
-| P1 | 无障碍服务层重构 | P0 | 1 | 代码完成 (P1.1 ~ P1.7 全部落地 2026-09-05); 待维护者以最终构建重跑冒烟脚本与手动验证清单后关闭 |
-| P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 代码完成, 待验收 (P2.1 / P2.2 完成 2026-09-05, P2.3 ~ P2.6 完成 2026-09-06; P2 验收待维护者) |
+| P1 | 无障碍服务层重构 | P0 | 1 | 完成 (P1.1 ~ P1.7 落地 2026-09-05; 维护者验收 2026-09-06, 未发现已知问题) |
+| P2 | UiSelector / UiObject / UiObjectCollection 重构 | P0 (P1 的 registry 与 window 子项) | 2 | 完成 (P2.1 / P2.2 落地 2026-09-05, P2.3 ~ P2.6 落地 2026-09-06; 维护者验收 2026-09-06, 未发现已知问题, `UiObject.kt` 542 行经验收接受) |
 | P3 | 异步链式 `waitAsync` (Flow) 与便携函数 | P1 (registry, event bus), P2 (PollPolicy) | 3 | 未开始 |
 | P4 | 高阶自动化封装 (toolkit) | P2, P3 | 4 | 未开始 |
 | P5 | 能力扩展 (诊断, 事件驱动等待, 跨运行时复用) | P1-P4 | PS | 未开始 |
@@ -365,6 +367,8 @@ P1 验收: JVM 单元测试 (registry / controller / event bus / window policy /
 
 P1 验收状态 (2026-09-05): JVM 五组测试均在 (`A11yServiceRegistryTest` / `A11yServiceControllerTest` / `A11yEventBusTest` / `WindowRootResolverTest` / `NodeLifecycleTest`), 全量通过; 冒烟脚本 (53 项) 本机 adb 在 AVD API 24 与 Xiaomi API 35 通过, 维护者最近一次 8 设备复跑为 48 项版本 (P1.3 关闭时); changelog 条目齐备. **待维护者**: 以 P1.6 后的构建重跑 53 项冒烟脚本 (含 root / WSS / Shizuku 的重启段) 并做上述手动验证清单, 通过后 P1 关闭.
 
+P1 验收结果 (2026-09-06): 维护者以 P2.6 构建完成验收, 未发现已知问题. P1 关闭.
+
 ---
 
 ## P2: UiSelector / UiObject / UiObjectCollection 重构
@@ -401,7 +405,7 @@ P2.2 证据:
 
 ### P2.3 过滤器去重 (完成 2026-09-06)
 
-- [x] `TextFilter` / `DescFilter` / `ContentFilter` / `PackageNameFilter` / `ClassNameFilter` / `IdFilter` 合并为泛型 `StringPropertyFilter(property, matcher)`, `matcher` 为 `Equals / Contains / StartsWith / EndsWith / Matches(regexString) / Match(NativeRegExp)`; `StringList*Filter` 通过 `KeysGetter` 泛化到同一实现. 落地: `filter/StringMatcher.kt` (密封类: `Equals` / `StartsWith` / `EndsWith` 字面比较, `Pattern(suffix, regex, whole)` 承担全部正则形式; 工厂 `equals` / `startsWith` / `endsWith` / `contains` / `matches` / `match` 各有 String 与 `NativeRegExp` 重载, 语义与原 `RegexFilter` 族逐一对应: 正则参数在 `equals` / `matches` 中整体匹配, 在 `contains` / `match` 中任意位置匹配; 普通字符串在 `contains` / `matches` / `match` 中编译为模式且 JS 字面量形式 `"/re/i"` 保留标志, 在 `equals` / `startsWith` / `endsWith` 中字面比较; 参数渲染 `"s"` / `/re/i` 与从前相同), `filter/StringProperty.kt` (枚举 TEXT / DESC / CONTENT / ID / ID_ENTRY / ID_HEX / CLASS_NAME / PACKAGE_NAME, 各自决定把节点的哪些值交给 matcher: `CONTENT` 为描述或文本任一匹配 (原 `KeysGetter` 唯一用途, 因此 `KeysGetter` / `RegexListFilter` / 6 个 `StringList*Filter` 随之删除), `ID_ENTRY` 为资源 id 的条目名, `null` 值一律不匹配), `filter/StringPropertyFilter.kt` (`property.test(node, matcher)`, 字符串形式 `matcher.describe(property)`). `IdFilter` / `ClassNameFilter` 只保留参数规则 (`id(s)` / `idStartsWith` 按是否含 `:id/` 选 `ID` 或 `ID_ENTRY`; `className(s)` / `classNameStartsWith` 经 `expand` 补全包名, `extendedClassNameMap` 仍供布局分析器使用), 其余 25 个文件删除 (`TextFilter` / `DescFilter` / `ContentFilter` / `PackageNameFilter` / `IdHexFilter` / `RegexFilter` / `RegexListFilter` / 6 个 `String*Filter` / 6 个 `StringList*Filter` / `KeyGetter` / `KeysGetter` / `MetricsMinFilter` / `MetricsMaxFilter` / `MetricsRangeFilter` / `MinIntFilter` / `MaxIntFilter`), 过滤器包由 39 个文件减为 18 个. 注册表的 `stringFamily` 改为 `stringFamily(name, property, getter, equals?, startsWith?)`, 表本身 (名称 / 重载 / 参数名) 不变, 提交的 `UiSelectorBuilders.kt` 无需重生成 (`UiSelectorBuildersTest` 确认). 有意不改的行为: `contains` 系列把普通字符串当作正则模式是 6.7.0 Alpha13 引入的现状, 是否改回字面子串见 Q9. 模式改为构造时编译 (原 `by lazy` 在首次查找时编译), 因此写错的模式在 builder 调用时即报错; 由此暴露并修复了全局函数形式抛出的 Java 异常不可被脚本捕获的问题 (见第 5 条). (SOURCE; JVM: `FilterTest` 18 用例)
+- [x] `TextFilter` / `DescFilter` / `ContentFilter` / `PackageNameFilter` / `ClassNameFilter` / `IdFilter` 合并为泛型 `StringPropertyFilter(property, matcher)`, `matcher` 为 `Equals / Contains / StartsWith / EndsWith / Matches(regexString) / Match(NativeRegExp)`; `StringList*Filter` 通过 `KeysGetter` 泛化到同一实现. 落地: `filter/StringMatcher.kt` (密封类: `Equals` / `StartsWith` / `EndsWith` 字面比较, `Pattern(suffix, regex, whole)` 承担全部正则形式; 工厂 `equals` / `startsWith` / `endsWith` / `contains` / `matches` / `match` 各有 String 与 `NativeRegExp` 重载, 语义与原 `RegexFilter` 族逐一对应: 正则参数在 `equals` / `matches` 中整体匹配, 在 `contains` / `match` 中任意位置匹配; 普通字符串在 `contains` / `matches` / `match` 中编译为模式且 JS 字面量形式 `"/re/i"` 保留标志, 在 `equals` / `startsWith` / `endsWith` 中字面比较; 参数渲染 `"s"` / `/re/i` 与从前相同), `filter/StringProperty.kt` (枚举 TEXT / DESC / CONTENT / ID / ID_ENTRY / ID_HEX / CLASS_NAME / PACKAGE_NAME, 各自决定把节点的哪些值交给 matcher: `CONTENT` 为描述或文本任一匹配 (原 `KeysGetter` 唯一用途, 因此 `KeysGetter` / `RegexListFilter` / 6 个 `StringList*Filter` 随之删除), `ID_ENTRY` 为资源 id 的条目名, `null` 值一律不匹配), `filter/StringPropertyFilter.kt` (`property.test(node, matcher)`, 字符串形式 `matcher.describe(property)`). `IdFilter` / `ClassNameFilter` 只保留参数规则 (`id(s)` / `idStartsWith` 按是否含 `:id/` 选 `ID` 或 `ID_ENTRY`; `className(s)` / `classNameStartsWith` 经 `expand` 补全包名, `extendedClassNameMap` 仍供布局分析器使用), 其余 25 个文件删除 (`TextFilter` / `DescFilter` / `ContentFilter` / `PackageNameFilter` / `IdHexFilter` / `RegexFilter` / `RegexListFilter` / 6 个 `String*Filter` / 6 个 `StringList*Filter` / `KeyGetter` / `KeysGetter` / `MetricsMinFilter` / `MetricsMaxFilter` / `MetricsRangeFilter` / `MinIntFilter` / `MaxIntFilter`), 过滤器包由 39 个文件减为 18 个. 注册表的 `stringFamily` 改为 `stringFamily(name, property, getter, equals?, startsWith?)`, 表本身 (名称 / 重载 / 参数名) 不变, 提交的 `UiSelectorBuilders.kt` 无需重生成 (`UiSelectorBuildersTest` 确认). 有意不改的行为: `contains` 系列把普通字符串当作正则模式是 6.7.0 Alpha13 引入的现状, 是否改回字面子串见 Q9 (后记: 2026-09-06 维护者决定改回, 见 D15; `StringMatcher.contains(String)` 改为字面子串, `FilterTest` / `SelectorRegistryTest` 断言随之调整, changelog `fix`). 模式改为构造时编译 (原 `by lazy` 在首次查找时编译), 因此写错的模式在 builder 调用时即报错; 由此暴露并修复了全局函数形式抛出的 Java 异常不可被脚本捕获的问题 (见第 5 条). (SOURCE; JVM: `FilterTest` 18 用例)
 - [x] `MetricsFilter` / `MetricsMinFilter` / `MetricsMaxFilter` / `MetricsRangeFilter` 合并为 `MetricsFilter(property, comparison)`; `MinIntFilter` / `MaxIntFilter` / `IntFilter` 同理. 落地: `MetricsFilter(property: Property, comparison: Comparison, spelling: Spelling, scale: ScreenScale.Source)`, `Property` 为枚举 LEFT / TOP / RIGHT / BOTTOM / WIDTH / HEIGHT / CENTER_X / CENTER_Y (各带轴向与取值器), `Comparison` 为密封类 `Equals(value)` / `Range(min, max)` / `Min(min)` / `Max(max)` (含参数渲染), `Spelling` PLAIN / BOUNDS 决定 builder 名 (`left` / `minLeft` / `maxLeft` 与 `boundsLeft` / `boundsMinLeft` / `boundsMaxLeft`), 原 4 x 16 = 64 个匿名属性对象归为 8 个枚举项; `IntFilter(property: Property, comparison: Comparison)` 同构 (10 个属性, `Equals` / `Min` / `Max`, `minChildCount` / `maxChildCount` 由前缀渲染). 顺带把屏幕相关参数的解析从 `DisplayUtils` (直接读 `ScreenMetrics`) 抽为 Android-free 的 `filter/ScreenScale.kt`: `(-1, 1)` 为屏幕边长比例, `-1` 为整条边, 其余为像素, `round` / `floor` / `ceil` 三种取整与原 `toRoundIntX` 等逐一对应; 边长惰性读取 (像素参数不触及屏幕尺寸, 与从前相同), `ScreenScale.Source.default` 为设备 (每次按需读取, 旋转生效; Xiaomi 平板横屏 2880 x 1800 下探针通过), 测试以 `Source.fixed(w, h)` 注入. `BoundsFilter` / `ToleranceFilter` / `DoubleMinFilter` 也改经 `ScreenScale` (构造参数带默认值, 类型与常量不变). 数字渲染改为 Android-free 的 `FilterFormat.number` (与 `StringUtils.formatDouble(d, 3)` 同规则但固定 `Locale.ROOT`; 原实现按界面语言格式化, 法语 / 俄语等会得到 `boundsLeft(0,5)`, 记入 changelog `fix`). (SOURCE; JVM: `FilterTest` 的度量 / 边界 / 屏幕中心 / 覆盖率用例, `SelectorRegistryTest.screenRelativePropertiesEvaluateAgainstTheDefaultScreenScale`)
 - [x] `BooleanFilter.cache` 移除或改为线程安全; `Selector.filters` 改为在评估时拷贝快照 (保持 `append` 原地修改语义, 但评估线程安全). 落地: 缓存与 `BooleanFilter[supplier, b]` 删除 (主源码集无调用者, 过滤器对象极轻); `Selector.filters` 改为 `CopyOnWriteArrayList` (类型收窄为 `MutableList<Filter>`, `add` / `append` / `plus` 的原地语义不变, `filter` / `toString` 遍历快照; `FilterTest` 以 "求值中追加" 的用例锁定). (SOURCE)
 - [x] JUnit4 测试: 每种 matcher 与 comparison 的真值表 (基于 `FakeUiNode`), 正则 `JsRegexUtils` 转换. 落地: `FilterTest` 重写为 18 用例 (普通字符串 / 模式 / 正则三组 matcher 真值表与渲染, 各 `StringProperty` 的取值与 `null` 规则, `IdFilter` / `ClassNameFilter` 规则, 布尔, 整数比较与命名, `ScreenScale` 的比例 / 整边 / 像素 / 三种取整, 度量比较与两种拼写的命名, 边界过滤器的规范化与屏幕相对参数, 屏幕中心与覆盖率, `FilterFormat`, 动作, `Selector` 快照); 新增 `JsRegexUtilsTest` 4 用例 (字面量解析含转义与字符类, 标志映射, 普通串与字面量的编译等价, 渲染). (JVM)
@@ -457,6 +461,8 @@ P2.6 证据:
 - `DEVICE` (本机 adb, P2.6 APK): 新探针 `build/smoke/collection-probe.js` AVD API 24 `29/29`, Xiaomi 23046RP50C (API 35) `29/29` (`Array.isArray(find())`, `at` 正负序号与越界, `first` / `last`, `nonNull`, `slice` 的四种形式且结果保留 `click` / `at`, 原生 `filter` / `map` / `some` / `every` / `indexOf` / `for...of` / `Array.from`, `size()` 仍绑定, `performAction` 两个重载都可解析, `performActionEach` 逐节点结果与 `for...of`, `clickEach` 限两个节点, 空集合的辅助方法, `children()` 亦带辅助方法; 附带记录 `for...of` 对 Java `List` 可用 / 对 Java `Iterator` 不可用); 冒烟脚本两机 `53/53`; 既有探针 `selector-probe.js` 两机 `33/33`, `filter-probe.js` 两机 `42/42`, `uinode-probe.js` 两机 `16/16`, `query-probe.js` 两机 `28/28`, `p25-probe.js` AVD 输出与 P2.5 记录 diff 仅错误信息中的对象哈希. 探针修正一则: `uinode-probe.js` 冷启动后只等 1.5 s, 启动画面约 1 s 内没有可点击节点, 回调过滤与普通选择器两次计数偶尔跨越该过渡 (0 对 22) 而误报, 现改为等待主界面并重试比对 (诊断探针 12 次采样两者始终一致, 非产品问题).
 
 P2 验收: 全局函数集合快照测试通过; `SelectorMapParser` / 过滤器 / 搜索 / `Compass` / `PollPolicy` 单元测试通过; `sample/accessibility/smoke-legacy-api.js` 真机通过; `UiSelector.kt` 与 `UiObject.kt` 各降至 500 行以下; changelog `improvement` + `feature` (P2.6) 条目已写入.
+
+P2 验收结果 (2026-09-06): 维护者验收通过, 未发现已知问题; `UiObject.kt` 542 行 (余下均为脚本可见成员) 经验收接受, 不再为行数目标继续拆分. 三处有意偏离原文的处理 (P2.4 黑名单可配置未做, P2.5 `clickBounds()` 不施加 `ScreenMetrics` 缩放, P2.5 代码生成器的 `parent().child(i)` 路径保持不可达) 经维护者确认保持现状. P2 关闭. 同日随 D15 落地 `contains` 系列的字面子串语义 (见第 1 节 D15 与 P2.3 第 4 条的备注).
 
 ---
 
@@ -712,7 +718,7 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 
 ## 附录 C: 待决事项
 
-进入对应阶段前由维护者拍板, 结果回填第 1 节. 已决事项: Q1 -> D12, Q2 -> D11, Q3 -> D10, Q4 -> D13, Q5 -> D8, Q6 -> D9, Q7 -> D7.
+进入对应阶段前由维护者拍板, 结果回填第 1 节. 已决事项: Q1 -> D12, Q2 -> D11, Q3 -> D10, Q4 -> D13, Q5 -> D8, Q6 -> D9, Q7 -> D7, Q8 -> D16, Q9 -> D15. 当前无待决事项.
 
 ### Q8 (P1.2 后续): 强制停止后是否自动重新启用无障碍服务
 
@@ -720,11 +726,15 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 
 建议: 保持现行为. 强制停止是用户主动的 "全部停下" 操作, 且系统同样撤销了服务, 自动恢复会绕过用户意图; 需要自动化的场景可用脚本 / 悬浮菜单 / 磁贴的显式入口 (它们现在都会自动启动并接续功能). 若日后要做, 只能以 "进程上次是被强制停止且服务此前启用" 的持久化标记为条件, 而非 `isMalfunctioning()`.
 
+结论 (2026-09-06): 按建议保持现行为 -> D16.
+
 ### Q9 (P2.3 后续): `contains` 系列的普通字符串参数是否改回字面子串
 
 背景 (2026-09-06, P2.3 合并字符串过滤器时确认). 6.7.0 Alpha13 (`ff1703285`) 让等价系列与包含系列接受正则参数时, `StringContainsFilter` 的普通字符串参数也改为经 `JsRegexUtils.compileJsOrPlainRegex` 编译为模式: `textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 `11`, `textContains("(")` 抛 `PatternSyntaxException`; 而 `text(s)` / `textStartsWith` / `textEndsWith` 仍按字面比较. changelog 只提到 "支持正则表达式参数", 未提普通字符串语义的变化, 疑为实现副作用. P2.3 按 "脚本表面不变" 保留了现状 (`StringMatcher.contains(String)` 编译为模式, `FilterTest` 与 `SelectorRegistryTest` 以 `textContains("/OG/i")` 锁定).
 
 建议: 改回字面子串 (`textContains("(")` 不再报错, `textContains(".")` 只匹配含点号的文本), 正则需求经 `textContains(/re/)` 或 `textMatch` 表达; 字符串形式的 JS 字面量 (`"/re/i"`) 是否继续在 `contains` 中视为正则也一并决定 (建议不再, 与 `text(s)` 一致). 改动量: `StringMatcher.contains(String)` 一行 + 两个测试断言 + changelog `fix`; Node Bridge / Python Host 的 `textContains` 走同一 builder, 随之一致.
+
+结论 (2026-09-06): 按建议改回字面子串, 字符串形式的 JS 字面量在 `contains` 中也不再视为正则 -> D15, 同日落地.
 
 ### Q4 (P5.3): 是否引入 "字符串选择器语法"
 
@@ -813,4 +823,6 @@ flow.race(['允许', '同意', '跳过']).click().catch(() => { /* 没有弹窗.
 - 落地 P2.4: Android-free 的 `core/automator/query/{PollPolicy,Poller}.kt` 新增, Android 侧 `core/accessibility/UiSelectorQuery.kt` 新增; `UiSelector` 的 `findOne(timeout)` / `untilFind*` / 弃用的 `findOne()` / `waitFor()` 改为查询计划执行 (默认值与错误信息不变), `FLAG_FIND_ON_UI_THREAD` 的跨线程等待改为 `FutureTask` (有超时的查询有界, 超时抛新增字符串 `error_find_on_ui_thread_timeout`; 无上限查询可中断; 修复原 `VolatileBox` 的唤醒丢失), 无上限方法加 KDoc 标注, `intermission()` / `VolatileBox` 用法删除; 黑名单可配置一项决定不做 (理由见 P2.4). changelog `improvement` 1 + `fix` 1 (10 语言). 证据: `JVM` 全量 2041 / 0; `ANDROID_BUILD` 通过; `DEVICE` 冒烟 AVD API 24 53/53, Xiaomi API 35 53/53 (该机本轮报告 53 项), 新探针 `query-probe.js` 两机 28/28, 既有探针不变; 详见 P2.4 证据.
 - 落地 P2.5 (剩余四条): `core/automator/pick/{PickResultType,Detector,Invoker,Picker}.kt` 新增 (拾取机制迁出 `UiObject` / `UiSelector`), `core/automator/UiObjectSummary.kt` 新增 (`summary` / `describe` / `fingerprint` 面向 `UiNode<*>`, `isSimilar` 逐行迁移), `UiObject` 主构造私有化 (惰性 `indexInParent`, 携带 bridge), `AccessibilityBridge.tap` + `SimpleActionAutomator` 安装, `Auto.kt` 的根节点携带 bridge, `codegeneration/{ReadOnlyUiObject,CodeGenerator}.kt` 替换 Java 版 (前者实现 `UiNode`), `UiSelector.searchIn`; `UiObject.kt` 860 -> 542 行, `UiSelector.kt` 424 -> 316 行. 顺带修复三处: `clickBounds()` 退出脚本事件循环, `['compass', 'p']` 结果类型, 集合子项代码的 `target.;`. changelog `improvement` 1 + `fix` 3 (10 语言). 证据: `JVM` 全量 2053 / 0; `ANDROID_BUILD` 通过; `DEVICE` 冒烟两机 53/53, 拆分前后探针输出 diff 仅含预期差异, 既有探针不变; 详见 P2.5 证据.
 - 落地 P2.6: `UiObjectCollection` 新增 `at` / `first` / `last` / `nonNull` / `slice` 与 `performActionEach` / `clickEach` / `longClickEach` / `scrollForwardEach` / `scrollBackwardEach` / `setTextEach`, 类 KDoc 说明脚本侧是 JS 数组 + 绑定集合方法 + Java 方法遮蔽同名数组方法的规则; 带回调的数组操作 (`filter` / `map` / `forEach` / `some` / `every` / `indexOf`) 与 `for...of` 有意不在 Kotlin 侧重复声明 (本来就是数组自身的, 重复声明反而遮蔽). 顺带修复 `ScriptBridges.asArray` 同名重载只剩最后一个的缺陷 (改为按名称绑定 `NativeJavaObject` 成员). changelog `feature` 1 + `fix` 1 (10 语言). 证据: `JVM` 全量 2058 / 0; `ANDROID_BUILD` 通过; `DEVICE` 新探针 `collection-probe.js` 两机 29/29, 冒烟两机 53/53, 既有探针不变; 详见 P2.6 证据. P2 至此代码完成, 待验收.
-- 下次起点: P1 验收仍待维护者 (以最新构建重跑 53 项冒烟脚本, 含 root / WSS / Shizuku 设备的重启段; 手动验证清单见 P1 验收段), 通过后 P1 关闭. 待维护者决定: Q9 (`contains` 系列普通字符串是否改回字面子串). 代码线索: P2 验收待维护者 (验收段各项: 全局函数快照与各单元测试已在 P2.6 全量通过 (2058 / 0); `sample/accessibility/smoke-legacy-api.js` 真机通过 (以 `build/smoke/run-smoke.js` 镜像, 两机 53/53); changelog `improvement` (P2.1 ~ P2.5) + `feature` (P2.1 / P2.6) 已写入; `UiSelector.kt` 现 316 行; `UiObject.kt` 现 542 行, 距 500 行目标差 42 行, 余下均为脚本可见成员 (导航 / 边界 / 属性 / 动作 / 分配器转发 / `snapshot` / `isShifted`), 是否再拆由验收时决定), 其后 P3 (P3.1 `FlowScheduler` 起; `Stabilizer` 可用 P2.5 的 `UiObject.fingerprint()`, 轮询计划复用 P2.4 的 `PollPolicy` / `Poller`). P2 期间沿用 P1 的节奏: 每个子项独立提交, 完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行; 本机 adb 可用 `build/smoke/run-smoke.js` 一类的包装脚本把控制台输出镜像到 `/sdcard/smoke-result.txt`).
+- 维护者反馈 (同日): P1 与 P2 验收完成, 未发现已知问题; `UiObject.kt` 542 行接受; Q8 -> D16 (保持现状), Q9 -> D15 (改回字面子串); 三处有意偏离保持现状; `.changelog/lang_zh-Hans.json` 与其余语言的条目数差异系维护者手动编辑所致, 暂时忽略 (维护者日后手动修订 zh-Hans 再同步到其它语言, 当前以 Roadmap 推进为主).
+- 落地 D15: `StringMatcher.contains(String)` 改为字面子串 (新增 `Contains` 匹配器; `matches` / `match` 的普通字符串仍编译为模式), `FilterTest` / `SelectorRegistryTest` 断言调整并补充 `"."` / `"("` / `"1+1"` 用例. changelog `fix` 1 (10 语言). 证据: `JVM` 全量 2058 / 0; `ANDROID_BUILD` 通过; `DEVICE` 探针 `build/smoke/contains-probe.js` AVD API 24 与 Xiaomi API 35 均 12/12 (`textContains("(")` 不报错, `textContains(".")` 只匹配含点号文本, 字符串形式 `"/re/i"` 为字面, 正则参数 / `textMatch` / `textMatches` 不变, 集合选择器同样字面), 冒烟两机 53/53.
+- 下次起点: P3.1 (Android-free 调度核心: `FlowStep` / `FlowScheduler` / `Stabilizer` / `FlowErrors` + JUnit4, 以附录 A 为规格; `Stabilizer` 用 P2.5 的 `UiObject.fingerprint()` 经 `UiNode` 抽象, 轮询复用 P2.4 的 `PollPolicy` / `Poller`, 时间源注入), 其后 P3.2 运行时接入. 当前无待决事项. P2 期间沿用 P1 的节奏: 每个子项独立提交, 完成后在真机重跑冒烟脚本 (XQ-DQ72 需先关闭保护模式或改在其它应用前置时运行; 本机 adb 可用 `build/smoke/run-smoke.js` 一类的包装脚本把控制台输出镜像到 `/sdcard/smoke-result.txt`).

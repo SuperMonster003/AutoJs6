@@ -59,7 +59,10 @@ class SelectorRegistryTest {
         assertFalse(filterOf("text", "login").filter(login))
         assertTrue(filterOf("textStartsWith", "Log").filter(login))
         assertTrue(filterOf("textEndsWith", "gin").filter(login))
-        assertTrue(filterOf("textContains", "/OGI/i").filter(login))
+        assertTrue(filterOf("textContains", "ogi").filter(login))
+        // A plain string is a literal substring (D15), not a pattern.
+        assertFalse(filterOf("textContains", "/OGI/i").filter(login))
+        assertFalse(filterOf("textContains", "L.g").filter(login))
         assertTrue(filterOf("textMatches", "L.*n").filter(login))
         assertTrue(filterOf("textMatch", "^L").filter(login))
         assertTrue(filterOf("desc", "Sign in").filter(login))

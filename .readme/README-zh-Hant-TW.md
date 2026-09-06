@@ -445,6 +445,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `pickup` / `detect` 的結果型別 `['compass', 'p']` 一律回報 "未知結果型別", 因 `compass` 在攔截表中登記為 `String` 參數而其簽章為 `CharSequence`; 現在可用
 * `修復` 版面配置分析器為集合控制項的子項產生程式碼且未選擇動作時, 產生的 `forEach` 程式碼區塊含無效敘述 `target.;`; 現在省略該行
 * `修復` 控制項集合陣列上同名的多個多載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數呼叫會回報參數不符; 現在按名稱繫結全部多載
+* `修復` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字串參數自 6.7.0 Alpha13 起被當作正規表示式模式 (`textContains(".")` 匹配任意非空文字, `textContains("1+1")` 匹配 "11", `textContains("(")` 回報錯誤), 現在恢復為字面子字串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正規表示式需求請傳正規表示式參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字串形式的 "/re/flags" 在 `contains` 中不再視為正規表示式
 * `最佳化` `TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `最佳化` TypeScript TSX 執行階段驗證提示現在會跟隨應用程式語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `最佳化` Ace 字型預覽在目前字型尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字型或下載完成後自動隱藏

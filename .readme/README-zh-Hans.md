@@ -421,6 +421,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` `pickup` / `detect` 的结果类型 `['compass', 'p']` 一律报 "未知结果类型", 因 `compass` 在拦截表中登记为 `String` 参数而其签名为 `CharSequence`; 现在可用
 * `修复` 布局分析器为集合控件的子项生成代码且未选择动作时, 生成的 `forEach` 代码块含无效语句 `target.;`; 现在省略该行
 * `修复` 控件集合数组上同名的多个重载只保留最后一个 (如 `performAction(action)` 与 `performAction(action, ...args)`), 以另一种参数个数调用会报参数不匹配; 现在按名称绑定全部重载
+* `修复` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串参数自 6.7.0 Alpha13 起被当作正则模式 (`textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 "11", `textContains("(")` 报错), 现在恢复为字面子串, 与 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正则需求请传正则参数 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 "/re/flags" 在 `contains` 中不再视为正则
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏

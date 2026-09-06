@@ -281,7 +281,8 @@
         "`UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑",
         "`pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 \"未知結果類型\", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用",
         "佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行",
-        "控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載"
+        "控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載",
+        "`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串參數自 6.7.0 Alpha13 起被當作正則模式 (`textContains(\".\")` 匹配任意非空文本, `textContains(\"1+1\")` 匹配 \"11\", `textContains(\"(\")` 報錯), 現在恢復為字面子串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正則需求請傳正則參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 \"/re/flags\" 在 `contains` 中不再視為正則"
       ],
       "improvement": [
         "`TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作",

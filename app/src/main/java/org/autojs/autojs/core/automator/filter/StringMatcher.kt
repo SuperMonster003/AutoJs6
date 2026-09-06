@@ -8,18 +8,21 @@ import org.mozilla.javascript.regexp.NativeRegExp
  * argument. [suffix] is the builder suffix and [argument] the argument as the selector's string
  * form renders it (`"a"` or `/a/i`).
  *
- * Plain strings are compared literally by `equals`, `startsWith` and `endsWith`; `contains`, `matches`
- * and `match` compile them as patterns, and a string in JavaScript literal form (`"/re/flags"`) keeps
- * its flags. Regex arguments match the whole value in `equals` and `matches`, and anywhere in
- * `contains` and `match`. Patterns compile when the matcher is built, so a malformed one fails the
- * builder call rather than the first search.
+ * Plain strings are compared literally by `equals`, `startsWith`, `endsWith` and `contains` (the
+ * latter as a substring; from 6.7.0 Alpha13 until roadmap decision D15 it compiled the string as a
+ * pattern, so `textContains(".")` matched any non-empty text and `textContains("(")` failed);
+ * `matches` and `match` compile them as patterns, and a string in JavaScript literal form
+ * (`"/re/flags"`) keeps its flags there. Regex arguments match the whole value in `equals` and
+ * `matches`, and anywhere in `contains` and `match`. Patterns compile when the matcher is built, so
+ * a malformed one fails the builder call rather than the first search.
  *
  * zh-CN: 字符串属性的比较方式: 六种选择器形式 (`text("a")`, `textStartsWith`, `textEndsWith`, `textContains`, `textMatches`,
  * `textMatch`), 各有普通字符串与正则两种参数. [suffix] 为 builder 后缀, [argument] 为选择器字符串形式中的参数 (`"a"` 或 `/a/i`).
  *
- * `equals` / `startsWith` / `endsWith` 按字面比较普通字符串; `contains` / `matches` / `match` 把它编译为模式, 且 JavaScript
- * 字面量形式的字符串 (`"/re/flags"`) 保留其标志. 正则参数在 `equals` 与 `matches` 中须匹配整个值, 在 `contains` 与 `match`
- * 中匹配任意位置. 模式在构造时编译, 因此写错的模式在 builder 调用时即失败, 而非首次查找时.
+ * `equals` / `startsWith` / `endsWith` / `contains` 按字面比较普通字符串 (后者为子串; 自 6.7.0 Alpha13 至 Roadmap 决定 D15 之前
+ * 它把字符串编译为模式, 因此 `textContains(".")` 匹配任意非空文本, `textContains("(")` 报错); `matches` / `match` 把它编译为模式,
+ * 且 JavaScript 字面量形式的字符串 (`"/re/flags"`) 在其中保留其标志. 正则参数在 `equals` 与 `matches` 中须匹配整个值, 在
+ * `contains` 与 `match` 中匹配任意位置. 模式在构造时编译, 因此写错的模式在 builder 调用时即失败, 而非首次查找时.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -44,6 +47,10 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
         override fun matches(value: CharSequence) = value.endsWith(ending)
     }
 
+    private class Contains(private val part: String) : StringMatcher("Contains", quote(part)) {
+        override fun matches(value: CharSequence) = value.contains(part)
+    }
+
     /** A regex form: the whole value must match, or a match must occur somewhere in it. zh-CN: 正则形式: 整个值须匹配, 或值中任意位置出现匹配. */
     private class Pattern(suffix: String, argument: String, private val regex: Regex, private val whole: Boolean) : StringMatcher(suffix, argument) {
         override fun matches(value: CharSequence) = if (whole) value.matches(regex) else value.contains(regex)
@@ -59,7 +66,7 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
 
         fun endsWith(suffix: String): StringMatcher = EndsWith(suffix)
 
-        fun contains(s: String): StringMatcher = Pattern("Contains", quote(s), compile(s), whole = false)
+        fun contains(s: String): StringMatcher = Contains(s)
 
         fun contains(regex: NativeRegExp): StringMatcher = Pattern("Contains", literal(regex), compile(regex), whole = false)
 

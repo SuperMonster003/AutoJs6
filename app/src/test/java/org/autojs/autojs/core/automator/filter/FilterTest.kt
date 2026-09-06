@@ -87,20 +87,26 @@ class FilterTest {
     }
 
     @Test
-    fun patternsCompileFromPlainStringsAndJsLiteralsExceptInEqualsStartsWithEndsWith() {
-        // `contains` / `matches` / `match` take the string as a pattern; a JS literal keeps its flags.
-        assertTrue(text(StringMatcher.contains("/OG/i")).accepts(login))
-        assertFalse(text(StringMatcher.contains("/OG/")).accepts(login))
-        assertTrue(text(StringMatcher.contains("L.g")).accepts(login))
+    fun patternsCompileFromPlainStringsAndJsLiteralsOnlyInMatchesAndMatch() {
+        // `matches` / `match` take the string as a pattern; a JS literal keeps its flags.
         assertTrue(text(StringMatcher.matches("/login/i")).accepts(login))
         assertTrue(text(StringMatcher.match("/^l/i")).accepts(login))
         assertFalse(text(StringMatcher.match("/^l/")).accepts(login))
-        // `equals`, `startsWith` and `endsWith` never do.
+        // `equals`, `startsWith`, `endsWith` and `contains` never do (D15: `contains` is a literal
+        // substring again, as before 6.7.0 Alpha13).
         assertFalse(text(StringMatcher.equals("/login/i")).accepts(login))
         assertFalse(text(StringMatcher.startsWith("/L/")).accepts(login))
         assertFalse(text(StringMatcher.endsWith("/n/")).accepts(login))
+        assertFalse(text(StringMatcher.contains("/OG/i")).accepts(login))
+        assertFalse(text(StringMatcher.contains("L.g")).accepts(login))
+        assertFalse(text(StringMatcher.contains(".")).accepts(login))
+        assertTrue(text(StringMatcher.contains(".")).accepts(FakeUiNode.root { text = "a.b" }))
+        assertTrue(text(StringMatcher.contains("(")).accepts(FakeUiNode.root { text = "f(x)" }))
+        assertTrue(text(StringMatcher.contains("1+1")).accepts(FakeUiNode.root { text = "1+1=2" }))
+        assertFalse(text(StringMatcher.contains("1+1")).accepts(FakeUiNode.root { text = "11" }))
         // A malformed pattern fails when the matcher is built.
         assertThrows(PatternSyntaxException::class.java) { StringMatcher.match("(") }
+        assertThrows(PatternSyntaxException::class.java) { StringMatcher.matches("(") }
     }
 
     @Test
