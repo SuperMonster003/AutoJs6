@@ -42,7 +42,6 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -63,7 +62,19 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
+import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.automator.GlobalActionAutomator
+import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.bridge.BridgeBounds
+import org.autojs.autojs.core.automator.bridge.BridgeNode
+import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
+import org.autojs.autojs.core.automator.bridge.BridgeSelector
+import org.autojs.autojs.core.automator.search.DFS
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -1543,27 +1554,15 @@ class AndroidNodeBridgeCapabilityProvider(
                 request.id,
                 service.performGlobalAction(AndroidAccessibilityService.GLOBAL_ACTION_RECENTS).toString(),
             )
-            "findByText" -> dispatchAccessibilityFindByText(request, service)
-            "clickText" -> dispatchAccessibilityClickText(request, service)
-            "findOne" -> dispatchAccessibilityFindOne(request, service)
-            "findAll" -> dispatchAccessibilityFindAll(request, service)
-            "click" -> dispatchAccessibilityClick(request, service)
-            "longClick" -> dispatchAccessibilitySelectorAction(
-                request,
-                service,
-                AccessibilityNodeInfo.ACTION_LONG_CLICK,
-            )
-            "setText" -> dispatchAccessibilitySetText(request, service)
-            "scrollForward" -> dispatchAccessibilitySelectorAction(
-                request,
-                service,
-                AccessibilityNodeInfo.ACTION_SCROLL_FORWARD,
-            )
-            "scrollBackward" -> dispatchAccessibilitySelectorAction(
-                request,
-                service,
-                AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
-            )
+            "findByText" -> dispatchAccessibilityFindByText(request)
+            "clickText" -> dispatchAccessibilityClickText(request)
+            "findOne" -> dispatchAccessibilityFindOne(request)
+            "findAll" -> dispatchAccessibilityFindAll(request)
+            "click" -> dispatchAccessibilityClick(request)
+            "longClick" -> dispatchAccessibilitySelectorAction(request, BridgeNodeActions.ACTION_LONG_CLICK)
+            "setText" -> dispatchAccessibilitySetText(request)
+            "scrollForward" -> dispatchAccessibilitySelectorAction(request, BridgeNodeActions.ACTION_SCROLL_FORWARD)
+            "scrollBackward" -> dispatchAccessibilitySelectorAction(request, BridgeNodeActions.ACTION_SCROLL_BACKWARD)
             "swipe" -> dispatchAccessibilitySwipe(request, service)
             "gesture" -> dispatchAccessibilityGesture(request, service)
             else -> unavailable(request)
@@ -1649,51 +1648,59 @@ class AndroidNodeBridgeCapabilityProvider(
         return GlobalActionAutomator(appContext, null) { service }
     }
 
-    private fun dispatchAccessibilityFindByText(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
+    // Roadmap P5.4: the selector descriptor, the node descriptor and the node actions of the frozen
+    // accessibility protocol are the Android-free core/automator/bridge classes over UiObject; the
+    // search is the runtime's DFS (pre-order, the order of the former recursion), the root comes
+    // from the window root provider (the active window root, then the service's cached fast root,
+    // as before) and the nodes are released through the node lifecycle once encoded or acted on.
+    // Roots are never released (the runtime's rule: the fast root is the service's cache).
+    // zh-CN: Roadmap P5.4: 冻结的 accessibility 协议的选择器描述符, 节点描述符与节点动作是 UiObject 之上的 Android-free
+    // core/automator/bridge 类; 搜索用运行时的 DFS (先序, 即原先递归的顺序), 根节点来自窗口根节点 provider (活动窗口根节点, 取不到时
+    // 为服务缓存的 fast 根节点, 与原先相同), 节点在编码或执行动作后经节点生命周期释放. 根节点从不释放 (运行时的规则: fast 根节点是
+    // 服务的缓存).
+    private val bridgeNodeActions = BridgeNodeActions(NodeLifecycle.default)
+
+    private fun dispatchAccessibilityFindByText(request: NodeBridgeRequest): NodeBridgeResponse {
         val text = request.args().optString(0)
-        val node = service.accessibilityRoot()?.findAccessibilityNodeInfosByText(text).orEmpty().firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.toAccessibilityJson()?.toString() ?: "null")
+        val json = withBridgeRoot { root ->
+            root.findAccessibilityNodeInfosByText(text).firstOrNull()?.let { UiObject(it.unwrap()) }?.useBridgeNode(root) { node ->
+                node.toBridgeJson().toString()
+            }
+        }
+        return NodeBridgeResponse.success(request.id, json ?: "null")
     }
 
-    private fun dispatchAccessibilityClickText(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
+    private fun dispatchAccessibilityClickText(request: NodeBridgeRequest): NodeBridgeResponse {
         val text = request.args().optString(0)
-        val node = service.accessibilityRoot()?.findAccessibilityNodeInfosByText(text).orEmpty().firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
+        val clicked = withBridgeRoot { root ->
+            root.findAccessibilityNodeInfosByText(text).firstOrNull()?.let { UiObject(it.unwrap()) }?.useBridgeNode(root) { node ->
+                bridgeNodeActions.click(node)
+            }
+        }
+        return NodeBridgeResponse.success(request.id, clicked.toString())
     }
 
-    private fun dispatchAccessibilityFindOne(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
+    private fun dispatchAccessibilityFindOne(request: NodeBridgeRequest): NodeBridgeResponse {
         val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.success(request.id, "null")
-        val node = service.findAccessibilityNodes(selector).firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.toAccessibilityJson()?.toString() ?: "null")
+        val json = withBridgeRoot { root ->
+            findBridgeNode(root, selector)?.useBridgeNode(root) { node -> node.toBridgeJson().toString() }
+        }
+        return NodeBridgeResponse.success(request.id, json ?: "null")
     }
 
-    private fun dispatchAccessibilityFindAll(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
+    private fun dispatchAccessibilityFindAll(request: NodeBridgeRequest): NodeBridgeResponse {
         val selector = request.args().optJSONObject(0) ?: JSONObject()
         val nodes = JSONArray()
-        service.findAccessibilityNodes(selector).forEach { node ->
-            nodes.put(node.toAccessibilityJson())
+        withBridgeRoot { root ->
+            DFS.search(root, selector.toBridgeSelector().toFilter(), lifecycle = NodeLifecycle.default).forEach { node ->
+                node.useBridgeNode(root) { nodes.put(it.toBridgeJson()) }
+            }
         }
         return NodeBridgeResponse.success(request.id, nodes.toString())
     }
 
-    private fun dispatchAccessibilityClick(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
-        val args = request.args()
-        val selector = args.optJSONObject(0) ?: return NodeBridgeResponse.failure(
+    private fun dispatchAccessibilityClick(request: NodeBridgeRequest): NodeBridgeResponse {
+        val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.failure(
             request.id,
             NodeBridgeError.permissionDenied(
                 message = "AutoJs6 accessibility bridge supports real-device click only through selector descriptors.",
@@ -1701,15 +1708,13 @@ class AndroidNodeBridgeCapabilityProvider(
                 method = request.method,
             ),
         )
-        val node = service.findAccessibilityNodes(selector).firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
+        val clicked = withBridgeRoot { root ->
+            findBridgeNode(root, selector)?.useBridgeNode(root) { node -> bridgeNodeActions.click(node) }
+        }
+        return NodeBridgeResponse.success(request.id, clicked.toString())
     }
 
-    private fun dispatchAccessibilitySelectorAction(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-        action: Int,
-    ): NodeBridgeResponse {
+    private fun dispatchAccessibilitySelectorAction(request: NodeBridgeRequest, action: Int): NodeBridgeResponse {
         val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.failure(
             request.id,
             NodeBridgeError.permissionDenied(
@@ -1718,14 +1723,13 @@ class AndroidNodeBridgeCapabilityProvider(
                 method = request.method,
             ),
         )
-        val node = service.findAccessibilityNodes(selector).firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.performAccessibilityNodeAction(action).toString())
+        val performed = withBridgeRoot { root ->
+            findBridgeNode(root, selector)?.useBridgeNode(root) { node -> bridgeNodeActions.perform(node, action) }
+        }
+        return NodeBridgeResponse.success(request.id, performed.toString())
     }
 
-    private fun dispatchAccessibilitySetText(
-        request: NodeBridgeRequest,
-        service: AutoJsAccessibilityService,
-    ): NodeBridgeResponse {
+    private fun dispatchAccessibilitySetText(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = request.args()
         val selector = args.optJSONObject(0) ?: return NodeBridgeResponse.failure(
             request.id,
@@ -1736,129 +1740,58 @@ class AndroidNodeBridgeCapabilityProvider(
             ),
         )
         val text = args.optString(1)
-        val node = service.findAccessibilityNodes(selector).firstOrNull()
-        return NodeBridgeResponse.success(request.id, node?.setAccessibilityNodeText(text).toString())
+        val set = withBridgeRoot { root ->
+            findBridgeNode(root, selector)?.useBridgeNode(root) { node -> bridgeNodeActions.setText(node, text) }
+        }
+        return NodeBridgeResponse.success(request.id, set.toString())
     }
 
     private fun NodeBridgeRequest.args(): JSONArray {
         return runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
     }
 
-    private fun AutoJsAccessibilityService.accessibilityRoot(): AccessibilityNodeInfo? {
-        return runCatching { rootInActiveWindow ?: fastRootInActiveWindow }.getOrNull()
+    /**
+     * [block] over the root of the active window (the cached fast root when the system provides
+     * none), `null` without one. zh-CN: 以活动窗口的根节点 (系统不提供时为缓存的 fast 根节点) 运行 [block], 没有根节点时为 `null`.
+     */
+    private fun <T> withBridgeRoot(block: (UiObject) -> T?): T? {
+        val provider = WindowRootProvider.default
+        val info = provider.activeRoot(BRIDGE_ROOT_NORMAL) ?: provider.activeRoot(BRIDGE_ROOT_FAST) ?: return null
+        return block(UiObject.createRoot(info))
     }
 
-    private fun AutoJsAccessibilityService.findAccessibilityNodes(selector: JSONObject): List<AccessibilityNodeInfo> {
-        val root = accessibilityRoot() ?: return emptyList()
-        val nodes = mutableListOf<AccessibilityNodeInfo>()
-        collectAccessibilityNodes(root, selector, nodes, depth = 0)
-        return nodes
+    private fun findBridgeNode(root: UiObject, selector: JSONObject): UiObject? {
+        return DFS.search(root, selector.toBridgeSelector().toFilter(), limit = 1, lifecycle = NodeLifecycle.default).firstOrNull()
     }
 
-    private fun collectAccessibilityNodes(
-        node: AccessibilityNodeInfo?,
-        selector: JSONObject,
-        output: MutableList<AccessibilityNodeInfo>,
-        depth: Int,
-    ) {
-        if (node == null) {
-            return
-        }
-        if (node.matchesAccessibilitySelector(selector, depth)) {
-            output += node
-        }
-        repeat(node.childCount) { index ->
-            collectAccessibilityNodes(
-                runCatching { node.getChild(index) }.getOrNull(),
-                selector,
-                output,
-                depth = depth + 1,
-            )
+    // The node is released after [block] unless it is the root itself.
+    // zh-CN: [block] 之后释放节点, 除非它就是根节点.
+    private inline fun <T> UiObject.useBridgeNode(root: UiObject, block: (UiObject) -> T): T {
+        try {
+            return block(this)
+        } finally {
+            if (this !== root) NodeLifecycle.default.release(this)
         }
     }
 
-    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject, depth: Int): Boolean {
-        var hasMatcher = false
-        fun markMatcher(): Boolean {
-            hasMatcher = true
-            return true
-        }
-
-        val nodeText = text?.toString().orEmpty()
-        val text = selector.optString("text").takeIf { it.isNotBlank() }
-        if (text != null && (!markMatcher() || nodeText != text)) {
-            return false
-        }
-        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
-        if (textContains != null && (!markMatcher() || !nodeText.contains(textContains))) {
-            return false
-        }
-        val textMatches = selector.optRegex("textMatches")
-        if (textMatches != null && (!markMatcher() || !textMatches.matches(nodeText))) {
-            return false
-        }
-
-        val nodeDesc = contentDescription?.toString().orEmpty()
-        val desc = selector.optString("desc").takeIf { it.isNotBlank() }
-        if (desc != null && (!markMatcher() || nodeDesc != desc)) {
-            return false
-        }
-        val descContains = selector.optString("descContains").takeIf { it.isNotBlank() }
-        if (descContains != null && (!markMatcher() || !nodeDesc.contains(descContains))) {
-            return false
-        }
-        val descMatches = selector.optRegex("descMatches")
-        if (descMatches != null && (!markMatcher() || !descMatches.matches(nodeDesc))) {
-            return false
-        }
-
-        val nodeId = viewIdResourceName.orEmpty()
-        val id = selector.optString("id").takeIf { it.isNotBlank() }
-        if (id != null && (!markMatcher() || nodeId != id)) {
-            return false
-        }
-        val idMatches = selector.optRegex("idMatches")
-        if (idMatches != null && (!markMatcher() || !idMatches.matches(nodeId))) {
-            return false
-        }
-
-        val nodeClassName = className?.toString().orEmpty()
-        val className = selector.optString("className").takeIf { it.isNotBlank() }
-        if (className != null && (!markMatcher() || nodeClassName != className)) {
-            return false
-        }
-        val classNameMatches = selector.optRegex("classNameMatches")
-        if (classNameMatches != null && (!markMatcher() || !classNameMatches.matches(nodeClassName))) {
-            return false
-        }
-
-        if (selector.has("clickable") && (!markMatcher() || selector.optBoolean("clickable") != isClickable)) {
-            return false
-        }
-        if (selector.has("enabled") && (!markMatcher() || selector.optBoolean("enabled") != isEnabled)) {
-            return false
-        }
-        if (selector.has("scrollable") && (!markMatcher() || selector.optBoolean("scrollable") != isScrollable)) {
-            return false
-        }
-        if (selector.has("depth") && (!markMatcher() || selector.optInt("depth", -1) != depth)) {
-            return false
-        }
-
-        val bounds = Rect()
-        getBoundsInScreen(bounds)
-        selector.optBounds("boundsInside")?.let { target ->
-            if (!markMatcher() || !bounds.insideAccessibilityBounds(target)) {
-                return false
-            }
-        }
-        selector.optBounds("boundsContains")?.let { target ->
-            if (!markMatcher() || !bounds.containsAccessibilityBounds(target)) {
-                return false
-            }
-        }
-        return hasMatcher
-    }
+    private fun JSONObject.toBridgeSelector(): BridgeSelector = BridgeSelector(
+        text = optString("text").takeIf { it.isNotBlank() },
+        textContains = optString("textContains").takeIf { it.isNotBlank() },
+        textMatches = optRegex("textMatches"),
+        desc = optString("desc").takeIf { it.isNotBlank() },
+        descContains = optString("descContains").takeIf { it.isNotBlank() },
+        descMatches = optRegex("descMatches"),
+        id = optString("id").takeIf { it.isNotBlank() },
+        idMatches = optRegex("idMatches"),
+        className = optString("className").takeIf { it.isNotBlank() },
+        classNameMatches = optRegex("classNameMatches"),
+        clickable = if (has("clickable")) optBoolean("clickable") else null,
+        enabled = if (has("enabled")) optBoolean("enabled") else null,
+        scrollable = if (has("scrollable")) optBoolean("scrollable") else null,
+        depth = if (has("depth")) optInt("depth", -1) else null,
+        boundsInside = optBounds("boundsInside"),
+        boundsContains = optBounds("boundsContains"),
+    )
 
     private fun JSONObject.optRegex(name: String): Regex? {
         val value = opt(name) ?: return null
@@ -1876,9 +1809,9 @@ class AndroidNodeBridgeCapabilityProvider(
         return runCatching { Regex(pattern, options) }.getOrNull()
     }
 
-    private fun JSONObject.optBounds(name: String): Rect? {
+    private fun JSONObject.optBounds(name: String): BridgeBounds? {
         val value = optJSONObject(name) ?: return null
-        return Rect(
+        return BridgeBounds(
             value.optInt("left"),
             value.optInt("top"),
             value.optInt("right"),
@@ -1886,64 +1819,23 @@ class AndroidNodeBridgeCapabilityProvider(
         )
     }
 
-    private fun Rect.insideAccessibilityBounds(bounds: Rect): Boolean {
-        return left >= bounds.left && top >= bounds.top && right <= bounds.right && bottom <= bounds.bottom
-    }
-
-    private fun Rect.containsAccessibilityBounds(bounds: Rect): Boolean {
-        return left <= bounds.left && top <= bounds.top && right >= bounds.right && bottom >= bounds.bottom
-    }
-
-    private fun AccessibilityNodeInfo.performAccessibilityNodeAction(action: Int): Boolean {
-        var current: AccessibilityNodeInfo? = this
-        while (current != null) {
-            if (current.isEnabled && runCatching { current.performAction(action) }.getOrDefault(false)) {
-                return true
-            }
-            current = runCatching { current.parent }.getOrNull()
-        }
-        return false
-    }
-
-    private fun AccessibilityNodeInfo.setAccessibilityNodeText(text: String): Boolean {
-        if (!isEnabled) {
-            return false
-        }
-        val arguments = Bundle().apply {
-            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
-        }
-        return runCatching { performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments) }.getOrDefault(false)
-    }
-
-    private fun AccessibilityNodeInfo.toAccessibilityJson(): JSONObject {
-        val bounds = Rect()
-        getBoundsInScreen(bounds)
+    private fun UiObject.toBridgeJson(): JSONObject {
+        val node = BridgeNode.of(this)
         return JSONObject()
-            .put("text", text?.toString().orEmpty())
-            .put("desc", contentDescription?.toString().orEmpty())
-            .put("id", viewIdResourceName.orEmpty())
-            .put("className", className?.toString().orEmpty())
+            .put("text", node.text)
+            .put("desc", node.desc)
+            .put("id", node.id)
+            .put("className", node.className)
             .put(
                 "bounds",
                 JSONObject()
-                    .put("left", bounds.left)
-                    .put("top", bounds.top)
-                    .put("right", bounds.right)
-                    .put("bottom", bounds.bottom),
+                    .put("left", node.bounds.left)
+                    .put("top", node.bounds.top)
+                    .put("right", node.bounds.right)
+                    .put("bottom", node.bounds.bottom),
             )
-            .put("clickable", isClickable)
-            .put("enabled", isEnabled)
-    }
-
-    private fun AccessibilityNodeInfo.clickAccessibilityNode(): Boolean {
-        var current: AccessibilityNodeInfo? = this
-        while (current != null) {
-            if (current.isEnabled && current.isClickable && current.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                return true
-            }
-            current = runCatching { current.parent }.getOrNull()
-        }
-        return runCatching { performAction(AccessibilityNodeInfo.ACTION_CLICK) }.getOrDefault(false)
+            .put("clickable", node.clickable)
+            .put("enabled", node.enabled)
     }
 
     private fun dispatchMediaProjection(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -5213,6 +5105,12 @@ class AndroidNodeBridgeCapabilityProvider(
         // Gestures block a broker dispatch thread until completion; cap the
         // requested duration so one call cannot pin it for minutes.
         const val MAX_ACCESSIBILITY_GESTURE_DURATION_MS = 10_000L
+
+        /** The active window root of the normal mode (`rootInActiveWindow`). zh-CN: normal 模式的活动窗口根节点 (`rootInActiveWindow`). */
+        private val BRIDGE_ROOT_NORMAL = A11yWindowRootPolicy()
+
+        /** The service's cached fast root, the fallback of the frozen protocol. zh-CN: 服务缓存的 fast 根节点, 冻结协议的兜底. */
+        private val BRIDGE_ROOT_FAST = A11yWindowRootPolicy(mode = WindowRootPolicy.Mode.FAST)
     }
 }
 
