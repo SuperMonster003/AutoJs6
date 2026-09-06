@@ -38,6 +38,12 @@ class FlowNode internal constructor(
     internal val callbacks = ArrayList<(State) -> Unit>()
     internal val owned = ArrayList<FlowNode>()
     internal var cancelRequested = false
+
+    /** The worker lane of the chain (that of the root), set by the scheduler at creation. zh-CN: 链 (即根) 的工作 lane, 由调度器在创建时设置. */
+    internal lateinit var worker: FlowLane
+
+    /** Whether a blocking task of this node is running on [worker] right now (guarded by the scheduler's lock). zh-CN: 本节点的阻塞任务此刻是否正在 [worker] 上运行 (受调度器的锁保护). */
+    internal var running = false
     /** The clock reading when the step began, negative until then. zh-CN: 步骤开始时的时钟读数, 开始前为负. */
     internal var startedAt = NOT_STARTED
 
@@ -59,6 +65,9 @@ class FlowNode internal constructor(
 
     /** The context the children of this node run in; the parent's (or the initial one) until settled. zh-CN: 本节点的子节点运行于其中的上下文; 结算前为父节点的 (或初始的). */
     val context: FlowContext get() = scheduler.contextOf(this)
+
+    /** Whether a step has been appended after this node (a leaf rejection is an unhandled one). zh-CN: 本节点之后是否追加了步骤 (叶节点的拒绝即未处理的拒绝). */
+    val hasContinuation: Boolean get() = scheduler.hasChildren(this)
 
     /** Appends [step] after this node and starts it (once this node settles). zh-CN: 在本节点之后追加 [step] 并启动 (待本节点结算). */
     fun next(step: FlowStep): FlowNode = scheduler.start(step, this)

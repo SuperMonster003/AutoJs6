@@ -32,6 +32,14 @@ class FlowScheduler(
     private val clock: () -> Long,
     private val sleep: (Long) -> Unit,
     private val random: () -> Double = { Math.random() },
+    /**
+     * When given, every chain root gets its own worker lane from here (children share their
+     * root's lane); without it every chain uses [worker]. The runtime backs the lanes by a thread
+     * pool, so independent chains (and the sources of a combinator) block concurrently.
+     * zh-CN: 给定时每条链的根从此处得到自己的工作 lane (子节点共用其根的 lane); 否则全部链使用 [worker]. 运行时以线程池支撑这些 lane,
+     * 使独立的链 (以及组合器的各来源) 并发阻塞.
+     */
+    private val workerFactory: (() -> FlowLane)? = null,
 ) {
 
     /** Observes step execution (`flow.trace`). zh-CN: 观察步骤执行 (`flow.trace`). */
@@ -44,8 +52,6 @@ class FlowScheduler(
 
     private val pending = LinkedHashSet<FlowNode>()
 
-    private var runningOnWorker: FlowNode? = null
-
     private val poller = Poller(clock, sleep)
 
     private class Outcome(val state: State, val context: FlowContext)
@@ -57,6 +63,7 @@ class FlowScheduler(
     fun start(step: FlowStep, parent: FlowNode? = null): FlowNode {
         val node = FlowNode(step, parent, this)
         val launchNow = synchronized(lock) {
+            node.worker = parent?.worker ?: workerFactory?.invoke() ?: worker
             pending += node
             when (parent) {
                 null -> true
@@ -74,14 +81,32 @@ class FlowScheduler(
     fun of(value: Any?): FlowNode = start(FlowStep.Value(value))
 
     /**
-     * Cancels every pending node (the script is exiting) and interrupts the worker; returns how
+     * A root that stays pending until [fulfill] or [reject] (or a cancellation): the runtime's way
+     * to adopt a promise. [source] is what is being adopted, kept for diagnostics.
+     * zh-CN: 保持待定直到 [fulfill] / [reject] (或取消) 的根节点: 运行时借此采纳 Promise. [source] 为被采纳的对象, 仅作诊断用.
+     */
+    fun defer(source: Any? = null): FlowNode = start(FlowStep.Adopted(source))
+
+    /** Settles a [defer]red node with [value]; ignored once settled. zh-CN: 以 [value] 结算 [defer] 创建的节点; 已结算则忽略. */
+    fun fulfill(node: FlowNode, value: Any?) = settleAdopted(node, State.Fulfilled(value))
+
+    /** Settles a [defer]red node with [error]; ignored once settled. zh-CN: 以 [error] 结算 [defer] 创建的节点; 已结算则忽略. */
+    fun reject(node: FlowNode, error: Throwable) = settleAdopted(node, State.Rejected(error))
+
+    private fun settleAdopted(node: FlowNode, state: State) {
+        require(node.step is FlowStep.Adopted) { "Only a node created by defer() can be settled from outside, not ${node.step.name}" }
+        settle(node, Outcome(state, contextOf(node)))
+    }
+
+    /**
+     * Cancels every pending node (the script is exiting) and interrupts the lanes of the running ones; returns how
      * many were cancelled.
-     * zh-CN: 取消全部待定节点 (脚本退出) 并中断工作线程; 返回取消的个数.
+     * zh-CN: 取消全部待定节点 (脚本退出) 并中断正在运行的节点所在的 lane; 返回取消的个数.
      */
     fun cancelAll(): Int {
         val nodes = synchronized(lock) {
-            pending.filter { !it.cancelRequested }.onEach { it.cancelRequested = true }.also {
-                if (runningOnWorker != null) worker.interruptCurrent()
+            pending.filter { !it.cancelRequested }.onEach { it.cancelRequested = true }.also { cancelled ->
+                cancelled.filter { it.running }.map { it.worker }.distinct().forEach { it.interruptCurrent() }
             }
         }
         nodes.forEach { settle(it, cancelledOutcome(it)) }
@@ -93,6 +118,8 @@ class FlowScheduler(
     internal fun stateOf(node: FlowNode): State = synchronized(lock) { node.stateInternal }
 
     internal fun contextOf(node: FlowNode): FlowContext = synchronized(lock) { node.contextInternal ?: inheritedContext(node) }
+
+    internal fun hasChildren(node: FlowNode): Boolean = synchronized(lock) { node.children.isNotEmpty() }
 
     private fun inheritedContext(node: FlowNode): FlowContext = node.parent?.let { it.contextInternal ?: inheritedContext(it) } ?: FlowContext.INITIAL
 
@@ -132,22 +159,24 @@ class FlowScheduler(
         val toCancelOwned = ArrayList<FlowNode>()
         synchronized(lock) {
             if (node.stateInternal !is State.Pending || node.cancelRequested) return false
-            var interrupt = false
+            val lanesToInterrupt = LinkedHashSet<FlowLane>()
             var current: FlowNode? = node
             while (current != null) {
                 current.cancelRequested = true
                 toSettle += current
                 toCancelOwned += current.owned
-                if (runningOnWorker === current) interrupt = true
+                if (current.running) lanesToInterrupt += current.worker
                 // Upwards: a pending parent whose every continuation is cancelled has no reason to go on.
                 // zh-CN: 向上: 全部续接都已取消的待定父节点没有继续的理由.
                 val parent = current.parent
                 current = parent?.takeIf { it.stateInternal is State.Pending && !it.cancelRequested && it.children.all { child -> child.cancelRequested } }
             }
-            if (interrupt) worker.interruptCurrent()
+            lanesToInterrupt.forEach { it.interruptCurrent() }
         }
         toSettle.forEach { settle(it, cancelledOutcome(it)) }
-        toCancelOwned.forEach { cancel(it) }
+        // An owned node may belong to another scheduler (an adopted flow of another script thread), so it
+        // is cancelled through its own. zh-CN: 代为运行的节点可能属于另一个调度器 (另一脚本线程的被采纳 Flow), 因此经其自身取消.
+        toCancelOwned.forEach { it.cancel() }
         return true
     }
 
@@ -166,9 +195,9 @@ class FlowScheduler(
             settle(node, cancelledOutcome(node))
             return
         }
-        when (val lane = laneFor(node.step, input)) {
+        when (val lane = laneFor(node, input)) {
             null -> runNode(node, input, ctx, blocking = false)
-            else -> lane.post { runNode(node, input, ctx, blocking = lane === worker) }
+            else -> lane.post { runNode(node, input, ctx, blocking = lane === node.worker) }
         }
     }
 
@@ -187,10 +216,10 @@ class FlowScheduler(
     /**
      * Runs [step] for [node] with [input], reporting through [done] (possibly later, from another
      * thread, for adoptions, combinators and retries); exceptions become rejections, an interrupt
-     * a cancellation. While a blocking step runs the node is the worker's current node, so that
+     * a cancellation. While a blocking step runs the node is marked running on its lane, so that
      * [cancel] can interrupt it.
      * zh-CN: 以 [input] 为 [node] 运行 [step], 经 [done] 报告 (采纳, 组合器与重试可能稍后从其它线程报告); 异常成为拒绝, 中断成为
-     * 取消. 阻塞步骤运行期间该节点是工作线程的当前节点, 使 [cancel] 得以中断它.
+     * 取消. 阻塞步骤运行期间该节点在其 lane 上标记为运行中, 使 [cancel] 得以中断它.
      */
     private fun execute(node: FlowNode, step: FlowStep, input: State, ctx: FlowContext, blocking: Boolean, done: (Outcome) -> Unit) {
         val body = {
@@ -209,16 +238,16 @@ class FlowScheduler(
     }
 
     /**
-     * Runs [block] as the worker's current task of [node], so that [cancel] can interrupt it; the
+     * Runs [block] as the running task of [node] on its lane, so that [cancel] can interrupt it; the
      * interrupt of a cancellation is cleared afterwards so it does not leak into the next task.
-     * zh-CN: 把 [block] 作为工作线程上 [node] 的当前任务运行, 使 [cancel] 得以中断它; 事后清除取消所用的中断, 以免泄漏到下一个任务.
+     * zh-CN: 把 [block] 作为 [node] 在其 lane 上运行中的任务运行, 使 [cancel] 得以中断它; 事后清除取消所用的中断, 以免泄漏到下一个任务.
      */
     private inline fun asWorkerTask(node: FlowNode, block: () -> Unit) {
-        synchronized(lock) { runningOnWorker = node }
+        synchronized(lock) { node.running = true }
         try {
             block()
         } finally {
-            synchronized(lock) { if (runningOnWorker === node) runningOnWorker = null }
+            synchronized(lock) { node.running = false }
             if (isCancelRequested(node)) Thread.interrupted()
         }
     }
@@ -234,6 +263,8 @@ class FlowScheduler(
         }
         when (step) {
             is FlowStep.Value -> done(Outcome(State.Fulfilled(step.value), ctx))
+            // Settled from outside by fulfill / reject. zh-CN: 由外部经 fulfill / reject 结算.
+            is FlowStep.Adopted -> Unit
             is FlowStep.Scope -> done(if (input is State.Fulfilled) Outcome(input, ctx.copy(scope = ctx.scope.overriddenBy(step.scope))) else passThrough)
             is FlowStep.Timeout -> done(if (input is State.Fulfilled) Outcome(input, ctx.copy(deadline = minOf(ctx.deadline, clock() + step.millis))) else passThrough)
             is FlowStep.Wait -> done(if (input is State.Fulfilled) runWait(node, step, ctx) else passThrough)
@@ -438,9 +469,9 @@ class FlowScheduler(
         var last: State = input
         lateinit var attempt: () -> Unit
         val rerun = {
-            val lane = laneFor(target.step, targetInput)
+            val lane = laneFor(target, targetInput)
             val run = Runnable {
-                execute(node, target.step, targetInput, targetContext, blocking = lane === worker) { outcome ->
+                execute(node, target.step, targetInput, targetContext, blocking = lane === target.worker) { outcome ->
                     val state = outcome.state
                     when {
                         state is State.Fulfilled || state is State.Rejected && state.error is FlowError.Cancelled -> done(outcome)
@@ -463,7 +494,7 @@ class FlowScheduler(
                     remaining -= 1
                     when {
                         step.delay <= 0 -> rerun()
-                        else -> worker.post {
+                        else -> node.worker.post {
                             val delayed = runCatching {
                                 asWorkerTask(node) {
                                     ensureNotCancelled(node, step.name, null, 0, (step.times - remaining).toLong())
@@ -485,7 +516,7 @@ class FlowScheduler(
 
     private fun isRerunnable(step: FlowStep): Boolean = when (step) {
         is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Sleep, is FlowStep.Callback, is FlowStep.Combinator -> true
-        is FlowStep.Value, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Retry -> false
+        is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Retry -> false
     }
 
     // Settlement. zh-CN: 结算.
@@ -537,11 +568,12 @@ class FlowScheduler(
         return policy.copy(timeout = remaining) to true
     }
 
-    private fun laneFor(step: FlowStep, input: State): FlowLane? {
+    private fun laneFor(node: FlowNode, input: State): FlowLane? {
+        val step = node.step
         val fulfilled = input is State.Fulfilled
         return when (step) {
-            is FlowStep.Value, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Combinator, is FlowStep.Retry -> null
-            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction -> if (fulfilled) worker else null
+            is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Combinator, is FlowStep.Retry -> null
+            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction -> if (fulfilled) node.worker else null
             is FlowStep.Callback -> {
                 val runs = when (step.kind) {
                     CallbackKind.FINALLY -> step.onOk != null
@@ -551,7 +583,7 @@ class FlowScheduler(
                 }
                 when {
                     !runs -> null
-                    step.kind == CallbackKind.RUN -> worker
+                    step.kind == CallbackKind.RUN -> node.worker
                     else -> script
                 }
             }

@@ -493,6 +493,133 @@ class FlowSchedulerTest {
         assertEquals(3, b.invoked.count { it.first === sameLength })
     }
 
+    // Adopted roots and foreign nodes. zh-CN: 采纳的根与外部节点.
+
+    @Test
+    fun aDeferredNodeIsSettledFromOutsideAndFeedsItsChain() {
+        val root = s.defer("promise")
+        assertEquals("promise", root.step.name)
+        assertFalse(root.hasContinuation)
+        val end = root.next(Callback(CallbackKind.MAP, fn { (it[0] as Int) * 2 }))
+        assertTrue(root.hasContinuation)
+        rig.drain()
+        assertTrue(root.state is State.Pending)
+        assertTrue(end.state is State.Pending)
+        assertEquals(2, s.pendingCount)
+        s.fulfill(root, 21)
+        rig.drain()
+        assertEquals(21, root.value)
+        assertEquals(42, end.value)
+        assertEquals(0, rig.worker.executed)
+        assertEquals(0, s.pendingCount)
+    }
+
+    @Test
+    fun aDeferredNodeRejectsWithTheGivenErrorAndACatchRecovers() {
+        val root = s.defer()
+        val boom = IllegalStateException("boom")
+        val recovered = root.next(Callback(CallbackKind.CATCH, null, fn { (it[0] as Throwable).message }))
+        s.reject(root, boom)
+        rig.drain()
+        assertSame(boom, root.error)
+        assertEquals("boom", recovered.value)
+    }
+
+    @Test
+    fun onlyDeferredNodesAcceptAnOutsideSettlement() {
+        val node = s.of(1)
+        assertThrows(IllegalArgumentException::class.java) { s.fulfill(node, 2) }
+        assertThrows(IllegalArgumentException::class.java) { s.reject(node, RuntimeException()) }
+        assertEquals(1, node.value)
+    }
+
+    @Test
+    fun aCancelledDeferredNodeIgnoresALateSettlement() {
+        val root = s.defer()
+        assertTrue(root.cancel())
+        assertTrue(root.isCancelled)
+        s.fulfill(root, 1)
+        assertTrue(root.error is FlowError.Cancelled)
+        assertFalse(root.cancel())
+        assertEquals(0, s.pendingCount)
+    }
+
+    @Test
+    fun cancellingRoutesAnOwnedForeignNodeThroughItsOwnScheduler() {
+        val other = FlowRig()
+        val foreign = other.scheduler.defer("foreign")
+        val marker = Any()
+        val adopting = object : FlowBindings by b {
+            override fun adopt(value: Any?): FlowNode? = if (value === marker) foreign else null
+        }
+        val scheduler = FlowScheduler(rig.worker, rig.script, adopting, clock = { rig.clock.now }, sleep = { rig.clock.advance(it) })
+        val adopter = scheduler.start(Callback(CallbackKind.RUN, fn { marker }))
+        rig.drain()
+        assertTrue(adopter.state is State.Pending)
+        assertTrue(adopter.cancel())
+        assertTrue(adopter.isCancelled)
+        assertTrue(foreign.isCancelled)
+        assertTrue(foreign.error is FlowError.Cancelled)
+        assertEquals(0, other.scheduler.pendingCount)
+        assertEquals(0, scheduler.pendingCount)
+    }
+
+    // Worker lanes per root. zh-CN: 每个根一条工作 lane.
+
+    @Test
+    fun everyRootGetsItsOwnWorkerLaneAndChildrenShareIt() {
+        val lanes = ArrayList<FakeLane>()
+        val scheduler = FlowScheduler(rig.worker, rig.script, b, clock = { rig.clock.now }, sleep = { rig.clock.advance(it) }, workerFactory = { FakeLane("lane-${lanes.size}").also { lanes += it } })
+        val a = scheduler.start(Wait(rig.never, policy(300)))
+        val aChild = a.next(Sleep(10, 10))
+        val bee = scheduler.start(Wait(rig.appearing(1), policy(300)))
+        assertEquals(2, lanes.size)
+        assertEquals(1, lanes[0].size)
+        assertEquals(1, lanes[1].size)
+        assertEquals(0, rig.worker.size)
+        lanes[1].runAll()
+        assertTrue(bee.state is State.Fulfilled)
+        assertTrue(a.state is State.Pending)
+        lanes[0].runAll()
+        assertTrue(a.error is FlowError.Timeout)
+        assertTrue(aChild.state is State.Rejected)
+        assertEquals(0, lanes[1].size)
+    }
+
+    @Test
+    fun cancellingARunningRootInterruptsItsOwnLaneOnly() {
+        val lanes = ArrayList<FakeLane>()
+        val scheduler = FlowScheduler(rig.worker, rig.script, b, clock = { rig.clock.now }, sleep = { rig.clock.advance(it) }, workerFactory = { FakeLane("lane-${lanes.size}").also { lanes += it } })
+        val other = scheduler.start(Wait(rig.never, policy(300)))
+        lateinit var self: FlowNode
+        var probes = 0
+        self = scheduler.start(Wait({ probes += 1; if (probes == 2) self.cancel(); null }, policy(5000)))
+        lanes[1].runAll()
+        assertTrue(self.isCancelled)
+        assertEquals(2, probes)
+        assertEquals(1, lanes[1].interrupts)
+        assertEquals(0, lanes[0].interrupts)
+        assertEquals(0, rig.worker.interrupts)
+        assertTrue(other.state is State.Pending)
+        lanes[0].runAll()
+        assertTrue(other.error is FlowError.Timeout)
+    }
+
+    @Test
+    fun combinatorSourcesRunOnSeparateLanesSoRaceIsDecidedByTheFirstToAppear() {
+        val lanes = ArrayList<FakeLane>()
+        val scheduler = FlowScheduler(rig.worker, rig.script, b, clock = { rig.clock.now }, sleep = { rig.clock.advance(it) }, workerFactory = { FakeLane("lane-${lanes.size}").also { lanes += it } })
+        b.screen["b"] = "found-b"
+        val race = scheduler.start(Combinator(CombinatorKind.RACE, listOf("a", "b"), policy(10_000)))
+        assertEquals(3, lanes.size)
+        lanes[2].runAll()
+        assertEquals("found-b", race.value)
+        assertEquals(1, b.probes)
+        lanes[1].runAll()
+        assertEquals(1, b.probes)
+        assertEquals(0, scheduler.pendingCount)
+    }
+
     // Real threads. zh-CN: 真实线程.
 
     @Test(timeout = 10_000)

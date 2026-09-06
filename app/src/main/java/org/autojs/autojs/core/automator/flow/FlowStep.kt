@@ -24,6 +24,17 @@ sealed class FlowStep {
     }
 
     /**
+     * A root settled from outside through [FlowScheduler.fulfill] / [FlowScheduler.reject]: how the
+     * runtime adopts a promise (or any thenable) it hooked callbacks onto; [source] is only kept for
+     * diagnostics. Never rerun, never cancelled from below (it has nothing running).
+     * zh-CN: 由外部经 [FlowScheduler.fulfill] / [FlowScheduler.reject] 结算的根节点: 运行时借此采纳挂上了回调的 Promise (或任何
+     * thenable); [source] 只作诊断用. 不会重跑, 也没有可中断的运行中任务.
+     */
+    data class Adopted(val source: Any? = null) : FlowStep() {
+        override val name get() = "promise"
+    }
+
+    /**
      * Polls [cond] under [policy] until the probe yields a value (`wait`, `waitUntil`), or, with
      * [negate], until it yields none (`waitWhile`, resolving `true`). With [within] the found value
      * also becomes the root of the scope of the following waits (`within(cond)`).

@@ -60,6 +60,7 @@ import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.api.augment.events.Keys
 import org.autojs.autojs.runtime.api.augment.files.Files
 import org.autojs.autojs.runtime.api.augment.floaty.Floaty
+import org.autojs.autojs.runtime.api.augment.flow.Flow
 import org.autojs.autojs.runtime.api.augment.formatter.Formatter
 import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
@@ -963,6 +964,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Timers(this).augment(target, timers)
         Auto(this).augment(target)
         Automator(this).augment(target)
+        Flow(this).augment(target)
         Selector(this).augment(target, additionalAttributes = READONLY)
         Events(this).augment(target, events)
         Keys.augmentWithRuntime(target, this)

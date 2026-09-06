@@ -28,6 +28,8 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.runtime.api.augment.flow.FlowExecutor
+import org.autojs.autojs.runtime.api.augment.flow.WaitKind
 import org.autojs.autojs.runtime.api.augment.util.Java
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -62,6 +64,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::removeEvent.name,
         ::removeEvents.name,
         ::waitFor.name,
+        ::wait.name,
         ::setMode.name,
         ::setFlags.name,
         ::getWindowRoot.name,
@@ -307,12 +310,29 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             return removeEvent(scriptRuntime, args)
         }
 
+        /**
+         * `auto.waitFor(timeout?)`: blocks the script until the accessibility service is running.
+         * Not to be confused with [wait], the asynchronous wait for a condition (roadmap D1).
+         * zh-CN: `auto.waitFor(timeout?)`: 阻塞脚本直到无障碍服务运行. 勿与 [wait] (条件的异步等待, Roadmap D1) 混淆.
+         */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun waitFor(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtMost(args, 1) {
             val (timeout) = it
             waitForRhino(timeout)
         }
+
+        /**
+         * `auto.wait(cond, timeout?, interval?)` / `auto.wait(cond, options)`: the asynchronous,
+         * chainable wait for a selector, function, node, flow or promise, returning a `Flow`; the
+         * same as the global `waitAsync` / `wait.async` / `flow.wait` (roadmap D1, P3.2). See
+         * [waitFor] for the service wait it is named after.
+         * zh-CN: `auto.wait(cond, timeout?, interval?)` / `auto.wait(cond, options)`: 对选择器, 函数, 节点, Flow 或 Promise 的
+         * 异步链式等待, 返回 `Flow`; 与全局 `waitAsync` / `wait.async` / `flow.wait` 相同 (Roadmap D1, P3.2). 服务等待见 [waitFor].
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun wait(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = FlowExecutor.of(scriptRuntime).api.wait(null, WaitKind.WAIT, "auto.wait", args)
 
         @JvmStatic
         @RhinoFunctionBody
