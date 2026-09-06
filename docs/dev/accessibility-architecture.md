@@ -12,7 +12,7 @@ Roadmap 负责 "做什么, 做到哪了", 本文负责 "现在长什么样, 目�
 
 ---
 
-## 1. 现状 (2026-09-06, P1.1 ~ P1.7, P2.1 ~ P2.6, P3.1 ~ P3.4, P4.1 ~ P4.3, P5.1 与 P5.2 完成后)
+## 1. 现状 (2026-09-06, P1.1 ~ P1.7, P2.1 ~ P2.6, P3.1 ~ P3.4, P4.1 ~ P4.3, P5.1 ~ P5.3 完成后)
 
 ### 1.1 分层与类映射
 
@@ -126,6 +126,7 @@ Flow 运行时接入 (`runtime/api/augment/flow/**`, P3.2): `FlowExecutor` 每�
 诊断 (P5.1, `core/automator/diagnostics/`, Android-free): `SelectorExplainer` 在各根上遍历一次 (`UiNodes.walk`, 不回收节点, 预算 2000), 对每个节点求值 `UiSelector.selector.filters` 的每个过滤器, 给出单独命中 / 叠加剩余 / 首个清空结果的步骤 / 匹配与 "差一点" 的节点; `NodeDump` 以文本 / JSON / `uiautomator dump` 风格 XML 输出子树 (`DumpOptions`: 深度, 属性, 仅可见, 预算, 缩进); `A11yStats` 挂在 `AccessibilityBridge.stats` (每脚本一个), 由 `UiSelector.findWithin` / `findOf` (每次搜索), `UiSelectorQuery.collection` (每次轮询查询) 与 `FlowExecutor` 固定安装的统计监听器 (每个已结算的 Flow 步骤; `FlowListeners` 让它与 `flow.trace` 的追踪监听器并存) 喂入. JS 表面在 `runtime/api/augment/automator/A11yDiagnosticsApi.kt` (`auto.explain(selector, root?)` / `auto.dump(options?)` / `auto.stats`, 结果为普通对象, `toString()` 为文本报告) 与 `DumpArguments.kt` (选项解析, 未知键报错); `UiObject.toJSON()` (使 `JSON.stringify(node)` 可用) / `dumpSubtree(options?)`. 布局分析器的代码生成 (`codegeneration/CodeGenerator.kt` + `CodeStyle.kt`) 可选 Flow 风格 (`waitThenClick(selector).sync()` 等; 仅 "找到一个" / "等待出现" 且目标可由自身选择器唯一确定时).
 
 事件驱动等待 (P5.2): 每个脚本运行时一个 `core/accessibility/event/A11yEventPulse.kt` (`AccessibilityBridge.pulse`, 首次使用时以观察者优先级订阅 `AccessibilityService.eventBus` 的全部事件类型, 不消费; 处理器在服务主线程上只记录 `IdleWaiter` 的时间戳, 在有等待者接受该类型时复制一次事件投给各 `EventWaiter`, 再触发 `EventGate`; 脚本退出时 `releasePulse()` 取消订阅). Android-free 核心 `core/automator/event/`: `EventGate` (记住一次信号的唤醒闩), `EventWaiter` (事件线程到等待线程的有界信箱, 容量 64, 谓词在等待线程上求值), `IdleWaiter` (按类型记录最后事件时间与计数, 安静期从最后一个事件算起, 同 uiautomator 的 `waitForIdle`). JS 表面 `runtime/api/augment/automator/EventWaitApi.kt` (同步全局 `waitForIdle` / `waitForEvent` / `waitForToast` / `waitForNotification`: 调用线程上解析, 阻塞调用线程, UI 线程上拒绝, 超时抛出脚本的 `FlowError`; Flow 形式为 `FlowStep.Tool`, 链式 `waitForIdle` 透传当前值) 与 `EventWaitArguments.kt` (Android-free 解析, 事件类型名解析注入); toast 与通知复用 `AccessibilityNotificationObserver` 的临时监听器 (其类型检查在 P5.2 修正为 `android.app.Notification`). 事件辅助轮询: `PollPolicy.eventAssisted` / `assisted(minInterval)`, `Poller(clock, sleep, eventSleep?)`; `auto.setFlags(["eventAssistedPolling"])` 打开后 `UiSelector.query` 对重复查询改用 `pulse.poller` (兜底间隔至少 200 ms), `FlowScheduler` 的 `eventSleep` 由 `FlowExecutor` 接到 `pulse.awaitEvent`, `FlowApi.start` 给 `FlowStep.Wait` 打上 `eventAssisted`; 缺省关闭.
+选择器与节点能力 (P5.3): 字符串选择器 `core/automator/selector/SelectorStringParser.kt` (Android-free; 空白分隔的 `key=value` / `key~=regex` / `key=/regex/flags` / `key` / `!key`, 键为 `SelectorRegistry` 的属性, 值经注册表的宽松强制转换, 逗号列表按需拆成多参数, 错误 `SelectorStringException` 带位置 / 条件 / 候选键) 经 `UiSelector.select(String)` 追加过滤器, 反射注册使其成为全局 `select('...')`, 与无参 `select()` 动作按参数类型区分. 节点级等待 `UiObject.isStale()` / `waitUntilGone()` / `waitForStable()`: 副本 `refresh()` 判断存亡, 循环在 Android-free 的 `core/automator/query/NodeWaits.kt`, 轮询器与 `eventAssistedPolling` 共用 (`bridge.pulse.poller`), UI 线程拒绝. 惰性查找 `UiSelector.findIterator()`: `core/automator/search/LazySearch.kt` (Android-free, `Iterator` + `Iterable` + `AutoCloseable`, 与 `DFS` / `BFS` 同序, 拒绝的节点经 `NodeLifecycle` 随遍历释放, `close()` 释放未到达的节点) 包在 `UiObjectIterator` 中, 在调用线程上执行, 不计入 `auto.stats`. 窗口过滤器对象: `core/accessibility/window/WindowMatch.kt` (Android-free 规则 + `Facts<W>` 访问器) 与 `A11yWindowFacts` (框架窗口, `displayId` 在 API 30 之前为默认显示器), 解析在 `runtime/api/augment/automator/WindowMatchArguments.kt`; `auto.setWindowFilter({...})` 进入 `WindowRootPolicy.filter`, `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` 直接过滤 `AccessibilityBridge.windows()`.
 
 ### 1.5 线程模型
 
@@ -174,6 +175,7 @@ Flow 运行时接入 (`runtime/api/augment/flow/**`, P3.2): `FlowExecutor` 每�
 P5.1 的探针 `build/smoke/p51-probe.js` (26 项: explain / dump / `toJSON` / `dumpSubtree` / stats / 代码生成器的 Flow 风格) 写 `/sdcard/p51-probe.txt`, 宿主为设置首页, 同样以 `run-probe.sh` 运行.
 
 P5.2 的探针 `build/smoke/p52-probe.js` (26 项: `waitForIdle` / `waitForEvent` / `waitForToast` / `waitForNotification` 的同步与 Flow 形式, `auto.stats` 集成, `eventAssistedPolling`) 写 `/sdcard/p52-probe.txt`, 宿主为设置首页, 以本应用的 `AboutActivity` 与 `notice()` 制造窗口事件与通知 (API 24 的设置应用对已在运行的任务只带 `activity_new_task` 的启动是空操作, API 26 之前静默通知不产生无障碍事件, 探针在那里以带振动的 builder 发通知), 同样以 `run-probe.sh` 运行.
+P5.3 的探针 `build/smoke/p53-probe.js` (31 项: `select('...')` 语法, `isStale` / `waitUntilGone` / `waitForStable`, `findIterator`, 窗口过滤器对象) 写 `/sdcard/p53-probe.txt`, 宿主为设置首页, 以带 `activity_clear_task` 的 Wi-Fi 页启动替换设置任务来制造 "节点消失", 以本应用的悬浮窗 (在桌面之上) 验证按包名过滤窗口, 同样以 `run-probe.sh` 运行.
 
 ### 1.9 基准数据
 
@@ -219,6 +221,7 @@ P1 的组件均为 "Android-free 核心 + 薄 Android 绑定" 的形态: 注册�
 | 无 | `core/automator/toolkit/**` (Android-free 核心) + `runtime/api/augment/toolkit/{RuntimeToolkit,ToolkitArguments,ToolkitApi}.kt` (薄 Android 适配 + JS 表面) + `automator.*` 与全局函数 (D10) + Flow 步骤 / `flow.*` 起点 | P4 (P4.1 ~ P4.3 落地 2026-09-06, 待验收; 文档与 d.ts 同步留 P6) |
 | 无 | `core/automator/diagnostics/{SelectorExplainer,NodeDump,A11yStats}.kt` (Android-free) + `runtime/api/augment/automator/{A11yDiagnosticsApi,DumpArguments}.kt` (`auto.explain` / `auto.dump` / `auto.stats`) + `UiObject.toJSON` / `dumpSubtree` + 代码生成器的 Flow 风格 (`codegeneration/CodeStyle.kt`) | P5.1 (已完成 2026-09-06; API 文档与 d.ts 留 P6) |
 | 无 | `core/automator/event/{EventGate,EventWaiter,IdleWaiter}.kt` (Android-free) + `core/accessibility/event/A11yEventPulse.kt` + `runtime/api/augment/automator/{EventWaitApi,EventWaitArguments}.kt` (`waitForIdle` / `waitForEvent` / `waitForToast` / `waitForNotification`, 同步与 Flow 形式) + `PollPolicy.eventAssisted` / `Poller.eventSleep` / `auto.setFlags(["eventAssistedPolling"])` | P5.2 (已完成 2026-09-06; API 文档与 d.ts 留 P6) |
+| 无 | `core/automator/selector/SelectorStringParser.kt` + `UiSelector.select(String)` (D13) + `core/automator/query/NodeWaits.kt` + `UiObject.isStale` / `waitUntilGone` / `waitForStable` + `core/automator/search/LazySearch.kt` + `UiObjectIterator` + `UiSelector.findIterator` + `core/accessibility/window/{WindowMatch,A11yWindowFacts}.kt` + `runtime/api/augment/automator/WindowMatchArguments.kt` (`auto.setWindowFilter({...})` / `auto.findWindows` / `auto.findWindowRoots`) | P5.3 (已完成 2026-09-06; API 文档与 d.ts 留 P6) |
 | `SimpleActionAutomator.captureScreen` 内联的截图回调; Node Bridge / Python Host 各自的 `hasOperationalState` 三元判定 | `A11yScreenshotter`; `registry.isOperational` | P1.6 (已完成 2026-09-05) |
 
 ---
@@ -239,7 +242,7 @@ P1 的组件均为 "Android-free 核心 + 薄 Android 绑定" 的形态: 注册�
 
 ### 3.2 字符串选择器语法 (Q4 -> D13, 2026-09-05)
 
-已决: 方案 B, 入口复用 `select`. 全局 `select('text=登录 clickable')` 返回 `UiSelector`; `UiSelector.select(String)` 追加解析出的过滤器; 无参 `select()` 保持 `ACTION_SELECT` 动作语义. 语法与约束见 Roadmap D13, 实现于 P5.3 (依赖 P2.2 的 `SelectorRegistry` 提供键名与别名).
+已决: 方案 B, 入口复用 `select`. 全局 `select('text=登录 clickable')` 返回 `UiSelector`; `UiSelector.select(String)` 追加解析出的过滤器; 无参 `select()` 保持 `ACTION_SELECT` 动作语义. 语法与约束见 Roadmap D13, 已于 P5.3 实现 (2026-09-06: `SelectorStringParser` + `UiSelector.select(String)`, 依赖 P2.2 的 `SelectorRegistry` 提供键名与别名; 实现细节见 1.4).
 
 ---
 

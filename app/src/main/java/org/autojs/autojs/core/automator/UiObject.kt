@@ -3,6 +3,7 @@ package org.autojs.autojs.core.automator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.AutoJs
@@ -12,15 +13,21 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.accessibility.UiSelectorQuery
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
+import org.autojs.autojs.core.automator.flow.MissingPolicy
+import org.autojs.autojs.core.automator.flow.Stability
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
 import org.autojs.autojs.core.automator.pick.Detector
 import org.autojs.autojs.core.automator.pick.PickResultType
+import org.autojs.autojs.core.automator.query.NodeWaits
+import org.autojs.autojs.core.automator.query.PollPolicy
+import org.autojs.autojs.core.automator.query.Poller
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.automator.DumpArguments
@@ -514,10 +521,96 @@ open class UiObject private constructor(
         }
     }
 
+    /**
+     * Whether the node has left the window (roadmap P5.3): refreshing a copy of it fails, so its
+     * own properties are what they were and actions on it no longer reach a view. The node itself
+     * is not refreshed. zh-CN: 节点是否已离开窗口 (Roadmap P5.3): 刷新它的副本失败, 其自身属性停留在过去, 对它的动作不再到达视图.
+     * 节点本身不被刷新.
+     */
+    fun isStale(): Boolean {
+        val probe = snapshot()
+        try {
+            return !probe.refresh()
+        } finally {
+            NodeLifecycle.default.release(probe)
+        }
+    }
+
+    /**
+     * Waits until the node is gone (roadmap P5.3): no longer refreshable, or refreshed but not
+     * visible to the user (a dismissed dialog, a finished progress bar). `true` when it went within
+     * [timeout] milliseconds (0 or less: no limit), polled every [interval] milliseconds and woken
+     * early by accessibility events under `auto.setFlags(["eventAssistedPolling"])`. Not for the
+     * UI thread. zh-CN: 等待节点消失 (Roadmap P5.3): 不能再刷新, 或刷新后对用户不可见 (已关闭的对话框, 已完成的进度条). 在 [timeout]
+     * 毫秒内 (0 或负数: 不限) 消失时为 `true`, 每 [interval] 毫秒轮询一次, `auto.setFlags(["eventAssistedPolling"])` 下由无障碍事件
+     * 提前唤醒. 不可在 UI 线程调用.
+     */
+    @JvmOverloads
+    fun waitUntilGone(timeout: Long = DEFAULT_WAIT_TIMEOUT, interval: Long = DEFAULT_WAIT_INTERVAL): Boolean {
+        ensureNotUiThread("waitUntilGone")
+        return NodeWaits.untilGone(waitPoller(), waitPolicy("waitUntilGone", timeout, interval)) { isGone() }
+    }
+
+    /**
+     * Waits until the node's own state (bounds, text, description, class name, child count, key
+     * flags: [fingerprint]) has stayed the same for [stableFor] milliseconds (roadmap P5.3),
+     * refreshing this node as it samples, so that it reflects the settled state on return. `true`
+     * once stable within [timeout] milliseconds (0 or less: no limit); `false` on timeout, or as
+     * soon as the node is gone. Polled every [interval] milliseconds, event-assisted like
+     * [waitUntilGone]. Not for the UI thread.
+     * zh-CN: 等待节点自身状态 (边界, 文本, 描述, 类名, 子节点数, 关键标志: [fingerprint]) 保持不变达 [stableFor] 毫秒 (Roadmap P5.3),
+     * 采样时刷新本节点, 返回时它反映稳定后的状态. 在 [timeout] 毫秒 (0 或负数: 不限) 内稳定为 `true`; 超时或节点一旦消失为 `false`.
+     * 每 [interval] 毫秒轮询一次, 事件辅助同 [waitUntilGone]. 不可在 UI 线程调用.
+     */
+    @JvmOverloads
+    fun waitForStable(stableFor: Long = Stability.DEFAULT_STABLE_FOR, timeout: Long = DEFAULT_WAIT_TIMEOUT, interval: Long = DEFAULT_WAIT_INTERVAL): Boolean {
+        ensureNotUiThread("waitForStable")
+        if (stableFor < 0) {
+            throw WrappedIllegalArgumentException("Argument \"stableFor\" ${stableFor.jsBrief()} for UiObject#waitForStable must be greater than or equal to 0")
+        }
+        val stability = Stability(stableFor = stableFor, missing = MissingPolicy.FAIL)
+        return NodeWaits.untilStable(waitPoller(), waitPolicy("waitForStable", timeout, interval), { SystemClock.uptimeMillis() }, stability) {
+            if (refresh()) this else null
+        }
+    }
+
+    private fun isGone(): Boolean {
+        val probe = snapshot()
+        try {
+            return !probe.refresh() || !probe.isVisibleToUser
+        } finally {
+            NodeLifecycle.default.release(probe)
+        }
+    }
+
+    // The script's poller: the bridge's event pulse under FLAG_EVENT_ASSISTED_POLLING, else plain sleeps.
+    // zh-CN: 脚本的轮询器: FLAG_EVENT_ASSISTED_POLLING 下为 bridge 的事件脉冲, 否则为普通休眠.
+    private fun waitPoller(): Poller = bridge?.takeIf { it.isEventAssistedPolling }?.pulse?.poller ?: UiSelectorQuery.defaultPoller
+
+    private fun waitPolicy(function: String, timeout: Long, interval: Long): PollPolicy {
+        if (interval < 0) {
+            throw WrappedIllegalArgumentException("Argument \"interval\" ${interval.jsBrief()} for UiObject#$function must be greater than or equal to 0")
+        }
+        val policy = PollPolicy.within(timeout, interval)
+        return if (bridge?.isEventAssistedPolling == true) policy.assisted() else policy
+    }
+
+    private fun ensureNotUiThread(function: String) {
+        if (RhinoUtils.isUiThread()) {
+            throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "UiObject#$function"))
+        }
+    }
+
     companion object {
 
         internal const val ACTION_APPEND_TEXT = 0x00200001
         internal const val COMPASS_PASS_ON = Compass.PASS_ON
+
+        /** The timeout of `waitUntilGone()` / `waitForStable()` without an argument. zh-CN: 不带参数的 `waitUntilGone()` / `waitForStable()` 的超时. */
+        const val DEFAULT_WAIT_TIMEOUT = 10_000L
+
+        /** Their poll interval, the one of `findOne(timeout)`. zh-CN: 它们的轮询间隔, 同 `findOne(timeout)`. */
+        const val DEFAULT_WAIT_INTERVAL = PollPolicy.DEFAULT_INTERVAL
         internal const val RESULT_TYPE_WIDGET = PickResultType.WIDGET
 
         @JvmStatic

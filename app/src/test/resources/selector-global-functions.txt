@@ -81,6 +81,7 @@ exists
 expand
 filter
 find
+findIterator
 findOnce
 findOne
 focus

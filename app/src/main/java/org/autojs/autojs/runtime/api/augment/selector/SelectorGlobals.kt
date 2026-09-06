@@ -21,7 +21,7 @@ object SelectorGlobals {
 
     /** Query methods exported besides the registry. zh-CN: 注册表之外导出的查询方法. */
     val queryMethods: List<String> = listOf(
-        "find", "findOnce", "findOne", "untilFind", "untilFindOne", "waitFor", "exists", "performAction",
+        "find", "findIterator", "findOnce", "findOne", "untilFind", "untilFindOne", "waitFor", "exists", "performAction",
     )
 
     /** The node actions of [UiObjectActions], as `UiSelector` performs them on what it finds. zh-CN: [UiObjectActions] 的节点动作, `UiSelector` 对找到的节点执行它们. */

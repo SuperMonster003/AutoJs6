@@ -12,6 +12,7 @@ import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.Acce
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.EventKeyFunction
 import org.autojs.autojs.core.accessibility.event.A11yEvent
 import org.autojs.autojs.core.accessibility.event.A11yEventBus
+import org.autojs.autojs.core.accessibility.window.A11yWindowFacts
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
@@ -70,6 +71,8 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::setFlags.name,
         ::getWindowRoot.name,
         ::setWindowFilter.name,
+        ::findWindows.name,
+        ::findWindowRoots.name,
         ::launchSettings.name,
         ::clearCache.name,
         ::currentPackage.name,
@@ -396,11 +399,51 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 filter.isJsNullish() -> accessibilityBridge.setWindowFilter { true }
                 filter is Boolean -> accessibilityBridge.setWindowFilter { filter }
                 filter is WindowFilter -> accessibilityBridge.setWindowFilter(filter)
+                filter is NativeObject -> WindowMatchArguments.parse(filter, "auto.setWindowFilter").let { match ->
+                    accessibilityBridge.setWindowFilter { info -> match.matches(info, A11yWindowFacts) }
+                }
                 filter is Callable -> accessibilityBridge.setWindowFilter { info ->
                     Context.toBoolean(callFunction(scriptRuntime, filter, null as VarScope?, scriptRuntime.topLevelScope.globalThis, arrayOf(info)))
                 }
                 else -> throw WrappedIllegalArgumentException("Argument filter ($filter) is invalid for auto.setWindowFilter")
             }
+        }
+
+        /**
+         * The service's windows passing a filter object (roadmap P5.3), in the framework's order:
+         * `auto.findWindows({ type: "application", packageName: "com.android.settings" })`; the keys are
+         * `type` (a name or names: `application`, `inputMethod`, `system`, `accessibilityOverlay`,
+         * `splitScreenDivider`, `magnificationOverlay`), `packageName` / `title` (a string or a regular
+         * expression), `displayId`, `active`, `focused`, `id`, `layer`; without an argument, every window.
+         * zh-CN: 通过过滤器对象 (Roadmap P5.3) 的服务窗口, 按框架的顺序: `auto.findWindows({ type: "application", packageName: "com.android.settings" })`;
+         * 键为 `type` (一个或多个名称), `packageName` / `title` (字符串或正则), `displayId`, `active`, `focused`, `id`, `layer`; 不带参数时为全部窗口.
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun findWindows(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtMost(args, 1) {
+            val (options) = it
+            val match = WindowMatchArguments.parse(options, "auto.findWindows")
+            val windows = scriptRuntime.accessibilityBridge.windows().filter { window -> match.matches(window, A11yWindowFacts) }
+            Java.toJsArrayRhino(windows, true)
+        }
+
+        /**
+         * The root nodes of [findWindows] (roadmap P5.3): the windows passing the filter object that
+         * have a root, as an array of `UiObject`; unlike `auto.windowRoots`, the window filter of
+         * `auto.setWindowFilter` does not apply. zh-CN: [findWindows] 的根节点 (Roadmap P5.3): 通过过滤器对象且有根节点的窗口,
+         * 为 `UiObject` 数组; 与 `auto.windowRoots` 不同, `auto.setWindowFilter` 的窗口过滤器不生效.
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun findWindowRoots(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtMost(args, 1) {
+            val (options) = it
+            val match = WindowMatchArguments.parse(options, "auto.findWindowRoots")
+            val bridge = scriptRuntime.accessibilityBridge
+            bridge.windows()
+                .filter { window -> match.matches(window, A11yWindowFacts) }
+                .mapNotNull { window -> runCatching { window.root }.getOrNull() }
+                .map { root -> UiObject.createRoot(root, null, bridge) }
+                .toNativeArray()
         }
 
         @JvmStatic

@@ -12,13 +12,16 @@ import org.autojs.autojs.core.automator.UiObjectActions
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.EMPTY
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
+import org.autojs.autojs.core.automator.UiObjectIterator
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.Selector
 import org.autojs.autojs.core.automator.pick.Picker
 import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
+import org.autojs.autojs.core.automator.selector.SelectorStringParser
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
+import org.autojs.autojs.core.automator.search.LazySearch
 import org.autojs.autojs.core.automator.search.SearchAlgorithm
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.StringReadable
@@ -93,6 +96,19 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         }
     }
 
+    /**
+     * Appends the terms of a string selector (roadmap D13 / P5.3), `select("text=Login clickable")`:
+     * whitespace-separated `key=value`, `key~=regex` (or `key=/regex/flags`), `key` and `!key`, with
+     * quotes around a value that has spaces; the keys are the registry properties (`auto.explain`
+     * lists them). Returns this selector; a malformed string throws [org.autojs.autojs.core.automator.selector.SelectorStringException]
+     * with the character position. `select()` without an argument stays the node action.
+     * zh-CN: 追加字符串选择器 (Roadmap D13 / P5.3) 的各条件, `select("text=Login clickable")`: 以空白分隔的 `key=value`,
+     * `key~=regex` (或 `key=/regex/flags`), `key` 与 `!key`, 含空格的值加引号; 键为注册表属性 (`auto.explain` 会列出). 返回本选择器;
+     * 格式错误的字符串抛出带字符位置的 [org.autojs.autojs.core.automator.selector.SelectorStringException]. 无参数的 `select()` 仍是节点动作.
+     */
+    @ScriptInterface
+    fun select(syntax: String): UiSelector = SelectorStringParser().parse(syntax, this)
+
     @ScriptInterface
     fun exists() = findOnce() != null
 
@@ -115,6 +131,26 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
                 else -> EMPTY
             }
         }
+    }
+
+    /**
+     * A lazy `find()` (roadmap P5.3): the matches under the current window roots, searched in
+     * `find()` order (the selector's algorithm, DFS by default) as the iterator advances, so a
+     * consumer that stops early (`break` out of `for (let node of sel.findIterator())`, or
+     * `close()`) never walks the rest of the tree; nodes the filters reject are released as the walk
+     * passes them. One search, no polling, on the calling thread; not counted in `auto.stats`.
+     * zh-CN: 惰性的 `find()` (Roadmap P5.3): 当前窗口根节点之下的匹配, 随迭代器前进按 `find()` 的顺序 (选择器的算法, 默认 DFS) 搜索,
+     * 提前停止的消费方 (`for (let node of sel.findIterator())` 中 `break`, 或 `close()`) 不会遍历树的其余部分; 被过滤器拒绝的节点在
+     * 经过时释放. 单次搜索, 不轮询, 在调用线程上; 不计入 `auto.stats`.
+     */
+    @ScriptInterface
+    fun findIterator(): UiObjectIterator {
+        val bridge = mAccessibilityBridge ?: return UiObjectIterator(LazySearch(emptyList(), selector))
+        bridge.ensureServiceStarted()
+        val roots = bridge.windowRoots()
+            .filter { !bridge.config.isInBlacklist("${it.packageName}") }
+            .map { UiObject.createRoot(it, mAllocator, bridge) }
+        return UiObjectIterator(LazySearch(roots, selector, breadthFirst = searchAlgorithm === BFS))
     }
 
     /**

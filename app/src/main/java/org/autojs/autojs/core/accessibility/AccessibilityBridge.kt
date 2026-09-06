@@ -145,6 +145,12 @@ abstract class AccessibilityBridge(
     fun windowRoots(): List<AccessibilityNodeInfo> = rootProvider.roots(windowRootPolicy)
 
     /**
+     * The service's windows, unfiltered, in the framework's order; empty without a service.
+     * zh-CN: 服务的全部窗口, 未过滤, 按框架的顺序; 无服务时为空.
+     */
+    fun windows(): List<AccessibilityWindowInfo> = rootProvider.windows()
+
+    /**
      * The first of [windowRoots], resolved lazily (with a window filter, only the windows up to the
      * first one that has a root are queried).
      * zh-CN: [windowRoots] 的首个根节点, 惰性解析 (有窗口过滤器时只查询到首个有根节点的窗口为止).
