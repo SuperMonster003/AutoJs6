@@ -128,7 +128,8 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
     /** The step of a Flow form: parsed now on the script thread, run later on the worker. zh-CN: Flow 形式的步骤: 此刻在脚本线程解析, 稍后在工作线程运行. */
     fun step(name: String, args: Array<out Any?>, chained: Boolean): Pair<FlowStep.Tool, Pair<Callable?, Callable?>> {
         val prepared = prepare(if (chained) Mode.CHAINED else Mode.ROOT, name, args)
-        return FlowStep.Tool(name, prepared.detail, prepared.run) to (prepared.onOk to prepared.onErr)
+        // The body runs on a Flow worker, which has no top call of its own. zh-CN: 主体在 Flow 工作线程上运行, 它没有自己的顶层调用.
+        return FlowStep.Tool(name, prepared.detail) { value, scope -> owner.bindings.withTopCall { prepared.run(value, scope) } } to (prepared.onOk to prepared.onErr)
     }
 
     private fun prepare(mode: Mode, name: String, args: Array<out Any?>): Prepared = when (name) {
@@ -372,7 +373,8 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
         else -> t
     }
 
-    private fun toJs(value: Any?): Any? = RhinoUtils.toJsValue(scope, value)
+    /** Inside the engine's Rhino context: a worker thread has none of its own, and a bare one cannot build arrays. zh-CN: 在引擎的 Rhino 上下文内: 工作线程没有自己的上下文, 而裸上下文无法构建数组. */
+    private fun toJs(value: Any?): Any? = RhinoUtils.withRhinoContext(scriptRuntime) { _ -> RhinoUtils.toJsValue(scope, value) }
 
     /**
      * The handle of a running popup guard (`dismissPopups({ watch: true })`): `stop()`, `trigger()`,
@@ -431,8 +433,10 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
     /** The JavaScript shapes of the outcomes. zh-CN: 各结果的 JavaScript 形态. */
     private inner class Results {
 
-        private fun obj(vararg pairs: Pair<String, Any?>): NativeObject = RhinoUtils.newNativeObject(scope).apply {
-            pairs.forEach { (key, value) -> put(key, this, js(value)) }
+        private fun obj(vararg pairs: Pair<String, Any?>): NativeObject = RhinoUtils.withRhinoContext(scriptRuntime) { _ ->
+            RhinoUtils.newNativeObject(scope).apply {
+                pairs.forEach { (key, value) -> put(key, this, js(value)) }
+            }
         }
 
         private fun js(value: Any?): Any? = when (value) {

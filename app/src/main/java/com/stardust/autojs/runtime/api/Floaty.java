@@ -176,11 +176,13 @@ public class Floaty {
         }
 
         public void requestFocus() {
-            mWindow.requestWindowFocus();
+            // The layout update touches the attached view; a script thread must not (CalledFromWrongThreadException).
+            // zh-CN: 布局更新会碰已附着的视图; 脚本线程不能这样做 (CalledFromWrongThreadException).
+            runWithWindow(() -> mWindow.requestWindowFocus());
         }
 
         public void disableFocus() {
-            mWindow.disableWindowFocus();
+            runWithWindow(() -> mWindow.disableWindowFocus());
         }
 
         public void close() {
@@ -285,11 +287,13 @@ public class Floaty {
         }
 
         public void requestFocus() {
-            mWindow.requestWindowFocus();
+            // The layout update touches the attached view; a script thread must not (CalledFromWrongThreadException).
+            // zh-CN: 布局更新会碰已附着的视图; 脚本线程不能这样做 (CalledFromWrongThreadException).
+            runWithWindow(() -> mWindow.requestWindowFocus());
         }
 
         public void disableFocus() {
-            mWindow.disableWindowFocus();
+            runWithWindow(() -> mWindow.disableWindowFocus());
         }
 
         public void close() {

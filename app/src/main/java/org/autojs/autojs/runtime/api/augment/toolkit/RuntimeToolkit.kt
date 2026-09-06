@@ -171,7 +171,21 @@ internal class RuntimeToolkit private constructor(val scriptRuntime: ScriptRunti
  */
 internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, private val owner: RuntimeToolkit) : ToolkitBindings<UiObject> {
 
-    override fun find(target: Any?, root: UiObject?): UiObject? = when (val t = RhinoUtils.unwrap(target)) {
+    /**
+     * [block] inside the engine's Rhino context and a top call: a toolkit worker thread has neither,
+     * and wrapping a node collection into a script array (as a pickup does) needs both.
+     * zh-CN: 在引擎的 Rhino 上下文与一次顶层调用内运行 [block]: 工具集的工作线程两者皆无, 而把节点集合包装成脚本数组 (拾取时会这样做) 两者都要.
+     */
+    fun <T> withTopCall(block: () -> T): T = RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
+        when {
+            RhinoScriptRuntime.hasTopCall(cx) -> block()
+            else -> @Suppress("UNCHECKED_CAST") (RhinoScriptRuntime.doTopCall(Callable { _, _, _, _ -> block() }, cx, scriptRuntime.topLevelScope, Undefined.SCRIPTABLE_UNDEFINED, emptyArray(), false) as T)
+        }
+    }
+
+    override fun find(target: Any?, root: UiObject?): UiObject? = withTopCall { findNow(target, root) }
+
+    private fun findNow(target: Any?, root: UiObject?): UiObject? = when (val t = RhinoUtils.unwrap(target)) {
         is UiObject -> t.takeIf { it.refresh() }
         is Callable -> nodeOf(callScript(t))
         is Function0<*> -> nodeOf(t())
@@ -182,7 +196,9 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
         }
     }
 
-    override fun findAll(target: Any?, root: UiObject?): List<UiObject> = when (val t = RhinoUtils.unwrap(target)) {
+    override fun findAll(target: Any?, root: UiObject?): List<UiObject> = withTopCall { findAllNow(target, root) }
+
+    private fun findAllNow(target: Any?, root: UiObject?): List<UiObject> = when (val t = RhinoUtils.unwrap(target)) {
         is UiObject -> if (t.refresh()) listOf(t) else emptyList()
         is Callable -> nodesOf(callScript(t))
         is Function0<*> -> nodesOf(t())
@@ -193,7 +209,9 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
         }
     }
 
-    override fun probe(cond: Any?, root: UiObject?): Any? = when (val c = RhinoUtils.unwrap(cond)) {
+    override fun probe(cond: Any?, root: UiObject?): Any? = withTopCall { probeNow(cond, root) }
+
+    private fun probeNow(cond: Any?, root: UiObject?): Any? = when (val c = RhinoUtils.unwrap(cond)) {
         is UiObject -> c.takeIf { it.refresh() }
         is Callable -> satisfied(callScript(c))
         is Function0<*> -> satisfied(c())
@@ -220,7 +238,7 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
 
     override fun refresh(node: UiObject): Boolean = node.refresh()
 
-    override fun pick(node: UiObject, resultType: Any?): Any? = RhinoUtils.unwrap(Detector.detect(scriptRuntime, node, null, resultType ?: PickResultType.WIDGET, null))
+    override fun pick(node: UiObject, resultType: Any?): Any? = withTopCall { RhinoUtils.unwrap(Detector.detect(scriptRuntime, node, null, resultType ?: PickResultType.WIDGET, null)) }
 
     /** The package in front per the activity info the service feeds, so the service is started first (a fresh install has it idle). zh-CN: 服务喂给活动信息的前台包名, 因此先启动服务 (新安装时服务尚未运行). */
     override fun currentPackage(): String? {
@@ -330,7 +348,14 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
 
         private val COLLECTION = PickResultType.spellings(PickResultType.WidgetCollection).first()
 
-        private val WINDOW_EVENT_TYPES = setOf(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
+        /**
+         * A window's state or content, plus the window list itself (a window added, removed, or made
+         * active / focused: an overlay that turns focusable after it appeared raises only this one on
+         * API 24, and a guard pass before that finds nothing in it).
+         * zh-CN: 窗口的状态或内容, 加上窗口列表本身 (窗口增删或成为活动 / 焦点窗口: 出现后才变为可聚焦的悬浮窗在 API 24 上只发出这一种事件,
+         * 而在此之前的守护轮次在其中什么也找不到).
+         */
+        private val WINDOW_EVENT_TYPES = setOf(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, AccessibilityEvent.TYPE_WINDOWS_CHANGED)
 
     }
 

@@ -448,6 +448,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 레이아웃 검사기가 동작을 선택하지 않은 채 컬렉션 컨트롤의 자식 항목 코드를 생성하면 생성된 `forEach` 블록에 잘못된 문장 `target.;` 이 포함되던 문제; 이제 해당 줄을 생략함
 * `수정` 위젯 컬렉션 배열에서 같은 이름의 여러 오버로드 중 마지막 하나만 남아 (예: `performAction(action)` 과 `performAction(action, ...args)`), 다른 인수 개수로 호출하면 매개변수 불일치로 실패하던 문제; 이제 이름별로 모든 오버로드를 바인딩함
 * `수정` 6.7.0 Alpha13 부터 `contains` 계열 선택자 (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 등) 에 전달한 일반 문자열이 정규식 패턴으로 컴파일되던 문제 (`textContains(".")` 가 비어 있지 않은 모든 텍스트와 일치, `textContains("1+1")` 이 "11" 과 일치, `textContains("(")` 이 오류 발생); `text(s)` / `textStartsWith` / `textEndsWith` 와 같이 다시 리터럴 부분 문자열로 처리함; 패턴이 필요하면 정규식을 전달 (`textContains(/re/i)`) 하거나 `textMatch` / `textMatches` 를 사용할 것. "/re/flags" 형식의 문자열도 `contains` 에서는 더 이상 정규식으로 취급하지 않음
+* `수정` 플로팅 창 (`floaty.rawWindow` / `floaty.window`) 의 `requestFocus()` / `disableFocus()` 가 스크립트 스레드에서 직접 창 레이아웃을 갱신해 간헐적으로 `CalledFromWrongThreadException` 을 던지던 문제 수정; 이제 UI 스레드에서 실행됨 (`setSize` / `setPosition` 과 동일)
 * `개선` `TypeScript 콘솔`은 기본적으로 접힌 상태를 유지하고 컴파일러 플러그인을 사용할 수 있을 때만 전체 로그 페이지 또는 편집기 로그 패널의 더보기 메뉴에서 필요에 따라 표시되며 표시 상태를 각각 기억함; 스니펫 실행 중에는 녹색 실행 동작이 빨간색 중지 동작으로 전환되고 전체 로그 페이지에 실제 작업 디렉터리가 표시되며 편집기 로그 패널의 더보기 메뉴에 복사, 보내기 및 내보내기도 통합됨
 * `개선` TypeScript TSX 런타임 검증 메시지가 하드코딩된 영어 대신 지원되는 10개 언어 모두에서 앱 언어를 따르도록 개선
 * `개선` 선택한 글꼴을 아직 다운로드하지 않은 경우 Ace 글꼴 미리보기가 다기능 키보드 위에 다운로드 안내를 표시하고, 다운로드 완료 또는 사용 가능한 글꼴로 전환하면 자동으로 숨김

@@ -284,7 +284,8 @@
         "`pickup` / `detect` の結果型 `['compass', 'p']` が常に \"不明な結果型\" で失敗していた (インターセプタ表で `compass` を `String` 引数として登録していたが, 実際のシグネチャは `CharSequence`); 使えるようにした",
         "レイアウトインスペクタがアクション未選択でコレクションコントロールの子項目のコードを生成すると, 生成された `forEach` ブロックに無効な文 `target.;` が含まれていた; その行を省略するようにした",
         "ウィジェットコレクション配列上の同名の複数オーバーロードのうち最後の一つしか残らず (例: `performAction(action)` と `performAction(action, ...args)`), もう一方の引数個数で呼ぶと引数不一致で失敗していた; 名前ごとに全オーバーロードを束縛するようにした",
-        "6.7.0 Alpha13 以降, `contains` 系セレクタ (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` など) に渡した通常の文字列が正規表現パターンとしてコンパイルされていた (`textContains(\".\")` が空でない任意のテキストに一致, `textContains(\"1+1\")` が \"11\" に一致, `textContains(\"(\")` がエラー); `text(s)` / `textStartsWith` / `textEndsWith` と同様にリテラルの部分文字列に戻した; パターンが必要なら正規表現を渡す (`textContains(/re/i)`) か `textMatch` / `textMatches` を使うこと. \"/re/flags\" 形式の文字列も `contains` では正規表現として扱わない"
+        "6.7.0 Alpha13 以降, `contains` 系セレクタ (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` など) に渡した通常の文字列が正規表現パターンとしてコンパイルされていた (`textContains(\".\")` が空でない任意のテキストに一致, `textContains(\"1+1\")` が \"11\" に一致, `textContains(\"(\")` がエラー); `text(s)` / `textStartsWith` / `textEndsWith` と同様にリテラルの部分文字列に戻した; パターンが必要なら正規表現を渡す (`textContains(/re/i)`) か `textMatch` / `textMatches` を使うこと. \"/re/flags\" 形式の文字列も `contains` では正規表現として扱わない",
+        "フローティングウィンドウ (`floaty.rawWindow` / `floaty.window`) の `requestFocus()` / `disableFocus()` がスクリプトスレッド上で直接ウィンドウのレイアウトを更新し, まれに `CalledFromWrongThreadException` を投げていた問題を修正; 現在は UI スレッドで実行される (`setSize` / `setPosition` と同様)"
       ],
       "improvement": [
         "`TypeScript コンソール` はデフォルトで折りたたまれ, コンパイラープラグインが利用可能な場合にのみ完全なログページまたはエディターログパネルのその他メニューから必要に応じて表示され, 表示状態は個別に記憶されるようになりました; スニペット実行中は緑色の実行アクションが赤色の停止アクションに切り替わり, 完全なログページには実際の作業ディレクトリが表示され, エディターログパネルのその他メニューにはコピー, 送信, エクスポートも集約されます",
