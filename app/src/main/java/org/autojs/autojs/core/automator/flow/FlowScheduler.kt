@@ -41,6 +41,12 @@ class FlowScheduler(
      * 使独立的链 (以及组合器的各来源) 并发阻塞.
      */
     private val workerFactory: (() -> FlowLane)? = null,
+    /**
+     * Sleeps at most the given time but returns early when an accessibility event arrives; the
+     * sleeps of event-assisted wait steps go through it (roadmap P5.2).
+     * zh-CN: 至多休眠给定时长, 无障碍事件到达时提前返回; 事件辅助的等待步骤的休眠经由它 (Roadmap P5.2).
+     */
+    private val eventSleep: ((Long) -> Unit)? = null,
 ) {
 
     /** Observes step execution (`flow.trace`). zh-CN: 观察步骤执行 (`flow.trace`). */
@@ -53,7 +59,7 @@ class FlowScheduler(
 
     private val pending = LinkedHashSet<FlowNode>()
 
-    private val poller = Poller(clock, sleep)
+    private val poller = Poller(clock, sleep, eventSleep)
 
     private class Outcome(val state: State, val context: FlowContext)
 

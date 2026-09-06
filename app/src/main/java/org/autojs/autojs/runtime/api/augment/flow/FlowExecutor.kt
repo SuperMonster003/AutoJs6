@@ -117,7 +117,7 @@ internal class FlowExecutor(val scriptRuntime: ScriptRuntime) : Closeable {
         return synchronized(entries) {
             entries.getOrPut(timer) {
                 val lane = FlowScriptLane(scriptRuntime, timer)
-                val scheduler = FlowScheduler(pool.newLane(), lane, bindings, clock = { SystemClock.uptimeMillis() }, sleep = { Thread.sleep(it) }, workerFactory = { pool.newLane() })
+                val scheduler = FlowScheduler(pool.newLane(), lane, bindings, clock = { SystemClock.uptimeMillis() }, sleep = { Thread.sleep(it) }, workerFactory = { pool.newLane() }, eventSleep = { scriptRuntime.accessibilityBridge.pulse.awaitEvent(it) })
                 scheduler.listener = effectiveListener()
                 Entry(scheduler, lane)
             }

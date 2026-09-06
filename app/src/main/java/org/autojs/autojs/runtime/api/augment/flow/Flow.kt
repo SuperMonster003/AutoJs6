@@ -70,6 +70,10 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::clickIfExists.name,
         ::clickAny.name,
         ::findAny.name,
+        ::waitForIdle.name,
+        ::waitForEvent.name,
+        ::waitForToast.name,
+        ::waitForNotification.name,
         ::scrollUntil.name,
         ::typeInto.name,
         ::dismissPopups.name,
@@ -202,6 +206,29 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cancelAll(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsIsEmpty(args) { FlowExecutor.of(scriptRuntime).cancelAll() }
+
+        // Event-driven waits (roadmap P5.2): `flow.waitForIdle(options?)` resolves `{ quietFor, elapsed, events }`,
+        // `flow.waitForEvent(type?, filter?, timeout?)` the event, `flow.waitForToast(text?, timeout?)` the toast and
+        // `flow.waitForNotification(filter?, timeout?)` the notification; a timeout rejects with a `FlowError`.
+        // zh-CN: 事件驱动等待 (Roadmap P5.2): `flow.waitForIdle(options?)` resolve 为 `{ quietFor, elapsed, events }`,
+        // `flow.waitForEvent(type?, filter?, timeout?)` 为事件, `flow.waitForToast(text?, timeout?)` 为 toast,
+        // `flow.waitForNotification(filter?, timeout?)` 为通知; 超时以 `FlowError` reject.
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForIdle(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).eventWait(null, "waitForIdle", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForEvent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).eventWait(null, "waitForEvent", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForToast(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).eventWait(null, "waitForToast", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForNotification(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).eventWait(null, "waitForNotification", args)
 
         // Toolkit roots (roadmap P4.2): `flow.smartClick(target, options?)` and the like; each waits for its
         // target by the flow defaults and resolves the tool's result. zh-CN: 工具起点 (Roadmap P4.2): `flow.smartClick(target, options?)`

@@ -6,9 +6,11 @@ import kotlin.math.pow
  * A polling plan: attempt at most [times] times, give up once more than [timeout] milliseconds
  * have passed, and sleep [interval] milliseconds between attempts (growing by [backoff] per
  * round, never above [maxInterval]). [UNBOUNDED] means no limit. The defaults reproduce the
- * selector queries as they have always been: a 50 ms interval and no limits.
+ * selector queries as they have always been: a 50 ms interval and no limits. [eventAssisted]
+ * lets a poller cut the sleep short when an accessibility event arrives (roadmap P5.2).
  * zh-CN: 轮询计划: 至多尝试 [times] 次, 经过的时间超过 [timeout] 毫秒后放弃, 两次尝试之间休眠 [interval] 毫秒 (每轮按
  * [backoff] 增长, 不超过 [maxInterval]). [UNBOUNDED] 表示不限. 默认值即选择器查询一贯的行为: 间隔 50 ms, 无上限.
+ * [eventAssisted] 允许轮询器在无障碍事件到达时提前结束休眠 (Roadmap P5.2).
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -18,6 +20,7 @@ data class PollPolicy(
     val times: Long = UNBOUNDED,
     val backoff: Double = 1.0,
     val maxInterval: Long = interval,
+    val eventAssisted: Boolean = false,
 ) {
 
     init {
@@ -41,12 +44,27 @@ data class PollPolicy(
         return if (grown >= maxInterval) maxInterval else grown.toLong()
     }
 
+    /**
+     * This plan woken early by accessibility events (roadmap P5.2): the sleeps between attempts end
+     * as soon as the screen changes, and the interval (the fallback when nothing changes) is raised
+     * to at least [minInterval] so that a quiet screen is polled less often.
+     * zh-CN: 由无障碍事件提前唤醒的本计划 (Roadmap P5.2): 尝试之间的休眠在屏幕变化时即结束, 间隔 (无变化时的兜底) 提高到至少
+     * [minInterval], 使安静的屏幕被轮询得更少.
+     */
+    fun assisted(minInterval: Long = EVENT_ASSISTED_INTERVAL): PollPolicy {
+        val interval = maxOf(interval, minInterval)
+        return copy(eventAssisted = true, interval = interval, maxInterval = maxOf(maxInterval, interval))
+    }
+
     companion object {
 
         const val UNBOUNDED = Long.MAX_VALUE
 
         /** The interval `findOne(timeout)` and `untilFind()` have always polled with. zh-CN: `findOne(timeout)` 与 `untilFind()` 一贯的轮询间隔. */
         const val DEFAULT_INTERVAL = 50L
+
+        /** The fallback interval of event-assisted polling. zh-CN: 事件辅助轮询的兜底间隔. */
+        const val EVENT_ASSISTED_INTERVAL = 200L
 
         /** A single attempt (`find()`, `findOnce()`, `exists()`). zh-CN: 单次尝试 (`find()`, `findOnce()`, `exists()`). */
         val ONCE = PollPolicy(times = 1)

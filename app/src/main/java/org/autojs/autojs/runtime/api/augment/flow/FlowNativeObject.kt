@@ -12,6 +12,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
+import org.autojs.autojs.runtime.api.augment.automator.EventWaitApi
 import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.toJsPromise
 import org.autojs.autojs.runtime.api.augment.toolkit.RuntimeToolkit
@@ -97,13 +98,31 @@ internal class FlowApi(val executor: FlowExecutor) {
     private val arguments get() = executor.arguments
 
     /** [step] after [parent], or as a root. zh-CN: [parent] 之后的 [step], 或作为根. */
-    fun start(step: FlowStep, parent: FlowNativeObject?): FlowNativeObject =
-        executor.wrap(parent?.node?.next(step) ?: executor.scheduler().start(step))
+    fun start(step: FlowStep, parent: FlowNativeObject?): FlowNativeObject {
+        val effective = assisted(step)
+        return executor.wrap(parent?.node?.next(effective) ?: executor.scheduler().start(effective))
+    }
+
+    /**
+     * A wait step woken early by accessibility events when `auto.setFlags` includes
+     * `eventAssistedPolling` (roadmap P5.2); other steps unchanged.
+     * zh-CN: `auto.setFlags` 含 `eventAssistedPolling` 时由无障碍事件提前唤醒的等待步骤 (Roadmap P5.2); 其它步骤不变.
+     */
+    private fun assisted(step: FlowStep): FlowStep = when {
+        step is FlowStep.Wait && !step.policy.eventAssisted && scriptRuntime.accessibilityBridge.isEventAssistedPolling -> step.copy(policy = step.policy.copy(eventAssisted = true))
+        else -> step
+    }
 
     private fun withCallbacks(flow: FlowNativeObject, onOk: Callable?, onErr: Callable?): FlowNativeObject = when {
         onOk == null && onErr == null -> flow
         else -> start(FlowStep.Callback(CallbackKind.THEN, onOk, onErr), flow)
     }
+
+    // Event-driven waits (roadmap P5.2). zh-CN: 事件驱动等待 (Roadmap P5.2).
+
+    /** `waitForIdle` / `waitForEvent` / `waitForToast` / `waitForNotification` as a root or a chain step. zh-CN: 作为起点或链式步骤的 `waitForIdle` / `waitForEvent` / `waitForToast` / `waitForNotification`. */
+    fun eventWait(parent: FlowNativeObject?, name: String, args: Array<out Any?>): FlowNativeObject =
+        start(EventWaitApi(scriptRuntime).step(name, args, chained = parent != null), parent)
 
     // Waits. zh-CN: 等待.
 
@@ -376,6 +395,7 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
         FlowActions.GLOBAL_ACTIONS.keys.forEach { name -> method(name) { self, args -> api.globalAction(self, name, args) } }
 
         ToolkitApi.CHAIN_STEPS.forEach { name -> method(name) { self, args -> api.tool(self, name, args) } }
+        EventWaitApi.STEPS.forEach { name -> method(name) { self, args -> api.eventWait(self, name, args) } }
 
         method("sleep", "delay") { self, args -> api.sleep(self, "sleep", args) }
         method("timeout") { self, args -> api.timeout(self, args) }

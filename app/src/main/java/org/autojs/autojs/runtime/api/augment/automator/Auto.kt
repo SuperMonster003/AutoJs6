@@ -151,6 +151,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             "useUsageStats" to AccessibilityBridge.FLAG_USE_USAGE_STATS,
             "useShell" to AccessibilityBridge.FLAG_USE_SHELL,
             "appWindowsFallback" to AccessibilityBridge.FLAG_APP_WINDOWS_FALLBACK,
+            "eventAssistedPolling" to AccessibilityBridge.FLAG_EVENT_ASSISTED_POLLING,
         )
 
         @JvmStatic

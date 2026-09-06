@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.core.accessibility.event.A11yEventPulse
 import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
@@ -71,6 +72,23 @@ abstract class AccessibilityBridge(
      * zh-CN: `auto.stats` 背后的计数: 绑定到本 bridge (每个脚本运行时一个) 的选择器的每次搜索与轮询查询, 以及脚本的 Flow 步骤.
      */
     val stats: A11yStats = A11yStats()
+
+    private val pulseDelegate = lazy { A11yEventPulse(AccessibilityService.eventBus) }
+
+    /**
+     * The script's view of the accessibility event stream (roadmap P5.2): `waitForIdle` /
+     * `waitForEvent` and event-assisted polling; subscribed on first use, released by [releasePulse].
+     * zh-CN: 脚本眼中的无障碍事件流 (Roadmap P5.2): `waitForIdle` / `waitForEvent` 与事件辅助轮询; 首次使用时订阅, 由 [releasePulse] 释放.
+     */
+    val pulse: A11yEventPulse by pulseDelegate
+
+    /** Whether [FLAG_EVENT_ASSISTED_POLLING] is set. zh-CN: 是否设置了 [FLAG_EVENT_ASSISTED_POLLING]. */
+    val isEventAssistedPolling: Boolean get() = flags and FLAG_EVENT_ASSISTED_POLLING != 0
+
+    /** Drops the event subscription of [pulse] if it was ever made (script exit). zh-CN: 取消 [pulse] 的事件订阅 (若曾建立; 脚本退出时). */
+    fun releasePulse() {
+        if (pulseDelegate.isInitialized()) pulse.close()
+    }
 
     private val usageStatsPermission = UsageStatsPermission(context)
 
@@ -180,6 +198,13 @@ abstract class AccessibilityBridge(
          * 焦点窗口优先. 默认关闭: 此时查询一如既往地返回空.
          */
         const val FLAG_APP_WINDOWS_FALLBACK = 8
+
+        /**
+         * Repeated selector queries and Flow waits sleep until an accessibility event arrives
+         * instead of a fixed interval (`auto.setFlags(["eventAssistedPolling"])`; roadmap P5.2).
+         * zh-CN: 重复的选择器查询与 Flow 等待休眠到无障碍事件到达为止, 而非固定间隔 (`auto.setFlags(["eventAssistedPolling"])`; Roadmap P5.2).
+         */
+        const val FLAG_EVENT_ASSISTED_POLLING = 16
 
         private fun fallbackOf(flags: Int) = when {
             flags and FLAG_APP_WINDOWS_FALLBACK != 0 -> WindowRootPolicy.Fallback.APPLICATION_WINDOWS

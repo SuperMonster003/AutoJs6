@@ -46,7 +46,7 @@ import org.opencv.core.Point as OpencvPoint
 class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     /** The toolkit's synchronous functions throw the script's `FlowError` object as it is (roadmap P4.2). zh-CN: 工具集的同步函数原样抛出脚本的 `FlowError` 对象 (Roadmap P4.2). */
-    override val scriptErrorPassThroughFunctions: Set<String> = ToolkitApi.SYNC_NAMES
+    override val scriptErrorPassThroughFunctions: Set<String> = ToolkitApi.SYNC_NAMES + EventWaitApi.SYNC_NAMES
 
     override val selfAssignmentFunctions = listOf(
         ::click.name to AS_GLOBAL,
@@ -85,6 +85,10 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         // The toolkit (roadmap P4.2, D10): on the module and global alike; the Flow forms live in `flow`.
         // zh-CN: 工具集 (Roadmap P4.2, D10): 模块与全局同时挂载; Flow 形式在 `flow` 中.
         ::smartClick.name to AS_GLOBAL,
+        ::waitForIdle.name to AS_GLOBAL,
+        ::waitForEvent.name to AS_GLOBAL,
+        ::waitForToast.name to AS_GLOBAL,
+        ::waitForNotification.name to AS_GLOBAL,
         ::clickIfExists.name to AS_GLOBAL,
         ::clickAny.name to AS_GLOBAL,
         ::findAny.name to AS_GLOBAL,
@@ -110,6 +114,30 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         // `selector` / `reason`). 拒绝在 UI 线程调用 (工具可能阻塞).
 
         private fun toolkit(scriptRuntime: ScriptRuntime): ToolkitApi = RuntimeToolkit.of(scriptRuntime).api
+
+        // Event-driven waits (roadmap P5.2): the synchronous forms of the Flow steps of the same names; each blocks the
+        // calling (non-UI) thread and throws a `FlowError` on timeout. zh-CN: 事件驱动等待 (Roadmap P5.2): 同名 Flow 步骤的同步形式;
+        // 各阻塞调用线程 (不能是 UI 线程), 超时抛出 `FlowError`.
+
+        /** `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })`: until no window event for `quietFor` ms; `{ quietFor, elapsed, events }`. zh-CN: `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })`: 直到窗口事件已有 `quietFor` 毫秒未到达; `{ quietFor, elapsed, events }`. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForIdle(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = EventWaitApi(scriptRuntime).sync(EventWaitApi.STEP_IDLE, args)
+
+        /** `waitForEvent(type?, filter?, timeout?)`: the next accessibility event of `type` (a name, an array, `"*"`) the filter accepts. zh-CN: `waitForEvent(type?, filter?, timeout?)`: 下一个过滤器接受的 `type` (名称, 数组, `"*"`) 无障碍事件. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForEvent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = EventWaitApi(scriptRuntime).sync(EventWaitApi.STEP_EVENT, args)
+
+        /** `waitForToast(text?, timeout?)`: the next toast (of another app) whose text contains / matches `text`. zh-CN: `waitForToast(text?, timeout?)`: 下一个文本包含 / 匹配 `text` 的 (其它应用的) toast. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForToast(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = EventWaitApi(scriptRuntime).sync(EventWaitApi.STEP_TOAST, args)
+
+        /** `waitForNotification(filter?, timeout?)`: the next notification the filter (text, regex, function or `{ packageName?, title?, text? }`) accepts. zh-CN: `waitForNotification(filter?, timeout?)`: 下一个过滤器 (文本, 正则, 函数或 `{ packageName?, title?, text? }`) 接受的通知. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun waitForNotification(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = EventWaitApi(scriptRuntime).sync(EventWaitApi.STEP_NOTIFICATION, args)
 
         /** `smartClick(target, options?)`: click, or a clickable ancestor, or a tap; `{ ok, method, target, verified }`. zh-CN: `smartClick(target, options?)`: 点击, 或可点击祖先, 或点按手势; `{ ok, method, target, verified }`. */
         @JvmStatic

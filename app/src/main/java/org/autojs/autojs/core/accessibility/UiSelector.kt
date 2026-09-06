@@ -168,7 +168,15 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     }
 
     /** A query over this selector; see [UiSelectorQuery]. zh-CN: 对本选择器的查询; 见 [UiSelectorQuery]. */
-    internal fun query(policy: PollPolicy = PollPolicy.ONCE, max: Int = Int.MAX_VALUE) = UiSelectorQuery(this, policy, max)
+    internal fun query(policy: PollPolicy = PollPolicy.ONCE, max: Int = Int.MAX_VALUE): UiSelectorQuery {
+        val bridge = mAccessibilityBridge
+        return when {
+            // Event-assisted polling (roadmap P5.2): a repeated query sleeps until the screen changes, at least 200 ms apart.
+            // zh-CN: 事件辅助轮询 (Roadmap P5.2): 重复的查询休眠到屏幕变化为止, 至少相隔 200 ms.
+            bridge != null && bridge.isEventAssistedPolling && policy.times != 1L && !policy.isNoop -> UiSelectorQuery(this, policy.assisted(), max, bridge.pulse.poller)
+            else -> UiSelectorQuery(this, policy, max)
+        }
+    }
 
     /**
      * Polls every 50 ms until a node is found or more than [timeout] milliseconds have passed.

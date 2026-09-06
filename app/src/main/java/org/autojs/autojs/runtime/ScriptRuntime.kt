@@ -777,6 +777,10 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
         ignoresException { automator.removeAllEventsForThisRuntime() }
 
+        // Drop the event subscription of this script's event-driven waits and event-assisted polling (roadmap P5.2).
+        // zh-CN: 取消本脚本事件驱动等待与事件辅助轮询的事件订阅 (Roadmap P5.2).
+        ignoresException { accessibilityBridge.releasePulse() }
+
         // Drop the accessibility state listener registered by this script (auto.stateListener).
         // zh-CN: 移除当前脚本注册的无障碍状态监听器 (auto.stateListener).
         ignoresException { accessibilityBridge.setAccessibilityListener(null) }

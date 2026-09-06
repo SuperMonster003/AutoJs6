@@ -60,7 +60,10 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
     }
 
     override fun onAccessibilityEvent(service: android.accessibilityservice.AccessibilityService, event: AccessibilityEvent): Boolean {
-        if (event.parcelableData is Notification) {
+        // A system notification arrives as a plain android.app.Notification (never as the subclass this file imports), so the
+        // check must name the framework class; otherwise every notification was mistaken for a toast (roadmap P5.2).
+        // zh-CN: 系统通知以普通的 android.app.Notification 到达 (而非本文件导入的子类), 检查必须写框架类, 否则所有通知都被当成 toast (Roadmap P5.2).
+        if (event.parcelableData is android.app.Notification) {
             val notification = event.parcelableData as android.app.Notification
             Log.d(TAG, "onNotification: $notification; $event")
             onNotification(Notification.create(notification, event.packageName.toString()))
