@@ -433,6 +433,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 悬浮窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在脚本线程调用时直接更新已附着窗口的布局, 偶发 `CalledFromWrongThreadException`; 现改为在 UI 线程执行 (与 `setSize` / `setPosition` 一致)
 * `修复` 无障碍通知观察者 (`events.observeToast()` 等所用) 把每条系统通知都当作其它应用的 toast 处理 (对通知的类型检查写成了本应用自己的子类, 永远不成立), 通知从未送达它的通知监听器, 其它应用的通知则被误报为 toast; 现改为检查框架的 `android.app.Notification`
 * `优化` Node bridge 无障碍模块新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 节点, 32 层与 256 KiB), explain (选择器描述符的逐过滤器命中数) 与 screenshot (Android 11+ 的无障碍截图, 支持缩放, 区域, 格式与质量选项, 以一次性缓存文件或工作目录文件交付), app 模块新增 currentWindow (当前包名, 活动与窗口列表)
+* `优化` Node bridge 新增 files 模块 (list, stat, read, write, mkdir, rename, delete), 以工作目录为根: 路径须为规范化的相对路径, 符号链接无法逃逸, 读写上限 1 MiB 且内容为 UTF-8 或 base64, 列表上限 2000 项, 写入与删除分别需要专用的 files.write 与 files.delete 能力令牌, 变更后刷新工作区文件管理器
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏

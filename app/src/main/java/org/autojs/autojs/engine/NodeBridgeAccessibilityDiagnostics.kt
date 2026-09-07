@@ -323,7 +323,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     }
 
     private fun resolveScopedFile(rawPath: String): File? {
-        if (rawPath.isBlank() || rawPath.indexOf(' ') >= 0) return null
+        if (rawPath.isBlank() || rawPath.indexOf('\u0000') >= 0) return null
         if (File(rawPath).isAbsolute || rawPath.split('/', '\\').any { it == ".." }) return null
         val base = runCatching {
             File(engineCwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile

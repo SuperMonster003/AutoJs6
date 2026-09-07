@@ -621,6 +621,7 @@ object NodeBridgeModules {
     const val JAVA = "java"
     const val RHINO = NodeBridgePermissionManifest.RHINO
     const val INPUT_OBSERVER = NodeBridgePermissionManifest.INPUT_OBSERVER
+    const val FILES = NodeBridgePermissionManifest.FILES
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf(
@@ -709,6 +710,7 @@ object NodeBridgeModules {
     val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
+    val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -744,6 +746,7 @@ object NodeBridgeModules {
         JAVA to javaMethods,
         RHINO to rhinoMethods,
         INPUT_OBSERVER to inputObserverMethods,
+        FILES to filesMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -834,6 +837,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeRateLimitedRejections = AtomicInteger(0)
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
     private val accessibilityDiagnostics by lazy { NodeBridgeAccessibilityDiagnostics(appContext, engineInfo.cwd) }
+    private val filesBridge by lazy { NodeBridgeFilesBridge(appContext) }
     private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -883,6 +887,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
             request.module == NodeBridgeModules.RHINO && request.method in NodeBridgeModules.rhinoMethods -> dispatchRhino(request, auditedCallback)
             request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
+            request.module == NodeBridgeModules.FILES && request.method in NodeBridgeModules.filesMethods -> auditedCallback(filesBridge.dispatch(request))
             else -> auditedCallback(unavailable(request))
         }
     }

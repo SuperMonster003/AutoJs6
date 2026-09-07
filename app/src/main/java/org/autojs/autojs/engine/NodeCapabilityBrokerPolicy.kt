@@ -16,6 +16,10 @@ object NodeCapabilityBrokerPolicy {
     const val DEFAULT_MAX_REQUEST_BYTES = 96 * 1024
     const val DEFAULT_MAX_ARGS_BYTES = 32 * 1024
     const val PINYIN_CONVERT_MAX_ARGS_BYTES = PinyinCustomDictionaryContract.MAX_JSON_BYTES + 16 * 1024
+    /** `files.write` carries up to 1 MiB of content; base64 inflates it by a third. */
+    const val FILES_WRITE_MAX_ARGS_BYTES = 2 * 1024 * 1024
+    /** Envelope allowance on top of an operation's args ceiling for the whole request. */
+    const val REQUEST_ENVELOPE_BYTES = 16 * 1024
 
     val operationDeclarations: List<OperationDeclaration> by lazy {
         val supportedMethods = NodeBridgeModules.supportedMethodsByModule.toMutableMap().apply {
@@ -38,6 +42,7 @@ object NodeCapabilityBrokerPolicy {
                         requiredCapabilities = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
                         maxArgsBytes = when {
                             module == NodeBridgeModules.PINYIN && method == "convert" -> PINYIN_CONVERT_MAX_ARGS_BYTES
+                            module == NodeBridgeModules.FILES && method == "write" -> FILES_WRITE_MAX_ARGS_BYTES
                             else -> DEFAULT_MAX_ARGS_BYTES
                         },
                     )
@@ -86,9 +91,10 @@ object NodeCapabilityBrokerPolicy {
             )
         }
         val requestBytes = safeRequestBytes(request)
-        if (requestBytes > maxRequestBytes) {
+        val requestLimit = maxOf(maxRequestBytes, declaration.maxArgsBytes + REQUEST_ENVELOPE_BYTES)
+        if (requestBytes > requestLimit) {
             return NodeBridgeError.resourceLimit(
-                message = "AutoJs6 capability broker rejected ${request.module}.${request.method}: request payload is $requestBytes bytes, limit $maxRequestBytes.",
+                message = "AutoJs6 capability broker rejected ${request.module}.${request.method}: request payload is $requestBytes bytes, limit $requestLimit.",
                 module = request.module,
                 method = request.method,
             )

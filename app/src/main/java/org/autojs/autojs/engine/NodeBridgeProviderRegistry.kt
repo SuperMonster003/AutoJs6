@@ -146,6 +146,7 @@ object NodeBridgeProviderRegistry {
     private const val SHELL_PROVIDER = "shell"
     private const val RHINO_PROVIDER = "rhino"
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
+    private const val FILES_PROVIDER = "files"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
         provider(
@@ -293,6 +294,12 @@ object NodeBridgeProviderRegistry {
             packagedSupport = packagedProviderDependent("controlled shell bridge requires explicit capability and remains separate from child_process"),
         ),
         provider(
+            id = FILES_PROVIDER,
+            modules = listOf(NodeBridgeModules.FILES),
+            capabilities = listOf(NodeBridgePermissionManifest.FILES, NodeBridgePermissionManifest.FILES_WRITE, NodeBridgePermissionManifest.FILES_DELETE),
+            packagedSupport = packagedSupported("scoped to the working directory; write and delete need their own capability tokens"),
+        ),
+        provider(
             id = RHINO_PROVIDER,
             displayName = "rhino JSON-only shim",
             modules = listOf(NodeBridgeModules.RHINO),
@@ -400,6 +407,7 @@ object NodeBridgeProviderRegistry {
         PACKAGE_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         RHINO_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        FILES_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
     }
 

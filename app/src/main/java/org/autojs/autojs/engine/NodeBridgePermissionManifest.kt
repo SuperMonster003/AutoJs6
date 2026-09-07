@@ -62,6 +62,9 @@ object NodeBridgePermissionManifest {
     const val INPUT_OBSERVER_INTERCEPT = "input_observer.intercept"
     const val FLOATY_RAW = "floaty.raw"
     const val FLOATY_TOUCH = "floaty.touch"
+    const val FILES = "files"
+    const val FILES_WRITE = "files.write"
+    const val FILES_DELETE = "files.delete"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -125,6 +128,9 @@ object NodeBridgePermissionManifest {
         INPUT_OBSERVER_INTERCEPT,
         FLOATY_RAW,
         FLOATY_TOUCH,
+        FILES,
+        FILES_WRITE,
+        FILES_DELETE,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -445,6 +451,11 @@ object NodeBridgePermissionManifest {
                 "getAvailableSources" -> listOf(INPUT_OBSERVER)
                 else -> listOf(INPUT_OBSERVER, INPUT_OBSERVER_KEYS)
             }
+            NodeBridgeModules.FILES -> when (method) {
+                "write", "mkdir", "rename" -> listOf(FILES, FILES_WRITE)
+                "delete" -> listOf(FILES, FILES_DELETE)
+                else -> listOf(FILES)
+            }
             else -> emptyList()
         }
         return required.map(::normalizeCapability).distinct()
@@ -508,6 +519,9 @@ object NodeBridgePermissionManifest {
             required == MEDIA_RECORDING ||
             required == APP_QUERY ||
             required == PACKAGE_MANAGER_MUTATE ||
+            // MCP roadmap P1.3: writing and deleting workspace files are never implied by "files".
+            required == FILES_WRITE ||
+            required == FILES_DELETE ||
             // M3.2: coordinate gestures are never implied by "accessibility".
             required == ACCESSIBILITY_GESTURE
         ) {
