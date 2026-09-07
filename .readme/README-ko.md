@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 7 일.
+데이터 갱신일: 2026 년 9 월 8 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -166,10 +166,11 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/05
+###### 2026/09/08
 
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
 * `추가` 사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨
+* `추가` MCP Server 플러그인 계약 모듈 (plugin-api/mcp-server-api): 고정된 AIDL 인터페이스, 전용 바인딩 임대로 공식 플러그인을 바인딩하고 플러그인 프로세스 종료 후 최대 3회 재바인딩하는 엄격한 호스트 클라이언트, grant 로 제한되며 Node bridge provider 를 통해 플러그인 요청을 분배하는 호스트 능력 브로커, 그리고 기본 꺼짐 상태의 플러그인 센터 등록
 * `추가` 사이드 드로어 "접근성 서비스" 항목의 관리자 (대화상자 형식, 설명 대화상자의 "관리자" 버튼 또는 항목 길게 누르기로 열기): 상태 영역에 서비스 상태, 시스템 설정, 프로세스 내 인스턴스, 가동 시간, 이벤트 수와 최근 이벤트, 창과 활성 창 루트, 최근 패키지와 액티비티, 서비스 구성, root 및 보안 설정 가용성, 리스너 수를 실시간 표시하고 각 행을 복사 가능; 제어 영역에서 시작, 중지, 재시작, 노드 캐시 삭제, 자체 점검 (창 루트와 노드 수를 집계한 뒤 이벤트 전달 대기) 및 이벤트 모니터 (최근 접근성 이벤트와 간격을 실시간 나열; 일시정지, 비우기, 창 상태 변경만 표시, 복사 지원) 제공; 설정 영역에 root 및 보안 설정 자동 활성화 스위치 배치; 전체 진단 정보를 한 번에 복사 가능; 상태 영역과 제어 영역 제목 오른쪽에 새로 고침 버튼과 표시 상세도를 단계적으로 줄이거나 늘리는 버튼을 배치 (상태는 4단계, 기본값은 기본 항목만, 모든 행이 숨겨지면 제목에 "상태 [작동 가능]" 처럼 서비스 상태를 덧붙임; 제어는 3단계, 기본값은 시작 / 중지 / 다시 시작 세 행, 모든 행이 숨겨지면 이 세 버튼이 제목 행으로 이동) 하고 선택한 단계는 기억됨; 각 행의 높이는 항목별로 고정되어 값 길이 변화로 대화상자 높이가 흔들리지 않음
 * `추가` `mediainfo`에 명시적 버전의 `snapshot`/`capabilities` API와 v1/v2 schema 상수를 추가; Rhino는 기존 `read` 결과를 유지하고 Node.js는 호스트 v1을 기본값으로 유지하며, 플러그인이 기능을 명시적으로 광고한 경우에만 플러그인 v2와 짧은 엔진 정보를 노출
 * `추가` Explorer Action 호스트 파일 정보 capability v1을 통해 신뢰된 읽기 전용 플러그인이 기존 APK 정보 대화상자에 SHA-256으로 결합된 제한형 현지화 요약을 추가할 수 있습니다; 플러그인이 없거나 비활성화되거나 호환되지 않거나 실패하면 기존 필드, 설치/manifest 작업 및 실패 처리는 그대로 유지됩니다
@@ -828,7 +829,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 7 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 8 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

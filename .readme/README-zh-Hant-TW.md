@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 7 日.
+資料更新於 2026 年 9 月 8 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -166,10 +166,11 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/05
+###### 2026/09/08
 
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屜工具分組在浮動按鈕與指標位置後加入可選的螢幕取色外掛, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
+* `新增` MCP Server 外掛契約模組 (plugin-api/mcp-server-api), 含凍結的 AIDL 介面, 以專用綁定租約綁定官方外掛並在外掛程序死亡後最多重綁三次的嚴格宿主客戶端, 受 grant 約束並經 Node bridge provider 分派外掛請求的宿主能力代理, 以及預設關閉的外掛中心註冊
 * `新增` 側拉抽屜 "無障礙服務" 條目的管理器 (對話框形式, 點選說明對話框的 "管理器" 按鈕或長按條目開啟): 狀態區即時顯示服務狀態, 系統設定, 程序內實例, 執行時長, 事件計數與最近事件, 視窗與作用中視窗根節點, 最近套件名稱與活動, 服務組態, root 與安全設定可用性及監聽者數量, 逐行可複製; 控制區提供啟動, 停止, 重新啟動, 清除節點快取, 自檢 (統計視窗根節點與節點數量並等待事件投遞) 及事件監視器 (即時列出最近的無障礙事件及其間隔, 支援暫停, 清空, 僅視窗狀態變化與複製); 設定區提供 root 與安全設定自動啟用開關; 完整診斷資訊可一鍵複製; 狀態區與控制區標題右側提供重新整理及逐級增減顯示詳略的按鈕 (狀態 4 級, 預設僅顯示最基本欄位, 全部隱藏時標題附帶服務狀態如 "狀態 [可操作]"; 控制 3 級, 預設僅顯示啟動 / 停止 / 重新啟動三列, 全部隱藏時這三個按鈕移入標題列), 所選等級會被記住; 各列高度按欄位固定, 數值長度變化不再引起對話框高度抖動
 * `新增` `mediainfo` 新增顯式版本化的 `snapshot`/`capabilities` API 與 v1/v2 schema 常數; Rhino 保持舊 `read` 結果不變, Node.js 保持宿主 v1 預設結果, 僅在外掛明確宣告支援時透傳外掛 v2 並公開簡短引擎版本
 * `新增` Explorer Action 主機檔案資訊能力 v1 允許已信任的唯讀外掛在現有 APK 資訊對話框中附加有界、經 SHA-256 綁定的本地化摘要; 外掛缺少、停用、不相容或失敗時, 原有欄位、安裝/資訊清單操作與失敗處理均保持不變
@@ -828,7 +829,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 7 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 8 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

@@ -37,6 +37,7 @@
         <package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />
         <package android:name="io.github.supermonster003.autojs6.plugin.screencolorpicker" />
         <package android:name="io.github.supermonster003.autojs6.plugin.videoplayer" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.mcp.server" />
         <intent>
             <action android:name="org.autojs.plugin.INFO" />
         </intent>
@@ -50,6 +51,10 @@
         <intent>
             <action android:name="org.autojs.plugin.SCREEN_COLOR_PICKER" />
             <category android:name="screen-color-picker" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.MCP_SERVER" />
+            <category android:name="mcp-server" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />

@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHost
@@ -31,6 +32,8 @@ import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.mcp.server.api.McpServerActions
+import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
 import java.io.File
 import java.io.Serializable
@@ -184,6 +187,15 @@ class InstalledPluginRepository {
                 }
             }
         }
+        McpServerPluginHost.ACTION_MCP_SERVER -> {
+            if (packageName != McpServerIds.DEFAULT_PACKAGE_NAME) {
+                listOf(preferred.copy(error = IllegalArgumentException("Unsupported MCP Server package: $packageName")))
+            } else {
+                McpServerPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = McpServerPluginHost.ACTION_MCP_SERVER)
+                }
+            }
+        }
         else -> listOf(preferred)
     }
 
@@ -201,6 +213,11 @@ class InstalledPluginRepository {
                 action = ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
                 category = ScreenColorPickerContract.SERVICE_CATEGORY,
                 packageName = ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
+            ),
+            ServiceQuery(
+                action = McpServerPluginHost.ACTION_MCP_SERVER,
+                category = McpServerActions.SERVICE_CATEGORY,
+                packageName = McpServerIds.DEFAULT_PACKAGE_NAME,
             ),
         )
         return specs.flatMap { spec ->

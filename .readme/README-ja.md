@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 7 日 に更新されました.
+データは 2026 年 9 月 8 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,10 +166,11 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/05
+###### 2026/09/08
 
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
 * `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
+* `新機能` MCP Server プラグイン契約モジュール (plugin-api/mcp-server-api): 凍結された AIDL インターフェース, 専用バインディングリースで公式プラグインをバインドしプラグインプロセスの死亡後に最大 3 回再バインドする厳格なホストクライアント, grant で制限され Node bridge provider 経由でプラグインの要求を振り分けるホスト能力ブローカー, および既定オフのプラグインセンター登録
 * `新機能` サイドドロワーの "アクセシビリティサービス" 項目のマネージャー (ダイアログ形式, 説明ダイアログの "マネージャー" ボタンまたは項目の長押しで開く): ステータス欄にサービス状態, システム設定, プロセス内インスタンス, 稼働時間, イベント数と最新イベント, ウィンドウとアクティブウィンドウのルート, 最新のパッケージとアクティビティ, サービス構成, root とセキュア設定の利用可否, リスナー数を表示し各行をコピー可能; コントロール欄に起動, 停止, 再起動, ノードキャッシュのクリア, セルフチェック (ウィンドウルートとノード数を集計しイベント配信を待機) とイベントモニター (最近のアクセシビリティイベントと間隔をリアルタイム表示; 一時停止, クリア, ウィンドウ状態変化のみ, コピーに対応) を提供; 設定欄に root とセキュア設定による自動有効化のスイッチを配置; 診断情報全体をワンタップでコピー可能; ステータス欄とコントロール欄の見出し右側に更新ボタンと表示の詳しさを段階的に増減するボタンを配置 (ステータスは 4 段階, デフォルトは基本項目のみ, 全行非表示時は見出しに "ステータス [動作中]" のようにサービス状態を付記; コントロールは 3 段階, デフォルトは開始 / 停止 / 再起動の 3 行, 全行非表示時はこの 3 つのボタンが見出し行へ移動) し, 選んだ段階は記憶される; 各行の高さは項目ごとに固定され, 値の長さの変化でダイアログの高さが揺れなくなった
 * `新機能` `mediainfo` に明示的なバージョン付き `snapshot`/`capabilities` API と v1/v2 schema 定数を追加; Rhino は従来の `read` 結果を維持し, Node.js はホスト v1 を既定値とし, プラグインが能力を明示した場合にのみプラグイン v2 と短いエンジン情報を公開
 * `新機能` Explorer Action のホストファイル情報 capability v1 により, 信頼済みの読み取り専用プラグインは既存の APK 情報ダイアログへ SHA-256 に結び付いた上限付きローカライズ概要を追加できます; プラグインが未導入, 無効, 非互換, または失敗した場合, 元の項目, インストール/manifest 操作, 失敗処理は変わりません
@@ -828,7 +829,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 7 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 8 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

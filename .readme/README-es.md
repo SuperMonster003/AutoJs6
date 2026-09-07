@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 7 de September de 2026.
+Datos actualizados el 8 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,10 +166,11 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/05
+###### 2026/09/08
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
+* `Nuevo` Modulo de contrato del plugin MCP Server (plugin-api/mcp-server-api): superficie AIDL congelada, un cliente de host estricto que vincula el plugin oficial con un arrendamiento de vinculacion dedicado y vuelve a vincularlo hasta tres veces tras la muerte del proceso del plugin, un intermediario de capacidades del host restringido por grant que enruta las solicitudes del plugin a traves del Node bridge provider, y registro en el Centro de plugins como plugin desactivado por defecto
 * `Nuevo` Administrador para la entrada "Servicio de accesibilidad" del cajón lateral (un diálogo, abierto con el botón "Administrador" del diálogo de descripción o con una pulsación larga sobre la entrada): la sección de estado muestra el estado del servicio, los ajustes del sistema, la instancia en el proceso, el tiempo activo, el recuento de eventos y el último evento, las ventanas y la raíz de la ventana activa, el último paquete y actividad, la configuración del servicio, la disponibilidad de root y ajustes seguros y el número de oyentes, cada fila copiable; la sección de control ofrece iniciar, detener, reiniciar, limpiar la caché de nodos, autocomprobación (cuenta raíces de ventana y nodos y luego espera un evento) y un monitor de eventos (lista en vivo de los últimos eventos de accesibilidad con sus intervalos; pausar, limpiar, solo cambios de estado de ventana y copiar); la sección de ajustes contiene los interruptores de habilitación automática con root y ajustes seguros; el texto de diagnóstico completo se puede copiar de una vez; los encabezados de estado y control llevan botones para actualizar y para bajar o subir el nivel de detalle (estado: 4 niveles, campos básicos por defecto, el título muestra el estado del servicio como "Estado [Operativo]" cuando todas las filas están ocultas; control: 3 niveles, las filas iniciar / detener / reiniciar por defecto, esos tres botones pasan al encabezado cuando todas las filas están ocultas) y los niveles elegidos se recuerdan; la altura de cada fila es fija por campo, de modo que los valores que cambian de longitud ya no hacen saltar el diálogo
 * `Nuevo` Se agregaron APIs `snapshot`/`capabilities` versionadas y constantes de schema v1/v2 a `mediainfo`; Rhino conserva los resultados `read` heredados, Node.js mantiene v1 del host por defecto, y v2 del plugin junto con metadatos breves del motor solo se exponen tras el anuncio explícito de capacidad
 * `Nuevo` La capacidad v1 de información de archivos del host de Explorer Action permite que plugins de solo lectura y de confianza añadan un resumen localizado, acotado y vinculado a SHA-256 al diálogo existente de información APK; si el plugin falta, está desactivado, es incompatible o falla, sus campos originales, las acciones de instalación/manifiesto y el tratamiento de errores no cambian
@@ -828,7 +829,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 7 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 8 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHost
@@ -35,6 +36,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
+import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
@@ -1034,6 +1036,7 @@ class PluginCenterViewModel : ViewModel() {
             OfflineDocsPluginContract.ENGINE to OfflineDocsPluginContract.ACTION,
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
             ScreenColorPickerContract.ENGINE to ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
+            McpServerIds.ENGINE to McpServerPluginHost.ACTION_MCP_SERVER,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
         )

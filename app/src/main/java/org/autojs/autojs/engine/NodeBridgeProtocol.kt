@@ -781,6 +781,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
     private val pinyinBackend: NodePinyinBackend = AndroidNodePinyinBackend(context),
     private val pinyin4jBackend: NodePinyin4jBackend = AndroidNodePinyin4jBackend(context),
+    private val permissionManifest: NodeBridgePermissionManifest.Manifest? = null,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -799,7 +800,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
     private val barcodeDiagnostics = ControlledBarcodeDiagnostics()
     private val bridgePermissionManifest by lazy {
-        NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
+        permissionManifest ?: NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
     }
     private val databaseHandles = ConcurrentHashMap<String, ControlledDatabaseHandle>()
     private val databaseHandleCounter = AtomicInteger(1)

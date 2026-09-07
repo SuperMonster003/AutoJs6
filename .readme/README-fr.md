@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 7 September 2026.
+Données mises à jour le 8 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -166,10 +166,11 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/05
+###### 2026/09/08
 
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
+* `Fonctionnalité` Module de contrat du plugin MCP Server (plugin-api/mcp-server-api): surface AIDL figee, client hote strict qui lie le plugin officiel via un bail de liaison dedie et le relie jusqu'a trois fois apres la mort du processus du plugin, courtier de capacites de l'hote restreint par grant qui achemine les requetes du plugin via le Node bridge provider, et enregistrement dans le Centre de plugins comme plugin desactive par defaut
 * `Fonctionnalité` Gestionnaire pour l'entrée "Service d'accessibilité" du tiroir latéral (une boîte de dialogue, ouverte avec le bouton "Gestionnaire" de la boîte de description ou par un appui long sur l'entrée) : la section d'état affiche l'état du service, les paramètres système, l'instance dans le processus, la durée de fonctionnement, le nombre d'événements et le dernier événement, les fenêtres et la racine de la fenêtre active, le dernier paquet et la dernière activité, la configuration du service, la disponibilité de root et des paramètres sécurisés ainsi que le nombre d'écouteurs, chaque ligne étant copiable ; la section de contrôle propose démarrer, arrêter, redémarrer, vider le cache des nœuds, l'auto-vérification (compte les racines de fenêtre et les nœuds puis attend un événement) et un moniteur d'événements (liste en direct des derniers événements d'accessibilité avec leurs intervalles ; pause, effacer, changements d'état de fenêtre uniquement et copie) ; la section des paramètres contient les interrupteurs d'activation automatique via root et via les paramètres sécurisés ; le texte de diagnostic complet peut être copié en une fois ; les en-têtes état et contrôle portent des boutons pour actualiser et pour réduire ou augmenter le niveau de détail (état : 4 niveaux, champs de base par défaut, le titre affiche l'état du service comme "État [Opérationnel]" quand toutes les lignes sont masquées ; contrôle : 3 niveaux, les lignes démarrer / arrêter / redémarrer par défaut, ces trois boutons passent dans l'en-tête quand toutes les lignes sont masquées) et les niveaux choisis sont mémorisés ; la hauteur de chaque ligne est fixe par champ, de sorte que les valeurs dont la longueur change ne font plus sauter la boîte de dialogue
 * `Fonctionnalité` Ajout des API `snapshot`/`capabilities` versionnées et des constantes de schéma v1/v2 à `mediainfo`; Rhino conserve les résultats `read` historiques, Node.js garde le format v1 de l'hôte par défaut, et le format v2 du plugin avec les métadonnées moteur courtes n'est exposé qu'après annonce explicite de la capacité
 * `Fonctionnalité` La capacité v1 d'informations de fichier hôte d'Explorer Action permet aux plugins de confiance en lecture seule d'ajouter un résumé localisé, borné et lié au SHA-256 à la boîte de dialogue d'informations APK existante; si le plugin est absent, désactivé, incompatible ou en échec, ses champs d'origine, les actions d'installation/manifeste et la gestion des erreurs restent inchangés
@@ -828,7 +829,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 7 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 8 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
