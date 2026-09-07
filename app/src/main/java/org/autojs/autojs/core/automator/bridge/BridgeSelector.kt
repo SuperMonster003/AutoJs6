@@ -81,10 +81,12 @@ data class BridgeSelector(
             boundsInside, boundsContains,
         ).all { it == null }
 
-    /** The descriptor as the runtime's filters, see the class comment. zh-CN: 描述符对应的运行时过滤器, 见类注释. */
-    fun toFilter(): Filter {
-        if (isEmpty) return NOTHING
-        return Selector().apply {
+    /**
+     * One filter per present condition, in protocol order (the steps `accessibility.explain`
+     * reports); empty for an empty descriptor.
+     * zh-CN: 每个给出的条件一个过滤器, 按协议顺序 (即 `accessibility.explain` 报告的步骤); 空描述符为空列表.
+     */
+    fun toFilters(): List<Filter> = buildList {
             text?.let { add(StringPropertyFilter(StringProperty.TEXT, StringMatcher.equals(it))) }
             textContains?.let { add(StringPropertyFilter(StringProperty.TEXT, StringMatcher.contains(it))) }
             textMatches?.let { add(BridgeRegexFilter("textMatches", it) { node -> node.text() }) }
@@ -101,7 +103,12 @@ data class BridgeSelector(
             depth?.let { add(IntFilter(IntFilter.Property.DEPTH, it)) }
             boundsInside?.let { add(BridgeBoundsFilter(it, inside = true)) }
             boundsContains?.let { add(BridgeBoundsFilter(it, inside = false)) }
-        }
+    }
+
+    /** The descriptor as the runtime's filters, see the class comment. zh-CN: 描述符对应的运行时过滤器, 见类注释. */
+    fun toFilter(): Filter {
+        if (isEmpty) return NOTHING
+        return Selector().apply { toFilters().forEach(::add) }
     }
 
     companion object {

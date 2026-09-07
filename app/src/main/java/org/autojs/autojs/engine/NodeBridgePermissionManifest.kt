@@ -390,6 +390,7 @@ object NodeBridgePermissionManifest {
                 "startActivity" -> listOf(APP_ACTIVITY)
                 "viewFile", "editFile" -> listOf(APP_ACTIVITY)
                 "getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)
+                "currentWindow" -> listOf(APP_QUERY, ACCESSIBILITY)
                 else -> listOf(APP)
             }
             NodeBridgeModules.ENGINES -> when (method) {
@@ -399,6 +400,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
             NodeBridgeModules.ACCESSIBILITY -> when (method) {
                 "swipe", "gesture" -> listOf(ACCESSIBILITY, ACCESSIBILITY_GESTURE)
+                "screenshot" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE)
                 else -> listOf(ACCESSIBILITY)
             }
             NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)

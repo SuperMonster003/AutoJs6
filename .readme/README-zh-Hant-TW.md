@@ -456,6 +456,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字串參數自 6.7.0 Alpha13 起被當作正規表示式模式 (`textContains(".")` 匹配任意非空文字, `textContains("1+1")` 匹配 "11", `textContains("(")` 回報錯誤), 現在恢復為字面子字串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正規表示式需求請傳正規表示式參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字串形式的 "/re/flags" 在 `contains` 中不再視為正規表示式
 * `修復` 懸浮視窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在指令碼執行緒呼叫時直接更新已附加視窗的版面, 偶發 `CalledFromWrongThreadException`; 現改為在 UI 執行緒執行 (與 `setSize` / `setPosition` 一致)
 * `修復` 無障礙通知觀察者 (`events.observeToast()` 等所用) 把每條系統通知都當作其它應用程式的 toast 處理 (對通知的型別檢查寫成了本應用程式自己的子類別, 永遠不成立), 通知從未送達它的通知監聽器, 其它應用程式的通知則被誤報為 toast; 現改為檢查框架的 `android.app.Notification`
+* `最佳化` Node bridge 無障礙模組新增 dump (文字, JSON 或 XML 視窗快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與品質選項, 以一次性快取檔案或工作目錄檔案交付), app 模組新增 currentWindow (目前套件名稱, 活動與視窗清單)
 * `最佳化` `TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `最佳化` TypeScript TSX 執行階段驗證提示現在會跟隨應用程式語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `最佳化` Ace 字型預覽在目前字型尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字型或下載完成後自動隱藏

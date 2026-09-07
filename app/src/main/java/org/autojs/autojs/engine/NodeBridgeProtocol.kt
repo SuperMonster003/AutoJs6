@@ -70,7 +70,6 @@ import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.core.automator.bridge.BridgeBounds
 import org.autojs.autojs.core.automator.bridge.BridgeNode
 import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
 import org.autojs.autojs.core.automator.bridge.BridgeSelector
@@ -634,6 +633,7 @@ object NodeBridgeModules {
         "isInstalled",
         "viewFile",
         "editFile",
+        "currentWindow",
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile")
     val dialogsMethods = setOf("alert", "confirm", "input", "select")
@@ -654,6 +654,9 @@ object NodeBridgeModules {
         "scrollBackward",
         "swipe",
         "gesture",
+        "dump",
+        "explain",
+        "screenshot",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -830,6 +833,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeResourceLimitRejections = AtomicInteger(0)
     private val bridgeRateLimitedRejections = AtomicInteger(0)
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
+    private val accessibilityDiagnostics by lazy { NodeBridgeAccessibilityDiagnostics(appContext, engineInfo.cwd) }
     private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -1519,11 +1523,33 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
+        if (request.method == "screenshot") {
+            dispatchAccessibilityScreenshot(request, callback)
+            return
+        }
         val response = when (request.method) {
             "isEnabled", "ensureEnabled" -> NodeBridgeResponse.success(request.id, accessibilityBridgeOperational().toString())
             else -> dispatchAccessibilityOperation(request)
         }
         callback(response)
+    }
+
+    private fun dispatchAccessibilityScreenshot(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val service = AutoJsAccessibilityService.instance
+        if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "an enabled accessibility capability provider in the current process",
+                    ),
+                ),
+            )
+            return
+        }
+        accessibilityDiagnostics.screenshot(request, service, callback)
     }
 
     private fun accessibilityBridgeOperational(): Boolean {
@@ -1566,6 +1592,8 @@ class AndroidNodeBridgeCapabilityProvider(
             "scrollBackward" -> dispatchAccessibilitySelectorAction(request, BridgeNodeActions.ACTION_SCROLL_BACKWARD)
             "swipe" -> dispatchAccessibilitySwipe(request, service)
             "gesture" -> dispatchAccessibilityGesture(request, service)
+            "dump" -> accessibilityDiagnostics.dump(request)
+            "explain" -> accessibilityDiagnostics.explain(request)
             else -> unavailable(request)
         }
     }
@@ -1775,69 +1803,9 @@ class AndroidNodeBridgeCapabilityProvider(
         }
     }
 
-    private fun JSONObject.toBridgeSelector(): BridgeSelector = BridgeSelector(
-        text = optString("text").takeIf { it.isNotBlank() },
-        textContains = optString("textContains").takeIf { it.isNotBlank() },
-        textMatches = optRegex("textMatches"),
-        desc = optString("desc").takeIf { it.isNotBlank() },
-        descContains = optString("descContains").takeIf { it.isNotBlank() },
-        descMatches = optRegex("descMatches"),
-        id = optString("id").takeIf { it.isNotBlank() },
-        idMatches = optRegex("idMatches"),
-        className = optString("className").takeIf { it.isNotBlank() },
-        classNameMatches = optRegex("classNameMatches"),
-        clickable = if (has("clickable")) optBoolean("clickable") else null,
-        enabled = if (has("enabled")) optBoolean("enabled") else null,
-        scrollable = if (has("scrollable")) optBoolean("scrollable") else null,
-        depth = if (has("depth")) optInt("depth", -1) else null,
-        boundsInside = optBounds("boundsInside"),
-        boundsContains = optBounds("boundsContains"),
-    )
+    private fun JSONObject.toBridgeSelector(): BridgeSelector = NodeBridgeAccessibilityCodec.selectorOf(this)
 
-    private fun JSONObject.optRegex(name: String): Regex? {
-        val value = opt(name) ?: return null
-        val pattern = when (value) {
-            is JSONObject -> value.optString("pattern")
-            is String -> value
-            else -> return null
-        }.takeIf { it.isNotBlank() } ?: return null
-        val flags = (value as? JSONObject)?.optString("flags").orEmpty()
-        val options = buildSet {
-            if ('i' in flags) add(RegexOption.IGNORE_CASE)
-            if ('m' in flags) add(RegexOption.MULTILINE)
-            if ('s' in flags) add(RegexOption.DOT_MATCHES_ALL)
-        }
-        return runCatching { Regex(pattern, options) }.getOrNull()
-    }
-
-    private fun JSONObject.optBounds(name: String): BridgeBounds? {
-        val value = optJSONObject(name) ?: return null
-        return BridgeBounds(
-            value.optInt("left"),
-            value.optInt("top"),
-            value.optInt("right"),
-            value.optInt("bottom"),
-        )
-    }
-
-    private fun UiObject.toBridgeJson(): JSONObject {
-        val node = BridgeNode.of(this)
-        return JSONObject()
-            .put("text", node.text)
-            .put("desc", node.desc)
-            .put("id", node.id)
-            .put("className", node.className)
-            .put(
-                "bounds",
-                JSONObject()
-                    .put("left", node.bounds.left)
-                    .put("top", node.bounds.top)
-                    .put("right", node.bounds.right)
-                    .put("bottom", node.bounds.bottom),
-            )
-            .put("clickable", node.clickable)
-            .put("enabled", node.enabled)
-    }
+    private fun UiObject.toBridgeJson(): JSONObject = NodeBridgeAccessibilityCodec.nodeJson(BridgeNode.of(this))
 
     private fun dispatchMediaProjection(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         callback(
@@ -4442,6 +4410,7 @@ class AndroidNodeBridgeCapabilityProvider(
                         fileProviderAuthority = appFileProviderAuthority(),
                     )
                 }
+                "currentWindow" -> accessibilityDiagnostics.currentWindow(request)
                 "openAppSetting" -> {
                     openAppSetting(request.firstStringArg().ifBlank { appContext.packageName })
                     NodeBridgeResponse.success(request.id, "null")

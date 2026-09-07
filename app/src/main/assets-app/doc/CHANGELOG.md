@@ -272,6 +272,7 @@
 * `修复` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串参数自 6.7.0 Alpha13 起被当作正则模式 (`textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 "11", `textContains("(")` 报错), 现在恢复为字面子串, 与 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正则需求请传正则参数 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 "/re/flags" 在 `contains` 中不再视为正则
 * `修复` 悬浮窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在脚本线程调用时直接更新已附着窗口的布局, 偶发 `CalledFromWrongThreadException`; 现改为在 UI 线程执行 (与 `setSize` / `setPosition` 一致)
 * `修复` 无障碍通知观察者 (`events.observeToast()` 等所用) 把每条系统通知都当作其它应用的 toast 处理 (对通知的类型检查写成了本应用自己的子类, 永远不成立), 通知从未送达它的通知监听器, 其它应用的通知则被误报为 toast; 现改为检查框架的 `android.app.Notification`
+* `优化` Node bridge 无障碍模块新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 节点, 32 层与 256 KiB), explain (选择器描述符的逐过滤器命中数) 与 screenshot (Android 11+ 的无障碍截图, 支持缩放, 区域, 格式与质量选项, 以一次性缓存文件或工作目录文件交付), app 模块新增 currentWindow (当前包名, 活动与窗口列表)
 * `优化` `TypeScript 控制台` 现在默认保持收起, 仅在编译插件可用时通过完整日志页或编辑器日志面板的更多菜单按需显示并分别记忆状态; 片段执行期间绿色运行图标会切换为可停止的红色图标, 完整日志页同步显示实际工作路径, 编辑器日志面板的更多菜单亦集中提供复制, 发送及导出操作
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏

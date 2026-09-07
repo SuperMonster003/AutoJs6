@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.mcp
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.RemoteException
 import android.util.Log
@@ -17,6 +18,8 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityBroker
 import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityCallback
 import org.autojs.plugin.mcp.server.api.McpServerContract
+import org.json.JSONObject
+import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -187,8 +190,9 @@ class McpHostCapabilityBroker(
     }
 
     private fun sendResponse(callback: IMcpHostCapabilityCallback, response: NodeBridgeResponse) {
-        var effective = response
-        var responseJson = response.toJson()
+        val payload = if (response.ok) extractOneShotPayload(response) else null
+        var effective = payload?.response ?: response
+        var responseJson = effective.toJson()
         if (responseJson.toByteArray(StandardCharsets.UTF_8).size > McpServerContract.MAX_BRIDGE_INLINE_JSON_BYTES) {
             effective = NodeBridgeResponse.failure(
                 response.id,
@@ -199,17 +203,81 @@ class McpHostCapabilityBroker(
             )
             responseJson = effective.toJson()
         }
+        val descriptor = payload?.descriptor?.takeIf { effective.ok }
         val bundle = Bundle().apply {
             putString(McpServerContract.KEY_BRIDGE_RESPONSE_JSON, responseJson)
             putBoolean(McpServerContract.KEY_BRIDGE_RESPONSE_OK, effective.ok)
             effective.error?.message?.let { putString(McpServerContract.KEY_BRIDGE_ERROR_MESSAGE, it) }
+            if (descriptor != null) {
+                putParcelable(McpServerContract.KEY_BRIDGE_PAYLOAD_FD, descriptor)
+                putLong(McpServerContract.KEY_BRIDGE_PAYLOAD_BYTES, payload.bytes)
+                putString(McpServerContract.KEY_BRIDGE_PAYLOAD_MIME, payload.mime)
+            }
         }
         try {
             callback.onResponse(bundle)
         } catch (_: RemoteException) {
             // The plugin process died; the session lease observes the death separately.
+        } finally {
+            // The transaction carried its own duplicate; the receiver owns that one.
+            payload?.descriptor?.let { runCatching { it.close() } }
         }
     }
+
+    /**
+     * A result whose `payload` is a one-shot file under the host cache (screenshots) travels as
+     * a read-only descriptor: the file is opened, unlinked, and the JSON keeps only the metadata
+     * (`payload.kind = "descriptor"`). Files elsewhere are left untouched and stay inline.
+     */
+    private fun extractOneShotPayload(response: NodeBridgeResponse): OneShotPayload? {
+        val resultJson = response.resultJson ?: return null
+        if (!resultJson.contains("\"oneShot\":true")) {
+            return null
+        }
+        val json = runCatching { JSONObject(resultJson) }.getOrNull() ?: return null
+        val payload = json.optJSONObject(KEY_PAYLOAD) ?: return null
+        if (payload.optString(KEY_PAYLOAD_KIND) != PAYLOAD_KIND_FILE || !payload.optBoolean(KEY_PAYLOAD_ONE_SHOT, false)) {
+            return null
+        }
+        val path = payload.optString(KEY_PAYLOAD_PATH).takeIf { it.isNotBlank() } ?: return null
+        val cacheRoot = runCatching { appContext.cacheDir.canonicalFile }.getOrNull() ?: return null
+        val file = runCatching { File(path).canonicalFile }.getOrNull() ?: return null
+        if (!file.path.startsWith(cacheRoot.path + File.separator) || !file.isFile) {
+            return null
+        }
+        val bytes = file.length()
+        val mime = payload.optString(KEY_PAYLOAD_MIME)
+        if (bytes > McpServerContract.MAX_BRIDGE_PAYLOAD_BYTES) {
+            file.delete()
+            return OneShotPayload(
+                descriptor = null,
+                bytes = bytes,
+                mime = mime,
+                response = NodeBridgeResponse.failure(
+                    response.id,
+                    NodeBridgeError.resourceLimit(
+                        "AutoJs6 MCP capability broker payload of $bytes bytes exceeds ${McpServerContract.MAX_BRIDGE_PAYLOAD_BYTES}.",
+                    ),
+                ),
+            )
+        }
+        val descriptor = runCatching { ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY) }.getOrElse { error ->
+            Log.w(TAG, "unable to open payload ${file.path}: ${error.message}")
+            return null
+        }
+        file.delete()
+        payload.remove(KEY_PAYLOAD_PATH)
+        payload.put(KEY_PAYLOAD_KIND, PAYLOAD_KIND_DESCRIPTOR)
+        json.put(KEY_PAYLOAD, payload)
+        return OneShotPayload(descriptor, bytes, mime, NodeBridgeResponse.success(response.id, json.toString()))
+    }
+
+    private class OneShotPayload(
+        val descriptor: ParcelFileDescriptor?,
+        val bytes: Long,
+        val mime: String,
+        val response: NodeBridgeResponse,
+    )
 
     private fun recoverId(requestJson: String): String = NodeBridgeRequest.recoverId(requestJson) ?: "invalid"
 
@@ -218,5 +286,12 @@ class McpHostCapabilityBroker(
         const val DEFAULT_SOURCE_NAME = "mcp-server"
         private const val GRANT_SOURCE = "mcp-grant"
         private const val TAG = "McpHostBroker"
+        private const val KEY_PAYLOAD = "payload"
+        private const val KEY_PAYLOAD_KIND = "kind"
+        private const val KEY_PAYLOAD_PATH = "path"
+        private const val KEY_PAYLOAD_ONE_SHOT = "oneShot"
+        private const val KEY_PAYLOAD_MIME = "mime"
+        private const val PAYLOAD_KIND_FILE = "file"
+        private const val PAYLOAD_KIND_DESCRIPTOR = "descriptor"
     }
 }
