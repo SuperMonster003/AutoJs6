@@ -681,6 +681,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Screen Color Picker API
     implementation(project(":plugin-api:screen-color-picker-api"))
+
+    // Plugin API: MCP Server API
+    implementation(project(":plugin-api:mcp-server-api"))
 }
 
 dependencies /* MIME */ {

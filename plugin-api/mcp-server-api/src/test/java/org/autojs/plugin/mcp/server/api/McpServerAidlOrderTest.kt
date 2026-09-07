@@ -1,0 +1,105 @@
+package org.autojs.plugin.mcp.server.api
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
+/**
+ * Freezes the transaction order of contract version 1: Binder transaction codes follow the
+ * declaration order, so a method may only ever be appended, never inserted, removed, or renamed.
+ */
+class McpServerAidlOrderTest {
+
+    @Test
+    fun declaredMethodsKeepTheirFrozenOrderAndOnewayFlags() {
+        val directory = locateAidlSourceDirectory()
+        val actualFileNames = Files.list(directory).use { paths ->
+            paths
+                .filter { path -> Files.isRegularFile(path) && path.fileName.toString().endsWith(".aidl") }
+                .map { path -> path.fileName.toString() }
+                .sorted()
+                .toList()
+        }
+        assertEquals(FROZEN.keys.sorted(), actualFileNames)
+
+        FROZEN.forEach { (fileName, expected) ->
+            val source = directory.resolve(fileName).toFile().readText(StandardCharsets.UTF_8)
+            val declaration = parse(source)
+            assertEquals("oneway flag of $fileName", expected.oneway, declaration.oneway)
+            assertEquals("method order of $fileName", expected.methods, declaration.methods)
+        }
+    }
+
+    private fun parse(source: String): Declaration {
+        val withoutComments = source
+            .replace(Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("//.*"), "")
+        val body = withoutComments.substringAfter("{").substringBeforeLast("}")
+        val methods = body.split(';')
+            .map { it.replace(Regex("\\s+"), " ").trim() }
+            .filter { it.isNotEmpty() }
+        val oneway = Regex("\\boneway\\s+interface\\b").containsMatchIn(withoutComments)
+        return Declaration(oneway, methods)
+    }
+
+    private fun locateAidlSourceDirectory(): Path {
+        val candidates = listOf(
+            Paths.get("src", "main", "aidl").resolve(AIDL_PACKAGE_PATH),
+            Paths.get("plugin-api", "mcp-server-api", "src", "main", "aidl").resolve(AIDL_PACKAGE_PATH),
+        ).map(Path::toAbsolutePath).map(Path::normalize)
+        val directory = candidates.firstOrNull(Files::isDirectory)
+        assertTrue("MCP Server AIDL source directory was not found in $candidates", directory != null)
+        return checkNotNull(directory)
+    }
+
+    private data class Declaration(val oneway: Boolean, val methods: List<String>)
+
+    private companion object {
+        val AIDL_PACKAGE_PATH: Path = Paths.get("org", "autojs", "plugin", "mcp", "server", "api")
+
+        val FROZEN = linkedMapOf(
+            "IMcpServerPlugin.aidl" to Declaration(
+                oneway = false,
+                methods = listOf(
+                    "PluginInfo getInfo()",
+                    "Bundle getCapabilities()",
+                    "IMcpServerSession openServer(in Bundle config, IMcpHostCapabilityBroker broker, IMcpServerCallback callback)",
+                ),
+            ),
+            "IMcpServerSession.aidl" to Declaration(
+                oneway = false,
+                methods = listOf(
+                    "Bundle getStatus()",
+                    "void updateConfig(in Bundle config)",
+                    "void stop(in Bundle reason)",
+                    "void close()",
+                ),
+            ),
+            "IMcpServerCallback.aidl" to Declaration(
+                oneway = true,
+                methods = listOf(
+                    "void onStatus(in Bundle status)",
+                    "void onEvent(in Bundle event)",
+                ),
+            ),
+            "IMcpHostCapabilityBroker.aidl" to Declaration(
+                oneway = false,
+                methods = listOf(
+                    "Bundle getBrokerInfo()",
+                    "void dispatch(in Bundle request, IMcpHostCapabilityCallback callback)",
+                    "void destroy(in Bundle reason)",
+                ),
+            ),
+            "IMcpHostCapabilityCallback.aidl" to Declaration(
+                oneway = true,
+                methods = listOf(
+                    "void onResponse(in Bundle response)",
+                ),
+            ),
+        )
+    }
+}

@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.mcp.server.api.** { *; }
+-dontwarn org.autojs.plugin.mcp.server.api.**
