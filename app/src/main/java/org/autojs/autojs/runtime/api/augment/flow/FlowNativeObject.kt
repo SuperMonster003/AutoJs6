@@ -268,6 +268,7 @@ internal class FlowApi(val executor: FlowExecutor) {
             put("stableFor", this, d.stableFor.toDouble())
             put("strictActions", this, d.strictActions)
             put("humanize", this, ToolkitApi.humanizeSnapshot(scriptRuntime.topLevelScope, d.humanize))
+            put("recoverService", this, d.recoverService)
             put("trace", this, executor.tracing)
         }
     }
