@@ -399,6 +399,7 @@ object NodeBridgePermissionManifest {
                 "viewFile", "editFile" -> listOf(APP_ACTIVITY)
                 "getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)
                 "currentWindow" -> listOf(APP_QUERY, ACCESSIBILITY)
+                "listSamples", "readSample" -> listOf(APP_QUERY)
                 else -> listOf(APP)
             }
             NodeBridgeModules.ENGINES -> when (method) {

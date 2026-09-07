@@ -636,8 +636,10 @@ object NodeBridgeModules {
         "viewFile",
         "editFile",
         "currentWindow",
+        "listSamples",
+        "readSample",
     )
-    val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile")
+    val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
     val dialogsMethods = setOf("alert", "confirm", "input", "select")
     val accessibilityMethods = setOf(
         "isEnabled",
@@ -692,7 +694,7 @@ object NodeBridgeModules {
     val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
-    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings")
+    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info")
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
@@ -842,6 +844,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val accessibilityDiagnostics by lazy { NodeBridgeAccessibilityDiagnostics(appContext, engineInfo.cwd) }
     private val filesBridge by lazy { NodeBridgeFilesBridge(appContext) }
     private val consoleBridge by lazy { NodeBridgeConsoleBridge() }
+    private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
+    private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
     private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -1038,7 +1042,10 @@ class AndroidNodeBridgeCapabilityProvider(
                 request.id,
                 JSONArray().put(engineInfo.toJsonObject()).toString(),
             )
-            "stopAll" -> NodeBridgeResponse.success(request.id, "0")
+            // MCP roadmap P1.3: host-process semantics only with {scope: "host"}; the plugin view stays.
+            "stopAll" -> hostEnginesBridge.stopAll(request) ?: NodeBridgeResponse.success(request.id, "0")
+            "list" -> hostEnginesBridge.list(request)
+            "stop" -> hostEnginesBridge.stop(request)
             "stopSelf" -> NodeBridgeResponse.success(request.id, "true")
             else -> NodeBridgeResponse.failure(
                 request.id,
@@ -3393,6 +3400,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchDevice(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         dispatchOnMain(request, callback) {
             when (request.method) {
+                "info" -> runCatching {
+                    NodeBridgeResponse.success(request.id, NodeBridgeDeviceInfo.json(appContext).toString())
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
                 "isScreenOn" -> runCatching {
                     NodeBridgeResponse.success(request.id, isScreenOn().toString())
                 }.getOrElse { error ->
@@ -4384,6 +4396,11 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchApp(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (request.method == "listSamples" || request.method == "readSample") {
+            // Asset reads stay off the main thread (MCP roadmap P1.3, D20).
+            callback(samplesBridge.dispatch(request))
+            return
+        }
         dispatchOnMain(request, callback) {
             when (request.method) {
                 "launchPackage" -> NodeBridgeResponse.success(

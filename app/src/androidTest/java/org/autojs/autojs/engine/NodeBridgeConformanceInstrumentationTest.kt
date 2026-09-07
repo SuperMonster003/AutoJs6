@@ -1270,7 +1270,7 @@ class NodeBridgeConformanceInstrumentationTest {
     private companion object {
         private val stableDispatchMethods: Map<String, Set<String>> = linkedMapOf(
             NodeBridgeModules.TOAST to setOf("showToast", "toast"),
-            NodeBridgeModules.APP to setOf(
+            NodeBridgeModules.APP to setOf("listSamples", "readSample", 
                 "launchPackage",
                 "launchApp",
                 "openAppSetting",
@@ -1284,9 +1284,9 @@ class NodeBridgeConformanceInstrumentationTest {
             ),
             NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
-            NodeBridgeModules.DEVICE to setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"),
+            NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"),
             NodeBridgeModules.SHELL to setOf("exec"),
-            NodeBridgeModules.ENGINES to setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
+            NodeBridgeModules.ENGINES to setOf("list", "stop", "myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
             NodeBridgeModules.ACCESSIBILITY to setOf(
                 "isEnabled",
                 "ensureEnabled",

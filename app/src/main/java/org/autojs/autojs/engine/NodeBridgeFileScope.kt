@@ -266,35 +266,6 @@ class NodeBridgeFileScope(root: File) {
         }
     }
 
-    private fun decodeUtf8(bytes: ByteArray, allowCutTail: Boolean): String {
-        var end = bytes.size
-        if (allowCutTail && end > 0) {
-            // A read cut at maxBytes may end inside a multi-byte sequence; drop an incomplete tail.
-            var start = end - 1
-            var back = 0
-            while (start > 0 && back < 3 && (bytes[start].toInt() and 0xC0) == 0x80) {
-                start--
-                back++
-            }
-            val lead = bytes[start].toInt() and 0xFF
-            val expected = when {
-                lead >= 0xF0 -> 4
-                lead >= 0xE0 -> 3
-                lead >= 0xC0 -> 2
-                else -> 1
-            }
-            if (expected > end - start) end = start
-        }
-        val decoder = StandardCharsets.UTF_8.newDecoder()
-            .onMalformedInput(CodingErrorAction.REPORT)
-            .onUnmappableCharacter(CodingErrorAction.REPORT)
-        return try {
-            decoder.decode(ByteBuffer.wrap(bytes, 0, end)).toString()
-        } catch (_: CharacterCodingException) {
-            throw NodeBridgeFileScopeException(Kind.WRONG_TYPE, "file is not valid UTF-8; read it with encoding \"$ENCODING_BASE64\"")
-        }
-    }
-
     private fun encodeUtf8(content: String): ByteArray {
         val encoder = StandardCharsets.UTF_8.newEncoder()
             .onMalformedInput(CodingErrorAction.REPORT)
@@ -318,6 +289,39 @@ class NodeBridgeFileScope(root: File) {
         const val MAX_WRITE_BYTES = 1024 * 1024
 
         private val WINDOWS_DRIVE_PATH = Regex("^[A-Za-z]:.*")
+
+        /**
+         * Strict UTF-8 decoding; with [allowCutTail] an incomplete trailing sequence (a read cut at
+         * a byte limit) is dropped instead of failing. Shared with `NodeBridgeSampleCatalog`.
+         * zh-CN: 严格的 UTF-8 解码; [allowCutTail] 时丢弃末尾不完整的序列 (按字节上限截断的读取) 而非失败. 与 `NodeBridgeSampleCatalog` 共用.
+         */
+        internal fun decodeUtf8(bytes: ByteArray, allowCutTail: Boolean): String {
+            var end = bytes.size
+            if (allowCutTail && end > 0) {
+                var start = end - 1
+                var back = 0
+                while (start > 0 && back < 3 && (bytes[start].toInt() and 0xC0) == 0x80) {
+                    start--
+                    back++
+                }
+                val lead = bytes[start].toInt() and 0xFF
+                val expected = when {
+                    lead >= 0xF0 -> 4
+                    lead >= 0xE0 -> 3
+                    lead >= 0xC0 -> 2
+                    else -> 1
+                }
+                if (expected > end - start) end = start
+            }
+            val decoder = StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+            return try {
+                decoder.decode(ByteBuffer.wrap(bytes, 0, end)).toString()
+            } catch (_: CharacterCodingException) {
+                throw NodeBridgeFileScopeException(Kind.WRONG_TYPE, "file is not valid UTF-8; read it with encoding \"$ENCODING_BASE64\"")
+            }
+        }
 
         fun requireEncoding(value: String): String {
             val encoding = value.trim().lowercase()
