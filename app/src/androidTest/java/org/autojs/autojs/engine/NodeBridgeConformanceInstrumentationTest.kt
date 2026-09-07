@@ -1329,6 +1329,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
             NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove", "install", "update", "remove"),
             NodeBridgeModules.FILES to setOf("list", "stat", "read", "write", "mkdir", "rename", "delete"),
+            NodeBridgeModules.CONSOLE to setOf("tail"),
         )
     }
 }

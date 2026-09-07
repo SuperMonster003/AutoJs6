@@ -65,6 +65,7 @@ object NodeBridgePermissionManifest {
     const val FILES = "files"
     const val FILES_WRITE = "files.write"
     const val FILES_DELETE = "files.delete"
+    const val CONSOLE = "console"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -131,6 +132,7 @@ object NodeBridgePermissionManifest {
         FILES,
         FILES_WRITE,
         FILES_DELETE,
+        CONSOLE,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -456,6 +458,7 @@ object NodeBridgePermissionManifest {
                 "delete" -> listOf(FILES, FILES_DELETE)
                 else -> listOf(FILES)
             }
+            NodeBridgeModules.CONSOLE -> listOf(CONSOLE)
             else -> emptyList()
         }
         return required.map(::normalizeCapability).distinct()

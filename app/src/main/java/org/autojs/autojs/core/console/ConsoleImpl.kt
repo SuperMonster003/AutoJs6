@@ -48,6 +48,7 @@ import org.opencv.core.Point
 import org.opencv.core.Size
 import java.io.IOException
 import java.lang.ref.WeakReference
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.pow
@@ -66,7 +67,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     private val mSafeSizeToSend: Int = 2.0.pow(16).toInt()
     private val mSafeSizeToCopy: Int = 2.0.pow(19).toInt()
 
-    private var mLogListeners = ArrayList<WeakReference<LogListener?>>()
+    private val mLogListeners = CopyOnWriteArrayList<WeakReference<LogListener?>>()
     private var mConsoleView: WeakReference<ConsoleView?>? = null
 
     @get:Synchronized
@@ -154,10 +155,23 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     override fun println(level: Int, charSequence: CharSequence): String? {
         val logEntry = LogEntry(mIdCounter.getAndIncrement(), level, charSequence)
-        synchronized(logEntries) { logEntries.add(logEntry) }
+        synchronized(logEntries) {
+            logEntries.add(logEntry)
+            // Soft cap (MCP roadmap P1.3): drop the oldest entries; consumers track entries by id.
+            // zh-CN: 软上限 (MCP 路线图 P1.3): 丢弃最旧的条目; 消费方按 id 跟踪条目.
+            val overflow = logEntries.size - MAX_LOG_ENTRIES
+            if (overflow > 0) logEntries.subList(0, overflow).clear()
+        }
         mLogListeners.forEach { it.get()?.onNewLog(logEntry) }
         return null
     }
+
+    /** The id of the newest entry ever printed, -1 before the first one. zh-CN: 最新打印条目的 id, 首条之前为 -1. */
+    val latestLogId: Int
+        get() = mIdCounter.get() - 1
+
+    /** A copy of the retained entries in id order. zh-CN: 当前保留条目按 id 顺序的副本. */
+    fun snapshotLogEntries(): List<LogEntry> = synchronized(logEntries) { ArrayList(logEntries) }
 
     public override fun write(level: Int, data: CharSequence?) {
         data?.let { println(level, it) }
@@ -809,8 +823,14 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         }
     }
 
-    private fun addLogListener(logListener: LogListener?) {
+    fun addLogListener(logListener: LogListener?) {
+        logListener ?: return
+        mLogListeners.removeAll { it.get() == null }
         mLogListeners.add(WeakReference(logListener))
+    }
+
+    fun removeLogListener(logListener: LogListener?) {
+        mLogListeners.removeAll { reference -> reference.get().let { it == null || it === logListener } }
     }
 
     private fun getStackTrace(t: Throwable) = ScriptRuntime.getStackTrace(t, false)
@@ -1079,6 +1099,8 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
         private val TAG = ConsoleImpl::class.java.simpleName
 
+        /** Soft cap of retained log entries; older ones are dropped. zh-CN: 保留日志条目的软上限, 更早的条目被丢弃. */
+        const val MAX_LOG_ENTRIES = 4096
         const val DEFAULT_TITLE = ""
         const val DEFAULT_ALPHA = 1.0
         const val DEFAULT_TOUCHABLE = true

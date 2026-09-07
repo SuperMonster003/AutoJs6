@@ -298,6 +298,7 @@
 * `修復` 無障礙通知觀察者 (`events.observeToast()` 等所用) 把每條系統通知都當作其它應用程式的 toast 處理 (對通知的型別檢查寫成了本應用程式自己的子類別, 永遠不成立), 通知從未送達它的通知監聽器, 其它應用程式的通知則被誤報為 toast; 現改為檢查框架的 `android.app.Notification`
 * `最佳化` Node bridge 無障礙模組新增 dump (文字, JSON 或 XML 視窗快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與品質選項, 以一次性快取檔案或工作目錄檔案交付), app 模組新增 currentWindow (目前套件名稱, 活動與視窗清單)
 * `最佳化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為正規化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 清單上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力權杖, 變更後重新整理工作區檔案管理器
+* `最佳化` Node bridge 新增 console 模組 (console.tail 讀取全域控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待指令碼結束並收集其 id 視窗內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 筆日誌 (超出捨棄最舊, 控制台檢視依條目 id 重新整理), ConsoleImpl 公開 addLogListener 與 removeLogListener
 * `最佳化` `TypeScript 控制檯` 現在預設保持收起, 僅在編譯器插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色執行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `最佳化` TypeScript TSX 執行階段驗證提示現在會跟隨應用程式語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
 * `最佳化` Ace 字型預覽在目前字型尚未下載時於多功能鍵盤上方顯示下載提示, 切換至可用字型或下載完成後自動隱藏

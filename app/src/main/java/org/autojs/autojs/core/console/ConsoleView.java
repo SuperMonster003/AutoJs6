@@ -489,26 +489,36 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private void refreshLog() {
         if (mConsole == null)
             return;
-        int oldSize = mLogEntries.size();
-        ArrayList<ConsoleImpl.LogEntry> logEntries = mConsole.getLogEntries();
+        // Entries are appended by id (ids only grow), so the console's soft cap, which drops the
+        // oldest entries, cannot desynchronize this view (MCP roadmap P1.3).
+        // zh-CN: 按 id 追加条目 (id 只增不减), 因此控制台丢弃最旧条目的软上限不会使本视图失步 (MCP 路线图 P1.3).
+        ArrayList<ConsoleImpl.LogEntry> fresh;
         synchronized (mConsole.getLogEntries()) {
-            final int size = logEntries.size();
+            ArrayList<ConsoleImpl.LogEntry> logEntries = mConsole.getLogEntries();
+            int size = logEntries.size();
             if (size == 0) {
                 return;
             }
-            if (oldSize >= size) {
+            int lastSeenId = mLogEntries.isEmpty() ? -1 : mLogEntries.get(mLogEntries.size() - 1).getId();
+            int start = size;
+            while (start > 0 && logEntries.get(start - 1).getId() > lastSeenId) {
+                start--;
+            }
+            if (start >= size) {
                 return;
             }
-            if (oldSize == 0) {
-                mLogEntries.addAll(logEntries);
-            } else {
-                for (int i = oldSize; i < size; i++) {
-                    mLogEntries.add(logEntries.get(i));
-                }
-            }
-            Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyItemRangeInserted(oldSize, size - oldSize);
-            mLogListRecyclerView.scrollToPosition(size - 1);
+            fresh = new ArrayList<>(logEntries.subList(start, size));
         }
+        RecyclerView.Adapter<?> adapter = Objects.requireNonNull(mLogListRecyclerView.getAdapter());
+        int oldSize = mLogEntries.size();
+        mLogEntries.addAll(fresh);
+        adapter.notifyItemRangeInserted(oldSize, fresh.size());
+        int overflow = mLogEntries.size() - ConsoleImpl.MAX_LOG_ENTRIES;
+        if (overflow > 0) {
+            mLogEntries.subList(0, overflow).clear();
+            adapter.notifyItemRangeRemoved(0, overflow);
+        }
+        mLogListRecyclerView.scrollToPosition(mLogEntries.size() - 1);
     }
 
     private class ViewHolder extends RecyclerView.ViewHolder {

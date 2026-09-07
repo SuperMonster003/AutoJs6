@@ -147,6 +147,7 @@ object NodeBridgeProviderRegistry {
     private const val RHINO_PROVIDER = "rhino"
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
     private const val FILES_PROVIDER = "files"
+    private const val CONSOLE_PROVIDER = "console"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
         provider(
@@ -300,6 +301,12 @@ object NodeBridgeProviderRegistry {
             packagedSupport = packagedSupported("scoped to the working directory; write and delete need their own capability tokens"),
         ),
         provider(
+            id = CONSOLE_PROVIDER,
+            modules = listOf(NodeBridgeModules.CONSOLE),
+            capabilities = listOf(NodeBridgePermissionManifest.CONSOLE),
+            packagedSupport = packagedSupported("bounded tail of the shared global console (500 lines / 256 KiB per call)"),
+        ),
+        provider(
             id = RHINO_PROVIDER,
             displayName = "rhino JSON-only shim",
             modules = listOf(NodeBridgeModules.RHINO),
@@ -408,6 +415,7 @@ object NodeBridgeProviderRegistry {
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         RHINO_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         FILES_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        CONSOLE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
     }
 
