@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 6 日.
+資料更新於 2026 年 9 月 7 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -320,6 +320,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 事件驅動等待: `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })` 在視窗狀態 / 內容 / 視窗列表事件停歇 `quietFor` 毫秒後回傳 `{ quietFor, elapsed, events }`, 取代 "sleep 一段時間再找" 的寫法; `waitForEvent(type?, filter?, timeout?)` 等待下一個無障礙事件 (類型為名稱 / 陣列 / `"*"`, 過濾器為函式或 `{ packageName, className, text }` 的字串 / 正則); `waitForToast(text?, timeout?)` 與 `waitForNotification(filter?, timeout?)` 等待其它應用程式的 toast 與通知 (文字包含 / 正則 / 函式 / 物件過濾); 四者均有同名 Flow 起點 (`flow.waitForIdle(...)` 等) 與鏈式步驟 (鏈式 `waitForIdle` 透傳目前值), 逾時拋出 / reject 為 `FlowError` (`code` 為 `TIMEOUT`); `auto.setFlags(["eventAssistedPolling"])` 讓輪詢型的選擇器查詢 (`findOne(timeout)` / `untilFind()` 等) 與 Flow 等待在無障礙事件到達時立即重試, 無事件時選擇器查詢的兜底間隔提高到 200 ms
 * `新增` 選擇器與節點能力: 字串選擇器語法 `select("text=登入 clickable")` (以空白分隔的 `key=value` / `key~=regex` 或 `key=/regex/flags` / `key` / `!key`, 含空格的值加引號, 未加引號且含逗號的值在需要時拆成多個參數如 `bounds=0,0,100,200`, 鍵名來自選擇器註冊表; `UiSelector.select(String)` 追加過濾器並回傳自身, 可與 builder 鏈式混用; 語法錯誤拋出帶字元位置, 出錯條件與候選鍵名的例外; 無參 `select()` 仍是節點動作); `UiObject.isStale()` / `waitUntilGone(timeout?, interval?)` / `waitForStable(stableFor?, timeout?, interval?)` 節點級的狀態判斷與等待 (預設逾時 10 s, 間隔 50 ms; `eventAssistedPolling` 旗標下由無障礙事件提前喚醒; UI 執行緒上拒絕); `findIterator()` 惰性查找 (按 `find()` 的順序隨迭代前進搜尋, `for...of` 中 `break` 或 `close()` 之後不再遍歷樹的其餘部分, `collect()` 取剩餘節點, `visited` / `produced` 計數); 視窗過濾器物件 `{ type, packageName, title, displayId, active, focused, id, layer }` 用於 `auto.setWindowFilter(...)` 與新增的 `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` (類型名如 `application` / `inputMethod` / `system` / `accessibilityOverlay`, 套件名與標題接受字串或正則, API 30 之前的視窗視為預設顯示器)
 * `新增` 健壯性 (Roadmap P5.5): 無障礙服務在等待期間被解除繫結時, 進行中的 `waitForEvent` / `waitForIdle` / `waitForToast` / `waitForNotification` (同步與 Flow 形式) 以 `A11Y_UNAVAILABLE` 立即結束而非等到逾時; Flow 等待新增 `recoverService` 選項 (亦可經 `flow.defaults({ recoverService: true })` 設為預設), 開啟後探測遇到服務中斷時在剩餘逾時內逐秒安靜地等待服務恢復 (已啟用但未繫結的服務經啟動策略重新啟用, 從不開啟設定頁, 使用者至多被詢問一次), 服務在逾時前回來則繼續等待目標, 否則以帶 `elapsed` / `attempts` 的 `A11Y_UNAVAILABLE` 拒絕; 平台跳過 `onServiceConnected` 時註冊表由首個事件採納實例並記錄 `adoptedByEvent` 旗標 (`auto.state.adoptedByEvent`, 服務管理器診斷的處理程序內執行個體一行附註), 服務資訊偏好 (穩定模式, 手勢觀察) 此時改由首個事件套用
+* `新增` 無障礙服務範例 (Roadmap P6.4): 應用內範例程式碼的 "無障礙服務" 目錄新增 6 個指令碼 (流程 (Flow) 非同步等待與鏈式動作, 工具集 表單填寫與彈窗關閉, 工具集 清單捲動與擷取, 字串選擇器與惰性迭代, 選擇器診斷與節點樹匯出, 事件驅動等待), 均以指令碼自身的懸浮視窗為目標, 不依賴其他應用程式
 * `修復` 帶 Unicode BOM 的腳本由檔案管理器直接執行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常執行卻於檔案管理器回報 `無效字元` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用資料的問題
 * `修復` 使實驗性遠端單檔案建置編號與舊建置器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓縮大小、使用建置期驗證的範本展開上限，並保留 256 MiB 空間
@@ -827,7 +828,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 6 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 7 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

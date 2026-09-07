@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 6 日 に更新されました.
+データは 2026 年 9 月 7 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -320,6 +320,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` イベント駆動の待機: `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })` はウィンドウ状態 / コンテンツ / ウィンドウ一覧のイベントが `quietFor` ms 途絶えると `{ quietFor, elapsed, events }` を返し, "しばらく sleep してから探す" 書き方を置き換え; `waitForEvent(type?, filter?, timeout?)` は次のアクセシビリティイベントを待機 (type は名前 / 配列 / `"*"`, filter は関数または文字列 / 正規表現の `{ packageName, className, text }`); `waitForToast(text?, timeout?)` と `waitForNotification(filter?, timeout?)` は他アプリの toast と通知を待機 (部分一致 / 正規表現 / 関数 / オブジェクトのフィルター); 4 つとも同名の Flow 起点 (`flow.waitForIdle(...)` など) とチェーンステップ (チェーンの `waitForIdle` は現在値をそのまま渡す) があり, タイムアウトは `FlowError` (`code` は `TIMEOUT`) を throw / reject; `auto.setFlags(["eventAssistedPolling"])` でポーリング型のセレクター検索 (`findOne(timeout)` / `untilFind()` など) と Flow の待機がアクセシビリティイベント到着時に即再試行し, イベントが無い間のセレクター検索の予備間隔は 200 ms に引き上げ
 * `新機能` セレクターとノードの機能: 文字列セレクター構文 `select("text=Login clickable")` (空白区切りの `key=value` / `key~=regex` または `key=/regex/flags` / `key` / `!key`, 空白を含む値は引用符で囲み, 引用符なしでコンマを含む値は `bounds=0,0,100,200` のように必要に応じて複数の引数に分割, キーはセレクターレジストリのもの; `UiSelector.select(String)` はフィルターを追加して自身を返すため builder とチェーン可能; 不正な文字列は文字位置, 問題の項と候補キーを添えて throw; 引数なしの `select()` は従来どおりノードのアクション); ノード単位の状態判定と待機 `UiObject.isStale()` / `waitUntilGone(timeout?, interval?)` / `waitForStable(stableFor?, timeout?, interval?)` (既定のタイムアウト 10 s, 間隔 50 ms; `eventAssistedPolling` フラグ下ではアクセシビリティイベントで早期に起床; UI スレッドでは拒否); 遅延検索 `findIterator()` (イテレーションの進行に合わせて `find()` の順序で検索し, `for...of` の `break` や `close()` の後は木の残りを走査しない, `collect()` で残りのノードを取得, `visited` / `produced` カウンター); ウィンドウフィルターオブジェクト `{ type, packageName, title, displayId, active, focused, id, layer }` を `auto.setWindowFilter(...)` と新設の `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` で使用 (型名は `application` / `inputMethod` / `system` / `accessibilityOverlay` など, パッケージ名とタイトルは文字列または正規表現, API 30 より前のウィンドウは既定のディスプレイとして扱う)
 * `新機能` 堅牢性 (Roadmap P5.5): 待機中にアクセシビリティサービスがアンバインドされた場合, 保留中の `waitForEvent` / `waitForIdle` / `waitForToast` / `waitForNotification` (同期形式と Flow 形式) はタイムアウトを待たずに直ちに `A11Y_UNAVAILABLE` で終了; Flow の待機に `recoverService` オプションを追加 (`flow.defaults({ recoverService: true })` で既定にも可能): 有効にするとサービス中断に遭遇したプローブは残りのタイムアウト内で 1 秒ずつ静かにサービスの復帰を待ち (有効化済みだが未バインドのサービスは起動ストラテジーで再有効化, 設定ページは決して開かず, ユーザーへの問い合わせは最大 1 回), サービスが間に合って戻れば目標の待機を続行, さもなければ `elapsed` / `attempts` を持つ `A11Y_UNAVAILABLE` で reject; プラットフォームが `onServiceConnected` を省略した場合, レジストリは最初のイベントからインスタンスを採用して `adoptedByEvent` フラグを記録し (`auto.state.adoptedByEvent`, サービスマネージャー診断のプロセス内インスタンス行に注記), サービス情報の設定 (安定モード, ジェスチャー監視) はその最初のイベントから適用
+* `新機能` アクセシビリティサンプル (Roadmap P6.4): アプリ内サンプルの "无障碍服务" ディレクトリに 6 本のスクリプトを追加 (Flow の非同期待機とチェーン動作, ツールキットによるフォーム入力とポップアップの閉鎖, ツールキットによるリストのスクロールと収集, 文字列セレクターと遅延イテレーション, セレクター診断とノードツリーの出力, イベント駆動の待機); いずれもスクリプト自身のフローティングウィンドウを対象とし, 他のアプリを必要としない
 * `修正` Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題
 * `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
 * `修正` 実験的なリモート単一ファイルビルドのビルド番号を従来のビルダーと一致させ、照合済みの展開後入力サイズ、ビルド時に検証されたテンプレート展開上限、256 MiB の予約領域を用いるフェイルクローズなワークスペース容量事前検査を追加
@@ -827,7 +828,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 6 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 7 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

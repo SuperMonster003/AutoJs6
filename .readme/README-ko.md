@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 6 일.
+데이터 갱신일: 2026 년 9 월 7 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -320,6 +320,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 이벤트 기반 대기: `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })` 는 창 상태 / 내용 / 창 목록 이벤트가 `quietFor` ms 동안 멈추면 `{ quietFor, elapsed, events }` 를 반환하여 "잠시 sleep 한 뒤 찾기" 방식을 대체; `waitForEvent(type?, filter?, timeout?)` 는 다음 접근성 이벤트를 대기 (type 은 이름 / 배열 / `"*"`, filter 는 함수 또는 문자열 / 정규식의 `{ packageName, className, text }`); `waitForToast(text?, timeout?)` 와 `waitForNotification(filter?, timeout?)` 는 다른 앱의 toast 와 알림을 대기 (부분 문자열 / 정규식 / 함수 / 객체 필터); 네 가지 모두 같은 이름의 Flow 시작점 (`flow.waitForIdle(...)` 등) 과 체인 단계 (체인의 `waitForIdle` 은 현재 값을 그대로 전달) 가 있으며, 시간 초과는 `FlowError` (`code` 는 `TIMEOUT`) 로 throw / reject; `auto.setFlags(["eventAssistedPolling"])` 은 폴링형 선택자 조회 (`findOne(timeout)` / `untilFind()` 등) 와 Flow 대기가 접근성 이벤트 도착 즉시 재시도하게 하고, 이벤트가 없는 동안 선택자 조회의 예비 간격을 200 ms 로 올림
 * `추가` 선택자와 노드 기능: 문자열 선택자 구문 `select("text=Login clickable")` (공백으로 구분한 `key=value` / `key~=regex` 또는 `key=/regex/flags` / `key` / `!key`, 공백이 있는 값은 따옴표로 감싸고, 따옴표 없이 쉼표가 있는 값은 `bounds=0,0,100,200` 처럼 필요할 때 여러 인수로 분할, 키는 선택자 레지스트리의 것; `UiSelector.select(String)` 은 필터를 추가하고 자신을 반환하므로 builder 와 체인 가능; 잘못된 문자열은 문자 위치, 문제의 항과 후보 키를 담아 throw; 인수 없는 `select()` 는 여전히 노드 동작); 노드 단위 상태 판정과 대기 `UiObject.isStale()` / `waitUntilGone(timeout?, interval?)` / `waitForStable(stableFor?, timeout?, interval?)` (기본 시간 초과 10 s, 간격 50 ms; `eventAssistedPolling` 플래그에서는 접근성 이벤트로 일찍 깨어남; UI 스레드에서는 거부); 지연 검색 `findIterator()` (반복이 진행되는 대로 `find()` 의 순서로 검색하며, `for...of` 의 `break` 나 `close()` 뒤에는 트리의 나머지를 순회하지 않고, `collect()` 로 남은 노드를 얻으며, `visited` / `produced` 카운터 제공); 창 필터 객체 `{ type, packageName, title, displayId, active, focused, id, layer }` 를 `auto.setWindowFilter(...)` 와 새로 추가된 `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` 에 사용 (유형 이름은 `application` / `inputMethod` / `system` / `accessibilityOverlay` 등, 패키지 이름과 제목은 문자열 또는 정규식, API 30 이전의 창은 기본 디스플레이로 간주)
 * `추가` 견고성 (Roadmap P5.5): 대기 중에 접근성 서비스가 바인딩 해제되면 진행 중인 `waitForEvent` / `waitForIdle` / `waitForToast` / `waitForNotification` (동기 및 Flow 형식) 은 시간 초과를 기다리지 않고 즉시 `A11Y_UNAVAILABLE` 로 끝남; Flow 대기에 `recoverService` 옵션 추가 (`flow.defaults({ recoverService: true })` 로 기본값 설정 가능): 켜면 서비스 중단을 만난 프로브가 남은 시간 초과 안에서 1 초씩 조용히 서비스 복구를 기다리고 (활성화되었지만 바인딩되지 않은 서비스는 시작 전략으로 다시 활성화, 설정 페이지는 절대 열지 않으며 사용자에게는 최대 한 번만 물음), 서비스가 제때 돌아오면 대상 대기를 계속하고 그렇지 않으면 `elapsed` / `attempts` 를 담은 `A11Y_UNAVAILABLE` 로 거부; 플랫폼이 `onServiceConnected` 를 건너뛰면 레지스트리가 첫 이벤트에서 인스턴스를 채택하고 `adoptedByEvent` 플래그를 기록하며 (`auto.state.adoptedByEvent`, 서비스 관리자 진단의 프로세스 내 인스턴스 줄에 주석), 서비스 정보 설정 (안정 모드, 제스처 관찰) 은 그 첫 이벤트에서 적용
+* `추가` 접근성 샘플 (Roadmap P6.4): 앱 내 샘플 디렉터리 "无障碍服务" 에 스크립트 6 개 추가 (Flow 비동기 대기와 체인 동작, 툴킷 폼 입력과 팝업 닫기, 툴킷 목록 스크롤과 수집, 문자열 셀렉터와 지연 반복, 셀렉터 진단과 노드 트리 내보내기, 이벤트 기반 대기); 모두 스크립트 자신의 플로팅 창을 대상으로 하여 다른 앱이 필요 없음
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
@@ -827,7 +828,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 6 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 7 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
