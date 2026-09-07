@@ -20,7 +20,7 @@ class McpServerContractTest {
         assertEquals("mcp-server", McpServerIds.ENGINE)
         assertEquals("default", McpServerIds.VARIANT_DEFAULT)
         assertEquals("io.github.supermonster003.autojs6.plugin.mcp.server", McpServerIds.DEFAULT_PACKAGE_NAME)
-        assertEquals(5278L, McpServerIds.REQUIRED_HOST_VERSION_CODE)
+        assertEquals(5279L, McpServerIds.REQUIRED_HOST_VERSION_CODE)
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, McpServerCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals("mcpServerContractVersion", McpServerCapabilityKeys.CONTRACT_VERSION)

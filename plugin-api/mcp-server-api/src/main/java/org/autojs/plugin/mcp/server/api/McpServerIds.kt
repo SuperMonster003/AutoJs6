@@ -14,8 +14,8 @@ object McpServerIds {
 
     /**
      * Smallest host `versionCode` the plugin may declare through
-     * `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. Roadmap P1.4 raises it to the host build that
-     * ships the capability broker; until then it equals the 6.8.0 plugin-center baseline.
+     * `PluginCapabilityKeys.REQUIRES_HOST_VERSION`: the 6.8.0 host build that ships the MCP contract
+     * module, the capability broker and the P1.3 bridge methods (roadmap P1.4).
      */
-    const val REQUIRED_HOST_VERSION_CODE = 5278L
+    const val REQUIRED_HOST_VERSION_CODE = 5279L
 }

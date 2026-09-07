@@ -1,0 +1,322 @@
+# MCP Server Plugin Protocol V1
+
+Status: versioned V1 contract. The host contract module `plugin-api/mcp-server-api`
+(MCP roadmap P1.1) froze the five AIDL interfaces, the Bundle keys, the state and
+error vocabularies and the ceilings listed here. Transaction numbers are frozen in
+declaration order; a later contract version may only append methods and optional
+keys. The host side of this protocol (client, grant, broker, session controller)
+landed with roadmap P1.2, the bridge methods the MCP tool groups rely on with
+P1.3, and the delivering host build is recorded in `McpServerIds.REQUIRED_HOST_VERSION_CODE`.
+This protocol does not run an MCP server in the AutoJs6 host by itself.
+
+## Decision
+
+The MCP server is a separate plugin APK (`io.github.supermonster003.autojs6.plugin.mcp.server`)
+with its own UID and process. The Streamable HTTP listener, the MCP SDK, the
+pairing store and the tool registry live in that plugin and must not be loaded
+into the AutoJs6 process. The host contributes exactly one thing per session: a
+capability broker Binder that maps tool calls onto Node Bridge methods
+(`module.method`) under a host-issued grant (roadmap D2, D3, D6).
+
+The stable plugin ID, engine and variant are `mcp-server` / `mcp-server` /
+`default`. The discovery actions are:
+
+- `org.autojs.plugin.INFO` (plugin info service)
+- `org.autojs.plugin.MCP_SERVER` with category `mcp-server` (plugin service)
+
+Both services are protected by the signature permission `org.autojs.permission.PLUGIN`.
+Discovery does not grant authority. Before binding, the host pins the resolved
+component and requires the package name above, an exported and enabled service
+that declares the plugin permission, and membership in the set of components
+answering the contract query. The plugin info must carry the expected id, engine
+and variant, a `mcpServerContractVersion` inside the supported range, and a
+`requiresHostVersion` that is not below `REQUIRED_HOST_VERSION_CODE`. Plugin-side
+caller checks (host package, signer, UID) belong to the plugin repository.
+
+The plugin is registered in the Plugin Center with `defaultEnabled = false`: the
+user turns the server on. The host binds with a dedicated binding lease that is
+held until the session closes; RemoteExceptions during `openServer` are not
+retried.
+
+## V1 Binder Surface
+
+```aidl
+IMcpServerPlugin
+    PluginInfo getInfo()
+    Bundle getCapabilities()
+    IMcpServerSession openServer(Bundle config, IMcpHostCapabilityBroker broker, IMcpServerCallback callback)
+
+IMcpServerSession
+    Bundle getStatus()
+    void updateConfig(Bundle config)
+    void stop(Bundle reason)
+    void close()
+
+IMcpServerCallback (oneway)
+    void onStatus(Bundle status)
+    void onEvent(Bundle event)
+
+IMcpHostCapabilityBroker
+    Bundle getBrokerInfo()
+    void dispatch(Bundle request, IMcpHostCapabilityCallback callback)
+    void destroy(Bundle reason)
+
+IMcpHostCapabilityCallback (oneway)
+    void onResponse(Bundle response)
+```
+
+`McpServerAidlOrderTest` parses the AIDL sources and guards this order and the
+`oneway` markers. Every Bundle written by the host carries `contractVersion`
+(`KEY_CONTRACT_VERSION`, currently `1`); the broker info additionally carries
+`hostCapabilityBrokerVersion` (currently `1`) so the plugin can gate broker
+features separately from the session contract.
+
+## Bundle Keys
+
+All keys are constants of `McpServerContract` (plugin API package
+`org.autojs.plugin.mcp.server.api`); wire literals are listed for clients that
+read Bundles without the Kotlin module.
+
+### Capabilities (`getCapabilities`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `requiresHostVersion` | Long | Minimum host `versionCode` (shared plugin key) |
+| `mcpServerContractVersion` | Int | Contract version implemented by the plugin |
+| `mcpServerToolGroups` | String[] | Tool groups the plugin exposes |
+| `mcpServerProtocolVersions` | String[] | MCP protocol versions the server negotiates |
+| `mcpServerSdkVersion` | String | MCP SDK version compiled into the plugin |
+
+### Server config (`openServer`, `updateConfig`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `contractVersion` | Int | Always `1` |
+| `serverConfigPort` | Int | `1024..65535`, default `9637` |
+| `serverConfigBindScope` | String | `loopback` (default) or `lan` |
+| `serverConfigProtocolMode` | String | `stateful` (default); `dual` is reserved and rejected with `invalid_config` (roadmap D9) |
+| `serverConfigHostLabel` | String | Optional, at most 64 characters |
+
+The endpoint path is `/mcp`; the loopback endpoint is `http://127.0.0.1:<port>/mcp`.
+
+### Status (`getStatus`, `onStatus`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `statusState` | String | One of the states below |
+| `statusEndpoints` | String[] | Reachable endpoint URLs |
+| `statusPort` | Int | Bound port |
+| `statusBindScope` | String | Effective bind scope |
+| `statusProtocolMode` | String | Effective protocol mode |
+| `statusPairedClientCount` | Int | Paired clients |
+| `statusActiveSessionCount` | Int | Live MCP sessions |
+| `statusStartedAt` | Long | Epoch millis of the last successful start |
+| `statusHostAvailable` | Boolean | Whether the broker is reachable from the plugin |
+| `statusLastErrorCode` | String | Last error or stop reason code |
+| `statusLastError` | String | Human-readable detail, at most 4 KiB |
+
+Unknown states are read as `stopped`.
+
+### Reason (`stop`, `destroy`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `contractVersion` | Int | Always `1` |
+| `errorCode` | String | Error or reason code |
+| `errorMessage` | String | Optional detail, at most 4 KiB |
+
+### Event (`onEvent`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `eventType` | String | `pairing_requested`, `client_paired`, `client_revoked`, `tool_call`, `warning` |
+| `eventText` | String | Optional detail, at most 2 KiB |
+| `eventTimestamp` | Long | Epoch millis |
+| `eventClientName` | String | Optional client name, at most 256 bytes |
+| `eventToolName` | String | Optional tool name |
+
+Events with an unknown or blank type are dropped by the host.
+
+### Broker info (`getBrokerInfo`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `contractVersion` | Int | Always `1` |
+| `hostCapabilityBrokerVersion` | Int | Broker contract version, `1` |
+| `hostCapabilityBrokerId` | String | Session id (`mcp-<uuid>`) |
+| `bridgeEngineInfo` | String | JSON of the synthetic engine info (`engineName = "mcp"`, `backend = "plugin"`, cwd = working directory) |
+| `hostCapabilityModules` | String[] | Modules present in the grant |
+| `grantMethods` | String[] | Allowed `module.method` keys |
+| `grantPermissions` | String[] | Permission tokens the grant carries |
+| `grantMaxRequestBytes` | Int | Per-request args ceiling |
+| `grantMaxConcurrentCalls` | Int | Concurrent tool calls, at most 4 |
+| `grantAccessibilityQueriesPerSecond` | Int | Accessibility rate limit |
+| `grantDefaultTimeoutMs` | Long | Timeout applied when a request carries none, 30 s |
+| `grantMaxTimeoutMs` | Long | Timeout clamp, 300 s |
+
+### Bridge request (`dispatch`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `bridgeRequestJson` | String | Node Bridge request JSON: `{id, module, method, args, timeoutMs, permissions}` |
+| `bridgeClientName` | String | Optional paired client name for audit lines, at most 256 bytes |
+
+### Bridge response (`onResponse`)
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `bridgeResponseJson` | String | Node Bridge response JSON: `{id, ok, result}` or `{id, ok: false, error}` |
+| `bridgeResponseOk` | Boolean | Mirrors `ok` |
+| `bridgeErrorMessage` | String | Error message when `ok` is false |
+| `bridgePayloadFd` | ParcelFileDescriptor | Present only for descriptor payloads (see below) |
+| `bridgePayloadBytes` | Long | Exact payload length |
+| `bridgePayloadMime` | String | Payload MIME type |
+
+## State Machine
+
+Server states are `stopped`, `starting`, `running`, `stopping` and `failed`;
+`starting`, `running` and `stopping` are the active states. The host session
+controller (`McpServerSessionController`) drives them as follows:
+
+1. `open(config)` validates the config (`invalid_config`), rejects a second open
+   (`already_open`), discovers and validates the plugin (`unsupported_contract`
+   on a version mismatch), creates a broker and a callback, calls `openServer`,
+   links to the session Binder's death and reads `getStatus()`. The host
+   publishes `starting` first and then whatever the plugin reports.
+2. The plugin reports `running` once the listener is bound; `port_in_use` and
+   `bind_failed` are plugin-side failures reported through `failed` or through
+   `stopped` with a last error code.
+3. `stop(reason)` asks the plugin to stop listening while keeping the session;
+   `close()` releases the session, the lease and the broker. Both are idempotent
+   on the host side; a user close suppresses any pending rebind.
+4. `updateConfig(config)` while open re-validates and forwards; the plugin may
+   restart the listener and reports `config_changed` as the stop reason of the
+   previous listener.
+
+Error codes: `unsupported_contract`, `invalid_config`, `port_in_use`,
+`bind_failed`, `already_open`, `internal`. Stop reasons: `user_request`,
+`host_shutdown`, `host_died`, `plugin_died`, `config_changed`.
+
+## Grant And Ceilings
+
+`McpCapabilityGrant` is a pure Kotlin value: the allowed `module.method` set, the
+permission-token subset, `maxRequestBytes` (at most 512 KiB), `maxConcurrentCalls`
+(at most 4), `accessibilityQueriesPerSecond`, `defaultTimeoutMs` (30 s) and
+`maxTimeoutMs` (300 s). The grant is the enforced permission manifest of the
+`AndroidNodeBridgeCapabilityProvider` behind the broker, so the Node Bridge path
+and the MCP path share one policy implementation.
+
+`dispatch` evaluates, in order:
+
+1. Destroyed broker: `process-dead` failure.
+2. Inline request larger than 512 KiB: `resource-limit`.
+3. Malformed request JSON: `invalid-request`.
+4. Method not granted: `permission-denied` with category `capability-denied`;
+   requested permissions outside the grant: `capabilityNotDeclared`
+   (category `capability-denied`); args above `maxRequestBytes`: `resource-limit`.
+5. The request timeout is clamped to `defaultTimeoutMs` / `maxTimeoutMs` and the
+   request is handed to the provider, which applies the Node Bridge preflight
+   (operation declarations, args and request ceilings) and rate limits.
+
+Results larger than 512 KiB of inline JSON are replaced by a `resource-limit`
+failure telling the caller to use a descriptor-carrying method.
+
+The default grant (`McpCapabilityGrant.DEFAULT`) allows the roadmap A.6 method
+set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOne, findAll, findByText, click, longClick, setText, scrollForward, scrollBackward, swipe, gesture, back, home, recentApps}`,
+`engines.{execScript, execScriptFile, list, stop, stopAll}`, `console.tail`,
+`files.{list, stat, read, write, mkdir, rename, delete}`,
+`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample}`,
+`package_manager.{list, verify}`, `clipboard.{getText, setText, hasText}`,
+`device.{info, isScreenOn, wakeUp, isIgnoringBatteryOptimizations}`,
+`media_projection.{requestScreenCapture, stop}`, `image.{captureScreen, recycle}`,
+`shell.exec` and `toast.{toast, showToast}`, with the tokens `accessibility`,
+`accessibility.gesture`, `engines`, `engines.exec`, `screen_capture`, `image`,
+`app`, `app.launch`, `app.query`, `app.activity`, `clipboard`, `device`,
+`device.power`, `shell`, `toast`, `package_manager`, `files`, `files.write`,
+`files.delete` and `console`.
+
+| Resource | V1 ceiling |
+| --- | ---: |
+| HTTP request body (plugin) | 1 MiB |
+| Concurrent tool calls | 4 |
+| Tool timeout | 30 s default, 300 s maximum |
+| Inline bridge JSON (request and result) | 512 KiB |
+| Descriptor payload | 8 MiB |
+| Accessibility dump nodes / depth / text | 400 / 32 / 256 KiB |
+| Screenshot encoded bytes | 4 MiB |
+| Console tail lines / bytes | 500 / 256 KiB |
+| File read / write | 1 MiB each |
+| Listing entries (files, samples) | 2000 |
+| Shell output | 256 KiB |
+| Paired clients | 32 |
+| Pairing window / cooldown | 60 s / 30 s |
+| Error message / event text / client name | 4 KiB / 2 KiB / 256 bytes |
+
+`McpServerContract` remains the authoritative set; the host bridge classes carry
+matching constants (`BridgeAccessibilityLimits`, `NodeBridgeFileScope`,
+`NodeBridgeConsoleTail`, `NodeBridgeSampleCatalog`).
+
+## Bridge Methods Added For MCP (P1.3)
+
+These methods serve every Node Bridge consumer (Node, Python host, MCP). Result
+JSON objects carry a `schema` field; the schemas below are frozen at `v1`.
+
+| Method | Schema | Notes |
+| --- | --- | --- |
+| `accessibility.dump(options)` | `autojs6-bridge-accessibility-dump-v1` | `format` text / json / xml, `window` active / all, `maxDepth <= 32`, `maxNodes <= 400`, `visibleOnly`, `properties`; JSON nodes carry the seven `BridgeNode` fields plus `root`, `depth`, `index`, `childCount`, `visible`; text is capped at 256 KiB (`textTruncated`) |
+| `accessibility.explain(selector, options)` | `autojs6-bridge-accessibility-explain-v1` | Per-filter `steps` (matched, cumulative), `matches`, `nearMisses`, `failingIndex`, rendered `text` |
+| `accessibility.screenshot(options)` | `autojs6-bridge-accessibility-screenshot-v1` | API 30+ via `A11yScreenshotter`; `format` jpeg / png / webp, `quality`, `scale` or `maxWidth`, `region`, optional `savePath` inside the working directory; below API 30 an `unavailable` failure names the `media_projection` fallback; tokens `accessibility` + `screen_capture` |
+| `app.currentWindow()` | `autojs6-bridge-app-current-window-v1` | Package and activity from `ActivityInfoProvider`, window list from `A11yWindowFacts` |
+| `files.*` | `autojs6-bridge-files-<method>-v1` | Rooted at the working directory, normalized relative paths only, symbolic links cannot escape; `write` / `mkdir` / `rename` need `files.write`, `delete` needs `files.delete` |
+| `console.tail(options)` | `autojs6-bridge-console-tail-v1` | `lines <= 500`, `sinceId`, `level`, `maxBytes <= 256 KiB`; returns `firstId` / `lastId` / `nextSinceId` / `latestId` / `total` / `capacity` (4096) / `evicted`; token `console` |
+| `engines.execScript` / `execScriptFile` options | execution JSON | `captureConsole` and `waitMs` (0..300000, defaults to `timeoutMs` when capturing) add `finished`, `outcome` (`running` / `success` / `exception`), `error` and a `console` window with `captureMode = "global-window"` |
+| `engines.list()` / `engines.stop(id)` | `autojs6-bridge-engines-list-v1` / `-stop-v1` | Host `ScriptEngineService` executions with `state` starting / running / finished; `stopAll({scope: "host"})` returns `autojs6-bridge-engines-stop-all-v1`, `stopAll()` without a scope keeps the plugin-process answer |
+| `device.info()` | `autojs6-bridge-device-info-v1` | Build fields, screen, battery, host version and process, accessibility state, screen state; no hardware identifiers |
+| `app.listSamples(path, options)` / `app.readSample(path, options)` | `autojs6-bridge-app-list-samples-v1` / `-read-sample-v1` | Read-only view of the `sample/` assets, dot entries hidden, `available: false` without samples; token `app.query` |
+
+## Lifecycle And Death Handling
+
+- One broker per `openServer`; its id is the session id. `destroy(reason)`
+  releases the provider (in-flight bridge calls complete with `process-dead`)
+  and every later `dispatch` answers `process-dead`.
+- The host links to the session Binder's death. On death it unlinks, closes the
+  binding lease, destroys the broker and, unless the user closed the session,
+  rebinds with delays of 1 s, 3 s and 9 s (`McpRebindPolicy`, three attempts)
+  while publishing `starting` with `plugin_died` as the last error code; when the
+  attempts are exhausted it publishes `stopped` with reason `plugin_died`.
+- The plugin must link to the broker Binder's death and treat it as
+  `host_died`: stop serving tools and report `stopped` (or `failed`) through the
+  callback if it is still alive. The host never replays tool calls after a
+  death; the MCP client sees a tool error and decides.
+- `onStatus` and `onResponse` are oneway. The host serializes status into a
+  `StateFlow`, so a burst of status callbacks collapses to the latest value; the
+  plugin must not rely on the host observing every intermediate state.
+- `stop` and `close` are idempotent; `close` after `stop` is the normal shutdown
+  order. A user-initiated close sets a flag before the Binder calls so a death
+  during shutdown does not trigger a rebind.
+
+## Payload Descriptor Convention
+
+Bridge results stay inline JSON unless they name a one-shot file. A result whose
+`payload` object is `{kind: "file", oneShot: true, path, mime, bytes}` with a path
+canonically under the host cache directory (`cacheDir/bridge-payloads`) is
+converted by the broker: the file is opened read-only, unlinked, the JSON keeps
+only the metadata with `kind = "descriptor"` and no `path`, and the Bundle gains
+`bridgePayloadFd`, `bridgePayloadBytes` and `bridgePayloadMime`. The receiver owns
+the transaction's duplicate of the descriptor and must close it; the host closes
+its own copy after `onResponse` returns. Payloads above 8 MiB fail with
+`resource-limit`. Files written elsewhere (for example a screenshot `savePath`
+inside the working directory) are reported as `{kind: "workspace", path}` and stay
+inline. Unclaimed one-shot files are swept from the cache after ten minutes.
+
+## R0 Scope And Non-Goals
+
+- The `dual` protocol mode (stateless MCP model of the 2026-07-28 specification)
+  is reserved until the Kotlin SDK supports it (roadmap D9); the host rejects it.
+- Pairing (token, first-connection confirmation) and tool toggles are plugin-side
+  and surface here only as events and status counters.
+- Console capture is an id window over the shared `GlobalConsole`, not a
+  per-execution stream: every script runtime prints into the same console.
+- The host drawer switch, plugin settings and localized strings belong to
+  roadmap P4; Binder round-trip tests with a fake or real plugin belong to the
+  P1 acceptance and P2.
