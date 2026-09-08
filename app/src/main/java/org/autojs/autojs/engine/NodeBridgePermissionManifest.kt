@@ -66,6 +66,10 @@ object NodeBridgePermissionManifest {
     const val FILES_WRITE = "files.write"
     const val FILES_DELETE = "files.delete"
     const val CONSOLE = "console"
+    const val EVENTS = "events"
+    const val EVENTS_NOTIFICATION = "events.notification"
+    const val EVENTS_TOAST = "events.toast"
+    const val EVENTS_KEY = "events.key"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -133,6 +137,10 @@ object NodeBridgePermissionManifest {
         FILES_WRITE,
         FILES_DELETE,
         CONSOLE,
+        EVENTS,
+        EVENTS_NOTIFICATION,
+        EVENTS_TOAST,
+        EVENTS_KEY,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -461,6 +469,12 @@ object NodeBridgePermissionManifest {
                 else -> listOf(FILES)
             }
             NodeBridgeModules.CONSOLE -> listOf(CONSOLE)
+            NodeBridgeModules.EVENTS -> when (method) {
+                "observeNotification" -> listOf(EVENTS, EVENTS_NOTIFICATION)
+                "observeToast" -> listOf(EVENTS, EVENTS_TOAST)
+                "observeKey" -> listOf(EVENTS, EVENTS_KEY)
+                else -> listOf(EVENTS)
+            }
             else -> emptyList()
         }
         return required.map(::normalizeCapability).distinct()
@@ -519,6 +533,9 @@ object NodeBridgePermissionManifest {
             required == SHELL_SHIZUKU ||
             required == NOTIFICATIONS_SETTINGS ||
             required == DEVICE_POWER ||
+            required == EVENTS_NOTIFICATION ||
+            required == EVENTS_TOAST ||
+            required == EVENTS_KEY ||
             required == MEDIA_AUDIO ||
             required == MEDIA_METADATA ||
             required == MEDIA_RECORDING ||

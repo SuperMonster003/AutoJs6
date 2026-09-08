@@ -1269,6 +1269,7 @@ class NodeBridgeConformanceInstrumentationTest {
 
     private companion object {
         private val stableDispatchMethods: Map<String, Set<String>> = linkedMapOf(
+            NodeBridgeModules.EVENTS to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
             NodeBridgeModules.TOAST to setOf("showToast", "toast"),
             NodeBridgeModules.APP to setOf("listSamples", "readSample", 
                 "launchPackage",
@@ -1284,7 +1285,8 @@ class NodeBridgeConformanceInstrumentationTest {
             ),
             NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
-            NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"),
+            NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake"),
             NodeBridgeModules.SHELL to setOf("exec"),
             NodeBridgeModules.ENGINES to setOf("list", "stop", "myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
             NodeBridgeModules.ACCESSIBILITY to setOf(
@@ -1309,11 +1311,11 @@ class NodeBridgeConformanceInstrumentationTest {
                 "screenshot",
             ),
             NodeBridgeModules.MEDIA_PROJECTION to setOf("requestScreenCapture", "nextImage", "stop"),
-            NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
-            NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
+            NodeBridgeModules.IMAGE to setOf("captureScreen", "toBytes", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
+            NodeBridgeModules.IMAGES to setOf("captureScreen", "toBytes", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.BARCODE to setOf("detect", "detectAll", "recognizeText", "recognizeTexts"),
-            NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"),
+            NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume"),
             NodeBridgeModules.MEDIAINFO to setOf("read", "get", "capabilities"),
             NodeBridgeModules.RECORDER to setOf("getStatus", "start", "stop"),
             NodeBridgeModules.PINYIN to setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase"),

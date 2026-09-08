@@ -59,9 +59,7 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
-import org.autojs.autojs.core.accessibility.OnKeyListener
 import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
@@ -639,6 +637,7 @@ object NodeBridgeModules {
     const val INPUT_OBSERVER = NodeBridgePermissionManifest.INPUT_OBSERVER
     const val FILES = NodeBridgePermissionManifest.FILES
     const val CONSOLE = NodeBridgePermissionManifest.CONSOLE
+    const val EVENTS = NodeBridgePermissionManifest.EVENTS
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf(
@@ -733,6 +732,7 @@ object NodeBridgeModules {
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
     val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
     val consoleMethods = setOf("tail")
+    val eventsMethods = setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -760,6 +760,7 @@ object NodeBridgeModules {
         UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
+        EVENTS to eventsMethods,
         SHELL to shellMethods,
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
@@ -831,6 +832,7 @@ class AndroidNodeBridgeCapabilityProvider(
     }
     private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
     private val deviceControls = NodeDeviceControls(appContext)
+    private val eventObservers = NodeEventObservers(appContext)
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -912,6 +914,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
+            request.module == NodeBridgeModules.EVENTS && request.method in NodeBridgeModules.eventsMethods -> dispatchEvents(request, auditedCallback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, auditedCallback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, auditedCallback)
@@ -988,6 +991,7 @@ class AndroidNodeBridgeCapabilityProvider(
         imageExecutor.shutdownNow()
         screenCapture.close()
         deviceControls.close()
+        eventObservers.closeAll()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -3473,33 +3477,15 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun attachAccessibilityInputObserver(
         subscriptionId: String,
         subscription: ControlledInputObserverSubscription,
-    ): Boolean {
-        val service = AutoJsAccessibilityService.instance
-        if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
-            return false
-        }
-        val listener = object : OnKeyListener {
-            override fun onKeyEvent(keyCode: Int, event: KeyEvent) {
-                subscription.queueKeyEvent(keyCode, event)
-            }
-        }
-        val disconnectCallback = object : AccessibilityServiceCallback {
-            override fun onConnected() = Unit
-
-            override fun onDisconnected() {
-                resourceRegistry.close(subscriptionId, "input_observer.accessibility_service_destroy")
-            }
-        }
-        subscription.addCloseAction {
-            runCatching { service.onKeyObserver.removeListener(listener) }
-            AutoJsAccessibilityService.removeDisconnectCallback(disconnectCallback)
-            subscription.markLiveListenerDetached()
-        }
-        service.onKeyObserver.addListener(listener)
+    ): Boolean = runCatching {
+        val detach = NodeEventObservers.observeKeys(
+            { keyCode, event -> subscription.queueKeyEvent(keyCode, event) },
+            { resourceRegistry.close(subscriptionId, "input_observer.accessibility_service_destroy") },
+        )
+        subscription.addCloseAction { detach(); subscription.markLiveListenerDetached() }
         subscription.markLiveListenerAttached()
-        AutoJsAccessibilityService.addDisconnectCallback(disconnectCallback)
-        return true
-    }
+        true
+    }.getOrDefault(false)
 
     private fun inputObserverInvalidSourceError(request: NodeBridgeRequest, source: String): NodeBridgeError {
         return NodeBridgeError.invalidRequest(
@@ -3509,23 +3495,10 @@ class AndroidNodeBridgeCapabilityProvider(
         )
     }
 
-    private fun inputObserverLivePolicyError(request: NodeBridgeRequest): NodeBridgeError? {
-        val mode = NodeExecutionModePolicy.normalize(engineInfo.executionMode)
-        val launchSurface = engineInfo.launchSurface
-        val allowed = when (mode) {
-            NodeExecutionModePolicy.MODE_ONE_SHOT -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
-            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
-            else -> false
-        }
-        if (allowed) {
-            return null
-        }
-        return NodeBridgeError.permissionDenied(
-            message = "input_observer accessibility source requires an active one-shot script or an interactive visible session; current executionMode=$mode launchSurface=$launchSurface.",
-            module = request.module,
-            method = request.method,
+    private fun inputObserverLivePolicyError(request: NodeBridgeRequest): NodeBridgeError? =
+        if (accessibilityBridgeOperational()) null else NodeBridgeError.permissionDenied(
+            "Enable AutoJs6 accessibility to observe hardware keys.", request.module, request.method,
         )
-    }
 
     private fun dispatchInputObserverDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args = request.argsArray()
@@ -3577,6 +3550,35 @@ class AndroidNodeBridgeCapabilityProvider(
                     NodeBridgeResponse.success(request.id, hasText.toString())
                 }
                 else -> unavailable(request)
+            }
+        }
+    }
+
+    private fun dispatchEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        mainHandler.post {
+            runCatching {
+                when (request.method) {
+                    "close" -> callback(NodeBridgeResponse.success(request.id, eventObservers.close(request.argsArray().optString(0), "closed").toString()))
+                    "drainEvents" -> callback(NodeBridgeResponse.success(request.id, eventObservers.drain(request.argsArray().optString(0)).toString()))
+                    else -> {
+                        val kind = when (request.method) {
+                            "observeNotification" -> "notification"
+                            "observeToast" -> "toast"
+                            "observeKey" -> "key"
+                            else -> "broadcast"
+                        }
+                        val stream = NodeBridgeEventStream.forRequest(request, "events-${UUID.randomUUID()}", callback)
+                        val session = eventObservers.observe(kind, stream)
+                        val result = session.toJson()
+                        stream?.acknowledge(result) ?: callback(NodeBridgeResponse.success(request.id, result.toString()))
+                    }
+                }
+            }.onFailure { error ->
+                callback(NodeBridgeResponse.failure(request.id, when (error) {
+                    is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Event observation permission denied.", request.module, request.method)
+                    is IllegalArgumentException -> NodeBridgeError.invalidRequest(error.message ?: "Invalid event subscription.", request.module, request.method)
+                    else -> NodeBridgeError.capabilityProviderMissing(request.module, request.method, error.message ?: "a connected Android event source")
+                }))
             }
         }
     }

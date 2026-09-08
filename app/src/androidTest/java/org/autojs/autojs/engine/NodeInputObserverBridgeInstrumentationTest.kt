@@ -125,7 +125,7 @@ class NodeInputObserverBridgeInstrumentationTest {
         } else {
             assertFalse(observe.toString(), observe.ok)
             assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, observe.error?.code)
-            assertEquals(NodeBridgeErrorCategory.UNAVAILABLE, observe.error?.category)
+            assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, observe.error?.category)
         }
     }
 
@@ -159,7 +159,7 @@ class NodeInputObserverBridgeInstrumentationTest {
     }
 
     @Test
-    fun kotlinInputObserverRejectsUnsafeObserverModesAndBackgroundLiveSource() {
+    fun kotlinInputObserverRejectsInterceptionAndChecksAccessibilityForScheduledSource() {
         val provider = AndroidNodeBridgeCapabilityProvider(context)
 
         val intercept = dispatch(
@@ -196,9 +196,15 @@ class NodeInputObserverBridgeInstrumentationTest {
             argsJson = """[{"type":"key","keys":["volume_up"],"actions":["down"],"source":"accessibility"}]""",
             permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
         )
-        assertFalse(scheduledLive.toString(), scheduledLive.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, scheduledLive.error?.code)
-        assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, scheduledLive.error?.category)
+        if (org.autojs.autojs.core.accessibility.AccessibilityService.registry.isOperational) {
+            assertTrue(scheduledLive.toString(), scheduledLive.ok)
+        } else {
+            assertFalse(scheduledLive.toString(), scheduledLive.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, scheduledLive.error?.code)
+            assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, scheduledLive.error?.category)
+        }
+        scheduledProvider.destroy()
+        provider.destroy()
     }
 
     @Test
@@ -298,6 +304,8 @@ class NodeInputObserverBridgeInstrumentationTest {
             "<embedded-autojs-input-observer-fake.js>",
             workingDirectory = workDir,
             timeoutMs = 30_000L,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("input_observer", "input_observer.keys")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("input_observer fake bridge", result)
@@ -305,7 +313,7 @@ class NodeInputObserverBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("input_observer.shadow=false"))
         assertTrue(result.stdout.contains("input_observer.frozen=true"))
         assertTrue(result.stdout.contains("input_observer.sources=fake:true:false,accessibility:false:true|true"))
-        assertTrue(result.stdout.contains("input_observer.sub=input-observer-fake-1|key|fake|true|false|true"))
+        assertTrue(result.stdout, result.stdout.contains("input_observer.sub=input-observer-fake-1|key|fake|true|true|true"))
         assertTrue(result.stdout.contains("input_observer.events=volume_up|24|down|true|true"))
         assertTrue(result.stdout.contains("input_observer.close=true|false|true"))
         assertTrue(result.stdout.contains("input_observer.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}"))

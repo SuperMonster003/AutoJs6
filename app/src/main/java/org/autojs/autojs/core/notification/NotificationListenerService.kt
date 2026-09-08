@@ -14,6 +14,29 @@ import android.service.notification.NotificationListenerService as AndroidNotifi
 class NotificationListenerService : AndroidNotificationListenerService() {
 
     private val mNotificationListeners = CopyOnWriteArrayList<NotificationListener>()
+    private val statusBarListeners = CopyOnWriteArrayList<StatusBarListener>()
+    var connected = false
+        private set
+
+    interface StatusBarListener {
+        fun onPosted(notification: StatusBarNotification)
+        fun onDisconnected() = Unit
+    }
+
+    fun addStatusBarListener(listener: StatusBarListener) { statusBarListeners.add(listener) }
+    fun removeStatusBarListener(listener: StatusBarListener) { statusBarListeners.remove(listener) }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        connected = true
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        connected = false
+        statusBarListeners.forEach { it.onDisconnected() }
+        statusBarListeners.clear()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -25,6 +48,7 @@ class NotificationListenerService : AndroidNotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        statusBarListeners.forEach { it.onPosted(sbn) }
         for (listener in mNotificationListeners) {
             listener.onNotification(Notification.create(sbn.notification, sbn.packageName))
         }
@@ -43,6 +67,9 @@ class NotificationListenerService : AndroidNotificationListenerService() {
     }
 
     override fun onDestroy() {
+        connected = false
+        statusBarListeners.forEach { it.onDisconnected() }
+        statusBarListeners.clear()
         super.onDestroy()
         instance = null
     }

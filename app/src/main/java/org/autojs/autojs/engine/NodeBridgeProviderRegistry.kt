@@ -149,8 +149,16 @@ object NodeBridgeProviderRegistry {
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
     private const val FILES_PROVIDER = "files"
     private const val CONSOLE_PROVIDER = "console"
+    private const val EVENTS_PROVIDER = "events"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
+        provider(
+            id = EVENTS_PROVIDER,
+            modules = listOf(NodeBridgeModules.EVENTS),
+            capabilities = listOf(NodeBridgePermissionManifest.EVENTS, NodeBridgePermissionManifest.EVENTS_NOTIFICATION,
+                NodeBridgePermissionManifest.EVENTS_TOAST, NodeBridgePermissionManifest.EVENTS_KEY),
+            packagedSupport = packagedProviderDependent("notification access and accessibility must be granted for the selected event source"),
+        ),
         provider(
             id = FETCH_PROVIDER,
             displayName = "fetch/axios",
@@ -275,7 +283,7 @@ object NodeBridgeProviderRegistry {
             id = INPUT_OBSERVER_PROVIDER,
             modules = listOf(NodeBridgeModules.INPUT_OBSERVER),
             capabilities = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
-            packagedSupport = packagedProviderDependent("fake source is available for tests; accessibility live source requires an active one-shot script or interactive visible session and rejects scheduled/background launch surfaces"),
+            packagedSupport = packagedProviderDependent("fake source is available for tests; live key observation requires a declared capability and operational accessibility service"),
         ),
         provider(
             id = WORK_MANAGER_PROVIDER,
@@ -404,6 +412,7 @@ object NodeBridgeProviderRegistry {
         PINYIN4J_PROVIDER -> if (Pinyin4jPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        EVENTS_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -421,6 +430,14 @@ object NodeBridgeProviderRegistry {
     }
 
     private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
+        EVENTS_PROVIDER -> linkedMapOf(
+            "liveMethods" to NodeBridgeModules.eventsMethods.joinToString(","),
+            "notificationAccess" to org.autojs.autojs.core.notification.NotificationListenerService.isNotificationListenerEnabled(context).toString(),
+            "accessibilityOperational" to AutoJsAccessibilityService.registry.isOperational.toString(),
+            "transport" to "JNI push with drainEvents compatibility for file transport",
+            "keyPolicy" to "observations only; hardware events are never consumed",
+            "toastPolicy" to "external app Toast events from the existing accessibility observer",
+        )
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
@@ -593,8 +610,8 @@ object NodeBridgeProviderRegistry {
             "liveSourceAvailable" to accessibilityOperational().toString(),
             "maxActiveSubscriptionsPerExecution" to "8",
             "eventDelivery" to "JNI callback push with bounded drainEvents compatibility",
-            "packagedPolicy" to "scheduled/background launch surfaces reject accessibility live observation; fake source remains available for tests",
-            "statusReason" to "P12-07 cleanup/security gate covers bounded queues, listener cleanup, and live-source launch-surface rejection",
+            "packagedPolicy" to "declared non-intercepting observation may run while the granted accessibility service is operational",
+            "statusReason" to "shares the Android key event source with autojs6:events; fake source and bounded drainEvents remain compatible",
         )
         WORK_MANAGER_PROVIDER -> linkedMapOf(
             "liveMethods" to "scheduleOnce,schedulePeriodic,cancel,list",
