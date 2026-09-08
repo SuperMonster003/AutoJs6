@@ -285,7 +285,7 @@ object NodeBridgeProviderRegistry {
             id = UI_OVERLAY_PROVIDER,
             modules = listOf(NodeBridgeModules.UI_OVERLAY),
             capabilities = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
-            packagedSupport = packagedProviderDependent("P13-18 records partial overlay promotion evidence over the P12-14 live gate; live packaged overlay creation remains blocked until a promoted show/update/drainEvents/close provider and foreground disclosure flow land"),
+            packagedSupport = packagedProviderDependent("the current package must declare and receive SYSTEM_ALERT_WINDOW; declarative windows support updates, push events, disclosure and script cleanup"),
         ),
         provider(
             id = INPUT_OBSERVER_PROVIDER,
@@ -428,7 +428,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         IMAGE_PROVIDER -> if (OpenCvPluginHost.isAvailable(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        UI_OVERLAY_PROVIDER -> if (Settings.canDrawOverlays(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         PACKAGE_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -456,8 +456,8 @@ object NodeBridgeProviderRegistry {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
-            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus",
-            "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus,recorder.start,recorder.stop",
+            "blockedMethods" to "media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
             "metadataCapability" to NodeBridgePermissionManifest.MEDIA_METADATA,
@@ -469,23 +469,19 @@ object NodeBridgeProviderRegistry {
             "mediainfoCapabilitiesSchema" to "autojs6-node-mediainfo-capabilities-v1",
             "mediainfoSchemaPolicy" to "legacy_node_v1_by_default; plugin_v2_only_when_advertised",
             "recorderStatusSchema" to "autojs6-node-recorder-status-v1",
-            "phase13Promotion" to "P13-26 partial media/recorder/mediainfo provider evidence gate",
-            "pathPolicy" to "mediainfo accepts only relative paths inside the scoped Node working directory",
-            "phase14RecorderProviderPromotion" to "P14-24 real recorder session promotion gate",
-            "recorderSessionPolicy" to "real_session_requires_record_audio_prompt_foreground_disclosure_resource_handle_temp_output_crash_cleanup",
-            "recorderStartStopPolicy" to "start_stop_stay_denied_until_runtime_permission_session_cleanup_packaged_stress",
+            "pathPolicy" to "mediainfo and recorder accept relative paths inside the Node working directory",
+            "recorderSessionPolicy" to "AAC/M4A output descriptor; microphone permission, foreground notification and execution cleanup",
+            "recorderStartStopPolicy" to "one recording per execution; default 60 seconds, maximum 5 minutes; notification Stop stops all Node recordings",
             "recorderForegroundDisclosurePolicy" to "microphone_foreground_disclosure_and_stop_action_required_before_start",
-            "recorderTempOutputPolicy" to "future_temp_outputs_must_be_owned_scoped_and_deleted_on_stop_destroy_crash_rollback",
-            "phase14PackagedRecorderMediaStress" to "P14-25 packaged recorder/media stress evidence gate",
-            "recorderPackagedStressPolicy" to "packaged_start_stop_task_removal_relaunch_crash_quota_temp_cleanup_required_before_promotion",
-            "mediaPackagedStressPolicy" to "current_packaged_media_recorder_stress_is_boundary_only_no_microphone_capture",
+            "recorderOutputPolicy" to "workspace output is retained; recorder and descriptor are released on stop or script cleanup",
+            "recorderValidation" to "permission regression passed; physical microphone and packaged recording acceptance pending",
             "phase14MediaPlaybackMediaStoreBoundary" to "P14-26 media playback and MediaStore boundary decision gate",
             "mediaPlaybackPolicy" to "v1_2_stable_denied_until_scoped_provider_audio_focus_lifecycle_packaged_evidence",
             "mediaStoreBoundaryPolicy" to "query_insert_update_delete_scanFile_broad_media_library_permissions_stable_denied",
             "mediaFutureCapabilityPolicy" to "future_media_playback_media_library_media_library_mutate_capabilities_require_new_gate",
-            "recorderPolicy" to "recorder exposes getStatus only; start/stop fail closed until foreground disclosure, permission, lifecycle, cleanup, and packaged smoke are promoted",
+            "recorderPolicy" to "getStatus/start/stop use the execution-owned Android MediaRecorder provider",
             "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
-            "statusReason" to "P13-26 partial gate promotes JSON-safe scoped metadata and read-only audio status while recording/playback/MediaStore remain blocked",
+            "statusReason" to "scoped metadata, audio stream control and recording are available; playback and MediaStore remain blocked",
         )
         PINYIN_PROVIDER -> linkedMapOf(
             "liveMethods" to NodeBridgeModules.pinyinMethods.sorted().joinToString(","),
@@ -589,12 +585,8 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "Activity-owned declarative UI MVP",
         )
         UI_OVERLAY_PROVIDER -> linkedMapOf(
-            "fakeMethods" to "show,update,drainEvents,close,closeAll,hasPermission,openPermissionSettings",
-            "liveGateMethods" to "hasPermission,openPermissionSettings,closeAll",
-            "p14LiveMethods" to "show,update,drainEvents,close",
-            "p14ProviderState" to "provider_poc",
-            "blockedLiveMethods" to "show,update,drainEvents,close",
-            "blockedLiveMethodsScope" to "phase13_historical_token",
+            "liveMethods" to NodeBridgeModules.uiOverlayMethods.joinToString(","),
+            "providerState" to "android_window_manager",
             "capability" to NodeBridgePermissionManifest.UI_OVERLAY,
             "permissionCapability" to NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION,
             "foregroundCapability" to NodeBridgePermissionManifest.UI_OVERLAY_FOREGROUND,
@@ -604,19 +596,13 @@ object NodeBridgeProviderRegistry {
             "defaultProjectPermission" to "android.permission.SYSTEM_ALERT_WINDOW",
             "permissionGranted" to runCatching { Settings.canDrawOverlays(context) }.getOrDefault(false).toString(),
             "resourceType" to NodeBridgeResourceType.OVERLAY_SESSION.name,
-            "p12_13LiveProviderState" to "not_promoted",
-            "liveProvider" to "p14_08_show_update_drainEvents_close_provider_poc",
-            "phase13Promotion" to "P13-18 partial overlay promotion evidence gate",
-            "liveCreationPromotion" to "blocked_until_promoted_show_update_drainEvents_close_provider",
-            "phase14Promotion" to "P14-08 live overlay provider POC gate",
-            "packagedPromotion" to "blocked_until_live_packaged_overlay_permission_foreground_disclosure_cleanup_and_leak_evidence",
-            "packagedPolicy" to "SYSTEM_ALERT_WINDOW metadata is recorded; scheduled/background silent overlays remain rejected until a foreground disclosure provider is promoted",
-            "foregroundDisclosure" to "required_before_packaged_promotion",
+            "liveProviderState" to "android_window_manager",
+            "liveProvider" to "declarative_windows_with_push_events_and_execution_cleanup",
+            "packagedPolicy" to "the current Android package must declare and be granted SYSTEM_ALERT_WINDOW",
+            "foregroundDisclosure" to "declared_overlay_disclosure",
             "cleanupPolicy" to "close,closeAll,and provider destroy remove provider-owned overlay sessions",
-            "skipPolicy" to "packaged and background overlay promotion remains skipped until P14-09/P14-10 permission/disclosure/device evidence lands",
             "rawWindowLeakPolicy" to "WindowManager, LayoutParams, FloatyWindow, WindowBridge, View, and NativeView are not exposed",
-            "phase13StatusReason" to "P13-18 partial gate over P12-14 live permission/settings/cleanup evidence; Android show/update/drainEvents/close creation path fails closed",
-            "statusReason" to "P14-08 provider POC exposes JSON-only show/update/drainEvents/close when SYSTEM_ALERT_WINDOW is granted; packaged promotion remains blocked",
+            "statusReason" to "declarative overlay windows support updates, dragging, push events and execution cleanup",
         )
         INPUT_OBSERVER_PROVIDER -> linkedMapOf(
             "liveMethods" to "getAvailableSources,observeKeys,drainEvents,close",

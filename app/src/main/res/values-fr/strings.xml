@@ -1458,6 +1458,8 @@
     <string name="text_no_search_results_for_keyword">Aucun resultat pour:\n\n%1$s</string>
     <string name="text_no_symbols_hint">La config actuelle est vide.\nAppuyez ici pour creer un symbole.</string>
     <string name="text_no_version_history">Aucun historique des versions</string>
+    <string name="text_node_audio_recording">Node.js enregistre du son</string>
+    <string name="text_node_audio_recording_channel">Enregistrement audio Node.js</string>
     <string name="text_node_cache_cleared">Cache des nœuds vidé</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Diagnostic Node.js</string>

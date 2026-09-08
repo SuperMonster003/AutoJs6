@@ -223,6 +223,7 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
 
     <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
 
@@ -615,6 +616,11 @@
         <service
             android:name="org.autojs.autojs.engine.NodeBridgeUiDispatchService"
             android:exported="false" />
+
+        <service
+            android:name="org.autojs.autojs.engine.NodeAudioRecordingService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <activity
             android:name="org.autojs.autojs.engine.NodeBridgeUiActivity"

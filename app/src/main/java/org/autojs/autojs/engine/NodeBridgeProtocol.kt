@@ -841,6 +841,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val deviceControls = NodeDeviceControls(appContext)
     private val eventObservers = NodeEventObservers(appContext)
     private val dialogs = NodeDialogs(appContext)
+    private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveScopedProjectFile) }
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -952,7 +953,7 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.overlay_active_session_count", overlaySessionIds.size.toString())
         put("embedded_script.overlay_permission_granted", overlayPermissionGranted().toString())
         put("embedded_script.overlay_permission_settings_launch_count", overlayPermissionSettingsLaunches.get().toString())
-        put("embedded_script.overlay_live_provider_state", "p14_08_provider_poc")
+        put("embedded_script.overlay_live_provider_state", "android_window_manager")
         put("embedded_script.overlay_pending_event_count", overlaySessions.values.sumOf { it.pendingEventCount() }.toString())
         put("embedded_script.overlay_dropped_event_count", overlaySessions.values.sumOf { it.droppedEventCount() }.toString())
         put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
@@ -1002,6 +1003,7 @@ class AndroidNodeBridgeCapabilityProvider(
         deviceControls.close()
         eventObservers.closeAll()
         dialogs.closeAll()
+        if (audioRecorder.isInitialized()) audioRecorder.value.close()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -1143,8 +1145,12 @@ class AndroidNodeBridgeCapabilityProvider(
                             method = request.method,
                         ),
                     )
-                session.update(patch)
-                NodeBridgeResponse.success(request.id, session.snapshot().toString())
+                try {
+                    session.update(patch)
+                    NodeBridgeResponse.success(request.id, session.snapshot().toString())
+                } catch (error: IllegalArgumentException) {
+                    NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest(error.message ?: "Invalid overlay update.", request.module, request.method))
+                }
             }
             "drainEvents" -> dispatchOwnedOverlayRequest(request, callback) { session, args ->
                 val options = args.optJSONObject(1) ?: JSONObject()
@@ -1332,7 +1338,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 .put("canOpenSettings", canOpenSettings)
                 .put("dryRun", dryRun)
                 .put("reason", reason)
-                .put("providerState", "p14_08_provider_poc")
+                .put("providerState", "android_window_manager")
                 .toString(),
         )
     }
@@ -1343,9 +1349,9 @@ class AndroidNodeBridgeCapabilityProvider(
             .put("granted", granted)
             .put("canOpenSettings", overlayPermissionSettingsIntentAvailable())
             .put("reason", if (granted) "permission-granted" else "permission-required")
-            .put("providerState", "p14_08_provider_poc")
+            .put("providerState", "android_window_manager")
             .put("packagedManifestPermission", "android.permission.SYSTEM_ALERT_WINDOW")
-            .put("foregroundDisclosure", "required_before_packaged_promotion")
+            .put("foregroundDisclosure", "declared_overlay_disclosure")
             .put("activeOverlayCount", overlaySessionIds.size)
     }
 
@@ -1355,7 +1361,7 @@ class AndroidNodeBridgeCapabilityProvider(
             .put("closedCount", closedCount)
             .put("remainingCount", overlaySessionIds.size)
             .put("reason", reason)
-            .put("providerState", "p14_08_provider_poc")
+            .put("providerState", "android_window_manager")
             .put("rawWindowLeaked", false)
     }
 
@@ -2420,7 +2426,10 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
-                    NodeBridgeError.invalidRequest(
+                    if (error is IllegalStateException && MediainfoPluginHost.queryServiceCount(appContext) == 0) {
+                        NodeBridgeError.capabilityProviderMissing(request.module, request.method, "an installed MediaInfo plugin")
+                            .copy(message = error.message ?: "Install the MediaInfo plugin to inspect audio files.")
+                    } else NodeBridgeError.invalidRequest(
                         message = error.message ?: "AutoJs6 mediainfo request failed.",
                         module = request.module,
                         method = request.method,
@@ -2431,19 +2440,15 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchRecorder(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        when (request.method) {
-            "getStatus" -> callback(NodeBridgeResponse.success(request.id, recorderStatus().toString()))
-            "start", "stop" -> callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.capabilityProviderMissing(
-                        module = request.module,
-                        method = request.method,
-                        requirement = "a privacy-reviewed audio recorder provider with foreground disclosure and cleanup evidence",
-                    ),
-                ),
+        audioRecorder.value.dispatch(request.method, request.argsArray().optJSONObject(0) ?: JSONObject()) { result ->
+            result.fold(
+                onSuccess = { callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(it))) },
+                onFailure = { error -> callback(NodeBridgeResponse.failure(request.id, when (error) {
+                    is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Microphone permission is required.", request.module, request.method)
+                    is IllegalArgumentException -> NodeBridgeError.invalidRequest(error.message ?: "Invalid audio recording request.", request.module, request.method)
+                    else -> NodeBridgeError.providerFailed(error.message ?: "Android could not record audio.", request.module, request.method)
+                })) },
             )
-            else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
         }
     }
 
@@ -2527,18 +2532,6 @@ class AndroidNodeBridgeCapabilityProvider(
     private val MEDIAINFO_STREAM_KINDS = setOf("GENERAL", "VIDEO", "AUDIO", "TEXT", "OTHER", "IMAGE", "MENU", "MAX")
     private val MEDIAINFO_NODE_SNAPSHOT_SCHEMA_V1 = "autojs6-node-mediainfo-snapshot-v1"
     private val MEDIAINFO_CAPABILITIES_SCHEMA = "autojs6-node-mediainfo-capabilities-v1"
-
-    private fun recorderStatus(): JSONObject {
-        val microphoneGranted = appContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        return JSONObject()
-            .put("schema", "autojs6-node-recorder-status-v1")
-            .put("recording", false)
-            .put("providerAvailable", false)
-            .put("microphonePermissionRequired", true)
-            .put("microphonePermissionGranted", microphoneGranted)
-            .put("foregroundDisclosureRequired", true)
-            .put("reason", "blocked_until_privacy_reviewed_recorder_provider")
-    }
 
     private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args = request.argsArray()
@@ -5399,9 +5392,9 @@ private class ControlledOverlaySession(
     private val eventCount = AtomicInteger(0)
     private val droppedCount = AtomicInteger(0)
     private val createdAt = System.currentTimeMillis()
-    private val descriptorText = descriptor.toString()
-    private val disclosure = descriptor.getJSONObject("disclosure")
-    private val windowOptions = descriptor.optJSONObject("window") ?: JSONObject()
+    private var model = JSONObject(descriptor.toString())
+    private var disclosure = model.getJSONObject("disclosure")
+    private var windowOptions = model.optJSONObject("window") ?: JSONObject()
 
     @Volatile
     private var rootView: View? = null
@@ -5412,14 +5405,54 @@ private class ControlledOverlaySession(
     @Volatile
     private var resource: NodeBridgeResourceHandle? = null
 
+    private var dragDownX = 0f
+    private var dragDownY = 0f
+    private var dragOriginX = 0
+    private var dragOriginY = 0
+    private var dragging = false
+    private val dragSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop
+    private val dragListener = View.OnTouchListener { view, event ->
+        val params = layoutParams
+        if (!windowOptions.optBoolean("draggable", false) || params == null) false
+        else when (event.actionMasked) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                dragDownX = event.rawX; dragDownY = event.rawY
+                dragOriginX = params.x; dragOriginY = params.y
+                dragging = false; view.isPressed = true
+                true
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                val dx = event.rawX - dragDownX; val dy = event.rawY - dragDownY
+                if (kotlin.math.abs(dx) > dragSlop || kotlin.math.abs(dy) > dragSlop) dragging = true
+                if (dragging) {
+                    view.isPressed = false
+                    params.x = dragOriginX + dx.toInt(); params.y = dragOriginY + dy.toInt()
+                    rootView?.let { windowManager.updateViewLayout(it, params) }
+                }
+                true
+            }
+            android.view.MotionEvent.ACTION_UP -> {
+                view.isPressed = false
+                if (dragging) enqueueEvent(JSONObject().put("type", "move").put("state", JSONObject().put("x", params.x).put("y", params.y)))
+                else view.performClick()
+                dragging = false
+                true
+            }
+            android.view.MotionEvent.ACTION_CANCEL -> { view.isPressed = false; dragging = false; true }
+            else -> false
+        }
+    }
+
     fun show() {
         check(rootView == null) { "Overlay session already shown." }
-        val content = JSONObject(descriptorText).getJSONObject("content")
-        val view = createContentView(content).apply {
+        val content = model.getJSONObject("content")
+        val view = android.widget.FrameLayout(context).apply {
             setBackgroundColor(Color.argb(245, 255, 255, 255))
             val padding = dp(8)
             setPadding(padding, padding, padding, padding)
             alpha = windowOptions.optDouble("alpha", 1.0).toFloat().coerceIn(0.2f, 1f)
+            setOnTouchListener(dragListener)
+            addView(createContentView(content))
         }
         val params = createLayoutParams(windowOptions)
         windowManager.addView(view, params)
@@ -5446,16 +5479,46 @@ private class ControlledOverlaySession(
     fun droppedEventCount(): Int = droppedCount.get()
 
     fun update(patch: JSONObject) {
-        val params = layoutParams
+        check(!closed.get()) { "The overlay is closed." }
+        val next = JSONObject(model.toString())
         val window = patch.optJSONObject("window")
+        if (window != null) {
+            val merged = JSONObject(windowOptions.toString())
+            window.keys().forEach { merged.put(it, window.get(it)) }
+            next.put("window", merged)
+        }
+        patch.optJSONObject("disclosure")?.let { next.put("disclosure", it) }
+        val targetId = patch.optString("id").takeIf { it.isNotBlank() }
+        val contentChanged = patch.has("content") || patch.keys().asSequence().any { it !in listOf("id", "window", "disclosure") }
+        if (patch.has("content")) next.put("content", patch.getJSONObject("content"))
+        else if (contentChanged) {
+            val content = next.getJSONObject("content")
+            val target = if (targetId == null) content else findContent(content, targetId)
+            require(target != null) { "No overlay component has id $targetId." }
+            patch.keys().forEach { key -> if (key !in listOf("id", "window", "disclosure")) target.put(key, patch.get(key)) }
+        }
+        validateDescriptor(next)?.let { throw IllegalArgumentException(it) }
+        // Construct the replacement before altering the displayed tree, so invalid properties leave it intact.
+        val contentView = if (contentChanged) createContentView(next.getJSONObject("content")) else null
+        model = next
+        disclosure = model.getJSONObject("disclosure")
+        windowOptions = model.optJSONObject("window") ?: windowOptions
+        val params = layoutParams
         if (params != null && window != null) {
             applyWindowPatch(params, window)
+            params.flags = overlayWindowFlags(windowOptions)
+            rootView?.alpha = windowOptions.optDouble("alpha", 1.0).toFloat()
             rootView?.let { windowManager.updateViewLayout(it, params) }
         }
-        val targetId = patch.optString("id").takeIf { it.isNotBlank() }
-        val target = targetId?.let { rootView?.findViewWithTag<View>(it) }
-        applyViewPatch(target ?: rootView, patch)
+        if (contentView != null) (rootView as? android.widget.FrameLayout)?.apply { removeAllViews(); addView(contentView) }
         enqueueEvent(JSONObject().put("type", "update").put("targetId", targetId ?: ""))
+    }
+
+    private fun findContent(node: JSONObject, id: String): JSONObject? {
+        if (node.optString("id") == id) return node
+        val children = node.optJSONArray("children") ?: return null
+        for (index in 0 until children.length()) findContent(children.getJSONObject(index), id)?.let { return it }
+        return null
     }
 
     fun drainEvents(maxEvents: Int): JSONArray {
@@ -5497,6 +5560,9 @@ private class ControlledOverlaySession(
             .put("visible", rootView != null && !closed.get())
             .put("createdAt", createdAt)
             .put("bounds", bounds)
+            .put("window", JSONObject().put("touchable", windowOptions.optBoolean("touchable", true))
+                .put("focusable", windowOptions.optBoolean("focusable", false)).put("draggable", windowOptions.optBoolean("draggable", false))
+                .put("alpha", rootView?.alpha ?: 1f))
             .put("disclosure", JSONObject().put("title", disclosure.optString("title")))
             .put("droppedCount", droppedCount.get())
     }
@@ -5510,6 +5576,10 @@ private class ControlledOverlaySession(
             else -> throw IllegalArgumentException("Unsupported ui.overlay component type: ${descriptor.optString("type")}")
         }.also { view ->
             descriptor.optString("id").takeIf { it.isNotBlank() }?.let { id -> view.tag = id }
+            view.layoutParams = ViewGroup.LayoutParams(dimension(descriptor.opt("width"), ViewGroup.LayoutParams.WRAP_CONTENT),
+                dimension(descriptor.opt("height"), ViewGroup.LayoutParams.WRAP_CONTENT))
+            applyViewPatch(view, descriptor)
+            view.setOnTouchListener(dragListener)
         }
     }
 
@@ -5521,7 +5591,7 @@ private class ControlledOverlaySession(
         val children = descriptor.optJSONArray("children") ?: JSONArray()
         for (index in 0 until children.length()) {
             val child = children.optJSONObject(index) ?: continue
-            layout.addView(createContentView(child), defaultChildLayoutParams())
+            layout.addView(createContentView(child))
         }
         return layout
     }
@@ -5552,13 +5622,19 @@ private class ControlledOverlaySession(
         if (target is TextView && patch.has("text")) {
             target.text = patch.optString("text")
         }
-        if (target is Button && patch.has("enabled")) {
+        if (target is TextView && patch.has("textSize")) target.textSize = patch.optDouble("textSize", 16.0).toFloat().coerceIn(8f, 48f)
+        if (target is TextView && patch.has("textColor")) target.setTextColor(overlayColor(patch.get("textColor")))
+        if (patch.has("backgroundColor")) target.setBackgroundColor(overlayColor(patch.get("backgroundColor")))
+        if (patch.has("padding")) dp(patch.optInt("padding").coerceAtLeast(0)).let { target.setPadding(it, it, it, it) }
+        if (patch.has("enabled")) {
             target.isEnabled = patch.optBoolean("enabled", true)
         }
         if (patch.has("visible")) {
             target.visibility = if (patch.optBoolean("visible", true)) View.VISIBLE else View.GONE
         }
     }
+
+    private fun overlayColor(value: Any): Int = if (value is Number) value.toInt() else Color.parseColor(value.toString())
 
     private fun createLayoutParams(window: JSONObject): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
@@ -5613,7 +5689,8 @@ private class ControlledOverlaySession(
     private fun dimension(raw: Any?, fallback: Int): Int {
         return when (raw) {
             "match_parent" -> WindowManager.LayoutParams.MATCH_PARENT
-            "wrap_content", null, JSONObject.NULL -> fallback
+            "wrap_content" -> WindowManager.LayoutParams.WRAP_CONTENT
+            null, JSONObject.NULL -> fallback
             is Int -> dp(raw.coerceIn(1, 4096))
             is Long -> dp(raw.coerceIn(1L, 4096L).toInt())
             is Number -> dp(raw.toInt().coerceIn(1, 4096))
@@ -5630,10 +5707,6 @@ private class ControlledOverlaySession(
         }
     }
 
-    private fun defaultChildLayoutParams(): ViewGroup.LayoutParams {
-        return LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-    }
-
     private fun enqueueEvent(rawEvent: JSONObject) {
         val event = JSONObject(rawEvent.toString())
             .put("overlayId", id)
@@ -5647,7 +5720,7 @@ private class ControlledOverlaySession(
         eventStream?.publish(event)
     }
 
-    private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt().coerceAtLeast(value)
+    private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt()
 
     private fun runOnMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -5696,8 +5769,8 @@ private class ControlledOverlaySession(
             if (window.optBoolean("visible", true) == false) {
                 return "ui.overlay.show does not allow hidden overlays."
             }
-            if (window.has("alpha") && window.optDouble("alpha", 1.0) <= 0.0) {
-                return "ui.overlay.show does not allow fully transparent overlays."
+            if (window.has("alpha") && window.optDouble("alpha", 1.0).let { !it.isFinite() || it !in 0.2..1.0 }) {
+                return "ui.overlay alpha must be between 0.2 and 1.0."
             }
             if (window.has("flags") || window.has("type") || window.has("layoutParams")) {
                 return "ui.overlay.show rejects raw WindowManager.LayoutParams, flags, and platform window types."

@@ -258,7 +258,7 @@ class NodeMediaBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidProviderReturnsReadOnlyMediaSnapshotsAndRecorderFailsClosed() {
+    fun androidProviderReturnsReadOnlyMediaSnapshotsAndRecorderPermissionStatus() {
         val workDir = File(context.cacheDir, "node-bridge-media-provider").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create media provider directory: $absolutePath" }
@@ -326,12 +326,16 @@ class NodeMediaBridgeInstrumentationTest {
         assertTrue(status.toString(), status.ok)
         val statusJson = jsonObject(status.resultJson.orEmpty())
         assertEquals("autojs6-node-recorder-status-v1", statusJson.getString("schema"))
-        assertFalse(statusJson.getBoolean("providerAvailable"))
+        assertTrue(statusJson.getBoolean("providerAvailable"))
         assertTrue(statusJson.getBoolean("foregroundDisclosureRequired"))
 
-        val start = dispatch(provider, "recorder", "start", """[{"path":"record.m4a"}]""")
-        assertFalse(start.toString(), start.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, start.error?.code)
+        // Recording is opt-in; an ordinary regression run must never open the microphone.
+        if (!statusJson.getBoolean("microphonePermissionGranted")) {
+            val start = dispatch(provider, "recorder", "start", """[{"path":"record.m4a"}]""")
+            assertFalse(start.toString(), start.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, start.error?.code)
+        }
+        provider.destroy()
     }
 
     private fun dispatch(

@@ -27,7 +27,7 @@ class NodeOverlayBridgeInstrumentationTest {
     }
 
     @Test
-    fun kotlinOverlayRegistryManifestAndProviderPocAreStable() {
+    fun kotlinOverlayRegistryManifestAndWindowProviderAreStable() {
         listOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings").forEach { method ->
             assertTrue(NodeBridgeModules.supports("ui.overlay", method))
         }
@@ -57,14 +57,12 @@ class NodeOverlayBridgeInstrumentationTest {
         val provider = AndroidNodeBridgeCapabilityProvider(context)
         val overlayHealth = NodeBridgeProviderRegistry.androidHealth(context)
             .first { it.definition.id == "ui.overlay" }
-        assertEquals(NodeBridgeProviderStatus.DEGRADED, overlayHealth.status)
+        assertEquals(if (Settings.canDrawOverlays(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED, overlayHealth.status)
         assertEquals(0, overlayHealth.activeResourceCount)
-        assertEquals("hasPermission,openPermissionSettings,closeAll", overlayHealth.details["liveGateMethods"])
-        assertEquals("show,update,drainEvents,close", overlayHealth.details["p14LiveMethods"])
-        assertEquals("provider_poc", overlayHealth.details["p14ProviderState"])
-        assertEquals("show,update,drainEvents,close", overlayHealth.details["blockedLiveMethods"])
+        assertTrue(overlayHealth.details["liveMethods"].orEmpty().contains("update"))
+        assertEquals("android_window_manager", overlayHealth.details["providerState"])
         assertEquals("android.permission.SYSTEM_ALERT_WINDOW", overlayHealth.details["packagedManifestPermission"])
-        assertEquals("required_before_packaged_promotion", overlayHealth.details["foregroundDisclosure"])
+        assertEquals("declared_overlay_disclosure", overlayHealth.details["foregroundDisclosure"])
         assertTrue(overlayHealth.details["rawWindowLeakPolicy"].orEmpty().contains("WindowManager"))
 
         val permission = dispatch(
@@ -74,9 +72,9 @@ class NodeOverlayBridgeInstrumentationTest {
         )
         assertTrue(permission.toString(), permission.ok)
         val permissionJson = JSONObject(permission.resultJson.orEmpty())
-        assertEquals("p14_08_provider_poc", permissionJson.getString("providerState"))
+        assertEquals("android_window_manager", permissionJson.getString("providerState"))
         assertEquals("android.permission.SYSTEM_ALERT_WINDOW", permissionJson.getString("packagedManifestPermission"))
-        assertEquals("required_before_packaged_promotion", permissionJson.getString("foregroundDisclosure"))
+        assertEquals("declared_overlay_disclosure", permissionJson.getString("foregroundDisclosure"))
         assertEquals(0, permissionJson.getInt("activeOverlayCount"))
 
         val settings = dispatch(
@@ -289,6 +287,8 @@ class NodeOverlayBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-ui-overlay-fake.js>",
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to
+                NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ui.overlay", "ui.overlay.permission")).toJson()),
             timeoutMs = 30_000L,
         )
 

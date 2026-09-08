@@ -1458,6 +1458,8 @@
     <string name="text_no_search_results_for_keyword">Ничего не найдено по запросу:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Текущая конфигурация пуста.\nНажмите здесь, чтобы создать символ.</string>
     <string name="text_no_version_history">Нет истории версий</string>
+    <string name="text_node_audio_recording">Node.js записывает звук</string>
+    <string name="text_node_audio_recording_channel">Запись звука Node.js</string>
     <string name="text_node_cache_cleared">Кэш узлов очищен</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Диагностика Node.js</string>
