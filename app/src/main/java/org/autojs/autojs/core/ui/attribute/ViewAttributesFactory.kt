@@ -26,6 +26,7 @@ import org.autojs.autojs.core.ui.widget.*
 import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.widget.JsCheckedTextView
 import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsGlobalConsoleView
 import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
@@ -81,6 +82,7 @@ object ViewAttributesFactory {
         //  ! │  │  │  ├─ JsCardView
         //  ! │  │  ├─ org.autojs.autojs.core.console.ConsoleView
         //  ! │  │  │  ├─ JsConsoleView
+        //  ! │  │  │  │  ├─ JsGlobalConsoleView
         //  ! │  │  ├─ JsFrameLayout
         //  ! │  ├─ android.widget.LinearLayout
         //  ! │  │  ├─ android.widget.NumberPicker
@@ -232,6 +234,7 @@ object ViewAttributesFactory {
         put(JsCalendarView::class.java, ::JsCalendarViewAttributes)
         put(JsCardView::class.java, ::JsCardViewAttributes)
         put(JsConsoleView::class.java, ::JsConsoleViewAttributes)
+        put(JsGlobalConsoleView::class.java, ::JsConsoleViewAttributes)
         put(JsDatePicker::class.java, ::JsDatePickerAttributes)
         put(JsGridView::class.java, ::JsGridViewAttributes)
         put(JsNumberPicker::class.java, ::JsNumberPickerAttributes)

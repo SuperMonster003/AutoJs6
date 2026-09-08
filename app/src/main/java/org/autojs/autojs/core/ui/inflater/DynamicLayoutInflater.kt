@@ -41,6 +41,7 @@ import org.autojs.autojs.core.ui.inflater.inflaters.JsCheckBoxInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsCheckedTextViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsChronometerInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsConsoleViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsGlobalConsoleViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsDatePickerInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsDrawerLayoutInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsEditTextInflater
@@ -146,6 +147,7 @@ import org.autojs.autojs.core.ui.widget.JsCheckBox
 import org.autojs.autojs.core.ui.widget.JsCheckedTextView
 import org.autojs.autojs.core.ui.widget.JsChronometer
 import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsGlobalConsoleView
 import org.autojs.autojs.core.ui.widget.JsDatePicker
 import org.autojs.autojs.core.ui.widget.JsDrawerLayout
 import org.autojs.autojs.core.ui.widget.JsEditText
@@ -299,6 +301,7 @@ open class DynamicLayoutInflater {
         registerViewAttrSetter(JsCheckedTextView::class.java, JsCheckedTextViewInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsChronometer::class.java, JsChronometerInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsConsoleView::class.java, JsConsoleViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsGlobalConsoleView::class.java, JsGlobalConsoleViewInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsDatePicker::class.java, JsDatePickerInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsDrawerLayout::class.java, JsDrawerLayoutInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsEditText::class.java, JsEditTextInflater(scriptRuntime, resourceParser))

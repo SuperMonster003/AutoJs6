@@ -5,6 +5,7 @@ import android.view.View
 import org.autojs.autojs.core.ui.widget.JsCheckedTextView
 import android.widget.Space
 import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsGlobalConsoleView
 import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.widget.*
 import org.autojs.autojs.core.ui.widget.JsCheckBox
@@ -47,6 +48,7 @@ object XmlConverter {
                 .map("checkedtext", JsCheckedTextView::class.java.name)
                 .map("chronometer", JsChronometer::class.java.name)
                 .map("console", JsConsoleView::class.java.name)
+                .map("globalconsole", JsGlobalConsoleView::class.java.name)
                 .map("datepicker", JsDatePicker::class.java.name)
                 .map("drawer", JsDrawerLayout::class.java.name)
                 .map(arrayOf("input", "edittext"), JsEditText::class.java.name)
@@ -130,7 +132,7 @@ object XmlConverter {
 
     @Throws(IOException::class, SAXException::class, ParserConfigurationException::class)
     fun convertToAndroidLayout(xml: String?): String {
-        return convertDocument(SecureXml.parse(requireNotNull(xml)))
+        return convertDocument(SecureXml.parse(XmlBareAttributes.normalize(requireNotNull(xml))))
     }
 
     @Throws(ParserConfigurationException::class, IOException::class, SAXException::class)
@@ -141,7 +143,7 @@ object XmlConverter {
                 stream.reader(input.encoding?.let(Charset::forName) ?: Charsets.UTF_8).readText()
             }
             ?: throw SAXException("InputSource must provide a character stream or byte stream")
-        return convertDocument(SecureXml.parse(xml))
+        return convertDocument(SecureXml.parse(XmlBareAttributes.normalize(xml)))
     }
 
     private fun convertDocument(document: org.w3c.dom.Document): String {
