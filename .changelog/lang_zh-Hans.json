@@ -139,7 +139,8 @@
         "恢复 `console.rawInput(prompt?, ...args)` 与 `console.input(prompt?, ...args)` (自 6.3.1 废弃): 阻塞脚本线程直到用户在控制台输入栏提交一行文本, `input` 将文本作为 JavaScript 表达式求值; 输入栏默认隐藏, 仅在脚本等待输入时自动显示 (浮动窗口未显示时自动显示并获取焦点, 弹出软键盘时窗口上移避让), 亦可通过 `console.setInputVisible(true)` 或各控制台的更多菜单常驻显示; 提交内容以 `> ` 前缀回显, 脚本结束时取消等待中的输入; 示例代码新增 \"控制台/输入交互\"",
         "UI 模式 `<globalconsole>` 控件显示全局控制台, `<console>` 改为显示当前脚本自身的控制台 (与 Auto.js 4 一致), 两者默认均不显示时间前缀; `<console global=\"true\">` 与裸属性写法 `<console global>` 等价于 `<globalconsole>` (布局 XML 支持裸属性, 视为 `\"true\"`); 控件属性覆盖 `console.setXxx` 方法 (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` 等), 设置 `title` 后显示带 \"更多\" 菜单的标题栏; 示例代码新增 \"布局/控制台控件\"",
         "Node.js 桥订阅通过既有回调推送传感器, WebSocket, UI, 悬浮窗与输入事件, 提供 on/once/off 监听, 有界事件队列及 drainEvents 兼容",
-        "Node.js 运行时支持可选 idleExitMs 空闲退出与后续脚本重新连接, 提供 idleForMs 诊断, 默认保持常驻"
+        "Node.js 运行时支持可选 idleExitMs 空闲退出与后续脚本重新连接, 提供 idleForMs 诊断, 默认保持常驻",
+        "process.stdin / readline 接收控制台输入, autojs6:host 接收执行级 JSON 消息, v3 postMessage 事务兼容旧宿主"
       ],
       "fix": [
         "文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题",

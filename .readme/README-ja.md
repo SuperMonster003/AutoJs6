@@ -329,6 +329,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` UI モードにグローバルコンソールを表示する `<globalconsole>` 要素を追加し, `<console>` はスクリプト自身のコンソールを表示するように変更 (Auto.js 4 と同様); どちらもデフォルトでは時刻プレフィックスを表示しない; `<console global="true">` と裸属性表記の `<console global>` は `<globalconsole>` と等価 (レイアウト XML は裸属性を `"true"` として受け付ける); 要素の属性は `console.setXxx` メソッドを網羅 (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` など), `title` を設定すると "その他" メニュー付きのタイトルバーを表示; サンプルコードに "レイアウト/コンソール要素" を追加
 * `新機能` Node.js ブリッジの購読でセンサー, WebSocket, UI, オーバーレイ, 入力イベントを既存のコールバック経由で配信し, on/once/off, 有界キュー, drainEvents 互換性を提供
 * `新機能` Node.js ランタイムに任意の idleExitMs によるアイドル終了と次のスクリプトの再接続を追加, idleForMs 診断を提供し既定では常駐を維持
+* `新機能` process.stdin / readline がコンソール入力に対応し, autojs6:host が実行ごとの JSON メッセージを受信; v3 postMessage は旧ホストと互換
 * `修正` Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題
 * `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
 * `修正` 実験的なリモート単一ファイルビルドのビルド番号を従来のビルダーと一致させ、照合済みの展開後入力サイズ、ビルド時に検証されたテンプレート展開上限、256 MiB の予約領域を用いるフェイルクローズなワークスペース容量事前検査を追加

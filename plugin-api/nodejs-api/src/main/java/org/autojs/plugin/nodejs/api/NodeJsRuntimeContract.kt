@@ -4,7 +4,17 @@ object NodeJsRuntimeContract {
 
     const val CONTRACT_VERSION = 2
     const val MIN_CONTRACT_VERSION = 2
-    const val MAX_CONTRACT_VERSION = CONTRACT_VERSION
+    // Preserve the v2 handshake: published hosts require exact equality.
+    const val MAX_CONTRACT_VERSION = 3
+    const val POST_MESSAGE_CONTRACT_VERSION = 3
+    const val KEY_MAX_CONTRACT_VERSION = "maxContractVersion"
+    const val KEY_MESSAGE_KIND = "kind"
+    // stdin: literal UTF-8 text; message: a JSON value encoded as a string.
+    const val KEY_MESSAGE_DATA = "data"
+    const val KEY_MESSAGE_EOF = "eof"
+    const val MESSAGE_STDIN = "stdin"
+    const val MESSAGE_HOST = "message"
+    const val MAX_MESSAGE_BYTES = 64 * 1024
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
     const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 3
     // Module-source transport versioning remains independent from the runtime
@@ -178,6 +188,8 @@ object NodeJsRuntimeContract {
     const val EVENT_STARTED = "started"
     const val EVENT_STDOUT = "stdout"
     const val EVENT_STDERR = "stderr"
+    // text is "true" while stdin can accept another chunk, otherwise "false".
+    const val EVENT_STDIN_STATE = "stdin_state"
     const val EVENT_FINISHED = "finished"
 
     const val CAPABILITY_SYNC_SCRIPT_EXECUTION = "syncScriptExecution"

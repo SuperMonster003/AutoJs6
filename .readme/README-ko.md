@@ -329,6 +329,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` UI 모드에 전역 콘솔을 표시하는 `<globalconsole>` 요소를 추가하고 `<console>` 은 스크립트 자체의 콘솔을 표시하도록 변경 (Auto.js 4 와 동일); 둘 다 기본적으로 시간 접두사를 표시하지 않음; `<console global="true">` 와 단독 속성 표기 `<console global>` 은 `<globalconsole>` 과 동일 (레이아웃 XML 은 단독 속성을 `"true"` 로 처리); 요소 속성은 `console.setXxx` 메서드를 포괄 (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` 등), `title` 을 설정하면 "더 보기" 메뉴가 있는 제목 표시줄을 표시; 샘플 코드에 "레이아웃/콘솔 요소" 추가
 * `추가` Node.js 브리지 구독에서 기존 콜백으로 센서, WebSocket, UI, 오버레이 및 입력 이벤트를 전달하며 on/once/off, 크기가 제한된 큐 및 drainEvents 호환성 지원
 * `추가` Node.js 런타임에 선택적 idleExitMs 유휴 종료 및 다음 스크립트 재연결 지원, idleForMs 진단 제공 및 기본 상주 동작 유지
+* `추가` process.stdin / readline 콘솔 입력과 autojs6:host 실행별 JSON 메시지 지원; v3 postMessage는 기존 호스트와 호환
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가

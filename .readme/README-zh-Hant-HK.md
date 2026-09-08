@@ -329,6 +329,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` UI 模式 `<globalconsole>` 控制項顯示全域控制台, `<console>` 改為顯示目前腳本自身的控制台 (與 Auto.js 4 一致), 兩者預設均不顯示時間前綴; `<console global="true">` 與裸屬性寫法 `<console global>` 等價於 `<globalconsole>` (版面 XML 支援裸屬性, 視為 `"true"`); 控制項屬性涵蓋 `console.setXxx` 方法 (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` 等), 設定 `title` 後顯示帶 "更多" 選單的標題欄; 範例程式碼新增 "版面/控制台控制項"
 * `新增` Node.js 橋訂閱透過既有回呼推送感測器, WebSocket, UI, 懸浮窗與輸入事件, 提供 on/once/off 監聽, 有界事件佇列及 drainEvents 相容
 * `新增` Node.js 執行階段支援可選 idleExitMs 閒置退出與後續指令碼重新連線, 提供 idleForMs 診斷, 預設保持常駐
+* `新增` process.stdin / readline 接收主控台輸入, autojs6:host 接收執行級 JSON 訊息, v3 postMessage 交易相容舊宿主
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
 * `修復` 使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間

@@ -150,6 +150,7 @@ object NodeJsRuntimePluginHost {
         val bindElapsedMs: Long,
         val sessionReused: Boolean,
         val sessionGeneration: Long,
+        var maxContractVersion: Int = NodeJsRuntimeContract.CONTRACT_VERSION,
     )
 
     private class BindingAttempt(
@@ -260,6 +261,9 @@ object NodeJsRuntimePluginHost {
             )
         }
         val diagnostics = acquired.toOperationDiagnostics(discovery)
+        acquired.maxContractVersion = runtimeInfo.getInt(
+            NodeJsRuntimeContract.KEY_MAX_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION,
+        )
         if (!markExecutionDispatched(reservation, acquired)) {
             throw NodeRuntimePluginOperationException(
                 message = "Node.js runtime plugin execution was cancelled before Binder dispatch: " +
@@ -396,6 +400,23 @@ object NodeJsRuntimePluginHost {
             { cancellation.cancel(true) },
             NodeRuntimePluginRpcDeadline.CANCEL_RPC_BUDGET_MS,
         )
+    }
+
+    fun postMessage(executionId: String, message: Bundle): Boolean {
+        val dispatched = executionRegistry.dispatched(executionId) ?: return false
+        if (dispatched.maxContractVersion < NodeJsRuntimeContract.POST_MESSAGE_CONTRACT_VERSION) return false
+        val runtime = synchronized(dispatched.entry.lock) {
+            dispatched.runtime.takeIf {
+                dispatched.entry.matchesBindingLocked(dispatched.bindingGeneration, dispatched.binder) &&
+                        dispatched.binder.isBinderAlive
+            }
+        } ?: return false
+        return try {
+            runtime.postMessage(executionId, message)
+        } catch (error: RemoteException) {
+            invalidateAcquired(dispatched, error, binderFailure = true)
+            false
+        }
     }
 
     suspend fun cancelScript(context: Context, executionId: String): Boolean {
@@ -648,7 +669,7 @@ object NodeJsRuntimePluginHost {
 
     private fun validateRuntimeInfo(runtimeInfo: Bundle) {
         val contractVersion = runtimeInfo.getInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, 0)
-        if (contractVersion != NodeJsRuntimeContract.CONTRACT_VERSION) {
+        if (!NodeJsRuntimeContract.supportsContractVersion(contractVersion)) {
             throw NodeRuntimePluginContractException(
                 "Unsupported Node.js runtime plugin contract $contractVersion; " +
                         "host requires ${NodeJsRuntimeContract.CONTRACT_VERSION}.",

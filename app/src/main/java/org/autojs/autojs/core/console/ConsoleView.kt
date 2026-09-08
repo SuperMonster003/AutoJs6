@@ -606,17 +606,16 @@ open class ConsoleView @JvmOverloads constructor(
     }
 
     private fun submitInput() {
-        val text = binding.input.text.toString().trim()
-        if (text.isEmpty()) {
-            return
-        }
+        val rawText = binding.input.text.toString()
         val console = mConsole
         if (console != null && console.hasPendingInput) {
-            if (console.submitInput(text)) {
+            if (console.submitInput(rawText)) {
                 binding.input.setText("")
             }
             return
         }
+        val text = rawText.trim()
+        if (text.isEmpty()) return
         if (isCommandModeEnabled) {
             val listener = mCommandSubmitListener ?: return
             if (mCommandInputBusy) return

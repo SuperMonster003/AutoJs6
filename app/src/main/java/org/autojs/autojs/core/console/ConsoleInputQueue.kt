@@ -22,6 +22,10 @@ class ConsoleInputRequest internal constructor(val id: Int, val owner: Any?) {
 
     fun cancel(): Boolean = mFuture.cancel(true)
 
+    internal fun whenComplete(callback: (String?) -> Unit) {
+        mFuture.whenComplete { text, error -> callback(if (error == null) text else null) }
+    }
+
     /** @throws InterruptedException when the waiting thread is interrupted; [CancellationException] when cancelled. */
     @Throws(InterruptedException::class, CancellationException::class)
     fun await(): String = try {

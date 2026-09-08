@@ -13,4 +13,7 @@ interface INodeJsRuntimePlugin {
 
     Bundle prewarmRuntime(in Bundle request);
 
+    // Additive v3 transaction; call only when runtimeInfo.maxContractVersion >= 3.
+    boolean postMessage(String executionId, in Bundle message);
+
 }

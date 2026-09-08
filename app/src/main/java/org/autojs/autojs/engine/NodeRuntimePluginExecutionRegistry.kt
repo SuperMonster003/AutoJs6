@@ -62,6 +62,10 @@ internal class NodeRuntimePluginExecutionRegistry<T : Any> {
         registration.dispatched?.let { Cancellation.AfterDispatch(it) } ?: Cancellation.BeforeDispatch
     }
 
+    fun dispatched(executionId: String): T? = synchronized(lock) {
+        registrations[executionId]?.takeUnless { it.cancelled }?.dispatched
+    }
+
     fun release(reservation: Reservation) {
         synchronized(lock) {
             val current = registrations[reservation.executionId]

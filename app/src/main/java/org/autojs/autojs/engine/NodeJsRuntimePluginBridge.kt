@@ -63,6 +63,7 @@ object NodeJsRuntimePluginBridge {
         request: NodePluginScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         outputListener: ((type: String, text: String) -> Unit)? = null,
+        stdinListener: ((ready: Boolean) -> Unit)? = null,
     ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         val requestWithProvider = if (request.executionId.isNullOrBlank()) {
@@ -133,10 +134,15 @@ object NodeJsRuntimePluginBridge {
                         )
                     }
                     val streamedEventCount = java.util.concurrent.atomic.AtomicInteger(0)
-                    val runtimeCallback = outputListener?.let { listener ->
+                    val runtimeCallback = if (outputListener != null || stdinListener != null) {
                         object : INodeJsRuntimeCallback.Stub() {
                             override fun onEvent(event: Bundle?) {
                                 val type = event?.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) ?: return
+                                if (type == NodeJsRuntimeContract.EVENT_STDIN_STATE) {
+                                    runCatching { stdinListener?.invoke(event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT) == "true") }
+                                        .onFailure { Log.w(TAG, "Node.js stdin listener failed.", it) }
+                                    return
+                                }
                                 if (type != NodeJsRuntimeContract.EVENT_STDOUT &&
                                     type != NodeJsRuntimeContract.EVENT_STDERR
                                 ) {
@@ -147,12 +153,12 @@ object NodeJsRuntimePluginBridge {
                                     return
                                 }
                                 streamedEventCount.incrementAndGet()
-                                runCatching { listener(type, text) }.onFailure { error ->
+                                runCatching { outputListener?.invoke(type, text) }.onFailure { error ->
                                     Log.w(TAG, "Node.js runtime plugin output listener failed.", error)
                                 }
                             }
                         }
-                    }
+                    } else null
                     val runResult = runBlocking {
                         NodeJsRuntimePluginHost.runScriptWithInfo(
                             context = context,
@@ -236,6 +242,9 @@ object NodeJsRuntimePluginBridge {
             }
         }
     }
+
+    fun postMessage(executionId: String, message: Bundle): Boolean =
+        NodeJsRuntimePluginHost.postMessage(executionId, message)
 
     fun cancelScript(context: Context, executionId: String): Boolean {
         var provider: INodeJsModuleSourceProvider? = null

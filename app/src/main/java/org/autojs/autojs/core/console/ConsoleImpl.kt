@@ -281,6 +281,24 @@ open class ConsoleImpl @JvmOverloads constructor(
         return true
     }
 
+    /** Nonblocking counterpart used by the external Node runtime's stdin. */
+    internal fun requestInput(callback: (String) -> Unit): ConsoleInputRequest {
+        val request = ConsoleInputQueue.newRequest(this)
+        if (isRuntimeExited) return request.also { it.cancel() }
+        registerInputRequest(request)
+        request.whenComplete { text ->
+            unregisterInputRequest(request)
+            if (text != null) callback(text)
+        }
+        try {
+            ensureInputSurface()
+        } catch (error: Exception) {
+            request.cancel()
+            throw error
+        }
+        return request
+    }
+
     private fun registerInputRequest(request: ConsoleInputRequest) {
         var console: ConsoleImpl? = this
         while (console != null) {

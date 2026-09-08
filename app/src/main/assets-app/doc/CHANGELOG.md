@@ -145,6 +145,7 @@
 * `新增` UI 模式 `<globalconsole>` 控件显示全局控制台, `<console>` 改为显示当前脚本自身的控制台 (与 Auto.js 4 一致), 两者默认均不显示时间前缀; `<console global="true">` 与裸属性写法 `<console global>` 等价于 `<globalconsole>` (布局 XML 支持裸属性, 视为 `"true"`); 控件属性覆盖 `console.setXxx` 方法 (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` 等), 设置 `title` 后显示带 "更多" 菜单的标题栏; 示例代码新增 "布局/控制台控件"
 * `新增` Node.js 桥订阅通过既有回调推送传感器, WebSocket, UI, 悬浮窗与输入事件, 提供 on/once/off 监听, 有界事件队列及 drainEvents 兼容
 * `新增` Node.js 运行时支持可选 idleExitMs 空闲退出与后续脚本重新连接, 提供 idleForMs 诊断, 默认保持常驻
+* `新增` process.stdin / readline 接收控制台输入, autojs6:host 接收执行级 JSON 消息, v3 postMessage 事务兼容旧宿主
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间

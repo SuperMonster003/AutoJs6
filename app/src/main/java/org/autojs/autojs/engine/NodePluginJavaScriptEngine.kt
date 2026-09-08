@@ -97,10 +97,14 @@ class NodePluginJavaScriptEngine(
             }
         }
         activeExecutionId = executionId
+        val input = NodeRuntimeConsoleInput(runtime.console) { message ->
+            NodeJsRuntimePluginBridge.postMessage(executionId, message)
+        }
         val rawResult = try {
             NodeJsRuntimePluginBridge.runScript(
                 context = androidContext,
                 request = request,
+                stdinListener = input::onState,
                 outputListener = { type, text ->
                     printScriptOutput(
                         if (type == NodeJsRuntimeContract.EVENT_STDERR) {
@@ -113,6 +117,7 @@ class NodePluginJavaScriptEngine(
                 },
             )
         } finally {
+            input.close()
             if (activeExecutionId == executionId) {
                 activeExecutionId = null
             }
