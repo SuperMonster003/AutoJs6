@@ -412,7 +412,8 @@
         "`UiObject` 분할: `pickup` / `detect` 결과 유형의 별칭 표, 피커, 이름으로 노드 메서드를 호출하는 인터셉터를 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`) 으로, `summary()` / `toString()` / `isSimilar()` 을 `UiObjectSummary` 로 이동; `UiObject.fingerprint()` 추가 (경계, 텍스트, 설명, 클래스명, 자식 수와 주요 불리언 속성의 해시, 형제나 자식은 순회하지 않음); `parent()` 로 도달한 노드의 `indexInParent()` 는 처음 사용할 때 계산; 레이아웃 검사기의 코드 생성기 (`CodeGenerator` / `ReadOnlyUiObject`) 를 Kotlin 으로 변환, 후자는 `UiNode` 를 직접 구현하는 스냅숏 뷰가 됨; 스크립트에 보이는 API 와 동작은 변함없음",
         "런타임 간 재사용 (Roadmap P5.4): Python Host 의 선택자 기능 (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) 과 Node Bridge 의 `accessibility` 모듈 (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) 이 스크립트 런타임의 접근성 코어 (`UiNode` 순회, 선택자 필터, 창 루트 공급자, 노드 수명 주기) 를 사용하도록 바뀌었으며 두 JSON 와이어 프로토콜은 필드 단위로 그대로임; Node Bridge 의 검색은 Android 13 미만에서 도중에 방문한 노드를 더 이상 누수하지 않음; Python Host 의 접근성 스크린샷은 공유 `A11yScreenshotter` 로 단일 시도를 수행함 (Host 의 제한된 재시도와 4 초 기한은 유지)",
         "각 스크립트 런타임이 독립적인 콘솔 (자체 로그 항목과 플로팅 창, 로그는 전역 콘솔로도 전달) 을 가지며 플로팅 창은 현재 스크립트의 출력만 표시 (Auto.js 4 와 동일), 같은 이름의 스크립트를 다시 실행하면 이전 실행이 남긴 플로팅 창을 대체; 로그 항목은 원본 내용과 타임스탬프를 저장하고 시간 접두사는 각 뷰가 필요 시 렌더링 (플로팅 창은 기본 숨김, 로그 페이지는 설정에서 활성화 가능); Node bridge `console.tail` 항목에 `time` 필드 (밀리초 타임스탬프) 추가, `text` 는 시간 접두사를 유지",
-        "화면 OCR 예제가 Android 캡처 승인을 요청하고 실제 이미지 핸들을 인식하며, OCR 또는 바코드 플러그인을 사용할 수 없으면 읽기 쉬운 unavailable 오류를 반환하고 인식 실패는 오류로 처리"
+        "화면 OCR 예제가 Android 캡처 승인을 요청하고 실제 이미지 핸들을 인식하며, OCR 또는 바코드 플러그인을 사용할 수 없으면 읽기 쉬운 unavailable 오류를 반환하고 인식 실패는 오류로 처리",
+        "Node 스크립트는 협상된 비동기 시작을 지원하고, 장기 실행 중 Binder 스레드를 해제하며, 종료 후 작업 공간 변경 사항을 반환하고 기존 동기 호스트와 호환"
       ],
       "dependency": [
         "모듈화 Android AXML",

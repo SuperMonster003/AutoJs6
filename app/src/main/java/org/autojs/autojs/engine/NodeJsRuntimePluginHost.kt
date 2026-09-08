@@ -32,8 +32,10 @@ import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import org.autojs.plugin.nodejs.api.NodeJsPluginIds
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resume
@@ -151,6 +153,7 @@ object NodeJsRuntimePluginHost {
         val sessionReused: Boolean,
         val sessionGeneration: Long,
         var maxContractVersion: Int = NodeJsRuntimeContract.CONTRACT_VERSION,
+        var asynchronousExecution: Boolean = false,
     )
 
     private class BindingAttempt(
@@ -264,6 +267,9 @@ object NodeJsRuntimePluginHost {
         acquired.maxContractVersion = runtimeInfo.getInt(
             NodeJsRuntimeContract.KEY_MAX_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION,
         )
+        acquired.asynchronousExecution = acquired.maxContractVersion >= NodeJsRuntimeContract.START_SCRIPT_CONTRACT_VERSION &&
+                runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES)
+                    ?.contains(NodeJsRuntimeContract.CAPABILITY_ASYNC_SCRIPT_EXECUTION) == true
         if (!markExecutionDispatched(reservation, acquired)) {
             throw NodeRuntimePluginOperationException(
                 message = "Node.js runtime plugin execution was cancelled before Binder dispatch: " +
@@ -337,8 +343,38 @@ object NodeJsRuntimePluginHost {
         callback: INodeJsRuntimeCallback?,
     ): Bundle {
         val startedAt = SystemClock.elapsedRealtime()
-        val future = binderCallExecutor.submit<Bundle> {
-            acquired.runtime.runScript(request, callback) ?: Bundle.EMPTY
+        val executionId = request.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID).orEmpty()
+        val completion = CompletableFuture<Bundle>()
+        val death = IBinder.DeathRecipient { completion.completeExceptionally(android.os.DeadObjectException()) }
+        if (acquired.asynchronousExecution) acquired.binder.linkToDeath(death, 0)
+        val future: Future<Bundle> = if (acquired.asynchronousExecution) {
+            val terminalCallback = object : INodeJsRuntimeCallback.Stub() {
+                override fun onEvent(event: Bundle) {
+                    if (event.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) == NodeJsRuntimeContract.EVENT_FINISHED) {
+                        val result = event.getBundle(NodeJsRuntimeContract.KEY_EVENT_RESULT)
+                        if (event.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID) == executionId && result != null) {
+                            completion.complete(result)
+                        } else {
+                            completion.completeExceptionally(RemoteException("Invalid Node.js runtime completion."))
+                        }
+                    }
+                    callback?.onEvent(event)
+                }
+            }
+            // Only the acknowledgement occupies an RPC thread. Completion may arrive before it.
+            CompletableFuture.supplyAsync({
+                val ack = acquired.runtime.startScript(request, terminalCallback)
+                    ?: throw RemoteException("Missing Node.js runtime acknowledgement.")
+                if (ack.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID) != executionId) {
+                    throw RemoteException("Invalid Node.js runtime acknowledgement.")
+                }
+                ack
+            }, binderCallExecutor).thenCompose { ack ->
+                if (ack.getBoolean(NodeJsRuntimeContract.KEY_ACCEPTED)) completion
+                else CompletableFuture.completedFuture(ack)
+            }
+        } else {
+            binderCallExecutor.submit<Bundle> { acquired.runtime.runScript(request, callback) ?: Bundle.EMPTY }
         }
         val timeoutMs = request.getLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS, 0L)
         return try {
@@ -351,7 +387,6 @@ object NodeJsRuntimePluginHost {
                 future.get()
             }
         } catch (_: TimeoutException) {
-            val executionId = request.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID).orEmpty()
             future.cancel(true)
             scheduleBoundedCancellation(acquired, executionId)
             Bundle().apply {
@@ -385,6 +420,8 @@ object NodeJsRuntimePluginHost {
             }
         } catch (error: ExecutionException) {
             throw (error.cause ?: error)
+        } finally {
+            if (acquired.asynchronousExecution) acquired.binder.unlinkToDeath(death, 0)
         }
     }
 
@@ -699,18 +736,7 @@ object NodeJsRuntimePluginHost {
         validateLifecycleContract(runtimeInfo)
     }
 
-    /**
-     * The R5 lifecycle contract is about *semantics*, not about the exact
-     * scheduling knobs a plugin happens to use. A plugin stays compliant as
-     * long as it runs a persistent runtime in a dedicated process, admits one
-     * execution at a time, and can cancel an in-flight execution.
-     *
-     * Admission queue depth and the cancellation strategy are plugin-side
-     * implementation choices: a plugin may queue callers instead of rejecting
-     * them, and may attempt a cooperative stop before falling back to a process
-     * restart. Both keep single-active semantics intact, so neither is pinned
-     * to a literal value here.
-     */
+    /** Each runtime remains single-active; an advertised process pool may schedule several runtimes. */
     private fun validateLifecycleContract(runtimeInfo: Bundle) {
         if (!runtimeInfo.getBoolean("persistentProcessRuntime", false)) {
             throw NodeRuntimePluginContractException(
@@ -723,10 +749,11 @@ object NodeJsRuntimePluginHost {
             )
         }
         val maxConcurrentExecutions = runtimeInfo.getInt("maxConcurrentExecutions", 0)
-        if (maxConcurrentExecutions != 1) {
+        val processPool = runtimeInfo.getString("processModel") == "process_pool" &&
+                runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES).orEmpty().contains("processPoolExecution")
+        if (maxConcurrentExecutions < 1 || (maxConcurrentExecutions != 1 && !processPool)) {
             throw NodeRuntimePluginContractException(
-                "Node.js runtime plugin is not single-active; " +
-                        "maxConcurrentExecutions=$maxConcurrentExecutions, host requires 1.",
+                "Node.js runtime plugin reported unsupported execution capacity $maxConcurrentExecutions.",
             )
         }
         val queueCapacity = runtimeInfo.getInt("queueCapacity", -1)

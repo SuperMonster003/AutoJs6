@@ -16,4 +16,8 @@ interface INodeJsRuntimePlugin {
     // Additive v3 transaction; call only when runtimeInfo.maxContractVersion >= 3.
     boolean postMessage(String executionId, in Bundle message);
 
+    // Additive sixth transaction; requires maxContractVersion >= 3 and asyncScriptExecution.
+    // accepted=true acknowledges admission. The callback receives finished + result after cleanup.
+    Bundle startScript(in Bundle request, INodeJsRuntimeCallback callback);
+
 }

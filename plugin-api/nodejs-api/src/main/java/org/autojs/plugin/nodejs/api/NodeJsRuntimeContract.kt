@@ -7,6 +7,8 @@ object NodeJsRuntimeContract {
     // Preserve the v2 handshake: published hosts require exact equality.
     const val MAX_CONTRACT_VERSION = 3
     const val POST_MESSAGE_CONTRACT_VERSION = 3
+    const val START_SCRIPT_CONTRACT_VERSION = 3
+    const val KEY_ACCEPTED = "accepted"
     const val KEY_MAX_CONTRACT_VERSION = "maxContractVersion"
     const val KEY_MESSAGE_KIND = "kind"
     // stdin: literal UTF-8 text; message: a JSON value encoded as a string.
@@ -188,6 +190,8 @@ object NodeJsRuntimeContract {
     const val KEY_EVENT_TYPE = "eventType"
     const val KEY_EVENT_LEVEL = "level"
     const val KEY_EVENT_TEXT = "text"
+    /** Complete runScript result, present on startScript's terminal event after workspace cleanup. */
+    const val KEY_EVENT_RESULT = "result"
 
     const val EVENT_STARTED = "started"
     const val EVENT_STDOUT = "stdout"
@@ -197,6 +201,7 @@ object NodeJsRuntimeContract {
     const val EVENT_FINISHED = "finished"
 
     const val CAPABILITY_SYNC_SCRIPT_EXECUTION = "syncScriptExecution"
+    const val CAPABILITY_ASYNC_SCRIPT_EXECUTION = "asyncScriptExecution"
     const val CAPABILITY_BUNDLE_TRANSPORT = "bundleTransport"
     const val CAPABILITY_NATIVE_EMBEDDED_RUNTIME = "nativeEmbeddedRuntime"
     const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"

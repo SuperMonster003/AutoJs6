@@ -167,8 +167,9 @@ object NodeJsRuntimePluginBridge {
                             reservation = checkNotNull(reservation),
                         )
                     }
-                    // A lost Binder response is deliberately not recoverable: only a
-                    // normal RPC return proves the plugin finished its output archive.
+                    // A normal runScript result or authenticated async terminal result proves
+                    // the plugin finished its output archive; an admission acknowledgement does not.
+                    // A lost response is deliberately not replayed.
                     try {
                         if (validateWorkspaceCommit(runResult.result)) {
                             workspaceTransport.synchronizeBack()

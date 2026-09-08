@@ -574,6 +574,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` ランタイム間の再利用 (Roadmap P5.4): Python Host のセレクター機能 (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) と Node Bridge の `accessibility` モジュール (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) がスクリプトランタイムのアクセシビリティコア (`UiNode` の走査, セレクターフィルター, ウィンドウルートプロバイダー, ノードのライフサイクル) を利用するようになり, 両者の JSON ワイヤープロトコルはフィールド単位で不変; Node Bridge の検索は Android 13 未満で途中に訪れたノードをリークしなくなった; Python Host のアクセシビリティスクリーンショットは共有の `A11yScreenshotter` で単回の試行を行う (Host 側の有界リトライと 4 秒の期限は維持)
 * `改善` 各スクリプトランタイムが独自のコンソール (独自のログエントリとフローティングウィンドウ, ログはグローバルコンソールにも転送) を持つようになり, フローティングウィンドウには現在のスクリプトの出力のみが表示され (Auto.js 4 と同様), 同名スクリプトの再実行時は前回の実行が残したフローティングウィンドウを置き換える; ログエントリは生の内容とタイムスタンプを保存し, 時刻プレフィックスは各ビューが必要に応じて描画 (フローティングウィンドウではデフォルト非表示, ログページでは設定で有効化可能); Node bridge の `console.tail` エントリに `time` フィールド (ミリ秒タイムスタンプ) を追加し, `text` は時刻プレフィックス付きのまま
 * `改善` 画面 OCR サンプルが Android のキャプチャ許可を要求して実際の画像ハンドルを認識し, OCR またはバーコードプラグインが利用不可なら読みやすい unavailable エラーを返し, 認識失敗はエラーとして処理
+* `改善` Node スクリプトはネゴシエーションによる非同期起動に対応し, 長時間実行中の Binder スレッドを解放, 終了後にワークスペースの変更を返却し, 従来の同期ホストとも互換
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
