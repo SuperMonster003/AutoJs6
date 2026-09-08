@@ -131,7 +131,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("barcode").status)
-        assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
         assertTrue(

@@ -164,7 +164,8 @@
         "أضاف وضع UI عنصر `<globalconsole>` لعرض وحدة التحكم العامة, وأصبح `<console>` يعرض وحدة تحكم السكربت نفسه (كما في Auto.js 4); ولا يعرض أي منهما بادئة الوقت افتراضيًا; `<console global=\"true\">` والصيغة ذات السمة المجردة `<console global>` تكافئان `<globalconsole>` (يقبل XML التخطيط السمات المجردة ويعاملها كـ `\"true\"`); تغطي سمات العنصر دوال `console.setXxx` (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` وغيرها), وتعيين `title` يعرض شريط عنوان مع قائمة \"المزيد\"; مثال جديد \"التخطيط/عنصر وحدة التحكم\"",
         "اشتراكات جسر Node.js تدفع أحداث المستشعرات وWebSocket والواجهة والنوافذ العائمة ومراقب الإدخال عبر callbacks الحالية، مع on/once/off وطوابير محدودة وتوافق drainEvents",
         "خيار idleExitMs لإنهاء عملية Node.js الخاملة وإعادة الاتصال للبرنامج النصي التالي, مع تشخيص idleForMs والإبقاء على العملية مقيمة افتراضيا",
-        "إدخال وحدة التحكم عبر process.stdin / readline ورسائل JSON لكل تشغيل عبر autojs6:host مع توافق postMessage v3 مع المضيفين السابقين"
+        "إدخال وحدة التحكم عبر process.stdin / readline ورسائل JSON لكل تشغيل عبر autojs6:host مع توافق postMessage v3 مع المضيفين السابقين",
+        "تستخدم جلسات التقاط الشاشة في Node.js موافقة Android وخدمة المقدمة الحالية, مع مقابض الصور وحفظ PNG/JPEG/WebP والتنظيف عند الإيقاف أو انتهاء البرنامج النصي"
       ],
       "fix": [
         "لم يكن التشغيل المباشر من مدير الملفات يراعي ترميز UTF-8 أو UTF-16 أو UTF-32 الذي تحدده علامة Unicode BOM, لذلك كانت النصوص البرمجية التي تعمل بصورة طبيعية في المحرر تفشل برسالة `محرف غير صالح`",

@@ -1029,7 +1029,7 @@ public class Images {
 
     public void stopScreenCapturerForegroundService() {
         var applicationContext = AutoJs.getInstance().getApplication().getApplicationContext();
-        applicationContext.stopService(new Intent(applicationContext, ScreenCapturerForegroundService.class));
+        ScreenCaptureRequester.stopForegroundServiceIfUnused(applicationContext);
         releaseScreenCaptureRequester();
     }
 

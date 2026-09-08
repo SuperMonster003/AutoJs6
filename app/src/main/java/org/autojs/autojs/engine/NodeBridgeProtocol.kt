@@ -817,6 +817,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
     private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
+    private val imageLock = Any()
+    private val imageDestroyed = AtomicBoolean(false)
+    private val imageExecutor = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "AutoJs6NodeImage").apply { isDaemon = true }
+    }
+    private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
     private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
@@ -969,6 +975,9 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     override fun destroy(reason: NodeBridgeError) {
+        imageDestroyed.set(true)
+        imageExecutor.shutdownNow()
+        screenCapture.close()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -980,7 +989,7 @@ class AndroidNodeBridgeCapabilityProvider(
         barcodeOperations.clear()
         databaseDestroyed.set(true)
         databaseExecutor.shutdownNow()
-        resourceRegistry.closeAll(destroyReason)
+        synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
         networkClient.dispatcher.cancelAll()
         networkClient.dispatcher.executorService.shutdownNow()
@@ -1845,33 +1854,142 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun UiObject.toBridgeJson(): JSONObject = NodeBridgeAccessibilityCodec.nodeJson(BridgeNode.of(this))
 
     private fun dispatchMediaProjection(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "a MediaProjection capability provider",
-                ),
-            ),
-        )
+        val args = request.argsArray()
+        when (request.method) {
+            "requestScreenCapture" -> screenCapture.request(args.optJSONObject(0) ?: JSONObject(), request.timeoutMs) { result ->
+                result.fold(
+                    onSuccess = { info ->
+                        if (imageDestroyed.get()) {
+                            callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead()))
+                        } else {
+                            val id = info.getString("id")
+                            // One active capturer per execution. Repeated requests reuse its handle.
+                            if (screenCaptureResourceId != id) {
+                                screenCaptureResourceId = id
+                                resourceRegistry.register(NodeBridgeResourceType.SCREEN_CAPTURER, id) {
+                                    screenCapture.stop(id)
+                                }
+                            }
+                            callback(NodeBridgeResponse.success(request.id, info.toString()))
+                        }
+                    },
+                    onFailure = { callback(imageFailure(request, it)) },
+                )
+            }
+            "nextImage" -> imageOperation(request, callback) {
+                val bitmap = screenCapture.capture(args.optString(0).takeIf(String::isNotBlank))
+                registerImage(bitmap, "screen").toJson().toString()
+            }
+            "stop" -> imageOperation(request, callback) {
+                val id = args.optString(0)
+                resourceRegistry.close(id, "media_projection.stop")
+                if (screenCaptureResourceId == id) screenCaptureResourceId = null
+                "null"
+            }
+        }
+    }
+
+    @Volatile private var screenCaptureResourceId: String? = null
+
+    private fun onScreenCaptureStopped(id: String) {
+        resourceRegistry.release(id, "media_projection.stopped")
+        if (screenCaptureResourceId == id) screenCaptureResourceId = null
     }
 
     private fun dispatchImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        when (request.method) {
-            "readImage" -> dispatchImageRead(request, callback)
-            "recycle" -> dispatchImageRecycle(request, callback)
-            else -> callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.capabilityProviderMissing(
-                        module = request.module,
-                        method = request.method,
-                        requirement = "a screenshot/image processing capability provider for ${request.method}",
-                    ),
-                ),
-            )
+        imageOperation(request, callback) {
+            when (request.method) {
+                "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()
+                "saveImage" -> saveImage(request)
+                "readImage" -> {
+                    dispatchImageRead(request, callback)
+                    null
+                }
+                "recycle" -> {
+                    dispatchImageRecycle(request, callback)
+                    null
+                }
+                else -> {
+                    callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.capabilityProviderMissing(
+                        request.module, request.method, "an image processing provider for ${request.method}",
+                    )))
+                    null
+                }
+            }
         }
+    }
+
+    private fun imageOperation(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit, operation: () -> String?) {
+        try {
+            imageExecutor.execute {
+                val response = runCatching {
+                    synchronized(imageLock) {
+                        if (imageDestroyed.get()) throw java.util.concurrent.CancellationException("Image provider is closed.")
+                        operation()?.let { NodeBridgeResponse.success(request.id, it) }
+                    }
+                }.getOrElse { imageFailure(request, it) }
+                response?.let(callback)
+            }
+        } catch (_: java.util.concurrent.RejectedExecutionException) {
+            callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead()))
+        }
+    }
+
+    private fun imageFailure(request: NodeBridgeRequest, error: Throwable): NodeBridgeResponse {
+        val message = error.message ?: "Image operation failed."
+        val failure = when (error) {
+            is SecurityException -> NodeBridgeError.permissionDenied(message, request.module, request.method)
+            is IllegalArgumentException -> NodeBridgeError.invalidRequest(message, request.module, request.method)
+            is java.util.concurrent.TimeoutException -> NodeBridgeError.timeout(request.module, request.method)
+            is java.util.concurrent.CancellationException, is InterruptedException -> NodeBridgeError.processDead(message)
+            is ImageHandleLimitException -> NodeBridgeError.resourceLimit(message, request.module, request.method)
+            else -> NodeBridgeError.providerFailed(message, request.module, request.method)
+        }
+        return NodeBridgeResponse.failure(request.id, failure)
+    }
+
+    private class ImageHandleLimitException(message: String) : RuntimeException(message)
+
+    private fun registerImage(bitmap: Bitmap, source: String): ControlledImageHandle {
+        if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+            bitmap.recycle()
+            bridgeResourceLimitRejections.incrementAndGet()
+            throw ImageHandleLimitException("Image bridge exceeded ${bridgeLimits.maxImageHandles} active handles.")
+        }
+        val id = "image-${UUID.randomUUID()}"
+        val resource = resourceRegistry.register(NodeBridgeResourceType.IMAGE_HANDLE, id, mapOf(
+            "source" to source, "width" to bitmap.width.toString(), "height" to bitmap.height.toString(),
+        )) { if (!bitmap.isRecycled) bitmap.recycle() }
+        return ControlledImageHandle(id, bitmap, resource).also { imageHandles[id] = it }
+    }
+
+    private fun imageArgument(args: JSONArray, index: Int): ControlledImageHandle {
+        val value = args.optJSONObject(index)
+        val id = value?.optNonBlankString("__autojs6ImageHandle") ?: value?.optNonBlankString("id")
+            ?: throw IllegalArgumentException("Image argument $index requires an image handle.")
+        return imageHandles[id]?.takeUnless { it.bitmap.isRecycled }
+            ?: throw IllegalArgumentException("Image argument $index must be an active image handle from this execution.")
+    }
+
+    private fun saveImage(request: NodeBridgeRequest): String {
+        val args = request.argsArray()
+        val image = imageArgument(args, 0)
+        val file = resolveScopedProjectFile(args.optString(1))
+            ?: throw SecurityException("Image output path must stay inside the working directory.")
+        val options = args.optJSONObject(2) ?: JSONObject()
+        val format = when (options.optString("format", "png").lowercase()) {
+            "png" -> Bitmap.CompressFormat.PNG
+            "jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
+            "webp" -> Bitmap.CompressFormat.WEBP
+            else -> throw IllegalArgumentException("Image format must be png, jpg, jpeg or webp.")
+        }
+        val quality = options.optInt("quality", 100)
+        require(quality in 0..100) { "Image quality must be in 0..100." }
+        file.parentFile?.mkdirs()
+        java.io.FileOutputStream(file).use { stream ->
+            check(image.bitmap.compress(format, quality, stream)) { "Image encoding failed." }
+        }
+        return "true"
     }
 
     private fun dispatchOcr(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -2410,26 +2528,7 @@ class AndroidNodeBridgeCapabilityProvider(
                     ),
                 ),
             )
-        val id = "image-${UUID.randomUUID()}"
-        val resource = resourceRegistry.register(
-            type = NodeBridgeResourceType.IMAGE_HANDLE,
-            id = id,
-            metadata = mapOf(
-                "source" to file.name,
-                "width" to bitmap.width.toString(),
-                "height" to bitmap.height.toString(),
-            ),
-        ) {
-            if (!bitmap.isRecycled) {
-                bitmap.recycle()
-            }
-        }
-        val handle = ControlledImageHandle(
-            id = id,
-            bitmap = bitmap,
-            resource = resource,
-        )
-        imageHandles[id] = handle
+        val handle = registerImage(bitmap, file.name)
         callback(NodeBridgeResponse.success(request.id, handle.toJson().toString()))
     }
 

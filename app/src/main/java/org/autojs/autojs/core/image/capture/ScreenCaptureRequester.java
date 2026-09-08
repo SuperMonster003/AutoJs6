@@ -41,6 +41,9 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private Callback mCallback;
     private Mediator mMediator;
     private boolean mWaitingForForegroundService;
+    private static final Object SERVICE_USERS_LOCK = new Object();
+    private static int sServiceUsers;
+    private boolean mServiceUser;
 
     public ScreenCaptureRequester() {
         super();
@@ -112,6 +115,12 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
             return;
         }
         var clazz = ScreenCapturerForegroundService.class;
+        synchronized (SERVICE_USERS_LOCK) {
+            if (!mServiceUser) {
+                mServiceUser = true;
+                ++sServiceUsers;
+            }
+        }
         Context applicationContext = getApplication().getApplicationContext();
         Intent serviceIntent = new Intent(applicationContext, clazz);
         ScreenCapturerForegroundService.clearForegroundStartFailure();
@@ -193,7 +202,6 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
             return;
         }
         if (SystemClock.uptimeMillis() >= deadlineUptimeMillis) {
-            context.stopService(new Intent(context, clazz));
             onRequestError(new TimeoutException("Start screen capture foreground service timeout (" + FOREGROUND_SERVICE_START_TIMEOUT + "ms)"));
             return;
         }
@@ -202,6 +210,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     }
 
     private void onRequestError(@NonNull Throwable t) {
+        unbindService();
         if (mCallback != null) {
             mCallback.onRequestError(t);
             recycle();
@@ -266,7 +275,28 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     }
 
     public void unbindService() {
-        /* Empty body. */
+        synchronized (SERVICE_USERS_LOCK) {
+            if (!mServiceUser) return;
+            mServiceUser = false;
+            --sServiceUsers;
+            stopForegroundServiceIfUnused(getApplication().getApplicationContext());
+        }
+    }
+
+    /** Cancels this request's activity and callbacks, without cancelling other capturers. */
+    public void cancel() {
+        mHandler.post(() -> {
+            recycle();
+            unbindService();
+        });
+    }
+
+    public static void stopForegroundServiceIfUnused(Context context) {
+        synchronized (SERVICE_USERS_LOCK) {
+            if (sServiceUsers == 0) {
+                context.stopService(new Intent(context, ScreenCapturerForegroundService.class));
+            }
+        }
     }
 
 }

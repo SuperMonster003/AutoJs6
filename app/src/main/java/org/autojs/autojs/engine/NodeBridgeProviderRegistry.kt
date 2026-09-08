@@ -253,7 +253,7 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES),
             capabilities = listOf(NodeBridgePermissionManifest.IMAGE, NodeBridgePermissionManifest.SCREEN_CAPTURE),
             packagedSupport = packagedDegraded(
-                "P13-20 partial image-handle provider: readImage/recycle are live for scoped files; capture, save, transforms, matching, and color search remain fail-closed without promoted media/image providers",
+                "Scoped image read/save/recycle are live; packaged capture is not validated and advanced image processing is not implemented",
             ),
         ),
         provider(
@@ -405,7 +405,7 @@ object NodeBridgeProviderRegistry {
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
-        MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
+        MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
@@ -506,32 +506,25 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "P13-25 partial gate exposes battery optimization status/settings evidence while direct power manager control remains blocked",
         )
         MEDIA_PROJECTION_PROVIDER -> linkedMapOf(
-            "reservedMethods" to "requestScreenCapture,nextImage,stop",
-            "blockedMethods" to "requestScreenCapture,nextImage,stop",
-            "optionalSmoke" to "NodeScreenCaptureRealDeviceSmokeInstrumentationTest",
+            "liveMethods" to "requestScreenCapture,nextImage,stop",
+            "blockedMethods" to "",
             "capability" to NodeBridgePermissionManifest.SCREEN_CAPTURE,
-            "phase13Promotion" to "P13-20 partial screenshot/image/OCR promotion evidence gate",
-            "permissionPromptPolicy" to "Activity-owned ScreenCaptureRequester smoke exists; Node bridge provider must not prompt directly until promoted",
-            "foregroundDisclosure" to "ScreenCapturerForegroundService smoke exists; packaged/bridge disclosure ownership is not promoted",
-            "capturerCleanupPolicy" to "optional smoke verifies one-frame capture, bitmap recycle, capturer shutdown, and foreground service stop",
-            "packagedPromotion" to "blocked_until_activity_owned_media_projection_provider_packaged_disclosure_and_denial_evidence",
-            "rawObjectPolicy" to "no raw MediaProjection, ImageReader, ScreenCapturer, Image, Bitmap, or ImageWrapper crosses the bridge",
-            "statusReason" to "P13-20 partial gate keeps media_projection unavailable while documenting optional real-device capture evidence",
+            "permissionPromptPolicy" to "Android ScreenCaptureRequester consent for each execution session",
+            "foregroundDisclosure" to "ScreenCapturerForegroundService starts after consent, shared until all capturers release it",
+            "capturerCleanupPolicy" to "stop, cancellation, system revocation and execution exit release capturer and pending consent",
+            "packagedPromotion" to "not_validated",
+            "rawObjectPolicy" to "only image and capturer handles cross the bridge",
         )
         IMAGE_PROVIDER -> linkedMapOf(
-            "liveMethods" to "readImage,recycle",
+            "liveMethods" to "captureScreen,readImage,saveImage,recycle",
             "fakeMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
-            "blockedMethods" to "captureScreen,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
+            "blockedMethods" to "clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
             "capability" to NodeBridgePermissionManifest.IMAGE,
             "captureCapability" to NodeBridgePermissionManifest.SCREEN_CAPTURE,
             "resourceType" to NodeBridgeResourceType.IMAGE_HANDLE.name,
-            "phase13Promotion" to "P13-20 partial screenshot/image/OCR promotion evidence gate",
-            "capturePromotion" to "blocked_until_promoted_media_projection_provider",
-            "advancedProcessingPromotion" to "blocked_until_owned_image_processing_provider_for_save_transform_match_color",
-            "packagedPromotion" to "blocked_until_packaged_image_assets_capture_permission_and_processing_evidence",
-            "cleanupPolicy" to "provider-owned image handles are ResourceRegistry-owned; recycle and provider destroy must return active handle count to zero",
-            "rawObjectPolicy" to "no raw Bitmap, Mat, ImageWrapper, OpenCV object, native pointer, or filesystem path handle crosses the bridge",
-            "statusReason" to "P13-20 partial gate: scoped readImage/recycle are live for OCR; screenshot and advanced image operations remain fail-closed",
+            "packagedPromotion" to "capture_not_validated",
+            "cleanupPolicy" to "provider-owned image handles are recycled on explicit recycle or execution exit",
+            "rawObjectPolicy" to "no raw Android or OpenCV objects cross the bridge",
         )
         ACCESSIBILITY_PROVIDER -> linkedMapOf(
             "liveMethods" to "isEnabled,ensureEnabled,findByText,clickText,findOne,findAll,click,longClick,setText,scrollForward,scrollBackward,back,home,recentApps,swipe,gesture",
