@@ -12,6 +12,28 @@ class NodeBridgePushInstrumentationTest {
     )
 
     @Test
+    fun explicitFetchModuleUsesTheHostProvider() {
+        NodeFetchBridgeInstrumentationTest.ControlledFetchLoopbackServer().use { server ->
+            val result = NodePluginTestHarness.runPluginScript(
+                """
+                (async () => {
+                  const fetch = require('autojs6:fetch');
+                  const response = await fetch('${server.baseUrl}/get?via=explicit');
+                  const json = await response.json();
+                  if (response.status !== 200 || json.method !== 'GET' || json.query !== 'via=explicit') throw new Error('host fetch mismatch');
+                  console.log('m13.host.fetch=' + (fetch !== globalThis.fetch));
+                })().catch(e => { console.error(e.stack); process.exitCode = 1; });
+                """.trimIndent(),
+                "m13-explicit-host-fetch.cjs",
+                runtimeModuleSources = permissions("network"),
+            )
+            NodePluginTestHarness.assertSucceeded("explicit host fetch", result)
+            assertTrue(result.stdout, result.stdout.contains("m13.host.fetch=true"))
+            assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
+        }
+    }
+
+    @Test
     fun overlayPushKeepsShownUpdateAndDrainEvents() {
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -101,7 +123,7 @@ class NodeBridgePushInstrumentationTest {
                 val result = NodePluginTestHarness.runPluginScript(
                     """
                     (async () => {
-                      const socket = await require('websocket').connect('${server.baseUrl}/socket');
+                      const socket = await require('autojs6:websocket').connect('${server.baseUrl}/socket');
                       let removedCalls = 0;
                       const removed = () => { removedCalls++; };
                       socket.once('message', removed).off('message', removed);
