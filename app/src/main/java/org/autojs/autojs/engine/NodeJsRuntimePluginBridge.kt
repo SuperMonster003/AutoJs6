@@ -319,6 +319,7 @@ object NodeJsRuntimePluginBridge {
             putString(NodeJsRuntimeContract.KEY_WORKING_DIRECTORY, workingDirectory)
             putString(NodeJsRuntimeContract.KEY_SANDBOX_ROOT, sandboxRoot)
             putLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS, timeoutMs)
+            if (idleExitMs > 0L) putLong(NodeJsRuntimeContract.KEY_IDLE_EXIT_MS, idleExitMs)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_MODE, executionMode)
             putStringMap(NodeJsRuntimeContract.KEY_ENV_NAMES, NodeJsRuntimeContract.KEY_ENV_VALUES, env)
             putStringMap(

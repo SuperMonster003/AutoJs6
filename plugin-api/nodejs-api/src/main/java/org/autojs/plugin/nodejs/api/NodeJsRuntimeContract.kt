@@ -38,6 +38,9 @@ object NodeJsRuntimeContract {
     const val KEY_WORKING_DIRECTORY = "workingDirectory"
     const val KEY_SANDBOX_ROOT = "sandboxRoot"
     const val KEY_TIMEOUT_MS = "timeoutMs"
+    /** Exit the dedicated process after this much idle time; absent/nonpositive keeps it resident. */
+    const val KEY_IDLE_EXIT_MS = "idleExitMs"
+    const val KEY_IDLE_FOR_MS = "idleForMs"
     const val KEY_EXECUTION_MODE = "executionMode"
 
     /**

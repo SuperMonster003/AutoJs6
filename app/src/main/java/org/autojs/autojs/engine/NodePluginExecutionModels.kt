@@ -32,6 +32,8 @@ data class NodePluginScriptRequest(
     val spawnDepth: Int = 0,
     val moduleSourceProvider: INodeJsModuleSourceProvider? = null,
     val moduleSourceProviderVersion: Int? = null,
+    /** Optional process idle exit after this request completes; 0 keeps it resident. */
+    val idleExitMs: Long = 0L,
 ) {
     companion object {
         const val DEFAULT_TIMEOUT_MS = 300_000L
