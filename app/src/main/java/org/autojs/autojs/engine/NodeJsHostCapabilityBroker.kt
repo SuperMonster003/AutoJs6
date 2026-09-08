@@ -142,6 +142,10 @@ internal class NodeJsHostCapabilityBroker(
             putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, response.toJson())
             if (response.event) putBoolean("event", true)
             putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, response.ok)
+            response.binary?.let { descriptor ->
+                putParcelable(NodeJsRuntimeContract.KEY_BRIDGE_BINARY_PFD, descriptor)
+                putLong(NodeJsRuntimeContract.KEY_BRIDGE_BINARY_BYTE_COUNT, response.binaryByteCount)
+            }
             response.error?.message?.let { message ->
                 putString(NodeJsRuntimeContract.KEY_BRIDGE_ERROR_MESSAGE, message)
             }
@@ -150,6 +154,8 @@ internal class NodeJsHostCapabilityBroker(
             callback.onResponse(responseBundle)
         } catch (_: RemoteException) {
             // Plugin process may have died; the script result path will surface the runtime failure.
+        } finally {
+            response.binary?.close()
         }
     }
 

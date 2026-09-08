@@ -121,6 +121,8 @@ object NodeJsRuntimeContract {
     const val KEY_BRIDGE_REQUEST_JSON = "bridgeRequestJson"
     const val KEY_BRIDGE_RESPONSE_JSON = "bridgeResponseJson"
     const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
+    const val KEY_BRIDGE_BINARY_PFD = "bridgeBinaryPfd"
+    const val KEY_BRIDGE_BINARY_BYTE_COUNT = "bridgeBinaryByteCount"
     const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
 
     const val KEY_MODULE_SOURCE_PROVIDER = "moduleSourceProvider"

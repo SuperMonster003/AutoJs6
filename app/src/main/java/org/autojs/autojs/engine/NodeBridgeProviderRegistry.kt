@@ -517,7 +517,8 @@ object NodeBridgeProviderRegistry {
             "rawObjectPolicy" to "only image and capturer handles cross the bridge",
         )
         IMAGE_PROVIDER -> linkedMapOf(
-            "liveMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
+            "liveMethods" to "captureScreen,readImage,saveImage,toBytes,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
+            "byteTransport" to "PFD attachment; PNG or straight-alpha sRGB RGBA8; no pixel data in JSON",
             "fakeMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
             "blockedMethods" to "",
             "analysisDependency" to "OpenCV plugin used by the host Images implementation",

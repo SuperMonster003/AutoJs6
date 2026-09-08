@@ -124,6 +124,7 @@ data class NodeBridgeRequest(
     val timeoutMs: Long,
     val permissions: List<String> = emptyList(),
     val events: Boolean = false,
+    val binary: Boolean = false,
 ) {
     fun toJson(): String = JSONObject().apply {
         put("id", id)
@@ -133,6 +134,7 @@ data class NodeBridgeRequest(
         put("timeoutMs", timeoutMs)
         put("permissions", JSONArray(permissions))
         if (events) put("events", true)
+        if (binary) put("binary", true)
     }.toString()
 
     companion object {
@@ -149,6 +151,7 @@ data class NodeBridgeRequest(
                 timeoutMs = parseTimeoutMs(value),
                 permissions = parsePermissions(value),
                 events = value.optBoolean("events", false),
+                binary = value.optBoolean("binary", false),
             )
         }
 
@@ -241,6 +244,8 @@ data class NodeBridgeResponse(
     val error: NodeBridgeError? = null,
     val event: Boolean = false,
     val subscriptionId: String? = null,
+    val binary: android.os.ParcelFileDescriptor? = null,
+    val binaryByteCount: Long = 0,
 ) {
     fun toJson(): String = JSONObject().apply {
         put("id", id)
@@ -677,6 +682,7 @@ object NodeBridgeModules {
     val imageModules = setOf(IMAGE, IMAGES)
     val imageMethods = setOf(
         "captureScreen",
+        "toBytes",
         "readImage",
         "saveImage",
         "clip",
@@ -1902,6 +1908,16 @@ class AndroidNodeBridgeCapabilityProvider(
             when (request.method) {
                 "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()
                 "saveImage" -> saveImage(request)
+                "toBytes" -> {
+                    require(request.binary) { "Image bytes require a client with PFD transport support." }
+                    val args = request.argsArray()
+                    val format = (args.optJSONObject(1) ?: JSONObject()).optString("format", "png")
+                    val bytes = NodeImageByteTransport.encode(appContext, imageArgument(args, 0).bitmap, format)
+                    callback(NodeBridgeResponse(request.id, true,
+                        JSONObject().put("byteCount", bytes.size).put("format", format).toString(),
+                        binary = bytes.descriptor, binaryByteCount = bytes.size))
+                    null
+                }
                 "clip", "resize", "grayscale", "threshold" -> {
                     val args = request.argsArray()
                     val bitmap = imageOperations.transform(request.method, imageArgument(args, 0).bitmap, args.optJSONObject(1) ?: JSONObject())
