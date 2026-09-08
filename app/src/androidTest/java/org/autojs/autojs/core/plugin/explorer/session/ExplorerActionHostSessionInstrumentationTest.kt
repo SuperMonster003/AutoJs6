@@ -40,6 +40,42 @@ import java.util.UUID
 class ExplorerActionHostSessionInstrumentationTest {
 
     @Test
+    fun selectedExtractionDirectoryDoesNotChangeSourceAccessOrAllowSourceTrash() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val root = File(context.cacheDir, "archive-destination-${System.nanoTime()}").apply { mkdirs() }
+        val sourceParent = File(root, "source").apply { mkdirs() }
+        val destination = File(root, "destination").apply { mkdirs() }
+        val source = File(sourceParent, "archive.zip").apply { writeText("source") }
+        val sibling = File(destination, "private.txt").apply { writeText("unrelated") }
+        val session = ExplorerActionHostSession.create(
+            context = context,
+            pluginPackageName = context.packageName,
+            commonParent = sourceParent,
+            targets = listOf(ExplorerActionHostSessionTarget("source", source)),
+            allowCreateOutput = true,
+            selectedOutputDirectory = destination,
+            onOutputCommitted = {},
+        )
+        try {
+            val prepared = session.prepareOutputTree("unpacked", ExplorerActionHostSessionValues.OUTPUT_CONFLICT_AUTO_RENAME)
+            val id = requireNotNull(prepared.getString(ExplorerActionHostSessionKeys.OUTPUT_TRANSACTION_ID))
+            ParcelFileDescriptor.AutoCloseOutputStream(session.openOutputFile(id, "readme.txt")).use { it.write("content".toByteArray()) }
+            session.commitOutput(id)
+            assertEquals("content", File(destination, "unpacked/readme.txt").readText())
+            assertFalse(File(sourceParent, "unpacked").exists())
+            assertEquals("source", source.readText())
+            assertEquals("unrelated", sibling.readText())
+            assertTrue(runCatching { session.openFile("source", "../destination/private.txt") }.isFailure)
+            assertTrue(runCatching { session.prepareOutput("file.zip", "application/zip", 0) }.isFailure)
+            assertTrue(runCatching { session.moveTargetsToTrash(arrayListOf("source"), arrayListOf(id)) }.isFailure)
+            assertTrue(runCatching { session.listTargetTrashBatches() }.isFailure)
+        } finally {
+            session.close()
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun clientBinderDeathRollsBackAnUncommittedOutputTree() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val testRoot = File(context.cacheDir, "explorer-action-v9-death-${System.nanoTime()}")

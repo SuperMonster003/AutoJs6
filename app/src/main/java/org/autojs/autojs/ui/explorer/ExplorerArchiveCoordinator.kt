@@ -69,7 +69,7 @@ internal interface ExplorerArchiveCoordinatorHost {
     fun cancelExplorerRefresh()
     fun applyArchiveReindex(result: ExplorerArchiveReindexResult)
     fun refreshArchivePage()
-    fun openMaterializedArchiveEntry(file: File, displayName: String, action: ExplorerPrimaryAction)
+    fun openMaterializedArchiveEntry(file: File, displayName: String, action: ExplorerPrimaryAction?)
     fun onArchiveWorkflowStateChanged()
 }
 
@@ -129,7 +129,7 @@ internal class ExplorerArchiveCoordinator(
         item: ArchiveExplorerFileItem,
         action: ExplorerPrimaryAction?,
     ) {
-        if (action == null || !item.canOpenEntry) {
+        if (!item.canOpenEntry) {
             ViewUtils.showToast(host.archiveContext, R.string.text_unavailable)
             return
         }
@@ -140,6 +140,7 @@ internal class ExplorerArchiveCoordinator(
             ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
             -> MAX_ARCHIVE_IMAGE_PREVIEW_BYTES
             ExplorerPrimaryAction.MEDIA_PLAY -> MAX_ARCHIVE_MEDIA_PREVIEW_BYTES
+            null -> MAX_ARCHIVE_MEDIA_PREVIEW_BYTES
         }
         if (item.size > maxBytes) {
             ViewUtils.showToast(
@@ -245,12 +246,28 @@ internal class ExplorerArchiveCoordinator(
     fun startExtraction(
         provider: ArchiveExplorerProvider,
         items: List<ArchiveExplorerItem>,
+        onDestinationSelected: () -> Unit = {},
     ) {
         if (extractionUiState != null || items.isEmpty() || host.archiveLifecycleOwner == null) return
-        val uiState = ArchiveExtractionUiState(provider, items.toList())
-        extractionUiState = uiState
-        stateChanged()
-        startExtractionAttempt(uiState)
+        val selectedItems = items.toList()
+        FileChooserDialogBuilder(host.archiveContext)
+            .title(R.string.text_archive_extraction_destination)
+            .dir("/", provider.sourceDirectory.path)
+            .chooseDir()
+            .singleChoice { directory ->
+                if (!host.isArchiveProviderActive(provider) || extractionUiState != null) return@singleChoice
+                val destination = runCatching { directory.canonicalFile }.getOrNull()
+                if (destination == null || !destination.isDirectory || !destination.canWrite()) {
+                    ViewUtils.showToast(host.archiveContext, R.string.text_unavailable)
+                    return@singleChoice
+                }
+                val uiState = ArchiveExtractionUiState(provider, selectedItems, destination)
+                onDestinationSelected()
+                extractionUiState = uiState
+                stateChanged()
+                startExtractionAttempt(uiState)
+            }
+            .show()
     }
 
     fun confirmDeletion(
@@ -1200,6 +1217,7 @@ internal class ExplorerArchiveCoordinator(
     private class ArchiveExtractionUiState(
         val provider: ArchiveExplorerProvider,
         val items: List<ArchiveExplorerItem>,
+        val destinationDirectory: File,
     ) : AutoCloseable {
         var attempt: ArchiveExtractionAttempt? = null
         var interactionDialog: MaterialDialog? = null
@@ -1221,6 +1239,7 @@ internal class ExplorerArchiveCoordinator(
                     password = password,
                     skipUnsafePaths = skipUnsafePaths,
                     allowResourceBudgetOverride = allowResourceBudgetOverride,
+                    destinationDirectory = destinationDirectory,
                 )
             } finally {
                 password?.fill('\u0000')

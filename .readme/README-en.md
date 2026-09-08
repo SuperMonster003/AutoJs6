@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 8, 2026.
+Data updated on Sept 8, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -173,6 +173,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` MCP Server plugin contract module (plugin-api/mcp-server-api) with a frozen AIDL surface, a strict host client that binds the official plugin on a dedicated lease and rebinds up to three times after the plugin process dies, a grant-restricted host capability broker that routes plugin requests through the Node bridge provider, and Plugin Center registration as a default-off plugin
 * `Feature` Manager for the "Accessibility service" drawer entry (a dialog, opened with the "Manager" button of the description dialog or by long-pressing the entry): the status section shows service status, system settings, in-process instance, uptime, event count and last event, windows and active window root, latest package and activity, service configuration, root and secure settings availability and listener counts, each row copyable; the control section offers start, stop, restart, clear node cache, self-check (counts window roots and nodes, then waits for an event) and an event monitor (live list of the latest accessibility events with their intervals; pause, clear, window state changes only and copy); the settings section holds the root and secure settings auto-enable switches; the full diagnostics text can be copied at once; the status and control headers carry buttons to refresh and to step the verbosity down or up (status: 4 levels, basic fields by default, the title shows the service status such as "State [Operational]" when all rows are hidden; control: 3 levels, the start / stop / restart rows by default, those three buttons move into the header when all rows are hidden) and the chosen levels are remembered; row heights are fixed per field so that values changing length no longer make the dialog jump
 * `Feature` Added explicit versioned `snapshot`/`capabilities` APIs and v1/v2 schema constants to `mediainfo`; Rhino keeps legacy `read` results, Node.js keeps the host v1 default, and plugin v2 plus short engine metadata are exposed only after explicit plugin capability advertisement
+* `Feature` Clicking an archive file extracts it into private temporary storage for execution or opening while preserving runtime filename suffixes; APK/APKS/XAPK/APKM/APKZ/AAB support archive viewing and extraction from file menus and the information dialog menu without replacing existing row buttons
 * `Feature` Explorer Action host file information capability v1 lets trusted read-only plugins append a bounded, SHA-256-bound localized summary to the existing APK information dialog; missing, disabled, incompatible, or failing plugins leave its original fields, installation and manifest actions, and failure handling unchanged
 * `Feature` `pinyin` adds per-call `customDictionary` reading overrides, completes `compare` and `compact`, and exposes the same external-plugin provider to Node.js through `autojs6:bridge.callAutoJs` with an explicit `pinyin` capability
 * `Feature` `pinyin4j` adds a capability-negotiated `readings` matrix for all readings in Hanyu, Tongyong, Wade-Giles, MPS2, Yale, and Gwoyeu Romatzyh; old plugins safely fall back only for Hanyu, while the same external-plugin provider is exposed to Node.js through `autojs6:bridge.callAutoJs` with an explicit `pinyin4j` capability
@@ -495,6 +496,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Consolidated file manager media detail queries into a single MediaInfo snapshot to reduce Binder calls and wait time
 * `Improvement` Limited external file viewing and media playback fallbacks to read-only URI access
 * `Improvement` Unified file manager plugin actions for default clicks, primary buttons, media detail playback, and the overflow menu under an explicit main-file-page policy with one deterministic fallback
+* `Improvement` Archive rows use view and information icons, archive browsing removes right-side path-bar actions, selected-entry extraction offers a destination picker, and plugin context menus omit plugin-name prefixes
 * `Improvement` Explorer Action v7 lets archive plugins reopen hidden pending output read-only and verify it before final publication while preserving direct-commit compatibility for v4 clients
 * `Improvement` Explorer Action v12 verifies caller UID, regular-file identity, size, modification time, symlink status, and session lifetime before each sibling-volume open, with fixed limits on names, catalog size, and open requests
 * `Improvement` Native archive selection now shows only Exit and Extract, integrates bounded progress and cancellation, and keeps the five-action filesystem bar legible on narrow screens by centering labels below icons
@@ -782,7 +784,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -833,7 +835,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 8, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 8, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

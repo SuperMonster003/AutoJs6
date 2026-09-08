@@ -1,12 +1,15 @@
 package org.autojs.autojs.core.plugin.explorer.archive
 
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
+import java.io.File
 
 /** Owns transient recovery values until one Binder extraction request has been sent. */
 internal class ExplorerArchiveExtractionRequestOptions(
     password: CharArray? = null,
     val skipUnsafePaths: Boolean = false,
     val allowResourceBudgetOverride: Boolean = false,
+    // Host-only destination; never serialized into a plugin request.
+    val destinationDirectory: File? = null,
 ) : AutoCloseable {
 
     private var passwordValue = password?.takeIf(CharArray::isNotEmpty)?.clone()

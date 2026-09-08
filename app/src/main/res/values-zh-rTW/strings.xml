@@ -863,6 +863,7 @@
     <string name="text_applying_binary_resources">正在應用二進位制資源</string>
     <string name="text_archive_extraction_cancelled">檔案解壓縮已取消</string>
     <string name="text_archive_extraction_completed">已解壓縮到 %1$s</string>
+    <string name="text_archive_extraction_destination">解壓位置</string>
     <string name="text_archive_extraction_progress">正在解壓縮 %1$d / %2$d</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">正在封存專案檔案</string>

@@ -16,6 +16,21 @@ class ArchiveEntryMaterializerTest {
     val temporaryFolder = TemporaryFolder()
 
     @Test
+    fun preservesRuntimeSuffixesAndRetainsOpenedScriptsAfterArchiveNavigationCloses() {
+        val bytes = "console.log('archive');".toByteArray()
+        val materializer = ArchiveEntryMaterializer(temporaryFolder.root, "scripts")
+        val files = listOf("demo.js", "demo.node.js", "demo.bun.ts", "demo.py").map { name ->
+            materializer.materialize(name, name, bytes.size.toLong(), 1024, ByteArrayInputStream(bytes)).also {
+                assertTrue(it.name == name)
+                assertArrayEquals(bytes, it.readBytes())
+            }
+        }
+        materializer.retainForOpening()
+        materializer.close()
+        files.forEach { assertTrue(it.isFile) }
+    }
+
+    @Test
     fun materializesExactBytesUnderTheSessionCacheAndCleansThemOnClose() {
         val bytes = "preview".toByteArray()
         val materializer = ArchiveEntryMaterializer(temporaryFolder.root, "session/../opaque")

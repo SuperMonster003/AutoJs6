@@ -867,6 +867,7 @@
     <string name="text_applying_binary_resources">バイナリ資源を適用中</string>
     <string name="text_archive_extraction_cancelled">アーカイブの展開をキャンセルしました</string>
     <string name="text_archive_extraction_completed">%1$s に展開しました</string>
+    <string name="text_archive_extraction_destination">展開先</string>
     <string name="text_archive_extraction_progress">%2$d 件中 %1$d 件を展開中</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">プロジェクトファイルをアーカイブしています</string>

@@ -868,6 +868,7 @@
     <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
     <string name="text_archive_extraction_cancelled">압축 풀기가 취소되었습니다</string>
     <string name="text_archive_extraction_completed">%1$s에 압축을 풀었습니다</string>
+    <string name="text_archive_extraction_destination">압축 해제 위치</string>
     <string name="text_archive_extraction_progress">%2$d개 중 %1$d개 압축 푸는 중</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">프로젝트 파일 보관 중</string>

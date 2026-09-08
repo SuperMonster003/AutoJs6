@@ -322,6 +322,7 @@ internal class ExplorerArchiveSessionConnection private constructor(
             commonParent = parent,
             targets = listOf(ExplorerActionHostSessionTarget(SOURCE_TARGET_ID, source)),
             allowCreateOutput = true,
+            selectedOutputDirectory = options.destinationDirectory,
         )
         val operationId = UUID.randomUUID().toString()
         val active = ActiveExtraction(outputSession, listener)

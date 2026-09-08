@@ -46,6 +46,7 @@ internal class ExplorerActionHostSession private constructor(
     private val applicationContext: Context,
     private val expectedUid: Int,
     commonParent: File,
+    private val selectedOutputDirectory: File?,
     targets: List<ExplorerActionHostSessionTarget>,
     private val allowCreateOutput: Boolean,
     private val allowReplaceTarget: Boolean,
@@ -76,8 +77,7 @@ internal class ExplorerActionHostSession private constructor(
         playbackHistoryStore = playbackHistoryStore,
         requireSessionOpen = { synchronized(lock) { checkOpen() } },
     )
-    private val parent: File
-        get() = inputAccess.parent
+    private val parent: File = selectedOutputDirectory ?: inputAccess.parent
     private val targetsById: Map<String, ExplorerActionHostTargetState>
         get() = inputAccess.targetsById
     private val outputs = LinkedHashMap<String, OutputTransaction>()
@@ -166,6 +166,7 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun prepareOutput(displayName: String, mimeType: String, conflictPolicy: Int): Bundle {
         enforceCaller()
+        check(selectedOutputDirectory == null) { "Extraction sessions only support directory outputs" }
         check(allowCreateOutput) { "Explorer Action does not have create-in-parent access" }
         val normalizedName = normalizeOutputName(displayName)
         val normalizedMimeType = ExplorerActionCatalogPolicy.normalizeMimeType(mimeType)
@@ -611,6 +612,7 @@ internal class ExplorerActionHostSession private constructor(
         outputTransactionIds: MutableList<String>,
     ): Bundle {
         enforceCaller()
+        check(selectedOutputDirectory == null) { "Extraction sessions cannot trash source targets" }
         val requestedTargetIds = targetIds.toList()
         val requestedOutputIds = outputTransactionIds.toList()
         val repository = TrashRepository(applicationContext)
@@ -771,6 +773,7 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun queryTargetTrashBatch(targetTrashBatchId: String): Bundle {
         enforceCaller()
+        check(selectedOutputDirectory == null) { "Extraction sessions cannot access source Trash history" }
         require(isCanonicalUuid(targetTrashBatchId)) {
             "Explorer Action target Trash batch ID is invalid"
         }
@@ -792,6 +795,7 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun listTargetTrashBatches(): Bundle {
         enforceCaller()
+        check(selectedOutputDirectory == null) { "Extraction sessions cannot access source Trash history" }
         check(allowCreateOutput) {
             "Explorer Action does not have target Trash history access"
         }
@@ -815,6 +819,7 @@ internal class ExplorerActionHostSession private constructor(
 
     override fun undoTargetTrashBatch(targetTrashBatchId: String): Bundle {
         enforceCaller()
+        check(selectedOutputDirectory == null) { "Extraction sessions cannot restore source targets" }
         require(isCanonicalUuid(targetTrashBatchId)) {
             "Explorer Action target Trash batch ID is invalid"
         }
@@ -1805,6 +1810,7 @@ internal class ExplorerActionHostSession private constructor(
             commonParent: File,
             targets: List<ExplorerActionHostSessionTarget>,
             allowCreateOutput: Boolean,
+            selectedOutputDirectory: File? = null,
             allowReplaceTarget: Boolean = false,
             allowReplacementUndo: Boolean = false,
             allowReadSiblings: Boolean = false,
@@ -1825,6 +1831,12 @@ internal class ExplorerActionHostSession private constructor(
                 "Explorer Action replacement history requires one replaceable target"
             }
             val canonicalParent = commonParent.canonicalFile
+            val outputDirectory = selectedOutputDirectory?.canonicalFile
+            require(outputDirectory == null || (
+                allowCreateOutput && !allowReplaceTarget && !allowReadSiblings &&
+                    !allowPlaybackProgress && relatedFileSuffixes.isEmpty() &&
+                    outputDirectory.isDirectory && outputDirectory.canWrite()
+                )) { "Selected extraction destination is unavailable or incompatible with this session" }
             val applicationContext = context.applicationContext
             val store = ExplorerActionOutputTreeStore(applicationContext)
             ExplorerActionOutputRecovery.recoverOutputTrees(store, clock())
@@ -1848,6 +1860,7 @@ internal class ExplorerActionHostSession private constructor(
                 applicationContext = applicationContext,
                 expectedUid = pluginUid,
                 commonParent = canonicalParent,
+                selectedOutputDirectory = outputDirectory,
                 targets = targets,
                 allowCreateOutput = allowCreateOutput,
                 allowReplaceTarget = allowReplaceTarget,

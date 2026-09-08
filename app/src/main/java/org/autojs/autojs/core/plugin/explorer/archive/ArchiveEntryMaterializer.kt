@@ -22,6 +22,7 @@ internal class ArchiveEntryMaterializer(
 
     private val rootDirectory = File(cacheDirectory, CACHE_ROOT_NAME)
     private val sessionDirectory = File(rootDirectory, sha256(sessionId))
+    private var retainedForOpening = false
 
     init {
         require(cacheDirectory.isDirectory || cacheDirectory.mkdirs()) {
@@ -92,8 +93,14 @@ internal class ArchiveEntryMaterializer(
     }
 
     override fun close() {
+        // Viewers and script engines may read asynchronously after Explorer closes the archive.
+        if (retainedForOpening) return
         deleteContainedTree(sessionDirectory)
         if (rootDirectory.listFiles().isNullOrEmpty()) rootDirectory.delete()
+    }
+
+    fun retainForOpening() {
+        retainedForOpening = true
     }
 
     private fun ensureAvailableSpace(expectedSize: Long) {
@@ -129,6 +136,12 @@ internal class ArchiveEntryMaterializer(
     private fun cacheFileName(displayName: String): String {
         val leafStart = maxOf(displayName.lastIndexOf('/'), displayName.lastIndexOf('\\')) + 1
         val leaf = displayName.substring(leafStart)
+        if (leaf == displayName && leaf.length in 1..180 && leaf != "." && leaf != ".." &&
+            leaf.none { it.code < 0x20 || it.code == 0x7f || it in "\\/:*?\"<>|" ||
+                it in '\u202a'..'\u202e' || it in '\u2066'..'\u2069' }
+        ) {
+            return leaf
+        }
         val extensionStart = leaf.lastIndexOf('.')
         val extension = leaf
             .takeIf { extensionStart in 1 until it.lastIndex }

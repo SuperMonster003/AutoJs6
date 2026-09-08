@@ -25,7 +25,11 @@ internal object ExplorerActionPolicy {
         entryPoint: ExplorerActionEntryPoint,
         descriptor: ExplorerActionDescriptor,
     ): Boolean {
-        return allowsThirdPartyActions(surface) && descriptor.placement == entryPoint.placement
+        val archiveMenu = entryPoint == ExplorerActionEntryPoint.OVERFLOW_MENU &&
+            descriptor.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER &&
+            descriptor.placement == ExplorerActionValues.PLACEMENT_PRIMARY
+        return allowsThirdPartyActions(surface) &&
+            (descriptor.placement == entryPoint.placement || archiveMenu)
     }
 
     fun sourceSurfaceValue(surface: ExplorerSurface): String? = when (surface) {

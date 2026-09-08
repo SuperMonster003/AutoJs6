@@ -40,7 +40,11 @@ internal class ExplorerPluginActionController(
         return if (requiresOfficialVideoPlayer(item)) {
             actions.firstOrNull(ExplorerVideoPlayerPluginUi::isOfficialAction)
         } else {
-            actions.firstOrNull()
+            // Package files keep their Inspector/install actions at implicit entry points.
+            actions.firstOrNull { action ->
+                !item.isInstallable ||
+                    action.descriptor.presentation != ExplorerActionValues.PRESENTATION_HOST_EXPLORER
+            }
         }
     }
 

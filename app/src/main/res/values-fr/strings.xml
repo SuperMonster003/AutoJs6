@@ -866,6 +866,7 @@
     <string name="text_applying_binary_resources">Application des ressources binaires</string>
     <string name="text_archive_extraction_cancelled">Extraction de l\'archive annulée</string>
     <string name="text_archive_extraction_completed">Extrait vers %1$s</string>
+    <string name="text_archive_extraction_destination">Destination de l’extraction</string>
     <string name="text_archive_extraction_progress">Extraction de %1$d sur %2$d</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">Archivage des fichiers du projet</string>

@@ -85,7 +85,6 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
 
                 runCatching {
                     val catalog = ExplorerActionPluginHost.getActionCatalog(appContext, candidate)
-                    val pluginTitle = resolvePluginTitle(appContext, packageName, pluginInfo)
                     ExplorerActionCatalogParser.parse(
                         packageName,
                         catalog,
@@ -98,7 +97,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
                         ) ?: return@actionLoop
                         val label = resolveActionLabel(appContext, packageName, descriptor) ?: return@actionLoop
                         val menuTitle = ExplorerActionCatalogPolicy.sanitizeDisplayText(
-                            "$pluginTitle: $label",
+                            label,
                             ExplorerActionProtocol.MAX_LABEL_LENGTH,
                         ) ?: return@actionLoop
                         val key = "$packageName:${descriptor.id}"

@@ -10,6 +10,17 @@ import org.junit.Test
 class ExplorerActionPolicyTest {
 
     @Test
+    fun archivePrimaryActionsAlsoAppearInExplicitFileMenus() {
+        val archive = descriptor(2, ExplorerActionValues.PLACEMENT_PRIMARY).copy(
+            protocolVersion = 5,
+            presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+        )
+        assertTrue(ExplorerActionPolicy.allows(ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.OVERFLOW_MENU, archive))
+        assertTrue(ExplorerActionPolicy.allows(ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.PRIMARY_BUTTON, archive))
+        assertFalse(ExplorerActionPolicy.allows(ExplorerSurface.UNSPECIFIED, ExplorerActionEntryPoint.OVERFLOW_MENU, archive))
+    }
+
+    @Test
     fun mainFilesMapsEntryPointsToTheirDeclaredPlacement() {
         val primary = descriptor(
             protocolVersion = 2,

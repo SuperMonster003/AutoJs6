@@ -67,21 +67,41 @@ object ApkInfoDialogManager {
     }
 
     @SuppressLint("SetTextI18n")
+    internal fun showApkInfoDialogWithActions(
+        context: Context,
+        packageFile: File,
+        archiveActions: Map<String, () -> Unit>,
+        onDismissListener: DialogInterface.OnDismissListener?,
+    ) = showPackageInfoDialog(
+        context, packageFile, null, onDismissListener,
+        installAction = { file, sha256 -> PackageInstallerActivity.install(context, file, sha256) },
+        archiveActions = archiveActions,
+    )
+
+    @SuppressLint("SetTextI18n")
     internal fun showPackageInfoDialog(
         context: Context,
         packageFile: File,
         builderApplier: (MaterialDialog.Builder.() -> Unit)?,
         onDismissListener: DialogInterface.OnDismissListener?,
         installAction: (File, String?) -> Unit,
+        archiveActions: Map<String, () -> Unit> = emptyMap(),
     ) {
         val binding = ApkFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         var requestedPermissions: List<String>? = null
         var manifestAvailable = false
         var expectedSourceSha256: String? = null
+        var activeDialog: MaterialDialog? = null
 
         val dialog = MaterialDialog.Builder(context)
             .title(packageFile.name)
+            .options(archiveActions.map { (label, action) ->
+                MaterialDialog.OptionMenuItemSpec(label) {
+                    activeDialog?.dismiss()
+                    action()
+                }
+            })
             .customView(binding.root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.ic_three_dots_outline_small)
@@ -112,6 +132,8 @@ object ApkInfoDialogManager {
                 }
             }
             .showAdaptive()
+
+        activeDialog = dialog
 
         restoreEssentialViews(binding, context)
         dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, Build.VERSION.SDK_INT.toString())

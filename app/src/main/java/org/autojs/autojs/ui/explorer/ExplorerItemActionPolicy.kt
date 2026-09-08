@@ -4,6 +4,7 @@ import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.plugin.explorer.api.ExplorerActionValues
 
 /** Immutable presentation state for the action strip of one Explorer file row. */
 internal data class ExplorerItemActionState(
@@ -35,7 +36,10 @@ internal object ExplorerItemActionPolicy {
             is ArchiveExplorerItem -> null
             else -> ExplorerPrimaryActionResolver.resolve(item.type)
         }
-        val effectivePluginAction = pluginPrimaryAction.takeUnless { item is ArchiveExplorerItem }
+        val effectivePluginAction = pluginPrimaryAction.takeUnless {
+            item is ArchiveExplorerItem || (item.isInstallable &&
+                it?.descriptor?.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER)
+        }
         val hasPrimaryAction = primaryAction != null || effectivePluginAction != null
         val editVisible = item.isTextEditable || (item.isExternalEditable && !item.type.isImageFile())
         val runAsMedia = !item.isExecutable && item.isMediaPlayable && primaryAction == null
@@ -47,7 +51,8 @@ internal object ExplorerItemActionPolicy {
             runVisible,
             installVisible,
         ).count { it } >= 2
-        val infoVisible = item.type.isImageFile() ||
+        val infoVisible = effectivePluginAction?.descriptor?.presentation ==
+            ExplorerActionValues.PRESENTATION_HOST_EXPLORER || item.type.isImageFile() ||
             (!alreadyHasTwoImportantIcons && (item.isInstallable || item.isMediaMenu || item.isMediaPlayable))
 
         return ExplorerItemActionState(

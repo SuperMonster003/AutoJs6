@@ -862,6 +862,7 @@
     <string name="text_applying_binary_resources">正在应用二进制资源</string>
     <string name="text_archive_extraction_cancelled">档案解压已取消</string>
     <string name="text_archive_extraction_completed">已解压到 %1$s</string>
+    <string name="text_archive_extraction_destination">解压位置</string>
     <string name="text_archive_extraction_progress">正在解压 %1$d / %2$d</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">正在归档项目文件</string>

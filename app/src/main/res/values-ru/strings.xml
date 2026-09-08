@@ -866,6 +866,7 @@
     <string name="text_applying_binary_resources">Применение бинарных ресурсов</string>
     <string name="text_archive_extraction_cancelled">Извлечение архива отменено</string>
     <string name="text_archive_extraction_completed">Извлечено в %1$s</string>
+    <string name="text_archive_extraction_destination">Папка распаковки</string>
     <string name="text_archive_extraction_progress">Извлечение %1$d из %2$d</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">Архивация файлов проекта</string>

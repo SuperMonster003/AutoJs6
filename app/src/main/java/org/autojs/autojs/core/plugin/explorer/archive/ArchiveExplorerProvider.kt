@@ -155,6 +155,9 @@ internal class ArchiveExplorerProvider(
     private val cacheDirectory: File,
 ) : ExplorerProvider {
 
+    val sourceDirectory: File
+        get() = requireNotNull(File(connection.sourcePath).canonicalFile.parentFile)
+
     val canExtractEntries: Boolean
         get() = connection.info.canExtractEntries
 
@@ -439,7 +442,7 @@ internal class ArchiveExplorerProvider(
                 expectedSize = item.size,
                 maxBytes = maxBytes,
                 input = stream,
-            )
+            ).also { entryMaterializer.retainForOpening() }
         }
     }
 

@@ -413,7 +413,13 @@ internal class ExplorerItemViewHolder(
     }
 
     private fun bindPrimaryPluginAction(action: ResolvedExplorerAction) {
-        mPrimaryViewer.setImageResource(R.drawable.ic_explorer_plugin_action)
+        mPrimaryViewer.setImageResource(
+            if (action.descriptor.presentation == org.autojs.plugin.explorer.api.ExplorerActionValues.PRESENTATION_HOST_EXPLORER) {
+                R.drawable.ic_eye
+            } else {
+                R.drawable.ic_explorer_plugin_action
+            },
+        )
         mPrimaryViewer.contentDescription = action.menuTitle
     }
 
@@ -535,6 +541,16 @@ internal class ExplorerItemViewHolder(
         host.hideHostDialog()
 
         when {
+            mPrimaryPluginAction?.descriptor?.presentation ==
+                org.autojs.plugin.explorer.api.ExplorerActionValues.PRESENTATION_HOST_EXPLORER -> {
+                val action = host.pluginActionProvider?.actionsFor(
+                    host.pluginActionSurface,
+                    ExplorerActionEntryPoint.OVERFLOW_MENU,
+                    mExplorerItem,
+                )?.firstOrNull { it.descriptor.id == "manage-archive" } ?: return
+                host.launchPluginAction(ExplorerActionEntryPoint.OVERFLOW_MENU, action, mExplorerItem)
+                host.notifyItemOperated(mExplorerItem)
+            }
             mExplorerItem.type.isImageFile() -> {
                 ImageInfoDialogManager.showImageInfoDialog(host.context, File(mExplorerItem.path)) {
                     host.showHostDialog()
@@ -542,7 +558,21 @@ internal class ExplorerItemViewHolder(
                 host.notifyItemOperated(mExplorerItem)
             }
             mExplorerItem.isInstallable -> {
-                ApkInfoDialogManager.showApkInfoDialog(host.context, mExplorerItem.toScriptFile(), null) {
+                val packageItem = mExplorerItem
+                val archiveActions = host.pluginActionProvider?.actionsFor(
+                    host.pluginActionSurface,
+                    ExplorerActionEntryPoint.OVERFLOW_MENU,
+                    packageItem,
+                ).orEmpty().filter {
+                    it.descriptor.presentation == org.autojs.plugin.explorer.api.ExplorerActionValues.PRESENTATION_HOST_EXPLORER ||
+                        it.descriptor.id == "extract-to"
+                }.associate { action ->
+                    action.menuTitle to {
+                        host.launchPluginAction(ExplorerActionEntryPoint.OVERFLOW_MENU, action, packageItem)
+                        Unit
+                    }
+                }
+                ApkInfoDialogManager.showApkInfoDialogWithActions(host.context, packageItem.toScriptFile(), archiveActions) {
                     // Restore host dialog after the info dialog is dismissed.
                     // zh-CN: 信息对话框关闭后恢复宿主对话框.
                     host.showHostDialog()

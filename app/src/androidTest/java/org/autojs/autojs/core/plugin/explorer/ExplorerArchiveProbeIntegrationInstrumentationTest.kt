@@ -38,6 +38,82 @@ class ExplorerArchiveProbeIntegrationInstrumentationTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
+    fun androidPackagesExposeArchiveMenusWithoutClaimingTheirRowButtons() = runBlocking {
+        assumeTrue("Archive Manager is not installed", pluginIsInstalled())
+        assertTrue(PluginTrustManager.isAuthorized(context, PLUGIN_PACKAGE))
+        val root = File(context.cacheDir, "archive-packages-${UUID.randomUUID()}").apply { mkdirs() }
+        try {
+            ExplorerActionRegistry.refresh(context)
+            listOf("apk", "apks", "xapk", "apkm", "apkz", "aab").forEach { extension ->
+                val source = createZip(File(root, "sample.$extension"))
+                assertFalse(ACTION_OPEN_ARCHIVE in actionIds(source, ExplorerActionEntryPoint.PRIMARY_BUTTON))
+                val item = ExplorerFileItem(source, null)
+                val actions = ExplorerActionRegistry.actionsFor(
+                    ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.OVERFLOW_MENU, listOf(item),
+                ).filter { it.packageName == PLUGIN_PACKAGE }
+                assertTrue(actions.any { it.descriptor.id == "extract-to" })
+                val action = actions.single { it.descriptor.id == ACTION_OPEN_AS_ARCHIVE }
+                val connection = ExplorerArchiveOpenRequestOptions().use { options ->
+                    ExplorerActionRegistry.openArchive(context, ExplorerSurface.MAIN_FILES,
+                        ExplorerActionEntryPoint.OVERFLOW_MENU, item, action, options)
+                }
+                val provider = ArchiveExplorerProvider(connection, File(root, "cache-$extension"))
+                try {
+                    assertEquals("zip", connection.info.formatId)
+                    assertEquals(listOf(ENTRY_NAME), provider.getExplorerPage(provider.rootPage).blockingGet().map { it.name })
+                    assertFalse(provider.canDeleteEntries)
+                    assertFalse(provider.canAddEntries)
+                } finally {
+                    provider.close()
+                }
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun aSingleMaterializedScriptRunsAfterTheArchiveIsClosed() = runBlocking {
+        assumeTrue("Archive Manager is not installed", pluginIsInstalled())
+        assertTrue(PluginTrustManager.isAuthorized(context, PLUGIN_PACKAGE))
+        val root = File(context.cacheDir, "archive-run-${UUID.randomUUID()}").apply { mkdirs() }
+        val marker = File(root, "executed.txt")
+        val archive = File(root, "scripts.zip")
+        ZipOutputStream(archive.outputStream()).use { zip ->
+            zip.putNextEntry(ZipEntry("hello.js"))
+            zip.write("files.write(${org.json.JSONObject.quote(marker.path)}, 'executed');".toByteArray())
+            zip.closeEntry()
+        }
+        try {
+            ExplorerActionRegistry.refresh(context)
+            val item = ExplorerFileItem(archive, null)
+            val action = ExplorerActionRegistry.actionsFor(
+                ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.PRIMARY_BUTTON, listOf(item),
+            ).single { it.packageName == PLUGIN_PACKAGE && it.descriptor.id == ACTION_OPEN_ARCHIVE }
+            val connection = ExplorerArchiveOpenRequestOptions().use { options ->
+                ExplorerActionRegistry.openArchive(context, ExplorerSurface.MAIN_FILES,
+                    ExplorerActionEntryPoint.PRIMARY_BUTTON, item, action, options)
+            }
+            val provider = ArchiveExplorerProvider(connection, File(root, "entries"))
+            val materialized = try {
+                val entry = provider.getExplorerPage(provider.rootPage).blockingGet().filterIsInstance<ArchiveExplorerFileItem>().single()
+                provider.materializeEntry(entry, 1024)
+            } finally {
+                provider.close()
+            }
+            assertEquals("hello.js", materialized.name)
+            assertTrue(materialized.isFile)
+            org.autojs.autojs.model.script.Scripts.runInteractive(context, org.autojs.autojs.model.script.ScriptFile(materialized.path))
+            val deadline = android.os.SystemClock.elapsedRealtime() + 10_000
+            while (!marker.exists() && android.os.SystemClock.elapsedRealtime() < deadline) android.os.SystemClock.sleep(50)
+            assertTrue("The extracted script did not execute", marker.isFile)
+            assertEquals("executed", marker.readText())
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun installedArchiveManagerRoutesUnmatchedNamesThroughOneReadOnlySession() = runBlocking {
         assumeTrue("Archive Manager is not installed", pluginIsInstalled())
         assumeTrue(

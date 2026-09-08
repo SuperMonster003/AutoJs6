@@ -39,6 +39,7 @@ import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.script.ScriptFile
+import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
@@ -211,7 +212,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 override fun openMaterializedArchiveEntry(
                     file: File,
                     displayName: String,
-                    action: ExplorerPrimaryAction,
+                    action: ExplorerPrimaryAction?,
                 ) {
                     openMaterializedArchiveEntryResult(file, displayName, action)
                 }
@@ -565,6 +566,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                     mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown)
                 },
             )
+            binding.selectionPlugin.setOnLongClickListener {
+                if (mSelectionArchiveExtraction) {
+                    launchSelectedPluginAction()
+                    true
+                } else false
+            }
         }
         restoreSortConfig()
         setOnRefreshListener(this)
@@ -955,7 +962,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         if (mSelectionArchiveExtraction) {
             val selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem }
             if (selectedItems.size == mSelection.size && selectedItems.isNotEmpty()) {
-                clearSelection()
                 startArchiveExtraction(selectedItems)
             }
             return
@@ -1020,9 +1026,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     private fun openMaterializedArchiveEntryResult(
         file: File,
         displayName: String,
-        action: ExplorerPrimaryAction,
+        action: ExplorerPrimaryAction?,
     ) {
         when (action) {
+            null -> {
+                val entry = ExplorerFileItem(file, null)
+                if (entry.isExecutable) {
+                    Scripts.runInteractive(context, ScriptFile(file.path))
+                } else {
+                    entry.view(context)
+                }
+            }
             ExplorerPrimaryAction.DOCUMENT_PREVIEWER -> {
                 launchDocumentPreviewerOrShowGuidance(
                     ExplorerActionEntryPoint.PRIMARY_BUTTON,
@@ -1135,7 +1149,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     private fun startArchiveExtraction(items: List<ArchiveExplorerItem>) {
         val provider = mArchiveNavigationState?.provider ?: return
-        mArchiveCoordinator.startExtraction(provider, items)
+        mArchiveCoordinator.startExtraction(provider, items) { clearSelection() }
     }
 
     private fun confirmArchiveDeletion(items: List<ArchiveExplorerItem>) {
@@ -1199,7 +1213,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             page.canExtractEntry &&
             mArchiveNavigationState?.provider?.canExtractEntries == true
         binding?.archiveExtractCurrent?.apply {
-            isVisible = supported
+            isVisible = false
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&
@@ -1219,7 +1233,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             page.canCreateChildren &&
             provider?.canCreateDirectory == true
         binding?.archiveCreateDirectory?.apply {
-            isVisible = supported
+            isVisible = false
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&
@@ -1236,7 +1250,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             page.canAddChildren &&
             provider?.canAddEntries == true
         binding?.archiveAddEntries?.apply {
-            isVisible = supported
+            isVisible = false
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&
@@ -1251,7 +1265,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         val supported = currentPageState.page is ArchiveExplorerPage &&
             provider?.filenameCharsetNames?.isNotEmpty() == true
         binding?.archiveFilenameEncoding?.apply {
-            isVisible = supported
+            isVisible = false
             isEnabled = supported &&
                 !isInSelectionMode &&
                 !mArchiveCoordinator.isExtracting &&

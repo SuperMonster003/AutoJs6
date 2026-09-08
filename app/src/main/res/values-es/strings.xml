@@ -866,6 +866,7 @@
     <string name="text_applying_binary_resources">Aplicando recursos binarios</string>
     <string name="text_archive_extraction_cancelled">Extracción del archivo cancelada</string>
     <string name="text_archive_extraction_completed">Extraído en %1$s</string>
+    <string name="text_archive_extraction_destination">Destino de extracción</string>
     <string name="text_archive_extraction_progress">Extrayendo %1$d de %2$d</string>
     <string name="text_archive_format_path_segment">%1$s [%2$s]</string>
     <string name="text_archiving_project_files">Archivando archivos del proyecto</string>
