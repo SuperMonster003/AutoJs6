@@ -35,11 +35,11 @@ import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.coerceStringUppercase
 import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
+import org.autojs.autojs.util.RhinoUtils.js_eval
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
-import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
@@ -235,18 +235,31 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
             },
         )
 
+        /**
+         * Reads a line from the console input bar and evaluates it as JavaScript (`console.input("x = ") + 1`
+         * yields a number when the user types `41`). Optional arguments are printed first like `console.log`.
+         * zh-CN: 从控制台输入栏读取一行并作为 JavaScript 求值 (用户输入 `41` 时 `console.input("x = ") + 1` 得到数字).
+         * 可选参数会像 `console.log` 一样先行打印.
+         */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun input(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
-            val s = "${Console::class.java.simpleName.lowercaseFirstChar()}.${::input.name}"
-            throw RuntimeException(globalContext.getString(R.string.error_abandoned_method, s))
+        fun input(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? {
+            val raw = rawInput(scriptRuntime, args)
+            return js_eval(scriptRuntime.topLevelScope, raw)
         }
 
+        /**
+         * Reads a line from the console input bar as a plain string, blocking the script thread until the user
+         * submits one. The floating console shows itself when nothing else displays this console.
+         * zh-CN: 从控制台输入栏读取一行纯文本, 阻塞脚本线程直到用户提交. 若没有其他视图显示本控制台, 浮动控制台会自动显示.
+         */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun rawInput(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
-            val s = "${Console::class.java.simpleName.lowercaseFirstChar()}.${::rawInput.name}"
-            throw RuntimeException(globalContext.getString(R.string.error_abandoned_method, s))
+        fun rawInput(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String {
+            if (args.isNotEmpty()) {
+                scriptRuntime.console.log(Util.formatRhino(*args))
+            }
+            return scriptRuntime.console.rawInput()
         }
 
         @JvmStatic
