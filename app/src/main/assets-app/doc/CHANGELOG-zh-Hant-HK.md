@@ -408,6 +408,7 @@
 * `優化` `UiObject` 拆分: `pickup` / `detect` 的結果類型別名表, 拾取器與按名稱調用節點方法的攔截器遷入 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` 遷入 `UiObjectSummary`; 新增 `UiObject.fingerprint()` (邊界, 文本, 描述, 類名, 子節點數與關鍵布爾屬性的哈希, 不遍歷兄弟與子節點); 經 `parent()` 到達的節點的 `indexInParent()` 改為首次使用時計算; 佈局分析器的代碼生成器 (`CodeGenerator` / `ReadOnlyUiObject`) 轉為 Kotlin, 後者改為直接實現 `UiNode` 的快照視圖; 腳本可見的 API 與行為不變
 * `優化` 跨運行時復用 (Roadmap P5.4): Python Host 的選擇器能力 (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) 與 Node Bridge 的 `accessibility` 模塊 (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) 改為消費腳本運行時的無障礙核心 (`UiNode` 遍歷, 選擇器過濾器, 窗口根節點 provider, 節點生命週期), 兩者的 JSON 線協議逐字段不變; Node Bridge 的查找在 Android 13 以下不再洩漏沿途訪問的節點; Python Host 的無障礙截圖改為經共享的 `A11yScreenshotter` 完成單次嘗試 (保留其有界重試與 4 秒期限)
 * `優化` 每個腳本執行階段擁有獨立的控制台 (自身的日誌條目與浮動視窗, 日誌同時轉發至全域控制台), 浮動視窗僅顯示目前腳本的輸出 (與 Auto.js 4 一致), 同名腳本重新執行時取代上次執行遺留的浮動視窗; 日誌條目改為儲存原始內容與時間戳, 時間前綴由各檢視按需渲染 (浮動視窗預設不顯示, 日誌頁可在設定中開啟); Node bridge `console.tail` 條目新增 `time` 欄位 (毫秒時間戳), `text` 保持帶時間前綴
+* `優化` 螢幕 OCR 範例申請 Android 擷取授權並辨識真實圖片控制代碼; OCR 或條碼插件不可用時傳回可讀 unavailable 錯誤, 辨識失敗仍按錯誤處理
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

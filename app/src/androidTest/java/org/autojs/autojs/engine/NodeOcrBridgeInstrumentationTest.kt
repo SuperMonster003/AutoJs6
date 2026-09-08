@@ -168,6 +168,8 @@ class NodeOcrBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-ocr-fake.js>",
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("image", "ocr")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("OCR fake bridge", result)

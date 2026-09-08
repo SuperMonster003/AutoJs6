@@ -406,7 +406,8 @@
         "選擇器查詢 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 及已棄用的 `findOne()` / `waitFor()`) 統一按輪詢計畫 (`PollPolicy`: 逾時, 間隔, 次數, 退避) 執行, 預設行為不變 (間隔 50 毫秒, 逾時 0 或負數表示一直等待); 無上限等待的方法在 KDoc 中標註 \"可能永久阻塞\"; 設定 `findOnUiThread` 旗標時投遞到 UI 執行緒的查詢以查詢逾時為等待上限, 逾時擲出可讀錯誤 (`findOne(timeout)`), 無上限的查詢 (`untilFind` 等) 改為可被停止指令碼中斷的等待",
         "`UiObject` 拆分: `pickup` / `detect` 的結果型別別名表, 拾取器與按名稱呼叫節點方法的攔截器遷入 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` 遷入 `UiObjectSummary`; 新增 `UiObject.fingerprint()` (邊界, 文字, 描述, 類別名稱, 子節點數與關鍵布林屬性的雜湊, 不走訪兄弟與子節點); 經 `parent()` 到達的節點的 `indexInParent()` 改為首次使用時計算; 版面配置分析器的程式碼產生器 (`CodeGenerator` / `ReadOnlyUiObject`) 轉為 Kotlin, 後者改為直接實作 `UiNode` 的快照檢視; 指令碼可見的 API 與行為不變",
         "跨執行環境重用 (Roadmap P5.4): Python Host 的選擇器能力 (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) 與 Node Bridge 的 `accessibility` 模組 (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) 改為使用指令碼執行環境的無障礙核心 (`UiNode` 走訪, 選擇器篩選器, 視窗根節點 provider, 節點生命週期), 兩者的 JSON 線協定逐欄位不變; Node Bridge 的查找在 Android 13 以下不再洩漏沿途走訪的節點; Python Host 的無障礙截圖改為經共用的 `A11yScreenshotter` 完成單次嘗試 (保留其有界重試與 4 秒期限)",
-        "每個腳本執行階段擁有獨立的控制台 (自身的日誌條目與浮動視窗, 日誌同時轉發至全域控制台), 浮動視窗僅顯示目前腳本的輸出 (與 Auto.js 4 一致), 同名腳本重新執行時取代上次執行遺留的浮動視窗; 日誌條目改為儲存原始內容與時間戳記, 時間前綴由各檢視按需渲染 (浮動視窗預設不顯示, 日誌頁可在設定中開啟); Node bridge `console.tail` 條目新增 `time` 欄位 (毫秒時間戳記), `text` 保持帶時間前綴"
+        "每個腳本執行階段擁有獨立的控制台 (自身的日誌條目與浮動視窗, 日誌同時轉發至全域控制台), 浮動視窗僅顯示目前腳本的輸出 (與 Auto.js 4 一致), 同名腳本重新執行時取代上次執行遺留的浮動視窗; 日誌條目改為儲存原始內容與時間戳記, 時間前綴由各檢視按需渲染 (浮動視窗預設不顯示, 日誌頁可在設定中開啟); Node bridge `console.tail` 條目新增 `time` 欄位 (毫秒時間戳記), `text` 保持帶時間前綴",
+        "螢幕 OCR 範例申請 Android 擷取授權並辨識真實圖片控制代碼; OCR 或條碼插件不可用時傳回可讀 unavailable 錯誤, 辨識失敗仍按錯誤處理"
       ],
       "dependency": [
         "模組化 Android AXML",

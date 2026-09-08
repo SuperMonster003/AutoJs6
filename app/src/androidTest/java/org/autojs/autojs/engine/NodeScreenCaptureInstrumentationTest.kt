@@ -21,7 +21,7 @@ class NodeScreenCaptureInstrumentationTest {
     private val context get() = instrumentation.targetContext
     private fun permissions() = mapOf(
         NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
-            .fromDeclaredCapabilities(listOf("screen_capture", "image")).toJson(),
+            .fromDeclaredCapabilities(listOf("screen_capture", "image", "ocr", "barcode")).toJson(),
     )
 
     @Test fun captureWithoutConsentReturnsPermissionDeniedAndImageSaveWorks() {
@@ -72,7 +72,8 @@ class NodeScreenCaptureInstrumentationTest {
             override fun onDraw(canvas: Canvas) {
                 canvas.drawColor(Color.WHITE)
                 canvas.drawBitmap(pattern, 80f, 160f, null)
-                canvas.drawText("AutoJs6 Node 2026", 80f, 350f, Paint().apply { color = Color.BLACK; textSize = 56f })
+                canvas.drawText(NodeImageRecognitionFixture.TEXT, 80f, 350f, Paint().apply { color = Color.BLACK; textSize = 56f })
+                NodeImageRecognitionFixture.drawCode(canvas)
             }
         }
         instrumentation.runOnMainSync {
@@ -82,6 +83,7 @@ class NodeScreenCaptureInstrumentationTest {
         val origin = IntArray(2)
         instrumentation.runOnMainSync { view.getLocationOnScreen(origin) }
         val analyze = InstrumentationRegistry.getArguments().getString("imageAnalysis") == "true"
+        val recognize = InstrumentationRegistry.getArguments().getString("imageRecognition") == "true"
         val directory = File(context.cacheDir, "node-screen-${UUID.randomUUID()}").apply { mkdirs() }
         try {
             val result = NodePluginTestHarness.runPluginScript(
@@ -93,6 +95,13 @@ class NodeScreenCaptureInstrumentationTest {
                   const frame = await images.captureScreen();
                   await images.saveImage(frame, 'screen.png');
                   console.log('m14.capture=' + frame.width + 'x' + frame.height);
+                  if ($recognize) {
+                    const text = await require('ocr').recognizeText(frame, {timeoutMs: 30000});
+                    const code = await require('barcode').detect(frame, {formats: ['QR_CODE'], timeoutMs: 30000});
+                    if (!text.replace(/\s+/g, '').includes('ROADMAP2026')) throw new Error('Known capture text missing: ' + text);
+                    if (!code || code.rawValue !== '${NodeImageRecognitionFixture.CODE}') throw new Error('Known capture QR missing');
+                    console.log('m14.capture.recognition=PASS');
+                  }
                   if ($analyze) {
                     const x = ${origin[0] + 80}, y = ${origin[1] + 160};
                     const clipped = await images.clip(frame, x, y, 128, 96);

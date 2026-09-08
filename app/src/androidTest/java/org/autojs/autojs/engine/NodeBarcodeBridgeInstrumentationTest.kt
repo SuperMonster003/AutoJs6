@@ -190,6 +190,8 @@ class NodeBarcodeBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-barcode-fake.js>",
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("image", "barcode", "screen_capture")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("barcode fake bridge", result)

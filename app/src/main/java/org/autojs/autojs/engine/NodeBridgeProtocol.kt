@@ -2099,13 +2099,13 @@ class AndroidNodeBridgeCapabilityProvider(
             val response = runCatching {
                 val ocrOptions = buildMlKitOcrPluginOptions(options)
                 val results = runBlocking {
-                    val target = OcrPluginHost.selectOrThrow(
+                    val target = selectRecognitionProvider { OcrPluginHost.selectOrThrow(
                         context = appContext,
                         engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: MLKIT_OCR_ENGINE,
                         variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         moduleLabel = MLKIT_OCR_MODULE_LABEL,
-                    )
+                    ) }
                     OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions, callTimeoutMs = timeoutMs)
                 }
                 NodeBridgeResponse.success(request.id, results.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY))
@@ -2113,7 +2113,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 ocrDiagnostics.recordFailure()
                 NodeBridgeResponse.failure(
                     request.id,
-                    NodeBridgeError.providerFailed(
+                    if (error is RecognitionProviderUnavailable) recognitionUnavailable(request, error) else NodeBridgeError.providerFailed(
                         message = error.message ?: error.javaClass.name,
                         module = request.module,
                         method = request.method,
@@ -2164,6 +2164,18 @@ class AndroidNodeBridgeCapabilityProvider(
             this.extras = extras.takeIf { !it.isEmpty } ?: Bundle()
         }
     }
+
+    private class RecognitionProviderUnavailable(cause: IllegalStateException) : RuntimeException(cause.message, cause)
+
+    private inline fun <T> selectRecognitionProvider(select: () -> T): T = try {
+        select()
+    } catch (error: IllegalStateException) {
+        throw RecognitionProviderUnavailable(error)
+    }
+
+    private fun recognitionUnavailable(request: NodeBridgeRequest, error: RecognitionProviderUnavailable) =
+        NodeBridgeError.capabilityProviderMissing(request.module, request.method, "an enabled compatible recognition plugin")
+            .copy(message = error.message ?: "No compatible recognition plugin is available.")
 
     private fun Bundle.getNonBlankString(key: String): String? {
         return getString(key)?.takeIf { it.isNotBlank() }
@@ -2256,10 +2268,10 @@ class AndroidNodeBridgeCapabilityProvider(
 
         operation.job = CoroutineScope(Dispatchers.IO).launch {
             val response = runCatching {
-                val target = BarcodePluginHost.selectOrThrow(
+                val target = selectRecognitionProvider { BarcodePluginHost.selectOrThrow(
                     context = appContext,
                     engine = ENGINE_MLKIT_BARCODE,
-                )
+                ) }
                 BarcodePluginHost.detect(
                     context = appContext,
                     target = target,
@@ -2279,7 +2291,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 onFailure = { error ->
                     NodeBridgeResponse.failure(
                         request.id,
-                        NodeBridgeError.providerFailed(
+                        if (error is RecognitionProviderUnavailable) recognitionUnavailable(request, error) else NodeBridgeError.providerFailed(
                             message = error.message ?: error.javaClass.name,
                             module = request.module,
                             method = request.method,
