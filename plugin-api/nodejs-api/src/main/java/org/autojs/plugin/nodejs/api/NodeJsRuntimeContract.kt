@@ -43,6 +43,8 @@ object NodeJsRuntimeContract {
     const val KEY_ACTIVE_EXECUTION_CANCELLATION_REQUESTED = "activeExecutionCancellationRequested"
 
     const val KEY_EXECUTION_ID = "executionId"
+    /** Additive worker index; -1 means the request has not been assigned a process. */
+    const val KEY_SLOT_ID = "slotId"
     const val KEY_SOURCE = "source"
     const val KEY_SOURCE_NAME = "sourceName"
     const val KEY_WORKING_DIRECTORY = "workingDirectory"
