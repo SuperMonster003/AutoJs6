@@ -697,7 +697,7 @@ object NodeBridgeModules {
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
-    val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo")
+    val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume")
     val mediainfoMethods = setOf("read", "get", "capabilities")
     val recorderMethods = setOf("getStatus", "start", "stop")
     val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
@@ -711,7 +711,8 @@ object NodeBridgeModules {
     val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
-    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info")
+    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
+        "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake")
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
@@ -829,6 +830,7 @@ class AndroidNodeBridgeCapabilityProvider(
         Thread(task, "AutoJs6NodeImage").apply { isDaemon = true }
     }
     private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
+    private val deviceControls = NodeDeviceControls(appContext)
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -985,6 +987,7 @@ class AndroidNodeBridgeCapabilityProvider(
         imageDestroyed.set(true)
         imageExecutor.shutdownNow()
         screenCapture.close()
+        deviceControls.close()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -2333,15 +2336,26 @@ class AndroidNodeBridgeCapabilityProvider(
                         request.id,
                         audioStreamInfo(stream).toString(),
                     )
+                    "setAudioStreamVolume" -> {
+                        val value = args.opt(1)
+                        val manager = audioManager()
+                        val min = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.getStreamMinVolume(stream.type) else 0
+                        val max = manager.getStreamMaxVolume(stream.type)
+                        require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toInt().toDouble() && value.toInt() in min..max) {
+                            "media.setAudioStreamVolume requires an integer in $min..$max for ${stream.name}."
+                        }
+                        manager.setStreamVolume(stream.type, value.toInt(), 0)
+                        NodeBridgeResponse.success(request.id, "null")
+                    }
                     else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
                 }
             }.getOrElse { error ->
                 NodeBridgeResponse.failure(
                     request.id,
-                    NodeBridgeError.invalidRequest(
-                        message = error.message ?: "AutoJs6 media request failed.",
-                        module = request.module,
-                        method = request.method,
+                    if (error is SecurityException) NodeBridgeError.permissionDenied(
+                        error.message ?: "Android denied the audio change.", request.module, request.method,
+                    ) else NodeBridgeError.invalidRequest(
+                        error.message ?: "AutoJs6 media request failed.", request.module, request.method,
                     ),
                 )
             }
@@ -3570,6 +3584,25 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchDevice(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         dispatchOnMain(request, callback) {
             when (request.method) {
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake" -> runCatching {
+                    val value = request.argsArray().opt(0)
+                    if (request.method != "cancelKeepingAwake") require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) {
+                        "device.${request.method} requires an integer."
+                    }
+                    when (request.method) {
+                        "setBrightness" -> { require((value as Number).toLong() in 0..255); deviceControls.setBrightness(value.toInt()) }
+                        "setBrightnessMode" -> { require((value as Number).toLong() in 0..1); deviceControls.setBrightnessMode(value.toInt()) }
+                        "keepScreenOn" -> deviceControls.keepScreenOn((value as Number).toLong())
+                        else -> deviceControls.cancelKeepingAwake()
+                    }
+                    NodeBridgeResponse.success(request.id, "null")
+                }.getOrElse { error ->
+                    NodeBridgeResponse.failure(request.id, when (error) {
+                        is IllegalArgumentException -> NodeBridgeError.invalidRequest(error.message ?: "Invalid device argument.", request.module, request.method)
+                        is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Device permission denied.", request.module, request.method)
+                        else -> NodeBridgeError.providerFailed(error.message ?: error.javaClass.name, request.module, request.method)
+                    })
+                }
                 "info" -> runCatching {
                     NodeBridgeResponse.success(request.id, NodeBridgeDeviceInfo.json(appContext).toString())
                 }.getOrElse { error ->

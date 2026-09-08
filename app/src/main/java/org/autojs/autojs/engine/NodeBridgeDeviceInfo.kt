@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.app.Application
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,6 +11,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.Process
 import android.os.SystemClock
+import android.provider.Settings
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs6.BuildConfig
@@ -37,8 +39,9 @@ internal object NodeBridgeDeviceInfo {
         return JSONObject()
             .put("schema", SCHEMA)
             .put("build", buildJson())
-            .put("screen", section { screenJson() })
+            .put("screen", section { screenJson(appContext) })
             .put("battery", section { batteryJson(appContext) })
+            .put("memory", section { memoryJson(appContext) })
             .put("host", hostJson(appContext))
             .put("accessibility", section { accessibilityJson() })
             .put("screenOn", isScreenOn(appContext))
@@ -56,6 +59,8 @@ internal object NodeBridgeDeviceInfo {
         .put("device", Build.DEVICE)
         .put("board", Build.BOARD)
         .put("hardware", Build.HARDWARE)
+        .put("bootloader", Build.BOOTLOADER)
+        .put("fingerprint", Build.FINGERPRINT)
         .put("sdkInt", Build.VERSION.SDK_INT)
         .put("release", Build.VERSION.RELEASE)
         .put("codename", Build.VERSION.CODENAME)
@@ -65,12 +70,16 @@ internal object NodeBridgeDeviceInfo {
         .put("display", Build.DISPLAY)
         .put("abis", JSONArray(Build.SUPPORTED_ABIS.toList()))
 
-    private fun screenJson(): JSONObject {
+    private fun screenJson(context: Context): JSONObject {
         val rotation = ScreenMetrics.rotation
         return JSONObject()
             .put("width", ScreenMetrics.deviceScreenWidth)
             .put("height", ScreenMetrics.deviceScreenHeight)
             .put("densityDpi", ScreenMetrics.deviceScreenDensity)
+            .put("density", context.resources.displayMetrics.density.toDouble())
+            .put("brightness", Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, -1))
+            .put("brightnessMode", Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1))
+            .put("canWriteSettings", Settings.System.canWrite(context))
             .put("orientation", if (ScreenMetrics.orientation == Configuration.ORIENTATION_LANDSCAPE) "landscape" else "portrait")
             .put("rotation", rotation)
             .put("rotationDegrees", rotation * 90)
@@ -100,9 +109,16 @@ internal object NodeBridgeDeviceInfo {
         return JSONObject()
             .put("available", true)
             .put("percent", percent)
+            .put("isCharging", status == "charging" || status == "full")
             .put("status", status)
             .put("plugged", plugged)
             .put("temperatureCelsius", if (temperature == Int.MIN_VALUE) JSONObject.NULL else temperature / 10.0)
+    }
+
+    private fun memoryJson(context: Context): JSONObject {
+        val manager = checkNotNull(context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)
+        val memory = ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
+        return JSONObject().put("totalMem", memory.totalMem).put("availMem", memory.availMem)
     }
 
     private fun hostJson(context: Context): JSONObject = JSONObject()

@@ -424,7 +424,7 @@ object NodeBridgeProviderRegistry {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
-            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus",
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus",
             "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
@@ -491,20 +491,20 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "P13-25 partial gate exposes status/settings evidence while advanced notification parity remains blocked",
         )
         DEVICE_PROVIDER -> linkedMapOf(
-            "liveMethods" to "isScreenOn,wakeUp,vibrate,isIgnoringBatteryOptimizations,openBatteryOptimizationSettings",
+            "liveMethods" to NodeBridgeModules.deviceMethods.joinToString(","),
             "capability" to NodeBridgePermissionManifest.DEVICE,
             "powerCapability" to NodeBridgePermissionManifest.DEVICE_POWER,
             "settingsResultSchema" to "autojs6-node-battery-optimization-settings-v1",
             "phase13Promotion" to "P13-25 partial notifications/settings/power manager evidence gate",
-            "powerPolicy" to "battery optimization status/settings are explicit device.power operations and support dryRun for tests",
+            "powerPolicy" to "brightness and timed screen wake locks require device.power; brightness also requires Android modify-system-settings permission",
             "phase14SettingsPowerOemBackgroundMatrix" to "P14-23 settings/power OEM and background-launch matrix gate",
             "powerOemMatrixPolicy" to "android12_android15_battery_optimization_exact_alarm_background_launch_oem_notes_required_before_mutation",
-            "powerMutationPolicy" to "status_and_settings_dry_run_only_mutation_flows_denied_until_prompt_rollback_device_matrix",
+            "powerMutationPolicy" to "screen wake lock is owned by one execution and released on timeout, explicit cancel or termination",
             "exactAlarmPolicy" to "state_matrix_only_no_schedule_exact_alarm_or_alarm_manager_authority",
             "privacyPolicy" to "device keeps hardware identifiers and sensitive profile fields absent from the Node surface",
-            "blockedMethods" to "imei,androidId,serial,brand,manufacturer,accounts,macAddress,ipAddress,rawPowerManager,wakelock,ignoreBatteryOptimizationRequest,exactAlarm,backgroundLaunchBypass",
+            "blockedMethods" to "imei,androidId,serial,accounts,macAddress,ipAddress,rawPowerManager,ignoreBatteryOptimizationRequest,exactAlarm,backgroundLaunchBypass",
             "rawObjectPolicy" to "no raw PowerManager, WakeLock, AlarmManager, PendingIntent, Intent, Context, Vibrator, Build, Account, network, OEM manager, or device identifier object crosses the bridge",
-            "statusReason" to "P13-25 partial gate exposes battery optimization status/settings evidence while direct power manager control remains blocked",
+            "statusReason" to "live device snapshot, brightness and timed screen controls; hardware identifiers stay unavailable",
         )
         MEDIA_PROJECTION_PROVIDER -> linkedMapOf(
             "liveMethods" to "requestScreenCapture,nextImage,stop",

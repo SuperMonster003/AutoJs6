@@ -438,7 +438,8 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> when (method) {
-                "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings" -> listOf(DEVICE, DEVICE_POWER)
+                "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake" -> listOf(DEVICE, DEVICE_POWER)
                 else -> listOf(DEVICE)
             }
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
