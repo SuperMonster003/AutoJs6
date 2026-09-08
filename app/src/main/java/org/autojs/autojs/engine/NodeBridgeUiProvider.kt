@@ -96,8 +96,9 @@ class NodeBridgeUiDispatchService : Service() {
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
         val requestJson = intent?.getStringExtra(EXTRA_REQUEST_JSON).orEmpty()
         mainHandler.post {
+            val request = runCatching { NodeBridgeRequest.fromJson(requestJson) }.getOrNull()
             val response = runCatching {
-                handleRequest(NodeBridgeRequest.fromJson(requestJson))
+                handleRequest(request ?: NodeBridgeRequest.fromJson(requestJson))
             }.getOrElse { error ->
                 NodeBridgeResponse.failure(
                     NodeBridgeRequest.recoverId(requestJson).orEmpty(),
@@ -108,7 +109,16 @@ class NodeBridgeUiDispatchService : Service() {
                     ),
                 )
             }
-            receiver?.send(RESULT_RESPONSE, response.toBundle())
+            val sessionId = if (response.ok) runCatching { JSONObject(response.resultJson.orEmpty()).optString("id") }.getOrDefault("") else ""
+            val stream = if (request?.events == true && request.method == "showLayout" && sessionId.isNotBlank() && receiver != null) {
+                NodeBridgeEventStream(request.id, sessionId) { value -> receiver.send(RESULT_RESPONSE, value.toBundle()) }
+            } else null
+            if (stream != null) {
+                NodeBridgeUiSessionStore.get(sessionId)?.setEventStream(stream)
+                stream.acknowledge(JSONObject(response.resultJson.orEmpty()))
+            } else {
+                receiver?.send(RESULT_RESPONSE, response.toBundle())
+            }
             stopSelf(startId)
         }
         return START_NOT_STICKY
@@ -360,6 +370,7 @@ class NodeBridgeUiSession(
     private val closed = AtomicBoolean(false)
     private val shown = AtomicBoolean(false)
     private val eventLifecycleLock = Any()
+    private var eventStream: NodeBridgeEventStream? = null
     private val eventQueue = ConcurrentLinkedQueue<JSONObject>()
     private val eventCount = AtomicInteger(0)
     private val stateLock = Any()
@@ -491,6 +502,11 @@ class NodeBridgeUiSession(
             .put("state", stateJson)
     }
 
+    internal fun setEventStream(stream: NodeBridgeEventStream) = synchronized(eventLifecycleLock) {
+        eventStream = stream
+        eventQueue.forEach(stream::publish)
+    }
+
     fun emitComponentEvent(type: String, componentId: String, fields: JSONObject = JSONObject()) {
         val event = JSONObject(fields.toString())
             .put("type", type)
@@ -532,6 +548,11 @@ class NodeBridgeUiSession(
         if (eventCount.incrementAndGet() > MAX_EVENT_QUEUE_SIZE) {
             eventQueue.poll()
             eventCount.decrementAndGet()
+        }
+        eventStream?.publish(event)
+        if (event.optString("type") == "close" && eventStream != null) {
+            eventStream = null
+            NodeBridgeUiSessionStore.remove(id)
         }
     }
 

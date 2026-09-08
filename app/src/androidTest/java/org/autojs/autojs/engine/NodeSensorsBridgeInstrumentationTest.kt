@@ -131,6 +131,8 @@ class NodeSensorsBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-sensors-fake.js>",
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to
+                NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("sensors")).toJson()),
             timeoutMs = 30_000L,
         )
 
@@ -287,7 +289,7 @@ class NodeSensorsBridgeInstrumentationTest {
         }
         val subscription = JSONObject(subscribe.resultJson.orEmpty())
         assertEquals(sensorType, subscription.getString("type"))
-        assertEquals(100, subscription.getInt("samplingIntervalMs"))
+        assertEquals(20, subscription.getInt("samplingIntervalMs"))
         assertEquals(2, subscription.getInt("maxQueueSize"))
         assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
 

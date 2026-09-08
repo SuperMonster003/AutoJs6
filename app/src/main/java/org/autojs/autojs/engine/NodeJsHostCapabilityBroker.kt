@@ -140,6 +140,7 @@ internal class NodeJsHostCapabilityBroker(
     ) {
         val responseBundle = Bundle().apply {
             putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, response.toJson())
+            if (response.event) putBoolean("event", true)
             putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, response.ok)
             response.error?.message?.let { message ->
                 putString(NodeJsRuntimeContract.KEY_BRIDGE_ERROR_MESSAGE, message)

@@ -123,6 +123,7 @@ data class NodeBridgeRequest(
     val argsJson: String,
     val timeoutMs: Long,
     val permissions: List<String> = emptyList(),
+    val events: Boolean = false,
 ) {
     fun toJson(): String = JSONObject().apply {
         put("id", id)
@@ -131,6 +132,7 @@ data class NodeBridgeRequest(
         put("args", NodeBridgeJson.parseJsonValue(argsJson.ifBlank { "[]" }))
         put("timeoutMs", timeoutMs)
         put("permissions", JSONArray(permissions))
+        if (events) put("events", true)
     }.toString()
 
     companion object {
@@ -146,6 +148,7 @@ data class NodeBridgeRequest(
                 argsJson = parseArgs(value).toString(),
                 timeoutMs = parseTimeoutMs(value),
                 permissions = parsePermissions(value),
+                events = value.optBoolean("events", false),
             )
         }
 
@@ -236,10 +239,16 @@ data class NodeBridgeResponse(
     val ok: Boolean,
     val resultJson: String? = null,
     val error: NodeBridgeError? = null,
+    val event: Boolean = false,
+    val subscriptionId: String? = null,
 ) {
     fun toJson(): String = JSONObject().apply {
         put("id", id)
         put("ok", ok)
+        if (event) {
+            put("event", true)
+            put("subscriptionId", subscriptionId)
+        }
         if (ok) {
             put("result", NodeBridgeJson.parseJsonValue(resultJson ?: "null"))
         } else {
@@ -264,6 +273,8 @@ data class NodeBridgeResponse(
                     id = value.getString("id"),
                     ok = true,
                     resultJson = NodeBridgeJson.valueToJson(value.opt("result")),
+                    event = value.optBoolean("event", false),
+                    subscriptionId = value.optString("subscriptionId").takeIf { it.isNotBlank() },
                 )
             } else {
                 NodeBridgeResponse(
@@ -851,7 +862,7 @@ class AndroidNodeBridgeCapabilityProvider(
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val brokerAttempt = capabilityBrokerAudit.begin(request)
         val auditedCallback: (NodeBridgeResponse) -> Unit = { response ->
-            capabilityBrokerAudit.complete(brokerAttempt, response)
+            if (!response.event) capabilityBrokerAudit.complete(brokerAttempt, response)
             callback(response)
         }
         brokerAttempt.preflightError?.let { error ->
@@ -1186,7 +1197,8 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         mainHandler.post {
             val id = "overlay-${UUID.randomUUID()}"
-            val session = ControlledOverlaySession(appContext, id, descriptor)
+            val eventStream = NodeBridgeEventStream.forRequest(request, id, callback)
+            val session = ControlledOverlaySession(appContext, id, descriptor, eventStream)
             val response = runCatching {
                 session.show()
                 val resource = resourceRegistry.register(
@@ -1217,7 +1229,8 @@ class AndroidNodeBridgeCapabilityProvider(
                     ),
                 )
             }
-            callback(response)
+            if (response.ok && eventStream != null) eventStream.acknowledge(JSONObject(response.resultJson.orEmpty()))
+            else callback(response)
         }
     }
 
@@ -1384,6 +1397,13 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+            if (response.event) {
+                callback(response)
+                if (JSONObject(response.resultJson.orEmpty()).optString("type") == "close") {
+                    response.subscriptionId?.let { releaseOwnedUiSession(it, "ui.terminal_close") }
+                }
+                return@dispatch
+            }
             if (!response.ok) {
                 callback(response)
                 return@dispatch
@@ -3097,10 +3117,12 @@ class AndroidNodeBridgeCapabilityProvider(
                 return@post
             }
             val subscriptionId = "sensor-${UUID.randomUUID()}"
+            val eventStream = NodeBridgeEventStream.forRequest(request, subscriptionId, callback)
             val subscription = ControlledSensorSubscription(
                 id = subscriptionId,
                 type = descriptor.value.type,
                 maxQueueSize = descriptor.value.maxQueueSize,
+                eventStream = eventStream,
             )
             val listener = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent) {
@@ -3130,7 +3152,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
                 return@post
             }
-            callback(NodeBridgeResponse.success(request.id, subscription.toJson(descriptor.value).toString()))
+            val result = subscription.toJson(descriptor.value)
+            eventStream?.acknowledge(result) ?: callback(NodeBridgeResponse.success(request.id, result.toString()))
         }
     }
 
@@ -3240,12 +3263,14 @@ class AndroidNodeBridgeCapabilityProvider(
             }
         }
         val subscriptionId = "input-observer-${UUID.randomUUID()}"
+        val eventStream = NodeBridgeEventStream.forRequest(request, subscriptionId, callback)
         val subscription = ControlledInputObserverSubscription(
             id = subscriptionId,
             source = descriptor.source,
             keys = descriptor.keys,
             actions = descriptor.actions,
             maxQueueSize = descriptor.maxQueueSize,
+            eventStream = eventStream,
         )
         inputObserverSubscriptions[subscriptionId] = subscription
         resourceRegistry.register(
@@ -3283,7 +3308,8 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
-        callback(NodeBridgeResponse.success(request.id, subscription.toJson().toString()))
+        val result = subscription.toJson()
+        eventStream?.acknowledge(result) ?: callback(NodeBridgeResponse.success(request.id, result.toString()))
     }
 
     private fun attachAccessibilityInputObserver(
@@ -4208,12 +4234,14 @@ class AndroidNodeBridgeCapabilityProvider(
 
         val controlled = connectRequest.value
         val sessionId = "websocket-${UUID.randomUUID()}"
+        val eventStream = NodeBridgeEventStream.forRequest(request, sessionId, callback)
         val responded = AtomicBoolean(false)
         val session = ControlledWebSocketSession(
             id = sessionId,
             url = controlled.url,
             maxMessageBytes = controlled.maxMessageBytes,
             maxQueueSize = controlled.maxQueueSize,
+            eventStream = eventStream,
         )
         websocketSessions[sessionId] = session
         val websocketResource = resourceRegistry.register(
@@ -4255,7 +4283,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 if (responded.compareAndSet(false, true)) {
                     mainHandler.removeCallbacks(timeoutRunnable)
                     websocketDiagnostics.recordCompletedConnect()
-                    callback(NodeBridgeResponse.success(request.id, session.toJson().toString()))
+                    eventStream?.acknowledge(session.toJson()) ?: callback(NodeBridgeResponse.success(request.id, session.toJson().toString()))
                 }
             }
 
@@ -4287,6 +4315,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
                 session.queueClose(1006, t.message ?: t.javaClass.name)
                 session.markTerminal()
+                if (eventStream != null) websocketSessions.remove(sessionId)
                 if (responded.compareAndSet(false, true)) {
                     websocketSessions.remove(sessionId)
                     websocketDiagnostics.recordTimeout()
@@ -4307,6 +4336,7 @@ class AndroidNodeBridgeCapabilityProvider(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 session.queueClose(code, reason)
                 session.markTerminal()
+                if (eventStream != null) websocketSessions.remove(sessionId)
                 if (websocketResource.release("websocket.closed")) {
                     websocketDiagnostics.finishConnection()
                 }
@@ -5115,6 +5145,7 @@ private class ControlledOverlaySession(
     private val context: Context,
     val id: String,
     descriptor: JSONObject,
+    private val eventStream: NodeBridgeEventStream? = null,
 ) {
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -5368,6 +5399,7 @@ private class ControlledOverlaySession(
             eventCount.decrementAndGet()
             droppedCount.incrementAndGet()
         }
+        eventStream?.publish(event)
     }
 
     private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt().coerceAtLeast(value)
@@ -7484,6 +7516,7 @@ private class ControlledInputObserverSubscription(
     private val keys: List<String>,
     private val actions: List<String>,
     private val maxQueueSize: Int,
+    private val eventStream: NodeBridgeEventStream? = null,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
     private val closeActions = ConcurrentLinkedQueue<() -> Unit>()
@@ -7557,6 +7590,7 @@ private class ControlledInputObserverSubscription(
         if (closed.getAndSet(true)) {
             return
         }
+        eventStream?.publish(JSONObject().put("type", "close"))
         events.clear()
         while (true) {
             val action = closeActions.poll() ?: return
@@ -7587,6 +7621,7 @@ private class ControlledInputObserverSubscription(
             droppedCount.incrementAndGet()
         }
         events.add(event)
+        eventStream?.publish(event)
     }
 }
 
@@ -7665,7 +7700,7 @@ private data class ControlledSensorRequestDescriptor(
 
 private object ControlledSensorPolicy {
     const val MAX_SUBSCRIPTIONS = 4
-    const val MIN_SAMPLING_INTERVAL_MS = 100L
+    const val MIN_SAMPLING_INTERVAL_MS = 20L
     const val DEFAULT_SAMPLING_INTERVAL_MS = 250L
     const val MAX_SAMPLING_INTERVAL_MS = 60_000L
     const val MIN_TIMEOUT_MS = 100L
@@ -7707,6 +7742,7 @@ private class ControlledSensorSubscription(
     val id: String,
     val type: String,
     private val maxQueueSize: Int,
+    private val eventStream: NodeBridgeEventStream? = null,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
     @Volatile
@@ -7746,6 +7782,7 @@ private class ControlledSensorSubscription(
             events.poll() ?: break
         }
         events.add(event)
+        eventStream?.publish(event)
     }
 }
 
@@ -7901,6 +7938,7 @@ private class ControlledWebSocketSession(
     val url: String,
     val maxMessageBytes: Int,
     val maxQueueSize: Int,
+    private val eventStream: NodeBridgeEventStream? = null,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
     @Volatile
@@ -7982,6 +8020,7 @@ private class ControlledWebSocketSession(
             events.poll() ?: break
         }
         events.add(event)
+        eventStream?.publish(event)
     }
 }
 

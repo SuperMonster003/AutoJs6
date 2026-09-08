@@ -405,6 +405,10 @@ class NodeUiBridgeInstrumentationTest {
             assertTrue(Regex("""ui\.live\.clicked=ok:ui-[^\r\n|]+\|true""").containsMatchIn(result.stdout))
             assertTrue(result.stdout.contains("ui.live.input=Bob|true"))
             assertTrue(result.stdout.contains("ui.live.no_raw_view=true"))
+            assertEquals("jni", result.nativeValues["embedded_script.bridge_live_transport"])
+            assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_poll_count"])
+            assertTrue(result.nativeValues["embedded_script.bridge_live_event_count"]!!.toInt() >= 2)
+
         } finally {
             instrumentation.removeMonitor(monitor)
             NodeBridgeUiSessionStore.closeAll("ui-live-js-test-cleanup")

@@ -540,7 +540,7 @@ class NodeWebSocketBridgeInstrumentationTest {
         }
     }
 
-    private class ControlledWebSocketLoopbackServer : AutoCloseable {
+    internal class ControlledWebSocketLoopbackServer : AutoCloseable {
 
         private val executor = Executors.newCachedThreadPool()
         private val serverSocket = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))

@@ -551,7 +551,7 @@ object NodeBridgeProviderRegistry {
         UI_PROVIDER -> linkedMapOf(
             "liveMethods" to "showLayout,update,batchUpdate,drainEvents,close",
             "components" to "Column,Row,Text,Button,Input,Image,ScrollView,List,Switch,Checkbox,Progress,Tabs",
-            "eventDelivery" to "bounded drainEvents JSON snapshots",
+            "eventDelivery" to "JNI callback push with bounded drainEvents compatibility",
             "maxActiveSessionsPerExecution" to "4",
             "phase13Promotion" to "P13-17 partial live provider evidence gate",
             "configurationChangePolicy" to "destroy_recreate_no_survival_claim",
@@ -595,7 +595,7 @@ object NodeBridgeProviderRegistry {
             "liveSource" to "accessibility",
             "liveSourceAvailable" to accessibilityOperational().toString(),
             "maxActiveSubscriptionsPerExecution" to "8",
-            "eventDelivery" to "bounded drainEvents JSON snapshots",
+            "eventDelivery" to "JNI callback push with bounded drainEvents compatibility",
             "packagedPolicy" to "scheduled/background launch surfaces reject accessibility live observation; fake source remains available for tests",
             "statusReason" to "P12-07 cleanup/security gate covers bounded queues, listener cleanup, and live-source launch-surface rejection",
         )
