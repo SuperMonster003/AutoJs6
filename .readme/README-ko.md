@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026/09/08.
+데이터 갱신일: 2026 년 9 월 8 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -134,7 +134,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -323,6 +323,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 선택자와 노드 기능: 문자열 선택자 구문 `select("text=Login clickable")` (공백으로 구분한 `key=value` / `key~=regex` 또는 `key=/regex/flags` / `key` / `!key`, 공백이 있는 값은 따옴표로 감싸고, 따옴표 없이 쉼표가 있는 값은 `bounds=0,0,100,200` 처럼 필요할 때 여러 인수로 분할, 키는 선택자 레지스트리의 것; `UiSelector.select(String)` 은 필터를 추가하고 자신을 반환하므로 builder 와 체인 가능; 잘못된 문자열은 문자 위치, 문제의 항과 후보 키를 담아 throw; 인수 없는 `select()` 는 여전히 노드 동작); 노드 단위 상태 판정과 대기 `UiObject.isStale()` / `waitUntilGone(timeout?, interval?)` / `waitForStable(stableFor?, timeout?, interval?)` (기본 시간 초과 10 s, 간격 50 ms; `eventAssistedPolling` 플래그에서는 접근성 이벤트로 일찍 깨어남; UI 스레드에서는 거부); 지연 검색 `findIterator()` (반복이 진행되는 대로 `find()` 의 순서로 검색하며, `for...of` 의 `break` 나 `close()` 뒤에는 트리의 나머지를 순회하지 않고, `collect()` 로 남은 노드를 얻으며, `visited` / `produced` 카운터 제공); 창 필터 객체 `{ type, packageName, title, displayId, active, focused, id, layer }` 를 `auto.setWindowFilter(...)` 와 새로 추가된 `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` 에 사용 (유형 이름은 `application` / `inputMethod` / `system` / `accessibilityOverlay` 등, 패키지 이름과 제목은 문자열 또는 정규식, API 30 이전의 창은 기본 디스플레이로 간주)
 * `추가` 견고성 (Roadmap P5.5): 대기 중에 접근성 서비스가 바인딩 해제되면 진행 중인 `waitForEvent` / `waitForIdle` / `waitForToast` / `waitForNotification` (동기 및 Flow 형식) 은 시간 초과를 기다리지 않고 즉시 `A11Y_UNAVAILABLE` 로 끝남; Flow 대기에 `recoverService` 옵션 추가 (`flow.defaults({ recoverService: true })` 로 기본값 설정 가능): 켜면 서비스 중단을 만난 프로브가 남은 시간 초과 안에서 1 초씩 조용히 서비스 복구를 기다리고 (활성화되었지만 바인딩되지 않은 서비스는 시작 전략으로 다시 활성화, 설정 페이지는 절대 열지 않으며 사용자에게는 최대 한 번만 물음), 서비스가 제때 돌아오면 대상 대기를 계속하고 그렇지 않으면 `elapsed` / `attempts` 를 담은 `A11Y_UNAVAILABLE` 로 거부; 플랫폼이 `onServiceConnected` 를 건너뛰면 레지스트리가 첫 이벤트에서 인스턴스를 채택하고 `adoptedByEvent` 플래그를 기록하며 (`auto.state.adoptedByEvent`, 서비스 관리자 진단의 프로세스 내 인스턴스 줄에 주석), 서비스 정보 설정 (안정 모드, 제스처 관찰) 은 그 첫 이벤트에서 적용
 * `추가` 접근성 샘플 (Roadmap P6.4): 앱 내 샘플 디렉터리 "无障碍服务" 에 스크립트 6 개 추가 (Flow 비동기 대기와 체인 동작, 툴킷 폼 입력과 팝업 닫기, 툴킷 목록 스크롤과 수집, 문자열 셀렉터와 지연 반복, 셀렉터 진단과 노드 트리 내보내기, 이벤트 기반 대기); 모두 스크립트 자신의 플로팅 창을 대상으로 하여 다른 앱이 필요 없음
+* `추가` 콘솔 플로팅 창 제목 표시줄의 세 버튼 (최소화, 공간 상태 설정, 닫기) 을 하나의 "더 보기" 버튼으로 통합하고 메뉴에서 최소화, 크기 조정, 입력 표시줄, 지우기, 복사, 설정 및 닫기를 제공; "크기 조정" 은 크기 조정 모드로 진입 (콘텐츠 영역이 어두워지고 현재 크기를 표시, 오른쪽 또는 아래쪽 가장자리나 오른쪽 아래 모서리를 드래그하여 크기 변경, 다른 영역을 탭하면 종료); "설정" 대화상자에서 시간 접두사, 시간 형식 (프리셋 또는 사용자 지정 패턴), 로그 색상 구분, 글자 크기, 상태 표시줄 회피, 제목 표시줄과 콘텐츠 영역 투명도를 전환 가능
+* `추가` 콘솔에 `setTimeVisible` / `setTimeFormat` / `setColorful` / `setAvoidStatusBar` / `setInputVisible` 메서드와 대응하는 `console.build` 옵션 (`timeVisible` / `timeFormat` / `colorful` / `avoidStatusBar` / `inputVisible`) 을 추가하여 플로팅 창 설정 대화상자의 항목과 일대일로 대응; 로그 페이지와 편집기 로그 패널의 더 보기 메뉴에 "설정" (시간 접두사, 시간 형식, 로그 색상 구분, 글자 크기) 과 "입력 표시줄" 전환을 추가하고 각각 상태를 기억; 샘플 코드에 "콘솔/시간 및 색상 설정" 과 "콘솔/설정 순서 무관" 추가
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
@@ -457,6 +459,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 6.7.0 Alpha13 부터 `contains` 계열 선택자 (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 등) 에 전달한 일반 문자열이 정규식 패턴으로 컴파일되던 문제 (`textContains(".")` 가 비어 있지 않은 모든 텍스트와 일치, `textContains("1+1")` 이 "11" 과 일치, `textContains("(")` 이 오류 발생); `text(s)` / `textStartsWith` / `textEndsWith` 와 같이 다시 리터럴 부분 문자열로 처리함; 패턴이 필요하면 정규식을 전달 (`textContains(/re/i)`) 하거나 `textMatch` / `textMatches` 를 사용할 것. "/re/flags" 형식의 문자열도 `contains` 에서는 더 이상 정규식으로 취급하지 않음
 * `수정` 플로팅 창 (`floaty.rawWindow` / `floaty.window`) 의 `requestFocus()` / `disableFocus()` 가 스크립트 스레드에서 직접 창 레이아웃을 갱신해 간헐적으로 `CalledFromWrongThreadException` 을 던지던 문제 수정; 이제 UI 스레드에서 실행됨 (`setSize` / `setPosition` 과 동일)
 * `수정` 접근성 알림 관찰자 (`events.observeToast()` 등의 배후) 가 모든 시스템 알림을 다른 앱의 toast 로 처리 (알림 타입 검사가 이 앱 자신의 하위 클래스를 가리켜 절대 일치하지 않음) 하여 알림이 알림 리스너에 전달되지 않고 다른 앱의 알림이 toast 로 잘못 보고되던 문제; 이제 프레임워크의 `android.app.Notification` 을 검사
+* `수정` `console.setPosition` / `setSize` / `setGravity` 등의 메서드와 `console.show()` 의 호출 순서가 결과에 영향을 미치던 문제 (`console.show(); console.setPosition(500, 400)` 은 사이에 `sleep` 이 필요했고, 역순 호출 시 설정이 유실될 수 있었음); 이제 설정을 기록하고 창이 연결된 후 일괄 적용하므로 호출 순서와 시점은 결과에 영향을 주지 않음
+* `수정` 콘솔 플로팅 창의 제목 표시줄을 드래그하여 창을 이동하는 동작이 가끔 실패하던 문제 (드래그 제스처가 창 연결 전에 바인딩되어 버튼 클릭 및 창 닫기와 경쟁); 이제 제목 표시줄 드래그는 창 연결 후 설정되고 이동 범위는 화면 내로 제한되며 드래그 종료 시 위치를 기록
+* `수정` 콘솔 플로팅 창 사방에 12dp 여백이 있어 `console.setPosition(0, 0)` 이 화면 가장자리에 닿지 못하던 문제; 여백을 제거하고 Y 좌표는 기본적으로 상태 표시줄 아래에서 계산되며 (`setAvoidStatusBar(false)` 로 해제 가능) 창 위치와 크기는 화면 범위 내로 제한
 * `개선` Node bridge 접근성 모듈에 dump (400 노드, 32 단계, 256 KiB 를 상한으로 하는 텍스트, JSON 또는 XML 창 스냅샷), explain (선택자 서술자의 필터별 일치 수), screenshot (Android 11 이상의 접근성 스크린샷, 배율, 영역, 형식, 품질 옵션과 함께 일회성 캐시 파일 또는 작업 공간 파일로 전달) 을 추가하고, app 모듈에 currentWindow (현재 패키지, 액티비티, 창 목록) 를 추가
 * `개선` Node bridge 에 작업 디렉터리를 루트로 하는 files 모듈 (list, stat, read, write, mkdir, rename, delete) 을 추가: 경로는 정규화된 상대 경로여야 하고, 심볼릭 링크로 외부에 나갈 수 없으며, 읽기와 쓰기는 UTF-8 또는 base64 내용으로 1 MiB 까지, 목록은 2000 항목까지이고, 쓰기와 삭제에는 전용 files.write 와 files.delete 능력 토큰이 필요하며, 변경 후 작업 공간 파일 관리자가 새로 고쳐짐
 * `개선` Node bridge 에 console 모듈 추가 (console.tail 은 전역 콘솔의 최신 항목을 lines 최대 500, sinceId, level 과 256 KiB 예산으로 읽음), engines.execScript 와 execScriptFile 에 captureConsole 과 waitMs 옵션 추가 (스크립트 종료를 기다려 해당 id 창 안의 콘솔 출력을 수집, captureMode 는 global-window), 콘솔은 최대 4096 개의 로그를 보관 (초과분은 가장 오래된 것부터 삭제, 콘솔 뷰는 항목 id 로 갱신), ConsoleImpl 이 addLogListener 와 removeLogListener 를 공개
@@ -554,6 +559,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 선택자 쿼리 (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` 및 사용 중단된 `findOne()` / `waitFor()`) 가 폴링 계획 (`PollPolicy`: 제한 시간, 간격, 횟수, 백오프) 으로 실행되며 기본 동작은 변함없음 (간격 50 ms, 제한 시간 0 이하는 무기한 대기); 무제한으로 대기하는 메서드는 KDoc 에 "영원히 차단될 수 있음" 을 명시; `findOnUiThread` 플래그가 설정된 경우 UI 스레드에 게시된 검색은 쿼리의 제한 시간까지만 기다리고 초과 시 읽기 쉬운 오류로 실패함 (`findOne(timeout)`); 무제한 쿼리 (`untilFind` 등) 는 중단 가능한 대기로 바뀌어 스크립트를 중지하면 종료됨
 * `개선` `UiObject` 분할: `pickup` / `detect` 결과 유형의 별칭 표, 피커, 이름으로 노드 메서드를 호출하는 인터셉터를 `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`) 으로, `summary()` / `toString()` / `isSimilar()` 을 `UiObjectSummary` 로 이동; `UiObject.fingerprint()` 추가 (경계, 텍스트, 설명, 클래스명, 자식 수와 주요 불리언 속성의 해시, 형제나 자식은 순회하지 않음); `parent()` 로 도달한 노드의 `indexInParent()` 는 처음 사용할 때 계산; 레이아웃 검사기의 코드 생성기 (`CodeGenerator` / `ReadOnlyUiObject`) 를 Kotlin 으로 변환, 후자는 `UiNode` 를 직접 구현하는 스냅숏 뷰가 됨; 스크립트에 보이는 API 와 동작은 변함없음
 * `개선` 런타임 간 재사용 (Roadmap P5.4): Python Host 의 선택자 기능 (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) 과 Node Bridge 의 `accessibility` 모듈 (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) 이 스크립트 런타임의 접근성 코어 (`UiNode` 순회, 선택자 필터, 창 루트 공급자, 노드 수명 주기) 를 사용하도록 바뀌었으며 두 JSON 와이어 프로토콜은 필드 단위로 그대로임; Node Bridge 의 검색은 Android 13 미만에서 도중에 방문한 노드를 더 이상 누수하지 않음; Python Host 의 접근성 스크린샷은 공유 `A11yScreenshotter` 로 단일 시도를 수행함 (Host 의 제한된 재시도와 4 초 기한은 유지)
+* `개선` 각 스크립트 런타임이 독립적인 콘솔 (자체 로그 항목과 플로팅 창, 로그는 전역 콘솔로도 전달) 을 가지며 플로팅 창은 현재 스크립트의 출력만 표시 (Auto.js 4 와 동일), 같은 이름의 스크립트를 다시 실행하면 이전 실행이 남긴 플로팅 창을 대체; 로그 항목은 원본 내용과 타임스탬프를 저장하고 시간 접두사는 각 뷰가 필요 시 렌더링 (플로팅 창은 기본 숨김, 로그 페이지는 설정에서 활성화 가능); Node bridge `console.tail` 항목에 `time` 필드 (밀리초 타임스탬프) 추가, `text` 는 시간 접두사를 유지
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -784,7 +790,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -835,7 +841,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026/09/08 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 8 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1001,7 +1007,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026/03/18.
+데이터 갱신일: 2026 년 3 월 18 일.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 

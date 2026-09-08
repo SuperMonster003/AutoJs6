@@ -17,6 +17,16 @@
             android:title="@string/text_export" />
 
     <item
+            android:id="@+id/action_settings"
+            android:icon="@drawable/ic_settings_black_48dp"
+            android:title="@string/text_settings" />
+
+    <item
+            android:id="@+id/action_input_bar"
+            android:checkable="true"
+            android:title="@string/text_input_bar" />
+
+    <item
             android:id="@+id/action_typescript_console"
             android:checkable="true"
             android:title="@string/text_typescript_console"

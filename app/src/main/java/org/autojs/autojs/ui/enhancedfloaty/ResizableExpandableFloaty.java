@@ -37,6 +37,31 @@ public interface ResizableExpandableFloaty {
 
     boolean isInitialExpanded();
 
+    /**
+     * Called on the UI thread once the window view is attached to the window manager
+     * (the window bridge is available from now on).
+     * zh-CN: 窗口视图附加到窗口管理器后在 UI 线程回调 (此后 window bridge 可用).
+     */
+    default void onAttachedToWindow(ResizableExpandableFloatyWindow window) {
+        /* Empty body. */
+    }
+
+    /**
+     * Called on the UI thread when the window is closed (by the floaty itself or by the service being destroyed).
+     * zh-CN: 窗口关闭 (由浮动窗口自身或服务销毁触发) 时在 UI 线程回调.
+     */
+    default void onDetachedFromWindow(ResizableExpandableFloatyWindow window) {
+        /* Empty body. */
+    }
+
+    /**
+     * @return true when the back key was consumed and the window should not collapse.
+     * zh-CN: 返回 true 表示已消费返回键, 窗口不应折叠.
+     */
+    default boolean onBackPressed(ResizableExpandableFloatyWindow window) {
+        return false;
+    }
+
     abstract class AbstractResizableExpandableFloaty implements ResizableExpandableFloaty {
         private float mCollapsedHiddenWidthRadio = 0f;
         private float mCollapsedViewUnpressedAlpha = 0.7f;

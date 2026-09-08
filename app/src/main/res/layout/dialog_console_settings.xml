@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+        <!-- Show time -->
+
+        <LinearLayout
+                android:id="@+id/row_time_visible"
+                style="@style/ConsoleSettingsRow">
+
+            <TextView
+                    style="@style/ConsoleSettingsRowTitle"
+                    android:text="@string/text_time_visible" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorSwitch
+                    android:id="@+id/switch_time_visible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:checked="true" />
+
+        </LinearLayout>
+
+        <!-- Time format -->
+
+        <LinearLayout
+                android:id="@+id/row_time_format"
+                style="@style/ConsoleSettingsRow">
+
+            <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                <TextView
+                        style="@style/ConsoleSettingsRowTitle"
+                        android:layout_width="match_parent"
+                        android:text="@string/text_time_format" />
+
+                <TextView
+                        android:id="@+id/text_time_format_value"
+                        style="@style/ConsoleSettingsRowSubtitle"
+                        tools:text="HH:mm:ss.SSS" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Log coloring -->
+
+        <LinearLayout
+                android:id="@+id/row_colorful"
+                style="@style/ConsoleSettingsRow">
+
+            <TextView
+                    style="@style/ConsoleSettingsRowTitle"
+                    android:text="@string/text_log_coloring" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorSwitch
+                    android:id="@+id/switch_colorful"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:checked="true" />
+
+        </LinearLayout>
+
+        <!-- Text size -->
+
+        <LinearLayout
+                style="@style/ConsoleSettingsRow"
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/text_text_size_value"
+                    style="@style/ConsoleSettingsRowTitle"
+                    android:layout_width="match_parent"
+                    tools:text="Text size: 14" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorSeekBar
+                    android:id="@+id/seek_text_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="48"
+                    tools:progress="6" />
+
+        </LinearLayout>
+
+        <!-- Window-only options -->
+
+        <LinearLayout
+                android:id="@+id/window_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <LinearLayout
+                    android:id="@+id/row_avoid_status_bar"
+                    style="@style/ConsoleSettingsRow">
+
+                <TextView
+                        style="@style/ConsoleSettingsRowTitle"
+                        android:text="@string/text_avoid_status_bar" />
+
+                <org.autojs.autojs.theme.widget.ThemeColorSwitch
+                        android:id="@+id/switch_avoid_status_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:checked="true" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    style="@style/ConsoleSettingsRow"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:id="@+id/text_title_opacity_value"
+                        style="@style/ConsoleSettingsRowTitle"
+                        android:layout_width="match_parent"
+                        tools:text="Title bar opacity: 100%" />
+
+                <org.autojs.autojs.theme.widget.ThemeColorSeekBar
+                        android:id="@+id/seek_title_opacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:max="100"
+                        tools:progress="100" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    style="@style/ConsoleSettingsRow"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:id="@+id/text_content_opacity_value"
+                        style="@style/ConsoleSettingsRowTitle"
+                        android:layout_width="match_parent"
+                        tools:text="Content opacity: 100%" />
+
+                <org.autojs.autojs.theme.widget.ThemeColorSeekBar
+                        android:id="@+id/seek_content_opacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:max="100"
+                        tools:progress="100" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -390,6 +390,7 @@
     <string name="error_invalid_plugin_mount_point">Invalid mount point format</string>
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
+    <string name="error_invalid_time_format_pattern">Invalid time format pattern</string>
     <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 port must be specified as \"[ipv6]:port\".</string>
     <string name="error_lua_runtime_ambiguous">Multiple compatible Lua runtime plugins are enabled. Disable extra Lua runtime providers in Plugin Center, then try again.</string>
@@ -875,6 +876,7 @@
     <string name="text_auto_rename">Auto rename</string>
     <string name="text_available">Available</string>
     <string name="text_available_windows">Available windows</string>
+    <string name="text_avoid_status_bar">Avoid status bar</string>
     <string name="text_back">Back</string>
     <string name="text_background_color">Background color</string>
     <string name="text_broadcast_action">Action</string>
@@ -988,7 +990,10 @@
     <string name="text_connection_cannot_be_established">Connection cannot be established</string>
     <string name="text_connection_failed">Connection failed</string>
     <string name="text_console">Console</string>
+    <string name="text_console_input_hint">Type a line and press Enter</string>
+    <string name="text_console_resize_mode_hint">Drag to resize, tap to finish</string>
     <string name="text_content">Content</string>
+    <string name="text_content_opacity">Content opacity</string>
     <string name="text_continue">Continue</string>
     <string name="text_continue_with_plugin_template">Continue with plugin template</string>
     <string name="text_control">Control</string>
@@ -1028,6 +1033,7 @@
     <string name="text_current">Current</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
+    <string name="text_custom">Custom</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
@@ -1308,6 +1314,7 @@
     <string name="text_adopted_by_first_event">adopted from its first event (onServiceConnected not invoked)</string>
     <string name="text_in_progress">In progress</string>
     <string name="text_info">Information</string>
+    <string name="text_input_bar">Input bar</string>
     <string name="text_insist_on_record">Record</string>
     <string name="text_inspect_layout">Inspect layout</string>
     <string name="text_inspect_layout_bounds">Inspect layout bounds</string>
@@ -1370,6 +1377,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
+    <string name="text_log_coloring">Log coloring</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login succeeded</string>
@@ -1387,6 +1395,7 @@
     <string name="text_maximize">Maximize</string>
     <string name="text_min_version">Minimum version</string>
     <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
+    <string name="text_minimize">Minimize</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
     <string name="text_monthly_task">Monthly task</string>
     <string name="text_more">More</string>
@@ -1440,6 +1449,7 @@
     <string name="text_no_release_notes">No release notes</string>
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">No root access</string>
+    <string name="text_no_script_waiting_for_console_input">No script is waiting for input</string>
     <string name="text_no_scripts_to_stop_running">No scripts to stop running</string>
     <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
@@ -1712,6 +1722,7 @@
     <string name="text_reset_succeed">Reset succeeded</string>
     <string name="text_reset_to_initial_content">Reset initially</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset is only for samples</string>
+    <string name="text_resize">Resize</string>
     <string name="text_resolving_plugin_artifacts">Resolving plugin artifacts</string>
     <string name="text_resolving_plugin_native_libraries">Resolving plugin native libraries</string>
     <string name="text_restart">Restart</string>
@@ -1891,10 +1902,14 @@
     <string name="text_theme_preview_use">Use</string>
     <string name="text_theme_previewer">Theme previewer</string>
     <string name="text_time">Time</string>
+    <string name="text_time_format">Time format</string>
+    <string name="text_time_format_pattern_hint">e.g. HH:mm:ss.SSS</string>
+    <string name="text_time_visible">Show time</string>
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_backend_title">Timed task scheduling engine</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_title">Title</string>
+    <string name="text_title_bar_opacity">Title bar opacity</string>
     <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_toggle_all">Toggle all</string>
     <string name="text_tools">Tools</string>

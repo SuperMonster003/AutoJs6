@@ -149,6 +149,7 @@
     <string name="key_editor_log_button_behavior" translatable="false">key_$_editor_log_button_behavior</string>
     <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
     <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
+    <string name="key_editor_log_panel_input_bar_visible" translatable="false">key_$_editor_log_panel_input_bar_visible</string>
     <string name="key_editor_log_panel_typescript_console_visible" translatable="false">key_$_editor_log_panel_typescript_console_visible</string>
     <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
     <string name="key_editor_pinch_to_zoom_change_text_size_enabled" translatable="false">key_$_editor_pinch_to_zoom_change_text_size_enabled</string>
@@ -205,6 +206,11 @@
     <string name="key_launcher_icon_adaptive" translatable="false">key_$_launcher_icon_adaptive</string>
     <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
     <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
+    <string name="key_log_activity_input_bar_visible" translatable="false">key_$_log_activity_input_bar_visible</string>
+    <string name="key_log_activity_log_coloring" translatable="false">key_$_log_activity_log_coloring</string>
+    <string name="key_log_activity_text_size" translatable="false">key_$_log_activity_text_size</string>
+    <string name="key_log_activity_time_format" translatable="false">key_$_log_activity_time_format</string>
+    <string name="key_log_activity_time_visible" translatable="false">key_$_log_activity_time_visible</string>
     <string name="key_log_activity_typescript_console_visible" translatable="false">key_$_log_activity_typescript_console_visible</string>
     <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
     <string name="key_night_mode" translatable="false">key_$_night_mode</string>

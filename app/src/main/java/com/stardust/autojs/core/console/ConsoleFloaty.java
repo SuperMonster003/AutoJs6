@@ -97,17 +97,31 @@ public class ConsoleFloaty extends ResizableExpandableFloaty.AbstractResizableEx
     }
 
     private void setWindowOperationIconListeners(View view, final ResizableExpandableFloatyWindow window) {
-        view.findViewById(R.id.close).setOnClickListener(v -> window.close());
-        view.findViewById(R.id.move_or_resize).setOnClickListener(v -> {
-            if (mMoveCursor.getVisibility() == View.VISIBLE) {
-                mMoveCursor.setVisibility(View.GONE);
-                mResizer.setVisibility(View.GONE);
-            } else {
-                mMoveCursor.setVisibility(View.VISIBLE);
-                mResizer.setVisibility(View.VISIBLE);
-            }
-        });
-        view.findViewById(R.id.minimize).setOnClickListener(v -> window.collapse());
+        // The current floating console layout has a single "more" menu instead of these buttons;
+        // the legacy ids are kept only so this compat class keeps compiling.
+        View close = view.findViewById(R.id.close);
+        if (close != null) {
+            close.setOnClickListener(v -> window.close());
+        }
+        View moveOrResize = view.findViewById(R.id.move_or_resize);
+        if (moveOrResize != null) {
+            moveOrResize.setOnClickListener(v -> {
+                if (mMoveCursor == null || mResizer == null) {
+                    return;
+                }
+                if (mMoveCursor.getVisibility() == View.VISIBLE) {
+                    mMoveCursor.setVisibility(View.GONE);
+                    mResizer.setVisibility(View.GONE);
+                } else {
+                    mMoveCursor.setVisibility(View.VISIBLE);
+                    mResizer.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        View minimize = view.findViewById(R.id.minimize);
+        if (minimize != null) {
+            minimize.setOnClickListener(v -> window.collapse());
+        }
     }
 
     @Nullable

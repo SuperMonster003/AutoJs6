@@ -395,6 +395,7 @@
     <string name="error_invalid_plugin_mount_point">Formato de punto de montaje no valido</string>
     <string name="error_invalid_rest_compass">Compás de reposo inválido: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elemento de mapa selector no válido: { %s: %s (%s) }</string>
+    <string name="error_invalid_time_format_pattern">Formato de hora no válido</string>
     <string name="error_ip_address_should_not_be_empty">La dirección IP no puede estar vacía</string>
     <string name="error_ipv6_port_requires_brackets">El puerto IPv6 debe especificarse con el formato \"[ipv6]:port\".</string>
     <string name="error_lua_runtime_ambiguous">Hay varios plugins de Lua Runtime compatibles habilitados. Deshabilita los providers adicionales de Lua Runtime en el Centro de plugins y vuelve a intentarlo.</string>
@@ -880,6 +881,7 @@
     <string name="text_auto_rename">Renombrar automaticamente</string>
     <string name="text_available">Disponible</string>
     <string name="text_available_windows">Ventanas disponibles</string>
+    <string name="text_avoid_status_bar">Evitar la barra de estado</string>
     <string name="text_back">Volver</string>
     <string name="text_background_color">Color de fondo</string>
     <string name="text_broadcast_action">Acción</string>
@@ -992,7 +994,10 @@
     <string name="text_connection_cannot_be_established">No se puede establecer la conexión</string>
     <string name="text_connection_failed">Conexión fallida</string>
     <string name="text_console">Consola</string>
+    <string name="text_console_input_hint">Escriba una línea y pulse Intro</string>
+    <string name="text_console_resize_mode_hint">Arrastre para redimensionar, toque para terminar</string>
     <string name="text_content">Contenido</string>
+    <string name="text_content_opacity">Opacidad del contenido</string>
     <string name="text_continue">Continuar</string>
     <string name="text_continue_with_plugin_template">Continuar con la plantilla del complemento</string>
     <string name="text_control">Control</string>
@@ -1032,6 +1037,7 @@
     <string name="text_current">Actual</string>
     <string name="text_current_page_configuration">Configuracion de la página actual</string>
     <string name="text_current_version">Versión actual</string>
+    <string name="text_custom">Personalizado</string>
     <string name="text_daily_task">Tarea diaria</string>
     <string name="text_date">Fecha</string>
     <string name="text_day1">Lunes</string>
@@ -1312,6 +1318,7 @@
     <string name="text_adopted_by_first_event">adoptado a partir de su primer evento (onServiceConnected no invocado)</string>
     <string name="text_in_progress">En curso</string>
     <string name="text_info">Información</string>
+    <string name="text_input_bar">Barra de entrada</string>
     <string name="text_insist_on_record">Registro</string>
     <string name="text_inspect_layout">Inspeccionar el diseño</string>
     <string name="text_inspect_layout_bounds">Inspeccionar los límites del diseño</string>
@@ -1374,6 +1381,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Cargando...</string>
     <string name="text_locate_current_theme_color">Localizar color del tema actual</string>
     <string name="text_log">Registrar</string>
+    <string name="text_log_coloring">Coloreado de registros</string>
     <string name="text_logging_in">Iniciar sesión</string>
     <string name="text_login">Inicio de sesión</string>
     <string name="text_login_succeed">Inicio de sesión exitoso</string>
@@ -1391,6 +1399,7 @@
     <string name="text_maximize">Maximizar</string>
     <string name="text_min_version">Versión mínima</string>
     <string name="text_min_version_of_vscode_vsc_ext">Versión mínima de la extensión VSCode</string>
+    <string name="text_minimize">Minimizar</string>
     <string name="text_mobile_qq_not_installed">\"QQ móvil\" no instalado</string>
     <string name="text_monthly_task">Tarea mensual</string>
     <string name="text_more">Más</string>
@@ -1444,6 +1453,7 @@
     <string name="text_no_release_notes">Sin notas de la version</string>
     <string name="text_no_root">No root</string>
     <string name="text_no_root_access">Sin acceso root</string>
+    <string name="text_no_script_waiting_for_console_input">Ningún script está esperando una entrada</string>
     <string name="text_no_scripts_to_stop_running">No hay scripts que dejen de ejecutarse</string>
     <string name="text_no_search_results_for_keyword">No se encontraron resultados para:\n\n%1$s</string>
     <string name="text_no_symbols_hint">La configuracion actual esta vacia.\nToca aquí para crear un simbolo.</string>
@@ -1716,6 +1726,7 @@
     <string name="text_reset_succeed">Restablecer con éxito</string>
     <string name="text_reset_to_initial_content">Restablecer inicialmente</string>
     <string name="text_reset_to_initial_content_only_for_assets">El restablecimiento es sólo para las muestras</string>
+    <string name="text_resize">Cambiar tamaño</string>
     <string name="text_resolving_plugin_artifacts">Resolviendo artefactos del complemento</string>
     <string name="text_resolving_plugin_native_libraries">Resolviendo bibliotecas nativas del plugin</string>
     <string name="text_restart">Reiniciar</string>
@@ -1895,10 +1906,14 @@
     <string name="text_theme_preview_use">Usar</string>
     <string name="text_theme_previewer">Vista previa de temas</string>
     <string name="text_time">Tiempo</string>
+    <string name="text_time_format">Formato de hora</string>
+    <string name="text_time_format_pattern_hint">p. ej. HH:mm:ss.SSS</string>
+    <string name="text_time_visible">Mostrar hora</string>
     <string name="text_timed_task">Tarea cronometrada</string>
     <string name="text_timed_task_backend_title">Motor de programación de tareas temporizadas</string>
     <string name="text_timed_task_timing">Cronometraje</string>
     <string name="text_title">Titulo</string>
+    <string name="text_title_bar_opacity">Opacidad de la barra de título</string>
     <string name="text_to_be_chosen">Por elegir</string>
     <string name="text_toggle_all">Alternar todo</string>
     <string name="text_tools">Herramientas</string>

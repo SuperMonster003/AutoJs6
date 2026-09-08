@@ -127,6 +127,11 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
         ::setBackgroundAlpha.name,
         ::setExitOnClose.name,
         ::setTouchable.name,
+        ::setTimeVisible.name,
+        ::setTimeFormat.name,
+        ::setColorful.name,
+        ::setAvoidStatusBar.name,
+        ::setInputVisible.name,
         ::setGlobalLogConfig.name,
         ::resetGlobalLogConfig.name,
         ::launch.name,
@@ -540,6 +545,41 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
                 1 -> scriptRuntime.console.setTouchable(coerceBoolean(it[0], true))
                 0 -> scriptRuntime.console.setTouchable()
             }
+            scriptRuntime.consoleProxyObject
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setTimeVisible(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsAtMost(args, 1) {
+            scriptRuntime.console.setTimeVisible(if (it.isEmpty()) true else coerceBoolean(it[0], true))
+            scriptRuntime.consoleProxyObject
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setTimeFormat(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsAtMost(args, 1) {
+            scriptRuntime.console.setTimeFormat(if (it.isEmpty() || it[0].isJsNullish()) null else coerceString(it[0]))
+            scriptRuntime.consoleProxyObject
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setColorful(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsAtMost(args, 1) {
+            scriptRuntime.console.setColorful(if (it.isEmpty()) true else coerceBoolean(it[0], true))
+            scriptRuntime.consoleProxyObject
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setAvoidStatusBar(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsAtMost(args, 1) {
+            scriptRuntime.console.setAvoidStatusBar(if (it.isEmpty()) true else coerceBoolean(it[0], true))
+            scriptRuntime.consoleProxyObject
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setInputVisible(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsAtMost(args, 1) {
+            scriptRuntime.console.setInputVisible(if (it.isEmpty()) true else coerceBoolean(it[0], true))
             scriptRuntime.consoleProxyObject
         }
 

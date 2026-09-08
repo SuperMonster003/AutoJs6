@@ -396,6 +396,7 @@
     <string name="error_invalid_plugin_mount_point">マウントポイント形式が不正です</string>
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタマップ要素です. { %s: %s (%s) } です</string>
+    <string name="error_invalid_time_format_pattern">時刻の形式が無効です</string>
     <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 のポートは \"[ipv6]:port\" 形式で指定する必要があります.</string>
     <string name="error_lua_runtime_ambiguous">互換性のある Lua Runtime プラグインが複数有効です. プラグインセンターで余分な Lua Runtime provider を無効にしてから, もう一度お試しください.</string>
@@ -881,6 +882,7 @@
     <string name="text_auto_rename">自動リネーム</string>
     <string name="text_available">利用可能</string>
     <string name="text_available_windows">使用可能なウィンドウ</string>
+    <string name="text_avoid_status_bar">ステータスバーを避ける</string>
     <string name="text_back">戻る</string>
     <string name="text_background_color">背景色</string>
     <string name="text_broadcast_action">動作</string>
@@ -993,7 +995,10 @@
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_connection_failed">接続に失敗しました</string>
     <string name="text_console">コンソール</string>
+    <string name="text_console_input_hint">入力して Enter を押す</string>
+    <string name="text_console_resize_mode_hint">ドラッグでサイズ変更, タップで完了</string>
     <string name="text_content">内容</string>
+    <string name="text_content_opacity">コンテンツの不透明度</string>
     <string name="text_continue">続行</string>
     <string name="text_continue_with_plugin_template">プラグインテンプレートで続行</string>
     <string name="text_control">制御</string>
@@ -1033,6 +1038,7 @@
     <string name="text_current">現在</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
+    <string name="text_custom">カスタム</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
     <string name="text_day1">月</string>
@@ -1313,6 +1319,7 @@
     <string name="text_adopted_by_first_event">最初のイベントから採用 (onServiceConnected 未呼び出し)</string>
     <string name="text_in_progress">進行中</string>
     <string name="text_info">インフォメーション</string>
+    <string name="text_input_bar">入力バー</string>
     <string name="text_insist_on_record">記録</string>
     <string name="text_inspect_layout">レイアウトの検査</string>
     <string name="text_inspect_layout_bounds">レイアウト境界の検査</string>
@@ -1375,6 +1382,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">読み込み中...</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
     <string name="text_log">ログ</string>
+    <string name="text_log_coloring">ログの色分け</string>
     <string name="text_logging_in">ログイン</string>
     <string name="text_login">ログイン</string>
     <string name="text_login_succeed">ログインに成功しました</string>
@@ -1392,6 +1400,7 @@
     <string name="text_maximize">最大化</string>
     <string name="text_min_version">最小バージョン</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
+    <string name="text_minimize">最小化</string>
     <string name="text_mobile_qq_not_installed">モバイル QQ がインストールされていない</string>
     <string name="text_monthly_task">毎月のタスク</string>
     <string name="text_more">詳細</string>
@@ -1445,6 +1454,7 @@
     <string name="text_no_release_notes">リリースノートなし</string>
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
+    <string name="text_no_script_waiting_for_console_input">入力を待っているスクリプトはありません</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
     <string name="text_no_search_results_for_keyword">一致する項目が見つかりません:\n\n%1$s</string>
     <string name="text_no_symbols_hint">現在の設定は空です.\nここをタップして記号を作成します.</string>
@@ -1717,6 +1727,7 @@
     <string name="text_reset_succeed">リセット成功</string>
     <string name="text_reset_to_initial_content">初期リセット</string>
     <string name="text_reset_to_initial_content_only_for_assets">リセットはサンプルのみ</string>
+    <string name="text_resize">サイズ変更</string>
     <string name="text_resolving_plugin_artifacts">プラグイン成果物を解決しています</string>
     <string name="text_resolving_plugin_native_libraries">プラグインのネイティブライブラリを解決中</string>
     <string name="text_restart">再起動</string>
@@ -1896,10 +1907,14 @@
     <string name="text_theme_preview_use">使用</string>
     <string name="text_theme_previewer">テーマプレビュー</string>
     <string name="text_time">時間</string>
+    <string name="text_time_format">時刻の形式</string>
+    <string name="text_time_format_pattern_hint">例: HH:mm:ss.SSS</string>
+    <string name="text_time_visible">時刻を表示</string>
     <string name="text_timed_task">時間指定タスク</string>
     <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>
     <string name="text_timed_task_timing">タイミング</string>
     <string name="text_title">タイトル</string>
+    <string name="text_title_bar_opacity">タイトルバーの不透明度</string>
     <string name="text_to_be_chosen">未選択</string>
     <string name="text_toggle_all">全て切替</string>
     <string name="text_tools">ツール</string>

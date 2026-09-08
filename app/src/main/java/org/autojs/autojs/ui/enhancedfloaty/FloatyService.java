@@ -7,8 +7,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
-import org.opencv.core.Size;
-
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -22,8 +20,6 @@ public class FloatyService extends Service {
 
     private WindowManager windowManager;
 
-    public Size initialSize;
-
     public FloatyService() {
         /* Empty constructor. */
     }
@@ -36,6 +32,11 @@ public class FloatyService extends Service {
 
     public static void removeWindow(FloatyWindow window) {
         windows.remove(window);
+    }
+
+    /** Whether the service process has created its window manager and can host windows right now. zh-CN: 服务是否已就绪并可立即承载窗口. */
+    public static boolean isRunning() {
+        return instance != null;
     }
 
     @Override
@@ -60,12 +61,6 @@ public class FloatyService extends Service {
         instance = null;
         for (FloatyWindow delegate : windows) {
             delegate.onServiceDestroy(this);
-        }
-    }
-
-    public static void setInitialMeasure(@Nullable Size size) {
-        if (instance != null) {
-            instance.initialSize = size;
         }
     }
 

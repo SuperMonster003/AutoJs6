@@ -391,6 +391,7 @@
     <string name="error_invalid_plugin_mount_point">挂载点格式不合法</string>
     <string name="error_invalid_rest_compass">无效的剩余罗盘参数: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">不合法的选择器集合元素: { %s: %s (%s) }</string>
+    <string name="error_invalid_time_format_pattern">无效的时间格式</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可为空</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 端口必须使用 \"[ipv6]:port\" 格式.</string>
     <string name="error_lua_runtime_ambiguous">检测到多个兼容且已启用的 Lua 运行时插件. 请在插件中心禁用多余的 Lua 运行时 Provider, 然后重试.</string>
@@ -876,6 +877,7 @@
     <string name="text_auto_rename">自动重命名</string>
     <string name="text_available">可用</string>
     <string name="text_available_windows">可用窗口</string>
+    <string name="text_avoid_status_bar">避开状态栏</string>
     <string name="text_back">返回</string>
     <string name="text_background_color">背景色</string>
     <string name="text_broadcast_action">动作 (Action)</string>
@@ -989,7 +991,10 @@
     <string name="text_connection_cannot_be_established">无法建立连接</string>
     <string name="text_connection_failed">连接失败</string>
     <string name="text_console">控制台</string>
+    <string name="text_console_input_hint">输入内容并回车</string>
+    <string name="text_console_resize_mode_hint">拖动调整尺寸, 轻触完成</string>
     <string name="text_content">内容</string>
+    <string name="text_content_opacity">内容区不透明度</string>
     <string name="text_continue">继续</string>
     <string name="text_continue_with_plugin_template">继续使用插件模板</string>
     <string name="text_control">控制</string>
@@ -1029,6 +1034,7 @@
     <string name="text_current">当前</string>
     <string name="text_current_page_configuration">当前页面配置</string>
     <string name="text_current_version">当前版本</string>
+    <string name="text_custom">自定义</string>
     <string name="text_daily_task">每日任务</string>
     <string name="text_date">日期</string>
     <string name="text_day1">一</string>
@@ -1309,6 +1315,7 @@
     <string name="text_adopted_by_first_event">由首个事件采纳 (onServiceConnected 未回调)</string>
     <string name="text_in_progress">处理中</string>
     <string name="text_info">信息</string>
+    <string name="text_input_bar">输入框</string>
     <string name="text_insist_on_record">录制</string>
     <string name="text_inspect_layout">布局分析</string>
     <string name="text_inspect_layout_bounds">布局范围分析</string>
@@ -1371,6 +1378,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加载中...</string>
     <string name="text_locate_current_theme_color">定位当前主题色</string>
     <string name="text_log">日志</string>
+    <string name="text_log_coloring">日志着色</string>
     <string name="text_logging_in">登录中</string>
     <string name="text_login">登录</string>
     <string name="text_login_succeed">登录成功</string>
@@ -1388,6 +1396,7 @@
     <string name="text_maximize">最大化</string>
     <string name="text_min_version">最低版本</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
+    <string name="text_minimize">最小化</string>
     <string name="text_mobile_qq_not_installed">未安装 \"手机QQ\"</string>
     <string name="text_monthly_task">每月任务</string>
     <string name="text_more">更多</string>
@@ -1441,6 +1450,7 @@
     <string name="text_no_release_notes">无发行说明</string>
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">无 root 权限</string>
+    <string name="text_no_script_waiting_for_console_input">当前没有脚本在等待输入</string>
     <string name="text_no_scripts_to_stop_running">无运行中的脚本</string>
     <string name="text_no_search_results_for_keyword">未找到匹配项:\n\n%1$s</string>
     <string name="text_no_symbols_hint">当前配置为空.\n点击此处可新建符号.</string>
@@ -1713,6 +1723,7 @@
     <string name="text_reset_succeed">重置成功</string>
     <string name="text_reset_to_initial_content">重置为初始内容</string>
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例代码文件</string>
+    <string name="text_resize">调整尺寸</string>
     <string name="text_resolving_plugin_artifacts">正在解析插件构建资源</string>
     <string name="text_resolving_plugin_native_libraries">正在解析插件原生库</string>
     <string name="text_restart">重启</string>
@@ -1892,10 +1903,14 @@
     <string name="text_theme_preview_use">使用</string>
     <string name="text_theme_previewer">主题预览器</string>
     <string name="text_time">时间</string>
+    <string name="text_time_format">时间格式</string>
+    <string name="text_time_format_pattern_hint">例如 HH:mm:ss.SSS</string>
+    <string name="text_time_visible">显示时间</string>
     <string name="text_timed_task">定时任务</string>
     <string name="text_timed_task_backend_title">定时任务调度引擎</string>
     <string name="text_timed_task_timing">定时</string>
     <string name="text_title">标题</string>
+    <string name="text_title_bar_opacity">标题栏不透明度</string>
     <string name="text_to_be_chosen">待选择</string>
     <string name="text_toggle_all">全选切换</string>
     <string name="text_tools">工具</string>

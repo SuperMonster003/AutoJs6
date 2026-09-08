@@ -14,7 +14,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator
 import org.autojs.autojs.core.accessibility.monitor.CloseableManager
 import org.autojs.autojs.core.activity.ActivityInfoProvider
-import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.looper.Loopers
@@ -249,7 +249,7 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     @JvmField
     @ScriptVariable
-    val console: GlobalConsole = builder.getConsole()
+    val console: ConsoleImpl = builder.getConsole()
 
     internal val consoleTimeTable = ConsoleTimeTable(this)
 
@@ -759,6 +759,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { images.cancelPendingQuantizations() }
 
         ignoresException {
+            console.onRuntimeExit()
             if (console.configurator.isExitOnClose) {
                 console.hideDelayed()
             }
@@ -1055,7 +1056,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         lateinit var appUtils: AppUtils
             private set
 
-        private lateinit var mConsole: GlobalConsole
+        private lateinit var mConsole: ConsoleImpl
         private lateinit var mUiHandler: UiHandler
         private lateinit var mAccessibilityBridge: AccessibilityBridge
 
@@ -1065,7 +1066,7 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         fun getUiHandler() = mUiHandler
 
-        fun setConsole(console: GlobalConsole) = also { mConsole = console }
+        fun setConsole(console: ConsoleImpl) = also { mConsole = console }
 
         fun getConsole() = mConsole
 

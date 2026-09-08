@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/action_minimize"
+            android:title="@string/text_minimize" />
+
+    <item
+            android:id="@+id/action_resize"
+            android:checkable="true"
+            android:title="@string/text_resize" />
+
+    <item
+            android:id="@+id/action_input_bar"
+            android:checkable="true"
+            android:title="@string/text_input_bar" />
+
+    <item
+            android:id="@+id/action_clear"
+            android:title="@string/text_clear" />
+
+    <item
+            android:id="@+id/action_copy"
+            android:title="@string/text_copy" />
+
+    <item
+            android:id="@+id/action_settings"
+            android:title="@string/text_settings" />
+
+    <item
+            android:id="@+id/action_close"
+            android:title="@string/text_close" />
+
+</menu>

@@ -1,56 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/console_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
         android:orientation="vertical">
 
     <LinearLayout
-            android:id="@+id/input_container"
+            android:id="@+id/title_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/console_title_bar_height"
+            android:background="@color/floating_console_title_bar_bg"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="4dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
-        <EditText
-                android:id="@+id/input"
+        <TextView
+                android:id="@+id/title"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
-                android:fontFamily="monospace"
-                android:hint="@string/text_typescript_console_hint"
-                android:imeOptions="actionSend"
-                android:inputType="textVisiblePassword"
+                android:ellipsize="end"
+                android:gravity="center_vertical|start"
                 android:maxLines="1"
-                android:singleLine="true"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textColorHint="?android:attr/textColorHint"
-                android:textSize="14sp" />
+                android:text="@string/text_console"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
 
-        <ImageButton
-                android:id="@+id/submit"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="4dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_run"
-                android:padding="12dp"
+        <ImageView
+                android:id="@+id/more"
+                android:layout_width="@dimen/console_title_bar_height"
+                android:layout_height="@dimen/console_title_bar_height"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_more"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_play_arrow_white_48dp"
-                android:tint="@color/dialog_button_finish" />
+                android:src="@drawable/ic_more_vert_24dp"
+                app:tint="@android:color/white" />
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.ThemeColorRecyclerView
-            android:id="@+id/log_list"
+    <FrameLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1">
+
+        <LinearLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <androidx.recyclerview.widget.ThemeColorRecyclerView
+                    android:id="@+id/log_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+            <LinearLayout
+                    android:id="@+id/input_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                <EditText
+                        android:id="@+id/input"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:hint="@string/text_console_input_hint"
+                        android:imeOptions="actionSend|flagNoExtractUi"
+                        android:importantForAutofill="no"
+                        android:inputType="textVisiblePassword"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textColorHint="?android:attr/textColorHint"
+                        android:textSize="14sp" />
+
+                <ImageButton
+                        android:id="@+id/submit"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="4dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_send"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_send_black_48dp"
+                        app:tint="@color/dialog_button_finish" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

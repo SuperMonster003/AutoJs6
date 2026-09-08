@@ -12,8 +12,20 @@ import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
  */
 public class DragGesture extends GestureDetector.SimpleOnGestureListener {
 
+    /**
+     * Adjusts the position a drag is about to apply (for example, to keep a window on screen).
+     * zh-CN: 调整拖动即将应用的位置 (例如让窗口保持在屏幕内).
+     */
+    public interface PositionFilter {
+        int[] filter(int x, int y);
+    }
+
     protected WindowBridge mWindowBridge;
     protected View mView;
+
+    private PositionFilter mPositionFilter;
+    private Runnable mOnDragEndListener;
+    private boolean mDragged = false;
 
     private float mKeepToSideHiddenWidthRadio = 0.5f;
     private int mInitialX;
@@ -38,11 +50,16 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
-                if (event.getAction() == MotionEvent.ACTION_UP) {
+                int action = event.getActionMasked();
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                     mView.setAlpha(mUnpressedAlpha);
-                    if (!mFlung && isKeepToSide()) {
+                    if (action == MotionEvent.ACTION_UP && !mFlung && isKeepToSide()) {
                         keepToSide();
                     }
+                    if (mDragged && mOnDragEndListener != null) {
+                        mOnDragEndListener.run();
+                    }
+                    mDragged = false;
                 }
                 return true;
             }
@@ -81,6 +98,15 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
         return mKeepToSideHiddenWidthRadio;
     }
 
+    public void setPositionFilter(PositionFilter positionFilter) {
+        mPositionFilter = positionFilter;
+    }
+
+    /** Invoked after a touch sequence that actually moved the view ends. zh-CN: 在实际移动了视图的触摸序列结束后调用. */
+    public void setOnDragEndListener(Runnable onDragEndListener) {
+        mOnDragEndListener = onDragEndListener;
+    }
+
     @Override
     public boolean onDown(MotionEvent event) {
         mInitialX = mWindowBridge.getX();
@@ -88,13 +114,21 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
         mInitialTouchX = event.getRawX();
         mInitialTouchY = event.getRawY();
         mFlung = false;
+        mDragged = false;
         return false;
     }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        mWindowBridge.updatePosition(mInitialX + (int) ((e2.getRawX() - mInitialTouchX)),
-                mInitialY + (int) ((e2.getRawY() - mInitialTouchY)));
+        int x = mInitialX + (int) ((e2.getRawX() - mInitialTouchX));
+        int y = mInitialY + (int) ((e2.getRawY() - mInitialTouchY));
+        if (mPositionFilter != null) {
+            int[] filtered = mPositionFilter.filter(x, y);
+            x = filtered[0];
+            y = filtered[1];
+        }
+        mDragged = true;
+        mWindowBridge.updatePosition(x, y);
         mView.setAlpha(mPressedAlpha);
         return false;
     }

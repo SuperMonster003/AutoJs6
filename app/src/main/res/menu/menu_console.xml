@@ -34,6 +34,12 @@
             app:showAsAction="never"/>
 
     <item
+            android:id="@+id/action_input_bar"
+            android:checkable="true"
+            android:title="@string/text_input_bar"
+            app:showAsAction="never" />
+
+    <item
             android:id="@+id/action_typescript_console"
             android:checkable="true"
             android:title="@string/text_typescript_console"

@@ -2,7 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
-import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeRuntimeProjectBuilder
@@ -303,7 +303,7 @@ class NodePluginJavaScriptEngine(
         }
     }
 
-    private fun printScriptOutputChunk(level: Int, chunk: String, console: GlobalConsole?) {
+    private fun printScriptOutputChunk(level: Int, chunk: String, console: ConsoleImpl?) {
         if (console == null) {
             Log.println(level, TAG, chunk)
         } else {

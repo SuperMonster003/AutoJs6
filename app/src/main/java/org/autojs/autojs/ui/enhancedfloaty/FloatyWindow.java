@@ -116,9 +116,15 @@ public abstract class FloatyWindow {
     }
 
     public void close() {
+        // Always leave the service registry, even when the view was never attached (the service
+        // may still be starting); otherwise a window closed before creation would be created later.
+        // zh-CN: 无论视图是否已附加 (服务可能仍在启动中) 都要退出服务注册表, 否则在创建前关闭的窗口会在之后被创建出来.
+        FloatyService.removeWindow(this);
+        if (mWindowManager == null || mWindowView == null) {
+            return;
+        }
         try {
             mWindowManager.removeView(mWindowView);
-            FloatyService.removeWindow(this);
         } catch (Exception e) {
             e.printStackTrace();
         }

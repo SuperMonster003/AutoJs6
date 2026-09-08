@@ -11,6 +11,9 @@
     <dimen name="divider_drawer_menu_group">1.5dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="floaty_window_offset">12dp</dimen>
+    <dimen name="console_title_bar_height">40dp</dimen>
+    <dimen name="console_resize_edge_width">10dp</dimen>
+    <dimen name="console_resize_grip_size">36dp</dimen>
     <dimen name="github_avatar_border_width">1dp</dimen>
     <dimen name="github_font_size_full_name">18sp</dimen>
     <dimen name="github_font_size_full_name_compat">14sp</dimen>

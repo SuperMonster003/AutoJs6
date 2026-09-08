@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.enhancedfloaty
 
 import android.graphics.PixelFormat
+import android.os.Build
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -23,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Created by Stardust on Apr 18, 2017.
  * Modified by SuperMonster003 as of Apr 29, 2023.
  * Transformed by SuperMonster003 on Dec 2, 2023.
+ * Modified by SuperMonster003 as of Sep 8, 2026.
  */
 open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFloaty) : FloatyWindow() {
 
@@ -31,7 +33,7 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
     private lateinit var mCollapsedView: View
     private lateinit var mExpandedView: View
     private lateinit var mViewSwitcher: ViewSwitcher
-    private lateinit var mDragGesture: DragGesture
+    private var mDragGesture: DragGesture? = null
 
     private var mResizer: View? = null
     private var mMoveCursor: View? = null
@@ -41,6 +43,20 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
     private var mCollapsedViewY = 0
     private var mExpandedViewX = 0
     private var mExpandedViewY = 0
+
+    /**
+     * Whether the window view is currently attached to the window manager. Set on the UI thread in
+     * [onAttachToWindow] and cleared in [close], so callers can tell a pending window (added to a
+     * starting [FloatyService]) from a live one.
+     *
+     * zh-CN: 窗口视图当前是否已附加到窗口管理器. 在 UI 线程于 [onAttachToWindow] 置位并在 [close] 清除, 便于调用方区分尚未创建的窗口 (已加入正在启动的 [FloatyService]) 与已存在的窗口.
+     */
+    @Volatile
+    var isWindowAttached = false
+        private set
+
+    val isExpanded: Boolean
+        get() = ::mViewSwitcher.isInitialized && mViewSwitcher.currentView === mExpandedView
 
     override fun onCreateView(service: FloatyService): View {
         inflateWindowViews(service)
@@ -62,8 +78,16 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
         mViewAttachedTasks.clear()
     }
 
+    /**
+     * Runs [task] once the window view is attached; immediately when it already is.
+     * zh-CN: 窗口视图附加后执行 [task]; 若已附加则立即执行.
+     */
     fun addOnViewAttachedTask(task: () -> Unit) {
-        mViewAttachedTasks.add(task)
+        if (isWindowAttached) {
+            task.invoke()
+        } else {
+            mViewAttachedTasks.add(task)
+        }
     }
 
     override fun onAttachToWindow(view: View, manager: WindowManager) {
@@ -71,8 +95,19 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
         initGesture()
         setKeyListener()
         setInitialState()
+        isWindowAttached = true
         mViewAttachedTasks.forEach { it.invoke() }
         clearOnViewAttachedTask()
+        floaty.onAttachedToWindow(this)
+    }
+
+    override fun close() {
+        val wasAttached = isWindowAttached
+        isWindowAttached = false
+        if (wasAttached) {
+            floaty.onDetachedFromWindow(this)
+        }
+        super.close()
     }
 
     private fun initGesture() {
@@ -120,7 +155,7 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
             expand()
         } else {
             mCollapsedViewX = floaty.initialX
-            mCollapsedViewX = floaty.initialY
+            mCollapsedViewY = floaty.initialY
             windowBridge?.updatePosition(mCollapsedViewX, mCollapsedViewY)
         }
     }
@@ -158,24 +193,36 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
     }
 
     fun expand() {
+        if (!::mViewSwitcher.isInitialized) return
         mViewSwitcher.showSecond()
         // enableWindowLimit();
         if (floaty.shouldRequestFocusWhenExpand()) {
             requestWindowFocus()
         }
-        mDragGesture.isKeepToSide = false
+        mDragGesture?.isKeepToSide = false
         windowBridge?.updatePosition(mExpandedViewX, mExpandedViewY)
     }
 
+    /** Collapses the window and places the collapsed view at ([x], [y]). zh-CN: 收起窗口并将收起后的视图置于 ([x], [y]). */
+    fun collapse(x: Int, y: Int) {
+        mCollapsedViewX = x
+        mCollapsedViewY = y
+        collapse()
+    }
+
     fun collapse() {
+        if (!::mViewSwitcher.isInitialized) return
         mViewSwitcher.showFirst()
-        disableWindowFocus()
+        releaseWindowFocus()
         setWindowLayoutNoLimit()
-        mDragGesture.isKeepToSide = true
+        mDragGesture?.isKeepToSide = true
         windowBridge?.updatePosition(mCollapsedViewX, mCollapsedViewY)
     }
 
     private fun onBackPressed() {
+        if (floaty.onBackPressed(this)) {
+            return
+        }
         if (mViewStack.canGoBack()) {
             mViewStack.goBack()
         } else {
@@ -188,7 +235,12 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
         collapse()
     }
 
-    private fun disableWindowFocus() {
+    /**
+     * Gives key and IME focus back to the app behind the window.
+     * zh-CN: 将按键与输入法焦点交还给窗口下方的应用.
+     */
+    fun releaseWindowFocus() {
+        if (!isWindowAttached) return
         updateWindowLayoutParams(windowLayoutParams.apply { flags = flags or FLAG_NOT_FOCUSABLE })
     }
 
@@ -196,16 +248,39 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
         updateWindowLayoutParams(windowLayoutParams.apply { flags = flags or FLAG_LAYOUT_IN_SCREEN })
     }
 
+    /**
+     * Lays the window out over the whole display: the status bar and a display cutout no longer
+     * offset its coordinates, only the navigation bar stays excluded from its parent frame.
+     *
+     * zh-CN: 让窗口在整个屏幕范围内布局: 状态栏与刘海区域不再使其坐标偏移, 仅导航栏仍被排除在父框架之外.
+     */
+    fun setWindowLayoutEdgeToEdge() {
+        if (!isWindowAttached) return
+        updateWindowLayoutParams(windowLayoutParams.apply {
+            flags = flags or FLAG_LAYOUT_IN_SCREEN
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        })
+    }
+
     fun requestWindowFocus() {
+        if (!isWindowAttached) return
         updateWindowLayoutParams(windowLayoutParams.apply { flags = flags and FLAG_NOT_FOCUSABLE.inv() })
         windowView?.requestFocus()
     }
+
+    val isWindowFocusable: Boolean
+        get() = isWindowAttached && windowLayoutParams.flags and FLAG_NOT_FOCUSABLE == 0
 
     private fun setWindowLayoutNoLimit() {
         updateWindowLayoutParams(windowLayoutParams.apply { flags = flags or FLAG_LAYOUT_NO_LIMITS })
     }
 
     fun setTouchable(touchable: Boolean) {
+        if (!isWindowAttached) return
         updateWindowLayoutParams(windowLayoutParams.apply {
             flags = when (touchable) {
                 true -> flags and FLAG_NOT_TOUCHABLE.inv()

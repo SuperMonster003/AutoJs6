@@ -58,6 +58,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private var mTypeScriptAvailabilityJob: Job? = null
     private var mTypeScriptConsoleAvailable = false
     private var mTypeScriptConsoleVisible = false
+    private lateinit var mSettings: LogPageConsoleSettings
 
     private var mStackFrameClickListener: OnStackFrameClickListener? = null
     private var mScriptControlListener: ScriptControlListener? = null
@@ -232,7 +233,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
-        binding.console.setCommandInputVisible(false)
+        mSettings = LogPageConsoleSettings(binding.console, R.string.key_editor_log_panel_input_bar_visible).also { it.apply() }
         binding.console.setOnCommandSubmitListener { source ->
             binding.console.setCommandInputBusy(true)
             mTypeScriptEvaluator.evaluate(source) {
@@ -322,8 +323,11 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 isVisible = mTypeScriptConsoleAvailable
                 isChecked = mTypeScriptConsoleVisible
             }
+            menu.findItem(R.id.action_input_bar)?.isChecked = mSettings.isInputBarVisible
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
+                    R.id.action_settings -> true.also { mSettings.showDialog(requireContext()) }
+                    R.id.action_input_bar -> true.also { mSettings.isInputBarVisible = !mSettings.isInputBarVisible }
                     R.id.action_copy -> true.also { AutoJs.instance.globalConsole.copyAll() }
                     R.id.action_send -> true.also { AutoJs.instance.globalConsole.send() }
                     R.id.action_export -> true.also {
@@ -363,7 +367,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private fun setTypeScriptConsoleVisible(visible: Boolean, persist: Boolean) {
         val resolved = visible && mTypeScriptConsoleAvailable
         mTypeScriptConsoleVisible = resolved
-        _binding?.console?.setCommandInputVisible(resolved)
+        _binding?.console?.isCommandModeEnabled = resolved
         if (persist) {
             Pref.putBoolean(R.string.key_editor_log_panel_typescript_console_visible, resolved)
         }

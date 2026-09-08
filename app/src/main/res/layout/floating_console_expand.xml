@@ -1,113 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tool="http://schemas.android.com/tools"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout
+    <org.autojs.autojs.core.console.FloatingConsoleView
+            android:id="@+id/console"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <!-- Resize mode: dims the content below the title bar; the title bar stays draggable. -->
+    <!-- zh-CN: 尺寸调整模式: 遮罩标题栏以下的内容区; 标题栏仍可拖动. -->
+
+    <FrameLayout
+            android:id="@+id/resize_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="12dp"
-            android:orientation="vertical">
+            android:layout_marginTop="@dimen/console_title_bar_height"
+            android:background="@drawable/floating_console_resize_overlay_bg"
+            android:clickable="true"
+            android:focusable="false"
+            android:visibility="gone"
+            tools:visibility="visible">
 
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:id="@+id/title_bar"
-                android:background="@drawable/floating_console_title_bar_bg"
-                android:orientation="horizontal">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
 
             <TextView
-                    android:id="@+id/title"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:gravity="center_vertical|start"
-                    android:maxLines="1"
-                    android:text="@string/text_console"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp" />
-
-            <LinearLayout
+                    android:id="@+id/resize_size_label"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="1080 x 720" />
 
-                <ImageView
-                        android:id="@+id/minimize"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:paddingBottom="8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:paddingTop="20dp"
-                        android:scaleType="center"
-                        android:src="@drawable/ic_remove_white_24dp"
-                        app:tint="@android:color/white" />
-
-                <ImageView
-                        android:id="@+id/move_or_resize"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:padding="8dp"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/ic_settings_ethernet_white_24dp"
-                        app:tint="@android:color/white" />
-
-                <ImageView
-                        android:id="@+id/close"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:padding="8dp"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/ic_close_white_24dp"
-                        app:tint="@android:color/white" />
-            </LinearLayout>
+            <TextView
+                    android:id="@+id/resize_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:text="@string/text_console_resize_mode_hint"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="12sp" />
 
         </LinearLayout>
 
-        <org.autojs.autojs.core.console.FloatingConsoleView
-                android:id="@+id/console"
-                android:layout_width="match_parent"
+        <View
+                android:id="@+id/resize_edge_end"
+                android:layout_width="@dimen/console_resize_edge_width"
                 android:layout_height="match_parent"
-                android:background="@drawable/floating_console_content_bg"
-                android:padding="8dp" />
+                android:layout_gravity="end"
+                android:background="#55FFFFFF" />
 
-    </LinearLayout>
+        <View
+                android:id="@+id/resize_edge_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/console_resize_edge_width"
+                android:layout_gravity="bottom"
+                android:background="#55FFFFFF" />
 
-    <ImageView
-            android:id="@+id/move_cursor"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/circle_cool_black"
-            android:padding="4dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_move_cursor"
-            android:visibility="gone"
-            tool:visibility="visible"
-            android:tint="@android:color/white"
-            tool:ignore="UseAppTint" />
+        <ImageView
+                android:id="@+id/resize_grip"
+                android:layout_width="@dimen/console_resize_grip_size"
+                android:layout_height="@dimen/console_resize_grip_size"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="6dp"
+                android:background="@drawable/circle_cool_black"
+                android:contentDescription="@string/text_resize"
+                android:padding="8dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_resizer"
+                app:tint="@android:color/white" />
 
-    <ImageView
-            android:id="@+id/resizer"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/circle_cool_black"
-            android:padding="5dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_resizer"
-            android:tint="@android:color/white"
-            android:visibility="gone"
-            tool:visibility="visible"
-            tool:ignore="UseAppTint" />
+    </FrameLayout>
 
-</RelativeLayout>
+</FrameLayout>

@@ -36,6 +36,7 @@ class LogActivity : BaseActivity() {
     private var mTypeScriptAvailabilityJob: Job? = null
     private var mTypeScriptConsoleAvailable = false
     private var mTypeScriptConsoleVisible = false
+    private lateinit var mSettings: LogPageConsoleSettings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +65,7 @@ class LogActivity : BaseActivity() {
             setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
                 openStackFrameTarget(fileName, lineNumber, columnNumber)
             }
-            setCommandInputVisible(false)
+            mSettings = LogPageConsoleSettings(this, R.string.key_log_activity_input_bar_visible).also { it.apply() }
             setOnCommandSubmitListener { source ->
                 setCommandInputBusy(true)
                 mTypeScriptEvaluator.evaluate(source) {
@@ -147,8 +148,11 @@ class LogActivity : BaseActivity() {
                 mConsoleImpl.clear()
             }
             R.id.action_settings -> {
-                // TODO by SuperMonster003 on Jul 3, 2023.
-                showToast(this, R.string.text_under_development)
+                mSettings.showDialog(this)
+            }
+            R.id.action_input_bar -> {
+                mSettings.isInputBarVisible = !mSettings.isInputBarVisible
+                invalidateOptionsMenu()
             }
             R.id.action_typescript_console -> {
                 setTypeScriptConsoleVisible(!mTypeScriptConsoleVisible, persist = true)
@@ -180,7 +184,7 @@ class LogActivity : BaseActivity() {
     private fun setTypeScriptConsoleVisible(visible: Boolean, persist: Boolean) {
         val resolved = visible && mTypeScriptConsoleAvailable
         mTypeScriptConsoleVisible = resolved
-        mBinding.console.setCommandInputVisible(resolved)
+        mBinding.console.isCommandModeEnabled = resolved
         mBinding.toolbar.subtitle = if (resolved) {
             getString(R.string.text_working_dir_path_with_value, mWorkingDirectory)
         } else {
@@ -197,6 +201,7 @@ class LogActivity : BaseActivity() {
             isVisible = mTypeScriptConsoleAvailable
             isChecked = mTypeScriptConsoleVisible
         }
+        menu.findItem(R.id.action_input_bar)?.isChecked = mSettings.isInputBarVisible
     }
 
     @Suppress("DEPRECATION")

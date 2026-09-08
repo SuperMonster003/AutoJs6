@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.console.ConsoleLogFormat
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -139,8 +140,13 @@ internal class NodeBridgeConsoleBridge(
                 .put("entries", entriesJson(selection.entries))
         }
 
+        /**
+         * `text` keeps the `HH:mm:ss.SSS/D: ` prefix the global console has always exposed on the
+         * wire; the raw timestamp travels separately as `time`.
+         * zh-CN: `text` 保留全局控制台一直对外暴露的 `HH:mm:ss.SSS/D: ` 前缀; 原始时间戳单独以 `time` 传递.
+         */
         private fun ConsoleImpl.LogEntry.toTailEntry(): NodeBridgeConsoleTail.Entry {
-            return NodeBridgeConsoleTail.Entry(id, level, content.toString())
+            return NodeBridgeConsoleTail.Entry(id, level, ConsoleLogFormat.formatLine(timestamp, level, content), timestamp)
         }
 
         private fun entriesJson(entries: List<NodeBridgeConsoleTail.Entry>): JSONArray {
@@ -151,6 +157,7 @@ internal class NodeBridgeConsoleBridge(
                         .put("id", entry.id)
                         .put("level", entry.level)
                         .put("levelName", NodeBridgeConsoleTail.levelName(entry.level))
+                        .put("time", entry.timestamp)
                         .put("text", entry.text),
                 )
             }

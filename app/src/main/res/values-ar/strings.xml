@@ -397,6 +397,7 @@
     <string name="error_invalid_plugin_mount_point">تنسيق نقطة الربط غير صالح</string>
     <string name="error_invalid_rest_compass">بوصلة راحة غير صالحة: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
+    <string name="error_invalid_time_format_pattern">تنسيق الوقت غير صالح</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
     <string name="error_ipv6_port_requires_brackets">يجب تحديد منفذ IPv6 بصيغة \"[ipv6]:port\".</string>
     <string name="error_lua_runtime_ambiguous">تم تمكين عدة إضافات متوافقة لـ Lua Runtime. عطّل موفري Lua Runtime الزائدين في مركز الإضافات, ثم أعد المحاولة.</string>
@@ -882,6 +883,7 @@
     <string name="text_auto_rename">اعادة تسمية تلقائيا</string>
     <string name="text_available">متاح</string>
     <string name="text_available_windows">النوافذ المتاحة</string>
+    <string name="text_avoid_status_bar">تجنب شريط الحالة</string>
     <string name="text_back">خلف</string>
     <string name="text_background_color">لون الخلفية</string>
     <string name="text_broadcast_action">عمل</string>
@@ -994,7 +996,10 @@
     <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
     <string name="text_connection_failed">فشل الاتصال</string>
     <string name="text_console">وحدة التحكم</string>
+    <string name="text_console_input_hint">اكتب سطرا واضغط Enter</string>
+    <string name="text_console_resize_mode_hint">اسحب لتغيير الحجم, وانقر للإنهاء</string>
     <string name="text_content">المحتوى</string>
+    <string name="text_content_opacity">عتامة المحتوى</string>
     <string name="text_continue">يكمل</string>
     <string name="text_continue_with_plugin_template">المتابعة باستخدام قالب المكون الإضافي</string>
     <string name="text_control">التحكم</string>
@@ -1034,6 +1039,7 @@
     <string name="text_current">الحالي</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
     <string name="text_current_version">النسخة الحالية</string>
+    <string name="text_custom">مخصص</string>
     <string name="text_daily_task">مهام يومية</string>
     <string name="text_date">تاريخ</string>
     <string name="text_day1">الاثنين</string>
@@ -1314,6 +1320,7 @@
     <string name="text_adopted_by_first_event">تم اعتماده من أول حدث (لم يتم استدعاء onServiceConnected)</string>
     <string name="text_in_progress">في تَقَدم</string>
     <string name="text_info">معلومة</string>
+    <string name="text_input_bar">شريط الإدخال</string>
     <string name="text_insist_on_record">سجل</string>
     <string name="text_inspect_layout">فحص التصميم</string>
     <string name="text_inspect_layout_bounds">فحص حدود التصميم</string>
@@ -1376,6 +1383,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">جار التحميل...</string>
     <string name="text_locate_current_theme_color">تحديد لون الثيم الحالي</string>
     <string name="text_log">سجل</string>
+    <string name="text_log_coloring">تلوين السجلات</string>
     <string name="text_logging_in">تسجيل الدخول</string>
     <string name="text_login">تسجيل الدخول</string>
     <string name="text_login_succeed">نجح تسجيل الدخول</string>
@@ -1393,6 +1401,7 @@
     <string name="text_maximize">تكبير</string>
     <string name="text_min_version">الإصدار الأدنى</string>
     <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
+    <string name="text_minimize">تصغير</string>
     <string name="text_mobile_qq_not_installed">لم يتم تثبيت \"Mobile QQ\"</string>
     <string name="text_monthly_task">مهمة شهرية</string>
     <string name="text_more">أكثر</string>
@@ -1446,6 +1455,7 @@
     <string name="text_no_release_notes">لا توجد ملاحظات اصدار</string>
     <string name="text_no_root">غير الجذر</string>
     <string name="text_no_root_access">لا الوصول إلى الجذر</string>
+    <string name="text_no_script_waiting_for_console_input">لا يوجد سكربت ينتظر الإدخال</string>
     <string name="text_no_scripts_to_stop_running">لا توجد نصوص للتوقف عن الجري</string>
     <string name="text_no_search_results_for_keyword">لم يتم العثور على نتائج لـ:\n\n%1$s</string>
     <string name="text_no_symbols_hint">الاعدادات الحالية فارغة.\nاضغط هنا لانشاء رمز.</string>
@@ -1718,6 +1728,7 @@
     <string name="text_reset_succeed">نجحت إعادة تعيين</string>
     <string name="text_reset_to_initial_content">إعادة تعيين في البداية</string>
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
+    <string name="text_resize">تغيير الحجم</string>
     <string name="text_resolving_plugin_artifacts">جار تحليل عناصر المكون الإضافي</string>
     <string name="text_resolving_plugin_native_libraries">جارٍ تحليل مكتبات الاضافة الاصلية</string>
     <string name="text_restart">إعادة بدء</string>
@@ -1897,10 +1908,14 @@
     <string name="text_theme_preview_use">استخدام</string>
     <string name="text_theme_previewer">معاينة السمات</string>
     <string name="text_time">زمن</string>
+    <string name="text_time_format">تنسيق الوقت</string>
+    <string name="text_time_format_pattern_hint">مثال: HH:mm:ss.SSS</string>
+    <string name="text_time_visible">إظهار الوقت</string>
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
     <string name="text_timed_task_timing">توقيت</string>
     <string name="text_title">العنوان</string>
+    <string name="text_title_bar_opacity">عتامة شريط العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
     <string name="text_tools">أدوات</string>

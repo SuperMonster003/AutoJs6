@@ -12,6 +12,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.dex.AndroidDexCompilerRuntime
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceHost
@@ -133,7 +134,10 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     }
 
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
-        .setConsole(globalConsole)
+        // Each runtime owns its console (its own entries, its own floating window) and forwards
+        // every line to the global console shown by the log page.
+        // zh-CN: 每个运行时拥有自身的控制台 (独立条目与浮动窗口), 并把每一行转发给日志页显示的全局控制台.
+        .setConsole(ConsoleImpl(uiHandler, globalConsole))
         .setUiHandler(uiHandler)
         .setAccessibilityBridge(createAccessibilityBridge().also { AccessibilityService.bridge = it })
         .setAppUtils(appUtils)

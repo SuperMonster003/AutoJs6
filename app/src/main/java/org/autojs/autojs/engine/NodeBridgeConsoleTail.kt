@@ -27,7 +27,7 @@ object NodeBridgeConsoleTail {
     const val LEVEL_ERROR = 6
     const val LEVEL_ASSERT = 7
 
-    class Entry(val id: Int, val level: Int, val text: String)
+    class Entry(val id: Int, val level: Int, val text: String, val timestamp: Long = 0L)
 
     /**
      * @property truncated entries were dropped by the line or byte budget (or the newest entry was cut).
