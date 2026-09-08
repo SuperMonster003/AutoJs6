@@ -150,8 +150,16 @@ object NodeBridgeProviderRegistry {
     private const val FILES_PROVIDER = "files"
     private const val CONSOLE_PROVIDER = "console"
     private const val EVENTS_PROVIDER = "events"
+    private const val KEYS_PROVIDER = "keys"
+    private const val DIALOGS_PROVIDER = "dialogs"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
+        provider(id = KEYS_PROVIDER, modules = listOf(NodeBridgeModules.KEYS),
+            capabilities = listOf(NodeBridgePermissionManifest.KEYS),
+            packagedSupport = packagedProviderDependent("system actions require operational accessibility; Android may decline unsupported actions")),
+        provider(id = DIALOGS_PROVIDER, modules = listOf(NodeBridgeModules.DIALOGS),
+            capabilities = listOf(NodeBridgePermissionManifest.DIALOGS),
+            packagedSupport = packagedSupported("Activity-owned dialogs and progress windows close with the script")),
         provider(
             id = EVENTS_PROVIDER,
             modules = listOf(NodeBridgeModules.EVENTS),
@@ -413,6 +421,8 @@ object NodeBridgeProviderRegistry {
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         EVENTS_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        KEYS_PROVIDER -> accessibilityStatus()
+        DIALOGS_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -430,6 +440,11 @@ object NodeBridgeProviderRegistry {
     }
 
     private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
+        KEYS_PROVIDER -> mapOf("liveMethods" to NodeBridgeModules.keysMethods.joinToString(","),
+            "powerDialog" to "opens the Android power menu; does not select power off or reboot",
+            "screenshot" to "system screenshot action; does not return image data")
+        DIALOGS_PROVIDER -> mapOf("liveMethods" to NodeBridgeModules.dialogsMethods.joinToString(","),
+            "lifecycle" to "visible Activity, request timeout, dismissal or script termination")
         EVENTS_PROVIDER -> linkedMapOf(
             "liveMethods" to NodeBridgeModules.eventsMethods.joinToString(","),
             "notificationAccess" to org.autojs.autojs.core.notification.NotificationListenerService.isNotificationListenerEnabled(context).toString(),

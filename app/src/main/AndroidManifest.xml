@@ -622,6 +622,12 @@
             android:exported="false"
             android:theme="@style/AppTheme" />
 
+        <activity
+            android:name="org.autojs.autojs.engine.NodeDialogActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity" />
 
         <service

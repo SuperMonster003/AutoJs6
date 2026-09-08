@@ -145,7 +145,8 @@
         "Node.js 图片句柄支持裁剪, 缩放, 灰度, 阈值, 找图及找色, 复用宿主图像后端, 返回独立图片并在执行结束时清理",
         "Node.js image.toBytes 通过文件描述符将 PNG 或 RGBA 像素传入原生 Buffer, 支持 JNI 与文件桥接, 在使用后, 超时或执行结束时回收附件",
         "Node device 接口提供实时构建, 屏幕, 电池和内存信息, 亮度控制及定时保持亮屏; media 支持设置音频流音量, 遵循 Android 权限",
-        "autojs6:events 通过推送回调观察 Android 通知, 外部 Toast, 无障碍按键及屏幕和电池广播, 使用显式权限并自动清理订阅; Node 原生 events 保持兼容"
+        "autojs6:events 通过推送回调观察 Android 通知, 外部 Toast, 无障碍按键及屏幕和电池广播, 使用显式权限并自动清理订阅; Node 原生 events 保持兼容",
+        "Node app 支持 Android 服务启动, 广播发送和已安装应用查询; dialogs 支持文本输入, 单选, 多选及随脚本清理的进度窗口, keys 提供无障碍系统操作"
       ],
       "fix": [
         "文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题",

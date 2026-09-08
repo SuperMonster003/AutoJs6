@@ -169,7 +169,8 @@
         "Los identificadores de imagen de Node.js admiten recorte, redimensionado, escala de grises, umbralización y búsqueda de plantillas o colores mediante el motor anfitrión, con imágenes independientes y limpieza al terminar",
         "Node.js image.toBytes transfiere píxeles PNG o RGBA mediante descriptores de archivo a Buffer nativos, por JNI o el puente de archivos, y libera los adjuntos tras su uso, al vencer el plazo o al terminar",
         "Las API Node device ofrecen información actual del sistema, pantalla, batería y memoria, control de brillo y pantalla encendida por tiempo limitado; media permite ajustar el volumen según los permisos de Android",
-        "autojs6:events observa notificaciones Android, Toast externos, teclas de accesibilidad y eventos de pantalla o batería mediante callbacks, con permisos explícitos y limpieza automática; events nativo de Node mantiene su compatibilidad"
+        "autojs6:events observa notificaciones Android, Toast externos, teclas de accesibilidad y eventos de pantalla o batería mediante callbacks, con permisos explícitos y limpieza automática; events nativo de Node mantiene su compatibilidad",
+        "Node app admite servicios Android, broadcasts y consultas de aplicaciones instaladas; dialogs ofrece entrada de texto, selección y ventanas de progreso que se cierran al terminar el script, y keys incorpora acciones del sistema de accesibilidad"
       ],
       "fix": [
         "La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`",

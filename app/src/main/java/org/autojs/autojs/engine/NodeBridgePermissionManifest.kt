@@ -70,6 +70,7 @@ object NodeBridgePermissionManifest {
     const val EVENTS_NOTIFICATION = "events.notification"
     const val EVENTS_TOAST = "events.toast"
     const val EVENTS_KEY = "events.key"
+    const val KEYS = "keys"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -141,6 +142,7 @@ object NodeBridgePermissionManifest {
         EVENTS_NOTIFICATION,
         EVENTS_TOAST,
         EVENTS_KEY,
+        KEYS,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -403,9 +405,9 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.APP -> when (method) {
                 "launchPackage", "launchApp" -> listOf(APP_LAUNCH)
                 "openAppSetting" -> listOf(APP_SETTINGS)
-                "startActivity" -> listOf(APP_ACTIVITY)
+                "startActivity", "startService", "sendBroadcast" -> listOf(APP_ACTIVITY)
                 "viewFile", "editFile" -> listOf(APP_ACTIVITY)
-                "getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)
+                "getPackageName", "getAppName", "isInstalled", "getInstalledApps", "getPackageInfo" -> listOf(APP_QUERY)
                 "currentWindow" -> listOf(APP_QUERY, ACCESSIBILITY)
                 "listSamples", "readSample" -> listOf(APP_QUERY)
                 else -> listOf(APP)
@@ -415,6 +417,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(ENGINES)
             }
             NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
+            NodeBridgeModules.KEYS -> listOf(KEYS)
             NodeBridgeModules.ACCESSIBILITY -> when (method) {
                 "swipe", "gesture" -> listOf(ACCESSIBILITY, ACCESSIBILITY_GESTURE)
                 "screenshot" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE)

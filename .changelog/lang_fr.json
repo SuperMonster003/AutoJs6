@@ -169,7 +169,8 @@
         "Les handles d’image Node.js prennent en charge le découpage, le redimensionnement, les niveaux de gris, le seuillage et la recherche de modèles ou de couleurs via le moteur hôte, avec des images indépendantes et leur libération en fin d’exécution",
         "Node.js image.toBytes transfère les pixels PNG ou RGBA par descripteurs de fichiers vers des Buffer natifs, via JNI ou le pont fichier, et libère les pièces jointes après usage, expiration ou fin d’exécution",
         "Les API Node device exposent les informations actuelles du système, de l’écran, de la batterie et de la mémoire, le réglage de luminosité et le maintien temporaire de l’écran allumé; media règle le volume selon les autorisations Android",
-        "autojs6:events observe les notifications Android, les Toast externes, les touches d’accessibilité et les événements écran ou batterie par callbacks, avec autorisations explicites et nettoyage automatique; events natif de Node reste compatible"
+        "autojs6:events observe les notifications Android, les Toast externes, les touches d’accessibilité et les événements écran ou batterie par callbacks, avec autorisations explicites et nettoyage automatique; events natif de Node reste compatible",
+        "Node app prend en charge les services Android, les broadcasts et la recherche des applications installées; dialogs propose la saisie, les choix et les fenêtres de progression fermées avec le script, et keys expose les actions système d’accessibilité"
       ],
       "fix": [
         "L'exécution directe depuis le gestionnaire de fichiers ne respectait pas l'encodage UTF-8, UTF-16 ou UTF-32 indiqué par le BOM Unicode, si bien que des scripts exécutés normalement dans l'éditeur échouaient avec `Caractère non valide`",

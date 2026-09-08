@@ -706,15 +706,17 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(uninstallRequest.args[0].data, "package:com.example.invalid");
               const appSettingsRequests = requests.filter((request) => request.module === "app" && request.method === "openAppSetting");
               assert(appSettingsRequests.length >= 4, "app settings aliases must dispatch through openAppSetting bridge method");
+              await expectPromise("app.sendBroadcast", app.sendBroadcast({ action: "org.autojs6.TEST" }));
+              const broadcastRequest = requests.filter(request => request.module === "app" && request.method === "sendBroadcast").pop();
+              assert.strictEqual(broadcastRequest.args[0].action, "org.autojs6.TEST");
               const beforeAppRejects = requests.length;
-              await expectRejectCode("app.sendBroadcast", app.sendBroadcast({ action: "org.autojs6.TEST" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               expectThrowCode("app.getUriForFile", () => app.getUriForFile("README.md"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.kill", app.kill("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.startDualActivity", app.startDualActivity({ action: "VIEW", url: "example.com" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.launchDualPackage", app.launchDualPackage("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.isDualInstalled", app.isDualInstalled("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.intent.root", Promise.resolve().then(() => app.intent({ action: "android.intent.action.VIEW", root: true })), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
-              assert.strictEqual(requests.length, beforeAppRejects, "app raw Uri/kill/dual/sendBroadcast/root rejected stubs must not dispatch bridge requests");
+              assert.strictEqual(requests.length, beforeAppRejects, "app raw Uri/kill/dual/root rejected stubs must not dispatch bridge requests");
               await expectPromise("dialogs.alert", dialogs.alert("title", "message", { timeoutMs: 1016 }));
               assert.strictEqual(await expectPromise("dialogs.confirm", dialogs.confirm("title", "message", { timeoutMs: 1017 })), true);
               assert.strictEqual(await expectPromise("dialogs.input", dialogs.input("title", "prefill", { timeoutMs: 1018 })), "typed");
@@ -1270,6 +1272,7 @@ class NodeBridgeConformanceInstrumentationTest {
     private companion object {
         private val stableDispatchMethods: Map<String, Set<String>> = linkedMapOf(
             NodeBridgeModules.EVENTS to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
+            NodeBridgeModules.KEYS to setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog"),
             NodeBridgeModules.TOAST to setOf("showToast", "toast"),
             NodeBridgeModules.APP to setOf("listSamples", "readSample", 
                 "launchPackage",
@@ -1282,8 +1285,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 "viewFile",
                 "editFile",
                 "currentWindow",
+                "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo",
             ),
-            NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
+            NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
             NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
                 "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake"),

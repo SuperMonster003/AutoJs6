@@ -638,6 +638,7 @@ object NodeBridgeModules {
     const val FILES = NodeBridgePermissionManifest.FILES
     const val CONSOLE = NodeBridgePermissionManifest.CONSOLE
     const val EVENTS = NodeBridgePermissionManifest.EVENTS
+    const val KEYS = NodeBridgePermissionManifest.KEYS
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf(
@@ -653,9 +654,14 @@ object NodeBridgeModules {
         "currentWindow",
         "listSamples",
         "readSample",
+        "startService",
+        "sendBroadcast",
+        "getInstalledApps",
+        "getPackageInfo",
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
-    val dialogsMethods = setOf("alert", "confirm", "input", "select")
+    val dialogsMethods = setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss")
+    val keysMethods = setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog")
     val accessibilityMethods = setOf(
         "isEnabled",
         "ensureEnabled",
@@ -761,6 +767,7 @@ object NodeBridgeModules {
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         EVENTS to eventsMethods,
+        KEYS to keysMethods,
         SHELL to shellMethods,
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
@@ -833,6 +840,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
     private val deviceControls = NodeDeviceControls(appContext)
     private val eventObservers = NodeEventObservers(appContext)
+    private val dialogs = NodeDialogs(appContext)
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -915,6 +923,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
             request.module == NodeBridgeModules.EVENTS && request.method in NodeBridgeModules.eventsMethods -> dispatchEvents(request, auditedCallback)
+            request.module == NodeBridgeModules.KEYS && request.method in NodeBridgeModules.keysMethods -> dispatchKeys(request, auditedCallback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, auditedCallback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, auditedCallback)
@@ -992,6 +1001,7 @@ class AndroidNodeBridgeCapabilityProvider(
         screenCapture.close()
         deviceControls.close()
         eventObservers.closeAll()
+        dialogs.closeAll()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -1108,16 +1118,7 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchDialogs(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "a UI capability provider",
-                ),
-            ),
-        )
+        dialogs.dispatch(request, callback)
     }
 
     private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -4604,6 +4605,70 @@ class AndroidNodeBridgeCapabilityProvider(
         )
     }
 
+    private fun dispatchKeys(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        dispatchOnMain(request, callback) {
+            val service = AutoJsAccessibilityService.instance
+            if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
+                NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(
+                    "Enable AutoJs6 accessibility to perform system actions.", request.module, request.method))
+            } else {
+                val action = when (request.method) {
+                    "notifications" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
+                    "quickSettings" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
+                    "lockScreen" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN
+                    "takeScreenshot" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT
+                    "splitScreen" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN
+                    else -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_POWER_DIALOG
+                }
+                NodeBridgeResponse.success(request.id, service.performGlobalAction(action).toString())
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun dispatchAppExtension(request: NodeBridgeRequest): NodeBridgeResponse = try {
+        val args = request.argsArray()
+        val value: Any? = when (request.method) {
+            "getInstalledApps" -> {
+                val includeSystem = args.optJSONObject(0)?.optBoolean("includeSystem", true) ?: true
+                JSONArray(appContext.packageManager.getInstalledPackages(0)
+                    .filter { includeSystem || (it.applicationInfo?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM == 0 }
+                    .map(::appPackageInfoJson))
+            }
+            "getPackageInfo" -> {
+                val packageName = args.getString(0)
+                require(packageName.isNotBlank()) { "A package name is required." }
+                try { appPackageInfoJson(appContext.packageManager.getPackageInfo(packageName, 0)) }
+                catch (_: PackageManager.NameNotFoundException) { null }
+            }
+            else -> {
+                val intent = createIntent(args.getJSONObject(0), forActivity = false)
+                    ?: throw IllegalArgumentException("A valid JSON intent descriptor is required.")
+                if (request.method == "startService") appContext.startService(intent)?.flattenToString()
+                else { appContext.sendBroadcast(intent); null }
+            }
+        }
+        NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value))
+    } catch (error: Exception) {
+        NodeBridgeResponse.failure(request.id, when (error) {
+            is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Android denied this app operation.", request.module, request.method)
+            is IllegalArgumentException, is org.json.JSONException -> NodeBridgeError.invalidRequest(error.message ?: "Invalid app request.", request.module, request.method)
+            else -> NodeBridgeError.providerFailed(error.message ?: "Android could not perform this app operation.", request.module, request.method)
+        })
+    }
+
+    @Suppress("DEPRECATION")
+    private fun appPackageInfoJson(info: android.content.pm.PackageInfo): JSONObject {
+        val application = info.applicationInfo
+        return JSONObject().put("packageName", info.packageName)
+            .put("appName", application?.let { appContext.packageManager.getApplicationLabel(it).toString() }.orEmpty())
+            .put("versionName", info.versionName ?: "")
+            .put("versionCode", if (Build.VERSION.SDK_INT >= 28) info.longVersionCode else info.versionCode.toLong())
+            .put("system", (application?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0)
+            .put("enabled", application?.enabled ?: false)
+            .put("firstInstallTime", info.firstInstallTime).put("lastUpdateTime", info.lastUpdateTime)
+    }
+
     private fun dispatchApp(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         if (request.method == "listSamples" || request.method == "readSample") {
             // Asset reads stay off the main thread (MCP roadmap P1.3, D20).
@@ -4612,6 +4677,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         dispatchOnMain(request, callback) {
             when (request.method) {
+                "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo" -> dispatchAppExtension(request)
                 "launchPackage" -> NodeBridgeResponse.success(
                     request.id,
                     launchPackage(request.firstStringArg()).toString(),
@@ -5143,7 +5209,7 @@ class AndroidNodeBridgeCapabilityProvider(
         appContext.startActivity(intent)
     }
 
-    private fun createIntent(options: JSONObject): Intent? {
+    private fun createIntent(options: JSONObject, forActivity: Boolean = true): Intent? {
         val action = options.optNonBlankString("action")
         val data = options.optNonBlankString("data")
         val type = options.optNonBlankString("type")
@@ -5174,7 +5240,7 @@ class AndroidNodeBridgeCapabilityProvider(
             component?.let { setComponent(parseComponentName(it) ?: return null) }
             categories.forEach(::addCategory)
             addFlags(flags)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (forActivity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             extras?.let { putJsonIntentExtras(this, it) }
         }
     }
@@ -8350,7 +8416,7 @@ private class StreamCapture(
     }
 }
 
-private object NodeBridgeJson {
+internal object NodeBridgeJson {
 
     fun parseJsonValue(json: String): Any {
         val trimmed = json.trim().ifEmpty { "null" }
