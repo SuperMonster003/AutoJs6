@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.view.View
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.log.LogActivity
@@ -61,9 +63,25 @@ class NodeScreenCaptureInstrumentationTest {
     @Test fun approvedCaptureSavesScreenSizedPngAndStops() {
         assumeTrue("Manual Android screen capture consent required", InstrumentationRegistry.getArguments().getString("captureConsent") == "manual")
         val activity = instrumentation.startActivitySync(Intent(context, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        instrumentation.runOnMainSync {
-            activity.setContentView(View(activity).apply { setBackgroundColor(Color.rgb(20, 190, 85)) })
+        val pattern = Bitmap.createBitmap(128, 96, Bitmap.Config.ARGB_8888)
+        for (y in 0 until pattern.height) for (x in 0 until pattern.width) {
+            pattern.setPixel(x, y, Color.rgb((x * 71 + y * 39) % 256, (x * 13 + y * 109) % 256, (x * 97 + y * 23) % 256))
         }
+        pattern.setPixel(0, 0, Color.rgb(20, 190, 85))
+        val view = object : View(activity) {
+            override fun onDraw(canvas: Canvas) {
+                canvas.drawColor(Color.WHITE)
+                canvas.drawBitmap(pattern, 80f, 160f, null)
+                canvas.drawText("AutoJs6 Node 2026", 80f, 350f, Paint().apply { color = Color.BLACK; textSize = 56f })
+            }
+        }
+        instrumentation.runOnMainSync {
+            activity.setContentView(view)
+        }
+        instrumentation.waitForIdleSync()
+        val origin = IntArray(2)
+        instrumentation.runOnMainSync { view.getLocationOnScreen(origin) }
+        val analyze = InstrumentationRegistry.getArguments().getString("imageAnalysis") == "true"
         val directory = File(context.cacheDir, "node-screen-${UUID.randomUUID()}").apply { mkdirs() }
         try {
             val result = NodePluginTestHarness.runPluginScript(
@@ -71,9 +89,23 @@ class NodeScreenCaptureInstrumentationTest {
                 (async () => {
                   const images = require('images');
                   await images.requestScreenCapture({ timeoutMs: 120000 });
+                  await new Promise(resolve => setTimeout(resolve, 500));
                   const frame = await images.captureScreen();
                   await images.saveImage(frame, 'screen.png');
                   console.log('m14.capture=' + frame.width + 'x' + frame.height);
+                  if ($analyze) {
+                    const x = ${origin[0] + 80}, y = ${origin[1] + 160};
+                    const clipped = await images.clip(frame, x, y, 128, 96);
+                    const color = await images.findColor(clipped, '#14be55', {threshold: 0});
+                    if (!color || color.x !== 0 || color.y !== 0) throw new Error('Known UI color was not captured: ' + JSON.stringify(color));
+                    await images.saveImage(clipped, 'template.png');
+                    const template = await images.readImage('template.png');
+                    const found = await images.findImage(frame, template, {threshold: 0.99});
+                    if (!found || Math.abs(found.x - x) > 2 || Math.abs(found.y - y) > 2) throw new Error('Screenshot template missed: ' + JSON.stringify(found));
+                    console.log('m14.capture.analysis=PASS expected=' + x + ',' + y + ' found=' + JSON.stringify(found));
+                    await images.recycle(template);
+                    await images.recycle(clipped);
+                  }
                   await images.recycle(frame);
                   await images.stopScreenCapture();
                   let denied = false;
@@ -95,6 +127,7 @@ class NodeScreenCaptureInstrumentationTest {
         } finally {
             directory.listFiles()?.forEach { it.delete() }; directory.delete()
             instrumentation.runOnMainSync { activity.finish() }
+            pattern.recycle()
         }
     }
 }

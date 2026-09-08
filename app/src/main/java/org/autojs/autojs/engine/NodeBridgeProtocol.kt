@@ -823,6 +823,7 @@ class AndroidNodeBridgeCapabilityProvider(
         Thread(task, "AutoJs6NodeImage").apply { isDaemon = true }
     }
     private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
+    private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
     private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
@@ -1901,6 +1902,22 @@ class AndroidNodeBridgeCapabilityProvider(
             when (request.method) {
                 "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()
                 "saveImage" -> saveImage(request)
+                "clip", "resize", "grayscale", "threshold" -> {
+                    val args = request.argsArray()
+                    val bitmap = imageOperations.transform(request.method, imageArgument(args, 0).bitmap, args.optJSONObject(1) ?: JSONObject())
+                    registerImage(bitmap, request.method).toJson().toString()
+                }
+                "findImage", "matchTemplate" -> {
+                    val args = request.argsArray()
+                    imageOperations.match(imageArgument(args, 0).bitmap, imageArgument(args, 1).bitmap,
+                        args.optJSONObject(2) ?: JSONObject(), request.method == "matchTemplate")
+                }
+                "findColor", "findMultiColors" -> {
+                    val args = request.argsArray()
+                    val multiple = request.method == "findMultiColors"
+                    imageOperations.findColors(imageArgument(args, 0).bitmap, args.get(1),
+                        if (multiple) args.getJSONArray(2) else JSONArray(), args.optJSONObject(if (multiple) 3 else 2) ?: JSONObject())
+                }
                 "readImage" -> {
                     dispatchImageRead(request, callback)
                     null

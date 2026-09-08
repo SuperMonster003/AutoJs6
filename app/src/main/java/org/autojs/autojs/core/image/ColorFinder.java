@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.image;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 
 import androidx.annotation.Nullable;
@@ -86,7 +87,11 @@ public class ColorFinder {
 
     @Nullable
     private MatOfPoint findColorInner(ImageWrapper image, int color, int threshold, Rect rect) {
-        Mat source = image.getMat();
+        return findColorInner(image.getMat(), color, threshold, rect);
+    }
+
+    @Nullable
+    private static MatOfPoint findColorInner(Mat source, int color, int threshold, Rect rect) {
         Mat bi = new Mat();
         Scalar lowerBound = new Scalar(Color.red(color) - threshold, Color.green(color) - threshold,
                 Color.blue(color) - threshold, 255);
@@ -110,6 +115,43 @@ public class ColorFinder {
         OpenCVHelper.release(bi);
         OpenCVHelper.release(nonZeroPos);
         return result;
+    }
+
+    /** Uses pixel coordinates for callers which already own the bitmap and Mat, without a Rhino runtime. */
+    @Nullable
+    public static Point findPointByColors(Bitmap bitmap, Mat source, int color, int threshold, Rect rect, int[] points) {
+        MatOfPoint candidates = findColorInner(source, color, threshold, rect);
+        if (candidates == null) return null;
+        try {
+            int[] coordinates = new int[2];
+            for (int row = 0; row < candidates.rows(); ++row) {
+                candidates.get(row, 0, coordinates);
+                Point point = new Point(coordinates[0], coordinates[1]);
+                if (rect != null) {
+                    point.x += rect.x;
+                    point.y += rect.y;
+                }
+                boolean matches = true;
+                for (int i = 0; i < points.length; i += 3) {
+                    long x = (long) point.x + points[i];
+                    long y = (long) point.y + points[i + 1];
+                    if (x < 0 || y < 0 || x >= bitmap.getWidth() || y >= bitmap.getHeight()) {
+                        matches = false;
+                        break;
+                    }
+                    int pixel = bitmap.getPixel((int) x, (int) y);
+                    ColorDetector detector = new ColorDetector.DifferenceDetector(points[i + 2], threshold);
+                    if (!detector.detectColor(Color.red(pixel), Color.green(pixel), Color.blue(pixel))) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if (matches) return point;
+            }
+            return null;
+        } finally {
+            OpenCVHelper.release(candidates);
+        }
     }
 
     @Nullable

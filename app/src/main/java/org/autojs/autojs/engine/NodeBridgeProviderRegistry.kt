@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
@@ -406,7 +407,7 @@ object NodeBridgeProviderRegistry {
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        IMAGE_PROVIDER -> if (OpenCvPluginHost.isAvailable(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
@@ -516,9 +517,11 @@ object NodeBridgeProviderRegistry {
             "rawObjectPolicy" to "only image and capturer handles cross the bridge",
         )
         IMAGE_PROVIDER -> linkedMapOf(
-            "liveMethods" to "captureScreen,readImage,saveImage,recycle",
+            "liveMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
             "fakeMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
-            "blockedMethods" to "clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
+            "blockedMethods" to "",
+            "analysisDependency" to "OpenCV plugin used by the host Images implementation",
+            "opencvAvailable" to OpenCvPluginHost.isAvailable(context).toString(),
             "capability" to NodeBridgePermissionManifest.IMAGE,
             "captureCapability" to NodeBridgePermissionManifest.SCREEN_CAPTURE,
             "resourceType" to NodeBridgeResourceType.IMAGE_HANDLE.name,

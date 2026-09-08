@@ -141,7 +141,8 @@
         "Node.js 桥订阅通过既有回调推送传感器, WebSocket, UI, 悬浮窗与输入事件, 提供 on/once/off 监听, 有界事件队列及 drainEvents 兼容",
         "Node.js 运行时支持可选 idleExitMs 空闲退出与后续脚本重新连接, 提供 idleForMs 诊断, 默认保持常驻",
         "process.stdin / readline 接收控制台输入, autojs6:host 接收执行级 JSON 消息, v3 postMessage 事务兼容旧宿主",
-        "Node.js 截屏会话接入 Android 授权和既有前台服务, 支持图片句柄, PNG/JPEG/WebP 保存及停止或脚本退出时清理"
+        "Node.js 截屏会话接入 Android 授权和既有前台服务, 支持图片句柄, PNG/JPEG/WebP 保存及停止或脚本退出时清理",
+        "Node.js 图片句柄支持裁剪, 缩放, 灰度, 阈值, 找图及找色, 复用宿主图像后端, 返回独立图片并在执行结束时清理"
       ],
       "fix": [
         "文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题",
