@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 8 de September de 2026.
+Datos actualizados el 10 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
@@ -338,6 +338,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Node app admite servicios Android, broadcasts y consultas de aplicaciones instaladas; dialogs ofrece entrada de texto, selección y ventanas de progreso que se cierran al terminar el script, y keys incorpora acciones del sistema de accesibilidad
 * `Nuevo` Node recorder admite grabación AAC con permiso de micrófono, notificación, límite de duración y limpieza al terminar el script; ui.overlay admite cambios de propiedades, arrastre y envío de eventos
 * `Nuevo` Los scripts Node pueden ejecutarse en dos procesos independientes con una cola FIFO compartida y cancelación y entrada dirigidas a cada ejecución
+* `Nuevo` Las consultas MediaInfo admiten streamNumber desde 0, countGet e infoKind para unidades, descripciones y nombres legibles; Rhino y Node mantienen TEXT del primer flujo por defecto y negocian las capacidades del plugin
 * `Corrección` La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`
 * `Corrección` La información de descarga de Android Studio dejó de escribirse automáticamente en los datos comunes del README tras la migración de los scrapers
 * `Corrección` Se alineó la numeración de compilaciones remotas experimentales de un solo archivo con el compilador heredado y se añadió una comprobación previa y cerrada ante fallos del espacio de trabajo, basada en tamaños expandidos verificados, un límite de expansión de plantilla validado al compilar y una reserva de 256 MiB
@@ -475,6 +476,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El orden de llamada de `console.setPosition` / `setSize` / `setGravity` y `console.show()` afectaba al resultado (por ejemplo `console.show(); console.setPosition(500, 400)` necesitaba un `sleep` entre ambos, y el orden inverso podía perder el ajuste); ahora los ajustes se registran y se aplican cuando la ventana queda adjunta, por lo que el orden y el momento ya no importan
 * `Corrección` Arrastrar la consola flotante por su barra de título fallaba ocasionalmente (el gesto de arrastre se vinculaba antes de adjuntar la ventana y competía con los clics de botones y el cierre de la ventana); ahora el arrastre se configura tras adjuntar la ventana, el movimiento se limita a la pantalla y la posición se registra al terminar el arrastre
 * `Corrección` La consola flotante tenía un margen de 12dp en cada lado, por lo que `console.setPosition(0, 0)` no alcanzaba el borde de la pantalla; se elimina el margen, la coordenada Y parte por defecto de debajo de la barra de estado (desactivable con `setAvoidStatusBar(false)`) y tanto la posición como el tamaño se limitan a la pantalla
+* `Corrección` Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea
 * `Mejora` El modulo de accesibilidad del puente Node agrega dump (instantaneas de ventana en texto, JSON o XML limitadas a 400 nodos, 32 niveles y 256 KiB), explain (recuento de coincidencias por filtro de un descriptor de selector) y screenshot (captura de pantalla por accesibilidad en Android 11+ con opciones de escala, region, formato y calidad, entregada como archivo de cache de un solo uso o archivo del espacio de trabajo), y el modulo app agrega currentWindow (paquete, actividad y lista de ventanas actuales)
 * `Mejora` El puente Node agrega un modulo files (list, stat, read, write, mkdir, rename, delete) con raiz en el directorio de trabajo: las rutas deben ser rutas relativas normalizadas, los enlaces simbolicos no pueden salir, las lecturas y escrituras se limitan a 1 MiB con contenido UTF-8 o base64, los listados a 2000 entradas, escribir y eliminar requieren los tokens de capacidad dedicados files.write y files.delete, y el administrador de archivos del espacio de trabajo se actualiza tras los cambios
 * `Mejora` El puente Node agrega un modulo console (console.tail lee las entradas mas recientes de la consola global con lines hasta 500, sinceId, level y un presupuesto de 256 KiB), engines.execScript y execScriptFile aceptan las opciones captureConsole y waitMs (esperar a que el script termine y recopilar la salida de consola de su ventana de id, captureMode global-window), la consola conserva como maximo 4096 entradas de registro (se descartan las mas antiguas y la vista de consola se actualiza por id de entrada), y ConsoleImpl expone addLogListener y removeLogListener
@@ -856,7 +858,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 8 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 10 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

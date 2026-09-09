@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 8 日 に更新されました.
+データは 2026 年 9 月 10 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
 * `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
@@ -338,6 +338,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node app が Android サービスの起動, ブロードキャスト送信とインストール済みアプリの照会に対応; dialogs が文字入力, 単一選択, 複数選択とスクリプト終了時に閉じる進捗ウィンドウを提供し, keys がユーザー補助のシステム操作を提供
 * `新機能` Node recorder がマイク権限, フォアグラウンド通知, 時間制限とスクリプト終了時の解放を備えた AAC 録音に対応; ui.overlay が宣言的な属性更新, ドラッグとイベント配信に対応
 * `新機能` Node スクリプトが 2 つの独立したランタイムプロセスで並行実行可能になり, FIFO キューの共有と実行単位のキャンセルおよび入力転送に対応
+* `新機能` MediaInfo クエリが 0 始まりの streamNumber, countGet によるストリーム数, 単位や説明や表示名を取得する infoKind に対応; Rhino と Node は既定の先頭ストリームの TEXT クエリを維持し, プラグインの拡張機能を確認
 * `修正` Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題
 * `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
 * `修正` 実験的なリモート単一ファイルビルドのビルド番号を従来のビルダーと一致させ、照合済みの展開後入力サイズ、ビルド時に検証されたテンプレート展開上限、256 MiB の予約領域を用いるフェイルクローズなワークスペース容量事前検査を追加
@@ -475,6 +476,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` `console.setPosition` / `setSize` / `setGravity` などのメソッドと `console.show()` の呼び出し順序が結果に影響する問題 (`console.show(); console.setPosition(500, 400)` は間に `sleep` が必要で, 逆順でも設定が失われることがあった); 設定を記録してウィンドウ接続後にまとめて適用するように変更し, 呼び出し順序とタイミングは結果に影響しなくなった
 * `修正` コンソールのフローティングウィンドウをタイトルバーのドラッグで移動する操作がまれに失敗する問題 (ドラッグジェスチャーがウィンドウ接続前にバインドされ, ボタンのクリックやウィンドウのクローズと競合していた); タイトルバーのドラッグはウィンドウ接続後に設定され, 移動範囲は画面内に制限され, ドラッグ終了時に位置を記録するようになった
 * `修正` コンソールのフローティングウィンドウの四辺に 12dp の余白があり, `console.setPosition(0, 0)` が画面端に届かない問題; 余白を削除し, Y 座標はデフォルトでステータスバーの下から計算され (`setAvoidStatusBar(false)` で無効化可能), ウィンドウの位置とサイズは画面内に制限される
+* `修正` MediaInfo 詳細とスナップショットの Complete name に元のファイルパスを表示し, プライベートキャッシュや記述子のパスを表示しないよう改善; スナップショットの表示ファイル名は維持
 * `改善` Node bridge のアクセシビリティモジュールに dump (400 ノード, 32 階層, 256 KiB を上限とするテキスト, JSON または XML のウィンドウスナップショット), explain (セレクター記述子のフィルターごとのヒット数), screenshot (Android 11 以降のアクセシビリティスクリーンショット, 拡縮, 領域, 形式, 品質のオプション付きで一回限りのキャッシュファイルまたはワークスペースファイルとして提供) を追加し, app モジュールに currentWindow (現在のパッケージ, アクティビティ, ウィンドウ一覧) を追加
 * `改善` Node bridge にワークスペースをルートとする files モジュール (list, stat, read, write, mkdir, rename, delete) を追加: パスは正規化された相対パスでなければならず, シンボリックリンクで外部へ出ることはできず, 読み書きは UTF-8 または base64 の内容で 1 MiB まで, 一覧は 2000 件まで, 書き込みと削除には専用の files.write と files.delete ケイパビリティトークンが必要で, 変更後はワークスペースのファイルマネージャーが更新される
 * `改善` Node bridge に console モジュールを追加 (console.tail はグローバルコンソールの最新エントリを lines 上限 500, sinceId, level と 256 KiB の予算で読み取る), engines.execScript と execScriptFile に captureConsole と waitMs オプションを追加 (スクリプトの終了を待ち, その id ウィンドウ内のコンソール出力を収集, captureMode は global-window), コンソールは最大 4096 件のログを保持 (超過分は最古から破棄, コンソールビューはエントリ id で更新), ConsoleImpl が addLogListener と removeLogListener を公開
@@ -856,7 +858,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 8 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 10 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

@@ -15,6 +15,66 @@ import java.util.concurrent.TimeUnit
 
 class NodeMediaBridgeInstrumentationTest {
 
+    @Test
+    fun realMediainfoQueriesPreservePathsAndSelectSecondAudioTrack() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("MediaInfo query integration")
+        val workDir = File(context.cacheDir, "mediainfo-query-${System.nanoTime()}").apply { check(mkdirs()) }
+        try {
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().context.assets.open("mediainfo-two-audio.mka").use { input ->
+                File(workDir, "two-audio.mka").outputStream().use { input.copyTo(it) }
+            }
+            File(workDir, "project.json").writeText("""{"type":"node","node":{"permissions":["media","media.metadata"]}}""")
+            val result = NodePluginTestHarness.runPluginScript(
+                """
+                "nodejs";
+                (async () => {
+                  const assert = require("node:assert/strict");
+                  const mi = require("mediainfo");
+                  const compat = require("autojs6:compat").mediainfo;
+                  assert.equal(await mi.countGet("two-audio.mka", "audio"), 2);
+                  assert.equal(await mi.get("two-audio.mka", "audio", "SamplingRate"), "8000");
+                  assert.equal(await mi.get("two-audio.mka", "audio", "SamplingRate", {streamNumber: 1}), "16000");
+                  assert.equal((await compat.get("two-audio.mka", "audio", "SamplingRate", {streamNumber: 1, infoKind: "MEASURE"})).trim(), "Hz");
+                  assert.equal(await compat.countGet("two-audio.mka", "audio"), 2);
+                  await assert.rejects(mi.get("two-audio.mka", "audio", "Format", {streamNumber: 0.5}), /streamNumber/);
+                  await assert.rejects(mi.get("two-audio.mka", "audio", "Format", {infoKind: "MAX"}), /infoKind/);
+                  const snapshot = await mi.read("two-audio.mka");
+                  assert.equal(snapshot.fileName, "two-audio.mka");
+                  assert.ok(snapshot.inform.includes(${JSONObject.quote(File(workDir, "two-audio.mka").canonicalPath)}), snapshot.inform);
+                  assert.ok(!snapshot.inform.includes("/proc/self/fd/"));
+                  const bridge = require("autojs6:bridge");
+                  let queries = 0;
+                  bridge.__test.setTransport({postMessage(message) {
+                    const request = JSON.parse(message);
+                    if (request.method === "get" || request.method === "countGet") queries++;
+                    setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({id: request.id, ok: true, result: {}})));
+                  }});
+                  await assert.rejects(mi.get("two-audio.mka", "audio", "Format", {streamNumber: 1}), /MEDIAINFO_QUERY_UNSUPPORTED/);
+                  await assert.rejects(mi.countGet("two-audio.mka", "audio"), /MEDIAINFO_QUERY_UNSUPPORTED/);
+                  assert.equal(queries, 0);
+                  console.log("mediainfo.queries=PASS second-track,unit,count,compat,path,validation,old-host");
+                })();
+                """.trimIndent(),
+                "mediainfo-query.cjs", workingDirectory = workDir, timeoutMs = 60_000,
+            )
+            NodePluginTestHarness.assertSucceeded("MediaInfo query integration", result)
+            assertTrue(result.stdout, result.stdout.contains("mediainfo.queries=PASS"))
+        } finally { workDir.deleteRecursively() }
+    }
+
+    @Test
+    fun oldPluginSnapshotsAreNormalizedBeforeReachingTheDetailsPage() {
+        val raw = JSONObject()
+            .put("fileName", "movie.mkv")
+            .put("inform", "File\r\nComplete name : /data/user/0/plugin/cache/autojs6-mediainfo-123.mkv\r\n")
+            .put("sections", JSONObject().put("file", JSONArray().put(JSONObject().put("completeName", "/proc/self/fd/42"))))
+        val path = "/storage/emulated/0/Movies/movie.mkv"
+        val result = JSONObject(org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost.normalizeSnapshotIdentity(raw.toString(), path))
+        assertTrue(result.getString("inform").contains(path))
+        assertEquals(path, result.getJSONObject("sections").getJSONArray("file").getJSONObject(0).getString("completeName"))
+        assertEquals("movie.mkv", result.getString("fileName"))
+    }
+
     private val context = NodePluginTestHarness.targetContext
 
     @Before

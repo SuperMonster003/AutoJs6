@@ -52,8 +52,9 @@ class MediainfoNativeObject(
             val funcName = streamKind.lowercase()
             defineProperty(funcName, newBaseFunction(scriptRuntime.topLevelScope, funcName, { argList ->
                 val parameter = argList.takeUnless { it.isEmpty() }?.get(0)?.let { coerceString(it) } ?: ""
+                val options = Mediainfo.queryOptions(argList.getOrNull(1))
                 runBlocking {
-                    MediainfoPluginHost.get(ScriptRuntime.applicationContext, file, streamKind, 0, parameter)
+                    MediainfoPluginHost.get(ScriptRuntime.applicationContext, file, streamKind, options.streamNumber, parameter, options.infoKind)
                 }
             }, NOT_CONSTRUCTABLE), READONLY or PERMANENT)
         }

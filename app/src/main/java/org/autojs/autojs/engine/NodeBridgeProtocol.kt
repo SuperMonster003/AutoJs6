@@ -84,6 +84,7 @@ import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
+import org.autojs.plugin.mediainfo.api.MediainfoQueryOptions
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -703,7 +704,7 @@ object NodeBridgeModules {
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
     val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume")
-    val mediainfoMethods = setOf("read", "get", "capabilities")
+    val mediainfoMethods = setOf("read", "get", "countGet", "capabilities")
     val recorderMethods = setOf("getStatus", "start", "stop")
     val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
     val pinyin4jMethods = setOf("of", "as", "readings")
@@ -2381,6 +2382,9 @@ class AndroidNodeBridgeCapabilityProvider(
                     .put("schema", MEDIAINFO_CAPABILITIES_SCHEMA)
                     .put("snapshotSchemas", JSONArray(capabilities.snapshotSchemas))
                     .put("defaultSnapshotSchema", capabilities.defaultSnapshotSchema)
+                    .put("streamCount", capabilities.streamCount)
+                    .put("streamNumber", true)
+                    .put("infoKinds", JSONArray(capabilities.infoKinds))
                 capabilities.engineVersion?.let { result.put("engineVersion", it) }
                 return callback(NodeBridgeResponse.success(request.id, result.toString()))
             }
@@ -2417,7 +2421,18 @@ class AndroidNodeBridgeCapabilityProvider(
                 "get" -> {
                     val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
                     val parameter = args.optString(2, "")
-                    val value = runBlocking { MediainfoPluginHost.get(appContext, file, streamKind, 0, parameter) }
+                    val options = args.opt(3).takeUnless { it == JSONObject.NULL }
+                    require(options == null || options is JSONObject) { "MediaInfo query options must be an object" }
+                    val query = MediainfoQueryOptions.parse(
+                        (options as? JSONObject)?.opt("streamNumber").takeUnless { it == JSONObject.NULL },
+                        options?.opt("infoKind").takeUnless { it == JSONObject.NULL },
+                    )
+                    val value = runBlocking { MediainfoPluginHost.get(appContext, file, streamKind, query.streamNumber, parameter, query.infoKind) }
+                    callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value)))
+                }
+                "countGet" -> {
+                    val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
+                    val value = runBlocking { MediainfoPluginHost.countGet(appContext, file, streamKind) }
                     callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value)))
                 }
                 else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))

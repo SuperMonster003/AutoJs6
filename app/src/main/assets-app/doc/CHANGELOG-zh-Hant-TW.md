@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屜工具分組在浮動按鈕與指標位置後加入可選的螢幕取色外掛, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
@@ -178,6 +178,7 @@
 * `新增` Node app 支援 Android 服務啟動, 廣播傳送和已安裝應用查詢; dialogs 支援文字輸入, 單選, 多選及隨腳本清理的進度視窗, keys 提供無障礙系統操作
 * `新增` Node recorder 支援具備麥克風權限, 前景通知, 時長上限與腳本清理的 AAC 錄音; ui.overlay 支援宣告式屬性更新, 拖曳與事件推送
 * `新增` Node 腳本可在兩個獨立執行階段處理程序中並行執行, 共用 FIFO 佇列並按執行工作路由取消和輸入
+* `新增` MediaInfo 查詢支援從 0 開始的 streamNumber, countGet 串流計數以及用於單位, 說明和可讀名稱的 infoKind; Rhino 和 Node 保持預設第 1 條串流的 TEXT 查詢, 並協商外掛擴充能力
 * `修復` 帶 Unicode BOM 的腳本由檔案管理器直接執行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常執行卻於檔案管理器回報 `無效字元` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用資料的問題
 * `修復` 使實驗性遠端單檔案建置編號與舊建置器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓縮大小、使用建置期驗證的範本展開上限，並保留 256 MiB 空間
@@ -315,6 +316,7 @@
 * `修復` `console.setPosition` / `setSize` / `setGravity` 等方法與 `console.show()` 的呼叫順序影響結果 (如 `console.show(); console.setPosition(500, 400)` 需在兩者之間 `sleep` 才生效, 反序呼叫亦可能遺失設定); 現改為記錄設定並在視窗附著後統一套用, 呼叫順序與時機不再影響結果
 * `修復` 拖曳控制台浮動視窗標題列移動視窗偶爾失效 (拖曳手勢在視窗附著前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題列拖曳在視窗附著後建立, 移動範圍限制在螢幕內並在拖曳結束後記錄位置
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到螢幕邊緣; 現已移除留白, 位置座標預設從狀態列下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在螢幕範圍內
+* `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `最佳化` Node bridge 無障礙模組新增 dump (文字, JSON 或 XML 視窗快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與品質選項, 以一次性快取檔案或工作目錄檔案交付), app 模組新增 currentWindow (目前套件名稱, 活動與視窗清單)
 * `最佳化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為正規化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 清單上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力權杖, 變更後重新整理工作區檔案管理器
 * `最佳化` Node bridge 新增 console 模組 (console.tail 讀取全域控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待指令碼結束並收集其 id 視窗內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 筆日誌 (超出捨棄最舊, 控制台檢視依條目 id 重新整理), ConsoleImpl 公開 addLogListener 與 removeLogListener

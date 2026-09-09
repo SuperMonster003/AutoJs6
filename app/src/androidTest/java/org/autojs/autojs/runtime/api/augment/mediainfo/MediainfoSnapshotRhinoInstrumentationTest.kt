@@ -48,6 +48,9 @@ class MediainfoSnapshotRhinoInstrumentationTest {
         val workDir = freshWorkDir()
         try {
             File(workDir, FIXTURE_NAME).writeBytes(minimalPcmWave())
+            InstrumentationRegistry.getInstrumentation().context.assets.open("mediainfo-two-audio.mka").use { input ->
+                File(workDir, "two-audio.mka").outputStream().use { input.copyTo(it) }
+            }
             val marker = File(workDir, MARKER_NAME)
             val startedEngineClass = runViaScriptEngineService(workDir, marker)
 
@@ -67,6 +70,12 @@ class MediainfoSnapshotRhinoInstrumentationTest {
             assertEquals("autojs6-plugin-mediainfo-snapshot-v1", result.getString("defaultSchema"))
             assertTrue(result.getBoolean("advertisesV2"))
             assertTrue(result.getBoolean("legacyReadStillWorks"))
+            assertEquals(2, result.getInt("streamCount"))
+            assertEquals("16000", result.getString("secondRate"))
+            assertEquals("Hz", result.getString("secondUnit").trim())
+            assertEquals("16000", result.getString("accessorRate"))
+            assertTrue(result.getBoolean("invalidIndexRejected"))
+            assertTrue(result.getString("report"), result.getString("report").contains(File(workDir, FIXTURE_NAME).absolutePath))
             assertTrue(result.getBoolean("paddedSchemaRejected"))
             assertTrue(
                 result.getString("paddedSchemaMessage"),
@@ -194,6 +203,10 @@ class MediainfoSnapshotRhinoInstrumentationTest {
             "rhino";
             var legacy = mediainfo.read("./$FIXTURE_NAME");
             var capabilities = mediainfo.capabilities();
+            let streams = mediainfo.read("two-audio.mka");
+            let invalidIndexRejected = false;
+            try { mediainfo.get("two-audio.mka", "audio", "SamplingRate", {streamNumber: 0.5}); }
+            catch (error) { invalidIndexRejected = true; }
             var v1 = mediainfo.snapshot("./$FIXTURE_NAME", {
               includeInform: false,
               includeSections: true
@@ -215,6 +228,12 @@ class MediainfoSnapshotRhinoInstrumentationTest {
             }
             files.write("./$MARKER_NAME", JSON.stringify({
               v1Schema: v1.schema,
+              streamCount: mediainfo.countGet("two-audio.mka", "audio"),
+              secondRate: mediainfo.get("two-audio.mka", "audio", "SamplingRate", {streamNumber: 1}),
+              secondUnit: mediainfo.get("two-audio.mka", "audio", "SamplingRate", {streamNumber: 1, infoKind: "MEASURE"}),
+              accessorRate: streams.audio("SamplingRate", {streamNumber: 1}),
+              invalidIndexRejected: invalidIndexRejected,
+              report: legacy.inform,
               v2Schema: v2.schema,
               fileName: v2.file.name,
               engineName: v2.engine.name,

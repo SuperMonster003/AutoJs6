@@ -456,7 +456,7 @@ object NodeBridgeProviderRegistry {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
-            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.capabilities,recorder.getStatus,recorder.start,recorder.stop",
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.countGet,mediainfo.capabilities,recorder.getStatus,recorder.start,recorder.stop",
             "blockedMethods" to "media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,

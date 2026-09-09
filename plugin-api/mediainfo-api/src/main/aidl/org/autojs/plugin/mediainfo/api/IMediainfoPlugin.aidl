@@ -14,4 +14,9 @@ interface IMediainfoPlugin {
     String get(in ParcelFileDescriptor mediaFd, String displayName, String streamKind, int streamNumber, String parameter);
 
     String snapshot(in ParcelFileDescriptor mediaFd, String displayName, in Bundle options);
+
+    // Append new transactions to preserve the four original transaction IDs.
+    String getDetail(in ParcelFileDescriptor mediaFd, String displayName, String streamKind, int streamNumber, String parameter, String infoKind);
+
+    int countGet(in ParcelFileDescriptor mediaFd, String displayName, String streamKind);
 }

@@ -11,12 +11,17 @@ import org.autojs.plugin.mediainfo.api.MediainfoPluginCapabilityKeys
 import org.autojs.plugin.mediainfo.api.MediainfoPluginActions
 import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
+import org.autojs.plugin.mediainfo.api.MediainfoQueryOptions
+import org.autojs.plugin.mediainfo.api.MediainfoReportIdentity
+import org.json.JSONObject
 import java.io.File
 
 data class MediainfoCapabilities(
     val snapshotSchemas: List<String>,
     val defaultSnapshotSchema: String,
     val engineVersion: String?,
+    val streamCount: Boolean = false,
+    val infoKinds: List<String> = listOf("TEXT"),
 )
 
 object MediainfoPluginHost {
@@ -45,14 +50,42 @@ object MediainfoPluginHost {
     suspend fun inform(context: Context, file: File): String {
         val target = host.selectOrThrow(context, engine = MediainfoPluginIds.ENGINE)
         return openReadOnly(file).use { fd ->
-            host.call(context, target) { proxy -> proxy.inform(fd, file.name) }
+            MediainfoReportIdentity.inform(
+                host.call(context, target) { proxy -> proxy.inform(fd, file.absolutePath) },
+                file.absolutePath,
+            )
         }
     }
 
-    suspend fun get(context: Context, file: File, streamKind: String, streamNumber: Int, parameter: String): String {
+    suspend fun get(context: Context, file: File, streamKind: String, streamNumber: Int, parameter: String, infoKind: String = "TEXT"): String {
+        val query = MediainfoQueryOptions.parse(streamNumber, infoKind)
         val target = host.selectOrThrow(context, engine = MediainfoPluginIds.ENGINE)
+        val capabilities = capabilitiesOf(target.pluginInfo)
+        require(query.infoKind in capabilities.infoKinds) {
+            "${MediainfoQueryOptions.UNSUPPORTED}: plugin does not support infoKind ${query.infoKind}"
+        }
         return openReadOnly(file).use { fd ->
-            host.call(context, target) { proxy -> proxy.get(fd, file.name, streamKind, streamNumber, parameter) }
+            host.call(context, target) { proxy ->
+                if (query.infoKind == "TEXT") {
+                    proxy.get(fd, file.absolutePath, streamKind, query.streamNumber, parameter)
+                } else {
+                    proxy.getDetail(fd, file.absolutePath, streamKind, query.streamNumber, parameter, query.infoKind)
+                }
+            }.let { value ->
+                if (streamKind.equals("GENERAL", ignoreCase = true) && query.streamNumber == 0 &&
+                    parameter == "CompleteName" && query.infoKind == "TEXT"
+                ) file.absolutePath else value
+            }
+        }
+    }
+
+    suspend fun countGet(context: Context, file: File, streamKind: String): Int {
+        val target = host.selectOrThrow(context, engine = MediainfoPluginIds.ENGINE)
+        require(capabilitiesOf(target.pluginInfo).streamCount) {
+            "${MediainfoQueryOptions.UNSUPPORTED}: plugin does not support stream counting"
+        }
+        return openReadOnly(file).use { fd ->
+            host.call(context, target) { proxy -> proxy.countGet(fd, file.absolutePath, streamKind) }
         }
     }
 
@@ -73,6 +106,7 @@ object MediainfoPluginHost {
             }
         val resolvedSchema = MediainfoSnapshotSchemas.requireSupported(schema, advertisedSchemas)
         val options = Bundle().apply {
+            putString(MediainfoOptionKeys.SOURCE_NAME, file.absolutePath)
             putBoolean(MediainfoOptionKeys.INCLUDE_INFORM, includeInform)
             putBoolean(MediainfoOptionKeys.INCLUDE_SECTIONS, includeSections)
             if (schema != null) {
@@ -80,8 +114,28 @@ object MediainfoPluginHost {
             }
         }
         return openReadOnly(file).use { fd ->
-            host.call(context, target) { proxy -> proxy.snapshot(fd, file.name, options) }
+            normalizeSnapshotIdentity(
+                host.call(context, target) { proxy -> proxy.snapshot(fd, file.name, options) },
+                file.absolutePath,
+            )
         }
+    }
+
+    /** Also repairs reports from older plugins that ignore SOURCE_NAME. */
+    internal fun normalizeSnapshotIdentity(raw: String, sourceName: String): String {
+        val snapshot = JSONObject(raw)
+        if (snapshot.has("inform")) {
+            snapshot.put("inform", MediainfoReportIdentity.inform(snapshot.getString("inform"), sourceName))
+        }
+        snapshot.optJSONObject("sections")?.let { sections ->
+            for (name in listOf("file", "general")) {
+                val entries = sections.optJSONArray(name) ?: continue
+                for (index in 0 until entries.length()) {
+                    entries.optJSONObject(index)?.takeIf { it.has("completeName") }?.put("completeName", sourceName)
+                }
+            }
+        }
+        return snapshot.toString()
     }
 
     fun trimInform(inform: String): String {
@@ -131,6 +185,14 @@ object MediainfoPluginHost {
             snapshotSchemas = snapshotSchemas,
             defaultSnapshotSchema = defaultSnapshotSchema,
             engineVersion = engineVersion,
+            streamCount = runCatching { bundle?.getBoolean(MediainfoPluginCapabilityKeys.STREAM_COUNT) }.getOrNull() == true,
+            infoKinds = buildList {
+                add("TEXT")
+                runCatching { bundle?.getStringArray(MediainfoPluginCapabilityKeys.INFO_KINDS) }
+                    .getOrNull().orEmpty().forEach { kind ->
+                        if (kind in MediainfoQueryOptions.INFO_KINDS && kind !in this) add(kind)
+                    }
+            },
         )
     }
 
