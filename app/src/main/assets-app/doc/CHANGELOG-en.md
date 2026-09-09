@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
@@ -178,6 +178,7 @@
 * `Feature` Node app supports Android service starts, broadcasts and installed package queries; dialogs supports text input, choices and progress windows with script cleanup, and keys provides accessibility system actions
 * `Feature` Node recorder supports AAC recording with microphone permission, foreground disclosure, duration limits and script cleanup; ui.overlay supports declarative property updates, dragging and pushed events
 * `Feature` Node scripts can run concurrently in two independent runtime processes, with a shared FIFO queue and execution-specific cancellation and input routing
+* `Fix` MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host
 * `Fix` File Manager direct execution did not honor the corresponding UTF-8, UTF-16, or UTF-32 encoding for scripts with a Unicode BOM, causing files that ran normally in the editor to fail with `Invalid character`
 * `Fix` Android Studio download information was no longer written automatically to shared README data after the scraper migration
 * `Fix` Aligned experimental remote single-file build numbering with the legacy builder, and added fail-closed workspace storage preflight using cross-checked expanded input sizes, a build-verified template expansion bound, and a 256 MiB reserve

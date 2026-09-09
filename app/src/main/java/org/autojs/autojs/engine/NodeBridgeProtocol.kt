@@ -841,7 +841,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val deviceControls = NodeDeviceControls(appContext)
     private val eventObservers = NodeEventObservers(appContext)
     private val dialogs = NodeDialogs(appContext)
-    private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveScopedProjectFile) }
+    private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveAndroidFile) }
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -2021,8 +2021,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun saveImage(request: NodeBridgeRequest): String {
         val args = request.argsArray()
         val image = imageArgument(args, 0)
-        val file = resolveScopedProjectFile(args.optString(1))
-            ?: throw SecurityException("Image output path must stay inside the working directory.")
+        val file = resolveAndroidFile(args.optString(1))
+            ?: throw SecurityException("Image output path must be a non-empty file path without NUL bytes.")
         val options = args.optJSONObject(2) ?: JSONObject()
         val format = when (options.optString("format", "png").lowercase()) {
             "png" -> Bitmap.CompressFormat.PNG
@@ -2386,12 +2386,12 @@ class AndroidNodeBridgeCapabilityProvider(
             }
             val args = request.argsArray()
             val rawPath = args.optString(0, "")
-            val file = resolveScopedProjectFile(rawPath)
+            val file = resolveAndroidFile(rawPath)
                 ?: return callback(
                     NodeBridgeResponse.failure(
                         request.id,
                         NodeBridgeError.permissionDenied(
-                            message = "AutoJs6 mediainfo path must stay inside the scoped working directory.",
+                            message = "AutoJs6 mediainfo path must be a non-empty file path without NUL bytes.",
                             module = request.module,
                             method = request.method,
                         ),
@@ -2536,12 +2536,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args = request.argsArray()
         val path = args.optString(0, "")
-        val file = resolveScopedProjectFile(path)
+        val file = resolveAndroidFile(path)
             ?: return callback(
                 NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.permissionDenied(
-                        message = "AutoJs6 image.readImage path must stay inside the scoped working directory.",
+                        message = "AutoJs6 image.readImage path must be a non-empty file path without NUL bytes.",
                         module = request.module,
                         method = request.method,
                     ),
@@ -2609,6 +2609,16 @@ class AndroidNodeBridgeCapabilityProvider(
             handle.resource.close("recycle")
         }
         callback(NodeBridgeResponse.success(request.id, "true"))
+    }
+
+    private fun resolveAndroidFile(rawPath: String): File? {
+        if (rawPath.isEmpty() || rawPath.indexOf('\u0000') >= 0) {
+            return null
+        }
+        val file = File(rawPath)
+        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath)
+        // Preserve path components and symlinks for Android's file APIs to resolve.
+        return if (file.isAbsolute) file else File(base, rawPath)
     }
 
     private fun resolveScopedProjectFile(rawPath: String): File? {

@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 8 September 2026.
+تم تحديث البيانات في 10 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `إضافة جديدة` محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة "bun" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js
 * `إضافة جديدة` يضيف قسم الأدوات في الدرج الجانبي الآن إضافة منتقي ألوان الشاشة الاختيارية كأداة ثالثة متوقفة افتراضيا بعد الزر العائم وموضع المؤشر; يتم تحديث التثبيت والتمكين وحالة التشغيل والإزالة تلقائيا دون حظر واجهة المستخدم
@@ -338,6 +338,7 @@
 * `إضافة جديدة` تدعم Node app تشغيل خدمات Android والبث والاستعلام عن التطبيقات المثبتة; توفر dialogs إدخال النص والاختيارات ونوافذ التقدم التي تغلق عند انتهاء السكربت وتوفر keys إجراءات النظام عبر إمكانية الوصول
 * `إضافة جديدة` تدعم Node recorder تسجيل AAC مع إذن الميكروفون وإشعار وحد زمني وإيقاف عند انتهاء السكربت; تدعم ui.overlay تحديث الخصائص والسحب وإرسال الأحداث
 * `إضافة جديدة` يمكن تشغيل سكربتات Node بالتوازي في عمليتين مستقلتين مع قائمة انتظار FIFO مشتركة وتوجيه الإلغاء والإدخال حسب كل تنفيذ
+* `تصليح` تدعم مسارات ملفات MediaInfo والصور المسارات المطلقة والمجلدات الأصلية وأسماء الملفات الصالحة; تستخدم مخرجات التسجيل قواعد وصول Android نفسها مع المضيف المحدث
 * `تصليح` لم يكن التشغيل المباشر من مدير الملفات يراعي ترميز UTF-8 أو UTF-16 أو UTF-32 الذي تحدده علامة Unicode BOM, لذلك كانت النصوص البرمجية التي تعمل بصورة طبيعية في المحرر تفشل برسالة `محرف غير صالح`
 * `تصليح` توقف تسجيل معلومات تنزيل Android Studio تلقائيا في بيانات README المشتركة بعد ترحيل أدوات الجمع
 * `تصليح` تمت محاذاة ترقيم البناء التجريبي عن بُعد للملف الواحد مع أداة البناء القديمة، وأضيف فحص مسبق لمساحة العمل يفشل بشكل مغلق ويستخدم أحجام الإدخال بعد فك الضغط التي تم التحقق منها، وحدًا لتوسّع القالب تم التحقق منه أثناء البناء، واحتياطيًا قدره 256 MiB
@@ -856,7 +857,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 8 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 10 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

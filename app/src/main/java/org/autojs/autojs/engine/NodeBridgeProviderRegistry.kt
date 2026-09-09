@@ -469,7 +469,7 @@ object NodeBridgeProviderRegistry {
             "mediainfoCapabilitiesSchema" to "autojs6-node-mediainfo-capabilities-v1",
             "mediainfoSchemaPolicy" to "legacy_node_v1_by_default; plugin_v2_only_when_advertised",
             "recorderStatusSchema" to "autojs6-node-recorder-status-v1",
-            "pathPolicy" to "mediainfo and recorder accept relative paths inside the Node working directory",
+            "pathPolicy" to "mediainfo, image files and recorder accept absolute paths or paths relative to the working directory; Android file access applies",
             "recorderSessionPolicy" to "AAC/M4A output descriptor; microphone permission, foreground notification and execution cleanup",
             "recorderStartStopPolicy" to "one recording per execution; default 60 seconds, maximum 5 minutes; notification Stop stops all Node recordings",
             "recorderForegroundDisclosurePolicy" to "microphone_foreground_disclosure_and_stop_action_required_before_start",
@@ -481,7 +481,7 @@ object NodeBridgeProviderRegistry {
             "mediaFutureCapabilityPolicy" to "future_media_playback_media_library_media_library_mutate_capabilities_require_new_gate",
             "recorderPolicy" to "getStatus/start/stop use the execution-owned Android MediaRecorder provider",
             "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
-            "statusReason" to "scoped metadata, audio stream control and recording are available; playback and MediaStore remain blocked",
+            "statusReason" to "metadata, audio stream control and recording are available; playback and MediaStore remain blocked",
         )
         PINYIN_PROVIDER -> linkedMapOf(
             "liveMethods" to NodeBridgeModules.pinyinMethods.sorted().joinToString(","),

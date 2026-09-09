@@ -59,7 +59,7 @@ internal class NodeAudioRecorder(private val context: Context, private val resol
         check(active == null && pending == null) { "This script is already recording audio." }
         if (!hasPermission()) throw SecurityException("Grant AutoJs6 microphone permission in Android app settings before recording audio.")
         val path = options.optString("path", "recording.m4a")
-        val file = resolveFile(path) ?: throw SecurityException("The audio output path must stay inside the working directory.")
+        val file = resolveFile(path) ?: throw SecurityException("The audio output path must be a non-empty file path without NUL bytes.")
         require(options.optString("format", "m4a") in listOf("m4a", "mp4")) { "Audio recording supports m4a/mp4 with AAC audio." }
         require(options.optInt("maxDurationMs", 60_000) in 1000..300_000) { "maxDurationMs must be between 1000 and 300000." }
         require(options.optInt("sampleRate", 44_100) in 8000..192_000) { "sampleRate must be between 8000 and 192000." }

@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 8 日.
+数据更新于 2026 年 9 月 10 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `新增` 独立 Bun Runtime 插件引擎, 用于本地单文件 JavaScript 和 TypeScript, 通过 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 标记路由, 且不会回退到 Rhino 或 Node.js
 * `新增` 侧拉抽屉工具分组在浮动按钮与指针位置后添加可选的屏幕取色插件, 作为第三个默认关闭的工具; 安装, 启用, 运行状态与卸载均会在不阻塞 UI 的情况下自动刷新
@@ -314,6 +314,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Node app 支持 Android 服务启动, 广播发送和已安装应用查询; dialogs 支持文本输入, 单选, 多选及随脚本清理的进度窗口, keys 提供无障碍系统操作
 * `新增` Node recorder 支持带麦克风权限, 前台通知, 时长上限与脚本清理的 AAC 录音; ui.overlay 支持声明式属性更新, 拖动与事件推送
 * `新增` Node 脚本可在两个独立运行时进程中并发执行, 共用 FIFO 队列并按执行任务路由取消和输入
+* `修复` MediaInfo 与图片文件路径支持绝对路径, 父目录和合法文件名; 录音输出同步交由更新后的宿主按 Android 文件权限处理
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
@@ -835,7 +836,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 8 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 10 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

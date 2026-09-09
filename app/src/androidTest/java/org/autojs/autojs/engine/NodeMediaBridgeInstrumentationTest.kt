@@ -177,7 +177,7 @@ class NodeMediaBridgeInstrumentationTest {
               }
               let invalidPath = "";
               try {
-                await mediainfo.read("../escape.mp3", { timeoutMs: 1000 });
+                await mediainfo.read(String.fromCharCode(0), { timeoutMs: 1000 });
               } catch (error) {
                 invalidPath = String(error && (error.autojs6Code || error.code || ""));
               }
@@ -336,6 +336,81 @@ class NodeMediaBridgeInstrumentationTest {
             assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, start.error?.code)
         }
         provider.destroy()
+    }
+
+    @Test
+    fun androidProviderUsesAndroidFileAccessOutsideTheWorkingDirectory() {
+        val root = File(context.cacheDir, "node-media-paths-${java.util.UUID.randomUUID()}").apply { check(mkdirs()) }
+        val workDir = root.resolve("project").apply { check(mkdirs()) }
+        val wave = root.resolve("media..take:01.wav").apply { writeBytes(minimalPcmWave()) }
+        val image = root.resolve("image..take:01.png")
+        android.graphics.Bitmap.createBitmap(16, 12, android.graphics.Bitmap.Config.ARGB_8888).let { bitmap ->
+            bitmap.eraseColor(android.graphics.Color.MAGENTA)
+            image.outputStream().use { check(bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)) }
+            bitmap.recycle()
+        }
+        android.system.Os.symlink(wave.absolutePath, workDir.resolve("linked.wav").absolutePath)
+        val provider = AndroidNodeBridgeCapabilityProvider(context,
+            NodeBridgeEngineInfo.fromContext(context, id = "media-paths", sourceName = "main.cjs", cwd = workDir.absolutePath))
+        try {
+            for (path in listOf(wave.absolutePath, "../${wave.name}", "linked.wav")) {
+                val response = dispatch(provider, "mediainfo", "read", JSONArray().put(path).put(JSONObject().put("includeInform", false)).toString())
+                assertTrue("Android-readable media path $path: $response", response.ok)
+                assertTrue(JSONObject(response.resultJson.orEmpty()).getJSONObject("sections").getJSONArray("audio").length() > 0)
+            }
+            val format = dispatch(provider, "mediainfo", "get", JSONArray().put(wave.absolutePath).put("general").put("Format").toString())
+            assertTrue("absolute mediainfo.get: $format", format.ok)
+            for ((index, path) in listOf(image.absolutePath, "../${image.name}").withIndex()) {
+                val read = dispatch(provider, "image", "readImage", JSONArray().put(path).toString())
+                assertTrue("Android-readable image path $path: $read", read.ok)
+                val handle = JSONObject(read.resultJson.orEmpty())
+                val output = root.resolve("saved-$index.png")
+                val outputPath = if (index == 0) output.absolutePath else "../${output.name}"
+                val saved = dispatch(provider, "image", "saveImage", JSONArray().put(handle).put(outputPath).toString())
+                assertTrue("Android-writable image path $outputPath: $saved", saved.ok)
+                assertTrue(output.length() > 0)
+                val reread = android.graphics.BitmapFactory.decodeFile(output.absolutePath)
+                assertEquals(16, reread.width)
+                assertEquals(12, reread.height)
+                reread.recycle()
+                assertTrue(dispatch(provider, "image", "recycle", JSONArray().put(handle).toString()).ok)
+            }
+            val script = NodePluginTestHarness.runPluginScript(
+                """
+                (async () => {
+                  const mediainfo = require('mediainfo'), images = require('images');
+                  for (const path of ${JSONArray(listOf(wave.absolutePath, "../${wave.name}", "linked.wav"))}) {
+                    const snapshot = await mediainfo.read(path, {includeInform: false});
+                    if (!snapshot.sections.audio.length) throw new Error('No audio track: ' + path);
+                  }
+                  for (const path of ${JSONArray(listOf(image.absolutePath, "../${image.name}"))}) {
+                    const handle = await images.readImage(path);
+                    try {
+                      await images.saveImage(handle, ${JSONObject.quote(root.resolve("script-output.png").absolutePath)});
+                    } finally { await images.recycle(handle); }
+                  }
+                  console.log('m20.facade-file-paths=PASS');
+                })().catch(error => { console.error(error.stack); process.exitCode = 1; });
+                """.trimIndent(),
+                "media-paths.cjs", workingDirectory = workDir, timeoutMs = 60_000,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to
+                    NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("media", "media.metadata", "image")).toJson()),
+            )
+            NodePluginTestHarness.assertSucceeded("media/image paths through the plugin", script)
+            assertTrue(script.stdout, script.stdout.contains("m20.facade-file-paths=PASS"))
+            assertTrue(root.resolve("script-output.png").length() > 0)
+            android.system.Os.chmod(wave.absolutePath, 0)
+            try {
+                val denied = dispatch(provider, "mediainfo", "read", JSONArray().put(wave.absolutePath).toString())
+                assertFalse("Android must deny opening a mode-000 fixture: $denied", denied.ok)
+                assertTrue(denied.toString(), denied.error?.message.orEmpty().contains("Permission denied", ignoreCase = true)
+                    || denied.error?.message.orEmpty().contains("EACCES"))
+            } finally { android.system.Os.chmod(wave.absolutePath, 0x180) }
+            println("m20.media-image-paths=PASS absolute,parent,symlink,filename,android-denial")
+        } finally {
+            provider.destroy()
+            root.deleteRecursively()
+        }
     }
 
     private fun dispatch(

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/08",
+      "released_date": "2026/09/10",
       "feature": [
         "Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva \"bun\" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js",
         "La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz",
@@ -175,6 +175,7 @@
         "Los scripts Node pueden ejecutarse en dos procesos independientes con una cola FIFO compartida y cancelación y entrada dirigidas a cada ejecución"
       ],
       "fix": [
+        "Las rutas de MediaInfo e imágenes admiten rutas absolutas, directorios superiores y nombres válidos; las grabaciones siguen las mismas reglas de acceso de Android con el anfitrión actualizado",
         "La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`",
         "La información de descarga de Android Studio dejó de escribirse automáticamente en los datos comunes del README tras la migración de los scrapers",
         "Se alineó la numeración de compilaciones remotas experimentales de un solo archivo con el compilador heredado y se añadió una comprobación previa y cerrada ante fallos del espacio de trabajo, basada en tamaños expandidos verificados, un límite de expansión de plantilla validado al compilar y una reserva de 256 MiB",

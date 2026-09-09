@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 8 日 に更新されました.
+データは 2026 年 9 月 10 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/08
+###### 2026/09/10
 
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
 * `新機能` サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新
@@ -338,6 +338,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node app が Android サービスの起動, ブロードキャスト送信とインストール済みアプリの照会に対応; dialogs が文字入力, 単一選択, 複数選択とスクリプト終了時に閉じる進捗ウィンドウを提供し, keys がユーザー補助のシステム操作を提供
 * `新機能` Node recorder がマイク権限, フォアグラウンド通知, 時間制限とスクリプト終了時の解放を備えた AAC 録音に対応; ui.overlay が宣言的な属性更新, ドラッグとイベント配信に対応
 * `新機能` Node スクリプトが 2 つの独立したランタイムプロセスで並行実行可能になり, FIFO キューの共有と実行単位のキャンセルおよび入力転送に対応
+* `修正` MediaInfo と画像のファイルパスで絶対パス, 親ディレクトリと有効なファイル名に対応; 録音出力も更新済みホストの Android ファイル権限に従って処理
 * `修正` Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題
 * `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
 * `修正` 実験的なリモート単一ファイルビルドのビルド番号を従来のビルダーと一致させ、照合済みの展開後入力サイズ、ビルド時に検証されたテンプレート展開上限、256 MiB の予約領域を用いるフェイルクローズなワークスペース容量事前検査を追加
@@ -856,7 +857,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 8 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 10 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
