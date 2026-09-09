@@ -43,5 +43,5 @@ compatibility, but the host never grants an unknown operation. Runtime internals
 raw Android objects, file descriptors, native pointers, and unrestricted Java
 reflection are not capabilities and must not cross the bridge.
 
-See [Security model](SECURITY_MODEL.md) and the plugin repository's
+See [Security model](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/SECURITY_MODEL.md) and the plugin repository's
 **docs/HOST-API.md** for the current script-facing surface.

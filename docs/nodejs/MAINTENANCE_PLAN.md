@@ -30,7 +30,7 @@ boundary must include both repository revisions in its verification note.
   guards for cross-repository changes.
 - Run real-plugin instrumentation for routing, contract, workspace, or bridge changes.
 - Inspect the host APK for accidental libnode reintroduction before release.
-- Keep [Quick start](QUICK_START.md), [Testing](TESTING.md), and the plugin
+- Keep [Quick start](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/QUICK_START.md), [Testing](TESTING.md), and the plugin
   **docs/HOST-API.md** current.
 
 See [Post-GA smoke](POST_GA_SMOKE.md) and [Release checklist](RELEASE_CHECKLIST.md).

@@ -33,15 +33,15 @@ that the host embeds or loads a runtime.
 
 ## Start Here
 
-- [Quick start](QUICK_START.md)
-- [Current compatibility profile](COMPATIBILITY_PROFILE.md)
+- [Quick start](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/QUICK_START.md)
+- [Current compatibility profile](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/COMPATIBILITY_PROFILE.md)
 - [Host/plugin integration and responsibilities](INTEGRATION_PLAN.md)
-- [Security model](SECURITY_MODEL.md)
+- [Security model](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/SECURITY_MODEL.md)
 - [Testing](TESTING.md)
 - [Release checklist](RELEASE_CHECKLIST.md)
-- [Rhino migration](MIGRATION_FROM_RHINO.md)
-- [Example projects](EXAMPLES.md)
-- [Error catalog](ERROR_CATALOG.md)
+- [Rhino migration](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/MIGRATION_FROM_RHINO.md)
+- [Example projects](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/EXAMPLES.md)
+- [Error catalog](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/ERROR_CATALOG.md)
 
 ## Cross-Repository Guards
 

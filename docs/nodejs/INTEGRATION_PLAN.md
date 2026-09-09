@@ -42,5 +42,5 @@ The plugin owns the cross-repository API/capability alignment guard.
 - The host APK never copies native libraries from the plugin repository.
 - Runtime defaults and optional runtime behavior are implemented by the plugin.
 
-See [Testing](TESTING.md) for acceptance and [Security model](SECURITY_MODEL.md)
+See [Testing](TESTING.md) for acceptance and [Security model](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/SECURITY_MODEL.md)
 for authority boundaries.
