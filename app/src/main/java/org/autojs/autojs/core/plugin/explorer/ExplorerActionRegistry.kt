@@ -199,10 +199,16 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
     ): List<ResolvedExplorerAction> {
         val actions = snapshot.get()
         val matchingIdsByPackage = actions.groupBy(ResolvedExplorerAction::packageName).mapValues {
-            (_, packageActions) ->
+            (packageName, packageActions) ->
             ExplorerActionMatchingPolicy.matchingActionIds(
                 descriptors = packageActions.map(ResolvedExplorerAction::descriptor),
-                targets = targets,
+                targets = targets.map { target ->
+                    if (target.kind != ExplorerActionValues.TARGET_FILE) target else target.copy(
+                        mimeType = ExplorerM3uPlaylistPolicy.resolveMimeType(
+                            packageName, target.extension, target.mimeType,
+                        ),
+                    )
+                },
             )
         }
         return actions.filter { action ->

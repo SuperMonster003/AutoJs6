@@ -546,6 +546,7 @@
     <string name="hint_long_click_run_to_debug">実行 ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
+    <string name="hint_m3u_player_plugin_unavailable">この M3U プレイリストで使用できるプレーヤーが見つかりません. 3-Ember または 3-Terra を選択し, プラグインセンターでインストール, 有効化または承認してください. 3-Ember が優先されます.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
     <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>

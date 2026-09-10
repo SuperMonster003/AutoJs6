@@ -542,6 +542,7 @@
     <string name="hint_long_click_run_to_debug">長按 \"執行\" 圖示可啟動除錯</string>
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
+    <string name="hint_m3u_player_plugin_unavailable">未找到可用於播放此 M3U 清單的播放器. 請選擇 3-Ember 或 3-Terra, 前往外掛中心安裝, 啟用或授權. 優先使用 3-Ember.</string>
     <string name="hint_pc_server_address_supported_formats">支援 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">外掛程序無法穩定啟動. 請更新或重新安裝外掛; 如問題持續, 請聯絡外掛開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前外掛需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>

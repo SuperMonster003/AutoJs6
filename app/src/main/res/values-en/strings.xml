@@ -541,6 +541,7 @@
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
+    <string name="hint_m3u_player_plugin_unavailable">No available player was found for this M3U playlist. Choose 3-Ember or 3-Terra to install, enable or authorize it in Plugin Center. 3-Ember is preferred.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 and domain are supported.</string>
     <string name="hint_plugin_process_failed_to_start">The plugin process could not start reliably. Update or reinstall the plugin; if the problem persists, contact the plugin developer.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>

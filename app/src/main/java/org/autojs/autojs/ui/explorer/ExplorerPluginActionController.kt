@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.explorer
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
+import org.autojs.autojs.core.plugin.explorer.ExplorerM3uPlaylistPolicy
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.model.explorer.ExplorerItem
@@ -37,6 +38,7 @@ internal class ExplorerPluginActionController(
     }
 
     fun select(item: ExplorerItem, actions: List<ResolvedExplorerAction>): ResolvedExplorerAction? {
+        if (requiresM3uPlayer(item)) return ExplorerM3uPlaylistPolicy.select(actions)
         return if (requiresOfficialVideoPlayer(item)) {
             actions.firstOrNull(ExplorerVideoPlayerPluginUi::isOfficialAction)
         } else {
@@ -60,13 +62,20 @@ internal class ExplorerPluginActionController(
         }.getOrNull()
     }
 
-    /** Returns true when the item is a video whose implicit viewer fallback must be suppressed. */
-    fun launchOfficialVideoOrShowGuidance(
+    /** Returns true when the item requires official media plugins instead of an implicit viewer. */
+    fun launchOfficialMediaOrShowGuidance(
         context: Context,
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         preResolvedAction: ResolvedExplorerAction? = null,
     ): Boolean {
+        if (requiresM3uPlayer(item)) {
+            // Resolve again at the click so a cached audio action cannot override the video priority.
+            val action = resolve(entryPoint, item)
+            val launched = action?.let { launch(context, entryPoint, it, item) } == true
+            if (!launched) ExplorerM3uPlaylistPlayerUi.showUnavailableDialog(context)
+            return true
+        }
         if (!requiresOfficialVideoPlayer(item)) return false
         val action = preResolvedAction
             ?.takeIf(ExplorerVideoPlayerPluginUi::isOfficialAction)
@@ -124,6 +133,10 @@ internal class ExplorerPluginActionController(
 
     private fun requiresOfficialVideoPlayer(item: ExplorerItem): Boolean {
         return surface == ExplorerSurface.MAIN_FILES && item.type.isVideoFile()
+    }
+
+    private fun requiresM3uPlayer(item: ExplorerItem): Boolean {
+        return surface == ExplorerSurface.MAIN_FILES && ExplorerM3uPlaylistPolicy.supports(item.type)
     }
 
     private fun requiresDocumentPreviewer(item: ExplorerItem): Boolean {

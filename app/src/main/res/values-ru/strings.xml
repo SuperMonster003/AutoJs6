@@ -545,6 +545,7 @@
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
+    <string name="hint_m3u_player_plugin_unavailable">Для этого списка M3U нет доступного проигрывателя. Выберите 3-Ember или 3-Terra для установки, включения или авторизации в Центре плагинов. Приоритет у 3-Ember.</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>

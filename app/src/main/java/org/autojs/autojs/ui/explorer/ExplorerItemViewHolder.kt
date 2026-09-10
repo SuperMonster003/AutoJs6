@@ -71,7 +71,7 @@ internal interface ExplorerItemViewHost {
     fun selectPluginAction(item: ExplorerItem, actions: List<ResolvedExplorerAction>): ResolvedExplorerAction?
     fun openArchiveEntry(item: ArchiveExplorerFileItem, action: ExplorerPrimaryAction?)
     fun notifyItemOperated(item: ExplorerItem)
-    fun launchOfficialVideoOrShowGuidance(
+    fun launchOfficialMediaOrShowGuidance(
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         preResolvedAction: ResolvedExplorerAction? = null,
@@ -330,7 +330,7 @@ internal class ExplorerItemViewHolder(
             return
         }
         if (
-            host.launchOfficialVideoOrShowGuidance(
+            host.launchOfficialMediaOrShowGuidance(
                 ExplorerActionEntryPoint.DEFAULT_CLICK,
                 mExplorerItem,
             )
@@ -443,7 +443,7 @@ internal class ExplorerItemViewHolder(
             return
         }
         if (
-            host.launchOfficialVideoOrShowGuidance(
+            host.launchOfficialMediaOrShowGuidance(
                 entryPoint = ExplorerActionEntryPoint.PRIMARY_BUTTON,
                 item = mExplorerItem,
                 preResolvedAction = pluginAction,
@@ -507,7 +507,7 @@ internal class ExplorerItemViewHolder(
                 Scripts.runInteractive(host.context, ScriptFile(mExplorerItem.path))
                 host.notifyItemOperated(mExplorerItem)
             }
-            host.launchOfficialVideoOrShowGuidance(
+            host.launchOfficialMediaOrShowGuidance(
                 ExplorerActionEntryPoint.PRIMARY_BUTTON,
                 mExplorerItem,
             ) -> {
@@ -591,7 +591,7 @@ internal class ExplorerItemViewHolder(
                         host.showHostDialog()
                     },
                     onPlayRequested = {
-                        host.launchOfficialVideoOrShowGuidance(
+                        host.launchOfficialMediaOrShowGuidance(
                             ExplorerActionEntryPoint.MEDIA_INFO_DIALOG,
                             mediaItem,
                         ) || (

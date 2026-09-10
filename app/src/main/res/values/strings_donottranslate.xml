@@ -283,6 +283,8 @@
     <string name="original_developer_nickname" translatable="false">hyb1996</string>
     <string name="plugin_html_previewer_name" translatable="false">HTML Previewer</string>
     <string name="plugin_markdown_previewer_name" translatable="false">Markdown Previewer</string>
+    <string name="plugin_three_ember_player_name" translatable="false">3-Ember</string>
+    <string name="plugin_three_terra_player_name" translatable="false">3-Terra</string>
     <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
     <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
     <string name="symbol_colon" translatable="false">:</string>

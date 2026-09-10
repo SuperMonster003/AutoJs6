@@ -547,6 +547,7 @@
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
+    <string name="hint_m3u_player_plugin_unavailable">이 M3U 재생 목록에 사용할 수 있는 플레이어가 없습니다. 3-Ember 또는 3-Terra를 선택하여 플러그인 센터에서 설치, 활성화 또는 승인하세요. 3-Ember가 우선 사용됩니다.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
     <string name="hint_plugin_process_failed_to_start">플러그인 프로세스를 안정적으로 시작할 수 없습니다. 플러그인을 업데이트하거나 다시 설치하십시오. 문제가 계속되면 플러그인 개발자에게 문의하십시오.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>

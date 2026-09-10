@@ -276,11 +276,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             this@ExplorerView.notifyItemOperated()
         }
 
-        override fun launchOfficialVideoOrShowGuidance(
+        override fun launchOfficialMediaOrShowGuidance(
             entryPoint: ExplorerActionEntryPoint,
             item: ExplorerItem,
             preResolvedAction: ResolvedExplorerAction?,
-        ): Boolean = this@ExplorerView.launchOfficialVideoOrShowGuidance(
+        ): Boolean = this@ExplorerView.launchOfficialMediaOrShowGuidance(
             entryPoint,
             item,
             preResolvedAction,
@@ -908,11 +908,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         item: ExplorerItem,
     ): ResolvedExplorerAction? = mPluginActions.resolve(entryPoint, item)
 
-    private fun launchOfficialVideoOrShowGuidance(
+    private fun launchOfficialMediaOrShowGuidance(
         entryPoint: ExplorerActionEntryPoint,
         item: ExplorerItem,
         preResolvedAction: ResolvedExplorerAction? = null,
-    ): Boolean = mPluginActions.launchOfficialVideoOrShowGuidance(
+    ): Boolean = mPluginActions.launchOfficialMediaOrShowGuidance(
         context,
         entryPoint,
         item,
@@ -1049,7 +1049,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             ExplorerPrimaryAction.MEDIA_PLAY -> {
                 val mediaItem = ExplorerFileItem(file, null)
                 if (
-                    !launchOfficialVideoOrShowGuidance(
+                    !launchOfficialMediaOrShowGuidance(
                         ExplorerActionEntryPoint.PRIMARY_BUTTON,
                         mediaItem,
                     )

@@ -352,8 +352,9 @@ internal object AndroidPackageArchiveInspector {
     ): AndroidPackageArchive {
         if (!file.isFile) throw IOException("Package file does not exist")
         return ZipFile(file).use { zip ->
-            val entries = validateAndCollectEntries(zip)
-            val rootManifest = entries.firstOrNull { it.name == "AndroidManifest.xml" && !it.isDirectory }
+            // A standalone APK only needs its bounded manifest for inspection. Its resources are
+            // neither enumerated nor extracted here; container entry budgets apply below instead.
+            val rootManifest = zip.getEntry("AndroidManifest.xml")?.takeUnless { it.isDirectory }
             if (rootManifest != null) {
                 val xml = ApkManifestDisplayDecoder.decode(file)
                 val summary = ManifestSummaryParser.parse(xml)
@@ -382,6 +383,7 @@ internal object AndroidPackageArchiveInspector {
                 )
             }
 
+            val entries = validateAndCollectEntries(zip)
             val entryNames = entries.asSequence().map { it.name }.toSet()
             val extension = file.extension.lowercase(Locale.ROOT)
             val format = detectContainerFormat(extension, entryNames)

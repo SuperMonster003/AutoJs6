@@ -40,6 +40,54 @@ class AndroidPackageArchiveInspectorTest {
     }
 
     @Test
+    fun singleApkWithManyResourcesCanBeInspectedAndPreparedForInstallation() {
+        val apk = temporaryFolder.newFile("many-resources.apk")
+        ZipOutputStream(FileOutputStream(apk)).use { zip ->
+            repeat(18_183) { index ->
+                zip.putNextEntry(ZipEntry("res/raw/resource_$index"))
+                zip.closeEntry()
+            }
+            zip.putNextEntry(ZipEntry("AndroidManifest.xml"))
+            zip.write(manifest())
+            zip.closeEntry()
+        }
+
+        listOf(false, true).forEach { prepare ->
+            val archive = AndroidPackageArchiveInspector.inspect(apk, arm64Device, prepare)
+
+            assertEquals(AndroidPackageFormat.APK, archive.format)
+            assertEquals("com.example.demo", archive.baseManifest?.packageName)
+            assertEquals(prepare, archive.selectedApks.single().sha256 != null)
+            assertTrue(archive.canInstall)
+        }
+    }
+
+    @Test
+    fun singleApkStillRejectsAnOversizedManifest() {
+        val apk = temporaryFolder.newFile("oversized-manifest.apk")
+        writeZip(apk, "AndroidManifest.xml" to ByteArray(4 * 1024 * 1024 + 1))
+
+        assertFailsWithIOException {
+            AndroidPackageArchiveInspector.inspect(apk, arm64Device)
+        }
+    }
+
+    @Test
+    fun packageContainerStillRejectsExcessiveEntryCounts() {
+        val xapk = temporaryFolder.newFile("many-entries.xapk")
+        ZipOutputStream(FileOutputStream(xapk)).use { zip ->
+            repeat(16_385) { index ->
+                zip.putNextEntry(ZipEntry("assets/entry_$index"))
+                zip.closeEntry()
+            }
+        }
+
+        assertFailsWithIOException {
+            AndroidPackageArchiveInspector.inspect(xapk, arm64Device)
+        }
+    }
+
+    @Test
     fun installationPreparationRejectsSourceChangedAfterInspection() {
         val apk = temporaryFolder.newFile("mutable.apk")
         writeZip(apk, "AndroidManifest.xml" to manifest())

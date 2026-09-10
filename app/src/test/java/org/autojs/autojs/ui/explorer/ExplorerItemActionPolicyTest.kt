@@ -34,6 +34,20 @@ class ExplorerItemActionPolicyTest {
     }
 
     @Test
+    fun m3uPlaylistsKeepOnlyPlayAndEditEvenWithoutInstalledPlugins() {
+        listOf(FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO).forEach { type ->
+            val state = resolve(type)
+
+            assertSame(ExplorerPrimaryAction.MEDIA_PLAY, state.primaryAction)
+            assertTrue(state.editVisible)
+            assertFalse(state.runVisible)
+            assertFalse(state.runAsMedia)
+            assertFalse(state.installVisible)
+            assertFalse(state.infoVisible)
+        }
+    }
+
+    @Test
     fun imageAlwaysKeepsInformationActionBesideItsViewer() {
         val state = resolve(FileUtils.TYPE.PNG)
 

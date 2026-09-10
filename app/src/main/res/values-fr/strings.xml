@@ -545,6 +545,7 @@
     <string name="hint_long_click_run_to_debug">Cliquez longuement sur le bouton \"Run\" pour déboguer</string>
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
+    <string name="hint_m3u_player_plugin_unavailable">Aucun lecteur disponible pour cette liste M3U. Choisissez 3-Ember ou 3-Terra pour installer, activer ou autoriser le plugin dans le Centre de plugins. 3-Ember est prioritaire.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 et les noms de domaine sont pris en charge.</string>
     <string name="hint_plugin_process_failed_to_start">Le processus du plugin n\'a pas pu démarrer de manière fiable. Mettez à jour ou réinstallez le plugin; si le problème persiste, contactez le développeur du plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>

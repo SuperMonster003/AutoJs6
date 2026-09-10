@@ -79,7 +79,7 @@ internal object ExplorerActionLauncher {
         require(items.isNotEmpty() && items.size <= ExplorerActionProtocol.MAX_TARGETS_PER_REQUEST) {
             "Explorer Action target count is invalid"
         }
-        val targets = items.map { item -> resolveTarget(context, item) }
+        val targets = items.map { item -> resolveTarget(context, item, action.packageName) }
         val parent = targets.first().file.parentFile
             ?: error("Explorer Action target has no parent directory: ${targets.first().item.name}")
         val canonicalParent = parent.canonicalFile
@@ -188,7 +188,7 @@ internal object ExplorerActionLauncher {
         }
     }
 
-    private fun resolveTarget(context: Context, item: ExplorerItem): ResolvedTarget {
+    private fun resolveTarget(context: Context, item: ExplorerItem, packageName: String): ResolvedTarget {
         val file = File(item.path).canonicalFile
         require(file.canRead() && (file.isFile || file.isDirectory)) {
             "Explorer Action target is not readable: ${item.name}"
@@ -201,11 +201,12 @@ internal object ExplorerActionLauncher {
         val mimeType = if (file.isDirectory) {
             DIRECTORY_MIME_TYPE
         } else {
-            ExplorerActionTargetTypePolicy.resolve(
+            val targetType = ExplorerActionTargetTypePolicy.resolve(
                 type = item.type,
                 fallbackMimeType = Mime.fromFileOrWildcard(file.path),
                 rawExtension = file.extension,
-            ).mimeType
+            )
+            ExplorerM3uPlaylistPolicy.resolveMimeType(packageName, targetType.extension, targetType.mimeType)
         }
         return ResolvedTarget(
             id = stableTargetId(file),

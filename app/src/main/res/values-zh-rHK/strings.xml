@@ -542,6 +542,7 @@
     <string name="hint_long_click_run_to_debug">長按 \"運行\" 圖標可啓動調試</string>
     <string name="hint_loop_delay">開始循環前的延遲</string>
     <string name="hint_loop_times">0 表示無限循環</string>
+    <string name="hint_m3u_player_plugin_unavailable">未找到可用於播放此 M3U 清單的播放器. 請選擇 3-Ember 或 3-Terra, 前往插件中心安裝, 啟用或授權. 優先使用 3-Ember.</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">插件進程無法穩定啓動. 請更新或重新安裝插件; 如問題持續, 請聯絡插件開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前插件需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>

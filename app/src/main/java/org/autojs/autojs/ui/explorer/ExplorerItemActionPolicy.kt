@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.explorer
 
+import org.autojs.autojs.core.plugin.explorer.ExplorerM3uPlaylistPolicy
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
@@ -37,7 +38,7 @@ internal object ExplorerItemActionPolicy {
             else -> ExplorerPrimaryActionResolver.resolve(item.type)
         }
         val effectivePluginAction = pluginPrimaryAction.takeUnless {
-            item is ArchiveExplorerItem || (item.isInstallable &&
+            item is ArchiveExplorerItem || ((item.isInstallable || ExplorerM3uPlaylistPolicy.supports(item.type)) &&
                 it?.descriptor?.presentation == ExplorerActionValues.PRESENTATION_HOST_EXPLORER)
         }
         val hasPrimaryAction = primaryAction != null || effectivePluginAction != null
