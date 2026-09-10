@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屉工具分組在浮動按鈕與指針位置後加入可選的屏幕取色插件, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
@@ -323,6 +323,7 @@
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內
 * `修復` MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
+* `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 插件的座標手勢) 在被重用的 broker 派發線程上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在調用線程上準備 Looper 並在首個手勢完成後退出它, 該線程上的下一次調用立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主循環 handler 交給 automator
 * `優化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以兼容大型 APK/AAB/APKS
 * `優化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取
 * `優化` APK/APKS/XAPK/APKM/APKZ/AAB 資訊對話框的元件資訊移至右上角選單的 "更多資訊" 對話框, 共用主對話框的項目樣式並同步更新讀取結果

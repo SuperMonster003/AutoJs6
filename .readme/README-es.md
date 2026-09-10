@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 10 de September de 2026.
+Datos actualizados el 11 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -166,7 +166,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
@@ -483,6 +483,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La consola flotante tenía un margen de 12dp en cada lado, por lo que `console.setPosition(0, 0)` no alcanzaba el borde de la pantalla; se elimina el margen, la coordenada Y parte por defecto de debajo de la barra de estado (desactivable con `setAvoidStatusBar(false)`) y tanto la posición como el tamaño se limitan a la pantalla
 * `Corrección` El controlador de sesion de MCP Server podia publicar la instantanea `starting` obtenida justo despues de `openServer` encima de un estado `running` que el plugin ya habia entregado por su callback, por lo que `status` nunca informaba que el oyente estaba en marcha; ahora la instantanea obtenida solo se publica cuando no llego ningun estado por callback mientras se solicitaba
 * `Corrección` Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea
+* `Corrección` `accessibility.swipe` / `accessibility.gesture` del Node bridge (los gestos por coordenadas de los plugins MCP Server y Node) respondian `false` (cancelado) a cada gesto posterior al primero en un hilo de despacho del broker reutilizado: el automata de gestos sin handler preparaba un Looper en el hilo llamador y lo cerraba al completarse el primer gesto, por lo que la siguiente llamada en ese hilo volvia de inmediato y su resultado real iba a un handler muerto; el bridge ahora entrega al automata el handler del bucle principal, como hace el broker Python del host
 * `Mejora` Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes
 * `Mejora` Los diálogos de información comparten un componente reutilizable que permite insertar entradas key:value en cualquier posición, alinear automáticamente las claves y cancelar las lecturas asíncronas al cerrarse
 * `Mejora` La información de componentes APK/APKS/XAPK/APKM/APKZ/AAB se traslada al diálogo "Más información" del menú superior derecho, con el mismo estilo del diálogo principal y actualización al cargar los metadatos
@@ -869,7 +870,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 10 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 11 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

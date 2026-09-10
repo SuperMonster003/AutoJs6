@@ -1670,9 +1670,9 @@ class AndroidNodeBridgeCapabilityProvider(
      * M3.2: coordinate swipe through AccessibilityService.dispatchGesture.
      * args: [x1, y1, x2, y2, durationMs?]. Returns "true" once the system
      * reports the gesture completed, "false" when it was cancelled.
-     * Identical end points are dispatched as a press of durationMs: the
-     * system cancels a zero-length stroke, and the MCP plugin (roadmap P3.2)
-     * sends its coordinate taps and long presses this way.
+     * Identical end points are dispatched as a press of durationMs (the
+     * automator's single-point stroke); the MCP plugin (roadmap P3.2) sends
+     * its coordinate taps and long presses this way.
      */
     private fun dispatchAccessibilitySwipe(
         request: NodeBridgeRequest,
@@ -1743,10 +1743,13 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun accessibilityGestureAutomator(
         service: AutoJsAccessibilityService,
     ): GlobalActionAutomator {
-        // No handler: the broker dispatch thread is not the main looper, so
-        // GlobalActionAutomator prepares its own looper and blocks until the
-        // system reports gesture completion.
-        return GlobalActionAutomator(appContext, null) { service }
+        // The main-looper handler, as PythonHostCapabilityBroker does. Without a
+        // handler the automator prepares a Looper on the calling thread and quits
+        // it once the first gesture completes, so a reused broker dispatch thread
+        // answers the next gesture at once with "cancelled" and the real result
+        // lands on a dead handler. With the handler the dispatch thread (never
+        // the main thread) blocks until the system reports the gesture result.
+        return GlobalActionAutomator(appContext, mainHandler) { service }
     }
 
     // Roadmap P5.4: the selector descriptor, the node descriptor and the node actions of the frozen

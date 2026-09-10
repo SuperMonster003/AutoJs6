@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
@@ -323,6 +323,7 @@
 * `Corrección` La consola flotante tenía un margen de 12dp en cada lado, por lo que `console.setPosition(0, 0)` no alcanzaba el borde de la pantalla; se elimina el margen, la coordenada Y parte por defecto de debajo de la barra de estado (desactivable con `setAvoidStatusBar(false)`) y tanto la posición como el tamaño se limitan a la pantalla
 * `Corrección` El controlador de sesion de MCP Server podia publicar la instantanea `starting` obtenida justo despues de `openServer` encima de un estado `running` que el plugin ya habia entregado por su callback, por lo que `status` nunca informaba que el oyente estaba en marcha; ahora la instantanea obtenida solo se publica cuando no llego ningun estado por callback mientras se solicitaba
 * `Corrección` Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea
+* `Corrección` `accessibility.swipe` / `accessibility.gesture` del Node bridge (los gestos por coordenadas de los plugins MCP Server y Node) respondian `false` (cancelado) a cada gesto posterior al primero en un hilo de despacho del broker reutilizado: el automata de gestos sin handler preparaba un Looper en el hilo llamador y lo cerraba al completarse el primer gesto, por lo que la siguiente llamada en ese hilo volvia de inmediato y su resultado real iba a un handler muerto; el bridge ahora entrega al automata el handler del bucle principal, como hace el broker Python del host
 * `Mejora` Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes
 * `Mejora` Los diálogos de información comparten un componente reutilizable que permite insertar entradas key:value en cualquier posición, alinear automáticamente las claves y cancelar las lecturas asíncronas al cerrarse
 * `Mejora` La información de componentes APK/APKS/XAPK/APKM/APKZ/AAB se traslada al diálogo "Más información" del menú superior derecho, con el mismo estilo del diálogo principal y actualización al cargar los metadatos

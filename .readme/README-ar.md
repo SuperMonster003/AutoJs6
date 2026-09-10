@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 10 September 2026.
+تم تحديث البيانات في 11 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `إضافة جديدة` محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة "bun" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js
 * `إضافة جديدة` يضيف قسم الأدوات في الدرج الجانبي الآن إضافة منتقي ألوان الشاشة الاختيارية كأداة ثالثة متوقفة افتراضيا بعد الزر العائم وموضع المؤشر; يتم تحديث التثبيت والتمكين وحالة التشغيل والإزالة تلقائيا دون حظر واجهة المستخدم
@@ -483,6 +483,7 @@
 * `تصليح` كان لوحدة التحكم العائمة هامش 12dp من كل جانب فلم يكن `console.setPosition(0, 0)` يصل إلى حافة الشاشة; أُزيل الهامش, ويبدأ الإحداثي Y افتراضيًا من أسفل شريط الحالة (يمكن تعطيله عبر `setAvoidStatusBar(false)`), ويُقيد الموضع والحجم داخل الشاشة
 * `تصليح` كان من الممكن أن ينشر متحكم جلسة MCP Server لقطة `starting` المأخوذة مباشرة بعد `openServer` فوق حالة `running` التي سلمتها الإضافة بالفعل عبر رد النداء, فلا يبلغ `status` أبدا عن تشغيل المستمع; الآن لا تنشر اللقطة المأخوذة إلا إذا لم تصل حالة عبر رد النداء أثناء الطلب
 * `تصليح` يعرض Complete name في تفاصيل ولقطات MediaInfo مسار الملف الأصلي بدلا من ذاكرة التخزين الخاصة أو مسار الواصف مع الحفاظ على اسم الملف المعروض في اللقطة
+* `تصليح` كانت `accessibility.swipe` / `accessibility.gesture` في جسر Node (إيماءات الإحداثيات لإضافتي MCP Server و Node) تجيب بـ `false` (ملغاة) عن كل إيماءة بعد الأولى على خيط إرسال broker معاد استخدامه: كان أوتوماتون الإيماءات بدون handler يهيئ Looper على الخيط المستدعي وينهيه بعد اكتمال الإيماءة الأولى, فيعود الاستدعاء التالي على ذلك الخيط فورا وتذهب نتيجته الحقيقية إلى handler ميت; يسلم الجسر الآن handler الحلقة الرئيسية إلى الأوتوماتون كما يفعل broker مضيف Python
 * `تحسين` توحيد فحص الحزم عند 262144 إدخالا ورفع حدود الحزم والفحص المتداخل وملفات البيان والبيانات الوصفية لدعم ملفات APK/AAB/APKS الكبيرة
 * `تحسين` تستخدم حوارات المعلومات مكون عناصر قابلا لإعادة الاستخدام يدعم إدراج عناصر key:value في أي موضع, ومحاذاة عمود المفاتيح تلقائيا, وإلغاء القراءة غير المتزامنة عند الإغلاق
 * `تحسين` نقلت معلومات مكونات APK/APKS/XAPK/APKM/APKZ/AAB إلى حوار "مزيد من المعلومات" في القائمة العلوية اليمنى, بنفس نمط عناصر الحوار الرئيسي مع تحديث النتائج عند تحميل البيانات الوصفية
@@ -869,7 +870,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 10 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 11 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

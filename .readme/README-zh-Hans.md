@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 10 日.
+数据更新于 2026 年 9 月 11 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -166,7 +166,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `新增` 独立 Bun Runtime 插件引擎, 用于本地单文件 JavaScript 和 TypeScript, 通过 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 标记路由, 且不会回退到 Rhino 或 Node.js
 * `新增` 侧拉抽屉工具分组在浮动按钮与指针位置后添加可选的屏幕取色插件, 作为第三个默认关闭的工具; 安装, 启用, 运行状态与卸载均会在不阻塞 UI 的情况下自动刷新
@@ -459,6 +459,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 控制台浮动窗口四周存在 12dp 的留白, `console.setPosition(0, 0)` 无法贴到屏幕边缘; 现已移除留白, 位置坐标默认从状态栏下方开始计算 (可用 `setAvoidStatusBar(false)` 关闭), 窗口位置与尺寸均限制在屏幕范围内
 * `修复` MCP Server 会话控制器可能把 `openServer` 之后拉取的 `starting` 快照覆盖到插件已经通过回调送达的 `running` 状态之上, 导致 `status` 始终不报告监听器已运行; 现在拉取的快照只在拉取期间没有回调状态到达时才发布
 * `修复` MediaInfo 详情与快照的 Complete name 显示原始文件路径, 避免显示私有缓存或描述符路径, 同时保留快照的显示文件名
+* `修复` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 与 Node 插件的坐标手势) 在被复用的 broker 派发线程上从第二次手势起总是应答 `false` (取消): 无 handler 的手势 automator 会在调用线程上准备 Looper 并在首个手势完成后退出它, 该线程上的下一次调用立即返回, 真正的结果被投递到已死的 handler; bridge 现在与 Python 宿主 broker 一样把主循环 handler 交给 automator
 * `优化` 安装包检查统一支持 262144 个归档条目, 提高单包, 嵌套扫描, 清单与元数据预算以兼容大型 APK/AAB/APKS
 * `优化` 信息对话框共用可复用的条目组件, 支持在任意位置插入 key:value 条目, 自动对齐键列并在关闭时取消异步读取
 * `优化` APK/APKS/XAPK/APKM/APKZ/AAB 信息对话框的组件信息移至右上角菜单的 "更多信息" 对话框, 共用主对话框的条目样式并同步更新读取结果
@@ -848,7 +849,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 10 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 11 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

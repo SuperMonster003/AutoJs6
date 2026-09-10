@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
@@ -323,6 +323,7 @@
 * `Fix` The floating console had a 12dp margin on every side, so `console.setPosition(0, 0)` could not reach the screen edge; the margin is removed, the Y coordinate starts below the status bar by default (disable with `setAvoidStatusBar(false)`), and both the position and the size are clamped to the screen
 * `Fix` The MCP Server session controller could publish the `starting` snapshot pulled right after `openServer` on top of a `running` status the plugin had already delivered through its callback, so `status` never reported the listener as running; the pulled snapshot is now published only when no callback status arrived while it was in flight
 * `Fix` MediaInfo details and snapshots show the original source path in Complete name instead of a private cache or descriptor path, while preserving the snapshot display filename
+* `Fix` Node bridge `accessibility.swipe` / `accessibility.gesture` (the coordinate gestures of the MCP Server and Node plugins) answered `false` (cancelled) for every gesture after the first one on a reused broker dispatch thread: the gesture automator without a handler prepared a Looper on the calling thread and quit it once the first gesture completed, so the next call on that thread returned at once and its real result went to a dead handler; the bridge now hands the automator the main-looper handler, as the Python host broker does
 * `Improvement` Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files
 * `Improvement` Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal
 * `Improvement` APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the "More information" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded

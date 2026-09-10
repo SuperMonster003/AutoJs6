@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 10 September 2026 года.
+Данные обновлены на 11 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `Новое` Независимый движок плагина Bun Runtime для локальных однофайловых сценариев JavaScript и TypeScript с маршрутизацией по директиве "bun" или маркерам `.bun.js/.bun.ts/.bun.tsx` без отката к Rhino или Node.js
 * `Новое` Раздел Инструменты боковой панели теперь добавляет необязательный плагин пипетки цвета экрана как третий, по умолчанию выключенный инструмент после плавающей кнопки и позиции указателя; установка, включение, состояние выполнения и удаление обновляются автоматически без блокировки UI
@@ -483,6 +483,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Исправление` У плавающего окна консоли был отступ 12dp со всех сторон, поэтому `console.setPosition(0, 0)` не достигал края экрана; отступ удалён, координата Y по умолчанию отсчитывается от нижней границы строки состояния (отключается через `setAvoidStatusBar(false)`), а позиция и размер окна ограничены экраном
 * `Исправление` Контроллер сеанса MCP Server мог опубликовать снимок `starting`, полученный сразу после `openServer`, поверх состояния `running`, которое плагин уже доставил через обратный вызов, из-за чего `status` не сообщал о запуске слушателя; теперь полученный снимок публикуется только если во время запроса не пришло состояние из обратного вызова
 * `Исправление` Complete name в подробностях и снимках MediaInfo показывает исходный путь вместо приватного кеша или дескриптора, сохраняя отображаемое имя файла снимка
+* `Исправление` `accessibility.swipe` / `accessibility.gesture` Node bridge (координатные жесты плагинов MCP Server и Node) на повторно используемом потоке диспетчеризации broker отвечали `false` (отмена) на каждый жест после первого: автомат жестов без handler подготавливал Looper в вызывающем потоке и завершал его после первого жеста, поэтому следующий вызов в том же потоке возвращался сразу, а реальный результат уходил в мёртвый handler; теперь bridge передаёт автомату handler главного цикла, как это делает Python-брокер хоста
 * `Улучшение` Унифицировать проверку пакетов до 262144 записей архива и увеличить лимиты пакетов, вложенного сканирования, манифестов и метаданных для крупных APK/AAB/APKS
 * `Улучшение` Информационные диалоги используют общий компонент с возможностью вставки записей key:value в любую позицию, автоматическим выравниванием столбца ключей и отменой асинхронного чтения при закрытии
 * `Улучшение` Сведения о компонентах APK/APKS/XAPK/APKM/APKZ/AAB перенесены в диалог "Дополнительная информация" из меню в правом верхнем углу, с тем же стилем записей и обновлением по мере загрузки метаданных
@@ -869,7 +870,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 10 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 11 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

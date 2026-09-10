@@ -240,8 +240,11 @@ A `keys.*` call without a running accessibility service fails with the
 `unavailable` category, as the `accessibility` module does.
 
 `accessibility.swipe` with identical end points (`x1 == x2`, `y1 == y2`) is dispatched as a
-press of `durationMs`: the system cancels a zero-length stroke, and the MCP plugin's coordinate
-`ui_click` / `ui_long_click` (roadmap P3.2) rely on this form.
+press of `durationMs` (a single-point stroke); the MCP plugin's coordinate `ui_click` /
+`ui_long_click` (roadmap P3.2) rely on this form. The gesture results are delivered on the main
+looper and the dispatch thread waits for them: a host built before 2026-09-11 gave the automator
+no handler, so a reused broker thread answered every gesture after its first one with `false`
+(the plugin reported `ACTION_FAILED` "the system cancelled ...").
 
 | Resource | V1 ceiling |
 | --- | ---: |

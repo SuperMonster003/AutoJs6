@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/10
+###### 2026/09/11
 
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
@@ -323,6 +323,7 @@
 * `Correction` La console flottante avait une marge de 12dp de chaque côté, si bien que `console.setPosition(0, 0)` n'atteignait pas le bord de l'écran ; la marge est supprimée, la coordonnée Y part par défaut du bas de la barre d'état (désactivable avec `setAvoidStatusBar(false)`), et la position comme la taille sont limitées à l'écran
 * `Correction` Le controleur de session MCP Server pouvait publier l'instantane `starting` obtenu juste apres `openServer` par-dessus un etat `running` deja livre par le rappel du plugin, si bien que `status` ne signalait jamais l'ecouteur comme actif ; l'instantane obtenu n'est desormais publie que si aucun etat n'est arrive par le rappel pendant la requete
 * `Correction` Complete name affiche le chemin du fichier source dans les détails et instantanés MediaInfo au lieu du cache privé ou du descripteur, sans modifier le nom de fichier de l'instantané
+* `Correction` `accessibility.swipe` / `accessibility.gesture` du Node bridge (les gestes par coordonnees des plugins MCP Server et Node) repondaient `false` (annule) a chaque geste apres le premier sur un thread de dispatch du broker reutilise : l'automate de gestes sans handler preparait un Looper sur le thread appelant et le quittait une fois le premier geste termine, si bien que l'appel suivant sur ce thread revenait aussitot et son vrai resultat partait vers un handler mort ; le bridge remet desormais a l'automate le handler de la boucle principale, comme le broker Python de l'hote
 * `Amélioration` Unifier l'inspection des paquets à 262144 entrées et augmenter les budgets des paquets, analyses imbriquées, manifestes et métadonnées pour les grands fichiers APK/AAB/APKS
 * `Amélioration` Les dialogues d'information partagent un composant réutilisable permettant d'insérer des entrées key:value à toute position, d'aligner automatiquement les clés et d'annuler les lectures asynchrones à la fermeture
 * `Amélioration` Les informations sur les composants APK/APKS/XAPK/APKM/APKZ/AAB sont déplacées vers le dialogue "Plus d’informations" du menu en haut à droite, avec le même style que le dialogue principal et une mise à jour lors du chargement des métadonnées
