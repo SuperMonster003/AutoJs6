@@ -13,6 +13,9 @@ class PluginErrorMapperTest {
             "service disconnected before getInfo: example.PluginInfoService",
             "Plugin process has died",
             "Plugin keeps stopping",
+            "onBindingDied: example.PluginService",
+            "onServiceDisconnected: example.PluginService",
+            "binderDied: example.PluginService",
         ).forEach { message ->
             assertEquals(
                 message,
@@ -45,5 +48,12 @@ class PluginErrorMapperTest {
         val error = IllegalStateException("bindService timed out: example.PluginInfoService")
 
         assertEquals(PluginErrorCode.HANDSHAKE_TIMEOUT, PluginErrorMapper.fromThrowable(error).code)
+    }
+
+    @Test
+    fun missingServiceClassIsReportedWithoutRecommendingActivation() {
+        val error = PluginErrorMapper.fromThrowable(ClassNotFoundException("example.PluginService"))
+        assertEquals(PluginErrorCode.PLUGIN_PROCESS_CRASHED, error.code)
+        org.junit.Assert.assertFalse(PluginErrorMapper.shouldRecommendActivation(error))
     }
 }

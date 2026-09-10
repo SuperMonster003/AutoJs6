@@ -319,6 +319,7 @@
 * `수정` 콘솔 플로팅 창 사방에 12dp 여백이 있어 `console.setPosition(0, 0)` 이 화면 가장자리에 닿지 못하던 문제; 여백을 제거하고 Y 좌표는 기본적으로 상태 표시줄 아래에서 계산되며 (`setAvoidStatusBar(false)` 로 해제 가능) 창 위치와 크기는 화면 범위 내로 제한
 * `수정` MCP Server 세션 컨트롤러가 `openServer` 직후 가져온 `starting` 스냅샷을 플러그인이 콜백으로 이미 전달한 `running` 상태 위에 게시하여 `status`가 리스너 실행을 보고하지 않을 수 있던 문제; 가져온 스냅샷은 가져오는 동안 콜백 상태가 도착하지 않은 경우에만 게시됩니다
 * `수정` MediaInfo 상세 정보와 스냅샷의 Complete name에 비공개 캐시나 디스크립터 경로 대신 원본 파일 경로를 표시하고 스냅샷의 표시 파일 이름은 유지
+* `개선` 플러그인 센터에서 시작 전에 OCR 서비스 클래스를 확인하고 활성화 오류를 즉시 표시. 핸드셰이크 대기를 5초로 제한하고 중단된 바인딩을 취소
 * `개선` Node bridge 접근성 모듈에 dump (400 노드, 32 단계, 256 KiB 를 상한으로 하는 텍스트, JSON 또는 XML 창 스냅샷), explain (선택자 서술자의 필터별 일치 수), screenshot (Android 11 이상의 접근성 스크린샷, 배율, 영역, 형식, 품질 옵션과 함께 일회성 캐시 파일 또는 작업 공간 파일로 전달) 을 추가하고, app 모듈에 currentWindow (현재 패키지, 액티비티, 창 목록) 를 추가
 * `개선` Node bridge 에 작업 디렉터리를 루트로 하는 files 모듈 (list, stat, read, write, mkdir, rename, delete) 을 추가: 경로는 정규화된 상대 경로여야 하고, 심볼릭 링크로 외부에 나갈 수 없으며, 읽기와 쓰기는 UTF-8 또는 base64 내용으로 1 MiB 까지, 목록은 2000 항목까지이고, 쓰기와 삭제에는 전용 files.write 와 files.delete 능력 토큰이 필요하며, 변경 후 작업 공간 파일 관리자가 새로 고쳐짐
 * `개선` Node bridge 에 console 모듈 추가 (console.tail 은 전역 콘솔의 최신 항목을 lines 최대 500, sinceId, level 과 256 KiB 예산으로 읽음), engines.execScript 와 execScriptFile 에 captureConsole 과 waitMs 옵션 추가 (스크립트 종료를 기다려 해당 id 창 안의 콘솔 출력을 수집, captureMode 는 global-window), 콘솔은 최대 4096 개의 로그를 보관 (초과분은 가장 오래된 것부터 삭제, 콘솔 뷰는 항목 id 로 갱신), ConsoleImpl 이 addLogListener 와 removeLogListener 를 공개

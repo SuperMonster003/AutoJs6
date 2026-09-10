@@ -926,6 +926,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     return@launch
                 }
                 lastError = error
+                if (!PluginErrorMapper.shouldRecommendActivation(PluginErrorMapper.fromThrowable(error))) {
+                    break
+                }
             }
             val error = lastError ?: return@launch
             if (isAdded && _binding != null) {
@@ -955,6 +958,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
+        PluginEnableProbe.run(item.packageName) {
+            probeAidlPluginService(item)
+        }
+    }
+
+    private suspend fun probeAidlPluginService(item: PluginCenterItem) {
         when (val action = item.serviceAction ?: PluginCenterViewModel.serviceActionFromEngine(item.engine)) {
             OcrPluginHost.ACTION_OCR -> {
                 OcrPluginHost.probe(contextRef, item.packageName)

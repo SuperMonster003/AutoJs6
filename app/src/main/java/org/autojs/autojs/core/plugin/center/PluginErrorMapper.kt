@@ -16,9 +16,13 @@ object PluginErrorMapper {
             isProtocolMismatch(diagnosticText, causeChain.joinToString("|") { it.javaClass.name }) -> PluginErrorCode.PROTOCOL_MISMATCH
             causeChain.any { it is SecurityException } -> PluginErrorCode.BIND_SECURITY_EXCEPTION
             causeChain.any { it is DeadObjectException } -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            causeChain.any { it is ClassNotFoundException || it is NoClassDefFoundError } -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
             causeChain.any { it is RemoteException } -> PluginErrorCode.DEAD_OBJECT
             diagnosticText.contains("service binding died", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
             diagnosticText.contains("service disconnected", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("onBindingDied", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("onServiceDisconnected", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
+            diagnosticText.contains("binderDied", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
             diagnosticText.contains("process has died", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
             diagnosticText.contains("process crashed", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
             diagnosticText.contains("keeps stopping", ignoreCase = true) -> PluginErrorCode.PLUGIN_PROCESS_CRASHED
@@ -26,6 +30,8 @@ object PluginErrorMapper {
             diagnosticText.contains("No plugin info service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
             diagnosticText.contains("bindService SecurityException", ignoreCase = true) -> PluginErrorCode.BIND_SECURITY_EXCEPTION
             diagnosticText.contains("service returned null binding", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
+            diagnosticText.contains("onNullBinding", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
+            diagnosticText.contains("Plugin enable handshake timed out", ignoreCase = true) -> PluginErrorCode.HANDSHAKE_TIMEOUT
             diagnosticText.contains("bind", ignoreCase = true) &&
                     (diagnosticText.contains("timeout", ignoreCase = true) ||
                             diagnosticText.contains("timed out", ignoreCase = true)) -> PluginErrorCode.HANDSHAKE_TIMEOUT

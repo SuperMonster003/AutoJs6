@@ -376,6 +376,7 @@
 * `Improvement` Moved the complete AXML/ARSC/parsing/signing/keystore/cryptography toolchain required for APK builds into the APK Builder Template plugin, with lightweight APK inspection in the host
 * `Improvement` APK Builder plugin discovery now validates the installed certificate SHA-256 before any Binder connection, blocks untrusted signers with the observed package and fingerprint, and keeps the official signer path unchanged
 * `Improvement` Move the approximately 1.3 MiB full AutoJs6 completion index out of Ace's synchronous first-presentation path, loading it during idle time after the first visible code frame and seamlessly replacing the bootstrap index; all five Android 9-15 environments restored 400 globals and 80 modules
+* `Improvement` Plugin Center checks OCR service classes before startup and reports enable failures promptly, with a 5-second handshake deadline and cancellation of abandoned bindings
 * `Improvement` Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Reorganized the code editor action bar and menu hierarchy, making Log a persistent action while improving the placement of File encoding and Read-only mode

@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginServicePreflight
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
@@ -86,7 +87,10 @@ object OcrPluginHost {
         Log.i(TAG, "discover: services=${services.size}")
         return services.map { svc ->
             Log.i(TAG, "discover: ${svc.packageName}/${svc.name}")
-            val result = runCatching { withService(context, svc, DEFAULT_BIND_TIMEOUT_MS) { it.getInfo() } }
+            val result = runCatching {
+                PluginServicePreflight.verify(svc)
+                withService(context, svc, DEFAULT_BIND_TIMEOUT_MS) { it.getInfo() }
+            }
             val info = result.getOrNull()
             val error = result.exceptionOrNull()
             if (error != null) {
@@ -102,6 +106,7 @@ object OcrPluginHost {
         }
         val serviceInfo = queryFirstOcrServiceWithRetry(context, packageName)
             ?: error("No OCR service found for package: $packageName")
+        PluginServicePreflight.verify(serviceInfo)
         return withService(context, serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { it.getInfo() }
     }
 
@@ -706,30 +711,49 @@ object OcrPluginHost {
 
     private suspend fun awaitProxy(entry: PooledConnection, bindTimeoutMs: Long): IOcrPlugin =
         suspendCancellableCoroutine { cont ->
-            var shouldBind = false
-            synchronized(entry.lock) {
-                entry.lastUsed = uptimeMillis()
-                cancelIdleUnbindLocked(entry)
-                val existing = entry.proxy
-                if (existing != null && entry.bound && entry.isBinderAliveLocked()) {
-                    cont.resume(existing)
-                    return@suspendCancellableCoroutine
+            // Serialize registration and cancellation with ServiceConnection callbacks.
+            // zh-CN: 绑定注册和取消与 ServiceConnection 回调在同一线程执行.
+            poolHandler.post {
+                if (!cont.isActive) return@post
+                var shouldBind = false
+                synchronized(entry.lock) {
+                    entry.lastUsed = uptimeMillis()
+                    cancelIdleUnbindLocked(entry)
+                    val existing = entry.proxy
+                    if (existing != null && entry.bound && entry.isBinderAliveLocked()) {
+                        cont.resume(existing)
+                        return@post
+                    }
+                    if (existing != null) {
+                        entry.clearConnectionLocked()
+                    }
+                    entry.waiters.add(cont)
+                    if (!entry.connecting) {
+                        entry.connecting = true
+                        shouldBind = true
+                    }
                 }
-                if (existing != null) {
-                    entry.clearConnectionLocked()
+                if (shouldBind) {
+                    startBind(entry, bindTimeoutMs)
                 }
-                entry.waiters.add(cont)
-                if (!entry.connecting) {
-                    entry.connecting = true
-                    shouldBind = true
-                }
-            }
-            if (shouldBind) {
-                startBind(entry, bindTimeoutMs)
             }
             cont.invokeOnCancellation {
-                synchronized(entry.lock) {
-                    entry.waiters.remove(cont)
+                poolHandler.post {
+                    val abandoned = synchronized(entry.lock) {
+                        entry.waiters.remove(cont)
+                        if (entry.waiters.isEmpty() && entry.connecting) {
+                            entry.connecting = false
+                            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+                            entry.bindTimeoutRunnable = null
+                            entry.clearConnectionLocked()
+                            true
+                        } else false
+                    }
+                    if (abandoned) {
+                        runCatching { entry.appCtx.unbindService(entry.connection) }
+                    } else {
+                        scheduleIdleUnbind(entry)
+                    }
                 }
             }
         }
@@ -900,6 +924,10 @@ object OcrPluginHost {
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 Log.i(TAG, "onServiceConnected: $name")
+                if (!synchronized(lock) { connecting }) {
+                    runCatching { appCtx.unbindService(this) }
+                    return
+                }
                 val proxy = IOcrPlugin.Stub.asInterface(binder)
                 val deathRecipient = IBinder.DeathRecipient {
                     Log.w(TAG, "binderDied: $name")
