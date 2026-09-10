@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sept 10, 2026.
+Data updated on Sep 10, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -476,6 +476,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The call order of `console.setPosition` / `setSize` / `setGravity` and `console.show()` affected the result (e.g. `console.show(); console.setPosition(500, 400)` needed a `sleep` in between, and the reverse order could drop the setting); settings are now recorded and applied once the window is attached, so order and timing no longer matter
 * `Fix` Dragging the floating console by its title bar occasionally failed (the drag gesture was bound before the window was attached and raced with button clicks and window closing); the title bar drag is now set up after attachment, the movement is clamped to the screen and the position is recorded when the drag ends
 * `Fix` The floating console had a 12dp margin on every side, so `console.setPosition(0, 0)` could not reach the screen edge; the margin is removed, the Y coordinate starts below the status bar by default (disable with `setAvoidStatusBar(false)`), and both the position and the size are clamped to the screen
+* `Fix` The MCP Server session controller could publish the `starting` snapshot pulled right after `openServer` on top of a `running` status the plugin had already delivered through its callback, so `status` never reported the listener as running; the pulled snapshot is now published only when no callback status arrived while it was in flight
 * `Improvement` Node bridge accessibility module adds dump (text, JSON, or XML window snapshots bounded by 400 nodes, 32 levels, and 256 KiB), explain (per-filter hit counts of a selector descriptor), and screenshot (accessibility screenshot on Android 11+ with scale, region, format, and quality options, delivered as a one-shot cache file or a workspace file), and the app module adds currentWindow (current package, activity, and window list)
 * `Improvement` Node bridge adds a files module (list, stat, read, write, mkdir, rename, delete) rooted at the working directory: paths must be normalized relative paths, symbolic links cannot lead outside, reads and writes are capped at 1 MiB with UTF-8 or base64 content, listings at 2000 entries, write and delete require the dedicated files.write and files.delete capability tokens, and the workspace file manager refreshes after changes
 * `Improvement` Node bridge adds a console module (console.tail reads the newest entries of the global console with lines up to 500, sinceId, level and a 256 KiB budget), engines.execScript and execScriptFile accept captureConsole and waitMs options (wait for the script to finish and collect the console output of its id window, captureMode global-window), the console keeps at most 4096 log entries (oldest dropped, the console view refreshes by entry id), and ConsoleImpl exposes addLogListener and removeLogListener
@@ -806,7 +807,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -857,7 +858,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sept 10, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 10, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

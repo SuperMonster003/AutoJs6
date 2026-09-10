@@ -45,12 +45,13 @@ class McpServerSessionController(
         fun onEvent(event: McpServerEvent)
     }
 
-    private class Active(
+    private inner class Active(
         val sessionId: String,
         val config: McpServerConfig,
         val leased: AidlPluginHost.LeasedCall<IMcpServerSession>,
         val broker: IMcpHostCapabilityBroker,
         val deathRecipient: IBinder.DeathRecipient,
+        val callback: SessionCallback,
     ) {
         val session: IMcpServerSession
             get() = leased.value
@@ -95,7 +96,7 @@ class McpServerSessionController(
         val current = checkNotNull(active) { "no MCP server session is open" }
         current.session.updateConfig(McpServerBundles.configToBundle(config))
         desiredConfig = config
-        active = Active(current.sessionId, config, current.leased, current.broker, current.deathRecipient)
+        active = Active(current.sessionId, config, current.leased, current.broker, current.deathRecipient, current.callback)
     }
 
     /** Asks the plugin to stop listening but keeps the session; [close] releases everything. */
@@ -121,9 +122,7 @@ class McpServerSessionController(
 
     suspend fun refreshStatus(): McpServerStatus = mutex.withLock {
         val current = active ?: return@withLock statusFlow.value
-        val snapshot = McpServerBundles.statusFromBundle(current.session.getStatus())
-        publish(snapshot)
-        snapshot
+        pullStatus(current, current.callback) ?: statusFlow.value
     }
 
     private suspend fun openLocked(config: McpServerConfig): McpServerStatus {
@@ -151,12 +150,28 @@ class McpServerSessionController(
             publish(McpServerStatus.failed(McpServerContract.REASON_PLUGIN_DIED, "MCP Server died while opening"))
             throw IllegalStateException("MCP Server died while opening", error)
         }
-        val current = Active(sessionId, config, leased, broker, deathRecipient)
+        val current = Active(sessionId, config, leased, broker, deathRecipient, callback)
         active = current
+        return pullStatus(current, callback) ?: McpServerStatus.starting(config)
+    }
+
+    /**
+     * Pulls `getStatus()` from the plugin and publishes it unless the plugin's callback delivered a
+     * status while the pull was in flight: the plugin starts its listener as soon as `openServer`
+     * is called, so `running` may arrive through the callback before the pulled snapshot, and the
+     * snapshot must not roll the flow back to `starting`. Returns null when the pull failed.
+     */
+    private fun pullStatus(current: Active, callback: SessionCallback): McpServerStatus? {
+        val before = callback.statusCount
         val snapshot = runCatching { McpServerBundles.statusFromBundle(current.session.getStatus()) }
-            .getOrElse { McpServerStatus.starting(config) }
-        publish(snapshot)
-        return snapshot
+            .getOrNull() ?: return null
+        synchronized(callback) {
+            if (callback.statusCount == before) {
+                publish(snapshot)
+                return snapshot
+            }
+        }
+        return statusFlow.value
     }
 
     private fun releaseLocked(current: Active, reasonCode: String, message: String?) {
@@ -233,11 +248,19 @@ class McpServerSessionController(
 
     private inner class SessionCallback(private val sessionId: String) : IMcpServerCallback.Stub() {
 
+        /** Number of status callbacks accepted so far; guarded by `synchronized(this)`. */
+        @Volatile
+        var statusCount = 0
+            private set
+
         override fun onStatus(status: Bundle?) {
             if (sessionId != currentSessionId) {
                 return
             }
-            publish(McpServerBundles.statusFromBundle(status))
+            synchronized(this) {
+                statusCount++
+                publish(McpServerBundles.statusFromBundle(status))
+            }
         }
 
         override fun onEvent(event: Bundle?) {

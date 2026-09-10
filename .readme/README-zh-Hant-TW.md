@@ -476,6 +476,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `console.setPosition` / `setSize` / `setGravity` 等方法與 `console.show()` 的呼叫順序影響結果 (如 `console.show(); console.setPosition(500, 400)` 需在兩者之間 `sleep` 才生效, 反序呼叫亦可能遺失設定); 現改為記錄設定並在視窗附著後統一套用, 呼叫順序與時機不再影響結果
 * `修復` 拖曳控制台浮動視窗標題列移動視窗偶爾失效 (拖曳手勢在視窗附著前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題列拖曳在視窗附著後建立, 移動範圍限制在螢幕內並在拖曳結束後記錄位置
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到螢幕邊緣; 現已移除留白, 位置座標預設從狀態列下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在螢幕範圍內
+* `修復` MCP Server 工作階段控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到外掛已經透過回呼送達的 `running` 狀態之上, 導致 `status` 始終不回報監聽器已執行; 現在拉取的快照只在拉取期間沒有回呼狀態到達時才發布
 * `最佳化` Node bridge 無障礙模組新增 dump (文字, JSON 或 XML 視窗快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與品質選項, 以一次性快取檔案或工作目錄檔案交付), app 模組新增 currentWindow (目前套件名稱, 活動與視窗清單)
 * `最佳化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為正規化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 清單上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力權杖, 變更後重新整理工作區檔案管理器
 * `最佳化` Node bridge 新增 console 模組 (console.tail 讀取全域控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待指令碼結束並收集其 id 視窗內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 筆日誌 (超出捨棄最舊, 控制台檢視依條目 id 重新整理), ConsoleImpl 公開 addLogListener 與 removeLogListener

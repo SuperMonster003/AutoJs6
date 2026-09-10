@@ -312,7 +312,8 @@
         "無障礙通知觀察者 (`events.observeToast()` 等所用) 把每條系統通知都當作其它應用的 toast 處理 (對通知的類型檢查寫成了本應用自己的子類, 永遠不成立), 通知從未送達它的通知監聽器, 其它應用的通知則被誤報為 toast; 現改為檢查框架的 `android.app.Notification`",
         "`console.setPosition` / `setSize` / `setGravity` 等方法與 `console.show()` 的呼叫順序影響結果 (如 `console.show(); console.setPosition(500, 400)` 需在兩者之間 `sleep` 才生效, 反序呼叫亦可能遺失設定); 現改為記錄設定並在視窗附着後統一套用, 呼叫順序與時機不再影響結果",
         "拖曳控制台浮動視窗標題欄移動視窗偶爾失效 (拖曳手勢在視窗附着前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題欄拖曳在視窗附着後建立, 移動範圍限制在屏幕內並在拖曳結束後記錄位置",
-        "控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內"
+        "控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內",
+        "MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈"
       ],
       "improvement": [
         "Node bridge 無障礙模組新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與質量選項, 以一次性緩存文件或工作目錄文件交付), app 模組新增 currentWindow (當前包名, 活動與窗口列表)",
