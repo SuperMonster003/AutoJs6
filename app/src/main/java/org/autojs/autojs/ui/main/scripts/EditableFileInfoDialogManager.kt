@@ -3,37 +3,29 @@ package org.autojs.autojs.ui.main.scripts
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.view.LayoutInflater
-import android.view.View.MeasureSpec.UNSPECIFIED
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.afollestad.materialdialogs.MaterialDialog
-import kotlinx.coroutines.CoroutineScope
+import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.Files
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.util.DialogUtils.showAdaptive
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.ui.dialog.InfoDialog
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.dropBom
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.EditableFileInfoDialogItemsBinding
-import java.io.File
-import java.nio.charset.Charset
-import java.nio.file.Files
 
 object EditableFileInfoDialogManager {
 
     @JvmStatic
     @SuppressLint("SetTextI18n")
-    fun showEditableFileInfoDialog(context: Context, file: File?, fileContentGetter: (() -> String)? = null) {
+    fun showEditableFileInfoDialog(context: Context, file: File?, fileContentGetter: (() -> String)? = null): InfoDialog? {
         if (file == null || !file.canRead()) {
             MaterialDialog.Builder(context)
                 .title(R.string.text_failed)
@@ -41,27 +33,32 @@ object EditableFileInfoDialogManager {
                 .positiveText(R.string.dialog_button_dismiss)
                 .positiveColorRes(R.color.dialog_button_default)
                 .showAdaptive()
-            return
+            return null
         }
-        val binding = EditableFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.editable_file_info_file_path_label, id = "filePath").maxLines = 10
+            addItem(R.string.editable_file_info_file_charset_label, id = "fileCharset")
+            addItem(R.string.editable_file_info_line_break_label, id = "lineBreak")
+            addItem(R.string.editable_file_info_file_size_label, id = "fileSize")
+            addSeparator(id = "splitLine")
+            addItem(R.string.editable_file_info_byte_count_label, id = "byteCount")
+            addItem(R.string.editable_file_info_char_count_label, id = "charCount")
+            addItem(R.string.editable_file_info_line_count_label, id = "lineCount")
+        }
 
         val textUnknown = context.getString(R.string.text_unknown)
 
-        // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
-        // zh-CN: 针对 Dialog 独立创建一个 Scope, 生命周期与 Dialog 绑定.
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val scope = infoDialog.scope
 
-        val dialog = MaterialDialog.Builder(context)
+        infoDialog.builder
             .title(file.name)
-            .customView(binding.root, false)
             .iconRes(R.drawable.ic_edit_smaller)
             .limitIconToDefaultSize()
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)
-            .showAdaptive()
+            .let { infoDialog.show() }
             .apply {
-                makeTextCopyable { titleView }
-                setOnDismissListener { scope.cancel() }
                 iconView?.setOnClickListener {
                     IntentUtils.viewFile(
                         context = context,
@@ -74,7 +71,7 @@ object EditableFileInfoDialogManager {
             }
 
         scope.launch {
-            dialog.setCopyableTextIfAbsent(binding.filePathValue, file.absolutePath)
+            items["filePath"].setValueIfAbsent(file.absolutePath)
 
             @Suppress("DEPRECATION")
             val bytes: ByteArray? = withContext(Dispatchers.IO) {
@@ -87,60 +84,38 @@ object EditableFileInfoDialogManager {
                 }.getOrNull()
             }
             when (bytes) {
-                null -> dialog.apply {
-                    setCopyableTextIfAbsent(binding.byteCountValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.fileCharsetValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.lineCountValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.charCountValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.lineBreakValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.fileSizeValue, scope) { PFiles.formatSizeWithUnit(file.length()) }
+                null -> {
+                    items["byteCount"].setValueIfAbsent(textUnknown)
+                    items["fileCharset"].setValueIfAbsent(textUnknown)
+                    items["lineCount"].setValueIfAbsent(textUnknown)
+                    items["charCount"].setValueIfAbsent(textUnknown)
+                    items["lineBreak"].setValueIfAbsent(textUnknown)
+                    items["fileSize"].setValueIfAbsent(scope) { PFiles.formatSizeWithUnit(file.length()) }
                 }
-                else -> dialog.apply {
+                else -> {
                     val charsetMatch = StringUtils.detectCharset(bytes)
                     val charset = charsetMatch.charsetOrDefault()
                     val text = withContext(Dispatchers.IO) {
                         fileContentGetter?.invoke() ?: String(dropBom(bytes, charset), charset)
                     }
-                    setCopyableTextIfAbsent(
-                        binding.fileCharsetValue,
+                    items["fileCharset"].setValueIfAbsent(
                         charsetMatch.nameOrDefault(textUnknown),
                         charsetMatch.confidence?.takeUnless { it == 100 }?.let {
                             " [ ${context.getString(R.string.text_confidence_level)}: $it ]"
                         },
                     )
-                    setCopyableTextIfAbsent(binding.lineBreakValue, scope) {
+                    items["lineBreak"].setValueIfAbsent(scope) {
                         val hasLineBreaks = text.indexOf('\n') >= 0 || text.indexOf('\r') >= 0
                         if (hasLineBreaks) detectLineBreak(text) else textUnknown
                     }
-                    setCopyableTextIfAbsent(binding.fileSizeValue, getReadableSizeString(context, charset, bytes, text))
-                    setCopyableTextIfAbsent(binding.byteCountValue, getByteCountString(context, charset, bytes, text))
-                    setCopyableTextIfAbsent(binding.charCountValue, scope) { "${text.codePointCount(0, text.length)}" }
-                    setCopyableTextIfAbsent(binding.lineCountValue, scope) { "${text.lineSequence().count()}" }
+                    items["fileSize"].setValueIfAbsent(getReadableSizeString(context, charset, bytes, text))
+                    items["byteCount"].setValueIfAbsent(getByteCountString(context, charset, bytes, text))
+                    items["charCount"].setValueIfAbsent(scope) { "${text.codePointCount(0, text.length)}" }
+                    items["lineCount"].setValueIfAbsent(scope) { "${text.lineSequence().count()}" }
                 }
             }
-            updateGuidelines(binding)
         }
-    }
-
-    private fun updateGuidelines(binding: EditableFileInfoDialogItemsBinding) {
-        val bindings = listOf(
-            binding.filePathLabel to binding.filePathGuideline,
-            binding.fileSizeLabel to binding.fileSizeGuideline,
-            binding.fileCharsetLabel to binding.fileCharsetGuideline,
-            binding.lineBreakLabel to binding.lineBreakGuideline,
-            binding.byteCountLabel to binding.byteCountGuideline,
-            binding.charCountLabel to binding.charCountGuideline,
-            binding.lineCountLabel to binding.lineCountGuideline,
-        )
-
-        @Suppress("DuplicatedCode")
-        val maxWidth = bindings.maxOfOrNull { it.first.apply { measure(UNSPECIFIED, UNSPECIFIED) }.measuredWidth } ?: return
-
-        bindings.forEach { (_, guideline) ->
-            guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also {
-                it.guideBegin = maxWidth
-            }
-        }
+        return infoDialog
     }
 
     private fun detectLineBreak(text: String): String {

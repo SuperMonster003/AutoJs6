@@ -8,30 +8,21 @@ import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.text.format.Formatter
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View.MeasureSpec.UNSPECIFIED
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.model.explorer.ExplorerItem
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableText
-import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.ui.dialog.InfoDialog
+import org.autojs.autojs.ui.dialog.InfoDialogItems
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.MediaFileInfoDialogItemsBinding
 import org.json.JSONObject
-import java.io.File
-import java.util.Locale
 
 object MediaInfoDialogManager {
 
@@ -55,16 +46,29 @@ object MediaInfoDialogManager {
         builderApplier: (MaterialDialog.Builder.() -> Unit)?,
         onDismissListener: DialogInterface.OnDismissListener?,
         onPlayRequested: (() -> Boolean)? = null,
-    ) {
-        val binding = MediaFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
+    ): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.media_info_container_format_label, id = "containerFormat")
+            addItem(R.string.media_info_video_format_label, id = "videoFormat").isVisible = false
+            addItem(R.string.media_info_audio_format_label, id = "audioFormat").isVisible = false
+            addItem(R.string.media_info_file_size_label, id = "fileSize")
+            addItem(R.string.media_info_duration_label, id = "duration")
+            addItem(R.string.media_info_bit_rate_label, id = "bitRateForAudio").isVisible = false
+            addSeparator(id = "splitLine").isVisible = false
+            addItem(R.string.media_info_bit_rate_label, id = "bitRateForVideo").isVisible = false
+            addItem(R.string.media_info_resolution_label, id = "resolution").isVisible = false
+            addItem(R.string.media_info_aspect_ratio_label, id = "aspectRatio").isVisible = false
+            addItem(R.string.media_info_frame_rate_label, id = "frameRate").isVisible = false
+            addItem(R.string.media_info_track_name_label, id = "trackName").isVisible = false
+            addItem(R.string.media_info_performer_label, id = "performer").isVisible = false
+            addItem(R.string.media_info_album_label, id = "album").isVisible = false
+        }
 
-        // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
-        // zh-CN: 针对 Dialog 独立创建一个 Scope, 生命周期与 Dialog 绑定.
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val scope = infoDialog.scope
 
-        val dialog = MaterialDialog.Builder(context)
+        val dialog = infoDialog.builder
             .title(explorerItem.name)
-            .customView(binding.root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.transparent)
             .limitIconToDefaultSize()
@@ -75,36 +79,21 @@ object MediaInfoDialogManager {
             .neutralText(R.string.ellipsis_six)
             .neutralColorRes(R.color.dialog_button_unavailable)
             .also { builder -> builderApplier?.invoke(builder) }
-            .build()
-            .apply {
-                makeTextCopyable { titleView }
-                setOnDismissListener {
-                    scope.cancel()
-                    onDismissListener?.onDismiss(this)
-                }
-            }
-            .showAdaptive()
-
-        restoreEssentialViews(binding, context)
-        val loading = context.getString(R.string.ellipsis_six)
-        binding.containerFormatValue.bindWith(dialog, loading, loading)
-        binding.fileSizeValue.bindWith(dialog, loading, loading)
-        binding.durationValue.bindWith(dialog, loading, loading)
-        updateGuidelines(binding)
+            .let { infoDialog.show(onDismissListener) }
 
         scope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     loadMediaInfo(context, File(explorerItem.path))
                 }
-                renderMediaInfo(dialog, binding, context, explorerItem, result, onPlayRequested)
+                renderMediaInfo(dialog, items, context, explorerItem, result, onPlayRequested)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
                 Log.e(TAG, "Unexpected MediaInfo dialog failure", error)
                 renderEmergencyFailure(
                     dialog = dialog,
-                    binding = binding,
+                    items = items,
                     context = context,
                     explorerItem = explorerItem,
                     failureMessage = MediaInfoFailureMessage.from(error),
@@ -112,6 +101,7 @@ object MediaInfoDialogManager {
                 )
             }
         }
+        return infoDialog
     }
 
     private suspend fun loadMediaInfo(context: Context, file: File): MediaInfoLoadResult {
@@ -158,7 +148,7 @@ object MediaInfoDialogManager {
 
     private fun renderMediaInfo(
         dialog: MaterialDialog,
-        binding: MediaFileInfoDialogItemsBinding,
+        items: InfoDialogItems,
         context: Context,
         explorerItem: ExplorerItem,
         result: MediaInfoLoadResult,
@@ -166,7 +156,7 @@ object MediaInfoDialogManager {
     ) {
         val data = result.data
         val dialogKind = data.resolveDialogKind(explorerItem.isMediaMenu)
-        applyDialogKindVisibility(binding, dialogKind)
+        applyDialogKindVisibility(items, dialogKind)
         when (dialogKind) {
             MediaInfoDialogKind.VIDEO -> {
                 dialog.setIcon(R.drawable.ic_movie)
@@ -186,34 +176,31 @@ object MediaInfoDialogManager {
             }
         }
 
-        restoreEssentialViews(binding, context)
         val unavailable = context.getString(R.string.text_unavailable)
-        binding.containerFormatValue.bindWith(dialog, data.containerFormat, unavailable)
-        binding.videoFormatValue.bindWith(dialog, data.videoFormat, unavailable)
-        binding.audioFormatValue.bindWith(dialog, data.audioFormat, unavailable)
-        binding.fileSizeValue.bindWith(dialog, data.fileSize, unavailable)
-        binding.durationValue.bindWith(dialog, data.duration, unavailable)
-        binding.bitRateForAudioValue.bindWith(dialog, data.audioBitRate, unavailable)
-        binding.bitRateForVideoValue.bindWith(dialog, data.videoBitRate, unavailable)
-        binding.trackNameValue.bindWith(dialog, data.trackName, unavailable)
-        binding.performerValue.bindWith(dialog, data.performer, unavailable)
-        binding.albumValue.bindWith(dialog, data.album, unavailable)
-        binding.resolutionValue.bindWith(
-            dialog,
+        items["containerFormat"].bindWith(data.containerFormat, unavailable)
+        items["videoFormat"].bindWith(data.videoFormat, unavailable)
+        items["audioFormat"].bindWith(data.audioFormat, unavailable)
+        items["fileSize"].bindWith(data.fileSize, unavailable)
+        items["duration"].bindWith(data.duration, unavailable)
+        items["bitRateForAudio"].bindWith(data.audioBitRate, unavailable)
+        items["bitRateForVideo"].bindWith(data.videoBitRate, unavailable)
+        items["trackName"].bindWith(data.trackName, unavailable)
+        items["performer"].bindWith(data.performer, unavailable)
+        items["album"].bindWith(data.album, unavailable)
+        items["resolution"].bindWith(
             if (data.width.isNotBlank() && data.height.isNotBlank()) "${data.width} × ${data.height}" else "",
             unavailable,
         )
-        binding.aspectRatioValue.bindWith(dialog, data.aspectRatio, unavailable)
-        binding.frameRateValue.bindWith(dialog, data.frameRate, unavailable)
+        items["aspectRatio"].bindWith(data.aspectRatio, unavailable)
+        items["frameRate"].bindWith(data.frameRate, unavailable)
 
-        updateGuidelines(binding)
         result.failureMessage?.let { dialog.setContent("MediaInfo: $it") }
         updateDialogNeutralButton(dialog, context, result.detailedInfo)
     }
 
     private fun renderEmergencyFailure(
         dialog: MaterialDialog,
-        binding: MediaFileInfoDialogItemsBinding,
+        items: InfoDialogItems,
         context: Context,
         explorerItem: ExplorerItem,
         failureMessage: String,
@@ -226,15 +213,15 @@ object MediaInfoDialogManager {
             failureMessage = failureMessage,
         )
         try {
-            renderMediaInfo(dialog, binding, context, explorerItem, result, onPlayRequested)
+            renderMediaInfo(dialog, items, context, explorerItem, result, onPlayRequested)
         } catch (renderError: Exception) {
             Log.e(TAG, "Unable to render MediaInfo failure state", renderError)
             runCatching {
-                restoreEssentialViews(binding, context)
+
                 val unavailable = context.getString(R.string.text_unavailable)
-                binding.containerFormatValue.bindWith(dialog, "", unavailable)
-                binding.fileSizeValue.bindWith(dialog, "", unavailable)
-                binding.durationValue.bindWith(dialog, "", unavailable)
+                items["containerFormat"].bindWith("", unavailable)
+                items["fileSize"].bindWith("", unavailable)
+                items["duration"].bindWith("", unavailable)
                 dialog.setContent("MediaInfo: $failureMessage")
                 updateDialogNeutralButton(dialog, context, result.detailedInfo)
             }.onFailure { finalError ->
@@ -448,34 +435,22 @@ object MediaInfoDialogManager {
     }
 
     private fun applyDialogKindVisibility(
-        binding: MediaFileInfoDialogItemsBinding,
+        items: InfoDialogItems,
         dialogKind: MediaInfoDialogKind,
     ) {
-        binding.videoFormatParent.isVisible = dialogKind.showsVideoDetails
-        binding.bitRateForVideoParent.isVisible = dialogKind.showsVideoDetails
-        binding.resolutionParent.isVisible = dialogKind.showsVideoDetails
-        binding.aspectRatioParent.isVisible = dialogKind.showsVideoDetails
-        binding.frameRateParent.isVisible = dialogKind.showsVideoDetails
+        items["videoFormat"].isVisible = dialogKind.showsVideoDetails
+        items["bitRateForVideo"].isVisible = dialogKind.showsVideoDetails
+        items["resolution"].isVisible = dialogKind.showsVideoDetails
+        items["aspectRatio"].isVisible = dialogKind.showsVideoDetails
+        items["frameRate"].isVisible = dialogKind.showsVideoDetails
 
-        binding.audioFormatParent.isVisible = dialogKind.showsAudioDetails
-        binding.bitRateForAudioParent.isVisible = dialogKind.showsAudioDetails
-        binding.albumParent.isVisible = dialogKind.showsAudioDetails
-        binding.trackNameParent.isVisible = dialogKind.showsAudioDetails
-        binding.performerParent.isVisible = dialogKind.showsAudioDetails
+        items["audioFormat"].isVisible = dialogKind.showsAudioDetails
+        items["bitRateForAudio"].isVisible = dialogKind.showsAudioDetails
+        items["album"].isVisible = dialogKind.showsAudioDetails
+        items["trackName"].isVisible = dialogKind.showsAudioDetails
+        items["performer"].isVisible = dialogKind.showsAudioDetails
 
-        binding.splitLine.isVisible = dialogKind.showsSplitLine
-    }
-
-    private fun restoreEssentialViews(binding: MediaFileInfoDialogItemsBinding, context: Context) {
-        binding.containerFormatLabel.text = context.getString(R.string.media_info_container_format_label)
-        binding.containerFormatColon.isVisible = true
-        binding.containerFormatValue.isVisible = true
-        binding.fileSizeLabel.text = context.getString(R.string.media_info_file_size_label)
-        binding.fileSizeColon.isVisible = true
-        binding.fileSizeValue.isVisible = true
-        binding.durationLabel.text = context.getString(R.string.media_info_duration_label)
-        binding.durationColon.isVisible = true
-        binding.durationValue.isVisible = true
+        items.entry("splitLine").view.isVisible = dialogKind.showsSplitLine
     }
 
     @SuppressLint("SetTextI18n")
@@ -494,35 +469,8 @@ object MediaInfoDialogManager {
         }
     }
 
-    private fun updateGuidelines(binding: MediaFileInfoDialogItemsBinding) {
-        val filteredBindings = listOf(
-            binding.containerFormatLabel to binding.containerFormatGuideline,
-            binding.videoFormatLabel to binding.videoFormatGuideline,
-            binding.audioFormatLabel to binding.audioFormatGuideline,
-            binding.fileSizeLabel to binding.fileSizeGuideline,
-            binding.durationLabel to binding.durationGuideline,
-            binding.bitRateForAudioLabel to binding.bitRateForAudioGuideline,
-            binding.bitRateForVideoLabel to binding.bitRateForVideoGuideline,
-            binding.resolutionLabel to binding.resolutionGuideline,
-            binding.aspectRatioLabel to binding.aspectRatioGuideline,
-            binding.frameRateLabel to binding.frameRateGuideline,
-            binding.albumLabel to binding.albumGuideline,
-            binding.trackNameLabel to binding.trackNameGuideline,
-            binding.performerLabel to binding.performerGuideline,
-        ).filter { (it.first.parent as? ConstraintLayout)?.isVisible == true }
-
-        @Suppress("DuplicatedCode")
-        val maxWidth = filteredBindings.maxOfOrNull { it.first.apply { measure(UNSPECIFIED, UNSPECIFIED) }.measuredWidth } ?: return
-
-        filteredBindings.forEach { (_, guideline) ->
-            guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also {
-                it.guideBegin = maxWidth
-            }
-        }
-    }
-
-    private fun TextView.bindWith(dialog: MaterialDialog, text: String, unavailable: String) {
-        dialog.setCopyableText(this, text.ifBlank { unavailable })
+    private fun InfoDialogItems.Item.bindWith(text: String, unavailable: String) {
+        setValue(text.ifBlank { unavailable })
     }
 
     private data class MediaInfoLoadResult(

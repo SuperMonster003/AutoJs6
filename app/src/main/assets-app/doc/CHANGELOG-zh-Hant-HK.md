@@ -319,6 +319,8 @@
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內
 * `修復` MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
+* `優化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取
+* `優化` APK/APKS/XAPK/APKM/APKZ/AAB 資訊對話框的元件資訊移至右上角選單的 "更多資訊" 對話框, 共用主對話框的項目樣式並同步更新讀取結果
 * `優化` Node bridge 無障礙模組新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與質量選項, 以一次性緩存文件或工作目錄文件交付), app 模組新增 currentWindow (當前包名, 活動與窗口列表)
 * `優化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為規範化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 列表上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力令牌, 變更後刷新工作區文件管理器
 * `優化` Node bridge 新增 console 模組 (console.tail 讀取全局控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待腳本結束並歸集其 id 窗口內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 條日誌 (超出丟棄最舊, 控制台視圖按條目 id 刷新), ConsoleImpl 公開 addLogListener 與 removeLogListener

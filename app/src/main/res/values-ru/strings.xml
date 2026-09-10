@@ -1404,6 +1404,7 @@
     <string name="text_monthly_task">Ежемесячная задача</string>
     <string name="text_more">Больше</string>
     <string name="text_more_details">Подробнее</string>
+    <string name="text_more_information">Дополнительная информация</string>
     <string name="text_mount">Монтировать</string>
     <string name="text_mount_path">Путь монтирования</string>
     <string name="text_move">Переместить</string>

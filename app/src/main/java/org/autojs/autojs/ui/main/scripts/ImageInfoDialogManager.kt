@@ -5,26 +5,17 @@ import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import android.text.format.DateFormat
-import android.view.View.MeasureSpec.UNSPECIFIED
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.afollestad.materialdialogs.DialogAction
-import com.afollestad.materialdialogs.MaterialDialog
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
-import org.autojs.autojs.util.DialogUtils.showAdaptive
-import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ImageFileInfoDialogItemsBinding
 import java.io.File
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.autojs.autojs.pio.PFiles
+import org.autojs.autojs.ui.dialog.InfoDialog
+import org.autojs.autojs6.R
 
 object ImageInfoDialogManager {
 
@@ -34,13 +25,19 @@ object ImageInfoDialogManager {
         context: Context,
         imageFile: File,
         onDismissListener: DialogInterface.OnDismissListener? = null,
-    ) {
-        val binding = ImageFileInfoDialogItemsBinding.inflate(android.view.LayoutInflater.from(context))
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    ): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.apk_info_format, id = "format")
+            addItem(R.string.media_info_resolution_label, id = "resolution")
+            addItem(R.string.media_info_file_size_label, id = "fileSize")
+            addItem(R.string.image_info_modified_label, id = "modified")
+            addItem(R.string.image_info_orientation_label, id = "orientation")
+        }
+        val scope = infoDialog.scope
         var detailedInfo = ""
-        val dialog = MaterialDialog.Builder(context)
+        val dialog = infoDialog.builder
             .title(imageFile.name)
-            .customView(binding.root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.ic_image_black_48dp)
             .limitIconToDefaultSize()
@@ -52,15 +49,7 @@ object ImageInfoDialogManager {
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
-            .build()
-            .apply {
-                makeTextCopyable { titleView }
-                setOnDismissListener {
-                    scope.cancel()
-                    onDismissListener?.onDismiss(this)
-                }
-            }
-            .showAdaptive()
+            .let { infoDialog.show(onDismissListener) }
 
         dialog.getActionButton(DialogAction.NEUTRAL).apply {
             isEnabled = false
@@ -72,12 +61,12 @@ object ImageInfoDialogManager {
                 withContext(Dispatchers.IO) { readMetadata(context, imageFile) }
             }
             result.onSuccess { metadata ->
-                dialog.setCopyableTextIfAbsent(binding.formatValue, metadata.format)
-                dialog.setCopyableTextIfAbsent(binding.resolutionValue, metadata.resolution)
-                dialog.setCopyableTextIfAbsent(binding.fileSizeValue, metadata.fileSize)
-                dialog.setCopyableTextIfAbsent(binding.modifiedValue, metadata.modified)
-                dialog.setCopyableTextIfAbsent(binding.orientationValue, metadata.orientation)
-                updateGuidelines(binding)
+                items["format"].setValueIfAbsent(metadata.format)
+                items["resolution"].setValueIfAbsent(metadata.resolution)
+                items["fileSize"].setValueIfAbsent(metadata.fileSize)
+                items["modified"].setValueIfAbsent(metadata.modified)
+                items["orientation"].setValueIfAbsent(metadata.orientation)
+
                 detailedInfo = metadata.detailedInfo
                 dialog.getActionButton(DialogAction.NEUTRAL).apply {
                     isEnabled = detailedInfo.isNotBlank()
@@ -90,15 +79,15 @@ object ImageInfoDialogManager {
             }.onFailure { error ->
                 if (error is CancellationException) throw error
                 listOf(
-                    binding.formatValue,
-                    binding.resolutionValue,
-                    binding.fileSizeValue,
-                    binding.modifiedValue,
-                    binding.orientationValue,
-                ).forEach { dialog.setCopyableTextIfAbsent(it, null) }
-                updateGuidelines(binding)
+                    items["format"],
+                    items["resolution"],
+                    items["fileSize"],
+                    items["modified"],
+                    items["orientation"],
+                ).forEach { it.setValueIfAbsent(null) }
             }
         }
+        return infoDialog
     }
 
     private fun readMetadata(context: Context, file: File): ImageMetadata {
@@ -115,7 +104,7 @@ object ImageInfoDialogManager {
             ?.takeIf(String::isNotBlank)
             ?: file.extension.uppercase(Locale.ROOT).ifBlank { context.getString(R.string.text_unknown) }
         val modified = DateFormat.getMediumDateFormat(context).format(Date(file.lastModified())) + " " +
-            DateFormat.getTimeFormat(context).format(Date(file.lastModified()))
+                DateFormat.getTimeFormat(context).format(Date(file.lastModified()))
         val exifEntries = EXIF_TAGS.mapNotNull { tag ->
             exif?.getAttribute(tag)?.takeIf(String::isNotBlank)?.let { tag to it }
         }
@@ -186,25 +175,6 @@ object ImageInfoDialogManager {
         val orientation: String,
         val detailedInfo: String,
     )
-
-    private fun updateGuidelines(binding: ImageFileInfoDialogItemsBinding) {
-        val labelsAndGuidelines = listOf(
-            binding.formatLabel to binding.formatGuideline,
-            binding.resolutionLabel to binding.resolutionGuideline,
-            binding.fileSizeLabel to binding.fileSizeGuideline,
-            binding.modifiedLabel to binding.modifiedGuideline,
-            binding.orientationLabel to binding.orientationGuideline,
-        )
-        val maxWidth = labelsAndGuidelines.maxOf { (label, _) ->
-            label.measure(UNSPECIFIED, UNSPECIFIED)
-            label.measuredWidth
-        }
-        labelsAndGuidelines.forEach { (_, guideline) ->
-            guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also {
-                it.guideBegin = maxWidth
-            }
-        }
-    }
 
     private val EXIF_TAGS = listOf(
         ExifInterface.TAG_MAKE,

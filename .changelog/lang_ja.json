@@ -318,6 +318,8 @@
         "MediaInfo 詳細とスナップショットの Complete name に元のファイルパスを表示し, プライベートキャッシュや記述子のパスを表示しないよう改善; スナップショットの表示ファイル名は維持"
       ],
       "improvement": [
+        "情報ダイアログで再利用可能な項目コンポーネントを共有し, 任意の位置への key:value 項目の挿入, キー列の自動整列, ダイアログを閉じた際の非同期読み取りのキャンセルに対応",
+        "APK/APKS/XAPK/APKM/APKZ/AAB のコンポーネント情報を右上のメニューの \"追加情報\" ダイアログに移動し, メインダイアログと同じ項目スタイルでメタデータの読み込み結果を反映",
         "Node bridge のアクセシビリティモジュールに dump (400 ノード, 32 階層, 256 KiB を上限とするテキスト, JSON または XML のウィンドウスナップショット), explain (セレクター記述子のフィルターごとのヒット数), screenshot (Android 11 以降のアクセシビリティスクリーンショット, 拡縮, 領域, 形式, 品質のオプション付きで一回限りのキャッシュファイルまたはワークスペースファイルとして提供) を追加し, app モジュールに currentWindow (現在のパッケージ, アクティビティ, ウィンドウ一覧) を追加",
         "Node bridge にワークスペースをルートとする files モジュール (list, stat, read, write, mkdir, rename, delete) を追加: パスは正規化された相対パスでなければならず, シンボリックリンクで外部へ出ることはできず, 読み書きは UTF-8 または base64 の内容で 1 MiB まで, 一覧は 2000 件まで, 書き込みと削除には専用の files.write と files.delete ケイパビリティトークンが必要で, 変更後はワークスペースのファイルマネージャーが更新される",
         "Node bridge に console モジュールを追加 (console.tail はグローバルコンソールの最新エントリを lines 上限 500, sinceId, level と 256 KiB の予算で読み取る), engines.execScript と execScriptFile に captureConsole と waitMs オプションを追加 (スクリプトの終了を待ち, その id ウィンドウ内のコンソール出力を収集, captureMode は global-window), コンソールは最大 4096 件のログを保持 (超過分は最古から破棄, コンソールビューはエントリ id で更新), ConsoleImpl が addLogListener と removeLogListener を公開",

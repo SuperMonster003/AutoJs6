@@ -8,33 +8,28 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_META_DATA
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.view.LayoutInflater
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import java.io.File
+import java.io.IOException
+import java.security.MessageDigest
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionHostFileInfoLoader
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
+import org.autojs.autojs.ui.dialog.InfoDialog
+import org.autojs.autojs.ui.dialog.InfoDialogItems
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
-import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ApkFileInfoDialogItemsBinding
-import java.io.File
-import java.io.IOException
-import java.security.MessageDigest
-import java.util.Locale
 
 object ApkInfoDialogManager {
 
@@ -44,8 +39,8 @@ object ApkInfoDialogManager {
         context: Context,
         apkFile: File,
         builderApplier: (MaterialDialog.Builder.() -> Unit)? = null,
-    ) {
-        showApkInfoDialog(context, apkFile, builderApplier, null)
+    ): InfoDialog {
+        return showApkInfoDialog(context, apkFile, builderApplier, null)
     }
 
     @JvmStatic
@@ -54,8 +49,8 @@ object ApkInfoDialogManager {
         apkFile: File,
         builderApplier: (MaterialDialog.Builder.() -> Unit)?,
         onDismissListener: DialogInterface.OnDismissListener?,
-    ) {
-        showPackageInfoDialog(
+    ): InfoDialog {
+        return showPackageInfoDialog(
             context = context,
             packageFile = apkFile,
             builderApplier = builderApplier,
@@ -86,23 +81,51 @@ object ApkInfoDialogManager {
         onDismissListener: DialogInterface.OnDismissListener?,
         installAction: (File, String?) -> Unit,
         archiveActions: Map<String, () -> Unit> = emptyMap(),
-    ) {
-        val binding = ApkFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    ): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.apk_info_format, id = "format")
+            addItem(R.string.text_label_name, id = "labelName")
+            addItem(R.string.apk_info_package_name, id = "packageName")
+            addItem(R.string.text_version, id = "versionPlaceholder")
+            addItem(R.string.apk_info_installed_version, id = "installedVersion").isVisible = false
+            addItem(R.string.apk_info_file_size, id = "fileSize")
+            addItem(R.string.apk_info_signature_scheme, id = "signatureScheme")
+            addItem(R.string.apk_info_min_sdk, id = "minSdk")
+            addItem(R.string.apk_info_target_sdk, id = "targetSdk")
+            addItem(R.string.apk_info_max_sdk, id = "maxSdk").isVisible = false
+            addItem(R.string.apk_info_device_sdk, id = "deviceSdk")
+            addItem(R.string.ellipsis_six, id = "pluginInfo").apply {
+                maxLines = 24
+                isVisible = false
+            }
+            addItem(R.string.apk_info_exception, id = "installation").apply {
+                maxLines = 4
+                isVisible = false
+            }
+        }
+        val scope = infoDialog.scope
         var requestedPermissions: List<String>? = null
         var manifestAvailable = false
         var expectedSourceSha256: String? = null
         var activeDialog: MaterialDialog? = null
+        var moreInfoDialog: InfoDialog? = null
+        val moreInfo = MutableStateFlow<PackageMoreInfo?>(null)
 
-        val dialog = MaterialDialog.Builder(context)
+        val dialog = infoDialog.builder
             .title(packageFile.name)
-            .options(archiveActions.map { (label, action) ->
-                MaterialDialog.OptionMenuItemSpec(label) {
-                    activeDialog?.dismiss()
-                    action()
-                }
-            })
-            .customView(binding.root, false)
+            .options(
+                archiveActions.map { (label, action) ->
+                    MaterialDialog.OptionMenuItemSpec(label) {
+                        activeDialog?.dismiss()
+                        action()
+                    }
+                } + MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_more_information)) { parent ->
+                    if (moreInfoDialog?.dialog?.isShowing != true) {
+                        moreInfoDialog = showMoreInfoDialog(context, parent, moreInfo)
+                    }
+                },
+            )
             .autoDismiss(false)
             .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
@@ -123,21 +146,17 @@ object ApkInfoDialogManager {
             }
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .also { builder -> builderApplier?.invoke(builder) }
-            .build()
-            .apply {
-                makeTextCopyable { titleView }
-                setOnDismissListener {
-                    scope.cancel()
-                    onDismissListener?.onDismiss(this)
-                }
+            .let {
+                infoDialog.show(onDismissListener = { dismissed ->
+                    moreInfoDialog?.dialog?.dismiss()
+                    onDismissListener?.onDismiss(dismissed)
+                })
             }
-            .showAdaptive()
 
         activeDialog = dialog
 
-        restoreEssentialViews(binding, context)
-        dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, Build.VERSION.SDK_INT.toString())
-        dialog.setCopyableTextIfAbsent(binding.fileSizeValue, PFiles.formatSizeWithUnit(packageFile.length()))
+        items["deviceSdk"].setValueIfAbsent(Build.VERSION.SDK_INT.toString())
+        items["fileSize"].setValueIfAbsent(PFiles.formatSizeWithUnit(packageFile.length()))
         setButtonAvailability(
             dialog = dialog,
             action = DialogAction.POSITIVE,
@@ -163,9 +182,8 @@ object ApkInfoDialogManager {
                 val packageName = info.packageName ?: summary?.packageName
                 val installedPackageName = packageName?.also { name ->
                     AppUtils.getInstalledVersionInfo(name)?.let { versionInfo ->
-                        binding.installedVersionParent.isVisible = true
-                        dialog.setCopyableTextIfAbsent(
-                            binding.installedVersionValue,
+                        items["installedVersion"].isVisible = true
+                        items["installedVersion"].setValueIfAbsent(
                             context.getString(
                                 R.string.text_full_version_info,
                                 versionInfo.versionName,
@@ -180,24 +198,26 @@ object ApkInfoDialogManager {
                 manifestAvailable = archive.format == AndroidPackageFormat.AAB || archive.baseApk != null
                 expectedSourceSha256 = info.sourceSha256
 
-                dialog.setCopyableTextIfAbsent(binding.formatValue, formatName(archive))
-                dialog.setCopyableTextIfAbsent(binding.labelNameValue, info.label ?: summary?.applicationLabel)
-                dialog.setCopyableTextIfAbsent(binding.packageNameValue, packageName)
-                setVersionValue(dialog, binding, info.versionName ?: summary?.versionName, info.versionCode ?: summary?.versionCode)
-                dialog.setCopyableTextIfAbsent(binding.componentsValue, componentsText(context, archive))
-                dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, info.signatureSchemes)
-                dialog.setCopyableTextIfAbsent(binding.minSdkValue, (info.minSdk ?: summary?.minSdk)?.toString())
-                dialog.setCopyableTextIfAbsent(binding.targetSdkValue, (info.targetSdk ?: summary?.targetSdk)?.toString())
+                items["format"].setValueIfAbsent(formatName(archive))
+                items["labelName"].setValueIfAbsent(info.label ?: summary?.applicationLabel)
+                items["packageName"].setValueIfAbsent(packageName)
+                setVersionValue(dialog, items, info.versionName ?: summary?.versionName, info.versionCode ?: summary?.versionCode)
+                items["signatureScheme"].setValueIfAbsent(info.signatureSchemes)
+                items["minSdk"].setValueIfAbsent((info.minSdk ?: summary?.minSdk)?.toString())
+                items["targetSdk"].setValueIfAbsent((info.targetSdk ?: summary?.targetSdk)?.toString())
                 summary?.maxSdk?.let { maxSdk ->
-                    binding.maxSdkParent.isVisible = true
-                    dialog.setCopyableTextIfAbsent(binding.maxSdkValue, maxSdk.toString())
+                    items["maxSdk"].isVisible = true
+                    items["maxSdk"].setValueIfAbsent(maxSdk.toString())
                 }
                 installationExceptionText(context, archive)?.let { exceptionText ->
-                    binding.installationParent.isVisible = true
-                    dialog.setCopyableTextIfAbsent(binding.installationValue, exceptionText)
+                    items["installation"].isVisible = true
+                    items["installation"].setValueIfAbsent(exceptionText)
                 }
-                dialog.setIcon(
-                    info.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_packaging),
+                val icon = info.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_packaging)
+                dialog.setIcon(icon)
+                moreInfo.value = PackageMoreInfo(
+                    components = componentsText(context, archive),
+                    icon = icon,
                 )
                 dialog.makeSettingsLaunchable({ it.iconView }, installedPackageName)
 
@@ -226,32 +246,32 @@ object ApkInfoDialogManager {
                         null
                     }
                     pluginInfo?.let { details ->
-                        binding.pluginInfoLabel.text = details.title
-                        dialog.setCopyableTextIfAbsent(binding.pluginInfoValue, details.summary)
-                        binding.pluginInfoParent.isVisible = true
+                        items["pluginInfo"].key = details.title
+                        items["pluginInfo"].setValueIfAbsent(details.summary)
+                        items["pluginInfo"].isVisible = true
                     }
                 }
             }.onFailure { error ->
                 if (error is CancellationException) throw error
                 val extension = packageFile.extension.uppercase(Locale.ROOT).ifBlank { "?" }
-                dialog.setCopyableTextIfAbsent(binding.formatValue, extension)
-                dialog.setCopyableTextIfAbsent(binding.labelNameValue, null)
-                dialog.setCopyableTextIfAbsent(binding.packageNameValue, null)
-                dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue, null)
-                dialog.setCopyableTextIfAbsent(binding.componentsValue, null)
-                dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, null)
-                dialog.setCopyableTextIfAbsent(binding.minSdkValue, null)
-                dialog.setCopyableTextIfAbsent(binding.targetSdkValue, null)
-                dialog.setCopyableTextIfAbsent(binding.maxSdkValue, null)
-                binding.installationParent.isVisible = true
-                dialog.setCopyableTextIfAbsent(
-                    binding.installationValue,
+                items["format"].setValueIfAbsent(extension)
+                items["labelName"].setValueIfAbsent(null)
+                items["packageName"].setValueIfAbsent(null)
+                items["versionPlaceholder"].setValueIfAbsent(null)
+                items["signatureScheme"].setValueIfAbsent(null)
+                items["minSdk"].setValueIfAbsent(null)
+                items["targetSdk"].setValueIfAbsent(null)
+                items["maxSdk"].setValueIfAbsent(null)
+                items["installation"].isVisible = true
+                items["installation"].setValueIfAbsent(
                     context.getString(
                         R.string.error_android_package_archive_invalid,
                         error.message.orEmpty(),
                     ),
                 )
-                dialog.setIcon(AppCompatResources.getDrawable(context, R.drawable.ic_packaging))
+                val icon = AppCompatResources.getDrawable(context, R.drawable.ic_packaging)
+                dialog.setIcon(icon)
+                moreInfo.value = PackageMoreInfo(components = null, icon = icon)
                 setButtonAvailability(
                     dialog = dialog,
                     action = DialogAction.POSITIVE,
@@ -260,6 +280,28 @@ object ApkInfoDialogManager {
                 )
             }
         }
+        return infoDialog
+    }
+
+    private fun showMoreInfoDialog(context: Context, parent: MaterialDialog, moreInfo: StateFlow<PackageMoreInfo?>): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val components = infoDialog.items.addItem(R.string.apk_info_components, id = "components").apply { maxLines = 3 }
+        val dialog = infoDialog.builder
+            .title(parent.titleView.text)
+            .icon(parent.iconView.drawable)
+            .limitIconToDefaultSize()
+            .negativeText(R.string.dialog_button_dismiss)
+            .negativeColorRes(R.color.dialog_button_default)
+            .let { infoDialog.show() }
+        infoDialog.scope.launch {
+            moreInfo.collect { info ->
+                if (info != null) {
+                    components.setValue(info.components)
+                    dialog.setIcon(info.icon)
+                }
+            }
+        }
+        return infoDialog
     }
 
     private suspend fun analyzeForDisplay(context: Context, packageFile: File): DisplayInfo {
@@ -366,23 +408,22 @@ object ApkInfoDialogManager {
 
     private fun setVersionValue(
         dialog: MaterialDialog,
-        binding: ApkFileInfoDialogItemsBinding,
+        items: InfoDialogItems,
         versionName: String?,
         versionCode: Long?,
     ) {
         when {
             versionName != null -> {
-                binding.versionPlaceholderLabel.setText(R.string.text_version)
-                dialog.setCopyableTextIfAbsent(
-                    binding.versionPlaceholderValue,
+                items["versionPlaceholder"].key = dialog.context.getString(R.string.text_version)
+                items["versionPlaceholder"].setValueIfAbsent(
                     dialog.context.getString(R.string.text_full_version_info, versionName, versionCode),
                 )
             }
             versionCode != null -> {
-                binding.versionPlaceholderLabel.setText(R.string.text_version_code)
-                dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue, versionCode.toString())
+                items["versionPlaceholder"].key = dialog.context.getString(R.string.text_version_code)
+                items["versionPlaceholder"].setValueIfAbsent(versionCode.toString())
             }
-            else -> dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue, null)
+            else -> items["versionPlaceholder"].setValueIfAbsent(null)
         }
     }
 
@@ -427,31 +468,6 @@ object ApkInfoDialogManager {
                 context.getString(R.string.apk_info_installation_invalid)
         }
 
-    private fun restoreEssentialViews(
-        binding: ApkFileInfoDialogItemsBinding,
-        context: Context,
-    ) {
-        listOf(
-            Triple(binding.formatLabel, binding.formatColon, binding.formatValue) to R.string.apk_info_format,
-            Triple(binding.labelNameLabel, binding.labelNameColon, binding.labelNameValue) to R.string.text_label_name,
-            Triple(binding.packageNameLabel, binding.packageNameColon, binding.packageNameValue) to R.string.apk_info_package_name,
-            Triple(binding.versionPlaceholderLabel, binding.versionPlaceholderColon, binding.versionPlaceholderValue) to R.string.text_version,
-            Triple(binding.componentsLabel, binding.componentsColon, binding.componentsValue) to R.string.apk_info_components,
-            Triple(binding.fileSizeLabel, binding.fileSizeColon, binding.fileSizeValue) to R.string.apk_info_file_size,
-            Triple(binding.signatureSchemeLabel, binding.signatureSchemeColon, binding.signatureSchemeValue) to R.string.apk_info_signature_scheme,
-            Triple(binding.minSdkLabel, binding.minSdkColon, binding.minSdkValue) to R.string.apk_info_min_sdk,
-            Triple(binding.targetSdkLabel, binding.targetSdkColon, binding.targetSdkValue) to R.string.apk_info_target_sdk,
-            Triple(binding.maxSdkLabel, binding.maxSdkColon, binding.maxSdkValue) to R.string.apk_info_max_sdk,
-            Triple(binding.deviceSdkLabel, binding.deviceSdkColon, binding.deviceSdkValue) to R.string.apk_info_device_sdk,
-            Triple(binding.installationLabel, binding.installationColon, binding.installationValue) to R.string.apk_info_exception,
-        ).forEach { (views, labelTextRes) ->
-            val (labelView, colonView, valueView) = views
-            labelView.text = context.getString(labelTextRes)
-            colonView.isVisible = true
-            valueView.isVisible = true
-        }
-    }
-
     private fun setButtonAvailability(
         dialog: MaterialDialog,
         action: DialogAction,
@@ -481,6 +497,8 @@ object ApkInfoDialogManager {
         val signatureSchemes: String?,
         val sourceSha256: String,
     )
+
+    private data class PackageMoreInfo(val components: String?, val icon: Drawable?)
 
     private const val MAX_SOURCE_DIGEST_BYTES = 4L * 1024L * 1024L * 1024L
 }

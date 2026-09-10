@@ -5,22 +5,23 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.util.LruCache
-import android.view.LayoutInflater
-import android.view.View.MeasureSpec.UNSPECIFIED
-import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,11 +29,11 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.dialog.InfoDialog
+import org.autojs.autojs.ui.dialog.InfoDialogItems
 import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.TimeUtils
@@ -40,12 +41,6 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs.util.ViewUtils.toCircular
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.PluginInfoDialogItemsBinding
-import java.lang.ref.WeakReference
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.charset.StandardCharsets
-import kotlin.math.roundToInt
 
 object PluginInfoDialogManager {
 
@@ -65,15 +60,15 @@ object PluginInfoDialogManager {
     }
 
     @JvmStatic
-    fun showPluginInfoDialog(context: Context, item: PluginCenterItem) {
-        if (item.isInstalled) {
+    fun showPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
+        return if (item.isInstalled) {
             showInstalledPluginInfoDialog(context, item)
         } else {
             showInstallablePluginInfoDialog(context, item)
         }
     }
 
-    private fun showInstallablePluginInfoDialog(context: Context, item: PluginCenterItem) {
+    private fun showInstallablePluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
         val states = listOf(context.getString(R.string.text_installable))
         val info = PluginInfoInstallable(
             item = item,
@@ -81,7 +76,7 @@ object PluginInfoDialogManager {
             lastInstallTime = item.lastInstallTime,
             lastUninstallTime = item.lastUninstallTime,
         )
-        showPluginInfoDialogInternal(context, info) {
+        return showPluginInfoDialogInternal(context, info) {
             neutralText(R.string.text_install)
             neutralColorRes(R.color.dialog_button_attraction)
             onNeutral { d, _ ->
@@ -96,7 +91,7 @@ object PluginInfoDialogManager {
         }
     }
 
-    private fun showInstalledPluginInfoDialog(context: Context, item: PluginCenterItem) {
+    private fun showInstalledPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
         val info = PluginInfoInstalled(
             item = item,
             states = parseStates(context, item),
@@ -104,7 +99,7 @@ object PluginInfoDialogManager {
             firstInstallTime = item.firstInstallTime,
             lastUpdateTime = item.lastUpdateTime,
         )
-        showPluginInfoDialogInternal(context, info) {
+        return showPluginInfoDialogInternal(context, info) {
             if (item.isUpdatable) {
                 neutralText(
                     if (item.requiresDowngradeReinstall) {
@@ -119,47 +114,62 @@ object PluginInfoDialogManager {
                 }
             }
         }.apply {
-            makeSettingsLaunchable({ it.iconView }, info.packageName)
+            dialog.makeSettingsLaunchable({ it.iconView }, info.packageName)
         }
     }
 
-    private fun showPluginInfoDialogInternal(context: Context, info: PluginInfoBase, builderApplier: MaterialDialog.Builder.() -> Unit = {}): MaterialDialog {
-        val binding = PluginInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
+    private fun showPluginInfoDialogInternal(context: Context, info: PluginInfoBase, builderApplier: MaterialDialog.Builder.() -> Unit = {}): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.text_label_state, id = "state").maxLines = 5
+            addItem(R.string.plugin_item_info_mechanism, id = "mechanism")
+            addItem(R.string.text_source, id = "pluginItemInfoSource")
+            addItem(R.string.apk_info_package_name, id = "packageName").maxLines = 5
+            addItem(R.string.text_version, id = "version")
+            addItem(R.string.plugin_item_info_updatable_version, id = "updatableVersion").isVisible = false
+            addItem(R.string.plugin_item_info_author, id = "pluginItemInfoAuthor").maxLines = 5
+            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsFirst").isVisible = false
+            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsSecond").isVisible = false
+            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsThird").isVisible = false
+            addItem(R.string.text_description, id = "description").maxLines = 20
+            addItem(R.string.plugin_item_info_package_size, id = "pluginItemInfoPackageSize")
+            addItem(R.string.plugin_item_info_supported_abis, id = "pluginItemInfoSupportedAbis").maxLines = 3
+            addItem(R.string.plugin_item_info_first_install_time, id = "pluginItemInfoFirstInstallTime").isVisible = false
+            addItem(R.string.plugin_item_info_last_update_time, id = "pluginItemInfoLastUpdateTime").isVisible = false
+            addItem(R.string.plugin_item_info_last_install_time, id = "pluginItemInfoLastInstallTime").isVisible = false
+            addItem(R.string.plugin_item_info_last_uninstall_time, id = "pluginItemInfoLastUninstallTime").isVisible = false
+        }
 
-        val dialog = MaterialDialog.Builder(context)
+        val dialog = infoDialog.builder
             .limitIconToDefaultSize()
             .title(info.title)
-            .customView(binding.root, false)
             .negativeText(R.string.dialog_button_dismiss)
             .onNegative { d, _ -> d.dismiss() }
             .autoDismiss(false)
             .apply(builderApplier)
-            .showAdaptive()
-            .apply { makeTextCopyable { titleView } }
+            .let { infoDialog.show() }
 
         // Hold the current dialog and package name for refreshing on onResume.
         // zh-CN: 记录 "当前对话框" 与包名, 便于 onResume 刷新.
         currentDialog = WeakReference(dialog)
         currentPackageName = info.packageName
 
-        restoreEssentialViews(binding, context, info)
-        updateGuidelines(binding)
+        restoreEssentialViews(items, context, info)
 
         if (info.states.isEmpty()) {
-            binding.stateParent.isVisible = false
+            items["state"].isVisible = false
         } else {
-            binding.stateValue.text = info.states.joinToString(" ${context.getString(R.string.symbol_pipe)} ")
+            items["state"].setValue(info.states.joinToString(" ${context.getString(R.string.symbol_pipe)} "))
         }
 
-        dialog.setCopyableTextIfAbsent(binding.packageNameValue, info.packageName)
-        dialog.setCopyableTextIfAbsent(binding.mechanismValue, info.mechanism)
-        dialog.setCopyableTextIfAbsent(binding.pluginItemInfoSourceValue, resolveSourceText(context, info))
-        dialog.setCopyableTextIfAbsent(binding.versionValue, info.version)
-        dialog.setCopyableTextIfAbsent(binding.pluginItemInfoAuthorValue, info.author)
-        dialog.setCopyableTextIfAbsent(binding.descriptionValue, info.description)
-        dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, info.packageSize.takeIf { it > 0 }?.let { formatSize(it) })
-        dialog.setCopyableTextIfAbsent(
-            binding.pluginItemInfoSupportedAbisValue,
+        items["packageName"].setValueIfAbsent(info.packageName)
+        items["mechanism"].setValueIfAbsent(info.mechanism)
+        items["pluginItemInfoSource"].setValueIfAbsent(resolveSourceText(context, info))
+        items["version"].setValueIfAbsent(info.version)
+        items["pluginItemInfoAuthor"].setValueIfAbsent(info.author)
+        items["description"].setValueIfAbsent(info.description)
+        items["pluginItemInfoPackageSize"].setValueIfAbsent(info.packageSize.takeIf { it > 0 }?.let { formatSize(it) })
+        items["pluginItemInfoSupportedAbis"].setValueIfAbsent(
             PluginAbiUtils.formatSupportedAbisForDisplay(
                 info.supportedAbis,
                 context.getString(R.string.text_unknown),
@@ -172,18 +182,16 @@ object PluginInfoDialogManager {
         // zh-CN: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
         if (info.packageSize <= 0) {
             info.apkUrl.takeUnless { it.isNullOrBlank() }?.let { url ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    val size = PluginInstaller.probeContentLength(url)
+                infoDialog.scope.launch {
+                    val size = withContext(Dispatchers.IO) { PluginInstaller.probeContentLength(url) }
                     if (size != null && size > 0 && currentDialog?.get() === dialog) {
-                        withContext(Dispatchers.Main) {
-                            dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, formatSize(size))
-                        }
+                        items["pluginItemInfoPackageSize"].setValueIfAbsent(formatSize(size))
                     }
                 }
             }
         }
 
-        return dialog
+        return infoDialog
     }
 
     private fun resolveSourceText(context: Context, info: PluginInfoBase): String {
@@ -482,21 +490,21 @@ object PluginInfoDialogManager {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun restoreEssentialViews(binding: PluginInfoDialogItemsBinding, context: Context, info: PluginInfoBase) {
+    private fun restoreEssentialViews(items: InfoDialogItems, context: Context, info: PluginInfoBase) {
         if (info.collaborators.isNotEmpty()) {
-            binding.pluginItemInfoCollaboratorsFirstLabel.text = "${context.getString(R.string.plugin_item_info_collaborators)} [1/${info.collaborators.size}]"
-            binding.pluginItemInfoCollaboratorsFirstValue.text = info.collaborators[0]
-            binding.pluginItemInfoCollaboratorsFirstParent.isVisible = true
+            items["pluginItemInfoCollaboratorsFirst"].key = "${context.getString(R.string.plugin_item_info_collaborators)} [1/${info.collaborators.size}]"
+            items["pluginItemInfoCollaboratorsFirst"].setValue(info.collaborators[0])
+            items["pluginItemInfoCollaboratorsFirst"].isVisible = true
         }
         if (info.collaborators.size > 1) {
-            binding.pluginItemInfoCollaboratorsSecondLabel.text = "${context.getString(R.string.plugin_item_info_collaborators)} [2/${info.collaborators.size}]"
-            binding.pluginItemInfoCollaboratorsSecondValue.text = info.collaborators[1]
-            binding.pluginItemInfoCollaboratorsSecondParent.isVisible = true
+            items["pluginItemInfoCollaboratorsSecond"].key = "${context.getString(R.string.plugin_item_info_collaborators)} [2/${info.collaborators.size}]"
+            items["pluginItemInfoCollaboratorsSecond"].setValue(info.collaborators[1])
+            items["pluginItemInfoCollaboratorsSecond"].isVisible = true
         }
         if (info.collaborators.size > 2) {
-            binding.pluginItemInfoCollaboratorsThirdLabel.text = "${context.getString(R.string.plugin_item_info_collaborators)} [3/${info.collaborators.size}]"
-            binding.pluginItemInfoCollaboratorsThirdValue.text = info.collaborators[2]
-            binding.pluginItemInfoCollaboratorsThirdParent.isVisible = true
+            items["pluginItemInfoCollaboratorsThird"].key = "${context.getString(R.string.plugin_item_info_collaborators)} [3/${info.collaborators.size}]"
+            items["pluginItemInfoCollaboratorsThird"].setValue(info.collaborators[2])
+            items["pluginItemInfoCollaboratorsThird"].isVisible = true
         }
         when (info) {
             is PluginInfoUpdatable -> {
@@ -504,62 +512,31 @@ object PluginInfoDialogManager {
             }
             is PluginInfoInstalled -> {
                 info.updatableVersion?.let {
-                    binding.versionLabel.text = context.getString(R.string.plugin_item_info_installed_version)
-                    binding.updatableVersionLabel.text = context.getString(
+                    items["version"].key = context.getString(R.string.plugin_item_info_installed_version)
+                    items["updatableVersion"].key = context.getString(
                         if (info.item.requiresDowngradeReinstall) {
                             R.string.plugin_item_info_matched_version
                         } else {
                             R.string.plugin_item_info_updatable_version
                         },
                     )
-                    binding.updatableVersionValue.text = it
-                    binding.updatableVersionParent.isVisible = true
+                    items["updatableVersion"].setValue(it)
+                    items["updatableVersion"].isVisible = true
                 }
-                info.firstInstallTime?.setupListItemView(binding.pluginItemInfoFirstInstallTimeParent, binding.pluginItemInfoFirstInstallTimeValue)
-                info.lastUpdateTime?.setupListItemView(binding.pluginItemInfoLastUpdateTimeParent, binding.pluginItemInfoLastUpdateTimeValue)
+                info.firstInstallTime?.setupListItemView(items["pluginItemInfoFirstInstallTime"])
+                info.lastUpdateTime?.setupListItemView(items["pluginItemInfoLastUpdateTime"])
             }
             is PluginInfoInstallable -> {
-                info.lastInstallTime?.setupListItemView(binding.pluginItemInfoLastInstallTimeParent, binding.pluginItemInfoLastInstallTimeValue)
-                info.lastUninstallTime?.setupListItemView(binding.pluginItemInfoLastUninstallTimeParent, binding.pluginItemInfoLastUninstallTimeValue)
+                info.lastInstallTime?.setupListItemView(items["pluginItemInfoLastInstallTime"])
+                info.lastUninstallTime?.setupListItemView(items["pluginItemInfoLastUninstallTime"])
             }
         }
     }
 
-    private fun updateGuidelines(binding: PluginInfoDialogItemsBinding) {
-        val filteredBindings = listOf(
-            binding.stateLabel to binding.stateGuideline,
-            binding.mechanismLabel to binding.mechanismGuideline,
-            binding.pluginItemInfoSourceLabel to binding.pluginItemInfoSourceGuideline,
-            binding.packageNameLabel to binding.packageNameGuideline,
-            binding.versionLabel to binding.versionGuideline,
-            binding.updatableVersionLabel to binding.updatableVersionGuideline,
-            binding.pluginItemInfoAuthorLabel to binding.pluginItemInfoAuthorGuideline,
-            binding.pluginItemInfoCollaboratorsFirstLabel to binding.pluginItemInfoCollaboratorsFirstGuideline,
-            binding.pluginItemInfoCollaboratorsSecondLabel to binding.pluginItemInfoCollaboratorsSecondGuideline,
-            binding.pluginItemInfoCollaboratorsThirdLabel to binding.pluginItemInfoCollaboratorsThirdGuideline,
-            binding.descriptionLabel to binding.descriptionGuideline,
-            binding.pluginItemInfoPackageSizeLabel to binding.pluginItemInfoPackageSizeGuideline,
-            binding.pluginItemInfoSupportedAbisLabel to binding.pluginItemInfoSupportedAbisGuideline,
-            binding.pluginItemInfoFirstInstallTimeLabel to binding.pluginItemInfoFirstInstallTimeGuideline,
-            binding.pluginItemInfoLastUpdateTimeLabel to binding.pluginItemInfoLastUpdateTimeGuideline,
-            binding.pluginItemInfoLastInstallTimeLabel to binding.pluginItemInfoLastInstallTimeGuideline,
-            binding.pluginItemInfoLastUninstallTimeLabel to binding.pluginItemInfoLastUninstallTimeGuideline,
-        ).filter { (it.first.parent as? ConstraintLayout)?.isVisible == true }
-
-        @Suppress("DuplicatedCode")
-        val maxWidth = filteredBindings.maxOfOrNull { it.first.apply { measure(UNSPECIFIED, UNSPECIFIED) }.measuredWidth } ?: return
-
-        filteredBindings.forEach { (_, guideline) ->
-            guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also {
-                it.guideBegin = maxWidth
-            }
-        }
-    }
-
-    private fun Long.setupListItemView(parentView: ConstraintLayout, valueView: TextView) {
+    private fun Long.setupListItemView(item: InfoDialogItems.Item) {
         this.takeIf { it > 0 }?.let {
-            valueView.text = TimeUtils.formatTimestamp(it)
-            parentView.isVisible = true
+            item.setValue(TimeUtils.formatTimestamp(it))
+            item.isVisible = true
         }
     }
 

@@ -1,25 +1,17 @@
 package org.autojs.autojs.theme.app
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View.MeasureSpec.UNSPECIFIED
-import android.widget.TextView
 import androidx.annotation.ColorInt
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.util.DialogUtils.showAdaptive
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableText
 import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.ui.dialog.InfoDialog
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ColorInfoDialogItemsBinding
 
 object ColorInfoDialogManager {
 
@@ -29,7 +21,7 @@ object ColorInfoDialogManager {
         @ColorInt color: Int?,
         title: String? = null,
         customNeutral: CustomColorInfoDialogNeutral? = null,
-    ) {
+    ): InfoDialog? {
         if (color == null) {
             MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
@@ -37,15 +29,21 @@ object ColorInfoDialogManager {
                 .positiveText(R.string.dialog_button_dismiss)
                 .positiveColorRes(R.color.dialog_button_default)
                 .showAdaptive()
-            return
+            return null
         }
-        val binding = ColorInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
+        val infoDialog = InfoDialog(context)
+        val items = infoDialog.items.apply {
+            addItem(R.string.literal_hex_uppercase, id = "colorHex")
+            addItem(R.string.literal_rgb_uppercase, id = "colorRgb")
+            addItem(R.string.literal_hsl_uppercase, id = "colorHsl")
+            addItem(R.string.literal_hsv_uppercase, id = "colorHsv")
+            addItem(R.string.literal_color_int, id = "colorInt")
+        }
 
         val colorWithoutAlpha = color or -0x1000000
 
-        val dialog = MaterialDialog.Builder(context).apply {
+        infoDialog.builder.apply {
             title(title ?: context.getString(R.string.dialog_title_color_details))
-            customView(binding.root, false)
             customNeutral?.let { neutral ->
                 neutral.textRes?.let(::neutralText)
                 neutral.colorRes?.let(::neutralColorRes)
@@ -57,59 +55,21 @@ object ColorInfoDialogManager {
             }
             positiveText(R.string.dialog_button_dismiss)
             positiveColorRes(R.color.dialog_button_default)
-        }.show()
+        }.let { infoDialog.show(copyTitle = title != null) }
 
-        title?.run { dialog.makeTextCopyable { it.titleView } }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            launch(Dispatchers.IO) {
-                ColorUtils.toHex(colorWithoutAlpha).let { binding.colorHexValue.bindWith(dialog, it) }
-                Colors.toRgbStringRhino(colorWithoutAlpha).let { binding.colorRgbValue.bindWith(dialog, it) }
-                Colors.toHslStringRhino(colorWithoutAlpha).let { binding.colorHslValue.bindWith(dialog, it) }
-                Colors.toHsvStringRhino(colorWithoutAlpha).let { binding.colorHsvValue.bindWith(dialog, it) }
-                ColorUtils.toInt(colorWithoutAlpha).let { binding.colorIntValue.bindWith(dialog, it.toString()) }
+        infoDialog.scope.launch {
+            val values = withContext(Dispatchers.IO) {
+                listOf(
+                    "colorHex" to ColorUtils.toHex(colorWithoutAlpha),
+                    "colorRgb" to Colors.toRgbStringRhino(colorWithoutAlpha),
+                    "colorHsl" to Colors.toHslStringRhino(colorWithoutAlpha),
+                    "colorHsv" to Colors.toHsvStringRhino(colorWithoutAlpha),
+                    "colorInt" to ColorUtils.toInt(colorWithoutAlpha).toString(),
+                )
             }
-            restoreEssentialViews(binding)
-            updateGuidelines(binding)
+            values.forEach { (id, value) -> items[id].setValue(value) }
         }
-    }
-
-    private fun restoreEssentialViews(binding: ColorInfoDialogItemsBinding) {
-        listOf(
-            binding.colorHexColon to binding.colorHexValue,
-            binding.colorRgbColon to binding.colorRgbValue,
-            binding.colorHslColon to binding.colorHslValue,
-            binding.colorHsvColon to binding.colorHsvValue,
-            binding.colorIntColon to binding.colorIntValue,
-        ).forEach { pair ->
-            val (colonView, valueView) = pair
-            colonView.isVisible = true
-            valueView.isVisible = true
-        }
-    }
-
-    private fun updateGuidelines(binding: ColorInfoDialogItemsBinding) {
-        val filteredBindings = listOf(
-            binding.colorHexLabel to binding.colorHexGuideline,
-            binding.colorRgbLabel to binding.colorRgbGuideline,
-            binding.colorHslLabel to binding.colorHslGuideline,
-            binding.colorHsvLabel to binding.colorHsvGuideline,
-            binding.colorIntLabel to binding.colorIntGuideline,
-        ).filter { (it.first.parent as? ConstraintLayout)?.isVisible == true }
-
-        val maxWidth = filteredBindings.maxOfOrNull { it.first.apply { measure(UNSPECIFIED, UNSPECIFIED) }.measuredWidth } ?: return
-
-        filteredBindings.forEach { (_, guideline) ->
-            guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also {
-                it.guideBegin = maxWidth
-            }
-        }
-    }
-
-    private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
-        withContext(Dispatchers.Main) {
-            dialog.setCopyableText(this@bindWith, text)
-        }
+        return infoDialog
     }
 
     data class CustomColorInfoDialogNeutral(

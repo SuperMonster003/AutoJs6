@@ -1406,6 +1406,7 @@
     <string name="text_monthly_task">월간 작업</string>
     <string name="text_more">더</string>
     <string name="text_more_details">세부</string>
+    <string name="text_more_information">추가 정보</string>
     <string name="text_mount">마운트</string>
     <string name="text_mount_path">마운트 경로</string>
     <string name="text_move">이동</string>
