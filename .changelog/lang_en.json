@@ -172,7 +172,8 @@
         "autojs6:events observes Android notifications, external Toast messages, accessibility keys and screen or battery broadcasts through push callbacks, with explicit permissions and automatic cleanup; native Node events remains unchanged",
         "Node app supports Android service starts, broadcasts and installed package queries; dialogs supports text input, choices and progress windows with script cleanup, and keys provides accessibility system actions",
         "Node recorder supports AAC recording with microphone permission, foreground disclosure, duration limits and script cleanup; ui.overlay supports declarative property updates, dragging and pushed events",
-        "Node scripts can run concurrently in two independent runtime processes, with a shared FIFO queue and execution-specific cancellation and input routing"
+        "Node scripts can run concurrently in two independent runtime processes, with a shared FIFO queue and execution-specific cancellation and input routing",
+        "MediaInfo queries support zero-based streamNumber, countGet stream counts, and infoKind for units, descriptions and readable names; Rhino and Node preserve default first-stream TEXT queries and negotiate extended plugin capabilities"
       ],
       "fix": [
         "MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host",
@@ -313,7 +314,8 @@
         "The call order of `console.setPosition` / `setSize` / `setGravity` and `console.show()` affected the result (e.g. `console.show(); console.setPosition(500, 400)` needed a `sleep` in between, and the reverse order could drop the setting); settings are now recorded and applied once the window is attached, so order and timing no longer matter",
         "Dragging the floating console by its title bar occasionally failed (the drag gesture was bound before the window was attached and raced with button clicks and window closing); the title bar drag is now set up after attachment, the movement is clamped to the screen and the position is recorded when the drag ends",
         "The floating console had a 12dp margin on every side, so `console.setPosition(0, 0)` could not reach the screen edge; the margin is removed, the Y coordinate starts below the status bar by default (disable with `setAvoidStatusBar(false)`), and both the position and the size are clamped to the screen",
-        "The MCP Server session controller could publish the `starting` snapshot pulled right after `openServer` on top of a `running` status the plugin had already delivered through its callback, so `status` never reported the listener as running; the pulled snapshot is now published only when no callback status arrived while it was in flight"
+        "The MCP Server session controller could publish the `starting` snapshot pulled right after `openServer` on top of a `running` status the plugin had already delivered through its callback, so `status` never reported the listener as running; the pulled snapshot is now published only when no callback status arrived while it was in flight",
+        "MediaInfo details and snapshots show the original source path in Complete name instead of a private cache or descriptor path, while preserving the snapshot display filename"
       ],
       "improvement": [
         "Node bridge accessibility module adds dump (text, JSON, or XML window snapshots bounded by 400 nodes, 32 levels, and 256 KiB), explain (per-filter hit counts of a selector descriptor), and screenshot (accessibility screenshot on Android 11+ with scale, region, format, and quality options, delivered as a one-shot cache file or a workspace file), and the app module adds currentWindow (current package, activity, and window list)",

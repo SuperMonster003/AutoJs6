@@ -178,6 +178,7 @@
 * `추가` Node app이 Android 서비스 시작, 브로드캐스트 전송 및 설치된 앱 조회를 지원; dialogs는 텍스트 입력, 단일 및 다중 선택과 스크립트 종료 시 닫히는 진행 창을 제공하고 keys는 접근성 시스템 동작을 제공
 * `추가` Node recorder가 마이크 권한, 포그라운드 알림, 시간 제한과 스크립트 종료 시 정리를 적용한 AAC 녹음을 지원; ui.overlay는 선언형 속성 갱신, 끌기 및 이벤트 전송을 지원
 * `추가` Node 스크립트를 두 개의 독립 런타임 프로세스에서 동시에 실행하며 FIFO 대기열을 공유하고 실행별 취소와 입력 전달을 지원
+* `추가` MediaInfo 쿼리는 0부터 시작하는 streamNumber, countGet 스트림 수, 단위와 설명 및 표시 이름을 위한 infoKind를 지원; Rhino와 Node는 첫 스트림의 TEXT 기본 쿼리를 유지하고 플러그인 확장 기능을 확인
 * `수정` MediaInfo 및 이미지 파일 경로가 절대 경로, 상위 디렉터리 및 유효한 파일 이름을 지원; 녹음 출력도 업데이트된 호스트에서 동일한 Android 파일 접근 규칙 적용
 * `수정` Unicode BOM이 있는 스크립트를 파일 관리자에서 직접 실행할 때 해당 UTF-8, UTF-16 또는 UTF-32 인코딩으로 읽지 않아 편집기에서는 정상 실행되지만 파일 관리자에서는 `잘못된 문자` 오류가 발생하던 문제
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
@@ -317,6 +318,7 @@
 * `수정` 콘솔 플로팅 창의 제목 표시줄을 드래그하여 창을 이동하는 동작이 가끔 실패하던 문제 (드래그 제스처가 창 연결 전에 바인딩되어 버튼 클릭 및 창 닫기와 경쟁); 이제 제목 표시줄 드래그는 창 연결 후 설정되고 이동 범위는 화면 내로 제한되며 드래그 종료 시 위치를 기록
 * `수정` 콘솔 플로팅 창 사방에 12dp 여백이 있어 `console.setPosition(0, 0)` 이 화면 가장자리에 닿지 못하던 문제; 여백을 제거하고 Y 좌표는 기본적으로 상태 표시줄 아래에서 계산되며 (`setAvoidStatusBar(false)` 로 해제 가능) 창 위치와 크기는 화면 범위 내로 제한
 * `수정` MCP Server 세션 컨트롤러가 `openServer` 직후 가져온 `starting` 스냅샷을 플러그인이 콜백으로 이미 전달한 `running` 상태 위에 게시하여 `status`가 리스너 실행을 보고하지 않을 수 있던 문제; 가져온 스냅샷은 가져오는 동안 콜백 상태가 도착하지 않은 경우에만 게시됩니다
+* `수정` MediaInfo 상세 정보와 스냅샷의 Complete name에 비공개 캐시나 디스크립터 경로 대신 원본 파일 경로를 표시하고 스냅샷의 표시 파일 이름은 유지
 * `개선` Node bridge 접근성 모듈에 dump (400 노드, 32 단계, 256 KiB 를 상한으로 하는 텍스트, JSON 또는 XML 창 스냅샷), explain (선택자 서술자의 필터별 일치 수), screenshot (Android 11 이상의 접근성 스크린샷, 배율, 영역, 형식, 품질 옵션과 함께 일회성 캐시 파일 또는 작업 공간 파일로 전달) 을 추가하고, app 모듈에 currentWindow (현재 패키지, 액티비티, 창 목록) 를 추가
 * `개선` Node bridge 에 작업 디렉터리를 루트로 하는 files 모듈 (list, stat, read, write, mkdir, rename, delete) 을 추가: 경로는 정규화된 상대 경로여야 하고, 심볼릭 링크로 외부에 나갈 수 없으며, 읽기와 쓰기는 UTF-8 또는 base64 내용으로 1 MiB 까지, 목록은 2000 항목까지이고, 쓰기와 삭제에는 전용 files.write 와 files.delete 능력 토큰이 필요하며, 변경 후 작업 공간 파일 관리자가 새로 고쳐짐
 * `개선` Node bridge 에 console 모듈 추가 (console.tail 은 전역 콘솔의 최신 항목을 lines 최대 500, sinceId, level 과 256 KiB 예산으로 읽음), engines.execScript 와 execScriptFile 에 captureConsole 과 waitMs 옵션 추가 (스크립트 종료를 기다려 해당 id 창 안의 콘솔 출력을 수집, captureMode 는 global-window), 콘솔은 최대 4096 개의 로그를 보관 (초과분은 가장 오래된 것부터 삭제, 콘솔 뷰는 항목 id 로 갱신), ConsoleImpl 이 addLogListener 와 removeLogListener 를 공개

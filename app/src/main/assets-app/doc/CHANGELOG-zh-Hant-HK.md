@@ -178,6 +178,7 @@
 * `新增` Node app 支援 Android 服務啟動, 廣播傳送和已安裝應用查詢; dialogs 支援文字輸入, 單選, 多選及隨腳本清理的進度視窗, keys 提供無障礙系統操作
 * `新增` Node recorder 支援具備麥克風權限, 前台通知, 時長上限與腳本清理的 AAC 錄音; ui.overlay 支援宣告式屬性更新, 拖動與事件推送
 * `新增` Node 腳本可在兩個獨立執行階段進程中並行執行, 共用 FIFO 佇列並按執行工作路由取消和輸入
+* `新增` MediaInfo 查詢支援從 0 開始的 streamNumber, countGet 串流計數以及用於單位, 說明和可讀名稱的 infoKind; Rhino 和 Node 保持預設第 1 條串流的 TEXT 查詢, 並協商外掛擴充能力
 * `修復` MediaInfo 與圖片檔案路徑支援絕對路徑, 父目錄和合法檔名; 錄音輸出同步交由更新後的宿主依 Android 檔案權限處理
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
@@ -317,6 +318,7 @@
 * `修復` 拖曳控制台浮動視窗標題欄移動視窗偶爾失效 (拖曳手勢在視窗附着前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題欄拖曳在視窗附着後建立, 移動範圍限制在屏幕內並在拖曳結束後記錄位置
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內
 * `修復` MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈
+* `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `優化` Node bridge 無障礙模組新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與質量選項, 以一次性緩存文件或工作目錄文件交付), app 模組新增 currentWindow (當前包名, 活動與窗口列表)
 * `優化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為規範化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 列表上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力令牌, 變更後刷新工作區文件管理器
 * `優化` Node bridge 新增 console 模組 (console.tail 讀取全局控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待腳本結束並歸集其 id 窗口內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 條日誌 (超出丟棄最舊, 控制台視圖按條目 id 刷新), ConsoleImpl 公開 addLogListener 與 removeLogListener

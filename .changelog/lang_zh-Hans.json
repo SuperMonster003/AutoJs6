@@ -148,7 +148,8 @@
         "autojs6:events 通过推送回调观察 Android 通知, 外部 Toast, 无障碍按键及屏幕和电池广播, 使用显式权限并自动清理订阅; Node 原生 events 保持兼容",
         "Node app 支持 Android 服务启动, 广播发送和已安装应用查询; dialogs 支持文本输入, 单选, 多选及随脚本清理的进度窗口, keys 提供无障碍系统操作",
         "Node recorder 支持带麦克风权限, 前台通知, 时长上限与脚本清理的 AAC 录音; ui.overlay 支持声明式属性更新, 拖动与事件推送",
-        "Node 脚本可在两个独立运行时进程中并发执行, 共用 FIFO 队列并按执行任务路由取消和输入"
+        "Node 脚本可在两个独立运行时进程中并发执行, 共用 FIFO 队列并按执行任务路由取消和输入",
+        "MediaInfo 查询支持从 0 开始的 streamNumber, countGet 流计数以及用于单位, 说明和可读名称的 infoKind; Rhino 和 Node 保持默认第 1 条流的 TEXT 查询, 并协商插件扩展能力"
       ],
       "fix": [
         "MediaInfo 与图片文件路径支持绝对路径, 父目录和合法文件名; 录音输出同步交由更新后的宿主按 Android 文件权限处理",
@@ -289,7 +290,8 @@
         "`console.setPosition` / `setSize` / `setGravity` 等方法与 `console.show()` 的调用顺序影响结果 (如 `console.show(); console.setPosition(500, 400)` 需在两者之间 `sleep` 才生效, 反序调用亦可能丢失设置); 现改为记录配置并在窗口附着后统一应用, 调用顺序与时机不再影响结果",
         "拖动控制台浮动窗口标题栏移动窗口偶尔失效 (拖动手势在窗口附着前绑定, 并与按钮点击及窗口关闭竞争); 现在标题栏拖动在窗口附着后建立, 移动范围限制在屏幕内并在拖动结束后记录位置",
         "控制台浮动窗口四周存在 12dp 的留白, `console.setPosition(0, 0)` 无法贴到屏幕边缘; 现已移除留白, 位置坐标默认从状态栏下方开始计算 (可用 `setAvoidStatusBar(false)` 关闭), 窗口位置与尺寸均限制在屏幕范围内",
-        "MCP Server 会话控制器可能把 `openServer` 之后拉取的 `starting` 快照覆盖到插件已经通过回调送达的 `running` 状态之上, 导致 `status` 始终不报告监听器已运行; 现在拉取的快照只在拉取期间没有回调状态到达时才发布"
+        "MCP Server 会话控制器可能把 `openServer` 之后拉取的 `starting` 快照覆盖到插件已经通过回调送达的 `running` 状态之上, 导致 `status` 始终不报告监听器已运行; 现在拉取的快照只在拉取期间没有回调状态到达时才发布",
+        "MediaInfo 详情与快照的 Complete name 显示原始文件路径, 避免显示私有缓存或描述符路径, 同时保留快照的显示文件名"
       ],
       "improvement": [
         "Node bridge 无障碍模块新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 节点, 32 层与 256 KiB), explain (选择器描述符的逐过滤器命中数) 与 screenshot (Android 11+ 的无障碍截图, 支持缩放, 区域, 格式与质量选项, 以一次性缓存文件或工作目录文件交付), app 模块新增 currentWindow (当前包名, 活动与窗口列表)",

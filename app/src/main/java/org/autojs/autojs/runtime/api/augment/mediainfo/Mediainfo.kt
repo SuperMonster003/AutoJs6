@@ -16,6 +16,8 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_json_parse
 import org.autojs.plugin.mediainfo.api.MediainfoOptionKeys
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
+import org.autojs.plugin.mediainfo.api.MediainfoQueryOptions
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.getProp
 import org.json.JSONArray
 import org.json.JSONObject
 import org.mozilla.javascript.NativeObject
@@ -33,6 +35,8 @@ class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         ::read.name,
         ::snapshot.name,
         ::capabilities.name,
+        ::get.name,
+        ::countGet.name,
     )
 
     override fun invoke(vararg args: Any?): NativeObject = ensureArgumentsOnlyOne(args) { path ->
@@ -45,6 +49,33 @@ class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         @RhinoRuntimeFunctionInterface
         fun read(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsOnlyOne(args) { path ->
             MediainfoNativeObject(scriptRuntime, path)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun get(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 3..4) { values ->
+            val file = File(MediainfoNativeObject.resolvePath(scriptRuntime, values[0]))
+            val options = queryOptions(values.getOrNull(3))
+            runBlocking {
+                MediainfoPluginHost.get(ScriptRuntime.applicationContext, file, coerceString(values[1]),
+                    options.streamNumber, coerceString(values[2]), options.infoKind)
+            }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun countGet(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsLength(args, 2) { values ->
+            val file = File(MediainfoNativeObject.resolvePath(scriptRuntime, values[0]))
+            runBlocking { MediainfoPluginHost.countGet(ScriptRuntime.applicationContext, file, coerceString(values[1])) }
+        }
+
+        internal fun queryOptions(raw: Any?): MediainfoQueryOptions {
+            if (raw.isJsNullish()) return MediainfoQueryOptions()
+            require(raw is NativeObject) { "MediaInfo query options must be a JavaScript Object" }
+            return MediainfoQueryOptions.parse(
+                raw.getProp("streamNumber").takeUnless { it.isJsNullish() },
+                raw.getProp("infoKind").takeUnless { it.isJsNullish() },
+            )
         }
 
         @JvmStatic
@@ -73,6 +104,9 @@ class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             val result = JSONObject()
                 .put("snapshotSchemas", JSONArray(capabilities.snapshotSchemas))
                 .put("defaultSnapshotSchema", capabilities.defaultSnapshotSchema)
+                .put("streamCount", capabilities.streamCount)
+                .put("streamNumber", true)
+                .put("infoKinds", JSONArray(capabilities.infoKinds))
             capabilities.engineVersion?.let { result.put("engineVersion", it) }
             js_json_parse(result.toString())
         }
