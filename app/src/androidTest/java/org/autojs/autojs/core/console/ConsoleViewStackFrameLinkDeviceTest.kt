@@ -1,8 +1,8 @@
 package org.autojs.autojs.core.console
 
-import android.graphics.Color
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.EditText
 import androidx.test.platform.app.InstrumentationRegistry
@@ -23,8 +23,8 @@ class ConsoleViewStackFrameLinkDeviceTest {
     fun submitsOneLineCommandAndClearsTheInput() {
         val submitted = AtomicReference<String>()
         instrumentation.runOnMainSync {
-            val view = ConsoleView(instrumentation.targetContext).apply {
-                setCommandInputVisible(true)
+            val view = ConsoleView(themedContext()).apply {
+                isCommandModeEnabled = true
                 setOnCommandSubmitListener(submitted::set)
             }
             val input = view.findViewById<EditText>(R.id.input)
@@ -45,7 +45,7 @@ class ConsoleViewStackFrameLinkDeviceTest {
         val clickableContent = AtomicReference<CharSequence>()
         val clickedTarget = AtomicReference<ClickedTarget>()
         instrumentation.runOnMainSync {
-            val view = ConsoleView(instrumentation.targetContext).apply {
+            val view = ConsoleView(themedContext()).apply {
                 setEnableStackFrameLinks(true)
                 setOnStackFrameClickListener { sourceName, lineIndex, columnNumber ->
                     clickedTarget.set(ClickedTarget(sourceName, lineIndex, columnNumber))
@@ -56,7 +56,6 @@ class ConsoleViewStackFrameLinkDeviceTest {
                 view.createClickableContent(
                     "TypeScript compilation failed\n" +
                         "my script.ts:3:7 - error TS2322: Type mismatch",
-                    Color.RED,
                 ),
             )
         }
@@ -73,6 +72,8 @@ class ConsoleViewStackFrameLinkDeviceTest {
 
         assertEquals(ClickedTarget("my script.ts", 2, 6), clickedTarget.get())
     }
+
+    private fun themedContext() = ContextThemeWrapper(instrumentation.targetContext, R.style.EditorTheme)
 
     private data class ClickedTarget(
         val sourceName: String,

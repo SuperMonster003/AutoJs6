@@ -24,7 +24,7 @@ class ConsoleViewLayoutDeviceTest {
     @Test
     fun commandInputIsHiddenByDefault() {
         instrumentation.runOnMainSync {
-            val view = ConsoleView(instrumentation.targetContext)
+            val view = ConsoleView(themedContext())
 
             assertEquals(
                 View.GONE,
@@ -37,8 +37,9 @@ class ConsoleViewLayoutDeviceTest {
     fun commandActionSwitchesBetweenRunAndStop() {
         instrumentation.runOnMainSync {
             var stopCount = 0
-            val context = instrumentation.targetContext
+            val context = themedContext()
             val view = ConsoleView(context).apply {
+                isCommandModeEnabled = true
                 setOnCommandSubmitListener { }
                 setOnCommandStopListener { stopCount++ }
             }
@@ -97,6 +98,8 @@ class ConsoleViewLayoutDeviceTest {
                     R.id.action_copy,
                     R.id.action_send,
                     R.id.action_export,
+                    R.id.action_settings,
+                    R.id.action_input_bar,
                     R.id.action_typescript_console,
                 ),
                 (0 until bottomSheetMenu.size()).map { index ->
@@ -112,8 +115,8 @@ class ConsoleViewLayoutDeviceTest {
         instrumentation.runOnMainSync {
             val width = 1080
             val height = 1920
-            val view = ConsoleView(instrumentation.targetContext).apply {
-                setCommandInputVisible(true)
+            val view = ConsoleView(themedContext()).apply {
+                isCommandModeEnabled = true
                 measure(
                     View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY),
@@ -128,8 +131,8 @@ class ConsoleViewLayoutDeviceTest {
                 logList.height >= height / 2,
             )
             assertTrue(
-                "The command row must stay above the log viewport",
-                inputContainer.bottom <= logList.top,
+                "The command row must stay below the log viewport",
+                logList.bottom <= inputContainer.top,
             )
         }
     }
@@ -146,7 +149,7 @@ class ConsoleViewLayoutDeviceTest {
             val bottomSheet = LayoutInflater.from(themedContext)
                 .inflate(R.layout.bottom_sheet_log, null, false)
             val console = bottomSheet.findViewById<ConsoleView>(R.id.console).apply {
-                setCommandInputVisible(true)
+                isCommandModeEnabled = true
             }
             bottomSheet.measure(
                 View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
@@ -163,8 +166,8 @@ class ConsoleViewLayoutDeviceTest {
                 logList.height >= height / 2,
             )
             assertTrue(
-                "The bottom sheet command row must stay above the log viewport",
-                inputContainer.bottom <= logList.top,
+                "The bottom sheet command row must stay below the log viewport",
+                logList.bottom <= inputContainer.top,
             )
             assertTrue(
                 "The More action must be the rightmost header action",
@@ -172,4 +175,6 @@ class ConsoleViewLayoutDeviceTest {
             )
         }
     }
+
+    private fun themedContext() = ContextThemeWrapper(instrumentation.targetContext, R.style.EditorTheme)
 }
