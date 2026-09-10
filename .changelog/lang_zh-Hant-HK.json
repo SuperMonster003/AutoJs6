@@ -212,6 +212,7 @@
         "IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題",
         "Android 報告目前已分配原生堆位元組數為零時, 健康的 Node.js R6 持久運行時 soak 證據被錯誤拒絕的問題",
         "Node.js R6 打包 APK 證據因收集器未準備當前 Inrt 模板或傳入目標 ABI 而被跳過或錯誤綁定 arm64 的問題",
+        "Node.js 專案啟動忽略 project.json 的 node.timeoutMs, 導致設定較長等待時間的腳本仍在約 5 秒後逾時",
         "跨 ABI 打包應用時錯誤將已安裝宿主進程的原生庫複製到其他 ABI 目錄, 導致 32 位打包應用加載 64 位終端庫並崩潰的問題",
         "TypeScript UI 腳本在引擎創建前編譯失敗時, 全局執行監聽器存取不存在的引擎可能導致宿主在報告診斷的同時崩潰的問題",
         "堆棧幀與編譯診斷鏈接將 1 基源碼列號直接當作 0 基編輯器偏移, 導致光標多前進一個字符的問題",

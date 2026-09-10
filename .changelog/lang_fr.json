@@ -212,6 +212,7 @@
         "Les builds de l'ensemble du projet dans IntelliJ IDEA échouaient après Clean car les AAR distribués de l'API Python Runtime étaient résolus avant leur génération et les fixtures de conformité n'implémentaient pas les méthodes AIDL ajoutées",
         "Les preuves soak Node.js R6 pouvaient rejeter un environnement d'exécution persistant sain lorsqu'Android signalait zéro octet actuellement alloué au tas natif",
         "Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible",
+        "Le lancement des projets Node.js ignorait node.timeoutMs dans project.json, interrompant au bout de 5 secondes environ les scripts configurés pour une attente plus longue",
         "L'empaquetage d'applications entre ABI pouvait copier les bibliothèques natives du processus hôte installé dans le répertoire d'une autre ABI, amenant les applications empaquetées 32 bits à charger des bibliothèques de terminal 64 bits puis à planter",
         "Lorsqu'un script TypeScript UI échouait à la compilation avant la création du moteur, l'écouteur d'exécution global pouvait déréférencer un moteur absent et faire planter l'hôte pendant le signalement des diagnostics",
         "Les liens de cadres de pile et de diagnostics du compilateur traitaient les colonnes source à base 1 comme des décalages d'éditeur à base 0, déplaçant le curseur d'un caractère de trop",

@@ -215,6 +215,7 @@
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
 * `Corrección` La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo
 * `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
+* `Corrección` El inicio de proyectos Node.js ignoraba node.timeoutMs en project.json, por lo que los scripts configurados para esperar más tiempo agotaban su plazo tras unos 5 segundos
 * `Corrección` El empaquetado de aplicaciones entre ABI podía copiar bibliotecas nativas del proceso host instalado a un directorio de otra ABI, lo que hacía que las aplicaciones empaquetadas de 32 bits cargaran bibliotecas de terminal de 64 bits y se cerraran inesperadamente
 * `Corrección` Cuando un script TypeScript UI fallaba al compilarse antes de crear el motor, el listener global de ejecución podía desreferenciar un motor inexistente y cerrar inesperadamente el host mientras se informaban los diagnósticos
 * `Corrección` Los enlaces de marcos de pila y diagnósticos del compilador trataban las columnas de origen basadas en 1 como desplazamientos del editor basados en 0, moviendo el cursor un carácter de más

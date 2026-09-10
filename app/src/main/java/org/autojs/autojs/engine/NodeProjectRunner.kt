@@ -231,6 +231,8 @@ object NodeProjectRunner {
         val normalizedProjectRoot = projectRoot.canonicalFile
         val sourceLaunchKind = launchSource.nodeProjectLaunchKind
         val defaultRequest = ProjectRequest(projectRoot = normalizedProjectRoot)
+        val projectTimeoutMs = readNodeProjectConfig(normalizedProjectRoot)
+            ?.second?.optJSONObject("node")?.optLong("timeoutMs")?.takeIf { it > 0L }
         val processPoolSlot = normalizeDescriptorProcessPoolSlot(launchSource.nodeProjectProcessPoolSlot)
         val request = defaultRequest.copy(
             packageDir = launchSource.nodeProjectPackageDirFile?.canonicalFile ?: normalizedProjectRoot,
@@ -239,7 +241,7 @@ object NodeProjectRunner {
             binName = launchSource.nodeProjectBinName,
             argv = launchSource.nodeProjectArgv.toList(),
             env = launchSource.nodeProjectEnv.toMap(),
-            timeoutMs = launchSource.nodeProjectTimeoutMs ?: defaultRequest.timeoutMs,
+            timeoutMs = launchSource.nodeProjectTimeoutMs ?: projectTimeoutMs ?: defaultRequest.timeoutMs,
             executionMode = launchSource.nodeProjectExecutionMode ?: defaultRequest.executionMode,
             entryDirective = NodeEntryDirective.normalize(launchSource.nodeProjectEntryDirective)
                 ?: (launchSource as? JavaScriptSource)

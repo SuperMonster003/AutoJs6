@@ -215,6 +215,7 @@
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
+* `Fix` Node.js project launches ignored node.timeoutMs in project.json, causing scripts configured for longer waits to time out after about 5 seconds
 * `Fix` Cross-ABI app packaging could copy native libraries from the installed host process into another ABI directory, causing 32-bit packaged apps to load 64-bit terminal libraries and crash
 * `Fix` TypeScript UI scripts with compilation failures before engine creation could crash the host while reporting diagnostics because the global execution listener dereferenced a missing engine
 * `Fix` Stack-frame and compiler-diagnostic links treated one-based source columns as zero-based editor offsets, moving the cursor one character too far
