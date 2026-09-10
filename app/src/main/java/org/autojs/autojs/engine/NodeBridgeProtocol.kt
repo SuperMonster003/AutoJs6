@@ -1670,6 +1670,9 @@ class AndroidNodeBridgeCapabilityProvider(
      * M3.2: coordinate swipe through AccessibilityService.dispatchGesture.
      * args: [x1, y1, x2, y2, durationMs?]. Returns "true" once the system
      * reports the gesture completed, "false" when it was cancelled.
+     * Identical end points are dispatched as a press of durationMs: the
+     * system cancels a zero-length stroke, and the MCP plugin (roadmap P3.2)
+     * sends its coordinate taps and long presses this way.
      */
     private fun dispatchAccessibilitySwipe(
         request: NodeBridgeRequest,
@@ -1691,8 +1694,9 @@ class AndroidNodeBridgeCapabilityProvider(
                 ),
             )
         }
-        val completed = accessibilityGestureAutomator(service)
-            .swipe(x1, y1, x2, y2, durationMs.coerceAtMost(MAX_ACCESSIBILITY_GESTURE_DURATION_MS))
+        val automator = accessibilityGestureAutomator(service)
+        val duration = durationMs.coerceAtMost(MAX_ACCESSIBILITY_GESTURE_DURATION_MS)
+        val completed = if (x1 == x2 && y1 == y2) automator.press(x1, y1, duration.toInt()) else automator.swipe(x1, y1, x2, y2, duration)
         return NodeBridgeResponse.success(request.id, completed.toString())
     }
 
@@ -4627,8 +4631,14 @@ class AndroidNodeBridgeCapabilityProvider(
         dispatchOnMain(request, callback) {
             val service = AutoJsAccessibilityService.instance
             if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
-                NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(
-                    "Enable AutoJs6 accessibility to perform system actions.", request.module, request.method))
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "an enabled accessibility capability provider in the current process",
+                    ),
+                )
             } else {
                 val action = when (request.method) {
                     "notifications" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS

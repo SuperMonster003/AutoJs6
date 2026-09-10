@@ -60,10 +60,13 @@ class BridgeDumpOptions(
 /**
  * One node of a dump: the frozen seven-field [node] plus where it sits ([root] is the index of
  * the root it belongs to, [depth] its level below that root, [index] its index among its
- * siblings, -1 for a root) and what the walk could not show ([childCount] counts all children,
- * even those the depth limit or the node budget left out).
+ * siblings, -1 for a root), what the walk could not show ([childCount] counts all children,
+ * even those the depth limit or the node budget left out), and the state flags the MCP compact
+ * tree lists next to the node (MCP roadmap P3.2): [scrollable], [checkable], [checked],
+ * [editable], [focused], [selected] and [longClickable].
  * zh-CN: 快照中的一个节点: 冻结的七字段 [node] 加上它的位置 ([root] 为所属根节点的下标, [depth] 为它在该根之下的层级, [index] 为它在
- * 兄弟节点中的下标, 根节点为 -1) 以及遍历未能展示的部分 ([childCount] 计入全部子节点, 包括被深度限制或节点预算略去的).
+ * 兄弟节点中的下标, 根节点为 -1), 遍历未能展示的部分 ([childCount] 计入全部子节点, 包括被深度限制或节点预算略去的), 以及 MCP 紧凑节点树
+ * 在节点旁列出的状态标记 (MCP 路线图 P3.2): [scrollable], [checkable], [checked], [editable], [focused], [selected] 与 [longClickable].
  */
 class BridgeDumpEntry(
     val node: BridgeNode,
@@ -72,6 +75,13 @@ class BridgeDumpEntry(
     val index: Int,
     val childCount: Int,
     val visible: Boolean,
+    val scrollable: Boolean = false,
+    val checkable: Boolean = false,
+    val checked: Boolean = false,
+    val editable: Boolean = false,
+    val focused: Boolean = false,
+    val selected: Boolean = false,
+    val longClickable: Boolean = false,
 )
 
 /** The outcome of [BridgeNodeDump.dump]. zh-CN: [BridgeNodeDump.dump] 的结果. */
@@ -122,6 +132,13 @@ object BridgeNodeDump {
             index = if (level == 0) -1 else node.indexInParent(),
             childCount = node.childCount(),
             visible = visible,
+            scrollable = node.scrollable(),
+            checkable = node.checkable(),
+            checked = node.checked(),
+            editable = node.editable(),
+            focused = node.focused(),
+            selected = node.selected(),
+            longClickable = node.longClickable(),
         )
         if (level >= options.maxDepth) return true
         for (i in 0 until node.childCount()) {

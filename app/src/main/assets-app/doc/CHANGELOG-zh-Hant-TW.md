@@ -423,6 +423,7 @@
 * `最佳化` 每個腳本執行階段擁有獨立的控制台 (自身的日誌條目與浮動視窗, 日誌同時轉發至全域控制台), 浮動視窗僅顯示目前腳本的輸出 (與 Auto.js 4 一致), 同名腳本重新執行時取代上次執行遺留的浮動視窗; 日誌條目改為儲存原始內容與時間戳記, 時間前綴由各檢視按需渲染 (浮動視窗預設不顯示, 日誌頁可在設定中開啟); Node bridge `console.tail` 條目新增 `time` 欄位 (毫秒時間戳記), `text` 保持帶時間前綴
 * `最佳化` 螢幕 OCR 範例申請 Android 擷取授權並辨識真實圖片控制代碼; OCR 或條碼插件不可用時傳回可讀 unavailable 錯誤, 辨識失敗仍按錯誤處理
 * `最佳化` Node 腳本支援協商式非同步啟動, 長駐執行釋放 Binder 執行緒, 終態回呼完成後回傳工作區, 相容舊同步宿主
+* `最佳化` Node bridge `accessibility.dump` 的 JSON 節點在七個描述符欄位之外攜帶 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 與 `longClickable` 狀態標記; MCP Server 工作階段授權加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全域動作以支援外掛的 `ui_press_key` 工具, 無障礙服務未執行時 `keys.*` 呼叫現在與 `accessibility` 模組一樣以 `unavailable` 類別回應; 起止點相同的 `accessibility.swipe` (零長度) 依 `durationMs` 的按壓派發, MCP 的 `ui_click` / `ui_long_click` 座標形式依賴於此
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

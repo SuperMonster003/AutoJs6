@@ -229,11 +229,19 @@ set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOn
 `package_manager.{list, verify}`, `clipboard.{getText, setText, hasText}`,
 `device.{info, isScreenOn, wakeUp, isIgnoringBatteryOptimizations}`,
 `media_projection.{requestScreenCapture, stop}`, `image.{captureScreen, recycle}`,
-`shell.exec` and `toast.{toast, showToast}`, with the tokens `accessibility`,
-`accessibility.gesture`, `engines`, `engines.exec`, `screen_capture`, `image`,
-`app`, `app.launch`, `app.query`, `app.activity`, `clipboard`, `device`,
-`device.power`, `shell`, `toast`, `package_manager`, `files`, `files.write`,
-`files.delete` and `console`.
+`shell.exec` and `toast.{toast, showToast}`, plus the global actions
+`keys.{notifications, quickSettings, powerDialog, lockScreen}` behind the plugin's
+`ui_press_key` (roadmap P3.2; `keys.takeScreenshot` and `keys.splitScreen` stay
+outside), with the tokens `accessibility`, `accessibility.gesture`, `keys`,
+`engines`, `engines.exec`, `screen_capture`, `image`, `app`, `app.launch`,
+`app.query`, `app.activity`, `clipboard`, `device`, `device.power`, `shell`,
+`toast`, `package_manager`, `files`, `files.write`, `files.delete` and `console`.
+A `keys.*` call without a running accessibility service fails with the
+`unavailable` category, as the `accessibility` module does.
+
+`accessibility.swipe` with identical end points (`x1 == x2`, `y1 == y2`) is dispatched as a
+press of `durationMs`: the system cancels a zero-length stroke, and the MCP plugin's coordinate
+`ui_click` / `ui_long_click` (roadmap P3.2) rely on this form.
 
 | Resource | V1 ceiling |
 | --- | ---: |
@@ -263,7 +271,7 @@ JSON objects carry a `schema` field; the schemas below are frozen at `v1`.
 
 | Method | Schema | Notes |
 | --- | --- | --- |
-| `accessibility.dump(options)` | `autojs6-bridge-accessibility-dump-v1` | `format` text / json / xml, `window` active / all, `maxDepth <= 32`, `maxNodes <= 400`, `visibleOnly`, `properties`; JSON nodes carry the seven `BridgeNode` fields plus `root`, `depth`, `index`, `childCount`, `visible`; text is capped at 256 KiB (`textTruncated`) |
+| `accessibility.dump(options)` | `autojs6-bridge-accessibility-dump-v1` | `format` text / json / xml, `window` active / all, `maxDepth <= 32`, `maxNodes <= 400`, `visibleOnly`, `properties`; JSON nodes carry the seven `BridgeNode` fields plus `root`, `depth`, `index`, `childCount`, `visible` and, since roadmap P3.2, the state flags `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable`; text is capped at 256 KiB (`textTruncated`) |
 | `accessibility.explain(selector, options)` | `autojs6-bridge-accessibility-explain-v1` | Per-filter `steps` (matched, cumulative), `matches`, `nearMisses`, `failingIndex`, rendered `text` |
 | `accessibility.screenshot(options)` | `autojs6-bridge-accessibility-screenshot-v1` | API 30+ via `A11yScreenshotter`; `format` jpeg / png / webp, `quality`, `scale` or `maxWidth`, `region`, optional `savePath` inside the working directory; below API 30 an `unavailable` failure names the `media_projection` fallback; tokens `accessibility` + `screen_capture` |
 | `app.currentWindow()` | `autojs6-bridge-app-current-window-v1` | Package and activity from `ActivityInfoProvider`, window list from `A11yWindowFacts` |

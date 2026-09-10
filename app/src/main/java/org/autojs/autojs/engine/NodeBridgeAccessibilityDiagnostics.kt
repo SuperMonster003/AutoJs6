@@ -400,6 +400,13 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         .put("index", entry.index)
         .put("childCount", entry.childCount)
         .put("visible", entry.visible)
+        .put("scrollable", entry.scrollable)
+        .put("checkable", entry.checkable)
+        .put("checked", entry.checked)
+        .put("editable", entry.editable)
+        .put("focused", entry.focused)
+        .put("selected", entry.selected)
+        .put("longClickable", entry.longClickable)
 
     private fun nodesJson(nodes: List<UiObject>): JSONArray = JSONArray().apply {
         nodes.forEach { node -> put(NodeBridgeAccessibilityCodec.nodeJson(BridgeNode.of(node))) }

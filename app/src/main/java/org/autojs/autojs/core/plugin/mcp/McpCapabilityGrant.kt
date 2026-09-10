@@ -95,7 +95,11 @@ data class McpCapabilityGrant(
 
         private fun methodsOf(module: String, vararg methods: String): List<String> = methods.map { key(module, it) }
 
-        /** Roadmap appendix A.6: every bridge method an MCP session may reach. */
+        /**
+         * Roadmap appendix A.6: every bridge method an MCP session may reach, plus the `keys` global
+         * actions behind the plugin's `ui_press_key` (roadmap P3.2: notifications, quick settings,
+         * the power dialog, and the lock screen; `takeScreenshot` and `splitScreen` stay outside).
+         */
         @JvmField
         val DEFAULT_METHODS: Set<String> = LinkedHashSet<String>().apply {
             addAll(
@@ -107,6 +111,7 @@ data class McpCapabilityGrant(
                     "back", "home", "recentApps",
                 ),
             )
+            addAll(methodsOf("keys", "notifications", "quickSettings", "powerDialog", "lockScreen"))
             addAll(methodsOf("engines", "execScript", "execScriptFile", "list", "stop", "stopAll"))
             addAll(methodsOf("console", "tail"))
             addAll(methodsOf("files", "list", "stat", "read", "write", "mkdir", "rename", "delete"))
@@ -125,6 +130,7 @@ data class McpCapabilityGrant(
         val DEFAULT_PERMISSIONS: Set<String> = linkedSetOf(
             NodeBridgePermissionManifest.ACCESSIBILITY,
             NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE,
+            NodeBridgePermissionManifest.KEYS,
             NodeBridgePermissionManifest.ENGINES,
             NodeBridgePermissionManifest.ENGINES_EXEC,
             NodeBridgePermissionManifest.SCREEN_CAPTURE,

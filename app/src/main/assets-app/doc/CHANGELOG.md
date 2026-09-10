@@ -402,6 +402,7 @@
 * `优化` 每个脚本运行时拥有独立的控制台 (自身的日志条目与浮动窗口, 日志同时转发至全局控制台), 浮动窗口仅显示当前脚本的输出 (与 Auto.js 4 一致), 同名脚本重新运行时替换上次运行遗留的浮动窗口; 日志条目改为保存原始内容与时间戳, 时间前缀由各视图按需渲染 (浮动窗口默认不显示, 日志页可在设置中开启); Node bridge `console.tail` 条目新增 `time` 字段 (毫秒时间戳), `text` 保持带时间前缀
 * `优化` 屏幕 OCR 样例申请 Android 截屏授权并识别真实图片句柄; OCR 或条码插件不可用时返回可读 unavailable 错误, 识别失败仍按错误处理
 * `优化` Node 脚本支持协商式异步启动, 长驻执行释放 Binder 线程, 终态回调完成后回传工作区, 兼容旧同步宿主
+* `优化` Node bridge `accessibility.dump` 的 JSON 节点在七个描述符字段之外携带 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 与 `longClickable` 状态标记; MCP Server 会话授权加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全局动作以支持插件的 `ui_press_key` 工具, 无障碍服务未运行时 `keys.*` 调用现在与 `accessibility` 模块一样以 `unavailable` 类别应答; 起止点相同的 `accessibility.swipe` (零长度) 按 `durationMs` 的按压派发, MCP 的 `ui_click` / `ui_long_click` 坐标形式依赖于此
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

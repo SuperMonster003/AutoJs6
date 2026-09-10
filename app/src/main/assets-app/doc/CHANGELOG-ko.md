@@ -423,6 +423,7 @@
 * `개선` 각 스크립트 런타임이 독립적인 콘솔 (자체 로그 항목과 플로팅 창, 로그는 전역 콘솔로도 전달) 을 가지며 플로팅 창은 현재 스크립트의 출력만 표시 (Auto.js 4 와 동일), 같은 이름의 스크립트를 다시 실행하면 이전 실행이 남긴 플로팅 창을 대체; 로그 항목은 원본 내용과 타임스탬프를 저장하고 시간 접두사는 각 뷰가 필요 시 렌더링 (플로팅 창은 기본 숨김, 로그 페이지는 설정에서 활성화 가능); Node bridge `console.tail` 항목에 `time` 필드 (밀리초 타임스탬프) 추가, `text` 는 시간 접두사를 유지
 * `개선` 화면 OCR 예제가 Android 캡처 승인을 요청하고 실제 이미지 핸들을 인식하며, OCR 또는 바코드 플러그인을 사용할 수 없으면 읽기 쉬운 unavailable 오류를 반환하고 인식 실패는 오류로 처리
 * `개선` Node 스크립트는 협상된 비동기 시작을 지원하고, 장기 실행 중 Binder 스레드를 해제하며, 종료 후 작업 공간 변경 사항을 반환하고 기존 동기 호스트와 호환
+* `개선` Node bridge `accessibility.dump`의 JSON 노드가 7개 기술자 필드 외에 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable` 상태 플래그를 가집니다; MCP Server 세션 권한에 플러그인의 `ui_press_key` 도구를 위한 전역 동작 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen`을 추가했고, 접근성 서비스가 실행 중이 아닐 때의 `keys.*` 호출은 이제 `accessibility` 모듈과 같이 `unavailable` 범주로 응답합니다; 시작점과 끝점이 같은 (길이 0의) `accessibility.swipe`는 `durationMs` 동안의 누르기로 전달되며, MCP의 `ui_click` / `ui_long_click` 좌표 형식이 이에 의존합니다
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

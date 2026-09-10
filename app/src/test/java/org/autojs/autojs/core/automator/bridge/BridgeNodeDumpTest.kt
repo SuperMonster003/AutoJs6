@@ -15,6 +15,8 @@ class BridgeNodeDumpTest {
         child("a") {
             text = "Login"
             clickable = true
+            longClickable = true
+            scrollable = true
             bounds(0, 0, 540, 100)
             child("a0") { text = "inner" }
         }
@@ -22,7 +24,14 @@ class BridgeNodeDumpTest {
             visibleToUser = false
             child("b0")
         }
-        child("c") { desc = "third" }
+        child("c") {
+            desc = "third"
+            checkable = true
+            checked = true
+            editable = true
+            focused = true
+            selected = true
+        }
     }
 
     @Test
@@ -42,6 +51,12 @@ class BridgeNodeDumpTest {
         assertTrue(login.node.clickable)
         assertTrue(login.node.enabled)
         assertFalse(result.entries[3].visible)
+        assertTrue(login.scrollable && login.longClickable)
+        assertFalse(login.checkable || login.checked || login.editable || login.focused || login.selected)
+        val third = result.entries[5]
+        assertTrue(third.checkable && third.checked && third.editable && third.focused && third.selected)
+        assertFalse(third.scrollable || third.longClickable)
+        assertFalse(result.entries[0].scrollable)
     }
 
     @Test

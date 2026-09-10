@@ -19,6 +19,12 @@ class McpCapabilityGrantTest {
         assertTrue(grant.allowsMethod("files", "write"))
         assertTrue(grant.allowsMethod("console", "tail"))
         assertTrue(grant.allowsMethod("device", "info"))
+        listOf("notifications", "quickSettings", "powerDialog", "lockScreen").forEach { method ->
+            assertTrue("keys.$method serves ui_press_key", grant.allowsMethod("keys", method))
+        }
+        assertFalse(grant.allowsMethod("keys", "takeScreenshot"))
+        assertFalse(grant.allowsMethod("keys", "splitScreen"))
+        assertTrue(NodeBridgePermissionManifest.KEYS in grant.permissions)
         listOf("rhino", "java", "websocket", "fetch", "ui_overlay", "input_observer", "http", "storage").forEach { module ->
             assertFalse("module $module must stay outside the default grant", module in grant.modules)
         }
