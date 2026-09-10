@@ -202,9 +202,9 @@ internal data class AndroidPackageArchive(
     }
 
     companion object {
-        private const val MAX_SINGLE_APK_BYTES = 4L * 1024L * 1024L * 1024L
-        private const val MAX_STAGED_APK_BYTES = 4L * 1024L * 1024L * 1024L
-        private const val MAX_DISPLAY_APK_BYTES = 512L * 1024L * 1024L
+        private const val MAX_SINGLE_APK_BYTES = PackageInspectionLimits.PACKAGE_BYTES
+        private const val MAX_STAGED_APK_BYTES = PackageInspectionLimits.TOTAL_SCAN_BYTES
+        private const val MAX_DISPLAY_APK_BYTES = PackageInspectionLimits.PACKAGE_BYTES
         private const val MINIMUM_FREE_CACHE_BYTES = 128L * 1024L * 1024L
 
         private fun InputStream.copyBoundedTo(
@@ -335,15 +335,15 @@ internal data class PackageDeviceSpec(
 
 internal object AndroidPackageArchiveInspector {
 
-    private const val MAX_ARCHIVE_ENTRIES = 16_384
-    private const val MAX_GENERIC_APK_ENTRIES = 512
-    private const val MAX_ENTRY_NAME_CHARS = 1_024
-    private const val MAX_DECLARED_ENTRY_BYTES = 4L * 1024L * 1024L * 1024L
-    private const val MAX_DECLARED_TOTAL_BYTES = 8L * 1024L * 1024L * 1024L
-    private const val MAX_NESTED_APK_SCAN_BYTES = 256L * 1024L * 1024L
-    private const val MAX_SINGLE_SELECTED_APK_BYTES = 4L * 1024L * 1024L * 1024L
-    private const val MAX_SELECTED_APK_BYTES = 4L * 1024L * 1024L * 1024L
-    private const val MAX_METADATA_BYTES = 1024 * 1024
+    private const val MAX_ARCHIVE_ENTRIES = PackageInspectionLimits.ARCHIVE_ENTRIES
+    private const val MAX_GENERIC_APK_ENTRIES = PackageInspectionLimits.GENERIC_APKS
+    private const val MAX_ENTRY_NAME_CHARS = PackageInspectionLimits.ENTRY_NAME_CHARS
+    private const val MAX_DECLARED_ENTRY_BYTES = PackageInspectionLimits.PACKAGE_BYTES
+    private const val MAX_DECLARED_TOTAL_BYTES = PackageInspectionLimits.TOTAL_DECLARED_BYTES
+    private const val MAX_NESTED_APK_SCAN_BYTES = PackageInspectionLimits.TOTAL_SCAN_BYTES
+    private const val MAX_SINGLE_SELECTED_APK_BYTES = PackageInspectionLimits.PACKAGE_BYTES
+    private const val MAX_SELECTED_APK_BYTES = PackageInspectionLimits.TOTAL_SCAN_BYTES
+    private const val MAX_METADATA_BYTES = PackageInspectionLimits.METADATA_BYTES
 
     fun inspect(
         file: File,

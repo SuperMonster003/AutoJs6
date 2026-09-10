@@ -39,6 +39,27 @@ class ExplorerM3uPlaylistInstrumentationTest {
     private val terra = action(ExplorerM3uPlaylistPolicy.AUDIO_PACKAGE, "play-audio")
 
     @Test
+    fun remainingPlaylistsKeepPlayAndEditWhileRetainingTheirMatchedPlayer() {
+        listOf(
+            FileUtils.TYPE.M3U8_AUDIO, FileUtils.TYPE.M3U8_VIDEO, FileUtils.TYPE.PLS,
+            FileUtils.TYPE.WAX, FileUtils.TYPE.WVX, FileUtils.TYPE.ASX,
+        ).forEach { type ->
+            val player = if (type == FileUtils.TYPE.WVX || type == FileUtils.TYPE.ASX ||
+                type == FileUtils.TYPE.M3U8_VIDEO) ember else terra
+            val item = item(type)
+            val provider = RecordingProvider(listOf(player))
+            val controller = controller(provider)
+            val selected = requireNotNull(controller.resolve(ExplorerActionEntryPoint.PRIMARY_BUTTON, item))
+            val state = ExplorerItemActionPolicy.resolve(item, selected)
+            assertSame(type.name, ExplorerPrimaryAction.MEDIA_PLAY, state.primaryAction)
+            assertEquals(type.name, 2, iconCount(state))
+            assertSame(player, state.pluginPrimaryAction)
+            assertTrue(controller.launch(context, ExplorerActionEntryPoint.PRIMARY_BUTTON, selected, item))
+            assertSame(player, provider.launched)
+        }
+    }
+
+    @Test
     fun eitherM3uClassificationKeepsTwoButtonsAndPrefersEmberOverCachedTerra() {
         listOf(FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO).forEach { type ->
             val item = item(type)

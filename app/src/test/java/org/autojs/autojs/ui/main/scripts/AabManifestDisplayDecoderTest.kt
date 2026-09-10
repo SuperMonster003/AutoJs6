@@ -18,6 +18,21 @@ class AabManifestDisplayDecoderTest {
     val temporaryFolder = TemporaryFolder()
 
     @Test
+    fun aabWithManyResourcesDecodesBaseManifest() {
+        val file = temporaryFolder.newFile("many-entries.zip")
+        ZipOutputStream(file.outputStream()).use { zip ->
+            repeat(18_184) { index ->
+                zip.putNextEntry(ZipEntry("assets/entry_$index"))
+                zip.closeEntry()
+            }
+            zip.putNextEntry(ZipEntry("base/manifest/AndroidManifest.xml"))
+            zip.write(manifest("com.example.large"))
+            zip.closeEntry()
+        }
+        assertTrue(AabManifestDisplayDecoder.decode(file).contains("com.example.large"))
+    }
+
+    @Test
     fun protobufManifestIsDecodedWithRawAndCompiledValues() {
         val decoded = AabManifestDisplayDecoder.decodeManifest(
             manifest(packageName = "com.example.app", split = "config.en"),

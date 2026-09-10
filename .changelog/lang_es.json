@@ -195,6 +195,7 @@
         "Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6",
         "Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita \"Abrir con otras aplicaciones\"",
         "Las filas M3U podían mostrar a la vez las acciones de plugin, reproducción y edición; la reproducción ahora prioriza 3-Ember y después 3-Terra, con enlaces al Centro de plugins para instalar, activar o autorizar un reproductor si no hay ninguno disponible",
+        "Iconos de complemento redundantes para listas .m3u8/.pls/.wax/.wvx/.asx en el gestor de archivos; conservar Reproducir y Editar junto con el reproductor asociado",
         "La consulta de información de APK ordinarios con muchos recursos podía fallar por el límite de entradas del archivo; ahora se lee directamente el manifiesto con un límite de tamaño, manteniendo la validación del recorrido para contenedores de varios APK",
         "El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con \"Cannot read file\"",
         "Los identificadores de UI de Node.js podían permanecer activos tras destruirse su Activity de Android, permitiendo actualizaciones tardías y reteniendo recursos del proveedor hasta finalizar la ejecución",
@@ -321,6 +322,7 @@
         "Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea"
       ],
       "improvement": [
+        "Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes",
         "Los diálogos de información comparten un componente reutilizable que permite insertar entradas key:value en cualquier posición, alinear automáticamente las claves y cancelar las lecturas asíncronas al cerrarse",
         "La información de componentes APK/APKS/XAPK/APKM/APKZ/AAB se traslada al diálogo \"Más información\" del menú superior derecho, con el mismo estilo del diálogo principal y actualización al cargar los metadatos",
         "El Centro de plugins comprueba las clases de servicio OCR antes del inicio y muestra rápidamente los errores de activación, con un límite de negociación de 5 segundos y cancelación de las conexiones abandonadas",

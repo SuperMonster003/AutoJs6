@@ -34,8 +34,11 @@ class ExplorerItemActionPolicyTest {
     }
 
     @Test
-    fun m3uPlaylistsKeepOnlyPlayAndEditEvenWithoutInstalledPlugins() {
-        listOf(FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO).forEach { type ->
+    fun playlistsKeepOnlyPlayAndEditEvenWithoutInstalledPlugins() {
+        listOf(
+            FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO, FileUtils.TYPE.M3U8_AUDIO,
+            FileUtils.TYPE.M3U8_VIDEO, FileUtils.TYPE.PLS, FileUtils.TYPE.WAX, FileUtils.TYPE.WVX, FileUtils.TYPE.ASX,
+        ).forEach { type ->
             val state = resolve(type)
 
             assertSame(ExplorerPrimaryAction.MEDIA_PLAY, state.primaryAction)

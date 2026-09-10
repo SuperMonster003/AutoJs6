@@ -23,16 +23,16 @@ import java.util.zip.ZipInputStream
 internal object ApkManifestDisplayDecoder {
 
     internal data class Limits(
-        val maxInputBytes: Int = 4 * 1024 * 1024,
-        val maxNodes: Int = 50_000,
-        val maxStrings: Int = 200_000,
-        val maxDecodedStringChars: Int = 4 * 1024 * 1024,
+        val maxInputBytes: Int = PackageInspectionLimits.MANIFEST_BYTES,
+        val maxNodes: Int = 200_000,
+        val maxStrings: Int = 800_000,
+        val maxDecodedStringChars: Int = PackageInspectionLimits.MANIFEST_BYTES,
         val maxSingleStringChars: Int = 16 * 1024,
         val maxXmlNameChars: Int = 1_024,
         val maxDepth: Int = 256,
         val maxNamespaces: Int = 256,
         val maxAttributesPerElement: Int = 4_096,
-        val maxOutputChars: Int = 4 * 1024 * 1024,
+        val maxOutputChars: Int = PackageInspectionLimits.MANIFEST_BYTES,
     )
 
     private val displayLimits = Limits()
@@ -964,8 +964,8 @@ internal object ApkManifestDisplayDecoder {
     private fun hex8(value: Int): String = "0x%08x".format(Locale.ROOT, value)
 
     private const val MANIFEST_ENTRY = "AndroidManifest.xml"
-    private const val MAX_APK_ENTRY_COUNT = 16_384
-    private const val MAX_APK_SCAN_BYTES = 64L * 1024L * 1024L
+    private const val MAX_APK_ENTRY_COUNT = PackageInspectionLimits.ARCHIVE_ENTRIES
+    private const val MAX_APK_SCAN_BYTES = PackageInspectionLimits.PACKAGE_BYTES
     private const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
     private const val INDENT = "  "
     private const val MAX_UTF8_BYTES_PER_CHAR = 4

@@ -195,6 +195,7 @@
         "File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted",
         "File manager video buttons could open the system application chooser for formats already classified as video; all recognized video types now use the official Video Player plugin first, and if it is missing, disabled, unauthorized, incompatible, unavailable, or fails to launch, the host shows recovery guidance with an explicit \"Open with other apps\" option",
         "M3U file rows could show plugin, play and edit actions together; playback now prefers 3-Ember, then 3-Terra, with Plugin Center links to install, enable or authorize a player when none is available",
+        "Redundant plugin action icons for .m3u8/.pls/.wax/.wvx/.asx playlists in the file manager; keep Play and Edit while retaining the matched player",
         "File manager APK inspection could fail on ordinary APKs with many resource entries because of the archive entry limit; standalone APKs now read a size-bounded manifest directly while multi-APK containers retain traversal validation",
         "Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with \"Cannot read file\"",
         "Node.js UI handles could remain active after their Android Activity was destroyed, allowing late updates and retaining provider-owned resources until execution teardown",
@@ -321,6 +322,7 @@
         "MediaInfo details and snapshots show the original source path in Complete name instead of a private cache or descriptor path, while preserving the snapshot display filename"
       ],
       "improvement": [
+        "Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files",
         "Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal",
         "APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the \"More information\" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded",
         "Node bridge accessibility module adds dump (text, JSON, or XML window snapshots bounded by 400 nodes, 32 levels, and 256 KiB), explain (per-filter hit counts of a selector descriptor), and screenshot (accessibility screenshot on Android 11+ with scale, region, format, and quality options, delivered as a one-shot cache file or a workspace file), and the app module adds currentWindow (current package, activity, and window list)",

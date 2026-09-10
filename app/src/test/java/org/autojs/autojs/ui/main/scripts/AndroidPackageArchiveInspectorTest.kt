@@ -65,7 +65,7 @@ class AndroidPackageArchiveInspectorTest {
     @Test
     fun singleApkStillRejectsAnOversizedManifest() {
         val apk = temporaryFolder.newFile("oversized-manifest.apk")
-        writeZip(apk, "AndroidManifest.xml" to ByteArray(4 * 1024 * 1024 + 1))
+        writeZip(apk, "AndroidManifest.xml" to ByteArray(PackageInspectionLimits.MANIFEST_BYTES + 1))
 
         assertFailsWithIOException {
             AndroidPackageArchiveInspector.inspect(apk, arm64Device)
@@ -76,7 +76,7 @@ class AndroidPackageArchiveInspectorTest {
     fun packageContainerStillRejectsExcessiveEntryCounts() {
         val xapk = temporaryFolder.newFile("many-entries.xapk")
         ZipOutputStream(FileOutputStream(xapk)).use { zip ->
-            repeat(16_385) { index ->
+            repeat(PackageInspectionLimits.ARCHIVE_ENTRIES + 1) { index ->
                 zip.putNextEntry(ZipEntry("assets/entry_$index"))
                 zip.closeEntry()
             }

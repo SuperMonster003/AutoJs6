@@ -124,8 +124,11 @@ class ExplorerPrimaryActionResolverTest {
     }
 
     @Test
-    fun m3uPlaylistsResolveToPrimaryMediaPlayerRegardlessOfContentClassification() {
-        listOf(FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO).forEach { type ->
+    fun playlistsResolveToPrimaryMediaPlayerRegardlessOfContentClassification() {
+        listOf(
+            FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO, FileUtils.TYPE.M3U8_AUDIO,
+            FileUtils.TYPE.M3U8_VIDEO, FileUtils.TYPE.PLS, FileUtils.TYPE.WAX, FileUtils.TYPE.WVX, FileUtils.TYPE.ASX,
+        ).forEach { type ->
             assertSame(type.name, ExplorerPrimaryAction.MEDIA_PLAY, ExplorerPrimaryActionResolver.resolve(type))
         }
     }
@@ -133,7 +136,6 @@ class ExplorerPrimaryActionResolverTest {
     @Test
     fun unsupportedAudioFormatsRetainLegacyExternalPlayback() {
         listOf(
-            FileUtils.TYPE.M3U8_AUDIO,
             FileUtils.TYPE.AUDIO_CUE_SHEET,
         ).forEach { type ->
             assertTrue(type.name, type.isMediaPlayable())

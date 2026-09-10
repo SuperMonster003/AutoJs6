@@ -20,14 +20,14 @@ import java.util.zip.ZipFile
 internal object BundletoolTocDecoder {
 
     internal data class Limits(
-        val maxInputBytes: Int = 2 * 1024 * 1024,
-        val maxZipEntries: Int = 16_384,
-        val maxFields: Int = 500_000,
-        val maxVariants: Int = 256,
-        val maxModules: Int = 2_048,
-        val maxApks: Int = 16_384,
+        val maxInputBytes: Int = PackageInspectionLimits.TOC_BYTES,
+        val maxZipEntries: Int = PackageInspectionLimits.ARCHIVE_ENTRIES,
+        val maxFields: Int = 4_000_000,
+        val maxVariants: Int = 2_048,
+        val maxModules: Int = 8_192,
+        val maxApks: Int = PackageInspectionLimits.ARCHIVE_ENTRIES,
         val maxTargetingValues: Int = 4_096,
-        val maxDecodedStringChars: Int = 2 * 1024 * 1024,
+        val maxDecodedStringChars: Int = PackageInspectionLimits.TOC_BYTES,
         val maxSingleStringChars: Int = 4 * 1024,
     )
 

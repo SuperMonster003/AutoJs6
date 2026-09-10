@@ -25,6 +25,21 @@ class BundletoolTocDecoderTest {
     )
 
     @Test
+    fun tocInArchiveWithManyResourcesCanSelectSplits() {
+        val file = temporaryFolder.newFile("many-entries.zip")
+        ZipOutputStream(file.outputStream()).use { zip ->
+            repeat(18_184) { index ->
+                zip.putNextEntry(ZipEntry("assets/entry_$index"))
+                zip.closeEntry()
+            }
+            zip.putNextEntry(ZipEntry("toc.pb"))
+            zip.write(tocWithInstantAndPersistentVariants())
+            zip.closeEntry()
+        }
+        assertTrue(BundletoolTocDecoder.select(file, arm64EnglishDevice).packageName.orEmpty().contains("com.example.bundle"))
+    }
+
+    @Test
     fun persistentVariantSelectsInstallTimeSplitsAndAssetSlices() {
         val selection = BundletoolTocDecoder.select(
             tocWithInstantAndPersistentVariants(),
