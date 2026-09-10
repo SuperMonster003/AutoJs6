@@ -1320,7 +1320,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.BARCODE to setOf("detect", "detectAll", "recognizeText", "recognizeTexts"),
             NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume"),
-            NodeBridgeModules.MEDIAINFO to setOf("read", "get", "capabilities"),
+            NodeBridgeModules.MEDIAINFO to setOf("read", "get", "countGet", "capabilities"),
             NodeBridgeModules.RECORDER to setOf("getStatus", "start", "stop"),
             NodeBridgeModules.PINYIN to setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase"),
             NodeBridgeModules.PINYIN4J to setOf("of", "as", "readings"),
