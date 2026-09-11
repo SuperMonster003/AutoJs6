@@ -31,6 +31,27 @@ class PluginVersionSummaryFormatterTest {
     }
 
     @Test
+    fun `ISO 8601 date-times keep the calendar date of their own offset`() {
+        val cases = linkedMapOf(
+            "2025-11-21T08:09:10Z" to "2025-11-21",
+            "2025-11-21T23:30:00-05:00" to "2025-11-21",
+            "2025-11-21T00:30:00+08:00" to "2025-11-21",
+            "2025-11-21T08:09:10.123+08:00" to "2025-11-21",
+            "2025-11-21T08:09" to "2025-11-21",
+            "2025-11-21 08:09" to "2025-11-21",
+            "2025/11/21 08:09" to "2025-11-21",
+        )
+
+        cases.forEach { (input, expectedDate) ->
+            assertEquals(
+                input,
+                "v1.2.3 (17) | $expectedDate",
+                PluginVersionSummaryFormatter.format("v1.2.3", 17L, input),
+            )
+        }
+    }
+
+    @Test
     fun `unknown date remains visible verbatim`() {
         assertEquals(
             "v1.2.3 (17) | someday",
