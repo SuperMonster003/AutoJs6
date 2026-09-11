@@ -29,6 +29,10 @@ object OpenCvPluginContract {
 
     const val EXPECTED_OPENCV_VERSION = VARIANT_4_8_0
     const val EXPECTED_NATIVE_NDK_VERSION = "26.1.10909125"
+
+    /** NDK releases whose `libopencv_java4.so` builds the host accepts: r26b (4 KB-era donor) and r28c (16 KB rebuild). */
+    @JvmField
+    val SUPPORTED_NATIVE_NDK_VERSIONS = setOf(EXPECTED_NATIVE_NDK_VERSION, "28.2.13676358")
     const val NATIVE_LIBRARY_NAME = "opencv_java4"
     const val NATIVE_LIBRARY_FILE_NAME = "libopencv_java4.so"
     const val JAVA_API_SHA256 = "340976552fda3cce525021f0b072427cabf0aa1c786fb80cfc4a3a8105d90b3f"

@@ -11,7 +11,7 @@ from pathlib import Path
 import shutil
 import zipfile
 
-DONOR_SHA = "869e3ee9cf0cbb6e76e8a02dd94cd12e6cd2445e4b6dc662f46ed8f715c8875a"
+DONOR_SHA = "f760265bbc0bae75f2f906088fee3447eb32d9bc2b4d7ad8fd246923ddc26dd6"  # NDK r28c rebuild, 2026-09-11
 
 
 def main():

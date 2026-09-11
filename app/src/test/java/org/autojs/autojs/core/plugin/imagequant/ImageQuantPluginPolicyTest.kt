@@ -64,6 +64,13 @@ class ImageQuantPluginPolicyTest {
             rejection(nativeNdkVersion = "27.0.12077973"),
         )
         assertEquals(
+            ImageQuantPluginLoadError.NATIVE_NDK_VERSION_MISMATCH,
+            rejection(nativeNdkVersion = "28.0.13004108"),
+        )
+        ImageQuantPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS.forEach { version ->
+            assertNull(version, rejection(nativeNdkVersion = version))
+        }
+        assertEquals(
             ImageQuantPluginLoadError.NATIVE_STL_MISMATCH,
             rejection(nativeStl = "c++_shared"),
         )

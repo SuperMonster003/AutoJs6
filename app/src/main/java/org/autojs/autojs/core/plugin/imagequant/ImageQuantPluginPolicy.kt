@@ -35,7 +35,7 @@ internal object ImageQuantPluginPolicy {
             ImageQuantPluginLoadError.LIBPNG_VERSION_UNSUPPORTED
         nativeLibraryName != ImageQuantPluginContract.NATIVE_LIBRARY_NAME ->
             ImageQuantPluginLoadError.NATIVE_LIBRARY_UNSUPPORTED
-        nativeNdkVersion !in setOf(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, "28.2.13676358") ->
+        nativeNdkVersion !in ImageQuantPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS ->
             ImageQuantPluginLoadError.NATIVE_NDK_VERSION_MISMATCH
         nativeStl != ImageQuantPluginContract.EXPECTED_NATIVE_STL ->
             ImageQuantPluginLoadError.NATIVE_STL_MISMATCH

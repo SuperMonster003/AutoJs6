@@ -85,7 +85,9 @@ class OpenCvPluginPolicyTest {
     @Test
     fun `native runtime must be rebuilt with the host NDK`() {
         assertNull(rejection(nativeNdkVersion = OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION))
-        listOf("", "18.1.5063045", "27.0.12077973").forEach { version ->
+        assertNull(rejection(nativeNdkVersion = "28.2.13676358"))
+        OpenCvPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS.forEach { version -> assertNull(rejection(nativeNdkVersion = version)) }
+        listOf("", "18.1.5063045", "27.0.12077973", "28.0.13004108").forEach { version ->
             assertEquals(
                 version,
                 OpenCvPluginLoadError.NATIVE_NDK_VERSION_MISMATCH,

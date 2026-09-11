@@ -549,7 +549,7 @@ internal object OpenCvPluginPolicy {
             OpenCvPluginLoadError.OPENCV_VERSION_UNSUPPORTED
         nativeLibraryName != OpenCvPluginContract.NATIVE_LIBRARY_NAME ->
             OpenCvPluginLoadError.NATIVE_LIBRARY_UNSUPPORTED
-        nativeNdkVersion != OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION ->
+        nativeNdkVersion !in OpenCvPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS ->
             OpenCvPluginLoadError.NATIVE_NDK_VERSION_MISMATCH
         javaApiSha256 != OpenCvPluginContract.JAVA_API_SHA256 ->
             OpenCvPluginLoadError.JAVA_API_MISMATCH

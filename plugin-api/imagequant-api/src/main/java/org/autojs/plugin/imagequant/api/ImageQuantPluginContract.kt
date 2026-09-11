@@ -34,6 +34,10 @@ object ImageQuantPluginContract {
     const val EXPECTED_LIBIMAGEQUANT_VERSION = VARIANT_2_17_0
     const val EXPECTED_LIBPNG_VERSION = "1.6.49"
     const val EXPECTED_NATIVE_NDK_VERSION = "26.1.10909125"
+
+    /** NDK releases whose bridge builds the host accepts: r26b (4 KB-era) and r28c (16 KB rebuild). */
+    @JvmField
+    val SUPPORTED_NATIVE_NDK_VERSIONS = setOf(EXPECTED_NATIVE_NDK_VERSION, "28.2.13676358")
     const val EXPECTED_NATIVE_STL = "c++_static"
     const val EXPECTED_NATIVE_ABI_VERSION = 1
     const val MIN_OPTIONS_API_VERSION = 1

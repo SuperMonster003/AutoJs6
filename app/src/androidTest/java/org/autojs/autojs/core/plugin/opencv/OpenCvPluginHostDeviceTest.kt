@@ -33,7 +33,7 @@ class OpenCvPluginHostDeviceTest {
         assertEquals(OpenCvPluginHost.Origin.PLUGIN, runtime.origin)
         assertEquals(OpenCvPluginContract.DEFAULT_PACKAGE_NAME, runtime.packageName)
         assertEquals(OpenCvPluginContract.EXPECTED_OPENCV_VERSION, runtime.openCvVersion)
-        assertEquals(OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
+        assertTrue(runtime.nativeNdkVersion, runtime.nativeNdkVersion in OpenCvPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS)
         assertTrue((runtime.nativeMinLoadAlign ?: 0) >= org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
 
