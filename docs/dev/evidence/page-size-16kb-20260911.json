@@ -4,7 +4,7 @@
   "scope": "AutoJs6 + 42 plugin repositories + shared Gradle plugin + official index",
   "acceptance": "PARTIAL: local implementation and stated tests passed; full runtime matrix and native 16 KB arm64 hardware pending",
   "hostBaseCommit": "a3af7b4f0",
-  "hostCommit": null,
+  "hostCommit": "7a1f9148135ce72627f37a20b0e91635719f5f5b",
   "sharedPlugin": {
     "version": "1.8.0",
     "releaseCommit": "8d32a51bcdd3421cecd7fc510f01a661cc394072",
@@ -3114,6 +3114,96 @@
       "localLog": "build/tmp-16kb/host-additional-plugins-api37.log",
       "logSha256": "87161c1f735926faffb38316bc7ca3fb62917caf17f434c9e4afbf94fe5ce439",
       "note": "Sibling Lua signer mismatch was corrected; see separate successful luaApi37 receipt"
+    },
+    {
+      "name": "mlkit-api37",
+      "tests": 2,
+      "pageSize": 16384,
+      "api": 37,
+      "passed": true,
+      "localLog": "build/tmp-16kb/mlkit-api37.log",
+      "logSha256": "b9e7497e4d3447b875568783164351a2c08773ff4b3980eb05e912917692c93c"
+    },
+    {
+      "name": "opencc-api36",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/opencc-api36.log",
+      "logSha256": "93d23dbae73b6a4a2bb1a0aa47b60875f10533b67251417852c5c6e7739c1aa1"
+    },
+    {
+      "name": "opencc-api37",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 37,
+      "passed": true,
+      "localLog": "build/tmp-16kb/opencc-api37.log",
+      "logSha256": "01f4172a79956e4e966114c88bf809cee9d3ab8aba25b907c3f11423e0af01b0"
+    },
+    {
+      "name": "ace-editor-api36",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/ace-editor-api36.log",
+      "logSha256": "2f5a4ef47ba6b6f77d69e678d8b12f19b8bb83b8795ff2cd17a26f7a6ffde6cc"
+    },
+    {
+      "name": "ace-editor-api37",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 37,
+      "passed": true,
+      "localLog": "build/tmp-16kb/ace-editor-api37.log",
+      "logSha256": "82ca2731600504f36a11330528ab9f46b15c879d8612dc354642408f757e397f"
+    },
+    {
+      "name": "archive-manager-api36",
+      "tests": 3,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/archive-manager-api36.log",
+      "logSha256": "850fb0ba4a198f5d8357ce379894c17989ec03f13ba73884a9bd7bd2f90fa246"
+    },
+    {
+      "name": "archive-manager-api37",
+      "tests": 3,
+      "pageSize": 16384,
+      "api": 37,
+      "passed": true,
+      "localLog": "build/tmp-16kb/archive-manager-api37.log",
+      "logSha256": "bf2286dcc28a80d9047ad17ae0aa16c67331f1dfb75f54bd200df39ea0b4099e"
+    },
+    {
+      "name": "imgui-api36",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/imgui-api36.log",
+      "logSha256": "e89f3cedd3d3d505e7cf09d0773339bc5d560cda5d56486db512bd468a6f8059"
+    },
+    {
+      "name": "quickjs-runtime-api36",
+      "tests": 1,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/quickjs-runtime-api36.log",
+      "logSha256": "95fb04071ce4c5575662250db316cb1d86bb85f297b4ee9851f38926951b1817"
+    },
+    {
+      "name": "host-additional-plugins-api36",
+      "tests": 6,
+      "pageSize": 16384,
+      "api": 36,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-additional-plugins-api36.log",
+      "logSha256": "19b8ef6fd1ece19a286cf064f32f3b3eb2c3229b8274e348da8dc809bc275239"
     }
   ],
   "userApks": [
@@ -3947,6 +4037,114 @@
         "ok": true
       },
       "label": "user-apk-final-arm64"
+    },
+    {
+      "serial": "emulator-5580",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "rapidVersion": "6",
+      "apkSha256": "5121a4ee349d31587700369b3ec4034b8c847fbc2ba74f74fc96823163e42fe7",
+      "nativeLibraries": [
+        {
+          "entry": "lib/x86_64/libRapidOcr.so",
+          "abi": "x86_64",
+          "size": 1437552,
+          "compressed": true,
+          "dataOffset": 27561462,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "abi": "x86_64",
+          "size": 1229808,
+          "compressed": true,
+          "dataOffset": 28003131,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-androidterm5.so",
+          "abi": "x86_64",
+          "size": 6808,
+          "compressed": true,
+          "dataOffset": 28416613,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-termexec2.so",
+          "abi": "x86_64",
+          "size": 9960,
+          "compressed": true,
+          "dataOffset": 28419343,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libonnxruntime.so",
+          "abi": "x86_64",
+          "size": 21420512,
+          "compressed": true,
+          "dataOffset": 28423435,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libopencv_java4.so",
+          "abi": "x86_64",
+          "size": 53335872,
+          "compressed": true,
+          "dataOffset": 36043721,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libpngquant_bridge.so",
+          "abi": "x86_64",
+          "size": 2742144,
+          "compressed": true,
+          "dataOffset": 57764999,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'x86_64'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 336,
+        "quantizedBytes": 2990,
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-final-api36"
     }
   ],
   "legacyImageQuantNegative": {
@@ -4279,9 +4477,79 @@
   },
   "constraints": [
     "16 KB arm64 physical hardware not available",
-    "P6 full per-plugin runtime matrix remains incomplete",
+    "P6 model inference for Three-Stone-AI remains unverified: the current emulator setup has no imported .litertlm model; the other native plugin runtime checks listed in deviceTests passed",
     "Bun x86_64 JSC page-size assumption remains B1, outside alignment scope",
     "Host/plugin remote CI and new plugin releases not triggered in this deployment",
     "QuickJS-Host maintenance rebase remains D11"
+  ],
+  "aceLuaLsNativeExecution": [
+    {
+      "schema": 1,
+      "measurement": "m5-lua-semantic-gate",
+      "path": "semantic",
+      "manufacturer": "Google",
+      "model": "sdk_gphone16k_x86_64",
+      "sdk": 36,
+      "release": "16",
+      "abi": "x86_64",
+      "webViewPackage": "com.google.android.webview@133.0.6943.137",
+      "initializationMs": 866,
+      "firstSemanticPacketMs": 731.7000000011176,
+      "completionSteadyP50Ms": 6.599999999627471,
+      "completionCount": 17,
+      "diagnosticCount": 2,
+      "processCrashCount": 1,
+      "restartCount": 1,
+      "lifecycleBefore": {
+        "providerCreatedCount": 1,
+        "providerDisposeCount": 0,
+        "processReleaseCount": 0,
+        "recoveryCount": 1,
+        "activeProviderCount": 1
+      },
+      "lifecycleAfter": {
+        "providerCreatedCount": 1,
+        "providerDisposeCount": 1,
+        "processReleaseCount": 1,
+        "recoveryCount": 1,
+        "activeProviderCount": 0
+      },
+      "callbackErrorCount": 1,
+      "expectedCrashErrorCount": 1
+    },
+    {
+      "schema": 1,
+      "measurement": "m5-lua-semantic-gate",
+      "path": "semantic",
+      "manufacturer": "Google",
+      "model": "sdk_gphone16k_x86_64",
+      "sdk": 37,
+      "release": "17",
+      "abi": "x86_64",
+      "webViewPackage": "com.google.android.webview@145.0.7632.218",
+      "initializationMs": 353,
+      "firstSemanticPacketMs": 581.6999999992549,
+      "completionSteadyP50Ms": 6.2999999998137355,
+      "completionCount": 17,
+      "diagnosticCount": 2,
+      "processCrashCount": 1,
+      "restartCount": 1,
+      "lifecycleBefore": {
+        "providerCreatedCount": 1,
+        "providerDisposeCount": 0,
+        "processReleaseCount": 0,
+        "recoveryCount": 1,
+        "activeProviderCount": 1
+      },
+      "lifecycleAfter": {
+        "providerCreatedCount": 1,
+        "providerDisposeCount": 1,
+        "processReleaseCount": 1,
+        "recoveryCount": 1,
+        "activeProviderCount": 0
+      },
+      "callbackErrorCount": 1,
+      "expectedCrashErrorCount": 1
+    }
   ]
 }

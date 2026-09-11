@@ -335,7 +335,7 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 | 原生 16 KB arm64 真机 | 未连接 | 待维护者提供设备, 不以 4 KB 真机或 x86_64 模拟器代替 |
 
 - [ ] 原生 16 KB arm64 全部运行时验收, 含 Paddle / Yolo / OpenCV / Image Quantization / Node / Lua / QuickJS.
-- [ ] P6.1 的全部 x86_64 插件功能冒烟矩阵; Bun 的 JSC 已知问题仍按 B1 单独跟踪.
+- [ ] Three-Stone-AI 的真实模型推理验收: 当前模拟器未导入 `.litertlm` 模型. 其它已覆盖的 x86_64 原生插件均在 API 36/37 取得运行时证据, 详见收据; Bun 的 JSC 已知问题仍按 B1 单独跟踪.
 - [x] Image Quantization 负向设备验证: 在当前测试 APK 中装入保留的真实 NDK r26b / 4 KB JNI, API 37/fatal 的公开量化调用返回 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED`, 宿主不崩溃. 该夹具不是完整未修改的历史发布 APK; 验证后已恢复新版插件. (DEVICE-16K: `installedUnalignedPluginRaisesCatchableLoadError`)
 - [ ] 宿主与插件后续发布后, 回填远程 CI 链接并重新实测官方索引的发布资产.
 
@@ -439,3 +439,7 @@ Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐
 - 官方索引按真实公开 APK 测量, 不用本地未发布版本覆盖旧发布版本的 4096 / unknown 值. 真实 16 KB arm64 设备缺失, P6 未关闭; QuickJS-Host 仍按 D11 由维护者 rebase.
 
 - 补验: ImGui 渲染, QuickJS 语言执行, Node 宿主执行, MediaInfo 读取, TypeScript 编译及 Lua 会话在 API 37/fatal 下通过. 真实旧版 4 KB Image Quantization JNI 夹具被宿主结构化拦截. 完整收据和 42 个插件提交映射见 [部署证据](evidence/page-size-16kb-20260911.md).
+
+- 补充矩阵: API 36/37 均通过 OpenCC 全转换, Ace LuaLS 语义与故障恢复, Archive Manager TAR/Zstd, MLKit 条码/OCR; API 36 另补齐 Node / Lua / MediaInfo / TypeScript 与 ImGui / QuickJS. Three-Stone-AI 的模型推理尚无当前模型输入, 不把 APK 安装记作推理验收. 宿主实现提交 `7a1f91481`, 官方索引 `df2eb35`, 插件提交表见证据文档.
+
+- 收尾: 宿主 / 42 插件 / 索引 / 共享插件共 45 个仓库已复核. 原有 30 个插件脏工作区与 R8 的 AD 暂存状态保留. 自动记忆索引已更新. 最终 Runtime Kit 生成的用户 APK 在 API 36/37 与 4 KB arm64 上均复验通过; P6 因上述设备 / 模型 / 发布后验收项保持开放.
