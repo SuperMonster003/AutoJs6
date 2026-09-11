@@ -170,6 +170,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/11
 
+* `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
 * `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
 * `Nuevo` Modulo de contrato del plugin MCP Server (plugin-api/mcp-server-api): superficie AIDL congelada, un cliente de host estricto que vincula el plugin oficial con un arrendamiento de vinculacion dedicado y vuelve a vincularlo hasta tres veces tras la muerte del proceso del plugin, un intermediario de capacidades del host restringido por grant que enruta las solicitudes del plugin a traves del Node bridge provider, y registro en el Centro de plugins como plugin desactivado por defecto

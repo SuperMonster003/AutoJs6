@@ -61,6 +61,9 @@ internal object EditorScriptRunPolicy {
         if (fileName.endsWith(PYTHON_EXTENSION_WITH_DOT, ignoreCase = true)) {
             return PYTHON_EXTENSION_WITH_DOT
         }
+        QUICKJS_EXTENSIONS_WITH_DOT.firstOrNull { extension ->
+            fileName.endsWith(extension, ignoreCase = true)
+        }?.let { return it }
         if (fileName.endsWith(NODE_JS_EXTENSION_WITH_DOT, ignoreCase = true)) {
             return NODE_JS_EXTENSION_WITH_DOT
         }
@@ -79,6 +82,7 @@ internal object EditorScriptRunPolicy {
     private const val DEFAULT_EXTENSION_WITH_DOT = ".js"
     private const val PYTHON_EXTENSION_WITH_DOT = ".py"
     private const val NODE_JS_EXTENSION_WITH_DOT = ".node.js"
+    private val QUICKJS_EXTENSIONS_WITH_DOT = listOf(".quickjs.js", ".quickjs.mjs")
     private val BUN_EXTENSIONS_WITH_DOT = listOf(".bun.js", ".bun.ts", ".bun.tsx")
     private const val LUA_EXTENSION_WITH_DOT = ".lua"
 

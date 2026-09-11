@@ -40,12 +40,31 @@ public class StringScriptSource extends JavaScriptSource {
     public String getEngineName() {
         int mode = getExecutionMode();
         String[] semanticNames = {mSemanticName, getOverriddenFullPath(), getOriginUri()};
+        boolean hasQuickJsMarker = false;
+        boolean hasBunMarker = false;
+        boolean hasNodeJsMarker = false;
+        boolean hasOverridableMjsMarker = false;
         for (String semanticName : semanticNames) {
-            if (JavaScriptSource.isBunFileName(semanticName)) {
-                mode |= EXECUTION_MODE_BUN;
-            } else if (JavaScriptSource.isNodeJsFileName(semanticName)) {
-                mode |= EXECUTION_MODE_NODEJS;
+            boolean isQuickJsMarker = JavaScriptSource.isQuickJsFileName(semanticName);
+            hasQuickJsMarker |= isQuickJsMarker;
+            hasBunMarker |= JavaScriptSource.isBunFileName(semanticName);
+            if (!isQuickJsMarker && JavaScriptSource.isNodeJsFileName(semanticName)) {
+                if (semanticName.toLowerCase(java.util.Locale.ROOT).endsWith(".mjs")) {
+                    hasOverridableMjsMarker = true;
+                } else {
+                    hasNodeJsMarker = true;
+                }
             }
+        }
+        if (hasQuickJsMarker) {
+            mode |= EXECUTION_MODE_QUICKJS;
+        }
+        if (hasBunMarker) {
+            mode |= EXECUTION_MODE_BUN;
+        }
+        if (hasNodeJsMarker ||
+                (hasOverridableMjsMarker && (mode & EXECUTION_MODE_QUICKJS) == 0)) {
+            mode |= EXECUTION_MODE_NODEJS;
         }
         JavaScriptSource.validateExclusiveEngineMode(mode);
         return JavaScriptSource.resolveEngineName(mode);

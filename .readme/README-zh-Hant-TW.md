@@ -170,6 +170,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/09/11
 
+* `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
 * `新增` 側拉抽屜工具分組在浮動按鈕與指標位置後加入可選的螢幕取色外掛, 作為第三個預設關閉的工具; 安裝, 啟用, 運行狀態與卸載均會在不阻塞 UI 的情況下自動更新
 * `新增` MCP Server 外掛契約模組 (plugin-api/mcp-server-api), 含凍結的 AIDL 介面, 以專用綁定租約綁定官方外掛並在外掛程序死亡後最多重綁三次的嚴格宿主客戶端, 受 grant 約束並經 Node bridge provider 分派外掛請求的宿主能力代理, 以及預設關閉的外掛中心註冊

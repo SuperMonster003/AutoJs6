@@ -126,6 +126,32 @@ class EditorScriptRunPolicyTest {
     }
 
     @Test
+    fun quickJsMarkersKeepTheirCompoundExtensions() {
+        mapOf(
+            "worker.quickjs.js" to ".quickjs.js",
+            "module.QUICKJS.MJS" to ".quickjs.mjs",
+        ).forEach { (fileName, expectedExtension) ->
+            assertEquals(
+                expectedExtension,
+                EditorScriptRunPolicy.temporaryExtensionWithDot(
+                    documentDisplayName = fileName,
+                    uriPath = null,
+                    editorName = null,
+                ),
+            )
+        }
+
+        assertEquals(
+            ".quickjs.mjs",
+            EditorScriptRunPolicy.temporaryExtensionWithDot(
+                documentDisplayName = "document",
+                uriPath = "/storage/emulated/0/Scripts/worker.quickjs.mjs",
+                editorName = "worker",
+            ),
+        )
+    }
+
+    @Test
     fun ordinaryJavaScriptKeepsItsExtension() {
         assertEquals(
             ".js",

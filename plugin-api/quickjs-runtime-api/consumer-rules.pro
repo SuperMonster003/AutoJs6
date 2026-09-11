@@ -1,0 +1,1 @@
+-keep class org.autojs.plugin.quickjs.runtime.api.** { *; }

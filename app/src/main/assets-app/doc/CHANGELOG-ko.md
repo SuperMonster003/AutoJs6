@@ -8,6 +8,7 @@
 
 ###### 2026/09/11
 
+* `추가` 로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, "quickjs"/"qjs" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
 * `추가` 사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨
 * `추가` MCP Server 플러그인 계약 모듈 (plugin-api/mcp-server-api): 고정된 AIDL 인터페이스, 전용 바인딩 임대로 공식 플러그인을 바인딩하고 플러그인 프로세스 종료 후 최대 3회 재바인딩하는 엄격한 호스트 클라이언트, grant 로 제한되며 Node bridge provider 를 통해 플러그인 요청을 분배하는 호스트 능력 브로커, 그리고 기본 꺼짐 상태의 플러그인 센터 등록

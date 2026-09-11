@@ -170,6 +170,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 ###### 2026/09/11
 
+* `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
 * `Fonctionnalité` La section Outils du tiroir latéral ajoute maintenant le plugin optionnel Sélecteur de couleur d'écran comme troisième outil, désactivé par défaut, après Bouton flottant et Position du pointeur; l'installation, l'activation, l'état d'exécution et la suppression sont actualisés automatiquement sans bloquer l'interface
 * `Fonctionnalité` Module de contrat du plugin MCP Server (plugin-api/mcp-server-api): surface AIDL figee, client hote strict qui lie le plugin officiel via un bail de liaison dedie et le relie jusqu'a trois fois apres la mort du processus du plugin, courtier de capacites de l'hote restreint par grant qui achemine les requetes du plugin via le Node bridge provider, et enregistrement dans le Centre de plugins comme plugin desactive par defaut

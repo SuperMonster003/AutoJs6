@@ -23,6 +23,7 @@ import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.BunPluginScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
 import org.autojs.autojs.engine.PythonPluginScriptEngine
+import org.autojs.autojs.engine.QuickJsPluginScriptEngine
 import org.autojs.autojs.engine.RemoteJvmScriptEngine
 import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
@@ -87,6 +88,9 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         if (!isInrt) {
             scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_BUN) {
                 BunPluginScriptEngine(applicationContext, globalConsole)
+            }
+            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_QUICKJS) {
+                QuickJsPluginScriptEngine(applicationContext, globalConsole)
             }
         }
         scriptEngineManager.registerEngine(LuaScriptSource.ENGINE) {

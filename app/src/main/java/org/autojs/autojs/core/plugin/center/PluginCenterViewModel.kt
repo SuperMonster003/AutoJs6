@@ -34,6 +34,8 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.ai.provider.api.AiProviderProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
+import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginActions
+import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.mcp.server.api.McpServerIds
@@ -1045,6 +1047,7 @@ class PluginCenterViewModel : ViewModel() {
             McpServerIds.ENGINE to McpServerPluginHost.ACTION_MCP_SERVER,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
+            QuickJsPluginIds.ENGINE to QuickJsPluginActions.RUNTIME,
         )
 
         fun serviceActionFromEngine(engine: String?): String? {

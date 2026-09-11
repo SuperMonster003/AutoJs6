@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026/09/11.
+데이터 갱신일: 2026 년 9 월 11 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -136,7 +136,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -170,6 +170,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/09/11
 
+* `추가` 로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, "quickjs"/"qjs" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
 * `추가` 사이드 서랍의 도구 섹션에 플로팅 버튼과 포인터 위치 다음의 세 번째 기본 꺼짐 항목으로 선택적 화면 색상 선택기 플러그인을 추가; 설치, 활성화, 실행 상태 및 제거가 UI를 차단하지 않고 자동 갱신됨
 * `추가` MCP Server 플러그인 계약 모듈 (plugin-api/mcp-server-api): 고정된 AIDL 인터페이스, 전용 바인딩 임대로 공식 플러그인을 바인딩하고 플러그인 프로세스 종료 후 최대 3회 재바인딩하는 엄격한 호스트 클라이언트, grant 로 제한되며 Node bridge provider 를 통해 플러그인 요청을 분배하는 호스트 능력 브로커, 그리고 기본 꺼짐 상태의 플러그인 센터 등록
@@ -826,7 +827,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -877,7 +878,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026/09/11 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 11 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1043,7 +1044,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026/03/18.
+데이터 갱신일: 2026 년 3 월 18 일.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 

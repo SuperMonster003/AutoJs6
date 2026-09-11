@@ -71,9 +71,12 @@ public class JavaScriptFileSource extends JavaScriptSource {
         } else {
             mode = flags;
         }
-        if (isBunExtension()) {
+        if (isQuickJsExtension()) {
+            mode |= EXECUTION_MODE_QUICKJS;
+        } else if (isBunExtension()) {
             mode |= EXECUTION_MODE_BUN;
-        } else if (isNodeJsExtension()) {
+        } else if (isNodeJsExtension() &&
+                ((mode & EXECUTION_MODE_QUICKJS) == 0 || !isOverridableMjsExtension())) {
             mode |= EXECUTION_MODE_NODEJS;
         }
         JavaScriptSource.validateExclusiveEngineMode(mode);
@@ -86,6 +89,9 @@ public class JavaScriptFileSource extends JavaScriptSource {
             return mEngineName;
         }
         int executionMode = getExecutionMode();
+        if ((executionMode & EXECUTION_MODE_QUICKJS) != 0) {
+            return mEngineName = ENGINE_QUICKJS;
+        }
         if ((executionMode & EXECUTION_MODE_BUN) != 0) {
             return mEngineName = ENGINE_BUN;
         }
@@ -158,6 +164,14 @@ public class JavaScriptFileSource extends JavaScriptSource {
 
     private boolean isBunExtension() {
         return JavaScriptSource.isBunFileName(getSemanticFile().getName());
+    }
+
+    private boolean isQuickJsExtension() {
+        return JavaScriptSource.isQuickJsFileName(getSemanticFile().getName());
+    }
+
+    private boolean isOverridableMjsExtension() {
+        return getSemanticFile().getName().toLowerCase(java.util.Locale.ROOT).endsWith(".mjs");
     }
 
     private boolean isNodeProjectType() {
