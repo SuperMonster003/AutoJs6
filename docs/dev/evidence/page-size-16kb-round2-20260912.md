@@ -1,6 +1,6 @@
 # 16 KB 第二轮: X1-X3 修复, NDK r28c 统一重编与真机复验, 2026-09-12
 
-结论: Samsung 补验暴露的 X1 (Rapid 缺 libc++) 与 X2 (Paddle v4 Server / v5 Thai / v6 Tiny 旧 libc++ 初始化 SIGSEGV) 已修复, 并在原生 16 KB arm64 (Samsung 剩余时段), 两台 16 KB x86_64 模拟器与 4 KB arm64 真机上取得真实 `ocr.recognizeText` 证据; X3 (Paddle v3 `1000 x 320` 崩溃) 在 4 KB 真机上以相同 pc 复现, 属于 Paddle-Lite 预编译库的输入相关缺陷, 与页大小无关, 转入 backlog B7. OpenCV 4.8.0 已用 NDK r28c 重编并同步到 Rapid / Paddle donor, 宿主 build 5280 起同时接受 r26b 与 r28c 原生构建. Three-Stone-AI 在 16 KB x86_64 (API 37) 上用真实 Qwen2.5-1.5B 模型完成初始化与非空生成. 最终产物在原生 16 KB arm64 上的复验因 Samsung 时段到期尚未完成.
+结论: Samsung 补验暴露的 X1 (Rapid 缺 libc++) 与 X2 (Paddle v4 Server / v5 Thai / v6 Tiny 旧 libc++ 初始化 SIGSEGV) 已修复, 并在原生 16 KB arm64 (Samsung 剩余时段), 两台 16 KB x86_64 模拟器与 4 KB arm64 真机上取得真实 `ocr.recognizeText` 证据; X3 (Paddle v3 `1000 x 320` 崩溃) 在 4 KB 真机上以相同 pc 复现, 属于 Paddle-Lite 预编译库的输入相关缺陷, 与页大小无关, 转入 backlog B7. OpenCV 4.8.0 已用 NDK r28c 重编并同步到 Rapid / Paddle donor, 宿主 build 5280 起同时接受 r26b 与 r28c 原生构建. Three-Stone-AI 在原生 16 KB arm64 (Samsung 第三时段) 与 16 KB x86_64 (API 36/37) 上均用真实 Qwen2.5-1.5B 模型完成初始化与非空生成. 2026-09-12 第三个 Samsung 时段 (localhost:30008) 已在原生 16 KB arm64 上复验全部最终 r28c 产物: 宿主 5280 + OpenCV v1.1.2 宿主测试 2/2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3 (1000x640 + 参考图), Rapid v6/v3, 以及 Three-Stone-AI, 并在收尾时把两个兼容属性重置为默认.
 
 对应 [完整 JSON](page-size-16kb-round2-20260912.json), [主 Roadmap](../page-size-16kb-roadmap.md), [维护者收尾清单](../page-size-16kb-maintainer-checklist.md) 与 [上一轮 Samsung 补验](page-size-16kb-samsung-20260911.md).
 
@@ -11,10 +11,12 @@
 | Samsung SM-A566B (RDB) (`localhost:54059`) | API 36 / arm64-v8a | 16384 | linker=false, PM compat disabled=true; 时段至 2026-09-11 23:52 |
 | AVD sdk_gphone16k_x86_64 (`emulator-5582`) | API 37 / x86_64 | 16384 | linker=fatal, PM compat disabled=true, 4 GB RAM |
 | AVD sdk_gphone16k_x86_64 (`emulator-5580`) | API 36 / x86_64 | 16384 | linker=false, PM compat disabled=true, 2.5 GB RAM |
+| Samsung SM-A566B (RDB slot 3) (`localhost:30008`) | API 36 / arm64-v8a | 16384 | linker=false, PM compat disabled=true; 2026-09-12 复验最终产物 |
+| AVD_API_36.0_16K (new) (`emulator-5554`) | API 36 / x86_64 | 16384 | linker=false, PM compat disabled=true, 12 GB RAM |
 | Xiaomi 23046RP50C (`968e9f18`) | API 35 / arm64-v8a | 4096 | X3 的 4 KB 对照; 扫描后 ADB 传输卡死 |
 | Redmi 22120RN86C (`bek749scrwv4wo8h`) | API 33 / arm64-v8a | 4096 | 最终产物的 4 KB arm64 回归 |
 
-Samsung 时段 `localhost:54059` 有效期至 2026-09-11 23:52 CST; 验收期间 `bionic.linker.16kb.app_compat.enabled=false`, `pm.16kb.app_compat.disabled=true`, 宿主与 6 个 OCR 插件 `pageSizeCompat=0` (`device-identity.txt`). 时段在恢复这两个属性之前到期, 恢复失败 (`device 'localhost:54059' not found`); 下次申领时请重新读取并按需恢复. Xiaomi Pad 在尺寸扫描后 ADB 传输卡死 (`error: closed` / `Too many open files`), 4 KB arm64 回归改用 Redmi 22120RN86C.
+Samsung 时段 `localhost:54059` 有效期至 2026-09-11 23:52 CST; 验收期间 `bionic.linker.16kb.app_compat.enabled=false`, `pm.16kb.app_compat.disabled=true`, 宿主与 6 个 OCR 插件 `pageSizeCompat=0` (`device-identity.txt`). 时段在恢复这两个属性之前到期, 恢复失败 (`device 'localhost:54059' not found`); 下次申领时请重新读取并按需恢复. Xiaomi Pad 在尺寸扫描后 ADB 传输卡死 (`error: closed` / `Too many open files`), 4 KB arm64 回归改用 Redmi 22120RN86C. 2026-09-12 用户重新上线 Samsung 第三时段 `localhost:30008` (约 85 分钟) 与新的 16 KB API 36 AVD (`emulator-5554`, 12 GB RAM), 用于最终产物的原生 arm64 复验; 该 RDB 链路的 `adb shell` 会间歇性卡死 (并发 adb 调用会加剧), 因此按每次一个操作串行执行, 收尾时把两个兼容属性重置为默认 (RDB 设备归还时也会重置).
 
 ## 修复与变更
 
@@ -73,6 +75,17 @@ bionic 以页为单位对 `PT_GNU_RELRO` 做 `mprotect(PROT_READ)`; 旧库 RELRO
 | AVD sdk_gphone16k_x86_64 | `emulator-5580-16k-rapid-r28c-generated` | rapid v6 | 1000 x 320 | 通过 | 20444 | TEST 16 KB, Hello World |
 | AVD sdk_gphone16k_x86_64 | `emulator-5580-16k-rapid-r28c-generated` | rapid v3 | 1000 x 320 | 失败 | 1279 | InternalError: 方法 "ocr.recognizeText" 调用失败. 插件 "io.github.supermonster… |
 | AVD sdk_gphone16k_x86_64 | `emulator-5580-16k-rapid-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 4877 | TEST 16 KB, Hello World |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v3-r28c-generated-1000x640` | paddle v3 | 1000 x 640 | 通过 | 1729 | TEST 16 KB, Hello World |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v3-r28c-reference` | paddle v3 | 944 x 640 | 通过 | 1481 | 测试 |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v4-mobile-r28c-generated` | paddle v4 | 1000 x 320 | 通过 | 2335 | TEST 16 KB, Hello |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v4-server-r28c-generated` | paddle v4 | 1000 x 320 | 通过 | 18937 | TEST 16 KB, Hello World |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v4-server-r28c-reference` | paddle v4 | 944 x 640 | 通过 | 9182 | 1,  |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v5-thai-r28c-generated` | paddle v5 | 1000 x 320 | 通过 | 1416 | TEST, 16 KB |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-paddle-v6-tiny-r28c-generated` | paddle v6 | 1000 x 320 | 通过 | 1285 | TEST 16 KB, Hello World |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-rapid-v6-v3-r28c-generated` | rapid v6 | 1000 x 320 | 通过 | 1830 | TEST 16 KB, Hello World |
+| Samsung SM-A566B (RDB slot 3) | `samsung3-16k-rapid-v6-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 816 | TEST 16 KB, Hello World |
+| AVD_API_36.0_16K (new) | `avd36new-16k-rapid-v6-v3-r28c-generated` | rapid v6 | 1000 x 320 | 通过 | 1876 | TEST 16 KB, Hello World |
+| AVD_API_36.0_16K (new) | `avd36new-16k-rapid-v6-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 532 | TEST 16 KB, Hello World |
 | Xiaomi 23046RP50C | `xiaomi-4k-paddle-v3-generated` | paddle v3 | 1000 x 320 | 失败 | 3524 | InternalError: 方法 "ocr.recognizeText" 调用失败. / Stack trace: / android.o… |
 | Redmi 22120RN86C | `redmi-4k-paddle-v3-r28c-generated-1000x640` | paddle v3 | 1000 x 640 | 通过 | 3204 | TEST 16 KB, Hello World |
 | Redmi 22120RN86C | `redmi-4k-paddle-v3-r28c-reference` | paddle v3 | 672 x 456 | 通过 | 2034 | 测试 |
@@ -141,16 +154,19 @@ Xiaomi 23046RP50C (API 35, 4096) 上安装相同 Paddle v3 产物, 同一生成�
 
 | 设备 | 宿主 versionCode | OpenCV 插件 | 结果 |
 | --- | --- | --- | --- |
+| Samsung SM-A566B (RDB slot 3) (API 36, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
+| AVD_API_36.0_16K (new) (API 36, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
 | AVD sdk_gphone16k_x86_64 (API 37, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
 | AVD sdk_gphone16k_x86_64 (API 36, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
 | Redmi 22120RN86C (API 33, 4096) | 5280 | v1.1.2 | 2 / 2 通过 |
 
 ## Three-Stone-AI 真实模型推理
 
+- Samsung SM-A566B (RDB slot 3) (API 36, 页大小 16384): 模型 SHA `faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9` (1597931520 字节, 目录 id `qwen2-5-1-5b-instruct`), 健康检查 3564 ms, 引擎初始化 505 ms, 生成 3291 ms, 输出 "Hello tester! How's the testing going today?" (10 个增量, CPU 后端).
+- AVD_API_36.0_16K (new) (API 36, 页大小 16384): 模型 SHA `faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9` (1597931520 字节, 目录 id `qwen2-5-1-5b-instruct`), 健康检查 4241 ms, 引擎初始化 367 ms, 生成 1811 ms, 输出 "Hello tester! How's everything going?" (8 个增量, CPU 后端).
 - AVD sdk_gphone16k_x86_64 (API 37, 页大小 16384): 模型 SHA `faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9` (1597931520 字节, 目录 id `qwen2-5-1-5b-instruct`), 健康检查 14308 ms, 引擎初始化 1254 ms, 生成 102681 ms, 输出 "Hello tester! How's everything going?" (8 个增量, CPU 后端).
 - Redmi 22120RN86C (API 33, 页大小 4096): 模型 SHA `faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9` (1597931520 字节, 目录 id `qwen2-5-1-5b-instruct`), 健康检查 22796 ms, 引擎初始化 1096 ms, 生成 13413 ms, 输出 "Hello tester! How's the testing going today?" (10 个增量, CPU 后端).
 - AVD sdk_gphone16k_x86_64 (API 36): ApplicationExitInfo reason=3 (LOW_MEMORY), rss=1.3GB; AVD MemTotal 2.5 GB. 1.6 GB 模型无法驻留, 不属于插件缺陷.
-- 原生 16 KB arm64: Samsung 时段在模型准备完成前到期, 待新时段补测.
 
 ## 产物 SHA-256
 
@@ -183,7 +199,6 @@ Rapid v3 / v6, Paddle v3 / v5 / v6 与 Three-Stone 的被测 APK 在版本号递
 
 ## 限制与未完成事项
 
-- 原生 16 KB arm64 上的最终产物复验 (r28c OpenCV 插件, r28c donor 的 Rapid / Paddle, Three-Stone-AI arm64) 需要新的 Samsung 时段.
-- Samsung 兼容模式属性未恢复 (时段到期); Xiaomi Pad ADB 传输需重新插拔或重启后再用.
+- 原生 16 KB arm64 上的最终产物复验已在 Samsung 第三时段完成 (见上文各表), 兼容属性已重置为默认. 未重建的 14:11 旧 flavor APK (v5 mobile, v6 small 等) 仍带旧 libc++, 需从已提交源码重建 (R1/R5).
 - API 36 AVD 仅 2.5 GB 内存, 1.6 GB 模型被 lmkd 终止 (LOW_MEMORY), 不是插件缺陷; 如需在该 AVD 复测请以 4 GB 内存重建.
 - 远程 CI, 正式 Release, 官方索引刷新 (R5-R8) 未做; 各插件仓库仍含其它会话的未提交修改, 本轮提交只包含本轮文件.

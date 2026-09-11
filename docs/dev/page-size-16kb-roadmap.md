@@ -246,7 +246,7 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 ### P2.2 OpenCV (核对)
 
 - [x] 叠加共享门禁 (保留 `verifyElfLoadSegmentAlignment` 与 provenance 校验); 用 `scan_alignment.py` 复核当前发布 APK; 在 API 36/37 ps16k, 4 KB arm64 与 Samsung SM-A566B 原生 16 KB arm64 上通过宿主加载 / 运算 / 异常冒烟, 见 Samsung 补验. (ANDROID_BUILD; DEVICE-16K)
-- [x] 2026-09-12: 以 NDK r28c (28.2.13676358, clang 19.0.1) 重编 4 个 ABI 的 `libopencv_java4.so`, 插件 v1.1.2 (build 12) 最低宿主 build 5280; 宿主策略同时接受 r26b / r28c 原生构建; 宿主 5280 + 插件 v1.1.2 的 `OpenCvPluginHostDeviceTest` 在 API 36/37 ps16k 与 Redmi 4 KB arm64 通过; 原生 16 KB arm64 复验待新 Samsung 时段. (ANDROID_BUILD; DEVICE-16K; [第二轮证据](evidence/page-size-16kb-round2-20260912.md))
+- [x] 2026-09-12: 以 NDK r28c (28.2.13676358, clang 19.0.1) 重编 4 个 ABI 的 `libopencv_java4.so`, 插件 v1.1.2 (build 12) 最低宿主 build 5280; 宿主策略同时接受 r26b / r28c 原生构建; 宿主 5280 + 插件 v1.1.2 的 `OpenCvPluginHostDeviceTest` 在 Samsung 原生 16 KB arm64 (第三时段), 新旧四台 ps16k 模拟器与 Redmi 4 KB arm64 均 2/2 通过. (ANDROID_BUILD; DEVICE-16K; [第二轮证据](evidence/page-size-16kb-round2-20260912.md))
 
 ### P2.3 Paddle-OCR v3 (D7)
 
@@ -254,7 +254,7 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 - [x] 替换 `libs/paddleocr/PaddleLite/cxx/libs/{arm64-v8a,armeabi-v7a}/libc++_shared.so` 为 r28.2 副本 (64 位 `0x4000`); 为 Paddle-Lite 预编译库补 `PROVENANCE.md` (来源未知则如实记录 "来源未记录, 2026-09-11 实测 `0x10000`" + sha256). (ELF; DOCS)
 - [x] 该仓库为未压缩打包, 门禁同时覆盖 zip 偏移; 应用共享门禁; 版本号递增, changelog, README. (ANDROID_BUILD; DOCS)
 - [x] `1000 x 320` 生成图崩溃已补 4 KB 对照 (2026-09-12): Xiaomi 23046RP50C 上相同产物, 相同 pc `0xc7a44` 复现, 尺寸扫描显示宽 800-1024 且高 320/352 稳定崩溃, 1000 x 640 / 640 x 320 / 1000 x 300 / 944 x 640 通过; 属于 Paddle-Lite 预编译库的输入相关缺陷, 与页大小无关, 转 backlog B7. OpenCV payload 同步 r28c 后, v3 在 Redmi 4 KB 以 1000 x 640 生成图与参考图通过. (DEVICE; 第二轮证据)
-- [ ] 原生 16 KB arm64 上 r28c payload 的 v3 最终产物复验 (Samsung 时段到期前只验证了旧 payload 的参考图). (DEVICE-16K; 维护者清单 R3)
+- [x] 原生 16 KB arm64 上 r28c payload 的 v3 最终产物复验 (2026-09-12 Samsung 第三时段): `1000 x 640` 生成图与 `944 x 640` 参考图均通过. (DEVICE-16K)
 
 ### P2.4 Rapid-OCR v3 与 v6 (D7)
 
@@ -268,7 +268,7 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 
 - [x] 应用共享门禁 (64 位已合规); 可选: 用 r28.2 副本替换自带的 armeabi-v7a `libc++_shared.so` (仍为 4 KB, 仅统一来源); 记录 ORT 升级时必须复核对齐的约定. (ANDROID_BUILD; DOCS)
 - [x] X2 修复 (2026-09-12): v4/v5/v6 的 arm64-v8a 与 armeabi-v7a `libc++_shared.so` 换为 NDK r28.2 副本 (旧库 RELRO 末端 `0x111000` 与可写数据同页, 16 KB 取整后被 mprotect 只读, 初始化写入 `SEGV_ACCERR`); ORT 会话改为文件路径内存映射, 修复 v4 Server 90 MB 识别模型的 `OutOfMemoryError`; OpenCV payload 同步 r28c. Samsung 16 KB: v6 Tiny / v5 Thai 通过, v4 Server 不再崩溃 (随后的 OOM 由 mmap 修复); Redmi 4 KB: v4 Mobile / Server, v5 Thai / Server, v6 Tiny 全部通过 (Server 含参考图); Samsung 上 v4 Mobile 的三次运行均为旧 APK 的 X2 崩溃 (当时 Mobile 重建失败), 最终 Mobile 产物经 APK 内 libc++ 审计为 r28.2, 其 16 KB 运行时验证待新时段. v1.0.2. (DEVICE-16K; DEVICE)
-- [ ] 最终产物在原生 16 KB arm64 的复验 (维护者清单 R3).
+- [x] 最终产物在原生 16 KB arm64 的复验 (2026-09-12 Samsung 第三时段): v4 Mobile / v4 Server (含参考图), v5 Thai, v6 Tiny 均通过, v4 Server 不再 OOM. (DEVICE-16K)
 
 ### P2.6 用户 APK 端到端
 
@@ -339,9 +339,11 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 | Xiaomi 23046RP50C, API 35 arm64 | 4096 | 上述宿主与 Python 功能; 同一个用户 APK 顺序运行 Paddle v3 与 Rapid v3/v6, 均识别出 "测试"; 2026-09-12: Paddle v3 1000 x 320 崩溃的 4 KB 复现与尺寸扫描 (X3 对照) |
 | Samsung SM-A566B, API 36 arm64 | 16384, compat off | 宿主及 16 个原生插件共 30 项 instrumentation 通过; 用户 APK 的终端 / 图像 / Paddle v3 + Rapid 通过. 独立 Paddle v3-v6 / Rapid v3-v6 共 6 个插件失败, Three-Stone-AI 缺模型; 见 Samsung 补验; 2026-09-12 第二时段 (localhost:54059): X1/X2 修复后 Rapid v3/v6, Paddle v6 Tiny / v5 Thai 通过, v4 Server 初始化不再崩溃 (随后 OOM 已修), Paddle v3 参考图通过; 时段到期, 最终产物未复验 |
 | Redmi 22120RN86C, API 33 arm64 | 4096 | 2026-09-12 最终产物 4 KB 回归: 宿主 5280 + OpenCV v1.1.2 设备测试, Rapid v3/v6, Paddle v3 (1000 x 640 + 参考图), v4 Mobile / Server, v5 Thai / Server, v6 Tiny 全部通过; Three-Stone-AI: Redmi 22120RN86C (API 33, 4 KB arm64) 同样通过 (生成 13413 ms, 输出 "Hello tester! How's the testing going today?") |
+| Samsung SM-A566B, API 36 arm64 (第三时段 localhost:30008) | 16384, compat off | 2026-09-12 最终 r28c 产物原生 16 KB arm64 复验: 宿主 5280 + OpenCV v1.1.2 (2/2), Paddle v4 Mobile / Server (含参考图), v5 Thai, v6 Tiny, v3 (1000 x 640 + 参考图), Rapid v6/v3 (r28c donor), Three-Stone-AI 真实 Qwen2.5-1.5B 推理全部通过; 收尾将两个兼容属性重置为默认 |
+| AVD_API_36.0_16K (新, emulator-5554) | 16384, compat off, 12 GB RAM | 2026-09-12: 宿主 5280 + OpenCV v1.1.2 (2/2), Rapid v6/v3 (r28c donor), Three-Stone-AI 真实推理通过 (补齐 2.5 GB AVD 的 LOW_MEMORY 缺口) |
 
-- [ ] 原生 16 KB arm64 全部运行时验收: 宿主 / OpenCV / Image Quantization / Yolo / Node / Lua / QuickJS 等已过; 6 个 OCR 插件的独立调用失败已修复并在 Samsung 第二时段复验 ([第二轮证据](evidence/page-size-16kb-round2-20260912.md)); 剩余: r28c donor / v1.0.2 最终产物与 Three-Stone-AI arm64 在新 Samsung 时段复验.
-- [x] Three-Stone-AI 的真实模型推理验收 (2026-09-12): API 37 x86_64 ps16k 上以真实 Qwen2.5-1.5B (`faa60663…`) 完成目录整合, 健康检查, 引擎初始化与非空生成 (`LiteRtRealModelInferenceInstrumentationTest`); Redmi 22120RN86C (API 33, 4 KB arm64) 同样通过 (生成 13413 ms, 输出 "Hello tester! How's the testing going today?"); 原生 16 KB arm64 待新 Samsung 时段. Bun 的 JSC 已知问题仍按 B1 单独跟踪.
+- [x] 原生 16 KB arm64 全部运行时验收 (2026-09-12): 宿主 / OpenCV / Image Quantization / Yolo / Node / Lua / QuickJS 等已过; 6 个 OCR 插件独立调用修复后, r28c donor / v1.0.2 最终产物与 Three-Stone-AI arm64 已在 Samsung 第三时段复验 ([第二轮证据](evidence/page-size-16kb-round2-20260912.md)). 未逐一运行的 Paddle 语言 / flavor 变体与最终 Release 候选按 R1/R5/R6 处理.
+- [x] Three-Stone-AI 的真实模型推理验收 (2026-09-12): 在 Samsung 原生 16 KB arm64 (第三时段, 生成 3291 ms), 新 16 KB API 36 AVD (生成 1811 ms), API 37 ps16k 与 Redmi 4 KB arm64 上均以真实 Qwen2.5-1.5B (`faa60663…`) 完成目录整合, 健康检查, 引擎初始化与非空生成 (`LiteRtRealModelInferenceInstrumentationTest`); 2.5 GB 的 API 36 AVD 被 LOW_MEMORY 终止 (非缺陷). Bun 的 JSC 已知问题仍按 B1 单独跟踪.
 - [x] Image Quantization 负向设备验证: 在当前测试 APK 中装入保留的真实 NDK r26b / 4 KB JNI, API 37/fatal 的公开量化调用返回 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED`, 宿主不崩溃. 该夹具不是完整未修改的历史发布 APK; 验证后已恢复新版插件. (DEVICE-16K: `installedUnalignedPluginRaisesCatchableLoadError`)
 - [ ] 宿主与插件后续发布后, 回填远程 CI 链接并重新实测官方索引的发布资产.
 
@@ -350,7 +352,7 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 
 ### Samsung 补验后的必修项
 
-- [x] X1 (2026-09-12): `c++_shared` 打包 libc++, 独立插件路径在 Samsung 16 KB / ps16k / Redmi 4 KB 复验通过; 用户 APK 路径上一轮已通过, 最终产物待 R2.
+- [x] X1 (2026-09-12): `c++_shared` 打包 libc++, 独立插件路径在 Samsung 16 KB (两个时段) / ps16k / Redmi 4 KB 复验通过 (r28c donor 最终产物见第三时段); 用户 APK 路径上一轮已通过.
 - [x] X2 (2026-09-12): r28.2 libc++ 替换, 根因为旧库 RELRO 末端与可写数据同页 (`tools/16kb/elf_layout.py`); v4 Server / v5 Thai / v6 Tiny 在 Samsung 复验, 其它变体共用同一 libc++ 与 ORT 代码, 在 Redmi 4 KB 验证 v4 Mobile / v5 Server.
 - [x] X3 (2026-09-12): 4 KB 对照复现相同崩溃并完成尺寸扫描, 归类为 Paddle-Lite 输入相关缺陷 (B7), 不阻塞 16 KB 验收.
 - [x] X4 (2026-09-12): 新增 `tools/16kb/elf_layout.py` (RELRO / 可写数据页布局判定, 已区分旧 libc++ RISK 与 r28.2 OK) 与 `tools/16kb/ocr_provider_smoke.py` (真实 provider 调用回归, 收据 + logcat); 原生依赖完整性由 `c++_shared` 打包与真实调用共同覆盖.
@@ -477,3 +479,10 @@ Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐
 - OpenCV 以 NDK r28c 重编 (v1.1.2, 最低宿主 5280), donor 同步至 Rapid v3/v6 与 Paddle v3-v6, 宿主策略接受 r26b / r28c; 最终产物 (宿主 5280 + OpenCV v1.1.2, Rapid, Paddle v3-v6 各变体) 在两台 ps16k 模拟器与 Redmi 4 KB arm64 通过; Samsung 时段在此之前到期, 原生 16 KB arm64 的最终复验与兼容属性恢复留待新时段. Xiaomi Pad 的 ADB 传输在扫描后卡死.
 - Three-Stone-AI 新增真实模型 instrumentation, API 37 ps16k 上 Qwen2.5-1.5B 生成 "Hello tester! How's everything going?"; API 36 AVD (2.5 GB) 被 LOW_MEMORY 终止; Redmi 22120RN86C (API 33, 4 KB arm64) 同样通过 (生成 13413 ms, 输出 "Hello tester! How's the testing going today?"). 插件中心日期此前已为 ISO 8601, 本轮补 ISO 日期时间解析.
 - 版本: 宿主 6.8.0 build 5280, OpenCV 1.1.2, Rapid v3/v6 1.0.2, Paddle v3-v6 1.0.2; 各仓库只做本地提交 (仅本轮文件), 未推送. 证据见 [第二轮](evidence/page-size-16kb-round2-20260912.md) 及 JSON.
+
+### 2026-09-12 Samsung 第三时段: 最终产物原生 16 KB arm64 复验
+
+- 用户重新上线 Samsung SM-A566B 第三时段 (`localhost:30008`, 约 85 分钟), 重连 Xiaomi Pad, 并提供新的 16 KB API 36 AVD (`emulator-5554`, 12 GB 内存).
+- 该 RDB 链路的 `adb shell` 间歇卡死, 且并发 adb 调用 (含监控探针) 会拖垮传输并使自动化链中途死亡; 改为每次一个操作串行执行后稳定. `adb install` / `adb push` 传输本身正常, 200 MB server APK 与 1.6 GB 模型分别耗时约 2.5 / 20 分钟.
+- 最终 r28c 产物在原生 16 KB arm64 全部通过: 宿主 5280 + OpenCV v1.1.2 宿主测试 2/2, Paddle v4 Mobile (修复后 libc++ 的首次 16 KB 运行) / v4 Server (内存映射 ORT, 不再 OOM, 含参考图) / v5 Thai / v6 Tiny / v3 (1000 x 640 + 参考图), Rapid v6/v3 (r28c donor), Three-Stone-AI 真实 Qwen2.5-1.5B 推理 (生成 3291 ms). 新 AVD 补齐了 2.5 GB AVD 的 Three-Stone LOW_MEMORY 缺口. 详见 [第二轮证据](evidence/page-size-16kb-round2-20260912.md).
+- 收尾将 `bionic.linker.16kb.app_compat.enabled` 与 `pm.16kb.app_compat.disabled` 重置为默认 (捕获原值的链在 RDB 掉线时已死, RDB 设备归还时亦会重置); 测试 APK 保留. 剩余仅发布类事项 R1 / R2 / R5-R8 与未重建的旧 flavor.

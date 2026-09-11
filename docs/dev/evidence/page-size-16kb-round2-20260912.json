@@ -1,7 +1,13 @@
 {
   "schemaVersion": 2,
   "date": "2026-09-12",
-  "status": "X1/X2 fixed and re-verified; X3 reclassified as a pre-existing Paddle-Lite input-dependent crash (identical on 4 KB); OpenCV rebuilt with NDK r28c and propagated to the Rapid/Paddle donors; Three-Stone-AI real inference proven on a 16 KB x86_64 AVD; native 16 KB arm64 re-verification of the final artifacts still needs a new Samsung slot.",
+  "status": "X1/X2 fixed and re-verified; X3 reclassified as a pre-existing Paddle-Lite input-dependent crash (identical on 4 KB); OpenCV rebuilt with NDK r28c and propagated to the Rapid/Paddle donors; Three-Stone-AI real inference proven on a 16 KB x86_64 AVD; final r28c artifacts re-verified on a second native 16 KB arm64 Samsung slot (localhost:30008) and a fresh 16 KB API 36 AVD; Three-Stone-AI real inference now proven on native 16 KB arm64 too.",
+  "samsungSlot3": {
+    "serial": "localhost:30008",
+    "validFromLocal": "2026-09-12 ~01:12 CST",
+    "durationMinutes": 85,
+    "note": "Final r28c artifacts re-verified on native 16 KB arm64: host 5280 + OpenCV v1.1.2 host test 2/2, Paddle v4 Mobile/Server v1.0.2, v5 Thai, v6 Tiny, v3 (1000x640 + reference), Rapid v6/v3 (r28c donor), and Three-Stone-AI real Qwen2.5-1.5B inference. Compatibility properties left at linker=false / PM compat disabled=true during acceptance; restored at end of the OCR chain."
+  },
   "samsungSlot": {
     "serial": "localhost:54059",
     "validUntilLocal": "2026-09-11 23:52 CST",
@@ -30,6 +36,20 @@
       "abi": "x86_64",
       "pageSize": 16384,
       "notes": "linker=false, PM compat disabled=true, 2.5 GB RAM"
+    },
+    "localhost:30008": {
+      "model": "Samsung SM-A566B (RDB slot 3)",
+      "api": "API 36",
+      "abi": "arm64-v8a",
+      "pageSize": 16384,
+      "notes": "linker=false, PM compat disabled=true; 2026-09-12 复验最终产物"
+    },
+    "emulator-5554": {
+      "model": "AVD_API_36.0_16K (new)",
+      "api": "API 36",
+      "abi": "x86_64",
+      "pageSize": 16384,
+      "notes": "linker=false, PM compat disabled=true, 12 GB RAM"
     },
     "968e9f18": {
       "model": "Xiaomi 23046RP50C",
@@ -340,6 +360,49 @@
     }
   ],
   "ocrReceipts": [
+    {
+      "label": "avd36new-16k-rapid-v6-v3-r28c-generated",
+      "serial": "emulator-5554",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "42aef34a7bb33de9c2b7c6cc86a76c572b59211d67f2ed2a0339f8e21c547c8a",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1876,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 532,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "2a797a343cb7ee986e58edbd0db409efee52540869017e98ad86ca579fb1a92c",
+      "logcatSha256": "a699526162053ed46d0f3a1387155485eca5b1e273c60e33ccc5e82d5e760a18"
+    },
     {
       "label": "emulator-5580-16k-rapid-r28c-generated",
       "serial": "emulator-5580",
@@ -1084,6 +1147,254 @@
       "logcatSha256": "e7cdf679dfdeca1cc1119c377479b2e591dfba96d7fbd37b0ec26375b880c4b8"
     },
     {
+      "label": "samsung3-16k-paddle-v3-r28c-generated-1000x640",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1729,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "c32e8d1146e6f1e45ac668269dc7174d577b8983255b082415ed193aa72873ac",
+      "logcatSha256": "060650e6b4608e3059d83d6cd9c65ef569cf8dbcb9481a3544e1c8e09e2ae3be"
+    },
+    {
+      "label": "samsung3-16k-paddle-v3-r28c-reference",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 944,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "测试"
+          ],
+          "milliseconds": 1481,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "31ecb2a584e055e17be72f6fdd5e943d4ed171cb6de885c7aae5da2e11b6da5e",
+      "logcatSha256": "8a48183e4f11f0d51f20a46edb8c9fa26f414b801c4e07679cc4c39fe04f7a44"
+    },
+    {
+      "label": "samsung3-16k-paddle-v4-mobile-r28c-generated",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello",
+            "World"
+          ],
+          "milliseconds": 2335,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "dc55420b94ac3e49fdb416f704b764695c4dbe2a9e7fac4eac950f1482509203",
+      "logcatSha256": "25f36c633aad549be616906258efc267d516e00c99053d9fde8fa6ba08e3ac62"
+    },
+    {
+      "label": "samsung3-16k-paddle-v4-server-r28c-generated",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 18937,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "e44b62e7894c1d1d6351d67ac95edb8322ab8f5eae50e28bbda287120f87b2be",
+      "logcatSha256": "02598f535142693f654b579b6d3a0095ce76238f7661f2b5a7a5926f06e27cd1"
+    },
+    {
+      "label": "samsung3-16k-paddle-v4-server-r28c-reference",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 944,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "1",
+            "",
+            ""
+          ],
+          "milliseconds": 9182,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "e35f9d8b625490056501dee1edc3dacb67d5daaf350d2b48f799b727e332b132",
+      "logcatSha256": "d76cc37a188cffd5c1b893babd615fc1e32345650d31bfe9617017681de20ad7"
+    },
+    {
+      "label": "samsung3-16k-paddle-v5-thai-r28c-generated",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST",
+            "16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1416,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "77b765ce1cf167ac78a3f264c658e280c558e950d8b3efaa1e7736644554f205",
+      "logcatSha256": "d4a81c6601dffd67984edc47334e131a612b5bfaf17d88b74df71ba3dd1d796e"
+    },
+    {
+      "label": "samsung3-16k-paddle-v6-tiny-r28c-generated",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1285,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "c45d7b1436b035dd6d27c344d58fa1eb7ac85e038288457016c21dfb48ba7f7b",
+      "logcatSha256": "25da96319f71f33660dd520d49997e55357195fa45dda83e0f74ae0b0ab8f5d2"
+    },
+    {
+      "label": "samsung3-16k-rapid-v6-v3-r28c-generated",
+      "serial": "localhost:30008",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1830,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 816,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "dc51bedfe54942a9cf987c9aa4d06cd6f1f5ad164164e5134dadf5fc334337ba",
+      "logcatSha256": "033c48224ef297a61b2fce46900e2f3787e477bb01ec1d0bc97e22296bc616b2"
+    },
+    {
       "label": "xiaomi-4k-paddle-v3-generated",
       "serial": "968e9f18",
       "pageSize": 4096,
@@ -1379,6 +1690,19 @@
       "pluginVersionName": "1.1.2",
       "ok": true,
       "instrumentExit": "0"
+    },
+    "emulator-5554": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0"
+    },
+    "localhost:30008": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0",
+      "source": "inline OpenCvPluginHostDeviceTest 2026-09-12 01:31, OK (2 tests)"
     }
   },
   "threeStoneAi": {
@@ -1420,16 +1744,54 @@
       "ok": true,
       "receiptSha256": "7ca46dbd88325b90eac64b348febe5c6507c2b9fa5075213cab70b7d56a00970"
     },
+    "emulator-5554": {
+      "pageSize": 16384,
+      "device": "Google sdk_gphone16k_x86_64 / API 36 / x86_64,arm64-v8a",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys",
+      "modelSha256": "faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9",
+      "modelSizeBytes": 1597931520,
+      "digestMillis": 2124,
+      "recommendedModelId": "qwen2-5-1-5b-instruct",
+      "healthCheckMillis": 4241,
+      "engineInitializeMillis": 367,
+      "generationMillis": 1811,
+      "prompt": "Reply with one short English sentence that greets a tester.",
+      "generatedText": "Hello tester! How's everything going?",
+      "streamedDeltas": 8,
+      "maxOutputTokens": 48,
+      "backend": "CPU",
+      "ok": true,
+      "receiptSha256": "68e1ea996da1183722039671735cb801da5696d9dad9811586a8022a65bb09dc"
+    },
+    "localhost:30008": {
+      "pageSize": 16384,
+      "device": "samsung SM-A566B / API 36 / arm64-v8a",
+      "fingerprint": "samsung/a56xnaeea_16kb/a56x:16/BP2A.250605.031.A3/A566BXXU6BYIF_OXM6BYIF:user/release-keys",
+      "modelSha256": "faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9",
+      "modelSizeBytes": 1597931520,
+      "digestMillis": 1417,
+      "recommendedModelId": "qwen2-5-1-5b-instruct",
+      "healthCheckMillis": 3564,
+      "engineInitializeMillis": 505,
+      "generationMillis": 3291,
+      "prompt": "Reply with one short English sentence that greets a tester.",
+      "generatedText": "Hello tester! How's the testing going today?",
+      "streamedDeltas": 10,
+      "maxOutputTokens": 48,
+      "backend": "CPU",
+      "ok": true,
+      "receiptSha256": "cb2afdda48cddf3632fa8536a0becb68308264e689d5a6c9d0985d76117ef4f0"
+    },
     "emulator-5580": {
       "ok": false,
       "reason": "ApplicationExitInfo reason=3 (LOW_MEMORY), rss=1.3GB; AVD MemTotal 2.5 GB. 1.6 GB 模型无法驻留, 不属于插件缺陷."
     }
   },
   "limits": [
-    "Samsung slot localhost:54059 expired 2026-09-11 23:52 CST: compatibility properties not restored, final r28c OpenCV / Rapid / Paddle artifacts and Three-Stone-AI arm64 not re-verified on native 16 KB arm64.",
+    "Samsung slot 1 (localhost:54059) expired 2026-09-11 23:52 CST with compatibility properties unrestored; slot 3 (localhost:30008, 2026-09-12) re-verified all final r28c artifacts and Three-Stone-AI on native 16 KB arm64 and reset the two compat properties to their default at the end.",
     "Xiaomi 23046RP50C ADB transport wedged after the sweep ('error: closed' / 'Too many open files'); the Redmi 22120RN86C replaced it for the 4 KB arm64 regression.",
     "API 36 AVD has 2.5 GB RAM; the 1.6 GB Qwen2.5-1.5B model is killed by lmkd (LOW_MEMORY). Real inference on 16 KB is proven on the API 37 AVD (4 GB).",
-    "Rapid v3/v6, Paddle v3/v5/v6 and Three-Stone artifacts under test were built before the version bump and carry the previous version name; release candidates must be rebuilt from the committed sources (R1/R5).",
+    "Rapid v3/v6, Paddle v3/v5/v6 and Three-Stone artifacts under test were built before the version bump and carry the previous version name (their binaries already carry the fixes); every release flavor must still be rebuilt from the committed sources so no stale old-libc++ flavor (v5 mobile, v6 small, etc.) ships (R1/R5).",
     "Plugin repos still contain other sessions' uncommitted edits (build scripts, gradle/data deletions, Three-Stone ui-redesign); commits stage only the files of this round."
   ]
 }
