@@ -328,6 +328,7 @@
 * `수정` MCP Server 세션 컨트롤러가 `openServer` 직후 가져온 `starting` 스냅샷을 플러그인이 콜백으로 이미 전달한 `running` 상태 위에 게시하여 `status`가 리스너 실행을 보고하지 않을 수 있던 문제; 가져온 스냅샷은 가져오는 동안 콜백 상태가 도착하지 않은 경우에만 게시됩니다
 * `수정` MediaInfo 상세 정보와 스냅샷의 Complete name에 비공개 캐시나 디스크립터 경로 대신 원본 파일 경로를 표시하고 스냅샷의 표시 파일 이름은 유지
 * `수정` Node bridge의 `accessibility.swipe` / `accessibility.gesture` (MCP Server와 Node 플러그인의 좌표 제스처)가 재사용된 broker 디스패치 스레드에서 두 번째 제스처부터 항상 `false` (취소)로 응답했습니다: handler가 없는 제스처 automator는 호출 스레드에 Looper를 준비하고 첫 제스처가 끝나면 종료하므로, 그 스레드의 다음 호출은 즉시 반환되고 실제 결과는 종료된 handler로 전달되었습니다; bridge는 이제 Python 호스트 broker처럼 메인 루퍼 handler를 automator에 넘깁니다
+* `수정` OpenCV 및 ImageQuant 플러그인 정책이 NDK r28c (28.2.13676358)로 빌드된 네이티브 라이브러리를 NDK 버전 불일치로 거부하여 다시 빌드한 OpenCV 플러그인 v1.1.2를 로드할 수 없던 문제 수정; 이제 r26b와 r28c 빌드를 모두 허용
 * `개선` 패키지 검사 항목 수를 262144개로 통일하고 대형 APK/AAB/APKS 파일을 위해 패키지, 중첩 스캔, 매니페스트 및 메타데이터 한도 확대
 * `개선` 정보 대화상자가 재사용 가능한 항목 구성 요소를 공유하며, 임의 위치에 key:value 항목 삽입, 키 열 자동 정렬 및 대화상자를 닫을 때 비동기 읽기 취소 지원
 * `개선` APK/APKS/XAPK/APKM/APKZ/AAB 구성 요소 정보를 오른쪽 위 메뉴의 "추가 정보" 대화상자로 이동하고, 기본 대화상자와 동일한 항목 스타일로 메타데이터 로딩 결과를 반영
@@ -435,6 +436,7 @@
 * `개선` Node bridge `accessibility.dump`의 JSON 노드가 7개 기술자 필드 외에 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable` 상태 플래그를 가집니다; MCP Server 세션 권한에 플러그인의 `ui_press_key` 도구를 위한 전역 동작 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen`을 추가했고, 접근성 서비스가 실행 중이 아닐 때의 `keys.*` 호출은 이제 `accessibility` 모듈과 같이 `unavailable` 범주로 응답합니다; 시작점과 끝점이 같은 (길이 0의) `accessibility.swipe`는 `durationMs` 동안의 누르기로 전달되며, MCP의 `ui_click` / `ui_long_click` 좌표 형식이 이에 의존합니다
 * `개선` 호스트와 runtime-kit 네이티브 라이브러리의 16 KB 정렬 지원, jackpal JNI 재빌드 및 NDK r28.2 libc++ 적용, 출처 기록과 공통 빌드 검증 제공
 * `개선` APK 빌더가 진행 상황과 결과에 호환되지 않는 네이티브 라이브러리를 표시하고, 압축 패키징을 유지하면서 로컬 빌드 입력에 정렬 정보 기록
+* `개선` 플러그인 센터의 버전 요약이 `2026-09-11T14:30:00+08:00` 같은 ISO 8601 날짜-시간 문자열도 `yyyy-MM-dd`로 정규화하며 문자열 자체 오프셋 기준의 달력 날짜를 유지
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

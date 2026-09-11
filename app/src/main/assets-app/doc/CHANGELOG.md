@@ -304,6 +304,7 @@
 * `修复` MCP Server 会话控制器可能把 `openServer` 之后拉取的 `starting` 快照覆盖到插件已经通过回调送达的 `running` 状态之上, 导致 `status` 始终不报告监听器已运行; 现在拉取的快照只在拉取期间没有回调状态到达时才发布
 * `修复` MediaInfo 详情与快照的 Complete name 显示原始文件路径, 避免显示私有缓存或描述符路径, 同时保留快照的显示文件名
 * `修复` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 与 Node 插件的坐标手势) 在被复用的 broker 派发线程上从第二次手势起总是应答 `false` (取消): 无 handler 的手势 automator 会在调用线程上准备 Looper 并在首个手势完成后退出它, 该线程上的下一次调用立即返回, 真正的结果被投递到已死的 handler; bridge 现在与 Python 宿主 broker 一样把主循环 handler 交给 automator
+* `修复` OpenCV 与 ImageQuant 插件策略将以 NDK r28c (28.2.13676358) 构建的原生库判定为原生 NDK 版本不匹配, 导致重编后的 OpenCV 插件 v1.1.2 无法加载; 现同时接受 r26b 与 r28c 构建
 * `优化` 安装包检查统一支持 262144 个归档条目, 提高单包, 嵌套扫描, 清单与元数据预算以兼容大型 APK/AAB/APKS
 * `优化` 信息对话框共用可复用的条目组件, 支持在任意位置插入 key:value 条目, 自动对齐键列并在关闭时取消异步读取
 * `优化` APK/APKS/XAPK/APKM/APKZ/AAB 信息对话框的组件信息移至右上角菜单的 "更多信息" 对话框, 共用主对话框的条目样式并同步更新读取结果
@@ -414,6 +415,7 @@
 * `优化` Node bridge `accessibility.dump` 的 JSON 节点在七个描述符字段之外携带 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 与 `longClickable` 状态标记; MCP Server 会话授权加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全局动作以支持插件的 `ui_press_key` 工具, 无障碍服务未运行时 `keys.*` 调用现在与 `accessibility` 模块一样以 `unavailable` 类别应答; 起止点相同的 `accessibility.swipe` (零长度) 按 `durationMs` 的按压派发, MCP 的 `ui_click` / `ui_long_click` 坐标形式依赖于此
 * `优化` 宿主与 runtime-kit 原生库支持 16 KB 对齐, 重编 jackpal JNI 库并使用 NDK r28.2 libc++, 附带来源记录与共享构建校验
 * `优化` APK 打包器在进度与结果中提示不兼容的原生库, 在本地构建输入元数据中记录对齐信息, 保持压缩打包
+* `优化` 插件中心的版本摘要同样将 `2026-09-11T14:30:00+08:00` 这类 ISO 8601 日期时间字符串规范化为 `yyyy-MM-dd`, 并保留字符串自身时区偏移下的日历日期
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

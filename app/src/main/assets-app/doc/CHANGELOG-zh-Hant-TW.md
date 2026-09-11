@@ -328,6 +328,7 @@
 * `修復` MCP Server 工作階段控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到外掛已經透過回呼送達的 `running` 狀態之上, 導致 `status` 始終不回報監聽器已執行; 現在拉取的快照只在拉取期間沒有回呼狀態到達時才發布
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 外掛的座標手勢) 在被重複使用的 broker 派發執行緒上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在呼叫執行緒上準備 Looper 並在首個手勢完成後退出它, 該執行緒上的下一次呼叫立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主迴圈 handler 交給 automator
+* `修復` OpenCV 與 ImageQuant 外掛策略將以 NDK r28c (28.2.13676358) 建置的原生程式庫判定為原生 NDK 版本不符, 導致重新建置後的 OpenCV 外掛 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 建置
 * `最佳化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以相容大型 APK/AAB/APKS
 * `最佳化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取
 * `最佳化` APK/APKS/XAPK/APKM/APKZ/AAB 資訊對話框的元件資訊移至右上角選單的 "更多資訊" 對話框, 共用主對話框的項目樣式並同步更新讀取結果
@@ -435,6 +436,7 @@
 * `最佳化` Node bridge `accessibility.dump` 的 JSON 節點在七個描述符欄位之外攜帶 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 與 `longClickable` 狀態標記; MCP Server 工作階段授權加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全域動作以支援外掛的 `ui_press_key` 工具, 無障礙服務未執行時 `keys.*` 呼叫現在與 `accessibility` 模組一樣以 `unavailable` 類別回應; 起止點相同的 `accessibility.swipe` (零長度) 依 `durationMs` 的按壓派發, MCP 的 `ui_click` / `ui_long_click` 座標形式依賴於此
 * `最佳化` 宿主與 runtime-kit 原生函式庫支援 16 KB 對齊, 重編 jackpal JNI 函式庫並使用 NDK r28.2 libc++, 附帶來源記錄與共用建置校驗
 * `最佳化` APK 打包器在進度與結果中提示不相容的原生函式庫, 在本機建置輸入中繼資料中記錄對齊資訊, 保持壓縮打包
+* `最佳化` 外掛中心的版本摘要同樣將 `2026-09-11T14:30:00+08:00` 這類 ISO 8601 日期時間字串正規化為 `yyyy-MM-dd`, 並保留字串自身時區偏移下的日曆日期
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

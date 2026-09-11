@@ -1,0 +1,1435 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-09-12",
+  "status": "X1/X2 fixed and re-verified; X3 reclassified as a pre-existing Paddle-Lite input-dependent crash (identical on 4 KB); OpenCV rebuilt with NDK r28c and propagated to the Rapid/Paddle donors; Three-Stone-AI real inference proven on a 16 KB x86_64 AVD; native 16 KB arm64 re-verification of the final artifacts still needs a new Samsung slot.",
+  "samsungSlot": {
+    "serial": "localhost:54059",
+    "validUntilLocal": "2026-09-11 23:52 CST",
+    "identity": "model=SM-A566B\nfingerprint=samsung/a56xnaeea_16kb/a56x:16/BP2A.250605.031.A3/A566BXXU6BYIF_OXM6BYIF:user/release-keys\nsdk=36\nrelease=16\nabilist=arm64-v8a\npageSize=16384\nlinkerCompat=false\npmCompatDisabled=true\norg.autojs.autojs6 1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777 pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.paddleocr.v3 f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8 pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.paddleocr.v4.server 5261bdc68a08d06d525cb46a6ff5afdf2b5ca123b0572a96dc33c0f4f7c37816 pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.paddleocr.v5.thai 2c73dabe2ae9917865afec7b489aeaad0956940704759920c442b19df7e3df7a pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny 9dc1bb0af105812610d1691f848370cba5fc102138f67e5f89b417b477b69bcd pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3 82c1e5eb2f1cd0537b3e37b4b62df1ea44d4d22489ed30f9f65f172d2f0d3ca8 pageSizeCompat=pageSizeCompat=0\nio.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6 12eb557317938f2da75674d2ddf21ae9584185665be9501125782542079822ad pageSizeCompat=pageSizeCompat=0\n",
+    "compatibilityPropertiesRestored": false,
+    "note": "The slot expired before the compatibility properties could be restored and before the r28c OpenCV / final Rapid / Paddle artifacts were installed."
+  },
+  "devices": {
+    "localhost:54059": {
+      "model": "Samsung SM-A566B (RDB)",
+      "api": "API 36",
+      "abi": "arm64-v8a",
+      "pageSize": 16384,
+      "notes": "linker=false, PM compat disabled=true; 时段至 2026-09-11 23:52"
+    },
+    "emulator-5582": {
+      "model": "AVD sdk_gphone16k_x86_64",
+      "api": "API 37",
+      "abi": "x86_64",
+      "pageSize": 16384,
+      "notes": "linker=fatal, PM compat disabled=true, 4 GB RAM"
+    },
+    "emulator-5580": {
+      "model": "AVD sdk_gphone16k_x86_64",
+      "api": "API 36",
+      "abi": "x86_64",
+      "pageSize": 16384,
+      "notes": "linker=false, PM compat disabled=true, 2.5 GB RAM"
+    },
+    "968e9f18": {
+      "model": "Xiaomi 23046RP50C",
+      "api": "API 35",
+      "abi": "arm64-v8a",
+      "pageSize": 4096,
+      "notes": "X3 的 4 KB 对照; 扫描后 ADB 传输卡死"
+    },
+    "bek749scrwv4wo8h": {
+      "model": "Redmi 22120RN86C",
+      "api": "API 33",
+      "abi": "arm64-v8a",
+      "pageSize": 4096,
+      "notes": "最终产物的 4 KB arm64 回归"
+    }
+  },
+  "fixes": [
+    {
+      "id": "X1",
+      "repos": [
+        "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+        "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6"
+      ],
+      "change": "libs/rapidocr/build.gradle.kts adds -DANDROID_STL=c++_shared so AGP packages the NDK r28.2 libc++_shared.so for all ABIs; opencv-native-4.8.0.aar replaced by the r28c donor (sha256 75f9c45d...)."
+    },
+    {
+      "id": "X2",
+      "repos": [
+        "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+        "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6"
+      ],
+      "change": "jniLibs arm64-v8a / armeabi-v7a libc++_shared.so replaced by the NDK r28.2 copies (tools/16kb/refresh_libcxx.py --target, provenance JSON); ORTSessionManager materializes model assets once and creates sessions from a file path (memory-mapped) instead of a byte[]; org-opencv-4_8_0/opencv-4.8.0.aar libopencv_java4.so replaced for 4 ABIs by the r28c donor (sha256 8c4b410a...)."
+    },
+    {
+      "id": "X3",
+      "repos": [
+        "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3"
+      ],
+      "change": "Reproduced on Xiaomi 4 KB with the same pc 0xc7a44 in libpaddle_light_api_shared.so; widths 800-1024 with height 320/352 crash, 1000x640 / 640x320 / 1000x300 / 944x640 pass. Pre-existing Paddle-Lite defect, moved to backlog B7. OpenCV payload synced to r28c."
+    },
+    {
+      "id": "X4",
+      "repos": [
+        "AutoJs6"
+      ],
+      "change": "tools/16kb/elf_layout.py (RELRO end vs writable data on 16 KB pages) and tools/16kb/ocr_provider_smoke.py (real ocr.recognizeText calls per provider with receipts) added; OpenCV / ImageQuant policies accept NDK 28.2.13676358 in addition to 26.1.10909125 (host build 5280)."
+    },
+    {
+      "id": "OpenCV",
+      "repos": [
+        "AutoJs6-Plugin-OpenCV"
+      ],
+      "change": "libopencv_java4.so rebuilt for 4 ABIs with NDK r28c (28.2.13676358, clang 19.0.1); plugin v1.1.2 (build 12) requires host build 5280; provenance sha256 f760265b...."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "AutoJs6/app/build/outputs/apk/app/debug/autojs6-v6.8.0-arm64-v8a.apk",
+      "sha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea"
+    },
+    {
+      "path": "AutoJs6/app/build/outputs/apk/app/debug/autojs6-v6.8.0-x86_64.apk",
+      "sha256": "42aef34a7bb33de9c2b7c6cc86a76c572b59211d67f2ed2a0339f8e21c547c8a"
+    },
+    {
+      "path": "AutoJs6/app/build/outputs/apk/androidTest/app/debug/app-app-debug-androidTest.apk",
+      "sha256": "116f5123cf2e44f9e5a980509061eb4874f41de88fc23c302d277370312111f9"
+    },
+    {
+      "path": "AutoJs6-Plugin-OpenCV/app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.2-arm64-v8a.apk",
+      "sha256": "e747256bc86768eb106dd77c7476fd69584dfa09a24ee94d47f157651e913d72"
+    },
+    {
+      "path": "AutoJs6-Plugin-OpenCV/app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.2-x86_64.apk",
+      "sha256": "744c6205e294bfdb9fc5358a42165f1d5f8fb32c7a3b1352516b0e1eacf601b3"
+    },
+    {
+      "path": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "sha256": "6db0070e9c2b3f7d4ec10669edd0376ecd4623de95a5be1a89f3e0d62a72ebb2"
+    },
+    {
+      "path": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-x86_64.apk",
+      "sha256": "763957bd108caac991576791da63a5626e881ce913816a7c9a173a9de8e168ed"
+    },
+    {
+      "path": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-arm64-v8a.apk",
+      "sha256": "16023221df418e42a95d9ee53ddadb89879637f96d26f3cebbcc92dcb15df85a"
+    },
+    {
+      "path": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-x86_64.apk",
+      "sha256": "078dda32758b73d0734858eb98e363995b2d548dcd0ac693a5bdcd30683e77c3"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "sha256": "dfb9d0d5f4210c41f52b00ee73930442a0df77b7058cee567de1b8ee7d6536e4"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4/app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-arm64-v8a.apk",
+      "sha256": "2aa27e8e8085a821a81959b8b67d95858610229a1f59962740391414d4cafc7d"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4/app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-arm64-v8a.apk",
+      "sha256": "d7daf8b0b1482b0feb5bd8a32938662e4261282dada7241c904639c119b17fb5"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5/app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-arm64-v8a.apk",
+      "sha256": "418788af478616f7b1999208971873e3fb87c979b24a9595ba0a52a9d2b72056"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5/app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-arm64-v8a.apk",
+      "sha256": "574574515a06b2bd302a83506fd1a43a64e3448e83140f58ecb68f84c50e57de"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6/app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-arm64-v8a.apk",
+      "sha256": "19f640e2ab6d4b92342cd266df94ae57bbebe8fb04420d0b6363d3d20d6b1d32"
+    },
+    {
+      "path": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+      "sha256": "cad6a96012d2fee0bf68c9e05196b13ca3b98bc3035179755535e87a34f1f945"
+    },
+    {
+      "path": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-universal.apk",
+      "sha256": "ac4dab60095d4561bff345405bd7bc30edac3dca4d586a26a9407c1a16136bfe"
+    },
+    {
+      "path": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-x86_64.apk",
+      "sha256": "c0a74a4531fcc14a41ffc1b10ea5404a0a2f0d2f1e836f3e73fe94632c26e5c1"
+    },
+    {
+      "path": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "sha256": "6690d85cd93bc4e29e159b9be71e1e7731e52e7f5f8733133e2be10967064cda"
+    },
+    {
+      "path": "AutoJs6-Plugin-OpenCV/libs/opencv-native-4.8.0.aar",
+      "sha256": "f760265bbc0bae75f2f906088fee3447eb32d9bc2b4d7ad8fd246923ddc26dd6"
+    },
+    {
+      "path": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3/libs/opencv-native-4.8.0.aar",
+      "sha256": "75f9c45d1c8467128c061e15042b482c57f05c7ebfca8206b4d417faacb609b4"
+    },
+    {
+      "path": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4/libs/org-opencv-4_8_0/opencv-4.8.0.aar",
+      "sha256": "8c4b410ae07a709d30e75019cf636393ce8784cacbac95ef3f47accf80b5d25c"
+    }
+  ],
+  "elfLayouts": {
+    "oldLibcxx": {
+      "file": "libcxx-old-arm64.so",
+      "sha256": "cbf48c05fd429d280da9947a3e59623bc2918a4522e47335330b3fac8bc4c4e1",
+      "exitCode": 1,
+      "report": "== D:\\idea-projects\\AutoJs6\\build\\tmp-16kb\\elf\\libcxx-old-arm64.so (1055016 bytes)\n  LOAD  R-X off=0x0 vaddr=0x0 filesz=0xfa5a4 memsz=0xfa5a4 align=0x10000\n  LOAD  RW- off=0xfa7c8 vaddr=0x10a7c8 filesz=0x6948 memsz=0xa058 align=0x10000\n  RELRO start=0x10a7c8 end=0x111000 end%16K=NOT aligned -> mprotect on 16 KB pages would cover 0x111000..0x114000 of writable data (RW LOAD ends 0x114820)\n  verdict: RISK"
+    },
+    "r282Libcxx": {
+      "file": "libcxx-r282-arm64.so",
+      "sha256": "ab4e6c71b96b851de45a8a9bd86369e7dbc2130a44b3b4520564be94847910f2",
+      "exitCode": 0,
+      "report": "== D:\\idea-projects\\AutoJs6\\build\\tmp-16kb\\elf\\libcxx-r282-arm64.so (9236352 bytes)\n  LOAD  R-- off=0x0 vaddr=0x0 filesz=0x988a0 memsz=0x988a0 align=0x4000\n  LOAD  R-X off=0x988a0 vaddr=0x9c8a0 filesz=0x8eff8 memsz=0x8eff8 align=0x4000\n  LOAD  RW- off=0x127898 vaddr=0x12f898 filesz=0x9b98 memsz=0xa768 align=0x4000\n  LOAD  RW- off=0x131430 vaddr=0x13d430 filesz=0x238 memsz=0x7d20 align=0x4000\n  RELRO start=0x12f898 end=0x13a000 end%16K=NOT aligned\n  verdict: OK"
+    }
+  },
+  "libcxxAudit": [
+    {
+      "apk": "AutoJs6/app/build/outputs/apk/app/debug/autojs6-v6.8.0-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6/app/build/outputs/apk/app/debug/autojs6-v6.8.0-x86_64.apk",
+      "entry": "lib/x86_64/libc++_shared.so",
+      "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+      "bytes": 1229808,
+      "relroEnd": "0x134000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6/app/build/outputs/apk/androidTest/app/debug/app-app-debug-androidTest.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-OpenCV/app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.2-arm64-v8a.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-OpenCV/app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.2-x86_64.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-x86_64.apk",
+      "entry": "lib/x86_64/libc++_shared.so",
+      "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+      "bytes": 1229808,
+      "relroEnd": "0x134000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6/app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-x86_64.apk",
+      "entry": "lib/x86_64/libc++_shared.so",
+      "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+      "bytes": 1229808,
+      "relroEnd": "0x134000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3/app/build/outputs/apk/debug/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4/app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4/app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5/app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5/app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6/app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544,
+      "relroEnd": "0x13a000",
+      "verdict": "OK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-universal.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-x86_64.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Three-Stone-AI/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "entry": null,
+      "note": "no libc++_shared.so (host-provided runtime)"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5/app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "9fb28ade1af6a5afde978ee706fac466a5b63d19bbb36e013447ea886199b331",
+      "bytes": 1055016,
+      "relroEnd": "0x111000",
+      "verdict": "RISK"
+    },
+    {
+      "apk": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6/app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-arm64-v8a.apk",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "9fb28ade1af6a5afde978ee706fac466a5b63d19bbb36e013447ea886199b331",
+      "bytes": 1055016,
+      "relroEnd": "0x111000",
+      "verdict": "RISK"
+    }
+  ],
+  "ocrReceipts": [
+    {
+      "label": "emulator-5580-16k-rapid-r28c-generated",
+      "serial": "emulator-5580",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "0c3b9be25b0ee2dac522c7db3448c87ecbbed7536176b6f95732d22fb9111d56",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 20444,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1279,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. 插件 \"io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3\" 未在插件中心启用. / java.lang.IllegalStateException: 插件 \"io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3\" 未在插件中心启用 (Tmp.js#38) / \tat Tmp.js:38 / \tat Tmp.js:34 / \tat Tmp.js:28 /"
+        }
+      ],
+      "receiptSha256": "6a32a4922683091d743f3394db61c8f68709cc693d9739be7ebbc0c53e0cb85a",
+      "logcatSha256": "6cd22348b6fc49daeb4868c28505d6e1dd448c82e5c3625c538db581603b5b53"
+    },
+    {
+      "label": "emulator-5580-16k-rapid-v3-r28c-generated",
+      "serial": "emulator-5580",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "0c3b9be25b0ee2dac522c7db3448c87ecbbed7536176b6f95732d22fb9111d56",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 4877,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "83801cede05c1748581b6d83e8ed2bb4ce902961b29f598001c4374ddc9a8ddd",
+      "logcatSha256": "ef1757b72a9d6438bd7aa30bbef08171a32556bb6e2c7b4fdd6230a88ba011f5"
+    },
+    {
+      "label": "emulator-5582-16k-rapid-r28c-generated",
+      "serial": "emulator-5582",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "0c3b9be25b0ee2dac522c7db3448c87ecbbed7536176b6f95732d22fb9111d56",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 8602,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1240,
+          "error": "InternalError: Failed to call method \"ocr.recognizeText\". Plugin \"io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3\" is not enabled in Plugin Center. / java.lang.IllegalStateException: Plugin \"io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3\" is not enabled in Plugin Center (Tmp.js#…"
+        }
+      ],
+      "receiptSha256": "132bb1830969954253df900ece2a2be5602cf1a3d907f094da814502741e1cec",
+      "logcatSha256": "be6f54039f25fb7bfda4b5e01d87f086c159411bfa3f8e422c834179c2cb7ded"
+    },
+    {
+      "label": "emulator-5582-16k-rapid-v3-r28c-generated",
+      "serial": "emulator-5582",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "0c3b9be25b0ee2dac522c7db3448c87ecbbed7536176b6f95732d22fb9111d56",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2661,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "70379a26b029912a5486257a97ea53555f62e0c37a695e4f75dab8f3d2452332",
+      "logcatSha256": "6dec0217a8701c05b6a814a40f922e2629c362e03d6489c7066e66e68e63be28"
+    },
+    {
+      "label": "redmi-4k-paddle-v3-r28c-generated-1000x640",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 3204,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "6335a73ce8e4b71d0d52643eab114868bbe2319b064cb3f6428759f3e3608285",
+      "logcatSha256": "27847ca9b31e9c001fa7eee019413bc7e1e35fc31706cb07cf0df29296ea2110"
+    },
+    {
+      "label": "redmi-4k-paddle-v3-r28c-reference",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 672,
+          "height": 456,
+          "ok": true,
+          "text": [
+            "测试"
+          ],
+          "milliseconds": 2034,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "6d0c207e9bdd7bda42513552732832c9acf70bfb419750ce7493115fdcc322de",
+      "logcatSha256": "9381adafbfbf735f2f990beab6210d2e593fc97f27d8bcfe7f67dc9e441aceac"
+    },
+    {
+      "label": "redmi-4k-paddle-v4-mobile-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello",
+            "World"
+          ],
+          "milliseconds": 5667,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "20422a7e6b15206f801bc190b357d8fb459969fbc2f3b5289493c7c96b7e8e2f",
+      "logcatSha256": "212022fecd5f36b08a2dcf88cf013a77637e77ad9fff87d7bfdefb2ab7ff30d0"
+    },
+    {
+      "label": "redmi-4k-paddle-v4-server-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 61604,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "0ce0728954c64ada593e128fe06a92707b652f72811dda0c9c048f3382fa72fd",
+      "logcatSha256": "fd070c37eec0b5a81ced34e50bc6a1a1d91e0f0babd2fe2b68c89a17d3337dfb"
+    },
+    {
+      "label": "redmi-4k-paddle-v4-server-r28c-reference",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 672,
+          "height": 456,
+          "ok": true,
+          "text": [
+            "测试",
+            "",
+            "",
+            ""
+          ],
+          "milliseconds": 30800,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "07fce70d3bac9e29e4af85f724c25e18ccb8e5e4110f13a14e77c2de13302475",
+      "logcatSha256": "082717cffd2df008769e4cc78176800d1121e6464d009e3652214be07e22077e"
+    },
+    {
+      "label": "redmi-4k-paddle-v5-server-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v5.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST",
+            "16 KB",
+            "Hello",
+            "World"
+          ],
+          "milliseconds": 14116,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "a1987964f284be3870faabf2f3b951f63cd67cf757d275930395d5243b0bc083",
+      "logcatSha256": "99349c3e03e1e3cd077a5b8da4bc7091a8e5b6a302e9cb13f9dad9df5ae02fdd"
+    },
+    {
+      "label": "redmi-4k-paddle-v5-server-r28c-reference",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v5.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 672,
+          "height": 456,
+          "ok": true,
+          "text": [
+            "测试"
+          ],
+          "milliseconds": 9957,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "1dd7ede23b513fb9be7cdbf7bad78b7c6e6d124871cd1e984935ddd124b2444f",
+      "logcatSha256": "1705c73cf47b55c45aaabad91006c5d83e00211e909261c977d3eec7c4609ef5"
+    },
+    {
+      "label": "redmi-4k-paddle-v5-thai-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST",
+            "16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 3078,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "16f6c37ba2765ca1928ba9cdcd96f1c6bb8fcdd492010587326ad8f3c256f409",
+      "logcatSha256": "827b6b14d22fc14e0e2c79b8a8f0eb8ab415b4b4a5dfe97c9fb158d7c07d7033"
+    },
+    {
+      "label": "redmi-4k-paddle-v6-tiny-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2878,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "3980e567d1765e1c8bc1ccd2fb82f35d70e8be6988dc3bea17eb827596897ff6",
+      "logcatSha256": "b4ee162391e3f549c8d183f293f4e1f14c6ccf1a4597a0b6ef9c153d1a745dc6"
+    },
+    {
+      "label": "redmi-4k-rapid-v6-v3-r28c-generated",
+      "serial": "bek749scrwv4wo8h",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 3864,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2139,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "5b18308469295881eabc8e138eeec239228d5fb9ca9ef9b9df05bc2a947012a0",
+      "logcatSha256": "d6063a6b8f18faef8b0bcb9ded3368d356c5621b12196cf757395f60b57a56b2"
+    },
+    {
+      "label": "samsung-paddle-v3-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1581,
+          "error": "InternalError: Failed to call method \"ocr.recognizeText\". binderDied: ComponentInfo{io.github.supermonster003.autojs6.plugin.paddleocr.v3/io.github.supermonster003.autojs6.plugin.paddleocr.v3.OcrService}. / java.lang.IllegalStateException: binderDied: ComponentInfo{io.github.supermonster003.autojs6.…"
+        }
+      ],
+      "receiptSha256": "53d6e5aac3969193983d7d4d36f1c5f9d96a580302e7ac4ca796f4f243096bab",
+      "logcatSha256": "9d8c5e5c1593ad4c2a7a031853d8f42c6063e515d779c5d789c140acca9b9119"
+    },
+    {
+      "label": "samsung-paddle-v3-reference",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 944,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "测试"
+          ],
+          "milliseconds": 1803,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "35c9fdf20e3a9bae55bf9fd7c6f52654b654e1473db59699e92b9874a0dcb679",
+      "logcatSha256": "bbc2faef11ab76b11f55bb74975a8d5770a639dec88f8053c62bd02f4169b1aa"
+    },
+    {
+      "label": "samsung-paddle-v4-generated-3",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1829,
+          "error": "InternalError: Failed to call method \"ocr.recognizeText\". / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:661) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recog…"
+        }
+      ],
+      "receiptSha256": "4e84ab5ab167ad9ebdb49047d05426d12e8096ff38210e477d4ea9e6c9c1b383",
+      "logcatSha256": "c90221166846569c31ff4c54b3f2009239de432664c317ba0009837147fa78d6"
+    },
+    {
+      "label": "samsung-paddle-v4-mobile-generated-2",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 61324,
+          "error": "InternalError: Failed to call method \"ocr.recognizeText\". bindService timeout: ComponentInfo{io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile/io.github.supermonster003.autojs6.plugin.paddleocr.v4.PpOcrV4PluginService}. / org.autojs.autojs.core.plugin.ocr.OcrPluginHost$TimeoutException: b…"
+        }
+      ],
+      "receiptSha256": "cdb3da4928a4274970dcbaac36ce2d1f245fcfaf7ac886140dfc6bf0ac93cd04",
+      "logcatSha256": "d8723460e94dabd96599291867038429d26b75f6a81ea9f996a78b47620d935c"
+    },
+    {
+      "label": "samsung-paddle-v4-mobile-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1899,
+          "error": "InternalError: Failed to call method \"ocr.recognizeText\". / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:661) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recog…"
+        }
+      ],
+      "receiptSha256": "0113660643e428b26620b83b44b9135ab73938c66ed9071daaa14000182cf8f2",
+      "logcatSha256": "5e9eec389b738e992dcb46f4940459ac7b1f75016f32adb964c8c26fa75f1d57"
+    },
+    {
+      "label": "samsung-paddle-v4-server-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1881,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "467293ded3e92208ead879c7e45156107c212904fcacd87c46cbb1661e137d71",
+      "logcatSha256": "c09cf566c9da212259d365e944ae83f8ece04dddea7bbf3e097c21064ba0e304"
+    },
+    {
+      "label": "samsung-paddle-v4-server-reference-2",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "reference",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 944,
+          "height": 640,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1832,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "d8506f606bc903959ed6919ba176805c5b71eb153e6361f5f7c07f3ac2844b2c",
+      "logcatSha256": "64d16976650f186b9c867f377d6b4f28ee9bfbe5c075aa5db566679c8a405026"
+    },
+    {
+      "label": "samsung-paddle-v4-server-reference",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "reference",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 944,
+          "height": 640,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1824,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "1d721819f7dc3b8128e3dce2e8c2f3c684f0462c7ee3ab97fdbf3e6c218ba37d",
+      "logcatSha256": "e6da46b1db656732f4eb9d272c5c3942942737e326f0d1bda4236720d3a0f6b6"
+    },
+    {
+      "label": "samsung-paddle-v5-thai-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST",
+            "16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1269,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "7a5a2b3b9638e842566ee341c3be72b803e3317c4aa0c045f0abf07f910f7b82",
+      "logcatSha256": "58f458e4b66e875c172c8448497baad096e67c1146915f7b8d748d0f7e77bbe9"
+    },
+    {
+      "label": "samsung-paddle-v6-tiny-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1120,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "aa8e487b2d167721bf650a3a4a1a998414674e0f241c37a63c4769c03a96638a",
+      "logcatSha256": "6496885fc34a82fb9cdecd43bd382be88b01e4fcbe0c759ce94c1676e6333b45"
+    },
+    {
+      "label": "samsung-rapid-v3-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1479,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "cd91234ea8f90204c6fd11955404a964553eb0734c8e4cd461aed109be4d963d",
+      "logcatSha256": "1769fcbc52dd94b496fc124d7cacc6db94fc81467f22a51bae508e3e2f2ac6d9"
+    },
+    {
+      "label": "samsung-rapid-v6-generated",
+      "serial": "localhost:54059",
+      "pageSize": 16384,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 1556,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "0b988b0f867a5268b4eac626e3487554a1ba7db1ed93c7f8ffd59f7116e0da55",
+      "logcatSha256": "e7cdf679dfdeca1cc1119c377479b2e591dfba96d7fbd37b0ec26375b880c4b8"
+    },
+    {
+      "label": "xiaomi-4k-paddle-v3-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "a26628ff3d879ab3468a975b4c6203eeeb4ffc38d388f3b35909c749b26932c8",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 3524,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        }
+      ],
+      "receiptSha256": "a50d4caf91c1eec3a3f790dd30d6c79bf124fd7f161aa6b18415781a9a77ac47",
+      "logcatSha256": "db6a361acbe15f626ea0175057123cb4493f5e294649f9e72d546ad23f00274d"
+    },
+    {
+      "label": "xiaomi-4k-paddle-v3-size-sweep",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": false,
+      "complete": true,
+      "enabledPackages": null,
+      "hostApkSha256": "a26628ff3d879ab3468a975b4c6203eeeb4ffc38d388f3b35909c749b26932c8",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 5409,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 960,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 60827,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. bindService timeout: ComponentInfo{io.github.supermonster003.autojs6.plugin.paddleocr.v3/io.github.supermonster003.autojs6.plugin.paddleocr.v3.OcrService}. / org.autojs.autojs.core.plugin.ocr.OcrPluginHost$TimeoutException: bindService timeout: ComponentIn…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 992,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1569,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1024,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1749,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 800,
+          "height": 320,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1593,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 352,
+          "ok": false,
+          "text": [],
+          "milliseconds": 1656,
+          "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 967,
+          "error": ""
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 640,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 404,
+          "error": ""
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 300,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 423,
+          "error": ""
+        },
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 944,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 477,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "66a35877592ad0d1ec6da8b5dfc1732139a918650b1858435c605fd907586400",
+      "logcatSha256": "2e4c6324afa28dc7785105d183956fb6fcb87902c0bd9e39f7353b33117f02a0"
+    }
+  ],
+  "redmiOcrAllPassed": true,
+  "xiaomiPaddle3SizeSweep": {
+    "label": "xiaomi-4k-paddle-v3-size-sweep",
+    "serial": "968e9f18",
+    "pageSize": 4096,
+    "image": "generated",
+    "ok": false,
+    "complete": true,
+    "enabledPackages": null,
+    "hostApkSha256": "a26628ff3d879ab3468a975b4c6203eeeb4ffc38d388f3b35909c749b26932c8",
+    "results": [
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 1000,
+        "height": 320,
+        "ok": false,
+        "text": [],
+        "milliseconds": 5409,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 960,
+        "height": 320,
+        "ok": false,
+        "text": [],
+        "milliseconds": 60827,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. bindService timeout: ComponentInfo{io.github.supermonster003.autojs6.plugin.paddleocr.v3/io.github.supermonster003.autojs6.plugin.paddleocr.v3.OcrService}. / org.autojs.autojs.core.plugin.ocr.OcrPluginHost$TimeoutException: bindService timeout: ComponentIn…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 992,
+        "height": 320,
+        "ok": false,
+        "text": [],
+        "milliseconds": 1569,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 1024,
+        "height": 320,
+        "ok": false,
+        "text": [],
+        "milliseconds": 1749,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 800,
+        "height": 320,
+        "ok": false,
+        "text": [],
+        "milliseconds": 1593,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 1000,
+        "height": 352,
+        "ok": false,
+        "text": [],
+        "milliseconds": 1656,
+        "error": "InternalError: 方法 \"ocr.recognizeText\" 调用失败. / Stack trace: / android.os.DeadObjectException /     at android.os.BinderProxy.transactNative(Native Method) /     at android.os.BinderProxy.transact(BinderProxy.java:684) /     at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrP…"
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 1000,
+        "height": 640,
+        "ok": true,
+        "text": [
+          "TEST 16 KB",
+          "Hello World"
+        ],
+        "milliseconds": 967,
+        "error": ""
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 640,
+        "height": 320,
+        "ok": true,
+        "text": [
+          "TEST 16 KB",
+          "Hello World"
+        ],
+        "milliseconds": 404,
+        "error": ""
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 1000,
+        "height": 300,
+        "ok": true,
+        "text": [
+          "TEST 16 KB",
+          "Hello World"
+        ],
+        "milliseconds": 423,
+        "error": ""
+      },
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "width": 944,
+        "height": 640,
+        "ok": true,
+        "text": [
+          "TEST 16 KB",
+          "Hello World"
+        ],
+        "milliseconds": 477,
+        "error": ""
+      }
+    ],
+    "receiptSha256": "66a35877592ad0d1ec6da8b5dfc1732139a918650b1858435c605fd907586400",
+    "logcatSha256": "2e4c6324afa28dc7785105d183956fb6fcb87902c0bd9e39f7353b33117f02a0"
+  },
+  "hostOpenCvFinalArtifactTests": {
+    "emulator-5582": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0"
+    },
+    "emulator-5580": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0"
+    },
+    "bek749scrwv4wo8h": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0"
+    }
+  },
+  "threeStoneAi": {
+    "emulator-5582": {
+      "pageSize": 16384,
+      "device": "Google sdk_gphone16k_x86_64 / API 37 / x86_64,arm64-v8a",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "modelSha256": "faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9",
+      "modelSizeBytes": 1597931520,
+      "digestMillis": 10028,
+      "recommendedModelId": "qwen2-5-1-5b-instruct",
+      "healthCheckMillis": 14308,
+      "engineInitializeMillis": 1254,
+      "generationMillis": 102681,
+      "prompt": "Reply with one short English sentence that greets a tester.",
+      "generatedText": "Hello tester! How's everything going?",
+      "streamedDeltas": 8,
+      "maxOutputTokens": 48,
+      "backend": "CPU",
+      "ok": true,
+      "receiptSha256": "93728420f212dd728b14b370bc5b726ffdb781c4411cf3a96c278114be1c8d9e"
+    },
+    "bek749scrwv4wo8h": {
+      "pageSize": 4096,
+      "device": "Xiaomi 22120RN86C / API 33 / arm64-v8a,armeabi-v7a,armeabi",
+      "fingerprint": "Redmi/earth/earth:13/TP1A.220624.014/V14.0.4.0.TCVCNXM:user/release-keys",
+      "modelSha256": "faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9",
+      "modelSizeBytes": 1597931520,
+      "digestMillis": 10064,
+      "recommendedModelId": "qwen2-5-1-5b-instruct",
+      "healthCheckMillis": 22796,
+      "engineInitializeMillis": 1096,
+      "generationMillis": 13413,
+      "prompt": "Reply with one short English sentence that greets a tester.",
+      "generatedText": "Hello tester! How's the testing going today?",
+      "streamedDeltas": 10,
+      "maxOutputTokens": 48,
+      "backend": "CPU",
+      "ok": true,
+      "receiptSha256": "7ca46dbd88325b90eac64b348febe5c6507c2b9fa5075213cab70b7d56a00970"
+    },
+    "emulator-5580": {
+      "ok": false,
+      "reason": "ApplicationExitInfo reason=3 (LOW_MEMORY), rss=1.3GB; AVD MemTotal 2.5 GB. 1.6 GB 模型无法驻留, 不属于插件缺陷."
+    }
+  },
+  "limits": [
+    "Samsung slot localhost:54059 expired 2026-09-11 23:52 CST: compatibility properties not restored, final r28c OpenCV / Rapid / Paddle artifacts and Three-Stone-AI arm64 not re-verified on native 16 KB arm64.",
+    "Xiaomi 23046RP50C ADB transport wedged after the sweep ('error: closed' / 'Too many open files'); the Redmi 22120RN86C replaced it for the 4 KB arm64 regression.",
+    "API 36 AVD has 2.5 GB RAM; the 1.6 GB Qwen2.5-1.5B model is killed by lmkd (LOW_MEMORY). Real inference on 16 KB is proven on the API 37 AVD (4 GB).",
+    "Rapid v3/v6, Paddle v3/v5/v6 and Three-Stone artifacts under test were built before the version bump and carry the previous version name; release candidates must be rebuilt from the committed sources (R1/R5).",
+    "Plugin repos still contain other sessions' uncommitted edits (build scripts, gradle/data deletions, Three-Stone ui-redesign); commits stage only the files of this round."
+  ]
+}

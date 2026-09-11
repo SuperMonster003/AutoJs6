@@ -4,6 +4,23 @@
 
 本文区分必须完成的验收 / 发布工作, 已采用但未记作维护者明确回答的默认值, 以及不阻塞本 Roadmap 的后续建议. 原 Roadmap 第 3 节是部署前基线, 其中旧 NDK / 4 KB 库描述不是尚未修复的现状.
 
+## 0. 2026-09-12 更新 (第二轮)
+
+详见 [第二轮证据](evidence/page-size-16kb-round2-20260912.md) 与 JSON. 本节只记录状态变化, 下文各节保留原始要求.
+
+| 编号 | 状态 | 说明 |
+| --- | --- | --- |
+| X1 | 已修复, 已复验 | Rapid v3/v6 以 `c++_shared` 打包 NDK r28.2 libc++; Samsung 16 KB, API 36/37 ps16k, Redmi 4 KB 的独立 provider 调用通过 |
+| X2 | 已修复, 已复验 | 根因: 旧 libc++ RELRO 末端 `0x111000` 与可写数据同页 (`tools/16kb/elf_layout.py`); v4/v5/v6 换 r28.2 libc++; Samsung 复验 v6 Tiny / v5 Thai, v4 Server 不再崩溃; ORT 会话改内存映射修复 v4 Server 的 OOM; Redmi 4 KB 通过 v4 Mobile / Server, v5 Thai / Server, v6 Tiny. Samsung 上 v4 Mobile 的三次运行均为旧 APK (当时 Mobile 重建失败), 最终 Mobile 产物经 APK 内 libc++ 审计为 r28.2, 16 KB 运行时验证待新时段; 未重建的 14:11 旧 flavor APK 仍带旧 libc++ |
+| X3 | 重新归类 (B7) | Xiaomi 4 KB 复现相同 pc `0xc7a44`, 尺寸扫描: 宽 800-1024 且高 320/352 崩溃, 其它通过; Paddle-Lite 输入相关缺陷, 与页大小无关 |
+| X4 | 已补充 | `elf_layout.py` 与 `ocr_provider_smoke.py` 纳入 `tools/16kb/`; 宿主策略接受 r26b / r28c |
+| R3 | 部分 | 修复后的首批产物在 Samsung 复验; r28c donor / v1.0.2 最终产物只在 ps16k 模拟器与 Redmi 4 KB 通过, 原生 16 KB arm64 复验需要新的 Samsung 时段 |
+| R4 | 16 KB x86_64 通过 | API 37 ps16k 真实 Qwen2.5-1.5B 推理通过; API 36 AVD 因 2.5 GB 内存 LOW_MEMORY; Redmi 22120RN86C (API 33, 4 KB arm64) 同样通过 (生成 13413 ms, 输出 "Hello tester! How's the testing going today?"); 16 KB arm64 待新时段 |
+| 版本 | 已本地提交 | 宿主 6.8.0 build 5280 (首个接受 r28c 的宿主), OpenCV 1.1.2 (build 12, 最低宿主 5280), Rapid v3/v6 1.0.2, Paddle v3-v6 1.0.2; 未推送 |
+| donor / lock | 已联动 | OpenCV AAR `f760265b…` (r28c), Rapid AAR `75f9c45d…`, Paddle AAR `8c4b410a…`, libc++ r28.2 `ab4e6c71…`, 各 provenance JSON 随仓库提交 |
+
+需要维护者的事项: 申请新的 Samsung 16 KB 时段复验最终产物 (含 Three-Stone-AI arm64), 并读回 / 按需恢复上一时段未恢复的两个兼容属性; Xiaomi Pad 需重新插拔或重启 ADB 传输; R1 / R2 / R5-R8 (发布源码, Runtime Kit, 远程 CI, 官方索引, 人工流程) 未变.
+
 ## 1. 已关闭的事项
 
 - [x] D11 / P1.7: 维护者已把 QuickJS-Host 关联分支合并到宿主 master 并解决冲突, 提交 `d17d125783426f89ee446a6352551a6a7b873150`. `git worktree list --porcelain` 已无该工作树, 原目录不存在. 无需再做 rebase 或删除.
@@ -69,7 +86,7 @@ X2 的旧 libc++ `GNU_RELRO` 末端为 `0x111000`, 与 16 KB 页不整齐, 崩�
 
 人工补看: 首次启动是否出现页大小警告, 插件安装 / 升级 / 启用是否可理解, 警告取消是否生效, 原有 4 KB 设备基本功能是否回归. 32 位 ABI 的常规启动回归按发布 QA 执行; 其第三方库 16 KB 对齐不属于 D8 硬性条件.
 
-Paddle 尚未逐个运行的变体为: v4 Mobile / Mobile English; v5 Mobile / Server / English / Korean / Latin / ESlav / Greek / Arabic / Cyrillic / Devanagari / Telugu / Tamil; v6 Small / Medium. 已测但失败的为 v4 Server / v5 Thai / v6 Tiny. 后续按实际发布范围与共用 native SHA 确定需要重复的 native 初始化及模型加载检查.
+Paddle 尚未逐个运行的变体为: v4 Mobile English; v5 Mobile / English / Korean / Latin / ESlav / Greek / Arabic / Cyrillic / Devanagari / Telugu / Tamil; v6 Small / Medium. 2026-09-12 已通过: v4 Mobile / Server, v5 Thai / Server, v6 Tiny (Redmi 4 KB 最终产物; v5 Thai / v6 Tiny 另在 Samsung 16 KB 通过, v4 Server 在 Samsung 不再崩溃). 后续按实际发布范围与共用 native SHA 确定需要重复的 native 初始化及模型加载检查.
 
 ## 5. 需要维护者复核的默认值与取舍
 
@@ -87,14 +104,14 @@ Q1-Q4 已经实现, 没有代码停在等待选择的状态. 维持现状即可�
 
 ## 6. 发布与维护时容易遗漏的事项
 
-1. **版本与宿主依赖同步.** 新 Rapid 当前声明宿主 build >= 5279, 原因是可选 OpenCV 原生库收集能力. 最终宿主 versionCode 必须唯一并满足更新规则; 如果已公开的 5279 不含修复, 需把 Rapid 的最低宿主版本同步到真正首次发布修复的 build, 不能只因版本名称相同就认为具备该能力.
+1. **版本与宿主依赖同步.** 新 Rapid 当前声明宿主 build >= 5279, 原因是可选 OpenCV 原生库收集能力. 最终宿主 versionCode 必须唯一并满足更新规则; 如果已公开的 5279 不含修复, 需把 Rapid 的最低宿主版本同步到真正首次发布修复的 build, 不能只因版本名称相同就认为具备该能力. 2026-09-12: 宿主 build 5280 是首个接受 r28c 原生构建的版本, OpenCV 插件 v1.1.2 已声明最低宿主 5280; Rapid 仍为 >= 5279.
 2. **Runtime Kit 的身份.** 旧本地 Kit 的 `gitSha=local` 是诚实记录, 具体 SHA 才能证明所测内容. 发布前生成正式身份 / 清单, 不手改历史收据成新提交. 新模板发布后再构建相应 APK Builder.
 3. **APK Builder 测试开关与签名.** 此前验收使用可信签名且显式开启 remote build 的测试包. 生产默认关闭的开关保持原语义; 16 KB 适配不自动开放远程打包. 要发布可用的该功能需遵守原功能的启用流程. Lua 同样不能靠降低签名检查通过验收.
 4. **压缩与解压契约.** 宿主 / inrt / 用户 APK 继续压缩 `.so` 并使用 `extractNativeLibs=true`. 不可只把 ZIP 写入改成 STORED 而不做 16 KB 数据偏移对齐. Builder 回归测试同时覆盖 manifest 的两种输入值, 不代表最终用户模板可以任意改成 false.
 5. **宿主 libc++ 所有权.** OpenCV 有意由宿主提供进程内 C++ runtime, 不要删宿主的 `libc++_shared.so`. 改 OpenCV / Image-Quantization 工具链后复核运行库兼容性.
 6. **Rapid 依赖变化与体积.** ORT 1.21.1 + OpenCV 4.8.0 共享 TBB 是为解决 Paddle 后加载 Rapid 的真实崩溃. 不恢复静态 OpenMP, 不用 `KMP_DUPLICATE_LIB_OK` 绕过. 共享 OpenCV 增加插件体积, 用户 APK 同时选择独立 OpenCV 时应去重; 没选时仍必须带上 Rapid 的 optional payload.
 7. **Paddle provenance.** v3 原始 Paddle-Lite 版本 / 下载 URL 未记录, 现有收据如实保留来源未知及 SHA. LLD 修复仅改 `.dynsym sh_info`, PT_LOAD 逐字节未变. 重新解压旧 SDK 后运行 `tools/16kb/refresh_paddle_opencv.py`, 避免把休眠的旧 x86_64 OpenCV 库带回来.
-8. **donor / lock 更新联动.** OpenCV 预编译库更换时, 同步 OpenCV 自身, 两个 Rapid AAR, 四个 Paddle AAR, 来源与 SHA lock 及实际 APK 的证据; 不只改版本字符串. LuaLS / Node / Bun 也要检查实际 exec 的 ELF, Python 要保留归档内扫描.
+8. **donor / lock 更新联动.** OpenCV 预编译库更换时, 同步 OpenCV 自身, 两个 Rapid AAR, 四个 Paddle AAR, 来源与 SHA lock 及实际 APK 的证据; 不只改版本字符串. LuaLS / Node / Bun 也要检查实际 exec 的 ELF, Python 要保留归档内扫描. 2026-09-12 已按此联动更新到 r28c donor, SHA 见第 0 节.
 9. **官方索引仍有旧记录.** 当前生成文件中 6 个 4096 条目是 APK Builder, MediaInfo, Node, Paddle v3, Rapid v3/v6; Python 为未知. 它们反映现有公开资产, 不是本地修复失败. 新版发布后逐项重新测量. `0` 与未知不可互换, `declared` 也不可称为实测.
 10. **产物报告字段.** 部署表原有 R8 的 `None` 是采集器漏读版本. 已对原 SHA 对应的 APK 复核并更正为 `0.2.0-provider-dev` / build 1; JSON 保留更正依据. 发布记录仍应读最终 APK 的 metadata, 不靠构建后可能自增的属性文件反推.
 11. **保留既有工作.** 不能为清理发布工作区执行全仓库 reset / clean; 特别保留 R8 原有暂存新增但工作区删除的 drawable 状态, 以及 Three-Stone-AI / Python 等其它会话修改. 整合后以最终源码重新生成有受影响内容的产物.
