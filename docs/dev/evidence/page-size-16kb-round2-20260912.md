@@ -1,6 +1,6 @@
 # 16 KB 第二轮: X1-X3 修复, NDK r28c 统一重编与真机复验, 2026-09-12
 
-结论: Samsung 补验暴露的 X1 (Rapid 缺 libc++) 与 X2 (Paddle v4 Server / v5 Thai / v6 Tiny 旧 libc++ 初始化 SIGSEGV) 已修复, 并在原生 16 KB arm64 (Samsung 剩余时段), 两台 16 KB x86_64 模拟器与 4 KB arm64 真机上取得真实 `ocr.recognizeText` 证据; X3 (Paddle v3 `1000 x 320` 崩溃) 在 4 KB 真机上以相同 pc 复现, 属于 Paddle-Lite 预编译库的输入相关缺陷, 与页大小无关, 转入 backlog B7. OpenCV 4.8.0 已用 NDK r28c 重编并同步到 Rapid / Paddle donor, 宿主 build 5280 起同时接受 r26b 与 r28c 原生构建. Three-Stone-AI 在原生 16 KB arm64 (Samsung 第三时段) 与 16 KB x86_64 (API 36/37) 上均用真实 Qwen2.5-1.5B 模型完成初始化与非空生成. 2026-09-12 第三个 Samsung 时段 (localhost:30008) 已在原生 16 KB arm64 上复验全部最终 r28c 产物: 宿主 5280 + OpenCV v1.1.2 宿主测试 2/2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3 (1000x640 + 参考图), Rapid v6/v3, 以及 Three-Stone-AI, 并在收尾时把两个兼容属性重置为默认.
+结论: Samsung 补验暴露的 X1 (Rapid 缺 libc++) 与 X2 (Paddle v4 Server / v5 Thai / v6 Tiny 旧 libc++ 初始化 SIGSEGV) 已修复, 并在原生 16 KB arm64 (Samsung 剩余时段), 两台 16 KB x86_64 模拟器与 4 KB arm64 真机上取得真实 `ocr.recognizeText` 证据; X3 (Paddle v3 `1000 x 320` 崩溃) 在 4 KB 真机上以相同 pc 复现, 属于 Paddle-Lite 预编译库的输入相关缺陷, 与页大小无关, 转入 backlog B7. OpenCV 4.8.0 已用 NDK r28c 重编并同步到 Rapid / Paddle donor, 宿主 build 5280 起同时接受 r26b 与 r28c 原生构建. Three-Stone-AI 在原生 16 KB arm64 (Samsung 第三时段) 与 16 KB x86_64 (API 36/37) 上均用真实 Qwen2.5-1.5B 模型完成初始化与非空生成. 2026-09-12 第三个 Samsung 时段 (localhost:30008) 已在原生 16 KB arm64 上复验全部最终 r28c 产物: 宿主 5280 + OpenCV v1.1.2 宿主测试 2/2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3 (1000x640 + 参考图), Rapid v6/v3, 以及 Three-Stone-AI, 并在收尾时把两个兼容属性重置为默认. 同日 Xiaomi Pad (API 35, 4 KB arm64) 重连后, 同一批最终产物 (宿主 OpenCV 测试, Rapid v6/v3, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3) 也全部通过, 与 Redmi 一起构成两台 4 KB arm64 真机的回归.
 
 对应 [完整 JSON](page-size-16kb-round2-20260912.json), [主 Roadmap](../page-size-16kb-roadmap.md), [维护者收尾清单](../page-size-16kb-maintainer-checklist.md) 与 [上一轮 Samsung 补验](page-size-16kb-samsung-20260911.md).
 
@@ -13,10 +13,10 @@
 | AVD sdk_gphone16k_x86_64 (`emulator-5580`) | API 36 / x86_64 | 16384 | linker=false, PM compat disabled=true, 2.5 GB RAM |
 | Samsung SM-A566B (RDB slot 3) (`localhost:30008`) | API 36 / arm64-v8a | 16384 | linker=false, PM compat disabled=true; 2026-09-12 复验最终产物 |
 | AVD_API_36.0_16K (new) (`emulator-5554`) | API 36 / x86_64 | 16384 | linker=false, PM compat disabled=true, 12 GB RAM |
-| Xiaomi 23046RP50C (`968e9f18`) | API 35 / arm64-v8a | 4096 | X3 的 4 KB 对照; 扫描后 ADB 传输卡死 |
+| Xiaomi 23046RP50C (`968e9f18`) | API 35 / arm64-v8a | 4096 | X3 的 4 KB 对照 (尺寸扫描); 2026-09-12 重连后补跑最终 r28c 产物的 4 KB arm64 回归 |
 | Redmi 22120RN86C (`bek749scrwv4wo8h`) | API 33 / arm64-v8a | 4096 | 最终产物的 4 KB arm64 回归 |
 
-Samsung 时段 `localhost:54059` 有效期至 2026-09-11 23:52 CST; 验收期间 `bionic.linker.16kb.app_compat.enabled=false`, `pm.16kb.app_compat.disabled=true`, 宿主与 6 个 OCR 插件 `pageSizeCompat=0` (`device-identity.txt`). 时段在恢复这两个属性之前到期, 恢复失败 (`device 'localhost:54059' not found`); 下次申领时请重新读取并按需恢复. Xiaomi Pad 在尺寸扫描后 ADB 传输卡死 (`error: closed` / `Too many open files`), 4 KB arm64 回归改用 Redmi 22120RN86C. 2026-09-12 用户重新上线 Samsung 第三时段 `localhost:30008` (约 85 分钟) 与新的 16 KB API 36 AVD (`emulator-5554`, 12 GB RAM), 用于最终产物的原生 arm64 复验; 该 RDB 链路的 `adb shell` 会间歇性卡死 (并发 adb 调用会加剧), 因此按每次一个操作串行执行, 收尾时把两个兼容属性重置为默认 (RDB 设备归还时也会重置).
+Samsung 时段 `localhost:54059` 有效期至 2026-09-11 23:52 CST; 验收期间 `bionic.linker.16kb.app_compat.enabled=false`, `pm.16kb.app_compat.disabled=true`, 宿主与 6 个 OCR 插件 `pageSizeCompat=0` (`device-identity.txt`). 时段在恢复这两个属性之前到期, 恢复失败 (`device 'localhost:54059' not found`); 下次申领时请重新读取并按需恢复. Xiaomi Pad 在尺寸扫描后 ADB 传输卡死 (`error: closed` / `Too many open files`), 4 KB arm64 回归改用 Redmi 22120RN86C. 2026-09-12 用户重新上线 Samsung 第三时段 `localhost:30008` (约 85 分钟) 与新的 16 KB API 36 AVD (`emulator-5554`, 12 GB RAM), 用于最终产物的原生 arm64 复验; 该 RDB 链路的 `adb shell` 会间歇性卡死 (并发 adb 调用会加剧), 因此按每次一个操作串行执行, 收尾时把两个兼容属性重置为默认 (RDB 设备归还时也会重置). Xiaomi Pad 重连后 USB 传输恢复正常, 最终产物在其上的 4 KB 回归 (`pad4k-*` 收据) 全部通过.
 
 ## 修复与变更
 
@@ -86,6 +86,15 @@ bionic 以页为单位对 `PT_GNU_RELRO` 做 `mprotect(PROT_READ)`; 旧库 RELRO
 | Samsung SM-A566B (RDB slot 3) | `samsung3-16k-rapid-v6-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 816 | TEST 16 KB, Hello World |
 | AVD_API_36.0_16K (new) | `avd36new-16k-rapid-v6-v3-r28c-generated` | rapid v6 | 1000 x 320 | 通过 | 1876 | TEST 16 KB, Hello World |
 | AVD_API_36.0_16K (new) | `avd36new-16k-rapid-v6-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 532 | TEST 16 KB, Hello World |
+| Xiaomi 23046RP50C | `pad4k-paddle-v3-r28c-generated-1000x640` | paddle v3 | 1000 x 640 | 通过 | 2076 | TEST 16 KB, Hello World |
+| Xiaomi 23046RP50C | `pad4k-paddle-v3-r28c-reference` | paddle v3 | 840 x 572 | 通过 | 1670 | 测试 |
+| Xiaomi 23046RP50C | `pad4k-paddle-v4-mobile-r28c-generated` | paddle v4 | 1000 x 320 | 通过 | 2663 | TEST 16 KB, Hello |
+| Xiaomi 23046RP50C | `pad4k-paddle-v4-server-r28c-generated` | paddle v4 | 1000 x 320 | 通过 | 14724 | TEST 16 KB, Hello World |
+| Xiaomi 23046RP50C | `pad4k-paddle-v4-server-r28c-reference` | paddle v4 | 840 x 572 | 通过 | 7155 | 0, 九 |
+| Xiaomi 23046RP50C | `pad4k-paddle-v5-thai-r28c-generated` | paddle v5 | 1000 x 320 | 通过 | 2084 | TEST, 16 KB |
+| Xiaomi 23046RP50C | `pad4k-paddle-v6-tiny-r28c-generated` | paddle v6 | 1000 x 320 | 通过 | 2923 | TEST 16 KB, Hello World |
+| Xiaomi 23046RP50C | `pad4k-rapid-v6-v3-r28c-generated` | rapid v6 | 1000 x 320 | 通过 | 3374 | TEST 16 KB, Hello World |
+| Xiaomi 23046RP50C | `pad4k-rapid-v6-v3-r28c-generated` | rapid v3 | 1000 x 320 | 通过 | 829 | TEST 16 KB, Hello World |
 | Xiaomi 23046RP50C | `xiaomi-4k-paddle-v3-generated` | paddle v3 | 1000 x 320 | 失败 | 3524 | InternalError: 方法 "ocr.recognizeText" 调用失败. / Stack trace: / android.o… |
 | Redmi 22120RN86C | `redmi-4k-paddle-v3-r28c-generated-1000x640` | paddle v3 | 1000 x 640 | 通过 | 3204 | TEST 16 KB, Hello World |
 | Redmi 22120RN86C | `redmi-4k-paddle-v3-r28c-reference` | paddle v3 | 672 x 456 | 通过 | 2034 | 测试 |
@@ -159,6 +168,7 @@ Xiaomi 23046RP50C (API 35, 4096) 上安装相同 Paddle v3 产物, 同一生成�
 | AVD sdk_gphone16k_x86_64 (API 37, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
 | AVD sdk_gphone16k_x86_64 (API 36, 16384) | 5280 | v1.1.2 | 2 / 2 通过 |
 | Redmi 22120RN86C (API 33, 4096) | 5280 | v1.1.2 | 2 / 2 通过 |
+| Xiaomi 23046RP50C (API 35, 4096) | 5280 | v1.1.2 | 2 / 2 通过 |
 
 ## Three-Stone-AI 真实模型推理
 

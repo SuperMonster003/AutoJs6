@@ -56,7 +56,7 @@
       "api": "API 35",
       "abi": "arm64-v8a",
       "pageSize": 4096,
-      "notes": "X3 的 4 KB 对照; 扫描后 ADB 传输卡死"
+      "notes": "X3 的 4 KB 对照 (尺寸扫描); 2026-09-12 重连后补跑最终 r28c 产物的 4 KB arm64 回归"
     },
     "bek749scrwv4wo8h": {
       "model": "Redmi 22120RN86C",
@@ -534,6 +534,256 @@
       ],
       "receiptSha256": "70379a26b029912a5486257a97ea53555f62e0c37a695e4f75dab8f3d2452332",
       "logcatSha256": "6dec0217a8701c05b6a814a40f922e2629c362e03d6489c7066e66e68e63be28"
+    },
+    {
+      "label": "pad4k-paddle-v3-r28c-generated-1000x640",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 1000,
+          "height": 640,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2076,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "933e9996f5a986b84b6cc7dfafbba0d2770661e2a18cf22a1853cc0c08d182b2",
+      "logcatSha256": "35c4189a67034748f73e918c6da0f02409f2262a3af36a5ee778eae223d8ce81"
+    },
+    {
+      "label": "pad4k-paddle-v3-r28c-reference",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v3",
+          "width": 840,
+          "height": 572,
+          "ok": true,
+          "text": [
+            "测试"
+          ],
+          "milliseconds": 1670,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "d41b53cc7b426dc3e4045b4ddd491225691897fdfe7ed0fe658cf02dac47d28d",
+      "logcatSha256": "9a9eef8e5dcce3cda7f99bf4846b429bd6a61715293a7a4f8bdd9ab05fb4428e"
+    },
+    {
+      "label": "pad4k-paddle-v4-mobile-r28c-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello",
+            "World"
+          ],
+          "milliseconds": 2663,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "f8f09a2acdec4672b95a702d77a489dd7235a6bc10d34e0561a9f9dda4938178",
+      "logcatSha256": "c316abe4e5f1fd48920b5aeba571418441ebd413cb7cf581d3a0f3e275446e7b"
+    },
+    {
+      "label": "pad4k-paddle-v4-server-r28c-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 14724,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "32dfc0f794ed48b6d163cfa77e2dd579c8d8c3a34a3c12f18ba048963eb249c2",
+      "logcatSha256": "7744df9cdbcb371cec6ddaad38473ded09b4e4eafe106dbad8e39bd6bd5c16b1"
+    },
+    {
+      "label": "pad4k-paddle-v4-server-r28c-reference",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "reference",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v4",
+          "width": 840,
+          "height": 572,
+          "ok": true,
+          "text": [
+            "0",
+            "九",
+            "",
+            "",
+            ""
+          ],
+          "milliseconds": 7155,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "655757d42c6a016e90a5cb20ed737b5f7c1370f4fe026652f618feb792bbeccf",
+      "logcatSha256": "a467a7acc29a6f0e43f3e9e418d638a3ee03e2585b7cd3388695e4db694d261a"
+    },
+    {
+      "label": "pad4k-paddle-v5-thai-r28c-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v5",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST",
+            "16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2084,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "5406cab4b059df2f46d579b1056f029f3d842a229f3967181f2eb2ce04e908a0",
+      "logcatSha256": "8a9072a7bc7b278541013cefc124937a127b89ea7deba998e8a2d825507e0c1a"
+    },
+    {
+      "label": "pad4k-paddle-v6-tiny-r28c-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "paddle",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 2923,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "f356b672177489e9b391ec8e0e81ac61efb61dfa512d27bf06f72fa6f4360fd9",
+      "logcatSha256": "77280541db70fb0d3e0ccd5017eec8ff1d69521a6cb56facbc5940815b11973b"
+    },
+    {
+      "label": "pad4k-rapid-v6-v3-r28c-generated",
+      "serial": "968e9f18",
+      "pageSize": 4096,
+      "image": "generated",
+      "ok": true,
+      "complete": true,
+      "enabledPackages": [
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
+      ],
+      "hostApkSha256": "08b04a489156edd836a9966cfaabace3b425e24207c15b1e454557057fb639ea",
+      "results": [
+        {
+          "mode": "rapid",
+          "variant": "v6",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 3374,
+          "error": ""
+        },
+        {
+          "mode": "rapid",
+          "variant": "v3",
+          "width": 1000,
+          "height": 320,
+          "ok": true,
+          "text": [
+            "TEST 16 KB",
+            "Hello World"
+          ],
+          "milliseconds": 829,
+          "error": ""
+        }
+      ],
+      "receiptSha256": "a759b4bca9bd234b7ef1f459491143a812a71b6d3d252d4e725495af954de23f",
+      "logcatSha256": "14dc367f8e06ee6e1403a8fcb21e1eb970d35a43847396697e05431498eab88d"
     },
     {
       "label": "redmi-4k-paddle-v3-r28c-generated-1000x640",
@@ -1692,6 +1942,12 @@
       "instrumentExit": "0"
     },
     "emulator-5554": {
+      "hostVersionCode": "5280",
+      "pluginVersionName": "1.1.2",
+      "ok": true,
+      "instrumentExit": "0"
+    },
+    "968e9f18": {
       "hostVersionCode": "5280",
       "pluginVersionName": "1.1.2",
       "ok": true,

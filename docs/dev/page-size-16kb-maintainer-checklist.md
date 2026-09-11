@@ -14,12 +14,12 @@
 | X2 | 已修复, 已复验 | 根因: 旧 libc++ RELRO 末端 `0x111000` 与可写数据同页 (`tools/16kb/elf_layout.py`); v4/v5/v6 换 r28.2 libc++; Samsung 复验 v6 Tiny / v5 Thai, v4 Server 不再崩溃; ORT 会话改内存映射修复 v4 Server 的 OOM; Redmi 4 KB 通过 v4 Mobile / Server, v5 Thai / Server, v6 Tiny. Samsung 上 v4 Mobile 的三次运行均为旧 APK (当时 Mobile 重建失败), 最终 Mobile 产物经 APK 内 libc++ 审计为 r28.2, 16 KB 运行时验证待新时段; 未重建的 14:11 旧 flavor APK 仍带旧 libc++ |
 | X3 | 重新归类 (B7) | Xiaomi 4 KB 复现相同 pc `0xc7a44`, 尺寸扫描: 宽 800-1024 且高 320/352 崩溃, 其它通过; Paddle-Lite 输入相关缺陷, 与页大小无关 |
 | X4 | 已补充 | `elf_layout.py` 与 `ocr_provider_smoke.py` 纳入 `tools/16kb/`; 宿主策略接受 r26b / r28c |
-| R3 | 原生 16 KB arm64 已复验 | 2026-09-12 Samsung 第三时段 (localhost:30008): 宿主 5280 + OpenCV v1.1.2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3, Rapid v6/v3 (r28c donor) 全部通过; 剩余为未逐一运行的语言/flavor 变体与最终 Release 候选 (R1/R5/R6) |
+| R3 | 原生 16 KB arm64 已复验 | 2026-09-12 Samsung 第三时段 (localhost:30008): 宿主 5280 + OpenCV v1.1.2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3, Rapid v6/v3 (r28c donor) 全部通过; 同批产物在 Xiaomi Pad (API 35) 与 Redmi (API 33) 两台 4 KB arm64 真机回归通过; 剩余为未逐一运行的语言/flavor 变体与最终 Release 候选 (R1/R5/R6) |
 | R4 | 原生 16 KB arm64 通过 | 2026-09-12 Samsung 第三时段真实 Qwen2.5-1.5B 推理通过 (生成 3291 ms); 另在新 16 KB API 36 AVD (1811 ms), API 37 ps16k, Redmi 4 KB arm64 通过; 2.5 GB AVD 因 LOW_MEMORY 终止 (非缺陷) |
 | 版本 | 已本地提交 | 宿主 6.8.0 build 5280 (首个接受 r28c 的宿主), OpenCV 1.1.2 (build 12, 最低宿主 5280), Rapid v3/v6 1.0.2, Paddle v3-v6 1.0.2; 未推送 |
 | donor / lock | 已联动 | OpenCV AAR `f760265b…` (r28c), Rapid AAR `75f9c45d…`, Paddle AAR `8c4b410a…`, libc++ r28.2 `ab4e6c71…`, 各 provenance JSON 随仓库提交 |
 
-2026-09-12 补充: Samsung 第三时段已完成最终产物 (含 Three-Stone-AI arm64) 的原生 16 KB arm64 复验, 兼容属性已重置为默认. 剩余需要维护者的事项: R1 / R2 / R5-R8 (发布源码定稿, 合并后 Runtime Kit 与用户 APK, 远程 CI, 官方索引刷新, 人工流程), 以及从已提交源码重建全部发布 flavor (未重建的 v5 mobile / v6 small 等仍带旧 libc++).
+2026-09-12 补充: Samsung 第三时段已完成最终产物 (含 Three-Stone-AI arm64) 的原生 16 KB arm64 复验, 兼容属性已重置为默认. 剩余需要维护者的事项: R1 / R2 / R5-R8 (发布源码定稿, 合并后 Runtime Kit 与用户 APK, 远程 CI, 官方索引刷新, 人工流程), 以及从已提交源码重建全部发布 flavor (未重建的 14:11 旧构建仍带旧 libc++: Paddle v4 mobileEn, v5 mobile / english / korean / latin / eslav / greek / arabic / cyrillic / devanagari / telugu / tamil, v6 small / medium).
 
 ## 1. 已关闭的事项
 
