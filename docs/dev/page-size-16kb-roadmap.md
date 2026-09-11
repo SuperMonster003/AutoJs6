@@ -2,7 +2,7 @@
 
 本文是 AutoJs6 宿主, APK 打包链路, 共享构建插件, 官方插件索引以及同目录全部官方插件仓库的 16 KB 页大小适配可执行状态表.
 以 2026-09-11 的本地代码快照 (宿主 `master@3507afdda`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5279`) 与同日对 44 个同目录仓库的 APK / ELF 扫描结果为起点,
-每个条目均可独立 Check 并落地. 第 3 节保留部署前基线, 当前部署与验收状态见第 5 节及 [2026-09-11 验证记录](evidence/page-size-16kb-20260911.md).
+每个条目均可独立 Check 并落地. 第 3 节保留部署前基线, 当前部署与验收状态见第 5 节及 [2026-09-11 验证记录](evidence/page-size-16kb-20260911.md). 全部剩余事项, 执行默认值, 手动验收与发布注意事项集中见 [维护者收尾清单](page-size-16kb-maintainer-checklist.md).
 
 使用方式:
 
@@ -30,7 +30,7 @@
 | D8 | 门禁只强制 arm64-v8a / x86_64, 32 位顺带修但不作为验收条件 | 16 KB 页只存在于 64 位设备, Play 要求也只针对 64 位, NDK r28+ 默认只对 64 位启用 16 KB 对齐. 自编库的显式标志对全部 ABI 生效 (32 位随之对齐), 但 MLKit / ORT / Chaquopy / NDK `libc++_shared.so` 等第三方 32 位库不追. 不借机削减任何仓库的 ABI 产物. |
 | D9 | Roadmap 位于宿主 `docs/dev/page-size-16kb-roadmap.md` | 与仓库内既有 roadmap 的位置与风格一致 (a11y Roadmap 的 D3 先例). 插件仓库自身的 ROADMAP / README 在其条目落地时追加一行指向本文的记录. |
 | D10 | 任何仓库都不设置 `android:pageSizeCompat` | 该属性无论取 `enabled` 还是 `disabled` 都会关闭系统的兼容模式警告, 会掩盖回归; 系统兼容模式 (backcompat) 只作为验证阶段的诊断手段 (通过 adb 属性开关, 见附录 E), 不作为交付形态. |
-| D11 | `AutoJs6-QuickJS-Host` 不单独跟踪 | 该目录是宿主 6.8.0 的验证分叉 (原生库现状与宿主完全相同), P1 落地后由维护者 rebase, 本 Roadmap 不为其单列条目. |
+| D11 | `AutoJs6-QuickJS-Host` 不单独跟踪 | 该目录是宿主 6.8.0 的验证分叉, 本 Roadmap 不为其单列条目. 2026-09-11 已由维护者将关联分支合并到宿主 master 并解决冲突 (`d17d12578`), 工作树与目录均已移除; 原定 rebase 收尾由该合并完成. |
 | D12 | 本 Roadmap 不引入 JS 公开 API 变更 | 因而不触发 `AGENTS.md` 中的文档 / d.ts / LSP 声明同步. "在 `device` 模块暴露页大小" 之类的想法记入附录 B 的 backlog B3. |
 
 由 D1 / D6 派生的硬约束:
@@ -141,10 +141,10 @@
 | 阶段 | 主题 | 依赖 | 涉及仓库 | 状态 |
 | --- | --- | --- | --- | --- |
 | P0 | 基线, 共享门禁与工具链 | 无 | 宿主 (tools), Gradle-Platform-Versions | 完成 (共享插件 1.8.0 已公开发布, CI 与独立消费验证通过) |
-| P1 | 宿主与打包链路 | P0.2 (门禁), 其余可先行 | 宿主, APK-Builder-Template | 代码与本地验收完成; 真机与远程 CI 待补 |
-| P2 | 被宿主进程加载或打包进用户 APK 的插件 | P0.2, P1.1 (libc++) | Image-Quantization, OpenCV, Paddle v3-v6, Rapid v3 / v6 | 修复与用户 APK 验证完成; 原生 16 KB arm64 待补 |
-| P3 | 独立进程的自编原生插件 | P0.2 | ImGui, TypeScript-Engine, Lua, NodeJs, QuickJS, OpenCC, MediaInfo, Yolo-NCNN, Ace-Editor, Bun | 构建门禁全部通过; 完整运行时矩阵待补 |
-| P4 | 第三方 / Maven 原生依赖插件与纯 JVM 插件 | P0.2 | Python, Three-Stone-AI, Archive-Manager, MLKit x2, 纯 JVM 18 个 | 完成; Python 扩展已在 16 KB 模拟器运行 |
+| P1 | 宿主与打包链路 | P0.2 (门禁), 其余可先行 | 宿主, APK-Builder-Template | 宿主及用户 APK 的 Samsung 16 KB 真机验证通过; 最终 Runtime Kit / 远程 CI 待补; D11 已合并收尾 |
+| P2 | 被宿主进程加载或打包进用户 APK 的插件 | P0.2, P1.1 (libc++) | Image-Quantization, OpenCV, Paddle v3-v6, Rapid v3 / v6 | 静态门禁通过, OpenCV / 量化 / 用户 APK 真机通过; 6 个独立 OCR 插件补测失败, 需按 P6 的 X1-X4 修复 |
+| P3 | 独立进程的自编原生插件 | P0.2 | ImGui, TypeScript-Engine, Lua, NodeJs, QuickJS, OpenCC, MediaInfo, Yolo-NCNN, Ace-Editor, Bun | 构建门禁及列明的模拟器 / arm64 真机冒烟通过; Bun x86_64 仍按 B1 跟踪; 最终发布候选收据待补 |
+| P4 | 第三方 / Maven 原生依赖插件与纯 JVM 插件 | P0.2 | Python, Three-Stone-AI, Archive-Manager, MLKit x2, 纯 JVM 18 个 | 门禁完成; Python / MLKit / Archive 真机运行通过, Three-Stone-AI 真实模型推理待补 |
 | P5 | 索引, 插件中心与文档 | P1.5, P2 | Official-Plugins-Index, 宿主 (plugin center), common-plugin-api | 代码与索引生成完成; 记录真实发布资产, 未发布新版插件 |
 | P6 | 验收矩阵与关闭 | P1-P5 | 全部 | 进行中; 静态复扫为 0, 全矩阵与发布后 CI 待补 |
 
@@ -227,7 +227,7 @@ P0 验收: 共享门禁插件发布且负样例失败; `verify_device.sh` 在 ps
 ### P1.7 文档与收尾
 
 - [x] 宿主 `.changelog` (10 语言) 与 README 重新生成; 本文 P1 条目回填证据. (DOCS)
-- [ ] 维护者 rebase `AutoJs6-QuickJS-Host` (D11, 记录即可).
+- [x] `AutoJs6-QuickJS-Host` 关联分支已由维护者合并到宿主 master 并解决冲突 (`d17d12578`), 工作树与目录均已移除. D11 收尾完成, 无需再次 rebase. (DOCS; `git worktree list --porcelain`)
 
 P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 (`ELF` 全 `0x4000` 或以上); ps16k 模拟器 (API 36) 上安装宿主无兼容模式警告, `verify_device.sh` 输出 `16384`, 冒烟脚本 (`sample/accessibility/smoke-legacy-api.js` + 终端 + OpenCV 插件 `images.*`) 通过; 原生 16 KB 真机同样通过; 用 P2.1 之前的 Image-Quantization APK 触发 P1.5 的结构化错误; CI 绿; changelog 已写.
 
@@ -245,14 +245,14 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 
 ### P2.2 OpenCV (核对)
 
-- [x] 叠加共享门禁 (保留 `verifyElfLoadSegmentAlignment` 与 provenance 校验); 用 `scan_alignment.py` 复核当前发布 APK; 在 API 36/37 ps16k 与 4 KB arm64 真机上通过宿主冒烟 (与 P1.1 合并执行); 原生 16 KB arm64 验收仍待补. (ANDROID_BUILD; DEVICE-16K)
+- [x] 叠加共享门禁 (保留 `verifyElfLoadSegmentAlignment` 与 provenance 校验); 用 `scan_alignment.py` 复核当前发布 APK; 在 API 36/37 ps16k, 4 KB arm64 与 Samsung SM-A566B 原生 16 KB arm64 上通过宿主加载 / 运算 / 异常冒烟, 见 Samsung 补验. (ANDROID_BUILD; DEVICE-16K)
 
 ### P2.3 Paddle-OCR v3 (D7)
 
 - [x] `version.properties` `PADDLE_OCR_NDK_VERSION` 21.1 -> 28.2; `libs/paddleocr/src/main/cpp/CMakeLists.txt` 补显式标志; 复核 C++ 源码无 `PAGE_SIZE` 假设. (ANDROID_BUILD)
 - [x] 替换 `libs/paddleocr/PaddleLite/cxx/libs/{arm64-v8a,armeabi-v7a}/libc++_shared.so` 为 r28.2 副本 (64 位 `0x4000`); 为 Paddle-Lite 预编译库补 `PROVENANCE.md` (来源未知则如实记录 "来源未记录, 2026-09-11 实测 `0x10000`" + sha256). (ELF; DOCS)
 - [x] 该仓库为未压缩打包, 门禁同时覆盖 zip 偏移; 应用共享门禁; 版本号递增, changelog, README. (ANDROID_BUILD; DOCS)
-- [ ] 原生 16 KB arm64 真机上 Paddle OCR 冒烟 (目前已完成 4 KB arm64 用户 APK 验证). (DEVICE-16K)
+- [ ] 原生 16 KB arm64 真机上 Paddle OCR 完整验收: Samsung 的独立插件与用户 APK 均通过 v3 参考图, 但独立插件的 `1000 x 320` 生成图两次在 Paddle-Lite 内 SIGSEGV, 需定位并修复该输入相关崩溃, 补 4 KB 对照. (DEVICE-16K; 维护者清单 X3)
 
 ### P2.4 Rapid-OCR v3 与 v6 (D7)
 
@@ -267,7 +267,7 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 
 ### P2.6 用户 APK 端到端
 
-- [x] 宿主 (P1 后) + P2.1 ~ P2.5 的插件, 用 APK 打包器生成一个勾选 OpenCV / Image-Quantization / Paddle / Rapid 库的用户 APK, `scan_alignment.py` 单文件模式确认 64 位 `.so` 全部 >= 16 KB 且 `extractNativeLibs=true`; 安装到 API 36/37 ps16k 与现有 4 KB arm64 真机运行 OCR / 图像脚本; 原生 16 KB arm64 部分仍待补. (ELF; DEVICE-16K)
+- [x] 宿主 (P1 后) + P2.1 ~ P2.5 的插件生成用户 APK, 静态检查 `.so` 与压缩 / 解压契约, 在 API 36/37 ps16k, 4 KB arm64 与 Samsung 原生 16 KB arm64 执行终端 / 图像 / Paddle v3 / Rapid. 具体组合与 SHA 见部署及 Samsung 收据; 该结果不覆盖独立 OCR 插件进程或未测试的 Paddle 模型变体. (ELF; DEVICE-16K)
 
 P2 验收: 各插件 APK 通过门禁; 宿主在 ps16k 上加载 OpenCV 与 Image-Quantization 无 P1.5 错误; OCR 插件在各自进程内于 ps16k / 16 KB 真机运行; P2.6 用户 APK 通过.
 
@@ -284,7 +284,7 @@ P2 验收: 各插件 APK 通过门禁; 宿主在 ps16k 上加载 OpenCV 与 Imag
 - [x] P3.5 QuickJS-Runtime: 叠加共享门禁 (可选); 其余保持, 作为参考实现记录. (ANDROID_BUILD)
 - [x] P3.6 OpenCC: 叠加共享门禁; 保留 `zipalign -P 16` 与 `verify-16kb` 作业. (ANDROID_BUILD)
 - [x] P3.7 MediaInfo: 叠加共享门禁; 保留 `verify_native_build.py`. (ANDROID_BUILD)
-- [x] P3.8 Yolo-NCNN: CMake 补显式标志 (ncnn 为静态库, 最终对齐由本库链接决定); 应用共享门禁; 新建最小 CI 或至少本地门禁; 本地构建与门禁已通过; 16 KB arm64 真机的 `docs/evidence/r9-arm64-*-16k-*.json` 类收据仍待补. (ANDROID_BUILD; DEVICE-16K 真机)
+- [x] P3.8 Yolo-NCNN: CMake 补显式标志并应用共享门禁; 本地构建与门禁通过; 本轮 `0.1.1` / build 3 在 Samsung SM-A566B 原生 16 KB 下执行 NCNN 参考图片推理, 5 个检测结果通过参考值断言. SHA 与结果见 Samsung 补验. (ANDROID_BUILD; DEVICE-16K 真机)
 - [x] P3.9 Ace-Editor: `tools/ace-lsp/build-luals-android.ps1` 的 luamake 链接参数补显式标志 (目前仅 x86 stub 有); `luals-build-lock.json` 每 ABI 增加 `minLoadAlign`; Gradle 门禁断言 lock 与实物一致 (LuaLS 为 exec 的可执行文件, 只需 ELF 对齐, 压缩打包为有意为之); 是否立即重编二进制见待决 Q4; 无 CI 则至少本地门禁. (ANDROID_BUILD; ELF)
 - [x] P3.10 Bun-Runtime: 叠加共享门禁 (可选); x86_64 16 KB 的 JSC 崩溃保持记录于 B1 与该仓库 README. (ANDROID_BUILD)
 
@@ -332,15 +332,24 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 | API 36 x86_64 ps16k, emulator-5580 | 16384 / linker=false, PM compat disabled=true | 宿主 libc++ / jackpal PTY, OpenCV, Image Quantization, Python ssl/sqlite3/ctypes, 插件中心标记, Rapid v3 用户 APK |
 | API 37 x86_64 ps16k, emulator-5582 | 16384 / linker=fatal, PM compat disabled=true | 上述宿主与 Python 功能; Rapid v3/v6 用户 APK 与可选 OpenCV 依赖; ImGui 渲染, QuickJS / Node / Lua 执行, MediaInfo 读取, TypeScript 编译; 旧图像量化库负例 |
 | Xiaomi 23046RP50C, API 35 arm64 | 4096 | 上述宿主与 Python 功能; 同一个用户 APK 顺序运行 Paddle v3 与 Rapid v3/v6, 均识别出 "测试" |
-| 原生 16 KB arm64 真机 | 未连接 | 待维护者提供设备, 不以 4 KB 真机或 x86_64 模拟器代替 |
+| Samsung SM-A566B, API 36 arm64 | 16384, compat off | 宿主及 16 个原生插件共 30 项 instrumentation 通过; 用户 APK 的终端 / 图像 / Paddle v3 + Rapid 通过. 独立 Paddle v3-v6 / Rapid v3-v6 共 6 个插件失败, Three-Stone-AI 缺模型; 见 Samsung 补验 |
 
-- [ ] 原生 16 KB arm64 全部运行时验收, 含 Paddle / Yolo / OpenCV / Image Quantization / Node / Lua / QuickJS.
+- [ ] 原生 16 KB arm64 全部运行时验收: 设备已提供, 宿主 / OpenCV / Image Quantization / Yolo / Node / Lua / QuickJS 等列明项目已过; 修复剩余 6 个 OCR 插件的独立调用失败并补 Three-Stone-AI, 再验证最终发布产物.
 - [ ] Three-Stone-AI 的真实模型推理验收: 当前模拟器未导入 `.litertlm` 模型. 其它已覆盖的 x86_64 原生插件均在 API 36/37 取得运行时证据, 详见收据; Bun 的 JSC 已知问题仍按 B1 单独跟踪.
 - [x] Image Quantization 负向设备验证: 在当前测试 APK 中装入保留的真实 NDK r26b / 4 KB JNI, API 37/fatal 的公开量化调用返回 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED`, 宿主不崩溃. 该夹具不是完整未修改的历史发布 APK; 验证后已恢复新版插件. (DEVICE-16K: `installedUnalignedPluginRaisesCatchableLoadError`)
 - [ ] 宿主与插件后续发布后, 回填远程 CI 链接并重新实测官方索引的发布资产.
 
 各已勾选条目的构建 / ELF / 单元测试证据统一存于
 [evidence/page-size-16kb-20260911.md](evidence/page-size-16kb-20260911.md) 与对应 JSON.
+
+### Samsung 补验后的必修项
+
+- [ ] X1: Rapid v3/v6 独立 APK 补齐 OpenCV 的 `libc++_shared.so` 依赖, 修复 `UnsatisfiedLinkError`, 并复验独立插件与用户 APK 两条路径.
+- [ ] X2: Paddle v4 Server / v5 Thai / v6 Tiny 的旧 libc++ 初始化 SIGSEGV, 需修复并按实际共用库范围复验其它变体.
+- [ ] X3: Paddle v3 独立插件与用户 APK 均可识别 `944 x 640` 参考图, 但独立插件的 `1000 x 320` 生成图重复在 Paddle-Lite 内 SIGSEGV. 相同 Paddle-Lite / JNI / libc++ 实物, 不同 OpenCV 的对照已记录; 需定位输入 / 初始化差异并补 4 KB 对照, 不把崩溃位置记作已确定根因.
+- [ ] X4: 随上述修复补原生依赖完整性与实际执行回归, 复核 RELRO / 可写数据布局. 当前 `PT_LOAD` / ZIP 门禁通过不能关闭这些失败.
+
+详细失败边界, 默认值, 发布顺序, 手动测试与 backlog 见 [维护者收尾清单](page-size-16kb-maintainer-checklist.md), 具体测试和产物见 [Samsung 补验](evidence/page-size-16kb-samsung-20260911.md).
 第 3 节的旧库 / 旧 NDK 数值是部署前快照, 不代表当前产物.
 
 ---
@@ -443,3 +452,13 @@ Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐
 - 补充矩阵: API 36/37 均通过 OpenCC 全转换, Ace LuaLS 语义与故障恢复, Archive Manager TAR/Zstd, MLKit 条码/OCR; API 36 另补齐 Node / Lua / MediaInfo / TypeScript 与 ImGui / QuickJS. Three-Stone-AI 的模型推理尚无当前模型输入, 不把 APK 安装记作推理验收. 宿主实现提交 `7a1f91481`, 官方索引 `df2eb35`, 插件提交表见证据文档.
 
 - 收尾: 宿主 / 42 插件 / 索引 / 共享插件共 45 个仓库已复核. 原有 30 个插件脏工作区与 R8 的 AD 暂存状态保留. 自动记忆索引已更新. 最终 Runtime Kit 生成的用户 APK 在 API 36/37 与 4 KB arm64 上均复验通过; P6 因上述设备 / 模型 / 发布后验收项保持开放.
+
+### 2026-09-11 合并收尾, 全量剩余事项与 Samsung 补验
+
+- 维护者已将 QuickJS-Host 关联分支合并到宿主 master, 解决冲突并移除工作树 / 目录; 合并提交 `d17d12578`, D11 / P1.7 已关闭. 合并提交的验证说明与本轮所测 APK SHA 分别记录, 不混为同一来源证明.
+- 已将全部发布阻塞, 其它收尾事项, 设备 / 模型 / 人工验收, Q1-Q4 默认值, D3 预编译库边界, 30 个既有未提交工作区与 B1-B6 后续项集中到 [维护者收尾清单](page-size-16kb-maintainer-checklist.md).
+- 用户提供 `localhost:30078`, 实测 Samsung SM-A566B / API 36 / arm64-v8a / PAGE_SIZE 16384, 验收时关闭 linker / PM 兼容模式并读回. 宿主及 16 个原生插件的 30 项 instrumentation 全过, 无跳过; Yolo 得到 5 个参考检测结果, Ace LuaLS 为真实 semantic 路径 / 17 个补全 / 预期恢复.
+- 6 个独立 OCR 插件在新增图片用例失败. Rapid v3/v6 明确缺少 OpenCV 所需的 libc++; Paddle v4 Server / v5 Thai / v6 Tiny 在旧 libc++ 初始化时 SIGSEGV; Paddle v3 的 1000 x 320 生成图两次崩溃, 944 x 640 参考图在独立插件中通过. 已增加 X1-X4, 未把静态门禁通过当作完整运行时支持, 未将未定位的问题直接归因于页大小.
+- 4 种真实用户 APK 组合全部通过: Paddle v3 + Rapid v3/v6, 各自选择 / 不选择独立 OpenCV. 终端退出 37, 量化输出有效, 两种 OCR 均识别 "测试". 最初因额外 Paddle flavor 干扰的夹具失败独立保留, 隔离后重验. 最终 Release / 合并后新 Runtime Kit 与公开资产仍需按 R1-R8 验收.
+- 所有安装输入与设备 base.apk SHA 一致; 25 个应用 APK 的直接 ELF / zipalign 检查通过. Python / Builder 的嵌套扫描引用相同产物 SHA 的原门禁. Three-Stone-AI 尚缺 `.litertlm` 模型输入, P6 未关闭.
+- 两个兼容模式属性, 宿主临时存储 AppOp 与三个 Paddle flavor 状态均恢复原值; 测试 APK 保留. 本轮只提交文档 / 收据, 没有 Gradle 构建或产品源码改动. 详细证据见 [Samsung 补验](evidence/page-size-16kb-samsung-20260911.md) 及 JSON.

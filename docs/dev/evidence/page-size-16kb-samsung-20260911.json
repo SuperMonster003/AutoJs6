@@ -1,0 +1,3622 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-11",
+  "status": "PARTIAL: host and 16 native plugin runtime smokes passed; 6 standalone OCR providers failed; real-model inference and final publication acceptance remain open.",
+  "scope": "Maintainer remaining-work inventory and user-authorized Samsung 16 KB follow-up. No product source edits, Gradle builds, releases or pushes in this follow-up.",
+  "hostCollectionCommit": "d17d125783426f89ee446a6352551a6a7b873150",
+  "quickJsHost": {
+    "merged": true,
+    "worktreeRemoved": true,
+    "directoryRemoved": true,
+    "mergeCommit": "d17d125783426f89ee446a6352551a6a7b873150",
+    "mergeValidationSource": "Maintainer merge commit message; not claimed as rerun during this follow-up."
+  },
+  "device": {
+    "serial": "localhost:30078",
+    "capturedAtUtc": "2026-09-11T08:47:33.284127+00:00",
+    "pageSize": 16384,
+    "model": "SM-A566B",
+    "api": "36",
+    "abis": "arm64-v8a",
+    "fingerprint": "samsung/a56xnaeea_16kb/a56x:16/BP2A.250605.031.A3/A566BXXU6BYIF_OXM6BYIF:user/release-keys",
+    "linkerCompat": "false",
+    "pmCompatDisabled": "true"
+  },
+  "artifacts": [
+    {
+      "repository": "AutoJs6-Plugin-Ace-Editor",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Ace-Editor\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-ace-editor-v1.1.25-universal.apk",
+      "sha256": "b6d54507f99beb4d9d9da4a5620567b793be73db098133680e5b4522d1cd68f6",
+      "bytes": 24536729,
+      "builtAtUtc": "2026-09-11T05:17:22.227356+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a' 'armeabi-v7a' 'x86' 'x86_64'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.ace.editor",
+        "versionName": "1.1.25"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.ace.editor",
+      "collectionHead": "ce2f5d49c3aba2ea543601ee97c820162568edce",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "b6d54507f99beb4d9d9da4a5620567b793be73db098133680e5b4522d1cd68f6",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=36 minSdk=24 targetSdk=36",
+        "versionName=1.1.25",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Ace-Editor",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Ace-Editor\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "71bf836ef4829a43130e9a8334a2a3eddd9779ebc0f658cd5520addaf5ffdc6a",
+      "bytes": 719248,
+      "builtAtUtc": "2026-09-11T07:21:08.188407+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.ace.editor.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.ace.editor.test",
+      "collectionHead": "ce2f5d49c3aba2ea543601ee97c820162568edce",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "71bf836ef4829a43130e9a8334a2a3eddd9779ebc0f658cd5520addaf5ffdc6a",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-Archive-Manager",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Archive-Manager\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-archive-manager-v2.22.1.apk",
+      "sha256": "662dff990def86795069b2d32b397b27ffb14c63e2395f3801b45c4a136c6d42",
+      "bytes": 12785044,
+      "builtAtUtc": "2026-09-11T05:51:58.694653+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a' 'armeabi-v7a' 'x86' 'x86_64'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.archivemanager",
+        "versionName": "2.22.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.archivemanager",
+      "collectionHead": "71bf9c86b8edbc39455456af785badb41581980c",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "662dff990def86795069b2d32b397b27ffb14c63e2395f3801b45c4a136c6d42",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=29 minSdk=24 targetSdk=36",
+        "versionName=2.22.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Archive-Manager",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Archive-Manager\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "54f4938310e4825a3177b8c34f99f1164a34da4474be87f55a88980f2d107e1a",
+      "bytes": 700969,
+      "builtAtUtc": "2026-09-11T07:21:23.000989+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.archivemanager.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.archivemanager.test",
+      "collectionHead": "71bf9c86b8edbc39455456af785badb41581980c",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "54f4938310e4825a3177b8c34f99f1164a34da4474be87f55a88980f2d107e1a",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-Bun-Runtime",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Bun-Runtime\\app\\build\\outputs\\apk\\debug\\app-arm64-v8a-debug.apk",
+      "sha256": "d8702bb041c33481ca3de794da2856df6e925763a4651cea3d2ead833afec814",
+      "bytes": 40901021,
+      "builtAtUtc": "2026-09-11T05:31:37.885557+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.bun.runtime",
+        "versionName": "0.2.2"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.bun.runtime",
+      "collectionHead": "800a48f0902e6586253e9f7a03d6d006889bec02",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "d8702bb041c33481ca3de794da2856df6e925763a4651cea3d2ead833afec814",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=7 minSdk=33 targetSdk=36",
+        "versionName=0.2.2",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Bun-Runtime",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Bun-Runtime\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "fc208eb64c7ac6a09f9e534ba4a21b740e3fda6fb2759cd4cbf9da1e82a4685d",
+      "bytes": 2271328,
+      "builtAtUtc": "2026-09-10T12:12:40.381410+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.bun.runtime.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.bun.runtime.test",
+      "collectionHead": "800a48f0902e6586253e9f7a03d6d006889bec02",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "fc208eb64c7ac6a09f9e534ba4a21b740e3fda6fb2759cd4cbf9da1e82a4685d",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=33 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Quantization",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Image-Quantization\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-image-quantization-v1.0.1-arm64-v8a.apk",
+      "sha256": "5d4ca8bbd46978327d7a2c551609d9bd61e62f755410ccebe4b62a7aaa77b646",
+      "bytes": 2005561,
+      "builtAtUtc": "2026-09-11T05:12:55.421322+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.imagequant",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.imagequant",
+      "collectionHead": "ea936f6c6b1dde02d2175a88b63f4d34f0390006",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "5d4ca8bbd46978327d7a2c551609d9bd61e62f755410ccebe4b62a7aaa77b646",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=5 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-ImGui",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-ImGui\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-imgui-v1.9.1-arm64-v8a.apk",
+      "sha256": "15397f1636cb16e7e0cbecadf01f5515e20299a84be7aa24b5ad7139a442efdb",
+      "bytes": 5023142,
+      "builtAtUtc": "2026-09-11T05:13:03.025744+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.imgui",
+        "versionName": "1.9.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.imgui",
+      "collectionHead": "4fde7173611e1ec3816907c163f126a51073b2b0",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "15397f1636cb16e7e0cbecadf01f5515e20299a84be7aa24b5ad7139a442efdb",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=15 minSdk=24 targetSdk=36",
+        "versionName=1.9.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-ImGui",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-ImGui\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "560511c6c98e6e98cec795a349ddd0c19280d34b2f6e87e95231e6f2c4243634",
+      "bytes": 941846,
+      "builtAtUtc": "2026-09-11T07:00:17.075366+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.imgui.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.imgui.test",
+      "collectionHead": "4fde7173611e1ec3816907c163f126a51073b2b0",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "560511c6c98e6e98cec795a349ddd0c19280d34b2f6e87e95231e6f2c4243634",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-Lua-Runtime",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Lua-Runtime\\app\\build\\outputs\\apk\\provider\\release\\app-provider-arm64-v8a-release.apk",
+      "sha256": "a94fa0f5ce178fd36d6e55f662bc3235a3bd15094ec115beea43e63e458f0c9e",
+      "bytes": 759464,
+      "builtAtUtc": "2026-09-11T07:09:44.638482+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.lua.runtime",
+        "versionName": "0.1.1-rc.2"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.lua.runtime",
+      "collectionHead": "303d59c9873d7b8ca560146f84dbbfce53483333",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "a94fa0f5ce178fd36d6e55f662bc3235a3bd15094ec115beea43e63e458f0c9e",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=63 minSdk=24 targetSdk=36",
+        "versionName=0.1.1-rc.2",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-MediaInfo",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-MediaInfo\\app\\build\\outputs\\apk\\debug\\app-arm64-v8a-debug.apk",
+      "sha256": "7db8606ac8ba4fd17f8fa5ccb9ee7465a7d3486a3b5bb775200ce9edc2c3a27f",
+      "bytes": 5116173,
+      "builtAtUtc": "2026-09-11T05:30:37.630956+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.mediainfo",
+        "versionName": "2.1.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.mediainfo",
+      "collectionHead": "34e23190a2d9d2929d1f889dae1035c802e2f54e",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "7db8606ac8ba4fd17f8fa5ccb9ee7465a7d3486a3b5bb775200ce9edc2c3a27f",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=13 minSdk=24 targetSdk=36",
+        "versionName=2.1.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-Barcode",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-MLKit-Barcode\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-mlkit-barcode-v1.0.1-arm64-v8a.apk",
+      "sha256": "4386fc0c6daf1487a32dedcd8817880dbde18ef309a222472c959082c018cf50",
+      "bytes": 7327668,
+      "builtAtUtc": "2026-09-11T05:53:42.401554+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.mlkit.barcode",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.mlkit.barcode",
+      "collectionHead": "a39683a99be5675217f3553070fd4115b5088e4c",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "4386fc0c6daf1487a32dedcd8817880dbde18ef309a222472c959082c018cf50",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=8 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-OCR",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-MLKit-OCR\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-mlkit-ocr-v1.0.1-arm64-v8a.apk",
+      "sha256": "8981e4ecd829cff7dc0a210e2583c2a33e5fcb676afb2193f81776e5c637c431",
+      "bytes": 10894391,
+      "builtAtUtc": "2026-09-11T05:54:26.141349+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.mlkitocr",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.mlkitocr",
+      "collectionHead": "f3a02b65c41c05e00e594990924dde8cf1da5c30",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "8981e4ecd829cff7dc0a210e2583c2a33e5fcb676afb2193f81776e5c637c431",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=9 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-NodeJs-Runtime",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-NodeJs-Runtime\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-nodejs-runtime-v1.4.1-arm64-v8a.apk",
+      "sha256": "df176489d42f8ef3256e709f7b983d9ba905f694d13d038f250aaeb194d4e28b",
+      "bytes": 28280036,
+      "builtAtUtc": "2026-09-11T05:26:32.786121+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.nodejs",
+        "versionName": "1.4.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.nodejs",
+      "collectionHead": "dd33c442e945c41572f871e478edd39841afd64c",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "df176489d42f8ef3256e709f7b983d9ba905f694d13d038f250aaeb194d4e28b",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=157 minSdk=24 targetSdk=36",
+        "versionName=1.4.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCC",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-OpenCC\\app\\build\\outputs\\apk\\debug\\app-arm64-v8a-debug.apk",
+      "sha256": "bfc0fe74c124fa3ee16510aea6193bbff64f7a708e5097102a5653c359e11d1e",
+      "bytes": 8951182,
+      "builtAtUtc": "2026-09-11T05:29:53.537858+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.opencc",
+        "versionName": "1.3.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.opencc",
+      "collectionHead": "29ec3a45d3f6ddafc179ef98bfc61a2972d08ee5",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "bfc0fe74c124fa3ee16510aea6193bbff64f7a708e5097102a5653c359e11d1e",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=21 minSdk=24 targetSdk=36",
+        "versionName=1.3.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCC",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-OpenCC\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "659a0dff5250cc62ea1a87f06a052a63be0492a18a62c7f970bc1f50a9cd8f10",
+      "bytes": 480643,
+      "builtAtUtc": "2026-09-11T07:21:06.430523+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.opencc.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.opencc.test",
+      "collectionHead": "29ec3a45d3f6ddafc179ef98bfc61a2972d08ee5",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "659a0dff5250cc62ea1a87f06a052a63be0492a18a62c7f970bc1f50a9cd8f10",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCV",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-OpenCV\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-opencv-v1.1.1-arm64-v8a.apk",
+      "sha256": "29e14079d91f3ef1fa86835f892d9c757a038fa97465b116f9735f9fb832c26b",
+      "bytes": 9784648,
+      "builtAtUtc": "2026-09-11T05:12:43.347907+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.opencv",
+        "versionName": "1.1.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.opencv",
+      "collectionHead": "24c85f01dd2772d9f776da215cd07971c5a417e9",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "29e14079d91f3ef1fa86835f892d9c757a038fa97465b116f9735f9fb832c26b",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=11 minSdk=24 targetSdk=36",
+        "versionName=1.1.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv3\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "sha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "bytes": 50470927,
+      "builtAtUtc": "2026-09-11T06:10:41.747411+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+      "collectionHead": "d9d27930a1aa342182f373c475cd011dd93effbc",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=34 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv4\\app\\build\\outputs\\apk\\server\\debug\\autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-arm64-v8a.apk",
+      "sha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+      "bytes": 198196927,
+      "builtAtUtc": "2026-09-11T06:11:07.485223+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+        "versionName": "1.0.1-server"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+      "collectionHead": "d5957223ccb52ea8e66822b287086e557cae8330",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=10 minSdk=26 targetSdk=36",
+        "versionName=1.0.1-server",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv5\\app\\build\\outputs\\apk\\thai\\debug\\autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-arm64-v8a.apk",
+      "sha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+      "bytes": 30367222,
+      "builtAtUtc": "2026-09-11T06:12:07.724706+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+        "versionName": "1.0.1-thai"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+      "collectionHead": "245c95f9a6b6b990756173c7981425985179c88a",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=64 minSdk=26 targetSdk=36",
+        "versionName=1.0.1-thai",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv6\\app\\build\\outputs\\apk\\tiny\\debug\\autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-arm64-v8a.apk",
+      "sha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+      "bytes": 24245331,
+      "builtAtUtc": "2026-09-11T06:12:24.374850+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+        "versionName": "1.0.1-tiny"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+      "collectionHead": "f1d82c7469af5df199731bafb7a248f88e3396be",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=17 minSdk=26 targetSdk=36",
+        "versionName=1.0.1-tiny",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Python-Runtime",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Python-Runtime\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-python-runtime-v0.5.1-arm64-v8a.apk",
+      "sha256": "62f2fb65816f131430dde098bf3164751b84c70e027d4a5ccae5710c2ff81566",
+      "bytes": 23784776,
+      "builtAtUtc": "2026-09-11T05:15:23.824749+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.python.runtime",
+        "versionName": "0.5.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.python.runtime",
+      "collectionHead": "1d80348a81c214b31fe56b6c7a42fe178de6b635",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "62f2fb65816f131430dde098bf3164751b84c70e027d4a5ccae5710c2ff81566",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=94 minSdk=24 targetSdk=36",
+        "versionName=0.5.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-QuickJS-Runtime\\app\\build\\outputs\\apk\\debug\\app-arm64-v8a-debug.apk",
+      "sha256": "0d1fe43eba0e8dc0f532ac96e74b5a3a0fa21e0fc05ed20fa3a279d41332aa95",
+      "bytes": 2937452,
+      "builtAtUtc": "2026-09-11T05:27:54.585843+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+      "collectionHead": "ed22590d3e2eff875d95f4c73b88c6c3c845bdc9",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "0d1fe43eba0e8dc0f532ac96e74b5a3a0fa21e0fc05ed20fa3a279d41332aa95",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=7 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-QuickJS-Runtime\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "527231f3bf5e528299f44c1f978a31bfe4e8f5fa2f6140ca8307a0260cc9f5c6",
+      "bytes": 943509,
+      "builtAtUtc": "2026-09-11T07:00:28.360245+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime.test",
+      "collectionHead": "ed22590d3e2eff875d95f4c73b88c6c3c845bdc9",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "527231f3bf5e528299f44c1f978a31bfe4e8f5fa2f6140ca8307a0260cc9f5c6",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Rapid-OCR-PP-OCRv3\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+      "sha256": "81e4883c3d98e3b94f27aa3b2910562fd1b3894fbcfa3b6ebedd00599cfec88f",
+      "bytes": 32178938,
+      "builtAtUtc": "2026-09-11T06:44:11.802630+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3",
+      "collectionHead": "4d95e21a727b7fd2a9a826cef45b6156fefe1133",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "81e4883c3d98e3b94f27aa3b2910562fd1b3894fbcfa3b6ebedd00599cfec88f",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=16 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Rapid-OCR-PP-OCRv6\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-arm64-v8a.apk",
+      "sha256": "99b87956b62984acfb2818dbfdbe028d8623bc8565f4e012d781ebbe64494bab",
+      "bytes": 47345341,
+      "builtAtUtc": "2026-09-11T06:44:39.874779+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+        "versionName": "1.0.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+      "collectionHead": "5db2d0057001da179dddc48f8e69849509e1154f",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "99b87956b62984acfb2818dbfdbe028d8623bc8565f4e012d781ebbe64494bab",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=19 minSdk=24 targetSdk=36",
+        "versionName=1.0.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Stone-AI",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Three-Stone-AI\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+      "sha256": "cad6a96012d2fee0bf68c9e05196b13ca3b98bc3035179755535e87a34f1f945",
+      "bytes": 31374961,
+      "builtAtUtc": "2026-09-11T05:50:18.464718+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.threestoneai",
+        "versionName": "1.1.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.threestoneai",
+      "collectionHead": "b743d98fb697aa226140679d7d0e7caf580ba5a2",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "cad6a96012d2fee0bf68c9e05196b13ca3b98bc3035179755535e87a34f1f945",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=56 minSdk=24 targetSdk=36",
+        "versionName=1.1.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-TypeScript-Engine",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-TypeScript-Engine\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-typescript-engine-v0.6.1-universal.apk",
+      "sha256": "c1da5ce09288ee4e5bf7ecbd647066728736fa97a0c5c91ca80ab1f491866b88",
+      "bytes": 5874808,
+      "builtAtUtc": "2026-09-11T05:22:19.315664+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "'arm64-v8a' 'armeabi-v7a' 'x86' 'x86_64'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.typescript",
+        "versionName": "0.6.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.typescript",
+      "collectionHead": "807751ca59d6511b590eb64ab404795a8fe1fc36",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "c1da5ce09288ee4e5bf7ecbd647066728736fa97a0c5c91ca80ab1f491866b88",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=7 minSdk=24 targetSdk=36",
+        "versionName=0.6.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Yolo-NCNN",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN\\app\\build\\outputs\\apk\\debug\\autojs6-plugin-yolo-ncnn-v0.1.1-arm64-v8a.apk",
+      "sha256": "cff83d62cddd4f2ab628c00c1ea7b533fd4a4fc3e76a6ecfb8ee10d1b5588672",
+      "bytes": 3645859,
+      "builtAtUtc": "2026-09-11T05:31:01.789171+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+        "versionName": "0.1.1"
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+      "collectionHead": "e8995d232e5cfe0133b48429766fdd3c8db58bda",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "cff83d62cddd4f2ab628c00c1ea7b533fd4a4fc3e76a6ecfb8ee10d1b5588672",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=3 minSdk=24 targetSdk=36",
+        "versionName=0.1.1",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    },
+    {
+      "repository": "AutoJs6-Plugin-Yolo-NCNN",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN\\app\\build\\outputs\\apk\\androidTest\\debug\\app-debug-androidTest.apk",
+      "sha256": "075ff70fdf753190db1f9323c9fa71e3db6062985521634b73213dae8ba33eb7",
+      "bytes": 10434279,
+      "builtAtUtc": "2026-09-10T02:20:14.156475+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn.test",
+        "versionName": ""
+      },
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn.test",
+      "collectionHead": "e8995d232e5cfe0133b48429766fdd3c8db58bda",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "075ff70fdf753190db1f9323c9fa71e3db6062985521634b73213dae8ba33eb7",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6\\app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-arm64-v8a.apk",
+      "sha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "bytes": 46525238,
+      "builtAtUtc": "2026-09-11T08:22:29.779498+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "36",
+        "package": "org.autojs.autojs6",
+        "versionName": "6.8.0"
+      },
+      "package": "org.autojs.autojs6",
+      "collectionHead": "d17d125783426f89ee446a6352551a6a7b873150",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "packageCompatibility": [
+        "primaryCpuAbi=arm64-v8a",
+        "versionCode=5279 minSdk=24 targetSdk=36",
+        "versionName=6.8.0",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6",
+      "testApk": true,
+      "path": "D:\\idea-projects\\AutoJs6\\app\\build\\outputs\\apk\\androidTest\\app\\debug\\app-app-debug-androidTest.apk",
+      "sha256": "21db41e917c9d9e3fae879a478233060e267581e6449b70a75707be164e184a2",
+      "bytes": 2394445,
+      "builtAtUtc": "2026-09-11T07:12:30.262324+00:00",
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "org.autojs.autojs6.test",
+        "versionName": ""
+      },
+      "package": "org.autojs.autojs6.test",
+      "collectionHead": "d17d125783426f89ee446a6352551a6a7b873150",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "21db41e917c9d9e3fae879a478233060e267581e6449b70a75707be164e184a2",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=0 minSdk=24 targetSdk=36",
+        "versionName=null",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": false
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Builder-Template",
+      "testApk": false,
+      "path": "D:\\idea-projects\\AutoJs6-Plugin-APK-Builder-Template\\app\\build\\outputs\\apk\\release\\autojs6-apk-builder-template-v1.0.1-autojs6-v6.8.0-universal.apk",
+      "sha256": "47895db120a406329861d0f1f9626ecb4a46df4fa30c05554a3396a945d98348",
+      "bytes": 43725368,
+      "builtAtUtc": "2026-09-11T07:00:23.973890+00:00",
+      "manifest": {
+        "extractNativeLibs": "false",
+        "nativeCode": "?",
+        "targetSdk": "36",
+        "package": "org.autojs.plugin.apkbuilder.template",
+        "versionName": "1.0.1+autojs6-6.8.0"
+      },
+      "package": "org.autojs.plugin.apkbuilder.template",
+      "collectionHead": "4a23759f83bb4e401fd423c57ce02cd45582190f",
+      "provenanceNote": "Prebuilt workspace artifact, identified by SHA-256; collection HEAD is not proof of build source identity.",
+      "installOutput": "Performing Streamed Install\nSuccess",
+      "installedSha256": "47895db120a406329861d0f1f9626ecb4a46df4fa30c05554a3396a945d98348",
+      "packageCompatibility": [
+        "primaryCpuAbi=null",
+        "versionCode=527901 minSdk=24 targetSdk=36",
+        "versionName=1.0.1+autojs6-6.8.0",
+        "pageSizeCompat=0"
+      ],
+      "matchesPriorPassingGateArtifact": true
+    }
+  ],
+  "staticChecks": [
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.ace.editor",
+      "apkSha256": "b6d54507f99beb4d9d9da4a5620567b793be73db098133680e5b4522d1cd68f6",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs6_luals.so",
+          "abi": "arm64-v8a",
+          "size": 2226784,
+          "compressed": true,
+          "dataOffset": 4965709,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/armeabi-v7a/libautojs6_luals.so",
+          "abi": "armeabi-v7a",
+          "size": 1842636,
+          "compressed": true,
+          "dataOffset": 5834192,
+          "zipAligned16k": false,
+          "elfAlign": 4096,
+          "elfErr": null,
+          "ok": false
+        },
+        {
+          "entry": "lib/x86/libautojs6_luals_install_compat.so",
+          "abi": "x86",
+          "size": 1256,
+          "compressed": true,
+          "dataOffset": 6634001,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libautojs6_luals.so",
+          "abi": "x86_64",
+          "size": 2220864,
+          "compressed": true,
+          "dataOffset": 6634697,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.archivemanager",
+      "apkSha256": "662dff990def86795069b2d32b397b27ffb14c63e2395f3801b45c4a136c6d42",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libzstd-jni-1.5.7-15.so",
+          "abi": "arm64-v8a",
+          "size": 476288,
+          "compressed": false,
+          "dataOffset": 8306688,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/armeabi-v7a/libzstd-jni-1.5.7-15.so",
+          "abi": "armeabi-v7a",
+          "size": 363260,
+          "compressed": false,
+          "dataOffset": 8798208,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86/libzstd-jni-1.5.7-15.so",
+          "abi": "x86",
+          "size": 552248,
+          "compressed": false,
+          "dataOffset": 9175040,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libzstd-jni-1.5.7-15.so",
+          "abi": "x86_64",
+          "size": 547360,
+          "compressed": false,
+          "dataOffset": 9732096,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.bun.runtime",
+      "apkSha256": "d8702bb041c33481ca3de794da2856df6e925763a4651cea3d2ead833afec814",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libbun_exec.so",
+          "abi": "arm64-v8a",
+          "size": 87914400,
+          "compressed": true,
+          "dataOffset": 2634634,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libbun_supervisor.so",
+          "abi": "arm64-v8a",
+          "size": 7440,
+          "compressed": true,
+          "dataOffset": 40714497,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.imagequant",
+      "apkSha256": "5d4ca8bbd46978327d7a2c551609d9bd61e62f755410ccebe4b62a7aaa77b646",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 900199,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.imgui",
+      "apkSha256": "15397f1636cb16e7e0cbecadf01f5515e20299a84be7aa24b5ad7139a442efdb",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs6_imgui.so",
+          "abi": "arm64-v8a",
+          "size": 2025688,
+          "compressed": true,
+          "dataOffset": 955571,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.lua.runtime",
+      "apkSha256": "a94fa0f5ce178fd36d6e55f662bc3235a3bd15094ec115beea43e63e458f0c9e",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs_lua_runtime.so",
+          "abi": "arm64-v8a",
+          "size": 594752,
+          "compressed": false,
+          "dataOffset": 98304,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.mediainfo",
+      "apkSha256": "7db8606ac8ba4fd17f8fa5ccb9ee7465a7d3486a3b5bb775200ce9edc2c3a27f",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libmediainfo.so",
+          "abi": "arm64-v8a",
+          "size": 11247008,
+          "compressed": true,
+          "dataOffset": 954221,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.mlkit.barcode",
+      "apkSha256": "4386fc0c6daf1487a32dedcd8817880dbde18ef309a222472c959082c018cf50",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libbarhopper_v3.so",
+          "abi": "arm64-v8a",
+          "size": 4946720,
+          "compressed": true,
+          "dataOffset": 3450551,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.mlkitocr",
+      "apkSha256": "8981e4ecd829cff7dc0a210e2583c2a33e5fcb676afb2193f81776e5c637c431",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libmlkit_google_ocr_pipeline.so",
+          "abi": "arm64-v8a",
+          "size": 11064544,
+          "compressed": true,
+          "dataOffset": 3484598,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.nodejs",
+      "apkSha256": "df176489d42f8ef3256e709f7b983d9ba905f694d13d038f250aaeb194d4e28b",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs6-node.so",
+          "abi": "arm64-v8a",
+          "size": 2545624,
+          "compressed": true,
+          "dataOffset": 990724,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 1666164,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libnode.so",
+          "abi": "arm64-v8a",
+          "size": 70742448,
+          "compressed": true,
+          "dataOffset": 2106713,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.opencc",
+      "apkSha256": "bfc0fe74c124fa3ee16510aea6193bbff64f7a708e5097102a5653c359e11d1e",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libopencc_jni.so",
+          "abi": "arm64-v8a",
+          "size": 1633824,
+          "compressed": false,
+          "dataOffset": 4931584,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.opencv",
+      "apkSha256": "29e14079d91f3ef1fa86835f892d9c757a038fa97465b116f9735f9fb832c26b",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 900294,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+      "apkSha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": false,
+          "dataOffset": 3686400,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": false,
+          "dataOffset": 7880704,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": false,
+          "dataOffset": 9142272,
+          "zipAligned16k": true,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": false,
+          "dataOffset": 29081600,
+          "zipAligned16k": true,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+      "apkSha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1055016,
+          "compressed": true,
+          "dataOffset": 2718301,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 3056260,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+          "abi": "arm64-v8a",
+          "size": 75720,
+          "compressed": true,
+          "dataOffset": 10028182,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": true,
+          "dataOffset": 10054504,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+      "apkSha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1055016,
+          "compressed": true,
+          "dataOffset": 2718457,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 3056416,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+          "abi": "arm64-v8a",
+          "size": 75720,
+          "compressed": true,
+          "dataOffset": 10028338,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": true,
+          "dataOffset": 10054660,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+      "apkSha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1055016,
+          "compressed": true,
+          "dataOffset": 2714786,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 3052745,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+          "abi": "arm64-v8a",
+          "size": 75720,
+          "compressed": true,
+          "dataOffset": 10024667,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": true,
+          "dataOffset": 10050989,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.python.runtime",
+      "apkSha256": "62f2fb65816f131430dde098bf3164751b84c70e027d4a5ccae5710c2ff81566",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libchaquopy_java.so",
+          "abi": "arm64-v8a",
+          "size": 156744,
+          "compressed": false,
+          "dataOffset": 1130496,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libcrypto_chaquopy.so",
+          "abi": "arm64-v8a",
+          "size": 3784,
+          "compressed": false,
+          "dataOffset": 1294336,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libcrypto_python.so",
+          "abi": "arm64-v8a",
+          "size": 3721048,
+          "compressed": false,
+          "dataOffset": 1310720,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpython3.13.so",
+          "abi": "arm64-v8a",
+          "size": 5392048,
+          "compressed": false,
+          "dataOffset": 5046272,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libsqlite3_chaquopy.so",
+          "abi": "arm64-v8a",
+          "size": 3784,
+          "compressed": false,
+          "dataOffset": 10452992,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libsqlite3_python.so",
+          "abi": "arm64-v8a",
+          "size": 886520,
+          "compressed": false,
+          "dataOffset": 10469376,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libssl_chaquopy.so",
+          "abi": "arm64-v8a",
+          "size": 3768,
+          "compressed": false,
+          "dataOffset": 11370496,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libssl_python.so",
+          "abi": "arm64-v8a",
+          "size": 623736,
+          "compressed": false,
+          "dataOffset": 11386880,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+      "apkSha256": "0d1fe43eba0e8dc0f532ac96e74b5a3a0fa21e0fc05ed20fa3a279d41332aa95",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs_quickjs_runtime.so",
+          "abi": "arm64-v8a",
+          "size": 1518864,
+          "compressed": false,
+          "dataOffset": 933888,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3",
+      "apkSha256": "81e4883c3d98e3b94f27aa3b2910562fd1b3894fbcfa3b6ebedd00599cfec88f",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443328,
+          "compressed": true,
+          "dataOffset": 3058136,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 3541947,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 10513864,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+      "apkSha256": "99b87956b62984acfb2818dbfdbe028d8623bc8565f4e012d781ebbe64494bab",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443280,
+          "compressed": true,
+          "dataOffset": 3058102,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 3541991,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 10513908,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.threestoneai",
+      "apkSha256": "cad6a96012d2fee0bf68c9e05196b13ca3b98bc3035179755535e87a34f1f945",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/liblitertlm_jni.so",
+          "abi": "arm64-v8a",
+          "size": 21199256,
+          "compressed": false,
+          "dataOffset": 7585792,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.typescript",
+      "apkSha256": "c1da5ce09288ee4e5bf7ecbd647066728736fa97a0c5c91ca80ab1f491866b88",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs6_r2_fd_flags.so",
+          "abi": "arm64-v8a",
+          "size": 4496,
+          "compressed": false,
+          "dataOffset": 2277376,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/armeabi-v7a/libautojs6_r2_fd_flags.so",
+          "abi": "armeabi-v7a",
+          "size": 3104,
+          "compressed": false,
+          "dataOffset": 2293760,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86/libautojs6_r2_fd_flags.so",
+          "abi": "x86",
+          "size": 3460,
+          "compressed": false,
+          "dataOffset": 2310144,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libautojs6_r2_fd_flags.so",
+          "abi": "x86_64",
+          "size": 4432,
+          "compressed": false,
+          "dataOffset": 2326528,
+          "zipAligned16k": true,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+      "apkSha256": "cff83d62cddd4f2ab628c00c1ea7b533fd4a4fc3e76a6ecfb8ee10d1b5588672",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libautojs_yolo.so",
+          "abi": "arm64-v8a",
+          "size": 5431864,
+          "compressed": true,
+          "dataOffset": 1013147,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "org.autojs.autojs6",
+      "apkSha256": "1b576582db30881ab856d4f11ec79529ab6241a0d81d860911bb480aa2260777",
+      "nativeEntries": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 33504546,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 33945111,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 33948081,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    },
+    {
+      "package": "org.autojs.plugin.apkbuilder.template",
+      "apkSha256": "47895db120a406329861d0f1f9626ecb4a46df4fa30c05554a3396a945d98348",
+      "nativeEntries": [],
+      "failures": [],
+      "zipalignExitCode": 0,
+      "ok": true
+    }
+  ],
+  "staticScope": "Direct APK lib/ ELF and SDK zipalign. For unchanged plugin artifact SHA-256, prior shared-gate receipts additionally cover configured nested payload scans.",
+  "instrumentation": [
+    {
+      "name": "ace-editor",
+      "classes": "io.github.supermonster003.autojs6.plugin.ace.editor.core.AceLuaSemanticSmokeTest",
+      "package": "io.github.supermonster003.autojs6.plugin.ace.editor.test",
+      "extras": {},
+      "seconds": 5.6,
+      "passed": true,
+      "tests": 1,
+      "logSha256": "b91ce685503fa4fc99be162eff59fa46846d6a20a416968ce8512c91720c09eb"
+    },
+    {
+      "name": "archive-manager",
+      "classes": "io.github.supermonster003.autojs6.plugin.archivemanager.TarArchiveCreatorInstrumentationTest",
+      "package": "io.github.supermonster003.autojs6.plugin.archivemanager.test",
+      "extras": {},
+      "seconds": 1.52,
+      "passed": true,
+      "tests": 3,
+      "logSha256": "f88f351c15704bdd24235d44478d146396268e4cd66db2c0fcd15a3fddbaf830"
+    },
+    {
+      "name": "bun-runtime",
+      "classes": "io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest",
+      "package": "io.github.supermonster003.autojs6.plugin.bun.runtime.test",
+      "extras": {
+        "requiredApiLevel": "36",
+        "requiredPageSizeBytes": "16384"
+      },
+      "seconds": 12.3,
+      "passed": true,
+      "tests": 8,
+      "logSha256": "e9fa63355454abbac36f7b7e903a0e3ac7ad1f922484a9a0d6a8753cff1dd3f2"
+    },
+    {
+      "name": "host-languages",
+      "classes": "org.autojs.autojs.engine.NodeHostPluginIntegrationInstrumentationTest#pluginExecutionRoundTripRuns,org.autojs.autojs.core.plugin.lua.LuaOfficialRuntimeSmokeTest,org.autojs.autojs.runtime.api.augment.mediainfo.MediainfoSnapshotRhinoInstrumentationTest#publicRhinoApiKeepsReadAndNegotiatesSnapshotV2Explicitly,org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerPluginClientDeviceTest#compilesUtf8SingleFileThroughRealPluginBinder,org.autojs.autojs.engine.PythonU1R2AcceptanceInstrumentationTest#publicModuleEngineReturnsExplicitJsonAndExactArtifactWithoutInferringStdout,org.autojs.autojs.engine.NodeBarcodeBridgeInstrumentationTest#kotlinBarcodeLiveProviderScansMlKitImageHandleAndCleansUp,org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#kotlinOcrLiveProviderRecognizesMlKitImageHandle",
+      "package": "org.autojs.autojs6.test",
+      "extras": {
+        "autojs.luaRuntime.officialProvider.enabled": "true",
+        "autojs.python.u1r2.public.enabled": "true"
+      },
+      "seconds": 34.3,
+      "passed": true,
+      "tests": 7,
+      "logSha256": "8e08f5c3589bd2024a325e8ca1134e306ddbed5c14a290c09c6d8b52fe521d33"
+    },
+    {
+      "name": "host-native",
+      "classes": "org.autojs.autojs.core.plugin.nativealign.NativePageAlignmentDeviceTest,org.autojs.autojs.core.plugin.opencv.OpenCvPluginHostDeviceTest,org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHostDeviceTest#installedPluginLoadsAndProducesIndexedPng,org.autojs.autojs.core.plugin.center.PluginNativeAlignmentBadgeDeviceTest",
+      "package": "org.autojs.autojs6.test",
+      "extras": {},
+      "seconds": 2.74,
+      "passed": true,
+      "tests": 5,
+      "logSha256": "f37d357f55d0af1e7668a6d2f80cd66802d724cdb28428446be97a45adee81a8"
+    },
+    {
+      "name": "imgui",
+      "classes": "io.github.supermonster003.autojs6.plugin.imgui.ImGuiRenderInstrumentedTest#renderLifecycleMatchesSemanticScreenshotBaseline",
+      "package": "io.github.supermonster003.autojs6.plugin.imgui.test",
+      "extras": {},
+      "seconds": 3.57,
+      "passed": true,
+      "tests": 1,
+      "logSha256": "7063553c22ad0e0440101e3427af31b90070843960c6d50a32c5991126423ab2"
+    },
+    {
+      "name": "opencc",
+      "classes": "io.github.supermonster003.autojs6.plugin.opencc.OpenccPluginServiceTest",
+      "package": "io.github.supermonster003.autojs6.plugin.opencc.test",
+      "extras": {},
+      "seconds": 2.12,
+      "passed": true,
+      "tests": 1,
+      "logSha256": "5bf9c4269293659df4f706c3780378edce0a62b9071350a9398f1839c31c11e6"
+    },
+    {
+      "name": "quickjs-runtime",
+      "classes": "io.github.supermonster003.autojs6.plugin.quickjs.runtime.QuickJsRuntimeInstrumentedTest",
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime.test",
+      "extras": {},
+      "seconds": 2.04,
+      "passed": true,
+      "tests": 3,
+      "logSha256": "aa0eaaae94ecf893d9bae8cdc8390eb9e4698bd988b9fd35e0e0d6e8197ad8c3"
+    },
+    {
+      "name": "yolo-ncnn",
+      "classes": "io.github.supermonster003.autojs6.plugin.yolo.ncnn.provider.NativeYoloSmokeTest",
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn.test",
+      "extras": {},
+      "seconds": 1.48,
+      "passed": true,
+      "tests": 1,
+      "logSha256": "fb98519742027d176e05e205a8a8bc222f21fc38a17bdcc373dfd836e250f798"
+    }
+  ],
+  "instrumentationTests": 30,
+  "instrumentationAllPassedWithoutSkips": true,
+  "nativePluginRuntimePassed": [
+    "OpenCV",
+    "Image-Quantization",
+    "NodeJs-Runtime",
+    "Lua-Runtime",
+    "TypeScript-Engine",
+    "MediaInfo",
+    "Python-Runtime",
+    "MLKit-Barcode",
+    "MLKit-OCR",
+    "Yolo-NCNN",
+    "ImGui",
+    "QuickJS-Runtime",
+    "OpenCC",
+    "Archive-Manager",
+    "Ace-Editor",
+    "Bun-Runtime"
+  ],
+  "standaloneOcr": {
+    "pageSize": 16384,
+    "results": [
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 3215
+      },
+      {
+        "mode": "paddle",
+        "variant": "v4",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 1590
+      },
+      {
+        "mode": "paddle",
+        "variant": "v5",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 1534
+      },
+      {
+        "mode": "paddle",
+        "variant": "v6",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 1571
+      },
+      {
+        "mode": "rapid",
+        "variant": "v3",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 1035
+      },
+      {
+        "mode": "rapid",
+        "variant": "v6",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#23)\n\tat Tmp.js:23\n\tat Tmp.js:19\n",
+        "milliseconds": 955
+      }
+    ],
+    "ok": false,
+    "complete": true
+  },
+  "ocrFixture": {
+    "source": "\"ui\";\nui.layout(<vertical padding=\"24\"><text id=\"result\" text=\"16 KB OCR provider smoke\" /></vertical>);\nthreads.start(function () {\n    var receipt = {pageSize: Number(android.system.Os.sysconf(android.system.OsConstants._SC_PAGESIZE)), results: []};\n    var output = new java.io.File(context.getExternalFilesDir(null), \"samsung-ocr-16kb.json\").getAbsolutePath();\n    var bitmap = android.graphics.Bitmap.createBitmap(1000, 320, android.graphics.Bitmap.Config.ARGB_8888);\n    var canvas = new android.graphics.Canvas(bitmap);\n    canvas[\"drawColor(int)\"](android.graphics.Color.WHITE);\n    var paint = new android.graphics.Paint();\n    paint[\"setColor(int)\"](android.graphics.Color.BLACK);\n    paint.setTextSize(90);\n    paint.setAntiAlias(true);\n    canvas.drawText(\"TEST 16 KB\", 50, 120, paint);\n    canvas.drawText(\"Hello World\", 50, 255, paint);\n    var image = Packages.org.autojs.autojs.core.image.ImageWrapper.ofBitmap(runtime, bitmap);\n    var jobs = [{mode:\"paddle\",variant:\"v3\"},{mode:\"paddle\",variant:\"v4\"},{mode:\"paddle\",variant:\"v5\"},{mode:\"paddle\",variant:\"v6\"},\n        {mode:\"rapid\",variant:\"v3\"},{mode:\"rapid\",variant:\"v6\"}];\n    try {\n        jobs.forEach(function (job) {\n            var row = {mode:job.mode, variant:job.variant};\n            var start = Date.now();\n            try {\n                row.text = ocr.recognizeText(image, job);\n                row.ok = row.text.length > 0;\n            } catch (e) { row.ok = false; row.error = String(e) + \"\\n\" + e.stack; }\n            row.milliseconds = Date.now() - start;\n            receipt.results.push(row);\n            files.write(output, JSON.stringify(receipt));\n            android.util.Log.i(\"Samsung16kOCR\", JSON.stringify(row));\n        });\n    } finally { image.recycle(); }\n    receipt.ok = receipt.pageSize === 16384 && receipt.results.every(function (row) { return row.ok; });\n    receipt.complete = true;\n    files.write(output, JSON.stringify(receipt));\n    ui.run(function () { ui.result.setText(JSON.stringify(receipt)); });\n});\n",
+    "sha256": "c255a6bbd0cea3d4735b3809ea5807f9f6ee5d7cfe91da74e5a87d07b1079554",
+    "invocation": "adb -s SERIAL shell am start -n org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity --es script <shell-quoted fixture>",
+    "testedFlavors": {
+      "paddle-v3": "default",
+      "paddle-v4": "server",
+      "paddle-v5": "thai",
+      "paddle-v6": "tiny",
+      "rapid-v3": "mobile",
+      "rapid-v6": "small"
+    }
+  },
+  "ocrNativeCrash": {
+    "localLog": "D:\\idea-projects\\AutoJs6\\build\\tmp-16kb\\samsung-followup-20260911\\ocr-native-crash.log",
+    "sha256": "6b58114bff636138adcbe8bdf793f83db9af61c051cb8b67420fe63012fb8a8d",
+    "excerpts": [
+      {
+        "error": "E/AndroidRuntime( 8552): java.lang.UnsatisfiedLinkError: dlopen failed: \"/system/priv-app/OneDrive_Samsung_v3/OneDrive_Samsung_v3.apk!/lib/arm64-v8a/libc++_shared.so\" program alignment (4096) cannot be smaller than system page size (16384)"
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+        "lines": [
+          "F/DEBUG   (27400): Cmdline: io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+          "F/DEBUG   (27400): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0xb400704cc46a8100",
+          "F/DEBUG   (27400):       #00 pc 00000000000c7a44  /data/app/~~kAe2d5B-ePbCMfAQbDFpKg==/io.github.supermonster003.autojs6.plugin.paddleocr.v3-Ar6bIx0vHU2F-brlnOfZuw==/base.apk!libpaddle_light_api_shared.so (offset 0x1bbc000) (BuildId: 46c961e2f8cc425ebc702c59f28a96caf6c4980e)",
+          "F/libc    (27416): Fatal signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0xb400704cc89a4100 in tid 27452 (binder:27416_1), pid 27416 (in.paddleocr.v3)",
+          "F/DEBUG   (27460): Cmdline: io.github.supermonster003.autojs6.plugin.paddleocr.v3",
+          "F/DEBUG   (27460): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0xb400704cc89a4100"
+        ]
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+        "lines": [
+          "F/DEBUG   (27544): Cmdline: io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+          "F/DEBUG   (27544): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0x0000704ddfbbaa78",
+          "F/DEBUG   (27544):       #00 pc 000000000005c15c  /data/app/~~5M-RMLbKwTxDmZmo6UCbnA==/io.github.supermonster003.autojs6.plugin.paddleocr.v4.server-kjvlrbXw1e-MM_M7vMz_hA==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27544):       #01 pc 000000000005bde0  /data/app/~~5M-RMLbKwTxDmZmo6UCbnA==/io.github.supermonster003.autojs6.plugin.paddleocr.v4.server-kjvlrbXw1e-MM_M7vMz_hA==/lib/arm64/libc++_shared.so (std::__ndk1::ios_base::Init::Init()+56) (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27544):       #02 pc 00000000000403b0  /data/app/~~5M-RMLbKwTxDmZmo6UCbnA==/io.github.supermonster003.autojs6.plugin.paddleocr.v4.server-kjvlrbXw1e-MM_M7vMz_hA==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27544):       #03 pc 000000000005697c  /apex/com.android.runtime/bin/linker64 (__dl__ZN6soinfo17call_constructorsEv+528) (BuildId: bd4d9899e0e274861172b4c4d187e471)"
+        ]
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+        "lines": [
+          "F/DEBUG   (27621): Cmdline: io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+          "F/DEBUG   (27621): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0x0000704de27d2a78",
+          "F/DEBUG   (27621):       #00 pc 000000000005c15c  /data/app/~~aq7noxkQJ8nE8-ambekh6A==/io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai-XHUPq3kzxRO-5MWhFve05Q==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27621):       #01 pc 000000000005bde0  /data/app/~~aq7noxkQJ8nE8-ambekh6A==/io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai-XHUPq3kzxRO-5MWhFve05Q==/lib/arm64/libc++_shared.so (std::__ndk1::ios_base::Init::Init()+56) (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27621):       #02 pc 00000000000403b0  /data/app/~~aq7noxkQJ8nE8-ambekh6A==/io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai-XHUPq3kzxRO-5MWhFve05Q==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27621):       #03 pc 000000000005697c  /apex/com.android.runtime/bin/linker64 (__dl__ZN6soinfo17call_constructorsEv+528) (BuildId: bd4d9899e0e274861172b4c4d187e471)"
+        ]
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+        "lines": [
+          "F/DEBUG   (27698): Cmdline: io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+          "F/DEBUG   (27698): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0x0000704deaffaa78",
+          "F/DEBUG   (27698):       #00 pc 000000000005c15c  /data/app/~~PpV11Qrzm22BZLTTcPEhsg==/io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny-UDdl7fWRFdCGyylvtKoijA==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27698):       #01 pc 000000000005bde0  /data/app/~~PpV11Qrzm22BZLTTcPEhsg==/io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny-UDdl7fWRFdCGyylvtKoijA==/lib/arm64/libc++_shared.so (std::__ndk1::ios_base::Init::Init()+56) (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27698):       #02 pc 00000000000403b0  /data/app/~~PpV11Qrzm22BZLTTcPEhsg==/io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny-UDdl7fWRFdCGyylvtKoijA==/lib/arm64/libc++_shared.so (BuildId: ef6e7301b33650c6ab99d63132badbf97c1a64a8)",
+          "F/DEBUG   (27698):       #03 pc 000000000005697c  /apex/com.android.runtime/bin/linker64 (__dl__ZN6soinfo17call_constructorsEv+528) (BuildId: bd4d9899e0e274861172b4c4d187e471)"
+        ]
+      },
+      {
+        "error": "E/AndroidRuntime(27367): java.lang.UnsatisfiedLinkError: dlopen failed: library \"libc++_shared.so\" not found: needed by /data/app/~~ciiFJbx9zbcII7qryx7h9Q==/io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3-OcHaWrX6GTeGdsaq8TPdrw==/lib/arm64/libopencv_java4.so in namespace clns-9"
+      },
+      {
+        "error": "E/AndroidRuntime(27771): java.lang.UnsatisfiedLinkError: dlopen failed: library \"libc++_shared.so\" not found: needed by /data/app/~~ciiFJbx9zbcII7qryx7h9Q==/io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3-OcHaWrX6GTeGdsaq8TPdrw==/lib/arm64/libopencv_java4.so in namespace clns-9"
+      },
+      {
+        "error": "E/AndroidRuntime(24341): java.lang.UnsatisfiedLinkError: dlopen failed: library \"libc++_shared.so\" not found: needed by /data/app/~~Bj1FbHmMFdVqBXB6Mff5BA==/io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6-Ff-LCjUgucWV1-Yw2N-zQA==/lib/arm64/libopencv_java4.so in namespace clns-9"
+      },
+      {
+        "error": "E/AndroidRuntime(27821): java.lang.UnsatisfiedLinkError: dlopen failed: library \"libc++_shared.so\" not found: needed by /data/app/~~Bj1FbHmMFdVqBXB6Mff5BA==/io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6-Ff-LCjUgucWV1-Yw2N-zQA==/lib/arm64/libopencv_java4.so in namespace clns-9"
+      }
+    ]
+  },
+  "ocrProgramHeaders": [
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "apkSha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 4,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 624800,
+          "memsz": 624800,
+          "align": 16384,
+          "endMod16k": 2208
+        },
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 624800,
+          "vaddr": 641184,
+          "filesz": 585720,
+          "memsz": 585720,
+          "align": 16384,
+          "endMod16k": 14488
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 1210520,
+          "vaddr": 1243288,
+          "filesz": 39832,
+          "memsz": 42856,
+          "align": 16384,
+          "endMod16k": 8192
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 1250352,
+          "vaddr": 1299504,
+          "filesz": 568,
+          "memsz": 32032,
+          "align": 16384,
+          "endMod16k": 4432
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 1210520,
+          "vaddr": 1243288,
+          "filesz": 39832,
+          "memsz": 42856,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "apkSha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 19320488,
+          "memsz": 19320488,
+          "align": 65536,
+          "endMod16k": 3752
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 606320,
+          "memsz": 1696072,
+          "align": 65536,
+          "endMod16k": 12456
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 397472,
+          "memsz": 397472,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "apkSha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+      "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 3615208,
+          "memsz": 3615208,
+          "align": 65536,
+          "endMod16k": 10728
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 3616752,
+          "vaddr": 3682288,
+          "filesz": 208644,
+          "memsz": 230288,
+          "align": 65536,
+          "endMod16k": 13184
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 3616752,
+          "vaddr": 3682288,
+          "filesz": 200720,
+          "memsz": 200720,
+          "align": 1,
+          "endMod16k": 0
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "apkSha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 1025444,
+          "memsz": 1025444,
+          "align": 65536,
+          "endMod16k": 9636
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26952,
+          "memsz": 41048,
+          "align": 65536,
+          "endMod16k": 2080
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26680,
+          "memsz": 26680,
+          "align": 1,
+          "endMod16k": 4096
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "apkSha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 19320488,
+          "memsz": 19320488,
+          "align": 65536,
+          "endMod16k": 3752
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 606320,
+          "memsz": 1696072,
+          "align": 65536,
+          "endMod16k": 12456
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 397472,
+          "memsz": 397472,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "apkSha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 1025444,
+          "memsz": 1025444,
+          "align": 65536,
+          "endMod16k": 9636
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26952,
+          "memsz": 41048,
+          "align": 65536,
+          "endMod16k": 2080
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26680,
+          "memsz": 26680,
+          "align": 1,
+          "endMod16k": 4096
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "apkSha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 19320488,
+          "memsz": 19320488,
+          "align": 65536,
+          "endMod16k": 3752
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 606320,
+          "memsz": 1696072,
+          "align": 65536,
+          "endMod16k": 12456
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 397472,
+          "memsz": 397472,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "apkSha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+      "entry": "lib/arm64-v8a/libc++_shared.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 1025444,
+          "memsz": 1025444,
+          "align": 65536,
+          "endMod16k": 9636
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26952,
+          "memsz": 41048,
+          "align": 65536,
+          "endMod16k": 2080
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 1025992,
+          "vaddr": 1091528,
+          "filesz": 26680,
+          "memsz": 26680,
+          "align": 1,
+          "endMod16k": 4096
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "apkSha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 19320488,
+          "memsz": 19320488,
+          "align": 65536,
+          "endMod16k": 3752
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 606320,
+          "memsz": 1696072,
+          "align": 65536,
+          "endMod16k": 12456
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 19320672,
+          "vaddr": 19386208,
+          "filesz": 397472,
+          "memsz": 397472,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "apkSha256": "81e4883c3d98e3b94f27aa3b2910562fd1b3894fbcfa3b6ebedd00599cfec88f",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 20021152,
+          "memsz": 20021152,
+          "align": 16384,
+          "endMod16k": 16288
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 20021152,
+          "vaddr": 20037536,
+          "filesz": 384640,
+          "memsz": 384640,
+          "align": 16384,
+          "endMod16k": 7712
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 20405792,
+          "vaddr": 20438560,
+          "filesz": 206688,
+          "memsz": 1297560,
+          "align": 16384,
+          "endMod16k": 10936
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 20021152,
+          "vaddr": 20037536,
+          "filesz": 384640,
+          "memsz": 385120,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "apkSha256": "99b87956b62984acfb2818dbfdbe028d8623bc8565f4e012d781ebbe64494bab",
+      "entry": "lib/arm64-v8a/libopencv_java4.so",
+      "headers": [
+        {
+          "kind": "LOAD",
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 20021152,
+          "memsz": 20021152,
+          "align": 16384,
+          "endMod16k": 16288
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 20021152,
+          "vaddr": 20037536,
+          "filesz": 384640,
+          "memsz": 384640,
+          "align": 16384,
+          "endMod16k": 7712
+        },
+        {
+          "kind": "LOAD",
+          "flags": 6,
+          "offset": 20405792,
+          "vaddr": 20438560,
+          "filesz": 206688,
+          "memsz": 1297560,
+          "align": 16384,
+          "endMod16k": 10936
+        },
+        {
+          "kind": "GNU_RELRO",
+          "flags": 4,
+          "offset": 20021152,
+          "vaddr": 20037536,
+          "filesz": 384640,
+          "memsz": 385120,
+          "align": 1,
+          "endMod16k": 8192
+        }
+      ]
+    }
+  ],
+  "paddle3CompositionComparison": [
+    {
+      "library": "libNative.so",
+      "pluginSha256": "ad71a873e7a9ed4a65ea4733b10836167d0b627b69026e0a118630618876d972",
+      "userApkSha256": "ad71a873e7a9ed4a65ea4733b10836167d0b627b69026e0a118630618876d972",
+      "same": true
+    },
+    {
+      "library": "libpaddle_light_api_shared.so",
+      "pluginSha256": "4e35ce297c6e1b568e42f2f6a5abcc7b09208bd74af18b8e93cafe304f8612b2",
+      "userApkSha256": "4e35ce297c6e1b568e42f2f6a5abcc7b09208bd74af18b8e93cafe304f8612b2",
+      "same": true
+    },
+    {
+      "library": "libc++_shared.so",
+      "pluginSha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "userApkSha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "same": true
+    },
+    {
+      "library": "libopencv_java4.so",
+      "pluginSha256": "e9b8ac06327b880c94a6c4ee81604a791bc3c313c4e2200530aa23614352be59",
+      "userApkSha256": "adb31f4905ac448d5b22faa293fd7d2315bcdab675b374088831fda7517c70ac",
+      "same": false
+    }
+  ],
+  "userApks": [
+    {
+      "serial": "localhost:30078",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": false,
+      "dedicatedOpenCvSelected": true,
+      "rapidVersion": "3",
+      "apkSha256": "43879f13eb35205827152b8c52d7a843eeec77efb7db3b3754c3f3595ee51b55",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443328,
+          "compressed": true,
+          "dataOffset": 18466310,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 18885361,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 19282950,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 19285753,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 19289550,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+          "abi": "arm64-v8a",
+          "size": 75720,
+          "compressed": true,
+          "dataOffset": 25725852,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 25749594,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 33930153,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 944,
+        "quantizedBytes": 19924,
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\". No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.\njava.lang.IllegalStateException: No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled. (main.js.js#23)\n\tat main.js.js:23\n"
+      },
+      "name": "user-apk-rapid3",
+      "receiptSha256": "76c96b990b1b2ad18682df043e7070cfa7f99005007e3739d7134ce08e387731",
+      "producerLogSha256": "61592f8b86f2439a5aa297518f3ebfec8c0f26472cc930f29c50bd3a87057634"
+    },
+    {
+      "serial": "localhost:30078",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "rapidVersion": "3",
+      "apkSha256": "9502224791293bd7915310440f1346aeeeb62486c13cd8f97da4cf46fb1d8cae",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 29373751,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443328,
+          "compressed": true,
+          "dataOffset": 30995904,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 31414955,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 31812544,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 31815347,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 31819144,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 38255441,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 46436008,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 47686965,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 944,
+        "quantizedBytes": 19924,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "name": "user-apk-rapid3-paddle3",
+      "receiptSha256": "a6fc0d7def07360c488ea778b2e153f674bfea80f8963ef843bd53448d7a5693",
+      "producerLogSha256": "3143732cc488130351e1b0e20cc4a045038dc3d33368f47a5c842c8f7d59eae7"
+    },
+    {
+      "serial": "localhost:30078",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "rapidVersion": "3",
+      "apkSha256": "c7b1aea0e1a5ae2b110d6e839f0c45519f74212d10592430aaf6a3465699ec97",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 29373745,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443328,
+          "compressed": true,
+          "dataOffset": 30995898,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 31414949,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 31812538,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 31815341,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 31819138,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": true,
+          "dataOffset": 38255435,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 46009323,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 47260280,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 944,
+        "quantizedBytes": 19924,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "name": "user-apk-rapid3-paddle3-no-opencv",
+      "receiptSha256": "35c0c3aeebac1e743d3cfffc89781c97bd70260d09541200a6b910e6fe9167d5",
+      "producerLogSha256": "1cbba0e6d79b60bc5bb8182bfc51798b9acb17fd2aa7fb74b880bb6e54b8ac5a"
+    },
+    {
+      "serial": "localhost:30078",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "rapidVersion": "6",
+      "apkSha256": "c79dcf5ee3b394006419901d0b39d4de2369309c2a4026b3f01f76e004d0732e",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 44197438,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443280,
+          "compressed": true,
+          "dataOffset": 45819591,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 46238662,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 46636251,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 46639054,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 46642851,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 53079148,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 61259715,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 62510672,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 944,
+        "quantizedBytes": 19924,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "name": "user-apk-rapid6-paddle3",
+      "receiptSha256": "8b9ae555f2a5280bf1e0ec6ffce3a0f16c7e68c3c57d1fd4e21eb6bddd178206",
+      "producerLogSha256": "95992ec53b4785dbd63f66c47d1fad5bb8238200f9e562c76a60ef35d7b177f2"
+    },
+    {
+      "serial": "localhost:30078",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "rapidVersion": "6",
+      "apkSha256": "365c68a384d53b4304b68ae23ae81b5da6c67a518ada0ec97b9a5563d6c7f824",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 44197432,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443280,
+          "compressed": true,
+          "dataOffset": 45819585,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 46238656,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 46636245,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 46639048,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 46642845,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 19929224,
+          "compressed": true,
+          "dataOffset": 53079142,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 60833030,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 62083987,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 944,
+        "quantizedBytes": 19924,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "name": "user-apk-rapid6-paddle3-no-opencv",
+      "receiptSha256": "8e25ad832fa991f136e5fda140cae7d1f140173ce6b1bcf95acc901fef23bd07",
+      "producerLogSha256": "74df334d6c8f7ab34365bea0128b5e3a94c5c52b5114b19c8daf16981e49660b"
+    }
+  ],
+  "initialUserApkFixtureFailure": "The producer selected an additional installed Paddle flavor because its hard-coded enable list covers only base package names. The initial receipt is retained; subsequent runs isolated Paddle v3 and are separately identified.",
+  "yolo": {
+    "backendVersion": "ncnn/1.0.20260526",
+    "imageWidth": 810,
+    "imageHeight": 1080,
+    "elapsedMillis": 191,
+    "detections": [
+      {
+        "classId": 5,
+        "label": "bus",
+        "confidence": 0.9392049312591553,
+        "bounds": [
+          11.918380737304688,
+          228.39425659179688,
+          799.22509765625,
+          735.2150268554688
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.9019904732704163,
+        "bounds": [
+          48.592716217041016,
+          397.960693359375,
+          243.21273803710938,
+          904.5357055664062
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8492761254310608,
+        "bounds": [
+          670.556396484375,
+          392.5901184082031,
+          810,
+          879.6233520507812
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.8327871561050415,
+        "bounds": [
+          223.11959838867188,
+          405.57794189453125,
+          345.2289733886719,
+          859.7220458984375
+        ]
+      },
+      {
+        "classId": 0,
+        "label": "person",
+        "confidence": 0.3993437588214874,
+        "bounds": [
+          0,
+          550.1927490234375,
+          66.00817108154297,
+          871.7786254882812
+        ]
+      }
+    ]
+  },
+  "aceLuaLs": {
+    "schema": 1,
+    "measurement": "m5-lua-semantic-gate",
+    "path": "semantic",
+    "manufacturer": "samsung",
+    "model": "SM-A566B",
+    "sdk": 36,
+    "release": "16",
+    "abi": "arm64-v8a",
+    "webViewPackage": "com.google.android.webview@134.0.6998.135",
+    "initializationMs": 277,
+    "firstSemanticPacketMs": 712.7000000001863,
+    "completionSteadyP50Ms": 9,
+    "completionCount": 17,
+    "diagnosticCount": 2,
+    "processCrashCount": 1,
+    "restartCount": 1,
+    "lifecycleBefore": {
+      "providerCreatedCount": 1,
+      "providerDisposeCount": 0,
+      "processReleaseCount": 0,
+      "recoveryCount": 1,
+      "activeProviderCount": 1
+    },
+    "lifecycleAfter": {
+      "providerCreatedCount": 1,
+      "providerDisposeCount": 1,
+      "processReleaseCount": 1,
+      "recoveryCount": 1,
+      "activeProviderCount": 0
+    },
+    "callbackErrorCount": 1,
+    "expectedCrashErrorCount": 1,
+    "sourceLog": "ocr-launch-initial.log"
+  },
+  "threeStoneAi": {
+    "runtimeTested": false,
+    "reason": "Fresh device has no imported .litertlm model; requested a local model path from maintainer."
+  },
+  "limits": [
+    "Prebuilt workspace APKs, exact installed hashes verified; collection HEAD is not an assertion of clean release build provenance.",
+    "Bun x86_64 JSC known failure remains B1; this arm64 success does not cover x86_64.",
+    "Paddle v4/v5/v6 other model/language flavors are not separately runtime-tested.",
+    "Independent OCR failure root causes need controlled follow-up; static PT_LOAD/ZIP passes do not imply runtime success.",
+    "Final post-merge Runtime Kit candidates, remote host/plugin release CI and index release asset regeneration are still required."
+  ],
+  "paddle3ReferenceImageControl": {
+    "pageSize": 16384,
+    "variant": "v3",
+    "width": 944,
+    "height": 640,
+    "paddle": [
+      "测试"
+    ],
+    "ok": true
+  },
+  "paddle3GeneratedImageColdRepeat": {
+    "pageSize": 16384,
+    "results": [
+      {
+        "mode": "paddle",
+        "variant": "v3",
+        "ok": false,
+        "error": "InternalError: Failed to call method \"ocr.recognizeText\".\n\nStack trace:\n\nandroid.os.DeadObjectException\n    at android.os.BinderProxy.transactNative(Native Method)\n    at android.os.BinderProxy.transact(BinderProxy.java:661)\n    at org.autojs.plugin.paddle.ocr.api.IOcrPlugin$Stub$Proxy.recognizeText(IOcrPlugin.java:149)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invokeSuspend(OcrPluginHost.kt:136)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:13)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$recognizeText$2.invoke(Unknown Source:6)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invokeSuspend(OcrPluginHost.kt:473)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:8)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withImagePfdServiceOnce$2$1.invoke(Unknown Source:4)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.withService(OcrPluginHost.kt:669)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost.access$withService(OcrPluginHost.kt:59)\n    at org.autojs.autojs.core.plugin.ocr.OcrPluginHost$withService$1.invokeSuspend(Unknown Source:20)\n    at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n    at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:832)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)\n    at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)\n\n (Tmp.js#22)\n\tat Tmp.js:22\n\tat Tmp.js:18\n",
+        "milliseconds": 2206
+      }
+    ],
+    "ok": false,
+    "complete": true,
+    "crashLogSha256": "653af1a2045df03efa98c67bbe93b2f74c0af298616272536ab2c47ed5e911f1"
+  },
+  "paddle3ReferenceFixtureSource": "\"ui\";\nui.layout(<vertical padding=\"24\"><text id=\"result\" text=\"Paddle v3 reference image\" /></vertical>);\nthreads.start(function () {\n    var out = {pageSize:Number(android.system.Os.sysconf(android.system.OsConstants._SC_PAGESIZE)), variant:\"v3\"};\n    var image;\n    try {\n        var id = context.getResources().getIdentifier(\"paddle_ocr_test\", \"drawable\", context.getPackageName());\n        var bitmap = android.graphics.BitmapFactory.decodeResource(context.getResources(), id);\n        var scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false);\n        bitmap.recycle();\n        image = Packages.org.autojs.autojs.core.image.ImageWrapper.ofBitmap(runtime, scaled);\n        out.width = image.getWidth();\n        out.height = image.getHeight();\n        out.paddle = ocr.recognizeText(image, {mode:\"paddle\",variant:\"v3\"});\n        out.ok = out.paddle.length > 0;\n    } catch(e) {out.ok=false;out.error=String(e)+\"\\n\"+e.stack;}\n    finally {if(image)image.recycle();}\n    files.write(new java.io.File(context.getExternalFilesDir(null), \"samsung-paddle-reference.json\").getAbsolutePath(), JSON.stringify(out));\n    android.util.Log.i(\"Samsung16kReference\",JSON.stringify(out));\n    ui.run(function(){ui.result.setText(JSON.stringify(out));});\n});\n",
+  "workspaceStateBeforeDocumentationCommit": [
+    {
+      "repository": "AutoJs6",
+      "branchStatus": "master...private/master [ahead 558]",
+      "dirtyEntries": 6
+    },
+    {
+      "repository": "AutoJs6-Gradle-Platform-Versions",
+      "branchStatus": "master...origin/master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Official-Plugins-Index",
+      "branchStatus": "main...origin/main [ahead 5, behind 5]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Accessibility-Compat",
+      "branchStatus": "master",
+      "dirtyEntries": 8
+    },
+    {
+      "repository": "AutoJs6-Plugin-Ace-Editor",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Builder-Template",
+      "branchStatus": "master...origin/master [ahead 11]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Inspector",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Archive-Manager",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Bun-Runtime",
+      "branchStatus": "master...origin/master [ahead 13]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-DEX-Compiler",
+      "branchStatus": "master",
+      "dirtyEntries": 11
+    },
+    {
+      "repository": "AutoJs6-Plugin-File-Inspector",
+      "branchStatus": "master...origin/master [ahead 1]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-HTML-Previewer",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Quantization",
+      "branchStatus": "master",
+      "dirtyEntries": 82
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Tools",
+      "branchStatus": "master",
+      "dirtyEntries": 130
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Viewer",
+      "branchStatus": "master",
+      "dirtyEntries": 155
+    },
+    {
+      "repository": "AutoJs6-Plugin-ImGui",
+      "branchStatus": "master...origin/master [ahead 1]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-Java-Runtime",
+      "branchStatus": "main...origin/main [ahead 1]",
+      "dirtyEntries": 64
+    },
+    {
+      "repository": "AutoJs6-Plugin-Kotlin-Runtime",
+      "branchStatus": "main...origin/main [ahead 5]",
+      "dirtyEntries": 42
+    },
+    {
+      "repository": "AutoJs6-Plugin-Lua-Runtime",
+      "branchStatus": "main",
+      "dirtyEntries": 18
+    },
+    {
+      "repository": "AutoJs6-Plugin-Markdown-Previewer",
+      "branchStatus": "master...origin/master [ahead 6]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-MCP-Server",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-MediaInfo",
+      "branchStatus": "master...origin/master [ahead 9]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-Barcode",
+      "branchStatus": "master...origin/master [ahead 2]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-OCR",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 1
+    },
+    {
+      "repository": "AutoJs6-Plugin-NodeJs-Runtime",
+      "branchStatus": "master...origin/master [ahead 12]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Offline-Docs",
+      "branchStatus": "master",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCC",
+      "branchStatus": "master...origin/master [ahead 4]",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCV",
+      "branchStatus": "master...origin/master [ahead 1]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 11
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "branchStatus": "master...origin/master [ahead 2]",
+      "dirtyEntries": 16
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "branchStatus": "master...origin/master [ahead 2]",
+      "dirtyEntries": 16
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 5
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin4j",
+      "branchStatus": "master...origin/master [ahead 9]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-Python-Runtime",
+      "branchStatus": "master...origin/master [ahead 83]",
+      "dirtyEntries": 5
+    },
+    {
+      "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+      "branchStatus": "master",
+      "dirtyEntries": 1
+    },
+    {
+      "repository": "AutoJs6-Plugin-R8-Compiler",
+      "branchStatus": "master...origin/master [ahead 9]",
+      "dirtyEntries": 5
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 10
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "branchStatus": "master...origin/master [ahead 4]",
+      "dirtyEntries": 1
+    },
+    {
+      "repository": "AutoJs6-Plugin-Screen-Color-Picker",
+      "branchStatus": "master",
+      "dirtyEntries": 0
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Ember-Player",
+      "branchStatus": "master",
+      "dirtyEntries": 61
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Stone-AI",
+      "branchStatus": "ui-redesign",
+      "dirtyEntries": 45
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Terra-Player",
+      "branchStatus": "master...origin/master [ahead 3]",
+      "dirtyEntries": 51
+    },
+    {
+      "repository": "AutoJs6-Plugin-TypeScript-Engine",
+      "branchStatus": "master",
+      "dirtyEntries": 19
+    },
+    {
+      "repository": "AutoJs6-Plugin-Yolo-NCNN",
+      "branchStatus": "master...origin/master [ahead 8]",
+      "dirtyEntries": 5
+    }
+  ],
+  "workspaceStateScope": "Read-only local status; no fetch. Ahead/behind refers to cached tracking refs. Host dirty state is this follow-up documentation before its commit.",
+  "deviceCleanup": {
+    "testApksRetained": true,
+    "hostScriptStopped": true,
+    "restoredPaddleFlavorPackageStates": [
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.server",
+        "before": [
+          "User 0: ceDataInode=1448984 deDataInode=198916 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "after": [
+          "User 0: ceDataInode=1448984 deDataInode=198916 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "commandOutput": "Package io.github.supermonster003.autojs6.plugin.paddleocr.v4.server new state: default"
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai",
+        "before": [
+          "User 0: ceDataInode=1449044 deDataInode=198919 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "after": [
+          "User 0: ceDataInode=1449044 deDataInode=198919 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "commandOutput": "Package io.github.supermonster003.autojs6.plugin.paddleocr.v5.thai new state: default"
+      },
+      {
+        "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny",
+        "before": [
+          "User 0: ceDataInode=1449017 deDataInode=198922 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "after": [
+          "User 0: ceDataInode=1449017 deDataInode=198922 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false",
+          "User 0:"
+        ],
+        "commandOutput": "Package io.github.supermonster003.autojs6.plugin.paddleocr.v6.tiny new state: default"
+      }
+    ],
+    "storageAppOpRestored": "MANAGE_EXTERNAL_STORAGE: default",
+    "compatibilityProperties": {
+      "bionic.linker.16kb.app_compat.enabled": {
+        "original": "",
+        "restored": "",
+        "matchesOriginal": true
+      },
+      "pm.16kb.app_compat.disabled": {
+        "original": "",
+        "restored": "",
+        "matchesOriginal": true
+      }
+    },
+    "pageSizeAfter": 16384
+  },
+  "ocrHarnessAdjustments": {
+    "initialPathLaunch": "No receipt from path Intent; PathChecker checks storage-manager access.",
+    "firstInlineLaunch": "Fixture stopped before OCR: Rhino selected Canvas.drawColor(long), Android ColorSpace rejected int color as packed long (Invalid ID: 63).",
+    "correction": "Explicit drawColor(int) and setColor(int) signatures in fixture only; no product code changed."
+  }
+}

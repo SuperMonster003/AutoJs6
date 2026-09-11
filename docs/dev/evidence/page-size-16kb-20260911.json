@@ -4551,5 +4551,15 @@
       "callbackErrorCount": 1,
       "expectedCrashErrorCount": 1
     }
+  ],
+  "reportingCorrections": [
+    {
+      "date": "2026-09-11",
+      "repository": "AutoJs6-Plugin-R8-Compiler",
+      "apkSha256": "fc3e16bd11f47d256cce454b6c4b0e13e3899f1175fd1364b470a27760402752",
+      "apkVersionName": "0.2.0-provider-dev",
+      "apkVersionCode": 1,
+      "method": "aapt2 dump badging, matched the APK SHA-256 already recorded above; workspace version field was not populated by the original collector."
+    }
   ]
 }
