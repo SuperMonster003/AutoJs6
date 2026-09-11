@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/jackpal/Android-Terminal-Emulator.git",
+  "commit": "35188f8a8b57989a4a4ec9485e11187b46be26d9",
+  "ndkVersion": "28.2.13676358",
+  "sources": {
+    "LICENSE": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+    "NOTICE": "51d8f4d0ad492381dbe33a874f89eff51ee8b96b701ede2ada4e2dfc2985b624",
+    "term/src/main/jni/common.cpp": "fdc92cbc18dbf28294950699456ef041081405c4dead567a73d9dca5b46602a1",
+    "term/src/main/jni/common.h": "36aad3c1d16345969d02b55ca5379c9d94c25f8899033992877d61aecb6114d0",
+    "term/src/main/jni/fileCompat.cpp": "4278d4da562dd3de11ad380719dc0f86e0ae41c9234a1b91838283a853fdb892",
+    "term/src/main/jni/fileCompat.h": "f8652ad46cac589df1aa5506a54b8f88787fc9c16d229e32aba1741cddd5e6cf",
+    "term/src/main/jni/termExec.cpp": "b179b483241cef7bc15b96cb79a08dcb0dc3ef8558c28b1eb9f4f0e9140e13a7",
+    "term/src/main/jni/termExec.h": "b3be919574a89617ccc211cf323e437d3f2d4320eb286b6dd3c6871e045e2ab5",
+    "libtermexec/src/main/jni/process.cpp": "e07f04b95be41d22f2fc4397d489d32a7ce8b306ede133a702ccaeb2c2b85559",
+    "libtermexec/src/main/jni/process.h": "33ba9adc9810fe0a778a5752f2a074439c9243019735136ea228824ed4545a1f"
+  }
+}

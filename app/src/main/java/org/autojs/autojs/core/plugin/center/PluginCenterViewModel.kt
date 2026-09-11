@@ -507,6 +507,7 @@ class PluginCenterViewModel : ViewModel() {
         }.getOrNull()
         PluginCenterItem(
             title = local.title.takeIf { it.isNotBlank() } ?: index?.title ?: local.packageName,
+            nativePageAlignment = PluginNativeAlignmentPolicy.installedAlignment(null, local.versionCode, index?.releases.orEmpty()),
             packageName = local.packageName,
             versionName = local.versionName,
             versionCode = local.versionCode,
@@ -556,6 +557,7 @@ class PluginCenterViewModel : ViewModel() {
         val engine = local?.engine ?: index?.engine
         return PluginCenterItem(
             title = local?.title?.takeIf { it.isNotBlank() } ?: index?.title ?: packageName,
+            nativePageAlignment = if (local != null) PluginNativeAlignmentPolicy.installedAlignment(local.nativePageAlignment, local.versionCode, index?.releases.orEmpty()) else latestRelease?.nativePageAlignment ?: index?.nativePageAlignment,
             packageName = packageName,
             versionName = local?.versionName ?: latestRelease?.versionName ?: context.getString(R.string.text_unknown),
             versionCode = local?.versionCode ?: latestRelease?.versionCode,
@@ -849,6 +851,8 @@ class PluginCenterViewModel : ViewModel() {
             canActivate = canActivate,
             requiresHostVersion = requiresHostVersion,
             hostVersionCode = hostVersionCode,
+            nativePageAlignment = if (local != null) PluginNativeAlignmentPolicy.installedAlignment(local.nativePageAlignment, local.versionCode, index?.releases.orEmpty()) else latestRelease?.nativePageAlignment ?: index?.nativePageAlignment,
+            updatableNativePageAlignment = targetUpdate?.nativePageAlignment,
         )
     }
 
@@ -980,6 +984,8 @@ class PluginCenterViewModel : ViewModel() {
             canActivate = false,
             requiresHostVersion = requiresHostVersion,
             hostVersionCode = hostVersionCode,
+            nativePageAlignment = PluginNativeAlignmentPolicy.installedAlignment(null, local.versionCode, index?.releases.orEmpty()),
+            updatableNativePageAlignment = targetUpdate?.nativePageAlignment,
         )
     }
 

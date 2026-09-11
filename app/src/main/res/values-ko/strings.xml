@@ -445,6 +445,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">%1$s 플러그인 인덱스를 가져오지 못했습니다: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">플러그인 \"%1$s\" 이(가) 플러그인 센터에서 활성화되어 있지 않습니다</string>
+    <string name="error_plugin_native_page_alignment_unsupported">플러그인 %1$s의 네이티브 라이브러리는 %2$d바이트로 정렬되어 있어 페이지 크기가 %3$d바이트인 기기에서 실행할 수 없습니다. 플러그인을 업데이트하세요.</string>
     <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
     <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
@@ -636,6 +637,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">이 AutoJs6 빌드에 맞는 플러그인 버전이 설치된 버전보다 낮습니다. Android에서는 기존 앱 위에 낮은 버전을 설치할 수 없습니다.\n\n설치됨: %1$s\n호환 버전: %2$s\n\n먼저 플러그인을 제거하세요. 제거가 끝나면 플러그인 센터로 돌아와 호환 버전을 설치하세요. 플러그인 앱 데이터가 삭제됩니다.</string>
     <string name="prompt_plugin_mount_conflict_override">대상 \"%1$s\" 이(가) 이미 존재합니다 (유형: %2$s). 계속하면 이 객체를 덮어씁니다. 계속할까요?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">대상 \"%1$s\" 이(가) 이미 플러그인 \"%2$s\" (%3$s) 에 의해 사용 중입니다. 먼저 해당 플러그인의 자동 마운트를 끄거나 현재 마운트 대상을 변경하세요.</string>
+    <string name="prompt_plugin_native_page_alignment">플러그인 %1$s의 네이티브 라이브러리가 16 KB 페이지에 맞게 정렬되지 않아 이 기기에서 작동하지 않을 수 있습니다. 사용 전에 플러그인을 업데이트하세요. 계속하시겠습니까?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">새로운 설정을 적용하려면 앱 재시작이 필요합니다</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
     <string name="screen_capturer_foreground_notification_channel_name">스크린 캡처 전경 서비스</string>
@@ -1634,6 +1636,7 @@
     <string name="text_plugin_mount_object_name">마운트 객체 이름</string>
     <string name="text_plugin_mount_point">마운트 지점</string>
     <string name="text_plugin_mount_point_global_display">global</string>
+    <string name="text_plugin_native_page_alignment_incompatible">16 KB 호환되지 않음</string>
     <string name="text_plugin_official">공식</string>
     <string name="text_plugin_online_source">온라인 플러그인 소스</string>
     <string name="text_plugin_show_official_plugins">공식 온라인 설치 가능 플러그인 표시</string>
@@ -2019,4 +2022,5 @@
     <string name="text_yearly_task">연간 작업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="warning_apk_native_page_alignment_unsupported">네이티브 라이브러리 %1$s의 정렬은 %2$d바이트입니다. 생성된 APK는 페이지 크기가 16 KB인 기기에서 실행되지 않을 수 있습니다. 라이브러리 또는 플러그인을 업데이트하세요.</string>
 </resources>

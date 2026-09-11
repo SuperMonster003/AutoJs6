@@ -180,5 +180,6 @@
   "text_reference": "Reference",
   "text_search": "Search",
   "text_stands_for": "stands for",
-  "text_traditional_method_lowercase": "traditional method"
+  "text_traditional_method_lowercase": "traditional method",
+  "text_plugin_native_alignment": "Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

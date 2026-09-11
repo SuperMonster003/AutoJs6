@@ -14,4 +14,6 @@ data class PluginIndexRelease(
 
     /** True when this release was selected from the APK Builder compatibility matrix. */
     val compatibilityMatrixMatched: Boolean = false,
+    val nativePageAlignment: Long? = null,
+    val nativePageAlignmentSource: String? = null,
 )

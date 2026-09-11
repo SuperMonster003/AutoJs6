@@ -1,0 +1,82 @@
+{
+  "repository": "https://github.com/jackpal/Android-Terminal-Emulator.git",
+  "commit": "35188f8a8b57989a4a4ec9485e11187b46be26d9",
+  "ndkVersion": "28.2.13676358",
+  "androidPlatform": 24,
+  "classesJarSha256": "27fc9ce6e318cc2fe372e09b39a3fea4afe411c104533de2f9b27432997e4e4b",
+  "aarSha256": "46c6aea86dc45908a3d2555635a6f31d2fcb74c7af01a9b1d80a9f3cb5522fc4",
+  "libraries": [
+    {
+      "path": "jni/arm64-v8a/libjackpal-androidterm5.so",
+      "sha256": "3f3a1afe194d73cf4b93359bd36671b979008787c7437e27e97a772e30e75df5",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "JNI_OnLoad"
+      ]
+    },
+    {
+      "path": "jni/arm64-v8a/libjackpal-termexec2.so",
+      "sha256": "c65a314c734b40e298f6ec0051d801ea1c1cb23a68526747814c00bad71c2680",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "Java_jackpal_androidterm_TermExec_createSubprocessInternal",
+        "Java_jackpal_androidterm_TermExec_sendSignal",
+        "Java_jackpal_androidterm_TermExec_waitFor"
+      ]
+    },
+    {
+      "path": "jni/armeabi-v7a/libjackpal-androidterm5.so",
+      "sha256": "628d80618fe59ca6b5e946648ee0a10f60dae9147027577fddf4f7dcc36ff99b",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "JNI_OnLoad"
+      ]
+    },
+    {
+      "path": "jni/armeabi-v7a/libjackpal-termexec2.so",
+      "sha256": "203da9c4e7ab27910daeb30646ec9d7ec5c2865fd2902988e96b5f012dd918dd",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "Java_jackpal_androidterm_TermExec_createSubprocessInternal",
+        "Java_jackpal_androidterm_TermExec_sendSignal",
+        "Java_jackpal_androidterm_TermExec_waitFor"
+      ]
+    },
+    {
+      "path": "jni/x86/libjackpal-androidterm5.so",
+      "sha256": "61a0b04ef0c2859427c015d028ab451fd07c59ac8d93bd3626f62b1ee2a2a858",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "JNI_OnLoad"
+      ]
+    },
+    {
+      "path": "jni/x86/libjackpal-termexec2.so",
+      "sha256": "20cd61ad2ed0bfec1245807762bbe75b2d81be6a296b6c150436741bbeafc750",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "Java_jackpal_androidterm_TermExec_createSubprocessInternal",
+        "Java_jackpal_androidterm_TermExec_sendSignal",
+        "Java_jackpal_androidterm_TermExec_waitFor"
+      ]
+    },
+    {
+      "path": "jni/x86_64/libjackpal-androidterm5.so",
+      "sha256": "aa961b44719b6598b64d25cf7a4a6205e1c8706300791b1d5d5c5d9253e66656",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "JNI_OnLoad"
+      ]
+    },
+    {
+      "path": "jni/x86_64/libjackpal-termexec2.so",
+      "sha256": "070e68ff3491e0a91e84d3b0fc90a05bb9028fc42137016f90ef74819747f8cf",
+      "minLoadAlign": 16384,
+      "jniExports": [
+        "Java_jackpal_androidterm_TermExec_createSubprocessInternal",
+        "Java_jackpal_androidterm_TermExec_sendSignal",
+        "Java_jackpal_androidterm_TermExec_waitFor"
+      ]
+    }
+  ]
+}

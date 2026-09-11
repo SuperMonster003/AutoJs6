@@ -98,6 +98,8 @@ Dans le tableau, Auto.js Pro 7/8/9 sont des versions payantes, les autres sont d
 * Prise en charge en tant que plugin Tasker
 * Prise en charge de l'intégration avec VSCode pour le développement de bureau (nécessite l'extension [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com))
 
+Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)
+
 ******
 
 ### Environnement
@@ -339,6 +341,9 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Node recorder prend en charge l’enregistrement AAC avec autorisation du microphone, notification, limite de durée et arrêt avec le script; ui.overlay permet la mise à jour des propriétés, le déplacement et les événements transmis
 * `Fonctionnalité` Les scripts Node peuvent s’exécuter dans deux processus indépendants avec une file FIFO partagée et un routage des annulations et des entrées par exécution
 * `Fonctionnalité` Les requêtes MediaInfo prennent en charge streamNumber à partir de 0, countGet et infoKind pour les unités, descriptions et noms lisibles; Rhino et Node conservent TEXT sur le premier flux par défaut et négocient les capacités du plugin
+* `Fonctionnalité` Vérification de l'alignement ELF avant le chargement des plugins OpenCV et Image Quantization, avec une erreur claire si la taille des pages est incompatible
+* `Fonctionnalité` Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB
+* `Correction` Un plantage lors de l'utilisation successive de Paddle OCR et Rapid OCR dans la même application empaquetée
 * `Correction` Les chemins MediaInfo et image acceptent les chemins absolus, les dossiers parents et les noms valides; les enregistrements suivent les mêmes droits Android avec un hôte mis à jour
 * `Correction` L'exécution directe depuis le gestionnaire de fichiers ne respectait pas l'encodage UTF-8, UTF-16 ou UTF-32 indiqué par le BOM Unicode, si bien que des scripts exécutés normalement dans l'éditeur échouaient avec `Caractère non valide`
 * `Correction` Les informations de téléchargement d'Android Studio n'étaient plus écrites automatiquement dans les données README communes après la migration des scrapers
@@ -589,6 +594,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Les exemples OCR demandent le consentement Android et reconnaissent de vraies images; les plugins OCR ou codes-barres indisponibles renvoient une erreur unavailable lisible, et les échecs de reconnaissance restent des erreurs
 * `Amélioration` Les scripts Node prennent en charge un démarrage asynchrone négocié, libèrent les threads Binder pendant les longues exécutions et renvoient les modifications de l’espace de travail à la fin, avec compatibilité des anciens hôtes synchrones
 * `Amélioration` Les noeuds JSON de `accessibility.dump` du Node bridge portent les indicateurs d'etat `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` et `longClickable` en plus des sept champs du descripteur ; l'autorisation de session MCP Server inclut les actions globales `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` pour l'outil `ui_press_key` du plugin, et un appel `keys.*` sans le service d'accessibilite repond desormais avec la categorie `unavailable` comme le module `accessibility` ; un `accessibility.swipe` de longueur nulle (points de depart et d'arrivee identiques) est envoye comme un appui de `durationMs`, dont dependent les formes par coordonnees de `ui_click` / `ui_long_click` de MCP
+* `Amélioration` Alignement 16 KB pour les bibliothèques natives de l'hôte et du runtime-kit, avec jackpal JNI recompilé, libc++ du NDK r28.2, provenance et vérification de compilation partagée
+* `Amélioration` Le constructeur APK signale les bibliothèques natives incompatibles dans la progression et les résultats, enregistre l'alignement dans les métadonnées locales et conserve l'empaquetage compressé
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

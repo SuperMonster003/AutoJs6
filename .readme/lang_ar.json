@@ -180,5 +180,6 @@
   "text_reference": "مرجع",
   "text_search": "بحث",
   "text_stands_for": "تمثل",
-  "text_traditional_method_lowercase": "طريقة تقليدية"
+  "text_traditional_method_lowercase": "طريقة تقليدية",
+  "text_plugin_native_alignment": "يقرأ مركز الملحقات محاذاة الصفحات من الفهرس الرسمي و manifest المثبت, ويحذر قبل تثبيت أو تفعيل إصدارات غير متوافقة على أجهزة 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

@@ -443,6 +443,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">Échec de la récupération de l\'index des plugins de %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Le plugin \"%1$s\" n\'est pas autorise dans le Centre des plugins</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Le plugin \"%1$s\" n\'est pas active dans le Centre des plugins</string>
+    <string name="error_plugin_native_page_alignment_unsupported">Le plugin %1$s contient une bibliothèque native alignée sur %2$d octets, incompatible avec les pages de %3$d octets. Veuillez mettre à jour le plugin.</string>
     <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" introuvable parmi les applis installees</string>
     <string name="error_plugin_returned_empty_info">Le plugin %1$s a renvoyé des informations vides.</string>
     <string name="error_plugin_returned_invalid_variant">Le plugin %1$s a renvoyé une variante invalide : %2$s.</string>
@@ -634,6 +635,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">La version du plugin compatible avec cette version d\'AutoJs6 est antérieure à la version installée. Android ne peut pas installer une version antérieure par-dessus une application existante.\n\nInstallée: %1$s\nCompatible: %2$s\n\nDésinstallez d\'abord le plugin. Après la désinstallation, revenez au Centre des plugins et installez la version compatible. Les données de l\'application du plugin seront supprimées.</string>
     <string name="prompt_plugin_mount_conflict_override">La cible \"%1$s\" existe deja (type: %2$s). Si vous continuez, cet objet sera ecrase. Continuer?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">La cible \"%1$s\" est deja occupee par le plugin \"%2$s\" (%3$s). Desactivez d\'abord le montage automatique de ce plugin ou modifiez cette cible de montage.</string>
+    <string name="prompt_plugin_native_page_alignment">Les bibliotheques natives du plugin %1$s ne sont pas alignees pour des pages de 16 KB. Ce plugin peut echouer sur cet appareil. Mettez-le a jour avant utilisation. Continuer quand meme?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Un redémarrage de l\'application est nécessaire pour appliquer les nouveaux paramètres.</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Un redémarrage de l\'appli peut être nécessaire pour que la langue soit appliquée comme prévu.</string>
     <string name="screen_capturer_foreground_notification_channel_name">Service de capture d\'écran en avant-plan</string>
@@ -1632,6 +1634,7 @@
     <string name="text_plugin_mount_object_name">Nom de l\'objet monte</string>
     <string name="text_plugin_mount_point">Point de montage</string>
     <string name="text_plugin_mount_point_global_display">global</string>
+    <string name="text_plugin_native_page_alignment_incompatible">Incompatible avec 16 KB</string>
     <string name="text_plugin_official">Officiel</string>
     <string name="text_plugin_online_source">Source de plugins en ligne</string>
     <string name="text_plugin_show_official_plugins">Afficher les plugins officiels installables en ligne</string>
@@ -2017,4 +2020,5 @@
     <string name="text_yearly_task">Tâche annuelle</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
+    <string name="warning_apk_native_page_alignment_unsupported">La bibliothèque native %1$s est alignée sur %2$d octets. Le fichier APK généré peut être incompatible avec les pages de 16 KB. Mettez à jour la bibliothèque ou le plugin.</string>
 </resources>

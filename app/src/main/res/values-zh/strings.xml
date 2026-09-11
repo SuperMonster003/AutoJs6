@@ -439,6 +439,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">获取 %1$s 插件索引失败: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">插件 \"%1$s\" 未在插件中心获得授权</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">插件 \"%1$s\" 未在插件中心启用</string>
+    <string name="error_plugin_native_page_alignment_unsupported">插件 %1$s 包含按 %2$d 字节对齐的原生库, 无法在页大小为 %3$d 字节的设备上运行. 请升级插件.</string>
     <string name="error_plugin_not_found_in_installed_apps">已安装应用中未找到插件 \"%1$s\"</string>
     <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 为空.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 无效: %2$s.</string>
@@ -630,6 +631,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">与当前 AutoJs6 版本配套的插件版本低于已安装版本. Android 不允许用较低版本覆盖已安装应用.\n\n已安装: %1$s\n配套版本: %2$s\n\n请先卸载插件. 卸载完成后返回插件中心, 再安装配套版本. 插件应用数据将被删除.</string>
     <string name="prompt_plugin_mount_conflict_override">目标 \"%1$s\" 已存在 (类型: %2$s). 继续将覆盖该对象, 是否继续.</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">目标 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 占用. 请先关闭该插件的自动挂载, 或修改当前挂载目标.</string>
+    <string name="prompt_plugin_native_page_alignment">插件 %1$s 的原生库未按 16 KB 页大小对齐, 可能无法在此设备上运行. 请升级插件后再使用. 是否仍要继续?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重启应用才能完成文档源切换</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分内容可能需要重启应用才能完成语言切换</string>
     <string name="screen_capturer_foreground_notification_channel_name">屏幕捕获器前台服务</string>
@@ -1629,6 +1631,7 @@
     <string name="text_plugin_mount_object_name">挂载对象名称</string>
     <string name="text_plugin_mount_point">挂载点</string>
     <string name="text_plugin_mount_point_global_display">global (全局)</string>
+    <string name="text_plugin_native_page_alignment_incompatible">不兼容 16 KB</string>
     <string name="text_plugin_official">官方</string>
     <string name="text_plugin_online_source">在线插件来源</string>
     <string name="text_plugin_show_official_plugins">显示官方可在线安装插件</string>
@@ -2022,4 +2025,5 @@
     <string name="python_long_running_notification_running">正在运行 %1$s</string>
     <string name="python_long_running_notification_stopping">正在停止 %1$s…</string>
     <string name="python_long_running_notification_stop">停止</string>
+    <string name="warning_apk_native_page_alignment_unsupported">原生库 %1$s 的对齐值为 %2$d 字节. 生成的 APK 可能无法在页大小为 16 KB 的设备上运行. 请升级原生库或插件.</string>
 </resources>

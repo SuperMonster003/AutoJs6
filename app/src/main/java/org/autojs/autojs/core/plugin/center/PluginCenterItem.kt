@@ -75,6 +75,8 @@ data class PluginCenterItem(
     var canActivate: Boolean = false,
     val requiresHostVersion: Long? = null,
     val hostVersionCode: Long? = null,
+    val nativePageAlignment: Long? = null,
+    val updatableNativePageAlignment: Long? = null,
 ) {
     val versionSummary: String = PluginVersionSummaryFormatter.format(versionName, versionCode, versionDate)
 

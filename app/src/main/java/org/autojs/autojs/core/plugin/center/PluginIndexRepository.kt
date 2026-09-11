@@ -832,6 +832,8 @@ class PluginIndexRepository {
                                 changelogUrl = rel.optString("changelogUrl").takeIf { it.isNotBlank() },
                                 changelogText = rel.optString("changelogText").takeIf { it.isNotBlank() },
                                 compatibilityMatrixMatched = rel.optBoolean("compatibilityMatrixMatched", false),
+                                nativePageAlignment = PluginNativeAlignmentPolicy.parse(rel.opt("nativePageAlignment")),
+                                nativePageAlignmentSource = rel.optString("nativePageAlignmentSource").takeIf { it in setOf("measured", "declared") },
                             ),
                         )
                     }
@@ -857,6 +859,8 @@ class PluginIndexRepository {
                 supportedAbis = supportedAbis,
                 tags = tags,
                 requiresHostVersion = requiresHostVersion,
+                nativePageAlignment = PluginNativeAlignmentPolicy.parse(obj.opt("nativePageAlignment")),
+                nativePageAlignmentSource = obj.optString("nativePageAlignmentSource").takeIf { it in setOf("measured", "declared") },
                 source = source,
             )
         }

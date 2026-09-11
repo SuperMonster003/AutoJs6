@@ -177,6 +177,7 @@ enum class ApkBuildLibrary(
                         "libRapidOcr.so",
                         "libonnxruntime.so",
                     ),
+                    optionalLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
                 ),
                 ApkPluginLibraryVariant(
                     variant = "pp-ocrv6",
@@ -190,6 +191,7 @@ enum class ApkBuildLibrary(
                         "libRapidOcr.so",
                         "libonnxruntime.so",
                     ),
+                    optionalLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
                 ),
             ),
         ),
@@ -327,6 +329,8 @@ data class ApkPluginLibraryVariant(
     /** <Required List> to <Optional List>. */
     val assetsToInclude: Pair<List<String>, List<String>> = emptyList<String>() to emptyList(),
     val libsToInclude: List<String> = emptyList(),
+    /** Present in newer plugin releases; older releases remain valid without these payloads. */
+    val optionalLibsToInclude: List<String> = emptyList(),
 )
 
 object ApkBuildLibraryCatalog {

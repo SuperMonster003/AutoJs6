@@ -189,7 +189,9 @@ def scan_so_file(path: Path):
     with open(path, "rb") as f:
         head = f.read(65536)
     align, err = elf_min_load_align(head)
-    return {"path": str(path), "size": path.stat().st_size, "elfAlign": align, "elfErr": err,
+    machine = struct.unpack_from("<H" if head[5:6] == b"\x01" else ">H", head, 18)[0] if len(head) >= 20 else None
+    abi = {183: "arm64-v8a", 62: "x86_64", 40: "armeabi-v7a", 3: "x86"}.get(machine)
+    return {"path": str(path), "abi": abi, "size": path.stat().st_size, "elfAlign": align, "elfErr": err,
             "ok": (align is not None and align >= PAGE)}
 
 
@@ -205,7 +207,8 @@ def pick_apks(project: Path, max_groups: int):
     return newest_per_group[:max_groups]
 
 
-SKIP_PARTS = ("build", ".git", ".gradle", "node_modules", ".bak")
+# Generated intermediates and deliberately invalid test fixtures are not shipping inputs.
+SKIP_PARTS = ("build", ".cxx", ".externalNativeBuild", ".git", ".gradle", "node_modules", ".bak", "test-fixtures")
 
 
 def loose_so_files(project: Path):
@@ -302,23 +305,28 @@ def main() -> int:
                 proj_strict_bad += render_apk_section(md, str(apk.relative_to(project)), apk, rows, info)
                 packaging_notes.add(f"extractNativeLibs={info['extractNativeLibs']}")
             if loose:
-                md.append("\n### Checked-in .so files\n")
+                md.append("\n### Source-tree .so files (including untracked vendor inputs)\n")
                 md.append("| path | KiB | ELF min p_align | ok |")
                 md.append("| --- | ---: | --- | --- |")
                 for p in loose:
                     r = scan_so_file(p)
+                    r["abi"] = next((part for part in p.parts if part in STRICT_ABIS), r["abi"])
+                    proj_total += 1
+                    proj_strict_bad += len(strict_failures([r]))
                     md.append(f"| {p.relative_to(project)} | {r['size'] // 1024} | {fmt_align(r['elfAlign'])} | {'OK' if r['ok'] else 'BAD'} |")
             if aars:
                 md.append("\n### .so inside AAR/JAR under the repo\n")
                 md.append("| archive | entry | KiB | ELF min p_align | ok |")
                 md.append("| --- | --- | ---: | --- | --- |")
                 for r in aars:
+                    proj_total += 1
+                    proj_strict_bad += len(strict_failures([r]))
                     md.append(f"| {r['archive']} | {r['entry']} | {r['size'] // 1024} | {fmt_align(r['elfAlign'])} | {'OK' if r['ok'] else 'BAD'} |")
             strict_failure_total += proj_strict_bad
             summary.append((project.name, f"{len(apks)} apk, {len(loose)} loose .so, {len(aars)} aar .so",
                             proj_total, proj_strict_bad, ", ".join(sorted(packaging_notes)) or "-"))
 
-    summary_md = ("\n## Summary\n\n| project | scanned | apk .so total | apk 64-bit failing | packaging |\n| --- | --- | ---: | ---: | --- |\n"
+    summary_md = ("\n## Summary\n\n| project | scanned | native entries total | 64-bit failing | packaging |\n| --- | --- | ---: | ---: | --- |\n"
                   + "\n".join(f"| {n} | {s} | {t} | {b} | {p} |" for n, s, t, b, p in summary) + "\n")
     md.insert(2, summary_md)
     report = out_dir / "alignment-report.md"

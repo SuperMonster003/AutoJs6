@@ -76,6 +76,8 @@
 * {{ li_function_tasker_plugin_support }}
 * {{ li_function_vscode_integration_support }}
 
+{{ text_plugin_native_alignment }}
+
 ******
 
 ### {{ h3_environment }}

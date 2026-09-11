@@ -444,6 +444,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">%1$s プラグインインデックスの取得に失敗しました: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで有効になっていません</string>
+    <string name="error_plugin_native_page_alignment_unsupported">プラグイン %1$s のネイティブライブラリは %2$d バイト境界に配置されているため, ページサイズが %3$d バイトの端末では実行できません. プラグインを更新してください.</string>
     <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
     <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
@@ -635,6 +636,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">この AutoJs6 ビルドに対応するプラグインバージョンは, インストール済みバージョンより低いものです. Android では既存アプリに低いバージョンを上書きインストールできません.\n\nインストール済み: %1$s\n対応バージョン: %2$s\n\n先にプラグインをアンインストールしてください. アンインストール後, プラグインセンターに戻って対応バージョンをインストールしてください. プラグインのアプリデータは削除されます.</string>
     <string name="prompt_plugin_mount_conflict_override">対象 \"%1$s\" は既に存在します (種類: %2$s). 続行するとこのオブジェクトは上書きされます. 続行しますか?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">対象 \"%1$s\" は既にプラグイン \"%2$s\" (%3$s) に使用されています. 先にそのプラグインの自動マウントを無効にするか, 現在のマウント対象を変更してください.</string>
+    <string name="prompt_plugin_native_page_alignment">プラグイン %1$s のネイティブライブラリは 16 KB ページに対応していないため, このデバイスで動作しない可能性があります. 使用前にプラグインを更新してください. 続行しますか?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">新しい設定を適用するには, アプリの再起動が必要です</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">言語を正しく適用するために, アプリの再起動が必要な場合があります</string>
     <string name="screen_capturer_foreground_notification_channel_name">スクリーンキャプチャーのフォアグラウンドサービス</string>
@@ -1633,6 +1635,7 @@
     <string name="text_plugin_mount_object_name">マウントオブジェクト名</string>
     <string name="text_plugin_mount_point">マウントポイント</string>
     <string name="text_plugin_mount_point_global_display">global</string>
+    <string name="text_plugin_native_page_alignment_incompatible">16 KB 非対応</string>
     <string name="text_plugin_official">公式</string>
     <string name="text_plugin_online_source">オンラインプラグインソース</string>
     <string name="text_plugin_show_official_plugins">公式のオンラインインストール可能プラグインを表示</string>
@@ -2018,4 +2021,5 @@
     <string name="text_yearly_task">毎年のタスク</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
+    <string name="warning_apk_native_page_alignment_unsupported">ネイティブライブラリ %1$s のアラインメントは %2$d バイトです. 生成された APK はページサイズが 16 KB の端末で動作しない可能性があります. ライブラリまたはプラグインを更新してください.</string>
 </resources>

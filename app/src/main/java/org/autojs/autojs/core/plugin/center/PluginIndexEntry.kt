@@ -37,6 +37,8 @@ data class PluginIndexEntry(
     val tags: List<String> = emptyList(),
 
     val requiresHostVersion: Long? = null,
+    val nativePageAlignment: Long? = null,
+    val nativePageAlignmentSource: String? = null,
 
     val source: PluginIndexSource = PluginIndexSource.OFFICIAL,
 )

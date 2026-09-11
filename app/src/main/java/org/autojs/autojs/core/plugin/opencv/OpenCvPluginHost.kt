@@ -10,6 +10,9 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
 import org.autojs.autojs.AbstractAutoJs
+import org.autojs.autojs.core.plugin.nativealign.NativeLibraryAlignment
+import org.autojs.autojs.core.plugin.nativealign.NativePageAlignmentException
+import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
@@ -79,6 +82,7 @@ object OpenCvPluginHost {
         val abi: String? = null,
         val nativeLibraryPath: String? = null,
         val nativeNdkVersion: String? = null,
+        val nativeMinLoadAlign: Long? = null,
     )
 
     private data class PreparedRuntime(
@@ -195,7 +199,7 @@ object OpenCvPluginHost {
         synchronized(loadLock) {
             loadedRuntime?.let { return it }
             if (AbstractAutoJs.isInrt) {
-                tryLoadBundledRuntime()?.let { bundled ->
+                tryLoadBundledRuntime(context)?.let { bundled ->
                     loadedRuntime = bundled
                     return bundled
                 }
@@ -220,6 +224,7 @@ object OpenCvPluginHost {
             } catch (error: UnsatisfiedLinkError) {
                 Log.d(TAG, "Host C++ runtime was not preloaded; OpenCV loader will resolve it", error)
             }
+            val nativeMinLoadAlign = validateNativeAlignment(context, staged.file, candidate.serviceInfo.packageName)
             try {
                 System.load(staged.file.absolutePath)
             } catch (error: LinkageError) {
@@ -249,6 +254,7 @@ object OpenCvPluginHost {
                 packageVersionCode = candidate.packageVersionCode,
                 abi = staged.abi,
                 nativeLibraryPath = staged.file.absolutePath,
+                nativeMinLoadAlign = nativeMinLoadAlign,
                 nativeNdkVersion = candidate.nativeNdkVersion,
             ).also { runtime ->
                 loadedRuntime = runtime
@@ -261,7 +267,9 @@ object OpenCvPluginHost {
         }
     }
 
-    private fun tryLoadBundledRuntime(): LoadedRuntime? {
+    private fun tryLoadBundledRuntime(context: Context): LoadedRuntime? {
+        val library = File(context.applicationInfo.nativeLibraryDir, OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME)
+        val nativeMinLoadAlign = library.takeIf(File::isFile)?.let { validateNativeAlignment(context, it, context.packageName) }
         try {
             System.loadLibrary(OpenCvPluginContract.NATIVE_LIBRARY_NAME)
         } catch (_: UnsatisfiedLinkError) {
@@ -274,9 +282,21 @@ object OpenCvPluginHost {
                 "Bundled OpenCV runtime reports $actualVersion; expected ${OpenCvPluginContract.EXPECTED_OPENCV_VERSION}",
             )
         }
-        return LoadedRuntime(Origin.BUNDLED, actualVersion).also {
+        return LoadedRuntime(Origin.BUNDLED, actualVersion, nativeMinLoadAlign = nativeMinLoadAlign).also {
             Log.i(TAG, "Loaded bundled OpenCV ${it.openCvVersion}")
         }
+    }
+
+    private fun validateNativeAlignment(context: Context, file: File, packageName: String): Long = try {
+        NativeLibraryAlignment.requireCompatible(file, NativePageSize.current())
+    } catch (error: NativePageAlignmentException) {
+        throw OpenCvPluginLoadException(
+            OpenCvPluginLoadError.NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED,
+            context.getString(R.string.error_plugin_native_page_alignment_unsupported, packageName, error.minLoadAlign, error.pageSize),
+            error,
+        )
+    } catch (error: Exception) {
+        throw OpenCvPluginLoadException(OpenCvPluginLoadError.NATIVE_LIBRARY_INVALID, "Invalid native ELF: ${file.name}", error)
     }
 
     private fun selectCandidate(context: Context): Candidate {
@@ -300,7 +320,7 @@ object OpenCvPluginHost {
             packageIdentity = candidate.packageIdentity,
             supportedAbis = processSupportedAbis(),
             nativeLibraryFileName = OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME,
-        )
+        ).also { validateNativeAlignment(context, it.file, candidate.serviceInfo.packageName) }
     } catch (error: OpenCvPluginLoadException) {
         throw error
     } catch (error: Exception) {
@@ -492,6 +512,7 @@ enum class OpenCvPluginLoadError {
     NATIVE_LIBRARY_INVALID,
     NATIVE_LIBRARY_EXTRACTION_FAILED,
     NATIVE_LIBRARY_LOAD_FAILED,
+    NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED,
     RUNTIME_VERSION_MISMATCH,
     BUNDLED_RUNTIME_MISSING,
 }

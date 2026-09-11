@@ -1,6 +1,7 @@
 @file:Suppress("SpellCheckingInspection", "AvoidApplyPluginMethod")
 
 import com.android.build.api.variant.FilterConfiguration
+import org.autojs.build.alignment.ElfLoadAlignment
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -13,6 +14,7 @@ plugins {
     id("org.autojs.build.signs")
     id("org.autojs.build.jvm-convention")
     id("com.android.application")
+    id("io.github.supermonster003.autojs6-native-alignment")
     id("com.google.devtools.ksp")
     id("idea")
 }
@@ -263,6 +265,7 @@ private data class RuntimeKitDigestEntry(
     val path: String,
     val sizeBytes: Long,
     val sha256: String,
+    val minLoadAlign: Long? = null,
 )
 
 private fun normalizeRuntimeKitVersion(value: String): String =
@@ -348,6 +351,9 @@ private fun collectZipDigestEntries(apkFile: File, accept: (String) -> Boolean):
                     path = entry.name,
                     sizeBytes = entry.size,
                     sha256 = zipEntrySha256(zip, entry),
+                    minLoadAlign = if (entry.name.startsWith("lib/") && entry.name.endsWith(".so")) {
+                        zip.getInputStream(entry).use { ElfLoadAlignment.parse(it.readNBytes(ElfLoadAlignment.PREFIX_SIZE)).minLoadAlign }
+                    } else null,
                 )
             }
             .sortedBy { it.path }
@@ -385,6 +391,7 @@ private fun writeDigestManifestJson(
                 append("\"path\": ${entry.path.toJsonLiteral()}, ")
                 append("\"sizeBytes\": ${entry.sizeBytes}, ")
                 append("\"sha256\": ${entry.sha256.toJsonLiteral()}")
+                entry.minLoadAlign?.let { append(", \"minLoadAlign\": $it") }
                 append("}")
                 if (index != entries.lastIndex) append(",")
                 appendLine()
@@ -1147,7 +1154,7 @@ androidComponents {
 tasks.register("generateRuntimeKit") {
     group = "build"
     description = "Builds the AutoJs6 Runtime Kit consumed by the standalone APK Builder template plugin."
-    dependsOn("assembleInrtRelease")
+    dependsOn("assembleInrtRelease", "verifyInrtReleaseNativePageAlignment")
 
     val runtimeKitVersionName = versions.appVersionName
     val runtimeKitVersionCode = versions.appVersionCode
@@ -1331,6 +1338,7 @@ tasks.register("generateRuntimeKit") {
                     appendLine("  \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
                     appendLine("  \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
                     appendLine("  \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                    appendLine("  \"nativeLibPageAlignment\": 16384,")
                     appendLine("  \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
                     appendLine("}")
                 },
@@ -1368,6 +1376,7 @@ tasks.register("generateRuntimeKit") {
                     appendLine("    \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
                     appendLine("    \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
                     appendLine("    \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                    appendLine("    \"nativeLibPageAlignment\": 16384,")
                     appendLine("    \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
                     appendLine("  },")
                     appendLine("  \"compatibility\": {")

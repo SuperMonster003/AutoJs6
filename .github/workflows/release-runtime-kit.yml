@@ -48,17 +48,6 @@ jobs:
           java-version: "21"
           cache: gradle
 
-      - name: Install CMake 3.10.2
-        run: |
-          wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
-          chmod +x cmake-3.10.2-Linux-x86_64.sh
-          sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
-
-      - name: Install Ninja
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -78,6 +67,18 @@ jobs:
           allow_patch_version_mismatch="${ALLOW_PATCH_VERSION_MISMATCH:-false}"
           args+=("--project-prop=autojs.runtimeKit.compatibility.allowPatchVersionMismatch=$allow_patch_version_mismatch")
           ./gradlew "${args[@]}"
+
+      - name: Verify native ELF and APK ZIP alignment
+        run: python3 tools/16kb/verify_apks.py app/build/runtime-kit --report build/reports/native-alignment/sdk-verification.json
+
+      - name: Upload native alignment reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-alignment-release-runtime-kit
+          path: |
+            app/build/reports/native-alignment/*.json
+            build/reports/native-alignment/*.json
 
       - name: Upload Runtime Kit artifact
         uses: actions/upload-artifact@v4

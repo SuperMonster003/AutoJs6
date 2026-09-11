@@ -33,13 +33,15 @@ object PluginAbiCompatibilityPrompt {
         item: PluginCenterItem,
         onContinue: () -> Unit,
     ) {
-        runBeforeAction(
-            context = context,
-            item = item,
-            remindKey = KEY_PLUGIN_ABI_MISMATCH_ENABLE_PROMPT,
-            contentRes = R.string.prompt_plugin_abi_mismatch_before_enable,
-            onContinue = onContinue,
-        )
+        PluginNativeAlignmentPrompt.runBeforeAction(context, item, download = false) {
+            runBeforeAction(
+                context = context,
+                item = item,
+                remindKey = KEY_PLUGIN_ABI_MISMATCH_ENABLE_PROMPT,
+                contentRes = R.string.prompt_plugin_abi_mismatch_before_enable,
+                onContinue = onContinue,
+            )
+        }
     }
 
     private fun runBeforeAction(

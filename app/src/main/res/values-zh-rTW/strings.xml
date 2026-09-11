@@ -440,6 +440,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">取得 %1$s 外掛索引失敗: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
+    <string name="error_plugin_native_page_alignment_unsupported">外掛程式 %1$s 包含按 %2$d 位元組對齊的原生程式庫, 無法在頁面大小為 %3$d 位元組的裝置上執行. 請升級外掛程式.</string>
     <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
     <string name="error_plugin_returned_empty_info">%1$s 外掛返回的 info 為空.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
@@ -631,6 +632,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">與目前 AutoJs6 版本搭配的外掛版本低於已安裝版本. Android 不允許以較低版本覆蓋已安裝的應用程式.\n\n已安裝: %1$s\n搭配版本: %2$s\n\n請先解除安裝外掛. 解除安裝完成後返回外掛中心, 再安裝搭配版本. 外掛應用程式資料將被刪除.</string>
     <string name="prompt_plugin_mount_conflict_override">目標 \"%1$s\" 已存在 (型別: %2$s). 繼續將覆蓋該物件, 是否繼續.</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">目標 \"%1$s\" 已被外掛 \"%2$s\" (%3$s) 佔用. 請先關閉該外掛的自動掛載, 或修改當前掛載目標.</string>
+    <string name="prompt_plugin_native_page_alignment">外掛程式 %1$s 的原生函式庫未按 16 KB 頁面大小對齊, 可能無法在此裝置上執行. 請升級外掛程式後再使用. 是否仍要繼續?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啟應用才能完成文件源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啟應用才能完成語言切換</string>
     <string name="screen_capturer_foreground_notification_channel_name">螢幕捕獲器前臺服務</string>
@@ -1629,6 +1631,7 @@
     <string name="text_plugin_mount_object_name">掛載物件名稱</string>
     <string name="text_plugin_mount_point">掛載點</string>
     <string name="text_plugin_mount_point_global_display">global (全域性)</string>
+    <string name="text_plugin_native_page_alignment_incompatible">不相容 16 KB</string>
     <string name="text_plugin_official">官方</string>
     <string name="text_plugin_online_source">線上外掛來源</string>
     <string name="text_plugin_show_official_plugins">顯示官方可線上安裝外掛</string>
@@ -2014,4 +2017,5 @@
     <string name="text_yearly_task">每年任務</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
+    <string name="warning_apk_native_page_alignment_unsupported">原生程式庫 %1$s 的對齊值為 %2$d 位元組. 產生的 APK 可能無法在頁面大小為 16 KB 的裝置上執行. 請升級原生程式庫或外掛程式.</string>
 </resources>

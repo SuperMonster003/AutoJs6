@@ -1011,7 +1011,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                                 -> true
                             else -> false
                         }
-                if (!canAutoEnable || item.isEnabled) return@launch
+                if (!canAutoEnable || item.isEnabled || PluginNativeAlignmentPolicy.needsWarning(
+                        item.nativePageAlignment, org.autojs.autojs.core.plugin.nativealign.NativePageSize.current(),
+                    )) return@launch
                 if (item.isAwaitingFreshInstallProbe()) {
                     vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
                     return@repeat

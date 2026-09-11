@@ -98,6 +98,8 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 * Taskerプラグインとして使用可能
 * VS Code拡張機能との連携をサポート (AutoJs6-VSCode-Extensionプラグインが必要です: [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com))
 
+プラグインセンターが公式インデックスとインストール済み manifest のページアラインメントを読み取り, 16 KB デバイスで非対応バージョンをインストールまたは有効化する前に警告. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)
+
 ******
 
 ### 環境
@@ -339,6 +341,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node recorder がマイク権限, フォアグラウンド通知, 時間制限とスクリプト終了時の解放を備えた AAC 録音に対応; ui.overlay が宣言的な属性更新, ドラッグとイベント配信に対応
 * `新機能` Node スクリプトが 2 つの独立したランタイムプロセスで並行実行可能になり, FIFO キューの共有と実行単位のキャンセルおよび入力転送に対応
 * `新機能` MediaInfo クエリが 0 始まりの streamNumber, countGet によるストリーム数, 単位や説明や表示名を取得する infoKind に対応; Rhino と Node は既定の先頭ストリームの TEXT クエリを維持し, プラグインの拡張機能を確認
+* `新機能` OpenCV と Image Quantization プラグインの読み込み前に ELF アラインメントを検査し, デバイスのページサイズと互換性がない場合は明確なエラーを表示
+* `新機能` プラグインセンターが公式インデックスとインストール済み manifest のページアラインメントを読み取り, 16 KB デバイスで非対応バージョンをインストールまたは有効化する前に警告
+* `修正` 同じパッケージ化アプリで Paddle OCR と Rapid OCR を順番に使用するとクラッシュする問題
 * `修正` MediaInfo と画像のファイルパスで絶対パス, 親ディレクトリと有効なファイル名に対応; 録音出力も更新済みホストの Android ファイル権限に従って処理
 * `修正` Unicode BOM 付きスクリプトをファイルマネージャーから直接実行すると対応する UTF-8, UTF-16 または UTF-32 として読み込まれず, エディタでは正常に実行できる一方でファイルマネージャーでは `無効な文字` となる問題
 * `修正` スクレイパー移行後に Android Studio のダウンロード情報が README 共通データへ自動反映されなくなる問題
@@ -589,6 +594,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 画面 OCR サンプルが Android のキャプチャ許可を要求して実際の画像ハンドルを認識し, OCR またはバーコードプラグインが利用不可なら読みやすい unavailable エラーを返し, 認識失敗はエラーとして処理
 * `改善` Node スクリプトはネゴシエーションによる非同期起動に対応し, 長時間実行中の Binder スレッドを解放, 終了後にワークスペースの変更を返却し, 従来の同期ホストとも互換
 * `改善` Node bridge の `accessibility.dump` の JSON ノードは 7 つの記述子フィールドに加えて `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable` の状態フラグを持つようになりました; MCP Server のセッション権限にプラグインの `ui_press_key` ツール向けのグローバル操作 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` を追加し, ユーザー補助サービスが動作していないときの `keys.*` 呼び出しは `accessibility` モジュールと同様に `unavailable` カテゴリーで応答します; 始点と終点が同じ (長さ 0 の) `accessibility.swipe` は `durationMs` の押下として送出され, MCP の `ui_click` / `ui_long_click` の座標形式はこれに依存します
+* `改善` ホストと runtime-kit のネイティブライブラリを 16 KB に対応, jackpal JNI の再ビルドと NDK r28.2 libc++ の使用, 出所記録と共通ビルド検証を整備
+* `改善` APK ビルダーが非対応のネイティブライブラリを進捗と結果に表示し, 圧縮パッケージを維持してローカルのビルド入力にアラインメントを記録
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

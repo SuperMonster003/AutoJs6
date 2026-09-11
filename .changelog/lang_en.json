@@ -173,9 +173,12 @@
         "Node app supports Android service starts, broadcasts and installed package queries; dialogs supports text input, choices and progress windows with script cleanup, and keys provides accessibility system actions",
         "Node recorder supports AAC recording with microphone permission, foreground disclosure, duration limits and script cleanup; ui.overlay supports declarative property updates, dragging and pushed events",
         "Node scripts can run concurrently in two independent runtime processes, with a shared FIFO queue and execution-specific cancellation and input routing",
-        "MediaInfo queries support zero-based streamNumber, countGet stream counts, and infoKind for units, descriptions and readable names; Rhino and Node preserve default first-stream TEXT queries and negotiate extended plugin capabilities"
+        "MediaInfo queries support zero-based streamNumber, countGet stream counts, and infoKind for units, descriptions and readable names; Rhino and Node preserve default first-stream TEXT queries and negotiate extended plugin capabilities",
+        "Checks native ELF alignment before loading OpenCV and Image Quantization plugins, with a clear error for incompatible device page sizes",
+        "Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices"
       ],
       "fix": [
+        "A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app",
         "MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host",
         "File Manager direct execution did not honor the corresponding UTF-8, UTF-16, or UTF-32 encoding for scripts with a Unicode BOM, causing files that ran normally in the editor to fail with `Invalid character`",
         "Android Studio download information was no longer written automatically to shared README data after the scraper migration",
@@ -427,7 +430,9 @@
         "Every script runtime now owns its console (its own log entries and floating window, with every line forwarded to the global console); the floating window only shows the output of the current script (as in Auto.js 4) and re-running a script with the same title replaces the floating window left by the previous run; log entries store the raw content and a timestamp and each view renders the time prefix on demand (hidden by default in the floating window, switchable in the log page settings); Node bridge `console.tail` entries gain a `time` field (epoch milliseconds) while `text` keeps its time prefix",
         "Screen OCR examples request Android capture consent and recognize real image handles; unavailable OCR or barcode plugins return readable unavailable errors, while recognition failures remain errors",
         "Node scripts support negotiated asynchronous startup, releasing Binder threads during long-running execution and returning workspace changes after terminal completion, with legacy synchronous host compatibility",
-        "Node bridge `accessibility.dump` JSON nodes carry the state flags `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` and `longClickable` next to the seven descriptor fields; the MCP Server session grant includes the `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` global actions for the plugin's `ui_press_key` tool, and a `keys.*` call without the accessibility service now answers the `unavailable` category like the `accessibility` module; a zero-length `accessibility.swipe` (identical end points) is dispatched as a press of `durationMs`, which the coordinate forms of the MCP `ui_click` / `ui_long_click` tools rely on"
+        "Node bridge `accessibility.dump` JSON nodes carry the state flags `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` and `longClickable` next to the seven descriptor fields; the MCP Server session grant includes the `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` global actions for the plugin's `ui_press_key` tool, and a `keys.*` call without the accessibility service now answers the `unavailable` category like the `accessibility` module; a zero-length `accessibility.swipe` (identical end points) is dispatched as a press of `durationMs`, which the coordinate forms of the MCP `ui_click` / `ui_long_click` tools rely on",
+        "Host and runtime-kit native libraries support 16 KB alignment, with rebuilt jackpal JNI libraries, NDK r28.2 libc++, provenance records and shared build verification",
+        "APK Builder reports incompatible native libraries in build progress and results, and records alignment in local build-input metadata while preserving compressed packaging"
       ],
       "dependency": [
         "Modularized Android AXML",

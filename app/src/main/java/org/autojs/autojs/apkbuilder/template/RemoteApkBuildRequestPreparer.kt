@@ -134,6 +134,9 @@ object RemoteApkBuildRequestPreparer {
         val archiveFile: File,
         val nativeLibrariesArchiveFile: File?,
         val expectedSignerCertificateSha256: String,
+        val nativeLibraryAlignments: Map<String, Long?> = emptyMap(),
+        val warnings: List<String> = emptyList(),
+        val nativeAlignmentMetadataFile: File? = null,
     ) : Closeable {
         override fun close() {
             runCatching { request.projectArchiveFd?.close() }
@@ -146,6 +149,7 @@ object RemoteApkBuildRequestPreparer {
             close()
             deletePreparedFile(archiveFile)
             nativeLibrariesArchiveFile?.let(::deletePreparedFile)
+            nativeAlignmentMetadataFile?.let(::deletePreparedFile)
         }
     }
 
@@ -173,6 +177,7 @@ object RemoteApkBuildRequestPreparer {
         }
         ensureNotCancelled(cancelSignal)
         val archiveFile = File(cacheDir, "project-${System.nanoTime()}.zip")
+        val nativeAlignmentMetadataFile = File(cacheDir, archiveFile.nameWithoutExtension + "-native-alignment.json")
         var nativeLibrariesArchiveFile: File? = null
         var projectArchiveFd: ParcelFileDescriptor? = null
         var nativeLibrariesArchiveFd: ParcelFileDescriptor? = null
@@ -214,6 +219,13 @@ object RemoteApkBuildRequestPreparer {
                 cancelSignal = cancelSignal,
                 progressListener = progressListener,
             )
+            val nativeLibraryAlignments = NativeBuildAlignment.inspect(nativeLibrariesArchiveFile)
+            // A local sidecar keeps the existing strict Binder extras contract compatible.
+            NativeBuildAlignment.writeMetadata(nativeAlignmentMetadataFile, nativeLibraryAlignments)
+            val nativeAlignmentWarnings = nativeLibraryAlignments.filter { it.needsWarning }.map { library ->
+                appContext.getString(R.string.warning_apk_native_page_alignment_unsupported, library.path, library.minLoadAlign ?: 0L)
+            }
+            nativeAlignmentWarnings.forEach { warning -> notifyProgress(progressListener, warning, null) }
             ensureNotCancelled(cancelSignal)
 
             val keyStore = projectConfig.keyStore
@@ -315,6 +327,9 @@ object RemoteApkBuildRequestPreparer {
             )
             return Prepared(
                 request = request,
+                nativeLibraryAlignments = nativeLibraryAlignments.associate { it.path to it.minLoadAlign },
+                nativeAlignmentMetadataFile = nativeAlignmentMetadataFile,
+                warnings = nativeAlignmentWarnings,
                 archiveFile = archiveFile,
                 nativeLibrariesArchiveFile = nativeLibrariesArchiveFile,
                 expectedSignerCertificateSha256 = expectedSignerCertificateSha256,
@@ -327,6 +342,7 @@ object RemoteApkBuildRequestPreparer {
             runCatching { typeScriptStagingEncryption?.close() }
             clearTypeScriptStagingKey(requestExtras)
             deletePreparedFile(archiveFile)
+            deletePreparedFile(nativeAlignmentMetadataFile)
             nativeLibrariesArchiveFile?.let(::deletePreparedFile)
             throw error
         }
@@ -704,7 +720,7 @@ object RemoteApkBuildRequestPreparer {
         targetAbis.forEach { abi ->
             ensureNotCancelled(cancelSignal)
             val abiCandidates = abiCandidates(abi)
-            artifact.variant.libsToInclude.forEach { soName ->
+            (artifact.variant.libsToInclude + artifact.variant.optionalLibsToInclude).distinct().forEach { soName ->
                 ensureNotCancelled(cancelSignal)
                 val entryName = "lib/$abi/$soName"
                 // Keep local and remote builds on the template's single libc++ runtime. Use a
@@ -746,7 +762,7 @@ object RemoteApkBuildRequestPreparer {
                 }
                 if (copied) {
                     wroteAny = true
-                } else {
+                } else if (soName in artifact.variant.libsToInclude) {
                     missingNativeLibraries += abi to soName
                 }
             }
@@ -852,6 +868,9 @@ object RemoteApkBuildRequestPreparer {
                 // The dedicated OpenCV plugin is the single owner of this JNI runtime.
                 variant.copy(
                     libsToInclude = variant.libsToInclude.filterNot {
+                        it == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
+                    },
+                    optionalLibsToInclude = variant.optionalLibsToInclude.filterNot {
                         it == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
                     },
                 )

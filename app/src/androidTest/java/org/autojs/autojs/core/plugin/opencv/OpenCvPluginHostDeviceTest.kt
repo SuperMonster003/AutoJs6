@@ -34,6 +34,7 @@ class OpenCvPluginHostDeviceTest {
         assertEquals(OpenCvPluginContract.DEFAULT_PACKAGE_NAME, runtime.packageName)
         assertEquals(OpenCvPluginContract.EXPECTED_OPENCV_VERSION, runtime.openCvVersion)
         assertEquals(OpenCvPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
+        assertTrue((runtime.nativeMinLoadAlign ?: 0) >= org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
 
         val matrix = Mat(2, 3, CvType.CV_8UC1, Scalar(7.0))

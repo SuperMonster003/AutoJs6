@@ -35,13 +35,16 @@ stalePythonReceipts.forEach { staleReceipt ->
 }
 
 pluginManagement {
+    // Optional composite for developing the shared build plugins before publication.
+    providers.gradleProperty("autojs.buildPlugins.includeBuild").orNull?.let { includeBuild(it) }
     repositories {
         gradlePluginPortal()
         mavenCentral()
         google()
     }
     plugins {
-        id("io.github.supermonster003.autojs6-platform-versions") version "1.7.5"
+        id("io.github.supermonster003.autojs6-platform-versions") version "1.8.0"
+        id("io.github.supermonster003.autojs6-native-alignment") version "1.8.0"
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
 }

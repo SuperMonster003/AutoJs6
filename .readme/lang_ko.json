@@ -180,5 +180,6 @@
   "text_reference": "참조",
   "text_search": "검색",
   "text_stands_for": "의 의미",
-  "text_traditional_method_lowercase": "전통적인 방법"
+  "text_traditional_method_lowercase": "전통적인 방법",
+  "text_plugin_native_alignment": "플러그인 센터에서 공식 인덱스와 설치된 manifest의 페이지 정렬을 읽고, 16 KB 기기에서 호환되지 않는 버전을 설치하거나 활성화하기 전에 경고. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

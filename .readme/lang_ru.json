@@ -180,5 +180,6 @@
   "text_reference": "смотрите",
   "text_search": "Поиск",
   "text_stands_for": "означает",
-  "text_traditional_method_lowercase": "традиционный метод"
+  "text_traditional_method_lowercase": "традиционный метод",
+  "text_plugin_native_alignment": "Центр плагинов читает выравнивание страниц из официального индекса и установленного manifest и предупреждает перед установкой или включением несовместимых версий на устройствах с 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

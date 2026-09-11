@@ -301,7 +301,7 @@ object RemoteApkBuildClient {
                     ),
                     cancelSignal = cancelSignal,
                     progressListener = progressListener,
-                    hostCompatibilityWarnings = opened.hostCompatibilityWarnings,
+                    hostCompatibilityWarnings = opened.hostCompatibilityWarnings + prepared.warnings,
                     diagnosticTracker = diagnosticTracker,
                 )
             } finally {

@@ -1,0 +1,4287 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-11",
+  "scope": "AutoJs6 + 42 plugin repositories + shared Gradle plugin + official index",
+  "acceptance": "PARTIAL: local implementation and stated tests passed; full runtime matrix and native 16 KB arm64 hardware pending",
+  "hostBaseCommit": "a3af7b4f0",
+  "hostCommit": null,
+  "sharedPlugin": {
+    "version": "1.8.0",
+    "releaseCommit": "8d32a51bcdd3421cecd7fc510f01a661cc394072",
+    "ciFixCommit": "88632408f65ac6f90044dabaaebd167552d219df",
+    "releaseRun": "https://github.com/SuperMonster003/AutoJs6-Gradle-Platform-Versions/actions/runs/34565033794",
+    "ciRun": "https://github.com/SuperMonster003/AutoJs6-Gradle-Platform-Versions/actions/runs/34566495643",
+    "standalonePublicConsumerPassed": true
+  },
+  "officialIndex": {
+    "commit": "df2eb35f2f5006c4d619f4ff21405affc9a81024",
+    "generatorTests": 28,
+    "alignmentCounts": {
+      "4096": 6,
+      "16384": 22,
+      "0": 2,
+      "unknown": 1
+    },
+    "note": "Values describe existing public release APKs, not local unreleased plugin changes"
+  },
+  "pluginRepositories": [
+    {
+      "repository": "AutoJs6-Plugin-Accessibility-Compat",
+      "baseCommit": "c91f31f66734975b98ec349e0a084adc64cdb118",
+      "commit": "cc668c7a627b8ac69a45a869fa58fbfc8e3ccf7b",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.1.0",
+      "versionBuild": "8",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "5949f8a9e4f812765f470728186eef051b23e00a1219818b1cb6469a11cb10ff",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "756dedc8283240a7de714feab1ef3105958ff8d5018d67ff5a6cadfd26827a2a",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Ace-Editor",
+      "baseCommit": "992446316f36323ebec0facd75bac96e957d366a",
+      "commit": "ce2f5d49c3aba2ea543601ee97c820162568edce",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.1.25",
+      "versionBuild": "36",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "45e094f0b638fd781b9359f854850908fdbe2da30fbf13d4e3669d0d4f0505b3",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-ace-editor-v1.1.25-universal.apk",
+              "sha256": "b6d54507f99beb4d9d9da4a5620567b793be73db098133680e5b4522d1cd68f6",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 4,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Builder-Template",
+      "baseCommit": "552344dab6becae8410a2e7b23719e5de7323e53",
+      "commit": "4a23759f83bb4e401fd423c57ce02cd45582190f",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.0.1",
+      "versionBuild": "1",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "50bf74c159b584805a581b203e8e33d475aafd9921811518557214fd2bb0c367",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-apk-builder-template-v1.0.1-autojs6-v6.8.0-universal.apk",
+              "sha256": "6b618faf08a46ffdbc3e9c88256b0908466bf16e32d448cd0f65a1ae3bfebdd6",
+              "nativeEntries": 13,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/Release.json",
+          "sha256": "4a4ec312a23738fc75cb9fa0acd4f39d52a9e1ae570a63e8f6b038acbce27318",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/release/autojs6-apk-builder-template-v1.0.1-autojs6-v6.8.0-universal.apk",
+              "sha256": "47895db120a406329861d0f1f9626ecb4a46df4fa30c05554a3396a945d98348",
+              "nativeEntries": 13,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 2,
+      "nativeEntryCountAcrossApks": 26,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Inspector",
+      "baseCommit": "8e7393edda4546ea18d439adc0b7163f35b38973",
+      "commit": "5b54d2ffd8f3587179ba57543f0960223eae7faa",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.1.0",
+      "versionBuild": "6",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "38e754303cb2c1bbc42768a2bdc50e6a66cea7ff031aaa1376e7d5915ee0733f",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-apk-inspector-v1.1.0.apk",
+              "sha256": "7cd33cbf32c39686d5afc380e7982c62f407bc09d68f0bb5fdab0d87ef7138e4",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Archive-Manager",
+      "baseCommit": "7e5839f3366197185579b51769bcdb57ef582750",
+      "commit": "71bf9c86b8edbc39455456af785badb41581980c",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "2.22.1",
+      "versionBuild": "29",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "247efd0c345118c315cebd5a339a6603c93db7b6cebb35ec1023245c22cefed4",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-archive-manager-v2.22.1.apk",
+              "sha256": "662dff990def86795069b2d32b397b27ffb14c63e2395f3801b45c4a136c6d42",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 4,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Bun-Runtime",
+      "baseCommit": "7284d13c3c0391da1d003c1312e80e77cf0fed13",
+      "commit": "800a48f0902e6586253e9f7a03d6d006889bec02",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "0.2.2",
+      "versionBuild": "7",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "107567523b6a468d5be7c8fb91f368197c4e13826843a2769fee2aec5af102b6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-universal-debug.apk",
+              "sha256": "a6f19864afd20243e65a5ecc9f23be5423e561cb570554b5be0c7b551146514a",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86_64-debug.apk",
+              "sha256": "bfd5fe4bb31bdfbe8049509c39787e8950b3e72506f8b20533ca1a2bcc8062cf",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-arm64-v8a-debug.apk",
+              "sha256": "d8702bb041c33481ca3de794da2856df6e925763a4651cea3d2ead833afec814",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 3,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-DEX-Compiler",
+      "baseCommit": "4e1768946e95e98571af44dbbbbc315e6654a21f",
+      "commit": "29c8781aaf2e01ef88dd0da5ef1c1f8196f88da2",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.1.0",
+      "versionBuild": "5",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "711d064d283c49d835e1dc013f41b30a72baeb91cb9a612f99432950f79d0758",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-dex-compiler-v1.1.0.apk",
+              "sha256": "7071e9c27083f47d9864089f83ca432657e3f5057ce2942b445e2772663d27c8",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-File-Inspector",
+      "baseCommit": "80f17c85089a027aba5fd4791ccb5bfbd975e817",
+      "commit": "83b025a7d6ebc498c85d5e8ef4753bc5e205c861",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "5",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "d61dbe58435020818460050a4c76689a5c10faf9fa9ab01a8ebd3ed660005d50",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-file-inspector-v1.0.1.apk",
+              "sha256": "5442d5111bea10c7c158ed09d14befc115e015a56b8b484556b34d10b137f2df",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-HTML-Previewer",
+      "baseCommit": "1149f6ca9c3e7dd7ef87e2225e6ceee60fab6a55",
+      "commit": "f11259f0fed2fcc706b1f25354a30466a01c5c07",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.0.1",
+      "versionBuild": "5",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "3f4232b4c7315bb8ef267cbfd249e2149b9da583261ecd6db25790b3461405a9",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-html-previewer-v1.0.1.apk",
+              "sha256": "db1d2641bf748c8ce9b937bddce472e118eea506e4472bf805e685623492ced7",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Quantization",
+      "baseCommit": "103cbfff0a184e0ce474fbd921f69cc4f008441f",
+      "commit": "ea936f6c6b1dde02d2175a88b63f4d34f0390006",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "5",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "1ac16898140f35d842100a3e522ed9f55dedcde92c75bdedc100a0c3518b7ab6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-quantization-v1.0.1-universal.apk",
+              "sha256": "c35ae5c25b534cc3a4bf4708da8d11967332ff43944a007c67254a36e7c53d78",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-quantization-v1.0.1-armeabi-v7a.apk",
+              "sha256": "ba24bf5b660097b8c1b41060331e827526462b7cfcb9ae0df3f053a7b822bb91",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-quantization-v1.0.1-x86_64.apk",
+              "sha256": "f709d1d23c0aa4970b3d1110c0cad5c3cb85d95aeda19be2eac37d365b371169",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-quantization-v1.0.1-x86.apk",
+              "sha256": "940199e87fea296fe52a92d7f3f3856fd19e327d00c40e8b615c2467c2b303fd",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-quantization-v1.0.1-arm64-v8a.apk",
+              "sha256": "5d4ca8bbd46978327d7a2c551609d9bd61e62f755410ccebe4b62a7aaa77b646",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/Release.json",
+          "sha256": "116d84bce858da55b7dfe89c6faea19bd14a00e6a09ead1463c213cfd38182e5",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-image-quantization-v1.0.0-universal.apk",
+              "sha256": "9732f2baf5a369864799a1b0ef57bbbbfdbb3edcb69e8d007aff964c6d29ce94",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-image-quantization-v1.0.0-armeabi-v7a.apk",
+              "sha256": "2348b845c277bb8f3e6d8ee15c6f582ebc7793d730f678447c74724001325e0b",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-image-quantization-v1.0.0-x86_64.apk",
+              "sha256": "9943aed235cb87ea15e858a9593f2f3cea4d802afd759a664f696bda1832fcb0",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-image-quantization-v1.0.0-x86.apk",
+              "sha256": "800511b883cd3d35e25ffb5a137b90709d33fb9bd542a858d2b07f9392cb0599",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-image-quantization-v1.0.0-arm64-v8a.apk",
+              "sha256": "f886a3758366eb6661c82cd8267f8182a68baad86395707203b4942c1fee9227",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 10,
+      "nativeEntryCountAcrossApks": 16,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Tools",
+      "baseCommit": "a4d2c0f09b99ce67f4ec6e1e98fb608a60ecbc90",
+      "commit": "9e996615b132bb96d14d063798890234bbeaa5f8",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.1.0",
+      "versionBuild": "6",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "956a78b44826be89b259e015e2db4bc705f9e1e2a9105242cccca19a2bf0f85a",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-tools-v1.1.0.apk",
+              "sha256": "da044354609944872329a5975ea37d8965fcf3570234d0d8f975ae56e20b7416",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Viewer",
+      "baseCommit": "e1215bbae080f17bc121caebbb30fd50d91969ff",
+      "commit": "c6fe169d196db21fb39ce32ddbb08963d63a0d70",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.2.0",
+      "versionBuild": "7",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "9ec60e5c3bee60235a47f5410037d1d9d3b00c4fd0c03abd4ae4fc320cf05618",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-image-viewer-v1.2.0.apk",
+              "sha256": "6b1d016ba3f1382d328bec77abc41be1e449c39023939e005f367f2114d2a4a7",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-ImGui",
+      "baseCommit": "4fc72e23a7e6972de3fd072effde11e245fbe4ad",
+      "commit": "4fde7173611e1ec3816907c163f126a51073b2b0",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.9.1",
+      "versionBuild": "15",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "07fd2e3f288b83fbcf64026f2d03febb01f15f3470cd66512ac5b07b59a15029",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-imgui-v1.9.1-universal.apk",
+              "sha256": "089a083732b4f8576b3cf68df4f685860d50a54cb5a71891c04639230bacefc1",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-imgui-v1.9.1-x86_64.apk",
+              "sha256": "d37a4977ca3735147c84a4e9682e735b8d345b9c3240d117e26669c2681d2cc4",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-imgui-v1.9.1-armeabi-v7a.apk",
+              "sha256": "e1abcbe26e9a6992a6d039bb6c86532e59e5a19a3ea108d4ee510ef62a4e1571",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-imgui-v1.9.1-x86.apk",
+              "sha256": "7bd41101f32480c97301782aafe1d71a76d75707e3610f50016c9aeaf2e5117a",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-imgui-v1.9.1-arm64-v8a.apk",
+              "sha256": "15397f1636cb16e7e0cbecadf01f5515e20299a84be7aa24b5ad7139a442efdb",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Java-Runtime",
+      "baseCommit": "0b69eaaf573caddd7a2be15e658714def78c99e0",
+      "commit": "5a9df003f3ffeb4d4df7c1ef205c7469a23c807a",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.8.0-m9",
+      "versionBuild": "8",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "15144527178bd34c3ecd29ab96909ca9a0e3a5d2c5911a4e6111eaa5c6d911c7",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "a44ddef6e223aed204b8ea8619fb3d7c226bcbc273b8b6b5d3400d00a044e3fb",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Kotlin-Runtime",
+      "baseCommit": "718f2e5b077cf23920736946378b6d076ecfb864",
+      "commit": "65d5b66caada86245503f2bb67d7e14f59686d45",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.7.0-m10",
+      "versionBuild": "7",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "6003766965ff0950f793bfbaff5068e48025a154b97d2facd5a549009d446235",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "99ec9998b06a5be970a13007a705f31c6ebd4b5835dc95ffef775a7ce5e1aa10",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Lua-Runtime",
+      "baseCommit": "f2cba38f12e19a6d17bed8bce0d5bb5a6b90b402",
+      "commit": "303d59c9873d7b8ca560146f84dbbfce53483333",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.1.1-rc.2",
+      "versionBuild": "63",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "f7512b9d38c370e2065128c39a4cd9f5636802e7c94971769f288f348117fed6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-universal-debug.apk",
+              "sha256": "bdc4cc2e67f15373cf1ace358c5ab03d7b019dc9cf1ccdb7bde446b840f452f0",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-x86_64-debug.apk",
+              "sha256": "a1b1b0192781a498ac6d2ca7f0c06b1eb4e3ad2e9b79c2140cb51044e8952b59",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-arm64-v8a-debug.apk",
+              "sha256": "ec9358e97c67b1a9425c1d65e98274fc41833631480e07ca1ee78c6dc4a4db2f",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-universal-debug.apk",
+              "sha256": "01e77285ae0ba76ae47048713962475ebd56170a040d3d734ec5d7b444e7fc77",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-x86_64-debug.apk",
+              "sha256": "7f29460b154f868ed89713c960284a5960e0115d5323d0f21b66b8df72014b3d",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-arm64-v8a-debug.apk",
+              "sha256": "16fd6b3b9a537d99694c9848cc3f32113a73c3586a4fb776a3796d1a8eaf89b5",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-universal-debug.apk",
+              "sha256": "035cdc0d472b5c2e43645dbf792129b5c4d7e156cfebcff3a7983bc526d74758",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-x86_64-debug.apk",
+              "sha256": "1830946adf354df5d472d9f33d12b1f3541c9677db8d44b271c162a2baef2366",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-arm64-v8a-debug.apk",
+              "sha256": "9fff5a508867f01eb56bdcec62ca4f79cdb52b16b8f5d8fc595b4f54ca3dbcb8",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/FaultTestDebug.json",
+          "sha256": "1e955a8ca8f46137aecdfc1a62525391e3bc86d6cd39d62e34fb6d43ba919ed1",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-universal-debug.apk",
+              "sha256": "bdc4cc2e67f15373cf1ace358c5ab03d7b019dc9cf1ccdb7bde446b840f452f0",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-x86_64-debug.apk",
+              "sha256": "a1b1b0192781a498ac6d2ca7f0c06b1eb4e3ad2e9b79c2140cb51044e8952b59",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/faultTest/debug/app-faultTest-arm64-v8a-debug.apk",
+              "sha256": "ec9358e97c67b1a9425c1d65e98274fc41833631480e07ca1ee78c6dc4a4db2f",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/NativeTestDebug.json",
+          "sha256": "95299d4a6ef680b0a52933a71b76fb0ae3ccd68eb45a9477e2a71e519ac8363d",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-universal-debug.apk",
+              "sha256": "01e77285ae0ba76ae47048713962475ebd56170a040d3d734ec5d7b444e7fc77",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-x86_64-debug.apk",
+              "sha256": "7f29460b154f868ed89713c960284a5960e0115d5323d0f21b66b8df72014b3d",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/nativeTest/debug/app-nativeTest-arm64-v8a-debug.apk",
+              "sha256": "16fd6b3b9a537d99694c9848cc3f32113a73c3586a4fb776a3796d1a8eaf89b5",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/ProviderDebug.json",
+          "sha256": "24930c6ced161e3272835ce044abc1d33249acde81cc68fa73a4a77e5f874fd9",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-universal-debug.apk",
+              "sha256": "035cdc0d472b5c2e43645dbf792129b5c4d7e156cfebcff3a7983bc526d74758",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-x86_64-debug.apk",
+              "sha256": "1830946adf354df5d472d9f33d12b1f3541c9677db8d44b271c162a2baef2366",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/debug/app-provider-arm64-v8a-debug.apk",
+              "sha256": "9fff5a508867f01eb56bdcec62ca4f79cdb52b16b8f5d8fc595b4f54ca3dbcb8",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/ProviderRelease.json",
+          "sha256": "40311b8fc7b0b1454a4f5dd8ff208de8bbcc7d82c3ec7110e678521e479ca580",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/provider/release/app-provider-universal-release.apk",
+              "sha256": "734c9729d9c1a109edc118d83c0b9574f2ad9af366d5561c66972c5f9d46003e",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/release/app-provider-x86_64-release.apk",
+              "sha256": "910843d9a2e558699f838bf9decc5933d9ce3b48a22cb28ee41e57876db4a014",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/provider/release/app-provider-arm64-v8a-release.apk",
+              "sha256": "a94fa0f5ce178fd36d6e55f662bc3235a3bd15094ec115beea43e63e458f0c9e",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 12,
+      "nativeEntryCountAcrossApks": 16,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Markdown-Previewer",
+      "baseCommit": "3d11e0baa21e8d7e6cb0dfb77e0a36b2101d9abc",
+      "commit": "fbd0e5bed4a5cb50a3a875a9346e3ce6ea920082",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.1.0",
+      "versionBuild": "6",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "fdbd770f75a798eeb0166634a25b098c11aaf0a250ff6e804290366df52ddfa6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-markdown-previewer-v1.1.0.apk",
+              "sha256": "8b8abb1f872e3b8c031004abace099b7ce97c6528597668d5d54f4f9c3e48f2d",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-MCP-Server",
+      "baseCommit": "a94b636b3db00fa464b30ff5583ad57d53dd90ba",
+      "commit": "f9ade9b7a809a8df4cf18648ce39c367bc1c1263",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.0.0",
+      "versionBuild": "19",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "c14beb4e52e13812c4a520f9e79d4ad820291f1ba65a40c5fd7e5bddb543cd75",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mcp-server-v1.0.0.apk",
+              "sha256": "701b652518e0eb6fe09d10a7d50368cd2460fbf830b4c026d2c9bb1ac9de1ba3",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-MediaInfo",
+      "baseCommit": "4602af4a0bfbcb588379ad0e3219c1a83c455edc",
+      "commit": "34e23190a2d9d2929d1f889dae1035c802e2f54e",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "2.1.1",
+      "versionBuild": "13",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "51a6de69e28379953cb4cce0d8855fd1b5722d3e30b377d5f99edf356ae38745",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-universal-debug.apk",
+              "sha256": "4ff012452d84e6adb26bf0d383fb8f05c3e6ea69f90303767a1f69e9bc26d874",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk",
+              "sha256": "fa818f6db5365f7af13cf3d3705df49c3b3a152b047695feeb690debc0f5eac5",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86_64-debug.apk",
+              "sha256": "b97b96582501fbfd24363b5dcd5d568317533ceacaae28026516291dcac366e4",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-arm64-v8a-debug.apk",
+              "sha256": "7db8606ac8ba4fd17f8fa5ccb9ee7465a7d3486a3b5bb775200ce9edc2c3a27f",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86-debug.apk",
+              "sha256": "e6e626a2780da516fa1acb388d68daa1a9b82002b2bada1c5cf623d7c4804a17",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-Barcode",
+      "baseCommit": "9845a51b65964a62a1a2cecae75045a090cd8bc8",
+      "commit": "a39683a99be5675217f3553070fd4115b5088e4c",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "8",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "6c98a6f31f3f1509c60c6bf8ed751d1d7f466dadbca7af848aa92de663151fca",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-barcode-v1.0.1-universal.apk",
+              "sha256": "9c3c813d062f77a84139c8c582fdc9b03a30e2b66359aaf83d4481f000149305",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-barcode-v1.0.1-armeabi-v7a.apk",
+              "sha256": "2de942b0672b2923fbc80a5161a3689d1c6c6a35d92aaecc6638186603c62575",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-barcode-v1.0.1-x86_64.apk",
+              "sha256": "8e09d2865e1d09e482568a985cf295dc7f4b1271a110b1adf0a6bc6a6d1b596d",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-barcode-v1.0.1-x86.apk",
+              "sha256": "b2e721bccc5a80c9c6501af3184b018d9bcba40a892260f3b27fe7ba1283bd4b",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-barcode-v1.0.1-arm64-v8a.apk",
+              "sha256": "4386fc0c6daf1487a32dedcd8817880dbde18ef309a222472c959082c018cf50",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-OCR",
+      "baseCommit": "3c9f6bd4dc198b79b331bf9acfd62ae100601064",
+      "commit": "f3a02b65c41c05e00e594990924dde8cf1da5c30",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "10",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "fe18e55d1dbffd76dc15285ca3fd3b2a9cb1593a4a9d966f62522603a616c1c4",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-ocr-v1.0.1-universal.apk",
+              "sha256": "9a19ba74e4023c4dda4829ff2fce8b7b1b0118c807a510c1ceabd1b16af3a57d",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-ocr-v1.0.1-armeabi-v7a.apk",
+              "sha256": "d15733e12f31aa8e64f7ce3506a27d1b9a027d60377db3e16bdb1567de66052b",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-ocr-v1.0.1-x86_64.apk",
+              "sha256": "558293614e87048954c90c2411a26019bf2e780e6701b34360b51936dfd925fc",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-mlkit-ocr-v1.0.1-arm64-v8a.apk",
+              "sha256": "8981e4ecd829cff7dc0a210e2583c2a33e5fcb676afb2193f81776e5c637c431",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 4,
+      "nativeEntryCountAcrossApks": 7,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-NodeJs-Runtime",
+      "baseCommit": "643dc803ebbc3d11f455f81544c312796f4f85d6",
+      "commit": "dd33c442e945c41572f871e478edd39841afd64c",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.4.1",
+      "versionBuild": "158",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "fc2634c481df3697df64c5970fd915e299203ad80cbe6b8a4d76914e6eae630f",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-nodejs-runtime-v1.4.1-universal.apk",
+              "sha256": "962edeecf8d7fd218c0c470a60f89fd4f22e66d0161388ca3c8e23b6706f7df6",
+              "nativeEntries": 9,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-nodejs-runtime-v1.4.1-armeabi-v7a.apk",
+              "sha256": "96a0222112d4478e90a38a4b080b4e595ceb1217f523aed51f8c61b1e4fc571f",
+              "nativeEntries": 3,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-nodejs-runtime-v1.4.1-arm64-v8a.apk",
+              "sha256": "df176489d42f8ef3256e709f7b983d9ba905f694d13d038f250aaeb194d4e28b",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-nodejs-runtime-v1.4.1-x86_64.apk",
+              "sha256": "f017d6abb86ac109711d77c5e05997c61ed266d6e33595aabb0c61d795f5a1d1",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 4,
+      "nativeEntryCountAcrossApks": 18,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Offline-Docs",
+      "baseCommit": "f0d90a6326ef63897e786be9e4f3f2d7d9121792",
+      "commit": "5f01fc7e5ab0731f23b8b33d3dcc7e302eb3471c",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "6.8.0",
+      "versionBuild": "19",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "84a5f440ea51dcdedd17872d123cff339794dd8f9c9c36a30e9826b2c4422ede",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-offline-docs-v6.8.0-universal.apk",
+              "sha256": "1eb10b3ca1ac59922e6ff467efb094c4730f2b4cf1718750ea9d77e8878905b3",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCC",
+      "baseCommit": "dd07ae348428fab91a01b44ca4974ba2e5cdd214",
+      "commit": "29ec3a45d3f6ddafc179ef98bfc61a2972d08ee5",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.3.1",
+      "versionBuild": "21",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "2c91d5b536685a9599b70ab0c9faa24877be2ac2fae6a707b6a4e05daef51e3e",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-universal-debug.apk",
+              "sha256": "ee507361e93a5e6a04f7f35936e1148370e5175e4224116fdc5fb24b684bab3e",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk",
+              "sha256": "6745d20584eed19be89fdd1df82ce4baaddc7cc63b011bed03e4e7245a373f97",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86_64-debug.apk",
+              "sha256": "af73b19c7a1ad7c3d09a2385af9e231963f1e23e31a29e6b96a7fddede7dfe1c",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86-debug.apk",
+              "sha256": "05329d4544637bb1cb3d9041ad18fb9b85b6efd95a0218ee7830489143a350e0",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-arm64-v8a-debug.apk",
+              "sha256": "bfc0fe74c124fa3ee16510aea6193bbff64f7a708e5097102a5653c359e11d1e",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCV",
+      "baseCommit": "80624190b8f1427dc5371f3045653866e44597f4",
+      "commit": "24c85f01dd2772d9f776da215cd07971c5a417e9",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.1.1",
+      "versionBuild": "11",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "7f0e86c056bcbca07e8fc3b9814447b365e3981fdbe4a32af030f8c9cc91a438",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.1-universal.apk",
+              "sha256": "cbc2f85da2053126f20e95fbb4137c47c068af4854cf5908c2675d765cc5b0c1",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.1-armeabi-v7a.apk",
+              "sha256": "a41f75a47fc7f55a0d9a38f9fac9b6ebfa29fa8a8eb7352dbb9ef3e7c695dd33",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.1-x86_64.apk",
+              "sha256": "644c9c3e7c0cdcdc42572888df46143de18a27c20d952be6699b21313548a5f1",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.1-x86.apk",
+              "sha256": "55b634e945c88bf25eb700f583787c84a3415b6dac1ff58ab5c6d54cf049dbd3",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-opencv-v1.1.1-arm64-v8a.apk",
+              "sha256": "29e14079d91f3ef1fa86835f892d9c757a038fa97465b116f9735f9fb832c26b",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "baseCommit": "9846c05301d8c3feaf85cca3dfb4bbc1f803914d",
+      "commit": "d9d27930a1aa342182f373c475cd011dd93effbc",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "35",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "18a322e0bdf646f3e8a506e8d43366c2cff6fe079a7aa5c91c6bca9495fd78c6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-universal.apk",
+              "sha256": "58c92e8071699ca37b1be976aa9d2c77bf195c4b048c46a20012f35028af3925",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-armeabi-v7a.apk",
+              "sha256": "d76690ac971c8dd63b64e21f1d59759027bfc4794d46a995bb7bc70c690bcd53",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+              "sha256": "f1e286e2c5a5e7aa449d3c646113dfaaf9d6fe12d2932c220aa6c1ed0af1a3d8",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 3,
+      "nativeEntryCountAcrossApks": 16,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "baseCommit": "57c660538d83253ef4f82fb21df4fb73d2f34508",
+      "commit": "d5957223ccb52ea8e66822b287086e557cae8330",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "10",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "ff1fb283899cd4915509b6c5cdbb82f00115197e3205b7af53b31d2eaff079ce",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-universal.apk",
+              "sha256": "cd69c5ad73a6be371a476a6dabe7a3e7e2401beca7aacd675721a2c718ac661a",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-armeabi-v7a.apk",
+              "sha256": "d8c0f32f86395a602dfb8cab0e5994fa6b50e81d451fffb52eb4bcc8188fb7f1",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-arm64-v8a.apk",
+              "sha256": "ef4133c77ff9696cec3ac423b07bf2a12de6ef0325630908eb43968c898c2e8b",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-universal.apk",
+              "sha256": "88ae9fd45cdee602e7058a8824a8682d7f732e05c9c356bb83d2516d7004f927",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-armeabi-v7a.apk",
+              "sha256": "d71e1cd389e612d45bc9be28829b3b8201f1f9f771c1fa402da22603733f1195",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-arm64-v8a.apk",
+              "sha256": "fdc37b56104cee2bb4f359c6475b95cd683c585d36ecb63dece1954fdd771837",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-universal.apk",
+              "sha256": "dcb6f329692a7c224136bb151c394f03ff1bee41ad1599e64557b54132fe3de5",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-armeabi-v7a.apk",
+              "sha256": "07d26bf1bd95e6fe3aa18664413edf6b05cd328b8dc18277ff852928f07cccff",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-arm64-v8a.apk",
+              "sha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/MobileDebug.json",
+          "sha256": "a6a019b534a0fb52c2fbfba5f9f6c7f0f224b03f7abe3e445816c7585607bd37",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-universal.apk",
+              "sha256": "cd69c5ad73a6be371a476a6dabe7a3e7e2401beca7aacd675721a2c718ac661a",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-armeabi-v7a.apk",
+              "sha256": "d8c0f32f86395a602dfb8cab0e5994fa6b50e81d451fffb52eb4bcc8188fb7f1",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-arm64-v8a.apk",
+              "sha256": "ef4133c77ff9696cec3ac423b07bf2a12de6ef0325630908eb43968c898c2e8b",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/MobileEnDebug.json",
+          "sha256": "f9b8ee0230fe83a93af477be365fd457ca832fdd2c8e74167dfea446622cf9b6",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-universal.apk",
+              "sha256": "88ae9fd45cdee602e7058a8824a8682d7f732e05c9c356bb83d2516d7004f927",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-armeabi-v7a.apk",
+              "sha256": "d71e1cd389e612d45bc9be28829b3b8201f1f9f771c1fa402da22603733f1195",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobileEn/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-mobile-en-arm64-v8a.apk",
+              "sha256": "fdc37b56104cee2bb4f359c6475b95cd683c585d36ecb63dece1954fdd771837",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/ServerDebug.json",
+          "sha256": "3089655e4b30d8efe6a04667ea0f10c7c58fb5de4beb7cabd6e8f2a5906d8fd0",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-universal.apk",
+              "sha256": "dcb6f329692a7c224136bb151c394f03ff1bee41ad1599e64557b54132fe3de5",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-armeabi-v7a.apk",
+              "sha256": "07d26bf1bd95e6fe3aa18664413edf6b05cd328b8dc18277ff852928f07cccff",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.1-server-arm64-v8a.apk",
+              "sha256": "277d819b2d5d3a6f599c5e358e137b88ea3d9e3750d785a2c8b66b808363f4a4",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 9,
+      "nativeEntryCountAcrossApks": 48,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "baseCommit": "f03cac246a8bac04961c1f04bdf5cb9b9b4d1637",
+      "commit": "245c95f9a6b6b990756173c7981425985179c88a",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "64",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/ArabicDebug.json",
+          "sha256": "0be04517a54525e08bdb01162e0ca596a8715e5e5c91ce98b5631b4794fb0252",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-universal.apk",
+              "sha256": "a4b30b3905a673ae1ef1ad670caac865be2b7b9d91300f8abc18e2873310b7ae",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-armeabi-v7a.apk",
+              "sha256": "5d83076608094d5f9b3831b91918436ca737be23e70e231c0452185baac66eb4",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-arm64-v8a.apk",
+              "sha256": "e5cd76b053f5e1a6a2d57b581e621547892f1a7b5d9858127c70ab8c2328da2e",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/CyrillicDebug.json",
+          "sha256": "3a7dec54c12b94ae437bb7b833591bb206db53ccc5b27e50c91d11c27afa872d",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-universal.apk",
+              "sha256": "13742d7e4b9b4e16dda049a97f78f44bba16aa1d23de073d89b855c7532bc430",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-armeabi-v7a.apk",
+              "sha256": "a920b2309718f7c8023c2f4d19194fccd48eef4cfce9275982f4a05155b7bee2",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-arm64-v8a.apk",
+              "sha256": "ea227b0e45ed5581cd3ed4750b993cc5a623465be2047d49594a76a49e1f0d14",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "fd21b2a7bb4918d12b9c51c521029233ac7eb7e0e3120738fdbe241c32a26ebe",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-universal.apk",
+              "sha256": "a4b30b3905a673ae1ef1ad670caac865be2b7b9d91300f8abc18e2873310b7ae",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-armeabi-v7a.apk",
+              "sha256": "5d83076608094d5f9b3831b91918436ca737be23e70e231c0452185baac66eb4",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/arabic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-arabic-arm64-v8a.apk",
+              "sha256": "e5cd76b053f5e1a6a2d57b581e621547892f1a7b5d9858127c70ab8c2328da2e",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-universal.apk",
+              "sha256": "13742d7e4b9b4e16dda049a97f78f44bba16aa1d23de073d89b855c7532bc430",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-armeabi-v7a.apk",
+              "sha256": "a920b2309718f7c8023c2f4d19194fccd48eef4cfce9275982f4a05155b7bee2",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/cyrillic/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-cyrillic-arm64-v8a.apk",
+              "sha256": "ea227b0e45ed5581cd3ed4750b993cc5a623465be2047d49594a76a49e1f0d14",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-universal.apk",
+              "sha256": "5cb19daf3d0eecfbeda00f5fe453a7c2625f9177c03f0dffe61ca3a344f1ebf0",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-armeabi-v7a.apk",
+              "sha256": "1c9260a00944057ab8b85a95a2fa2e31c4abca88cc88ca7e12c45538a0f7e595",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-arm64-v8a.apk",
+              "sha256": "629371511caf925b25b49a68f7dbf342664859c692ae6a3b86174a630bfb1177",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-universal.apk",
+              "sha256": "5f95ffedfb76210bc259421e4a48e7a200337fa0318bf25992ef249046b707b8",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-armeabi-v7a.apk",
+              "sha256": "bcbc7f3eca9c977e6ebe70e2c7721506eb319fb667efae10083e05fd124a91cc",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-arm64-v8a.apk",
+              "sha256": "921e3f083083efa2841e9a3f56491b778e316282f7895049eff6bed424f00fcb",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-universal.apk",
+              "sha256": "572872b04c56507fd6e6a9ba1f925ea8fab66c6525518c996dd4fb6134aa1073",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-armeabi-v7a.apk",
+              "sha256": "a7054d1f2bcb21b3549ee2430f41fd4895fee5b02ae98dd0354dd228b7d88354",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-arm64-v8a.apk",
+              "sha256": "4f2b3a3c559241325dde1fcc5652d15b7476d65bc8014c2762fe105947dad5c1",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-universal.apk",
+              "sha256": "70b6f2c10bfef581b3e373f6c2560fb8959e86f062920b24eaae60e980f0a3d2",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-armeabi-v7a.apk",
+              "sha256": "3e11983f00ce08eb9092a07d196b45c293a22c17409505e8972bd2ee4cfd484f",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-arm64-v8a.apk",
+              "sha256": "48bd026e41b9cd862004ac179d1b04c15d83c297a20175578ed852e56a26da9e",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-universal.apk",
+              "sha256": "9e1ccdb0b7a85b4c8f3643650a1bedb495846d3a7812ca83a3de0629d1f7f688",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-armeabi-v7a.apk",
+              "sha256": "3f40bc6ed2294cca2c2713743f80aaf73b9e1eb4f1c59944411ad62186b67d31",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-arm64-v8a.apk",
+              "sha256": "697b086c9ac67f5116c3a4e1f6cee01456220136ce2c77a07967ce349e6496c3",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-universal.apk",
+              "sha256": "5be3d6077c1e9e584f631c791be5553d77b2ceabff6242b69c2bf7781f798bec",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-armeabi-v7a.apk",
+              "sha256": "5099df188a0dd318ddee904657ede9e53d2baea2bb2a4ffb85f736a63a555a1d",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-arm64-v8a.apk",
+              "sha256": "dab26471810db81b9acf29bf7cffd7c4a93bd49daabdfc1d1409aea27508316d",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-universal.apk",
+              "sha256": "e03f826f4bf8c688dd3975f23e1241d44896729ffac240cfd3544cabd1170eff",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-armeabi-v7a.apk",
+              "sha256": "5936bbf1da6abc6e450b8c2d345857e22b37c0f44f038e6afda26b4d8992d078",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-arm64-v8a.apk",
+              "sha256": "d723c836d9e0769fc30040eb0e8775acd5d45cd11942b59192f83c623090c1b6",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-universal.apk",
+              "sha256": "6bb60f77063cc36b828b4d766cd9fcffe308e0d9f5fe359affbecfaa5bcda1f0",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-arm64-v8a.apk",
+              "sha256": "69e4802664c1c8be592d4f1d38dc746a8317be522f1bc789c9f554927ec6cd73",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-armeabi-v7a.apk",
+              "sha256": "5aacc2d29a97ed52a5d20d5ce40d9fa85374e16f6c08adb1b58cdf600b45be80",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-universal.apk",
+              "sha256": "04f2120cef66a558ba55a15a4e362db3297fdc7006e1ffb0987764d218ae9c3b",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-armeabi-v7a.apk",
+              "sha256": "9375b6691757992c8669b5d890b3ed4ddee8fec9129199667b4e2ad2c86f78f8",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-arm64-v8a.apk",
+              "sha256": "15614d2902b8b9dda70f0932e07b87cd38b52dd3053649d19d998d2c16d70c4f",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-universal.apk",
+              "sha256": "41498622a222c0af7eb5dab18c5de87a5a270318dc4ca7746033468f3ad4548b",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-arm64-v8a.apk",
+              "sha256": "581831fb91a3acc3c0694a11281971c29a901a78608513b86ebc7891b4a4d156",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-armeabi-v7a.apk",
+              "sha256": "b39eb9d27ce55a4b3a41eb40e4c39f936a745d6ee7436a7d472b5d7250691c4b",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-universal.apk",
+              "sha256": "013bff7b392dee2495e433419436264639b7042f72cfa02fe959d5dbeb1d7806",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-armeabi-v7a.apk",
+              "sha256": "678fa2914e8d40c5509ec99d818724d9c37306a017059080885d5eeec8499e48",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-arm64-v8a.apk",
+              "sha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/DevanagariDebug.json",
+          "sha256": "810e13ae7e29e6d42468b1d440b31fb942d147e281aab6220690433deaa5087a",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-universal.apk",
+              "sha256": "5cb19daf3d0eecfbeda00f5fe453a7c2625f9177c03f0dffe61ca3a344f1ebf0",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-armeabi-v7a.apk",
+              "sha256": "1c9260a00944057ab8b85a95a2fa2e31c4abca88cc88ca7e12c45538a0f7e595",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/devanagari/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-devanagari-arm64-v8a.apk",
+              "sha256": "629371511caf925b25b49a68f7dbf342664859c692ae6a3b86174a630bfb1177",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/EnglishDebug.json",
+          "sha256": "062cf2ba9628a74d009f8eac65bf79aaa2f2da2e99a1e1cff0756f84718385b9",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-universal.apk",
+              "sha256": "5f95ffedfb76210bc259421e4a48e7a200337fa0318bf25992ef249046b707b8",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-armeabi-v7a.apk",
+              "sha256": "bcbc7f3eca9c977e6ebe70e2c7721506eb319fb667efae10083e05fd124a91cc",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/english/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-english-arm64-v8a.apk",
+              "sha256": "921e3f083083efa2841e9a3f56491b778e316282f7895049eff6bed424f00fcb",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/EslavDebug.json",
+          "sha256": "f9718900fd1450414c5b3d25efccfb3d5f3aea734aabb9b9d11857142f07c722",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-universal.apk",
+              "sha256": "572872b04c56507fd6e6a9ba1f925ea8fab66c6525518c996dd4fb6134aa1073",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-armeabi-v7a.apk",
+              "sha256": "a7054d1f2bcb21b3549ee2430f41fd4895fee5b02ae98dd0354dd228b7d88354",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/eslav/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-eslav-arm64-v8a.apk",
+              "sha256": "4f2b3a3c559241325dde1fcc5652d15b7476d65bc8014c2762fe105947dad5c1",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/GreekDebug.json",
+          "sha256": "f68b355f0126e70ea426b1c1e81135b182db7ed753cfb6f7ae1fb2b9a5d8d372",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-universal.apk",
+              "sha256": "70b6f2c10bfef581b3e373f6c2560fb8959e86f062920b24eaae60e980f0a3d2",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-armeabi-v7a.apk",
+              "sha256": "3e11983f00ce08eb9092a07d196b45c293a22c17409505e8972bd2ee4cfd484f",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/greek/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-greek-arm64-v8a.apk",
+              "sha256": "48bd026e41b9cd862004ac179d1b04c15d83c297a20175578ed852e56a26da9e",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/KoreanDebug.json",
+          "sha256": "a5407bdd14e1cc6f63c8a783092f0221dbf0c7fbe03385783a3b6477c329fa65",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-universal.apk",
+              "sha256": "9e1ccdb0b7a85b4c8f3643650a1bedb495846d3a7812ca83a3de0629d1f7f688",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-armeabi-v7a.apk",
+              "sha256": "3f40bc6ed2294cca2c2713743f80aaf73b9e1eb4f1c59944411ad62186b67d31",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/korean/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-korean-arm64-v8a.apk",
+              "sha256": "697b086c9ac67f5116c3a4e1f6cee01456220136ce2c77a07967ce349e6496c3",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/LatinDebug.json",
+          "sha256": "a9771962cf69f9bce7a2b203e3b33cbca27eb05fe3d2269eaa76d980195d9922",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-universal.apk",
+              "sha256": "5be3d6077c1e9e584f631c791be5553d77b2ceabff6242b69c2bf7781f798bec",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-armeabi-v7a.apk",
+              "sha256": "5099df188a0dd318ddee904657ede9e53d2baea2bb2a4ffb85f736a63a555a1d",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/latin/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-latin-arm64-v8a.apk",
+              "sha256": "dab26471810db81b9acf29bf7cffd7c4a93bd49daabdfc1d1409aea27508316d",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/MobileDebug.json",
+          "sha256": "07d7b8692f4b82d3ff43536ff9ce8afd5ea2d9eee5c8ae4294f32c36d1cd6219",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-universal.apk",
+              "sha256": "e03f826f4bf8c688dd3975f23e1241d44896729ffac240cfd3544cabd1170eff",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-armeabi-v7a.apk",
+              "sha256": "5936bbf1da6abc6e450b8c2d345857e22b37c0f44f038e6afda26b4d8992d078",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/mobile/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-mobile-arm64-v8a.apk",
+              "sha256": "d723c836d9e0769fc30040eb0e8775acd5d45cd11942b59192f83c623090c1b6",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/ServerDebug.json",
+          "sha256": "322375e3fc1386a6a825492f9268bf16f00fed93a2397532a8036bcf3a27c526",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-universal.apk",
+              "sha256": "6bb60f77063cc36b828b4d766cd9fcffe308e0d9f5fe359affbecfaa5bcda1f0",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-arm64-v8a.apk",
+              "sha256": "69e4802664c1c8be592d4f1d38dc746a8317be522f1bc789c9f554927ec6cd73",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/server/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-server-armeabi-v7a.apk",
+              "sha256": "5aacc2d29a97ed52a5d20d5ce40d9fa85374e16f6c08adb1b58cdf600b45be80",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/TamilDebug.json",
+          "sha256": "21545f4ce45c4c1c5484129a30f98ae376b967bb4dc333ad661ef50647ba7465",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-universal.apk",
+              "sha256": "04f2120cef66a558ba55a15a4e362db3297fdc7006e1ffb0987764d218ae9c3b",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-armeabi-v7a.apk",
+              "sha256": "9375b6691757992c8669b5d890b3ed4ddee8fec9129199667b4e2ad2c86f78f8",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tamil/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-tamil-arm64-v8a.apk",
+              "sha256": "15614d2902b8b9dda70f0932e07b87cd38b52dd3053649d19d998d2c16d70c4f",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/TeluguDebug.json",
+          "sha256": "e6eefc1c3e9834d0f10e808da63354f4fd13bca566dccd87732018ba93fbd217",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-universal.apk",
+              "sha256": "41498622a222c0af7eb5dab18c5de87a5a270318dc4ca7746033468f3ad4548b",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-arm64-v8a.apk",
+              "sha256": "581831fb91a3acc3c0694a11281971c29a901a78608513b86ebc7891b4a4d156",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/telugu/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-telugu-armeabi-v7a.apk",
+              "sha256": "b39eb9d27ce55a4b3a41eb40e4c39f936a745d6ee7436a7d472b5d7250691c4b",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/ThaiDebug.json",
+          "sha256": "5e9876ca719654d934dd3752792d78b17482e71d2433ae0a5491c904b759cb5a",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-universal.apk",
+              "sha256": "013bff7b392dee2495e433419436264639b7042f72cfa02fe959d5dbeb1d7806",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-armeabi-v7a.apk",
+              "sha256": "678fa2914e8d40c5509ec99d818724d9c37306a017059080885d5eeec8499e48",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/thai/debug/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.1-thai-arm64-v8a.apk",
+              "sha256": "9731d5f79fc226d707c0e1805c25a7fa4cce5e550c4c929315bbdb3abe11b082",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 39,
+      "nativeEntryCountAcrossApks": 208,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "baseCommit": "050a792fc8c1699ba1ac8c7868f3a245af4294f2",
+      "commit": "f1d82c7469af5df199731bafb7a248f88e3396be",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "17",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "d62ee678b14f6bd2f3576891e34bd8c32336acb9288bbd741d0ed0c36e29772d",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-universal.apk",
+              "sha256": "28e5b8f794d4517e8612a4ffab61fbc6944c01331a897bbc4be167733ee8efcf",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-armeabi-v7a.apk",
+              "sha256": "924abc3a667eb4f92e2236c251c1a330cb664de08019ebeb4413e7ca1ecafdd3",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-arm64-v8a.apk",
+              "sha256": "20e056fefbbe03d79aa4cbbaf52914e7a1ba357faab219b6ff23509120d95d54",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-universal.apk",
+              "sha256": "7fbe9d6e7e366e3d0ab70823411f811105ce7e3a017a12adbfe7e5e56353a037",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-armeabi-v7a.apk",
+              "sha256": "5ac7f7163e3b026d7562f714b9a54fb1b3deb48509e98fda64964e2c40e83ea8",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-arm64-v8a.apk",
+              "sha256": "0aa1587fe511c4ef99973299cdda3144465c1053239b20970c1e04d396d58d06",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-universal.apk",
+              "sha256": "4c72c0d4695c12af121fc72bb4ad2ef43e20b477c797168c6784eeb0b76e322c",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-armeabi-v7a.apk",
+              "sha256": "8d7c15a3840499baa56cdea5fee6321dc282d42c5c534c9f2eb0883886106dec",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-arm64-v8a.apk",
+              "sha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/MediumDebug.json",
+          "sha256": "e7774ca6ab9e3ec5d78ad20e813a75c34e12132e2e8028b52bd280c62b373142",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-universal.apk",
+              "sha256": "28e5b8f794d4517e8612a4ffab61fbc6944c01331a897bbc4be167733ee8efcf",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-armeabi-v7a.apk",
+              "sha256": "924abc3a667eb4f92e2236c251c1a330cb664de08019ebeb4413e7ca1ecafdd3",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/medium/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-medium-arm64-v8a.apk",
+              "sha256": "20e056fefbbe03d79aa4cbbaf52914e7a1ba357faab219b6ff23509120d95d54",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/SmallDebug.json",
+          "sha256": "690cb1a6eed61f05eaa0d228e29b8ab652f0c9ca900c82a18f9564f161bf8607",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-universal.apk",
+              "sha256": "7fbe9d6e7e366e3d0ab70823411f811105ce7e3a017a12adbfe7e5e56353a037",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-armeabi-v7a.apk",
+              "sha256": "5ac7f7163e3b026d7562f714b9a54fb1b3deb48509e98fda64964e2c40e83ea8",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/small/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-small-arm64-v8a.apk",
+              "sha256": "0aa1587fe511c4ef99973299cdda3144465c1053239b20970c1e04d396d58d06",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/TinyDebug.json",
+          "sha256": "9ed70a986af9e65dfc2fcb504e4f104c7e7b4e1612dc74af2b06e03fefa6d103",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-universal.apk",
+              "sha256": "4c72c0d4695c12af121fc72bb4ad2ef43e20b477c797168c6784eeb0b76e322c",
+              "nativeEntries": 8,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-armeabi-v7a.apk",
+              "sha256": "8d7c15a3840499baa56cdea5fee6321dc282d42c5c534c9f2eb0883886106dec",
+              "nativeEntries": 4,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/tiny/debug/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.1-tiny-arm64-v8a.apk",
+              "sha256": "799578481b801571b8cc42c052efe96ba4814ecc9eb5f51f49a15dec2fc9efa9",
+              "nativeEntries": 4,
+              "native64Entries": 4,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 9,
+      "nativeEntryCountAcrossApks": 48,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin",
+      "baseCommit": "4494db301f791a9a7d039f0db62dfb0dfdeadf00",
+      "commit": "55e126ebd9f679d906367f1d2850b6b426c50ae0",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "10",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "d33838ef1b81b7201fc404d6c06feb951be99451e0182c7a6062fb62fef75f6e",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "555e64b32514f0bc37d8c2e3dec30936b48ab1359fa3dd43a487a811ee279cf1",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin4j",
+      "baseCommit": "33484591900da5a2c9af61a46bb7367f6302a40d",
+      "commit": "282fd079e2da7433a522500d72bfad5cccdcd27e",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.3.0",
+      "versionBuild": "13",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "1734fbb4ee47318a5e775fdb40ac18b3409fac72f9e5c8de9d72a052c92df53b",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "ebc2ddea706eeaabfc6c5e8ba9fd4f5a2243bb52d987b2b85876896783eb3945",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Python-Runtime",
+      "baseCommit": "086f9362ca5a3338fc89b0a180b86a547aedf4c7",
+      "commit": "1d80348a81c214b31fe56b6c7a42fe178de6b635",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.5.1",
+      "versionBuild": "94",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "af24a8b19f29529fbc5808c2a0e23105c6e50901dba1dda439635f5f35f9c855",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-python-runtime-v0.5.1-universal.apk",
+              "sha256": "bf4e927e3dcf207e2eb92496e0f82b36406cc53b3aaf5d55e8b2842c9b1f4fa0",
+              "nativeEntries": 132,
+              "native64Entries": 132,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-python-runtime-v0.5.1-x86_64.apk",
+              "sha256": "a81176780320407e210ea22447215090d24708fab47611c312ec1e7b00c406e1",
+              "nativeEntries": 124,
+              "native64Entries": 124,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-python-runtime-v0.5.1-arm64-v8a.apk",
+              "sha256": "62f2fb65816f131430dde098bf3164751b84c70e027d4a5ccae5710c2ff81566",
+              "nativeEntries": 124,
+              "native64Entries": 124,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 3,
+      "nativeEntryCountAcrossApks": 380,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+      "baseCommit": "866f16abaea7ecf2f02ec8f008a6984d2d433aab",
+      "commit": "dc9a562e0fca4536235a96ab4de13e309575ae1e",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "7",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "a8431a290c850b6f27c02fa91e0fb39e98cf188df9611324758abfe215e3c37f",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-universal-debug.apk",
+              "sha256": "7c5a65b1dc627da6c75541141f6d2401a4e67e6a67eda4615181f6ba9aa2ab47",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk",
+              "sha256": "5478d885baf8658aa1572dc4eb4e7b7ca71c41a6bf3f9e8f200eaf3d510a793d",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86-debug.apk",
+              "sha256": "83186820f40c862195905102e25c710b16d6d9f30f4e0796314bd7d28010c311",
+              "nativeEntries": 1,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-arm64-v8a-debug.apk",
+              "sha256": "0d1fe43eba0e8dc0f532ac96e74b5a3a0fa21e0fc05ed20fa3a279d41332aa95",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/app-x86_64-debug.apk",
+              "sha256": "2ab9472589b36538cb26f664822aff20fec7b444bce19fe4b839962dd36e2909",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 5,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-R8-Compiler",
+      "baseCommit": "95a3da346f1ff7582d9d7a4ca8ffc1e588371fa7",
+      "commit": "ddda197d5b1ba0dd152cb525c16c75a72ce2f2a5",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": null,
+      "versionBuild": null,
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "6638e90a9f4e044b0571a8837cbad8ef16076493a4420c6bf8126ab9b7344a61",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "fc3e16bd11f47d256cce454b6c4b0e13e3899f1175fd1364b470a27760402752",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "baseCommit": "90e5df3da023c0e85d0b91657586c60b4b830e01",
+      "commit": "4d95e21a727b7fd2a9a826cef45b6156fefe1133",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "16",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "e07bac00a47c916fc4844f734aa757a66b449aa1dcbd40116da8252661784e82",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-universal.apk",
+              "sha256": "6db4965177f26489070edc5fd423975c1e685b674200dad93f2682d6827f1c8b",
+              "nativeEntries": 9,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-x86_64.apk",
+              "sha256": "a5d5a40a44149cd4b937885a4529d243cd470e594bd45f278eef4daef2421dfe",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+              "sha256": "81e4883c3d98e3b94f27aa3b2910562fd1b3894fbcfa3b6ebedd00599cfec88f",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-armeabi-v7a.apk",
+              "sha256": "9a15347ea2844da5b0f834b36940aa162b9c265d5ba3235d34ba273a07c61005",
+              "nativeEntries": 3,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/Release.json",
+          "sha256": "66ff3b99048ad2f9408561d6fab4139ca81d6e049b0772699893860ba551f60c",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-universal.apk",
+              "sha256": "13d8d2e68f5601ad3226b8d35d528e95b14377ca4bd33f52c4161112480b1f11",
+              "nativeEntries": 9,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-armeabi-v7a.apk",
+              "sha256": "ee3eb2527c95f79ccd8ac8c086ae7a7ab6974edc1a021b4f606d5af7c1c2b43f",
+              "nativeEntries": 3,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-x86_64.apk",
+              "sha256": "60d91fb2b620b00d3a6582c56d3682699d18ffbccf7b82316974e14a7bcdbda7",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.1-arm64-v8a.apk",
+              "sha256": "363172580bc352a9e14d6b8ddce54b6b95661f5ed8ba643e279bd4cfcdb687f6",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 8,
+      "nativeEntryCountAcrossApks": 36,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "baseCommit": "b1a7d408b0e87afc792811741afb7907ec2519d4",
+      "commit": "5db2d0057001da179dddc48f8e69849509e1154f",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.0.1",
+      "versionBuild": "19",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "59f7806afd5cbadb7dc86486eb7d1ec7ae61f3b83eb6c5a657d39cb4d81da1d2",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-universal.apk",
+              "sha256": "56a357edf1238c0d66f1daf73c8dc25c2e8411203fe9341df3a80a1a14460c70",
+              "nativeEntries": 9,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-armeabi-v7a.apk",
+              "sha256": "b15876c99b061a0fd2351efe96133e4fbcb11c45ab2a47b1aeaa5a9af33a96ac",
+              "nativeEntries": 3,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-arm64-v8a.apk",
+              "sha256": "99b87956b62984acfb2818dbfdbe028d8623bc8565f4e012d781ebbe64494bab",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-x86_64.apk",
+              "sha256": "0d81c8710fdc9b9b4b0139a2b716420c6e1117ad58c235f01318297fa241e0b0",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "file": "app/build/reports/native-alignment/Release.json",
+          "sha256": "1702f15c3a2ae407829855ce0c8d94c5fc847dd5511a5cdc8b49a951388741e7",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-universal.apk",
+              "sha256": "b430c7dee00b1ed8145997bcdd429f1886fa961de0b0920998535a2bb684225b",
+              "nativeEntries": 9,
+              "native64Entries": 6,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-armeabi-v7a.apk",
+              "sha256": "73e359dd693e36ad2fdfa5bf1e4d93a8373476018f8d4dbc363df77a47dfab39",
+              "nativeEntries": 3,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-arm64-v8a.apk",
+              "sha256": "5bf3575e7ca54e0ddd3b2d3c708006a02b2423489fce08a4a74636d40b00984d",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.1-x86_64.apk",
+              "sha256": "3c4096f9a31ace97b3c7a91ed022b82f1d20885b44da57f78e785b5262335993",
+              "nativeEntries": 3,
+              "native64Entries": 3,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 8,
+      "nativeEntryCountAcrossApks": 36,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Screen-Color-Picker",
+      "baseCommit": "b657e53e2578b1aabdaac2ac85cfc715c6df2fcf",
+      "commit": "7e70eb3f1830f09072ff6ae01321a3fb0befaf07",
+      "workspaceWasDirtyBeforeDeployment": false,
+      "versionName": "1.0.1",
+      "versionBuild": "2",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "c51fb1cc37277b2148f59e0ce2064396eb7b5d0760ba46ad60f6097a8c586d2b",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/app-debug.apk",
+              "sha256": "9d24ec3c274cf58f8ce7177308d1dcfa4ad673633b4af6974ddadb4757c2ed8d",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Ember-Player",
+      "baseCommit": "06efbe8c52f1148f66c17c22896f472226e4d068",
+      "commit": "9741d928c2ada36e66471610d519dc1ac5eb5666",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "3.0.0",
+      "versionBuild": "15",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "86b76cfea5ef3533553b4c73067da2e7aba2c2d6003d84a452785b3c51195c6c",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-three-ember-player-v3.0.0.apk",
+              "sha256": "676bd41a52bf21589b138e7e601254686fecd94fd92e2fd056aa7a56bcc0a836",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Stone-AI",
+      "baseCommit": "1dce9fe8622efdb4f521314749bb7257e6c04cc1",
+      "commit": "b743d98fb697aa226140679d7d0e7caf580ba5a2",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.1.1",
+      "versionBuild": "56",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "23bc75ad1fc0312222acbe1cfe2fa43cfbf3e6090275d12b0bb6eb9607d3fd9c",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-universal.apk",
+              "sha256": "ac4dab60095d4561bff345405bd7bc30edac3dca4d586a26a9407c1a16136bfe",
+              "nativeEntries": 2,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-x86_64.apk",
+              "sha256": "c0a74a4531fcc14a41ffc1b10ea5404a0a2f0d2f1e836f3e73fe94632c26e5c1",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+              "sha256": "cad6a96012d2fee0bf68c9e05196b13ca3b98bc3035179755535e87a34f1f945",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 3,
+      "nativeEntryCountAcrossApks": 4,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Terra-Player",
+      "baseCommit": "5effcf1856bae4b74869883481dd5553198c5888",
+      "commit": "2c103192187a20900986bcc1009d835622fc7c59",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "1.5.0",
+      "versionBuild": "14",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "82d3acfe3ad8acebcd8fc227877c11c575821c7a63d0259523623077578c7d8a",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-three-terra-player-v1.5.0.apk",
+              "sha256": "d20e7ebd88f0811b366b7d737a4c98822c703e4ec495c1ba30a3cbc64d229bd5",
+              "nativeEntries": 0,
+              "native64Entries": 0,
+              "native64MinLoadAlign": null,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 0,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-TypeScript-Engine",
+      "baseCommit": "40f32782c8ae829f99d081ba26fe01034c50ab3a",
+      "commit": "807751ca59d6511b590eb64ab404795a8fe1fc36",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.6.1",
+      "versionBuild": "7",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "fbf71150aada2d02bd19da45cd655de411c0a493b60c7388602440b94476eec9",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-typescript-engine-v0.6.1-universal.apk",
+              "sha256": "c1da5ce09288ee4e5bf7ecbd647066728736fa97a0c5c91ca80ab1f491866b88",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            },
+            {
+              "file": "app/build/outputs/apk/r2CapacityEvidenceDebug/autojs6-plugin-typescript-engine-v0.6.0-r2-capacity-evidence-debug-universal.apk",
+              "sha256": "16734ab80b8ba2b1da8d6c64a0f780fa7378486816319800ca914f0c34302a4d",
+              "nativeEntries": 4,
+              "native64Entries": 2,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 2,
+      "nativeEntryCountAcrossApks": 8,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    },
+    {
+      "repository": "AutoJs6-Plugin-Yolo-NCNN",
+      "baseCommit": "dc43e15d873e37add904a1b6d32bdf4433ecc785",
+      "commit": "e8995d232e5cfe0133b48429766fdd3c8db58bda",
+      "workspaceWasDirtyBeforeDeployment": true,
+      "versionName": "0.1.1",
+      "versionBuild": "3",
+      "gateReports": [
+        {
+          "file": "app/build/reports/native-alignment/Debug.json",
+          "sha256": "474ca86d649e50a163a45c2c1754a63eb06c216611f366643003534965ed3d57",
+          "ok": true,
+          "artifacts": [
+            {
+              "file": "app/build/outputs/apk/debug/autojs6-plugin-yolo-ncnn-v0.1.1-arm64-v8a.apk",
+              "sha256": "cff83d62cddd4f2ab628c00c1ea7b533fd4a4fc3e76a6ecfb8ee10d1b5588672",
+              "nativeEntries": 1,
+              "native64Entries": 1,
+              "native64MinLoadAlign": 16384,
+              "ok": true
+            }
+          ]
+        }
+      ],
+      "uniqueApkCount": 1,
+      "nativeEntryCountAcrossApks": 1,
+      "artifactIdentity": "SHA-256 identifies the tested preserved workspace; pre-existing changes are not included in the 16 KB commit"
+    }
+  ],
+  "unitTests": [
+    {
+      "repository": "host",
+      "name": "org.autojs.autojs.apkbuilder.template.NativeBuildAlignmentTest",
+      "reportSha256": "5734001498b5c5313c0b3db838dede0667eb3074750871fa39621ff93718922f",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "host",
+      "name": "org.autojs.autojs.core.plugin.center.PluginCenterItemSemanticsTest",
+      "reportSha256": "b45b495c9a61e6fdf1571eaa80e9e5f0acc41eac12860e1afc456550c9370748",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "host",
+      "name": "org.autojs.autojs.core.plugin.center.PluginNativeAlignmentPolicyTest",
+      "reportSha256": "cf21651a22d453577e4ec3b67cec0838e406c481f42adab87c122e1409b15db6",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "host",
+      "name": "org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginPolicyTest",
+      "reportSha256": "659e01a4a4747bce8c59f0c21816b93ffab480964089e0812f089a86f1a66af3",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "host",
+      "name": "org.autojs.autojs.core.plugin.nativealign.ElfLoadAlignmentTest",
+      "reportSha256": "ad5e1aeff9f56865722ee7bbd69057032c8c077138f1d8d649a776fd1b9a88d0",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "shared",
+      "name": "org.autojs.build.alignment.ApkManifestAlignmentTest",
+      "reportSha256": "26ad3739bf001c992fdcff85816d5823f919de55726c46e241e214b4e764a218",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "shared",
+      "name": "org.autojs.build.alignment.NativeAlignmentTest",
+      "reportSha256": "22dc8e0bd57d138403190a52039b435dc259c41d11f3dcefa881260b3a12ca3d",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "repository": "apkBuilder",
+      "name": "org.autojs.plugin.apkbuilder.template.impl.RemoteUnsignedApkWriterTest",
+      "reportSha256": "1c0c809afab083aa510ac8887973fe033a2aced890aaecaca31ed68300e22629",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "deviceTests": [
+    {
+      "name": "hostLibrariesApi36",
+      "tests": 4,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-image-device-api36.log",
+      "logSha256": "4d51611b4960612bb2771fdfc1cc3cbd00616dda6da28fbfa64596af7eacb411"
+    },
+    {
+      "name": "hostLibrariesApi37",
+      "tests": 4,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-image-device-api37.log",
+      "logSha256": "b6a4f1a8d8c548012ec40077c87bf59aeef0fcc324d259a9ea7bfb022987c31b"
+    },
+    {
+      "name": "hostLibrariesArm64",
+      "tests": 4,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-image-device-arm64-4kb.log",
+      "logSha256": "4e2e1916a287299656001696297db00d17cee3cb3b8d69cb3cdb8a6d1933b542"
+    },
+    {
+      "name": "pythonAndBadgeApi36",
+      "tests": 2,
+      "passed": true,
+      "localLog": "build/tmp-16kb/python-badge-final-emulator-5580.log",
+      "logSha256": "ae8973c3cbc62c6bf49f7662526bfdde77adfeeac595318293e3a01f86dfe839"
+    },
+    {
+      "name": "pythonApi37",
+      "tests": 1,
+      "passed": true,
+      "localLog": "build/tmp-16kb/python-api37.log",
+      "logSha256": "96e849987aae714b4e0726d82d56f3ad55847d06b350e8295ef97e3db6219f2f"
+    },
+    {
+      "name": "badgeApi37",
+      "tests": 1,
+      "passed": true,
+      "localLog": "build/tmp-16kb/badge-api37.log",
+      "logSha256": "d1f162e77c99258374c193451405456b980b4f25bfc147a89ae5d4fef1d59e78"
+    },
+    {
+      "name": "pythonAndBadgeArm64",
+      "tests": 2,
+      "passed": true,
+      "localLog": "build/tmp-16kb/python-badge-final-968e9f18.log",
+      "logSha256": "76d751c907da35e6f091bebc3ce52787a4f365ecbd76a4fc9a238130874cde46"
+    },
+    {
+      "name": "imguiApi37",
+      "tests": 1,
+      "passed": true,
+      "localLog": "build/tmp-16kb/imgui-api37.log",
+      "logSha256": "0d042e7598af1b30aee189bf679d318874088d14dcbe249caab0a64412e83973"
+    },
+    {
+      "name": "quickjsApi37",
+      "tests": 1,
+      "passed": true,
+      "localLog": "build/tmp-16kb/quickjs-runtime-api37.log",
+      "logSha256": "7ea40daebf3330f3231ee372838de7cde1eb208623ca5de6ae98393e7260520e"
+    },
+    {
+      "name": "luaApi37",
+      "tests": 1,
+      "passed": true,
+      "localLog": "build/tmp-16kb/lua-api37.log",
+      "logSha256": "3fe46defbac566de2a69f9577d952e57ef35ccd6a8d440921ccd89576ebe5c8a"
+    },
+    {
+      "name": "NodeHostPluginIntegrationInstrumentationTest#pluginExecutionRoundTripRuns",
+      "api": 37,
+      "pageSize": 16384,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-additional-plugins-api37.log",
+      "logSha256": "87161c1f735926faffb38316bc7ca3fb62917caf17f434c9e4afbf94fe5ce439",
+      "note": "Sibling Lua signer mismatch was corrected; see separate successful luaApi37 receipt"
+    },
+    {
+      "name": "MediainfoSnapshotRhinoInstrumentationTest#publicRhinoApiKeepsReadAndNegotiatesSnapshotV2Explicitly",
+      "api": 37,
+      "pageSize": 16384,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-additional-plugins-api37.log",
+      "logSha256": "87161c1f735926faffb38316bc7ca3fb62917caf17f434c9e4afbf94fe5ce439",
+      "note": "Sibling Lua signer mismatch was corrected; see separate successful luaApi37 receipt"
+    },
+    {
+      "name": "TypeScriptCompilerPluginClientDeviceTest#compilesUtf8SingleFileThroughRealPluginBinder",
+      "api": 37,
+      "pageSize": 16384,
+      "passed": true,
+      "localLog": "build/tmp-16kb/host-additional-plugins-api37.log",
+      "logSha256": "87161c1f735926faffb38316bc7ca3fb62917caf17f434c9e4afbf94fe5ce439",
+      "note": "Sibling Lua signer mismatch was corrected; see separate successful luaApi37 receipt"
+    }
+  ],
+  "userApks": [
+    {
+      "serial": "emulator-5580",
+      "api": "36",
+      "pageSize": 16384,
+      "linkerCompat": "false",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "apkSha256": "6d8327acafd4537e31b6e0ad2838976dc66e11a5d44195b77b4d76d26f9c6023",
+      "nativeLibraries": [
+        {
+          "entry": "lib/x86_64/libRapidOcr.so",
+          "abi": "x86_64",
+          "size": 1437568,
+          "compressed": true,
+          "dataOffset": 12737784,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "abi": "x86_64",
+          "size": 1229808,
+          "compressed": true,
+          "dataOffset": 13179492,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-androidterm5.so",
+          "abi": "x86_64",
+          "size": 6808,
+          "compressed": true,
+          "dataOffset": 13592974,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-termexec2.so",
+          "abi": "x86_64",
+          "size": 9960,
+          "compressed": true,
+          "dataOffset": 13595704,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libonnxruntime.so",
+          "abi": "x86_64",
+          "size": 21420512,
+          "compressed": true,
+          "dataOffset": 13599796,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libopencv_java4.so",
+          "abi": "x86_64",
+          "size": 53335872,
+          "compressed": true,
+          "dataOffset": 21220082,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libpngquant_bridge.so",
+          "abi": "x86_64",
+          "size": 2742144,
+          "compressed": true,
+          "dataOffset": 42941360,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'x86_64'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 336,
+        "quantizedBytes": 2990,
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-api36",
+      "rapidVersion": "3"
+    },
+    {
+      "serial": "emulator-5582",
+      "api": "37",
+      "pageSize": 16384,
+      "linkerCompat": "fatal",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "apkSha256": "6bd5320bbfa716633f127371d09ff00e6d6e09f1aa40b1812fc618edd34d7297",
+      "nativeLibraries": [
+        {
+          "entry": "lib/x86_64/libRapidOcr.so",
+          "abi": "x86_64",
+          "size": 1437568,
+          "compressed": true,
+          "dataOffset": 12737775,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "abi": "x86_64",
+          "size": 1229808,
+          "compressed": true,
+          "dataOffset": 13179483,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-androidterm5.so",
+          "abi": "x86_64",
+          "size": 6808,
+          "compressed": true,
+          "dataOffset": 13592965,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-termexec2.so",
+          "abi": "x86_64",
+          "size": 9960,
+          "compressed": true,
+          "dataOffset": 13595695,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libonnxruntime.so",
+          "abi": "x86_64",
+          "size": 21420512,
+          "compressed": true,
+          "dataOffset": 13599787,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libopencv_java4.so",
+          "abi": "x86_64",
+          "size": 53335872,
+          "compressed": true,
+          "dataOffset": 21220073,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libpngquant_bridge.so",
+          "abi": "x86_64",
+          "size": 2742144,
+          "compressed": true,
+          "dataOffset": 42941351,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'x86_64'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 336,
+        "quantizedBytes": 2785,
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-api37",
+      "rapidVersion": "3"
+    },
+    {
+      "serial": "Xiaomi-23046RP50C-arm64-4kb",
+      "api": "35",
+      "pageSize": 4096,
+      "linkerCompat": "",
+      "pmCompatDisabled": "",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "apkSha256": "644917e5e499101f92ee58fdc221a614f8b43f5f4244cd2913f93c2ee39f4013",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 29371869,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443328,
+          "compressed": true,
+          "dataOffset": 30994022,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 31413073,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 31810662,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 31813465,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 31817262,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 38253559,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 46434126,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 47685083,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 4096,
+        "terminalExit": 37,
+        "width": 840,
+        "quantizedBytes": 15660,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-arm64",
+      "rapidVersion": "3"
+    },
+    {
+      "serial": "emulator-5582",
+      "api": "37",
+      "pageSize": 16384,
+      "linkerCompat": "fatal",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "rapidVersion": "6",
+      "apkSha256": "6830b65657d0333b78b878929b96f99432fa5ed9a0f99f1d3272f09fc6ea0f97",
+      "nativeLibraries": [
+        {
+          "entry": "lib/x86_64/libRapidOcr.so",
+          "abi": "x86_64",
+          "size": 1437552,
+          "compressed": true,
+          "dataOffset": 27561464,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "abi": "x86_64",
+          "size": 1229808,
+          "compressed": true,
+          "dataOffset": 28003133,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-androidterm5.so",
+          "abi": "x86_64",
+          "size": 6808,
+          "compressed": true,
+          "dataOffset": 28416615,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-termexec2.so",
+          "abi": "x86_64",
+          "size": 9960,
+          "compressed": true,
+          "dataOffset": 28419345,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libonnxruntime.so",
+          "abi": "x86_64",
+          "size": 21420512,
+          "compressed": true,
+          "dataOffset": 28423437,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libopencv_java4.so",
+          "abi": "x86_64",
+          "size": 53335872,
+          "compressed": true,
+          "dataOffset": 36043723,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libpngquant_bridge.so",
+          "abi": "x86_64",
+          "size": 2742144,
+          "compressed": true,
+          "dataOffset": 57765001,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'x86_64'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 336,
+        "quantizedBytes": 2785,
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-api37-rapid6"
+    },
+    {
+      "serial": "Xiaomi-23046RP50C-arm64-4kb",
+      "api": "35",
+      "pageSize": 4096,
+      "linkerCompat": "",
+      "pmCompatDisabled": "",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "rapidVersion": "6",
+      "apkSha256": "e1486c8ed41e5953208575bb9b528d4e9c9e1089e195b6309c17692f2937a310",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 44195555,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443280,
+          "compressed": true,
+          "dataOffset": 45817708,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 46236779,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 46634368,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 46637171,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 46640968,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 53077265,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 61257832,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 62508789,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 4096,
+        "terminalExit": 37,
+        "width": 840,
+        "quantizedBytes": 15660,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-arm64-rapid6"
+    },
+    {
+      "serial": "emulator-5582",
+      "api": "37",
+      "pageSize": 16384,
+      "linkerCompat": "fatal",
+      "pmCompatDisabled": "true",
+      "ok": true,
+      "dedicatedOpenCvSelected": false,
+      "rapidVersion": "6",
+      "apkSha256": "ac2d4b8c3d85eeac90ee396a4164a2f0c2075f31f355877251ede2b2a228659f",
+      "nativeLibraries": [
+        {
+          "entry": "lib/x86_64/libRapidOcr.so",
+          "abi": "x86_64",
+          "size": 1437552,
+          "compressed": true,
+          "dataOffset": 27561463,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "abi": "x86_64",
+          "size": 1229808,
+          "compressed": true,
+          "dataOffset": 28003132,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-androidterm5.so",
+          "abi": "x86_64",
+          "size": 6808,
+          "compressed": true,
+          "dataOffset": 28416614,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libjackpal-termexec2.so",
+          "abi": "x86_64",
+          "size": 9960,
+          "compressed": true,
+          "dataOffset": 28419344,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libonnxruntime.so",
+          "abi": "x86_64",
+          "size": 21420512,
+          "compressed": true,
+          "dataOffset": 28423436,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libopencv_java4.so",
+          "abi": "x86_64",
+          "size": 53335872,
+          "compressed": true,
+          "dataOffset": 36043722,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/x86_64/libpngquant_bridge.so",
+          "abi": "x86_64",
+          "size": 2742144,
+          "compressed": true,
+          "dataOffset": 57765000,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'x86_64'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 16384,
+        "terminalExit": 37,
+        "width": 336,
+        "quantizedBytes": 2785,
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-final-api37"
+    },
+    {
+      "serial": "Xiaomi-23046RP50C-arm64-4kb",
+      "api": "35",
+      "pageSize": 4096,
+      "linkerCompat": "",
+      "pmCompatDisabled": "",
+      "ok": true,
+      "dedicatedOpenCvSelected": true,
+      "rapidVersion": "6",
+      "apkSha256": "db8c1d4bd1959e7534d2cad01b47e4e7ac61c03c7a757d647eb26b7adee42d83",
+      "nativeLibraries": [
+        {
+          "entry": "lib/arm64-v8a/libNative.so",
+          "abi": "arm64-v8a",
+          "size": 4191672,
+          "compressed": true,
+          "dataOffset": 44195555,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libRapidOcr.so",
+          "abi": "arm64-v8a",
+          "size": 1443280,
+          "compressed": true,
+          "dataOffset": 45817708,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "abi": "arm64-v8a",
+          "size": 1253544,
+          "compressed": true,
+          "dataOffset": 46236779,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-androidterm5.so",
+          "abi": "arm64-v8a",
+          "size": 7024,
+          "compressed": true,
+          "dataOffset": 46634368,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libjackpal-termexec2.so",
+          "abi": "arm64-v8a",
+          "size": 9656,
+          "compressed": true,
+          "dataOffset": 46637171,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libonnxruntime.so",
+          "abi": "arm64-v8a",
+          "size": 17908496,
+          "compressed": true,
+          "dataOffset": 46640968,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libopencv_java4.so",
+          "abi": "arm64-v8a",
+          "size": 20614416,
+          "compressed": true,
+          "dataOffset": 53077265,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpaddle_light_api_shared.so",
+          "abi": "arm64-v8a",
+          "size": 3827464,
+          "compressed": true,
+          "dataOffset": 61257832,
+          "zipAligned16k": false,
+          "elfAlign": 65536,
+          "elfErr": null,
+          "ok": true
+        },
+        {
+          "entry": "lib/arm64-v8a/libpngquant_bridge.so",
+          "abi": "arm64-v8a",
+          "size": 2941840,
+          "compressed": true,
+          "dataOffset": 62508789,
+          "zipAligned16k": false,
+          "elfAlign": 16384,
+          "elfErr": null,
+          "ok": true
+        }
+      ],
+      "manifest": {
+        "extractNativeLibs": "true",
+        "nativeCode": "'arm64-v8a'",
+        "targetSdk": "29",
+        "package": "org.autojs.autojs6.nativepagesmoke",
+        "versionName": "1.0"
+      },
+      "runtime": {
+        "pageSize": 4096,
+        "terminalExit": 37,
+        "width": 840,
+        "quantizedBytes": 15660,
+        "paddle": [
+          "测试"
+        ],
+        "rapid": [
+          "测试"
+        ],
+        "ok": true
+      },
+      "label": "user-apk-final-arm64"
+    }
+  ],
+  "legacyImageQuantNegative": {
+    "fixture": "current APK with preserved pre-upgrade NDK r26b JNI payload",
+    "legacyLibrarySha256": "e16a8c49d5820e41834134d9e969a13e32cf5a2a0b7146fc844d14791a4772b5",
+    "apkSha256": "c33a5f8b8a01abd58cba96adf720488a94f4a201eafe09e5dceb1ffb199b4569",
+    "pageSize": 16384,
+    "linkerCompat": "fatal",
+    "ok": true,
+    "restoredCurrentPlugin": true
+  },
+  "negativeHostGate": {
+    "passedByFailingOldApk": true,
+    "errorCount": 12,
+    "reportSha256": "850b393902777f1012a15b595d437c020c8886ca435c0318a46f322a0155d2cf"
+  },
+  "runtimeKits": [
+    {
+      "runtimeKitId": "autojs6-runtime-v6.8.0+5279-local-arm64-v8a",
+      "templateSha256": "07cef7aae9af7688eec4d702a762dfd34e7d813e4ec8ae3288d22ca48179e704",
+      "supportedAbis": [
+        "arm64-v8a"
+      ],
+      "nativeLibPageAlignment": 16384,
+      "elfAndZipalignPassed": true
+    },
+    {
+      "runtimeKitId": "autojs6-runtime-v6.8.0+5279-local-armeabi-v7a",
+      "templateSha256": "b3e9d29598d2832a58cb20df3877b61f76d0d560e9f115252bfc831578e79a88",
+      "supportedAbis": [
+        "armeabi-v7a"
+      ],
+      "nativeLibPageAlignment": 16384,
+      "elfAndZipalignPassed": true
+    },
+    {
+      "runtimeKitId": "autojs6-runtime-v6.8.0+5279-local-universal",
+      "templateSha256": "f3fe9df87528a8d98f7fc1d5533709ce912f71f6cf8fb4151e3edee23d84f9c3",
+      "supportedAbis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64",
+        "x86"
+      ],
+      "nativeLibPageAlignment": 16384,
+      "elfAndZipalignPassed": true
+    },
+    {
+      "runtimeKitId": "autojs6-runtime-v6.8.0+5279-local-x86",
+      "templateSha256": "448209ab253cc7ba71115d07b389429e8efbf396fd4b0b8507d3488c2dbc28f1",
+      "supportedAbis": [
+        "x86"
+      ],
+      "nativeLibPageAlignment": 16384,
+      "elfAndZipalignPassed": true
+    },
+    {
+      "runtimeKitId": "autojs6-runtime-v6.8.0+5279-local-x86_64",
+      "templateSha256": "020936de0d2e46a60250303457fcc46f56e31b4086e38b0b76538c320c5e849f",
+      "supportedAbis": [
+        "x86_64"
+      ],
+      "nativeLibPageAlignment": 16384,
+      "elfAndZipalignPassed": true
+    }
+  ],
+  "finalScan": {
+    "native64Failures": 0,
+    "reportSha256": "8828dd6a96ed990d1969b37bf7d878242c575f977157338464b587ca195aa6c2",
+    "repositories": [
+      {
+        "repository": "AutoJs6",
+        "scanned": "2 apk, 4 loose .so, 8 aar .so",
+        "nativeEntries": 18,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Accessibility-Compat",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Ace-Editor",
+        "scanned": "2 apk, 4 loose .so, 0 aar .so",
+        "nativeEntries": 12,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-APK-Builder-Template",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-APK-Inspector",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Archive-Manager",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 8,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Bun-Runtime",
+        "scanned": "1 apk, 4 loose .so, 0 aar .so",
+        "nativeEntries": 6,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-DEX-Compiler",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-File-Inspector",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-HTML-Previewer",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Image-Quantization",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Image-Tools",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Image-Viewer",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-ImGui",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Java-Runtime",
+        "scanned": "3 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Kotlin-Runtime",
+        "scanned": "3 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Lua-Runtime",
+        "scanned": "5 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 5,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Markdown-Previewer",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-MCP-Server",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-MediaInfo",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-MLKit-Barcode",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 1,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-MLKit-OCR",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-NodeJs-Runtime",
+        "scanned": "2 apk, 3 loose .so, 0 aar .so",
+        "nativeEntries": 9,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Offline-Docs",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-OpenCC",
+        "scanned": "3 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-OpenCV",
+        "scanned": "2 apk, 0 loose .so, 4 aar .so",
+        "nativeEntries": 9,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+        "scanned": "1 apk, 10 loose .so, 4 aar .so",
+        "nativeEntries": 18,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "scanned": "3 apk, 2 loose .so, 4 aar .so",
+        "nativeEntries": 18,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+        "scanned": "5 apk, 2 loose .so, 4 aar .so",
+        "nativeEntries": 26,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+        "scanned": "3 apk, 2 loose .so, 4 aar .so",
+        "nativeEntries": 18,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Pinyin",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Pinyin4j",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Python-Runtime",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 8,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 2,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-R8-Compiler",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+        "scanned": "2 apk, 0 loose .so, 4 aar .so",
+        "nativeEntries": 10,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+        "scanned": "2 apk, 0 loose .so, 4 aar .so",
+        "nativeEntries": 10,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Screen-Color-Picker",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Three-Ember-Player",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Three-Stone-AI",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 3,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Three-Terra-Player",
+        "scanned": "2 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 0,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-TypeScript-Engine",
+        "scanned": "3 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 8,
+        "native64Failures": 0
+      },
+      {
+        "repository": "AutoJs6-Plugin-Yolo-NCNN",
+        "scanned": "1 apk, 0 loose .so, 0 aar .so",
+        "nativeEntries": 1,
+        "native64Failures": 0
+      }
+    ]
+  },
+  "constraints": [
+    "16 KB arm64 physical hardware not available",
+    "P6 full per-plugin runtime matrix remains incomplete",
+    "Bun x86_64 JSC page-size assumption remains B1, outside alignment scope",
+    "Host/plugin remote CI and new plugin releases not triggered in this deployment",
+    "QuickJS-Host maintenance rebase remains D11"
+  ]
+}

@@ -179,6 +179,9 @@
 * `新增` Node recorder 支援具備麥克風權限, 前台通知, 時長上限與腳本清理的 AAC 錄音; ui.overlay 支援宣告式屬性更新, 拖動與事件推送
 * `新增` Node 腳本可在兩個獨立執行階段進程中並行執行, 共用 FIFO 佇列並按執行工作路由取消和輸入
 * `新增` MediaInfo 查詢支援從 0 開始的 streamNumber, countGet 串流計數以及用於單位, 說明和可讀名稱的 infoKind; Rhino 和 Node 保持預設第 1 條串流的 TEXT 查詢, 並協商外掛擴充能力
+* `新增` 載入 OpenCV 與 Image Quantization 外掛程式前檢查原生程式庫 ELF 對齊, 頁面大小不相容時提供明確錯誤
+* `新增` 外掛程式中心讀取官方索引與已安裝 manifest 的原生頁面對齊資訊, 在 16 KB 裝置安裝或啟用不相容版本前提示
+* `修復` 在同一個打包應用中依次使用 Paddle OCR 和 Rapid OCR 時可能崩潰的問題
 * `修復` MediaInfo 與圖片檔案路徑支援絕對路徑, 父目錄和合法檔名; 錄音輸出同步交由更新後的宿主依 Android 檔案權限處理
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
 * `修復` Scrapers 工具遷移後 Android Studio 下載資訊不再自動寫入 README 通用數據的問題
@@ -429,6 +432,8 @@
 * `優化` 螢幕 OCR 範例申請 Android 擷取授權並辨識真實圖片控制代碼; OCR 或條碼插件不可用時傳回可讀 unavailable 錯誤, 辨識失敗仍按錯誤處理
 * `優化` Node 腳本支援協商式非同步啟動, 長駐執行釋放 Binder 執行緒, 終態回呼完成後回傳工作區, 相容舊同步宿主
 * `優化` Node bridge `accessibility.dump` 的 JSON 節點在七個描述符欄位之外攜帶 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 與 `longClickable` 狀態標記; MCP Server 會話授權加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全局動作以支援插件的 `ui_press_key` 工具, 無障礙服務未運行時 `keys.*` 調用現在與 `accessibility` 模組一樣以 `unavailable` 類別回應; 起止點相同的 `accessibility.swipe` (零長度) 按 `durationMs` 的按壓派發, MCP 的 `ui_click` / `ui_long_click` 座標形式依賴於此
+* `優化` 宿主與 runtime-kit 原生程式庫支援 16 KB 對齊, 重編 jackpal JNI 程式庫並使用 NDK r28.2 libc++, 附帶來源記錄與共用建置校驗
+* `優化` APK 打包器在進度與結果中提示不相容的原生程式庫, 在本機建置輸入中繼資料中記錄對齊資訊, 保持壓縮打包
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

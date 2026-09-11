@@ -180,5 +180,6 @@
   "text_reference": "参照",
   "text_search": "検索",
   "text_stands_for": "を表します",
-  "text_traditional_method_lowercase": "従来の方法"
+  "text_traditional_method_lowercase": "従来の方法",
+  "text_plugin_native_alignment": "プラグインセンターが公式インデックスとインストール済み manifest のページアラインメントを読み取り, 16 KB デバイスで非対応バージョンをインストールまたは有効化する前に警告. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

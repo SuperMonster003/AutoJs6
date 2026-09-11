@@ -180,5 +180,6 @@
   "text_reference": "Consultar",
   "text_search": "Buscar",
   "text_stands_for": "significa",
-  "text_traditional_method_lowercase": "método tradicional"
+  "text_traditional_method_lowercase": "método tradicional",
+  "text_plugin_native_alignment": "El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

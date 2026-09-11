@@ -445,6 +445,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">تعذر جلب فهرس إضافات %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
+    <string name="error_plugin_native_page_alignment_unsupported">تحتوي الإضافة %1$s على مكتبة أصلية بمحاذاة %2$d بايت, ولا يمكن تشغيلها مع صفحات بحجم %3$d بايت. يرجى تحديث الإضافة.</string>
     <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
     <string name="error_plugin_returned_empty_info">أعاد المكوّن الإضافي %1$s معلومات فارغة.</string>
     <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
@@ -636,6 +637,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">إصدار المكون الإضافي المتوافق مع إصدار AutoJs6 هذا أقل من الإصدار المثبت. لا يسمح Android بتثبيت إصدار أقدم فوق تطبيق موجود.\n\nالمثبت: %1$s\nالمتوافق: %2$s\n\nأزل تثبيت المكون الإضافي أولا. بعد إلغاء التثبيت, ارجع إلى مركز المكونات الإضافية وثبت الإصدار المتوافق. ستتم إزالة بيانات تطبيق المكون الإضافي.</string>
     <string name="prompt_plugin_mount_conflict_override">الهدف \"%1$s\" موجود بالفعل (النوع: %2$s). المتابعة ستؤدي الى استبدال هذا الكائن، هل تريد المتابعة?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">الهدف \"%1$s\" مشغول بالفعل بواسطة الاضافة \"%2$s\" (%3$s). يرجى تعطيل الربط التلقائي لتلك الاضافة اولا، او تغيير هدف الربط الحالي.</string>
+    <string name="prompt_plugin_native_page_alignment">المكتبات الأصلية في الملحق %1$s غير محاذاة لصفحات 16 KB. قد لا يعمل الملحق على هذا الجهاز. قم بترقيته قبل الاستخدام. هل تريد المتابعة رغم ذلك?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
     <string name="screen_capturer_foreground_notification_channel_name">شاشة كابتوري فريجرونيد خدمة</string>
@@ -1634,6 +1636,7 @@
     <string name="text_plugin_mount_object_name">اسم كائن الربط</string>
     <string name="text_plugin_mount_point">نقطة الربط</string>
     <string name="text_plugin_mount_point_global_display">global</string>
+    <string name="text_plugin_native_page_alignment_incompatible">غير متوافق مع 16 KB</string>
     <string name="text_plugin_official">رسمي</string>
     <string name="text_plugin_online_source">مصدر الاضافات عبر الانترنت</string>
     <string name="text_plugin_show_official_plugins">اظهار الاضافات الرسمية القابلة للتثبيت عبر الانترنت</string>
@@ -2019,4 +2022,5 @@
     <string name="text_yearly_task">مهمة سنوية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>
 </resources>

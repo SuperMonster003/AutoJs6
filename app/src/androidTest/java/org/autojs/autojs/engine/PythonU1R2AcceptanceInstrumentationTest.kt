@@ -2322,6 +2322,10 @@ class PythonU1R2AcceptanceInstrumentationTest {
             """
             import sys
             from autojs6 import artifacts, result
+            import ssl, sqlite3, ctypes
+            assert ssl.OPENSSL_VERSION
+            assert sqlite3.connect(":memory:").execute("select 16 * 1024").fetchone()[0] == 16384
+            assert ctypes.CDLL("libc.so").getpagesize() in (4096, 16384, 65536)
             from .relative_value import VALUE
 
             assert __name__ == "__main__"

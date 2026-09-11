@@ -98,6 +98,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * 支持作为 Tasker 插件使用
 * 支持与 VSCode 连接并进行桌面开发 (需要 [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com) 插件)
 
+插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)
+
 ******
 
 ### 环境
@@ -315,6 +317,9 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Node recorder 支持带麦克风权限, 前台通知, 时长上限与脚本清理的 AAC 录音; ui.overlay 支持声明式属性更新, 拖动与事件推送
 * `新增` Node 脚本可在两个独立运行时进程中并发执行, 共用 FIFO 队列并按执行任务路由取消和输入
 * `新增` MediaInfo 查询支持从 0 开始的 streamNumber, countGet 流计数以及用于单位, 说明和可读名称的 infoKind; Rhino 和 Node 保持默认第 1 条流的 TEXT 查询, 并协商插件扩展能力
+* `新增` 加载 OpenCV 与 Image Quantization 插件前检查原生库 ELF 对齐, 页大小不兼容时提供明确错误
+* `新增` 插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示
+* `修复` 在同一个打包应用中依次使用 Paddle OCR 和 Rapid OCR 时可能崩溃的问题
 * `修复` MediaInfo 与图片文件路径支持绝对路径, 父目录和合法文件名; 录音输出同步交由更新后的宿主按 Android 文件权限处理
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
@@ -568,6 +573,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 屏幕 OCR 样例申请 Android 截屏授权并识别真实图片句柄; OCR 或条码插件不可用时返回可读 unavailable 错误, 识别失败仍按错误处理
 * `优化` Node 脚本支持协商式异步启动, 长驻执行释放 Binder 线程, 终态回调完成后回传工作区, 兼容旧同步宿主
 * `优化` Node bridge `accessibility.dump` 的 JSON 节点在七个描述符字段之外携带 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 与 `longClickable` 状态标记; MCP Server 会话授权加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全局动作以支持插件的 `ui_press_key` 工具, 无障碍服务未运行时 `keys.*` 调用现在与 `accessibility` 模块一样以 `unavailable` 类别应答; 起止点相同的 `accessibility.swipe` (零长度) 按 `durationMs` 的按压派发, MCP 的 `ui_click` / `ui_long_click` 坐标形式依赖于此
+* `优化` 宿主与 runtime-kit 原生库支持 16 KB 对齐, 重编 jackpal JNI 库并使用 NDK r28.2 libc++, 附带来源记录与共享构建校验
+* `优化` APK 打包器在进度与结果中提示不兼容的原生库, 在本地构建输入元数据中记录对齐信息, 保持压缩打包
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

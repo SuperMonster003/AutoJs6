@@ -180,5 +180,6 @@
   "text_reference": "Voir aussi",
   "text_search": "Rechercher",
   "text_stands_for": "signifie",
-  "text_traditional_method_lowercase": "méthode traditionnelle"
+  "text_traditional_method_lowercase": "méthode traditionnelle",
+  "text_plugin_native_alignment": "Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

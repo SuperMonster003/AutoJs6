@@ -58,6 +58,8 @@ object PluginCenterItemSemantics {
                 && a.installableApkSha256 == b.installableApkSha256
                 && a.installableApkSizeBytes == b.installableApkSizeBytes
                 && a.supportedAbis == b.supportedAbis
+                && a.nativePageAlignment == b.nativePageAlignment
+                && a.updatableNativePageAlignment == b.updatableNativePageAlignment
     }
 
     private fun haveSamePresentationMetadata(a: PluginCenterItem, b: PluginCenterItem): Boolean {

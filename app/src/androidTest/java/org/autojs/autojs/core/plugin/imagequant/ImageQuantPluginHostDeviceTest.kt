@@ -21,6 +21,28 @@ class ImageQuantPluginHostDeviceTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
+    fun installedUnalignedPluginRaisesCatchableLoadError() {
+        assumeTrue("Legacy native fixture is opt-in", InstrumentationRegistry.getArguments()
+            .getString("autojs.nativeAlignment.legacyImageQuant").toBoolean())
+        assumeTrue(org.autojs.autojs.core.plugin.nativealign.NativePageSize.current() == 16384L)
+        assertTrue("Install the fixture containing the legacy 4 KB JNI library first", isPluginInstalled())
+        val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
+        try {
+            val error = try {
+                PngQuantBridge.quantize(bitmap, 80)
+                throw AssertionError("Legacy 4 KB JNI library unexpectedly loaded")
+            } catch (error: ImageQuantPluginLoadException) {
+                error
+            }
+            assertEquals(ImageQuantPluginLoadError.NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED, error.code)
+            assertTrue(error.message.orEmpty(), error.message.orEmpty().contains("4096"))
+            assertTrue(error.message.orEmpty(), error.message.orEmpty().contains("16384"))
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
+    @Test
     fun missingPluginRaisesCatchableLoadError() {
         assumeFalse("Image Quantization plugin is installed", isPluginInstalled())
 
@@ -54,7 +76,8 @@ class ImageQuantPluginHostDeviceTest {
         assertEquals(ImageQuantPluginContract.DEFAULT_PACKAGE_NAME, runtime.packageName)
         assertEquals(ImageQuantPluginContract.EXPECTED_LIBIMAGEQUANT_VERSION, runtime.libimagequantVersion)
         assertEquals(ImageQuantPluginContract.EXPECTED_LIBPNG_VERSION, runtime.libpngVersion)
-        assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, runtime.nativeNdkVersion)
+        assertTrue(runtime.nativeNdkVersion in setOf(ImageQuantPluginContract.EXPECTED_NATIVE_NDK_VERSION, "28.2.13676358"))
+        assertTrue((runtime.nativeMinLoadAlign ?: 0) >= org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         assertEquals(ImageQuantPluginContract.EXPECTED_NATIVE_STL, runtime.nativeStl)
         assertEquals(ImageQuantPluginContract.OPTIONS_API_VERSION, runtime.optionsApiVersion)
         assertTrue(runtime.optionsApiVersion >= ImageQuantPluginContract.COLOR_IO_API_VERSION)

@@ -41,6 +41,7 @@ object InstalledPluginMetadataStore {
         val engine: String?,
         val variant: String?,
         val engineId: String?,
+        val nativePageAlignment: Long? = null,
     ) {
         /**
          * Version-coupled fields (versionDate, requiresHostVersion, supportedAbis) are only
@@ -131,6 +132,7 @@ object InstalledPluginMetadataStore {
         versionDate = versionDate,
         requiresHostVersion = requiresHostVersion,
         supportedAbis = supportedAbis,
+        nativePageAlignment = nativePageAlignment,
         engine = engine,
         variant = variant,
         engineId = engineId,
@@ -150,6 +152,7 @@ object InstalledPluginMetadataStore {
             versionDate = versionDate,
             requiresHostVersion = requiresHostVersion,
             supportedAbis = supportedAbis?.filterNotNull(),
+            nativePageAlignment = PluginNativeAlignmentPolicy.parse(nativePageAlignment),
             engine = engine,
             variant = variant,
             engineId = engineId,
@@ -186,6 +189,7 @@ object InstalledPluginMetadataStore {
         val engine: String? = null,
         val variant: String? = null,
         val engineId: String? = null,
+        val nativePageAlignment: Long? = null,
     )
 
 }

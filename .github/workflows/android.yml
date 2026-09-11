@@ -40,18 +40,6 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Install CMake 3.10.2
-        run: |
-          set -euo pipefail
-          installer="$RUNNER_TEMP/cmake-3.10.2-Linux-x86_64.sh"
-          wget -q https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh -O "$installer"
-          chmod +x "$installer"
-          sudo "$installer" --skip-license --prefix=/usr/local >/dev/null
-          cmake --version
-
-      - name: Verify preinstalled Ninja
-        run: ninja --version
-
       - name: Test plugin hosts and build distributions
         run: |
           set -euo pipefail
@@ -101,6 +89,18 @@ jobs:
             --build-cache \
             --console=plain \
             --stacktrace
+
+      - name: Verify native ELF and APK ZIP alignment
+        run: python3 tools/16kb/verify_apks.py app/build/outputs/apk --report build/reports/native-alignment/sdk-verification.json
+
+      - name: Upload native alignment reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-alignment-android
+          path: |
+            app/build/reports/native-alignment/*.json
+            build/reports/native-alignment/*.json
 
       - name: Upload Gradle failure log
         if: failure() || cancelled()

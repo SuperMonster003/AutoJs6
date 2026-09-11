@@ -21,7 +21,9 @@ object PluginInstallCompatibilityPrompt {
         onContinue: () -> Unit,
     ) {
         if (!item.requiresDowngradeReinstall) {
-            PluginAbiCompatibilityPrompt.runBeforeDownload(context, item, onContinue)
+            PluginNativeAlignmentPrompt.runBeforeAction(context, item, download = true) {
+                PluginAbiCompatibilityPrompt.runBeforeDownload(context, item, onContinue)
+            }
             return
         }
 

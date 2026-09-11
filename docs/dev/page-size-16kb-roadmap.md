@@ -2,14 +2,14 @@
 
 本文是 AutoJs6 宿主, APK 打包链路, 共享构建插件, 官方插件索引以及同目录全部官方插件仓库的 16 KB 页大小适配可执行状态表.
 以 2026-09-11 的本地代码快照 (宿主 `master@3507afdda`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5279`) 与同日对 44 个同目录仓库的 APK / ELF 扫描结果为起点,
-每个条目均可独立 Check 并落地, 后续会话按阶段逐步推进.
+每个条目均可独立 Check 并落地. 第 3 节保留部署前基线, 当前部署与验收状态见第 5 节及 [2026-09-11 验证记录](evidence/page-size-16kb-20260911.md).
 
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 涉及多个仓库的条目按 "宿主先行, 被宿主进程加载的插件其次, 独立进程插件再次" 的次序推进.
 2. 条目完成后勾选 `[x]`, 并在条目后追加证据 (提交 hash / 测试类名 / 设备型号 / 扫描结果), 证据等级见附录 D.
 3. 每个插件仓库的条目落地时, 同时在该仓库的 changelog (`improvement` 分类) 与 README 中记录 "16 KB 页大小支持", 并按各仓库惯例递增版本号; 宿主条目落地时同步 `.changelog` (10 语言) 并重新生成 README.
-4. 附录 C 的 "待决事项" 在进入对应阶段前由维护者拍板, 拍板结果回填到 "固定决策".
+4. 附录 C 记录本次按推荐方案采用的执行默认值. 这些默认值不冒充维护者对 Q1-Q4 的明确回答; D1-D12 保持原有范围.
 5. 本 Roadmap 不涉及任何 JS 公开 API 变更, 因此无需同步文档项目与 d.ts 项目 (D12); 若日后某条目引入 API, 按 `AGENTS.md` 的关联项目流程处理.
 
 ---
@@ -62,11 +62,11 @@
 
 ---
 
-## 3. 现状诊断 (2026-09-11)
+## 3. 部署前基线 (2026-09-11, 保留用于对照)
 
 ### 3.1 平台与工具链事实
 
-以下事实取自 developer.android.com 的 "Support 16 KB page sizes" 页面 (2026-09-10 版) 与本机环境, 是各条目的直接依据:
+以下事实取自 [Android 官方 Support 16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) (2026-09-10 版, 2026-09-11 复核) 与本机环境, 是各条目的直接依据:
 
 | 事实 | 对本 Roadmap 的含义 |
 | --- | --- |
@@ -140,13 +140,13 @@
 
 | 阶段 | 主题 | 依赖 | 涉及仓库 | 状态 |
 | --- | --- | --- | --- | --- |
-| P0 | 基线, 共享门禁与工具链 | 无 | 宿主 (tools), Gradle-Platform-Versions | 进行中 (P0.1 / P0.3 完成 2026-09-11) |
-| P1 | 宿主与打包链路 | P0.2 (门禁), 其余可先行 | 宿主, APK-Builder-Template | 未开始 |
-| P2 | 被宿主进程加载或打包进用户 APK 的插件 | P0.2, P1.1 (libc++) | Image-Quantization, OpenCV, Paddle v3-v6, Rapid v3 / v6 | 未开始 |
-| P3 | 独立进程的自编原生插件 | P0.2 | ImGui, TypeScript-Engine, Lua, NodeJs, QuickJS, OpenCC, MediaInfo, Yolo-NCNN, Ace-Editor, Bun | 未开始 |
-| P4 | 第三方 / Maven 原生依赖插件与纯 JVM 插件 | P0.2 | Python, Three-Stone-AI, Archive-Manager, MLKit x2, 纯 JVM 18 个 | 未开始 |
-| P5 | 索引, 插件中心与文档 | P1.5, P2 | Official-Plugins-Index, 宿主 (plugin center), common-plugin-api | 未开始 |
-| P6 | 验收矩阵与关闭 | P1-P5 | 全部 | 未开始 |
+| P0 | 基线, 共享门禁与工具链 | 无 | 宿主 (tools), Gradle-Platform-Versions | 完成 (共享插件 1.8.0 已公开发布, CI 与独立消费验证通过) |
+| P1 | 宿主与打包链路 | P0.2 (门禁), 其余可先行 | 宿主, APK-Builder-Template | 代码与本地验收完成; 真机与远程 CI 待补 |
+| P2 | 被宿主进程加载或打包进用户 APK 的插件 | P0.2, P1.1 (libc++) | Image-Quantization, OpenCV, Paddle v3-v6, Rapid v3 / v6 | 修复与用户 APK 验证完成; 原生 16 KB arm64 待补 |
+| P3 | 独立进程的自编原生插件 | P0.2 | ImGui, TypeScript-Engine, Lua, NodeJs, QuickJS, OpenCC, MediaInfo, Yolo-NCNN, Ace-Editor, Bun | 构建门禁全部通过; 完整运行时矩阵待补 |
+| P4 | 第三方 / Maven 原生依赖插件与纯 JVM 插件 | P0.2 | Python, Three-Stone-AI, Archive-Manager, MLKit x2, 纯 JVM 18 个 | 完成; Python 扩展已在 16 KB 模拟器运行 |
+| P5 | 索引, 插件中心与文档 | P1.5, P2 | Official-Plugins-Index, 宿主 (plugin center), common-plugin-api | 代码与索引生成完成; 记录真实发布资产, 未发布新版插件 |
+| P6 | 验收矩阵与关闭 | P1-P5 | 全部 | 进行中; 静态复扫为 0, 全矩阵与发布后 CI 待补 |
 
 阶段内条目可并行; P2 / P3 / P4 之间无依赖, 只是优先级不同 (P2 的库会进入宿主进程或用户 APK, 影响面最大). P0.2 未完成前, 各仓库可先用 `tools/16kb/scan_alignment.py` 或本仓库已有门禁取得 `ELF` 级证据, 门禁落地后补 `ANDROID_BUILD` 证据.
 
@@ -165,17 +165,17 @@
 
 仓库: `AutoJs6-Gradle-Platform-Versions`. 设计草案见附录 A, 命名见待决 Q1.
 
-- [ ] 新增项目级插件 (与 `autojs6-platform-versions` 同仓库发布, 建议 id `io.github.supermonster003.autojs6-native-alignment`) 与任务 `verifyNativePageAlignment`: 输入为已装配变体的 APK 文件 (按文件扫描 `build/outputs/apk/**`, 或经反射读取 AGP `androidComponents` 的 APK 产物, 二选一见 Q1), 对 `strictAbis` (默认 `arm64-v8a`, `x86_64`) 内每个 `.so` 断言 `PT_LOAD` 最小对齐 >= `pageSize` (默认 16384); 条目未压缩时断言数据偏移 % 16384 == 0; 可选 RELRO 末端对齐检查; 输出 `build/reports/native-alignment/<variant>.json` 与失败摘要. (JVM: 插件仓库单元测试, 用合成的最小 ELF 头与 zip 夹具覆盖 ELF32 / ELF64 / 压缩 / 未压缩 / 缺失 APK 四类分支)
-- [ ] 扩展 DSL `nativeAlignment { strictAbis; pageSize; expectNoNativeLibraries; alsoScan(files) }`: `expectNoNativeLibraries = true` 供纯 JVM 插件断言 "没有任何 `.so`" (P4.5); `alsoScan` 供 Python 插件扫描 assets 内的 ELF 归档 (P4.1).
-- [ ] 自动挂接: 应用插件后 `assemble<Variant>` `finalizedBy` 对应的验证任务; 提供 `-Pautojs.nativeAlignment.skip=true` 的逃生口 (仅本地, CI 禁止).
-- [ ] 消费样例与文档: 插件仓库 README 增加用法; `sample/` 增加一个含 4 KB `.so` 的负样例工程, 断言任务失败. (JVM + ANDROID_BUILD: 样例工程 `assembleDebug` 失败于预期错误)
-- [ ] 发布新版本 (建议 1.8.0), 宿主与各插件仓库在各自条目中升级 `settings.gradle.kts` 的插件版本并应用门禁.
+- [x] 新增项目级插件 (与 `autojs6-platform-versions` 同仓库发布, 建议 id `io.github.supermonster003.autojs6-native-alignment`) 与任务 `verifyNativePageAlignment`: 输入为已装配变体的 APK 文件 (按文件扫描 `build/outputs/apk/**`, 或经反射读取 AGP `androidComponents` 的 APK 产物, 二选一见 Q1), 对 `strictAbis` (默认 `arm64-v8a`, `x86_64`) 内每个 `.so` 断言 `PT_LOAD` 最小对齐 >= `pageSize` (默认 16384); 条目未压缩时断言数据偏移 % 16384 == 0; 可选 RELRO 末端对齐检查; 输出 `build/reports/native-alignment/<variant>.json` 与失败摘要. (JVM: 插件仓库单元测试, 用合成的最小 ELF 头与 zip 夹具覆盖 ELF32 / ELF64 / 压缩 / 未压缩 / 缺失 APK 四类分支)
+- [x] 扩展 DSL `nativeAlignment { strictAbis; pageSize; expectNoNativeLibraries; alsoScan(files) }`: `expectNoNativeLibraries = true` 供纯 JVM 插件断言 "没有任何 `.so`" (P4.5); `alsoScan` 供 Python 插件扫描 assets 内的 ELF 归档 (P4.1).
+- [x] 自动挂接: 应用插件后 `assemble<Variant>` `finalizedBy` 对应的验证任务; 提供 `-Pautojs.nativeAlignment.skip=true` 的逃生口 (仅本地, CI 禁止).
+- [x] 消费样例与文档: 插件仓库 README 增加用法; `sample/` 增加一个含 4 KB `.so` 的负样例工程, 断言任务失败. (JVM + ANDROID_BUILD: 样例工程 `assembleDebug` 失败于预期错误)
+- [x] 发布新版本 (建议 1.8.0), 宿主与各插件仓库在各自条目中升级 `settings.gradle.kts` 的插件版本并应用门禁.
 
 ### P0.3 宿主工具与验证清单 (完成 2026-09-11)
 
 - [x] `tools/16kb/scan_alignment.py` 入库: 项目根目录与 SDK 路径可由 `AUTOJS6_PROJECTS_ROOT` / `ANDROID_HOME` 覆盖, 输出目录默认 `build/tmp-16kb/`; 用法写在脚本头部. (SOURCE)
-- [ ] `tools/16kb/verify_device.sh <serial> <package>`: 输出 `getconf PAGE_SIZE`, 目标包的 `dumpsys package` 中与页大小 / 兼容模式相关的行, 安装后首个启动的 logcat 中 `16 KB` / `page size` 关键行, 以及 Android 17 上开关 fatal 属性的子命令 (附录 E 的命令集脚本化). (SOURCE; DEVICE-16K: 在 ps16k 模拟器上跑通)
-- [ ] 创建 ps16k AVD 的命令与命名约定写入附录 E (`aj6-ps16k-36-x86_64`, `aj6-ps16k-37-x86_64`), 并在维护者机器上创建一次. (DEVICE-16K)
+- [x] `tools/16kb/verify_device.sh <serial> <package>`: 输出 `getconf PAGE_SIZE`, 目标包的 `dumpsys package` 中与页大小 / 兼容模式相关的行, 安装后首个启动的 logcat 中 `16 KB` / `page size` 关键行, 以及 Android 17 上开关 fatal 属性的子命令 (附录 E 的命令集脚本化). (SOURCE; DEVICE-16K: 在 ps16k 模拟器上跑通)
+- [x] 创建 ps16k AVD 的命令与命名约定写入附录 E (`aj6-ps16k-36-x86_64`, `aj6-ps16k-37-x86_64`), 并在维护者机器上创建一次. (DEVICE-16K)
 
 P0 验收: 共享门禁插件发布且负样例失败; `verify_device.sh` 在 ps16k 模拟器上输出 `16384`; 本文 3.x 节数据与脚本输出一致.
 
@@ -187,46 +187,46 @@ P0 验收: 共享门禁插件发布且负样例失败; `verify_device.sh` 在 ps
 
 ### P1.1 `libc++_shared.so` 替换
 
-- [ ] 用 NDK r28.2.13676358 `toolchains/llvm/prebuilt/<host>/sysroot/usr/lib/{aarch64,x86_64,arm,i686}-linux-android*/libc++_shared.so` 替换 `app/src/main/jniLibs/` 下 4 个文件 (64 位 `0x4000`; 32 位仍 `0x1000`, 按 D8 接受并在 provenance 中注明); 新增 `app/src/main/jniLibs/PROVENANCE.md` 或 `libc++_shared.provenance.json` (NDK 版本, 各 ABI sha256, 对齐值). (ELF: `scan_alignment.py`)
-- [ ] 确认 OpenCV 插件 (r26b 构建) 与升级后的 libc++ 兼容: 宿主加载 OpenCV 插件运行时后执行 `images.*` 冒烟 (libc++ 向后兼容, 预期无问题, 仍需证据). (DEVICE: 至少 1 台 4 KB 真机; DEVICE-16K: ps16k 模拟器)
-- [ ] changelog `improvement`: 宿主原生库 16 KB 页大小对齐 (与 P1.2 合并为一条).
+- [x] 用 NDK r28.2.13676358 `toolchains/llvm/prebuilt/<host>/sysroot/usr/lib/{aarch64,x86_64,arm,i686}-linux-android*/libc++_shared.so` 替换 `app/src/main/jniLibs/` 下 4 个文件 (64 位 `0x4000`; 32 位仍 `0x1000`, 按 D8 接受并在 provenance 中注明); 新增 `app/src/main/jniLibs/PROVENANCE.md` 或 `libc++_shared.provenance.json` (NDK 版本, 各 ABI sha256, 对齐值). (ELF: `scan_alignment.py`)
+- [x] 确认 OpenCV 插件 (r26b 构建) 与升级后的 libc++ 兼容: 宿主加载 OpenCV 插件运行时后执行 `images.*` 冒烟 (libc++ 向后兼容, 预期无问题, 仍需证据). (DEVICE: 至少 1 台 4 KB 真机; DEVICE-16K: ps16k 模拟器)
+- [x] changelog `improvement`: 宿主原生库 16 KB 页大小对齐 (与 P1.2 合并为一条).
 
 ### P1.2 jackpal 终端模拟器原生库重编 (D2)
 
-- [ ] 确认源码映射: 上游 jackpal/Android-Terminal-Emulator 中 `libtermexec` 模块的 JNI (`termExec.cpp` 等) 对应 `libjackpal-termexec2.so`, `term` 模块的 JNI (`fileCompat.cpp` / `common.cpp` 等) 对应 `libjackpal-androidterm5.so`; 以现有 AAR 内库的导出符号 (`Java_jackpal_androidterm_*`) 逐一核对, 并记录上游 commit. (DOCS: `libs/jackpal-androidterm-libtermexec-1_0/native-build/README.md`)
-- [ ] 新增可复现构建: `libs/jackpal-androidterm-libtermexec-1_0/native-build/{CMakeLists.txt 或 Android.mk, build.ps1 / build.sh, upstream.lock.json}`, NDK r28.2, `ANDROID_PLATFORM=android-24`, 4 ABI, 显式 `-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384`, 产物打成新 `libtermexec-release.aar` (Java 部分与原 AAR 完全一致, 仅替换 `jni/**`); 记录各 ABI sha256 与对齐. 宿主日常构建不引入 NDK (D2). (SOURCE; ELF)
-- [ ] 回归: 宿主终端模拟器 (抽屉 / 脚本 `$shell` 相关路径) 可创建 pty 并执行命令; inrt 用户 APK 内的终端功能同样可用. (DEVICE x2 含 1 台 ps16k)
-- [ ] changelog `improvement` (与 P1.1 合并).
+- [x] 确认源码映射: 上游 jackpal/Android-Terminal-Emulator 中 `libtermexec` 模块的 JNI (`process.cpp`) 对应 `libjackpal-termexec2.so`, `term` 模块的 JNI (`termExec.cpp` / `fileCompat.cpp` / `common.cpp`) 对应 `libjackpal-androidterm5.so`; 以现有 AAR 内库的导出符号 (`Java_jackpal_androidterm_*`) 逐一核对, 并记录上游 commit. (DOCS: `libs/jackpal-androidterm-libtermexec-1_0/native-build/README.md`)
+- [x] 新增可复现构建: `libs/jackpal-androidterm-libtermexec-1_0/native-build/{CMakeLists.txt 或 Android.mk, build.ps1 / build.sh, upstream.lock.json}`, NDK r28.2, `ANDROID_PLATFORM=android-24`, 4 ABI, 显式 `-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384`, 产物打成新 `libtermexec-release.aar` (Java 部分与原 AAR 完全一致, 仅替换 `jni/**`); 记录各 ABI sha256 与对齐. 宿主日常构建不引入 NDK (D2). (SOURCE; ELF)
+- [x] 回归: 宿主终端模拟器 (抽屉 / 脚本 `$shell` 相关路径) 可创建 pty 并执行命令; inrt 用户 APK 内的终端功能同样可用. (DEVICE x2 含 1 台 ps16k)
+- [x] changelog `improvement` (与 P1.1 合并).
 
 ### P1.3 宿主构建门禁与 Runtime Kit 清单
 
-- [ ] `app/build.gradle.kts` 应用 P0.2 的门禁插件, `strictAbis = [arm64-v8a, x86_64]`, 覆盖 `assembleApp*` / `assembleInrt*` 全部变体与 `generateRuntimeKit` 的输入模板 APK; 现有 "宿主 APK 不得携带 OpenCV JNI" 守卫 (`app/build.gradle.kts:88-129`) 保留. (ANDROID_BUILD)
-- [ ] Runtime Kit: `native-libs.json` 每个条目追加 `minLoadAlign` (十进制字节), `build-contract.json` 与 `runtime-kit.json` 的 `contract` 追加 `nativeLibPageAlignment: 16384` (兼容: 字段为新增, `schemaVersion` 不变; APK-Builder-Template 读取时缺省视为 4096). (SOURCE; ANDROID_BUILD: `generateRuntimeKit` 产物核对)
-- [ ] 在 P1.1 / P1.2 之前先挂门禁并观察到它对当前 4 KB 库报错, 作为门禁有效性的证据. (ANDROID_BUILD: 失败日志摘录)
+- [x] `app/build.gradle.kts` 应用 P0.2 的门禁插件, `strictAbis = [arm64-v8a, x86_64]`, 覆盖 `assembleApp*` / `assembleInrt*` 全部变体与 `generateRuntimeKit` 的输入模板 APK; 现有 "宿主 APK 不得携带 OpenCV JNI" 守卫 (`app/build.gradle.kts:88-129`) 保留. (ANDROID_BUILD)
+- [x] Runtime Kit: `native-libs.json` 每个条目追加 `minLoadAlign` (十进制字节), `build-contract.json` 与 `runtime-kit.json` 的 `contract` 追加 `nativeLibPageAlignment: 16384` (兼容: 字段为新增, `schemaVersion` 不变; APK-Builder-Template 读取时缺省视为 4096). (SOURCE; ANDROID_BUILD: `generateRuntimeKit` 产物核对)
+- [x] 在 P1.1 / P1.2 之前先挂门禁并观察到它对当前 4 KB 库报错, 作为门禁有效性的证据. (ANDROID_BUILD: 失败日志摘录)
 
 ### P1.4 宿主 CI
 
-- [ ] `.github/workflows/android.yml`: 门禁随 `assemble` 自动执行; 另加显式步骤对上传的 release arm64 / universal APK 执行 `zipalign -c -P 16 -v 4` (build-tools 35+) 与 `tools/16kb/scan_alignment.py` 单仓库模式, 输出作为工件; 移除已无用途的 "Install CMake 3.10.2" 步骤 (若确认没有任何模块依赖). (ANDROID_BUILD: CI 绿)
-- [ ] `.github/workflows/release-runtime-kit.yml`: 同上, 对 inrt 模板 APK 执行门禁后再发布. (ANDROID_BUILD)
+- [x] `.github/workflows/android.yml`: 门禁随 `assemble` 自动执行; 另加显式步骤对上传的 release arm64 / universal APK 执行 `zipalign -c -P 16 -v 4` (build-tools 35+) 与 `tools/16kb/scan_alignment.py` 单仓库模式, 输出作为工件; 移除已无用途的 "Install CMake 3.10.2" 步骤 (若确认没有任何模块依赖). (ANDROID_BUILD: 对应构建和 SDK 检查本地通过; 发布后远程 CI 待补)
+- [x] `.github/workflows/release-runtime-kit.yml`: 同上, 对 inrt 模板 APK 执行门禁后再发布. (ANDROID_BUILD)
 
 ### P1.5 宿主运行时保护 (D6)
 
-- [ ] 新增 Android-free 工具 `core/plugin/nativealign/{ElfLoadAlignment,NativePageSize}.kt`: 解析 ELF32 / ELF64 程序头得到最小 `PT_LOAD` 对齐 (只读前 64 KB); `NativePageSize.current()` 用 `Os.sysconf(OsConstants._SC_PAGESIZE)`; `isCompatible(minAlign, pageSize)`. (JVM: `ElfLoadAlignmentTest`, 夹具复用 P0.2 的合成 ELF)
-- [ ] `OpenCvPluginHost.stageCandidate` / `ensureLoaded` 与 `ImageQuantPluginHost.ensureLoaded` 在 `System.load` 前调用校验: 设备页大小 16 KB 且库对齐 < 16 KB 时抛新错误码 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED` (两个 `*PluginLoadError` 枚举各加一项), 文案说明 "插件 X 的原生库未按 16 KB 对齐, 请升级插件"; `LoadedRuntime` 记录 `nativeMinLoadAlign` 供诊断输出. 字符串 x 11 文件, 按 name 升序. (JVM; DEVICE-16K: 用 P2.1 之前的 Image-Quantization 旧版 APK 在 ps16k 上触发该错误)
-- [ ] APK 打包器: `RemoteApkBuildRequestPreparer` 收集宿主 / 插件 `.so` 时解析对齐, 任一 64 位库 < 16 KB 时在构建进度与结果中给出警告 (不阻断, 见待决 Q3), 并把最小对齐写入构建输入的元数据. (JVM: 现有 preparer 测试补用例)
-- [ ] changelog `feature` / `improvement` 各 1 条 (加载前校验; 打包警告).
+- [x] 新增 Android-free 工具 `core/plugin/nativealign/{ElfLoadAlignment,NativePageSize}.kt`: ELF 解析器不依赖 Android; 页大小读取封装在 Android 层. 解析 ELF32 / ELF64 程序头得到最小 `PT_LOAD` 对齐 (只读前 64 KB); `NativePageSize.current()` 用 `Os.sysconf(OsConstants._SC_PAGESIZE)`; `isCompatible(minAlign, pageSize)`. (JVM: `ElfLoadAlignmentTest`, 夹具复用 P0.2 的合成 ELF)
+- [x] `OpenCvPluginHost.stageCandidate` / `ensureLoaded` 与 `ImageQuantPluginHost.ensureLoaded` 在 `System.load` 前调用校验: 设备页大小 16 KB 且库对齐 < 16 KB 时抛新错误码 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED` (两个 `*PluginLoadError` 枚举各加一项), 文案说明 "插件 X 的原生库未按 16 KB 对齐, 请升级插件"; `LoadedRuntime` 记录 `nativeMinLoadAlign` 供诊断输出. 字符串 x 11 文件, 按 name 升序. (JVM: ELF 解析与错误策略测试; 新版插件在 ps16k 加载通过; API 37/fatal 中含真实旧版 4 KB JNI 的测试插件返回结构化错误, 见验证记录)
+- [x] APK 打包器: `RemoteApkBuildRequestPreparer` 收集宿主 / 插件 `.so` 时解析对齐, 任一 64 位库 < 16 KB 时在构建进度与结果中给出警告 (不阻断, 见待决 Q3), 并把最小对齐写入构建输入的元数据. (JVM: `NativeBuildAlignmentTest`; 元数据存于 Prepared 和本地输入 sidecar, 不向严格白名单 Binder 协议添加未知 extras)
+- [x] changelog `feature` / `improvement` 各 1 条 (加载前校验; 打包警告).
 
 ### P1.6 APK-Builder-Template 回归守卫
 
 仓库: `AutoJs6-Plugin-APK-Builder-Template`.
 
-- [ ] JVM 测试: 用一个含 `lib/arm64-v8a/x.so` 的模板夹具走 `RemoteApkLightweightBuilder`, 断言输出 APK 中 `.so` 条目为 DEFLATED 且 manifest `extractNativeLibs` 与模板一致 (D1 的硬约束); 断言不存在 STORED 的 `.so`. (JVM)
-- [ ] CI (`build-from-runtime-kit.yml`): 对 `runtime-kit/template.apk` 执行 ELF 对齐门禁 (复用 P0.2 插件的 `alsoScan` 或 `scan_alignment.py`), 对构建产物执行 `zipalign -c -P 16 -v 4` 仅作为信息 (压缩打包下不要求通过, 记录即可). (ANDROID_BUILD)
-- [ ] README 增加 "16 KB 页大小: 输出 APK 继承模板的压缩打包, 合规性取决于模板与所选插件的 ELF 对齐" 说明. (DOCS)
+- [x] JVM 测试: 用一个含 `lib/arm64-v8a/x.so` 的模板夹具走 `RemoteApkLightweightBuilder`, 断言输出 APK 中 `.so` 条目为 DEFLATED 且 manifest `extractNativeLibs` 与模板一致 (D1 的硬约束); 断言不存在 STORED 的 `.so`. (JVM)
+- [x] CI (`build-from-runtime-kit.yml`): 对 `runtime-kit/template.apk` 执行 ELF 对齐门禁 (复用 P0.2 插件的 `alsoScan` 或 `scan_alignment.py`), 对构建产物执行 `zipalign -c -P 16 -v 4` 仅作为信息 (压缩打包下不要求通过, 记录即可). (ANDROID_BUILD)
+- [x] README 增加 "16 KB 页大小: 输出 APK 继承模板的压缩打包, 合规性取决于模板与所选插件的 ELF 对齐" 说明. (DOCS)
 
 ### P1.7 文档与收尾
 
-- [ ] 宿主 `.changelog` (10 语言) 与 README 重新生成; 本文 P1 条目回填证据. (DOCS)
+- [x] 宿主 `.changelog` (10 语言) 与 README 重新生成; 本文 P1 条目回填证据. (DOCS)
 - [ ] 维护者 rebase `AutoJs6-QuickJS-Host` (D11, 记录即可).
 
 P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 (`ELF` 全 `0x4000` 或以上); ps16k 模拟器 (API 36) 上安装宿主无兼容模式警告, `verify_device.sh` 输出 `16384`, 冒烟脚本 (`sample/accessibility/smoke-legacy-api.js` + 终端 + OpenCV 插件 `images.*`) 通过; 原生 16 KB 真机同样通过; 用 P2.1 之前的 Image-Quantization APK 触发 P1.5 的结构化错误; CI 绿; changelog 已写.
@@ -239,35 +239,35 @@ P1 验收: 宿主 universal / arm64-v8a / x86_64 / inrt 模板 APK 通过门禁 
 
 ### P2.1 Image-Quantization
 
-- [ ] `app/build.gradle.kts:24` 的 NDK 26.1 -> 28.2 (同步 BuildConfig / manifest placeholder / `verification.yml` 的运行时指纹); `app/src/main/cpp/CMakeLists.txt` 补显式标志; 应用共享门禁. (ANDROID_BUILD; ELF)
-- [ ] 版本号递增, changelog `improvement`, README. (DOCS)
-- [ ] 宿主侧: ps16k 上 P1.5 的错误消失, `images.quantize` 类冒烟通过. (DEVICE-16K)
+- [x] `app/build.gradle.kts:24` 的 NDK 26.1 -> 28.2 (同步 BuildConfig / manifest placeholder / `verification.yml` 的运行时指纹); `app/src/main/cpp/CMakeLists.txt` 补显式标志; 应用共享门禁. (ANDROID_BUILD; ELF)
+- [x] 版本号递增, changelog `improvement`, README. (DOCS)
+- [x] 宿主侧: ps16k 上 P1.5 的错误消失, `images.quantize` 类冒烟通过. (DEVICE-16K)
 
 ### P2.2 OpenCV (核对)
 
-- [ ] 叠加共享门禁 (保留 `verifyElfLoadSegmentAlignment` 与 provenance 校验); 用 `scan_alignment.py` 复核当前发布 APK; 在 ps16k 与 16 KB 真机上通过宿主冒烟 (与 P1.1 合并执行). (ANDROID_BUILD; DEVICE-16K)
+- [x] 叠加共享门禁 (保留 `verifyElfLoadSegmentAlignment` 与 provenance 校验); 用 `scan_alignment.py` 复核当前发布 APK; 在 API 36/37 ps16k 与 4 KB arm64 真机上通过宿主冒烟 (与 P1.1 合并执行); 原生 16 KB arm64 验收仍待补. (ANDROID_BUILD; DEVICE-16K)
 
 ### P2.3 Paddle-OCR v3 (D7)
 
-- [ ] `version.properties` `PADDLE_OCR_NDK_VERSION` 21.1 -> 28.2; `libs/paddleocr/src/main/cpp/CMakeLists.txt` 补显式标志; 复核 C++ 源码无 `PAGE_SIZE` 假设. (ANDROID_BUILD)
-- [ ] 替换 `libs/paddleocr/PaddleLite/cxx/libs/{arm64-v8a,armeabi-v7a}/libc++_shared.so` 为 r28.2 副本 (64 位 `0x4000`); 为 Paddle-Lite 预编译库补 `PROVENANCE.md` (来源未知则如实记录 "来源未记录, 2026-09-11 实测 `0x10000`" + sha256). (ELF; DOCS)
-- [ ] 该仓库为未压缩打包, 门禁同时覆盖 zip 偏移; 应用共享门禁; 版本号递增, changelog, README. (ANDROID_BUILD; DOCS)
-- [ ] ps16k 模拟器 (arm64 库需真机) 上 OCR 冒烟. (DEVICE-16K)
+- [x] `version.properties` `PADDLE_OCR_NDK_VERSION` 21.1 -> 28.2; `libs/paddleocr/src/main/cpp/CMakeLists.txt` 补显式标志; 复核 C++ 源码无 `PAGE_SIZE` 假设. (ANDROID_BUILD)
+- [x] 替换 `libs/paddleocr/PaddleLite/cxx/libs/{arm64-v8a,armeabi-v7a}/libc++_shared.so` 为 r28.2 副本 (64 位 `0x4000`); 为 Paddle-Lite 预编译库补 `PROVENANCE.md` (来源未知则如实记录 "来源未记录, 2026-09-11 实测 `0x10000`" + sha256). (ELF; DOCS)
+- [x] 该仓库为未压缩打包, 门禁同时覆盖 zip 偏移; 应用共享门禁; 版本号递增, changelog, README. (ANDROID_BUILD; DOCS)
+- [ ] 原生 16 KB arm64 真机上 Paddle OCR 冒烟 (目前已完成 4 KB arm64 用户 APK 验证). (DEVICE-16K)
 
 ### P2.4 Rapid-OCR v3 与 v6 (D7)
 
-- [ ] `libs/rapidocr/build.gradle.kts`: 去掉 RapidAI/OnnxruntimeBuilder 7z 下载, 改为解包 Maven `com.microsoft.onnxruntime:onnxruntime-android:1.21.1` 的 AAR (`jni/<abi>/libonnxruntime.so` + `headers/`) 到 `onnxruntime-shared/`, `version.properties` 的 ORT 版本键随之更新; CMake 按 1.21 的 C++ API 修正编译错误 (预期改动小). (ANDROID_BUILD)
-- [ ] `RAPID_OCR_NDK_VERSION` 23.1 -> 28.2; CMake 补显式标志 (含 x86_64); 应用共享门禁. (ELF)
-- [ ] 模型与新 ORT 的推理结果一致性: 用仓库内既有样例图片对比 v3 / v6 识别结果. (DEVICE x1 4 KB + DEVICE-16K)
-- [ ] 版本号递增, changelog, README; 两个仓库分别提交. (DOCS)
+- [x] `libs/rapidocr/build.gradle.kts`: 去掉 RapidAI/OnnxruntimeBuilder 7z 下载, 改为解包 Maven `com.microsoft.onnxruntime:onnxruntime-android:1.21.1` 的 AAR (`jni/<abi>/libonnxruntime.so` + `headers/`) 到 `build/onnxruntime-native/`, `version.properties` 的 ORT 版本键随之更新; CMake 按 1.21 的 C++ API 修正编译错误 (预期改动小). (ANDROID_BUILD)
+- [x] `RAPID_OCR_NDK_VERSION` 23.1 -> 28.2; CMake 补显式标志 (含 x86_64); 应用共享门禁. (ELF)
+- [x] 模型与新 ORT 的推理结果一致性: 用仓库内既有样例图片对比 v3 / v6 识别结果. (DEVICE x1 4 KB + DEVICE-16K)
+- [x] 版本号递增, changelog, README; 两个仓库分别提交. (DOCS)
 
 ### P2.5 Paddle-OCR v4 / v5 / v6
 
-- [ ] 应用共享门禁 (64 位已合规); 可选: 用 r28.2 副本替换自带的 armeabi-v7a `libc++_shared.so` (仍为 4 KB, 仅统一来源); 记录 ORT 升级时必须复核对齐的约定. (ANDROID_BUILD; DOCS)
+- [x] 应用共享门禁 (64 位已合规); 可选: 用 r28.2 副本替换自带的 armeabi-v7a `libc++_shared.so` (仍为 4 KB, 仅统一来源); 记录 ORT 升级时必须复核对齐的约定. (ANDROID_BUILD; DOCS)
 
 ### P2.6 用户 APK 端到端
 
-- [ ] 宿主 (P1 后) + P2.1 ~ P2.5 的插件, 用 APK 打包器生成一个勾选 OpenCV / Image-Quantization / Paddle / Rapid 库的用户 APK, `scan_alignment.py` 单文件模式确认 64 位 `.so` 全部 >= 16 KB 且 `extractNativeLibs=true`; 安装到 ps16k 与 16 KB 真机运行 OCR / 图像脚本. (ELF; DEVICE-16K)
+- [x] 宿主 (P1 后) + P2.1 ~ P2.5 的插件, 用 APK 打包器生成一个勾选 OpenCV / Image-Quantization / Paddle / Rapid 库的用户 APK, `scan_alignment.py` 单文件模式确认 64 位 `.so` 全部 >= 16 KB 且 `extractNativeLibs=true`; 安装到 API 36/37 ps16k 与现有 4 KB arm64 真机运行 OCR / 图像脚本; 原生 16 KB arm64 部分仍待补. (ELF; DEVICE-16K)
 
 P2 验收: 各插件 APK 通过门禁; 宿主在 ps16k 上加载 OpenCV 与 Image-Quantization 无 P1.5 错误; OCR 插件在各自进程内于 ps16k / 16 KB 真机运行; P2.6 用户 APK 通过.
 
@@ -277,16 +277,16 @@ P2 验收: 各插件 APK 通过门禁; 宿主在 ps16k 上加载 OpenCV 与 Imag
 
 目标: 显式标志 + 门禁 + 版本记录, 消除对 NDK 默认值的隐式依赖; 修复 ImGui.
 
-- [ ] P3.1 ImGui: `version.properties` `IMGUI_NDK_VERSION` 26.1 -> 28.2; CMake 补显式标志; 应用共享门禁; `android.yml` 随 assemble 生效; 版本号, changelog, README. (ANDROID_BUILD; ELF; DEVICE-16K: ps16k 上 ImGui 示例渲染)
-- [ ] P3.2 TypeScript-Engine: CMake 补显式标志; `verifyR2FileDescriptorNativeBridgeInApk` (`app/build.gradle.kts:1428-1444`) 补 `PT_LOAD` 断言或改为应用共享门禁; 新建最小 `.github/workflows/build.yml` (assemble + 门禁); 版本号, changelog. (ANDROID_BUILD; ELF)
-- [ ] P3.3 Lua-Runtime: CMake 补显式标志; 叠加共享门禁 (PS1 门禁保留); 记录. (ANDROID_BUILD)
-- [ ] P3.4 NodeJs-Runtime: 桥 `app/src/main/cpp/CMakeLists.txt` 补显式标志; 统一 `tools/nodejs/runtime-build/container/Dockerfile` 的 `ANDROID_NDK_VERSION` 与 lock (28.2); `build.yml` 增加对齐门禁 (`restore-native` 之后); 叠加共享门禁; 版本号, changelog. (ANDROID_BUILD; ELF)
-- [ ] P3.5 QuickJS-Runtime: 叠加共享门禁 (可选); 其余保持, 作为参考实现记录. (ANDROID_BUILD)
-- [ ] P3.6 OpenCC: 叠加共享门禁; 保留 `zipalign -P 16` 与 `verify-16kb` 作业. (ANDROID_BUILD)
-- [ ] P3.7 MediaInfo: 叠加共享门禁; 保留 `verify_native_build.py`. (ANDROID_BUILD)
-- [ ] P3.8 Yolo-NCNN: CMake 补显式标志 (ncnn 为静态库, 最终对齐由本库链接决定); 应用共享门禁; 新建最小 CI 或至少本地门禁; 在 16 KB arm64 真机上补一份 `docs/evidence/r9-arm64-*-16k-*.json` 类收据. (ANDROID_BUILD; DEVICE-16K 真机)
-- [ ] P3.9 Ace-Editor: `tools/ace-lsp/build-luals-android.ps1` 的 luamake 链接参数补显式标志 (目前仅 x86 stub 有); `luals-build-lock.json` 每 ABI 增加 `minLoadAlign`; Gradle 门禁断言 lock 与实物一致 (LuaLS 为 exec 的可执行文件, 只需 ELF 对齐, 压缩打包为有意为之); 是否立即重编二进制见待决 Q4; 无 CI 则至少本地门禁. (ANDROID_BUILD; ELF)
-- [ ] P3.10 Bun-Runtime: 叠加共享门禁 (可选); x86_64 16 KB 的 JSC 崩溃保持记录于 B1 与该仓库 README. (ANDROID_BUILD)
+- [x] P3.1 ImGui: `version.properties` `IMGUI_NDK_VERSION` 26.1 -> 28.2; CMake 补显式标志; 应用共享门禁; `android.yml` 随 assemble 生效; 版本号, changelog, README. (ANDROID_BUILD; ELF; DEVICE-16K: ps16k 上 ImGui 示例渲染)
+- [x] P3.2 TypeScript-Engine: CMake 补显式标志; `verifyR2FileDescriptorNativeBridgeInApk` (`app/build.gradle.kts:1428-1444`) 补 `PT_LOAD` 断言或改为应用共享门禁; 新建最小 `.github/workflows/build.yml` (assemble + 门禁); 版本号, changelog. (ANDROID_BUILD; ELF)
+- [x] P3.3 Lua-Runtime: CMake 补显式标志; 叠加共享门禁 (PS1 门禁保留); 记录. (ANDROID_BUILD)
+- [x] P3.4 NodeJs-Runtime: 桥 `app/src/main/cpp/CMakeLists.txt` 补显式标志; 统一 `tools/nodejs/runtime-build/container/Dockerfile` 的 `ANDROID_NDK_VERSION` 与 lock (28.2); `build.yml` 增加对齐门禁 (`restore-native` 之后); 叠加共享门禁; 版本号, changelog. (ANDROID_BUILD; ELF)
+- [x] P3.5 QuickJS-Runtime: 叠加共享门禁 (可选); 其余保持, 作为参考实现记录. (ANDROID_BUILD)
+- [x] P3.6 OpenCC: 叠加共享门禁; 保留 `zipalign -P 16` 与 `verify-16kb` 作业. (ANDROID_BUILD)
+- [x] P3.7 MediaInfo: 叠加共享门禁; 保留 `verify_native_build.py`. (ANDROID_BUILD)
+- [x] P3.8 Yolo-NCNN: CMake 补显式标志 (ncnn 为静态库, 最终对齐由本库链接决定); 应用共享门禁; 新建最小 CI 或至少本地门禁; 本地构建与门禁已通过; 16 KB arm64 真机的 `docs/evidence/r9-arm64-*-16k-*.json` 类收据仍待补. (ANDROID_BUILD; DEVICE-16K 真机)
+- [x] P3.9 Ace-Editor: `tools/ace-lsp/build-luals-android.ps1` 的 luamake 链接参数补显式标志 (目前仅 x86 stub 有); `luals-build-lock.json` 每 ABI 增加 `minLoadAlign`; Gradle 门禁断言 lock 与实物一致 (LuaLS 为 exec 的可执行文件, 只需 ELF 对齐, 压缩打包为有意为之); 是否立即重编二进制见待决 Q4; 无 CI 则至少本地门禁. (ANDROID_BUILD; ELF)
+- [x] P3.10 Bun-Runtime: 叠加共享门禁 (可选); x86_64 16 KB 的 JSC 崩溃保持记录于 B1 与该仓库 README. (ANDROID_BUILD)
 
 P3 验收: 各插件通过门禁; ps16k (x86_64) 上各插件冒烟通过 (Bun x86_64 除外, 按 B1 记录); Node / Lua / QuickJS / Yolo 在 16 KB arm64 真机上通过.
 
@@ -296,11 +296,11 @@ P3 验收: 各插件通过门禁; ps16k (x86_64) 上各插件冒烟通过 (Bun x
 
 目标: 对无法自编的依赖建立 "升级即复核" 的自动门禁; 补扫 lib/ 之外的 ELF.
 
-- [ ] P4.1 Python-Runtime: 应用共享门禁 (`lib/` 8 个已 `0x4000`, 未压缩打包由 AGP 处理 zip 对齐); 用 `alsoScan` 或 `tools/verify-r2-static.ps1` 新步骤扫描 Chaquopy 经 assets 交付的扩展模块归档 (`target-3.13.9-0-<abi>.zip` / stdlib `.imy`, 运行时解压后 `dlopen`, 不在 `lib/` 内); wheel 的 16 KiB LOAD 门禁保持; 新建最小 CI. (ANDROID_BUILD; ELF; DEVICE-16K: ps16k 上 `import ssl, sqlite3, ctypes` 冒烟)
-- [ ] P4.2 Three-Stone-AI: 应用共享门禁 (`litertlm-android:0.15.0` 实测 `0x4000`, 未压缩打包); 记录 "升级 LiteRT-LM 必须复核" 约定. (ANDROID_BUILD)
-- [ ] P4.3 Archive-Manager: 应用共享门禁 (`zstd-jni:1.5.7-15@aar` 实测 `0x4000`). (ANDROID_BUILD)
-- [ ] P4.4 MLKit-Barcode / MLKit-OCR: 应用共享门禁 (64 位 `0x4000`); 版本目录注释标明复核约定. (ANDROID_BUILD)
-- [ ] P4.5 纯 JVM 18 个仓库: 随各自下次发布应用共享门禁的 `expectNoNativeLibraries = true` 模式, 不单独发版; 本条目在全部完成时勾选, 中途在会话记录中列出已完成的仓库. (ANDROID_BUILD)
+- [x] P4.1 Python-Runtime: 应用共享门禁 (`lib/` 8 个已 `0x4000`, 未压缩打包由 AGP 处理 zip 对齐); 用 `alsoScan` 或 `tools/verify-r2-static.ps1` 新步骤扫描 Chaquopy 经 assets 交付的扩展模块归档 (`target-3.13.9-0-<abi>.zip` / stdlib `.imy`, 运行时解压后 `dlopen`, 不在 `lib/` 内); wheel 的 16 KiB LOAD 门禁保持; 新建最小 CI. (ANDROID_BUILD; ELF; DEVICE-16K: ps16k 上 `import ssl, sqlite3, ctypes` 冒烟)
+- [x] P4.2 Three-Stone-AI: 应用共享门禁 (`litertlm-android:0.15.0` 实测 `0x4000`, 未压缩打包); 记录 "升级 LiteRT-LM 必须复核" 约定. (ANDROID_BUILD)
+- [x] P4.3 Archive-Manager: 应用共享门禁 (`zstd-jni:1.5.7-15@aar` 实测 `0x4000`). (ANDROID_BUILD)
+- [x] P4.4 MLKit-Barcode / MLKit-OCR: 应用共享门禁 (64 位 `0x4000`); 版本目录注释标明复核约定. (ANDROID_BUILD)
+- [x] P4.5 纯 JVM 18 个仓库: 随各自下次发布应用共享门禁的 `expectNoNativeLibraries = true` 模式, 不单独发版; 本条目在全部完成时勾选, 中途在会话记录中列出已完成的仓库. (ANDROID_BUILD)
 
 P4 验收: 上述仓库门禁报告存在且通过; Python 的 assets 内 ELF 扫描结果记录 (若发现 4 KB 扩展模块, 转为 Chaquopy 升级或剔除该模块的待决事项).
 
@@ -308,10 +308,10 @@ P4 验收: 上述仓库门禁报告存在且通过; Python 的 assets 内 ELF �
 
 ## P5: 索引, 插件中心与文档 (D6)
 
-- [ ] P5.1 插件契约: `plugin-api/common-plugin-api` 新增 meta-data 键常量 `org.autojs.plugin.contract.NATIVE_PAGE_ALIGNMENT` (值为十进制字节, 如 `16384`; 无原生库的插件不声明或声明 `0`); 各含原生库的插件在 manifest 声明, 共享门禁校验声明值 <= 实测最小对齐, 不一致即失败. (SOURCE; JVM)
-- [ ] P5.2 官方索引: `AutoJs6-Official-Plugins-Index/tools/generate_official_plugin_index.py` 为每个 release 计算 `nativePageAlignment` (优先从发布资产 APK 实测 ELF, 结果按 sha 缓存; 无法下载时回退到 meta-data 声明), 条目级别取各 release 中最新版本的值; 字段名与语义见待决 Q2; `test_generate_official_plugin_index.py` 补用例; 重新生成 `plugins.official.generated.json`. (JVM: 生成器测试; DOCS)
-- [ ] P5.3 宿主插件中心: `core/plugin/center/{PluginIndexEntry,PluginCenterItem,InstalledPluginMetadataStore}.kt` 解析索引字段与已安装插件的 meta-data; 设备页大小为 16 KB 时, 对 `nativePageAlignment < 16384` 的版本显示标记并在安装 / 选择前警告 (文案 x 11); `PluginCenterItemAdapter` 展示; P1.5 与本条共用 `NativePageSize`. changelog `feature`. (JVM: semantics 测试; DEVICE-16K: ps16k 上用一个故意保留 4 KB 的旧插件 APK 验证标记)
-- [ ] P5.4 文档: 宿主 README 的插件章节说明 16 KB 标记含义; 各插件仓库 README / changelog 在其条目落地时已写 (核对清单); 本文各阶段回填. (DOCS)
+- [x] P5.1 插件契约: `plugin-api/common-plugin-api` 新增 meta-data 键常量 `org.autojs.plugin.contract.NATIVE_PAGE_ALIGNMENT` (值为十进制字节, 如 `16384`; 无原生库的插件不声明或声明 `0`); 各含原生库的插件在 manifest 声明, 共享门禁校验声明值 <= 实测最小对齐, 不一致即失败. (SOURCE; JVM)
+- [x] P5.2 官方索引: `AutoJs6-Official-Plugins-Index/tools/generate_official_plugin_index.py` 为每个 release 计算 `nativePageAlignment` (优先从发布资产 APK 实测 ELF, 结果按 sha 缓存; 无法下载时回退到 meta-data 声明), 条目级别取各 release 中最新版本的值; 字段名与语义见待决 Q2; `test_generate_official_plugin_index.py` 补用例; 重新生成 `plugins.official.generated.json`. (JVM: 生成器测试; DOCS)
+- [x] P5.3 宿主插件中心: `core/plugin/center/{PluginIndexEntry,PluginCenterItem,InstalledPluginMetadataStore}.kt` 解析索引字段与已安装插件的 meta-data; 设备页大小为 16 KB 时, 对 `nativePageAlignment < 16384` 的版本显示标记并在安装 / 选择前警告 (文案 x 11); `PluginCenterItemAdapter` 展示; P1.5 与本条共用 `NativePageSize`. changelog `feature`. (JVM: semantics 测试; DEVICE-16K: ps16k 上用一个故意保留 4 KB 的旧插件 APK 验证标记)
+- [x] P5.4 文档: 宿主 README 的插件章节说明 16 KB 标记含义; 各插件仓库 README / changelog 在其条目落地时已写 (核对清单); 本文各阶段回填. (DOCS)
 
 P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标记在 ps16k 模拟器上可见; 宿主 changelog 已写.
 
@@ -320,12 +320,32 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 ## P6: 验收矩阵与关闭
 
 - [ ] P6.1 矩阵: ps16k x86_64 (API 36 与 37) 上安装宿主 + 全部 x86_64 插件, 关闭兼容模式 (API 37 用 fatal 属性) 后逐一运行冒烟; 原生 16 KB arm64 真机上安装宿主 + 全部 arm64 插件同样执行; 结果表回填本节 (设备 / API / 页大小 / 结论). (DEVICE-16K)
-- [ ] P6.2 回归守卫: 宿主 CI, 各插件 CI 或本地门禁均绿; 索引重新生成; `scan_alignment.py` 全量复扫为 0 个 64 位不合规项. (ANDROID_BUILD; ELF)
+- [x] P6.2 回归守卫: 宿主与 42 个插件的本地构建及门禁通过 (宿主与插件修改后的远程 CI 尚未触发); 索引重新生成; `scan_alignment.py` 全量复扫为 0 个 64 位不合规项. (ANDROID_BUILD; ELF)
 - [ ] P6.3 关闭: 更新本文状态与会话记录, 更新自动记忆索引; 附录 B 的 backlog 交由维护者决定是否另立 Roadmap.
 
 ---
 
-## 附录 A: 共享门禁插件设计草案 (P0.2)
+### 当前验证矩阵 (2026-09-11)
+
+| 环境 | 页大小 / 兼容模式 | 已通过的范围 |
+| --- | --- | --- |
+| API 36 x86_64 ps16k, emulator-5580 | 16384 / linker=false, PM compat disabled=true | 宿主 libc++ / jackpal PTY, OpenCV, Image Quantization, Python ssl/sqlite3/ctypes, 插件中心标记, Rapid v3 用户 APK |
+| API 37 x86_64 ps16k, emulator-5582 | 16384 / linker=fatal, PM compat disabled=true | 上述宿主与 Python 功能; Rapid v3/v6 用户 APK 与可选 OpenCV 依赖; ImGui 渲染, QuickJS / Node / Lua 执行, MediaInfo 读取, TypeScript 编译; 旧图像量化库负例 |
+| Xiaomi 23046RP50C, API 35 arm64 | 4096 | 上述宿主与 Python 功能; 同一个用户 APK 顺序运行 Paddle v3 与 Rapid v3/v6, 均识别出 "测试" |
+| 原生 16 KB arm64 真机 | 未连接 | 待维护者提供设备, 不以 4 KB 真机或 x86_64 模拟器代替 |
+
+- [ ] 原生 16 KB arm64 全部运行时验收, 含 Paddle / Yolo / OpenCV / Image Quantization / Node / Lua / QuickJS.
+- [ ] P6.1 的全部 x86_64 插件功能冒烟矩阵; Bun 的 JSC 已知问题仍按 B1 单独跟踪.
+- [x] Image Quantization 负向设备验证: 在当前测试 APK 中装入保留的真实 NDK r26b / 4 KB JNI, API 37/fatal 的公开量化调用返回 `NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED`, 宿主不崩溃. 该夹具不是完整未修改的历史发布 APK; 验证后已恢复新版插件. (DEVICE-16K: `installedUnalignedPluginRaisesCatchableLoadError`)
+- [ ] 宿主与插件后续发布后, 回填远程 CI 链接并重新实测官方索引的发布资产.
+
+各已勾选条目的构建 / ELF / 单元测试证据统一存于
+[evidence/page-size-16kb-20260911.md](evidence/page-size-16kb-20260911.md) 与对应 JSON.
+第 3 节的旧库 / 旧 NDK 数值是部署前快照, 不代表当前产物.
+
+---
+
+## 附录 A: 共享门禁插件实现 (P0.2)
 
 - 输入: 变体的 APK 文件集合 (拆分 + universal); AAR (库模块) 可选; `alsoScan` 的任意 zip / 目录.
 - 检查项 (每个 `lib/<abi>/*.so`, `abi in strictAbis`):
@@ -343,29 +363,29 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 - B1 Bun x86_64 在 16 KB 设备上 JSC 中止 (上游 WebKit `CeilingOnPageSize`): 需以大页 JIT 配置重编 Bun; arm64 已通过. 由 Bun 插件仓库自身 ROADMAP 跟踪.
 - B2 现代打包评估 (D1 的替代路径): 宿主 / inrt 改 `useLegacyPackaging=false` 的收益 (安装体积 / 启动) 与代价 (APK-Builder-Template 改为 STORED + 16 KB 对齐写入, `extractNativeLibs=false` 改写, 旧模板兼容); 仅当宿主原生库体量显著增长时重新评估.
 - B3 在 `device` 模块暴露 `pageSize` (需同步文档 / d.ts / LSP 声明, 触发 `AGENTS.md` 关联项目流程).
-- B4 宿主 CI 清理: "Install CMake 3.10.2" 与 Ninja 步骤的用途核实 (P1.4 顺带).
+- B4 已完成: 宿主 CI 的无用 CMake 3.10.2 / Ninja 安装步骤已移除, 构建本地通过.
 - B5 32 位第三方库 (MLKit / ORT / Chaquopy / NDK libc++) 的对齐, 仅当上游提供时跟进.
 - B6 `AutoJs6-Plugin-APK-Inspector` 增加 "APK 是否 16 KB 就绪" 的检查视图 (其 `test-fixtures/bundletool-selection` 可加 16 KB 夹具).
 
-## 附录 C: 待决事项
+## 附录 C: 本次采用的执行默认值
 
-进入对应阶段前由维护者拍板, 结果回填第 1 节. 当前待决: Q1 (P0.2 前), Q2 (P5.2 前), Q3 (P1.5 前), Q4 (P3.9 前).
+Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐方案继续实现, 并将具体结果留供维护者复核, 不将其记作已确认的 D 决策.
 
 ### Q1 (P0.2): 门禁插件的命名与 APK 定位方式
 
-建议: 插件 id `io.github.supermonster003.autojs6-native-alignment`, 任务 `verifyNativePageAlignment`, 扩展 `nativeAlignment {}`; APK 定位采用附录 A 的方案 (a) 文件扫描 (零 AGP 类型依赖, 与平台插件既有原则一致), 变体名从任务名 `assemble<Variant>` 推导; 若某仓库改了 `outputFileName`, 用 `nativeAlignment.apkFiles(...)` 显式指定.
+已采用: 插件 id `io.github.supermonster003.autojs6-native-alignment`, 任务 `verifyNativePageAlignment`, 扩展 `nativeAlignment {}`; APK 定位采用附录 A 的方案 (a) 文件扫描 (零 AGP 类型依赖, 与平台插件既有原则一致), 变体名从任务名 `assemble<Variant>` 推导, 并以 `output-metadata.json` 验证全部重命名 / split APK 存在; 若某仓库改了 `outputFileName`, 用 `nativeAlignment.apkFiles(...)` 显式指定.
 
 ### Q2 (P5.2): 索引字段的名称与语义
 
-建议: release 级 `nativePageAlignment` (整数字节: `16384` / `4096`; 无原生库为 `0`), 条目级同名字段取最新 release 的值; 另加 `nativePageAlignmentSource` (`measured` / `declared`) 便于区分实测与声明. 不引入布尔 `supports16Kb`, 避免日后页大小再变时字段失效.
+已采用: release 级 `nativePageAlignment` (整数字节: `16384` / `4096`; 无原生库为 `0`), 条目级同名字段取最新 release 的值; 另加 `nativePageAlignmentSource` (`measured` / `declared`) 便于区分实测与声明. 不引入布尔 `supports16Kb`, 避免日后页大小再变时字段失效.
 
 ### Q3 (P1.5): APK 打包器遇到 4 KB 插件库时是警告还是阻断
 
-建议: 警告 (进度与结果中列出具体库与对齐值), 不阻断. 用户生成的 APK 可能面向 4 KB 设备; 阻断会让 P2 完成前的所有含 OCR / 图像库的打包失败. P2 完成后可评估升级为 "16 KB 设备上默认阻断, 设置项可放宽".
+已采用: 警告 (进度与结果中列出具体库与对齐值), 不阻断. 用户生成的 APK 可能面向 4 KB 设备; 阻断会让 P2 完成前的所有含 OCR / 图像库的打包失败. P2 完成后可评估升级为 "16 KB 设备上默认阻断, 设置项可放宽".
 
 ### Q4 (P3.9): Ace-Editor 的 LuaLS 二进制是否立即重编
 
-建议: 不立即重编 (64 位实物已 `0x4000`), 只补构建脚本的显式标志与 lock 的 `minLoadAlign` 断言, 待下次 LuaLS 升级时自然生效; 若维护者希望 armeabi-v7a 也对齐 (D8 不要求), 则随下次升级一并重编.
+已采用: 不立即重编 (64 位实物已 `0x4000`), 只补构建脚本的显式标志与 lock 的 `minLoadAlign` 断言, 待下次 LuaLS 升级时自然生效; 若维护者希望 armeabi-v7a 也对齐 (D8 不要求), 则随下次升级一并重编.
 
 ## 附录 D: 证据等级与验收方式
 
@@ -400,9 +420,22 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 
 ## 会话记录
 
-### 2026-09-11
+### 2026-09-11 初稿
 
 - 完成: 宿主与 43 个同目录仓库的 APK / ELF 基线扫描 (脚本 `tools/16kb/scan_alignment.py`); 三组只读审计 (运行时插件, 视觉 / OCR 插件, 杂项 + APK-Builder-Template 打包路径 + 纯 JVM 插件); 官方文档事实核对; 固定决策 D1-D8 (维护者以两轮选择题拍板, 全部采用推荐项) 与派生约定 D9-D12; 本 Roadmap 初稿.
 - 关键发现: 宿主自身 3 个 `.so` 全为 4 KB (libc++ 与 jackpal), 且 jackpal 会随打包器进入每个用户 APK; 宿主把 OpenCV / Image-Quantization 的 `.so` 加载进自身进程, 后者当前 4 KB; Rapid v3/v6 / Paddle v3 / ImGui / Image-Quantization 为 64 位不合规; OpenCV / MediaInfo / OpenCC / QuickJS / Lua / Node / Bun 已有各自门禁并合规; 32 位库普遍 4 KB 但不在验收范围 (D8); APK-Builder-Template 以 DEFLATED 写入且不改 `extractNativeLibs`, 因此 D1 下用户 APK 只需 ELF 对齐.
 - 未做: P0.2 门禁插件, P0.3 的 `verify_device.sh` 与 AVD 创建, 以及 P1 起全部代码改动.
 - 下次会话建议起点: P0.2 (共享门禁插件, 拍板 Q1) 与 P1.1 / P1.2 (宿主 libc++ 与 jackpal) 可并行; P1.3 先挂门禁观察其对当前 4 KB 库报错.
+
+### 2026-09-11 部署
+
+- 共享门禁 `io.github.supermonster003.autojs6-native-alignment:1.8.0` 已发布至 Plugin Portal / Maven Central. 提交 `8d32a51`, CI SDK 路径修正 `8863240`; 发布工作流与负向 Android 样例 CI 均通过, 无 composite 的独立消费工程验证通过.
+- 宿主及 42 个插件接入门禁; 23 个原生插件, 18 个纯 JVM 插件, 1 个携带 Runtime Kit 的打包模板插件. APK Builder 声明 16384 并递归扫描 assets 内模板; Python 递归扫描 Chaquopy ZIP / IMY 扩展模块. 不设置 pageSizeCompat.
+- 宿主替换 NDK r28.2 libc++, 重编 jackpal 并保留 Java / 资源与 JNI 导出兼容. 新增加载前保护, 打包警告 / sidecar, Runtime Kit 对齐清单, 插件中心兼容性标记及安装 / 启用提醒.
+- Paddle v3 的旧 Paddle-Lite `.dynsym sh_info` 不符合新 LLD 的要求; 已仅修正节头索引, PT_LOAD 内容保持逐字节不变, 原始与修正后的 SHA 及脚本入库. 四个 Paddle 仓库的预编译 OpenCV AAR 内未打包的旧 x86_64 库也已替换, 避免以后扩 ABI 时回归.
+- Rapid v3/v6 使用 Maven ORT 1.21.1, NDK r28.2, OpenCV 4.8.0 共享 TBB 运行库. 实机发现 Paddle 后加载 Rapid 会因两份静态 OpenMP 中止; 已移除 Rapid 的静态 OpenMP, 并通过两引擎同进程识别. 新 Rapid 要求宿主 build >= 5279, 打包器可携带可选 OpenCV 依赖, 旧 Rapid APK 仍可打包.
+- OpenCV 已验证的 r26b 预编译运行库按 P2.2 保留其真实 provenance, 本次没有伪造 NDK 来源或重编它; r28.2 下限应用于本次重编的库. Ace 的已对齐 LuaLS 二进制按 Q4 默认值保留, 显式标志在下次重编时生效.
+- 所有 42 个插件本地构建和统一门禁通过, 全量扫描 64 位不合规数为 0. 5 种 ABI 的 Runtime Kit 均通过 ELF 与 SDK zipalign 复核. 多语言 changelog / README 已生成, 各仓库本次变更独立提交; 会话开始前已有变更保留在工作区.
+- 官方索引按真实公开 APK 测量, 不用本地未发布版本覆盖旧发布版本的 4096 / unknown 值. 真实 16 KB arm64 设备缺失, P6 未关闭; QuickJS-Host 仍按 D11 由维护者 rebase.
+
+- 补验: ImGui 渲染, QuickJS 语言执行, Node 宿主执行, MediaInfo 读取, TypeScript 编译及 Lua 会话在 API 37/fatal 下通过. 真实旧版 4 KB Image Quantization JNI 夹具被宿主结构化拦截. 完整收据和 42 个插件提交映射见 [部署证据](evidence/page-size-16kb-20260911.md).

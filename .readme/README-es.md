@@ -98,6 +98,8 @@ En la tabla, Auto.js Pro 7/8/9 son versiones pagas, mientras que las demás son 
 * Soporte para su uso como un complemento de Tasker
 * Soporte para la integración con VSCode para desarrollo de escritorio (requiere el [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com))
 
+El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)
+
 ******
 
 ### Entorno
@@ -339,6 +341,9 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Node recorder admite grabación AAC con permiso de micrófono, notificación, límite de duración y limpieza al terminar el script; ui.overlay admite cambios de propiedades, arrastre y envío de eventos
 * `Nuevo` Los scripts Node pueden ejecutarse en dos procesos independientes con una cola FIFO compartida y cancelación y entrada dirigidas a cada ejecución
 * `Nuevo` Las consultas MediaInfo admiten streamNumber desde 0, countGet e infoKind para unidades, descripciones y nombres legibles; Rhino y Node mantienen TEXT del primer flujo por defecto y negocian las capacidades del plugin
+* `Nuevo` Comprobacion de la alineacion ELF antes de cargar complementos OpenCV e Image Quantization, con un error claro si el tamano de pagina no es compatible
+* `Nuevo` El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB
+* `Corrección` Un cierre inesperado al usar Paddle OCR y Rapid OCR consecutivamente en la misma aplicación empaquetada
 * `Corrección` Las rutas de MediaInfo e imágenes admiten rutas absolutas, directorios superiores y nombres válidos; las grabaciones siguen las mismas reglas de acceso de Android con el anfitrión actualizado
 * `Corrección` La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`
 * `Corrección` La información de descarga de Android Studio dejó de escribirse automáticamente en los datos comunes del README tras la migración de los scrapers
@@ -589,6 +594,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Los ejemplos OCR solicitan el consentimiento de Android y reconocen imágenes reales; los plugins OCR o de códigos de barras no disponibles devuelven un error unavailable legible, y los fallos de reconocimiento siguen siendo errores
 * `Mejora` Los scripts de Node admiten inicio asíncrono negociado, liberan los hilos Binder durante ejecuciones prolongadas y devuelven los cambios del espacio de trabajo al finalizar, con compatibilidad para hosts síncronos anteriores
 * `Mejora` Los nodos JSON de `accessibility.dump` del Node bridge llevan los indicadores de estado `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` y `longClickable` junto a los siete campos del descriptor; la concesion de sesion de MCP Server incluye las acciones globales `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` para la herramienta `ui_press_key` del plugin, y una llamada `keys.*` sin el servicio de accesibilidad ahora responde con la categoria `unavailable` como el modulo `accessibility`; un `accessibility.swipe` de longitud cero (puntos inicial y final iguales) se envia como una pulsacion de `durationMs`, de la que dependen las formas por coordenadas de `ui_click` / `ui_long_click` de MCP
+* `Mejora` Alineacion de 16 KB para bibliotecas nativas del anfitrion y runtime-kit, con jackpal JNI recompilado, libc++ de NDK r28.2, registros de procedencia y verificacion de compilacion compartida
+* `Mejora` El generador APK informa sobre bibliotecas nativas incompatibles durante la compilacion y en los resultados, registra su alineacion en metadatos locales y mantiene el empaquetado comprimido
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

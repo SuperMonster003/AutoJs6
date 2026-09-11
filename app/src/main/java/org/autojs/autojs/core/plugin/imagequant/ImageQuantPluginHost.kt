@@ -10,6 +10,9 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
 import org.autojs.autojs.AbstractAutoJs
+import org.autojs.autojs.core.plugin.nativealign.NativeLibraryAlignment
+import org.autojs.autojs.core.plugin.nativealign.NativePageAlignmentException
+import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
@@ -78,6 +81,7 @@ object ImageQuantPluginHost {
         val abi: String? = null,
         val nativeLibraryPath: String? = null,
         val nativeNdkVersion: String? = null,
+        val nativeMinLoadAlign: Long? = null,
         val nativeStl: String? = null,
     )
 
@@ -209,7 +213,7 @@ object ImageQuantPluginHost {
                 return runtime
             }
             if (AbstractAutoJs.isInrt) {
-                tryLoadBundledRuntime()?.let { bundled ->
+                tryLoadBundledRuntime(context)?.let { bundled ->
                     loadedRuntime = bundled
                     return bundled
                 }
@@ -222,6 +226,7 @@ object ImageQuantPluginHost {
             val candidate = selectCandidate(context)
             val staged = stageCandidate(context, candidate)
 
+            val nativeMinLoadAlign = validateNativeAlignment(context, staged.file, candidate.serviceInfo.packageName)
             try {
                 System.load(staged.file.absolutePath)
             } catch (error: LinkageError) {
@@ -249,6 +254,7 @@ object ImageQuantPluginHost {
                 packageVersionCode = candidate.packageVersionCode,
                 abi = staged.abi,
                 nativeLibraryPath = staged.file.absolutePath,
+                nativeMinLoadAlign = nativeMinLoadAlign,
                 nativeNdkVersion = candidate.nativeNdkVersion,
                 nativeStl = candidate.nativeStl,
             ).also { runtime ->
@@ -318,7 +324,9 @@ object ImageQuantPluginHost {
         return runtime
     }
 
-    private fun tryLoadBundledRuntime(): LoadedRuntime? {
+    private fun tryLoadBundledRuntime(context: Context): LoadedRuntime? {
+        val library = File(context.applicationInfo.nativeLibraryDir, ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME)
+        val nativeMinLoadAlign = library.takeIf(File::isFile)?.let { validateNativeAlignment(context, it, context.packageName) }
         try {
             System.loadLibrary(ImageQuantPluginContract.NATIVE_LIBRARY_NAME)
         } catch (_: UnsatisfiedLinkError) {
@@ -327,6 +335,7 @@ object ImageQuantPluginHost {
         val runtimeProbe = verifyRuntimeProbe()
         return LoadedRuntime(
             origin = Origin.BUNDLED,
+            nativeMinLoadAlign = nativeMinLoadAlign,
             libimagequantVersion = ImageQuantPluginContract.EXPECTED_LIBIMAGEQUANT_VERSION,
             libpngVersion = ImageQuantPluginContract.EXPECTED_LIBPNG_VERSION,
             runtimeProbe = runtimeProbe,
@@ -334,6 +343,18 @@ object ImageQuantPluginHost {
         ).also {
             Log.i(TAG, "Loaded bundled Image Quantization ${it.libimagequantVersion}")
         }
+    }
+
+    private fun validateNativeAlignment(context: Context, file: File, packageName: String): Long = try {
+        NativeLibraryAlignment.requireCompatible(file, NativePageSize.current())
+    } catch (error: NativePageAlignmentException) {
+        throw ImageQuantPluginLoadException(
+            ImageQuantPluginLoadError.NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED,
+            context.getString(R.string.error_plugin_native_page_alignment_unsupported, packageName, error.minLoadAlign, error.pageSize),
+            error,
+        )
+    } catch (error: Exception) {
+        throw ImageQuantPluginLoadException(ImageQuantPluginLoadError.NATIVE_LIBRARY_INVALID, "Invalid native ELF: ${file.name}", error)
     }
 
     private fun selectCandidate(context: Context): Candidate {
@@ -357,7 +378,7 @@ object ImageQuantPluginHost {
             packageIdentity = candidate.packageIdentity,
             supportedAbis = processSupportedAbis(),
             nativeLibraryFileName = ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME,
-        )
+        ).also { validateNativeAlignment(context, it.file, candidate.serviceInfo.packageName) }
     } catch (error: ImageQuantPluginLoadException) {
         throw error
     } catch (error: Exception) {

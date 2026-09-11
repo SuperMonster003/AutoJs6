@@ -180,5 +180,6 @@
   "text_reference": "参阅",
   "text_search": "搜索",
   "text_stands_for": "表示",
-  "text_traditional_method_lowercase": "传统方式"
+  "text_traditional_method_lowercase": "传统方式",
+  "text_plugin_native_alignment": "插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示. [16 KB roadmap](https://github.com/SuperMonster003/AutoJs6/blob/master/docs/dev/page-size-16kb-roadmap.md)"
 }

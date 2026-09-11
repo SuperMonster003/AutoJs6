@@ -74,6 +74,7 @@ class InstalledPluginRepository {
         val serviceAction: String?,
         val isStopped: Boolean,
         val resolvedMetadata: InstalledPluginMetadataStore.Entry?,
+        val nativePageAlignment: Long? = null,
     )
 
     private data class Discovery(
@@ -334,6 +335,10 @@ class InstalledPluginRepository {
         // zh-CN: 以下取值来自插件的实时 Binder 或上次完整发现成功时持久化的元数据.
         // 文本类标识信息可跨包更新沿用, 与版本耦合的取值则要求包构建完全一致.
         val cachedExact = cachedEntry?.takeIf { it.matchesInstalledPackage(versionCode, lastUpdateTime) }
+        @Suppress("DEPRECATION")
+        val nativePageAlignment = PluginNativeAlignmentPolicy.parse(
+            appInfo.metaData?.get(org.autojs.plugin.common.api.PluginCapabilityKeys.NATIVE_PAGE_ALIGNMENT),
+        ) ?: cachedExact?.nativePageAlignment
 
         val pluginName = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.name)
         val pluginDescription = PluginResourceResolver.resolveStringValue(context, packageName, pluginInfo?.description)
@@ -371,6 +376,7 @@ class InstalledPluginRepository {
                 versionDate = pluginInfo.versionDate,
                 requiresHostVersion = requiresHostVersion,
                 supportedAbis = supportedAbis,
+                nativePageAlignment = nativePageAlignment,
                 engine = pluginInfo.engine,
                 variant = pluginInfo.variant,
                 engineId = pluginInfo.id,
@@ -394,6 +400,7 @@ class InstalledPluginRepository {
             versionDate = if (hasLiveInfo) pluginInfo.versionDate else cachedExact?.versionDate,
             requiresHostVersion = requiresHostVersion,
             supportedAbis = supportedAbis,
+            nativePageAlignment = nativePageAlignment,
             packageSize = packageSize,
             firstInstallTime = pkgInfo?.firstInstallTime,
             lastUpdateTime = lastUpdateTime,

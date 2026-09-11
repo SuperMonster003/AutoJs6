@@ -77,6 +77,8 @@ class PluginCenterItemViewHolder(
 
     fun bind(item: PluginCenterItem) {
         currentItem = item
+        itemView.findViewById<android.widget.TextView>(R.id.native_alignment_badge).isVisible =
+            PluginNativeAlignmentPolicy.needsWarning(item.nativePageAlignment, org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         val previousPackageName = lastBoundPackageName
         lastBoundPackageName = item.packageName
 

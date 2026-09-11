@@ -443,6 +443,7 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">Не удалось получить индекс плагинов из источника %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
+    <string name="error_plugin_native_page_alignment_unsupported">Плагин %1$s содержит нативную библиотеку с выравниванием %2$d байт, несовместимую со страницами размером %3$d байт. Обновите плагин.</string>
     <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
     <string name="error_plugin_returned_empty_info">Плагин %1$s вернул пустую информацию.</string>
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
@@ -634,6 +635,7 @@
     <string name="prompt_plugin_matched_version_requires_reinstall">Версия плагина, совместимая с этой сборкой AutoJs6, ниже установленной. Android не позволяет установить более низкую версию поверх существующего приложения.\n\nУстановлена: %1$s\nСовместимая: %2$s\n\nСначала удалите плагин. После удаления вернитесь в Центр плагинов и установите совместимую версию. Данные приложения плагина будут удалены.</string>
     <string name="prompt_plugin_mount_conflict_override">Цель \"%1$s\" уже существует (тип: %2$s). При продолжении этот объект будет перезаписан. Продолжить?</string>
     <string name="prompt_plugin_mount_occupied_by_plugin">Цель \"%1$s\" уже занята плагином \"%2$s\" (%3$s). Сначала отключите автомонтирование этого плагина или измените текущую цель монтирования.</string>
+    <string name="prompt_plugin_native_page_alignment">Нативные библиотеки плагина %1$s не выровнены для страниц 16 KB. Плагин может не работать на этом устройстве. Обновите его перед использованием. Все равно продолжить?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Перезапуск приложения может потребоваться для того, чтобы язык применялся как положено</string>
     <string name="screen_capturer_foreground_notification_channel_name">Служба захвата экрана на переднем плане</string>
@@ -1632,6 +1634,7 @@
     <string name="text_plugin_mount_object_name">Имя объекта монтирования</string>
     <string name="text_plugin_mount_point">Точка монтирования</string>
     <string name="text_plugin_mount_point_global_display">global</string>
+    <string name="text_plugin_native_page_alignment_incompatible">Несовместимо с 16 KB</string>
     <string name="text_plugin_official">Официальный</string>
     <string name="text_plugin_online_source">Источник онлайн-плагинов</string>
     <string name="text_plugin_show_official_plugins">Показывать официальные онлайн-устанавливаемые плагины</string>
@@ -2017,4 +2020,5 @@
     <string name="text_yearly_task">Ежегодная задача</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
+    <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>
 </resources>
