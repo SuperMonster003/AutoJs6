@@ -2,9 +2,13 @@
 
 对应 [Android SDK 37 升级 Roadmap](../android-sdk-37-roadmap.md) 的 P0 基线. 快照: 宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`, 工作区干净.
 
+证据范围 (同日复核补充): 本文件第 1 节是原会话所列编译任务的结果摘要, 本次复核未重跑, 未在此附原始 Gradle 日志. 对应 `ANDROID_COMPILE`, 不代表完整 inrt / release / R8 / lint / 出包或设备功能验证通过. 第 2 节的原始 dump 对应 `PLATFORM_CONFIG`, 行为语义仍需单独验证. 更正与后续验收入口见 [执行条件与证据校正](android-sdk-37-review-20260913.md).
+
 ## 1. 探针编译 (compileSdk 36 -> 37, targetSdk 保持 36)
 
 方法: 临时把 `version.properties` 的 `COMPILE_SDK_VERSION` 改为 `37`, 以 `--offline --continue` 运行 `:app:compileAppDebugKotlin :app:compileAppDebugJavaWithJavac compileDebugKotlin compileDebugJavaWithJavac` (覆盖 app 的 app flavor 与全部 modules / plugin-api / test-apps / plugins 子项目), 结束后 `git checkout -- version.properties` 还原并以相同任务重新编译 36 作为告警基线. 工具链: Gradle 9.7.1, AGP 9.4.0, Kotlin 2.4.0, KSP 2.3.12 (由 `autojs6-platform-versions` 1.8.0 选定, 未改动), 平台 `platforms;android-37.0` rev 2.
+
+后续执行约束: 上段保留原操作记录, 不是建议再次整文件 checkout. 依当前 `AGENTS.md`, 恢复临时配置时只恢复本次修改的 SDK 键, 保留构建自增与维护者对其它键的修改.
 
 | 项目 | compileSdk 36 (基线) | compileSdk 37 (探针) |
 | --- | --- | --- |

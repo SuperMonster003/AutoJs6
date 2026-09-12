@@ -3,39 +3,41 @@
 本文是 AutoJs6 宿主 (含 inrt 打包模板与仓内 modules / plugin-api / test-apps) 以及同目录 42 个官方插件仓库把 `compileSdk` / `targetSdk` 从 36 升到 37 的可执行状态表.
 以 2026-09-13 的本地代码快照 (宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`) 与同日的 [探针记录](evidence/android-sdk-37-probe-20260913.md) (compileSdk 37 探针编译, API 37 模拟器 `dumpsys platform_compat` 清单) 为起点, 每个条目均可独立 Check 并落地.
 
+2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 当前完成的是规划与部分编译基线; P0.2 与 P1-P6 尚未实施. 原探针未覆盖 inrt 独立编译, release 出包, R8, lint 与设备功能验证.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
 2. 条目完成后勾选 `[x]`, 并在条目后追加证据 (提交 hash / 测试类名 / 设备型号 / lint 报告路径), 证据等级见附录 D.
 3. 涉及 JS 公开 API 或权限模型的条目 (如 P2.1 的本地网络权限), 完成后必须同步 `AGENTS.md` 列出的关联仓库 (文档 / d.ts / Ace LSP 声明) 与 `.changelog` (10 语言) 并重新生成 README.
 4. 附录 A 的待决事项在进入对应阶段前由维护者拍板, 拍板结果回填到第 1 节.
-5. 附录 B 是 API 37 模拟器上 36 项 targetSdk 门控变更的逐项评估, 是 P2 条目的直接依据; 官方文档的核对状态 (VERIFIED / UNVERIFIED) 随条目标注, 网络不稳定时以模拟器实测为准.
+5. 附录 B 是指定 API 37 镜像中 36 项 targetSdk 门控变更的逐项评估, 不是 Android 17 全部行为变更的全集. `dumpsys` 只能证明变更名称 / ID / 配置存在, 不能证明行为语义或功能通过. 官方文档的核对状态 (VERIFIED / UNVERIFIED) 随条目标注; 页面未提及不能作为 "明确未变" 的证据, 网络失败时保留待核验状态.
 
 ---
 
 ## 1. 固定决策
 
-以下决策已由维护者确认 (D1-D4 于 2026-09-13 以选择题形式拍板, D5-D11 为由此派生的执行约定), 后续阶段不再重新讨论:
+D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D11 是据此拟定的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
 | D1 | 范围 = 宿主 + 全部 42 个官方插件仓库 | 宿主 (app 两个 flavor, 仓内 modules / plugin-api / test-apps / plugins 子项目随 `version.properties` 自动跟随) 先行; 42 个插件仓库作为 P5 逐仓推进, 每仓独立条目, 独立提交, 独立版本递增与 changelog. `AutoJs6-Gradle-Platform-Versions` 无需改动 (数据表已含 `37.0=9.1.1`), `AutoJs6-Official-Plugins-Index` 仅在插件发布时按既有流程刷新. |
 | D2 | 两步走 | 宿主先把 `COMPILE_SDK_VERSION` 升到 37 (P1, `TARGET_SDK_VERSION` 保持 36) 单独提交并回归; 行为变更适配在 targetSdk 仍为 36 时借助兼容开关与临时 target 覆盖完成 (P2); 最后单独提交 `TARGET_SDK_VERSION=37` (P3). 每一步可独立回滚, 与 Archive-Manager 插件 2026-08-23 的做法一致. |
 | D3 | inrt 模板 `TARGET_SDK_VERSION_INRT` 29 -> 37 | 用户打包的 APK 与宿主同步以 37 为目标, 在 P3 与宿主 targetSdk 同一提交切换. 由于 inrt 一次跨越 8 个 API 等级 (30-37), P3.3 单列 "打包应用 29 -> 37 清单", 存储引导与旧版升级保护见待决 Q4. |
-| D4 | 探针编译作为 P0 基线 | 2026-09-13 已完成 compileSdk 37 探针编译 (0 错误, 仅 1 处新增弃用告警) 与 36 基线对照, 结果记入 [探针记录](evidence/android-sdk-37-probe-20260913.md); P1 不再重复 "先看能不能编译", 直接从修正弃用与 lint 开始. |
+| D4 | 探针编译作为 P0 基线 | 2026-09-13 已完成所列 Kotlin / Java 任务的 compileSdk 37 探针 (0 错误, 仅 1 处新增弃用告警) 与 36 基线对照, 结果记入 [探针记录](evidence/android-sdk-37-probe-20260913.md); P1 从修正弃用与 lint 开始, 独立补齐 inrt / release / R8 / 出包验证. |
 | D5 | 验证矩阵 | Android 17 证据只来自本机 AVD (`AVD_API_37` / `aj6-ps16k-37-x86_64`, `android-37.0` google_apis_ps16k x86_64 镜像); 真机 (Xiaomi 23046RP50C API 35, Sony XQ-DQ72 API 33, Redmi 22120RN86C API 33, Sony XQ-AT72 API 31, Sony G8441 API 28) 提供 targetSdk 提升后在旧系统上的回归; 16 KB 门禁 (`verifyNativePageAlignment`) 在每次 assemble 时继续生效. 无 Android 17 真机, 有则由维护者回填. |
 | D6 | 落地位置 = master, 每个子条目一个提交 | 与 a11y / 16 KB Roadmap 一致; 提交时按显式文件清单暂存, 不 `git add -A` (多会话工作区). |
 | D7 | 不捆绑无关依赖升级 | 本 Roadmap 只改 SDK 版本与由此强制或直接相关的代码; androidx.core 1.19 (要求 compileSdk 37) 等 "被解锁" 的升级记入附录 F, 不在本 Roadmap 实施. |
 | D8 | `autojs6-platform-versions` 保持 1.8.0 | 1.8.0 与 1.8.1 的 `android-api-agp-compat.properties` 相同 (`37.0=9.1.1`), 当前解析出的 AGP 9.4.0 / Gradle 9.7.1 / Kotlin 2.4.0 / KSP 2.3.12 全部满足 API 37; 不因本次升级改动 `settings.gradle.kts` 的插件版本. |
-| D9 | changelog 写法 | 宿主与每个插件在各自 `dependency` 分类写一条 "升级 Android SDK 版本 36 -> 37" (英文 "Upgraded Android SDK version 36 -> 37", 其余语言按各仓库既有译法), 在 P1 (compileSdk) 落地时即写入, P3 不重复; 行为变更适配按性质写入 `fix` / `improvement`. |
+| D9 | changelog 写法 | SDK 日志参考既有 35 -> 36 升级记录, 最终分类以各仓库 `AGENTS.md` 为准; 当前宿主规定 `dependency` 仅统计 Gradle 依赖声明, SDK 平台升级记入 `improvement` (例如 "编译 SDK 版本调整为 37", 英文 "Updated compile SDK to 37"). P1 只描述编译版本, P3 再描述宿主与打包应用的目标版本及用户可见变化; 行为适配按性质写入 `fix` / `improvement`. 不提前宣称 targetSdk 已升级. |
 | D10 | `app/src/main/java/com/stardust/**` 兼容包保持冻结 | 探针编译显示 android.jar 37 未在该包内引发错误; 若后续 lint / 构建暴露必须修改的项, 仅允许 35 -> 36 先例 (`2ab13f3c7` 注释掉 `MainThreadProxy` 的 `Thread.stop` 系列) 那种 "最小编译修正", 不做其它改动. |
 | D11 | 插件仓库的节奏 | 纯 JVM 且无行为暴露的插件 (附录 E "暴露" 列为空) 可在一次发布内同时完成 compileSdk 与 targetSdk; 存在本地网络 / 动态加载 / 后台音频 / 屏幕捕获暴露的插件与宿主一样两步走. 各仓库脏工作区 (附录 E) 先由维护者处理或按会话惯例分开提交, 本 Roadmap 的提交不得混入. |
 
 由 D1-D3 派生的硬约束:
 
 - SDK 版本只在 `version.properties` 一处定义 (`COMPILE_SDK_VERSION` / `TARGET_SDK_VERSION` / `TARGET_SDK_VERSION_INRT` / `MIN_SDK_VERSION`), 经 `build-logic/convention/src/main/kotlin/org/autojs/build/Versions.kt` 暴露为 `versions.sdkVersion*`, 47 个构建脚本 (app, modules, plugin-api, test-apps, plugins/apk-builder-template) 全部经此读取; 任何条目都不得在子项目脚本中写死数字.
-- `MIN_SDK_VERSION=24` 不变; P2 中为 API 37 新增的调用一律以 `Build.VERSION.SDK_INT >= 37` 分支或 `*Compat` 包装, 不抬高 minSdk.
-- P2 的代码改动必须在 targetSdk 36 下也能正确运行 (改动先于切换合入), 因此新权限申请等逻辑以 "目标版本 >= 37 且系统 >= 37" 作为条件, 避免在切换前打扰用户.
+- 宿主 `MIN_SDK_VERSION=24` 不变, 各插件保留实际有效的 minSdk (见附录 E); P2 中为 API 37 新增的调用一律以 `Build.VERSION.SDK_INT >= 37` 分支或 `*Compat` 包装, 不抬高 minSdk.
+- P2 的代码改动必须在宿主 targetSdk 36 / inrt targetSdk 29 下也能正确运行. 每项按真实门控条件判断: 新权限走系统版本 / 目标版本分支, 对所有应用生效的行为在 Android 17 上也必须处理, 不能统一加 `targetSdk >= 37` 后跳过. 兼容开关与 target 覆盖包分别记录条件.
 
 ---
 
@@ -68,12 +70,13 @@
 | 工具链 (由 `autojs6-platform-versions` 1.8.0 从 `version.properties` 与其数据表解析): Gradle 9.7.1, AGP 9.4.0, Kotlin 2.4.0, KSP 2.3.12; `android-api-agp-compat.properties` 中 `37.0=9.1.1` | API 37 的最低 AGP 是 9.1.1 (官方 AGP 9.1 发行说明, VERIFIED), 当前 9.4.0 满足, 无需 `android.suppressUnsupportedCompileSdk`; AGP 9.4 要求 Gradle >= 9.6.0, 已满足 |
 | 本机 SDK: `platforms/android-37.0` (Platform.Version=17, rev 2, ExtensionLevel 22, 正式版), `build-tools/37.0.0`; AVD `AVD_API_37` 与 `aj6-ps16k-37-x86_64` 均为 `android-37.0;google_apis_ps16k;x86_64` | 平台目录名是 `android-37.0` 而非 `android-37`, AGP 9.4 对 `compileSdk = 37` 已正确解析 (Archive-Manager 先例: 2026-09-12 release APK `compileSdkVersion='37' compileSdkVersionCodename='17'`) |
 | Android 17 正式版 2026-06-16 发布 (VERIFIED); Google 博客称 Play 将于 2027-08 要求新应用与更新以 API 37 为目标 (VERIFIED 引文, 具体日期 UNVERIFIED) | 本次升级不受外部截止期驱动, 但插件舰队与宿主同步可避免 2027 年集中返工 |
-| 探针编译 (compileSdk 37, target 36): 全仓 0 错误, 仅新增 1 处弃用告警 (`ui/edit/keyboard/SymbolsSettingsActivity.kt:1110` `InputMethodManager.SHOW_IMPLICIT`); 36 基线对照无其它差异; javac 告警 0 | P1 的代码改动预期极小; API 37 移除的 `android.hardware.fingerprint` 包本仓库未引用 |
+| 探针编译 (compileSdk 37, target 36): 所列任务 0 错误, 仅新增 1 处弃用告警 (`ui/edit/keyboard/SymbolsSettingsActivity.kt:1110` `InputMethodManager.SHOW_IMPLICIT`); 36 基线对照无其它差异; javac 告警 0 | P1 的编译修正预期较少; inrt / release / R8 / lint / 测试结果不能由此推出; 本机 android.jar 的 fingerprint 类差异已另行核验 (SOURCE, 见复核记录) |
 | `build-logic/ksp-version-codes-processor/src/main/resources/version-codes.csv` 已含 `CINNAMON_BUN,Android 17,Cinnamon Bun,17,37,"June 16, 2026"` (`4bdb3bb68`, 2026-03-14); 文档仓库 `api/util.md` 已同步 | `util.versionCodes` / `SdkVersionUtils.sdkIntToString(37)` 已能解析 "17", 无需改动 |
 | 上一次升级提交 `2ab13f3c7` (2025-09-26, 35 -> 36): 24 个文件, 主要是 android.jar 删除 / 弃用 API 的编译修正, changelog `dependency` "升级 Android SDK 版本 35 -> 36" | D9 的写法来源; 本次编译修正量远小于上次 |
 | CI (`.github/workflows/android.yml`): JDK 21, 未显式安装 SDK 平台, 依赖 AGP 自动下载; `run-gradle-ci.sh` 跑单元测试子集, `assembleApkBuilderTemplateDistribution`, 16 KB 校验 | P1.6 需确认 runner 能取到 `platforms;android-37.0` (预期由 AGP `sdkDownload` 自动完成), 否则补 `sdkmanager` 步骤 |
-| Manifest (`app/src/main/AndroidManifest.xml`): `largeHeap` (291), `requestLegacyExternalStorage` (293), `usesCleartextTraffic` (297), `tools:targetApi="tiramisu"`, 无 `screenOrientation` / `resizeableActivity` / `enableOnBackInvokedCallback` / `<property>` 大屏豁免; 前台服务类型 `specialUse` x2 (593, 603, 带 `PROPERTY_SPECIAL_USE_FGS_SUBTYPE`), `microphone` (627), `mediaProjection` (948); 权限含 `INTERNET`, `SYSTEM_ALERT_WINDOW`, `MANAGE_EXTERNAL_STORAGE`, `READ_SMS` / `RECEIVE_SMS`, `BLUETOOTH_*`, `QUERY_ALL_PACKAGES` 等 74 项 | 未使用 Android 16 的大屏豁免属性, 因此 `DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT` 无增量影响; 前台服务类型在 Android 17 无新增要求 (VERIFIED) |
+| Manifest (`app/src/main/AndroidManifest.xml`): `largeHeap` (291), `requestLegacyExternalStorage` (293), `usesCleartextTraffic` (297), `tools:targetApi="tiramisu"`, 无 `screenOrientation` / `resizeableActivity` / `enableOnBackInvokedCallback` / `<property>` 大屏豁免; 前台服务类型 `specialUse` x2 (593, 603, 带 `PROPERTY_SPECIAL_USE_FGS_SUBTYPE`), `microphone` (627), `mediaProjection` (948); 权限含 `INTERNET`, `SYSTEM_ALERT_WINDOW`, `MANAGE_EXTERNAL_STORAGE`, `READ_SMS` / `RECEIVE_SMS`, `BLUETOOTH_*`, `QUERY_ALL_PACKAGES` 等 74 项 | 未声明 Android 16 大屏豁免, 移除该 manifest 豁免预期无增量; 服务类型 / 启动条件仍需 P2.2 / P2.15 核验, 不能由当前声明推出 Android 17 无变化 |
 | `network_security_config.xml`: `base-config` 仅系统信任锚, `githubusercontent.com` 域禁明文并附加 `@raw/isrg_root_x1`; 无 `certificateTransparency` / `domainEncryption` 元素 | P2.6 的改动点 (CT 默认开启, ECH 默认开启) |
+| `app/build.gradle.kts`: `lint.abortOnError=false`; `lintVitalAnalyzeAppRelease` / `lintVitalAnalyzeInrtRelease` 被 `enabled=false` 禁用; 模板分发构建还会跳过 app 的 vital lint, CI 显式排除 inrt vital analysis | P0.2 必须先提供有效 lint 验证入口; 直接调用被禁用的任务或检查 `BUILD SUCCESSFUL` 不能作为 LINT 通过证据 |
 
 ### 3.2 Android 17 对宿主的影响矩阵
 
@@ -81,11 +84,11 @@
 
 | 编号 | 变更 | 生效条件 | 宿主暴露点 | 条目 |
 | --- | --- | --- | --- | --- |
-| I1 | 本地网络权限 `android.permission.ACCESS_LOCAL_NETWORK` (VERIFIED): targetSdk >= 37 默认阻断到局域网地址的出站 TCP / UDP, 入站 TCP accept, mDNS `.local` 解析; targetSdk <= 36 随 `INTERNET` 隐式授予; 回环地址不受限 | 权限系统, 非兼容开关 (`RESTRICT_LOCAL_NETWORK` 仍为 disabled, 仅测试用) | VS Code 扩展连接两种模式 (`pluginclient/JsonSocketServer.kt:24` `ServerSocket`, `pluginclient/JsonSocketClient.kt:64-65` 连接电脑); 脚本 `http.*` / `web.*` / `$web.newWebSocket` (`runtime/api/augment/web/Web.kt`, `core/web/WebSocket.kt`); MQTT (`org.eclipse.paho.android.service.MqttService`); Node 桥 (`engine/NodeBridgeProtocol.kt` 的 `newWebSocket`); 用户脚本自建 socket | P2.1 |
-| I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务才能播放 / 申请焦点 / 调音量; targetSdk 37 额外要求该前台服务具备 while-in-use 能力 (在可见或用户交互时启动), 否则静默失败 | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本在 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 下运行 | P2.2 |
+| I1 | 本地网络权限 `android.permission.ACCESS_LOCAL_NETWORK` (VERIFIED): targetSdk >= 37 默认阻断到局域网地址的出站 TCP / UDP, 入站 TCP accept, mDNS `.local` 解析; targetSdk <= 36 随 `INTERNET` 隐式授予; 同一 profile 内回环不受此权限限制. 跨 profile 的回环在 Android 17 上另受限制, 与 targetSdk 无关 ([官方说明](https://developer.android.com/about/versions/17/behavior-changes-all#block-cross-profile-loopback-traffic)) | 权限系统, 非兼容开关 (`RESTRICT_LOCAL_NETWORK` 仍为 disabled, 仅测试用); 跨 profile 另测 | VS Code 扩展连接两种模式 (`pluginclient/JsonSocketServer.kt:24` `ServerSocket`, `pluginclient/JsonSocketClient.kt:64-65` 连接电脑); 脚本 `http.*` / `web.*` / `$web.newWebSocket` (`runtime/api/augment/web/Web.kt`, `core/web/WebSocket.kt`); MQTT (`org.eclipse.paho.android.service.MqttService`); Node 桥 (`engine/NodeBridgeProtocol.kt` 的 `newWebSocket`); 用户脚本自建 socket | P2.1 |
+| I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务; targetSdk 37 的后台路径还需 while-in-use 能力, 但精确闹钟授权 + `USAGE_ALARM` 可豁免 WIU 条件. 播放 / 音量调用可静默失败, 焦点请求返回 `AUDIOFOCUS_REQUEST_FAILED`; `throw` 测试模式比默认规则更严 ([官方说明](https://developer.android.com/about/versions/17/changes/bg-audio)) | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本在 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 下运行 | P2.2 |
 | I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | `core/plugin/opencv/OpenCvPluginHost.kt:227-229` 与 `core/plugin/imagequant/ImageQuantPluginHost.kt:229-231` 在 staging 后直接 `System.load(staged.file)`; DEX 路径 `rhino/AndroidClassLoader.kt:93-122` 已复制到缓存并 `setReadOnly()` (API 34 先例), `core/plugin/editor/AceEditorPluginHost.kt:321` 以插件 APK 路径构造 `PathClassLoader` (系统只读路径) | P2.3 |
 | I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 与 `LOOPER_CLEARS_THREAD_INTERRUPTED`, `OVERRIDDEN_THREAD_START_METHOD` (名称 VERIFIED, 语义 UNVERIFIED): 公开 API 不变, 反射 `mMessages` 恒为 null; Looper 派发前清除中断标志; 覆写 `Thread.start()` 的子类行为变化 | target 37 | 脚本引擎的 Looper 体系: `core/looper/Loopers.kt:20-25` (公开 `IdleHandler`), `core/looper/MainThreadProxy.java:68,86`, `core/looper/TimerThread.kt:74-76` (覆写 `interrupt()`), `exit()` / `threads.*` / `sleep()` 的中断语义 (127 处 `interrupt` / `isInterrupted`); 8 个含 `start()` 方法的文件需筛出 Thread 子类; 用户脚本对 Looper 内部的反射 | P2.4 |
-| I5 | 后台活动启动 (VERIFIED): `IntentSender.sendIntent()` 需要发送方显式 opt-in (`COVER_INTENT_SENDER`); `ASM_RESTRICTIONS` 为 opt-in 默认关闭; `SYSTEM_ALERT_WINDOW` 仍是 BAL 豁免 | target 37 | `ui/main/scripts/AndroidPackageSessionInstaller.kt:173,176` (`MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED`), `external/shortcut/ShortcutManager.java:46` 与 `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163` (`requestPinShortcut(IntentSender)`), `ui/main/drawer/DrawerFragment.kt:160` (`StartIntentSenderForResult`); 脚本 `app.launch` / `app.startActivity` 从后台启动 (依赖悬浮窗豁免) | P2.5 |
+| I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); `ASM_RESTRICTIONS` 在本镜像为 target 37 门控且未标 disabled, 行为待核验; BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `ui/main/scripts/AndroidPackageSessionInstaller.kt:173,176` (`MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED`), `external/shortcut/ShortcutManager.java:46` 与 `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163` (`requestPinShortcut(IntentSender)`), `ui/main/drawer/DrawerFragment.kt:160` (`StartIntentSenderForResult`); 脚本 `app.launch` / `app.startActivity` 从后台启动 | P2.5 |
 | I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); NSC 可按域关闭 (`<certificateTransparency enabled="false"/>`, `<domainEncryption>`) | target 37 | `network_security_config.xml`; 脚本访问私有 CA / 自签名服务器与企业 TLS 代理; 用户安装 CA 是否豁免 CT 为 UNVERIFIED | P2.6 |
 | I7 | `PARCEL_HARDENING` (名称 VERIFIED, 语义 UNVERIFIED): Parcel 读写更严格 | target 37 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `core/plugin/center/InstalledPluginRepository.kt:351` (`BundleCompat.getSerializable`), `engine/NodeModuleSourceFileTransportSession.kt`, Tasker / 快捷方式 extras | P2.7 |
 | I8 | 存储: `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` (名称 VERIFIED, 语义 UNVERIFIED); `MediaStore` / `DocumentsContract` API 面有变化 | target 37 | 文件管理器与 `files.*` / `media.*`: `model/script/PathChecker.java:56`, `permission/AllFilesAccessPermission.kt`, MediaStore 查询点 (代码内未直接引用 `DATA` 列); `MANAGE_EXTERNAL_STORAGE` 语义不变 | P2.8 |
@@ -97,7 +100,7 @@
 | I14 | Android Advanced Protection Mode 下, 未声明 `isAccessibilityTool="true"` 的无障碍服务被系统撤销且不可启用 (二手来源, UNVERIFIED) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明该属性 (AutoJs6 是自动化工具, 不应伪装为残障辅助工具, 见待决 Q5); `core/accessibility/control/A11yServiceController` 的 "启用失败" 诊断 | P2.14 |
 | I15 | 低影响项: Bluetooth 绑定 API 需特权 (`BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`), RFCOMM `read()` 断开返回 -1 (`MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, 仅 `BluetoothSocket`), 联系人 `Data` 视图移除账户列与严格 SQL 检查 (`RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, 仅 ContactsContract), 密钥库每应用 5 万把上限, RenderScript ScriptC 停用 (本仓库无 RenderScript), 镜像虚拟显示权限检查 (`CHECK_ADD_MIRROR_DISPLAY_PERMISSION`, 宿主经 MediaProjection 创建 `VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR`, `core/image/capture/ScreenCapturer.java:284-289`), `ContentCaptureManager.setContentCaptureEnabled(false)` 失效, 物理键盘密码显示拆分 | target 37 | 逐项验证即可, 预期无代码改动 | P2.15 |
 
-Android 17 明确未变的部分 (VERIFIED, 由官方页面缺席确认): 前台服务类型与超时, `SYSTEM_ALERT_WINDOW` / `TYPE_APPLICATION_OVERLAY`, MediaProjection 行为, JobScheduler / AlarmManager 限制, 预测性返回 (36 已默认), 边到边 (35 强制, 36 移除豁免), `android.accessibilityservice` 包无 API 变化, 最低可安装 targetSdk (仍为 24, 二手来源 UNVERIFIED).
+需要继续核验的部分 (UNVERIFIED): 前台服务类型 / 超时, `SYSTEM_ALERT_WINDOW` / `TYPE_APPLICATION_OVERLAY`, MediaProjection, JobScheduler / AlarmManager, 预测性返回, 边到边, `android.accessibilityservice` 包与最低可安装 targetSdk. 当前主文档未列某项新限制, 不等于该项没有变化; P2.15 用 API diff / 对应专题文档 / 实机回归分别给出结论. 已有 Android 14-16 限制仍纳入 inrt 29 -> 37 回归.
 
 ### 3.3 宿主代码锚点汇总
 
@@ -119,7 +122,7 @@ Android 17 明确未变的部分 (VERIFIED, 由官方页面缺席确认): 前台
 
 ### 3.4 插件舰队现状
 
-42 个插件仓库全部 `TARGET_SDK_VERSION=36`, 除 Archive-Manager (`COMPILE_SDK_VERSION=37`) 外 `COMPILE_SDK_VERSION=36`; 41 个仓库使用 `autojs6-platform-versions` 1.8.0, Bun-Runtime 为 1.7.4 (且 `MIN_SDK_VERSION=33`), R8-Compiler 无 `MIN_SDK_VERSION`. 10 个仓库工作区有未提交改动 (Bun 18, Lua 30, MLKit-OCR 3, Paddle v3 40, v4 / v5 / v6 各 6, Rapid v3 45, Rapid v6 56, Yolo 36 个文件). 逐仓的进程模型, 权限暴露与阶段归属见附录 E.
+42 个插件仓库全部 `TARGET_SDK_VERSION=36`, 除 Archive-Manager (`COMPILE_SDK_VERSION=37`) 外 `COMPILE_SDK_VERSION=36`; 41 个仓库使用 `autojs6-platform-versions` 1.8.0, Bun-Runtime 为 1.7.4 (且 `MIN_SDK_VERSION=33`). 属性文件不一定等于实际构建值: R8-Compiler 的 app / 两个 plugin-api 构建脚本硬编码 compileSdk 36, app 硬编码 targetSdk 36 / minSdk 24; Paddle v4 / v5 / v6 app 实际 minSdk 为 26. P5 必须核查消费点和产物. 初稿快照中 10 个仓库工作区有未提交改动 (Bun 18, Lua 30, MLKit-OCR 3, Paddle v3 40, v4 / v5 / v6 各 6, Rapid v3 45, Rapid v6 56, Yolo 36 个文件); 开始每仓工作时重新检查. 逐仓的进程模型, 权限暴露与阶段归属见附录 E.
 
 ---
 
@@ -144,7 +147,7 @@ Android 17 明确未变的部分 (VERIFIED, 由官方页面缺席确认): 前台
 | P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案 | 42 个插件仓库 | 未开始 |
 | P6 | 验收与关闭 | P1-P5 | 全部 | 未开始 |
 
-P2 的条目之间无依赖, 可按影响矩阵顺序并行; P5 与 P2 / P3 可交错 (插件的 compileSdk 步骤不依赖宿主 targetSdk 切换), 但 P5 中涉及本地网络与动态加载的插件应复用 P2.1 / P2.3 落定的方案.
+P2 可按影响矩阵分批推进: P2.6 的局域网 TLS 验证先满足 P2.1 权限前提; P2.16 的 inrt 验证复用 P2.1 / P2.2 等方案. P5 与 P2 / P3 可交错 (插件的 compileSdk 步骤不依赖宿主 targetSdk 切换), 但 P5 中涉及本地网络与动态加载的插件应复用 P2.1 / P2.3 落定的方案.
 
 ---
 
@@ -154,32 +157,33 @@ P2 的条目之间无依赖, 可按影响矩阵顺序并行; P5 与 P2 / P3 可�
 
 ### P0.1 探针与兼容清单 (完成 2026-09-13)
 
-- [x] compileSdk 37 探针编译 (全仓 0 错误, 新增 1 处弃用告警) 与 36 基线对照. (ANDROID_BUILD: [探针记录](evidence/android-sdk-37-probe-20260913.md) 第 1 节)
-- [x] `AVD_API_37` 上 `dumpsys platform_compat` 全文入库, 提取 36 项 `enableSinceTargetSdk=37` 变更并逐项评估. (SOURCE: [platform_compat 全文](evidence/android-sdk-37-platform-compat-api37-20260913.txt); DOCS: 附录 B)
-- [x] 官方文档核对 (behavior-changes-17 / behavior-changes-all / features / AGP 发行说明 / SDK 仓库 XML / Play 政策), 结论并入第 3 节与附录 B, 核对状态逐项标注. (DOCS)
+- [x] compileSdk 37 探针编译 (所列任务 0 错误, 新增 1 处弃用告警) 与 36 基线对照. (ANDROID_COMPILE: [探针记录](evidence/android-sdk-37-probe-20260913.md) 第 1 节; 历史摘要, 本次复核未重跑)
+- [x] `AVD_API_37` 上 `dumpsys platform_compat` 全文入库, 提取 36 项 `enableSinceTargetSdk=37` 变更并逐项评估. (PLATFORM_CONFIG: [platform_compat 全文](evidence/android-sdk-37-platform-compat-api37-20260913.txt); DOCS: 附录 B, 行为语义未全部核验)
+- [x] 初次官方资料收集已写入第 3 节与附录 B, 复核修正见 [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). (DOCS; 不代表所有 UNVERIFIED 项已关闭)
 
 ### P0.2 targetSdk 覆盖开关
 
-- [ ] `Versions.kt` 增加可选 Gradle 属性 `autojs.sdk.target.override` (仅对 debug 构建生效, 未设置时无任何影响): `sdkVersionTarget` / `sdkVersionTargetInrt` 以该值覆盖, 供 P2 用 `-Pautojs.sdk.target.override=37` 出一个 "target 37 的 debug 包" 而不改动 `version.properties`; `showInfo()` 打印覆盖提示. 覆盖仅用于验证, release 任务检测到该属性时构建失败. (SOURCE; ANDROID_BUILD: 覆盖前后 `aapt2 dump badging` 的 `targetSdkVersion` 分别为 36 / 37)
-- [ ] `tools/sdk37/compat.sh <serial> <package> <enable|disable|reset> <CHANGE...>` 与 `tools/sdk37/dump_compat.sh <serial>`: 封装 `am compat` / `dumpsys platform_compat` / `cmd audio set-enable-hardening` / `am memory-limiter`, 用法写在脚本头部 (附录 C 命令集脚本化). (SOURCE; DEVICE-37: 在 `AVD_API_37` 上对宿主 debug 包 enable / reset 一次)
-- [ ] lint 基线: 在 compileSdk 36 上运行 `:app:lintAppDebug` 与 `:app:lintVitalAnalyzeAppRelease`, 报告存档到 `build/sdk37-lint-36/` (不入库), 供 P1.2 比对. (LINT)
+- [ ] `Versions.kt` 增加可选 Gradle 属性 `autojs.sdk.target.override` (仅用于 debug 验证): 校验整数 / 支持范围, `showInfo()` 打印覆盖提示; 未设置时宿主 / inrt 分别保持 36 / 29. `-Pautojs.sdk.target.override=37` 的 debug 产物两者均为 37, 不修改 `version.properties`. release / Runtime Kit / 模板分发任务若直接或间接使用覆盖配置, 必须在打包前失败; 验证完整任务名与聚合任务路径, 不能仅匹配命令行是否含 `Release`. (SOURCE; ANDROID_BUILD: app + inrt 覆盖前后 manifest; release 拒绝日志)
+- [ ] `tools/sdk37/compat.sh <serial> <package> <enable|disable|reset> <CHANGE...>` 与 `tools/sdk37/dump_compat.sh <serial>`: 按附录 C 封装, 每次 `am compat` 只传一个 change 和一个 package, 检查返回值并保存原覆盖状态. 音频 / 内存命令属于设备级控制, 单独入口且记录恢复方式, 不混进按包 compat 循环. (SOURCE; DEVICE-37: 在 `AVD_API_37` 上对宿主 debug 包 enable / reset 一次)
+- [ ] lint 入口: 增加显式验证模式, 使 app / inrt 的 vital analysis 在该模式真正执行, 同时规避模板分发的 `onlyIf` 跳过条件; 普通构建是否启用 lint 单独决定. 保存任务结果 / 新生成报告, `SKIPPED` 或旧报告不能算通过; `abortOnError=false` 时另外统计 Error / Fatal. (SOURCE; LINT)
+- [ ] lint 基线: 在 compileSdk 36 上用上述入口独立运行 `:app:lintAppDebug` 与 app / inrt release vital 检查, 报告存档到 `build/sdk37-lint-36/` (不入库), 同时记录 disabled issues / 既有问题, 供 P1 比对. (LINT)
 
-P0 验收: 覆盖开关出包的 `targetSdkVersion` 为 37; 脚本在 AVD 上跑通; lint 基线存在.
+P0 验收: app / inrt 覆盖包的 `targetSdkVersion` 为 37, 正常包仍为 36 / 29; release 覆盖被拒绝; 脚本在 AVD 上跑通并清理本次 override; 有效 lint 基线存在.
 
 ---
 
 ## P1: 宿主 compileSdk 37
 
-目标: `COMPILE_SDK_VERSION=37`, 编译 / lint / 测试 / 出包 / CI 全部通过, targetSdk 保持 36, 运行时行为不变.
+目标: `COMPILE_SDK_VERSION=37`, 编译 / lint / 测试 / 出包 / CI 全部通过, 宿主 targetSdk 保持 36 / inrt 保持 29; 不启用 target 37 门控, 同时验证编译 / 资源 / 优化产物无功能退化.
 
 - [ ] `version.properties`: `COMPILE_SDK_VERSION=36` -> `37`. 仓内 47 个构建脚本随之生效, 不改子项目脚本. (SOURCE)
-- [ ] 修正探针暴露的弃用: `ui/edit/keyboard/SymbolsSettingsActivity.kt:1110` 的 `InputMethodManager.SHOW_IMPLICIT` 改用 `WindowInsetsControllerCompat.show(ime())` 或 `showSoftInput(view, 0)` (按调用语义选), 不加 `@Suppress`. (SOURCE; ANDROID_BUILD: 37 编译告警回到与 36 基线一致)
-- [ ] lint 对比: `:app:lintAppDebug` 与 `:app:lintVitalAnalyzeAppRelease` / `lintVitalAnalyzeInrtRelease` 在 37 上运行, 与 P0.2 基线 diff; 新增的 error / fatal 全部处理, 新增的 warning 逐条决定处理或记录 (`ObsoleteSdkInt`, `UnusedAttribute`, `NewApi` 预期为零); `tools:targetApi` 与 `tools:ignore` 只在确有必要时调整. (LINT: 报告路径与 diff 摘要写入证据)
-- [ ] 单元测试: `:app:testAppDebugUnitTest` 全量 (上次记录 2532 通过 / 5 跳过), `:plugin-api:*:testDebugUnitTest`, `:test-apps:*:testDebugUnitTest`; `:app:compileAppDebugAndroidTestKotlin` 通过. (JVM; ANDROID_BUILD)
+- [ ] 修正探针暴露的弃用: `ui/edit/keyboard/SymbolsSettingsActivity.kt:1110` 的 `InputMethodManager.SHOW_IMPLICIT` 按 [API 参考](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#SHOW_IMPLICIT) 改用不带该 flag 的调用, 同时验证 API 24 / 28 等旧系统的输入法显示语义; 若采用 `WindowInsetsControllerCompat` 则验证焦点 / 时序. (SOURCE; ANDROID_COMPILE: 37 编译告警对比; DEVICE: 旧系统输入法)
+- [ ] lint 对比: 使用 P0.2 的有效入口在 37 上运行 app debug + app / inrt release 检查, 与 36 基线 diff; 新增 error / fatal 全部处理, 新增 warning 逐条处理或记录; `tools:targetApi` 与 `tools:ignore` 只在确有必要时调整. 核对任务未跳过、报告为本次生成, 不以 Gradle 退出码代替问题统计. (LINT: 报告路径与 diff 摘要写入证据)
+- [ ] 单元测试: `:app:testAppDebugUnitTest` 全量 (历史记录 2532 通过 / 5 跳过, 本次重新统计), 根项目 `testDebugUnitTest` 任务选择器覆盖提供同名任务的子项目, 并对照 `settings.gradle.kts` 核查 plugin-api / test-apps 覆盖范围; 不使用 Gradle 不支持的 `:plugin-api:*:testDebugUnitTest` 通配路径. `:app:compileAppDebugAndroidTestKotlin` 通过. (JVM; ANDROID_COMPILE)
 - [ ] 出包与门禁: `assembleAppDebug`, `assembleAppRelease`, `assembleInrtRelease`, `generateRuntimeKit`, `assembleApkBuilderTemplateDistribution`, `verifyNativePageAlignment` 全部通过; `aapt2 dump badging` 显示 app `compileSdkVersion='37' targetSdkVersion:'36'`, inrt `targetSdkVersion:'29'`. (ANDROID_BUILD)
-- [ ] 冒烟: debug 包装入 `AVD_API_37`, Xiaomi 23046RP50C (API 35), Sony G8441 (API 28), 运行 `sample/accessibility/smoke-legacy-api.js` 与一段 UI 模式 / 悬浮窗 / 截图脚本 (compileSdk 变化不改运行时行为, 此项只防止 R8 / 资源合并层面的意外). (DEVICE; DEVICE-37)
+- [ ] 冒烟: debug 包装入 `AVD_API_37`, Xiaomi 23046RP50C (API 35), Sony G8441 (API 28), 运行 `sample/accessibility/smoke-legacy-api.js` 与 UI 模式 / 悬浮窗 / 截图 / 输入法脚本. release 包另跑一轮核心冒烟, 覆盖 R8 优化路径; target 不变不代表编译或资源产物必然没有运行时差异. (DEVICE; DEVICE-37)
 - [ ] CI: 推送后 `android.yml` 与 `release-runtime-kit.yml` 绿; 若 runner 未能自动获取 `platforms;android-37.0`, 在 `Set up JDK` 之后补 `sdkmanager "platforms;android-37.0" "build-tools;37.0.0"` 步骤. (ANDROID_BUILD: 远程 CI 链接)
-- [ ] changelog `dependency`: "升级 Android SDK 版本 36 -> 37" (10 语言, 与 `2ab13f3c7` 的译法一致), 重新生成 README; 提交 `chore(sdk): raise compileSdk to 37 (roadmap P1)`, 按显式文件清单暂存. (DOCS)
+- [ ] changelog 按 D9 在 `improvement` 描述 compileSdk 37 (10 语言), 日期按当日更新, 重新生成 README; 提交 `chore(sdk): raise compileSdk to 37 (roadmap P1)`, 按显式文件清单暂存. (DOCS)
 
 P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该提交.
 
@@ -191,16 +195,17 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 
 ### P2.1 本地网络权限 (I1)
 
-- [ ] 事实核对: 用覆盖开关出 target 37 的 debug 包装入 `AVD_API_37`, 分别执行 VS Code 扩展的服务端模式 (设备监听) 与客户端模式 (连接电脑), `http.get("http://<局域网 IP>")`, `$web.newWebSocket("ws://<局域网 IP>")`, `http.get("http://127.0.0.1:<端口>")` (回环应不受影响), 记录失败形态 (超时 / `EPERM`) 与 logcat; 再用 `pm grant org.autojs.autojs6 android.permission.ACCESS_LOCAL_NETWORK` 复测通过. (DEVICE-37: 失败与恢复的两组日志)
-- [ ] manifest 声明 `android.permission.ACCESS_LOCAL_NETWORK` (仅声明, targetSdk <= 36 时系统忽略); 新增 `permission/LocalNetworkPermission.kt` (沿用 `PostNotificationsPermission` 的 `Base` / `AbleToUrge` 结构: `has()` 在 SDK < 37 或 targetSdk < 37 时恒为 true, `request()` 走标准运行时权限流程). (SOURCE; JVM: 条件判断的单元测试)
+- [ ] 事实核对: target 37 debug 包先声明 `ACCESS_LOCAL_NETWORK`, 确认合并 manifest 与实际包名后再做 grant / revoke 对照 (未声明的权限不能直接授予). 分别执行 VS Code 服务端 / 客户端, LAN TCP / UDP / WebSocket, 同 profile 的 `127.0.0.1` / `[::1]`, 记录拒绝, 授予, 撤销及重新进入功能的结果. HTTP 明文策略, TLS 证书, AVD NAT / 主机防火墙先独立排除, 不能把所有连接错误归因于 LNP. (DEVICE-37: 失败与恢复的两组日志)
+- [ ] manifest 声明 `android.permission.ACCESS_LOCAL_NETWORK`; 新增 `permission/LocalNetworkPermission.kt` (沿用 `PostNotificationsPermission` 的 `Base` / `AbleToUrge` 结构, 常规 target <= 36 兼容路径不主动申请新权限, target 37 走标准运行时权限流程). 兼容开关强制测试的条件另外记录. (SOURCE; DEVICE-37)
 - [ ] 申请时机 (待决 Q1, 默认按推荐项): VS Code 扩展连接入口 (`DevPluginService` 两种模式) 在启动前确保权限, 缺失时弹出说明并引导; 抽屉与设置页增加权限开关行 (与 "显示在其它应用上层" 同款 UI); 脚本层 `http` / `web` / socket 调用不主动弹窗, 但在目标为局域网地址且权限缺失时抛出带解释的错误 (文案 x 11 文件, 按 name 升序), 并提供 `runtime.requestPermissions(["access_local_network"])` (若既有权限申请 API 已支持通用权限名则复用, 不新增函数). (SOURCE; DEVICE-37)
 - [ ] MQTT (`MqttService`) 与 Node 桥的局域网路径: 复测 broker 在局域网时的连接错误提示. (DEVICE-37)
+- [ ] 对拒绝后重试、不再询问、既有 Nearby Devices 授权组以及 target 36 -> 37 覆盖安装分别记录权限状态; 系统选择器适用于用户选择的设备, 不能替代任意脚本 socket / 服务端权限. 工作资料中的宿主与个人资料中的插件若依赖回环, 单列跨 profile 受限用例, 不承诺 localhost 在所有安装组合中可达. (DEVICE-37)
 - [ ] 文档: 若 JS 层出现新权限名或新错误码, 同步文档 / d.ts / LSP (P4); changelog `feature` (权限流程) 与 `improvement` (错误提示). (DOCS)
 
 ### P2.2 后台音频 (I2)
 
-- [ ] 事实核对: `adb shell cmd audio set-enable-hardening throw` 后, 在 `AVD_API_37` 上以 (a) 前台可见时启动脚本, (b) 定时任务触发, (c) `InrtBootCompletedReceiver` / 广播触发 三种入口运行 `media.playMusic`, `device.setMusicVolume`, TTS 朗读, 记录哪些路径抛出 / 静默; 用 `dumpsys audio` 的 `AudioHardening` 行确认 `level`. (DEVICE-37)
-- [ ] 策略 (待决 Q3, 默认按推荐项): 保持 "前台服务在应用可见 / 用户交互时启动并常驻" 的既有模式, 新增诊断: 当脚本调用音频 API 而前台服务缺乏 while-in-use 能力时, 在控制台输出一条可定位的警告 (SDK >= 37 且 target >= 37 时). 不引入 media3. (SOURCE; DEVICE-37)
+- [ ] 事实核对: 先在默认系统状态对 target 36 / 37 包分别测试 (a) 前台启动后切后台, (b) 定时任务, (c) 开机 / 广播入口的播放、焦点、音量、TTS; 对精确闹钟授权 + `USAGE_ALARM` 独立测试. 然后在可恢复的专用 AVD 上用 `cmd audio set-enable-hardening throw` 定位失败. `enable` / `throw` 会对所有 target 强制 WIU 且覆盖闹钟例外, 不能用其结果断言默认行为; 保存 `AudioHardening` 日志并恢复设备原状态. (DEVICE-37)
+- [ ] 策略 (待决 Q3): 验证现有 `specialUse` 服务在用户可见 / 用户交互时启动后的能力; 按后台播放实际用途评估 `mediaPlayback` 类型. 诊断覆盖 Android 17 的全体应用规则及 target 37 的额外规则, 不能仅凭服务存活推断 WIU, 也不能假设存在公开的 WIU 查询 API. 定时任务 / 开机后无法自动播放的路径给出用户可执行的恢复入口或明确记录已知限制; 只打印警告不能算功能通过. TTS 另外记录实际合成 / 播放进程. (SOURCE; DEVICE-37)
 - [ ] 定时任务 / 开机自启入口的前台服务启动方式复核 (`timing/**`, `external/foreground/**`), 确认与 Android 15 的 `FGS_BOOT_COMPLETED_RESTRICTIONS` / `FGS_SAW_RESTRICTIONS` 组合下仍可启动 `specialUse` 服务. (DEVICE-37; DEVICE: API 35 真机)
 - [ ] changelog `improvement`. (DOCS)
 
@@ -213,22 +218,23 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 
 ### P2.4 Looper / 线程 (I4)
 
-- [ ] `am compat enable USE_NEW_MESSAGEQUEUE LOOPER_CLEARS_THREAD_INTERRUPTED OVERRIDDEN_THREAD_START_METHOD` 下运行: `sample/` 中的定时器 / `threads` / `sleep` / `exit()` / `events` / UI 模式 / 悬浮窗 / 长时间 `setInterval` 脚本与 a11y 冒烟; 重点验证 `exit()` 与 `threads.shutDownAll()` 能中断 `sleep` 与阻塞查找, `MainThreadProxy` / `TimerThread` 的 `interrupt()` 语义. (DEVICE-37: 用例清单与结果)
+- [ ] 依附录 C 逐个启用 `USE_NEW_MESSAGEQUEUE`, `LOOPER_CLEARS_THREAD_INTERRUPTED`, `OVERRIDDEN_THREAD_START_METHOD`, 先分别测试再组合测试: `sample/` 中的定时器 / `threads` / `sleep` / `exit()` / `events` / UI 模式 / 悬浮窗 / 长时间 `setInterval` 脚本与 a11y 冒烟; 重点验证 `exit()` 与 `threads.shutDownAll()` 能中断 `sleep` 与阻塞查找, `MainThreadProxy` / `TimerThread` 的 `interrupt()` 语义. (DEVICE-37: 用例清单与结果)
 - [ ] 筛查含 `start()` 的 8 个文件, 列出其中的 `Thread` 子类并说明覆写方式; 若确有覆写 `Thread.start()` 的子类, 改为组合或在 `run()` 内完成前置逻辑. (SOURCE)
 - [ ] 文档: 在 `docs/dev/accessibility-architecture.md` 的 "已知平台行为" 或本文附录 F 记录 "Android 17 上脚本反射 `MessageQueue.mMessages` 恒为 null, `static final` 字段反射写入抛 `IllegalAccessException`" 供用户脚本参考; 对 `util.java` / 反射相关文档页评估是否需要提示 (P4). (DOCS)
 
 ### P2.5 后台活动启动 (I5)
 
-- [ ] `AndroidPackageSessionInstaller.kt:173,176`: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED` 改为 `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` (SDK 36+) 并为 `IntentSender` 发送方设置 `ActivityOptions`; `requestPinShortcut(IntentSender)` 三处与 `DrawerFragment.kt:160` 的 `StartIntentSenderForResult` 补发送方 opt-in. (SOURCE)
+- [ ] 逐调用点区分 PendingIntent 的创建方、发送方与目标类型. 安装器 `createPendingIntentOptions()` 是 creator opt-in, token 交给系统 `PackageInstaller.Session.commit()` 发送, 代码明确支持界面离开前台后的确认回调; 保留此需求, 不能直接将 `ALLOW_ALWAYS` 改为 `ALLOW_IF_VISIBLE`. SDK 34 / 35 的 `ALLOWED` 兼容分支也不能改用仅 SDK 36 才存在的常量. 自己实际发送的 Activity token 优先使用可见条件 opt-in. (SOURCE)
+- [ ] `ShortcutUtils` / `external/shortcut/ShortcutManager` 的成功回调使用 `PendingIntent.getBroadcast()`, 先确认是否真的启动 Activity; `DrawerFragment` 的 `StartIntentSenderForResult` 核对 ActivityResult 实际发送路径与 options 传递. 不能看到 `IntentSender` 就统一加 Activity BAL 授权. (SOURCE)
 - [ ] `am compat enable COVER_INTENT_SENDER` + `StrictMode.VmPolicy.detectBlockedBackgroundActivityLaunch()` (debug 构建) 下: 安装 APK 会话, 固定快捷方式, 抽屉的 IntentSender 流程, 脚本从后台 `app.launch` / `app.startActivity` (悬浮窗豁免), 均无 "Background activity launch blocked". (DEVICE-37)
-- [ ] `ASM_RESTRICTIONS` (opt-in) 打开后复测脚本跨应用启动, 结论记录; 不在 manifest 设置 `allowCrossUidActivitySwitchFromBelow`. (DEVICE-37)
+- [ ] `ASM_RESTRICTIONS` 的 dump 含 `enableSinceTargetSdk=37; overridable`, 未含 `disabled`; 核对最终镜像的默认状态与行为后复测跨应用启动, 分别记录默认 / enable / disable 结果, 不把 `overridable` 解释为默认关闭. 是否需要 `allowCrossUidActivitySwitchFromBelow` 由调用链证据决定. (PLATFORM_CONFIG; DEVICE-37)
 - [ ] changelog `fix`. (DOCS)
 
 ### P2.6 网络安全配置 (I6)
 
-- [ ] `am compat enable DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` 下: `http.get` 访问 (a) 公网 HTTPS, (b) 本机自签名 HTTPS 服务 (系统 "用户凭据" 安装其 CA), (c) 私有 CA 签发但未安装的证书; 记录 CT 对用户安装 CA 是否豁免 (UNVERIFIED 项的实测结论). (DEVICE-37)
-- [ ] 按结论与待决 Q2 决定 `network_security_config.xml` 的 `base-config` 是否加 `<certificateTransparency enabled="false"/>` 与 `<domainEncryption>`; 无论如何为 `githubusercontent.com` 域保持 CT 默认. (SOURCE)
-- [ ] 文档: 若保持 CT 开启, 在 `http` 模块文档增加 "Android 17 私有 CA 需安装为用户凭据" 说明 (P4). (DOCS)
+- [ ] 按附录 C 分别启用 CT / ECH 开关. 当前 NSC 仅信任系统 CA, 安装用户 CA 本身不会使其受信任; 先记录 target 36 的证书链基线, 再用独立 debug 域的显式 CA 测试配置区分链验证失败与 CT 失败. 局域网测试先授予 LNP; 默认客户端与 `RequestBuilder.isInsecure` 的自定义 TrustManager 路径分别记录. (SOURCE; DEVICE-37)
+- [ ] 默认保留 CT / ECH 配置. CT 例外只针对已验证的域与信任链, 不因证书不受信任而全局关闭 CT; 当前 `githubusercontent.com` 还含资源 CA, 记录实际验证链. ECH 需当前网络库及对端支持, 仅 target 升级或添加 `<domainEncryption>` 不证明已启用. 依据测试与 Q2 决定必要的局部配置. (SOURCE; DEVICE-37)
+- [ ] 文档说明证书信任、CT、ECH、LNP 是不同条件, 不写成 "安装用户 CA 即可"; 涉及脚本公开行为时同步 P4. ([官方 NSC 文档](https://developer.android.com/privacy-and-security/security-config); DOCS)
 
 ### P2.7 Parcel 与插件 IPC (I7)
 
@@ -237,7 +243,7 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 
 ### P2.8 存储与文件管理器 (I8)
 
-- [ ] `am compat enable EXCLUDE_UNRELIABLE_STORAGE_VOLUMES REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES TRASH_BEHAVIOR_CHANGE` 下: 文件管理器根目录与外部存储卷列举 (`PathChecker`, 含插入 OTG / 模拟 SD 卡的 AVD 配置), 回收站, 版本历史, `files.*` 读写 `/sdcard`, `media.scanFile`, `images.save` 到相册, 相册 / 文档选择器; 记录 `MediaStore` 查询行为差异. (DEVICE-37)
+- [ ] 按附录 C 分别启用 `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` 后: 文件管理器根目录与外部存储卷列举 (`PathChecker`, 含插入 OTG / 模拟 SD 卡的 AVD 配置), 回收站, 版本历史, `files.*` 读写 `/sdcard`, `media.scanFile`, `images.save` 到相册, 相册 / 文档选择器; 先核实各开关实际约束的 provider / API, 再记录行为差异. (DEVICE-37)
 - [ ] 修正与记录; `MANAGE_EXTERNAL_STORAGE` 引导 (`AllFilesAccessPermission`) 在 API 37 上流程不变. (SOURCE / DOCS)
 
 ### P2.9 小组件与通知 (I9)
@@ -251,12 +257,12 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 
 ### P2.11 WebView (I11)
 
-- [ ] `am compat enable ENABLE_USER_AGENT_REDUCTION` 下: 文档页, HTML 预览, `ui.webview` 的 UA 字符串与页面渲染; `WebViewAttributes` 的 `userAgentString` 覆盖仍有效. 文档提示 "Android 17 默认 UA 缩减, 需要完整 UA 时显式设置". (DEVICE-37; DOCS)
+- [ ] `am compat enable ENABLE_USER_AGENT_REDUCTION` 下测试文档页, HTML 预览, `ui.webview` 的默认 / 自定义 UA 与渲染, 记录 OS / target / WebView 版本. 自定义 UA 仍可设置, 但给缩减后的默认 UA 追加后缀不会恢复完整设备信息; 需要详细信息的网页评估 User-Agent Client Hints (官方博客注明 WebView 116+ 且使用默认 UA). ([官方 WebView 说明](https://android-developers.googleblog.com/2024/12/user-agent-reduction-on-android-webview.html); DEVICE-37; DOCS)
 
 ### P2.12 大屏, 输入法与配置变化 (I12)
 
 - [ ] 在 Xiaomi 23046RP50C (API 35, sw >= 600dp) 与 `AVD_API_37` 上以 target 37 覆盖包运行 UI 模式脚本 (含 `activity.setRequestedOrientation`), 悬浮窗, 控制台, 编辑器旋转 / 分屏; 确认与 target 36 行为一致 (宿主无豁免属性, 预期零差异), 旋转后输入法可见性与 `EditActivity` 的 `adjustResize` 表现. (DEVICE; DEVICE-37)
-- [ ] 复核 `MainActivity` / `EditActivity` / `LogActivity` 的 `configChanges` 在 "更少 Activity 重建" 规则下无重复处理; 无改动则记录. (SOURCE)
+- [ ] 复核 `MainActivity` / `EditActivity` / `LogActivity` 的 `configChanges` 与 IME 恢复, 记录 Activity 重建 / `onConfigurationChanged` 次数; "更少 Activity 重建" 的具体触发条件补官方或源码证据后再确认. UI 脚本还需测试物理键盘、触摸板捕获、返回与边到边布局, 不以 Java / Kotlin 编译通过代替输入行为验证. (SOURCE; DEVICE-37)
 
 ### P2.13 内存上限 (I13)
 
@@ -269,8 +275,15 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 ### P2.15 低影响项逐项验证 (I15)
 
 - [ ] 对 `BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`, `MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, `RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` (截图 `images.captureScreen` 经 MediaProjection), `DEPRECATE_SET_CONTENT_CAPTURE_ENABLED`, `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL`, `BACK_DISPOSITION_CONTROLS_BACK_INTERCEPTION`, `DETECT_IMPLICIT_URI_PERMISSION_GRANT` (加 `detectImplicitUriPermissionGrant()` 检查 `app.viewFile` / 分享路径, 为 Android 18 预备), 在附录 B 对应行填 "已验证无影响" 或转为独立条目. (DEVICE-37)
+- [ ] 为第 3.2 节的未确认项建立结论表: a11y (`AccessibilityService`, `AccessibilityNodeInfo`, 事件 / 手势 / 全局动作 / 截图), MediaProjection (每会话授权 / 回调 / resize / FGS), overlay (显示 / 触摸 / 后台启动), JobScheduler / WorkManager / 闹钟, 通知 / WebView, 最低可安装 target. 每行给 API diff 或专题文档 URL、宿主调用点、运行用例和结论; 文档未提及与尚未测试单列. 已知 Android 14-16 规则不能标作 Android 17 新规. (SOURCE; DOCS; DEVICE-37)
+- [ ] a11y 事件补测 CJKV 输入法的 `TYPE_VIEW_TEXT_CHANGED` 组合 / 提交过程, 关注 `getTextChangeTypes()` 新信息及已有监听器兼容性; 不因 `android.accessibilityservice` 包本身未发现差异而忽略 `android.view.accessibility`. 仅当脚本 API 暴露新字段时同步文档 / d.ts. ([官方目标版本变更](https://developer.android.com/about/versions/17/behavior-changes-17); DEVICE-37)
 
-P2 验收: I1-I15 每项在附录 B 有结论; target 37 覆盖包在 `AVD_API_37` 通过 P2.1-P2.5 的全部用例; 同一代码的正常 debug 包在 API 28 / 33 / 35 真机上跑 a11y 冒烟与 VS Code 连接无退化; changelog 条目齐备.
+### P2.16 inrt 切换前适配 (D3)
+
+- [ ] 在仍保留 `TARGET_SDK_VERSION_INRT=29` 的代码上, 用 P0.2 的 target 37 debug 覆盖包提前执行 P3.3 清单, 完成 inrt 专属权限 / 存储 / 启动流程的适配; 正常 target 29 包同步回归. P3.3 是最终验收表, 不能等提交 target 37 后才首次排查这些差异. (SOURCE; DEVICE-37)
+- [ ] 无关存储的 assets / 私有目录脚本在拒绝 "所有文件访问" 时仍可启动; 需要共享存储的脚本在缺少授权时得到明确引导. 测试取消授权、返回设置、永久拒绝、无 launcher 入口、开机启动, 不把权限请求回调到达视为授权成功. (DEVICE-37)
+
+P2 验收: I1-I15 与 P2.16 每项有结论, 附录 B 对应行回填; target 37 覆盖包在 `AVD_API_37` 通过 P2.1-P2.5 与 inrt 专属用例; 同一代码的正常 debug 包在 API 28 / 33 / 35 真机上跑 a11y 冒烟与 VS Code 连接无退化; changelog 条目齐备. 已知平台限制单独记录, 不计为对应功能通过.
 
 ---
 
@@ -281,7 +294,7 @@ P2 验收: I1-I15 每项在附录 B 有结论; target 37 覆盖包在 `AVD_API_3
 ### P3.1 切换
 
 - [ ] `version.properties`: `TARGET_SDK_VERSION=37`, `TARGET_SDK_VERSION_INRT=37`; 移除 P0.2 覆盖开关的使用 (开关本身保留). (SOURCE)
-- [ ] manifest 复核: `requestLegacyExternalStorage` 对 target >= 30 无效但对旧版升级无害, 按待决 Q4 决定是否增加 `preserveLegacyExternalStorage="true"` (仅影响 inrt 用户 APK 从 29 升级到 37 的存储保留); `tools:targetApi` 是否需要调整由 lint 决定. (SOURCE; LINT)
+- [ ] manifest 复核: 在 Android 11+ 且 target >= 30 时 `requestLegacyExternalStorage` 失效. `preserveLegacyExternalStorage` 是既有安装的数据迁移机制, 不保证 target 29 -> 37 在所有系统上保留访问, 也不覆盖首次安装 / 卸载重装; 按 Q4 与升级测试决定是否使用, 仅作用于 inrt. `tools:targetApi` 是否需要调整由 lint 决定. (SOURCE; LINT)
 - [ ] 出包与门禁同 P1 (`aapt2` 显示 app 与 inrt 均 `targetSdkVersion:'37'`); 单元测试全量; lint 对比 P1 结果. (ANDROID_BUILD; JVM; LINT)
 
 ### P3.2 宿主回归矩阵
@@ -296,17 +309,17 @@ P2 验收: I1-I15 每项在附录 B 有结论; target 37 覆盖包在 `AVD_API_3
 
 | 等级 | 对打包应用的增量 | 验证 |
 | --- | --- | --- |
-| 30 | 分区存储强制 (`requestLegacyExternalStorage` 失效): 脚本读写 `/sdcard` 需 `MANAGE_EXTERNAL_STORAGE`; `SplashActivity.kt:76` 目前只申请 `WRITE_EXTERNAL_STORAGE` (>= 33 无意义) | 首次启动引导 "所有文件访问" (待决 Q4); `files.read("/sdcard/...")` 在授予前后 |
+| 30 | 分区存储强制: 任意共享路径的直接文件访问需评估所有文件访问权限; 应用专属目录 / MediaStore / SAF 各有规则, `MANAGE_EXTERNAL_STORAGE` 也不等于可访问任意其它应用私有目录. `SplashActivity.kt:76` 仍只申请旧存储权限 | 按脚本实际需要引导 (Q4); 授予 / 拒绝后的共享路径与私有目录脚本各测 |
 | 30 | 包可见性 (`<queries>` 已在共用 manifest, 且声明 `QUERY_ALL_PACKAGES`) | `app.launch` / `app.getAppName` 任意包 |
 | 31 | 组件 `exported` 显式化 (共用 manifest 已满足); `PendingIntent` 可变性 (代码已按 36 处理); 后台启动前台服务限制 (`FGS_BG_START_RESTRICTION_CHANGE_ID`; `BOOT_COMPLETED` 属豁免); 精确闹钟权限 (`SCHEDULE_EXACT_ALARM` + 已声明的 `USE_EXACT_ALARM`); 系统启动画面叠加在自定义 `SplashActivity` 之前; 通知跳板限制 | 开机自启 (`InrtBootCompletedReceiver`), 定时任务, 启动画面观感 |
-| 33 | `POST_NOTIFICATIONS` 运行时权限 (前台服务通知不可见但服务可运行); 细分媒体权限; `WRITE_EXTERNAL_STORAGE` 申请必然被拒 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`), 去掉无效的存储申请 |
+| 33 | `POST_NOTIFICATIONS` 运行时权限; 拒绝时前台服务通知在通知栏不可见但服务仍需合法通知及启动条件; 细分媒体权限; 旧 `WRITE_EXTERNAL_STORAGE` 不能代替共享存储授权 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`), 按系统 / target 移除无效存储申请 |
 | 34 | 前台服务类型必填 (已声明); 运行时注册接收器需导出标志 (共用代码); 隐式 Intent 只匹配已导出组件; `Thread.stop` 不可用; 动态加载 DEX 只读 (`AndroidClassLoader` 已处理); MediaProjection 每次会话授权 + 回调 | `runtime.loadDex`, 截图, `events.broadcast` |
 | 35 | 边到边强制 (UI 模式脚本布局); 前台服务 `dataSync` / `mediaProcessing` 超时 (未用); `BOOT_COMPLETED` 禁止启动部分类型前台服务 (`specialUse` 允许); 悬浮窗不再豁免后台启动前台服务 (`FGS_SAW_RESTRICTIONS`, 仅可见悬浮窗豁免); 最低可安装 targetSdk 24 | UI 模式脚本顶部内容, 开机自启后的前台服务 |
 | 36 | 预测性返回默认开启 (`onBackPressed` 不再回调, 共用 `BackCompat`); 边到边豁免移除; 大屏忽略方向; Intent 重定向保护; `announceForAccessibility` 弃用 | 打包应用的 `LogActivity` / `SettingsActivity` 返回, 平板方向 |
 | 37 | P2 全部条目, 其中本地网络权限与后台音频对打包应用最直接 (脚本自建 HTTP 服务 / TTS) | 复用 P2.1 / P2.2 的用例 |
 
 - [ ] 依上表逐行验证并修正 inrt 专属流程 (`SplashActivity` 权限引导, `fragment_preferences_inrt.xml` 的开关顺序与默认值). (SOURCE; DEVICE-37; DEVICE)
-- [ ] 旧版升级: 用 target 29 的旧模板打一个示例 APK 装到 API 33 真机与 `AVD_API_37`, 再用 target 37 的新模板覆盖安装, 验证脚本文件与 `/sdcard` 数据可继续访问 (待决 Q4 的 `preserveLegacyExternalStorage`). (DEVICE; DEVICE-37)
+- [ ] 安装矩阵: 用相同 applicationId / 签名、递增 versionCode 的示例 APK 测 target 29 -> 37 覆盖安装, 并另测 target 37 首次安装 / 卸载重装, 两者不能共享成功结论. API 30 设备或 AVD、API 33 真机与 `AVD_API_37` 分别记录旧文件位置、已有授权、升级后的实际访问及迁移结果. `preserveLegacyExternalStorage` 不能替代新安装的权限引导. ([官方迁移说明](https://developer.android.com/training/data-storage/use-cases); DEVICE; DEVICE-37)
 - [ ] 打包器 UI (`ui/project/BuildActivity`, `ProjectConfigActivity`) 与文档说明打包应用在 Android 11+ 的存储引导. (DOCS)
 
 ### P3.4 打包链路与 Runtime Kit
@@ -316,7 +329,7 @@ P2 验收: I1-I15 每项在附录 B 有结论; target 37 覆盖包在 `AVD_API_3
 
 ### P3.5 文档与提交
 
-- [ ] changelog: P2 各条目的 `fix` / `improvement` 汇总核对 (D9), README 重新生成; 本文回填. (DOCS)
+- [ ] changelog: 按 D9 记录宿主 targetSdk 36 -> 37 与 inrt 29 -> 37 的实际变化, 核对 P2 的 `fix` / `improvement`, README 重新生成; 本文回填. (DOCS)
 - [ ] 提交 `chore(sdk): raise targetSdk to 37 for app and inrt (roadmap P3)`. (DOCS)
 
 P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 35 / 33 上安装运行; CI 绿.
@@ -335,15 +348,15 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ## P5: 官方插件舰队 (42 仓)
 
-目标: 每个插件 `compileSdk` / `targetSdk` 均为 37, 暴露项已适配, 各自 changelog / README / 版本号更新. 逐仓清单与暴露列见附录 E; 本节按分组给出条目模板与分组特有事项.
+目标: 每个插件 `compileSdk` / `targetSdk` 均为 37, 暴露项已适配, 各自 changelog / README / 版本号更新. 逐仓清单与暴露列见附录 E; 每仓都需独立记录 C (compile), T (target), V (验证), D (版本与文档) 四项状态, 不能只用分组的一次勾选代替 42 仓验收.
 
 ### P5.0 每仓通用条目 (复制到附录 E 对应行的证据栏)
 
 1. 工作区: 若附录 E "脏" 列非 0, 先由维护者提交或搁置既有改动 (D11). (SOURCE)
-2. compileSdk: `COMPILE_SDK_VERSION=37`; 构建 (`assembleDebug` / `assembleRelease`), 单元测试, 既有门禁 (16 KB `verifyNativePageAlignment`, 各仓库自有校验); 修正弃用. (ANDROID_BUILD; JVM)
+2. compileSdk: 核查 `version.properties` 到各构建脚本的实际消费链后设为 37, 包含 app / Android library / lint 配置; R8-Compiler 硬编码例外见 P5.3. 构建 (`assembleDebug` / `assembleRelease`), 单元测试, 既有门禁 (16 KB `verifyNativePageAlignment`, 各仓库自有校验); 修正弃用并核对 APK 元数据. (ANDROID_BUILD; JVM)
 3. 暴露适配: 按附录 E 暴露列处理 (本地网络 -> 复用 P2.1 权限助手模式; 动态加载 -> 只读; 前台服务 / 音频 -> P2.2 结论; 屏幕捕获 -> P2.15 结论; WebView -> P2.11 结论). (SOURCE)
 4. targetSdk: `TARGET_SDK_VERSION=37`; 在 `AVD_API_37` 与一台 4 KB 真机 (API 33 或 35) 上跑该插件的 instrumentation / 冒烟 (16 KB Roadmap 用过的 `*DeviceTest`, `ocr_provider_smoke.py` 等). (DEVICE-37; DEVICE)
-5. 版本递增 (各仓库惯例), changelog `dependency` "升级 Android SDK 版本 36 -> 37" + 适配条目, README 重新生成, 单独提交. (DOCS)
+5. 版本递增 (各仓库惯例), changelog 按 D9 与各仓库规则记录已完成的 compile / target 步骤及适配, README 重新生成, 单独提交. (DOCS)
 6. 发布节奏按待决 Q6.
 
 ### P5.1 被宿主进程加载 (OpenCV, Image-Quantization)
@@ -360,15 +373,16 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 - [ ] 通用条目; 动态加载只读: Node 的 `.node` 原生扩展与用户项目内的 `.so`, Bun 的 `libbun_exec.so` (exec 路径不受 `dlopen` 规则影响, 但其 `dlopen` 用户库需只读), Python (Chaquopy 解压到私有目录的扩展模块), Java / Kotlin / DEX / R8 编译产物的 DEX 加载 (`DexClassLoader` 前 `setReadOnly`), 逐仓 grep `System.load` / `dlopen` / `DexClassLoader` 并在 `THROW_ERROR_FOR_WRITABLE_DCL` 下复测. (SOURCE; DEVICE-37)
 - [ ] 本地网络: 在插件进程内执行脚本时打开局域网 socket (Node `http.createServer`, Bun `Bun.serve`, Python `socket`) 需要各插件自身的 `ACCESS_LOCAL_NETWORK` (权限按 UID, 宿主授权不覆盖插件); 三个带 `INTERNET` 的运行时 (Node, Bun, Python) 声明权限并在宿主转发的错误中提示 "在插件设置中授予". (SOURCE; DEVICE-37)
 - [ ] 内存上限与 MessageQueue: 各运行时若使用 Android Looper, 在 `USE_NEW_MESSAGEQUEUE` 下复测; 大负载脚本观察 `am memory-limiter status`. (DEVICE-37)
-- [ ] Bun-Runtime 顺带把 `autojs6-platform-versions` 从 1.7.4 升到 1.8.0 (与舰队一致, 不是本 Roadmap 的必需项, 但同仓库改动时一并完成). (SOURCE)
+- [ ] R8-Compiler: `app/build.gradle.kts` 与两个 plugin-api 模块硬编码 compileSdk 36, app 的 targetSdk 以及 library lint target 也为 36; 先统一版本来源再执行通用条目. app 的 versionCode / versionName 同样硬编码, 按该仓实际发布约定递增. 另外核查固定 `r8-library/android-36.jar` 及 SHA-256: 插件自身 compileSdk 提升不会更新脚本编译所用的平台库, 必须记录对 API 37 输入 / 符号的支持边界及相关测试. (SOURCE; JVM; ANDROID_BUILD)
+- [ ] Bun-Runtime: 验证当前 1.7.4 平台插件是否正确解析 API 37; 只有阻碍本次构建时才升级到经验证版本, 否则遵循 D7 保持版本并将可选升级留到后续. (SOURCE; ANDROID_BUILD)
 
 ### P5.4 网络, 媒体与屏幕插件 (MCP-Server, Screen-Color-Picker, Three-Ember-Player, Three-Terra-Player, Three-Stone-AI, HTML-Previewer, Markdown-Previewer, Offline-Docs, Ace-Editor)
 
 - [ ] MCP-Server: 局域网 SSE / Streamable 服务端需要 `ACCESS_LOCAL_NETWORK` (入站 accept 也受限); 插件设置页增加权限引导, 服务启动前检查; `specialUse` 前台服务不变; 在 `AVD_API_37` 上用 Inspector / Claude Code 走一次完整配对 (复用 MCP Roadmap 的 P3.1 验收流程). (SOURCE; DEVICE-37)
 - [ ] Screen-Color-Picker: `mediaProjection` 前台服务 + 悬浮窗; `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` 下取色通过. (DEVICE-37)
 - [ ] Three-Ember / Three-Terra: `mediaPlayback` 前台服务在后台音频强化 (target 37 需 while-in-use) 下的启动时机; `cmd audio set-enable-hardening throw` 复测播放 / 列表切换 / 锁屏. (DEVICE-37)
-- [ ] Three-Stone-AI: 若 LiteRT-LM 使用 NPU 委托, 声明 `<uses-feature android:name="android.hardware.npu" android:required="false"/>` (target 37 要求, VERIFIED); 内存上限下的推理. (SOURCE; DEVICE-37)
-- [ ] HTML / Markdown 预览, Offline-Docs, Ace-Editor: WebView UA 缩减与 File System Access 下渲染正常; LSP / 本地文档服务走回环不受本地网络权限影响, 记录结论. (DEVICE-37)
+- [ ] Three-Stone-AI: 官方 [Android 17 总览](https://developer.android.com/about/versions/17/summary) 列出 target 37 使用 NPU 需要声明 `android.hardware.npu` (VERIFIED). 若 LiteRT-LM 实际使用 NPU 委托, 添加可选特性声明并测试无 NPU 设备回退; 另测内存上限下的推理. 目标版本主页面未展开该项, 不凭章节缺失忽略总览要求. (SOURCE; DEVICE-37)
+- [ ] HTML / Markdown 预览, Offline-Docs, Ace-Editor: WebView UA 缩减与 File System Access 下渲染正常; 同 profile 的 LSP / 本地文档回环验证与跨 profile 限制分开记录. (DEVICE-37)
 
 ### P5.5 其余插件 (MLKit-Barcode, MLKit-OCR, Yolo-NCNN, MediaInfo, OpenCC, ImGui, Archive-Manager, Image-Tools, Image-Viewer, File-Inspector, APK-Inspector, Pinyin, Pinyin4j, Accessibility-Compat)
 
@@ -391,9 +405,9 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | 编号 | 事项 | 选项 | 推荐 |
 | --- | --- | --- | --- |
 | Q1 | 本地网络权限的申请时机 (P2.1) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a): 与既有 "按功能引导权限" 的模式一致, 不打扰不用局域网功能的用户 |
-| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持平台默认开启, 仅文档说明; (b) `base-config` 关闭 CT 以保住私有 CA 脚本场景; (c) 按 P2.6 实测决定: 用户安装 CA 豁免则 (a), 否则 (b) | (c) |
+| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), 有证据时 (b); 复核修正原推荐的全局关闭方案 |
 | Q3 | 后台音频策略 (P2.2) | (a) 保持前台服务常驻模式 + 诊断警告; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | (a): 改动最小, 且脚本音频并非媒体应用语义 |
-| Q4 | inrt 存储引导与旧版升级保护 (P3.3) | (a) 首次启动引导 "所有文件访问" 且 manifest 增加 `preserveLegacyExternalStorage="true"`; (b) 仅设置页开关, 不引导; (c) 引导但不加保留属性 | (a): 打包应用的脚本几乎都读写 `/sdcard`, 旧版升级不应丢失访问 |
+| Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a): 无共享存储需求的脚本允许跳过, 拒绝权限后仍有可理解的结果 |
 | Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a): AutoJs6 是自动化工具, 声明会与其定义不符 |
 | Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (a) |
 | Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (a): Android 17 未强制, 与 SDK 升级解耦 |
@@ -406,7 +420,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 
 | 变更 (ID) | 含义 | 宿主影响 | 条目 | 结论 |
 | --- | --- | --- | --- | --- |
-| `ASM_RESTRICTIONS` (230590090, overridable) | Activity 安全模型 (任务劫持保护), target 37 起可 opt-in, 默认关闭 (VERIFIED) | 脚本跨应用启动 Activity | P2.5 | |
+| `ASM_RESTRICTIONS` (230590090, overridable) | dump 为 target 37 门控且未标 disabled (PLATFORM_CONFIG); `overridable` 不等于默认关闭, 完整行为与有效状态待核验 (UNVERIFIED) | 脚本跨应用启动 Activity | P2.5 | |
 | `BACK_DISPOSITION_CONTROLS_BACK_INTERCEPTION` (454542168) | 输入法 `setBackDisposition` 决定是否拦截返回 (UNVERIFIED) | 无 (非输入法) | P2.15 | |
 | `BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION` (401333807) | Bluetooth 绑定类 API 需要特权权限 (UNVERIFIED) | 脚本蓝牙 API (代码内无 `createBond`) | P2.15 | |
 | `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` (378605160) | 创建镜像虚拟显示需权限检查 (UNVERIFIED) | `ScreenCapturer.java:284-289` 经 MediaProjection 创建 `AUTO_MIRROR` 显示 | P2.15 | |
@@ -449,20 +463,57 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 
 ## 附录 C: 命令与参考
 
-- 兼容开关 (仅 debuggable 构建可用):
-  - `adb -s <serial> shell am compat enable|disable|reset <CHANGE_NAME|ID> org.autojs.autojs6`; `adb shell am compat reset-all org.autojs.autojs6`
-  - `adb shell dumpsys platform_compat` (全量清单); `adb logcat | grep CompatibilityChangeReporter` (运行时报告)
-  - 开发者选项 > App Compatibility Changes 有同样的开关
-- 后台音频: `adb shell cmd audio set-enable-hardening enable|disable|throw`; `adb shell dumpsys audio | grep -A3 AudioHardening`
-- 内存上限: `adb shell am memory-limiter status`; `am memory-limiter ignore <uid>|none|all`; `am memory-limiter manual <pid> <MB>|max|none`
-- 本地网络 (Android 16 设备上模拟): `adb shell am compat enable RESTRICT_LOCAL_NETWORK <pkg>` 后重启; Android 17 上直接用 target 37 覆盖包 + `pm grant <pkg> android.permission.ACCESS_LOCAL_NETWORK` / `pm revoke`
-- StrictMode (debug 构建): `VmPolicy.Builder().detectBlockedBackgroundActivityLaunch().detectImplicitUriPermissionGrant()`; logcat 关键字 "Background activity launch blocked", "Please set the grant explicitly in the app"
-- 短信: `adb -s emulator-5554 emu sms send 10086 "验证码 123456"`
-- 出包核对: `%ANDROID_HOME%/build-tools/37.0.0/aapt2 dump badging app.apk | findstr /C:"compileSdkVersion" /C:"targetSdkVersion"`
-- lint: `./gradlew :app:lintAppDebug :app:lintVitalAnalyzeAppRelease :app:lintVitalAnalyzeInrtRelease`; 报告 `app/build/reports/lint-results-*.html`
-- 探针 / 基线编译 (P0 用法): `./gradlew --offline --continue --console=plain "-Pkotlin.daemon.jvmargs=-Xmx6g" :app:compileAppDebugKotlin :app:compileAppDebugJavaWithJavac compileDebugKotlin compileDebugJavaWithJavac`
-- 模拟器: `emulator -avd AVD_API_37 -no-snapshot-save` (`android-37.0;google_apis_ps16k;x86_64`, `getconf PAGE_SIZE` 为 16384); `adb shell getprop ro.build.version.sdk` 应为 37
-- 官方参考 (2026-09-13 核对): https://developer.android.com/about/versions/17/behavior-changes-17 ; https://developer.android.com/about/versions/17/behavior-changes-all ; https://developer.android.com/about/versions/17/migration ; https://developer.android.com/privacy-and-security/local-network-permission ; https://developer.android.com/about/versions/17/changes/bg-audio ; https://developer.android.com/about/versions/17/changes/messagequeue ; https://developer.android.com/about/versions/17/changes/ff-restrictions-ignored ; https://developer.android.com/guide/components/activities/background-starts ; https://developer.android.com/guide/app-compatibility/test-debug ; https://developer.android.com/build/releases/about-agp (API 37.0 -> AGP 9.1.1) ; https://developer.android.com/google/play/requirements/target-sdk
+下列示例使用本工作区的 PowerShell. 先按 `adb devices -l` 替换序列号, 再从所测 APK / `dumpsys package` 确认包名; inrt 与各插件不能沿用宿主包名. `adb` / `aapt2` 若不在 PATH, 使用本机 SDK 的完整路径.
+
+兼容开关每次仅接受一个 change 与一个 package. 先保存已有 override; 以下 `reset` 只适用于测试前没有该项 override 的包, 有则恢复原值. 普通设备上使用 debuggable 测试包; 具体可切换范围还受设备构建类型与 change 属性限制. 详见 [Compatibility framework tools](https://developer.android.com/guide/app-compatibility/test-debug).
+
+```powershell
+$Sdk37Serial = 'emulator-5554' # 替换为 adb devices 中已确认的 API 37 设备
+$Sdk37Package = 'org.autojs.autojs6' # 替换为待测 APK 的 applicationId
+$Sdk37Change = 'USE_NEW_MESSAGEQUEUE'
+adb -s $Sdk37Serial shell getprop ro.build.version.sdk
+adb -s $Sdk37Serial shell dumpsys package $Sdk37Package
+adb -s $Sdk37Serial shell dumpsys platform_compat
+adb -s $Sdk37Serial shell am compat enable $Sdk37Change $Sdk37Package
+adb -s $Sdk37Serial shell am compat disable $Sdk37Change $Sdk37Package
+adb -s $Sdk37Serial shell am compat reset $Sdk37Change $Sdk37Package
+```
+
+上面展示 enable / disable / reset 三种独立操作; 实际测试在每次切换后重新运行用例并记录, 不连续执行三条后再测试. 多个开关应逐个调用, 例如组合测试的启用步骤:
+
+```powershell
+$Sdk37Changes = @('USE_NEW_MESSAGEQUEUE', 'LOOPER_CLEARS_THREAD_INTERRUPTED', 'OVERRIDDEN_THREAD_START_METHOD')
+foreach ($Sdk37Change in $Sdk37Changes) {
+    adb -s $Sdk37Serial shell am compat enable $Sdk37Change $Sdk37Package
+    if ($LASTEXITCODE -ne 0) { throw "Cannot enable $Sdk37Change for $Sdk37Package" }
+}
+# 完成用例后逐项恢复原 override; 原来没有覆盖时用 reset.
+```
+
+P2 中简写 `am compat enable CHANGE` 均表示用上述形式补全 adb, serial 与实际 package. `reset-all` 仅用于原先没有其它测试 override 的专用包. 开发者选项 > App Compatibility Changes 可检查同一组变更; `dumpsys` 的静态列表不是功能通过证据.
+
+Android 17 本地网络权限, 必须先在 manifest 声明并安装 target 37 包:
+
+```powershell
+adb -s $Sdk37Serial shell pm revoke $Sdk37Package android.permission.ACCESS_LOCAL_NETWORK
+# 运行拒绝场景.
+adb -s $Sdk37Serial shell pm grant $Sdk37Package android.permission.ACCESS_LOCAL_NETWORK
+# 重启待测功能, 运行授权场景; 另测真实 UI 申请及再次撤销.
+```
+
+Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程按 [本地网络权限指南](https://developer.android.com/privacy-and-security/local-network-permission) 执行; 不把 API 37 的新权限 grant 命令用于 API 36.
+
+- 音频: `adb -s $Sdk37Serial shell cmd audio set-enable-hardening throw`, 状态通过 `adb -s $Sdk37Serial shell dumpsys audio` 与 logcat 检查. 这是全设备诊断模式, 会覆盖默认 target / 闹钟差异; `disable` 是关闭限制, 不等于恢复出厂默认. 在可恢复的专用 AVD 记录并恢复原状态, 默认规则的验收另跑一轮.
+- 内存: `adb -s $Sdk37Serial shell am memory-limiter status`; 对具体 PID 使用 `manual <pid> <MB>` 测试, 完成后 `manual <pid> none` 恢复该 PID 的默认限制. `ignore all` 影响全设备, 不作为常规迁移步骤.
+- StrictMode: debug 构建中以 API >= 36 调用 `detectBlockedBackgroundActivityLaunch()`, API >= 37 调用 `detectImplicitUriPermissionGrant()`, 配合 `penaltyLog()` / `build()` 安装策略; 不在旧系统无条件链接调用新方法.
+- 短信: `adb -s $Sdk37Serial emu sms send 10086 "OTP 123456"` (仅模拟器); 记录实际 OTP 检测与 3 小时窗口, 不把未检测为 OTP 的普通短信视为保护机制失效.
+- APK 核对 (本机): `& 'E:/.android/sdk/build-tools/37.0.0/aapt2.exe' dump badging '<实际 APK 路径>'`. 检查 `compileSdkVersion`, `targetSdkVersion`, `sdkVersion`, package; inrt / 插件 / 用户生成 APK 分别保留结果.
+- lint: P0.2 先落实有效入口, 再独立执行 app debug 与 app / inrt release 检查. 不直接依赖当前被禁用的 `lintVitalAnalyze*Release`; 证据须包含新报告及任务执行状态.
+- 单元测试: `./gradlew :app:testAppDebugUnitTest testDebugUnitTest :app:compileAppDebugAndroidTestKotlin`; 核查任务覆盖列表与测试报告, 不带 `--tests` 过滤时才代表全量宿主单元测试.
+- 历史探针任务: `./gradlew --offline --continue --console=plain "-Pkotlin.daemon.jvmargs=-Xmx6g" :app:compileAppDebugKotlin :app:compileAppDebugJavaWithJavac compileDebugKotlin compileDebugJavaWithJavac`. 这些任务不包括完整 inrt / release 验证. 恢复临时 SDK 配置时只恢复本次修改的键, 保留构建自增 / 用户修改的其它属性.
+- 模拟器: 先记录既有 adb 设备; 若启动专用 AVD, 用 `-no-snapshot-save`, 后台辅助进程使用隐藏窗口. 用 `adb -s $Sdk37Serial shell getconf PAGE_SIZE` / `getprop ro.build.version.sdk` 记录页大小与 API, 只关闭本次启动的模拟器.
+
+官方参考按主题使用: [目标版本变更](https://developer.android.com/about/versions/17/behavior-changes-17), [所有应用变更](https://developer.android.com/about/versions/17/behavior-changes-all), [迁移清单](https://developer.android.com/about/versions/17/migration), [MessageQueue](https://developer.android.com/about/versions/17/changes/messagequeue), [大屏限制](https://developer.android.com/about/versions/17/changes/ff-restrictions-ignored), [后台 Activity 安全](https://developer.android.com/guide/components/activities/secure-bal), [AGP / API 兼容表](https://developer.android.com/build/releases/about-agp), [Play 目标版本要求](https://developer.android.com/google/play/requirements/target-sdk). 具体核验范围与取页失败见 [复核记录](evidence/android-sdk-37-review-20260913.md).
 
 ---
 
@@ -471,13 +522,15 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | 标签 | 可以证明 | 不能证明 |
 | --- | --- | --- |
 | `SOURCE` | 源码 / 配置 / 脚本存在, 结构符合设计 | 编译或行为正确 |
+| `PLATFORM_CONFIG` | 指定镜像中存在某 change / ID / 默认门控配置 | 行为语义, 某包实际执行路径, 功能通过 |
 | `JVM` | Android-free 逻辑的单元测试 (JUnit4, 无 Robolectric) | 真机行为 |
+| `ANDROID_COMPILE` | 指定 variant 的 Kotlin / Java 编译任务通过 | 完整 APK, release R8, lint, 未编译的 variant, 运行时行为 |
 | `ANDROID_BUILD` | `assemble*` / `generateRuntimeKit` 通过且 16 KB 门禁通过 (或 CI 绿) | 真机行为 |
-| `LINT` | lint 报告与基线 diff 已记录, 无新增 error / fatal | 运行时行为 |
+| `LINT` | 检查未被跳过, 新报告与基线 diff 已记录, 无新增 error / fatal | `SKIPPED` / `abortOnError=false` 下仅凭构建成功不能证明无问题; 不能证明运行时行为 |
 | `DEVICE` | 指定 4 KB 真机与 API 级别 (28 / 31 / 33 / 35) 上的冒烟通过 | Android 17 行为 |
 | `DEVICE-37` | `AVD_API_37` (或 Android 17 真机, 注明型号) 上, 注明 targetSdk (36 + 覆盖 / 37) 与打开的兼容开关, 冒烟通过 | 未列出设备 / 开关组合 |
 | `DEVICE-16K` | `aj6-ps16k-37-x86_64` 上安装无兼容模式警告 | - |
-| `DOCS` | changelog / README / 文档 / d.ts / 本文已更新且版本号已递增 | - |
+| `DOCS` | 本条所要求的文档 / changelog / d.ts 已更新, 需要生成或递增的产物已完成 | 未执行的构建 / 设备用例; 纯 roadmap 修订不要求版本递增 |
 
 条目勾选时在其后追加证据, 格式示例: `[x] ... (DEVICE-37: AVD_API_37, target 37 覆盖包, compat USE_NEW_MESSAGEQUEUE on, 12/12 用例; commit abc1234)`.
 
@@ -485,16 +538,16 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 
 ## 附录 E: 插件舰队矩阵
 
-"暴露" 列取自各仓库 manifest 扫描 (2026-09-13): 前台服务类型, 悬浮窗 (`SYSTEM_ALERT_WINDOW`), `INTERNET`, `MANAGE_EXTERNAL_STORAGE`, 以及已知的进程模型; "脏" 为工作区未提交文件数. 阶段与分组对应 P5.x. "证据" 列在落地时回填 (提交 hash / 设备).
+"暴露" 列取自各仓库 manifest 扫描 (2026-09-13): 前台服务类型, 悬浮窗 (`SYSTEM_ALERT_WINDOW`), `INTERNET`, `MANAGE_EXTERNAL_STORAGE`, 以及已知的进程模型; "脏" 为初稿快照中的未提交文件数, 每仓开工时刷新. SDK 数值先来自属性文件, 已核实的构建脚本覆盖值在下表修正, 其余均以实际产物最终确认. 阶段与分组对应 P5.x. "证据" 列按 `C / T / V / D` 分别回填状态、提交 hash 与设备 (见 P5), 不将整个分组一次性勾选.
 
 | 仓库 | compile / target / min | 平台插件 | 进程模型 | 暴露 | 脏 | 阶段 | 证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenCV | 36 / 36 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | |
 | Image-Quantization | 36 / 36 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | |
 | Paddle-OCR-PP-OCRv3 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 40 | P5.2 | |
-| Paddle-OCR-PP-OCRv4 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
-| Paddle-OCR-PP-OCRv5 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
-| Paddle-OCR-PP-OCRv6 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
+| Paddle-OCR-PP-OCRv4 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
+| Paddle-OCR-PP-OCRv5 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
+| Paddle-OCR-PP-OCRv6 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
 | Rapid-OCR-PP-OCRv3 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 45 | P5.2 | |
 | Rapid-OCR-PP-OCRv6 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 56 | P5.2 | |
 | APK-Builder-Template | 36 / 36 / 24 | 1.8.0 | 插件进程 (打包) | 模板 targetSdk 期望, CI 断言 | 0 | P5.2 | |
@@ -507,7 +560,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | Java-Runtime | 36 / 36 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | |
 | Kotlin-Runtime | 36 / 36 / 26 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | |
 | DEX-Compiler | 36 / 36 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX 产物) | 0 | P5.3 | |
-| R8-Compiler | 36 / 36 / - | 1.8.0 | 插件进程 | 动态加载 (DEX 产物) | 0 | P5.3 | |
+| R8-Compiler | 36 / 36 / 24 (硬编码) | 1.8.0 | 插件进程 | 动态加载 (DEX 产物), 固定 android-36.jar | 0 | P5.3 | |
 | MCP-Server | 36 / 36 / 24 | 1.8.0 | 插件进程 | INTERNET (本地网络服务端), `specialUse` 前台服务 | 0 | P5.4 | |
 | Screen-Color-Picker | 36 / 36 / 24 | 1.8.0 | 插件进程 | `mediaProjection` 前台服务, 悬浮窗 | 0 | P5.4 | |
 | Three-Ember-Player | 36 / 36 / 24 | 1.8.0 | 插件进程 | `mediaPlayback` 前台服务, INTERNET, 后台音频 | 0 | P5.4 | |
@@ -540,7 +593,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 - androidx.activity 1.14.0-alpha02 起 Compose 系列库要求 compileSdk 37.1 (次级 SDK); 届时需要 `compileSdk { version = release(37) { minorApiLevel = 1 } }` 语法, `Versions.kt` 与 `autojs6-platform-versions` 数据表都要支持 "37.1" 形式. 本机尚未安装 `platforms;android-37.1`.
 - `usesCleartextTraffic="true"` 已被官方标记为未来移除, 应把允许明文的域迁入 `network_security_config.xml` (待决 Q7 选 (a) 时记于此).
 - Android 18 起 `ACTION_SEND` / `ACTION_IMAGE_CAPTURE` 不再隐式授予 URI 权限, P2.15 的 `detectImplicitUriPermissionGrant()` 检查结果可提前修正.
-- `FingerprintManager` 包在 API 37 已移除 (本仓库未引用); `InputMethodManager.SHOW_IMPLICIT` 之外的弃用由 lint 逐版跟踪.
+- 本机 `android-36/android.jar` 有 4 个 `android/hardware/fingerprint/*.class`, `android-37.0/android.jar` 为 0 (SOURCE: [复核记录](evidence/android-sdk-37-review-20260913.md)); 这证明 SDK 编译符号移除, 不等于设备运行时一定无此类. `InputMethodManager.SHOW_IMPLICIT` 之外的弃用由 lint 逐版跟踪.
 - APK 签名方案 v3.2 (混合后量子, ML-DSA) 对内置 APK 打包器 / `modules/apk-signer` 是可选能力, 与本次无关.
 - Advanced Protection Mode 对无障碍服务的限制若被实测确认, 需要在用户文档 FAQ 与插件中心 "无障碍兼容" 页面长期维护说明.
 
@@ -555,3 +608,11 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 - 环境变化: 本会话为取兼容清单启动并关闭了 `AVD_API_37` (`-no-snapshot-save`, 未改动 AVD 状态); 会话开始时列出的 API 27 模拟器 (`emulator-5554`) 在启动新模拟器前已不在 `adb devices` 中, 原因未查.
 - 未做: P0.2 覆盖开关与脚本, P1 起全部代码改动.
 - 下次会话建议起点: P0.2 (覆盖开关, 供 P2 全程使用) 与 P1 (compileSdk 37, 改动极小) 可同一会话完成; 随后 P2.1 / P2.3 / P2.4 三项影响最大且互不依赖, 可并行推进.
+
+### 2026-09-13 执行条件复核
+
+- 保留 D1-D4 与原探针历史结果; 修正 "全仓编译" 的证据范围, 增加 ANDROID_COMPILE / PLATFORM_CONFIG 等级, 去掉由页面缺席推断 "明确未变" 的结论.
+- 补齐 P0.2 的有效 lint 入口与 release 覆盖拒绝要求, 修正 adb 多 change / 缺 package 示例及 Gradle 通配任务路径; 音频默认规则与设备级诊断模式分开验收.
+- 修正 P2.5 的 creator / sender / broadcast 角色, P2.6 的用户 CA / CT / ECH 前提, P2.1 的权限声明与跨 profile 回环边界; 增加 a11y IME 事件验证及 P2.16 的 inrt 切换前适配.
+- 核实插件实际配置例外: R8-Compiler 的 SDK 硬编码与固定 android-36.jar, Paddle v4 / v5 / v6 的 minSdk 26; SDK 日志分类遵循当前 AGENTS.md, 移除非必需的 Bun 平台插件顺带升级.
+- 本次仅修订规划与证据, 未执行 Gradle 构建 / lint / 设备测试, 未将 P0.2 或 P1-P6 标为完成. 检查清单与来源见 [复核记录](evidence/android-sdk-37-review-20260913.md).
