@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 11 日 に更新されました.
+データは 2026 年 9 月 12 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -168,7 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `新機能` ローカルの単一ファイル JavaScript/ES module を対象に, "quickjs"/"qjs" ディレクティブまたは `.quickjs.js/.quickjs.mjs` マーカーでルーティングし, Rhino, Node.js, Bun にフォールバックしない独立 QuickJS Runtime プラグインエンジン
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
@@ -382,6 +382,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題
 * `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
 * `修正` Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題
+* `修正` デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題
 * `修正` Android が現在割り当て済みのネイティブヒープを 0 バイトと報告すると, 正常な Node.js R6 常駐ランタイムの soak 証拠が拒否される問題
 * `修正` コレクターが最新の Inrt テンプレートを準備せずターゲット ABI も渡さないため, Node.js R6 のパッケージ APK 証拠がスキップされるか arm64 に固定される問題
 * `修正` Node.js プロジェクトの起動時に project.json の node.timeoutMs が無視され, 長い待機時間を設定したスクリプトも約 5 秒でタイムアウトする問題
@@ -490,6 +491,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` MCP Server のセッションコントローラーが, `openServer` 直後に取得した `starting` スナップショットを, プラグインがコールバックで既に届けていた `running` 状態の上に公開してしまい, `status` がリスナーの起動を報告しないことがあった問題; 取得したスナップショットは, 取得中にコールバック状態が届かなかった場合にのみ公開されるようになりました
 * `修正` MediaInfo 詳細とスナップショットの Complete name に元のファイルパスを表示し, プライベートキャッシュや記述子のパスを表示しないよう改善; スナップショットの表示ファイル名は維持
 * `修正` Node bridge の `accessibility.swipe` / `accessibility.gesture` (MCP Server と Node プラグインの座標ジェスチャー) は, 再利用された broker ディスパッチスレッド上では 2 回目以降のジェスチャーに常に `false` (キャンセル) を返していました: handler のないジェスチャー automator は呼び出しスレッドに Looper を準備し最初のジェスチャー完了後にそれを終了するため, 同じスレッドでの次の呼び出しは即座に戻り, 実際の結果は終了済みの handler に届いていました; bridge は Python ホスト broker と同様にメインループの handler を automator に渡すようになりました
+* `修正` OpenCV および ImageQuant プラグインのポリシーが NDK r28c (28.2.13676358) でビルドされたネイティブライブラリを NDK バージョン不一致として拒否し, 再ビルドした OpenCV プラグイン v1.1.2 を読み込めなかった問題を修正; r26b と r28c の両方のビルドを受け入れるように
 * `改善` パッケージ検査のアーカイブ項目数を 262144 に統一し, 大きな APK/AAB/APKS に対応するためパッケージ, 入れ子スキャン, マニフェスト, メタデータの上限を拡大
 * `改善` 情報ダイアログで再利用可能な項目コンポーネントを共有し, 任意の位置への key:value 項目の挿入, キー列の自動整列, ダイアログを閉じた際の非同期読み取りのキャンセルに対応
 * `改善` APK/APKS/XAPK/APKM/APKZ/AAB のコンポーネント情報を右上のメニューの "追加情報" ダイアログに移動し, メインダイアログと同じ項目スタイルでメタデータの読み込み結果を反映
@@ -597,6 +599,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Node bridge の `accessibility.dump` の JSON ノードは 7 つの記述子フィールドに加えて `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable` の状態フラグを持つようになりました; MCP Server のセッション権限にプラグインの `ui_press_key` ツール向けのグローバル操作 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` を追加し, ユーザー補助サービスが動作していないときの `keys.*` 呼び出しは `accessibility` モジュールと同様に `unavailable` カテゴリーで応答します; 始点と終点が同じ (長さ 0 の) `accessibility.swipe` は `durationMs` の押下として送出され, MCP の `ui_click` / `ui_long_click` の座標形式はこれに依存します
 * `改善` ホストと runtime-kit のネイティブライブラリを 16 KB に対応, jackpal JNI の再ビルドと NDK r28.2 libc++ の使用, 出所記録と共通ビルド検証を整備
 * `改善` APK ビルダーが非対応のネイティブライブラリを進捗と結果に表示し, 圧縮パッケージを維持してローカルのビルド入力にアラインメントを記録
+* `改善` プラグインセンターのバージョン概要が `2026-09-11T14:30:00+08:00` のような ISO 8601 日時文字列も `yyyy-MM-dd` に正規化し, 文字列自身のオフセットにおける暦日を保持するように
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 11 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 12 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

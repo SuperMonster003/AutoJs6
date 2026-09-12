@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 11 September 2026.
+Données mises à jour le 12 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
@@ -382,6 +382,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat
 * `Correction` Les builds de modules Android dans IntelliJ IDEA échouaient en raison d'une correspondance ambiguë de la tâche compileJava
 * `Correction` Les builds de l'ensemble du projet dans IntelliJ IDEA échouaient après Clean car les AAR distribués de l'API Python Runtime étaient résolus avant leur génération et les fixtures de conformité n'implémentaient pas les méthodes AIDL ajoutées
+* `Correction` La compilation d'APK Builder Template échouait après `clean` car le répertoire Runtime Kit par défaut omettait le suffixe de variante `universal`
 * `Correction` Les preuves soak Node.js R6 pouvaient rejeter un environnement d'exécution persistant sain lorsqu'Android signalait zéro octet actuellement alloué au tas natif
 * `Correction` Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible
 * `Correction` Le lancement des projets Node.js ignorait node.timeoutMs dans project.json, interrompant au bout de 5 secondes environ les scripts configurés pour une attente plus longue
@@ -490,6 +491,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Le controleur de session MCP Server pouvait publier l'instantane `starting` obtenu juste apres `openServer` par-dessus un etat `running` deja livre par le rappel du plugin, si bien que `status` ne signalait jamais l'ecouteur comme actif ; l'instantane obtenu n'est desormais publie que si aucun etat n'est arrive par le rappel pendant la requete
 * `Correction` Complete name affiche le chemin du fichier source dans les détails et instantanés MediaInfo au lieu du cache privé ou du descripteur, sans modifier le nom de fichier de l'instantané
 * `Correction` `accessibility.swipe` / `accessibility.gesture` du Node bridge (les gestes par coordonnees des plugins MCP Server et Node) repondaient `false` (annule) a chaque geste apres le premier sur un thread de dispatch du broker reutilise : l'automate de gestes sans handler preparait un Looper sur le thread appelant et le quittait une fois le premier geste termine, si bien que l'appel suivant sur ce thread revenait aussitot et son vrai resultat partait vers un handler mort ; le bridge remet desormais a l'automate le handler de la boucle principale, comme le broker Python de l'hote
+* `Correction` Les politiques des plugins OpenCV et ImageQuant rejetaient les bibliothèques natives compilées avec le NDK r28c (28.2.13676358) pour incompatibilité de version du NDK, ce qui bloquait le plugin OpenCV v1.1.2 recompilé ; les compilations r26b et r28c sont désormais acceptées
 * `Amélioration` Unifier l'inspection des paquets à 262144 entrées et augmenter les budgets des paquets, analyses imbriquées, manifestes et métadonnées pour les grands fichiers APK/AAB/APKS
 * `Amélioration` Les dialogues d'information partagent un composant réutilisable permettant d'insérer des entrées key:value à toute position, d'aligner automatiquement les clés et d'annuler les lectures asynchrones à la fermeture
 * `Amélioration` Les informations sur les composants APK/APKS/XAPK/APKM/APKZ/AAB sont déplacées vers le dialogue "Plus d’informations" du menu en haut à droite, avec le même style que le dialogue principal et une mise à jour lors du chargement des métadonnées
@@ -597,6 +599,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Les noeuds JSON de `accessibility.dump` du Node bridge portent les indicateurs d'etat `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` et `longClickable` en plus des sept champs du descripteur ; l'autorisation de session MCP Server inclut les actions globales `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` pour l'outil `ui_press_key` du plugin, et un appel `keys.*` sans le service d'accessibilite repond desormais avec la categorie `unavailable` comme le module `accessibility` ; un `accessibility.swipe` de longueur nulle (points de depart et d'arrivee identiques) est envoye comme un appui de `durationMs`, dont dependent les formes par coordonnees de `ui_click` / `ui_long_click` de MCP
 * `Amélioration` Alignement 16 KB pour les bibliothèques natives de l'hôte et du runtime-kit, avec jackpal JNI recompilé, libc++ du NDK r28.2, provenance et vérification de compilation partagée
 * `Amélioration` Le constructeur APK signale les bibliothèques natives incompatibles dans la progression et les résultats, enregistre l'alignement dans les métadonnées locales et conserve l'empaquetage compressé
+* `Amélioration` Les résumés de version du Centre de plugins normalisent aussi les chaînes date-heure ISO 8601 telles que `2026-09-11T14:30:00+08:00` en `yyyy-MM-dd`, en conservant la date calendaire du décalage horaire de la chaîne
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 11 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 12 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

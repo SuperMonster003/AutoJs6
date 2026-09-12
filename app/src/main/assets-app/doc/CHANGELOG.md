@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `新增` 独立 QuickJS Runtime 插件引擎, 用于本地单文件 JavaScript 和 ES module, 通过 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 标记路由, 且不会回退到 Rhino, Node.js 或 Bun
 * `新增` 独立 Bun Runtime 插件引擎, 用于本地单文件 JavaScript 和 TypeScript, 通过 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 标记路由, 且不会回退到 Rhino 或 Node.js
@@ -196,6 +196,7 @@
 * `修复` Node.js R6 证据采集及验证因 apksigner 证书摘要输出格式变更而拒绝 Android Build Tools 37 报告的 APK 签名身份的问题
 * `修复` IntelliJ IDEA 构建 Android 模块时因 compileJava 任务匹配歧义而失败的问题
 * `修复` IntelliJ IDEA 全项目构建在 Clean 后因 Python Runtime API 分发 AAR 尚未生成而无法解析 Android 依赖, 且 conformance 夹具未同步追加的 AIDL 方法导致编译失败的问题
+* `修复` APK Builder Template 构建在 `clean` 后因默认 Runtime Kit 目录缺少 `universal` 变体后缀而失败的问题
 * `修复` Android 报告当前已分配原生堆字节数为零时, 健康的 Node.js R6 持久运行时 soak 证据被错误拒绝的问题
 * `修复` Node.js R6 打包 APK 证据因采集器未准备当前 Inrt 模板或传入目标 ABI 而被跳过或错误绑定 arm64 的问题
 * `修复` Node.js 项目启动忽略 project.json 的 node.timeoutMs, 导致配置较长等待时间的脚本仍在约 5 秒后超时

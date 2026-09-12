@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `新機能` ローカルの単一ファイル JavaScript/ES module を対象に, "quickjs"/"qjs" ディレクティブまたは `.quickjs.js/.quickjs.mjs` マーカーでルーティングし, Rhino, Node.js, Bun にフォールバックしない独立 QuickJS Runtime プラグインエンジン
 * `新機能` ローカルの単一ファイル JavaScript/TypeScript を対象に, "bun" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン
@@ -220,6 +220,7 @@
 * `修正` apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題
 * `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
 * `修正` Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題
+* `修正` デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題
 * `修正` Android が現在割り当て済みのネイティブヒープを 0 バイトと報告すると, 正常な Node.js R6 常駐ランタイムの soak 証拠が拒否される問題
 * `修正` コレクターが最新の Inrt テンプレートを準備せずターゲット ABI も渡さないため, Node.js R6 のパッケージ APK 証拠がスキップされるか arm64 に固定される問題
 * `修正` Node.js プロジェクトの起動時に project.json の node.timeoutMs が無視され, 長い待機時間を設定したスクリプトも約 5 秒でタイムアウトする問題

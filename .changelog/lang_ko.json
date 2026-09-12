@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/11",
+      "released_date": "2026/09/12",
       "feature": [
         "로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, \"quickjs\"/\"qjs\" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음",
         "로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, \"bun\" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음",
@@ -217,6 +217,7 @@
         "apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제",
         "IntelliJ IDEA에서 Android 모듈을 빌드할 때 compileJava 작업 일치가 모호하여 실패하는 문제",
         "Clean 후 IntelliJ IDEA 전체 프로젝트 빌드에서 Python Runtime API 배포 AAR을 생성 전에 해석하고 conformance fixture가 추가된 AIDL 메서드를 구현하지 않아 실패하는 문제",
+        "기본 Runtime Kit 디렉터리에 `universal` 변형 접미사가 없어 `clean` 후 APK Builder Template 빌드가 실패하는 문제",
         "Android가 현재 할당된 네이티브 힙 바이트를 0으로 보고할 때 정상적인 Node.js R6 상주 런타임 soak 증거가 거부되는 문제",
         "수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제",
         "Node.js 프로젝트 실행 시 project.json의 node.timeoutMs가 무시되어 더 긴 대기 시간을 설정한 스크립트도 약 5초 후 시간 초과되는 문제",

@@ -219,7 +219,7 @@ val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateA
     description = "Copies a verified AutoJs6 Runtime Kit into the APK builder template plugin assets."
 
     val defaultRuntimeKitDir = rootProject.file(
-        "app/build/runtime-kit/autojs6-runtime-kit-v${normalizeRuntimeKitVersion(versions.appVersionName)}+${versions.appVersionCode}"
+        "app/build/runtime-kit/autojs6-runtime-kit-v${normalizeRuntimeKitVersion(versions.appVersionName)}+${versions.appVersionCode}-universal"
     )
     val configuredRuntimeKitDir = providers.gradleProperty(runtimeKitDirProperty).orNull?.let { path ->
         File(path).takeIf { it.isAbsolute } ?: rootProject.file(path)

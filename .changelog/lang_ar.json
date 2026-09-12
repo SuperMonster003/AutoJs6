@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/11",
+      "released_date": "2026/09/12",
       "feature": [
         "محرك إضافة QuickJS Runtime مستقل لملفات JavaScript المحلية المنفردة ووحدات ES, مع التوجيه باستخدام التعليمة \"quickjs\"/\"qjs\" أو العلامات `.quickjs.js/.quickjs.mjs`, ومن دون الرجوع إلى Rhino أو Node.js أو Bun",
         "محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة \"bun\" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js",
@@ -217,6 +217,7 @@
         "رفض جمع ادلة Node.js R6 والتحقق منها هويات موقعي APK التي ابلغ عنها Android Build Tools 37 بسبب تغيير apksigner لتنسيق اخراج ملخص الشهادة",
         "فشل بناء وحدات Android في IntelliJ IDEA بسبب غموض مطابقة مهمة compileJava",
         "فشل بناء المشروع بالكامل في IntelliJ IDEA بعد Clean لان ملفات AAR الموزعة لواجهة Python Runtime API كانت تحل قبل انشائها ولان fixtures التوافق لم تنفذ طرق AIDL المضافة",
+        "فشل بناء APK Builder Template بعد `clean` لأن دليل Runtime Kit الافتراضي أغفل لاحقة المتغير `universal`",
         "قد ترفض ادلة soak في Node.js R6 بيئة تشغيل دائمة سليمة عندما يبلغ Android عن صفر بايتات مخصصة حاليا للكومة الاصلية",
         "تخطي دليل APK المعبأ في Node.js R6 او ربطه ب arm64 لان المجمع لم يجهز قالب Inrt حديثا ولم يمرر ABI المستهدف",
         "كان تشغيل مشاريع Node.js يتجاهل node.timeoutMs في project.json, مما أدى إلى انتهاء مهلة البرامج النصية بعد نحو 5 ثوان رغم ضبطها لانتظار أطول",

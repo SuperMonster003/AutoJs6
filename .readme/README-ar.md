@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 11 September 2026.
+تم تحديث البيانات في 12 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,7 +168,7 @@
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `إضافة جديدة` محرك إضافة QuickJS Runtime مستقل لملفات JavaScript المحلية المنفردة ووحدات ES, مع التوجيه باستخدام التعليمة "quickjs"/"qjs" أو العلامات `.quickjs.js/.quickjs.mjs`, ومن دون الرجوع إلى Rhino أو Node.js أو Bun
 * `إضافة جديدة` محرك إضافة Bun Runtime مستقل لملفات JavaScript وTypeScript المحلية المنفردة, مع التوجيه باستخدام التعليمة "bun" أو العلامات `.bun.js/.bun.ts/.bun.tsx`, ومن دون الرجوع إلى Rhino أو Node.js
@@ -382,6 +382,7 @@
 * `تصليح` رفض جمع ادلة Node.js R6 والتحقق منها هويات موقعي APK التي ابلغ عنها Android Build Tools 37 بسبب تغيير apksigner لتنسيق اخراج ملخص الشهادة
 * `تصليح` فشل بناء وحدات Android في IntelliJ IDEA بسبب غموض مطابقة مهمة compileJava
 * `تصليح` فشل بناء المشروع بالكامل في IntelliJ IDEA بعد Clean لان ملفات AAR الموزعة لواجهة Python Runtime API كانت تحل قبل انشائها ولان fixtures التوافق لم تنفذ طرق AIDL المضافة
+* `تصليح` فشل بناء APK Builder Template بعد `clean` لأن دليل Runtime Kit الافتراضي أغفل لاحقة المتغير `universal`
 * `تصليح` قد ترفض ادلة soak في Node.js R6 بيئة تشغيل دائمة سليمة عندما يبلغ Android عن صفر بايتات مخصصة حاليا للكومة الاصلية
 * `تصليح` تخطي دليل APK المعبأ في Node.js R6 او ربطه ب arm64 لان المجمع لم يجهز قالب Inrt حديثا ولم يمرر ABI المستهدف
 * `تصليح` كان تشغيل مشاريع Node.js يتجاهل node.timeoutMs في project.json, مما أدى إلى انتهاء مهلة البرامج النصية بعد نحو 5 ثوان رغم ضبطها لانتظار أطول
@@ -490,6 +491,7 @@
 * `تصليح` كان من الممكن أن ينشر متحكم جلسة MCP Server لقطة `starting` المأخوذة مباشرة بعد `openServer` فوق حالة `running` التي سلمتها الإضافة بالفعل عبر رد النداء, فلا يبلغ `status` أبدا عن تشغيل المستمع; الآن لا تنشر اللقطة المأخوذة إلا إذا لم تصل حالة عبر رد النداء أثناء الطلب
 * `تصليح` يعرض Complete name في تفاصيل ولقطات MediaInfo مسار الملف الأصلي بدلا من ذاكرة التخزين الخاصة أو مسار الواصف مع الحفاظ على اسم الملف المعروض في اللقطة
 * `تصليح` كانت `accessibility.swipe` / `accessibility.gesture` في جسر Node (إيماءات الإحداثيات لإضافتي MCP Server و Node) تجيب بـ `false` (ملغاة) عن كل إيماءة بعد الأولى على خيط إرسال broker معاد استخدامه: كان أوتوماتون الإيماءات بدون handler يهيئ Looper على الخيط المستدعي وينهيه بعد اكتمال الإيماءة الأولى, فيعود الاستدعاء التالي على ذلك الخيط فورا وتذهب نتيجته الحقيقية إلى handler ميت; يسلم الجسر الآن handler الحلقة الرئيسية إلى الأوتوماتون كما يفعل broker مضيف Python
+* `تصليح` كانت سياسات إضافتي OpenCV و ImageQuant ترفض المكتبات الأصلية المبنية بـ NDK r28c (28.2.13676358) باعتبارها عدم تطابق في إصدار NDK, مما منع تحميل إضافة OpenCV v1.1.2 المعاد بناؤها; أصبحت بناءات r26b و r28c مقبولة معاً
 * `تحسين` توحيد فحص الحزم عند 262144 إدخالا ورفع حدود الحزم والفحص المتداخل وملفات البيان والبيانات الوصفية لدعم ملفات APK/AAB/APKS الكبيرة
 * `تحسين` تستخدم حوارات المعلومات مكون عناصر قابلا لإعادة الاستخدام يدعم إدراج عناصر key:value في أي موضع, ومحاذاة عمود المفاتيح تلقائيا, وإلغاء القراءة غير المتزامنة عند الإغلاق
 * `تحسين` نقلت معلومات مكونات APK/APKS/XAPK/APKM/APKZ/AAB إلى حوار "مزيد من المعلومات" في القائمة العلوية اليمنى, بنفس نمط عناصر الحوار الرئيسي مع تحديث النتائج عند تحميل البيانات الوصفية
@@ -597,6 +599,7 @@
 * `تحسين` تحمل عقد JSON في `accessibility.dump` لجسر Node أعلام الحالة `scrollable` و `checkable` و `checked` و `editable` و `focused` و `selected` و `longClickable` إلى جانب حقول الواصف السبعة; يشمل منح جلسة MCP Server الإجراءات العامة `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` لأداة `ui_press_key` في الإضافة, ويجيب استدعاء `keys.*` بدون خدمة إمكانية الوصول الآن بفئة `unavailable` مثل وحدة `accessibility`; يرسل `accessibility.swipe` ذو الطول الصفري (نقطتا البداية والنهاية متطابقتان) كضغطة بمدة `durationMs`, وهو ما تعتمد عليه الأشكال الإحداثية لأدوات MCP `ui_click` / `ui_long_click`
 * `تحسين` دعم محاذاة 16 KB للمكتبات الأصلية للمضيف و runtime-kit, مع إعادة بناء jackpal JNI واستخدام libc++ من NDK r28.2 وسجلات المصدر والتحقق المشترك أثناء البناء
 * `تحسين` يعرض منشئ APK المكتبات الأصلية غير المتوافقة في التقدم والنتائج, ويسجل المحاذاة في بيانات الإدخال المحلية مع الحفاظ على التعبئة المضغوطة
+* `تحسين` ملخصات الإصدار في مركز الإضافات تُطبّع أيضاً سلاسل التاريخ والوقت بصيغة ISO 8601 مثل `2026-09-11T14:30:00+08:00` إلى `yyyy-MM-dd` مع الحفاظ على التاريخ التقويمي وفق إزاحة السلسلة نفسها
 * `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 11 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 12 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

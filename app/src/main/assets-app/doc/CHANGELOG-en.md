@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
@@ -220,6 +220,7 @@
 * `Fix` Node.js R6 evidence collection and verification rejected APK signer identities reported by Android Build Tools 37 because apksigner changed its certificate digest output format
 * `Fix` IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
+* `Fix` APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` Node.js project launches ignored node.timeoutMs in project.json, causing scripts configured for longer waits to time out after about 5 seconds

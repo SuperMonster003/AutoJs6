@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 11 일.
+데이터 갱신일: 2026 년 9 월 12 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `추가` 로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, "quickjs"/"qjs" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
@@ -382,6 +382,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제
 * `수정` IntelliJ IDEA에서 Android 모듈을 빌드할 때 compileJava 작업 일치가 모호하여 실패하는 문제
 * `수정` Clean 후 IntelliJ IDEA 전체 프로젝트 빌드에서 Python Runtime API 배포 AAR을 생성 전에 해석하고 conformance fixture가 추가된 AIDL 메서드를 구현하지 않아 실패하는 문제
+* `수정` 기본 Runtime Kit 디렉터리에 `universal` 변형 접미사가 없어 `clean` 후 APK Builder Template 빌드가 실패하는 문제
 * `수정` Android가 현재 할당된 네이티브 힙 바이트를 0으로 보고할 때 정상적인 Node.js R6 상주 런타임 soak 증거가 거부되는 문제
 * `수정` 수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제
 * `수정` Node.js 프로젝트 실행 시 project.json의 node.timeoutMs가 무시되어 더 긴 대기 시간을 설정한 스크립트도 약 5초 후 시간 초과되는 문제
@@ -490,6 +491,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` MCP Server 세션 컨트롤러가 `openServer` 직후 가져온 `starting` 스냅샷을 플러그인이 콜백으로 이미 전달한 `running` 상태 위에 게시하여 `status`가 리스너 실행을 보고하지 않을 수 있던 문제; 가져온 스냅샷은 가져오는 동안 콜백 상태가 도착하지 않은 경우에만 게시됩니다
 * `수정` MediaInfo 상세 정보와 스냅샷의 Complete name에 비공개 캐시나 디스크립터 경로 대신 원본 파일 경로를 표시하고 스냅샷의 표시 파일 이름은 유지
 * `수정` Node bridge의 `accessibility.swipe` / `accessibility.gesture` (MCP Server와 Node 플러그인의 좌표 제스처)가 재사용된 broker 디스패치 스레드에서 두 번째 제스처부터 항상 `false` (취소)로 응답했습니다: handler가 없는 제스처 automator는 호출 스레드에 Looper를 준비하고 첫 제스처가 끝나면 종료하므로, 그 스레드의 다음 호출은 즉시 반환되고 실제 결과는 종료된 handler로 전달되었습니다; bridge는 이제 Python 호스트 broker처럼 메인 루퍼 handler를 automator에 넘깁니다
+* `수정` OpenCV 및 ImageQuant 플러그인 정책이 NDK r28c (28.2.13676358)로 빌드된 네이티브 라이브러리를 NDK 버전 불일치로 거부하여 다시 빌드한 OpenCV 플러그인 v1.1.2를 로드할 수 없던 문제 수정; 이제 r26b와 r28c 빌드를 모두 허용
 * `개선` 패키지 검사 항목 수를 262144개로 통일하고 대형 APK/AAB/APKS 파일을 위해 패키지, 중첩 스캔, 매니페스트 및 메타데이터 한도 확대
 * `개선` 정보 대화상자가 재사용 가능한 항목 구성 요소를 공유하며, 임의 위치에 key:value 항목 삽입, 키 열 자동 정렬 및 대화상자를 닫을 때 비동기 읽기 취소 지원
 * `개선` APK/APKS/XAPK/APKM/APKZ/AAB 구성 요소 정보를 오른쪽 위 메뉴의 "추가 정보" 대화상자로 이동하고, 기본 대화상자와 동일한 항목 스타일로 메타데이터 로딩 결과를 반영
@@ -597,6 +599,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Node bridge `accessibility.dump`의 JSON 노드가 7개 기술자 필드 외에 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected`, `longClickable` 상태 플래그를 가집니다; MCP Server 세션 권한에 플러그인의 `ui_press_key` 도구를 위한 전역 동작 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen`을 추가했고, 접근성 서비스가 실행 중이 아닐 때의 `keys.*` 호출은 이제 `accessibility` 모듈과 같이 `unavailable` 범주로 응답합니다; 시작점과 끝점이 같은 (길이 0의) `accessibility.swipe`는 `durationMs` 동안의 누르기로 전달되며, MCP의 `ui_click` / `ui_long_click` 좌표 형식이 이에 의존합니다
 * `개선` 호스트와 runtime-kit 네이티브 라이브러리의 16 KB 정렬 지원, jackpal JNI 재빌드 및 NDK r28.2 libc++ 적용, 출처 기록과 공통 빌드 검증 제공
 * `개선` APK 빌더가 진행 상황과 결과에 호환되지 않는 네이티브 라이브러리를 표시하고, 압축 패키징을 유지하면서 로컬 빌드 입력에 정렬 정보 기록
+* `개선` 플러그인 센터의 버전 요약이 `2026-09-11T14:30:00+08:00` 같은 ISO 8601 날짜-시간 문자열도 `yyyy-MM-dd`로 정규화하며 문자열 자체 오프셋 기준의 달력 날짜를 유지
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 11 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 12 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

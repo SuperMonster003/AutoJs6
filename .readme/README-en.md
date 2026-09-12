@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 11, 2026.
+Data updated on Sep 12, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
@@ -382,6 +382,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Node.js R6 evidence collection and verification rejected APK signer identities reported by Android Build Tools 37 because apksigner changed its certificate digest output format
 * `Fix` IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
+* `Fix` APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` Node.js project launches ignored node.timeoutMs in project.json, causing scripts configured for longer waits to time out after about 5 seconds
@@ -490,6 +491,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The MCP Server session controller could publish the `starting` snapshot pulled right after `openServer` on top of a `running` status the plugin had already delivered through its callback, so `status` never reported the listener as running; the pulled snapshot is now published only when no callback status arrived while it was in flight
 * `Fix` MediaInfo details and snapshots show the original source path in Complete name instead of a private cache or descriptor path, while preserving the snapshot display filename
 * `Fix` Node bridge `accessibility.swipe` / `accessibility.gesture` (the coordinate gestures of the MCP Server and Node plugins) answered `false` (cancelled) for every gesture after the first one on a reused broker dispatch thread: the gesture automator without a handler prepared a Looper on the calling thread and quit it once the first gesture completed, so the next call on that thread returned at once and its real result went to a dead handler; the bridge now hands the automator the main-looper handler, as the Python host broker does
+* `Fix` OpenCV and ImageQuant plugin policies rejected native libraries built with NDK r28c (28.2.13676358) as a native NDK version mismatch, which blocked the rebuilt OpenCV plugin v1.1.2; both r26b and r28c builds are now accepted
 * `Improvement` Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files
 * `Improvement` Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal
 * `Improvement` APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the "More information" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded
@@ -597,6 +599,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Node bridge `accessibility.dump` JSON nodes carry the state flags `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` and `longClickable` next to the seven descriptor fields; the MCP Server session grant includes the `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` global actions for the plugin's `ui_press_key` tool, and a `keys.*` call without the accessibility service now answers the `unavailable` category like the `accessibility` module; a zero-length `accessibility.swipe` (identical end points) is dispatched as a press of `durationMs`, which the coordinate forms of the MCP `ui_click` / `ui_long_click` tools rely on
 * `Improvement` Host and runtime-kit native libraries support 16 KB alignment, with rebuilt jackpal JNI libraries, NDK r28.2 libc++, provenance records and shared build verification
 * `Improvement` APK Builder reports incompatible native libraries in build progress and results, and records alignment in local build-input metadata while preserving compressed packaging
+* `Improvement` Plugin Center version summaries also normalize ISO 8601 date-time strings such as `2026-09-11T14:30:00+08:00` to `yyyy-MM-dd`, keeping the calendar date of the string's own offset
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 11, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 12, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

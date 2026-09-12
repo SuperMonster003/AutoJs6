@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
@@ -220,6 +220,7 @@
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
 * `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
+* `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
 * `Corrección` La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo
 * `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
 * `Corrección` El inicio de proyectos Node.js ignoraba node.timeoutMs en project.json, por lo que los scripts configurados para esperar más tiempo agotaban su plazo tras unos 5 segundos

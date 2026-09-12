@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 9 月 11 日.
+數據更新於 2026 年 9 月 12 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/11
+###### 2026/09/12
 
 * `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
@@ -382,6 +382,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Node.js R6 證據收集及驗證因 apksigner 證書摘要輸出格式變更而拒絕 Android Build Tools 37 報告的 APK 簽名身份的問題
 * `修復` IntelliJ IDEA 構建 Android 模塊時因 compileJava 任務匹配歧義而失敗的問題
 * `修復` IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題
+* `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題
 * `修復` Android 報告目前已分配原生堆位元組數為零時, 健康的 Node.js R6 持久運行時 soak 證據被錯誤拒絕的問題
 * `修復` Node.js R6 打包 APK 證據因收集器未準備當前 Inrt 模板或傳入目標 ABI 而被跳過或錯誤綁定 arm64 的問題
 * `修復` Node.js 專案啟動忽略 project.json 的 node.timeoutMs, 導致設定較長等待時間的腳本仍在約 5 秒後逾時
@@ -490,6 +491,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 插件的座標手勢) 在被重用的 broker 派發線程上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在調用線程上準備 Looper 並在首個手勢完成後退出它, 該線程上的下一次調用立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主循環 handler 交給 automator
+* `修復` OpenCV 與 ImageQuant 插件策略將以 NDK r28c (28.2.13676358) 構建的原生庫判定為原生 NDK 版本不匹配, 導致重編後的 OpenCV 插件 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 構建
 * `優化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以兼容大型 APK/AAB/APKS
 * `優化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取
 * `優化` APK/APKS/XAPK/APKM/APKZ/AAB 資訊對話框的元件資訊移至右上角選單的 "更多資訊" 對話框, 共用主對話框的項目樣式並同步更新讀取結果
@@ -597,6 +599,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` Node bridge `accessibility.dump` 的 JSON 節點在七個描述符欄位之外攜帶 `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` 與 `longClickable` 狀態標記; MCP Server 會話授權加入 `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` 全局動作以支援插件的 `ui_press_key` 工具, 無障礙服務未運行時 `keys.*` 調用現在與 `accessibility` 模組一樣以 `unavailable` 類別回應; 起止點相同的 `accessibility.swipe` (零長度) 按 `durationMs` 的按壓派發, MCP 的 `ui_click` / `ui_long_click` 座標形式依賴於此
 * `優化` 宿主與 runtime-kit 原生程式庫支援 16 KB 對齊, 重編 jackpal JNI 程式庫並使用 NDK r28.2 libc++, 附帶來源記錄與共用建置校驗
 * `優化` APK 打包器在進度與結果中提示不相容的原生程式庫, 在本機建置輸入中繼資料中記錄對齊資訊, 保持壓縮打包
+* `優化` 插件中心的版本摘要同樣將 `2026-09-11T14:30:00+08:00` 這類 ISO 8601 日期時間字串規範化為 `yyyy-MM-dd`, 並保留字串自身時區偏移下的日曆日期
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -878,7 +881,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 11 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 9 月 12 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 
