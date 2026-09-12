@@ -351,6 +351,7 @@
     <string name="error_failed_to_launch_system_settings">Échec du lancement des paramètres système</string>
     <string name="error_failed_to_load_plugins_with_reason">Échec du chargement des plugins.\nRaison : %1$s.</string>
     <string name="error_failed_to_move">Echec du deplacement</string>
+    <string name="error_failed_to_query_ocr_plugins_for_selection">Impossible de rechercher les plugins OCR pour %1$s: %2$s.</string>
     <string name="error_failed_to_rename">Échec du renommage</string>
     <string name="error_failed_to_render_content">Impossible d\'afficher le contenu</string>
     <string name="error_failed_to_retrieve_changelog">Échec de la récupération du journal des modifications</string>
@@ -422,6 +423,7 @@
     <string name="error_no_display_over_other_apps_permission">Aucune permission \"display over other apps\"</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">Aucune ressource Paddle OCR intégrée n\'a été trouvée. Veuillez reconditionner avec Paddle OCR activé.</string>
     <string name="error_no_enabled_plugin_for_module_label">Aucun plugin activé pour \"%1$s\". Veuillez activer un plugin et réessayer.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">Aucun plugin OCR installé ne correspond à la demande: %1$s. Installez un plugin correspondant dans le Centre de plugins.</string>
     <string name="error_no_permission_to_access_shizuku">Pas de permission pour accéder à Shizuku</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
     <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
@@ -547,6 +549,7 @@
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
     <string name="hint_m3u_player_plugin_unavailable">Aucun lecteur disponible pour cette liste M3U. Choisissez 3-Ember ou 3-Terra pour installer, activer ou autoriser le plugin dans le Centre de plugins. 3-Ember est prioritaire.</string>
+    <string name="hint_ocr_default_engine_and_switching">ocr() utilise ML Kit OCR par défaut. Pour Paddle OCR ou Rapid OCR, utilisez ocr.paddle() ou ocr.rapid(), ou définissez ocr.mode.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 et les noms de domaine sont pris en charge.</string>
     <string name="hint_plugin_process_failed_to_start">Le processus du plugin n\'a pas pu démarrer de manière fiable. Mettez à jour ou réinstallez le plugin; si le problème persiste, contactez le développeur du plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>
@@ -1073,6 +1076,7 @@
     <string name="text_deselect_all">Tout deselectionner</string>
     <string name="text_destination">Destination</string>
     <string name="text_details">Détails</string>
+    <string name="text_detected_ocr_plugins">Plugins OCR détectés: %1$s.</string>
     <string name="text_developer_details_under_development">Les détails du développeur sont en cours de développement</string>
     <string name="text_developer_options">Les options du développeur</string>
     <string name="text_dex_compiler">Compilateur DEX</string>

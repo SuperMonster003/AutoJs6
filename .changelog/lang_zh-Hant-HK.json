@@ -259,6 +259,7 @@
         "早期 JavaScript 模塊遷移中的參數分派, 返回值, 數值邊界, 圖像坐標及臨時資源生命週期與原實現不一致的問題",
         "Android 14+ 申請屏幕捕獲權限時可能因媒體投影前台服務啟動異常導致應用崩潰的問題 _[`issue #516`](http://issues.autojs6.com/516)_",
         "多線程或跨文件重複調用 OCR 時可能反覆申請屏幕捕獲權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_",
+        "OCR 插件選擇失敗時錯誤訊息可能指向錯誤引擎, 缺少所需引擎 ID/變體和已偵測插件資訊, 且插件查詢失敗時誤報未安裝的問題",
         "Paddle OCR 插件服務長時間運行後可能斷開且無法自動恢復的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_",
         "Paddle OCR 插件未處於運行狀態時無法被自動喚醒, 導致功能調用或項目打包失敗的問題 _[`issue #517`](http://issues.autojs6.com/517)_",
         "`images.resize(ImageWrapper, width, height)` 錯誤用法會將高度作為 OpenCV 插值參數傳入, 且不兼容的原生異常展開可能導致應用崩潰而非報告腳本異常的問題",

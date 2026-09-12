@@ -351,6 +351,7 @@
     <string name="error_failed_to_launch_system_settings">Не удалось открыть системные настройки</string>
     <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
     <string name="error_failed_to_move">Не удалось переместить</string>
+    <string name="error_failed_to_query_ocr_plugins_for_selection">Не удалось запросить плагины OCR для %1$s: %2$s.</string>
     <string name="error_failed_to_rename">Не удалось переименовать</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
     <string name="error_failed_to_retrieve_changelog">Не удалось получить список изменений</string>
@@ -422,6 +423,7 @@
     <string name="error_no_display_over_other_apps_permission">Нет разрешения \"отображать поверх других приложений\"</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">Не найдены встроенные ресурсы Paddle OCR. Перепакуйте приложение с включённым Paddle OCR.</string>
     <string name="error_no_enabled_plugin_for_module_label">Для \"%1$s\" нет включённого плагина. Включите плагин и повторите попытку.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">Ни один установленный плагин OCR не соответствует запросу: %1$s. Установите подходящий плагин в Центре плагинов.</string>
     <string name="error_no_permission_to_access_shizuku">Нет разрешения на доступ к Shizuku</string>
     <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
     <string name="error_no_read_phone_state_permission">Нет разрешения \"читать состояние телефона\"</string>
@@ -547,6 +549,7 @@
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
     <string name="hint_m3u_player_plugin_unavailable">Для этого списка M3U нет доступного проигрывателя. Выберите 3-Ember или 3-Terra для установки, включения или авторизации в Центре плагинов. Приоритет у 3-Ember.</string>
+    <string name="hint_ocr_default_engine_and_switching">ocr() по умолчанию использует ML Kit OCR. Для Paddle OCR или Rapid OCR вызовите ocr.paddle() или ocr.rapid(), либо задайте ocr.mode.</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
@@ -1073,6 +1076,7 @@
     <string name="text_deselect_all">Снять выделение</string>
     <string name="text_destination">Назначение</string>
     <string name="text_details">Детали</string>
+    <string name="text_detected_ocr_plugins">Обнаруженные плагины OCR: %1$s.</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
     <string name="text_dex_compiler">Компилятор DEX</string>

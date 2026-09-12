@@ -262,6 +262,7 @@
 * `修復` 早期 JavaScript 模組遷移中的引數分派, 傳回值, 數值邊界, 影像座標及暫存資源生命週期與原始實作不一致的問題
 * `修復` Android 14+ 申請螢幕擷取權限時可能因媒體投影前景服務啟動異常導致應用程式當機的問題 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修復` 多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕擷取權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修復` OCR 外掛選擇失敗時錯誤訊息可能指向錯誤引擎, 缺少所需引擎 ID/變體和已偵測外掛資訊, 且外掛查詢失敗時誤報未安裝的問題
 * `修復` Paddle OCR 外掛服務長時間執行後可能中斷連線且無法自動復原的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修復` Paddle OCR 外掛未處於執行狀態時無法被自動喚醒, 導致功能呼叫或專案打包失敗的問題 _[`issue #517`](http://issues.autojs6.com/517)_
 * `修復` `images.resize(ImageWrapper, width, height)` 錯誤用法會將高度作為 OpenCV 插值參數傳入, 且不相容的原生例外展開可能導致應用程式當機而非回報腳本例外的問題

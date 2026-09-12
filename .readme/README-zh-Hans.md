@@ -400,6 +400,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 早期 JavaScript 模块迁移中的参数分派, 返回值, 数值边界, 图像坐标及临时资源生命周期与原实现不一致的问题
 * `修复` Android 14+ 申请屏幕捕获权限时可能因媒体投影前台服务启动异常导致应用崩溃的问题 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修复` 多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修复` OCR 插件选择失败时错误消息可能指向错误引擎, 缺少所需引擎 ID/变体和已检测插件信息, 且插件查询失败时误报未安装的问题
 * `修复` Paddle OCR 插件服务长时间运行后可能断开且无法自动恢复的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `修复` Paddle OCR 插件未处于运行状态时无法被自动唤醒, 导致功能调用或项目打包失败的问题 _[`issue #517`](http://issues.autojs6.com/517)_
 * `修复` `images.resize(ImageWrapper, width, height)` 错误用法会将高度作为 OpenCV 插值参数传入, 且不兼容的原生异常展开可能导致应用崩溃而非报告脚本异常的问题

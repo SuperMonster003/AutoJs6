@@ -348,6 +348,7 @@
     <string name="error_failed_to_launch_system_settings">系統設置啓動失敗</string>
     <string name="error_failed_to_load_plugins_with_reason">插件讀取失敗.\n原因: %1$s.</string>
     <string name="error_failed_to_move">移動失敗</string>
+    <string name="error_failed_to_query_ocr_plugins_for_selection">查詢 %1$s 所需的 OCR 插件失敗: %2$s.</string>
     <string name="error_failed_to_rename">重命名失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
     <string name="error_failed_to_retrieve_changelog">獲取更新日誌失敗</string>
@@ -419,6 +420,7 @@
     <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 權限</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">未找到內置 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
     <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 沒有已啓用的插件. 請先啓用插件, 然後重試.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">已安裝的 OCR 插件均不符合請求: %1$s. 請在插件中心安裝匹配的插件.</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 訪問權限</string>
     <string name="error_no_post_notifications_permission">缺少 \"發佈通知\" 權限</string>
     <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 權限</string>
@@ -544,6 +546,7 @@
     <string name="hint_loop_delay">開始循環前的延遲</string>
     <string name="hint_loop_times">0 表示無限循環</string>
     <string name="hint_m3u_player_plugin_unavailable">未找到可用於播放此 M3U 清單的播放器. 請選擇 3-Ember 或 3-Terra, 前往插件中心安裝, 啟用或授權. 優先使用 3-Ember.</string>
+    <string name="hint_ocr_default_engine_and_switching">ocr() 預設使用 ML Kit OCR. 如需使用 Paddle OCR 或 Rapid OCR, 請呼叫 ocr.paddle() 或 ocr.rapid(), 或設定 ocr.mode.</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">插件進程無法穩定啓動. 請更新或重新安裝插件; 如問題持續, 請聯絡插件開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前插件需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>
@@ -1070,6 +1073,7 @@
     <string name="text_deselect_all">取消全選</string>
     <string name="text_destination">目標</string>
     <string name="text_details">詳情</string>
+    <string name="text_detected_ocr_plugins">已偵測到的 OCR 插件: %1$s.</string>
     <string name="text_developer_details_under_development">\"開發者詳情\" 正在開發中</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_dex_compiler">DEX 編譯器</string>

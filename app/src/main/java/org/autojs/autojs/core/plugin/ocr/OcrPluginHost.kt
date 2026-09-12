@@ -306,18 +306,15 @@ object OcrPluginHost {
         variant: String?,
         moduleLabel: String,
     ): IllegalStateException {
+        val selectionLabel = describeSelection(engineId, engine, variant, moduleLabel)
         if (discovered.isEmpty()) {
-            return IllegalStateException(
-                context.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
-            )
+            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine)
         }
         val scopedInfoItems = discovered.filter { item ->
             item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
         }
         if (scopedInfoItems.isEmpty() && hasExplicitSelectionCriteria(engineId, engine, variant)) {
-            return IllegalStateException(
-                context.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
-            )
+            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine)
         }
         val variantList = scopedInfoItems
             .mapNotNull { item ->
@@ -332,7 +329,7 @@ object OcrPluginHost {
             .ifBlank { "*" }
         val fallback = context.getString(
             R.string.error_no_available_enabled_plugin_variants_found,
-            moduleLabel,
+            selectionLabel,
             variantList,
         )
 
@@ -381,6 +378,56 @@ object OcrPluginHost {
         }
 
         return IllegalStateException(fallback)
+    }
+
+    private fun buildUnmatchedSelectionFailure(
+        context: Context,
+        discovered: List<Discovered>,
+        selectionLabel: String,
+        engine: String?,
+    ): IllegalStateException {
+        // Failed discovery cannot establish that the requested plugin is missing.
+        val failures = discovered.filter { it.error != null }
+        val message = if (failures.isEmpty()) {
+            context.getString(R.string.error_no_matching_ocr_plugin_for_selection, selectionLabel)
+        } else {
+            val details = failures.joinToString("; ") { item ->
+                "${item.serviceInfo.packageName}/${item.serviceInfo.name}: ${item.error?.message ?: item.error}"
+            }
+            context.getString(R.string.error_failed_to_query_ocr_plugins_for_selection, selectionLabel, details)
+        }
+        val parts = mutableListOf(message)
+        val detectedPlugins = discovered.mapNotNull { item ->
+            item.pluginInfo?.let { info ->
+                val name = info.name.ifBlank { item.serviceInfo.packageName }
+                val selection = describeSelection(info.id, info.engine, info.variant, name)
+                "$name [$selection; package=${item.serviceInfo.packageName}]"
+            }
+        }.distinct()
+        if (detectedPlugins.isNotEmpty()) {
+            parts += context.getString(R.string.text_detected_ocr_plugins, detectedPlugins.joinToString("; "))
+        }
+        if (engine == "mlkit-ocr") {
+            parts += context.getString(R.string.hint_ocr_default_engine_and_switching)
+        }
+        return IllegalStateException(parts.joinToString("\n"), failures.firstOrNull()?.error)
+    }
+
+    private fun describeSelection(engineId: String?, engine: String?, variant: String?, moduleLabel: String): String {
+        // The engine option can override the caller's module, so its label must follow the request.
+        val label = when (engine) {
+            "mlkit-ocr" -> "ML Kit OCR"
+            "paddle-ocr" -> "Paddle OCR"
+            "rapid-ocr" -> "Rapid OCR"
+            null -> engineId ?: moduleLabel
+            else -> engine
+        }
+        val criteria = listOfNotNull(
+            engine?.let { "engine=$it" },
+            engineId?.let { "engineId=$it" },
+            variant?.let { "variant=$it" },
+        )
+        return if (criteria.isEmpty()) label else "$label (${criteria.joinToString(", ")})"
     }
 
     private fun matchesSelectionCriteria(

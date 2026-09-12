@@ -424,6 +424,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Argument dispatch, return values, numeric boundaries, image coordinates, and temporary resource lifecycles in the early JavaScript module migration did not match the original implementation
 * `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
+* `Fix` OCR plugin selection errors could name the wrong engine, omit the required engine ID/variant and detected plugins, or report failed discovery as a missing installation
 * `Fix` Paddle OCR plugin service could disconnect after running for a long time and fail to recover automatically _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
 * `Fix` Paddle OCR plugin could not be woken automatically when not running, causing feature calls or project packaging to fail _[`issue #517`](http://issues.autojs6.com/517)_
 * `Fix` Incorrect `images.resize(ImageWrapper, width, height)` calls could pass the height to OpenCV as an interpolation value, while incompatible native exception unwinding could crash the app instead of reporting a script exception
