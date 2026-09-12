@@ -380,6 +380,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未規範化寫回插件請求, 導致合法 Node.js workingDirectory 被誤判為越過 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 運行時時錯誤排除所有 ABI 的 JNI/AAR 庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而崩潰的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 證書摘要輸出格式變更而拒絕 Android Build Tools 37 報告的 APK 簽名身份的問題
+* `修復` IntelliJ IDEA 直接執行項目時, 原生庫頁對齊校驗因未使用當前構建的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 構建 Android 模塊時因 compileJava 任務匹配歧義而失敗的問題
 * `修復` IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題

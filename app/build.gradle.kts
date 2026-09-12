@@ -1,7 +1,9 @@
 @file:Suppress("SpellCheckingInspection", "AvoidApplyPluginMethod")
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.FilterConfiguration
 import org.autojs.build.alignment.ElfLoadAlignment
+import org.autojs.build.alignment.VerifyNativePageAlignment
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -1100,6 +1102,17 @@ androidComponents {
         val variantName = variant.name
         val mergeAssetsTaskName = "merge${variantName.asGradleTaskNamePart()}Assets"
         val isInrtVariant = variantName.startsWith(flavorNameInrt, ignoreCase = true)
+
+        val variantApkDirectory = variant.artifacts.get(SingleArtifact.APK)
+        // The shared plugin registers tasks in afterEvaluate; apply its defaults first.
+        // IDE APKs can live under intermediates/apk; apkDirectory is @Internal and needs its producer wired explicitly.
+        // zh-CN: 在共享插件延迟注册任务后再覆盖默认目录; IDE APK 目录需显式关联生成任务.
+        afterEvaluate {
+            tasks.named<VerifyNativePageAlignment>("verify${variantName.asGradleTaskNamePart()}NativePageAlignment") {
+                apkDirectory.set(variantApkDirectory)
+                dependsOn(variantApkDirectory)
+            }
+        }
 
         tasks.matching { it.name == mergeAssetsTaskName }.configureEach {
             val includeBuiltInTemplate = apkBuilderIncludeBuiltInTemplate.get()

@@ -218,6 +218,7 @@
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未正規化寫回外掛請求, 導致合法 Node.js workingDirectory 被誤判為超出 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 執行階段時錯誤排除所有 ABI 的 JNI/AAR 程式庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而當機的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題
+* `修復` IntelliJ IDEA 直接執行專案時, 原生程式庫頁面對齊驗證因未使用目前建置的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 建置 Android 模組時因 compileJava 工作匹配歧義而失敗的問題
 * `修復` IntelliJ IDEA 全專案建置在 Clean 後因 Python Runtime API 發佈 AAR 尚未產生而無法解析 Android 相依性, 且 conformance 測試夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題

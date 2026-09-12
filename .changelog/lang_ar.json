@@ -215,6 +215,7 @@
         "لم تجر تسوية الاسمين البديلين /data/user/0 و /data/data لادلة Android الخاصة واعادة كتابتهما في طلبات الاضافة, مما ادى الى اعتبار مسار workingDirectory صالح ل Node.js متجاوزا sandboxRoot بصورة خاطئة",
         "استبعدت تصميمات nodePlugin التي لا تحتوي على بيئة تشغيل Node في المضيف مكتبات JNI/AAR لجميع ABI بشكل خاطئ, مما تسبب في انهيار تهيئة Rhino Shell بسبب غياب libjackpal-termexec2.so",
         "رفض جمع ادلة Node.js R6 والتحقق منها هويات موقعي APK التي ابلغ عنها Android Build Tools 37 بسبب تغيير apksigner لتنسيق اخراج ملخص الشهادة",
+        "فشل تشغيل المشروع مباشرة من IntelliJ IDEA عند التحقق من محاذاة صفحات المكتبات الأصلية لأن البحث عن APK لم يستخدم دليل نواتج البناء الحالي",
         "فشل بناء وحدات Android في IntelliJ IDEA بسبب غموض مطابقة مهمة compileJava",
         "فشل بناء المشروع بالكامل في IntelliJ IDEA بعد Clean لان ملفات AAR الموزعة لواجهة Python Runtime API كانت تحل قبل انشائها ولان fixtures التوافق لم تنفذ طرق AIDL المضافة",
         "فشل بناء APK Builder Template بعد `clean` لأن دليل Runtime Kit الافتراضي أغفل لاحقة المتغير `universal`",

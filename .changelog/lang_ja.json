@@ -215,6 +215,7 @@
         "Android プライベートディレクトリの /data/user/0 と /data/data のエイリアスが正規化されてプラグインリクエストに書き戻されず, 正当な Node.js workingDirectory が sandboxRoot を逸脱していると誤判定される問題",
         "ホストに Node ランタイムを含まない nodePlugin ビルドで全 ABI の JNI/AAR ライブラリが誤って除外され, libjackpal-termexec2.so の欠落により Rhino Shell の初期化時にクラッシュする問題",
         "apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題",
+        "IntelliJ IDEA からプロジェクトを直接実行すると, APK の検索に現在のビルドの成果物ディレクトリが使われず, ネイティブライブラリのページアライメント検証で APK が見つからないと誤判定される問題",
         "IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題",
         "Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題",
         "デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題",

@@ -218,6 +218,7 @@
 * `Corrección` Los alias /data/user/0 y /data/data de los directorios privados de Android no se normalizaban ni se volvían a escribir en las solicitudes del plugin, lo que hacía que un workingDirectory válido de Node.js se rechazara incorrectamente por exceder sandboxRoot
 * `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
+* `Corrección` La ejecución directa del proyecto desde IntelliJ IDEA fallaba al verificar la alineación de páginas de las bibliotecas nativas porque la búsqueda de APK no utilizaba el directorio de artefactos de la compilación actual
 * `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
 * `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
