@@ -421,11 +421,12 @@
     <string name="error_no_applications_available_for_sending_this_file">لا توجد تطبيقات متاحة لإرسال هذا الملف</string>
     <string name="error_no_applications_available_for_viewing_this_file">لا توجد تطبيقات متاحة لعرض هذا الملف</string>
     <string name="error_no_available_enabled_plugin_variants_found">لم يتم العثور على أي متغيرات مفعّلة ومتاحة للمكوّن الإضافي %1$s (%2$s).</string>
+    <string name="error_no_available_ocr_engine">لا يوجد محرك OCR متاح. تحقق من مكتبات OCR المضمنة عند تحزيم التطبيق.</string>
     <string name="error_no_available_url_provided_for_current_plugin">لم يتم توفير عنوان URL متاح للملحق الحالي</string>
     <string name="error_no_display_over_other_apps_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">لم يتم العثور على موارد Paddle OCR المضمّنة. يُرجى إعادة الحزم مع تفعيل Paddle OCR.</string>
     <string name="error_no_enabled_plugin_for_module_label">لا يوجد مكوّن إضافي مفعّل لـ \"%1$s\". يُرجى تفعيل مكوّن إضافي ثم إعادة المحاولة.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">لا توجد اضافة OCR مثبتة تطابق الطلب: %1$s. ثبت اضافة مطابقة في مركز الاضافات.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">لا توجد اضافة OCR متاحة تطابق الطلب: %1$s. ثبت اضافة مطابقة او فعلها او امنحها الاذن في مركز الاضافات.</string>
     <string name="error_no_permission_to_access_shizuku">لا يوجد إذن للوصول إلى Shizuku</string>
     <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
     <string name="error_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
@@ -551,7 +552,7 @@
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
     <string name="hint_m3u_player_plugin_unavailable">لم يتم العثور على مشغل متاح لقائمة M3U هذه. اختر 3-Ember أو 3-Terra لتثبيته أو تفعيله أو منحه الإذن في مركز المكونات الإضافية. الأولوية لـ 3-Ember.</string>
-    <string name="hint_ocr_default_engine_and_switching">تستخدم ocr() محرك ML Kit OCR افتراضيا. لاستخدام Paddle OCR او Rapid OCR, استدع ocr.paddle() او ocr.rapid(), او اضبط ocr.mode.</string>
+    <string name="hint_ocr_default_engine_and_switching">يفحص اختيار OCR التلقائي الاضافات المفعلة بالترتيب ML Kit OCR, Paddle OCR, Rapid OCR. استخدم ocr.mode او ocr.tap() لاختيار محرك, او عين auto الى ocr.mode لاستعادة الاختيار التلقائي.</string>
     <string name="hint_pc_server_address_supported_formats">يتم دعم IPv4 و IPv6 وأسماء النطاقات.</string>
     <string name="hint_plugin_process_failed_to_start">تعذر بدء عملية المكون الإضافي بشكل موثوق. حدّث المكون الإضافي أو أعد تثبيته; وإذا استمرت المشكلة, فاتصل بمطور المكون الإضافي.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">يتطلب المكون الإضافي الحالي إصدارا أعلى من بيئة المضيف AutoJs6 (versionCode المطلوب: %1$d, versionCode الحالي: %2$d). يجب ترقية AutoJs6.</string>

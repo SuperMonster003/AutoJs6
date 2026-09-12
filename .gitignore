@@ -52,6 +52,9 @@ AGENTS.md
 !/tools/16kb/
 !/tools/16kb/**
 /tools/16kb/__pycache__/
+!/tools/ocr/
+!/tools/ocr/auto_mode_smoke.js
+!/tools/ocr/auto_mode_smoke.py
 
 /gradle/wrappers/backup/
 

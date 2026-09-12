@@ -420,11 +420,12 @@
     <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
     <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
     <string name="error_no_available_enabled_plugin_variants_found">利用可能で有効化された %1$s プラグインの variant が見つかりません (%2$s).</string>
+    <string name="error_no_available_ocr_engine">利用可能な OCR エンジンがありません. アプリのパッケージ化時に含めた OCR ライブラリを確認してください.</string>
     <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
     <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する 権限がない</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
     <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" に有効化されたプラグインがありません. プラグインを有効化してから再試行してください.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">要求に一致する OCR プラグインがインストールされていません: %1$s. プラグインセンターで一致するプラグインをインストールしてください.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">要求に一致する利用可能な OCR プラグインがありません: %1$s. プラグインセンターで一致するプラグインをインストール, 有効化または許可してください.</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku にアクセスする権限がありません</string>
     <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
     <string name="error_no_read_phone_state_permission">電話の状態を読む 権限がない</string>
@@ -550,7 +551,7 @@
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="hint_m3u_player_plugin_unavailable">この M3U プレイリストで使用できるプレーヤーが見つかりません. 3-Ember または 3-Terra を選択し, プラグインセンターでインストール, 有効化または承認してください. 3-Ember が優先されます.</string>
-    <string name="hint_ocr_default_engine_and_switching">ocr() はデフォルトで ML Kit OCR を使用します. Paddle OCR または Rapid OCR を使うには, ocr.paddle() または ocr.rapid() を呼び出すか, ocr.mode を設定してください.</string>
+    <string name="hint_ocr_default_engine_and_switching">OCR の自動選択は ML Kit OCR, Paddle OCR, Rapid OCR の順に有効なプラグインを確認します. ocr.mode または ocr.tap() でエンジンを指定し, ocr.mode に auto を設定すると自動選択に戻ります.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
     <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>

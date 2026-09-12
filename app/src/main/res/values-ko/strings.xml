@@ -421,11 +421,12 @@
     <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
     <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
     <string name="error_no_available_enabled_plugin_variants_found">사용 가능하며 활성화된 %1$s 플러그인 variant를 찾을 수 없습니다 (%2$s).</string>
+    <string name="error_no_available_ocr_engine">사용 가능한 OCR 엔진이 없습니다. 앱을 패키징할 때 포함한 OCR 라이브러리를 확인하세요.</string>
     <string name="error_no_available_url_provided_for_current_plugin">현재 플러그인에 사용 가능한 URL 이 제공되지 않았습니다</string>
     <string name="error_no_display_over_other_apps_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">내장된 Paddle OCR assets를 찾을 수 없습니다. Paddle OCR을 활성화하여 다시 패키징해 주세요.</string>
     <string name="error_no_enabled_plugin_for_module_label">\"%1$s\"에 활성화된 플러그인이 없습니다. 플러그인을 활성화한 후 다시 시도해 주세요.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">설치된 OCR 플러그인 중 요청과 일치하는 플러그인이 없습니다: %1$s. 플러그인 센터에서 일치하는 플러그인을 설치하세요.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">요청과 일치하는 사용 가능한 OCR 플러그인이 없습니다: %1$s. 플러그인 센터에서 일치하는 플러그인을 설치, 활성화 또는 승인하세요.</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku 에 액세스할 수 있는 권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
     <string name="error_no_read_phone_state_permission">\"전화 상태 읽기\"권한이 없습니다</string>
@@ -551,7 +552,7 @@
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
     <string name="hint_m3u_player_plugin_unavailable">이 M3U 재생 목록에 사용할 수 있는 플레이어가 없습니다. 3-Ember 또는 3-Terra를 선택하여 플러그인 센터에서 설치, 활성화 또는 승인하세요. 3-Ember가 우선 사용됩니다.</string>
-    <string name="hint_ocr_default_engine_and_switching">ocr()은 기본적으로 ML Kit OCR을 사용합니다. Paddle OCR 또는 Rapid OCR을 사용하려면 ocr.paddle() 또는 ocr.rapid()을 호출하거나 ocr.mode를 설정하세요.</string>
+    <string name="hint_ocr_default_engine_and_switching">OCR 자동 선택은 ML Kit OCR, Paddle OCR, Rapid OCR 순서로 활성화된 플러그인을 확인합니다. ocr.mode 또는 ocr.tap()으로 엔진을 지정하거나, ocr.mode를 auto로 설정하여 자동 선택을 복원하세요.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
     <string name="hint_plugin_process_failed_to_start">플러그인 프로세스를 안정적으로 시작할 수 없습니다. 플러그인을 업데이트하거나 다시 설치하십시오. 문제가 계속되면 플러그인 개발자에게 문의하십시오.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>

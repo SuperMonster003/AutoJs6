@@ -69,7 +69,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             Ocr.detectWith(scriptRuntime, OcrMode.PADDLE, argList)
         }
 
-        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
+        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<String> {
             ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val parsed = getOcrOptions(options)
             val (cpuThreadNum, useSlim, useOpenCL) = parsed
@@ -83,7 +83,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = OcrPluginHost.selectOrThrow(
+                    val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                         context = globalContext,
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
@@ -99,7 +99,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
         }
 
-        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
+        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<OcrResult> {
             ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val parsed = getOcrOptions(options)
             val (cpuThreadNum, useSlim, useOpenCL) = parsed
@@ -113,7 +113,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             val results = if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = OcrPluginHost.selectOrThrow(
+                    val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                         context = globalContext,
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,

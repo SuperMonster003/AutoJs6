@@ -75,6 +75,7 @@
 * `新增` 獨立 Lua Runtime 外掛後端, 支援透過單獨的 PUC Lua 5.4.8 外掛處理程序執行本機 .lua 檔案, 並驗證固定元件/簽章/協定/ABI, 提供有界執行且絕不回退至 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 外掛後端, 支援在隔離處理程序中編譯及執行單一 .java/.kt 指令碼, 提供 package/import, 即時 console 輸出, 可取消 sleep, 主程式 toast 與明確能力協商
 * `新增` JVM Source Runtime 支援範圍為單一檔案 Java 8 (Java provider 最低 API 24) 與 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次發布僅在 API 31/arm64-v8a 實機完成 smoke, 不宣告未驗證 API 層級
+* `新增` `ocr` 預設依 ML Kit/Paddle/Rapid 順序動態選擇引擎; `ocr.mode` 回傳選中的引擎或空字串, 明確指定的模式保持固定, 可透過 `mode` 或 `tap` 設定 `auto`, 空字串或 nullish 值以恢復自動選擇
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 AI Provider 文字生成 v1 開發協定套件, 並配備專用符合性測試應用程式及惡意情境夾具
 * `新增` AutoJs6 官方外掛可透過簽章權限保護的版本化唯讀設定協定, 讀取主程式主題色, 深色模式策略及語言的外觀快照

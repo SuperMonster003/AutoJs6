@@ -53,11 +53,11 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             Ocr.detectWith(scriptRuntime, OcrMode.MLKIT, argList)
         }
 
-        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
+        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<String> {
             ApkBuilder.Lib.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = OcrPluginHost.selectOrThrow(
+                val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_MLKIT_OCR,
@@ -68,11 +68,11 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             }
         }
 
-        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
+        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<OcrResult> {
             ApkBuilder.Lib.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = OcrPluginHost.selectOrThrow(
+                val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_MLKIT_OCR,

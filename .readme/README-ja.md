@@ -237,6 +237,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` 独立した Lua Runtime プラグインバックエンドがローカル .lua ファイルを別の PUC Lua 5.4.8 プラグインプロセスで実行し, 固定コンポーネント/署名/プロトコル/ABI の検証, 上限付き実行, JavaScript へのフォールバック禁止に対応
 * `新機能` Java/Kotlin 用の独立 JVM Source Runtime プラグインバックエンドが単一ファイルの .java/.kt を分離プロセスでコンパイル/実行し, package/import, リアルタイム console 出力, キャンセル可能な sleep, ホスト toast, 明示的な capability ネゴシエーションに対応
 * `新機能` JVM Source Runtime のサポート範囲は単一ファイル Java 8 (Java provider の最小 API 24) と Kotlin 2.3 (Kotlin provider の最小 API 26); 本リリースの実機 smoke は API 31/arm64-v8a のみで, 未検証 API レベルはサポートを表明しない
+* `新機能` `ocr` がデフォルトで ML Kit/Paddle/Rapid の順にエンジンを動的に選択; `ocr.mode` は選択したエンジンまたは空文字列を返し, 明示したモードは固定され, `mode` または `tap` への `auto`, 空文字列, nullish 値の設定で自動選択に復帰
 * `新機能` プラグインシステムが Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/テキスト変換/メディア情報などの拡張 API に対応
 * `新機能` プラグインシステムがバージョン化 TaggedWire 転送と DEX コンパイル/AI Provider テキスト生成向け v1 開発プロトコルパックに対応し, 専用の適合性テストアプリと敵対的 fixture を提供
 * `新機能` AutoJs6 公式プラグインが署名保護されたバージョン化読み取り専用設定コントラクトを通じて, ホストのテーマ色/ダークモード方針/言語の外観スナップショットを読み取り可能

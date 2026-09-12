@@ -8,6 +8,27 @@ class OcrEngine(context: Context) {
     companion object {
         const val numThread: Int = 4
 
+        fun hasModels(assets: AssetManager): Boolean = resolveModelSpec(assets) != null
+
+        private fun resolveModelSpec(assets: AssetManager): ModelSpec? {
+            return listOf(
+                ModelSpec(
+                    variant = "pp-ocrv6",
+                    detName = "models/PP-OCRv6_det_small.onnx",
+                    clsName = "models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+                    recName = "models/PP-OCRv6_rec_small.onnx",
+                    keysName = "models/ppocrv6_dict.txt",
+                ),
+                ModelSpec(
+                    variant = "pp-ocrv3",
+                    detName = "models/ch_PP-OCRv3_det_infer.onnx",
+                    clsName = "models/ch_ppocr_mobile_v2.0_cls_infer.onnx",
+                    recName = "models/ch_PP-OCRv3_rec_infer.onnx",
+                    keysName = "models/ppocr_keys_v1.txt",
+                ),
+            ).firstOrNull { it.isAvailable(assets) }
+        }
+
         @Volatile
         private var nativeLibrariesLoaded = false
 
@@ -33,6 +54,7 @@ class OcrEngine(context: Context) {
     }
 
     private val modelSpec = resolveModelSpec(context.applicationContext.assets)
+        ?: throw IllegalStateException("No embedded Rapid OCR assets found")
 
     init {
         ensureNativeLibrariesLoaded()
@@ -83,26 +105,6 @@ class OcrEngine(context: Context) {
     ): OcrResult
 
     external fun benchmark(input: Bitmap, loop: Int): Double
-
-    private fun resolveModelSpec(assets: AssetManager): ModelSpec {
-        return listOf(
-            ModelSpec(
-                variant = "pp-ocrv6",
-                detName = "models/PP-OCRv6_det_small.onnx",
-                clsName = "models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
-                recName = "models/PP-OCRv6_rec_small.onnx",
-                keysName = "models/ppocrv6_dict.txt",
-            ),
-            ModelSpec(
-                variant = "pp-ocrv3",
-                detName = "models/ch_PP-OCRv3_det_infer.onnx",
-                clsName = "models/ch_ppocr_mobile_v2.0_cls_infer.onnx",
-                recName = "models/ch_PP-OCRv3_rec_infer.onnx",
-                keysName = "models/ppocr_keys_v1.txt",
-            ),
-        ).firstOrNull { it.isAvailable(assets) }
-            ?: throw IllegalStateException("No embedded Rapid OCR assets found")
-    }
 
 }
 

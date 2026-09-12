@@ -75,6 +75,7 @@
 * `Feature` Independent Lua Runtime plugin backend for running local .lua files in a separate PUC Lua 5.4.8 plugin process, with fixed-component/signer/protocol/ABI validation, bounded execution, and no fallback to JavaScript
 * `Feature` Independent Java and Kotlin JVM Source Runtime plugin backends compile and run single-file .java/.kt scripts in isolated processes, with package/import support, live console output, cancellable sleep, host toast, and explicit capability negotiation
 * `Feature` JVM Source Runtime support scope is single-file Java 8 (Java provider min API 24) and Kotlin 2.3 (Kotlin provider min API 26); this release was device-smoked only on API 31/arm64-v8a and makes no claim for untested API levels
+* `Feature` `ocr` defaults to live automatic engine selection in ML Kit/Paddle/Rapid order; `ocr.mode` reports the selected engine or an empty string, explicit modes stay fixed, and `auto`, an empty string or nullish values restore automatic selection through `mode` or `tap`
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/text conversion/media information and more
 * `Feature` Plugin system provides versioned TaggedWire transport and developer protocol packs for DEX compilation and AI Provider text generation, with dedicated conformance test apps and hostile fixtures
 * `Feature` Official AutoJs6 plugins can read a versioned, read-only host appearance snapshot for theme colors, dark-mode policy, and language through the signature-protected settings contract

@@ -1,7 +1,11 @@
 package org.autojs.autojs.runtime.api.augment.ocr
 
+import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
@@ -22,6 +26,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
@@ -44,7 +49,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
     )
 
     override val selfAssignmentGettersAndSetters = listOf(
-        Triple("mode", Supplier<Any?> { scriptRuntime.ocr.mode }, Consumer<Any?> { tap(scriptRuntime, arrayOf(it)) }),
+        Triple("mode", Supplier<Any?> { currentMode(scriptRuntime)?.value.orEmpty() }, Consumer<Any?> { tap(scriptRuntime, arrayOf(it)) }),
     )
 
     override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
@@ -54,9 +59,8 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun tap(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { mode ->
-            scriptRuntime.ocr.mode = mode.toOcrModeOrNull(scriptRuntime) ?: OcrMode.MLKIT.also {
-                throw WrappedIllegalArgumentException("Unknown mode ${mode.jsSpecies()} for ocr.tap")
-            }
+            scriptRuntime.ocr.mode = mode.toOcrModeOrNull(scriptRuntime)
+                ?: throw WrappedIllegalArgumentException("Unknown mode ${mode.jsSpecies()} for ocr.tap")
             return@ensureArgumentsOnlyOne UNDEFINED
         }
 
@@ -72,14 +76,17 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
             detectWith(scriptRuntime, null, argList)
         }
 
-        @Suppress("EnumValuesSoftDeprecate")
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun summary(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            val available = availableModes()
+            val requested = scriptRuntime.ocr.mode
+            val current = requested.takeUnless { it == OcrMode.AUTO } ?: available.firstOrNull()
             listOf(
                 "[ OCR summary ]",
-                "Current mode: ${scriptRuntime.ocr.mode.value}",
-                "Available modes: [ ${OcrMode.values().filterNot { it == OcrMode.UNKNOWN }.joinToString(", ") { it.value }} ]"
+                "Current mode: ${current?.value.orEmpty()}",
+                "Mode selection: ${requested.value}",
+                "Available modes: [ ${available.joinToString(", ") { it.value }} ]"
             ).joinToString("\n")
         }
 
@@ -105,9 +112,21 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
             funcName: String,
             unwrappedArgs: Array<out Any?>,
             overrideMode: OcrMode? = null,
+            selection: Selection? = null,
             resultsHandler: ((results: List<T>, rect: OpencvRect) -> List<T>)? = null,
         ): List<T> {
             val (arg0, arg1, arg2) = unwrappedArgs
+            val selected = selection ?: try {
+                selectForCall(
+                    scriptRuntime,
+                    overrideMode,
+                    (if (arg0 is ImageWrapper || arg0.isJsString()) arg1 else arg0) as? NativeObject,
+                    funcName,
+                )
+            } catch (e: Throwable) {
+                (arg0 as? ImageWrapper)?.shoot()
+                throw e
+            }
 
             return when {
                 arg0.isJsString() -> {
@@ -124,7 +143,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     // @Overload
                     // funcName(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
                     // funcName(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(img.oneShot(), arg1, arg2), overrideMode, resultsHandler)
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(img.oneShot(), arg1, arg2), overrideMode, selected, resultsHandler)
                 }
                 arg0 !is ImageWrapper -> {
                     // @Signature
@@ -137,7 +156,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
 
                     val capt = AugmentableImages.captureScreen(scriptRuntime, emptyArray())
                     require(capt is ImageWrapper) { "Failed to capture a valid image for ocr.$funcName" }
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt.oneShot(), arg0, arg1), overrideMode, resultsHandler)
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt.oneShot(), arg0, arg1), overrideMode, selected, resultsHandler)
                 }
                 shouldTakenAsRegion(arg1) -> {
 
@@ -149,7 +168,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     }
 
                     // @Overload funcName(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(arg0, options), overrideMode, resultsHandler)
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(arg0, options), overrideMode, selected, resultsHandler)
                 }
                 else -> {
 
@@ -168,14 +187,11 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                                 .oneShot()
                                 .also { clip -> clippedImage = clip }
                         } ?: img
-                        val optMode = overrideMode ?: opt.inquire("mode", scriptRuntime.ocr.mode)
-                        val ocrMode = optMode.toOcrModeOrNull(scriptRuntime)
-                            ?: throw WrappedIllegalArgumentException("Cannot call ocr.$funcName with an unknown mode: ${optMode.jsBrief()}")
                         val prop = OcrMode::class.declaredMemberProperties.firstOrNull { it.name.contentEquals(funcName, true) }
                             ?: throw WrappedIllegalArgumentException("Cannot find ocr dispatcher property for $funcName")
-                        val fn = prop.get(ocrMode) as? (ScriptRuntime, ImageWrapper, NativeObject) -> List<T>
+                        val fn = prop.get(selected.mode) as? (ScriptRuntime, ImageWrapper, NativeObject, OcrPluginHost.Discovered?) -> List<T>
                             ?: throw WrappedIllegalArgumentException("Dispatcher type mismatch for $funcName")
-                        var results = fn.invoke(scriptRuntime, image, opt)
+                        var results = fn.invoke(scriptRuntime, image, opt, selected.plugin)
                         if (rect != null) {
                             resultsHandler?.let { results = it(results, rect) }
                         }
@@ -190,7 +206,55 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
 
         private fun shouldTakenAsRegion(o: Any?) = o is OpencvRect || o is AndroidRect || o is NativeArray
 
+        private fun currentMode(scriptRuntime: ScriptRuntime): OcrMode? {
+            return scriptRuntime.ocr.mode.takeUnless { it == OcrMode.AUTO } ?: availableModes().firstOrNull()
+        }
+
+        private fun availableModes(): List<OcrMode> {
+            val engines = OcrPluginHost.availableEngines(globalContext).toMutableSet()
+            if (isInrt) {
+                engines.remove("paddle-ocr")
+                engines.remove("rapid-ocr")
+                val paddleAvailable = runCatching {
+                    ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles()
+                    PaddleOcrEmbeddedEngine.resolveVariantName(globalContext) != null
+                }.getOrDefault(false)
+                if (paddleAvailable) engines += "paddle-ocr"
+                if (org.autojs.autojs.runtime.api.OcrRapid.isEmbeddedAvailable(globalContext)) engines += "rapid-ocr"
+            }
+            return OcrMode.entries.filter { it.engine in engines }
+        }
+
+        internal data class Selection(val mode: OcrMode, val plugin: OcrPluginHost.Discovered? = null)
+
+        private fun selectForCall(scriptRuntime: ScriptRuntime, overrideMode: OcrMode?, options: NativeObject?, funcName: String): Selection {
+            val optMode = overrideMode ?: if (options != null && ScriptableObject.hasProperty(options, "mode")) {
+                options.prop("mode")
+            } else scriptRuntime.ocr.mode
+            val requested = optMode.toOcrModeOrNull(scriptRuntime)
+                ?: throw WrappedIllegalArgumentException("Cannot call ocr.$funcName with an unknown mode: ${optMode.jsBrief()}")
+            if (requested != OcrMode.AUTO) return Selection(requested)
+            if (isInrt) {
+                val embedded = availableModes().firstOrNull()
+                    ?: throw IllegalStateException(globalContext.getString(org.autojs.autojs6.R.string.error_no_available_ocr_engine))
+                return Selection(embedded)
+            }
+            val plugin = runBlocking(scriptRuntime.coroutineContext) {
+                OcrPluginHost.selectOrThrow(
+                    context = globalContext,
+                    engineId = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE_ID, ::coerceString, "")?.takeIf { it.isNotBlank() },
+                    engine = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE, ::coerceString, "")?.takeIf { it.isNotBlank() },
+                    variant = options?.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")?.takeIf { it.isNotBlank() },
+                    moduleLabel = "ML Kit OCR / Paddle OCR / Rapid OCR",
+                    automatic = true,
+                )
+            }
+            val mode = OcrMode.entries.first { it.engine == plugin.pluginInfo?.engine }
+            return Selection(mode, plugin)
+        }
+
         private fun Any?.toOcrModeOrNull(scriptRuntime: ScriptRuntime? = null) = when (this) {
+            is OcrMode -> this
             is ScriptableObject -> when (this) {
                 scriptRuntime?.augmentedOcrMLKit -> OcrMode.MLKIT
                 scriptRuntime?.augmentedOcrPaddle -> OcrMode.PADDLE
@@ -198,23 +262,21 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                 else -> null
             }
             else -> {
-                val modeValue = coerceString(this, "")
-                OcrMode.entries.find { it.value.contentEquals(modeValue, true) }
+                val modeValue = if (isJsNullish()) "" else coerceString(this, "")
+                if (modeValue.isEmpty()) OcrMode.AUTO else OcrMode.entries.find { it.value.contentEquals(modeValue, true) }
             }
         }
 
-        @Suppress("unused")
-        private fun <T> nullImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject) = emptyList<T>()
-
         enum class OcrMode(
             val value: String,
-            val recognizeText: ((ScriptRuntime, ImageWrapper, NativeObject) -> List<String>)?,
-            val detect: ((ScriptRuntime, ImageWrapper, NativeObject) -> List<OcrResult>)?,
+            val recognizeText: ((ScriptRuntime, ImageWrapper, NativeObject, OcrPluginHost.Discovered?) -> List<String>)?,
+            val detect: ((ScriptRuntime, ImageWrapper, NativeObject, OcrPluginHost.Discovered?) -> List<OcrResult>)?,
+            val engine: String? = null,
         ) {
-            MLKIT("mlkit", OcrMLKit::recognizeTextImpl, OcrMLKit::detectImpl),
-            PADDLE("paddle", OcrPaddle::recognizeTextImpl, OcrPaddle::detectImpl),
-            RAPID("rapid", OcrRapid::recognizeTextImpl, OcrRapid::detectImpl),
-            UNKNOWN("unknown", ::nullImpl, ::nullImpl);
+            MLKIT("mlkit", OcrMLKit::recognizeTextImpl, OcrMLKit::detectImpl, "mlkit-ocr"),
+            PADDLE("paddle", OcrPaddle::recognizeTextImpl, OcrPaddle::detectImpl, "paddle-ocr"),
+            RAPID("rapid", OcrRapid::recognizeTextImpl, OcrRapid::detectImpl, "rapid-ocr"),
+            AUTO("auto", null, null);
         }
 
     }

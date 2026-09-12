@@ -415,11 +415,12 @@
     <string name="error_no_applications_available_for_sending_this_file">未找到用于发送该文件的应用</string>
     <string name="error_no_applications_available_for_viewing_this_file">未找到用于查看该文件的应用</string>
     <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已启用的 %1$s 插件变体 (%2$s).</string>
+    <string name="error_no_available_ocr_engine">没有可用的 OCR 引擎. 请检查打包应用时包含的 OCR 库.</string>
     <string name="error_no_available_url_provided_for_current_plugin">当前插件未提供可用的 URL</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"显示在其他应用上层\" 权限</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">未找到内置 Paddle OCR 资源, 请在打包时勾选并注入 Paddle OCR 后重试.</string>
     <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 没有已启用的插件. 请先启用插件, 然后重试.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">已安装的 OCR 插件均不符合请求: %1$s. 请在插件中心安装匹配的插件.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">没有可用的 OCR 插件符合请求: %1$s. 请在插件中心安装, 启用或授权匹配的插件.</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 访问权限</string>
     <string name="error_no_post_notifications_permission">缺少 \"发布通知\" 权限</string>
     <string name="error_no_read_phone_state_permission">缺少 \"读取手机状态\" 权限</string>
@@ -545,7 +546,7 @@
     <string name="hint_loop_delay">开始循环前的延迟</string>
     <string name="hint_loop_times">0 表示无限循环</string>
     <string name="hint_m3u_player_plugin_unavailable">未找到可用于播放此 M3U 列表的播放器. 请选择 3-Ember 或 3-Terra, 前往插件中心安装, 启用或授权. 优先使用 3-Ember.</string>
-    <string name="hint_ocr_default_engine_and_switching">ocr() 默认使用 ML Kit OCR. 如需使用 Paddle OCR 或 Rapid OCR, 请调用 ocr.paddle() 或 ocr.rapid(), 或设置 ocr.mode.</string>
+    <string name="hint_ocr_default_engine_and_switching">OCR 自动选择按 ML Kit OCR, Paddle OCR, Rapid OCR 的顺序检查已启用的插件. 可通过 ocr.mode 或 ocr.tap() 指定引擎, 或将 ocr.mode 设为 auto 以恢复自动选择.</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">插件进程无法稳定启动. 请更新或重新安装插件; 如问题持续, 请联系插件开发者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">当前插件需要更高版本的 AutoJs6 宿主环境 (要求 versionCode: %1$d, 当前 versionCode: %2$d), 需要升级 AutoJs6.</string>

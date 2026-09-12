@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
@@ -21,12 +22,14 @@ import android.os.SharedMemory
 import android.os.SystemClock.uptimeMillis
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.autojs.autojs.core.plugin.center.InstalledPluginMetadataStore
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginServicePreflight
@@ -63,6 +66,35 @@ object OcrPluginHost {
     // Legacy action shared by OCR plugins. Keep the string stable for installed Paddle/Rapid plugins.
     const val ACTION_OCR = "org.autojs.plugin.PADDLE_OCR"
 
+    val AUTOMATIC_ENGINE_ORDER: List<String> = listOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
+
+    /** Reads current installation and enablement without starting or binding plugin processes. */
+    fun availableEngines(context: Context): List<String> {
+        val metadata = InstalledPluginMetadataStore.readAll(context)
+        val engines = queryOcrServiceCandidates(context).flatMap { candidate ->
+            val service = candidate.serviceInfo ?: return@flatMap emptyList()
+            val packageName = service.packageName
+            if (!service.enabled || !service.applicationInfo.enabled ||
+                !PluginEnableStore.isEnabled(context, packageName, true) ||
+                !PluginTrustManager.isAuthorized(context, packageName)
+            ) return@flatMap emptyList()
+
+            val cached = metadata[packageName]?.let { entry ->
+                val installed = runCatching { context.packageManager.getPackageInfo(packageName, 0) }.getOrNull()
+                entry.takeIf {
+                    installed != null && it.matchesInstalledPackage(PackageInfoCompat.getLongVersionCode(installed), installed.lastUpdateTime)
+                }
+            }
+            if (!PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), cached?.requiresHostVersion)) {
+                return@flatMap emptyList()
+            }
+            // Live metadata from Plugin Center also supports older plugins without engine categories.
+            cached?.engine?.let { return@flatMap listOf(it) }
+            AUTOMATIC_ENGINE_ORDER.filter { candidate.filter?.hasCategory(it) == true }
+        }.toSet()
+        return AUTOMATIC_ENGINE_ORDER.filter { it in engines }
+    }
+
     private const val DEFAULT_BIND_TIMEOUT_MS = 60_000L
     private const val DEFAULT_CALL_TIMEOUT_MS = 60_000L
     private const val IDLE_UNBIND_MS = 30_000L
@@ -83,7 +115,10 @@ object OcrPluginHost {
     )
 
     suspend fun discover(context: Context, packageName: String? = null): List<Discovered> {
-        val services = queryOcrServices(context, packageName)
+        return discoverServices(context, queryOcrServices(context, packageName))
+    }
+
+    private suspend fun discoverServices(context: Context, services: List<ServiceInfo>): List<Discovered> {
         Log.i(TAG, "discover: services=${services.size}")
         return services.map { svc ->
             Log.i(TAG, "discover: ${svc.packageName}/${svc.name}")
@@ -180,8 +215,9 @@ object OcrPluginHost {
         // e.g. "v5"
         variant: String? = null,
         moduleLabel: String = MODULE_LABEL_OCR_PLUGIN,
+        automatic: Boolean = false,
     ): Discovered {
-        val result = selectDetailed(context, engineId, engine, variant)
+        val result = selectDetailed(context, engineId, engine, variant, automatic)
         return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, moduleLabel)
     }
 
@@ -190,13 +226,22 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        automatic: Boolean = false,
     ): SelectionResult {
-        var discovered = discover(context)
-        selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
+        suspend fun discoverCandidates(): List<Discovered> {
+            if (!automatic) return discover(context)
+            val services = queryOcrServices(context).filter { service ->
+                PluginEnableStore.isEnabled(context, service.packageName, true) &&
+                    PluginTrustManager.isAuthorized(context, service.packageName)
+            }
+            return discoverServices(context, services)
+        }
+        var discovered = discoverCandidates()
+        selectFrom(discovered, context, engineId, engine, variant, automatic)?.let { return SelectionResult(it, discovered) }
         if (discovered.any { it.error != null }) {
             recoverFailedDiscoveries(context, discovered)
-            discovered = discover(context)
-            selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
+            discovered = discoverCandidates()
+            selectFrom(discovered, context, engineId, engine, variant, automatic)?.let { return SelectionResult(it, discovered) }
         }
         return SelectionResult(null, discovered)
     }
@@ -207,7 +252,20 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        automatic: Boolean = false,
     ): Discovered? {
+        if (automatic) {
+            return AUTOMATIC_ENGINE_ORDER.firstNotNullOfOrNull { candidateEngine ->
+                // Keep Rapid's public variant aliases when selecting before engine dispatch.
+                val candidateVariant = if (candidateEngine == "rapid-ocr") when (variant) {
+                    "v3" -> "pp-ocrv3"
+                    "v6" -> "pp-ocrv6"
+                    else -> variant
+                } else variant
+                if (engine != null && engine != candidateEngine) null
+                else selectFrom(discovered, context, engineId, candidateEngine, candidateVariant)
+            }
+        }
         val list = discovered
             .filter { it.pluginInfo != null }
             .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
@@ -407,7 +465,7 @@ object OcrPluginHost {
         if (detectedPlugins.isNotEmpty()) {
             parts += context.getString(R.string.text_detected_ocr_plugins, detectedPlugins.joinToString("; "))
         }
-        if (engine == "mlkit-ocr") {
+        if (engine == null || engine == "mlkit-ocr") {
             parts += context.getString(R.string.hint_ocr_default_engine_and_switching)
         }
         return IllegalStateException(parts.joinToString("\n"), failures.firstOrNull()?.error)
@@ -668,6 +726,10 @@ object OcrPluginHost {
     }
 
     private fun queryOcrServices(context: Context, packageName: String? = null): List<ServiceInfo> {
+        return queryOcrServiceCandidates(context, packageName).mapNotNull { it.serviceInfo }
+    }
+
+    private fun queryOcrServiceCandidates(context: Context, packageName: String? = null): List<ResolveInfo> {
         val pm = context.packageManager
         val intent = Intent(ACTION_OCR).apply {
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
@@ -675,12 +737,11 @@ object OcrPluginHost {
                 setPackage(packageName)
             }
         }
-        val resolveList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(PackageManager.GET_RESOLVED_FILTER.toLong()))
         } else {
-            pm.queryIntentServices(intent, 0)
+            pm.queryIntentServices(intent, PackageManager.GET_RESOLVED_FILTER)
         }
-        return resolveList.mapNotNull { it.serviceInfo }
     }
 
     private fun buildBindFlags(serviceInfo: ServiceInfo): Int {

@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.ocr.Ocr
 class Ocr {
 
     @JvmField
-    var mode = Ocr.Companion.OcrMode.MLKIT
+    @Volatile
+    var mode = Ocr.Companion.OcrMode.AUTO
 
 }

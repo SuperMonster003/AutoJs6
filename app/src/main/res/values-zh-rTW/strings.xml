@@ -416,11 +416,12 @@
     <string name="error_no_applications_available_for_sending_this_file">未找到用於傳送該檔案的應用</string>
     <string name="error_no_applications_available_for_viewing_this_file">未找到用於檢視該檔案的應用</string>
     <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已啟用的 %1$s 外掛變體 (%2$s).</string>
+    <string name="error_no_available_ocr_engine">沒有可用的 OCR 引擎. 請檢查打包應用程式時包含的 OCR 程式庫.</string>
     <string name="error_no_available_url_provided_for_current_plugin">當前外掛未提供可用的 URL</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">未找到內建 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
     <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 沒有已啟用的外掛. 請先啟用外掛, 然後重試.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">已安裝的 OCR 外掛均不符合要求: %1$s. 請在外掛中心安裝相符的外掛.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">沒有可用的 OCR 外掛符合要求: %1$s. 請在外掛中心安裝, 啟用或授權相符的外掛.</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 訪問許可權</string>
     <string name="error_no_post_notifications_permission">缺少 \"釋出通知\" 許可權</string>
     <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 許可權</string>
@@ -546,7 +547,7 @@
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
     <string name="hint_m3u_player_plugin_unavailable">未找到可用於播放此 M3U 清單的播放器. 請選擇 3-Ember 或 3-Terra, 前往外掛中心安裝, 啟用或授權. 優先使用 3-Ember.</string>
-    <string name="hint_ocr_default_engine_and_switching">ocr() 預設使用 ML Kit OCR. 如需使用 Paddle OCR 或 Rapid OCR, 請呼叫 ocr.paddle() 或 ocr.rapid(), 或設定 ocr.mode.</string>
+    <string name="hint_ocr_default_engine_and_switching">OCR 自動選擇依 ML Kit OCR, Paddle OCR, Rapid OCR 的順序檢查已啟用的外掛. 可透過 ocr.mode 或 ocr.tap() 指定引擎, 或將 ocr.mode 設為 auto 以恢復自動選擇.</string>
     <string name="hint_pc_server_address_supported_formats">支援 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">外掛程序無法穩定啟動. 請更新或重新安裝外掛; 如問題持續, 請聯絡外掛開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前外掛需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>

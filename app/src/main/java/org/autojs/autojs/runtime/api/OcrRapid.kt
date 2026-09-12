@@ -2,12 +2,17 @@ package org.autojs.autojs.runtime.api
 
 import android.content.Context
 import androidx.core.graphics.createBitmap
+import com.benjaminwan.ocrlibrary.OcrEngine
 import com.benjaminwan.ocrlibrary.RapidOcrEngine
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.ImageWrapper
 import java.io.File
 
 class OcrRapid {
+
+    companion object {
+        internal fun isEmbeddedAvailable(context: Context): Boolean = RapidOcrEmbeddedEngine.isAvailable(context)
+    }
 
     fun detect(image: ImageWrapper?): List<OcrResult> {
         return RapidOcrEmbeddedEngine.detect(AutoJs.instance.applicationContext, image)
@@ -36,6 +41,11 @@ private object RapidOcrEmbeddedEngine {
 
     private val lock = Any()
     private var engine: RapidOcrEngine? = null
+
+    fun isAvailable(context: Context): Boolean {
+        val libraries = File(context.applicationInfo.nativeLibraryDir).list()?.toSet().orEmpty()
+        return libraries.containsAll(requiredNativeLibraries) && OcrEngine.hasModels(context.assets)
+    }
 
     fun detect(context: Context, image: ImageWrapper?): List<OcrResult> {
         image ?: return emptyList()

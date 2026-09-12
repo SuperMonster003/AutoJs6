@@ -419,11 +419,12 @@
     <string name="error_no_applications_available_for_sending_this_file">No hay aplicaciones disponibles para enviar este archivo</string>
     <string name="error_no_applications_available_for_viewing_this_file">No hay aplicaciones disponibles para ver este archivo</string>
     <string name="error_no_available_enabled_plugin_variants_found">No se encontraron variantes de plugin %1$s habilitadas y disponibles (%2$s).</string>
+    <string name="error_no_available_ocr_engine">No hay ningún motor OCR disponible. Compruebe las bibliotecas OCR incluidas al empaquetar la aplicación.</string>
     <string name="error_no_available_url_provided_for_current_plugin">No se proporcionó ninguna URL disponible para el complemento actual</string>
     <string name="error_no_display_over_other_apps_permission">No hay permiso de \"mostrar sobre otras aplicaciones\".</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">No se encontraron recursos integrados de Paddle OCR. Vuelve a empaquetar con Paddle OCR habilitado.</string>
     <string name="error_no_enabled_plugin_for_module_label">No hay ningún plugin habilitado para \"%1$s\". Habilita un plugin e inténtalo de nuevo.</string>
-    <string name="error_no_matching_ocr_plugin_for_selection">Ningún plugin OCR instalado coincide con la solicitud: %1$s. Instale un plugin compatible en el Centro de plugins.</string>
+    <string name="error_no_matching_ocr_plugin_for_selection">Ningún plugin OCR disponible coincide con la solicitud: %1$s. Instale, habilite o autorice un plugin compatible en el Centro de plugins.</string>
     <string name="error_no_permission_to_access_shizuku">No hay permiso para acceder a Shizuku</string>
     <string name="error_no_post_notifications_permission">Sin permiso para \"enviar notificaciones\"</string>
     <string name="error_no_read_phone_state_permission">No hay permiso de \"lectura del estado del teléfono\".</string>
@@ -549,7 +550,7 @@
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
     <string name="hint_m3u_player_plugin_unavailable">No hay un reproductor disponible para esta lista M3U. Elija 3-Ember o 3-Terra para instalar, activar o autorizar el plugin en el Centro de plugins. 3-Ember tiene prioridad.</string>
-    <string name="hint_ocr_default_engine_and_switching">ocr() utiliza ML Kit OCR de forma predeterminada. Para Paddle OCR o Rapid OCR, utilice ocr.paddle() u ocr.rapid(), o configure ocr.mode.</string>
+    <string name="hint_ocr_default_engine_and_switching">La selección automática OCR comprueba los plugins habilitados en este orden: ML Kit OCR, Paddle OCR, Rapid OCR. Use ocr.mode u ocr.tap() para elegir un motor, o asigne auto a ocr.mode para restaurar la selección automática.</string>
     <string name="hint_pc_server_address_supported_formats">Se admiten IPv4, IPv6 y dominios.</string>
     <string name="hint_plugin_process_failed_to_start">El proceso del plugin no pudo iniciarse de forma estable. Actualiza o reinstala el plugin; si el problema persiste, contacta con el desarrollador del plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">El plugin actual requiere una versión más alta del entorno host de AutoJs6 (versionCode requerido: %1$d, versionCode actual: %2$d). Es necesario actualizar AutoJs6.</string>

@@ -55,13 +55,13 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             Ocr.detectWith(scriptRuntime, OcrMode.RAPID, argList)
         }
 
-        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
+        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<String> {
             if (isInrt) {
                 return scriptRuntime.ocrRapid.recognizeText(image)
             }
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = OcrPluginHost.selectOrThrow(
+                val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
@@ -72,13 +72,13 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             }
         }
 
-        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
+        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject, selectedPlugin: OcrPluginHost.Discovered? = null): List<OcrResult> {
             if (isInrt) {
                 return scriptRuntime.ocrRapid.detect(image)
             }
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = OcrPluginHost.selectOrThrow(
+                val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
