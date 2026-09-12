@@ -10,7 +10,7 @@
 2. 条目完成后勾选 `[x]`, 并在条目后追加证据 (提交 hash / 测试类名 / 设备型号 / 扫描结果), 证据等级见附录 D.
 3. 每个插件仓库的条目落地时, 同时在该仓库的 changelog (`improvement` 分类) 与 README 中记录 "16 KB 页大小支持", 并按各仓库惯例递增版本号; 宿主条目落地时同步 `.changelog` (10 语言) 并重新生成 README.
 4. 附录 C 记录本次按推荐方案采用的执行默认值. 这些默认值不冒充维护者对 Q1-Q4 的明确回答; D1-D12 保持原有范围.
-5. 本 Roadmap 不涉及任何 JS 公开 API 变更, 因此无需同步文档项目与 d.ts 项目 (D12); 若日后某条目引入 API, 按 `AGENTS.md` 的关联项目流程处理.
+5. P0-P6 不涉及 JS 公开 API 变更 (D12). 维护者于 2026-09-13 单独启动附录 B 的 B3 (`device.pageSize`), 该项按 `AGENTS.md` 同步文档, d.ts 与 LSP 关联项目.
 
 ---
 
@@ -31,7 +31,7 @@
 | D9 | Roadmap 位于宿主 `docs/dev/page-size-16kb-roadmap.md` | 与仓库内既有 roadmap 的位置与风格一致 (a11y Roadmap 的 D3 先例). 插件仓库自身的 ROADMAP / README 在其条目落地时追加一行指向本文的记录. |
 | D10 | 任何仓库都不设置 `android:pageSizeCompat` | 该属性无论取 `enabled` 还是 `disabled` 都会关闭系统的兼容模式警告, 会掩盖回归; 系统兼容模式 (backcompat) 只作为验证阶段的诊断手段 (通过 adb 属性开关, 见附录 E), 不作为交付形态. |
 | D11 | `AutoJs6-QuickJS-Host` 不单独跟踪 | 该目录是宿主 6.8.0 的验证分叉, 本 Roadmap 不为其单列条目. 2026-09-11 已由维护者将关联分支合并到宿主 master 并解决冲突 (`d17d12578`), 工作树与目录均已移除; 原定 rebase 收尾由该合并完成. |
-| D12 | 本 Roadmap 不引入 JS 公开 API 变更 | 因而不触发 `AGENTS.md` 中的文档 / d.ts / LSP 声明同步. "在 `device` 模块暴露页大小" 之类的想法记入附录 B 的 backlog B3. |
+| D12 | P0-P6 不引入 JS 公开 API 变更 | 主阶段不触发文档 / d.ts / LSP 声明同步. 附录 B 的 B3 于 2026-09-13 由维护者单独启动, 按 `AGENTS.md` 完成关联项目同步. |
 
 由 D1 / D6 派生的硬约束:
 
@@ -58,7 +58,7 @@
 - Bun 运行时在 x86_64 16 KB 设备上的 JSC 崩溃 (上游 WebKit `CeilingOnPageSize` 问题, `AutoJs6-Plugin-Bun-Runtime/ROADMAP.md:243-266`): 属运行时页大小假设而非打包对齐, 记入附录 B 的 B1.
 - 现代打包 (未压缩 + 16 KB zip 对齐) 与 APK-Builder-Template 写入逻辑改造 (D1, 附录 B 的 B2).
 - 第三方 32 位库的对齐 (D8).
-- JS 公开 API (D12).
+- P0-P6 之外的 JS 公开 API (D12); 单独启动的 `device.pageSize` 见附录 B 的 B3.
 
 ---
 
@@ -380,7 +380,7 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 
 - B1 Bun x86_64 在 16 KB 设备上 JSC 中止 (上游 WebKit `CeilingOnPageSize`): Bun 仓库 2026-09-12 (`3ac84ca`) 以 `USE_64KB_PAGE_BLOCK=1` 与显式 JIT 配置重编 pinned WebKit 并重链九补丁 Bun, 独立 test-only APK 在原生 x86_64 API 36 的 4 KiB / 16 KiB AVD 各两轮 8/8 Binder 通过; 正式 payload 仍为官方 1.4.0, 候选转正与最终 Release 验收由 Bun 仓库 ROADMAP M5 跟踪. arm64 已通过.
 - B2 现代打包评估 (D1 的替代路径): 2026-09-12 实测宿主 / inrt 每个 ABI 仅 3 个原生库 (1.3 MB 未压缩, 0.4 MB 压缩, 约 APK 的 1%), 改 `useLegacyPackaging=false` 的收益不足以抵消 APK-Builder-Template 的 STORED + 16 KB 对齐写入改造, 维持 D1; 仅当宿主原生库体量显著增长时重新评估 ([记录](evidence/page-size-16kb-backlog-20260912.md)).
-- B3 在 `device` 模块暴露 `pageSize` (需同步文档 / d.ts / LSP 声明, 触发 `AGENTS.md` 关联项目流程与三个关联仓库的版本递增); 2026-09-12 未做, 由维护者决定是否另立.
+- [x] B3 在 `device` 模块暴露只读 `pageSize` (2026-09-13): 返回当前系统的内存页大小 (字节), 复用 `NativePageSize.current()`, 支持 `$device.pageSize`; `DevicePageSizeInstrumentationTest` 在 4 KB arm64 真机与 16 KB x86_64 模拟器各 1/1 通过. 文档 / 离线插件, d.ts 4.11.0 / Ace 1.1.27 与 LSP 均按 `AGENTS.md` 同步, 版本递增, 多语言日志与生成物已更新 (ANDROID_BUILD + DEVICE-4K + DEVICE-16K; [证据](evidence/page-size-16kb-b3-20260913.md)).
 - B4 已完成: 宿主 CI 的无用 CMake 3.10.2 / Ninja 安装步骤已移除, 构建本地通过.
 - B5 32 位第三方库 (MLKit / ORT / Chaquopy / NDK libc++) 的对齐, 仅当上游提供时跟进. 2026-09-12 全仓扫描: 64 位 0 项不合规, 32 位 14 项 (armeabi-v7a 的 NDK libc++, ORT JNI, Paddle-Lite, 以及 Ace Editor 自编 `libautojs6_luals.so` 的 armeabi-v7a / x86); 16 KB 设备只运行 64 位代码, 无运行时影响 ([清单](evidence/page-size-16kb-backlog-20260912.md)).
 - B6 `AutoJs6-Plugin-APK-Inspector` 增加 "APK 是否 16 KB 就绪" 的检查视图: 2026-09-12 已实现 (v1.1.1, `f9ff8f5`): 只读取 64 位库的 ELF 头 / 程序头表判定 `PT_LOAD` 对齐, `extractNativeLibs="false"` 时核对 ZIP 数据偏移, 结论进入原生库分区 / 宿主文件信息摘要 / 发现分区, 11 项单元测试; `test-fixtures/bundletool-selection` 的 16 KB 夹具未加 (单元测试以合成 ELF 覆盖) ([记录](evidence/page-size-16kb-backlog-20260912.md)).
@@ -492,4 +492,8 @@ Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐
 ### 2026-09-12 附录 B 收尾与 Release 候选审计
 
 - 维护者提交全部插件工作区并对宿主与各插件执行 `./gradlew clean assembleRelease`; 独立审计 89 个 Release APK (宿主 app / inrt, OpenCV, Rapid v3/v6, Paddle v3-v6 全部 flavor, Three-Stone-AI, Bun): 版本号, 64 位 ELF 对齐, libc++ RELRO 布局与门禁报告 0 项问题, 每个 64 位 ABI 只剩一个 r28.2 libc++ 二进制 ([审计](evidence/page-size-16kb-release-candidates-20260912.md)). 宿主暂不发布到 GitHub, R5 / R6 相关项暂缓.
-- B7 修复并复验 (Paddle v3 v1.0.3), B6 实现 (APK Inspector v1.1.1), B5 / B2 实测记录, B1 记录 Bun 仓库的大页 JSC 候选状态; B3 留给维护者. 详见 [附录 B 记录](evidence/page-size-16kb-backlog-20260912.md).
+- B7 修复并复验 (Paddle v3 v1.0.3), B6 实现 (APK Inspector v1.1.1), B5 / B2 实测记录, B1 记录 Bun 仓库的大页 JSC 候选状态; B3 在本轮尚未启动. 详见 [附录 B 记录](evidence/page-size-16kb-backlog-20260912.md).
+
+### 2026-09-13: B3 公开 API
+
+- 维护者单独启动 B3, 完成 `device.pageSize` / `$device.pageSize` 只读数值属性, 文档与离线内容同步, d.ts 与 Ace LSP 声明同步及版本递增. 4 KB arm64 真机 / 16 KB x86_64 模拟器上的生产 Rhino 属性契约测试均通过; B3 已勾选, 证据见 [验证记录](evidence/page-size-16kb-b3-20260913.md).

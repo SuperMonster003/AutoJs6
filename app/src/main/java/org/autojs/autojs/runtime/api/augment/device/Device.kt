@@ -4,6 +4,7 @@ import androidx.core.net.toUri
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.app.tool.PointerLocationTool
+import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
@@ -21,6 +22,8 @@ import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.ScriptableObject.PERMANENT
+import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
 import org.autojs.autojs.runtime.api.Device as ApiDevice
@@ -51,12 +54,13 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::togglePointerLocation.name,
     )
 
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
+    override val selfAssignmentGetters = listOf<Any>(
         "width" to Supplier { ScreenMetrics.deviceScreenWidth },
         "height" to Supplier { ScreenMetrics.deviceScreenHeight },
         "rotation" to Supplier { scriptRuntime.device.rotation },
         "orientation" to Supplier { scriptRuntime.device.orientation },
         "density" to Supplier { ScreenMetrics.deviceScreenDensity },
+        ("pageSize" to Supplier { NativePageSize.current() }) to (READONLY or PERMANENT),
     )
 
     companion object : ArgumentGuards() {

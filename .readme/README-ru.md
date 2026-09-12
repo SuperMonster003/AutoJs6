@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 12 September 2026 года.
+Данные обновлены на 13 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -168,9 +168,10 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/09/12
+###### 2026/09/13
 
 * `Новое` Независимый движок плагина QuickJS Runtime для локального однофайлового JavaScript и модулей ES с маршрутизацией по директиве "quickjs"/"qjs" или маркерам `.quickjs.js/.quickjs.mjs` без отката к Rhino, Node.js или Bun
+* `Новое` Свойство только для чтения `device.pageSize` возвращает размер страницы памяти текущей системы в байтах для определения среды с 4 KB / 16 KB
 * `Новое` Независимый движок плагина Bun Runtime для локальных однофайловых сценариев JavaScript и TypeScript с маршрутизацией по директиве "bun" или маркерам `.bun.js/.bun.ts/.bun.tsx` без отката к Rhino или Node.js
 * `Новое` Раздел Инструменты боковой панели теперь добавляет необязательный плагин пипетки цвета экрана как третий, по умолчанию выключенный инструмент после плавающей кнопки и позиции указателя; установка, включение, состояние выполнения и удаление обновляются автоматически без блокировки UI
 * `Новое` Модуль контракта плагина MCP Server (plugin-api/mcp-server-api): замороженный AIDL-интерфейс, строгий клиент хоста, который привязывает официальный плагин через выделенную аренду привязки и до трех раз повторно привязывается после гибели процесса плагина, ограниченный grant брокер возможностей хоста, направляющий запросы плагина через Node bridge provider, и регистрация в Центре плагинов как плагин, выключенный по умолчанию
@@ -884,7 +885,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 12 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 13 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

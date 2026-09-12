@@ -6,9 +6,10 @@
 
 # v6.8.0
 
-###### 2026/09/12
+###### 2026/09/13
 
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
+* `Feature` `device.pageSize` read-only property returns the running system memory page size in bytes, identifying 4 KB / 16 KB environments
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
 * `Feature` The side drawer Tools section now adds the optional Screen Color Picker plugin as a third, default-off tool after Floating Button and Pointer Location; installation, enablement, runtime state, and removal refresh automatically without blocking the UI
 * `Feature` MCP Server plugin contract module (plugin-api/mcp-server-api) with a frozen AIDL surface, a strict host client that binds the official plugin on a dedicated lease and rebinds up to three times after the plugin process dies, a grant-restricted host capability broker that routes plugin requests through the Node bridge provider, and Plugin Center registration as a default-off plugin

@@ -1,9 +1,10 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/12",
+      "released_date": "2026/09/13",
       "feature": [
         "ローカルの単一ファイル JavaScript/ES module を対象に, \"quickjs\"/\"qjs\" ディレクティブまたは `.quickjs.js/.quickjs.mjs` マーカーでルーティングし, Rhino, Node.js, Bun にフォールバックしない独立 QuickJS Runtime プラグインエンジン",
+        "現在のシステムのメモリページサイズをバイト単位で返す読み取り専用プロパティ `device.pageSize`, 4 KB / 16 KB の実行環境を識別可能",
         "ローカルの単一ファイル JavaScript/TypeScript を対象に, \"bun\" ディレクティブまたは `.bun.js/.bun.ts/.bun.tsx` マーカーでルーティングし, Rhino や Node.js にフォールバックしない独立 Bun Runtime プラグインエンジン",
         "サイドドロワーのツール欄に, フローティングボタンとポインター位置に続く 3 番目の既定オフ項目として任意の画面カラーピッカープラグインを追加; インストール, 有効化, 実行状態, 削除は UI をブロックせず自動更新",
         "MCP Server プラグイン契約モジュール (plugin-api/mcp-server-api): 凍結された AIDL インターフェース, 専用バインディングリースで公式プラグインをバインドしプラグインプロセスの死亡後に最大 3 回再バインドする厳格なホストクライアント, grant で制限され Node bridge provider 経由でプラグインの要求を振り分けるホスト能力ブローカー, および既定オフのプラグインセンター登録",

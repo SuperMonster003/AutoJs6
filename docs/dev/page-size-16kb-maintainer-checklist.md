@@ -128,7 +128,7 @@ Q1-Q4 已经实现, 没有代码停在等待选择的状态. 维持现状即可�
 | --- | --- | --- |
 | B1 | Bun x86_64 16 KB 的 WebKit/JSC 页大小假设, 需要大页 JIT 配置与上游 / 自编验证 | 由 Bun 自身 Roadmap (M5) 单独推进; 2026-09-12 Bun 仓库 `3ac84ca` 的大页 JSC 候选已在 x86_64 4 KiB / 16 KiB AVD 通过, 正式 payload 未替换. 候选转正前必须保留 x86_64 运行失败边界; arm64 通过不能抵消它. |
 | B2 | 宿主 / inrt 采用未压缩原生库并重做 APK Builder 的 STORED + 16 KB 对齐 / manifest / 旧模板兼容 | 维持 D1, 不启动: 2026-09-12 实测每个 ABI 仅 3 个原生库, 约 APK 的 1% ([记录](evidence/page-size-16kb-backlog-20260912.md)). |
-| B3 | JS `device.pageSize` 公开 API | 暂不启动, 由维护者决定; 如做, 必须同步文档, d.ts 和 LSP 声明项目并按 `AGENTS.md` 递增三个关联仓库版本. |
+| B3 | JS `device.pageSize` 公开 API | 已完成 (2026-09-13): 只读数值属性, 文档 / 离线插件, d.ts 4.11.0 / Ace 1.1.27 与 LSP 同步及版本递增; 4 KB arm64 真机与 16 KB x86_64 模拟器各 1/1 通过 ([证据](evidence/page-size-16kb-b3-20260913.md)). |
 | B5 | 第三方 32 位库也按 16 KB 对齐 | 等上游自然升级, D8 不把它列为验收条件; 2026-09-12 全仓扫描 32 位不合规 14 项 / 64 位 0 项已记录 ([清单](evidence/page-size-16kb-backlog-20260912.md)). |
 | B6 | APK-Inspector 增加 16 KB 分析视图 | 已实现 (2026-09-12, v1.1.1 `f9ff8f5`); 真机 UI 复核可在下一个设备时段顺带完成. |
 
