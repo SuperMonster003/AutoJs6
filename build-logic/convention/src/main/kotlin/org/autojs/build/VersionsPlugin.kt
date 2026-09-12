@@ -35,6 +35,23 @@ import org.gradle.api.Project
  */
 class VersionsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        project.extensions.add("versions", Utils.newVersions(project))
+        val versions = Utils.newVersions(project)
+        project.extensions.add("versions", versions)
+        versions.sdkTargetOverride?.let { override ->
+            val guard = project.tasks.register("rejectNonDebugSdkTargetOverride", SdkTargetOverrideGuard::class.java) {
+                targetSdk.set(override)
+            }
+            // Attach to resolved tasks, including dependencies of abbreviated or aggregate requests.
+            // zh-CN: 约束实际任务, 同时覆盖缩写和聚合任务引入的依赖; 不依赖 taskGraph 回调.
+            project.tasks.configureEach {
+                if (
+                    name.contains("release", ignoreCase = true) ||
+                    name.equals("generateRuntimeKit", ignoreCase = true) ||
+                    name.equals("assembleApkBuilderTemplateDistribution", ignoreCase = true)
+                ) {
+                    dependsOn(guard)
+                }
+            }
+        }
     }
 }

@@ -35,9 +35,16 @@ class Versions @JvmOverloads constructor(
         get() = Date().time - bp["BUILD_TIME"].toLong() > minBuildTimeGap
 
     val sdkVersionMin = bp.requireInt("MIN_SDK_VERSION")
-    val sdkVersionTarget = bp.requireInt("TARGET_SDK_VERSION")
-    val sdkVersionTargetInrt = bp.requireInt("TARGET_SDK_VERSION_INRT")
     val sdkVersionCompile = bp.requireInt("COMPILE_SDK_VERSION")
+    val sdkTargetOverride = project.providers.gradleProperty(SDK_TARGET_OVERRIDE_PROPERTY).orNull?.let { raw ->
+        val supportedRange = sdkVersionMin..maxOf(sdkVersionCompile, 37)
+        raw.trim().toIntOrNull()?.takeIf { it in supportedRange }
+            ?: throw org.gradle.api.GradleException(
+                "$SDK_TARGET_OVERRIDE_PROPERTY must be an integer in $supportedRange; was '$raw'",
+            )
+    }
+    val sdkVersionTarget = sdkTargetOverride ?: bp.requireInt("TARGET_SDK_VERSION")
+    val sdkVersionTargetInrt = sdkTargetOverride ?: bp.requireInt("TARGET_SDK_VERSION_INRT")
     val appVersionName = bp.requireString("VERSION_NAME")
     val appVersionCode = bp.requireInt("VERSION_BUILD")
     val vscodeExtRequiredVersion = bp.requireString("VSCODE_EXT_REQUIRED_VERSION")
@@ -80,6 +87,11 @@ class Versions @JvmOverloads constructor(
             "=".repeat(maxLength),
             "",
         ).forEach { println(it) }
+        sdkTargetOverride?.let {
+            project.logger.warn(
+                "SDK target override: app / inrt -> $it (debug verification only; release and distribution tasks are rejected)",
+            )
+        }
     }
 
     fun handleIfNeeded(project: Project, flavorName: String, targetBuildType: List<String>) {
@@ -151,9 +163,10 @@ class Versions @JvmOverloads constructor(
         }
     }
 
-    private companion object {
-        const val BUILD_NUMBER_AUTO_INCREMENT_ENABLED_PROPERTY = "autojs.gradle.build.number.auto.increment.enabled"
-        const val BUILD_TIME_UPDATE_ENABLED_PROPERTY = "autojs.gradle.build.time.update.enabled"
+    companion object {
+        const val SDK_TARGET_OVERRIDE_PROPERTY = "autojs.sdk.target.override"
+        private const val BUILD_NUMBER_AUTO_INCREMENT_ENABLED_PROPERTY = "autojs.gradle.build.number.auto.increment.enabled"
+        private const val BUILD_TIME_UPDATE_ENABLED_PROPERTY = "autojs.gradle.build.time.update.enabled"
     }
 
 }

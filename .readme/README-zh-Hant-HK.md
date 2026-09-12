@@ -346,6 +346,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` MediaInfo 查詢支援從 0 開始的 streamNumber, countGet 串流計數以及用於單位, 說明和可讀名稱的 infoKind; Rhino 和 Node 保持預設第 1 條串流的 TEXT 查詢, 並協商外掛擴充能力
 * `新增` 載入 OpenCV 與 Image Quantization 外掛程式前檢查原生程式庫 ELF 對齊, 頁面大小不相容時提供明確錯誤
 * `新增` 外掛程式中心讀取官方索引與已安裝 manifest 的原生頁面對齊資訊, 在 16 KB 裝置安裝或啟用不相容版本前提示
+* `修復` CI 編輯器插件檢查固定要求舊協議版本 1, 導致支援新版相容協議的宿主無法通過檢查的問題
 * `修復` 在同一個打包應用中依次使用 Paddle OCR 和 Rapid OCR 時可能崩潰的問題
 * `修復` MediaInfo 與圖片檔案路徑支援絕對路徑, 父目錄和合法檔名; 錄音輸出同步交由更新後的宿主依 Android 檔案權限處理
 * `修復` 帶 Unicode BOM 的腳本由文件管理器直接運行時未按對應的 UTF-8, UTF-16 或 UTF-32 編碼讀取, 導致其可在編輯器正常運行卻於文件管理器報 `無效字符` 的問題
@@ -496,6 +497,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 插件的座標手勢) 在被重用的 broker 派發線程上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在調用線程上準備 Looper 並在首個手勢完成後退出它, 該線程上的下一次調用立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主循環 handler 交給 automator
 * `修復` OpenCV 與 ImageQuant 插件策略將以 NDK r28c (28.2.13676358) 構建的原生庫判定為原生 NDK 版本不匹配, 導致重編後的 OpenCV 插件 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 構建
+* `優化` 專案 compileSdk 提升至 37 (Android 17), 完善 SDK 遷移的偵錯建置與 lint 驗證
 * `優化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以兼容大型 APK/AAB/APKS
 * `優化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取
 * `優化` APK/APKS/XAPK/APKM/APKZ/AAB 資訊對話框的元件資訊移至右上角選單的 "更多資訊" 對話框, 共用主對話框的項目樣式並同步更新讀取結果

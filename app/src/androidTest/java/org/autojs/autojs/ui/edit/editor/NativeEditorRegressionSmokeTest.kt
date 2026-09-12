@@ -228,7 +228,7 @@ class NativeEditorRegressionSmokeTest {
             editorView.editor.requestEditorFocus()
             val inputMethodManager = instrumentation.targetContext.getSystemService(Context.INPUT_METHOD_SERVICE)
                 as InputMethodManager
-            inputMethodManager.showSoftInput(inputView, InputMethodManager.SHOW_IMPLICIT)
+            inputMethodManager.showSoftInput(inputView, 0)
         }
         instrumentation.waitForIdleSync()
         SystemClock.sleep(IME_SETTLE_DELAY_MS)

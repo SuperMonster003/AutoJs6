@@ -181,6 +181,7 @@
         "Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB"
       ],
       "fix": [
+        "Le contrôle CI du plugin éditeur exigeait la version 1 du contrat et rejetait les hôtes prenant en charge des versions compatibles plus récentes",
         "Un plantage lors de l'utilisation successive de Paddle OCR et Rapid OCR dans la même application empaquetée",
         "Les chemins MediaInfo et image acceptent les chemins absolus, les dossiers parents et les noms valides; les enregistrements suivent les mêmes droits Android avec un hôte mis à jour",
         "L'exécution directe depuis le gestionnaire de fichiers ne respectait pas l'encodage UTF-8, UTF-16 ou UTF-32 indiqué par le BOM Unicode, si bien que des scripts exécutés normalement dans l'éditeur échouaient avec `Caractère non valide`",
@@ -333,6 +334,7 @@
         "Les politiques des plugins OpenCV et ImageQuant rejetaient les bibliothèques natives compilées avec le NDK r28c (28.2.13676358) pour incompatibilité de version du NDK, ce qui bloquait le plugin OpenCV v1.1.2 recompilé ; les compilations r26b et r28c sont désormais acceptées"
       ],
       "improvement": [
+        "Passage du compileSdk du projet à 37 (Android 17) et amélioration des builds de débogage et de la vérification lint pour la migration du SDK",
         "Unifier l'inspection des paquets à 262144 entrées et augmenter les budgets des paquets, analyses imbriquées, manifestes et métadonnées pour les grands fichiers APK/AAB/APKS",
         "Les dialogues d'information partagent un composant réutilisable permettant d'insérer des entrées key:value à toute position, d'aligner automatiquement les clés et d'annuler les lectures asynchrones à la fermeture",
         "Les informations sur les composants APK/APKS/XAPK/APKM/APKZ/AAB sont déplacées vers le dialogue \"Plus d’informations\" du menu en haut à droite, avec le même style que le dialogue principal et une mise à jour lors du chargement des métadonnées",

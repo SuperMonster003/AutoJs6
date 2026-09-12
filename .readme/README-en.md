@@ -346,6 +346,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` MediaInfo queries support zero-based streamNumber, countGet stream counts, and infoKind for units, descriptions and readable names; Rhino and Node preserve default first-stream TEXT queries and negotiate extended plugin capabilities
 * `Feature` Checks native ELF alignment before loading OpenCV and Image Quantization plugins, with a clear error for incompatible device page sizes
 * `Feature` Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices
+* `Fix` The CI editor plugin gate required legacy contract version 1 and rejected hosts supporting newer compatible contract versions
 * `Fix` A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app
 * `Fix` MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host
 * `Fix` File Manager direct execution did not honor the corresponding UTF-8, UTF-16, or UTF-32 encoding for scripts with a Unicode BOM, causing files that ran normally in the editor to fail with `Invalid character`
@@ -496,6 +497,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` MediaInfo details and snapshots show the original source path in Complete name instead of a private cache or descriptor path, while preserving the snapshot display filename
 * `Fix` Node bridge `accessibility.swipe` / `accessibility.gesture` (the coordinate gestures of the MCP Server and Node plugins) answered `false` (cancelled) for every gesture after the first one on a reused broker dispatch thread: the gesture automator without a handler prepared a Looper on the calling thread and quit it once the first gesture completed, so the next call on that thread returned at once and its real result went to a dead handler; the bridge now hands the automator the main-looper handler, as the Python host broker does
 * `Fix` OpenCV and ImageQuant plugin policies rejected native libraries built with NDK r28c (28.2.13676358) as a native NDK version mismatch, which blocked the rebuilt OpenCV plugin v1.1.2; both r26b and r28c builds are now accepted
+* `Improvement` Raise project compileSdk to 37 (Android 17) and improve debug builds and lint verification for SDK migration
 * `Improvement` Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files
 * `Improvement` Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal
 * `Improvement` APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the "More information" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded

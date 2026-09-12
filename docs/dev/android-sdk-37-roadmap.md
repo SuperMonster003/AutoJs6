@@ -3,7 +3,7 @@
 本文是 AutoJs6 宿主 (含 inrt 打包模板与仓内 modules / plugin-api / test-apps) 以及同目录 42 个官方插件仓库把 `compileSdk` / `targetSdk` 从 36 升到 37 的可执行状态表.
 以 2026-09-13 的本地代码快照 (宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`) 与同日的 [探针记录](evidence/android-sdk-37-probe-20260913.md) (compileSdk 37 探针编译, API 37 模拟器 `dumpsys platform_compat` 清单) 为起点, 每个条目均可独立 Check 并落地.
 
-2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 当前完成的是规划与部分编译基线; P0.2 与 P1-P6 尚未实施. 原探针未覆盖 inrt 独立编译, release 出包, R8, lint 与设备功能验证.
+2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后已完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md). 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, 本次 release 冒烟不构成 R8 优化验证. P2-P6 尚未实施.
 
 使用方式:
 
@@ -24,7 +24,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | D1 | 范围 = 宿主 + 全部 42 个官方插件仓库 | 宿主 (app 两个 flavor, 仓内 modules / plugin-api / test-apps / plugins 子项目随 `version.properties` 自动跟随) 先行; 42 个插件仓库作为 P5 逐仓推进, 每仓独立条目, 独立提交, 独立版本递增与 changelog. `AutoJs6-Gradle-Platform-Versions` 无需改动 (数据表已含 `37.0=9.1.1`), `AutoJs6-Official-Plugins-Index` 仅在插件发布时按既有流程刷新. |
 | D2 | 两步走 | 宿主先把 `COMPILE_SDK_VERSION` 升到 37 (P1, `TARGET_SDK_VERSION` 保持 36) 单独提交并回归; 行为变更适配在 targetSdk 仍为 36 时借助兼容开关与临时 target 覆盖完成 (P2); 最后单独提交 `TARGET_SDK_VERSION=37` (P3). 每一步可独立回滚, 与 Archive-Manager 插件 2026-08-23 的做法一致. |
 | D3 | inrt 模板 `TARGET_SDK_VERSION_INRT` 29 -> 37 | 用户打包的 APK 与宿主同步以 37 为目标, 在 P3 与宿主 targetSdk 同一提交切换. 由于 inrt 一次跨越 8 个 API 等级 (30-37), P3.3 单列 "打包应用 29 -> 37 清单", 存储引导与旧版升级保护见待决 Q4. |
-| D4 | 探针编译作为 P0 基线 | 2026-09-13 已完成所列 Kotlin / Java 任务的 compileSdk 37 探针 (0 错误, 仅 1 处新增弃用告警) 与 36 基线对照, 结果记入 [探针记录](evidence/android-sdk-37-probe-20260913.md); P1 从修正弃用与 lint 开始, 独立补齐 inrt / release / R8 / 出包验证. |
+| D4 | 探针编译作为 P0 基线 | 2026-09-13 已完成所列 Kotlin / Java 任务的 compileSdk 37 探针 (0 错误, 仅 1 处新增弃用告警) 与 36 基线对照, 结果记入 [探针记录](evidence/android-sdk-37-probe-20260913.md); P1 独立补齐 inrt / release / lint / 出包与设备验证. 源码复核确认 release 的 `isMinifyEnabled=false`, 因此 R8 优化不在当前产物路径中; 将来启用时另建基线. |
 | D5 | 验证矩阵 | Android 17 证据只来自本机 AVD (`AVD_API_37` / `aj6-ps16k-37-x86_64`, `android-37.0` google_apis_ps16k x86_64 镜像); 真机 (Xiaomi 23046RP50C API 35, Sony XQ-DQ72 API 33, Redmi 22120RN86C API 33, Sony XQ-AT72 API 31, Sony G8441 API 28) 提供 targetSdk 提升后在旧系统上的回归; 16 KB 门禁 (`verifyNativePageAlignment`) 在每次 assemble 时继续生效. 无 Android 17 真机, 有则由维护者回填. |
 | D6 | 落地位置 = master, 每个子条目一个提交 | 与 a11y / 16 KB Roadmap 一致; 提交时按显式文件清单暂存, 不 `git add -A` (多会话工作区). |
 | D7 | 不捆绑无关依赖升级 | 本 Roadmap 只改 SDK 版本与由此强制或直接相关的代码; androidx.core 1.19 (要求 compileSdk 37) 等 "被解锁" 的升级记入附录 F, 不在本 Roadmap 实施. |
@@ -66,7 +66,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 
 | 事实 | 含义 |
 | --- | --- |
-| `version.properties`: `COMPILE_SDK_VERSION=36`, `TARGET_SDK_VERSION=36`, `TARGET_SDK_VERSION_INRT=29`, `MIN_SDK_VERSION=24` | 三个值分别对应 P1 / P3 / P3 (D3) 的改动点; `Versions.kt:37-40` 以 `requireInt` 读取, 因此写 `37` 而非 `37.0` |
+| 初始 `version.properties`: `COMPILE_SDK_VERSION=36`, `TARGET_SDK_VERSION=36`, `TARGET_SDK_VERSION_INRT=29`, `MIN_SDK_VERSION=24`; P1 后 compile 为 37, 其余保持 | 三个值分别对应 P1 / P3 / P3 (D3) 的改动点; `Versions.kt` 以整数读取, 因此写 `37` 而非 `37.0`; debug 临时 target 覆盖由独立 Gradle 属性控制 |
 | 工具链 (由 `autojs6-platform-versions` 1.8.0 从 `version.properties` 与其数据表解析): Gradle 9.7.1, AGP 9.4.0, Kotlin 2.4.0, KSP 2.3.12; `android-api-agp-compat.properties` 中 `37.0=9.1.1` | API 37 的最低 AGP 是 9.1.1 (官方 AGP 9.1 发行说明, VERIFIED), 当前 9.4.0 满足, 无需 `android.suppressUnsupportedCompileSdk`; AGP 9.4 要求 Gradle >= 9.6.0, 已满足 |
 | 本机 SDK: `platforms/android-37.0` (Platform.Version=17, rev 2, ExtensionLevel 22, 正式版), `build-tools/37.0.0`; AVD `AVD_API_37` 与 `aj6-ps16k-37-x86_64` 均为 `android-37.0;google_apis_ps16k;x86_64` | 平台目录名是 `android-37.0` 而非 `android-37`, AGP 9.4 对 `compileSdk = 37` 已正确解析 (Archive-Manager 先例: 2026-09-12 release APK `compileSdkVersion='37' compileSdkVersionCodename='17'`) |
 | Android 17 正式版 2026-06-16 发布 (VERIFIED); Google 博客称 Play 将于 2027-08 要求新应用与更新以 API 37 为目标 (VERIFIED 引文, 具体日期 UNVERIFIED) | 本次升级不受外部截止期驱动, 但插件舰队与宿主同步可避免 2027 年集中返工 |
@@ -76,7 +76,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | CI (`.github/workflows/android.yml`): JDK 21, 未显式安装 SDK 平台, 依赖 AGP 自动下载; `run-gradle-ci.sh` 跑单元测试子集, `assembleApkBuilderTemplateDistribution`, 16 KB 校验 | P1.6 需确认 runner 能取到 `platforms;android-37.0` (预期由 AGP `sdkDownload` 自动完成), 否则补 `sdkmanager` 步骤 |
 | Manifest (`app/src/main/AndroidManifest.xml`): `largeHeap` (291), `requestLegacyExternalStorage` (293), `usesCleartextTraffic` (297), `tools:targetApi="tiramisu"`, 无 `screenOrientation` / `resizeableActivity` / `enableOnBackInvokedCallback` / `<property>` 大屏豁免; 前台服务类型 `specialUse` x2 (593, 603, 带 `PROPERTY_SPECIAL_USE_FGS_SUBTYPE`), `microphone` (627), `mediaProjection` (948); 权限含 `INTERNET`, `SYSTEM_ALERT_WINDOW`, `MANAGE_EXTERNAL_STORAGE`, `READ_SMS` / `RECEIVE_SMS`, `BLUETOOTH_*`, `QUERY_ALL_PACKAGES` 等 74 项 | 未声明 Android 16 大屏豁免, 移除该 manifest 豁免预期无增量; 服务类型 / 启动条件仍需 P2.2 / P2.15 核验, 不能由当前声明推出 Android 17 无变化 |
 | `network_security_config.xml`: `base-config` 仅系统信任锚, `githubusercontent.com` 域禁明文并附加 `@raw/isrg_root_x1`; 无 `certificateTransparency` / `domainEncryption` 元素 | P2.6 的改动点 (CT 默认开启, ECH 默认开启) |
-| `app/build.gradle.kts`: `lint.abortOnError=false`; `lintVitalAnalyzeAppRelease` / `lintVitalAnalyzeInrtRelease` 被 `enabled=false` 禁用; 模板分发构建还会跳过 app 的 vital lint, CI 显式排除 inrt vital analysis | P0.2 必须先提供有效 lint 验证入口; 直接调用被禁用的任务或检查 `BUILD SUCCESSFUL` 不能作为 LINT 通过证据 |
+| 初始 `app/build.gradle.kts`: `lint.abortOnError=false`; app / inrt vital analysis 禁用, 模板分发还会跳过 app vital; CI 显式排除 inrt vital analysis | P0.2 已增加 `-Pautojs.sdk.lint.verify=true`, 启用实际 analysis / report 并在错误时失败; 普通构建保持既有配置. SDK 36 / 37 均有 debug 547 项 Error / Fatal, 两个 release 各 1 项既有 Fatal; 差异为零不等于 lint 清零 |
 
 ### 3.2 Android 17 对宿主的影响矩阵
 
@@ -139,8 +139,8 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 
 | 阶段 | 主题 | 依赖 | 涉及仓库 | 状态 |
 | --- | --- | --- | --- | --- |
-| P0 | 基线与工具 | 无 | 宿主 | 探针与兼容清单完成 (2026-09-13); 覆盖开关与脚本待做 |
-| P1 | 宿主 compileSdk 37 | P0 | 宿主 | 未开始 |
+| P0 | 基线与工具 | 无 | 宿主 | 完成 (2026-09-13): 覆盖开关, 分发拒绝, compat 工具, 有效 lint 基线 |
+| P1 | 宿主 compileSdk 37 | P0 | 宿主 | 本地实现 / 构建 / 测试 / 冒烟完成; lint 零增量但有既有错误, 远程 CI 待验证 |
 | P2 | 宿主 targetSdk 37 行为变更适配 (target 仍为 36) | P0.2 (覆盖开关), P1 | 宿主 | 未开始 |
 | P3 | 宿主 targetSdk 37 切换 (app + inrt) | P2 全部 | 宿主, APK-Builder-Template (只读验证) | 未开始 |
 | P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 未开始 |
@@ -161,12 +161,12 @@ P2 可按影响矩阵分批推进: P2.6 的局域网 TLS 验证先满足 P2.1 �
 - [x] `AVD_API_37` 上 `dumpsys platform_compat` 全文入库, 提取 36 项 `enableSinceTargetSdk=37` 变更并逐项评估. (PLATFORM_CONFIG: [platform_compat 全文](evidence/android-sdk-37-platform-compat-api37-20260913.txt); DOCS: 附录 B, 行为语义未全部核验)
 - [x] 初次官方资料收集已写入第 3 节与附录 B, 复核修正见 [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). (DOCS; 不代表所有 UNVERIFIED 项已关闭)
 
-### P0.2 targetSdk 覆盖开关
+### P0.2 targetSdk 覆盖开关 (完成 2026-09-13)
 
-- [ ] `Versions.kt` 增加可选 Gradle 属性 `autojs.sdk.target.override` (仅用于 debug 验证): 校验整数 / 支持范围, `showInfo()` 打印覆盖提示; 未设置时宿主 / inrt 分别保持 36 / 29. `-Pautojs.sdk.target.override=37` 的 debug 产物两者均为 37, 不修改 `version.properties`. release / Runtime Kit / 模板分发任务若直接或间接使用覆盖配置, 必须在打包前失败; 验证完整任务名与聚合任务路径, 不能仅匹配命令行是否含 `Release`. (SOURCE; ANDROID_BUILD: app + inrt 覆盖前后 manifest; release 拒绝日志)
-- [ ] `tools/sdk37/compat.sh <serial> <package> <enable|disable|reset> <CHANGE...>` 与 `tools/sdk37/dump_compat.sh <serial>`: 按附录 C 封装, 每次 `am compat` 只传一个 change 和一个 package, 检查返回值并保存原覆盖状态. 音频 / 内存命令属于设备级控制, 单独入口且记录恢复方式, 不混进按包 compat 循环. (SOURCE; DEVICE-37: 在 `AVD_API_37` 上对宿主 debug 包 enable / reset 一次)
-- [ ] lint 入口: 增加显式验证模式, 使 app / inrt 的 vital analysis 在该模式真正执行, 同时规避模板分发的 `onlyIf` 跳过条件; 普通构建是否启用 lint 单独决定. 保存任务结果 / 新生成报告, `SKIPPED` 或旧报告不能算通过; `abortOnError=false` 时另外统计 Error / Fatal. (SOURCE; LINT)
-- [ ] lint 基线: 在 compileSdk 36 上用上述入口独立运行 `:app:lintAppDebug` 与 app / inrt release vital 检查, 报告存档到 `build/sdk37-lint-36/` (不入库), 同时记录 disabled issues / 既有问题, 供 P1 比对. (LINT)
+- [x] `Versions.kt` 增加 `autojs.sdk.target.override`, 校验整数 / minSdk 至 max(compileSdk, 37), 并打印 debug 覆盖提示. 两个 target 37 debug APK 均已检查 badging 并安装; 正常 app / inrt 为 36 / 29. `SdkTargetOverrideGuard` 作为实际任务依赖拒绝 release / Runtime Kit / 模板分发, 覆盖缩写与聚合路径; 11 项参数 / 任务拒绝检查通过. (SOURCE; ANDROID_BUILD: [实施记录](evidence/android-sdk-37-p0-p1-20260913.md) 第 2 节)
+- [x] [compat.sh](../../tools/sdk37/compat.sh) 与 [dump_compat.sh](../../tools/sdk37/dump_compat.sh) 保存原覆盖状态, 检查 debuggable 与整批 change, 每条 adb 命令只操作一个 change / package; 已在 API 37 对两个开关 enable / reset 并核对恢复, 非法 change 和 release 包拒绝通过. 音频 / 内存仅提供独立命令说明, 本次未修改设备级控制. (SOURCE; DEVICE-37: 实施记录第 2 节)
+- [x] `-Pautojs.sdk.lint.verify=true` 启用 app / inrt vital analysis, 绕过模板分发跳过条件并令错误产生非零退出码; 实际运行 debug / 两个 release 报告. AGP 9.4 的 vital 输出为 text, 对比工具检查其诊断计数. (SOURCE; LINT: 实施记录第 3 节)
+- [x] SDK 36 有效 lint 基线存档 `build/sdk37-lint-36/`, 包含命令日志、报告、版本与 lint model; 不新增禁用规则. debug 546 Error + 1 Fatal / 2437 Warning / 3 Hint, app / inrt release 各 1 Fatal. (LINT: 实施记录第 3 节)
 
 P0 验收: app / inrt 覆盖包的 `targetSdkVersion` 为 37, 正常包仍为 36 / 29; release 覆盖被拒绝; 脚本在 AVD 上跑通并清理本次 override; 有效 lint 基线存在.
 
@@ -174,18 +174,19 @@ P0 验收: app / inrt 覆盖包的 `targetSdkVersion` 为 37, 正常包仍为 36
 
 ## P1: 宿主 compileSdk 37
 
-目标: `COMPILE_SDK_VERSION=37`, 编译 / lint / 测试 / 出包 / CI 全部通过, 宿主 targetSdk 保持 36 / inrt 保持 29; 不启用 target 37 门控, 同时验证编译 / 资源 / 优化产物无功能退化.
+目标: `COMPILE_SDK_VERSION=37`, 编译 / 测试 / 出包与运行回归通过, lint 无新增问题并显式记录既有问题, CI 获得独立远程证据; 宿主 targetSdk 保持 36 / inrt 保持 29. 本地实施证据见 [实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 不将既有 lint 失败或未运行的 CI 标作通过.
 
-- [ ] `version.properties`: `COMPILE_SDK_VERSION=36` -> `37`. 仓内 47 个构建脚本随之生效, 不改子项目脚本. (SOURCE)
-- [ ] 修正探针暴露的弃用: `ui/edit/keyboard/SymbolsSettingsActivity.kt:1110` 的 `InputMethodManager.SHOW_IMPLICIT` 按 [API 参考](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#SHOW_IMPLICIT) 改用不带该 flag 的调用, 同时验证 API 24 / 28 等旧系统的输入法显示语义; 若采用 `WindowInsetsControllerCompat` 则验证焦点 / 时序. (SOURCE; ANDROID_COMPILE: 37 编译告警对比; DEVICE: 旧系统输入法)
-- [ ] lint 对比: 使用 P0.2 的有效入口在 37 上运行 app debug + app / inrt release 检查, 与 36 基线 diff; 新增 error / fatal 全部处理, 新增 warning 逐条处理或记录; `tools:targetApi` 与 `tools:ignore` 只在确有必要时调整. 核对任务未跳过、报告为本次生成, 不以 Gradle 退出码代替问题统计. (LINT: 报告路径与 diff 摘要写入证据)
-- [ ] 单元测试: `:app:testAppDebugUnitTest` 全量 (历史记录 2532 通过 / 5 跳过, 本次重新统计), 根项目 `testDebugUnitTest` 任务选择器覆盖提供同名任务的子项目, 并对照 `settings.gradle.kts` 核查 plugin-api / test-apps 覆盖范围; 不使用 Gradle 不支持的 `:plugin-api:*:testDebugUnitTest` 通配路径. `:app:compileAppDebugAndroidTestKotlin` 通过. (JVM; ANDROID_COMPILE)
-- [ ] 出包与门禁: `assembleAppDebug`, `assembleAppRelease`, `assembleInrtRelease`, `generateRuntimeKit`, `assembleApkBuilderTemplateDistribution`, `verifyNativePageAlignment` 全部通过; `aapt2 dump badging` 显示 app `compileSdkVersion='37' targetSdkVersion:'36'`, inrt `targetSdkVersion:'29'`. (ANDROID_BUILD)
-- [ ] 冒烟: debug 包装入 `AVD_API_37`, Xiaomi 23046RP50C (API 35), Sony G8441 (API 28), 运行 `sample/accessibility/smoke-legacy-api.js` 与 UI 模式 / 悬浮窗 / 截图 / 输入法脚本. release 包另跑一轮核心冒烟, 覆盖 R8 优化路径; target 不变不代表编译或资源产物必然没有运行时差异. (DEVICE; DEVICE-37)
-- [ ] CI: 推送后 `android.yml` 与 `release-runtime-kit.yml` 绿; 若 runner 未能自动获取 `platforms;android-37.0`, 在 `Set up JDK` 之后补 `sdkmanager "platforms;android-37.0" "build-tools;37.0.0"` 步骤. (ANDROID_BUILD: 远程 CI 链接)
-- [ ] changelog 按 D9 在 `improvement` 描述 compileSdk 37 (10 语言), 日期按当日更新, 重新生成 README; 提交 `chore(sdk): raise compileSdk to 37 (roadmap P1)`, 按显式文件清单暂存. (DOCS)
+- [x] `version.properties`: `COMPILE_SDK_VERSION=37`, 仓内构建脚本统一跟随; 宿主 / inrt 正常 target 仍为 36 / 29, 工具链与依赖版本保持. (SOURCE; ANDROID_BUILD: 实施记录第 1 / 4 节)
+- [x] `SymbolsSettingsActivity` 和 AndroidTest 的 `NativeEditorRegressionSmokeTest` 使用 `showSoftInput(editText, 0)`, 保持已有焦点 / 调用时序. 实际符号设置页在 API 24 / 28 / 35 / 37 均验证输入框获得焦点、键盘显示、Back 隐藏. ([API 参考](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#SHOW_IMPLICIT); SOURCE; ANDROID_COMPILE; DEVICE: 实施记录第 5 节)
+- [x] SDK 37 debug + app / inrt release lint 实际运行并存档 `build/sdk37-lint-37/`; [compare_lint.py](../../tools/sdk37/compare_lint.py) 对照 SDK 36 的 ID / 严重性 / 消息 / 文件及重复计数, 三份报告新增与减少均为零. 两轮 Gradle 均因既有错误退出 1, 不是 clean lint; 无新增 suppress / baseline / disabled issue. (LINT: 实施记录第 3 节)
+- [x] 单元测试 3166 项: 3161 通过 / 5 跳过 / 0 失败; 其中 app 2533 通过 / 5 跳过. 对照 settings 核对 10 modules / 29 plugin-api / 1 plugins / 6 test-apps 均进入任务选择器, 21 项任务为 NO-SOURCE, 不算用例通过. AndroidTest Kotlin 编译通过, 含上述弃用修正后的重编译. (JVM; ANDROID_COMPILE: 实施记录第 4 节)
+- [x] 正常 app debug / release 各 5 个 ABI / universal APK, inrt release 5 个及独立 inrt debug universal APK, 均为 compile 37 且 target 分别为 36 / 29; 5 份 Runtime Kit、根任务 `:assembleApkBuilderTemplateDistribution` 和 16 KB 门禁通过. 不在 Kit / 模板构建命令中直接追加 `assembleInrt*`: 现有脚本会因此关闭 ABI splits, 应通过 Kit 依赖构建 inrt release, debug 单独执行. (ANDROID_BUILD: 实施记录第 4 节)
+- [x] API 28 / 35 / 37 debug 与 API 37 release 各通过 a11y 53 / 53, UI / overlay / 基础 MediaProjection; API 35 使用全屏授权通过. 该平板单应用选择本宿主后返回未授权, 保留为 P2.15 待定位观察项, 不推断为 SDK 升级引入. release 当前 `isMinifyEnabled=false`, 覆盖实际出包与运行路径, 无 R8 优化证据. (DEVICE; DEVICE-37: 实施记录第 5 节)
+- [x] 本地 CI 入口修正并验证: editor gate 不再硬编码契约 VERSION=1, 验证正整数版本与 MIN=1 / MAX=VERSION; 当前契约为 5, 三项无效契约检查均被拒绝. CI 所列测试 / conformance assemble / Runtime Kit / 模板 / native 检查本地通过. (SOURCE; JVM; ANDROID_BUILD: 实施记录第 4 节)
+- [ ] 远程 CI: 推送后的 `android.yml` 记录链接与 SDK 自动下载结果; 若 runner 无法获取平台再补显式 sdkmanager 安装. `release-runtime-kit.yml` 会上传 Release 资产并触发插件仓库, 其构建步骤已本地验证, 发布工作流留待正常发布时验证, 不为 P1 检查提前发布. (ANDROID_BUILD: 远程 CI / 正常发布链接)
+- [x] changelog 按 D9 在 `improvement` 描述 compileSdk 37 (10 语言), gate 修正在 `fix`; 日期 2026/09/13, 已执行 `.python/generate_markdown.py` 生成 README / CHANGELOG. 本地提交 `chore(sdk): raise compileSdk to 37 (roadmap P1)`, 按显式文件与共享日志条目暂存. (DOCS)
 
-P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该提交.
+P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随正常发布补验. 既有 lint 错误清单持续可见, 不把零增量改写为全量 lint 通过. P2 的本地行为适配可使用已验证工具继续, 不提前切换持久 target.
 
 ---
 
@@ -274,6 +275,7 @@ P1 验收: 上述全部勾选; 本文 P1 条目回填证据; `git log -1` 为该
 
 ### P2.15 低影响项逐项验证 (I15)
 
+- [ ] 跟进 P1 的 Xiaomi 23046RP50C API 35 观察: 单应用选择 AutoJs6 后脚本返回未授权, 同机全屏授权成功; 以 compile 36 / 37 对照及系统授权结果、宿主 Activity 回调定位原因, 再决定是否转独立修复. API 37 的单应用基础截图通过不能替代该 OEM 路径. (DEVICE: [实施记录](evidence/android-sdk-37-p0-p1-20260913.md) 第 5 节)
 - [ ] 对 `BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`, `MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, `RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` (截图 `images.captureScreen` 经 MediaProjection), `DEPRECATE_SET_CONTENT_CAPTURE_ENABLED`, `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL`, `BACK_DISPOSITION_CONTROLS_BACK_INTERCEPTION`, `DETECT_IMPLICIT_URI_PERMISSION_GRANT` (加 `detectImplicitUriPermissionGrant()` 检查 `app.viewFile` / 分享路径, 为 Android 18 预备), 在附录 B 对应行填 "已验证无影响" 或转为独立条目. (DEVICE-37)
 - [ ] 为第 3.2 节的未确认项建立结论表: a11y (`AccessibilityService`, `AccessibilityNodeInfo`, 事件 / 手势 / 全局动作 / 截图), MediaProjection (每会话授权 / 回调 / resize / FGS), overlay (显示 / 触摸 / 后台启动), JobScheduler / WorkManager / 闹钟, 通知 / WebView, 最低可安装 target. 每行给 API diff 或专题文档 URL、宿主调用点、运行用例和结论; 文档未提及与尚未测试单列. 已知 Android 14-16 规则不能标作 Android 17 新规. (SOURCE; DOCS; DEVICE-37)
 - [ ] a11y 事件补测 CJKV 输入法的 `TYPE_VIEW_TEXT_CHANGED` 组合 / 提交过程, 关注 `getTextChangeTypes()` 新信息及已有监听器兼容性; 不因 `android.accessibilityservice` 包本身未发现差异而忽略 `android.view.accessibility`. 仅当脚本 API 暴露新字段时同步文档 / d.ts. ([官方目标版本变更](https://developer.android.com/about/versions/17/behavior-changes-17); DEVICE-37)
@@ -341,7 +343,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 - [ ] 文档仓库 (`AutoJs6-Documentation`): 若 P2.1 引入新权限名 / 错误码或 P2 新增任何 JS API, 执行 `auto-generate-for-autojs6.bat` 并提交 (含 `AutoJs6-Plugin-Offline-Docs`); 无 API 变化时只在文档增加 "Android 17 适配说明" 页 (本地网络权限, 后台音频, OTP 短信延迟, WebView UA, 反射限制, 私有 CA). (DOCS)
 - [ ] d.ts 与 LSP (`AutoJs6-TypeScript-Declarations`, `AutoJs6-Plugin-Ace-Editor`): 仅当 JS API 变化时执行 `aj6dts.bat -Publish` 与 `:app:generateAutoJs6LspDeclarations`, 版本号加一. (DOCS)
 - [ ] VS Code 扩展 (`AutoJs6-VSCode-Ext`): README / 故障排查增加 "Android 17 设备需授予本地网络权限" 说明 (不改代码, `VSCODE_EXT_REQUIRED_VERSION` 不变). (DOCS)
-- [ ] CI: P1 / P3 各自推送后远程 `android.yml` 与 `release-runtime-kit.yml` 绿; 记录 runner 是否自动下载了 `android-37.0`. (ANDROID_BUILD)
+- [ ] CI: P1 / P3 各自推送后验证远程 `android.yml`, 记录 runner 是否自动下载 `android-37.0`; `release-runtime-kit.yml` 的外部发布与插件触发随正常发布验证, 构建步骤可先本地运行. (ANDROID_BUILD)
 - [ ] `AutoJs6-Official-Plugins-Index`: 确认生成器无 targetSdk 字段假设; 插件发布时按既有流程刷新. (SOURCE)
 
 ---

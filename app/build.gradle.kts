@@ -28,6 +28,13 @@ val flavorNameApp = "app"
 val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
+val sdkLintVerification = providers.gradleProperty("autojs.sdk.lint.verify")
+    .map { value ->
+        value.trim().toBooleanStrictOrNull()
+            ?: throw GradleException("autojs.sdk.lint.verify must be true or false; was '$value'")
+    }
+    .orElse(false)
+    .get()
 val isInrtAssembleTaskRequested = gradle.startParameter.taskNames.any { taskName ->
     taskName.substringAfterLast(':').startsWith("assemble${flavorNameInrt.uppercaseFirstChar()}", ignoreCase = true)
 }
@@ -1088,7 +1095,7 @@ android {
     }
 
     lint {
-        abortOnError = false
+        abortOnError = sdkLintVerification
     }
 
 }
@@ -1456,7 +1463,7 @@ tasks {
             "lintVitalAnalyzeInrtRelease",
         )
     }.configureEach {
-        enabled = false
+        enabled = sdkLintVerification
     }
 
     matching {
@@ -1466,7 +1473,7 @@ tasks {
             "lintVitalAppRelease",
         )
     }.configureEach {
-        onlyIf { !apkBuilderTemplateDistributionRequested.get() }
+        onlyIf { sdkLintVerification || !apkBuilderTemplateDistributionRequested.get() }
     }
 
     val openCvSeparationTasks = listOf(

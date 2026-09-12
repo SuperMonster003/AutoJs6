@@ -181,6 +181,7 @@
         "El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB"
       ],
       "fix": [
+        "La comprobación CI del complemento de editor exigía la versión 1 del contrato y rechazaba hosts compatibles con versiones más recientes",
         "Un cierre inesperado al usar Paddle OCR y Rapid OCR consecutivamente en la misma aplicación empaquetada",
         "Las rutas de MediaInfo e imágenes admiten rutas absolutas, directorios superiores y nombres válidos; las grabaciones siguen las mismas reglas de acceso de Android con el anfitrión actualizado",
         "La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`",
@@ -333,6 +334,7 @@
         "Las políticas de los plugins OpenCV e ImageQuant rechazaban las bibliotecas nativas compiladas con NDK r28c (28.2.13676358) por discrepancia de versión del NDK, lo que bloqueaba el plugin OpenCV v1.1.2 reconstruido; ahora se aceptan tanto las compilaciones r26b como r28c"
       ],
       "improvement": [
+        "Actualización del compileSdk del proyecto a 37 (Android 17) y mejoras en las compilaciones de depuración y la verificación lint para la migración del SDK",
         "Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes",
         "Los diálogos de información comparten un componente reutilizable que permite insertar entradas key:value en cualquier posición, alinear automáticamente las claves y cancelar las lecturas asíncronas al cerrarse",
         "La información de componentes APK/APKS/XAPK/APKM/APKZ/AAB se traslada al diálogo \"Más información\" del menú superior derecho, con el mismo estilo del diálogo principal y actualización al cargar los metadatos",

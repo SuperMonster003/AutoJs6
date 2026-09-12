@@ -181,6 +181,7 @@
         "Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices"
       ],
       "fix": [
+        "The CI editor plugin gate required legacy contract version 1 and rejected hosts supporting newer compatible contract versions",
         "A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app",
         "MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host",
         "File Manager direct execution did not honor the corresponding UTF-8, UTF-16, or UTF-32 encoding for scripts with a Unicode BOM, causing files that ran normally in the editor to fail with `Invalid character`",
@@ -333,6 +334,7 @@
         "OpenCV and ImageQuant plugin policies rejected native libraries built with NDK r28c (28.2.13676358) as a native NDK version mismatch, which blocked the rebuilt OpenCV plugin v1.1.2; both r26b and r28c builds are now accepted"
       ],
       "improvement": [
+        "Raise project compileSdk to 37 (Android 17) and improve debug builds and lint verification for SDK migration",
         "Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files",
         "Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal",
         "APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the \"More information\" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded",

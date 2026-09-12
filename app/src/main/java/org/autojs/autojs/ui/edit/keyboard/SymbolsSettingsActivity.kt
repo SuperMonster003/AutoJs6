@@ -1107,7 +1107,7 @@ class SymbolsSettingsActivity : BaseActivity() {
     private fun showKeyboard(editText: EditText) {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
         editText.post {
-            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+            imm.showSoftInput(editText, 0)
         }
     }
 

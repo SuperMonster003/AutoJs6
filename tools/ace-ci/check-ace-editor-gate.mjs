@@ -57,7 +57,11 @@ assertIncludes(FILES.appBuild, 'implementation(project(":plugin-api:editor-api")
 assertIncludes(FILES.manifest, '<action android:name="org.autojs.plugin.EDITOR" />');
 assertIncludes(FILES.manifest, '<category android:name="ace-editor" />');
 
-assertIncludes(FILES.contract, "const val VERSION = 1");
+if (!/^\s*const val VERSION = [1-9]\d*\s*$/m.test(read(FILES.contract))) {
+  throw new Error(`${FILES.contract}: missing positive contract VERSION`);
+}
+assertIncludes(FILES.contract, "const val MIN_SUPPORTED_VERSION = 1");
+assertIncludes(FILES.contract, "const val MAX_SUPPORTED_VERSION = VERSION");
 assertIncludes(FILES.contract, 'const val ACTION_EDITOR = "org.autojs.plugin.EDITOR"');
 assertIncludes(FILES.contract, 'const val CATEGORY_ACE = "ace-editor"');
 assertIncludes(FILES.contract, "META_DATA_REQUIRES_HOST_VERSION");

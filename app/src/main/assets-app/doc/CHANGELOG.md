@@ -160,6 +160,7 @@
 * `新增` MediaInfo 查询支持从 0 开始的 streamNumber, countGet 流计数以及用于单位, 说明和可读名称的 infoKind; Rhino 和 Node 保持默认第 1 条流的 TEXT 查询, 并协商插件扩展能力
 * `新增` 加载 OpenCV 与 Image Quantization 插件前检查原生库 ELF 对齐, 页大小不兼容时提供明确错误
 * `新增` 插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示
+* `修复` CI 编辑器插件检查固定要求旧协议版本 1, 导致支持新版兼容协议的宿主无法通过检查的问题
 * `修复` 在同一个打包应用中依次使用 Paddle OCR 和 Rapid OCR 时可能崩溃的问题
 * `修复` MediaInfo 与图片文件路径支持绝对路径, 父目录和合法文件名; 录音输出同步交由更新后的宿主按 Android 文件权限处理
 * `修复` 文件管理器直接运行带 Unicode BOM 的脚本时未按 UTF-8, UTF-16 或 UTF-32 对应编码读取, 导致编辑器可正常运行而文件管理器报 `无效字符` 的问题
@@ -310,6 +311,7 @@
 * `修复` MediaInfo 详情与快照的 Complete name 显示原始文件路径, 避免显示私有缓存或描述符路径, 同时保留快照的显示文件名
 * `修复` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 与 Node 插件的坐标手势) 在被复用的 broker 派发线程上从第二次手势起总是应答 `false` (取消): 无 handler 的手势 automator 会在调用线程上准备 Looper 并在首个手势完成后退出它, 该线程上的下一次调用立即返回, 真正的结果被投递到已死的 handler; bridge 现在与 Python 宿主 broker 一样把主循环 handler 交给 automator
 * `修复` OpenCV 与 ImageQuant 插件策略将以 NDK r28c (28.2.13676358) 构建的原生库判定为原生 NDK 版本不匹配, 导致重编后的 OpenCV 插件 v1.1.2 无法加载; 现同时接受 r26b 与 r28c 构建
+* `优化` 项目 compileSdk 提升至 37 (Android 17), 完善 SDK 迁移的调试构建与 lint 验证
 * `优化` 安装包检查统一支持 262144 个归档条目, 提高单包, 嵌套扫描, 清单与元数据预算以兼容大型 APK/AAB/APKS
 * `优化` 信息对话框共用可复用的条目组件, 支持在任意位置插入 key:value 条目, 自动对齐键列并在关闭时取消异步读取
 * `优化` APK/APKS/XAPK/APKM/APKZ/AAB 信息对话框的组件信息移至右上角菜单的 "更多信息" 对话框, 共用主对话框的条目样式并同步更新读取结果
