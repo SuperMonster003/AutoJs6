@@ -1,0 +1,3052 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "kind": "release-candidate-audit",
+  "note": "Release APKs rebuilt by the maintainer from committed sources (all workspaces clean) with `./gradlew clean assembleRelease`; the shared gate verify<Variant>NativePageAlignment finalized every assemble task. This audit independently re-parses every 64-bit .so (min PT_LOAD align, RELRO/writable-data page overlap) and records SHA-256. Nothing is pushed or published.",
+  "repos": [
+    {
+      "repo": "AutoJs6",
+      "description": "宿主 (app + inrt)",
+      "branch": "master",
+      "head": "b9f2e484d",
+      "headSubject": "fix(build): select universal Runtime Kit for template plugin",
+      "headDate": "2026-09-12 08:47:59 +0800",
+      "dirtyFiles": 2,
+      "releaseApkCount": 10,
+      "gateReports": [
+        "AppRelease.json",
+        "InrtRelease.json",
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "description": "OpenCV 独立插件 (r28c)",
+      "branch": "master",
+      "head": "5bbccd8",
+      "headSubject": "chore: remove obsolete compatibility properties and version mappings",
+      "headDate": "2026-09-12 08:24:37 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 5,
+      "gateReports": [
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "description": "Rapid v3 (c++_shared, r28c donor)",
+      "branch": "master",
+      "head": "00cd04f",
+      "headSubject": "chore: record release build metadata",
+      "headDate": "2026-09-12 09:42:16 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 4,
+      "gateReports": [
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "description": "Rapid v6 (c++_shared, r28c donor)",
+      "branch": "master",
+      "head": "dff384b",
+      "headSubject": "chore: record release build metadata",
+      "headDate": "2026-09-12 09:44:15 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 4,
+      "gateReports": [
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "description": "Paddle v3 (r28c payload, B7 detector warm-up)",
+      "branch": "master",
+      "head": "d48dac1",
+      "headSubject": "fix(native): warm up the Paddle-Lite detector with a 960x960 blank image before the first detection (v1.0.3)",
+      "headDate": "2026-09-12 13:21:19 +0800",
+      "dirtyFiles": 1,
+      "releaseApkCount": 3,
+      "gateReports": [
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "description": "Paddle v4 (r28.2 libc++, mmap ORT)",
+      "branch": "master",
+      "head": "6def929",
+      "headSubject": "chore: record release build metadata",
+      "headDate": "2026-09-12 09:22:46 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 9,
+      "gateReports": [
+        "MobileEnRelease.json",
+        "MobileRelease.json",
+        "Release.json",
+        "ServerRelease.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "description": "Paddle v5 (r28.2 libc++, mmap ORT)",
+      "branch": "master",
+      "head": "015b044",
+      "headSubject": "chore: record release build metadata",
+      "headDate": "2026-09-12 09:30:49 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 39,
+      "gateReports": [
+        "ArabicRelease.json",
+        "CyrillicRelease.json",
+        "DevanagariRelease.json",
+        "EnglishRelease.json",
+        "EslavRelease.json",
+        "GreekRelease.json",
+        "KoreanRelease.json",
+        "LatinRelease.json",
+        "MobileRelease.json",
+        "Release.json",
+        "ServerRelease.json",
+        "TamilRelease.json",
+        "TeluguRelease.json",
+        "ThaiRelease.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "description": "Paddle v6 (r28.2 libc++, mmap ORT)",
+      "branch": "master",
+      "head": "8c1ea7c",
+      "headSubject": "chore: record release build metadata",
+      "headDate": "2026-09-12 09:34:12 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 9,
+      "gateReports": [
+        "MediumRelease.json",
+        "Release.json",
+        "SmallRelease.json",
+        "TinyRelease.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Three-Stone-AI",
+      "description": "Three-Stone-AI (ui-redesign)",
+      "branch": "ui-redesign",
+      "head": "88287a8",
+      "headSubject": "feat: refine AI model management and application settings",
+      "headDate": "2026-09-12 08:31:10 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 3,
+      "gateReports": [
+        "Release.json"
+      ]
+    },
+    {
+      "repo": "AutoJs6-Plugin-Bun-Runtime",
+      "description": "Bun Runtime (官方 payload; 大页 JSC 候选另行跟踪)",
+      "branch": "master",
+      "head": "3ac84ca",
+      "headSubject": "fix(runtime): rebuild large-page JSC and validate experimental Binder",
+      "headDate": "2026-09-12 12:12:43 +0800",
+      "dirtyFiles": 0,
+      "releaseApkCount": 3,
+      "gateReports": [
+        "Release.json"
+      ]
+    }
+  ],
+  "apks": [
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/app/release/autojs6-v6.8.0-arm64-v8a.apk",
+      "name": "autojs6-v6.8.0-arm64-v8a.apk",
+      "bytes": 36285310,
+      "sha256": "ba7d429bcd513ba5f09eded41f6b41e2699837dced78291b257b69a502e8ef6a",
+      "mtime": "2026-09-12 09:06",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "AppRelease.json",
+        "variant": "AppRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/app/release/autojs6-v6.8.0-armeabi-v7a.apk",
+      "name": "autojs6-v6.8.0-armeabi-v7a.apk",
+      "bytes": 36233116,
+      "sha256": "2bcc8d8820b9c72d848dba58821523354d8ce926ff1775b463128f747be8569b",
+      "mtime": "2026-09-12 09:06",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "AppRelease.json",
+        "variant": "AppRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/app/release/autojs6-v6.8.0-universal.apk",
+      "name": "autojs6-v6.8.0-universal.apk",
+      "bytes": 37482336,
+      "sha256": "6c25423de1bc5e0a7775a00ac4f6b6c49e782064fd640f365ceeb3cc8a7919b6",
+      "mtime": "2026-09-12 09:06",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
+      "soCount": 12,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "AppRelease.json",
+        "variant": "AppRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/app/release/autojs6-v6.8.0-x86.apk",
+      "name": "autojs6-v6.8.0-x86.apk",
+      "bytes": 36305268,
+      "sha256": "4d06e2850b4495cb8aca2731d6438cb87794f94990227ed0d6dcefb8bfd2821f",
+      "mtime": "2026-09-12 09:06",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "x86"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "AppRelease.json",
+        "variant": "AppRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/app/release/autojs6-v6.8.0-x86_64.apk",
+      "name": "autojs6-v6.8.0-x86_64.apk",
+      "bytes": 36301413,
+      "sha256": "4837c7a341029a8d5e4f657cd5592ff5b3d821771770e0a6b494d61b7acd2887",
+      "mtime": "2026-09-12 09:06",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "AppRelease.json",
+        "variant": "AppRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-arm64-v8a.apk",
+      "name": "inrt-v6.8.0-arm64-v8a.apk",
+      "bytes": 35093627,
+      "sha256": "adc85dc969e02b935598f8a2157e41a028fc2855aa8e969cd04403a05c7c3728",
+      "mtime": "2026-09-12 09:08",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "InrtRelease.json",
+        "variant": "InrtRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-armeabi-v7a.apk",
+      "name": "inrt-v6.8.0-armeabi-v7a.apk",
+      "bytes": 35041433,
+      "sha256": "b0bce0bb075f56ad543090093c8d1c7dc183a85fc71a9de09da50250ccaa7a2f",
+      "mtime": "2026-09-12 09:08",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "InrtRelease.json",
+        "variant": "InrtRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-universal.apk",
+      "name": "inrt-v6.8.0-universal.apk",
+      "bytes": 36290653,
+      "sha256": "b6feedb631e6d4a059aaf320afbf06e821ae90564c04a875b20e0cc7a4a72250",
+      "mtime": "2026-09-12 09:08",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
+      "soCount": 12,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "InrtRelease.json",
+        "variant": "InrtRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-x86.apk",
+      "name": "inrt-v6.8.0-x86.apk",
+      "bytes": 35113585,
+      "sha256": "7e679e5a7863e4b13f2a0f4255afb8e565c3c3d7446f8e1c508d190fc178037c",
+      "mtime": "2026-09-12 09:08",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "x86"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "InrtRelease.json",
+        "variant": "InrtRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6",
+      "file": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-x86_64.apk",
+      "name": "inrt-v6.8.0-x86_64.apk",
+      "bytes": 35109730,
+      "sha256": "fc859ab37264134f3cc0b00345977f8e501d31c654b54ebb7c8ab90ffb54f473",
+      "mtime": "2026-09-12 09:08",
+      "version": "6.8.0",
+      "versionExpected": "6.8.0",
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 3,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "InrtRelease.json",
+        "variant": "InrtRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": null
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-opencv-v1.1.2-arm64-v8a.apk",
+      "name": "autojs6-plugin-opencv-v1.1.2-arm64-v8a.apk",
+      "bytes": 8313725,
+      "sha256": "649cf9c1540ae8922204e98e207d1d0bd17b9e4b95fc21095190bfe2feb947cf",
+      "mtime": "2026-09-12 09:14",
+      "version": "1.1.2",
+      "versionExpected": "1.1.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-opencv-v1.1.2-armeabi-v7a.apk",
+      "name": "autojs6-plugin-opencv-v1.1.2-armeabi-v7a.apk",
+      "bytes": 7337355,
+      "sha256": "bb1322a13b1038315cb791c910c10ab685776d2345e7fc173e2a957eca4911b2",
+      "mtime": "2026-09-12 09:14",
+      "version": "1.1.2",
+      "versionExpected": "1.1.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-opencv-v1.1.2-universal.apk",
+      "name": "autojs6-plugin-opencv-v1.1.2-universal.apk",
+      "bytes": 53216880,
+      "sha256": "b1930f464ca5ed63a1b258c4c1635b620d9e20bcbd0cd434103a5d56ed01b81a",
+      "mtime": "2026-09-12 09:14",
+      "version": "1.1.2",
+      "versionExpected": "1.1.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-opencv-v1.1.2-x86.apk",
+      "name": "autojs6-plugin-opencv-v1.1.2-x86.apk",
+      "bytes": 16060707,
+      "sha256": "f7330c0883d783c40a8920010df98e0ae38e76c78b789c3aa27a6b729b2986e4",
+      "mtime": "2026-09-12 09:14",
+      "version": "1.1.2",
+      "versionExpected": "1.1.2",
+      "versionOk": true,
+      "abis": [
+        "x86"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-OpenCV",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-opencv-v1.1.2-x86_64.apk",
+      "name": "autojs6-plugin-opencv-v1.1.2-x86_64.apk",
+      "bytes": 21972266,
+      "sha256": "fd32149f5aed0886f7efd2f41c02a338af488a54eb392ba9414a528a05d8ad18",
+      "mtime": "2026-09-12 09:14",
+      "version": "1.1.2",
+      "versionExpected": "1.1.2",
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-arm64-v8a.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-arm64-v8a.apk",
+      "bytes": 28108197,
+      "sha256": "b681c6aa91e4b67ec537dfadaa1bfb28f63af67be28f3e854d24c32e1c5c4f22",
+      "mtime": "2026-09-12 09:40",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-armeabi-v7a.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-armeabi-v7a.apk",
+      "bytes": 26521741,
+      "sha256": "df02056591724d69049f0de1d6c5a7714a5daef11e376ebebd3392ea9c7e8a94",
+      "mtime": "2026-09-12 09:40",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-universal.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-universal.apk",
+      "bytes": 71531351,
+      "sha256": "b5e1a1686e22bf432d42b08f47ad43df0523f8152ff43f25f9f5ace8ee4dcce6",
+      "mtime": "2026-09-12 09:40",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "soCount": 12,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-x86_64.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.2-x86_64.apk",
+      "bytes": 42973317,
+      "sha256": "2294847cd75cb1090866b64dc397f89472a996cf5e2ec41cd6cdb4de9a3ce4c9",
+      "mtime": "2026-09-12 09:40",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-arm64-v8a.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-arm64-v8a.apk",
+      "bytes": 42933659,
+      "sha256": "b669aa2c965d50f99265e22c40187a17940a4fb1531886b3203d5306062f70ef",
+      "mtime": "2026-09-12 09:43",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-armeabi-v7a.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-armeabi-v7a.apk",
+      "bytes": 41347251,
+      "sha256": "5e6cbb9ef738855de691ef3c5ecf208aeb852ff35250521ba6b2fe6c522b9e77",
+      "mtime": "2026-09-12 09:43",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-universal.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-universal.apk",
+      "bytes": 86356785,
+      "sha256": "5457708d7432a574ca3f68bbf810fd6a513ae8a942fd52f18db75fea73381ea8",
+      "mtime": "2026-09-12 09:43",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "soCount": 12,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        },
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-x86_64.apk",
+      "name": "autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.2-x86_64.apk",
+      "bytes": 57798787,
+      "sha256": "9781fcad1176043a34084677bfd953cb774419410c6cb34ccf3b547cfa2c77fb",
+      "mtime": "2026-09-12 09:43",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/x86_64/libc++_shared.so",
+          "sha256": "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x134000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-arm64-v8a.apk",
+      "bytes": 47167559,
+      "sha256": "b4ecc5bd535426d98480e7aa34995bce42abd2a7b8d7af6e7a289720cd975c79",
+      "mtime": "2026-09-12 13:22",
+      "version": "1.0.3",
+      "versionExpected": "1.0.3",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-armeabi-v7a.apk",
+      "bytes": 39692463,
+      "sha256": "c6283e7a3720dd646d0ffcdd0ec612f4da3062af3fe4d918f48d213d8b4af655",
+      "mtime": "2026-09-12 13:22",
+      "version": "1.0.3",
+      "versionExpected": "1.0.3",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.3-universal.apk",
+      "bytes": 69413354,
+      "sha256": "0751e3f37df3754b943884882571e1e75406373ef1f1822c4cd3a26002e32da1",
+      "mtime": "2026-09-12 13:22",
+      "version": "1.0.3",
+      "versionExpected": "1.0.3",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-arm64-v8a.apk",
+      "bytes": 29857457,
+      "sha256": "0030d1055e2d4532a1c8aeb6ed841e9ac60eab385b24e673c708d54eea7e1be7",
+      "mtime": "2026-09-12 09:19",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-armeabi-v7a.apk",
+      "bytes": 28281057,
+      "sha256": "d1fdea2205bd7491043881ddca99eddec68713e48d851f932cffdeaa9e12b79c",
+      "mtime": "2026-09-12 09:19",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-universal.apk",
+      "bytes": 43296867,
+      "sha256": "f0ad5b4b4161d8e6a9debf21108ade9f17c982871de2262a86db1f9d2d0c8396",
+      "mtime": "2026-09-12 09:19",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobileEn/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-arm64-v8a.apk",
+      "bytes": 26970691,
+      "sha256": "7fd9e8ffcb548be0b77b2fbf4029045f4b269aab3982add1226e87f281bac4db",
+      "mtime": "2026-09-12 09:18",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileEnRelease.json",
+        "variant": "MobileEnRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobileEn/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-armeabi-v7a.apk",
+      "bytes": 25394291,
+      "sha256": "a0bcec121668bdfdf39bcf6ecf9a7a782edec682bbbed95a6687853348241f8a",
+      "mtime": "2026-09-12 09:18",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "MobileEnRelease.json",
+        "variant": "MobileEnRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/mobileEn/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-universal.apk",
+      "bytes": 40410097,
+      "sha256": "12c21f9445f0b14f71949a624a82e1f9137f5648f2e08b49aa655ee776da9ac1",
+      "mtime": "2026-09-12 09:18",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileEnRelease.json",
+        "variant": "MobileEnRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-arm64-v8a.apk",
+      "bytes": 194875897,
+      "sha256": "bcc402b179b16a63219fd9fd1dc769451a8232c35d5a3203ad236b666cb11e55",
+      "mtime": "2026-09-12 09:20",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-armeabi-v7a.apk",
+      "bytes": 193299497,
+      "sha256": "c32c6e360aa552ffed17432e54ca866113874232868b653270051ce4342ebbf8",
+      "mtime": "2026-09-12 09:20",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-server-universal.apk",
+      "bytes": 208315307,
+      "sha256": "c81a26fb8226a4a431f99939a6e089389ae112f76cae53c48dcd6bceed9d88a2",
+      "mtime": "2026-09-12 09:20",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/arabic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-arm64-v8a.apk",
+      "bytes": 27374357,
+      "sha256": "c5cad52f12ddda3236f4a6a0236b4f03ae42a9cae3f2e114dda53e1ceeac9b92",
+      "mtime": "2026-09-12 09:22",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ArabicRelease.json",
+        "variant": "ArabicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/arabic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-armeabi-v7a.apk",
+      "bytes": 25797957,
+      "sha256": "e02feaf932621430e83f19af663816d83d183ced0d3128b09da7fb38c3972844",
+      "mtime": "2026-09-12 09:22",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "ArabicRelease.json",
+        "variant": "ArabicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/arabic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-arabic-universal.apk",
+      "bytes": 40813763,
+      "sha256": "9df38c3ac0c5f56f619e6521af9b6c7df5b4e39f16f05df4fc2d580c5a0515ed",
+      "mtime": "2026-09-12 09:22",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ArabicRelease.json",
+        "variant": "ArabicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/cyrillic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-arm64-v8a.apk",
+      "bytes": 27378141,
+      "sha256": "a756dd7c3436bfa7df2bf0970c67bab24375f409f83972ddb39114e298c5bea2",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "CyrillicRelease.json",
+        "variant": "CyrillicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/cyrillic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-armeabi-v7a.apk",
+      "bytes": 25801741,
+      "sha256": "922c8ab320c097ddd6e54ccd5172726a9a17412fbe6a03f655c77a1e27771645",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "CyrillicRelease.json",
+        "variant": "CyrillicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/cyrillic/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-cyrillic-universal.apk",
+      "bytes": 40817547,
+      "sha256": "afcb3b6727097125a0aa59a8a76c7002306b7be5df1a306240ebd475ff75d3bc",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "CyrillicRelease.json",
+        "variant": "CyrillicRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/devanagari/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-arm64-v8a.apk",
+      "bytes": 27288869,
+      "sha256": "555d3e8f252b12b6950f83f255443886ff2cd48b89650470b3861fbf3296b0e8",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "DevanagariRelease.json",
+        "variant": "DevanagariRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/devanagari/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-armeabi-v7a.apk",
+      "bytes": 25712473,
+      "sha256": "6040dacf7eb67d885b85ca818f22a697afc357ffb1913ae94062eead44a9a4cb",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "DevanagariRelease.json",
+        "variant": "DevanagariRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/devanagari/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-devanagari-universal.apk",
+      "bytes": 40728279,
+      "sha256": "ea66157851c5d6e50f39c58f80f26ab7850b256acb8b8dfafb4173867dd6c03a",
+      "mtime": "2026-09-12 09:23",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "DevanagariRelease.json",
+        "variant": "DevanagariRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/english/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-arm64-v8a.apk",
+      "bytes": 27261791,
+      "sha256": "9ec0a3cb36f33d1f3a149372e2169d3e5610cba47196cbed97cddafa3d7a5404",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "EnglishRelease.json",
+        "variant": "EnglishRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/english/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-armeabi-v7a.apk",
+      "bytes": 25685395,
+      "sha256": "3b88a522ee747130528c9a6c8d0f00862733a9a70728540fc99d30e3e02f12c3",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "EnglishRelease.json",
+        "variant": "EnglishRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/english/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-english-universal.apk",
+      "bytes": 40701201,
+      "sha256": "82ef95a789f75d354ca338d2c28de6766d81f29b2a3238597d7b4f0be90e6ec3",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "EnglishRelease.json",
+        "variant": "EnglishRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/eslav/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-arm64-v8a.apk",
+      "bytes": 27331207,
+      "sha256": "1676cb8426540a8d0d82641115c7ebec8edbb4700a2954fc507fcef0e669fe8f",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "EslavRelease.json",
+        "variant": "EslavRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/eslav/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-armeabi-v7a.apk",
+      "bytes": 25754807,
+      "sha256": "a8568851998b828cb10ba011f582d0a595cf7300e5a390756edd654c77db5e4c",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "EslavRelease.json",
+        "variant": "EslavRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/eslav/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-eslav-universal.apk",
+      "bytes": 40770613,
+      "sha256": "ced7a8f7e60646ed808f3f8af7fa8b39a10376f525b34d5eac29be855bd45dca",
+      "mtime": "2026-09-12 09:24",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "EslavRelease.json",
+        "variant": "EslavRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/greek/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-arm64-v8a.apk",
+      "bytes": 27238675,
+      "sha256": "5fe10cfbce7deb52f3bf411f489dbd49da9085b85477f3aa64e9dd1cdfb00255",
+      "mtime": "2026-09-12 09:25",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "GreekRelease.json",
+        "variant": "GreekRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/greek/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-armeabi-v7a.apk",
+      "bytes": 25662275,
+      "sha256": "c762130e1dfd3e04cbcd1cf77c1ef2daf960f25e0a3f76cf732067fcea531e5f",
+      "mtime": "2026-09-12 09:25",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "GreekRelease.json",
+        "variant": "GreekRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/greek/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-greek-universal.apk",
+      "bytes": 40678085,
+      "sha256": "798c12f04f4ca515eac0a2e432f25899fbb7621f73084e5436b0185b0eec11e8",
+      "mtime": "2026-09-12 09:25",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "GreekRelease.json",
+        "variant": "GreekRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/korean/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-arm64-v8a.apk",
+      "bytes": 28358489,
+      "sha256": "0e81db19a3c4d8697dc63d6e2fc04b2c1fb867b0644692c3e9105af4d30cac86",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "KoreanRelease.json",
+        "variant": "KoreanRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/korean/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-armeabi-v7a.apk",
+      "bytes": 26782089,
+      "sha256": "6d21c090e4e840842a46b4c88f6cd70d7acdbb6f5a4a405281ca8e9beb470e2e",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "KoreanRelease.json",
+        "variant": "KoreanRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/korean/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-korean-universal.apk",
+      "bytes": 41797899,
+      "sha256": "b10099fec4eb58880d2773201cba49325a84525004037a365b15cf12b0c1a536",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "KoreanRelease.json",
+        "variant": "KoreanRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/latin/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-arm64-v8a.apk",
+      "bytes": 27353987,
+      "sha256": "1bf2f797cd994f42b5a7c8962bd2728f8f9383c027b209dff4cd89882123633a",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "LatinRelease.json",
+        "variant": "LatinRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/latin/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-armeabi-v7a.apk",
+      "bytes": 25777587,
+      "sha256": "3fc84d0d39b45f358ea6f91109d9e7d52c235271bc2060d6d26512c969c3cc58",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "LatinRelease.json",
+        "variant": "LatinRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/latin/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-latin-universal.apk",
+      "bytes": 40793393,
+      "sha256": "22ef6d1ffeb5997f6ff3ee00ef56838ae5ecb10bed95d96874223634cb2c0093",
+      "mtime": "2026-09-12 09:26",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "LatinRelease.json",
+        "variant": "LatinRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-arm64-v8a.apk",
+      "bytes": 34129589,
+      "sha256": "f4237270c8b70dba4ba94e8078b4e8f4dd72a43e9bb84a7c253151ef0c1898ad",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-armeabi-v7a.apk",
+      "bytes": 32553189,
+      "sha256": "532c5b6143acd6c2def004417440d74875d2b39c32e5931ac0c5c32ae53c2d9d",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/mobile/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-mobile-universal.apk",
+      "bytes": 47568999,
+      "sha256": "586764e7e5e65a54f7311e62ceb6d811eddf91ab9b4b835c115df34ea02209e8",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MobileRelease.json",
+        "variant": "MobileRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-arm64-v8a.apk",
+      "bytes": 171127129,
+      "sha256": "85b5dc5e99ab195a655867eda0b1e4c8e2cf72867594e311b1fc97a541b323f0",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-armeabi-v7a.apk",
+      "bytes": 169550729,
+      "sha256": "142fd8bd95b1e2bb880a9ab02ac7809ae237b1e474763d12b25c8412bac7fb0d",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/server/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-server-universal.apk",
+      "bytes": 184566535,
+      "sha256": "55d6839da0fcef99e59b8fef2c83c82c72446e6580f6183c3b22895824822a03",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ServerRelease.json",
+        "variant": "ServerRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/tamil/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-arm64-v8a.apk",
+      "bytes": 27286107,
+      "sha256": "583e97f726b9a6610c2a5e25ed9116eb93d8ffcbd21ac462c12f5f27175c768c",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TamilRelease.json",
+        "variant": "TamilRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/tamil/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-armeabi-v7a.apk",
+      "bytes": 25709707,
+      "sha256": "bb3a608d78ffce21525f72873111ef4bd4ad288e86faa0074976eddbc0408cb0",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "TamilRelease.json",
+        "variant": "TamilRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/tamil/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-tamil-universal.apk",
+      "bytes": 40725517,
+      "sha256": "7819b1f40ee9a777bad8ae1deeaabfdc932395c12f038fbc9f5236ecb769bfba",
+      "mtime": "2026-09-12 09:27",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TamilRelease.json",
+        "variant": "TamilRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/telugu/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-arm64-v8a.apk",
+      "bytes": 27283681,
+      "sha256": "782e58f1b7d8d8bf0bbf7d302212333e72be90b2a0e9703e6f1ad5c2a1bc81fe",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TeluguRelease.json",
+        "variant": "TeluguRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/telugu/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-armeabi-v7a.apk",
+      "bytes": 25707281,
+      "sha256": "3e306a93e0ad6cba669ac42490d993e07d04aa1a141eaf4b3dcdd53dde83d773",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "TeluguRelease.json",
+        "variant": "TeluguRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/telugu/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-telugu-universal.apk",
+      "bytes": 40723091,
+      "sha256": "a7012fb6f2cc7656f5b5b36d9eb007ef96ccfdee5fc6659b2fedca2bc4dde995",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TeluguRelease.json",
+        "variant": "TeluguRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/thai/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-arm64-v8a.apk",
+      "bytes": 27307029,
+      "sha256": "5b88a2db51651f51b5153891d20743f1efb7fa9ca266a56b30980087203b1e76",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ThaiRelease.json",
+        "variant": "ThaiRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/thai/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-armeabi-v7a.apk",
+      "bytes": 25730629,
+      "sha256": "7c0962319e662ffbb8b6196a1dca3ba861ab3596569becc14b5a71dd46882f19",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "ThaiRelease.json",
+        "variant": "ThaiRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "file": "app/build/outputs/apk/thai/release/autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.2-thai-universal.apk",
+      "bytes": 40746435,
+      "sha256": "4d007b2ab1de3a7ae3c64e692da17ab6959842e3ede7b4d73c96e1e4025a6e4e",
+      "mtime": "2026-09-12 09:28",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "ThaiRelease.json",
+        "variant": "ThaiRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/medium/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-arm64-v8a.apk",
+      "bytes": 116054428,
+      "sha256": "94e6166e7d7a0a798b2ed2b28d6b9dbfdb83b0441c979d5f50ca83c50668d3af",
+      "mtime": "2026-09-12 09:32",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MediumRelease.json",
+        "variant": "MediumRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/medium/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-armeabi-v7a.apk",
+      "bytes": 114478028,
+      "sha256": "0ca7b27b8c9e50bcfb32fe492073b63b013b51a2fd58ec9856334d473daeede4",
+      "mtime": "2026-09-12 09:32",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "MediumRelease.json",
+        "variant": "MediumRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/medium/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-medium-universal.apk",
+      "bytes": 129493838,
+      "sha256": "b4f5cf094d62704234a96b109c6566ed14bca80a9160bd9824a8fa3fca0a3877",
+      "mtime": "2026-09-12 09:32",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "MediumRelease.json",
+        "variant": "MediumRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/small/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-arm64-v8a.apk",
+      "bytes": 41596968,
+      "sha256": "f3c0bdd1f00a22826a6cd8cc31577eace4061db42e867512360b65558a52792b",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "SmallRelease.json",
+        "variant": "SmallRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/small/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-armeabi-v7a.apk",
+      "bytes": 40020568,
+      "sha256": "845ea46a187289596b266b667db954de0cf452d179338cbe4d56b214fd5e3083",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "SmallRelease.json",
+        "variant": "SmallRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/small/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-small-universal.apk",
+      "bytes": 55036378,
+      "sha256": "73007d122c2fdca90af9963b233efb3bc7c16de6ba5820d8295bc7c715c0992b",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "SmallRelease.json",
+        "variant": "SmallRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/tiny/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-arm64-v8a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-arm64-v8a.apk",
+      "bytes": 21211232,
+      "sha256": "ff723dab60a2fa4ff0fdfa417f5d8740ef42c6309caae5b547a7a23d4483bf33",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TinyRelease.json",
+        "variant": "TinyRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/tiny/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-armeabi-v7a.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-armeabi-v7a.apk",
+      "bytes": 19634836,
+      "sha256": "3c9dc242d1557169142255c1a017f49695db3020a7210453d43fd49d2ec6988c",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "armeabi-v7a"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": null,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "TinyRelease.json",
+        "variant": "TinyRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "file": "app/build/outputs/apk/tiny/release/autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-universal.apk",
+      "name": "autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.2-tiny-universal.apk",
+      "bytes": 34650642,
+      "sha256": "cf7bb683ce6592118e82240800d9a654b22833550b85c2f043bc9a19488cf80a",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.0.2",
+      "versionExpected": "1.0.2",
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "soCount": 8,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [
+        {
+          "entry": "lib/arm64-v8a/libc++_shared.so",
+          "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+          "minLoadAlign": 16384,
+          "relroEnd": "0x13a000",
+          "verdict": "OK"
+        }
+      ],
+      "gate": {
+        "report": "TinyRelease.json",
+        "variant": "TinyRelease",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Three-Stone-AI",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+      "name": "autojs6-plugin-three-stone-ai-v1.1.1-arm64-v8a.apk",
+      "bytes": 24591831,
+      "sha256": "9179a437d7905dfecb98454cd54b66eaefd7db010bfee051cf17837f292875cd",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.1.1",
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Three-Stone-AI",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-three-stone-ai-v1.1.1-universal.apk",
+      "name": "autojs6-plugin-three-stone-ai-v1.1.1-universal.apk",
+      "bytes": 49815562,
+      "sha256": "3a7d681b4a9f3c465549429fcc05b0a701ea469711577ad00471e8d70dcac157",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.1.1",
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "soCount": 2,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Three-Stone-AI",
+      "file": "app/build/outputs/apk/release/autojs6-plugin-three-stone-ai-v1.1.1-x86_64.apk",
+      "name": "autojs6-plugin-three-stone-ai-v1.1.1-x86_64.apk",
+      "bytes": 28614588,
+      "sha256": "9b00f55eca6a10e9b0bc5e785576a13f8be1159bd9f0c11faed646ef118ebed6",
+      "mtime": "2026-09-12 09:33",
+      "version": "1.1.1",
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 1,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": false,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Bun-Runtime",
+      "file": "app/build/outputs/apk/release/app-arm64-v8a-release.apk",
+      "name": "app-arm64-v8a-release.apk",
+      "bytes": 35431828,
+      "sha256": "72e1eab169258e720291861dd2c0b43cd287bf4813d4d9a304848b71a9e4827a",
+      "mtime": "2026-09-12 08:42",
+      "version": null,
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a"
+      ],
+      "soCount": 2,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Bun-Runtime",
+      "file": "app/build/outputs/apk/release/app-universal-release.apk",
+      "name": "app-universal-release.apk",
+      "bytes": 72011748,
+      "sha256": "ef694c4feab5a6035d14ccf869177afbd03ad76211af18f67ae57e3fb743a591",
+      "mtime": "2026-09-12 08:42",
+      "version": null,
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "soCount": 4,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    },
+    {
+      "repo": "AutoJs6-Plugin-Bun-Runtime",
+      "file": "app/build/outputs/apk/release/app-x86_64-release.apk",
+      "name": "app-x86_64-release.apk",
+      "bytes": 36824370,
+      "sha256": "eb2b5f0c72e28678877d018bcba1429994380d01953e0593caaee81374484d17",
+      "mtime": "2026-09-12 08:42",
+      "version": null,
+      "versionExpected": null,
+      "versionOk": true,
+      "abis": [
+        "x86_64"
+      ],
+      "soCount": 2,
+      "min64BitLoadAlign": 16384,
+      "elfVerdict64Bit": "OK",
+      "libcxx": [],
+      "gate": {
+        "report": "Release.json",
+        "variant": "Release",
+        "summaryOk": true,
+        "skipped": false,
+        "entriesOk": true,
+        "extractNativeLibs": true,
+        "declaredNativePageAlignment": 16384
+      }
+    }
+  ],
+  "problems": [],
+  "libcxxSha256ByAbi": {
+    "arm64-v8a": [
+      "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c"
+    ],
+    "x86_64": [
+      "2e855857f80819737d25a663109fedf816a5e996a85423166806014a06593256"
+    ]
+  }
+}

@@ -12,12 +12,17 @@
 | --- | --- | --- |
 | X1 | 已修复, 已复验 | Rapid v3/v6 以 `c++_shared` 打包 NDK r28.2 libc++; Samsung 16 KB, API 36/37 ps16k, Redmi 4 KB 的独立 provider 调用通过 |
 | X2 | 已修复, 已复验 | 根因: 旧 libc++ RELRO 末端 `0x111000` 与可写数据同页 (`tools/16kb/elf_layout.py`); v4/v5/v6 换 r28.2 libc++; Samsung 复验 v6 Tiny / v5 Thai, v4 Server 不再崩溃; ORT 会话改内存映射修复 v4 Server 的 OOM; Redmi 4 KB 通过 v4 Mobile / Server, v5 Thai / Server, v6 Tiny. Samsung 上 v4 Mobile 的三次运行均为旧 APK (当时 Mobile 重建失败), 最终 Mobile 产物经 APK 内 libc++ 审计为 r28.2, 16 KB 运行时验证待新时段; 未重建的 14:11 旧 flavor APK 仍带旧 libc++ |
-| X3 | 重新归类 (B7) | Xiaomi 4 KB 复现相同 pc `0xc7a44`, 尺寸扫描: 宽 800-1024 且高 320/352 崩溃, 其它通过; Paddle-Lite 输入相关缺陷, 与页大小无关 |
+| X3 | 重新归类 (B7), 已修复 | Xiaomi 4 KB 复现相同 pc `0xc7a44`; 尺寸扫描的 "宽 800-1024 且高 320/352 崩溃" 实为进程首次检测小形状触发 (崩溃后进程重启造成的假象), 与页大小无关; 见下方 B7 |
 | X4 | 已补充 | `elf_layout.py` 与 `ocr_provider_smoke.py` 纳入 `tools/16kb/`; 宿主策略接受 r26b / r28c |
 | R3 | 原生 16 KB arm64 已复验 | 2026-09-12 Samsung 第三时段 (localhost:30008): 宿主 5280 + OpenCV v1.1.2, Paddle v4 Mobile/Server, v5 Thai, v6 Tiny, v3, Rapid v6/v3 (r28c donor) 全部通过; 同批产物在 Xiaomi Pad (API 35) 与 Redmi (API 33) 两台 4 KB arm64 真机回归通过; 剩余为未逐一运行的语言/flavor 变体与最终 Release 候选 (R1/R5/R6) |
 | R4 | 原生 16 KB arm64 通过 | 2026-09-12 Samsung 第三时段真实 Qwen2.5-1.5B 推理通过 (生成 3291 ms); 另在新 16 KB API 36 AVD (1811 ms), API 37 ps16k, Redmi 4 KB arm64 通过; 2.5 GB AVD 因 LOW_MEMORY 终止 (非缺陷) |
 | 版本 | 已本地提交 | 宿主 6.8.0 build 5280 (首个接受 r28c 的宿主), OpenCV 1.1.2 (build 12, 最低宿主 5280), Rapid v3/v6 1.0.2, Paddle v3-v6 1.0.2; 未推送 |
 | donor / lock | 已联动 | OpenCV AAR `f760265b…` (r28c), Rapid AAR `75f9c45d…`, Paddle AAR `8c4b410a…`, libc++ r28.2 `ab4e6c71…`, 各 provenance JSON 随仓库提交 |
+| Release 候选 | 已审计 | 2026-09-12 维护者从已提交源码 `clean assembleRelease`; 89 个 Release APK 版本 / 64 位 ELF / libc++ RELRO / 门禁 0 项问题 ([审计](evidence/page-size-16kb-release-candidates-20260912.md)); 未签名验证, 未推送 |
+| R5 / R6 | 维护者暂缓 | 宿主暂不发布到远程 GitHub, 远程 CI 与官方索引刷新在发布时再做 |
+| B7 | 已修复 | Paddle v3 v1.0.3 (`d48dac1`): 首次检测前 960x960 预热规避 Paddle-Lite 首次小形状崩溃; Pad / Redmi 4 KB 复验通过, 16 KB arm64 待下一个 Samsung 时段 ([记录](evidence/page-size-16kb-backlog-20260912.md)) |
+| B6 | 已实现 | APK Inspector v1.1.1 (`f9ff8f5`) 16 KB 就绪检查视图 + 11 项单元测试 |
+| B5 / B2 / B1 | 已记录 | 32 位不合规 14 项仅信息; 现代打包不需要; Bun 大页 JSC 候选在 Bun 仓库验证, 正式 payload 未替换 |
 
 2026-09-12 补充: Samsung 第三时段已完成最终产物 (含 Three-Stone-AI arm64) 的原生 16 KB arm64 复验, 兼容属性已重置为默认. 剩余需要维护者的事项: R1 / R2 / R5-R8 (发布源码定稿, 合并后 Runtime Kit 与用户 APK, 远程 CI, 官方索引刷新, 人工流程), 以及从已提交源码重建全部发布 flavor (未重建的 14:11 旧构建仍带旧 libc++: Paddle v4 mobileEn, v5 mobile / english / korean / latin / eslav / greek / arabic / cyrillic / devanagari / telugu / tamil, v6 small / medium).
 
@@ -121,11 +126,11 @@ Q1-Q4 已经实现, 没有代码停在等待选择的状态. 维持现状即可�
 
 | 编号 | 工作 | 当前建议 |
 | --- | --- | --- |
-| B1 | Bun x86_64 16 KB 的 WebKit/JSC 页大小假设, 需要大页 JIT 配置与上游 / 自编验证 | 由 Bun 自身 Roadmap 单独推进. 即使本 Roadmap 关闭, 也必须保留 x86_64 运行失败边界; arm64 通过不能抵消它. |
-| B2 | 宿主 / inrt 采用未压缩原生库并重做 APK Builder 的 STORED + 16 KB 对齐 / manifest / 旧模板兼容 | 维持 D1, 暂不启动. |
-| B3 | JS `device.pageSize` 公开 API | 暂不启动; 如做, 必须同步文档, d.ts 和 LSP 声明项目. |
-| B5 | 第三方 32 位库也按 16 KB 对齐 | 等上游自然升级, D8 不把它列为验收条件. |
-| B6 | APK-Inspector 增加 16 KB 分析视图 | 独立产品改进, 可另排期. |
+| B1 | Bun x86_64 16 KB 的 WebKit/JSC 页大小假设, 需要大页 JIT 配置与上游 / 自编验证 | 由 Bun 自身 Roadmap (M5) 单独推进; 2026-09-12 Bun 仓库 `3ac84ca` 的大页 JSC 候选已在 x86_64 4 KiB / 16 KiB AVD 通过, 正式 payload 未替换. 候选转正前必须保留 x86_64 运行失败边界; arm64 通过不能抵消它. |
+| B2 | 宿主 / inrt 采用未压缩原生库并重做 APK Builder 的 STORED + 16 KB 对齐 / manifest / 旧模板兼容 | 维持 D1, 不启动: 2026-09-12 实测每个 ABI 仅 3 个原生库, 约 APK 的 1% ([记录](evidence/page-size-16kb-backlog-20260912.md)). |
+| B3 | JS `device.pageSize` 公开 API | 暂不启动, 由维护者决定; 如做, 必须同步文档, d.ts 和 LSP 声明项目并按 `AGENTS.md` 递增三个关联仓库版本. |
+| B5 | 第三方 32 位库也按 16 KB 对齐 | 等上游自然升级, D8 不把它列为验收条件; 2026-09-12 全仓扫描 32 位不合规 14 项 / 64 位 0 项已记录 ([清单](evidence/page-size-16kb-backlog-20260912.md)). |
+| B6 | APK-Inspector 增加 16 KB 分析视图 | 已实现 (2026-09-12, v1.1.1 `f9ff8f5`); 真机 UI 复核可在下一个设备时段顺带完成. |
 
 B4 的无用 CMake / Ninja CI 安装步骤清理已完成, 不属于剩余事项.
 

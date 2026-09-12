@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "kind": "appendix-b-backlog",
+  "b1": {
+    "status": "candidate-in-bun-repo",
+    "note": "AutoJs6-Plugin-Bun-Runtime 3ac84ca (2026-09-12) rebuilt JSC/WTF/bmalloc from pinned WebKit 0f966e81 with USE_64KB_PAGE_BLOCK=1 and explicit JIT/DFG/FTL/Wasm-JIT/external-mimalloc settings and relinked the nine-patch Bun (x86_64 SHA-256 704cc156...3963e38). The isolated test-only .api28binder.jsc16k APK passes the 8-test Binder suite twice on native x86_64 API 36 at 4 KiB and 16 KiB pages (docs/compatibility/2026-09-12-m5-x86-16k-jsc.md). The released Bun payload is unchanged (official 1.4.0+34cbb9a40), so the plugin's x86_64 16 KB block stands until the candidate becomes a release; tracked by the Bun repo ROADMAP M5."
+  },
+  "b2": {
+    "decision": "not-warranted",
+    "measurements": [
+      {
+        "apk": "autojs6-v6.8.0-arm64-v8a.apk",
+        "apkBytes": 36285310,
+        "soCount": 3,
+        "soUncompressedBytes": 1270224,
+        "soCompressedBytes": 403943,
+        "stored": 0,
+        "largest": [
+          [
+            "lib/arm64-v8a/libc++_shared.so",
+            1253544
+          ],
+          [
+            "lib/arm64-v8a/libjackpal-termexec2.so",
+            9656
+          ],
+          [
+            "lib/arm64-v8a/libjackpal-androidterm5.so",
+            7024
+          ]
+        ]
+      },
+      {
+        "apk": "inrt-v6.8.0-arm64-v8a.apk",
+        "apkBytes": 35093627,
+        "soCount": 3,
+        "soUncompressedBytes": 1270224,
+        "soCompressedBytes": 403943,
+        "stored": 0,
+        "largest": [
+          [
+            "lib/arm64-v8a/libc++_shared.so",
+            1253544
+          ],
+          [
+            "lib/arm64-v8a/libjackpal-termexec2.so",
+            9656
+          ],
+          [
+            "lib/arm64-v8a/libjackpal-androidterm5.so",
+            7024
+          ]
+        ]
+      },
+      {
+        "apk": "autojs6-v6.8.0-universal.apk",
+        "apkBytes": 37482336,
+        "soCount": 12,
+        "soUncompressedBytes": 4535792,
+        "soCompressedBytes": 1599685,
+        "stored": 0,
+        "largest": [
+          [
+            "lib/arm64-v8a/libc++_shared.so",
+            1253544
+          ],
+          [
+            "lib/x86_64/libc++_shared.so",
+            1229808
+          ],
+          [
+            "lib/x86/libc++_shared.so",
+            1143240
+          ]
+        ]
+      }
+    ],
+    "note": "Host and inrt ship 3 native libraries per ABI (libc++_shared + 2 jackpal JNI): 1.3 MB uncompressed, 0.4 MB deflated, about 1% of the APK. useLegacyPackaging=true / extractNativeLibs=true stays; modern packaging would add ~0.9 MB per ABI to the download for ~1.3 MB less extracted storage and would force the APK-Builder-Template rewrite listed in D1. Re-evaluate only if the host native volume grows by an order of magnitude."
+  },
+  "b5": {
+    "scan": "tools/16kb/scan_alignment.py --max-apks 3 (2026-09-12 13:21)",
+    "badRows": [
+      {
+        "project": "AutoJs6",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "app/src/main/jniLibs/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6",
+        "source": "(repo files)",
+        "abi": "x86",
+        "entry": "app/src/main/jniLibs/x86/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Ace-Editor",
+        "source": "autojs6-plugin-ace-editor-v1.1.25-universal.apk",
+        "abi": "armeabi-v7a",
+        "entry": "lib/armeabi-v7a/libautojs6_luals.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Ace-Editor",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "app/src/main/jniLibs/armeabi-v7a/libautojs6_luals.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/paddleocr/PaddleLite/cxx/libs/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/paddleocr/PaddleLite/cxx/libs/armeabi-v7a/libpaddle_light_api_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/paddleocr/PaddleLite/java/libs/armeabi-v7a/libpaddle_lite_jni.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "source": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-universal.apk",
+        "abi": "armeabi-v7a",
+        "entry": "lib/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "source": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-universal.apk",
+        "abi": "armeabi-v7a",
+        "entry": "lib/armeabi-v7a/libonnxruntime4j_jni.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "source": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-armeabi-v7a.apk",
+        "abi": "armeabi-v7a",
+        "entry": "lib/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "source": "autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.2-mobile-en-armeabi-v7a.apk",
+        "abi": "armeabi-v7a",
+        "entry": "lib/armeabi-v7a/libonnxruntime4j_jni.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/ppocrv4-plugin-runtime/src/main/jniLibs/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/ppocrv5-plugin-runtime/src/main/jniLibs/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      },
+      {
+        "project": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+        "source": "(repo files)",
+        "abi": "armeabi-v7a",
+        "entry": "libs/ppocrv6-plugin-runtime/src/main/jniLibs/armeabi-v7a/libc++_shared.so",
+        "minLoadAlign": "0x1000"
+      }
+    ],
+    "bad64Bit": 0,
+    "byLibrary": [
+      [
+        "libc++_shared.so",
+        8
+      ],
+      [
+        "libautojs6_luals.so",
+        2
+      ],
+      [
+        "libonnxruntime4j_jni.so",
+        2
+      ],
+      [
+        "libpaddle_light_api_shared.so",
+        1
+      ],
+      [
+        "libpaddle_lite_jni.so",
+        1
+      ]
+    ],
+    "note": "All misaligned entries are 32-bit (armeabi-v7a / x86): NDK r28.2 libc++_shared.so, ONNX Runtime libonnxruntime4j_jni.so, Paddle-Lite libpaddle_light_api_shared.so / libpaddle_lite_jni.so and the self-built libautojs6_luals.so of Ace Editor. Android 16 KB devices only run 64-bit code, so these rows have no runtime effect; they stay informational until upstreams ship 16 KB 32-bit builds (libautojs6_luals.so could be relinked with -z max-page-size=16384 if ever wanted)."
+  },
+  "b6": {
+    "status": "implemented",
+    "repo": "AutoJs6-Plugin-APK-Inspector",
+    "commit": "f9ff8f5",
+    "version": "1.1.1 (build 7)",
+    "note": "PageSizeReadinessInspector reads only the ELF header + program-header table (<= 64 KiB per entry, streamed) of every arm64-v8a / x86_64 / riscv64 library in a directly inspected APK or AAB, verifies PT_LOAD alignment >= 16 KB and, when the manifest declares extractNativeLibs=\"false\", the ZIP data offsets of stored libraries via the package's own central directory. Verdicts READY / NOT_READY / UNVERIFIED / NO_64BIT_LIBRARIES / NOT_EVALUATED (nested container APKs) are rendered in the native-library section, the host file-information summary and (NOT_READY) the findings section; 17 strings x 11 locales; PageSizeReadinessInspectorTest (11 tests) plus the existing archive / partition suites pass; ManifestSummary gained extractNativeLibs."
+  },
+  "b7": {
+    "status": "fixed",
+    "repo": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+    "commit": "d48dac1",
+    "version": "1.0.3 (build 39)",
+    "rootCause": "The bundled Paddle-Lite crashes (SIGSEGV / SEGV_ACCERR in a conv worker thread, pc 0xc7a44 / 0xc7a40 / 0xc7930 / 0x11f2cc in libpaddle_light_api_shared.so) when the FIRST detector run of a process has a short input after DetResizeImg (1000x320 -> 256x960, 640x320 -> 320x640, 1000x300 -> 288x960 ...). Once a large shape (1000x640 -> 576x960, reference 608x928, or 960x960) has run first, every later shape passes. The earlier size sweep looked size-dependent only because crashed processes restarted and the passing sizes ran in a warmed process.",
+    "fix": "OCR_PPredictor::warm_up_det() runs infer_det once on a 960x960 white cv::Mat before the first real detection (libs/paddleocr/src/main/cpp/ocr_ppredictor.{h,cpp}); cost ~120 ms on Xiaomi Pad, ~450 ms on Redmi, once per process.",
+    "receipts": [
+      {
+        "label": "b7-pad4k-paddle-v3-1000x320",
+        "note": "旧 v1.0.1 APK, 进程已被 07:41 的 1000x640 / 参考图预热",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "1000x320",
+            "ok": true,
+            "milliseconds": 2680
+          }
+        ],
+        "receiptSha256": "932399f13ef3c89b28ad467171acb8c2dd636897fa4e4be4cb449032201897b9"
+      },
+      {
+        "label": "b7-pad4k-paddle-v3-crash-set",
+        "note": "旧 APK, 每个尺寸都是新进程的首次调用 (崩溃后进程重启)",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": false,
+        "results": [
+          {
+            "size": "960x320",
+            "ok": false,
+            "milliseconds": 3420
+          },
+          {
+            "size": "992x320",
+            "ok": false,
+            "milliseconds": 1478
+          },
+          {
+            "size": "1024x320",
+            "ok": false,
+            "milliseconds": 1526
+          },
+          {
+            "size": "800x320",
+            "ok": false,
+            "milliseconds": 1502
+          },
+          {
+            "size": "1000x352",
+            "ok": false,
+            "milliseconds": 1511
+          },
+          {
+            "size": "1000x300",
+            "ok": false,
+            "milliseconds": 1554
+          }
+        ],
+        "receiptSha256": "8303d682bba5f4d2f870a4590c80cc6af4474e479440074c62fc5735c7612f3f"
+      },
+      {
+        "label": "b7-t1-large-first",
+        "note": "旧 APK, force-stop 后先 1000x640 再各崩溃尺寸",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "1000x640",
+            "ok": true,
+            "milliseconds": 2813
+          },
+          {
+            "size": "1000x320",
+            "ok": true,
+            "milliseconds": 557
+          },
+          {
+            "size": "960x320",
+            "ok": true,
+            "milliseconds": 545
+          },
+          {
+            "size": "800x320",
+            "ok": true,
+            "milliseconds": 540
+          },
+          {
+            "size": "1000x352",
+            "ok": true,
+            "milliseconds": 546
+          },
+          {
+            "size": "1000x300",
+            "ok": true,
+            "milliseconds": 497
+          }
+        ],
+        "receiptSha256": "c998279f7a190193f8fbcb6907ec971624d77d239aa28ba82812546c50be5165"
+      },
+      {
+        "label": "b7-t2-small-first",
+        "note": "旧 APK, force-stop 后首次即 1000x320",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": false,
+        "results": [
+          {
+            "size": "1000x320",
+            "ok": false,
+            "milliseconds": 3522
+          }
+        ],
+        "receiptSha256": "67a3e0522eb01960648ef15fd4aad3b726119d738754e00872d13752902bfa4e"
+      },
+      {
+        "label": "b7-t3-mid-first",
+        "note": "旧 APK, force-stop 后首次即 640x320",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": false,
+        "results": [
+          {
+            "size": "640x320",
+            "ok": false,
+            "milliseconds": 3388
+          },
+          {
+            "size": "960x320",
+            "ok": false,
+            "milliseconds": 1557
+          }
+        ],
+        "receiptSha256": "6f78417f851921dcd754bd8ef083bc89937b8a46f2e41ddababb5a7401e873a5"
+      },
+      {
+        "label": "b7-t4-small-first-fulllog",
+        "note": "旧 APK, 同 T2 并抓取完整 logcat (det shape 256,960 -> infer Run start -> SIGSEGV)",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": false,
+        "results": [
+          {
+            "size": "1000x320",
+            "ok": false,
+            "milliseconds": 3508
+          }
+        ],
+        "receiptSha256": "5ed75c0fab2ab412565aab00ad6385cd6c7e5323597eafc0d7efeab25ccb5e8d"
+      },
+      {
+        "label": "b7-t5-960sq-first",
+        "note": "旧 APK, force-stop 后首次 960x960 再 1000x320 / 640x320",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "960x960",
+            "ok": true,
+            "milliseconds": 2127
+          },
+          {
+            "size": "1000x320",
+            "ok": true,
+            "milliseconds": 638
+          },
+          {
+            "size": "640x320",
+            "ok": true,
+            "milliseconds": 573
+          }
+        ],
+        "receiptSha256": "5f7d2a0d0ed115aee4e4ab857d01a689525e2e48c7c234c491e9668416ccfd42"
+      },
+      {
+        "label": "b7fix-968e9f18-small-first",
+        "note": "v1.0.3 (预热修复), Xiaomi Pad, force-stop 后首次 1000x320",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "1000x320",
+            "ok": true,
+            "milliseconds": 2959
+          }
+        ],
+        "receiptSha256": "2d20eba6bdc989045605351a5a28b37ffead3b94ac86c457208744b9fa1e35ac"
+      },
+      {
+        "label": "b7fix-968e9f18-crash-set",
+        "note": "v1.0.3, Xiaomi Pad, 原崩溃尺寸集 + 1000x640",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "640x320",
+            "ok": true,
+            "milliseconds": 2146
+          },
+          {
+            "size": "960x320",
+            "ok": true,
+            "milliseconds": 576
+          },
+          {
+            "size": "992x320",
+            "ok": true,
+            "milliseconds": 625
+          },
+          {
+            "size": "1024x320",
+            "ok": true,
+            "milliseconds": 508
+          },
+          {
+            "size": "800x320",
+            "ok": true,
+            "milliseconds": 528
+          },
+          {
+            "size": "1000x352",
+            "ok": true,
+            "milliseconds": 511
+          },
+          {
+            "size": "1000x300",
+            "ok": true,
+            "milliseconds": 513
+          },
+          {
+            "size": "1000x640",
+            "ok": true,
+            "milliseconds": 552
+          }
+        ],
+        "receiptSha256": "4cf78a62a80751ee6ede61e33d43689eb044e0491dfd5d39812f19dcbe841fa3"
+      },
+      {
+        "label": "b7fix-968e9f18-reference",
+        "note": "v1.0.3, Xiaomi Pad, 参考图",
+        "serial": "968e9f18",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "840x572",
+            "ok": true,
+            "milliseconds": 2108
+          }
+        ],
+        "receiptSha256": "e8582c46a2e0b2be8385618910fd788beb937a24ec57b787717943a573f9d8f0"
+      },
+      {
+        "label": "b7fix-bek749scrwv4wo8h-small-first",
+        "note": "v1.0.3, Redmi, force-stop 后首次 1000x320",
+        "serial": "bek749scrwv4wo8h",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "1000x320",
+            "ok": true,
+            "milliseconds": 5042
+          }
+        ],
+        "receiptSha256": "515da1a8ea4b8ac31fdb2498734a099c73caede008148b86a70ff5c6b71eb202"
+      },
+      {
+        "label": "b7fix-bek749scrwv4wo8h-crash-set",
+        "note": "v1.0.3, Redmi, 原崩溃尺寸集 + 1000x640",
+        "serial": "bek749scrwv4wo8h",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "640x320",
+            "ok": true,
+            "milliseconds": 3050
+          },
+          {
+            "size": "960x320",
+            "ok": true,
+            "milliseconds": 1192
+          },
+          {
+            "size": "992x320",
+            "ok": true,
+            "milliseconds": 1156
+          },
+          {
+            "size": "1024x320",
+            "ok": true,
+            "milliseconds": 1156
+          },
+          {
+            "size": "800x320",
+            "ok": true,
+            "milliseconds": 1205
+          },
+          {
+            "size": "1000x352",
+            "ok": true,
+            "milliseconds": 1210
+          },
+          {
+            "size": "1000x300",
+            "ok": true,
+            "milliseconds": 1190
+          },
+          {
+            "size": "1000x640",
+            "ok": true,
+            "milliseconds": 1320
+          }
+        ],
+        "receiptSha256": "ccf1090913f170ffacae56938327494fb91b3ccbb751305733767c12618d8a77"
+      },
+      {
+        "label": "b7fix-bek749scrwv4wo8h-reference",
+        "note": "v1.0.3, Redmi, 参考图",
+        "serial": "bek749scrwv4wo8h",
+        "pageSize": 4096,
+        "ok": true,
+        "results": [
+          {
+            "size": "672x456",
+            "ok": true,
+            "milliseconds": 2842
+          }
+        ],
+        "receiptSha256": "b25178bc4391e83c018d94ca208c6563e7cf65e2086fd1d067b85f18cdd4e0c4"
+      }
+    ]
+  },
+  "releaseCandidates": "page-size-16kb-release-candidates-20260912.{md,json}: 89 Release APKs from committed sources, 0 problems, one r28.2 libc++ per 64-bit ABI"
+}

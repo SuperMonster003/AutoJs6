@@ -355,7 +355,7 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 
 - [x] X1 (2026-09-12): `c++_shared` 打包 libc++, 独立插件路径在 Samsung 16 KB (两个时段) / ps16k / Redmi 4 KB 复验通过 (r28c donor 最终产物见第三时段); 用户 APK 路径上一轮已通过.
 - [x] X2 (2026-09-12): r28.2 libc++ 替换, 根因为旧库 RELRO 末端与可写数据同页 (`tools/16kb/elf_layout.py`); v4 Server / v5 Thai / v6 Tiny 在 Samsung 复验, 其它变体共用同一 libc++ 与 ORT 代码, 在 Redmi 4 KB 验证 v4 Mobile / v5 Server.
-- [x] X3 (2026-09-12): 4 KB 对照复现相同崩溃并完成尺寸扫描, 归类为 Paddle-Lite 输入相关缺陷 (B7), 不阻塞 16 KB 验收.
+- [x] X3 (2026-09-12): 4 KB 对照复现相同崩溃并完成尺寸扫描, 归类为 Paddle-Lite 输入相关缺陷 (B7), 不阻塞 16 KB 验收; 同日确认真正触发条件为进程首次检测小形状, 已在 Paddle v3 v1.0.3 以预热修复 (见附录 B7).
 - [x] X4 (2026-09-12): 新增 `tools/16kb/elf_layout.py` (RELRO / 可写数据页布局判定, 已区分旧 libc++ RISK 与 r28.2 OK) 与 `tools/16kb/ocr_provider_smoke.py` (真实 provider 调用回归, 收据 + logcat); 原生依赖完整性由 `c++_shared` 打包与真实调用共同覆盖.
 
 详细失败边界, 默认值, 发布顺序, 手动测试与 backlog 见 [维护者收尾清单](page-size-16kb-maintainer-checklist.md), 具体测试和产物见 [Samsung 补验](evidence/page-size-16kb-samsung-20260911.md).
@@ -378,13 +378,13 @@ P5 验收: 索引 JSON 含全部官方插件的页对齐字段; 插件中心标�
 
 ## 附录 B: Backlog (不阻塞 P0-P6)
 
-- B1 Bun x86_64 在 16 KB 设备上 JSC 中止 (上游 WebKit `CeilingOnPageSize`): 需以大页 JIT 配置重编 Bun; arm64 已通过. 由 Bun 插件仓库自身 ROADMAP 跟踪.
-- B2 现代打包评估 (D1 的替代路径): 宿主 / inrt 改 `useLegacyPackaging=false` 的收益 (安装体积 / 启动) 与代价 (APK-Builder-Template 改为 STORED + 16 KB 对齐写入, `extractNativeLibs=false` 改写, 旧模板兼容); 仅当宿主原生库体量显著增长时重新评估.
-- B3 在 `device` 模块暴露 `pageSize` (需同步文档 / d.ts / LSP 声明, 触发 `AGENTS.md` 关联项目流程).
+- B1 Bun x86_64 在 16 KB 设备上 JSC 中止 (上游 WebKit `CeilingOnPageSize`): Bun 仓库 2026-09-12 (`3ac84ca`) 以 `USE_64KB_PAGE_BLOCK=1` 与显式 JIT 配置重编 pinned WebKit 并重链九补丁 Bun, 独立 test-only APK 在原生 x86_64 API 36 的 4 KiB / 16 KiB AVD 各两轮 8/8 Binder 通过; 正式 payload 仍为官方 1.4.0, 候选转正与最终 Release 验收由 Bun 仓库 ROADMAP M5 跟踪. arm64 已通过.
+- B2 现代打包评估 (D1 的替代路径): 2026-09-12 实测宿主 / inrt 每个 ABI 仅 3 个原生库 (1.3 MB 未压缩, 0.4 MB 压缩, 约 APK 的 1%), 改 `useLegacyPackaging=false` 的收益不足以抵消 APK-Builder-Template 的 STORED + 16 KB 对齐写入改造, 维持 D1; 仅当宿主原生库体量显著增长时重新评估 ([记录](evidence/page-size-16kb-backlog-20260912.md)).
+- B3 在 `device` 模块暴露 `pageSize` (需同步文档 / d.ts / LSP 声明, 触发 `AGENTS.md` 关联项目流程与三个关联仓库的版本递增); 2026-09-12 未做, 由维护者决定是否另立.
 - B4 已完成: 宿主 CI 的无用 CMake 3.10.2 / Ninja 安装步骤已移除, 构建本地通过.
-- B5 32 位第三方库 (MLKit / ORT / Chaquopy / NDK libc++) 的对齐, 仅当上游提供时跟进.
-- B6 `AutoJs6-Plugin-APK-Inspector` 增加 "APK 是否 16 KB 就绪" 的检查视图 (其 `test-fixtures/bundletool-selection` 可加 16 KB 夹具).
-- B7 Paddle v3 的 Paddle-Lite 预编译库 (`libpaddle_light_api_shared.so`, 来源未记录) 对宽 800-1024 且高 320/352 的输入在 4 KB 与 16 KB 上均 SIGSEGV (pc `0xc7a44`, `SEGV_ACCERR`); 1000 x 640 / 640 x 320 / 1000 x 300 / 944 x 640 通过. 修复需重编或更换 Paddle-Lite, 或在 JNI 侧对输入补边到安全比例; 尺寸扫描见 [第二轮证据](evidence/page-size-16kb-round2-20260912.md).
+- B5 32 位第三方库 (MLKit / ORT / Chaquopy / NDK libc++) 的对齐, 仅当上游提供时跟进. 2026-09-12 全仓扫描: 64 位 0 项不合规, 32 位 14 项 (armeabi-v7a 的 NDK libc++, ORT JNI, Paddle-Lite, 以及 Ace Editor 自编 `libautojs6_luals.so` 的 armeabi-v7a / x86); 16 KB 设备只运行 64 位代码, 无运行时影响 ([清单](evidence/page-size-16kb-backlog-20260912.md)).
+- B6 `AutoJs6-Plugin-APK-Inspector` 增加 "APK 是否 16 KB 就绪" 的检查视图: 2026-09-12 已实现 (v1.1.1, `f9ff8f5`): 只读取 64 位库的 ELF 头 / 程序头表判定 `PT_LOAD` 对齐, `extractNativeLibs="false"` 时核对 ZIP 数据偏移, 结论进入原生库分区 / 宿主文件信息摘要 / 发现分区, 11 项单元测试; `test-fixtures/bundletool-selection` 的 16 KB 夹具未加 (单元测试以合成 ELF 覆盖) ([记录](evidence/page-size-16kb-backlog-20260912.md)).
+- B7 Paddle v3 的 Paddle-Lite 预编译库 (`libpaddle_light_api_shared.so`) 崩溃已于 2026-09-12 修复 (v1.0.3, `d48dac1`): 真正的触发条件是进程首次检测输入较矮 (1000x320 -> 256x960, 640x320 等), 先跑过大形状后任何尺寸都正常; JNI 侧在首次检测前用 960x960 空白图预热检测器, Xiaomi Pad / Redmi 4 KB 上原崩溃尺寸全部通过, 原生 16 KB arm64 复验待下一个 Samsung 时段 ([记录](evidence/page-size-16kb-backlog-20260912.md); 旧的尺寸扫描见 [第二轮证据](evidence/page-size-16kb-round2-20260912.md)).
 
 ## 附录 C: 本次采用的执行默认值
 
@@ -488,3 +488,8 @@ Q1-Q4 没有收到新的明确回答. 本次根据部署授权采用下列推荐
 - 最终 r28c 产物在原生 16 KB arm64 全部通过: 宿主 5280 + OpenCV v1.1.2 宿主测试 2/2, Paddle v4 Mobile (修复后 libc++ 的首次 16 KB 运行) / v4 Server (内存映射 ORT, 不再 OOM, 含参考图) / v5 Thai / v6 Tiny / v3 (1000 x 640 + 参考图), Rapid v6/v3 (r28c donor), Three-Stone-AI 真实 Qwen2.5-1.5B 推理 (生成 3291 ms). 新 AVD 补齐了 2.5 GB AVD 的 Three-Stone LOW_MEMORY 缺口. 详见 [第二轮证据](evidence/page-size-16kb-round2-20260912.md).
 - 收尾将 `bionic.linker.16kb.app_compat.enabled` 与 `pm.16kb.app_compat.disabled` 重置为默认 (捕获原值的链在 RDB 掉线时已死, RDB 设备归还时亦会重置); 测试 APK 保留. 剩余仅发布类事项 R1 / R2 / R5-R8 与未重建的旧 flavor.
 - Xiaomi Pad 重连后 USB 传输恢复, 同一批最终产物在其上 (API 35, 4 KB arm64) 全部通过 (`pad4k-*` 收据, 见第二轮证据), 与 Redmi 一起构成两台 4 KB arm64 真机回归. 未重建的 14:11 旧 flavor: Paddle v4 mobileEn, v5 mobile / english / korean / latin / eslav / greek / arabic / cyrillic / devanagari / telugu / tamil, v6 small / medium; 发布前须从已提交源码重建全部 flavor (R1 / R5).
+
+### 2026-09-12 附录 B 收尾与 Release 候选审计
+
+- 维护者提交全部插件工作区并对宿主与各插件执行 `./gradlew clean assembleRelease`; 独立审计 89 个 Release APK (宿主 app / inrt, OpenCV, Rapid v3/v6, Paddle v3-v6 全部 flavor, Three-Stone-AI, Bun): 版本号, 64 位 ELF 对齐, libc++ RELRO 布局与门禁报告 0 项问题, 每个 64 位 ABI 只剩一个 r28.2 libc++ 二进制 ([审计](evidence/page-size-16kb-release-candidates-20260912.md)). 宿主暂不发布到 GitHub, R5 / R6 相关项暂缓.
+- B7 修复并复验 (Paddle v3 v1.0.3), B6 实现 (APK Inspector v1.1.1), B5 / B2 实测记录, B1 记录 Bun 仓库的大页 JSC 候选状态; B3 留给维护者. 详见 [附录 B 记录](evidence/page-size-16kb-backlog-20260912.md).
