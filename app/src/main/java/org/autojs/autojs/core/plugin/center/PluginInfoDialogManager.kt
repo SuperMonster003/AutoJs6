@@ -210,7 +210,7 @@ object PluginInfoDialogManager {
     }
 
     private fun resolveInitialDialogIcon(context: Context, info: PluginInfoBase): Drawable {
-        info.icon?.let { return toDialogCircularIcon(context, it) }
+        info.icon?.let { return toDialogCircularIcon(context, PluginInstalledIconResolver.forCurrentMode(it)) }
         val remoteUrl = info.remoteIconUrl?.takeIf { it.isNotBlank() }
         val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl, info.remoteNightIconUrl) ?: remoteUrl
         preferredUrl

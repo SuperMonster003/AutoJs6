@@ -300,6 +300,7 @@
 * `Corrección` Los iconos de los botones del Centro de plugins quedaban demasiado alejados de sus etiquetas tras simplificar el diseño de las filas
 * `Corrección` El Centro de plugins conservaba fechas de septiembre como `Sept 13, 2026` en lugar de normalizarlas a `yyyy-MM-dd`
 * `Corrección` El Centro de plugins podía mostrar un icono remoto obsoleto en lugar del icono instalado actualmente cuando un plugin no tenía una URL de icono en línea
+* `Corrección` Al cambiar entre los modos claro y oscuro del Centro de plugins podía aparecer brevemente un icono instalado del tema anterior; ambas variantes se preparan en segundo plano y se selecciona el tema actual desde la primera presentación
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
 * `Corrección` El fallo del proceso de un solo plugin local podía dejar completamente vacía la lista del Centro de plugins
 * `Corrección` Al volver al Centro de plugins desde otra pantalla o desde segundo plano, la actualización concurrente podía eliminar temporalmente los plugins SDK heredados instalados o sustituirlos por entradas de índice desactivadas, reordenando filas, reenlazando interruptores y cambiando la posición de desplazamiento

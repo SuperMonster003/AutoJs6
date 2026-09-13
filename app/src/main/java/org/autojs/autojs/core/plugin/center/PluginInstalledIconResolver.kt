@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.DrawableWrapper
 import android.util.DisplayMetrics
 import androidx.core.graphics.drawable.toBitmap
 import org.autojs.autojs.util.ViewUtils
@@ -34,21 +35,41 @@ object PluginInstalledIconResolver {
             context.createPackageContext(appInfo.packageName, 0)
         }.getOrNull()
 
-        val resolved = if (iconResId == null || packageContext == null) {
-            fallbackIcon()
-        } else {
-            resolveThemedIcon(context, packageContext, iconResId) ?: fallbackIcon()
+        if (iconResId == null || packageContext == null) {
+            return fallbackIcon()?.rasterizeForPluginCenter(context)
         }
-        return resolved?.rasterizeForPluginCenter(context)
+
+        // A retained ViewModel can replay this snapshot before discovery finishes after a
+        // theme change. Prepare both modes here so that first bind needs no package I/O.
+        // zh-CN: 主题切换后, 保留的 ViewModel 可能在重新发现完成前重放此快照.
+        // 在后台准备两种模式, 使首次绑定无需访问包资源即可使用当前主题.
+        val resolvedDay = resolveThemedIcon(context, packageContext, iconResId, nightModeEnabled = false)
+        val resolvedNight = resolveThemedIcon(context, packageContext, iconResId, nightModeEnabled = true)
+        val daySource = resolvedDay ?: resolvedNight ?: fallbackIcon() ?: return null
+        val nightSource = resolvedNight ?: daySource
+        val dayIcon = daySource.rasterizeForPluginCenter(context)
+        val nightIcon = if (daySource === nightSource ||
+            daySource.constantState?.let { it === nightSource.constantState } == true
+        ) {
+            dayIcon
+        } else {
+            nightSource.rasterizeForPluginCenter(context)
+        }
+        return if (dayIcon === nightIcon) dayIcon else ThemedInstalledIcon(dayIcon, nightIcon)
     }
+
+    /** Selects an already prepared raster without package loading or drawing on the UI thread. */
+    fun forCurrentMode(icon: Drawable): Drawable =
+        (icon as? ThemedInstalledIcon)?.forNightMode(ViewUtils.isNightModeEnabled) ?: icon
 
     private fun resolveThemedIcon(
         context: Context,
         packageContext: Context,
         iconResId: Int,
+        nightModeEnabled: Boolean,
     ): Drawable? {
         val packageConfig = Configuration(packageContext.resources.configuration)
-        val hostNightMode = if (ViewUtils.isNightModeEnabled) {
+        val hostNightMode = if (nightModeEnabled) {
             Configuration.UI_MODE_NIGHT_YES
         } else {
             Configuration.UI_MODE_NIGHT_NO
@@ -79,5 +100,12 @@ object PluginInstalledIconResolver {
         return runCatching {
             BitmapDrawable(context.resources, toBitmap(size, size))
         }.getOrDefault(this)
+    }
+
+    private class ThemedInstalledIcon(
+        private val dayIcon: Drawable,
+        private val nightIcon: Drawable,
+    ) : DrawableWrapper(if (ViewUtils.isNightModeEnabled) nightIcon else dayIcon) {
+        fun forNightMode(nightModeEnabled: Boolean): Drawable = if (nightModeEnabled) nightIcon else dayIcon
     }
 }

@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
+import android.content.pm.ApplicationInfo
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -7,14 +9,86 @@ import android.util.LruCache
 import android.view.ContextThemeWrapper
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.graphics.drawable.toBitmap
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PluginCenterPresentationDeviceTest {
+
+    @Test
+    fun retainedDayIconsUseNightArtworkOnTheFirstBind() {
+        assertRetainedIconFollowsTheme(initialNight = false)
+    }
+
+    @Test
+    fun retainedNightIconsUseDayArtworkOnTheFirstBind() {
+        assertRetainedIconFollowsTheme(initialNight = true)
+    }
+
+    private fun assertRetainedIconFollowsTheme(initialNight: Boolean) {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val testContext = instrumentation.context
+        val originalNight = ViewUtils.isNightModeEnabled
+        val originalAutoNight = ViewUtils.isAutoNightModeEnabled
+        val appInfo = ApplicationInfo(testContext.applicationInfo).apply {
+            icon = testContext.resources.getIdentifier("plugin_center_themed_icon", "drawable", testContext.packageName)
+        }
+        assertTrue("The test APK must contain the themed icon fixture", appInfo.icon != 0)
+        try {
+            instrumentation.runOnMainSync {
+                ViewUtils.isAutoNightModeEnabled = false
+                ViewUtils.isNightModeEnabled = initialNight
+            }
+            // Discovery happens off the UI thread. The same snapshot survives the theme change.
+            val retainedIcon = requireNotNull(PluginInstalledIconResolver.load(context, appInfo))
+            val retainedItem = PluginCenterItem(
+                title = "Themed icon fixture", packageName = appInfo.packageName, versionName = "1.0.0",
+                isInstalled = true, icon = retainedIcon,
+                iconSignature = PluginInstalledIconResolver.signatureOf(appInfo.packageName, 1L, 1L),
+            )
+            for (night in listOf(!initialNight, initialNight, !initialNight)) {
+                instrumentation.runOnMainSync {
+                    ViewUtils.isNightModeEnabled = night
+                    val configuration = Configuration(context.resources.configuration).apply {
+                        uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                            if (night) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+                    }
+                    val themed = ContextThemeWrapper(context.createConfigurationContext(configuration), context.applicationInfo.theme)
+                    val adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
+                        override fun onInstall(item: PluginCenterItem) = Unit
+                        override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) = Unit
+                        override fun onUninstall(item: PluginCenterItem) = Unit
+                        override fun onDetails(item: PluginCenterItem) = Unit
+                        override fun onUpdate(item: PluginCenterItem) = Unit
+                        override fun onSettings(item: PluginCenterItem) = Unit
+                    })
+                    val holder = adapter.onCreateViewHolder(FrameLayout(themed), 0)
+                    try {
+                        holder.bind(retainedItem)
+                        val displayed = holder.itemView.findViewById<ImageView>(R.id.icon).drawable.toBitmap(16, 16)
+                        assertEquals("The first bind must use the current theme without waiting for rediscovery",
+                            if (night) Color.BLUE else Color.RED, displayed.getPixel(8, 8))
+                    } finally {
+                        holder.recycle()
+                    }
+                }
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                // Finish persisting before the instrumentation process can be terminated.
+                Pref.putBooleanSync(R.string.key_night_mode_enabled, originalNight)
+                Pref.putBooleanSync(R.string.key_auto_night_mode_enabled, originalAutoNight)
+            }
+        }
+    }
 
     @Test
     fun versionSummariesNormalizeSeptemberOnAndroid() {

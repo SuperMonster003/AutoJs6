@@ -300,6 +300,7 @@
 * `Fix` Plugin Center action icons were spaced too far from their labels after the row layout was flattened
 * `Fix` Plugin Center left September dates such as `Sept 13, 2026` unnormalized instead of displaying `yyyy-MM-dd`
 * `Fix` Plugin Center could display a stale remote icon instead of the current installed icon when a plugin had no online icon URL
+* `Fix` Switching Plugin Center between light and dark modes could briefly display an installed icon from the previous theme; both variants are now prepared in the background and the current theme is selected on the first bind
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
 * `Fix` A single local plugin process failure could leave Plugin Center with a completely blank list
 * `Fix` Returning to Plugin Center from another screen or the background could make a concurrent refresh transiently remove installed legacy SDK plugins or replace them with disabled index-only entries, reordering rows, rebinding switches, and shifting the scroll position
