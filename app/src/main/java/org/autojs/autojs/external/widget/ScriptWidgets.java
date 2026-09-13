@@ -20,7 +20,7 @@ public class ScriptWidgets {
 
     private static final String LOG_TAG = "ScriptWidgets";
     private static final SharedPreferences widgets = GlobalAppContext.get().getSharedPreferences("ScriptWidgets", Context.MODE_PRIVATE);
-    private static final Pattern ID_PATTERN = Pattern.compile("[a-zA-Z]+_([0-9])+");
+    private static final Pattern ID_PATTERN = Pattern.compile("[a-zA-Z]+_([0-9]+)");
 
     static String getPathForAppWidgetId(int id) {
         return widgets.getString("path_" + id, null);

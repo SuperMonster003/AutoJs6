@@ -186,6 +186,7 @@
       "fix": [
         "L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours",
         "Les installations APK en arrière-plan ne pouvaient pas continuer lorsque le système bloquait la page de confirmation; l'état est désormais enregistré par session, avec reprise depuis une notification ou au retour dans l'application, même après un refus des notifications ou une recréation du processus",
+        "Les widgets de scripts pouvaient perdre leurs chemins de scripts et leurs associations de clic lors des mises à jour par lots si leurs identifiants comportaient plusieurs chiffres",
         "La lecture binaire des exemples intégrés par le bridge utilise l'encodeur base64 Okio existant sous Android 7.0 / 7.1, sans appeler une méthode Java réservée à l'API 26, pour les ressources MCP des exemples",
         "Les fichiers MCP et Shell fonctionnent sur Android 24 / 25 sans méthodes Java récentes; la suppression récursive retire les liens symboliques en préservant leurs cibles",
         "Le contrôle CI du plugin éditeur exigeait la version 1 du contrat et rejetait les hôtes prenant en charge des versions compatibles plus récentes",
