@@ -67,3 +67,26 @@ Audio `enable` / `throw` override target-dependent WIU and alarm exceptions. `di
 Run `sample/accessibility/smoke-legacy-api.js` with accessibility enabled, the screen unlocked and guard mode off. Then run [smoke-ui.js](smoke-ui.js) from AutoJs6 with overlay access enabled. It opens a script Activity, requests keyboard focus, displays an overlay and requests one MediaProjection capture. Accept the system dialog for the test activity; it checks the returned image dimensions without saving a screenshot. Console messages start with `[SDK37]`, and an unattended capture dialog times out after 60 seconds.
 
 Also open Symbols Settings, edit a symbol and verify that the keyboard appears and dismisses on Back on the old-API devices. The generic script UI probe does not exercise that activity's keyboard helper. Record the installed APK hash, compile / target SDK, device fingerprint, build type and test results together.
+
+## Dynamic loading
+
+Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
+
+```powershell
+$Sdk37Jdk = 'E:/.java/jdk-21.0.1'
+$Sdk37LegacyJdk = 'E:/.java/jdk-1.8.0_312'
+$Sdk37Sdk = 'E:/.android/sdk'
+New-Item -ItemType Directory -Force -Path build/sdk37-fixtures/classes,build/sdk37-fixtures/legacy-classes,build/sdk37-fixtures/dex | Out-Null
+& "$Sdk37Jdk/bin/javac.exe" --release 8 -d build/sdk37-fixtures/classes tools/sdk37/fixtures/DexProbe.java
+& "$Sdk37LegacyJdk/bin/javac.exe" -source 6 -target 6 -d build/sdk37-fixtures/legacy-classes tools/sdk37/fixtures/JarProbe.java
+$env:JAVA_HOME = $Sdk37Jdk
+& "$Sdk37Sdk/build-tools/37.0.0/d8.bat" --min-api 24 --output build/sdk37-fixtures/dex build/sdk37-fixtures/classes/org/autojs/sdk37/fixture/DexProbe.class
+Copy-Item build/sdk37-fixtures/dex/classes.dex build/sdk37-fixtures/sdk37-probe.dex
+& "$Sdk37Jdk/bin/jar.exe" --create --file build/sdk37-fixtures/sdk37-probe.jar -C build/sdk37-fixtures/legacy-classes org/autojs/sdk37/fixture/JarProbe.class
+```
+
+Put `sdk37-probe.dex`, `sdk37-probe.jar` and [smoke-dynamic-loading.js](smoke-dynamic-loading.js) in the same directory accessible to AutoJs6. The script calls the actual `runtime.loadDex` / `runtime.loadJar` APIs twice in one process and checks a value returned by each loaded class, covering initial loading and read-only cache reuse. Success messages begin with `[SDK37-DCL]`. On API 37, test both target 36 with `THROW_ERROR_FOR_WRITABLE_DCL` enabled and a target 37 debug APK with the override reset to its default. Repeat on an old API device.
+
+`AndroidClassLoaderRawDexDeviceTest` separately verifies that loading and reusing a raw DEX preserves both the original bytes and the read-only staged copy. Its embedded DEX comes from `fixtures/DexProbe.java` with the commands above. On API 24 / 25 the optimized output directory must differ from the input directory; ART can otherwise overwrite a raw `.dex` with its optimized output. The optimized-directory argument is unused starting with API 26.
+
+For native libraries, install compatible OpenCV and Image Quantization plugins and run `OpenCvPluginHostDeviceTest` plus `ImageQuantPluginHostDeviceTest#installedPluginLoadsAndProducesIndexedPng`. These tests exercise JNI and verify the staged file has no write mode bits. To test legacy cache repair, use a temporary AVD: record hash / size / mtime / mode of the two staged libraries, make only those files owner-writable, rerun in a fresh process, then confirm the same bytes and timestamps with read-only mode restored. Do not change cached library permissions on a user's active device.

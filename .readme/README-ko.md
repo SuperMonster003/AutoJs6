@@ -499,6 +499,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` Node bridge의 `accessibility.swipe` / `accessibility.gesture` (MCP Server와 Node 플러그인의 좌표 제스처)가 재사용된 broker 디스패치 스레드에서 두 번째 제스처부터 항상 `false` (취소)로 응답했습니다: handler가 없는 제스처 automator는 호출 스레드에 Looper를 준비하고 첫 제스처가 끝나면 종료하므로, 그 스레드의 다음 호출은 즉시 반환되고 실제 결과는 종료된 handler로 전달되었습니다; bridge는 이제 Python 호스트 broker처럼 메인 루퍼 handler를 automator에 넘깁니다
 * `수정` OpenCV 및 ImageQuant 플러그인 정책이 NDK r28c (28.2.13676358)로 빌드된 네이티브 라이브러리를 NDK 버전 불일치로 거부하여 다시 빌드한 OpenCV 플러그인 v1.1.2를 로드할 수 없던 문제 수정; 이제 r26b와 r28c 빌드를 모두 허용
 * `수정` OpenCV 및 Image Quantization 플러그인이 네이티브 라이브러리 캐시를 읽기 전용으로 설정하지 못해도 로드를 계속하던 문제, Android 17의 동적 코드 로드 제한 지원
+* `수정` Android 7.0 / 7.1의 runtime.loadDex에서 ART 최적화 출력과 입력 경로가 겹쳐 DEX 캐시가 손상되고 클래스 로드에 실패하는 문제
 * `수정` MediaProjection 브리지 캡처에서 일시적으로 프레임이 없으면 최대 6회 재시도하여, 캡처 경로가 갱신된 뒤에도 재승인 없이 연속 촬영 지원
 * `개선` 프로젝트 compileSdk를 37 (Android 17)로 높이고 SDK 마이그레이션을 위한 디버그 빌드 및 lint 검증 개선
 * `개선` 패키지 검사 항목 수를 262144개로 통일하고 대형 APK/AAB/APKS 파일을 위해 패키지, 중첩 스캔, 매니페스트 및 메타데이터 한도 확대

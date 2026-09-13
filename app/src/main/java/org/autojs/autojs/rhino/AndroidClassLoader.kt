@@ -120,9 +120,20 @@ class AndroidClassLoader internal constructor(
             throw FatalLoadingException(e)
         }
 
-        return DexClassLoader(safeDexFile.path, cacheDir.path, null, parent).also {
+        return DexClassLoader(safeDexFile.path, optimizationDirectory(), null, parent).also {
             mDexClassLoaders[safeDexFile.path] = it
         }
+    }
+
+    private fun optimizationDirectory(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return cacheDir.path
+        // Before API 26, ART derives its output name from the input basename and uses .dex.
+        // zh-CN: API 26 之前 ART 用输入文件名生成 .dex 输出, 必须与原始 DEX 所在目录分开.
+        val directory = File(cacheDir, "optimized")
+        if (!directory.isDirectory && !directory.mkdirs() && !directory.isDirectory) {
+            throw IOException("Unable to create DEX optimization directory: ${directory.path}")
+        }
+        return directory.path
     }
 
     @Throws(IOException::class, FileNotFoundException::class)
@@ -428,7 +439,7 @@ class AndroidClassLoader internal constructor(
                 throwIfInterrupted()
 
                 try {
-                    val loader = DexClassLoader(target.path, cacheDir.path, null, parent)
+                    val loader = DexClassLoader(target.path, optimizationDirectory(), null, parent)
                     throwIfInterrupted()
                     adoptedTarget = target
                     target to loader
@@ -843,7 +854,7 @@ class AndroidClassLoader internal constructor(
             throw IOException("Failed to make local D8 adoption file read-only: ${safeDexFile.path}")
         }
         throwIfInterrupted()
-        val loader = DexClassLoader(safeDexFile.path, cacheDir.path, null, parent)
+        val loader = DexClassLoader(safeDexFile.path, optimizationDirectory(), null, parent)
         throwIfInterrupted()
         mDexClassLoaders[safeDexFile.path] = loader
         try {

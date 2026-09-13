@@ -310,6 +310,7 @@
         "Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 与 Node 插件的坐标手势) 在被复用的 broker 派发线程上从第二次手势起总是应答 `false` (取消): 无 handler 的手势 automator 会在调用线程上准备 Looper 并在首个手势完成后退出它, 该线程上的下一次调用立即返回, 真正的结果被投递到已死的 handler; bridge 现在与 Python 宿主 broker 一样把主循环 handler 交给 automator",
         "OpenCV 与 ImageQuant 插件策略将以 NDK r28c (28.2.13676358) 构建的原生库判定为原生 NDK 版本不匹配, 导致重编后的 OpenCV 插件 v1.1.2 无法加载; 现同时接受 r26b 与 r28c 构建",
         "OpenCV 与 Image Quantization 插件在原生库缓存只读设置失败后仍尝试加载的问题, 兼容 Android 17 的动态代码加载限制",
+        "Android 7.0 / 7.1 的 runtime.loadDex 因 ART 优化输出与输入路径重合, 损坏 DEX 缓存并导致类加载失败的问题",
         "MediaProjection 桥接截图遇到暂时空帧时最多重试 6 次, 支持捕获管线刷新后的连续截图, 无需再次申请授权"
       ],
       "improvement": [

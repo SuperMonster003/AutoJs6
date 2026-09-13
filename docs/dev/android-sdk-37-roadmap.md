@@ -3,7 +3,7 @@
 本文是 AutoJs6 宿主 (含 inrt 打包模板与仓内 modules / plugin-api / test-apps) 以及同目录 42 个官方插件仓库把 `compileSdk` / `targetSdk` 从 36 升到 37 的可执行状态表.
 以 2026-09-13 的本地代码快照 (宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`) 与同日的 [探针记录](evidence/android-sdk-37-probe-20260913.md) (compileSdk 37 探针编译, API 37 模拟器 `dumpsys platform_compat` 清单) 为起点, 每个条目均可独立 Check 并落地.
 
-2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后已完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md). 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, 本次 release 冒烟不构成 R8 优化验证. P2-P6 尚未实施.
+2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后已完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 P2.3 动态加载只读适配, 见 [P2.3 实施记录](evidence/android-sdk-37-p23-20260913.md). 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 尚未实施.
 
 使用方式:
 
@@ -86,7 +86,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | --- | --- | --- | --- | --- |
 | I1 | 本地网络权限 `android.permission.ACCESS_LOCAL_NETWORK` (VERIFIED): targetSdk >= 37 默认阻断到局域网地址的出站 TCP / UDP, 入站 TCP accept, mDNS `.local` 解析; targetSdk <= 36 随 `INTERNET` 隐式授予; 同一 profile 内回环不受此权限限制. 跨 profile 的回环在 Android 17 上另受限制, 与 targetSdk 无关 ([官方说明](https://developer.android.com/about/versions/17/behavior-changes-all#block-cross-profile-loopback-traffic)) | 权限系统, 非兼容开关 (`RESTRICT_LOCAL_NETWORK` 仍为 disabled, 仅测试用); 跨 profile 另测 | VS Code 扩展连接两种模式 (`pluginclient/JsonSocketServer.kt:24` `ServerSocket`, `pluginclient/JsonSocketClient.kt:64-65` 连接电脑); 脚本 `http.*` / `web.*` / `$web.newWebSocket` (`runtime/api/augment/web/Web.kt`, `core/web/WebSocket.kt`); MQTT (`org.eclipse.paho.android.service.MqttService`); Node 桥 (`engine/NodeBridgeProtocol.kt` 的 `newWebSocket`); 用户脚本自建 socket | P2.1 |
 | I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务; targetSdk 37 的后台路径还需 while-in-use 能力, 但精确闹钟授权 + `USAGE_ALARM` 可豁免 WIU 条件. 播放 / 音量调用可静默失败, 焦点请求返回 `AUDIOFOCUS_REQUEST_FAILED`; `throw` 测试模式比默认规则更严 ([官方说明](https://developer.android.com/about/versions/17/changes/bg-audio)) | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本在 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 下运行 | P2.2 |
-| I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | `core/plugin/opencv/OpenCvPluginHost.kt:227-229` 与 `core/plugin/imagequant/ImageQuantPluginHost.kt:229-231` 在 staging 后直接 `System.load(staged.file)`; DEX 路径 `rhino/AndroidClassLoader.kt:93-122` 已复制到缓存并 `setReadOnly()` (API 34 先例), `core/plugin/editor/AceEditorPluginHost.kt:321` 以插件 APK 路径构造 `PathClassLoader` (系统只读路径) | P2.3 |
+| I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | OpenCV / ImageQuant stager 原已尝试 `setWritable(false, false)`, 但忽略结果; P2.3 改为在写入临时文件前及返回最终文件前强制验证只读, 修复旧缓存. `AndroidClassLoader` 的 DEX 已有只读处理, 本轮另修复 API 24 / 25 优化输出覆盖原始 DEX; Ace Editor 从已安装的插件 APK 构造 `PathClassLoader` | P2.3 (完成, 见实施记录) |
 | I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 与 `LOOPER_CLEARS_THREAD_INTERRUPTED`, `OVERRIDDEN_THREAD_START_METHOD` (名称 VERIFIED, 语义 UNVERIFIED): 公开 API 不变, 反射 `mMessages` 恒为 null; Looper 派发前清除中断标志; 覆写 `Thread.start()` 的子类行为变化 | target 37 | 脚本引擎的 Looper 体系: `core/looper/Loopers.kt:20-25` (公开 `IdleHandler`), `core/looper/MainThreadProxy.java:68,86`, `core/looper/TimerThread.kt:74-76` (覆写 `interrupt()`), `exit()` / `threads.*` / `sleep()` 的中断语义 (127 处 `interrupt` / `isInterrupted`); 8 个含 `start()` 方法的文件需筛出 Thread 子类; 用户脚本对 Looper 内部的反射 | P2.4 |
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); `ASM_RESTRICTIONS` 在本镜像为 target 37 门控且未标 disabled, 行为待核验; BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `ui/main/scripts/AndroidPackageSessionInstaller.kt:173,176` (`MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED`), `external/shortcut/ShortcutManager.java:46` 与 `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163` (`requestPinShortcut(IntentSender)`), `ui/main/drawer/DrawerFragment.kt:160` (`StartIntentSenderForResult`); 脚本 `app.launch` / `app.startActivity` 从后台启动 | P2.5 |
 | I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); NSC 可按域关闭 (`<certificateTransparency enabled="false"/>`, `<domainEncryption>`) | target 37 | `network_security_config.xml`; 脚本访问私有 CA / 自签名服务器与企业 TLS 代理; 用户安装 CA 是否豁免 CT 为 UNVERIFIED | P2.6 |
@@ -141,7 +141,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | --- | --- | --- | --- | --- |
 | P0 | 基线与工具 | 无 | 宿主 | 完成 (2026-09-13): 覆盖开关, 分发拒绝, compat 工具, 有效 lint 基线 |
 | P1 | 宿主 compileSdk 37 | P0 | 宿主 | 本地实现 / 构建 / 测试 / 冒烟完成; lint 零增量但有既有错误, 远程 CI 待验证 |
-| P2 | 宿主 targetSdk 37 行为变更适配 (target 仍为 36) | P0.2 (覆盖开关), P1 | 宿主 | 未开始 |
+| P2 | 宿主 targetSdk 37 行为变更适配 (target 仍为 36) | P0.2 (覆盖开关), P1 | 宿主 | 进行中: P2.3 已完成, 其余条目待实施 |
 | P3 | 宿主 targetSdk 37 切换 (app + inrt) | P2 全部 | 宿主, APK-Builder-Template (只读验证) | 未开始 |
 | P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 未开始 |
 | P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案 | 42 个插件仓库 | 未开始 |
@@ -212,10 +212,11 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.3 动态加载只读 (I3)
 
-- [ ] `OpenCvPluginHost.stageCandidate` / `ImageQuantPluginHost` staging 完成后对 `.so` 调用 `setReadOnly()` (失败时抛结构化错误, 复用 16 KB Roadmap P1.5 的错误码模式), 再 `System.load`; 已存在的旧 staged 文件在校验时补只读. (SOURCE; JVM: staging 策略测试; DEVICE-37: `am compat enable THROW_ERROR_FOR_WRITABLE_DCL` 下 OpenCV 与量化插件加载通过)
-- [ ] 复核其余动态加载点: `rhino/AndroidClassLoader.loadDex` (已只读), `AceEditorPluginHost` (`PathClassLoader` 指向插件 APK), Node / Lua / QuickJS / Python 宿主侧是否有 staging 到可写目录后加载的路径 (grep `System.load(` 仅 2 处, `DexClassLoader` 3 处). (SOURCE: 复核结论写入本条)
-- [ ] 脚本 API `runtime.loadDex` / `runtime.loadJar` 在 `THROW_ERROR_FOR_WRITABLE_DCL` 下通过. (DEVICE-37)
-- [ ] changelog `fix`. (DOCS)
+- [x] OpenCV / ImageQuant stager 强制验证只读设置的返回值与 `canWrite()`: 临时文件先打开写入句柄, 再设只读并写入, 发布后再次校验; 命中旧缓存时也修复并校验. 失败复用各自 `NATIVE_LIBRARY_EXTRACTION_FAILED`, 不再交给 `System.load` 才发现. 原有代码已尝试去除写权限, 本项修复的是忽略失败结果的缺口. (SOURCE: `a784273d2`; JVM: 38/38; DEVICE-37: target 36 + `THROW_ERROR_FOR_WRITABLE_DCL`, 首次及旧缓存两轮各 3/3, target 37 默认行为 3/3; DEVICE: API 24 3/3)
+- [x] 其余加载点复核: `app/src/main` 的 `System.load` 仅上述两处; `AndroidClassLoader` 有 3 个 `DexClassLoader` 构造点; Ace Editor 读取已安装的 APK; Node / Lua / QuickJS / Bun / Python 宿主侧为 Binder 调用, 未发现同类原生库 staging. 仓内 Paddle `OpenCLGuard` 另有一个 `System.load`, 仅尝试固定系统 / vendor / odm / apex 库路径. 插件进程内部仍由 P5 逐仓核验. (SOURCE: [调用点与边界](evidence/android-sdk-37-p23-20260913.md#调用点复核))
+- [x] 实际脚本 `runtime.loadDex` / `runtime.loadJar` 在 API 37 target 36 + `THROW_ERROR_FOR_WRITABLE_DCL` 与 target 37 默认行为下通过; `tools/sdk37/smoke-dynamic-loading.js` 补充同一进程首次加载 / 缓存复用探针. (DEVICE-37: [测试矩阵](evidence/android-sdk-37-p23-20260913.md#设备验证))
+- [x] 旧系统回归发现并修复 API 24 / 25 原始 DEX 输入与 ART 优化输出重合: 3 个构造点统一使用独立 `optimized` 子目录, API 26+ 保持原路径. API 24 / 37 的 `AndroidClassLoaderRawDexDeviceTest` 各 1/1, 检查两次加载后的原始 / 缓存字节和只读状态; API 24 实际 DEX / JAR 两轮调用通过. Java 8 JAR 在旧系统内置编译器中的既有限制单列于证据, 不作为加载适配通过的推论. (SOURCE; ANDROID_BUILD; DEVICE; DEVICE-37)
+- [x] 两项 `fix` 日志分别写入当前版本 10 语言 JSON, 已运行 `.python/generate_markdown.py` 更新 README / CHANGELOG. 无 JS API 签名或权限模型变化, 无需同步文档 / d.ts 关联仓库. (DOCS: [P2.3 实施记录](evidence/android-sdk-37-p23-20260913.md))
 
 ### P2.4 Looper / 线程 (I4)
 
@@ -372,7 +373,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ### P5.3 独立进程运行时插件 (NodeJs, Bun, Python, Lua, QuickJS, TypeScript-Engine, Java-Runtime, Kotlin-Runtime, DEX-Compiler, R8-Compiler)
 
-- [ ] 通用条目; 动态加载只读: Node 的 `.node` 原生扩展与用户项目内的 `.so`, Bun 的 `libbun_exec.so` (exec 路径不受 `dlopen` 规则影响, 但其 `dlopen` 用户库需只读), Python (Chaquopy 解压到私有目录的扩展模块), Java / Kotlin / DEX / R8 编译产物的 DEX 加载 (`DexClassLoader` 前 `setReadOnly`), 逐仓 grep `System.load` / `dlopen` / `DexClassLoader` 并在 `THROW_ERROR_FOR_WRITABLE_DCL` 下复测. (SOURCE; DEVICE-37)
+- [ ] 通用条目; 逐仓检索 `System.load` / `dlopen` / `DexClassLoader`, 区分 Java 原生库加载, NDK 加载与独立 exec. 核查 Node `.node` / 用户 `.so`, Bun `libbun_exec.so` 及用户库, Python / Chaquopy 扩展模块, Java / Kotlin / DEX / R8 的 DEX 产物. Java `System.load` 按 P2.3 处理, DEX 延续已有只读要求; NDK `dlopen` / exec 是否受其它规则限制须有对应源码或设备证据, 不把 `THROW_ERROR_FOR_WRITABLE_DCL` 的 Java 行为直接推广到全部加载方式. 各插件用 target 37 包复测. (SOURCE; DEVICE-37)
 - [ ] 本地网络: 在插件进程内执行脚本时打开局域网 socket (Node `http.createServer`, Bun `Bun.serve`, Python `socket`) 需要各插件自身的 `ACCESS_LOCAL_NETWORK` (权限按 UID, 宿主授权不覆盖插件); 三个带 `INTERNET` 的运行时 (Node, Bun, Python) 声明权限并在宿主转发的错误中提示 "在插件设置中授予". (SOURCE; DEVICE-37)
 - [ ] 内存上限与 MessageQueue: 各运行时若使用 Android Looper, 在 `USE_NEW_MESSAGEQUEUE` 下复测; 大负载脚本观察 `am memory-limiter status`. (DEVICE-37)
 - [ ] R8-Compiler: `app/build.gradle.kts` 与两个 plugin-api 模块硬编码 compileSdk 36, app 的 targetSdk 以及 library lint target 也为 36; 先统一版本来源再执行通用条目. app 的 versionCode / versionName 同样硬编码, 按该仓实际发布约定递增. 另外核查固定 `r8-library/android-36.jar` 及 SHA-256: 插件自身 compileSdk 提升不会更新脚本编译所用的平台库, 必须记录对 API 37 输入 / 符号的支持边界及相关测试. (SOURCE; JVM; ANDROID_BUILD)
@@ -453,7 +454,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `RESTRICT_DATA_URI_COLUMNS` (437318646) | `ContactsContract.Data` 移除账户列 (VERIFIED) | `QuickContactBadgeAttributes.kt` | P2.15 | |
 | `RESTRICT_DEPRECATED_DATA_BUILDER_CONSTRUCTORS` (424093067) | 弃用的 Data Builder 构造器受限 (UNVERIFIED) | 待定位 | P2.15 | |
 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` (417951523) | 显示密码设置拆分为触摸 / 物理键盘 (VERIFIED) | 无 | P2.15 | |
-| `THROW_ERROR_FOR_WRITABLE_DCL` (463348571) | `System.load()` 可写文件抛 `UnsatisfiedLinkError` (VERIFIED) | OpenCV / 量化插件 staging | P2.3 | |
+| `THROW_ERROR_FOR_WRITABLE_DCL` (463348571) | `System.load()` 可写文件抛 `UnsatisfiedLinkError` (VERIFIED) | OpenCV / 量化插件 staging | P2.3 | `a784273d2`; target 36 强制 / target 37 默认加载通过; 可写副本按预期被拒绝, 见 P2.3 实施记录 |
 | `TRASH_BEHAVIOR_CHANGE` (461429441) | MediaStore 回收站语义变化 (UNVERIFIED) | `media.*`, 相册相关 | P2.8 | |
 | `USE_NEW_MESSAGEQUEUE` (421623328) | 无锁 MessageQueue (VERIFIED) | 脚本引擎 Looper | P2.4 | |
 | `USE_NSD_PICKER_WHEN_NO_LOCAL_NET_PERMISSION` (490596785) | 无本地网络权限时 NSD 走系统选择器 (VERIFIED) | 无 (未用 `NsdManager`) | P2.1 | |
@@ -598,6 +599,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 本机 `android-36/android.jar` 有 4 个 `android/hardware/fingerprint/*.class`, `android-37.0/android.jar` 为 0 (SOURCE: [复核记录](evidence/android-sdk-37-review-20260913.md)); 这证明 SDK 编译符号移除, 不等于设备运行时一定无此类. `InputMethodManager.SHOW_IMPLICIT` 之外的弃用由 lint 逐版跟踪.
 - APK 签名方案 v3.2 (混合后量子, ML-DSA) 对内置 APK 打包器 / `modules/apk-signer` 是可选能力, 与本次无关.
 - Advanced Protection Mode 对无障碍服务的限制若被实测确认, 需要在用户文档 FAQ 与插件中心 "无障碍兼容" 页面长期维护说明.
+- P2.3 在 API 24 发现既有 JAR 编译器边界: 本地 D8 引用系统尚无的 `java.nio.file.Paths`, legacy dx 回退拒绝 Java 8 class major 52; Java 6 major 50 夹具可正常转换与加载. 后续独立修复旧系统编译器兼容性及失败诊断, 不因本次原始 DEX 目录修复或 API 37 冒烟通过而宣称此限制已解除. 见 [P2.3 证据](evidence/android-sdk-37-p23-20260913.md#jar-夹具与既有限制).
 
 ---
 
@@ -606,7 +608,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 ### 2026-09-13 初稿
 
 - 完成: 宿主与 42 个插件仓库的 SDK / 工具链 / manifest 事实收集; compileSdk 37 探针编译 (0 错误, 1 处新增弃用) 与 36 基线对照; `AVD_API_37` 的 `dumpsys platform_compat` 清单 (36 项门控) 与官方文档核对; 固定决策 D1-D4 (维护者以选择题拍板: 范围含全部插件, 两步走, inrt 同步升到 37, 允许探针编译) 与派生约定 D5-D11; 本 Roadmap 初稿与两份证据文件.
-- 关键发现: 编译层面几乎零成本 (AGP 9.4.0 已满足 API 37, 全仓编译通过); 风险集中在 targetSdk 37 的运行时行为: 本地网络运行时权限 (含入站 accept, 影响 VS Code 扩展 / MCP / 脚本 socket), 后台音频 while-in-use 要求, `System.load` 只读要求 (OpenCV / 量化插件 staging 路径未设只读), 无锁 MessageQueue 与线程中断语义, `IntentSender` 的 BAL opt-in, CT / ECH 默认开启; inrt 从 29 跨到 37 需要单独的存储引导与旧版升级保护.
+- 关键发现: 编译层面几乎零成本 (AGP 9.4.0 已满足 API 37, 探针范围内编译通过); 风险集中在 targetSdk 37 的运行时行为: 本地网络运行时权限 (含入站 accept, 影响 VS Code 扩展 / MCP / 脚本 socket), 后台音频 while-in-use 要求, `System.load` 只读要求 (初稿称 staging 未设只读, P2.3 复核修正为已有尝试但未检查失败), 无锁 MessageQueue 与线程中断语义, `IntentSender` 的 BAL opt-in, CT / ECH 默认开启; inrt 从 29 跨到 37 需要单独的存储引导与旧版升级保护.
 - 环境变化: 本会话为取兼容清单启动并关闭了 `AVD_API_37` (`-no-snapshot-save`, 未改动 AVD 状态); 会话开始时列出的 API 27 模拟器 (`emulator-5554`) 在启动新模拟器前已不在 `adb devices` 中, 原因未查.
 - 未做: P0.2 覆盖开关与脚本, P1 起全部代码改动.
 - 下次会话建议起点: P0.2 (覆盖开关, 供 P2 全程使用) 与 P1 (compileSdk 37, 改动极小) 可同一会话完成; 随后 P2.1 / P2.3 / P2.4 三项影响最大且互不依赖, 可并行推进.
@@ -618,3 +620,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 修正 P2.5 的 creator / sender / broadcast 角色, P2.6 的用户 CA / CT / ECH 前提, P2.1 的权限声明与跨 profile 回环边界; 增加 a11y IME 事件验证及 P2.16 的 inrt 切换前适配.
 - 核实插件实际配置例外: R8-Compiler 的 SDK 硬编码与固定 android-36.jar, Paddle v4 / v5 / v6 的 minSdk 26; SDK 日志分类遵循当前 AGENTS.md, 移除非必需的 Bun 平台插件顺带升级.
 - 本次仅修订规划与证据, 未执行 Gradle 构建 / lint / 设备测试, 未将 P0.2 或 P1-P6 标为完成. 检查清单与来源见 [复核记录](evidence/android-sdk-37-review-20260913.md).
+
+### 2026-09-13 P2.3 实施
+
+- 开始前检查全部待提交工作, 既有 MCP 截图改动由同时工作的会话提交为 `dd521ed5d`, 确认干净后继续 SDK 适配. 期间新出现的 MCP / Node bridge 改动不混入本轮逻辑提交.
+- `a784273d2`: OpenCV / ImageQuant 原生库临时文件, 发布文件与旧缓存均强制验证只读; 38 项 JVM 测试通过, API 37 target 36 强制 / target 37 默认及 API 24 的 JNI 测试通过. 修正初稿 "未设只读" 为 "已有尝试但忽略失败结果".
+- 旧系统回归发现 API 24 原始 DEX 优化输出与输入重合并复现; API 24 / 25 改用独立目录, API 26+ 保持原路径. 新增原始 DEX 设备测试及实际 DEX / JAR 两次加载脚本. 既有 Java 8 JAR 编译器限制另列附录 F.
+- 完成范围与 APK / 设备 / 日志详见 [P2.3 实施记录](evidence/android-sdk-37-p23-20260913.md). 正常 target 保持 36 / 29, P2.3 已勾选; 其余 P2 项目与 P3-P6 待实施, P1 的远程 CI 与既有 lint 状态保持原记录.

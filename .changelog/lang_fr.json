@@ -334,6 +334,7 @@
         "`accessibility.swipe` / `accessibility.gesture` du Node bridge (les gestes par coordonnees des plugins MCP Server et Node) repondaient `false` (annule) a chaque geste apres le premier sur un thread de dispatch du broker reutilise : l'automate de gestes sans handler preparait un Looper sur le thread appelant et le quittait une fois le premier geste termine, si bien que l'appel suivant sur ce thread revenait aussitot et son vrai resultat partait vers un handler mort ; le bridge remet desormais a l'automate le handler de la boucle principale, comme le broker Python de l'hote",
         "Les politiques des plugins OpenCV et ImageQuant rejetaient les bibliothèques natives compilées avec le NDK r28c (28.2.13676358) pour incompatibilité de version du NDK, ce qui bloquait le plugin OpenCV v1.1.2 recompilé ; les compilations r26b et r28c sont désormais acceptées",
         "Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17",
+        "runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes",
         "Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement"
       ],
       "improvement": [

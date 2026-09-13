@@ -499,6 +499,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 外掛的座標手勢) 在被重複使用的 broker 派發執行緒上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在呼叫執行緒上準備 Looper 並在首個手勢完成後退出它, 該執行緒上的下一次呼叫立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主迴圈 handler 交給 automator
 * `修復` OpenCV 與 ImageQuant 外掛策略將以 NDK r28c (28.2.13676358) 建置的原生程式庫判定為原生 NDK 版本不符, 導致重新建置後的 OpenCV 外掛 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 建置
 * `修復` OpenCV 與 Image Quantization 外掛在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
+* `修復` Android 7.0 / 7.1 的 runtime.loadDex 因 ART 最佳化輸出與輸入路徑重合, 損壞 DEX 快取並導致類別載入失敗的問題
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
 * `最佳化` 專案 compileSdk 提升至 37 (Android 17), 完善 SDK 遷移的偵錯建置與 lint 驗證
 * `最佳化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以相容大型 APK/AAB/APKS
