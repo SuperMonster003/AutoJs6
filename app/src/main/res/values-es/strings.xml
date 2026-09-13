@@ -438,6 +438,7 @@
     <string name="error_no_write_settings_permission">Sin permiso de \"escritura en la configuración\".</string>
     <string name="error_official_plugin_missing">Falta el plugin dependiente: %1$s. Busca e instala en línea el plugin oficial relacionado en el \"Centro de plugins\" de AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView sólo puede albergar un hijo directo</string>
+    <string name="error_package_installation_confirmation_expired">La confirmación de instalación ha caducado. Abra de nuevo el paquete para reiniciar la instalación.</string>
     <string name="error_package_installation_confirmation_missing">La confirmación de instalación del sistema no está disponible</string>
     <string name="error_package_installation_status">La instalación del paquete falló con el estado %1$d</string>
     <string name="error_parse_github_release_assets">Fallo al analizar los activos de publicación de GitHub</string>
@@ -1513,7 +1514,11 @@
     <string name="text_others">Otros</string>
     <string name="text_output_apk_path">Ruta de salida del APK</string>
     <string name="text_overwrite">Sobrescribir</string>
+    <string name="text_package_installation">Instalación de aplicación</string>
+    <string name="text_package_installation_confirmation_pending">Continúe para confirmar la instalación de la aplicación.</string>
+    <string name="text_package_installation_result_available">El resultado de la instalación de la aplicación está disponible.</string>
     <string name="text_package_installation_succeeded">Paquete instalado correctamente</string>
+    <string name="text_package_installation_waiting">Esperando el estado de la instalación</string>
     <string name="text_package_name">Nombre del paquete</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
     <string name="text_parent_folder">Carpeta principal</string>

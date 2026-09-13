@@ -439,6 +439,7 @@
     <string name="error_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
     <string name="error_official_plugin_missing">依存プラグインが不足しています: %1$s. AutoJs6 の \"プラグインセンター\" で関連する公式プラグインを検索してオンラインでインストールしてください</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView は 1 つの直接の子だけをホストできます</string>
+    <string name="error_package_installation_confirmation_expired">インストールの確認が無効になりました. パッケージを再度開いてインストールをやり直してください.</string>
     <string name="error_package_installation_confirmation_missing">システムのインストール確認を利用できません</string>
     <string name="error_package_installation_status">パッケージのインストールに失敗しました. ステータス: %1$d</string>
     <string name="error_parse_github_release_assets">GitHub リリースアセットの解析に失敗しました</string>
@@ -1514,7 +1515,11 @@
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
     <string name="text_overwrite">上書き</string>
+    <string name="text_package_installation">アプリのインストール</string>
+    <string name="text_package_installation_confirmation_pending">続行してアプリのインストールを確認してください.</string>
+    <string name="text_package_installation_result_available">アプリのインストール結果を確認できます.</string>
     <string name="text_package_installation_succeeded">パッケージをインストールしました</string>
+    <string name="text_package_installation_waiting">インストール状態を待機中</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
     <string name="text_parent_folder">親フォルダー</string>

@@ -434,6 +434,7 @@
     <string name="error_no_write_settings_permission">缺少 \"修改系统设置\" 权限</string>
     <string name="error_official_plugin_missing">缺少依赖插件: %1$s, 可在 AutoJs6 \"插件中心\" 搜索并在线安装相关的官方插件</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView 只能拥有至多一个直接子控件</string>
+    <string name="error_package_installation_confirmation_expired">安装确认已失效. 请重新打开安装包以重新开始安装.</string>
     <string name="error_package_installation_confirmation_missing">系统安装确认界面不可用</string>
     <string name="error_package_installation_status">安装包安装失败, 状态码: %1$d</string>
     <string name="error_parse_github_release_assets">解析 GitHub 发行版资源信息失败</string>
@@ -1510,7 +1511,11 @@
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
     <string name="text_overwrite">覆盖</string>
+    <string name="text_package_installation">应用安装</string>
+    <string name="text_package_installation_confirmation_pending">继续以确认应用安装.</string>
+    <string name="text_package_installation_result_available">应用安装结果已就绪.</string>
     <string name="text_package_installation_succeeded">安装包已成功安装</string>
+    <string name="text_package_installation_waiting">正在等待安装状态</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
     <string name="text_parent_folder">父文件夹</string>

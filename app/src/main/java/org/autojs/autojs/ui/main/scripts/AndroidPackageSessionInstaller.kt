@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.main.scripts
 
-import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageInfo
@@ -8,7 +7,6 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.content.pm.SigningInfo
 import android.os.Build
-import android.os.Bundle
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
@@ -26,6 +24,7 @@ internal object AndroidPackageSessionInstaller {
         val packageInstaller = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
             setAppPackageName(verified.packageName)
+            setAppLabel(verified.appLabel)
             setSize(stagedApks.sumOf { it.file.length() })
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 setInstallReason(PackageManager.INSTALL_REASON_USER)
@@ -39,6 +38,7 @@ internal object AndroidPackageSessionInstaller {
         }
         val sessionId = packageInstaller.createSession(params)
         try {
+            PackageInstallStatusCoordinator.register(context, sessionId, verified.packageName, verified.appLabel)
             packageInstaller.openSession(sessionId).use { session ->
                 stagedApks.forEachIndexed { index, staged ->
                     val sessionName = staged.manifest.splitName
@@ -54,23 +54,23 @@ internal object AndroidPackageSessionInstaller {
                         output.close()
                     }
                 }
-                val callbackIntent = PackageInstallStatusActivity.createIntent(
+                val callbackIntent = PackageInstallStatusCoordinator.callbackIntent(
                     context = context,
                     sessionId = sessionId,
                 )
                 val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                val callback = PendingIntent.getActivity(
+                val callback = PendingIntent.getBroadcast(
                     context,
                     sessionId,
                     callbackIntent,
                     flags,
-                    createPendingIntentOptions(),
                 )
                 session.commit(callback.intentSender)
             }
             return sessionId
         } catch (error: Throwable) {
             runCatching { packageInstaller.abandonSession(sessionId) }
+            runCatching { PackageInstallStatusCoordinator.acknowledge(context, sessionId) }
             throw error
         }
     }
@@ -132,7 +132,13 @@ internal object AndroidPackageSessionInstaller {
                 throw IOException("APK signing certificates do not match")
             }
         }
-        return VerifiedPackageSet(packageName)
+        val appLabel = runCatching {
+            baseInfo.applicationInfo?.apply {
+                sourceDir = baseApk.file.absolutePath
+                publicSourceDir = baseApk.file.absolutePath
+            }?.loadLabel(packageManager)?.toString()?.takeIf(String::isNotBlank)?.take(256)
+        }.getOrNull() ?: packageName
+        return VerifiedPackageSet(packageName, appLabel)
     }
 
     private fun PackageInfo.longVersionCodeCompat(): Long =
@@ -160,26 +166,8 @@ internal object AndroidPackageSessionInstaller {
             .digest(toByteArray())
             .joinToString("") { byte -> "%02x".format(byte) }
 
-    /**
-     * PackageInstaller can deliver its user-confirmation callback after the coordinator has left
-     * the foreground. The callback PendingIntent exists solely to open that confirmation flow, so
-     * opt its creator in explicitly on Android releases that require it.
-     */
-    private fun createPendingIntentOptions(): Bundle? {
-        if (Build.VERSION.SDK_INT < 34) return null
-        return ActivityOptions.makeBasic()
-            .setPendingIntentCreatorBackgroundActivityStartMode(
-                if (Build.VERSION.SDK_INT >= 36) {
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-                } else {
-                    @Suppress("DEPRECATION")
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                },
-            )
-            .toBundle()
-    }
-
     private data class VerifiedPackageSet(
         val packageName: String,
+        val appLabel: String,
     )
 }

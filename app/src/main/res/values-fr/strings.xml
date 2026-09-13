@@ -438,6 +438,7 @@
     <string name="error_no_write_settings_permission">Non \"write settings\" permission</string>
     <string name="error_official_plugin_missing">Plugin dépendant manquant: %1$s. Recherchez et installez en ligne le plugin officiel associé dans le \"Centre des plugins\" d\'AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView ne peut accueillir qu\'un seul enfant direct.</string>
+    <string name="error_package_installation_confirmation_expired">La confirmation a expiré. Ouvrez à nouveau le paquet pour relancer l\'installation.</string>
     <string name="error_package_installation_confirmation_missing">La confirmation d\'installation du système est indisponible</string>
     <string name="error_package_installation_status">L\'installation du package a échoué avec l\'état %1$d</string>
     <string name="error_parse_github_release_assets">Échec de l\'analyse des ressources de la version GitHub</string>
@@ -1513,7 +1514,11 @@
     <string name="text_others">Autres</string>
     <string name="text_output_apk_path">Chemin de sortie de l\'APK</string>
     <string name="text_overwrite">Ecraser</string>
+    <string name="text_package_installation">Installation d\'application</string>
+    <string name="text_package_installation_confirmation_pending">Continuez pour confirmer l\'installation de l\'application.</string>
+    <string name="text_package_installation_result_available">Le résultat de l\'installation de l\'application est disponible.</string>
     <string name="text_package_installation_succeeded">Package installé avec succès</string>
+    <string name="text_package_installation_waiting">En attente de l\'état de l\'installation</string>
     <string name="text_package_name">Nom du paquet</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nom du paquet (en cours de calcul...)</string>
     <string name="text_parent_folder">Dossier parent</string>

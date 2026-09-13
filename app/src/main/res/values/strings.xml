@@ -433,6 +433,7 @@
     <string name="error_no_write_settings_permission">No \"write settings\" permission</string>
     <string name="error_official_plugin_missing">Missing dependency plugin: %1$s, search and install the related official plugin online in AutoJs6 \"Plugin Center\"</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
+    <string name="error_package_installation_confirmation_expired">The installation confirmation has expired. Open the package again to restart installation.</string>
     <string name="error_package_installation_confirmation_missing">The system installation confirmation is unavailable</string>
     <string name="error_package_installation_status">Package installation failed with status %1$d</string>
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
@@ -1509,7 +1510,11 @@
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_overwrite">Overwrite</string>
+    <string name="text_package_installation">App installation</string>
+    <string name="text_package_installation_confirmation_pending">Continue to confirm the app installation.</string>
+    <string name="text_package_installation_result_available">The app installation result is available.</string>
     <string name="text_package_installation_succeeded">Package installed successfully</string>
+    <string name="text_package_installation_waiting">Waiting for the installation status</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
     <string name="text_parent_folder">Parent folder</string>

@@ -236,13 +236,15 @@ class PackageInstallerActivity : BaseActivity() {
                     }
                 }
             }
-            result.onSuccess {
-                // PackageInstaller now owns the session contents. A private, session-scoped
-                // Activity receives confirmation and final status callbacks.
+            result.onSuccess { sessionId ->
+                // The callback is durable even if this page has already left the foreground.
                 pendingArchive = null
                 installationInProgress = false
                 cleanupIncomingDirectory()
                 dismissProgress()
+                if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                    startActivity(PackageInstallStatusActivity.showIntent(this@PackageInstallerActivity, sessionId))
+                }
                 finish()
             }.onFailure { error ->
                 dismissProgress()

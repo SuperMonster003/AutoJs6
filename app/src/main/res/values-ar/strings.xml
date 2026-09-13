@@ -440,6 +440,7 @@
     <string name="error_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
     <string name="error_official_plugin_missing">المكون الإضافي التابع مفقود: %1$s. ابحث عن المكون الإضافي الرسمي ذي الصلة وثبّته عبر الإنترنت من \"مركز الإضافات\" في AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">يمكن أن تستضيف Scrollview طفلًا مباشرًا واحد فقط</string>
+    <string name="error_package_installation_confirmation_expired">انتهت صلاحية تأكيد التثبيت. افتح الحزمة مرة أخرى لإعادة بدء التثبيت.</string>
     <string name="error_package_installation_confirmation_missing">تأكيد تثبيت النظام غير متاح</string>
     <string name="error_package_installation_status">فشل تثبيت الحزمة بالحالة %1$d</string>
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
@@ -1515,7 +1516,11 @@
     <string name="text_others">آحرون</string>
     <string name="text_output_apk_path">مسار الإخراج APK</string>
     <string name="text_overwrite">استبدال</string>
+    <string name="text_package_installation">تثبيت التطبيق</string>
+    <string name="text_package_installation_confirmation_pending">تابع لتأكيد تثبيت التطبيق.</string>
+    <string name="text_package_installation_result_available">نتيجة تثبيت التطبيق متاحة.</string>
     <string name="text_package_installation_succeeded">تم تثبيت الحزمة بنجاح</string>
+    <string name="text_package_installation_waiting">في انتظار حالة التثبيت</string>
     <string name="text_package_name">اسم الحزمة</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
     <string name="text_parent_folder">المجلد الأصل</string>

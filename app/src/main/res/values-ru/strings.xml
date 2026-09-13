@@ -438,6 +438,7 @@
     <string name="error_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
     <string name="error_official_plugin_missing">Отсутствует зависимый плагин: %1$s. Найдите и установите связанный официальный плагин онлайн в \"Центре плагинов\" AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView может содержать только одного прямого дочернего элемента</string>
+    <string name="error_package_installation_confirmation_expired">Подтверждение установки истекло. Откройте пакет повторно, чтобы начать установку заново.</string>
     <string name="error_package_installation_confirmation_missing">Системное подтверждение установки недоступно</string>
     <string name="error_package_installation_status">Установка пакета завершилась со статусом %1$d</string>
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
@@ -1513,7 +1514,11 @@
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
     <string name="text_overwrite">Перезаписать</string>
+    <string name="text_package_installation">Установка приложения</string>
+    <string name="text_package_installation_confirmation_pending">Продолжите, чтобы подтвердить установку приложения.</string>
+    <string name="text_package_installation_result_available">Результат установки приложения доступен.</string>
     <string name="text_package_installation_succeeded">Пакет успешно установлен</string>
+    <string name="text_package_installation_waiting">Ожидание состояния установки</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
     <string name="text_parent_folder">Родительская папка</string>

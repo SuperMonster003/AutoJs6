@@ -372,9 +372,13 @@
             android:name="org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity"
             android:excludeFromRecents="true"
             android:exported="false"
-            android:noHistory="true"
+            android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/AppTheme.Transparent" />
+
+        <receiver
+            android:name="org.autojs.autojs.ui.main.scripts.PackageInstallStatusReceiver"
+            android:exported="false" />
 
         <activity
             android:name="org.autojs.autojs.ui.main.scripts.PackageInstallerEntryActivity"
