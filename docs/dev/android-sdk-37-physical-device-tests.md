@@ -29,6 +29,8 @@ D37 / D16K 行用于补齐实体机证据. 缺设备时保留未覆盖项, 不�
 
 O02 的受控 TLS 对照已提供 [自动化方法](../../tools/sdk37/README.md#tls-trust-ct-ech-and-request-scoped-insecure-options) 与 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). API 37 / API 24 的模拟器结果不关闭 O02. 真机仍需真实公网 / 企业代理端点与实际协商证据, 不在日用手机安装测试 CA; 现有 TLS helper 限模拟器, 不能直接把 serial 改成手机后使用.
 
+UI04 的 UA 与基本渲染已有 [模拟器复跑工具](../../tools/sdk37/README.md#webview-user-agent-reduction-and-rendering) 与 [P2.11 证据](evidence/android-sdk-37-p211-20260913.md), API 37 / WebView 145 的 28 个场景通过. 此结果不关闭真机的输入、复杂字体、文件选择、Markdown / Ace 或最终插件包验收. HTML Previewer 按自身包的 target / UA 开关测试; File System Access 只有符号暴露观测, 仍需实际 chooser / 授权证据.
+
 ## 2. 包与证据准备
 
 同源对照至少准备宿主正常 target 36 / debug target 37、inrt 正常 target 29 / debug target 37. 用户生成 APK 和插件另存实际 applicationId、签名、versionCode、compile/target/min、SHA-256、源码提交和 ABI. 同机覆盖安装前后必须保留原文件与授权状态; 首次安装和升级分开记录. 测试安装 / 卸载仅针对专用测试 applicationId, 不为制造“干净状态”卸载日用包.

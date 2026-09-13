@@ -64,6 +64,60 @@ The comparison matches issue ID, severity, message and location files, ignoring 
 
 ## Device compatibility changes
 
+### WebView User-Agent reduction and rendering
+
+`run_webview_probe.py` drives actual Rhino `ui.webview` layouts, the host's
+`DocumentationActivity`, or the independently installed HTML Previewer. It uses
+only the Python standard library, including a small local DevTools client. See
+[the P2.11 evidence](../../docs/dev/evidence/android-sdk-37-p211-20260913.md).
+
+Use a disposable emulator and a fresh output directory. The helper stops the host
+and HTML Previewer and starts a new host task, interrupting their current work. It
+creates uniquely named test receipts / HTML files, starts a PC loopback HTTP
+fixture for the UI route, and removes its temporary adb DevTools forward when
+finished. It does not install APKs, alter compatibility flags, grant permissions,
+enable plugins, change documentation preferences or dismiss system dialogs.
+
+Install a debuggable host first. For API 37 / host target 37, grant the test host
+`android.permission.ACCESS_LOCAL_NETWORK` before the HTTP UI fixture. The two
+additional routes require the matching debuggable official plugins: Offline Docs
+must be available and selected as the documentation source; HTML Previewer uses
+its audited v2 Explorer Action entry with a read grant limited to the fresh test
+directory. The HTML fixture is static; DevTools observations do not enable the
+previewer's normally disabled document JavaScript.
+
+```powershell
+py tools/sdk37/run_webview_probe.py --serial emulator-5584 --expected-target 37 --expected-webview-target 37 --expected-reduced true --output build/sdk37-webview/default
+py tools/sdk37/run_webview_probe.py --serial emulator-5584 --expected-target 37 --expected-webview-target 37 --expected-reduced true --ua-mode custom --output build/sdk37-webview/custom
+py tools/sdk37/run_webview_probe.py --serial emulator-5584 --expected-target 37 --expected-webview-target 37 --expected-reduced true --route docs --docs-page app.html --output build/sdk37-webview/docs-app
+# HTML Previewer has its own target and package-specific compatibility state.
+py tools/sdk37/run_webview_probe.py --serial emulator-5584 --expected-target 37 --expected-webview-target 36 --expected-reduced false --route html --output build/sdk37-webview/html-default
+```
+
+`--ua-mode` also accepts `suffix` and `reset`. The UI route compares the actual
+HTTP User-Agent header, `WebSettings.userAgentString` and `navigator.userAgent`.
+Every route checks fresh / expected content, document dimensions, the focused
+window and a screenshot; UI / HTML additionally check CSS and local navigation.
+Secure document origins also record available User-Agent Client Hints. An
+insecure HTTP origin returning no Client Hints does not establish whether the
+provider supports them. File System Access feature detection is recorded as an
+observation only; it does not verify chooser behavior or file access grants.
+
+Before toggling `ENABLE_USER_AGENT_REDUCTION`, save its existing overrides.
+For this API 37.0 image, host target 36 defaults to unreduced UA and target 37 to
+reduced UA. Run each override separately and restore the initial state. For HTML,
+apply the override to `io.github.supermonster003.autojs6.plugin.htmlpreviewer`;
+the host's override does not cover that process. Actual targets, APK hashes,
+WebView provider version, device identity and raw UA compat state accompany each
+result. Missing receipts, skipped navigation, wrong headers or an obscuring
+system dialog cannot count as a successful run. Review the saved screenshots
+before accepting visual results.
+
+```powershell
+py -m unittest discover -s tools/sdk37 -p test_webview_probe.py -v
+py -m py_compile tools/sdk37/run_webview_probe.py
+```
+
 ### TLS trust, CT, ECH and request-scoped insecure options
 
 The [P2.6 evidence](../../docs/dev/evidence/android-sdk-37-p26-20260913.md)
