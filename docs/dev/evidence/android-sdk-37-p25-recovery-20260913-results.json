@@ -1,0 +1,1968 @@
+{
+  "date": "2026-09-13",
+  "baseline": "ead79cb00",
+  "devices": [
+    {
+      "serial": "emulator-5568",
+      "avd": "aj6-ps16k-37-x86_64",
+      "readOnly": true,
+      "snapshotLoad": false,
+      "snapshotSave": false,
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "api": 37,
+      "pageSize": 16384,
+      "pageSizeSource": "getconf PAGE_SIZE",
+      "kernelMapPageSize": 4096,
+      "accessibilityServices": "null"
+    },
+    {
+      "serial": "emulator-5570",
+      "avd": "AVD_API_24",
+      "readOnly": true,
+      "snapshotLoad": false,
+      "snapshotSave": false,
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "api": 24,
+      "pageSize": 4096,
+      "pageSizeSource": "/proc/self/smaps KernelPageSize",
+      "kernelMapPageSize": 4096,
+      "accessibilityServices": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
+    }
+  ],
+  "validation": {
+    "releaseManifests": [
+      {
+        "flavor": "appRelease",
+        "target": 36,
+        "privateComponents": true,
+        "debugProbesAbsent": true
+      },
+      {
+        "flavor": "inrtRelease",
+        "target": 29,
+        "privateComponents": true,
+        "debugProbesAbsent": true
+      }
+    ],
+    "translatedMessages": 5,
+    "resourceDirectories": 11,
+    "changelogLanguages": 10,
+    "artifacts": [
+      {
+        "file": "target37-reviewed.apk",
+        "bytes": 47739284,
+        "sha256": "17ffb30dca14cb0388591e7175d40f7da010df26ca15a4e30912672e4a4f5de0",
+        "compileSdk": 37,
+        "targetSdk": 37,
+        "zipalign16KB": true
+      },
+      {
+        "file": "normal-app-reviewed.apk",
+        "bytes": 47946808,
+        "sha256": "9545ac7ef76812e622b73d3338f952c07c5dd9f3233c9f5c41539e8947118a66",
+        "compileSdk": 37,
+        "targetSdk": 36,
+        "zipalign16KB": true
+      },
+      {
+        "file": "normal-inrt-reviewed.apk",
+        "bytes": 54270331,
+        "sha256": "c584022fc4a6c573a848bc373aa55c0e236fb0e611f1d6caf3f51fd0fbdc888e",
+        "compileSdk": 37,
+        "targetSdk": 29,
+        "zipalign16KB": true
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "file": "target37-reviewed.apk",
+      "bytes": 47739284,
+      "sha256": "17ffb30dca14cb0388591e7175d40f7da010df26ca15a4e30912672e4a4f5de0",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "zipalign16KB": true
+    },
+    {
+      "file": "normal-app-reviewed.apk",
+      "bytes": 47946808,
+      "sha256": "9545ac7ef76812e622b73d3338f952c07c5dd9f3233c9f5c41539e8947118a66",
+      "compileSdk": 37,
+      "targetSdk": 36,
+      "zipalign16KB": true
+    },
+    {
+      "file": "normal-inrt-reviewed.apk",
+      "bytes": 54270331,
+      "sha256": "c584022fc4a6c573a848bc373aa55c0e236fb0e611f1d6caf3f51fd0fbdc888e",
+      "compileSdk": 37,
+      "targetSdk": 29,
+      "zipalign16KB": true
+    },
+    {
+      "file": "build/sdk37-p25-recovery/target37-v2.apk",
+      "bytes": 47736364,
+      "sha256": "55a599ef5393515458ab4707d6da18f0c0fee5a39f4b022098db56d4c852d209"
+    },
+    {
+      "file": "build/sdk37-p25-recovery/target37-v3.apk",
+      "bytes": 47737154,
+      "sha256": "14de16f20f494b42fa7f16f9064026053242f20bddad14cefd05e5825e59273e"
+    },
+    {
+      "file": "build/sdk37-p25-recovery/normal-app-target36.apk",
+      "bytes": 47946600,
+      "sha256": "8413b1baeb84612f18b622e4747a5aae17a7064b0510140ec9b90168055f2711"
+    },
+    {
+      "file": "build/sdk37-p25-recovery/normal-inrt-target29.apk",
+      "bytes": 54270331,
+      "sha256": "b46d31a50963400239bda750b6e2eb42076a8241c9d5afd43ffa3ac97d68f2b8"
+    },
+    {
+      "file": "build/sdk37-p25-recovery/conflict-fixture.apk",
+      "bytes": 20881,
+      "sha256": "d6efb156677c48eb8326841785657a00e26f43dbb749651fa15e5e81e3c73fe1"
+    },
+    {
+      "file": "build/sdk37-p25/actual-picker-source.apk",
+      "bytes": 6716225,
+      "sha256": "c55dd575cd331e24bd5a57326314bc4e133bc414501ddf0bd80d821532f55444"
+    },
+    {
+      "file": "build/sdk37-p25/fixture-v1/bal-fixture.apk",
+      "bytes": 16785,
+      "sha256": "dbc40ac4ed374f7e98f9be6a112a3f9d6675ba974a065bc13ff708f5e478d31f"
+    }
+  ],
+  "sessions": [
+    {
+      "sessionId": 873037193,
+      "scenario": "API37 host37 v2; notifications denied; process 5486 -> 5804",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 15:41:03.199  5486  5486 I PackageInstallStatus: Installation callback recorded: session=873037193, status=-1",
+        "09-13 15:42:31.359  5804  5804 I PackageInstallStatus: Installation callback recorded: session=873037193, status=0"
+      ]
+    },
+    {
+      "sessionId": 200057667,
+      "scenario": "API37 host37 v2; multi-session survivor; submission importance100, auxiliary foreground observation",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 15:43:04.706  5804  5804 I PackageInstallStatus: Installation callback recorded: session=200057667, status=-1",
+        "09-13 15:47:39.557  5804  5804 I PackageInstallStatus: Installation callback recorded: session=200057667, status=0"
+      ]
+    },
+    {
+      "sessionId": 1683033218,
+      "scenario": "API37 host37 v2; importance400; notification click; cancel; rotate result; acknowledge only this session",
+      "outcome": "cancelled",
+      "platformCallbackStatuses": [
+        -1,
+        3
+      ],
+      "callbackLogLines": [
+        "09-13 15:43:25.799  5804  5804 I PackageInstallStatus: Installation callback recorded: session=1683033218, status=-1",
+        "09-13 15:45:42.304  5804  5804 I PackageInstallStatus: Installation callback recorded: session=1683033218, status=3"
+      ]
+    },
+    {
+      "sessionId": 154924614,
+      "scenario": "API37 host37 v3; production installer; signature conflict; process 7522 -> 7995",
+      "outcome": "signature-conflict",
+      "platformCallbackStatuses": [
+        -1,
+        5
+      ],
+      "callbackLogLines": [
+        "09-13 15:48:00.502  7522  7522 I PackageInstallStatus: Installation callback recorded: session=154924614, status=-1",
+        "09-13 15:48:22.146  7522  7522 I PackageInstallStatus: Installation callback recorded: session=154924614, status=5"
+      ]
+    },
+    {
+      "sessionId": 266263096,
+      "scenario": "API37 host37 v3; force-stop invalidates token; local expired-confirmation failure; old session abandoned",
+      "outcome": "expired-local",
+      "platformCallbackStatuses": [
+        -1
+      ],
+      "callbackLogLines": [
+        "09-13 15:50:07.803  7995  7995 I PackageInstallStatus: Installation callback recorded: session=266263096, status=-1"
+      ]
+    },
+    {
+      "sessionId": 943295966,
+      "scenario": "API37 normal host36 v3; importance400; notifications denied; return and confirm",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 15:53:25.230  9014  9014 I PackageInstallStatus: Installation callback recorded: session=943295966, status=-1",
+        "09-13 15:54:41.642  9014  9014 I PackageInstallStatus: Installation callback recorded: session=943295966, status=0"
+      ]
+    },
+    {
+      "sessionId": 1972619492,
+      "scenario": "API37 normal inrt29 v3; importance400; return and confirm",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 15:55:20.063  9614  9614 I PackageInstallStatus: Installation callback recorded: session=1972619492, status=-1",
+        "09-13 15:56:55.957  9614  9614 I PackageInstallStatus: Installation callback recorded: session=1972619492, status=0"
+      ]
+    },
+    {
+      "sessionId": 1166153041,
+      "scenario": "API24 normal host36 v3; production installer; exposed interim UI wording issue",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 15:55:04.306  3786  3786 I PackageInstallStatus: Installation callback recorded: session=1166153041, status=-1",
+        "09-13 15:56:04.914  3786  3786 I PackageInstallStatus: Installation callback recorded: session=1166153041, status=0"
+      ]
+    },
+    {
+      "sessionId": 1914894935,
+      "scenario": "API37 final host37; importance400; notifications denied; process 10262 -> 10663; return and confirm",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 16:01:07.087 10262 10262 I PackageInstallStatus: Installation callback recorded: session=1914894935, status=-1",
+        "09-13 16:02:43.185 10663 10663 I PackageInstallStatus: Installation callback recorded: session=1914894935, status=0"
+      ]
+    },
+    {
+      "sessionId": 129438008,
+      "scenario": "API24 final normal host36; production installer; waiting status UI before final callback",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 16:03:03.127  4401  4401 I PackageInstallStatus: Installation callback recorded: session=129438008, status=-1",
+        "09-13 16:04:57.566  4401  4401 I PackageInstallStatus: Installation callback recorded: session=129438008, status=0"
+      ]
+    },
+    {
+      "sessionId": 1114123554,
+      "scenario": "API37 final normal inrt29; production installer",
+      "outcome": "success",
+      "platformCallbackStatuses": [
+        -1,
+        0
+      ],
+      "callbackLogLines": [
+        "09-13 16:04:55.069 11143 11143 I PackageInstallStatus: Installation callback recorded: session=1114123554, status=-1",
+        "09-13 16:05:57.475 11143 11143 I PackageInstallStatus: Installation callback recorded: session=1114123554, status=0"
+      ]
+    }
+  ],
+  "probeRecords": [
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "bg-denied",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789285250201,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 5486,
+        "taskId": 20,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 873037193,
+        "fixtureReadError": "java.lang.IllegalArgumentException: Unknown authority org.autojs.sdk37.balfixture",
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "bg-notification-first",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789285371745,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 5804,
+        "taskId": 23,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installSession": 200057667,
+        "fixtureReadError": "java.lang.IllegalArgumentException: Unknown authority org.autojs.sdk37.balfixture",
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "bg-notification-second",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789285392951,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 5804,
+        "taskId": 24,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 1683033218,
+        "fixtureReadError": "java.lang.IllegalArgumentException: Unknown authority org.autojs.sdk37.balfixture",
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "conflict-rebuilt",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789285747106,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 7995,
+        "taskId": 31,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "status": 5,
+            "generation": 2,
+            "confirmationTokenExists": false
+          }
+        ],
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "foreground-conflict",
+        "route": "install-ui",
+        "sdk": 37,
+        "startedAt": 1789285679083,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 7522,
+        "taskId": 29,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": true,
+        "installUiStarted": true,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "normal36-return",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789286062364,
+        "targetSdk": 36,
+        "uid": 10231,
+        "pid": 9014,
+        "taskId": 35,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 943295966,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "status": -1,
+            "generation": 1,
+            "confirmationTokenExists": true
+          }
+        ],
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "rebuilt-denied",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789285301245,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 5804,
+        "taskId": 21,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 873037193,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "status": -1,
+            "generation": 1,
+            "confirmationTokenExists": true
+          }
+        ],
+        "fixtureReadError": "java.lang.IllegalArgumentException: Unknown authority org.autojs.sdk37.balfixture",
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789285795210439100",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789285794829,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 7995,
+        "taskId": 32,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 266263096,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789285845838853100",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789285847060,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 8495,
+        "taskId": 33,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 266263096,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "status": -1,
+            "generation": 1,
+            "confirmationTokenExists": false
+          }
+        ],
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789285991355246700",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789285992254,
+        "targetSdk": 36,
+        "uid": 10231,
+        "pid": 9014,
+        "taskId": 34,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 943295966,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789286453306986300",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789286453964,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 10262,
+        "taskId": 40,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 1914894935,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789286526936549900",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789286527776,
+        "targetSdk": 37,
+        "uid": 10231,
+        "pid": 10663,
+        "taskId": 41,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 1914894935,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "status": -1,
+            "generation": 1,
+            "confirmationTokenExists": true
+          }
+        ],
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6.inrt",
+      "result": {
+        "case": "inrt29-return",
+        "route": "install-recovery",
+        "sdk": 37,
+        "startedAt": 1789286160377,
+        "targetSdk": 29,
+        "uid": 10260,
+        "pid": 9614,
+        "taskId": 38,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": false,
+        "installations": [
+          {
+            "sessionId": 1972619492,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "status": -1,
+            "generation": 1,
+            "confirmationTokenExists": true
+          }
+        ],
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6.inrt",
+      "result": {
+        "case": "recovery_1789286106248176100",
+        "route": "install",
+        "sdk": 37,
+        "startedAt": 1789286107098,
+        "targetSdk": 29,
+        "uid": 10260,
+        "pid": 9614,
+        "taskId": 37,
+        "overlayPermission": false,
+        "background": true,
+        "senderMode": "visible",
+        "sendImportance": 400,
+        "windowFocusAtSend": false,
+        "installSession": 1972619492,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5568",
+      "package": "org.autojs.autojs6.inrt",
+      "result": {
+        "case": "recovery_1789286692619586700",
+        "route": "install-ui",
+        "sdk": 37,
+        "startedAt": 1789286693367,
+        "targetSdk": 29,
+        "uid": 10260,
+        "pid": 11143,
+        "taskId": 43,
+        "overlayPermission": false,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": true,
+        "installUiStarted": true,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5570",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789286103570790600",
+        "route": "install-ui",
+        "sdk": 24,
+        "startedAt": 1789286102994,
+        "targetSdk": 36,
+        "uid": 10080,
+        "pid": 3786,
+        "taskId": 250,
+        "overlayPermission": true,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": true,
+        "installUiStarted": true,
+        "completed": true
+      }
+    },
+    {
+      "serial": "emulator-5570",
+      "package": "org.autojs.autojs6",
+      "result": {
+        "case": "recovery_1789286582268228200",
+        "route": "install-ui",
+        "sdk": 24,
+        "startedAt": 1789286581759,
+        "targetSdk": 36,
+        "uid": 10080,
+        "pid": 4401,
+        "taskId": 252,
+        "overlayPermission": true,
+        "background": false,
+        "senderMode": "visible",
+        "sendImportance": 100,
+        "windowFocusAtSend": true,
+        "installUiStarted": true,
+        "completed": true
+      }
+    }
+  ],
+  "snapshots": [
+    {
+      "name": "api24-confirmation",
+      "package": "org.autojs.autojs6",
+      "pid": "3786",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1166153041,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286104201,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_PERMISSIONS;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Do you want to install this application? It does not require any special access.",
+        "CANCEL",
+        "INSTALL"
+      ]
+    },
+    {
+      "name": "api24-final-result",
+      "package": "org.autojs.autojs6",
+      "pid": "3786",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: recovery_1789286103570790600"
+      ]
+    },
+    {
+      "name": "api24-installed",
+      "package": "org.autojs.autojs6",
+      "pid": "3786",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1166153041,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286104201,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_PERMISSIONS;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "api24-reviewed-after-confirmation",
+      "package": "org.autojs.autojs6",
+      "pid": "4401",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 129438008,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286583008,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_PERMISSIONS;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Waiting for the installation status",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "api24-reviewed-confirmation",
+      "package": "org.autojs.autojs6",
+      "pid": "4401",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 129438008,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286583008,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_PERMISSIONS;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Do you want to install an update to this existing application? Your existing data will not be lost. It does not require any special access.",
+        "CANCEL",
+        "INSTALL"
+      ]
+    },
+    {
+      "name": "api24-reviewed-success",
+      "package": "org.autojs.autojs6",
+      "pid": "4401",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: recovery_1789286582268228200"
+      ]
+    },
+    {
+      "name": "bg-denied-before-kill",
+      "pid": "5486",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 873037193,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285263127,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Sun, Sep 13",
+        "Gmail",
+        "Photos",
+        "YouTube",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "16 KB native runtime smoke"
+      ]
+    },
+    {
+      "name": "cancelled-acknowledged",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "Screen Color Picker"
+      ]
+    },
+    {
+      "name": "cancelled-after-rotation",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": 3,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_ABORTED: User rejected permissions"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Failed",
+        "Package installation failed: INSTALL_FAILED_ABORTED: User rejected permissions",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "conflict-background-result",
+      "pid": "7522",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285680260,
+            "status": 5,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+            "appLabel": "SDK37 BAL Fixture"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "SDK37 BAL Fixture"
+      ]
+    },
+    {
+      "name": "conflict-platform-response",
+      "pid": "7522",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285680260,
+            "status": 5,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+            "appLabel": "SDK37 BAL Fixture"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Failed",
+        "Package installation failed: INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "conflict-rebuilt-prompt",
+      "pid": "7995",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285680260,
+            "status": 5,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+            "appLabel": "SDK37 BAL Fixture"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "The app installation result is available.\n\nSDK37 BAL Fixture",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "conflict-rebuilt-result",
+      "pid": "7995",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285680260,
+            "status": 5,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+            "appLabel": "SDK37 BAL Fixture"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Failed",
+        "Package installation failed: INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package org.autojs.sdk37.balfixture signatures do not match newer version; ignoring!",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "expiry-before-force-stop",
+      "pid": "7995",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 266263096,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285807734,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "SDK37 BAL Fixture"
+      ]
+    },
+    {
+      "name": "expiry-error",
+      "pid": "8495",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 266263096,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285807734,
+            "status": 1,
+            "generation": 2,
+            "detail": "The installation confirmation has expired. Open the package again to restart installation.",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Failed",
+        "Package installation failed: The installation confirmation has expired. Open the package again to restart installation.",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "expiry-return-prompt",
+      "pid": "8495",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 266263096,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285807734,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nScreen Color Picker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "foreground-conflict-result",
+      "pid": "7522",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 154924614,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285680260,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "SDK37 BAL Fixture"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "SDK37 BAL Fixture",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "inrt-reviewed-confirmation",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "11143",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1114123554,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286694878,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "inrt-reviewed-settled",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "11143",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: recovery_1789286692619586700"
+      ]
+    },
+    {
+      "name": "inrt-reviewed-success",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "11143",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1114123554,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286694878,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "SDK37 BAL: recovery_1789286692619586700"
+      ]
+    },
+    {
+      "name": "inrt29-background",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "9614",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1972619492,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286120000,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Sun, Sep 13",
+        "Gmail",
+        "Photos",
+        "YouTube",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "AutoJs6.inrt"
+      ]
+    },
+    {
+      "name": "inrt29-confirmation",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "9614",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1972619492,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286120000,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "inrt29-return",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "9614",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1972619492,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286120000,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nScreen Color Picker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "inrt29-success",
+      "package": "org.autojs.autojs6.inrt",
+      "pid": "9614",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: inrt29-return"
+      ]
+    },
+    {
+      "name": "normal36-confirmation",
+      "pid": "9014",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 943295966,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286005163,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "normal36-prompt",
+      "pid": "9014",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 943295966,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286005163,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nScreen Color Picker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "normal36-success",
+      "package": "org.autojs.autojs6",
+      "pid": "9014",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: normal36-return"
+      ]
+    },
+    {
+      "name": "notification-first-open-attempt",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "AutoJs6",
+        "•",
+        "1 minute ago",
+        "2",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "Notification cooldown is now on",
+        "•",
+        "5 minutes ago",
+        "Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.",
+        "New ads privacy features now available",
+        "•",
+        "5 minutes ago",
+        "Now, there’s more choice over the ads you see while protecting your identity",
+        "Set a screen lock",
+        "•",
+        "6 minutes ago",
+        "For added security, set a PIN, pattern, or password for this device.",
+        "Silent",
+        "Wi-Fi",
+        "AndroidWifi",
+        "Bluetooth",
+        "Mobile data",
+        "T-Mobile, 5G",
+        "Quick Share",
+        "3:44",
+        "Sun, Sep 13"
+      ]
+    },
+    {
+      "name": "notification-first-pending",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nio.github.supermonster003.autojs6.plugin.screencolorpicker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "notification-opened",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Internet",
+        "Tap a network to connect",
+        "T-Mobile",
+        "5G",
+        "Wi‑Fi",
+        "AndroidWifi",
+        "Connected",
+        "Share Wi‑Fi",
+        "Done"
+      ]
+    },
+    {
+      "name": "notification-second-cancelled",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": 3,
+            "generation": 2,
+            "detail": "INSTALL_FAILED_ABORTED: User rejected permissions"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Failed",
+        "Package installation failed: INSTALL_FAILED_ABORTED: User rejected permissions",
+        "DISMISS"
+      ]
+    },
+    {
+      "name": "notification-second-confirmation",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Install this app?",
+        "SDK37 BAL Fixture",
+        "Cancel",
+        "Install"
+      ]
+    },
+    {
+      "name": "notifications-expanded",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "AutoJs6",
+        "•",
+        "1 minute ago",
+        "2",
+        "App installation",
+        "•",
+        "org.autojs.sdk37.balfixture",
+        "•",
+        "1 minute ago",
+        "Continue to confirm the app installation.",
+        "App installation",
+        "•",
+        "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+        "•",
+        "2 minutes ago",
+        "Continue to confirm the app installation.",
+        "Notification cooldown is now on",
+        "•",
+        "6 minutes ago",
+        "Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.",
+        "New ads privacy features now available",
+        "•",
+        "6 minutes ago",
+        "Now, there’s more choice over the ads you see while protecting your identity",
+        "Wi-Fi",
+        "AndroidWifi",
+        "Bluetooth",
+        "Mobile data",
+        "T-Mobile, 5G",
+        "Quick Share",
+        "3:45",
+        "Sun, Sep 13"
+      ]
+    },
+    {
+      "name": "rebuilt-denied-before-continue",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 873037193,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285263127,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nio.github.supermonster003.autojs6.plugin.screencolorpicker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "rebuilt-denied-confirmation",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 873037193,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285263127,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Install this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Install"
+      ]
+    },
+    {
+      "name": "rebuilt-denied-result",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: rebuilt-denied"
+      ]
+    },
+    {
+      "name": "remaining-confirmation",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "remaining-installed",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "Screen Color Picker"
+      ]
+    },
+    {
+      "name": "remaining-notification",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.",
+        "AutoJs6",
+        "•",
+        "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+        "•",
+        "4 minutes ago",
+        "Notification cooldown is now on",
+        "•",
+        "7 minutes ago",
+        "Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.",
+        "New ads privacy features now available",
+        "•",
+        "7 minutes ago",
+        "Now, there’s more choice over the ads you see while protecting your identity",
+        "Set a screen lock",
+        "•",
+        "8 minutes ago",
+        "For added security, set a PIN, pattern, or password for this device.",
+        "Wi-Fi",
+        "AndroidWifi",
+        "Bluetooth",
+        "Mobile data",
+        "T-Mobile, 5G",
+        "Quick Share",
+        "3:47",
+        "Sun, Sep 13"
+      ]
+    },
+    {
+      "name": "reviewed37-before-kill",
+      "package": "org.autojs.autojs6",
+      "pid": "10262",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1914894935,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286466964,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Sun, Sep 13",
+        "Gmail",
+        "Photos",
+        "YouTube",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "AutoJs6.inrt"
+      ]
+    },
+    {
+      "name": "reviewed37-confirmation",
+      "package": "org.autojs.autojs6",
+      "pid": "10663",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1914894935,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286466964,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Update this app?",
+        "Screen Color Picker",
+        "Cancel",
+        "Update"
+      ]
+    },
+    {
+      "name": "reviewed37-return-prompt",
+      "package": "org.autojs.autojs6",
+      "pid": "10663",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 1914894935,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789286466964,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end",
+            "appLabel": "Screen Color Picker"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "App installation",
+        "Continue to confirm the app installation.\n\nScreen Color Picker",
+        "DISMISS",
+        "CONTINUE"
+      ]
+    },
+    {
+      "name": "reviewed37-success",
+      "package": "org.autojs.autojs6",
+      "pid": "10663",
+      "ledger": {
+        "version": 1,
+        "sessions": []
+      },
+      "visibleTexts": [
+        "SDK37 BAL: recovery_1789286526936549900"
+      ]
+    },
+    {
+      "name": "two-session-notifications",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "AutoJs6",
+        "•",
+        "now",
+        "2",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "Notification cooldown is now on",
+        "•",
+        "4 minutes ago",
+        "Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.",
+        "New ads privacy features now available",
+        "•",
+        "4 minutes ago",
+        "Now, there’s more choice over the ads you see while protecting your identity",
+        "Set a screen lock",
+        "•",
+        "5 minutes ago",
+        "For added security, set a PIN, pattern, or password for this device.",
+        "Silent",
+        "Wi-Fi",
+        "AndroidWifi",
+        "Bluetooth",
+        "Mobile data",
+        "T-Mobile, 5G",
+        "Quick Share",
+        "3:43",
+        "Sun, Sep 13"
+      ]
+    },
+    {
+      "name": "two-session-notifications-ready",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "AutoJs6",
+        "•",
+        "now",
+        "2",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "App installation",
+        "Continue to confirm the app installation.",
+        "Notification cooldown is now on",
+        "•",
+        "4 minutes ago",
+        "Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.",
+        "New ads privacy features now available",
+        "•",
+        "4 minutes ago",
+        "Now, there’s more choice over the ads you see while protecting your identity",
+        "Set a screen lock",
+        "•",
+        "6 minutes ago",
+        "For added security, set a PIN, pattern, or password for this device.",
+        "Silent",
+        "Wi-Fi",
+        "AndroidWifi",
+        "Bluetooth",
+        "Mobile data",
+        "T-Mobile, 5G",
+        "Quick Share",
+        "3:44",
+        "Sun, Sep 13"
+      ]
+    },
+    {
+      "name": "two-sessions-pending",
+      "pid": "5804",
+      "ledger": {
+        "version": 1,
+        "sessions": [
+          {
+            "sessionId": 200057667,
+            "packageName": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "createdAt": 1789285384650,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          },
+          {
+            "sessionId": 1683033218,
+            "packageName": "org.autojs.sdk37.balfixture",
+            "createdAt": 1789285405779,
+            "status": -1,
+            "generation": 1,
+            "detail": "",
+            "confirmationKey": "intent:#Intent;action=android.content.pm.action.CONFIRM_INSTALL;package=com.google.android.packageinstaller;end"
+          }
+        ]
+      },
+      "visibleTexts": [
+        "Screen Color Picker",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "Screen Color Picker"
+      ]
+    }
+  ],
+  "limits": [
+    "Session submission is not installation success.",
+    "Early v2 install probes attempted an unrelated missing BAL provider; raw fixtureReadError is retained.",
+    "Session 200057667 was submitted at foreground importance100; it is not background-eligibility evidence.",
+    "Snapshots contain sequential adb reads, not an atomic cross-process observation.",
+    "Force-stop expiry is distinct from ordinary process death.",
+    "System reboot, abrupt power loss and the remaining P2.5 ASM/Launcher/a11y/device gates were not closed."
+  ]
+}
