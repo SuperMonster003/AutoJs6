@@ -9,6 +9,7 @@ import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
+import org.autojs.autojs.theme.preference.LocalNetworkPermissionSwitchPreference
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -26,6 +27,7 @@ class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnShar
         EditorEnginePreferences.reconcile(requireContext())
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         refreshSharedCodeEditorPreferences()
+        findPreference<LocalNetworkPermissionSwitchPreference>(getString(R.string.key_local_network_permission))?.sync()
     }
 
     override fun onPause() {

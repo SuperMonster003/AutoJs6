@@ -133,6 +133,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき, デバイスの画面をオンにして明るく保つための設定です.\nAutoJs6 アプリケーションの全ページのうち, ホームページでのみ使用する場合は, \"ホームページのみ\" オプションを選択します</string>
     <string name="description_launcher_icon_preference">ランチャーアイコンはアダプティブアイコンと従来の透過背景アイコンの表示モードに対応しています. 実際の表示効果はAndroidシステムによって異なる場合があります. 表示モードを切り替えた後, 反映されるまで数秒かかることがあります.</string>
     <string name="description_launcher_shortcuts">ショートカットは, AutoJs6 で特定のアクションを実行することができます. ユーザーは, サポートされているランチャーにこれらのショートカットを表示し, AutoJs6 アプリケーションのドキュメントを読んだり, AutoJs6 の設定ページを起動したりするなど, いくつかのタスクを素早く開始したり, アクティビティを起動したりすることができます</string>
+    <string name="description_local_network_permission">VS Code を含むローカルネットワーク上のデバイスやサービスへの接続を許可します. スクリプトから明示的に権限を要求できます.</string>
     <string name="description_manage_ignored_updates_preference">クリックすると, リストアイテムを表示または管理できます.\nリストアイテムを削除するには, 長押しします</string>
     <string name="description_night_mode">AutoJs6 のナイトモード方針を制御し, その状態を反映します.\n\n注: ナイトモードのスイッチと自動ナイトモードのスイッチは相互に関連しており, 互いに影響します.</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
@@ -400,6 +401,8 @@
     <string name="error_invalid_time_format_pattern">時刻の形式が無効です</string>
     <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 のポートは \"[ipv6]:port\" 形式で指定する必要があります.</string>
+    <string name="error_local_network_permission_hint">ローカルネットワーク権限が無効です. 接続先がローカルネットワーク上にある場合は, アプリ設定で付近のデバイスを許可するか runtime.requestPermissions([\"access_local_network\"]) を呼び出し, 許可後に再試行してください. アドレス, サーバー, ファイアウォールも確認してください.</string>
+    <string name="error_local_network_permission_required">LAN サーバーを起動する前にローカルネットワーク権限を許可してください.</string>
     <string name="error_lua_runtime_ambiguous">互換性のある Lua Runtime プラグインが複数有効です. プラグインセンターで余分な Lua Runtime provider を無効にしてから, もう一度お試しください.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua Runtime が変更されたか, 起動できませんでした. もう一度お試しください; 問題が解決しない場合は, プラグインセンターでプラグインを更新するか再度有効にしてください.</string>
     <string name="error_lua_runtime_incompatible">インストールされている Lua Runtime は, この AutoJs6 バージョンまたはデバイスと互換性がありません. AutoJs6 または Lua Runtime プラグインを更新してから, もう一度お試しください.</string>
@@ -1388,6 +1391,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
     <string name="text_loading_completed">読み込み完了</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">読み込み中...</string>
+    <string name="text_local_network_permission">ローカルネットワーク権限</string>
+    <string name="text_local_network_permission_settings">ローカルネットワークへのアクセスが許可されていません. システム設定のアプリ権限で付近のデバイスを許可し, 戻って再試行してください.</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
     <string name="text_log">ログ</string>
     <string name="text_log_coloring">ログの色分け</string>

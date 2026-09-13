@@ -134,6 +134,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 이 포그라운드에 있을 때 장치의 화면을 켜고 밝게 유지하기 위한 기본 설정입니다.\nAutoJs6 애플리케이션의 모든 페이지 중 홈페이지에서만 발생하도록 하려면 \"홈페이지만\" 옵션을 선택합니다.</string>
     <string name="description_launcher_icon_preference">런처 아이콘은 어댑티브 아이콘과 기존 투명 배경 아이콘 두 가지 표시 모드를 지원합니다. 실제 표시 효과는 안드로이드 시스템별로 다를 수 있습니다. 표시 모드를 전환한 후 적용되기까지 몇 초가 걸릴 수 있습니다.</string>
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
+    <string name="description_local_network_permission">VS Code 를 포함한 로컬 네트워크의 기기 및 서비스 연결을 허용합니다. 스크립트에서 이 권한을 명시적으로 요청할 수 있습니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
     <string name="description_night_mode">AutoJs6 의 야간 모드 전략을 제어하고 그 상태를 반영합니다.\n\n참고: 야간 모드 스위치와 자동 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
@@ -401,6 +402,8 @@
     <string name="error_invalid_time_format_pattern">잘못된 시간 형식입니다</string>
     <string name="error_ip_address_should_not_be_empty">IP 주소는 비워둘 수 없습니다</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 포트는 \"[ipv6]:port\" 형식으로 지정해야 합니다.</string>
+    <string name="error_local_network_permission_hint">로컬 네트워크 권한이 꺼져 있습니다. 대상이 로컬 네트워크에 있다면 앱 설정에서 근처 기기를 허용하거나 runtime.requestPermissions([\"access_local_network\"]) 를 호출하고, 권한 허용 후 다시 시도하세요. 주소, 서버 및 방화벽도 확인하세요.</string>
+    <string name="error_local_network_permission_required">LAN 서버를 시작하기 전에 로컬 네트워크 권한을 허용하세요.</string>
     <string name="error_lua_runtime_ambiguous">호환되는 Lua Runtime 플러그인이 여러 개 활성화되어 있습니다. 플러그인 센터에서 불필요한 Lua Runtime provider를 비활성화한 후 다시 시도하세요.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua Runtime이 변경되었거나 시작되지 않았습니다. 다시 시도하세요; 문제가 계속되면 플러그인 센터에서 플러그인을 업데이트하거나 다시 활성화하세요.</string>
     <string name="error_lua_runtime_incompatible">설치된 Lua Runtime이 현재 AutoJs6 버전 또는 기기와 호환되지 않습니다. AutoJs6 또는 Lua Runtime 플러그인을 업데이트한 후 다시 시도하세요.</string>
@@ -1389,6 +1392,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
     <string name="text_loading_completed">로딩 완료</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
+    <string name="text_local_network_permission">로컬 네트워크 권한</string>
+    <string name="text_local_network_permission_settings">로컬 네트워크 접근이 허용되지 않았습니다. 시스템 설정의 앱 권한에서 근처 기기를 허용한 후 돌아와 다시 시도하세요.</string>
     <string name="text_locate_current_theme_color">현재 테마 색상 찾기</string>
     <string name="text_log">통나무</string>
     <string name="text_log_coloring">로그 색상</string>

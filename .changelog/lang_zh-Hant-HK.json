@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/09/13",
       "feature": [
+        "Android 17 本地網絡權限管理, 支援側欄, 設定頁及 VS Code 連接時按需申請, 並按實際 targetSdk 宣告權限",
         "MCP 工作目錄能力支援 Android 應用查詢, 編輯器行列定位, 按設定策略自動啟用無障礙, Shell 輸出限制與大型 JSON 結果的唯讀檔案描述符傳輸; root 執行使用獨立 shell.root 授權和手機端開關",
         "獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 \"quickjs\"/\"qjs\" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun",
         "`device.pageSize` 唯讀屬性, 傳回目前系統的記憶體頁大小 (位元組), 支援識別 4 KB / 16 KB 執行環境",
@@ -342,6 +343,7 @@
         "MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權"
       ],
       "improvement": [
+        "區域網絡 HTTP, WebSocket 及 Node 受控網絡橋的連接失敗提示, 保留原始錯誤並說明授權後的重試方式; 通用權限名稱轉換不受系統語言影響",
         "專案 compileSdk 提升至 37 (Android 17), 完善 SDK 遷移的偵錯建置與 lint 驗證",
         "安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以兼容大型 APK/AAB/APKS",
         "資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取",

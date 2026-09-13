@@ -132,6 +132,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">Предпочтение для сохранения экрана устройства включенным и ярким, когда AutoJs6 находится на переднем плане.\nЧтобы это происходило только на главной странице среди всех страниц приложения AutoJs6, выберите опцию \"Только главная страница\".</string>
     <string name="description_launcher_icon_preference">Значок запуска поддерживает режимы отображения адаптивного значка или наследуемого значка с прозрачным фоном. Фактический вид может различаться на разных версиях Android. После переключения режима отображения может пройти несколько секунд, прежде чем изменения вступят в силу.</string>
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
+    <string name="description_local_network_permission">Разрешить соединения с устройствами и службами локальной сети, включая VS Code. Скрипты могут явно запрашивать это разрешение.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
     <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nПримечание: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
@@ -399,6 +400,8 @@
     <string name="error_invalid_time_format_pattern">Недопустимый формат времени</string>
     <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
     <string name="error_ipv6_port_requires_brackets">Порт IPv6 должен быть указан в формате \"[ipv6]:port\".</string>
+    <string name="error_local_network_permission_hint">Разрешение доступа к локальной сети отключено. Если адрес находится в локальной сети, разрешите доступ к устройствам поблизости в настройках приложения или вызовите runtime.requestPermissions([\"access_local_network\"]), предоставьте разрешение и повторите попытку. Также проверьте адрес, сервер и межсетевой экран.</string>
+    <string name="error_local_network_permission_required">Предоставьте разрешение доступа к локальной сети перед запуском LAN-сервера.</string>
     <string name="error_lua_runtime_ambiguous">Включено несколько совместимых плагинов Lua Runtime. Отключите лишние provider-компоненты Lua Runtime в Центре плагинов и повторите попытку.</string>
     <string name="error_lua_runtime_identity_or_bind">Среда Lua Runtime изменилась или не запустилась. Повторите попытку; если проблема сохраняется, обновите или повторно включите плагин в Центре плагинов.</string>
     <string name="error_lua_runtime_incompatible">Установленная среда Lua Runtime несовместима с этой версией AutoJs6 или устройством. Обновите AutoJs6 или плагин Lua Runtime и повторите попытку.</string>
@@ -1387,6 +1390,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
     <string name="text_loading_completed">Загрузка завершена</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
+    <string name="text_local_network_permission">Разрешение доступа к локальной сети</string>
+    <string name="text_local_network_permission_settings">Доступ к локальной сети запрещен. Разрешите доступ к устройствам поблизости в разрешениях приложения, затем вернитесь и повторите попытку.</string>
     <string name="text_locate_current_theme_color">Найти текущий цвет темы</string>
     <string name="text_log">Журнал</string>
     <string name="text_log_coloring">Раскраска логов</string>

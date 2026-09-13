@@ -127,6 +127,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
     <string name="description_launcher_icon_preference">Launcher icon supports both adaptive icon or legacy transparent background icon display modes. The actual display effect may vary on different Android systems. It may take a few seconds to take effect after switching display modes.</string>
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
+    <string name="description_local_network_permission">Allow connections to devices and services on the local network, including VS Code. Scripts can request this permission explicitly.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
     <string name="description_night_mode">Used to control and reflect AutoJs6\'s night mode strategy.\n\nNote: the night mode toggle and the auto night mode toggle are linked and affect each other.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
@@ -394,6 +395,8 @@
     <string name="error_invalid_time_format_pattern">Invalid time format pattern</string>
     <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 port must be specified as \"[ipv6]:port\".</string>
+    <string name="error_local_network_permission_hint">Local network permission is off. If the destination is on your local network, allow Nearby devices in app settings or call runtime.requestPermissions([\"access_local_network\"]), complete authorization and retry. Also check the address, server and firewall.</string>
+    <string name="error_local_network_permission_required">Allow local network permission before starting the LAN server.</string>
     <string name="error_lua_runtime_ambiguous">Multiple compatible Lua runtime plugins are enabled. Disable extra Lua runtime providers in Plugin Center, then try again.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua Runtime changed or could not be started. Try again; if the problem persists, update or re-enable the plugin in Plugin Center.</string>
     <string name="error_lua_runtime_incompatible">The installed Lua Runtime is incompatible with this AutoJs6 version or device. Update AutoJs6 or the Lua Runtime plugin, then try again.</string>
@@ -1383,6 +1386,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_completed">Loading completed</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
+    <string name="text_local_network_permission">Local network permission</string>
+    <string name="text_local_network_permission_settings">Local network access is disabled. You can allow Nearby devices in the app permissions in system settings, then return and retry.</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
     <string name="text_log_coloring">Log coloring</string>

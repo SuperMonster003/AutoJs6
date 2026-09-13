@@ -132,6 +132,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">Preferencia para mantener la pantalla del dispositivo encendida y brillante cuando AutoJs6 está en primer plano.\nPara que sólo ocurra en la página de inicio entre todas las páginas de la aplicación AutoJs6, elija la opción \"sólo página de inicio\".</string>
     <string name="description_launcher_icon_preference">El ícono del iniciador admite modos de visualización de ícono adaptable o heredado con fondo transparente. El efecto de visualización real puede variar en diferentes sistemas Android. Puede tardar unos segundos en surtir efecto después de cambiar el modo de visualización.</string>
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
+    <string name="description_local_network_permission">Permitir conexiones a dispositivos y servicios de la red local, incluido VS Code. Los scripts pueden solicitar este permiso de forma explícita.</string>
     <string name="description_manage_ignored_updates_preference">Pulse para ver o gestionar los elementos de la lista.\nHaga una pulsación larga para eliminar el elemento de la lista.</string>
     <string name="description_night_mode">Se usa para controlar y reflejar la estrategia de modo nocturno de AutoJs6.\n\nNota: el interruptor de modo nocturno y el interruptor de modo nocturno automático están vinculados y se afectan mutuamente.</string>
     <string name="description_night_mode_preference">El modo nocturno (también conocido como tema oscuro) se aplica tanto a la interfaz de usuario del sistema Android como a las aplicaciones que se ejecutan en el dispositivo, lo que mejora la visibilidad para los usuarios con baja visión y los que son sensibles a la luz brillante, y facilita el uso de un dispositivo en un entorno con poca luz.\n\nSistema de seguimiento: AutoJs6 tiene ajustes de modo nocturno iguales a los del sistema Android\nSiempre activado: AutoJs6 mantiene activado el modo Noche (independientemente de la configuración del sistema Android)\nSiempre desactivado: AutoJs6 mantiene el modo nocturno desactivado (independientemente de la configuración del sistema Android)\n\nNota: La opción de seguir el sistema es sólo para el nivel 28 de la API de Android (Android 9) [P] y superior.</string>
@@ -399,6 +400,8 @@
     <string name="error_invalid_time_format_pattern">Formato de hora no válido</string>
     <string name="error_ip_address_should_not_be_empty">La dirección IP no puede estar vacía</string>
     <string name="error_ipv6_port_requires_brackets">El puerto IPv6 debe especificarse con el formato \"[ipv6]:port\".</string>
+    <string name="error_local_network_permission_hint">El permiso de red local está desactivado. Si el destino está en tu red local, permite los dispositivos cercanos en los ajustes de la aplicación o llama a runtime.requestPermissions([\"access_local_network\"]), concede el permiso e inténtalo de nuevo. Comprueba también la dirección, el servidor y el cortafuegos.</string>
+    <string name="error_local_network_permission_required">Concede el permiso de red local antes de iniciar el servidor LAN.</string>
     <string name="error_lua_runtime_ambiguous">Hay varios plugins de Lua Runtime compatibles habilitados. Deshabilita los providers adicionales de Lua Runtime en el Centro de plugins y vuelve a intentarlo.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua Runtime ha cambiado o no se pudo iniciar. Vuelve a intentarlo; si el problema persiste, actualiza o vuelve a habilitar el plugin en el Centro de plugins.</string>
     <string name="error_lua_runtime_incompatible">El Lua Runtime instalado no es compatible con esta versión de AutoJs6 o con el dispositivo. Actualiza AutoJs6 o el plugin Lua Runtime y vuelve a intentarlo.</string>
@@ -1387,6 +1390,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Intentando una solución alternativa...</string>
     <string name="text_loading_completed">Carga completada</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Cargando...</string>
+    <string name="text_local_network_permission">Permiso de red local</string>
+    <string name="text_local_network_permission_settings">El acceso a la red local está desactivado. Permite los dispositivos cercanos en los permisos de la aplicación, vuelve e inténtalo de nuevo.</string>
     <string name="text_locate_current_theme_color">Localizar color del tema actual</string>
     <string name="text_log">Registrar</string>
     <string name="text_log_coloring">Coloreado de registros</string>

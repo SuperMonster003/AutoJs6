@@ -19,6 +19,7 @@ class MutableOkHttp : OkHttpClient() {
     var maxRetries = DEFAULT_MAX_RETRIES
 
     init {
+        mInterceptors.add(LocalNetworkDiagnostics())
         mInterceptors.add(getRetryInterceptor())
         muteClient(Builder())
     }

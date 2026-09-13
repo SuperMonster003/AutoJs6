@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` MCP workspace capabilities add Android application queries, editor line and column positioning, automatic accessibility activation using configured strategies, bounded Shell output, and read-only descriptors for large JSON results; root execution uses a separate shell.root grant and phone setting
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` `device.pageSize` read-only property returns the running system memory page size in bytes, identifying 4 KB / 16 KB environments
@@ -343,6 +344,7 @@
 * `Fix` The OpenCV and Image Quantization plugin loaders continued after read-only cache protection failed; native files are now verified as read-only before loading for Android 17 compatibility
 * `Fix` runtime.loadDex on Android 7.0 / 7.1 could overwrite the staged DEX with ART's optimized output, causing class loading to fail
 * `Fix` MediaProjection bridge captures retry transient missing frames up to six times, allowing consecutive screenshots after the capture pipeline refreshes without requesting consent again
+* `Improvement` LAN connection recovery hints for HTTP, WebSocket and the Node controlled network bridge preserve original errors and explain retry after authorization; generic permission-name conversion is independent of the system language
 * `Improvement` Raise project compileSdk to 37 (Android 17) and improve debug builds and lint verification for SDK migration
 * `Improvement` Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files
 * `Improvement` Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal

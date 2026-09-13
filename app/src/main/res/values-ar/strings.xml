@@ -134,6 +134,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">تفضيل إبقاء شاشة الجهاز قيد التشغيل وساطعة عندما يكون AutoJs6 في المقدمة.\nلتحقيق ذلك فقط على الصفحة الرئيسية بين جميع صفحات تطبيق AutoJs6 ، اختر خيار \"الصفحة الرئيسية فقط\".</string>
     <string name="description_launcher_icon_preference">يدعم رمز المشغّل وضعي عرض: الرمز المتكيّف أو الرمز التقليدي بخلفية شفافة. قد يختلف تأثير العرض الفعلي عبر أنظمة أندرويد المختلفة. قد يستغرق الأمر بضع ثوانٍ ليصبح التغيير ساريًا بعد تبديل وضع العرض.</string>
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
+    <string name="description_local_network_permission">السماح بالاتصال بالأجهزة والخدمات على الشبكة المحلية, بما فيها VS Code. يمكن للبرامج النصية طلب هذا الإذن صراحة.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nملاحظة: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
@@ -401,6 +402,8 @@
     <string name="error_invalid_time_format_pattern">تنسيق الوقت غير صالح</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
     <string name="error_ipv6_port_requires_brackets">يجب تحديد منفذ IPv6 بصيغة \"[ipv6]:port\".</string>
+    <string name="error_local_network_permission_hint">إذن الشبكة المحلية غير مفعل. إذا كانت الوجهة على شبكتك المحلية, فاسمح بالأجهزة القريبة في إعدادات التطبيق أو استدع runtime.requestPermissions([\"access_local_network\"]), وأكمل منح الإذن ثم حاول مجددا. تحقق أيضا من العنوان والخادم وجدار الحماية.</string>
+    <string name="error_local_network_permission_required">اسمح بإذن الشبكة المحلية قبل تشغيل خادم LAN.</string>
     <string name="error_lua_runtime_ambiguous">تم تمكين عدة إضافات متوافقة لـ Lua Runtime. عطّل موفري Lua Runtime الزائدين في مركز الإضافات, ثم أعد المحاولة.</string>
     <string name="error_lua_runtime_identity_or_bind">تغير Lua Runtime أو تعذر تشغيله. أعد المحاولة; إذا استمرت المشكلة, فحدّث الإضافة أو أعد تمكينها في مركز الإضافات.</string>
     <string name="error_lua_runtime_incompatible">Lua Runtime المثبت غير متوافق مع إصدار AutoJs6 هذا أو مع الجهاز. حدّث AutoJs6 أو إضافة Lua Runtime, ثم أعد المحاولة.</string>
@@ -1389,6 +1392,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">جارٍ تجربة حل بديل...</string>
     <string name="text_loading_completed">اكتمل التحميل</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">جار التحميل...</string>
+    <string name="text_local_network_permission">إذن الشبكة المحلية</string>
+    <string name="text_local_network_permission_settings">الوصول إلى الشبكة المحلية غير مسموح. اسمح بالأجهزة القريبة ضمن أذونات التطبيق في إعدادات النظام, ثم عد وحاول مجددا.</string>
     <string name="text_locate_current_theme_color">تحديد لون الثيم الحالي</string>
     <string name="text_log">سجل</string>
     <string name="text_log_coloring">تلوين السجلات</string>

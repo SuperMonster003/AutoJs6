@@ -8,6 +8,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.eventloop.EventEmitter
+import org.autojs.autojs.core.http.LocalNetworkDiagnostics
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.mozilla.javascript.Callable
 import java.lang.ref.WeakReference
@@ -30,6 +31,7 @@ class WebSocket @JvmOverloads constructor(
 
     private var listener: WebSocketMessageListener
     private lateinit var webSocket: okhttp3.WebSocket
+    private val networkClient = LocalNetworkDiagnostics.withDiagnostics(client)
 
     init {
         WebSocketMessageListener(this).also { listener = it }
@@ -37,7 +39,7 @@ class WebSocket @JvmOverloads constructor(
     }
 
     private fun build() {
-        webSocket = client.newWebSocket(Builder().url(url).build(), listener)
+        webSocket = networkClient.newWebSocket(Builder().url(url).build(), listener)
         instances.add(WeakReference(this))
     }
 

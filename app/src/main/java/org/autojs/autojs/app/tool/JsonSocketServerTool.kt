@@ -2,6 +2,7 @@ package org.autojs.autojs.app.tool
 
 import android.annotation.SuppressLint
 import android.content.Context
+import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 
@@ -16,8 +17,14 @@ class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
             devPlugin.isServerSocketNormallyClosed = state
         }
 
-    @SuppressLint("CheckResult")
     override fun connect() {
+        LocalNetworkPermission(context).request { granted ->
+            if (granted) startServer() else onConnectionDialogDismissed.onDismiss(null)
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    private fun startServer() {
         devPlugin
             .enableLocalServer()
             .subscribe(Observers.emptyConsumer()) {
@@ -29,7 +36,7 @@ class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     override fun connectIfNotNormallyClosed() {
-        if (!isNormallyClosed) connect()
+        if (!isNormallyClosed && LocalNetworkPermission.isGranted(context)) startServer()
     }
 
     override fun disconnect() {

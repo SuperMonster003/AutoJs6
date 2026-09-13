@@ -170,6 +170,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/09/13
 
+* `新增` Android 17 本機網路權限管理, 支援側欄, 設定頁及 VS Code 連線時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` MCP 工作目錄能力支援 Android 應用程式查詢, 編輯器行列定位, 按設定策略自動啟用無障礙, Shell 輸出限制與大型 JSON 結果的唯讀檔案描述符傳輸; root 執行使用獨立 shell.root 授權和手機端開關
 * `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` `device.pageSize` 唯讀屬性, 傳回目前系統的記憶體頁大小 (位元組), 支援識別 4 KB / 16 KB 執行環境
@@ -505,6 +506,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` OpenCV 與 Image Quantization 外掛在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
 * `修復` Android 7.0 / 7.1 的 runtime.loadDex 因 ART 最佳化輸出與輸入路徑重合, 損壞 DEX 快取並導致類別載入失敗的問題
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
+* `最佳化` 區域網路 HTTP, WebSocket 及 Node 受控網路橋的連線失敗提示, 保留原始錯誤並說明授權後的重試方式; 通用權限名稱轉換不受系統語言影響
 * `最佳化` 專案 compileSdk 提升至 37 (Android 17), 完善 SDK 遷移的偵錯建置與 lint 驗證
 * `最佳化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以相容大型 APK/AAB/APKS
 * `最佳化` 資訊對話框共用可重用的項目元件, 支援在任意位置插入 key:value 項目, 自動對齊鍵欄並在關閉時取消非同步讀取

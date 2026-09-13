@@ -14,6 +14,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
@@ -50,6 +51,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     // Remember last host for retry/amend.
     // zh-CN: 记录最近一次 host, 用于重试/修正.
     private var lastConnectingHost: String? = null
+    private var localNetworkRequestInFlight = false
 
     // Main thread handler for UI operations, because connectToRemoteServer is @AnyThread.
     // zh-CN: 主线程 handler 用于 UI 操作, 因为 connectToRemoteServer 标注为 @AnyThread.
@@ -71,11 +73,13 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     override val isInMainThread = true
 
     override fun connect() {
-        inputRemoteHost(isAutoConnect = !isNormallyClosed)
+        inputRemoteHost(isAutoConnect = false)
     }
 
     override fun connectIfNotNormallyClosed() {
-        if (!isNormallyClosed) connect()
+        if (!isNormallyClosed) {
+            inputRemoteHost(isAutoConnect = true)
+        }
     }
 
     override fun disconnect() {
@@ -352,8 +356,33 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             }
     }
 
-    private fun connectToServerWithStatus(host: String, dismissInputDialog: MaterialDialog?) {
+    private fun connectToServerWithStatus(host: String, dismissInputDialog: MaterialDialog?, permissionRequested: Boolean = false) {
         if (isContextInvalidForDialog()) return
+
+        if (!permissionRequested && !LocalNetworkPermission.isGranted(context)) {
+            if (localNetworkRequestInFlight) return
+            localNetworkRequestInFlight = true
+            Observable.fromCallable { devPlugin.needsLocalNetworkPermission(host) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ needed ->
+                    if (isContextInvalidForDialog()) {
+                        localNetworkRequestInFlight = false
+                    } else if (needed) {
+                        LocalNetworkPermission(context).request { granted ->
+                            localNetworkRequestInFlight = false
+                            if (granted) connectToServerWithStatus(host, dismissInputDialog, permissionRequested = true)
+                        }
+                    } else {
+                        localNetworkRequestInFlight = false
+                        connectToServerWithStatus(host, dismissInputDialog, permissionRequested = true)
+                    }
+                }, { error ->
+                    localNetworkRequestInFlight = false
+                    showConnectionFailedDialog(host, error)
+                })
+            return
+        }
 
         val trimmedHost = host.trim()
         lastConnectingHost = trimmedHost

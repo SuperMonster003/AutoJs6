@@ -34,6 +34,7 @@ import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
+import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.permission.UsageStatsPermission
@@ -129,6 +130,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
+    private lateinit var mLocalNetworkPermissionItem: DrawerMenuToggleableItem
     private lateinit var mNotificationAccessItem: DrawerMenuToggleableItem
     private lateinit var mAllFilesAccessPermissionItem: DrawerMenuToggleableItem
     private lateinit var mUsageStatsPermissionItem: DrawerMenuToggleableItem
@@ -401,7 +403,18 @@ open class DrawerFragment : Fragment() {
                 drawerItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
             }
+            setOnConnectionDialogDismissed { drawerItem.setCheckedIfNeeded(false) }
             connectIfNotNormallyClosed()
+        }
+
+        mLocalNetworkPermissionItem = DrawerMenuToggleableItem(
+            helper = LocalNetworkPermission(mContext),
+            icon = R.drawable.ic_cast_connected_black_48dp,
+            title = R.string.text_local_network_permission,
+            descriptionRes = R.string.description_local_network_permission,
+        ).also { item ->
+            item.isHidden = !LocalNetworkPermission.isRequired(mContext)
+            item.setOnLaunchSettingsListener { (item.getHelper() as LocalNetworkPermission).config() }
         }
 
         mNotificationPostItem = DrawerMenuToggleableItem(
@@ -937,6 +950,7 @@ open class DrawerFragment : Fragment() {
             mServerModeItem,
             DrawerMenuGroup(R.string.text_permissions),
             mNotificationPostItem,
+            mLocalNetworkPermissionItem,
             mNotificationAccessItem,
             mAllFilesAccessPermissionItem,
             mUsageStatsPermissionItem,
@@ -990,6 +1004,7 @@ open class DrawerFragment : Fragment() {
         mClientModeItem,
         mServerModeItem,
         mNotificationPostItem,
+        mLocalNetworkPermissionItem,
         mNotificationAccessItem,
         mAllFilesAccessPermissionItem,
         mUsageStatsPermissionItem,

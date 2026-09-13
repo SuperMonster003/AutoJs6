@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestMultiple
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import org.autojs.autojs.permission.PostNotificationsPermission
+import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.RomUtils
 import java.util.WeakHashMap
@@ -75,6 +76,7 @@ class Permissions(private val context: Context) {
         fun registerRequestMultiplePermissionsLauncher(activity: FragmentActivity): ActivityResultLauncher<Array<String>> {
             getRegisteredRequestMultiplePermissionsLauncher(activity)?.let { return it }
             return activity.registerForActivityResult(RequestMultiplePermissions()) { resultMap ->
+                LocalNetworkPermission.onRequestResult(activity, resultMap)
                 for ((key: String, isGranted: Boolean) in resultMap) {
                     Log.d(TAG, "$key: $isGranted")
                     when (key) {
@@ -82,7 +84,6 @@ class Permissions(private val context: Context) {
                             // Deliver one-shot callback.
                             // zh-CN: 触发一次性回调 (如果存在), 然后移除, 避免重复触发和泄漏.
                             PostNotificationsPermission.postNotificationsResultCallbackCache.remove(activity)?.invoke(isGranted)
-                            break
                         }
                     }
                 }

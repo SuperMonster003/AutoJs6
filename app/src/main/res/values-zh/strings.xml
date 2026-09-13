@@ -128,6 +128,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">用于当 AutoJs6 位于前台时使设备屏幕保持常亮.\n如需在 AutoJs6 应用的所有页面中, 仅在主页时保持设备屏幕常亮, 可选择 \"仅限主页\" 选项.</string>
     <string name="description_launcher_icon_preference">启动器图标支持自适应图标显示方式与传统透明背景图标显示方式. 不同安卓系统的图标实际显示效果可能有所不同. 切换显示方式后, 可能需要几秒钟的时间生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中执行特定操作, 用户可以在启动器中显示这些快捷方式, 并快速开始某些任务或启动某个活动, 如阅读 AutoJs6 应用文档, 启动 AutoJs6 设置页面等.</string>
+    <string name="description_local_network_permission">允许连接局域网中的设备和服务, 包括 VS Code. 脚本可显式申请此权限.</string>
     <string name="description_manage_ignored_updates_preference">点击可查看或管理列表项.\n长按可移除列表项.</string>
     <string name="description_night_mode">用于控制并反映 AutoJs6 夜间模式策略.\n\n注: 夜间模式开关与自动夜间模式开关互相关联且互相影响.</string>
     <string name="description_night_mode_preference">夜间模式, 亦称 [ 暗黑模式 / 深色主题 ] 等. 夜间模式应用于安卓系统 UI (如通知栏和导航栏) 及 AutoJs6 应用页面. 夜间模式可提升设备在低光环境下的易用性, 同时有助于提升弱视或光敏感用户的视觉体验.\n\n跟随系统: AutoJs6 与安卓操作系统的夜间模式设置一致\n总是开启: AutoJs6 保持开启夜间模式 (忽略操作系统设置)\n总是关闭: AutoJs6 保持关闭夜间模式 (忽略操作系统设置)\n\n注: 跟随系统功能仅支持安卓 API 级别 28 (安卓 9) [P] 及以上操作系统.</string>
@@ -395,6 +396,8 @@
     <string name="error_invalid_time_format_pattern">无效的时间格式</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可为空</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 端口必须使用 \"[ipv6]:port\" 格式.</string>
+    <string name="error_local_network_permission_hint">本地网络权限未开启. 如果目标位于局域网, 请在应用设置中允许附近的设备, 或调用 runtime.requestPermissions([\"access_local_network\"]), 完成授权后重试. 同时检查地址, 服务端与防火墙.</string>
+    <string name="error_local_network_permission_required">请先允许本地网络权限, 再启动局域网服务端.</string>
     <string name="error_lua_runtime_ambiguous">检测到多个兼容且已启用的 Lua 运行时插件. 请在插件中心禁用多余的 Lua 运行时 Provider, 然后重试.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua 运行时发生变化或无法启动. 请重试; 如问题持续, 请在插件中心更新或重新启用该插件.</string>
     <string name="error_lua_runtime_incompatible">已安装的 Lua 运行时与当前 AutoJs6 版本或设备不兼容. 请更新 AutoJs6 或 Lua 运行时插件, 然后重试.</string>
@@ -1384,6 +1387,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在尝试备选方案...</string>
     <string name="text_loading_completed">加载完毕</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加载中...</string>
+    <string name="text_local_network_permission">本地网络权限</string>
+    <string name="text_local_network_permission_settings">本地网络访问未授权. 可在系统设置的应用权限中允许附近的设备, 然后返回并重试.</string>
     <string name="text_locate_current_theme_color">定位当前主题色</string>
     <string name="text_log">日志</string>
     <string name="text_log_coloring">日志着色</string>

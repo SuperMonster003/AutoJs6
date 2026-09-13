@@ -3,8 +3,10 @@ package org.autojs.autojs.core.permission;
 import android.content.Context;
 import android.content.Intent;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.permission.LocalNetworkPermission;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
@@ -18,7 +20,10 @@ public class Permissions {
         ArrayList<String> list = new ArrayList<>();
         for (String permission : permissions) {
             if (!permission.startsWith("android.permission.")) {
-                permission = "android.permission." + permission.toUpperCase();
+                permission = "android.permission." + permission.toUpperCase(Locale.ROOT);
+            }
+            if (LocalNetworkPermission.PERMISSION.equals(permission) && !LocalNetworkPermission.isRequired(context)) {
+                continue;
             }
             if (context.checkSelfPermission(permission) == PERMISSION_DENIED) {
                 list.add(permission);

@@ -1,5 +1,7 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.core.http.LocalNetworkDiagnostics
+
 import android.Manifest
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 import android.app.Notification
@@ -826,6 +828,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
     private val networkClient = OkHttpClient.Builder()
+        .addInterceptor(LocalNetworkDiagnostics { appContext })
         .followRedirects(false)
         .followSslRedirects(false)
         .build()
@@ -4352,7 +4355,9 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                val code = if (call.isCanceled()) NodeRuntimeErrorCodes.NETWORK_ABORTED else NodeRuntimeErrorCodes.NETWORK_TIMEOUT
+                val cancelled = call.isCanceled() && !LocalNetworkDiagnostics.isCallTimeout(e)
+                val failure = if (cancelled) e else LocalNetworkDiagnostics.explain(appContext, call.request().url.host, e)
+                val code = if (cancelled) NodeRuntimeErrorCodes.NETWORK_ABORTED else NodeRuntimeErrorCodes.NETWORK_TIMEOUT
                 if (code == NodeRuntimeErrorCodes.NETWORK_ABORTED) {
                     networkDiagnostics.recordAbort()
                 } else {
@@ -4362,10 +4367,10 @@ class AndroidNodeBridgeCapabilityProvider(
                     NodeBridgeResponse.failure(
                         request.id,
                         NodeBridgeError.network(
-                            message = if (call.isCanceled()) {
+                            message = if (cancelled) {
                                 "AutoJs6 controlled fetch was cancelled."
                             } else {
-                                "AutoJs6 controlled fetch timed out or failed: ${e.message ?: e.javaClass.name}"
+                                "AutoJs6 controlled fetch timed out or failed: ${failure.message ?: failure.javaClass.name}"
                             },
                             code = code,
                             module = request.module,

@@ -22,8 +22,9 @@ object Base {
         for (permission in permissions) {
             var perm = permission
             if (!perm.startsWith(PREFIX)) {
-                perm = PREFIX + perm.uppercase(Locale.getDefault())
+                perm = PREFIX + perm.uppercase(Locale.ROOT)
             }
+            if (perm == LocalNetworkPermission.PERMISSION && !LocalNetworkPermission.isRequired(context)) continue
             if (context.checkSelfPermission(perm) == PackageManager.PERMISSION_DENIED) {
                 list.add(perm)
             }

@@ -129,6 +129,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">用於當 AutoJs6 位於前臺時使裝置螢幕保持常亮.\n如需在 AutoJs6 應用的所有頁面中, 僅在主頁時保持裝置螢幕常亮, 可選擇 \"僅限主頁\" 選項.</string>
     <string name="description_launcher_icon_preference">啟動器圖示支援自適應圖示顯示方式與傳統透明背景圖示顯示方式. 不同安卓系統的圖示實際顯示效果可能有所不同. 切換顯示方式後, 可能需要幾秒鐘的時間生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 使用者可以在啟動器中顯示這些快捷方式, 並快速開始某些任務或啟動某個活動, 如閲讀 AutoJs6 應用文件, 啟動 AutoJs6 設定頁面等.</string>
+    <string name="description_local_network_permission">允許連線至區域網路中的裝置和服務, 包括 VS Code. 指令碼可明確申請此權限.</string>
     <string name="description_manage_ignored_updates_preference">點選可檢視或管理列表項.\n長按可移除列表項.</string>
     <string name="description_night_mode">用於控制並反映 AutoJs6 夜間模式策略.\n\n注: 夜間模式開關與自動夜間模式開關互相關聯且互相影響.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等. 夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面. 夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
@@ -396,6 +397,8 @@
     <string name="error_invalid_time_format_pattern">無效的時間格式</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
     <string name="error_ipv6_port_requires_brackets">IPv6 埠必須使用 \"[ipv6]:port\" 格式.</string>
+    <string name="error_local_network_permission_hint">本機網路權限未開啟. 如果目標位於區域網路, 請在應用程式設定中允許附近的裝置, 或呼叫 runtime.requestPermissions([\"access_local_network\"]), 完成授權後重試. 同時檢查位址, 伺服器與防火牆.</string>
+    <string name="error_local_network_permission_required">請先允許本機網路權限, 再啟動區域網路伺服器.</string>
     <string name="error_lua_runtime_ambiguous">偵測到多個相容且已啟用的 Lua 執行時外掛. 請在外掛中心停用多餘的 Lua 執行時 Provider, 然後重試.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua 執行時已變更或無法啟動. 請重試; 如果問題持續, 請在外掛中心更新或重新啟用該外掛.</string>
     <string name="error_lua_runtime_incompatible">已安裝的 Lua 執行時與目前 AutoJs6 版本或裝置不相容. 請更新 AutoJs6 或 Lua 執行時外掛, 然後重試.</string>
@@ -1384,6 +1387,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
     <string name="text_loading_completed">載入完畢</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">載入中...</string>
+    <string name="text_local_network_permission">本機網路權限</string>
+    <string name="text_local_network_permission_settings">本機網路存取未獲授權. 可在系統設定的應用程式權限中允許附近的裝置, 然後返回並重試.</string>
     <string name="text_locate_current_theme_color">定位當前主題色</string>
     <string name="text_log">日誌</string>
     <string name="text_log_coloring">日誌著色</string>

@@ -132,6 +132,7 @@
     <string name="description_keep_screen_on_when_in_foreground_preference">Préférence pour que l\'écran de l\'appareil reste allumé et lumineux lorsque AutoJs6 est au premier plan.\nPour que cela se produise uniquement sur la page d\'accueil parmi toutes les pages de l\'application AutoJs6, choisissez l\'option \"page d\'accueil uniquement\".</string>
     <string name="description_launcher_icon_preference">L\'icône du lanceur prend en charge les modes d\'affichage d\'icône adaptative ou d\'icône héritée à fond transparent. L\'effet d\'affichage réel peut varier selon les systèmes Android. L\'application du changement peut prendre quelques secondes après avoir basculé de mode d\'affichage.</string>
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
+    <string name="description_local_network_permission">Autoriser les connexions aux appareils et services du réseau local, dont VS Code. Les scripts peuvent demander explicitement cette autorisation.</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
     <string name="description_night_mode">Permet de contrôler et de refléter la stratégie de mode nuit d\'AutoJs6.\n\nNote : l\'interrupteur de mode nuit et l\'interrupteur de mode nuit automatique sont liés et s\'influencent mutuellement.</string>
     <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi : AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé : AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé : AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque : l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
@@ -399,6 +400,8 @@
     <string name="error_invalid_time_format_pattern">Format de l\'heure non valide</string>
     <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
     <string name="error_ipv6_port_requires_brackets">Le port IPv6 doit être spécifié au format \"[ipv6]:port\".</string>
+    <string name="error_local_network_permission_hint">L\'autorisation du réseau local est désactivée. Si la destination est sur votre réseau local, autorisez les appareils à proximité dans les paramètres de l\'application ou appelez runtime.requestPermissions([\"access_local_network\"]), accordez l\'autorisation et réessayez. Vérifiez aussi l\'adresse, le serveur et le pare-feu.</string>
+    <string name="error_local_network_permission_required">Autorisez l\'accès au réseau local avant de démarrer le serveur LAN.</string>
     <string name="error_lua_runtime_ambiguous">Plusieurs plugins Lua Runtime compatibles sont activés. Désactivez les providers Lua Runtime supplémentaires dans le Centre des plugins, puis réessayez.</string>
     <string name="error_lua_runtime_identity_or_bind">Lua Runtime a changé ou n\'a pas pu démarrer. Réessayez; si le problème persiste, mettez à jour ou réactivez le plugin dans le Centre des plugins.</string>
     <string name="error_lua_runtime_incompatible">Le Lua Runtime installé est incompatible avec cette version d\'AutoJs6 ou cet appareil. Mettez à jour AutoJs6 ou le plugin Lua Runtime, puis réessayez.</string>
@@ -1387,6 +1390,8 @@
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
     <string name="text_loading_completed">Chargement termine</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
+    <string name="text_local_network_permission">Autorisation du réseau local</string>
+    <string name="text_local_network_permission_settings">L\'accès au réseau local est désactivé. Autorisez les appareils à proximité dans les autorisations de l\'application, puis revenez et réessayez.</string>
     <string name="text_locate_current_theme_color">Localiser la couleur du thème actuel</string>
     <string name="text_log">Journal</string>
     <string name="text_log_coloring">Coloration des journaux</string>

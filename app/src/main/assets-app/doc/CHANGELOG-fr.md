@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Les capacités MCP ajoutent la recherche des applications Android, les positions dans un éditeur, une activation de l'accessibilité selon les stratégies configurées, une sortie Shell limitée et des descripteurs en lecture seule pour les grands résultats JSON; root utilise une autorisation shell.root et un réglage distincts sur le téléphone
 * `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Propriété en lecture seule `device.pageSize` renvoyant la taille des pages mémoire du système en octets, pour identifier les environnements de 4 KB / 16 KB
@@ -343,6 +344,7 @@
 * `Correction` Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17
 * `Correction` runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes
 * `Correction` Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement
+* `Amélioration` Conseils de reprise des connexions LAN HTTP, WebSocket et du pont réseau contrôlé Node, conservant les erreurs originales et expliquant la reprise après autorisation; conversion des noms de permissions indépendante de la langue du système
 * `Amélioration` Passage du compileSdk du projet à 37 (Android 17) et amélioration des builds de débogage et de la vérification lint pour la migration du SDK
 * `Amélioration` Unifier l'inspection des paquets à 262144 entrées et augmenter les budgets des paquets, analyses imbriquées, manifestes et métadonnées pour les grands fichiers APK/AAB/APKS
 * `Amélioration` Les dialogues d'information partagent un composant réutilisable permettant d'insérer des entrées key:value à toute position, d'aligner automatiquement les clés et d'annuler les lectures asynchrones à la fermeture

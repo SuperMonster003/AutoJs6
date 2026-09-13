@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -23,6 +24,7 @@ open class PreferencesActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Permissions.registerRequestMultiplePermissionsLauncher(this)
         binding = ActivityPreferencesBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             it.toolbar.apply {

@@ -1,6 +1,8 @@
 package org.autojs.autojs.pluginclient
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.annotation.AnyThread
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -8,12 +10,16 @@ import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.http.LocalNetworkDiagnostics
+import org.autojs.autojs.permission.LocalNetworkPermission
+import org.autojs.autojs6.R
 import org.autojs.autojs.pluginclient.JsonSocket.HANDSHAKE_TIMEOUT
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ThreadUtils
 import java.io.File
 import java.io.IOException
 import java.net.ServerSocket
+import java.net.InetAddress
 import java.net.SocketException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -227,10 +233,39 @@ class DevPluginService(val context: Context) {
 
     private data class RemoteEndpoint(val host: String, val port: Int)
 
+    /** A UI request heuristic, evaluated off the main thread; the OS still authorizes sockets. */
+    fun needsLocalNetworkPermission(host: String): Boolean {
+        if (LocalNetworkPermission.isGranted(context)) return false
+        val manager = context.getSystemService(ConnectivityManager::class.java)
+        val network = manager.activeNetwork
+        val capabilities = manager.getNetworkCapabilities(network)
+        if (capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true ||
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
+        ) return false
+        val name = runCatching { parseRemoteEndpoint(host, Port.PC_SERVER).host }.getOrNull() ?: return false
+        val addresses = runCatching { InetAddress.getAllByName(name) }.getOrNull()
+            ?: return name.trimEnd('.').endsWith(".local", ignoreCase = true)
+        val routes = manager.getLinkProperties(network)?.routes.orEmpty()
+        return addresses.any { address ->
+            when {
+                address.isLoopbackAddress || address.isAnyLocalAddress -> false
+                address.address.size == 4 -> LocalNetworkDiagnostics.couldBeLocalHost(address.hostAddress)
+                address.isLinkLocalAddress || address.isSiteLocalAddress || address.isMulticastAddress -> true
+                (address.address[0].toInt() and 0xfe) == 0xfc -> true
+                else -> routes.any { !it.hasGateway() && it.destination.prefixLength > 0 && it.matches(address) }
+            }
+        }
+    }
+
     @AnyThread
     fun enableLocalServer(): Observable<JsonSocketServer> {
         return Observable
             .create<JsonSocketServer> { emitter ->
+
+                if (!LocalNetworkPermission.isGranted(context)) {
+                    emitter.onError(IOException(context.getString(R.string.error_local_network_permission_required)))
+                    return@create
+                }
 
                 // Ensure only one accept loop runs at the same time.
                 // zh-CN: 确保同一时间只有一个 accept 循环在运行.

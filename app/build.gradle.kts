@@ -1010,9 +1010,15 @@ android {
         }
         getByName(flavorNameApp) {
             assets.directories.add("src/main/assets-$flavorNameApp")
+            if (versions.sdkVersionTarget >= 37) {
+                manifest.srcFile("src/target37/AndroidManifest.xml")
+            }
         }
         getByName(flavorNameInrt) {
             assets.directories.add("src/main/assets-$flavorNameInrt")
+            if (versions.sdkVersionTargetInrt >= 37) {
+                manifest.srcFile("src/target37/AndroidManifest.xml")
+            }
         }
 
     }

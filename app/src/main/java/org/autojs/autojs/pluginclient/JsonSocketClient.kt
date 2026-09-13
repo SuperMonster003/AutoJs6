@@ -12,6 +12,7 @@ import com.google.gson.JsonObject
 import io.github.g00fy2.versioncompare.Version
 import io.reactivex.subjects.BehaviorSubject
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.http.LocalNetworkDiagnostics
 import org.autojs.autojs.core.pref.Pref.getBoolean
 import org.autojs.autojs.core.pref.Pref.putBoolean
 import org.autojs.autojs.util.StringUtils.key
@@ -270,7 +271,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
     public override fun onSocketError(e: Throwable) {
         Log.w(TAG, "onSocketError")
         e.printStackTrace()
-        setStateDisconnected(e)
+        setStateDisconnected(if (e is IOException) LocalNetworkDiagnostics.explain(ctx, host, e) else e)
         switchOff()
     }
 

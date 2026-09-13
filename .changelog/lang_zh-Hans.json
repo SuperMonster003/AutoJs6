@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/09/13",
       "feature": [
+        "Android 17 本地网络权限管理, 支持抽屉, 设置页与 VS Code 连接时按需申请, 并按实际 targetSdk 声明权限",
         "MCP 工作目录能力支持 Android 应用查询, 编辑器行列定位, 按配置策略自动启用无障碍, Shell 输出限制与大 JSON 结果的只读文件描述符传输; root 执行使用独立 shell.root 授权和手机端开关",
         "`ocr` 默认按 ML Kit/Paddle/Rapid 顺序动态选择引擎; `ocr.mode` 返回选中的引擎或空字符串, 显式模式保持固定, 可通过 `mode` 或 `tap` 设置 `auto`, 空字符串或 nullish 值以恢复自动选择",
         "`device.pageSize` 只读属性, 返回当前系统的内存页大小 (字节), 支持识别 4 KB / 16 KB 运行环境",
@@ -318,6 +319,7 @@
         "MediaProjection 桥接截图遇到暂时空帧时最多重试 6 次, 支持捕获管线刷新后的连续截图, 无需再次申请授权"
       ],
       "improvement": [
+        "局域网 HTTP, WebSocket 与 Node 受控网络桥的连接失败提示, 保留原始错误并说明授权后的重试方式; 通用权限名称转换不受系统语言影响",
         "项目 compileSdk 提升至 37 (Android 17), 完善 SDK 迁移的调试构建与 lint 验证",
         "安装包检查统一支持 262144 个归档条目, 提高单包, 嵌套扫描, 清单与元数据预算以兼容大型 APK/AAB/APKS",
         "信息对话框共用可复用的条目组件, 支持在任意位置插入 key:value 条目, 自动对齐键列并在关闭时取消异步读取",

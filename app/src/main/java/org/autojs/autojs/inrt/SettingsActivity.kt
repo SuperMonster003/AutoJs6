@@ -48,6 +48,7 @@ class SettingsActivity : AppCompatActivity() {
         listOf(
             R.string.key_foreground_service,
             R.string.key_post_notifications_permission,
+            R.string.key_local_network_permission,
             R.string.key_display_over_other_apps,
             R.string.key_all_files_access,
         ).forEach { findPreference(it)?.sync() }
