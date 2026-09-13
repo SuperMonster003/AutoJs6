@@ -134,7 +134,7 @@ internal class NodeScreenCaptureSession(
             ?: throw SecurityException("Request screen capture permission before capturing an image.")
         val delay = readyAt - SystemClock.uptimeMillis()
         if (delay > 0) Thread.sleep(delay)
-        val frame = capture.capture() ?: throw IllegalStateException("No screen frame is available yet.")
+        val frame = captureFreshFrame { capture.capture() }
         try { ImageWrapper.toBitmap(frame) } finally { frame.close() }
     }
 
@@ -168,5 +168,17 @@ internal class NodeScreenCaptureSession(
         return JSONObject().put("id", id).put("__autojs6ScreenCapturerHandle", id)
             .put("width", options.width().takeIf { it > 0 } ?: ScreenMetrics.getOrientationAwareScreenWidth(orientation))
             .put("height", options.height().takeIf { it > 0 } ?: ScreenMetrics.getOrientationAwareScreenHeight(orientation))
+    }
+
+    companion object {
+        /** Each native capture waits at most 1.2 s and refreshes its display on timeout. Retry the
+         * refreshed pipeline, as Images.captureScreen does, within the bridge's 15 s budget. */
+        internal fun <T : Any> captureFreshFrame(pause: () -> Unit = { Thread.sleep(40L) }, capture: () -> T?): T {
+            repeat(6) { attempt ->
+                capture()?.let { return it }
+                if (attempt < 5) pause()
+            }
+            throw IllegalStateException("No screen frame is available after 6 bounded attempts.")
+        }
     }
 }

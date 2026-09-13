@@ -1926,6 +1926,10 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (request.method == "captureScreen" && request.argsArray().length() > 0) {
+            accessibilityDiagnostics.captureScreen(request, { screenCapture.capture() }, callback)
+            return
+        }
         imageOperation(request, callback) {
             when (request.method) {
                 "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()

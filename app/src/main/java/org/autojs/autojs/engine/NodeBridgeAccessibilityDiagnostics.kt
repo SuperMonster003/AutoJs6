@@ -226,7 +226,33 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         }
     }
 
-    private fun encode(request: NodeBridgeRequest, parsed: ScreenshotArgs, source: Bitmap, startedAt: Long): NodeBridgeResponse {
+    /** Encoded MediaProjection capture for descriptor clients; the no-argument image method still returns a handle. */
+    fun captureScreen(request: NodeBridgeRequest, capture: () -> Bitmap, callback: (NodeBridgeResponse) -> Unit) {
+        val parsed = runCatching {
+            val args = argsOf(request)
+            require(args.length() == 1 && args.opt(0) is JSONObject) { "image.captureScreen requires one screenshot options object" }
+            ScreenshotArgs.parse(args.getJSONObject(0)).also {
+                require(it.savePath == null) { "image.captureScreen returns a one-shot payload and does not accept savePath" }
+            }
+        }.getOrElse { callback(invalid(request, it)); return }
+        val startedAt = SystemClock.elapsedRealtime()
+        encoder.execute {
+            val bitmap = try {
+                capture()
+            } catch (error: SecurityException) {
+                callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(
+                    "Screen capture permission is missing or was revoked; request it again on the phone.", request.module, request.method,
+                )))
+                return@execute
+            } catch (error: Exception) {
+                callback(providerFailure(request, error))
+                return@execute
+            }
+            callback(encode(request, parsed, bitmap, startedAt, "media_projection"))
+        }
+    }
+
+    private fun encode(request: NodeBridgeRequest, parsed: ScreenshotArgs, source: Bitmap, startedAt: Long, captureSource: String = "accessibility"): NodeBridgeResponse {
         val created = ArrayList<Bitmap>().apply { add(source) }
         try {
             var bitmap = source
@@ -282,7 +308,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
                 .put("mime", parsed.mime)
             val result = JSONObject()
                 .put("schema", SCHEMA_SCREENSHOT)
-                .put("source", "accessibility")
+                .put("source", captureSource)
                 .put("width", bitmap.width)
                 .put("height", bitmap.height)
                 .put("format", parsed.format)

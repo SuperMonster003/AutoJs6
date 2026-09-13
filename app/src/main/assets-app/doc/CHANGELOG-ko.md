@@ -184,6 +184,7 @@
 * `추가` MediaInfo 쿼리는 0부터 시작하는 streamNumber, countGet 스트림 수, 단위와 설명 및 표시 이름을 위한 infoKind를 지원; Rhino와 Node는 첫 스트림의 TEXT 기본 쿼리를 유지하고 플러그인 확장 기능을 확인
 * `추가` OpenCV 및 Image Quantization 플러그인을 로드하기 전에 ELF 정렬을 검사하고 기기 페이지 크기와 호환되지 않으면 명확한 오류 표시
 * `추가` 플러그인 센터에서 공식 인덱스와 설치된 manifest의 페이지 정렬을 읽고, 16 KB 기기에서 호환되지 않는 버전을 설치하거나 활성화하기 전에 경고
+* `추가` MCP 스크린샷 대체 경로: image.captureScreen(options)는 접근성 스크린샷의 자르기, 배율, 형식, 품질 옵션을 받아 파일 디스크립터로 전송하는 인코딩 이미지를 반환합니다. captureScreen()은 이미지 핸들 반환을 유지하며 MediaProjection 승인이 없거나 취소되면 권한 오류를 반환합니다.
 * `수정` CI 편집기 플러그인 검사가 기존 계약 버전 1을 요구하여 새로운 호환 계약 버전을 지원하는 호스트를 거부하는 문제
 * `수정` 동일한 패키징 앱에서 Paddle OCR과 Rapid OCR을 순서대로 사용할 때 발생할 수 있는 충돌
 * `수정` MediaInfo 및 이미지 파일 경로가 절대 경로, 상위 디렉터리 및 유효한 파일 이름을 지원; 녹음 출력도 업데이트된 호스트에서 동일한 Android 파일 접근 규칙 적용
@@ -335,6 +336,7 @@
 * `수정` MediaInfo 상세 정보와 스냅샷의 Complete name에 비공개 캐시나 디스크립터 경로 대신 원본 파일 경로를 표시하고 스냅샷의 표시 파일 이름은 유지
 * `수정` Node bridge의 `accessibility.swipe` / `accessibility.gesture` (MCP Server와 Node 플러그인의 좌표 제스처)가 재사용된 broker 디스패치 스레드에서 두 번째 제스처부터 항상 `false` (취소)로 응답했습니다: handler가 없는 제스처 automator는 호출 스레드에 Looper를 준비하고 첫 제스처가 끝나면 종료하므로, 그 스레드의 다음 호출은 즉시 반환되고 실제 결과는 종료된 handler로 전달되었습니다; bridge는 이제 Python 호스트 broker처럼 메인 루퍼 handler를 automator에 넘깁니다
 * `수정` OpenCV 및 ImageQuant 플러그인 정책이 NDK r28c (28.2.13676358)로 빌드된 네이티브 라이브러리를 NDK 버전 불일치로 거부하여 다시 빌드한 OpenCV 플러그인 v1.1.2를 로드할 수 없던 문제 수정; 이제 r26b와 r28c 빌드를 모두 허용
+* `수정` MediaProjection 브리지 캡처에서 일시적으로 프레임이 없으면 최대 6회 재시도하여, 캡처 경로가 갱신된 뒤에도 재승인 없이 연속 촬영 지원
 * `개선` 프로젝트 compileSdk를 37 (Android 17)로 높이고 SDK 마이그레이션을 위한 디버그 빌드 및 lint 검증 개선
 * `개선` 패키지 검사 항목 수를 262144개로 통일하고 대형 APK/AAB/APKS 파일을 위해 패키지, 중첩 스캔, 매니페스트 및 메타데이터 한도 확대
 * `개선` 정보 대화상자가 재사용 가능한 항목 구성 요소를 공유하며, 임의 위치에 key:value 항목 삽입, 키 열 자동 정렬 및 대화상자를 닫을 때 비동기 읽기 취소 지원
