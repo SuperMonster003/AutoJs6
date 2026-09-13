@@ -26,8 +26,12 @@ import org.autojs.autojs.script.StringScriptSource
 import org.autojs.autojs.ui.main.scripts.AndroidPackageArchiveInspector
 import org.autojs.autojs.ui.main.scripts.AndroidPackageSessionInstaller
 import org.autojs.autojs.ui.main.scripts.PackageDeviceSpec
+import org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity
+import org.autojs.autojs.ui.main.scripts.PackageInstallStatusCoordinator
+import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.json.JSONObject
+import org.json.JSONArray
 import java.io.File
 
 /** Run in the real application UID, without instrumentation or adopted shell permissions. */
@@ -144,12 +148,35 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
                 "install" -> {
                     Thread({
                         runCatching {
-                            val archive = AndroidPackageArchiveInspector.inspect(File(filesDir, "sdk37-bal-install.apk"),
+                            val apkName = intent.getStringExtra("apkName") ?: "sdk37-bal-install.apk"
+                            require(apkName.matches(Regex("[A-Za-z0-9_.-]+\\.apk")))
+                            val archive = AndroidPackageArchiveInspector.inspect(File(filesDir, apkName),
                                 PackageDeviceSpec.from(this), prepareForInstallation = true)
                             AndroidPackageSessionInstaller.install(this, archive, File(cacheDir, "sdk37-bal-install-$caseId"))
-                        }.onSuccess { handler.post { result.put("installSession", it); save() } }
+                        }.onSuccess { id -> handler.post {
+                            result.put("installSession", id)
+                            save()
+                            if (intent.getBooleanExtra("showConfirmation", false) && hasWindowFocus()) {
+                                startActivity(PackageInstallStatusActivity.showIntent(this, id))
+                            }
+                        } }
                             .onFailure { error -> handler.post { result.put("installError", error.toString()); save() } }
                     }, "SDK37-BAL-install").start()
+                }
+                "install-recovery" -> {
+                    result.put("installations", JSONArray().apply {
+                        PackageInstallStatusCoordinator.records(this@ActivityLaunchCompatibilityProbeActivity).forEach { record ->
+                            put(JSONObject().put("sessionId", record.sessionId).put("packageName", record.packageName)
+                                .put("status", record.status).put("generation", record.generation)
+                                .put("confirmationTokenExists", PackageInstallStatusCoordinator.confirmationToken(
+                                    this@ActivityLaunchCompatibilityProbeActivity, record) != null))
+                        }
+                    })
+                }
+                "install-ui" -> {
+                    val apkName = intent.getStringExtra("apkName") ?: "sdk37-bal-install.apk"
+                    require(apkName.matches(Regex("[A-Za-z0-9_.-]+\\.apk")))
+                    result.put("installUiStarted", PackageInstallerActivity.install(this, File(filesDir, apkName)))
                 }
                 else -> error("Unknown route: $route")
             }
@@ -183,7 +210,7 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
     }
 
     private fun complete() {
-        runCatching {
+        if (route !in setOf("install", "install-recovery", "install-ui")) runCatching {
             val key = if (route == "script-launch") "launcher" else caseId
             val event = contentResolver.call(FIXTURE_URI, "read", key, null)?.getString("event") ?: "{}"
             result.put("fixtureEvent", JSONObject(event))

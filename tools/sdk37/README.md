@@ -146,6 +146,27 @@ Pass `--adb` if adb is not on PATH. The helper does not install packages or modi
 
 The probe Activity requires `android.permission.DUMP`, and its landing Activity is private. Both exist only in debug source sets. Host debug builds enable `StrictMode.detectBlockedBackgroundActivityLaunch()` on API 36+ without replacing existing VM checks. The installed API 37 SDK exposes the IntentSender options overload as `(Context, int, Intent, String, Bundle, Executor, OnFinished)`; use the compiled SDK signature instead of copying an older online snippet.
 
+## Installation confirmation recovery
+
+Use `run_install_recovery_probe.py` for installation recovery cases. It preserves the application process and pending sessions, does not require the BAL token fixture, and never force-stops either package. It requires an explicit disposable emulator serial and a debuggable host or inrt APK. The `install` route submits through the production archive inspector and session installer; `install-ui` opens the production `PackageInstallerActivity`; `install-recovery` records persisted sessions and whether their system confirmation tokens still exist.
+
+Copy a signed, compatible test APK into `files/sdk37-bal-install.apk` in the selected app. For multiple sessions, use distinct filenames and `--apk-name`. For example:
+
+```powershell
+$Sdk37Adb = 'E:/.android/sdk/platform-tools/adb.exe'
+$Sdk37Serial = 'emulator-5568'
+& $Sdk37Adb -s $Sdk37Serial push build/sdk37-fixtures/example.apk /data/local/tmp/sdk37-install-example.apk
+& $Sdk37Adb -s $Sdk37Serial shell run-as org.autojs.autojs6 cp /data/local/tmp/sdk37-install-example.apk files/sdk37-bal-install.apk
+python tools/sdk37/run_install_recovery_probe.py --adb $Sdk37Adb --serial $Sdk37Serial --route install --background --output build/sdk37-install/background
+python tools/sdk37/run_install_recovery_probe.py --adb $Sdk37Adb --serial $Sdk37Serial --route install-recovery --output build/sdk37-install/return
+```
+
+`--background` explicitly sends Home before the delayed submission, since moving only the newest task behind other app tasks does not prove the UID is in the background. The helper checks the actual process importance and focus at submission. Use `--package org.autojs.autojs6.inrt` with the matching APK and files directory. Permission setup, UI confirmation/cancellation and final package verification remain explicit test steps. The helper reports `installationSuccess: "not asserted"`; a session ID is only submission evidence.
+
+Check the ledger in `no_backup/package-install-status.json`, callback logs, notification session IDs, system installer UI and final `dumpsys package <installed-package>`. Exercise notifications denied, returning to a visible app, two different sessions, cancellation, signature conflict and rotation while showing a result. Kill only the selected app PID with `run-as <package> kill -9 <pid>` to test ordinary process reconstruction; `am force-stop` additionally invalidates PendingIntents and tests the separate expired-confirmation fallback. Do not run instrumentation or the older BAL helper in the middle of a pending-session recovery case, because those can terminate the app and change the test condition.
+
+The receiver and recovery Activity are private in release manifests. Callback identity, durable multi-session state and terminal-status replay protection are separately tested by `PackageInstallStatusStoreDeviceTest` and `PackageInstallStatusRecordTest`. The [recovery evidence](../../docs/dev/evidence/android-sdk-37-p25-recovery-20260913.md) records exact APKs, outcomes and the distinction between process death and force-stop.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
