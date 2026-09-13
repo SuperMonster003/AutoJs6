@@ -343,6 +343,7 @@
         "Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento"
       ],
       "improvement": [
+        "La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción",
         "Indicaciones para recuperar conexiones LAN HTTP, WebSocket y del puente de red controlado de Node, conservando los errores originales y explicando el reintento tras la autorización; conversión de permisos independiente del idioma del sistema",
         "Actualización del compileSdk del proyecto a 37 (Android 17) y mejoras en las compilaciones de depuración y la verificación lint para la migración del SDK",
         "Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes",

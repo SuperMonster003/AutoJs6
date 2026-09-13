@@ -121,7 +121,7 @@
     <string name="description_extending_js_build_in_objects">擴充套件 JavaScript 內建物件可以增加程式碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啟後所有指令碼均預設啟用內建擴充套件.\n內建擴充套件往往是不安全的, 除非明確瞭解內建擴充套件的原理及風險, 否則不建議啟用.\n選項關閉後, 仍然可以透過 plugins 全域性物件啟用內建擴充套件, 詳見專案文件.</string>
     <string name="description_file_extensions_preference">設定是否在 AutoJs6 檔案管理器中顯示副檔名.</string>
     <string name="description_floating_button">浮動按鈕用於在螢幕邊緣顯示一個可拖動的快捷功能入口, 可用於 [ 啟動或停止指令碼 / 佈局分析 / 檢視最近包名或活動名稱 / 顯示指標位置 ] 等.\n\n注: 該功能通常需要授予 \"顯示在其他應用上層\" 許可權.</string>
-    <string name="description_foreground_service">前臺服務用於在後臺更穩定地保持 AutoJs6 執行, 適合 [ 長時間執行指令碼 / 保持連線 / 持續監聽 ] 等場景.\n\n啟用後, 系統會顯示一條 \"前臺服務通知\" 用於告知使用者 AutoJs6 正在持續執行, 該通知通常會保持顯示直到服務停止.\n\n將通知設定為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前臺服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 傳送通知, 可能影響前臺服務的正常啟動及穩定性.</string>
+    <string name="description_foreground_service">前臺服務用於在後臺更穩定地保持 AutoJs6 執行, 適合 [ 長時間執行指令碼 / 保持連線 / 持續監聽 ] 等場景.\n\nAndroid 17 可能限制背景音訊. 在背景播放音訊前, 請開啟 AutoJs6 並在此啟用前景服務. 如果服務是在背景啟動的, 請在此關閉後重新啟用, 再次執行音訊指令碼. 排程或開機觸發的播放可能需要先完成此操作.\n\n啟用後, 系統會顯示一條 \"前臺服務通知\" 用於告知使用者 AutoJs6 正在持續執行, 該通知通常會保持顯示直到服務停止.\n\n將通知設定為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前臺服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 傳送通知, 可能影響前臺服務的正常啟動及穩定性.</string>
     <string name="description_github_token_preference">僅用於 GitHub API 請求以降低觸發速率限制的機率. Token 將儲存在本機, 並在此介面隱藏.</string>
     <string name="description_hidden_files_preference">用於設定是否在 AutoJs6 檔案管理器中顯示隱藏檔案和資料夾 (通常以 \".\" 開頭).</string>
     <string name="description_ignore_battery_optimizations">忽略電池最佳化可降低系統對 AutoJs6 的後臺限制, 有助於定時任務或長時間指令碼在待機時相對更加穩定地執行.\n\n注: 不同廠商系統可能仍會有額外的省電策略, 如自啟動限制或後臺凍結等.</string>

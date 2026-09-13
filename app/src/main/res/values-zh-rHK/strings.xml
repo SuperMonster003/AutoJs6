@@ -121,7 +121,7 @@
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
     <string name="description_file_extensions_preference">設置是否在 AutoJs6 文件管理器中顯示副檔名.</string>
     <string name="description_floating_button">浮動按鈕用於在屏幕邊緣顯示一個可拖動的快捷功能入口, 可用於 [ 啓動或停止腳本 / 佈局分析 / 查看最近包名或活動名稱 / 顯示指針位置 ] 等.\n\n注: 該功能通常需要授予 \"顯示在其他應用上層\" 權限.</string>
-    <string name="description_foreground_service">前台服務用於在後台更穩定地保持 AutoJs6 運行, 適合 [ 長時間執行腳本 / 保持連接 / 持續監聽 ] 等場景.\n\n啓用後, 系統會顯示一條 \"前台服務通知\" 用於告知用户 AutoJs6 正在持續運行, 該通知通常會保持顯示直到服務停止.\n\n將通知設置為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前台服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 發送通知, 可能影響前台服務的正常啓動及穩定性.</string>
+    <string name="description_foreground_service">前台服務用於在後台更穩定地保持 AutoJs6 運行, 適合 [ 長時間執行腳本 / 保持連接 / 持續監聽 ] 等場景.\n\nAndroid 17 可能限制後台音頻. 在後台播放音頻前, 請開啓 AutoJs6 並在此啓用前台服務. 如果服務是在後台啓動的, 請在此關閉後重新啓用, 再次運行音頻腳本. 定時或開機觸發的播放可能需要先完成此操作.\n\n啓用後, 系統會顯示一條 \"前台服務通知\" 用於告知用户 AutoJs6 正在持續運行, 該通知通常會保持顯示直到服務停止.\n\n將通知設置為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前台服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 發送通知, 可能影響前台服務的正常啓動及穩定性.</string>
     <string name="description_github_token_preference">僅用於 GitHub API 請求以減少觸發速率限制. Token 將儲存在本機, 並在此介面隱藏.</string>
     <string name="description_hidden_files_preference">用於設置是否在 AutoJs6 文件管理器中顯示隱藏文件和文件夾 (通常以 \".\" 開頭).</string>
     <string name="description_ignore_battery_optimizations">忽略電池優化可降低系統對 AutoJs6 的後台限制, 有助於定時任務或長時間腳本在待機時相對更加穩定地運行.\n\n注: 不同廠商系統可能仍會有額外的省電策略, 如自啓動限制或後台凍結等.</string>
