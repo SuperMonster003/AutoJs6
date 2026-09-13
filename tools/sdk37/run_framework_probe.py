@@ -92,29 +92,45 @@ def drive_picker(device, pending, case_id, output):
         raise RuntimeError("System picker did not become foreground: " + focus)
     time.sleep(1)
     path = "/sdcard/sdk37-picker-ui-" + case_id + ".xml"
-    for attempt in range(3):
+    for attempt in range(5):
         dump = device.shell("uiautomator", "dump", "--compressed", path, timeout=15)
         write_json(output / (name + f"-dump-{attempt}.json"), dump)
         checked(dump)
         if "UI hierchary dumped to:" in dump["stdout"]:
-            break
+            xml = checked(device.shell("cat", path))
+            checked(device.shell("rm", path))
+            nodes = list(ET.fromstring(xml).iter("node"))
+            ready = name.endswith("Cancel") or any(
+                node.get("text") == pending["documentName"] if name == "documentSelect" else
+                node.get("resource-id", "").endswith("/icon_thumbnail") or node.get("content-desc", "").startswith("Photo taken on ")
+                for node in nodes)
+            if ready:
+                break
+            (output / (name + f"-loading-{attempt}.xml")).write_text(xml, encoding="utf-8")
         time.sleep(0.7)
     else:
-        raise RuntimeError("uiautomator did not produce a hierarchy: " + dump["stdout"] + dump["stderr"])
-    xml = checked(device.shell("cat", path))
-    checked(device.shell("rm", path))
+        raise RuntimeError("System picker did not expose the required item: " + name)
     (output / (name + ".xml")).write_text(xml, encoding="utf-8")
     nodes = list(ET.fromstring(xml).iter("node"))
     packages = {node.get("package", "") for node in nodes}
     if not any(part in package for part in expected_packages for package in packages):
         raise RuntimeError("The expected system picker is not foreground: " + repr(packages))
+    current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
+    if current.get("pending", {}).get("name") != name:
+        raise RuntimeError("Picker request ended before the UI action: " + name)
     if name.endswith("Cancel"):
         for _ in range(5):
+            windows = checked(device.shell("dumpsys", "window"))
+            focus = next((line for line in windows.splitlines() if "mCurrentFocus=" in line), "")
+            if not any(part in focus for part in expected_packages):
+                raise RuntimeError("Refusing to send Back outside the expected picker")
             checked(device.shell("input", "keyevent", "4"))
-            time.sleep(0.4)
-            current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
-            if current.get("pending", {}).get("name") != name:
-                return
+            # Result callbacks can lag behind input dispatch. Do not queue Back into the host.
+            for _ in range(20):
+                time.sleep(0.2)
+                current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
+                if current.get("pending", {}).get("name") != name:
+                    return
         raise RuntimeError("The picker did not cancel after navigating back")
     if name == "documentSelect":
         matches = [node for node in nodes if node.get("text") == pending["documentName"]]
@@ -132,21 +148,36 @@ def drive_picker(device, pending, case_id, output):
     x1, y1, x2, y2 = map(int, bounds.groups())
     checked(device.shell("input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2)))
     if name == "photoSelect":
-        time.sleep(0.4)
-        current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
-        if current.get("pending", {}).get("name") != name:
-            return
-        checked(device.shell("uiautomator", "dump", "--compressed", path, timeout=15))
-        xml = checked(device.shell("cat", path))
-        (output / "photoSelect-confirm.xml").write_text(xml, encoding="utf-8")
-        checked(device.shell("rm", path))
-        done = [node for node in ET.fromstring(xml).iter("node") if node.get("text") == "Done"]
-        if len(done) != 1:
-            raise RuntimeError("Expected the Photo Picker's explicit Done confirmation")
-        bounds = list(map(int, re.findall(r"\d+", done[0].get("bounds", ""))))
-        if len(bounds) != 4:
-            raise RuntimeError("Photo Picker confirmation has no bounds")
-        checked(device.shell("input", "tap", str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2)))
+        for attempt in range(3):
+            time.sleep(0.5)
+            current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
+            if current.get("pending", {}).get("name") != name:
+                return
+            checked(device.shell("uiautomator", "dump", "--compressed", path, timeout=15))
+            xml = checked(device.shell("cat", path))
+            (output / f"photoSelect-confirm-{attempt}.xml").write_text(xml, encoding="utf-8")
+            checked(device.shell("rm", path))
+            current = json.loads(checked(device.shell("run-as", HOST, "cat", "files/sdk37-framework-" + case_id + ".json")))
+            if current.get("pending", {}).get("name") != name:
+                return
+            nodes = list(ET.fromstring(xml).iter("node"))
+            if not any(part in node.get("package", "") for part in expected_packages for node in nodes):
+                raise RuntimeError("Photo Picker left the foreground before confirmation")
+            done = [node for node in nodes if node.get("text") == "Done"]
+            # A delayed informational banner can shift the grid after the initial dump.
+            # Locate the same first photo again from the new hierarchy, never reuse old coordinates.
+            photos = [node for node in nodes if node.get("resource-id", "").endswith("/icon_thumbnail")]
+            if not photos:
+                photos = [node for node in nodes if node.get("content-desc", "").startswith("Photo taken on ")]
+            target = done[0] if len(done) == 1 else photos[0] if photos and attempt < 2 else None
+            if target is None:
+                raise RuntimeError("Expected the Photo Picker's explicit Done confirmation")
+            bounds = list(map(int, re.findall(r"\d+", target.get("bounds", ""))))
+            if len(bounds) != 4:
+                raise RuntimeError("Photo Picker item has no bounds")
+            checked(device.shell("input", "tap", str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2)))
+            if done:
+                return
 
 
 def close_host_tasks(device):

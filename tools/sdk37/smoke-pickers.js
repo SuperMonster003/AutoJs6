@@ -2,6 +2,10 @@ ui.layout(<vertical bg="#164234"><text text="SDK 37 storage pickers" textColor="
 const pickerResults = {};
 ui.emitter.on("activity_result", function (request, result, data) {
     pickerResults[request] = { code: result, uri: data && data.getData() ? String(data.getData()) : null, flags: data ? data.getFlags() : 0 };
+    if (receipt.pending && receipt.pending.request === request) {
+        delete receipt.pending;
+        saveReceipt();
+    }
 });
 threads.start(function () {
     const resolver = context.getContentResolver();
@@ -18,7 +22,7 @@ threads.start(function () {
             if (!focused) sleep(100);
         }
         requireProbe(focused, "Script Activity did not regain focus before " + name);
-        receipt.pending = { name: name, documentName: String(document.getName()) };
+        receipt.pending = { name: name, request: request, documentName: String(document.getName()) };
         saveReceipt();
         ui.run(() => activity.startActivityForResult(intent, request));
         let deadline = Date.now() + 45000;
