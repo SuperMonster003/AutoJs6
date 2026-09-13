@@ -427,6 +427,43 @@ Host-side checks, without adb:
 py -m unittest discover -s tools/sdk37 -p test_parcel_evidence.py -v
 ```
 
+## Storage, widgets and notification views
+
+`run_framework_probe.py` runs real Rhino scripts against the installed host on an **exclusively owned API 37 emulator**. It stops host work and removes simple tasks rooted in that host, including external pickers left in those tasks by failed probes. It creates fresh fixtures and output directories. It never installs APKs, changes compat overrides, grants permissions or clears preexisting app data. Do not use this tool on a shared emulator.
+
+Build normal and target 37 debug APKs separately and archive each before another build overwrites the outputs. Install the desired APK yourself. Select the emulator explicitly. If using a private ADB server on Windows, set `ANDROID_ADB_SERVER_PORT` in the same shell as Python. The server must have a stable connection to that emulator.
+
+```powershell
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 36 --suite storage --expect-trash-directory false --output build/sdk37-storage36
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 37 --suite storage --expect-trash-directory true --expect-compat TRASH_BEHAVIOR_CHANGE=true --output build/sdk37-storage37
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 37 --suite pickers --output build/sdk37-pickers37
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 37 --suite allfiles --expect-all-files false --output build/sdk37-allfiles-denied37
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 37 --suite widgets --expect-widget-icon-rejected false --output build/sdk37-widgets37
+python tools/sdk37/run_framework_probe.py --serial emulator-5586 --expected-target 37 --suite notifications --expect-compat CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS=true --output build/sdk37-notifications37
+```
+
+Replace the serial, paths and platform expectations with those of your disposable device. Storage / widget / picker fixtures require all-files access. Notifications require POST_NOTIFICATIONS. Widget hosting requires an explicit test-only grant on the selected emulator:
+
+```powershell
+adb -s emulator-5586 shell appwidget grantbind --package org.autojs.autojs6 --user 0
+```
+
+The suites check the following:
+
+- `storage`: real `files` operations, ExplorerFileProvider / PathChecker, mounted volumes and removable-volume read/write, production history and trash repositories, `images.save` / `media.scanFile`, actual MediaStore trash / restore paths, the ordinary Contacts Directory permission baseline, and the all-files Settings entry. A visible script Activity prevents cached-process freezing while a worker runs the checks. Each run touches only its newly created files and rows. A normal SD card does not exercise unreliable USB volume filtering.
+- `pickers`: system document selection and cancellation, persistable read grant / release, Photo Picker selection and cancellation. The driver targets the English API 37 DocumentsUI / Photo Picker layout, verifies the foreground package, handles directory navigation and the explicit photo Done button, and checks returned document bytes or this run's unique photo pixels. It does not test WebView File System Access. Other languages / OEM pickers require their own driver and must not be silently accepted.
+- `allfiles`: check the explicit expected state through the production permission helper and platform, request Settings from the foreground Activity and verify that the app-specific page becomes foreground. A successful start request alone is insufficient. Toggle the host's switch in Settings between runs. Revocation can kill the host process, so the denied and granted observations run in separate processes. Restore the initial permission state when finished.
+- `widgets`: actual AppWidgetHost registration, multi-digit mapping retention and obsolete-key removal, first click and click after changing the script, plus separate oversized Bitmap and Icon controls. On CE2A.260420.019, the Bitmap control throws for both targets, but oversized Icons only warn at target 36 / 37. `--expect-widget-icon-rejected false` requires that actual warning. This is an observed image / official-documentation discrepancy, not evidence that all API 37 devices accept oversized Icons.
+- `notifications`: production `notice` / BigText, actual AppForegroundService notification, small custom views and a custom ImageView hierarchy exceeding the device's resource limit. The runner matches SystemUI's warning / rejection to this run's notification ID, captures the notification shade and requires cleanup. An active notification or successful `notify()` alone does not prove custom content rendered.
+
+`--expect-compat NAME=true|false` may be repeated for the four known storage / notification changes. It checks **effective host package overrides**, never pending raw overrides. It does not imply that a provider-owned gate or platform feature flag was exercised. See the [P2.8 provider scope](../../docs/dev/evidence/android-sdk-37-p28-20260913.md) and [P2.9 image-specific limits](../../docs/dev/evidence/android-sdk-37-p29-20260913.md) before choosing expectations. Reset only the overrides and test permissions you changed; never apply device-wide policy changes to make a test pass.
+
+Every output includes the installed target / APK hash, exact launched script and hash, case-bound per-row receipt, before / after state, focused window, screenshot and bounded-time system logs. Missing / duplicate / malformed rows, wrong target, assertion failure, changed compat state or missing negative-control logs fail the run. Failed UI attempts can leave an external picker in the test host's task; the next run removes that simple host task without stopping unrelated system applications. Preserve failed output directories as diagnostics.
+
+```powershell
+python -m unittest discover -s tools/sdk37 -p test_framework_probe.py -v
+```
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
