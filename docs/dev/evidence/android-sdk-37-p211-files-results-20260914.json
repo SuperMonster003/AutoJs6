@@ -1,0 +1,1553 @@
+{
+  "date": "2026-09-14",
+  "baseCommit": "373b7ef65",
+  "fixCommit": "4d8564d98",
+  "cases": [
+    {
+      "caseId": "aa4c35c2817c4018babed66890c5d99d",
+      "started": "2026-09-13T16:59:21.202593+00:00",
+      "success": true,
+      "scenarios": [
+        {
+          "name": "inputSelect",
+          "dom": {
+            "kind": "input",
+            "name": "sdk37-web-aa4c35c2817c4018babed66890c5d99d.txt",
+            "text": "SDK37 WebView document aa4c35c2817c4018babed66890c5d99d"
+          },
+          "callback": {
+            "time": 1789318769221,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318773120,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-aa4c35c2817c4018babed66890c5d99d.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "inputCancel",
+          "dom": {
+            "kind": "input",
+            "cancelled": true,
+            "event": "change",
+            "count": 0
+          },
+          "callback": {
+            "time": 1789318776650,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318780325,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openSelect",
+          "dom": {
+            "kind": "open",
+            "name": "sdk37-web-aa4c35c2817c4018babed66890c5d99d.txt",
+            "permission": "granted",
+            "text": "SDK37 WebView document aa4c35c2817c4018babed66890c5d99d"
+          },
+          "callback": {
+            "time": 1789318783459,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318787067,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A523",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openCancel",
+          "dom": {
+            "kind": "open",
+            "error": "AbortError",
+            "message": "Failed to execute 'showOpenFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318790587,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318794228,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "saveCancel",
+          "outcome": "blocked-before-chooser",
+          "dom": {
+            "kind": "save",
+            "error": "AbortError",
+            "message": "Failed to execute 'showSaveFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": null,
+          "result": null
+        },
+        {
+          "name": "directoryCancel",
+          "outcome": "blocked-before-chooser",
+          "dom": {
+            "kind": "directory",
+            "error": "AbortError",
+            "message": "Failed to execute 'showDirectoryPicker' on 'Window': The user aborted a request."
+          },
+          "callback": null,
+          "result": null
+        }
+      ],
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compatDefinition": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+      ],
+      "fsaEnabled": false,
+      "installedApkSha256": "95499d4de139d04f026e1ebb57bbe81733e1517005dc8f09bd2db617d2105f11",
+      "scriptSha256": "83e11d3674763d7ffd5d9c4d4141d84a8c0e15fa33806211b0c0011153248e1c",
+      "taskCleanup": [],
+      "page": {
+        "url": "https://appassets.androidplatform.net/sdk37/aa4c35c2817c4018babed66890c5d99d",
+        "text": "File access aa4c35c2817c4018babed66890c5d99d\nOpen documentSave document\nChoose directoryReady\n\nwindow.receipts=[];\nfunction report(value){receipts.push(value);document.querySelector('#status').textContent=JSON.stringify(value)}\ndocument.querySelector('#input').onchange=async e=>{const f=e.target.files[0];report(f?{kind:'input',name:f.name,text:await f.text()}:{kind:'input',cancelled:true,event:'change',count:0})};\ndocument.querySelector('#input').oncancel=e=>report({kind:'input',cancelled:true,event:'cancel',count:e.target.files.length});\nfor(const kind of ['open','save','directory'])document.getElementById(kind).onclick=async()=>{\n try{let h=kind==='open'?(await showOpenFilePicker({types:[{description:'Text',accept:{'text/plain':['.txt']}}]}))[0]:\n kind==='save'?await showSaveFilePicker({suggestedName:'sdk37-aa4c35c2817c4018babed66890c5d99d.txt'}):await showDirectoryPicker();\n let r={kind,name:h.name,permission:await h.queryPermission({mode:'read'})};\n if(kind==='open')r.text=await (await h.getFile()).text();report(r)\n }catch(e){report({kind,error:e.name,message:e.message})}\n};\n",
+        "secure": true,
+        "ua": "Mozilla/5.0 (Linux; Android 17; sdk_gphone16k_x86_64 Build/CE2A.260420.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/145.0.7632.218 Mobile Safari/537.36",
+        "open": "function",
+        "save": "function",
+        "directory": "function"
+      },
+      "receipt": {
+        "caseId": "aa4c35c2817c4018babed66890c5d99d",
+        "target": 36,
+        "callbacks": [
+          {
+            "time": 1789318769221,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318776650,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318783459,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318790587,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          }
+        ],
+        "results": [
+          {
+            "time": 1789318773120,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-aa4c35c2817c4018babed66890c5d99d.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318780325,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318787067,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A523",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318794228,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        ],
+        "errors": [],
+        "ready": true,
+        "contextChecks": {
+          "webActivity": true,
+          "childTheme": true,
+          "childActivity": true
+        },
+        "persistedBefore": "[]",
+        "persistedAfter": "[]"
+      },
+      "compatAfter": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+      ],
+      "forwardCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "forward",
+          "--remove",
+          "tcp:50756"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "stop": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixtureCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "rm /sdcard/Download/sdk37-web-aa4c35c2817c4018babed66890c5d99d.txt"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "ended": "2026-09-13T17:00:02.104861+00:00",
+      "chooserRevalidationPassed": true,
+      "label": "web36-default-final",
+      "rawResultSha256": "1b1b2c38eab06eea3d63426c1944d12dd6ca554da0de3336742c1cef433bbf1c",
+      "images": [
+        {
+          "name": "inputCancel.png",
+          "sha256": "27e79547fefb0477330ab8e55bd25ce0f15d79c129648b5c475d9b0200c1d785"
+        },
+        {
+          "name": "inputSelect.png",
+          "sha256": "8a93c9049be364fe4bcb689e0dd928f0d5d3636d97afca18516cf734858bf84d"
+        },
+        {
+          "name": "openCancel.png",
+          "sha256": "700661b3c4128fbc2b8b2bb49231fafa417dfbc3bce7882c985ec12974076dee"
+        },
+        {
+          "name": "openSelect.png",
+          "sha256": "8a8b5e7928f430b9efa35550cf501fe7a72cbbd65982c50d21dae7537297e8c9"
+        }
+      ]
+    },
+    {
+      "caseId": "8ac73bb21ee74ffcbd342c0d1c60712d",
+      "started": "2026-09-13T17:00:02.363963+00:00",
+      "success": true,
+      "scenarios": [
+        {
+          "name": "inputSelect",
+          "dom": {
+            "kind": "input",
+            "name": "sdk37-web-8ac73bb21ee74ffcbd342c0d1c60712d.txt",
+            "text": "SDK37 WebView document 8ac73bb21ee74ffcbd342c0d1c60712d"
+          },
+          "callback": {
+            "time": 1789318811152,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318815095,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-8ac73bb21ee74ffcbd342c0d1c60712d.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "inputCancel",
+          "dom": {
+            "kind": "input",
+            "cancelled": true,
+            "event": "change",
+            "count": 0
+          },
+          "callback": {
+            "time": 1789318818849,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318823839,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openSelect",
+          "dom": {
+            "kind": "open",
+            "name": "sdk37-web-8ac73bb21ee74ffcbd342c0d1c60712d.txt",
+            "permission": "granted",
+            "text": "SDK37 WebView document 8ac73bb21ee74ffcbd342c0d1c60712d"
+          },
+          "callback": {
+            "time": 1789318827021,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318831593,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A525",
+            "flags": 67,
+            "readGranted": true,
+            "writeGranted": true
+          }
+        },
+        {
+          "name": "openCancel",
+          "dom": {
+            "kind": "open",
+            "error": "AbortError",
+            "message": "Failed to execute 'showOpenFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318835164,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318839755,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "saveCancel",
+          "dom": {
+            "kind": "save",
+            "error": "AbortError",
+            "message": "Failed to execute 'showSaveFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318842969,
+            "mode": 3,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.CREATE_DOCUMENT",
+            "type": "*/*",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318847868,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "directoryCancel",
+          "dom": {
+            "kind": "directory",
+            "error": "AbortError",
+            "message": "Failed to execute 'showDirectoryPicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318851073,
+            "mode": 2,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT_TREE",
+            "type": "null",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318855731,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        }
+      ],
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compatDefinition": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+      ],
+      "fsaEnabled": true,
+      "installedApkSha256": "95499d4de139d04f026e1ebb57bbe81733e1517005dc8f09bd2db617d2105f11",
+      "scriptSha256": "3751d32fa34e20f910b962499b2f1ceef51399b67f5de791e1675bebe121a058",
+      "taskCleanup": [],
+      "page": {
+        "url": "https://appassets.androidplatform.net/sdk37/8ac73bb21ee74ffcbd342c0d1c60712d",
+        "text": "File access 8ac73bb21ee74ffcbd342c0d1c60712d\nOpen documentSave document\nChoose directoryReady\n\nwindow.receipts=[];\nfunction report(value){receipts.push(value);document.querySelector('#status').textContent=JSON.stringify(value)}\ndocument.querySelector('#input').onchange=async e=>{const f=e.target.files[0];report(f?{kind:'input',name:f.name,text:await f.text()}:{kind:'input',cancelled:true,event:'change',count:0})};\ndocument.querySelector('#input').oncancel=e=>report({kind:'input',cancelled:true,event:'cancel',count:e.target.files.length});\nfor(const kind of ['open','save','directory'])document.getElementById(kind).onclick=async()=>{\n try{let h=kind==='open'?(await showOpenFilePicker({types:[{description:'Text',accept:{'text/plain':['.txt']}}]}))[0]:\n kind==='save'?await showSaveFilePicker({suggestedName:'sdk37-8ac73bb21ee74ffcbd342c0d1c60712d.txt'}):await showDirectoryPicker();\n let r={kind,name:h.name,permission:await h.queryPermission({mode:'read'})};\n if(kind==='open')r.text=await (await h.getFile()).text();report(r)\n }catch(e){report({kind,error:e.name,message:e.message})}\n};\n",
+        "secure": true,
+        "ua": "Mozilla/5.0 (Linux; Android 17; sdk_gphone16k_x86_64 Build/CE2A.260420.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/145.0.7632.218 Mobile Safari/537.36",
+        "open": "function",
+        "save": "function",
+        "directory": "function"
+      },
+      "receipt": {
+        "caseId": "8ac73bb21ee74ffcbd342c0d1c60712d",
+        "target": 36,
+        "callbacks": [
+          {
+            "time": 1789318811152,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318818849,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318827021,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318835164,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318842969,
+            "mode": 3,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.CREATE_DOCUMENT",
+            "type": "*/*",
+            "flags": 0
+          },
+          {
+            "time": 1789318851073,
+            "mode": 2,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT_TREE",
+            "type": "null",
+            "flags": 0
+          }
+        ],
+        "results": [
+          {
+            "time": 1789318815095,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-8ac73bb21ee74ffcbd342c0d1c60712d.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318823839,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318831593,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A525",
+            "flags": 67,
+            "readGranted": true,
+            "writeGranted": true
+          },
+          {
+            "time": 1789318839755,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318847868,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318855731,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        ],
+        "errors": [],
+        "ready": true,
+        "contextChecks": {
+          "webActivity": true,
+          "childTheme": true,
+          "childActivity": true
+        },
+        "persistedBefore": "[]",
+        "persistedAfter": "[]"
+      },
+      "compatAfter": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+      ],
+      "forwardCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "forward",
+          "--remove",
+          "tcp:51812"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "stop": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixtureCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "rm /sdcard/Download/sdk37-web-8ac73bb21ee74ffcbd342c0d1c60712d.txt"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "ended": "2026-09-13T17:00:57.641433+00:00",
+      "chooserRevalidationPassed": true,
+      "label": "web36-enabled-final",
+      "rawResultSha256": "0ca3f85a2161cee3fb9845d66b65e97c94c4a031c66752ba0f31140cb12513e3",
+      "images": [
+        {
+          "name": "directoryCancel.png",
+          "sha256": "82b58261d71989ba217bb8646a15336d5c475d42afb3b39af1d10b52ccd2960e"
+        },
+        {
+          "name": "inputCancel.png",
+          "sha256": "c637ee28f15df9868745cb6666ce4981267c7e55de538c69a69033c24bef9955"
+        },
+        {
+          "name": "inputSelect.png",
+          "sha256": "c637ee28f15df9868745cb6666ce4981267c7e55de538c69a69033c24bef9955"
+        },
+        {
+          "name": "openCancel.png",
+          "sha256": "dc0028afe8eec1df429a834ed68f4db595bf510e302a3ee98b3020647a8962a7"
+        },
+        {
+          "name": "openSelect.png",
+          "sha256": "dc0028afe8eec1df429a834ed68f4db595bf510e302a3ee98b3020647a8962a7"
+        },
+        {
+          "name": "saveCancel.png",
+          "sha256": "f95fa11f4eb89e4eceb391a8d16d8746bc6877c46cdaa73273da1efd0e981fc3"
+        }
+      ]
+    },
+    {
+      "caseId": "dd61b14dd24b4c1a8a1c35f02c920214",
+      "started": "2026-09-13T16:55:04.267976+00:00",
+      "success": true,
+      "scenarios": [
+        {
+          "name": "inputSelect",
+          "dom": {
+            "kind": "input",
+            "name": "sdk37-web-dd61b14dd24b4c1a8a1c35f02c920214.txt",
+            "text": "SDK37 WebView document dd61b14dd24b4c1a8a1c35f02c920214"
+          },
+          "callback": {
+            "time": 1789318516073,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318519407,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-dd61b14dd24b4c1a8a1c35f02c920214.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "inputCancel",
+          "dom": {
+            "kind": "input",
+            "cancelled": true,
+            "event": "change",
+            "count": 0
+          },
+          "callback": {
+            "time": 1789318522922,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318526701,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openSelect",
+          "dom": {
+            "kind": "open",
+            "name": "sdk37-web-dd61b14dd24b4c1a8a1c35f02c920214.txt",
+            "permission": "granted",
+            "text": "SDK37 WebView document dd61b14dd24b4c1a8a1c35f02c920214"
+          },
+          "callback": {
+            "time": 1789318529711,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318533313,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A517",
+            "flags": 67,
+            "readGranted": true,
+            "writeGranted": true
+          }
+        },
+        {
+          "name": "openCancel",
+          "dom": {
+            "kind": "open",
+            "error": "AbortError",
+            "message": "Failed to execute 'showOpenFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318536555,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318540193,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "saveCancel",
+          "dom": {
+            "kind": "save",
+            "error": "AbortError",
+            "message": "Failed to execute 'showSaveFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318543266,
+            "mode": 3,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.CREATE_DOCUMENT",
+            "type": "*/*",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318546965,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "directoryCancel",
+          "dom": {
+            "kind": "directory",
+            "error": "AbortError",
+            "message": "Failed to execute 'showDirectoryPicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318549972,
+            "mode": 2,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT_TREE",
+            "type": "null",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318553757,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        }
+      ],
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compatDefinition": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+      ],
+      "installedApkSha256": "b068ac720b55d7efed94db1fa86e8104eca416cc2909bbba54781afcc4c6e28f",
+      "scriptSha256": "74cb822c51dfdf62b646bc2865e03451996f862e3c7b5646bfe97ed06b4951b8",
+      "taskCleanup": [],
+      "page": {
+        "url": "https://appassets.androidplatform.net/sdk37/dd61b14dd24b4c1a8a1c35f02c920214",
+        "text": "File access dd61b14dd24b4c1a8a1c35f02c920214\nOpen documentSave document\nChoose directoryReady\n\nwindow.receipts=[];\nfunction report(value){receipts.push(value);document.querySelector('#status').textContent=JSON.stringify(value)}\ndocument.querySelector('#input').onchange=async e=>{const f=e.target.files[0];report(f?{kind:'input',name:f.name,text:await f.text()}:{kind:'input',cancelled:true,event:'change',count:0})};\ndocument.querySelector('#input').oncancel=e=>report({kind:'input',cancelled:true,event:'cancel',count:e.target.files.length});\nfor(const kind of ['open','save','directory'])document.getElementById(kind).onclick=async()=>{\n try{let h=kind==='open'?(await showOpenFilePicker({types:[{description:'Text',accept:{'text/plain':['.txt']}}]}))[0]:\n kind==='save'?await showSaveFilePicker({suggestedName:'sdk37-dd61b14dd24b4c1a8a1c35f02c920214.txt'}):await showDirectoryPicker();\n let r={kind,name:h.name,permission:await h.queryPermission({mode:'read'})};\n if(kind==='open')r.text=await (await h.getFile()).text();report(r)\n }catch(e){report({kind,error:e.name,message:e.message})}\n};\n",
+        "secure": true,
+        "ua": "Mozilla/5.0 (Linux; Android 10; K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/145.0.0.0 Mobile Safari/537.36",
+        "open": "function",
+        "save": "function",
+        "directory": "function"
+      },
+      "receipt": {
+        "caseId": "dd61b14dd24b4c1a8a1c35f02c920214",
+        "target": 37,
+        "callbacks": [
+          {
+            "time": 1789318516073,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318522922,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318529711,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318536555,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318543266,
+            "mode": 3,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.CREATE_DOCUMENT",
+            "type": "*/*",
+            "flags": 0
+          },
+          {
+            "time": 1789318549972,
+            "mode": 2,
+            "permissionMode": 1,
+            "accept": [
+              ""
+            ],
+            "action": "android.intent.action.OPEN_DOCUMENT_TREE",
+            "type": "null",
+            "flags": 0
+          }
+        ],
+        "results": [
+          {
+            "time": 1789318519407,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-dd61b14dd24b4c1a8a1c35f02c920214.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318526701,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318533313,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A517",
+            "flags": 67,
+            "readGranted": true,
+            "writeGranted": true
+          },
+          {
+            "time": 1789318540193,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318546965,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318553757,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        ],
+        "errors": [],
+        "ready": true,
+        "contextChecks": {
+          "webActivity": true,
+          "childTheme": true,
+          "childActivity": true
+        },
+        "persistedBefore": "[]",
+        "persistedAfter": "[]"
+      },
+      "compatAfter": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+      ],
+      "forwardCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "forward",
+          "--remove",
+          "tcp:65138"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "stop": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixtureCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "rm /sdcard/Download/sdk37-web-dd61b14dd24b4c1a8a1c35f02c920214.txt"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "ended": "2026-09-13T16:55:55.782407+00:00",
+      "chooserRevalidationPassed": true,
+      "label": "web37-default-verified",
+      "rawResultSha256": "936e9a6d72d29b60c34936ae1178f2c5d23a4f28dabba9e8b9bfbd86a7ae5a33",
+      "images": [
+        {
+          "name": "directoryCancel.png",
+          "sha256": "19915c131affdd1c8078157dd9e9c5be98f6922a7761d169b9ae617a903b4a7b"
+        },
+        {
+          "name": "inputCancel.png",
+          "sha256": "c30e944eec69c37b62d4f081c5158bdb220877b8dc62550ee0eaa5ca447ad855"
+        },
+        {
+          "name": "inputSelect.png",
+          "sha256": "ba50828d484e2b78fc10c32256e2a95a42ee057d3187d63469c393e2aea1ef9a"
+        },
+        {
+          "name": "openCancel.png",
+          "sha256": "98d6965f86cda02e1bbd33a05a5725b6fd813a2fbee59fdf6330a0fb8d7ce893"
+        },
+        {
+          "name": "openSelect.png",
+          "sha256": "a836ca9e41a3d2b82fa147b022c6baa3995790306beaee5be0dc5d964f651e86"
+        },
+        {
+          "name": "saveCancel.png",
+          "sha256": "0004b1ecde93382f410f7371a25a74d9b98e09c65099c86a182dfbe6d5a89838"
+        }
+      ]
+    },
+    {
+      "caseId": "77f86bdc8a8c46f6a4002d7d60bc0137",
+      "started": "2026-09-13T16:58:12.736121+00:00",
+      "success": true,
+      "scenarios": [
+        {
+          "name": "inputSelect",
+          "dom": {
+            "kind": "input",
+            "name": "sdk37-web-77f86bdc8a8c46f6a4002d7d60bc0137.txt",
+            "text": "SDK37 WebView document 77f86bdc8a8c46f6a4002d7d60bc0137"
+          },
+          "callback": {
+            "time": 1789318700085,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318703930,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-77f86bdc8a8c46f6a4002d7d60bc0137.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "inputCancel",
+          "dom": {
+            "kind": "input",
+            "cancelled": true,
+            "event": "change",
+            "count": 0
+          },
+          "callback": {
+            "time": 1789318707504,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318711142,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openSelect",
+          "dom": {
+            "kind": "open",
+            "name": "sdk37-web-77f86bdc8a8c46f6a4002d7d60bc0137.txt",
+            "permission": "granted",
+            "text": "SDK37 WebView document 77f86bdc8a8c46f6a4002d7d60bc0137"
+          },
+          "callback": {
+            "time": 1789318714325,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318718206,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A521",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "openCancel",
+          "dom": {
+            "kind": "open",
+            "error": "AbortError",
+            "message": "Failed to execute 'showOpenFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": {
+            "time": 1789318721765,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          "result": {
+            "time": 1789318725438,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        },
+        {
+          "name": "saveCancel",
+          "outcome": "blocked-before-chooser",
+          "dom": {
+            "kind": "save",
+            "error": "AbortError",
+            "message": "Failed to execute 'showSaveFilePicker' on 'Window': The user aborted a request."
+          },
+          "callback": null,
+          "result": null
+        },
+        {
+          "name": "directoryCancel",
+          "outcome": "blocked-before-chooser",
+          "dom": {
+            "kind": "directory",
+            "error": "AbortError",
+            "message": "Failed to execute 'showDirectoryPicker' on 'Window': The user aborted a request."
+          },
+          "callback": null,
+          "result": null
+        }
+      ],
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compatDefinition": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+      ],
+      "fsaEnabled": false,
+      "installedApkSha256": "b068ac720b55d7efed94db1fa86e8104eca416cc2909bbba54781afcc4c6e28f",
+      "scriptSha256": "5e07e3baa0ec7013f420435afe7cc0b5c82dd4f8410dc6353875c640b7233da2",
+      "taskCleanup": [],
+      "page": {
+        "url": "https://appassets.androidplatform.net/sdk37/77f86bdc8a8c46f6a4002d7d60bc0137",
+        "text": "File access 77f86bdc8a8c46f6a4002d7d60bc0137\nOpen documentSave document\nChoose directoryReady\n\nwindow.receipts=[];\nfunction report(value){receipts.push(value);document.querySelector('#status').textContent=JSON.stringify(value)}\ndocument.querySelector('#input').onchange=async e=>{const f=e.target.files[0];report(f?{kind:'input',name:f.name,text:await f.text()}:{kind:'input',cancelled:true,event:'change',count:0})};\ndocument.querySelector('#input').oncancel=e=>report({kind:'input',cancelled:true,event:'cancel',count:e.target.files.length});\nfor(const kind of ['open','save','directory'])document.getElementById(kind).onclick=async()=>{\n try{let h=kind==='open'?(await showOpenFilePicker({types:[{description:'Text',accept:{'text/plain':['.txt']}}]}))[0]:\n kind==='save'?await showSaveFilePicker({suggestedName:'sdk37-77f86bdc8a8c46f6a4002d7d60bc0137.txt'}):await showDirectoryPicker();\n let r={kind,name:h.name,permission:await h.queryPermission({mode:'read'})};\n if(kind==='open')r.text=await (await h.getFile()).text();report(r)\n }catch(e){report({kind,error:e.name,message:e.message})}\n};\n",
+        "secure": true,
+        "ua": "Mozilla/5.0 (Linux; Android 10; K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/145.0.0.0 Mobile Safari/537.36",
+        "open": "function",
+        "save": "function",
+        "directory": "function"
+      },
+      "receipt": {
+        "caseId": "77f86bdc8a8c46f6a4002d7d60bc0137",
+        "target": 37,
+        "callbacks": [
+          {
+            "time": 1789318700085,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318707504,
+            "mode": 0,
+            "permissionMode": 0,
+            "accept": [
+              "text/plain"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318714325,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          },
+          {
+            "time": 1789318721765,
+            "mode": 0,
+            "permissionMode": 1,
+            "accept": [
+              ".txt",
+              ".text"
+            ],
+            "action": "android.intent.action.GET_CONTENT",
+            "type": "text/plain",
+            "flags": 0
+          }
+        ],
+        "results": [
+          {
+            "time": 1789318703930,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fsdk37-web-77f86bdc8a8c46f6a4002d7d60bc0137.txt",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318711142,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318718206,
+            "request": 24009,
+            "code": -1,
+            "uri": "content://com.android.providers.downloads.documents/document/msf%3A521",
+            "flags": 1,
+            "readGranted": true,
+            "writeGranted": false
+          },
+          {
+            "time": 1789318725438,
+            "request": 24009,
+            "code": 0,
+            "uri": null,
+            "flags": 0,
+            "readGranted": false,
+            "writeGranted": false
+          }
+        ],
+        "errors": [],
+        "ready": true,
+        "contextChecks": {
+          "webActivity": true,
+          "childTheme": true,
+          "childActivity": true
+        },
+        "persistedBefore": "[]",
+        "persistedAfter": "[]"
+      },
+      "compatAfter": [
+        "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+      ],
+      "forwardCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "forward",
+          "--remove",
+          "tcp:52875"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "stop": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "fixtureCleanup": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5590",
+          "shell",
+          "rm /sdcard/Download/sdk37-web-77f86bdc8a8c46f6a4002d7d60bc0137.txt"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "ended": "2026-09-13T16:58:53.504552+00:00",
+      "chooserRevalidationPassed": true,
+      "label": "web37-disabled-complete",
+      "rawResultSha256": "4a7f0934a43f51780e4423723635bdbde1f8c672643d73d9e93c64c68370d210",
+      "images": [
+        {
+          "name": "inputCancel.png",
+          "sha256": "93f389647dc930427a4d3ef1c340f7d8703c26105c2843dd34d867e899644883"
+        },
+        {
+          "name": "inputSelect.png",
+          "sha256": "372a97c219003f45fed76249728af602852a95aa7973b6ee1d75633a492a0f57"
+        },
+        {
+          "name": "openCancel.png",
+          "sha256": "ea54b1b08132bafce0677537a9f9247555caed7ac80322ed03925183967637f0"
+        },
+        {
+          "name": "openSelect.png",
+          "sha256": "93a86097ad36591dff2626099fbe66923336b0278c164adbc4026b74b5598d25"
+        }
+      ]
+    }
+  ],
+  "toolCommit": "71db66ed1",
+  "cleanup": {
+    "ended": "2026-09-13T17:17:19.651392+00:00",
+    "adbServerPort": 5054,
+    "smsPermissions": [
+      "android.permission.READ_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+      "android.permission.RECEIVE_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]"
+    ],
+    "listeners": "com.google.android.as/com.google.android.apps.miphone.aiai.common.notification.service.AiAiNotificationListenerService:com.google.android.apps.nexuslauncher/com.android.launcher3.notification.NotificationListener",
+    "debugApp": "null",
+    "forwards": "",
+    "compat": [
+      "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)",
+      "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+    ],
+    "termination": {
+      "checkedUtc": "2026-09-13T17:19:27.2908074Z",
+      "ownedProcesses": [],
+      "ownedListeners": []
+    },
+    "debugger": {
+      "sessions": [],
+      "userBreakpoints": 5,
+      "enabledUserBreakpoints": 2,
+      "agentBreakpoints": 0
+    }
+  },
+  "scenarios": 24,
+  "systemChooserRoundTrips": 20,
+  "blockedBeforeChooser": 4,
+  "debuggerContextEvents": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"status\":\"running\",\"breakpointErrorsTail\":[],\"tracepointOutputsTail\":[{\"type\":\"TRACEPOINT_OUTPUT\",\"timestampMs\":1789317408315,\"timestampIso\":\"2026-09-13T16:36:48.315Z\",\"sessionId\":\"SDK37 WebFiles 20260914\",\"message\":\"Breakpoint reached at org.autojs.autojs.core.ui.widget.EventWebView$InternalChromeClient.onShowFileChooser(EventWebView.kt:472)\\ncom.android.internal.policy.DecorContext@331b799\\n\",\"breakpointId\":\"line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/core/ui/widget/EventWebView.kt|471\",\"filePath\":\"file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/core/ui/widget/EventWebView.kt\",\"line\":472},{\"type\":\"TRACEPOINT_OUTPUT\",\"timestampMs\":1789317430783,\"timestampIso\":\"2026-09-13T16:37:10.783Z\",\"sessionId\":\"SDK37 WebFiles 20260914\",\"message\":\"Breakpoint reached at org.autojs.autojs.core.ui.widget.EventWebView$InternalChromeClient.onShowFileChooser(EventWebView.kt:472)\\ncom.android.internal.policy.DecorContext@331b799\\n\",\"breakpointId\":\"line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/core/ui/widget/EventWebView.kt|471\",\"filePath\":\"file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/core/ui/widget/EventWebView.kt\",\"line\":472}]}"
+      }
+    ],
+    "isError": false
+  }
+}

@@ -1,0 +1,972 @@
+{
+  "date": "2026-09-14",
+  "baseCommit": "373b7ef65",
+  "scope": "Immediate SMS queries and broadcasts; notification delivery remains unresolved; no three-hour expiry test",
+  "cases": [
+    {
+      "caseId": "ee435d38e11046f487f9d753e9e4d92d",
+      "started": "2026-09-13T16:25:49.410942+00:00",
+      "ended": "2026-09-13T16:27:18.879469+00:00",
+      "target": 36,
+      "sender": "15553332399329",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)"
+      },
+      "installedApkSha256": "23854f0cca57e94424792a293f4fbeb3ec6dfe086b0302b8cd35b67fcb3fd0b5",
+      "scriptSha256": "6c72308854784e7317c7f8d17b791ed1d03dd22b823e40c85dbf0e217e1e6cde",
+      "receipt": {
+        "caseId": "ee435d38e11046f487f9d753e9e4d92d",
+        "target": 36,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789316754472,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15553332399329",
+            "body": "SDK37 lunch is ready."
+          },
+          {
+            "time": 1789316766201,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15553332399329",
+            "body": "Your verification code is 482913. Do not share this code."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789316755043,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": "Messages is doing work in the background",
+            "extraText": "Messages is doing work in the background",
+            "bigText": "Messages is doing work in the background"
+          },
+          {
+            "time": 1789316755279,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15553332399329",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789316755290,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          },
+          {
+            "time": 1789316766588,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": "Messages is doing work in the background",
+            "extraText": "Messages is doing work in the background",
+            "bigText": "Messages is doing work in the background"
+          },
+          {
+            "time": 1789316766828,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "",
+            "text": "Sensitive notification content hidden",
+            "extraText": "Sensitive notification content hidden",
+            "bigText": null
+          },
+          {
+            "time": 1789316778823,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "",
+            "text": "Sensitive notification content hidden",
+            "extraText": "Sensitive notification content hidden",
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789316753549,
+            "rows": [],
+            "lastTime": 1789316754568,
+            "samples": 2
+          },
+          {
+            "time": 1789316755593,
+            "rows": [
+              {
+                "id": "4",
+                "address": "15553332399329",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789316754417,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789316765794,
+            "samples": 11
+          },
+          {
+            "time": 1789316766817,
+            "rows": [
+              {
+                "id": "4",
+                "address": "15553332399329",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789316754417,
+                "containsOtp": 0
+              },
+              {
+                "id": "5",
+                "address": "15553332399329",
+                "body": "Your verification code is 482913. Do not share this code.",
+                "date": 1789316766177,
+                "containsOtp": 1
+              }
+            ],
+            "lastTime": 1789316837270,
+            "samples": 70
+          }
+        ]
+      },
+      "label": "sms36-default",
+      "rawResultSha256": "d7bf8e13fff79bfa1c92931860ec6959f560f0ca5a6cdcfeed8b11bcd1e4b8a2",
+      "reportedSuccess": true,
+      "validationErrors": [],
+      "success": true,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "6",
+          "address": "15553332399329",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789316778188,
+          "containsOtp": 513
+        },
+        {
+          "id": "5",
+          "address": "15553332399329",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789316766177,
+          "containsOtp": 1
+        },
+        {
+          "id": "4",
+          "address": "15553332399329",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789316754417,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x04cd0c7b: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:2 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:2|10145: Notification(channel=bugle_default_channel shortcut=2 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789316755061",
+            "mUpdateTimeMs=1789316778612"
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "037cdb4f8ba74a8897821cb5a70ab93a",
+      "started": "2026-09-13T16:29:17.908198+00:00",
+      "ended": "2026-09-13T16:30:47.446781+00:00",
+      "target": 36,
+      "sender": "15554979649419",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": true,
+        "source": "packageOverrides",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+      },
+      "installedApkSha256": "23854f0cca57e94424792a293f4fbeb3ec6dfe086b0302b8cd35b67fcb3fd0b5",
+      "scriptSha256": "e02dc54c5a8976d6e8e6072393da03f887aa286e42001f0349be17ecef8dbf20",
+      "receipt": {
+        "caseId": "037cdb4f8ba74a8897821cb5a70ab93a",
+        "target": 36,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789316962948,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15554979649419",
+            "body": "SDK37 lunch is ready."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789316963681,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15554979649419",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789316963694,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789316962063,
+            "rows": [],
+            "lastTime": 1789316963077,
+            "samples": 2
+          },
+          {
+            "time": 1789316964116,
+            "rows": [
+              {
+                "id": "7",
+                "address": "15554979649419",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789316962859,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789317045736,
+            "samples": 81
+          }
+        ]
+      },
+      "label": "sms36-enabled",
+      "rawResultSha256": "91f419953335fd140eb106d7fa131086b85abdcaf540e9223d27d7f6b7440db5",
+      "reportedSuccess": true,
+      "validationErrors": [
+        "OTP notification redaction evidence missing (English AVD required)"
+      ],
+      "success": false,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "9",
+          "address": "15554979649419",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789316986787,
+          "containsOtp": 513
+        },
+        {
+          "id": "8",
+          "address": "15554979649419",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789316974742,
+          "containsOtp": 1
+        },
+        {
+          "id": "7",
+          "address": "15554979649419",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789316962859,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x08225bcc: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:3 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:3|10145: Notification(channel=bugle_default_channel shortcut=3 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789316963461",
+            "mUpdateTimeMs=1789316987173"
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "d60ec457b19f4c3f959fb191020752f1",
+      "started": "2026-09-13T16:37:43.967314+00:00",
+      "ended": "2026-09-13T16:39:15.837912+00:00",
+      "target": 37,
+      "sender": "15559370749873",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": true,
+        "source": "targetSdk",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)"
+      },
+      "installedApkSha256": "dfebcfa9911294674b276b00927cfbe09400d7eb417436360b77f88da91cc3a5",
+      "scriptSha256": "1b888ec5f5dd3e12420ad434154a8ba85bb25cc32ea20f839e2b01850ae92121",
+      "receipt": {
+        "caseId": "d60ec457b19f4c3f959fb191020752f1",
+        "target": 37,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789317470032,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15559370749873",
+            "body": "SDK37 lunch is ready."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789317470860,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15559370749873",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789317470871,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789317469036,
+            "rows": [],
+            "lastTime": 1789317470058,
+            "samples": 2
+          },
+          {
+            "time": 1789317471081,
+            "rows": [
+              {
+                "id": "10",
+                "address": "15559370749873",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789317469983,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789317553735,
+            "samples": 82
+          }
+        ]
+      },
+      "label": "sms37-default",
+      "rawResultSha256": "65edd3276b2563aa86e45298dfc1525dd0bb05133267b845f44cedf2d3a20c0f",
+      "reportedSuccess": false,
+      "validationErrors": [
+        "OTP notification redaction evidence missing (English AVD required)"
+      ],
+      "success": false,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "12",
+          "address": "15559370749873",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789317494000,
+          "containsOtp": 513
+        },
+        {
+          "id": "11",
+          "address": "15559370749873",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789317481971,
+          "containsOtp": 1
+        },
+        {
+          "id": "10",
+          "address": "15559370749873",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789317469983,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x0cea9c7a: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:4 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:4|10145: Notification(channel=bugle_default_channel shortcut=4 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789317470626",
+            "mUpdateTimeMs=1789317494408"
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "044bec7cec154553807825adab657aaa",
+      "started": "2026-09-13T16:47:34.618166+00:00",
+      "ended": "2026-09-13T16:49:05.172683+00:00",
+      "target": 37,
+      "sender": "15558453658860",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": false,
+        "source": "packageOverrides",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+      },
+      "installedApkSha256": "b068ac720b55d7efed94db1fa86e8104eca416cc2909bbba54781afcc4c6e28f",
+      "scriptSha256": "346b4b2fc5738694c05d66c96b568e57c6d76217fc76e2fe76ef2b0d1d3d2238",
+      "receipt": {
+        "caseId": "044bec7cec154553807825adab657aaa",
+        "target": 37,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789318060726,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15558453658860",
+            "body": "SDK37 lunch is ready."
+          },
+          {
+            "time": 1789318072686,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15558453658860",
+            "body": "Your verification code is 482913. Do not share this code."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789318061544,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15558453658860",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789318061560,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789318059726,
+            "rows": [],
+            "lastTime": 1789318060748,
+            "samples": 2
+          },
+          {
+            "time": 1789318061764,
+            "rows": [
+              {
+                "id": "16",
+                "address": "15558453658860",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789318060682,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789318072007,
+            "samples": 11
+          },
+          {
+            "time": 1789318073028,
+            "rows": [
+              {
+                "id": "16",
+                "address": "15558453658860",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789318060682,
+                "containsOtp": 0
+              },
+              {
+                "id": "17",
+                "address": "15558453658860",
+                "body": "Your verification code is 482913. Do not share this code.",
+                "date": 1789318072666,
+                "containsOtp": 1
+              }
+            ],
+            "lastTime": 1789318143529,
+            "samples": 70
+          }
+        ]
+      },
+      "label": "sms37-disabled",
+      "rawResultSha256": "14511d4b8b8a751b6b606a0fb9330b29720a5f579890996ef4d04ea8f1007f6b",
+      "reportedSuccess": false,
+      "validationErrors": [
+        "OTP notification redaction evidence missing (English AVD required)"
+      ],
+      "success": false,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "18",
+          "address": "15558453658860",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789318084697,
+          "containsOtp": 513
+        },
+        {
+          "id": "17",
+          "address": "15558453658860",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789318072666,
+          "containsOtp": 1
+        },
+        {
+          "id": "16",
+          "address": "15558453658860",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789318060682,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x00581b69: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:6 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:6|10145: Notification(channel=bugle_default_channel shortcut=6 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789318061321",
+            "mUpdateTimeMs=1789318085249"
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c21dc7fac9074c458dc8c3cc03bde938",
+      "started": "2026-09-13T16:45:05.935957+00:00",
+      "ended": "2026-09-13T16:46:36.480668+00:00",
+      "target": 37,
+      "sender": "15553723300553",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": true,
+        "source": "targetSdk",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)"
+      },
+      "installedApkSha256": "faec5014474d8b2f4167800d5bac1515113af89deffe3806f81c6823f5a55c89",
+      "scriptSha256": "0005727c86c50c92049456e0f8b6577e55abaf55900726e134e958b11064b90c",
+      "receipt": {
+        "caseId": "c21dc7fac9074c458dc8c3cc03bde938",
+        "target": 37,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789317912219,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15553723300553",
+            "body": "SDK37 lunch is ready."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789317913052,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15553723300553",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789317913064,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789317911243,
+            "rows": [],
+            "lastTime": 1789317912285,
+            "samples": 2
+          },
+          {
+            "time": 1789317913303,
+            "rows": [
+              {
+                "id": "13",
+                "address": "15553723300553",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789317912169,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789317994879,
+            "samples": 81
+          }
+        ]
+      },
+      "label": "sms37-fixed-repeat",
+      "rawResultSha256": "043820690f7bc6a196710b7a9c2285264ecd00a210899acf28c206c88bbe2716",
+      "reportedSuccess": false,
+      "validationErrors": [
+        "OTP notification redaction evidence missing (English AVD required)"
+      ],
+      "success": false,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "15",
+          "address": "15553723300553",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789317936182,
+          "containsOtp": 513
+        },
+        {
+          "id": "14",
+          "address": "15553723300553",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789317924157,
+          "containsOtp": 1
+        },
+        {
+          "id": "13",
+          "address": "15553723300553",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789317912169,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x0e9948af: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:5 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:5|10145: Notification(channel=bugle_default_channel shortcut=5 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789317912818",
+            "mUpdateTimeMs=1789317936587"
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "08c045d755a64349b4bb063a31c3a750",
+      "started": "2026-09-13T17:02:35.654791+00:00",
+      "ended": "2026-09-13T17:04:05.772662+00:00",
+      "target": 36,
+      "sender": "15557585540949",
+      "messages": {
+        "plain": "SDK37 lunch is ready.",
+        "generic": "Your verification code is 482913. Do not share this code.",
+        "webotp": "Your verification code is 736251.\n\n@example.com #736251"
+      },
+      "device": {
+        "serial": "emulator-5590",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "compat": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)"
+      },
+      "installedApkSha256": "95499d4de139d04f026e1ebb57bbe81733e1517005dc8f09bd2db617d2105f11",
+      "scriptSha256": "3908cb260e29e7dbe3f8ef95b3ff4e7fb66f31cfe83b287a24c154522b25e5f1",
+      "receipt": {
+        "caseId": "08c045d755a64349b4bb063a31c3a750",
+        "target": 36,
+        "sdk": 37,
+        "ready": true,
+        "complete": true,
+        "broadcasts": [
+          {
+            "time": 1789318961554,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15557585540949",
+            "body": "SDK37 lunch is ready."
+          },
+          {
+            "time": 1789318973539,
+            "action": "android.provider.Telephony.SMS_RECEIVED",
+            "address": "15557585540949",
+            "body": "Your verification code is 482913. Do not share this code."
+          }
+        ],
+        "notifications": [
+          {
+            "time": 1789318962445,
+            "packageName": "com.google.android.apps.messaging",
+            "title": "15557585540949",
+            "text": "SDK37 lunch is ready.",
+            "extraText": "SDK37 lunch is ready.",
+            "bigText": null
+          },
+          {
+            "time": 1789318962462,
+            "packageName": "com.google.android.apps.messaging",
+            "title": null,
+            "text": null,
+            "extraText": null,
+            "bigText": null
+          }
+        ],
+        "errors": [],
+        "deviceLocked": false,
+        "permissions": {
+          "READ_SMS": true,
+          "RECEIVE_SMS": true
+        },
+        "defaultSms": "com.google.android.apps.messaging",
+        "queryStates": [
+          {
+            "time": 1789318960567,
+            "rows": [],
+            "lastTime": 1789318961585,
+            "samples": 2
+          },
+          {
+            "time": 1789318962601,
+            "rows": [
+              {
+                "id": "21",
+                "address": "15557585540949",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789318961504,
+                "containsOtp": 0
+              }
+            ],
+            "lastTime": 1789318972815,
+            "samples": 11
+          },
+          {
+            "time": 1789318973827,
+            "rows": [
+              {
+                "id": "21",
+                "address": "15557585540949",
+                "body": "SDK37 lunch is ready.",
+                "date": 1789318961504,
+                "containsOtp": 0
+              },
+              {
+                "id": "22",
+                "address": "15557585540949",
+                "body": "Your verification code is 482913. Do not share this code.",
+                "date": 1789318973499,
+                "containsOtp": 1
+              }
+            ],
+            "lastTime": 1789319044283,
+            "samples": 70
+          }
+        ]
+      },
+      "label": "sms36-late-default",
+      "rawResultSha256": "a59ffe86f57162b441cead96a630a14081f7f31d82ed0deeb5bd35f9efe7274b",
+      "reportedSuccess": false,
+      "validationErrors": [
+        "OTP notification redaction evidence missing (English AVD required)"
+      ],
+      "success": false,
+      "smsVisibilityPassed": true,
+      "providerRows": [
+        {
+          "id": "23",
+          "address": "15557585540949",
+          "body": "Your verification code is 736251.\n\n@example.com #736251",
+          "date": 1789318985535,
+          "containsOtp": 513
+        },
+        {
+          "id": "22",
+          "address": "15557585540949",
+          "body": "Your verification code is 482913. Do not share this code.",
+          "date": 1789318973499,
+          "containsOtp": 1
+        },
+        {
+          "id": "21",
+          "address": "15557585540949",
+          "body": "SDK37 lunch is ready.",
+          "date": 1789318961504,
+          "containsOtp": 0
+        }
+      ],
+      "systemNotifications": [
+        {
+          "record": "  NotificationRecord(0x0e83ff55: pkg=com.google.android.apps.messaging user=UserHandle{0} id=2 tag=com.google.android.apps.messaging:incoming_message:8 importance=4 key=0|com.google.android.apps.messaging|2|com.google.android.apps.messaging:incoming_message:8|10145: Notification(channel=bugle_default_channel shortcut=8 contentView=null vibrate=null sound=null tick defaults=0 flags=AUTO_CANCEL color=0xff8ab4f8 category=msg groupKey=incoming_message_group_key actions=2 vis=PRIVATE))",
+          "sensitive": true,
+          "containsWebOtpText": true,
+          "metadata": [
+            "mSensitiveContent=true",
+            "mCreationTimeMs=1789318962215",
+            "mUpdateTimeMs=1789318986026"
+          ]
+        }
+      ]
+    }
+  ],
+  "toolCommit": "71db66ed1",
+  "cleanup": {
+    "ended": "2026-09-13T17:17:19.651392+00:00",
+    "adbServerPort": 5054,
+    "smsPermissions": [
+      "android.permission.READ_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+      "android.permission.RECEIVE_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]"
+    ],
+    "listeners": "com.google.android.as/com.google.android.apps.miphone.aiai.common.notification.service.AiAiNotificationListenerService:com.google.android.apps.nexuslauncher/com.android.launcher3.notification.NotificationListener",
+    "debugApp": "null",
+    "forwards": "",
+    "compat": [
+      "ChangeId(437043173; name=FILTER_GENERIC_OTP; enableSinceTargetSdk=37)",
+      "ChangeId(364980165; name=ENABLE_FILE_SYSTEM_ACCESS; enableSinceTargetSdk=37)"
+    ],
+    "termination": {
+      "checkedUtc": "2026-09-13T17:19:27.2908074Z",
+      "ownedProcesses": [],
+      "ownedListeners": []
+    },
+    "debugger": {
+      "sessions": [],
+      "userBreakpoints": 5,
+      "enabledUserBreakpoints": 2,
+      "agentBreakpoints": 0
+    }
+  },
+  "formalGroups": 4,
+  "formalSmsVisibilityComparisons": 24,
+  "formalCompletePasses": 1,
+  "supplementaryGroups": 2
+}
