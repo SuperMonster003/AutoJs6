@@ -170,6 +170,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ###### 2026/09/13
 
+* `Feature` MCP Server drawer switch with installation, activation, enablement, authorization, and compatibility guidance; notification Stop synchronization; saved plugin settings retained on reconnect; permission-checked settings entry from the drawer and Plugin Center. Restores a previously enabled server when AutoJs6 opens, unless the user stopped it while the host was absent; no boot startup.
 * `Feature` MCP workspace capabilities add Android application queries, editor line and column positioning, automatic accessibility activation using configured strategies, bounded Shell output, and read-only descriptors for large JSON results; root execution uses a separate shell.root grant and phone setting
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` `device.pageSize` read-only property returns the running system memory page size in bytes, identifying 4 KB / 16 KB environments

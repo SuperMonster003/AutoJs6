@@ -11,6 +11,7 @@ data class McpServerConfig(
     val bindScope: String = McpServerContract.BIND_SCOPE_LOOPBACK,
     val protocolMode: String = McpServerContract.PROTOCOL_MODE_STATEFUL,
     val hostLabel: String? = null,
+    val useSavedSettings: Boolean = false,
 ) {
 
     /** `null` when the configuration can be sent; otherwise the `ERROR_*` code plus a detail. */

@@ -170,6 +170,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/13
 
+* `Nuevo` Interruptor MCP Server con guías de instalación, activación, autorización y compatibilidad; sincronización con Detener en la notificación; ajustes conservados al reconectar; acceso verificado a la misma página desde el panel y el Centro de complementos. Restaura el servidor al abrir AutoJs6 salvo que el usuario lo detuviera sin el anfitrión; no arranca con el dispositivo.
 * `Nuevo` Las capacidades MCP incorporan consultas de aplicaciones Android, posiciones del editor, activación de accesibilidad mediante las estrategias configuradas, salida Shell limitada y descriptores de solo lectura para resultados JSON grandes; root usa un permiso shell.root y un ajuste del teléfono independientes
 * `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
 * `Nuevo` Propiedad de solo lectura `device.pageSize` que devuelve el tamaño de página de memoria del sistema en bytes, para identificar entornos de 4 KB / 16 KB

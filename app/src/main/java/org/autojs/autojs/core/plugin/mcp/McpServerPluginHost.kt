@@ -74,6 +74,12 @@ object McpServerPluginHost {
     ): AidlPluginHost.LeasedCall<IMcpServerSession> = withContext(Dispatchers.IO) {
         config.validate()?.let { error -> throw IllegalArgumentException("${error.code}: ${error.message}") }
         val target = selectOrThrow(context)
+        if (config.useSavedSettings) {
+            val settingsVersion = host.call(context, target) { proxy ->
+                proxy.getCapabilities()?.getInt(McpServerCapabilityKeys.SETTINGS_VERSION, 0) ?: 0
+            }
+            require(settingsVersion >= McpServerContract.SETTINGS_VERSION) { "MCP Server settings extension is unavailable" }
+        }
         host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
             checkNotNull(proxy.openServer(McpServerBundles.configToBundle(config), broker, callback)) {
                 "MCP Server returned no session"

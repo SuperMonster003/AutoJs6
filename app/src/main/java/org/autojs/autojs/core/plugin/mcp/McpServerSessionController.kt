@@ -125,7 +125,7 @@ class McpServerSessionController(
         pullStatus(current, current.callback) ?: statusFlow.value
     }
 
-    private suspend fun openLocked(config: McpServerConfig): McpServerStatus {
+    private suspend fun openLocked(config: McpServerConfig, rebinding: Boolean = false): McpServerStatus {
         val sessionId = "mcp-" + UUID.randomUUID().toString()
         currentSessionId = sessionId
         val broker = brokerFactory(sessionId)
@@ -136,7 +136,7 @@ class McpServerSessionController(
         } catch (error: Throwable) {
             runCatching { broker.destroy(McpServerBundles.reasonBundle(McpServerContract.ERROR_INTERNAL, error.message)) }
             currentSessionId = null
-            publish(McpServerStatus.failed(McpServerContract.ERROR_INTERNAL, error.message ?: error.javaClass.name))
+            if (!rebinding) publish(McpServerStatus.failed(McpServerContract.ERROR_INTERNAL, error.message ?: error.javaClass.name))
             throw error
         }
         val deathRecipient = IBinder.DeathRecipient { onSessionDied(sessionId) }
@@ -147,7 +147,7 @@ class McpServerSessionController(
             runCatching { leased.bindingLease.close() }
             runCatching { broker.destroy(McpServerBundles.reasonBundle(McpServerContract.REASON_PLUGIN_DIED, error.message)) }
             currentSessionId = null
-            publish(McpServerStatus.failed(McpServerContract.REASON_PLUGIN_DIED, "MCP Server died while opening"))
+            if (!rebinding) publish(McpServerStatus.failed(McpServerContract.REASON_PLUGIN_DIED, "MCP Server died while opening"))
             throw IllegalStateException("MCP Server died while opening", error)
         }
         val current = Active(sessionId, config, leased, broker, deathRecipient, callback)
@@ -167,6 +167,9 @@ class McpServerSessionController(
             .getOrNull() ?: return null
         synchronized(callback) {
             if (callback.statusCount == before) {
+                // openServer queues listener startup. Its initial getStatus can still be stopped;
+                // preserve starting until the first callback instead of closing the drawer switch.
+                if (before == 0 && snapshot.state == McpServerContract.STATE_STOPPED) return statusFlow.value
                 publish(snapshot)
                 return snapshot
             }
@@ -231,7 +234,7 @@ class McpServerSessionController(
                 }
                 val target = desiredConfig ?: config
                 try {
-                    openLocked(target)
+                    openLocked(target, rebinding = true)
                     rebindAttempt = 0
                 } catch (error: Throwable) {
                     Log.w(TAG, "MCP Server rebind attempt $attempt failed: ${error.message}")

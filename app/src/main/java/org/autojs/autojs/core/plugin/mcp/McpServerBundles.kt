@@ -12,6 +12,7 @@ internal object McpServerBundles {
         putString(McpServerContract.KEY_SERVER_CONFIG_BIND_SCOPE, config.bindScope)
         putString(McpServerContract.KEY_SERVER_CONFIG_PROTOCOL_MODE, config.protocolMode)
         config.hostLabel?.takeIf { it.isNotBlank() }?.let { putString(McpServerContract.KEY_SERVER_CONFIG_HOST_LABEL, it) }
+        if (config.useSavedSettings) putBoolean(McpServerContract.KEY_SERVER_CONFIG_USE_SAVED_SETTINGS, true)
     }
 
     fun reasonBundle(code: String, message: String? = null): Bundle = Bundle().apply {

@@ -135,6 +135,7 @@
     <string name="description_launcher_icon_preference">런처 아이콘은 어댑티브 아이콘과 기존 투명 배경 아이콘 두 가지 표시 모드를 지원합니다. 실제 표시 효과는 안드로이드 시스템별로 다를 수 있습니다. 표시 모드를 전환한 후 적용되기까지 몇 초가 걸릴 수 있습니다.</string>
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
+    <string name="description_mcp_server">MCP Server 플러그인으로 페어링된 AI 클라이언트의 기기 자동화를 허용합니다. 설정에서 포트, 네트워크, 토큰, 도구 그룹을 선택하세요.</string>
     <string name="description_night_mode">AutoJs6 의 야간 모드 전략을 제어하고 그 상태를 반영합니다.\n\n참고: 야간 모드 스위치와 자동 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
     <string name="description_night_mode_preference_more">Android 시스템에서 야간 모드를 활성화하려면:\n- Android API 레벨 29 (Android 10) [Q] 이상: 설정 -> 디스플레이 -> 테마.\n- Android API 레벨 28 (Android 9) [P]: 개발자 옵션 -> 야간 모드.\n\nWebView 구성 요소(예: AutoJs6 설명서 페이지)를 사용하여 웹 기반 콘텐츠에 야간 모드 (어두운 테마) 를 적용하려면 다음 조건을 충족해야 합니다.\n1. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P]: 버전 >= 105\n2. WebView 구성 요소의 웹 기반 콘텐츠는 Dark 테마에 맞게 조정됩니다 (CSS 또는 Android XML 리소스 등).</string>
@@ -599,6 +600,17 @@
     <string name="logger_ver_history_raw_thread_success">\"Raw\" 스레드 요청 성공, 오프라인 캐시 기록</string>
     <string name="logger_ver_history_start_blob_thread">\"Blob\" 대체 요청 스레드 시작</string>
     <string name="logger_ver_history_start_raw_thread">\"Raw\" 요청 스레드 시작</string>
+    <string name="mcp_server_state_activation">활성화 필요</string>
+    <string name="mcp_server_state_authorization">승인 필요</string>
+    <string name="mcp_server_state_disabled">플러그인 비활성화됨</string>
+    <string name="mcp_server_state_failed">시작 실패. 설정에서 포트를 확인하세요.</string>
+    <string name="mcp_server_state_host_unavailable">AutoJs6 대기 중</string>
+    <string name="mcp_server_state_incompatible">호환되지 않는 버전</string>
+    <string name="mcp_server_state_not_installed">플러그인 미설치</string>
+    <string name="mcp_server_state_running">실행 중</string>
+    <string name="mcp_server_state_starting">시작 중</string>
+    <string name="mcp_server_state_stopped">중지됨</string>
+    <string name="mcp_server_state_stopping">중지 중</string>
     <string name="media_info_album_label">앨범</string>
     <string name="media_info_aspect_ratio_label">종횡비</string>
     <string name="media_info_audio_format_label">오디오</string>
@@ -635,6 +647,15 @@
     <string name="prompt_ai_plugin_install_required">AI 서비스 설정을 열기 전에 플러그인 센터에서 3-Stone AI를 설치하세요.</string>
     <string name="prompt_ai_plugin_settings_unavailable">설치된 3-Stone AI에 신뢰할 수 있는 설정 진입점이 없습니다. 플러그인 센터에서 업데이트하거나 다시 설치하세요.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">현재 파일이 유효한 플러그인 패키지가 아닐 수 있습니다. 설치를 계속하시겠습니까?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mcp_server_activate">MCP Server가 설치되었지만 아직 활성화되지 않았습니다. AutoJs6 연결을 허용하려면 활성화하세요.</string>
+    <string name="prompt_mcp_server_application_disabled">Android에서 MCP Server가 비활성화되었습니다. 시스템 설정에서 앱을 활성화한 뒤 다시 시도하세요.</string>
+    <string name="prompt_mcp_server_authorize">이 기기에 MCP 접근을 제공하려면 먼저 플러그인 센터에서 승인해야 합니다.</string>
+    <string name="prompt_mcp_server_enable">AutoJs6에서 MCP Server 플러그인을 활성화하고 서버를 시작할까요?</string>
+    <string name="prompt_mcp_server_failed">플러그인에 연결할 수 없습니다. 플러그인 센터에서 상태를 확인한 뒤 다시 시도하세요.</string>
+    <string name="prompt_mcp_server_incompatible">AutoJs6 빌드 %1$d 이상이 필요합니다. 호환되는 AutoJs6와 MCP Server를 설치하세요.</string>
+    <string name="prompt_mcp_server_install">공식 플러그인 센터에서 MCP Server를 설치하고 활성화한 뒤 이 스위치를 사용하세요.</string>
+    <string name="prompt_mcp_server_settings_unavailable">이 MCP Server 버전은 설정 페이지를 제공하지 않습니다. 플러그인 센터에서 업데이트하세요.</string>
+    <string name="prompt_mcp_server_trust">수동 승인된 플러그인이지만 서명자가 공식 또는 신뢰 목록에 없습니다. 페어링된 MCP 클라이언트에 AutoJs6 기기 기능을 제공하도록 허용할까요?</string>
     <string name="prompt_plugin_abi_mismatch_before_download">플러그인 ABI 목록과 현재 기기 ABI 목록의 교집합이 없습니다.\n\n플러그인 ABI: %1$s\n기기 ABI: %2$s\n\n그래도 다운로드를 계속하시겠습니까?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">플러그인 ABI 목록과 현재 기기 ABI 목록의 교집합이 없습니다.\n\n플러그인 ABI: %1$s\n기기 ABI: %2$s\n\n그래도 활성화를 계속하시겠습니까?</string>
     <string name="prompt_plugin_hide_from_center">숨기면 이 플러그인은 더 이상 플러그인 센터 목록에 표시되지 않습니다. 숨겨진 모든 플러그인은 플러그인 센터 \"전역 설정\"에서 관리할 수 있습니다.</string>
@@ -1407,6 +1428,7 @@
     <string name="text_manage_ignored_updates">무시 된 업데이트를 관리합니다</string>
     <string name="text_manage_key_store">키 저장소 관리</string>
     <string name="text_maximize">최대화</string>
+    <string name="text_mcp_server">MCP 서버</string>
     <string name="text_min_version">최소 버전</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
     <string name="text_minimize">최소화</string>

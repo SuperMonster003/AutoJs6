@@ -23,4 +23,10 @@ object McpServerCapabilityKeys {
 
     /** String: version of the MCP SDK bundled in the plugin, for diagnostics only. */
     const val SDK_VERSION = "mcpServerSdkVersion"
+
+    /** Int: optional settings extension. Version 1 supports OPEN_SETTINGS and saved configuration. */
+    const val SETTINGS_VERSION = "mcpServerSettingsVersion"
+
+    /** Boolean, getCapabilities only: true after a user stop or before the first successful start. */
+    const val USER_STOPPED = "mcpServerUserStopped"
 }

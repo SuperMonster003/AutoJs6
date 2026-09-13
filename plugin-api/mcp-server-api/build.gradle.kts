@@ -10,6 +10,8 @@ android {
 
     defaultConfig {
         minSdk = versions.sdkVersionMin
+        // Exported Binder contracts remain consumable by plugins on the audited SDK 36 platform.
+        aarMetadata { minCompileSdk = 36 }
         consumerProguardFiles("consumer-rules.pro")
     }
 

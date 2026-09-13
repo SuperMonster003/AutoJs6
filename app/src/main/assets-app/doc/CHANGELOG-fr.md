@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `Fonctionnalité` Bouton MCP Server avec guides d'installation, d'activation, d'autorisation et de compatibilité; arrêt synchronisé avec la notification; paramètres conservés à la reconnexion; accès vérifié à la même page depuis le volet et le Centre de plugins. Restaure le serveur à l'ouverture d'AutoJs6 sauf arrêt par l'utilisateur en l'absence de l'hôte; aucun lancement au démarrage de l'appareil.
 * `Fonctionnalité` Les capacités MCP ajoutent la recherche des applications Android, les positions dans un éditeur, une activation de l'accessibilité selon les stratégies configurées, une sortie Shell limitée et des descripteurs en lecture seule pour les grands résultats JSON; root utilise une autorisation shell.root et un réglage distincts sur le téléphone
 * `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Propriété en lecture seule `device.pageSize` renvoyant la taille des pages mémoire du système en octets, pour identifier les environnements de 4 KB / 16 KB

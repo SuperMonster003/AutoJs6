@@ -133,6 +133,7 @@
     <string name="description_launcher_icon_preference">El ícono del iniciador admite modos de visualización de ícono adaptable o heredado con fondo transparente. El efecto de visualización real puede variar en diferentes sistemas Android. Puede tardar unos segundos en surtir efecto después de cambiar el modo de visualización.</string>
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="description_manage_ignored_updates_preference">Pulse para ver o gestionar los elementos de la lista.\nHaga una pulsación larga para eliminar el elemento de la lista.</string>
+    <string name="description_mcp_server">Permite a clientes de IA vinculados automatizar este dispositivo mediante el complemento MCP Server. Abre Ajustes para elegir puerto, red, token y grupos de herramientas.</string>
     <string name="description_night_mode">Se usa para controlar y reflejar la estrategia de modo nocturno de AutoJs6.\n\nNota: el interruptor de modo nocturno y el interruptor de modo nocturno automático están vinculados y se afectan mutuamente.</string>
     <string name="description_night_mode_preference">El modo nocturno (también conocido como tema oscuro) se aplica tanto a la interfaz de usuario del sistema Android como a las aplicaciones que se ejecutan en el dispositivo, lo que mejora la visibilidad para los usuarios con baja visión y los que son sensibles a la luz brillante, y facilita el uso de un dispositivo en un entorno con poca luz.\n\nSistema de seguimiento: AutoJs6 tiene ajustes de modo nocturno iguales a los del sistema Android\nSiempre activado: AutoJs6 mantiene activado el modo Noche (independientemente de la configuración del sistema Android)\nSiempre desactivado: AutoJs6 mantiene el modo nocturno desactivado (independientemente de la configuración del sistema Android)\n\nNota: La opción de seguir el sistema es sólo para el nivel 28 de la API de Android (Android 9) [P] y superior.</string>
     <string name="description_night_mode_preference_more">Para activar el modo nocturno en el sistema Android:\n- Android API Level 29 (Android 10) [Q] y superior: Ajustes -> Pantalla -> Tema.\n- Android API Level 28 (Android 9) [P]: Opciones de desarrollador -> Modo nocturno.\n\nLas siguientes condiciones deben cumplirse para aplicar un modo nocturno (tema oscuro) al contenido basado en la web utilizando un componente WebView (como la página de documentación de AutoJs6):\n1. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P]: versión >= 105\n2. El contenido basado en la web en el componente WebView se adapta al tema oscuro (mediante CSS o recursos XML de Android, etc.)</string>
@@ -597,6 +598,17 @@
     <string name="logger_ver_history_raw_thread_success">Hilo \"raw\" exitoso, escribiendo caché sin conexión</string>
     <string name="logger_ver_history_start_blob_thread">Iniciando hilo de solicitud alterna \"blob\"</string>
     <string name="logger_ver_history_start_raw_thread">Iniciando hilo de solicitud \"raw\"</string>
+    <string name="mcp_server_state_activation">Se requiere activación</string>
+    <string name="mcp_server_state_authorization">Se requiere autorización</string>
+    <string name="mcp_server_state_disabled">Complemento desactivado</string>
+    <string name="mcp_server_state_failed">Error de inicio. Abre Ajustes para comprobar el puerto.</string>
+    <string name="mcp_server_state_host_unavailable">Esperando a AutoJs6</string>
+    <string name="mcp_server_state_incompatible">Versión incompatible</string>
+    <string name="mcp_server_state_not_installed">Complemento no instalado</string>
+    <string name="mcp_server_state_running">En ejecución</string>
+    <string name="mcp_server_state_starting">Iniciando</string>
+    <string name="mcp_server_state_stopped">Detenido</string>
+    <string name="mcp_server_state_stopping">Deteniendo</string>
     <string name="media_info_album_label">Álbum</string>
     <string name="media_info_aspect_ratio_label">Relación de aspecto</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -633,6 +645,15 @@
     <string name="prompt_ai_plugin_install_required">Instala 3-Stone AI desde el Centro de plugins antes de abrir los ajustes del servicio de IA.</string>
     <string name="prompt_ai_plugin_settings_unavailable">La instalación de 3-Stone AI no ofrece una entrada de ajustes de confianza. Actualízala o vuelve a instalarla desde el Centro de plugins.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">El archivo actual puede no ser un paquete de complemento válido. ¿Deseas continuar con la instalación?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mcp_server_activate">MCP Server está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión de AutoJs6.</string>
+    <string name="prompt_mcp_server_application_disabled">Android ha desactivado MCP Server. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
+    <string name="prompt_mcp_server_authorize">Este complemento necesita autorización en el Centro de complementos antes de permitir acceso MCP al dispositivo.</string>
+    <string name="prompt_mcp_server_enable">Habilitar el complemento MCP Server en AutoJs6 e iniciar el servidor?</string>
+    <string name="prompt_mcp_server_failed">No se puede conectar al complemento. Comprueba su estado en el Centro de complementos e inténtalo de nuevo.</string>
+    <string name="prompt_mcp_server_incompatible">Este complemento requiere AutoJs6 build %1$d o posterior. Instala versiones compatibles de AutoJs6 y MCP Server.</string>
+    <string name="prompt_mcp_server_install">Instala MCP Server desde el Centro de complementos oficial y actívalo para usar este interruptor.</string>
+    <string name="prompt_mcp_server_settings_unavailable">Esta versión de MCP Server no ofrece la página de ajustes. Actualiza el complemento en el Centro de complementos.</string>
+    <string name="prompt_mcp_server_trust">Autorizaste este complemento manualmente, pero su firma no está en la lista oficial o de confianza. Permitir que ofrezca capacidades de AutoJs6 a clientes MCP vinculados?</string>
     <string name="prompt_plugin_abi_mismatch_before_download">La lista de ABI del plugin no tiene intersección con la lista de ABI del dispositivo actual.\n\nABI del plugin: %1$s\nABI del dispositivo: %2$s\n\n¿Continuar con la descarga de todos modos?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">La lista de ABI del plugin no tiene intersección con la lista de ABI del dispositivo actual.\n\nABI del plugin: %1$s\nABI del dispositivo: %2$s\n\n¿Continuar con la activación de todos modos?</string>
     <string name="prompt_plugin_hide_from_center">Después de ocultarlo, este plugin ya no aparecerá en la lista del Centro de plugins. Puedes gestionar todos los plugins ocultos en la \"Configuración global\" del Centro de plugins.</string>
@@ -1405,6 +1426,7 @@
     <string name="text_manage_ignored_updates">Gestionar las actualizaciones ignoradas</string>
     <string name="text_manage_key_store">Gestionar almacenamiento de claves</string>
     <string name="text_maximize">Maximizar</string>
+    <string name="text_mcp_server">Servidor MCP</string>
     <string name="text_min_version">Versión mínima</string>
     <string name="text_min_version_of_vscode_vsc_ext">Versión mínima de la extensión VSCode</string>
     <string name="text_minimize">Minimizar</string>

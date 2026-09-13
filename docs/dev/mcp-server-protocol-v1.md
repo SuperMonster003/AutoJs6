@@ -295,10 +295,10 @@ JSON objects carry a `schema` field; the schemas below are frozen at `v1`.
   rebinds with delays of 1 s, 3 s and 9 s (`McpRebindPolicy`, three attempts)
   while publishing `starting` with `plugin_died` as the last error code; when the
   attempts are exhausted it publishes `stopped` with reason `plugin_died`.
-- The plugin must link to the broker Binder's death and treat it as
-  `host_died`: stop serving tools and report `stopped` (or `failed`) through the
-  callback if it is still alive. The host never replays tool calls after a
-  death; the MCP client sees a tool error and decides.
+- The plugin links to the broker Binder's death. The listener stays running
+  with `hostAvailable = false`; host-backed tools return `HOST_UNAVAILABLE`.
+  A new host session replaces the dead broker and reuses the listener. The host
+  never replays tool calls after a death; the MCP client sees a tool error and decides.
 - `onStatus` and `onResponse` are oneway. The host serializes status into a
   `StateFlow`, so a burst of status callbacks collapses to the latest value; the
   plugin must not rely on the host observing every intermediate state.
@@ -337,6 +337,52 @@ and are not exposed by this phase.
   and surface here only as events and status counters.
 - Console capture is an id window over the shared `GlobalConsole`, not a
   per-execution stream: every script runtime prints into the same console.
-- The host drawer switch, plugin settings and localized strings belong to
-  roadmap P4; Binder round-trip tests with a fake or real plugin belong to the
-  P1 acceptance and P2.
+- The host drawer switch and plugin settings are delivered by the optional P4
+  extension below. Binder round-trip tests remain the P1 / P2 acceptance path.
+
+## P4 Settings Extension, Version 1
+
+This extension leaves the AIDL transaction order and core contract version intact.
+`mcpServerSettingsVersion = 1` is advertised in PluginInfo and `getCapabilities()`.
+The drawer checks this capability before opening a session with
+`serverConfigUseSavedSettings = true`. The plugin then uses its private saved
+port, bind scope and developer-mode settings. Legacy callers omit the key and
+keep their explicit port / scope behavior.
+
+`mcpServerUserStopped` is a dynamic Boolean in `getCapabilities()` only. It defaults
+to true when the lifecycle file is missing or invalid. A successful start writes
+false; a user stop writes true. Automatic reconnect checks this flag, so a stop
+from the plugin notification while the host was dead is respected on host relaunch.
+Manual drawer activation can start a stopped server. Neither application starts
+the endpoint at device boot.
+
+The settings action is `org.autojs.plugin.mcp.server.action.OPEN_SETTINGS`.
+Both drawer long-press and Plugin Center resolve one explicit activity in the
+MCP Server package and require it to be enabled, exported and guarded by
+`org.autojs.permission.PLUGIN`. Missing, disabled, unactivated, untrusted and
+incompatible plugins have separate guidance. A user-granted signer requires
+the extra D18 confirmation, pinned to its current certificate fingerprints.
+
+The process-scoped owner survives drawer recreation. It ignores callbacks from
+deliberate close operations, preserves starting until a real status callback,
+and keeps retryable plugin death failures inside the bounded rebind loop.
+Notification / settings stops close the drawer switch and release the broker.
+Configuration restarts keep the user intent enabled. Plugin `stop()` and `close()`
+retain synchronous completion while sharing the lifecycle queue with startup.
+
+The paired release API AARs are built together. Their `minCompileSdk = 36`
+metadata permits the compileSdk 36 plugin to consume this compileSdk 37 host
+build without introducing any SDK 37 API usage into the contracts.
+
+Validation on 2026-09-13: 19 host MCP JVM tests and real Binder round trips on
+API 24 (x86 AVD) and API 35 (Xiaomi 23046RP50C), 1/1 each. API 24 UI evidence
+confirms activation, drawer start, long-press settings, Plugin Center settings,
+and notification stop synchronizing the drawer. The plugin repository's
+`docs/dev/p4-settings-and-drawer.md` records the paired build and remaining
+client / OEM acceptance work. The implementation is isolated on `feat/mcp-p4`
+from existing unrelated changes in the original host worktree.
+
+Host debug and androidTest assemblies passed. Full app lint was canceled after
+about 45 minutes without a result; sampled threads were still in lint detector /
+Kotlin UAST analysis. This is not a successful host lint check. No host runtime
+dependency changed, and the host release assembly was not repeated in P4.
