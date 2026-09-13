@@ -1,4 +1,4 @@
-"""Submit/inspect an install through the app UID on a disposable emulator, preserving pending sessions.
+"""Submit/inspect an install through the app UID on an emulator or selected lab phone, preserving pending sessions.
 
 This helper never treats session submission as installation success. Inspect the recorded callback,
 system confirmation UI and installed package separately. It never force-stops the app or fixture.
@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--adb', default='adb')
     parser.add_argument('--serial', required=True)
+    parser.add_argument('--physical-device', action='store_true', help='Use the explicitly selected lab phone for installation probes')
     parser.add_argument('--package', choices=('org.autojs.autojs6', 'org.autojs.autojs6.inrt'), default='org.autojs.autojs6')
     parser.add_argument('--route', choices=('install', 'install-ui', 'install-recovery'), required=True)
     parser.add_argument('--apk-name', default='sdk37-bal-install.apk', help='Existing APK filename in the app files directory')
@@ -22,8 +23,8 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--timeout', type=int, default=90)
     args = parser.parse_args()
-    if not re.fullmatch(r'emulator-\d+', args.serial):
-        parser.error('Use a disposable emulator')
+    if not re.fullmatch(r'emulator-\d+', args.serial) and not args.physical_device:
+        parser.error('Use a disposable emulator or explicitly pass --physical-device for the selected lab phone')
     if not re.fullmatch(r'[A-Za-z0-9_.-]+\.apk', args.apk_name):
         parser.error('--apk-name must be an APK filename without directories')
     if args.background and args.route != 'install':

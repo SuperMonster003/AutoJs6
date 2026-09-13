@@ -3,12 +3,16 @@
 Use a disposable emulator with host alias 10.0.2.2. For inbound tests, configure:
   adb -s SERIAL emu redir add tcp:17645:17643
   adb -s SERIAL emu redir add tcp:17646:7347
-The fixture binds only 127.0.0.1 and probes this redirection, never a physical device.
+By default the fixture binds only 127.0.0.1 and probes this redirection.
+For a physical IPv4 LAN, pass --bind PC_LAN_IP --device PHONE_LAN_IP. The servers
+then accept only that peer and probe its ports 17643 / 7347 directly, without adb tunnels.
 Stop with Ctrl+C. It does not change permissions, firewall rules or adb state.
 """
+import argparse
 import base64
 import hashlib
 import http.server
+import ipaddress
 import json
 import os
 import signal
@@ -23,7 +27,19 @@ def event(kind, **fields):
     print(json.dumps(dict(event=kind, time=time.time(), **fields)), flush=True)
 
 
-class TcpServer(socketserver.ThreadingTCPServer):
+class PeerFilter:
+    allowed_peer = None
+
+    def verify_request(self, request, client_address):
+        return self.allowed_peer is None or client_address[0] == self.allowed_peer
+
+
+class TcpServer(PeerFilter, socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+class UdpServer(PeerFilter, socketserver.ThreadingUDPServer):
     allow_reuse_address = True
     daemon_threads = True
 
@@ -115,18 +131,33 @@ class VsCodeHandler(socketserver.BaseRequestHandler):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--bind", type=ipaddress.IPv4Address, default=ipaddress.IPv4Address("127.0.0.1"))
+    parser.add_argument("--device", type=ipaddress.IPv4Address, help="Physical phone IPv4 address, reachable from this PC")
+    args = parser.parse_args()
+    if args.device:
+        if any(address.is_loopback or address.is_unspecified or address.is_multicast
+               or not address.is_private for address in (args.bind, args.device)):
+            parser.error("Physical mode requires explicit private unicast LAN IPv4 addresses for both --bind and --device")
+    elif str(args.bind) != "127.0.0.1":
+        parser.error("A non-loopback bind requires --device to select the single test peer")
     stopped = threading.Event()
     servers = [
-        TcpServer(("127.0.0.1", 17637), HttpHandler),
-        socketserver.ThreadingUDPServer(("127.0.0.1", 17638), UdpHandler),
-        TcpServer(("127.0.0.1", 17639), MqttHandler),
-        TcpServer(("127.0.0.1", 17640), VsCodeHandler),
+        TcpServer((str(args.bind), 17637), HttpHandler),
+        UdpServer((str(args.bind), 17638), UdpHandler),
+        TcpServer((str(args.bind), 17639), MqttHandler),
+        TcpServer((str(args.bind), 17640), VsCodeHandler),
     ]
+    for server in servers:
+        server.allowed_peer = str(args.device) if args.device else None
+    inbound_host = str(args.device) if args.device else "127.0.0.1"
+    inbound_port, vscode_port = (17643, 7347) if args.device else (17645, 17646)
+    source_address = (str(args.bind), 0) if args.device else None
 
     def probe_inbound():
         while not stopped.is_set():
             try:
-                with socket.create_connection(("127.0.0.1", 17645), timeout=0.3) as sock:
+                with socket.create_connection((inbound_host, inbound_port), timeout=0.3, source_address=source_address) as sock:
                     sock.sendall(b"P")
                     # Keep the host endpoint alive until the guest consumes the payload.
                     # Closing immediately can discard buffered data in emulator redirection.
@@ -139,7 +170,7 @@ def main():
     def probe_vscode_server():
         while not stopped.is_set():
             try:
-                with socket.create_connection(("127.0.0.1", 17646), timeout=0.3) as sock:
+                with socket.create_connection((inbound_host, vscode_port), timeout=0.3, source_address=source_address) as sock:
                     sock.settimeout(4)
                     vscode_hello(sock)
                     if sock.recv(4096):
@@ -155,7 +186,9 @@ def main():
     threading.Thread(target=probe_vscode_server, daemon=True).start()
     signal.signal(signal.SIGINT, lambda *_: stopped.set())
     signal.signal(signal.SIGTERM, lambda *_: stopped.set())
-    event("ready", pid=os.getpid(), ports=[17637, 17638, 17639, 17640], inbound_redirections=[17645, 17646])
+    event("ready", pid=os.getpid(), mode="physical-ipv4" if args.device else "emulator",
+          bind=str(args.bind), allowed_peer=str(args.device) if args.device else None,
+          ports=[17637, 17638, 17639, 17640], inbound_host=inbound_host, inbound_ports=[inbound_port, vscode_port])
     try:
         while not stopped.wait(0.5):
             pass

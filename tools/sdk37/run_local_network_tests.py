@@ -41,12 +41,15 @@ def main():
     parser.add_argument("--package", default="org.autojs.autojs6", choices=["org.autojs.autojs6", "org.autojs.autojs6.inrt"])
     parser.add_argument("--expect", required=True, choices=["granted", "denied"])
     parser.add_argument("--suite", default="transports", choices=["transports", *UI_SUITES])
-    parser.add_argument("--host", default="10.0.2.2", type=ipaddress.ip_address)
+    parser.add_argument("--host", default="10.0.2.2", type=ipaddress.IPv4Address,
+                        help="Fixture IPv4 address; physical devices require the PC's actual LAN address")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     if args.suite in UI_SUITES and not re.fullmatch(r"emulator-\d+", args.serial):
         parser.error("Permission UI suites require a disposable emulator.")
-    args.output.mkdir(parents=True, exist_ok=True)
+    if not re.fullmatch(r"emulator-\d+", args.serial) and str(args.host) == "10.0.2.2":
+        parser.error("Physical transports require --host PC_LAN_IP and the fixture's --bind / --device mode")
+    args.output.mkdir(parents=True, exist_ok=False)
     base = [args.adb, "-s", args.serial]
 
     def adb(*command, timeout=30):

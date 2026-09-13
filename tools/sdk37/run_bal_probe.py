@@ -1,4 +1,4 @@
-"""Run one BAL probe in a debuggable app on a disposable emulator; never changes compat flags."""
+"""Run one BAL probe on a disposable emulator or an explicitly selected lab phone; never changes compat flags."""
 import argparse
 import json
 from pathlib import Path
@@ -11,6 +11,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--serial", required=True)
+    parser.add_argument("--physical-device", action="store_true",
+                        help="Use the selected lab phone; the probe and fixture are force-stopped, interrupting their work")
     parser.add_argument("--package", choices=("org.autojs.autojs6", "org.autojs.autojs6.inrt"), default="org.autojs.autojs6")
     parser.add_argument("--route", choices=("result", "sender", "sender-legacy", "pending", "broadcast", "script-launch", "script-start", "asm", "install"), required=True)
     parser.add_argument("--sender-mode", choices=("none", "visible", "denied"), default="visible")
@@ -21,8 +23,8 @@ def main():
     parser.add_argument("--timeout", type=int, default=120, help="Probe completion deadline in seconds (30-300)")
     parser.add_argument("--reuse-process", action="store_true", help="Remove only probe tasks and retain a warm application process")
     args = parser.parse_args()
-    if not re.fullmatch(r"emulator-\d+", args.serial):
-        parser.error("Use a disposable emulator serial")
+    if not re.fullmatch(r"emulator-\d+", args.serial) and not args.physical_device:
+        parser.error("Use a disposable emulator or explicitly pass --physical-device for the selected lab phone")
     if not 30 <= args.timeout <= 300:
         parser.error("--timeout must be between 30 and 300 seconds")
     if args.route == "sender-legacy" and args.sender_mode != "none":
