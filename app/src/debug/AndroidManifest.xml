@@ -2,6 +2,15 @@
 
     <application>
         <activity
+            android:name="org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity
+            android:name="org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity
             android:name="org.autojs.autojs.compat.AudioCompatibilityProbeActivity"
             android:exported="true"
             android:permission="android.permission.DUMP"
@@ -20,6 +29,7 @@
     </application>
 
     <queries>
+        <package android:name="org.autojs.sdk37.balfixture" />
         <intent>
             <action android:name="org.autojs.plugin.python.RUNTIME" />
         </intent>

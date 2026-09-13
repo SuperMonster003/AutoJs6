@@ -122,6 +122,30 @@ For permission UI tests, first revoke ACCESS_LOCAL_NETWORK and clear its `user-s
 
 For upgrade coverage, install a normal target 36 APK, record its implicit permission state and successful traffic, then install the target 37 APK with `-r` and record the resulting state before any grant or revoke. Test legacy target APKs with `--expect granted`. Keep fresh installs, upgrades and existing Nearby Devices grants distinct. Actual Wi-Fi / Ethernet, VPN, managed-profile and separate plugin-UID tests remain separate device matrix rows; the emulator fixture does not claim those environments.
 
+## Background Activity launches
+
+Use a disposable API 37 emulator with the host debug APK and the independent BAL fixture. The fixture is intentionally debuggable, has no network access, accepts provider calls only from the debuggable host / inrt, and creates tokens for its own fixed Activity or receiver. Its Activity tokens explicitly deny creator-side delegation, so sender tests cannot pass by borrowing creator privileges. Build it offline with the installed API 37 SDK and Build Tools:
+
+```powershell
+python tools/sdk37/build_bal_fixture.py --sdk E:/.android/sdk --jdk E:/.java/jdk-21.0.1 --output build/sdk37-bal-fixture
+adb -s emulator-5566 install -t build/sdk37-bal-fixture/bal-fixture.apk
+./gradlew :app:assembleAppDebug '-Pautojs.sdk.target.override=37'
+# Install the APK named in output-metadata.json; keep its SHA-256 with the results.
+python tools/sdk37/run_bal_probe.py --serial emulator-5566 --route result --sender-mode visible --expect result --output build/sdk37-bal/visible-result
+python tools/sdk37/run_bal_probe.py --serial emulator-5566 --route sender --sender-mode none --expect blocked --output build/sdk37-bal/sender-no-opt-in
+python tools/sdk37/run_bal_probe.py --serial emulator-5566 --route broadcast --background --sender-mode none --expect broadcast --output build/sdk37-bal/broadcast
+```
+
+Pass `--adb` if adb is not on PATH. The helper does not install packages or modify permissions / compat overrides. It force-stops the selected probe package and the disposable fixture, uses a fresh case ID and output directory, and records actual target creation and result delivery separately from the return of the send call. `--reuse-process` retains the host process after removing only tasks belonging to the host / fixture; the fixture is still force-stopped so an old Activity cannot be uncovered during a background case. `--timeout` sets the completion deadline (120 seconds by default). Default and explicit enable / disable runs must use separate output directories. Snapshot the existing `COVER_INTENT_SENDER` and `ASM_RESTRICTIONS` overrides before changing them; restore each original override, or reset it if none existed.
+
+`--background` moves the probe task to the background and waits 12 seconds before sending. Before interpreting a blocked / allowed result, inspect the saved app-ops, process state and system BAL log for overlay / accessibility / recent-launch exceptions. Granting options does not itself grant an app background-launch eligibility. A blocked assertion requires a platform BAL block / StrictMode violation, not just a missing target. `--route asm` places a different UID's Activity above the probe, waits for the lower Activity's `onStop()` plus 12 seconds, then asks it to start a same-UID landing Activity; `--allow-below true|false` controls an explicit exception in the fixture, while omitting it tests the fixture default. Record lifecycle timestamps, task IDs and the system ASM decision, rather than inferring the result from the compat declaration alone.
+
+`sender` tests the API 37 options overload of `IntentSender.sendIntent`; `sender-legacy --sender-mode none` separately tests the old overload with no options parameter. Do not treat them as interchangeable in a `COVER_INTENT_SENDER` comparison. `result` uses the production options adapter through the AndroidX ActivityResult contract. On the tested image, the visible `result` case also succeeds without options; that observation does not remove the need to test direct sends and background sends separately.
+
+`script-launch` and `script-start` execute real Rhino `app.launch` / `app.startActivity` calls. The fixture's launch event must be newer than the probe start; a successful script return does not prove the target opened. `install` reads only `files/sdk37-bal-install.apk` from the probe package and uses the real package archive inspector and installer; `--expect install` asserts session submission only. System confirmation, rejection, final installation and background completion still need separate UI / package-state evidence. The standalone installer fixture and the token fixture can be the same APK, but replacing it changes its process lifetime and must not be interleaved with a token test.
+
+The probe Activity requires `android.permission.DUMP`, and its landing Activity is private. Both exist only in debug source sets. Host debug builds enable `StrictMode.detectBlockedBackgroundActivityLaunch()` on API 36+ without replacing existing VM checks. The installed API 37 SDK exposes the IntentSender options overload as `(Context, int, Intent, String, Bundle, Executor, OnFinished)`; use the compiled SDK signature instead of copying an older online snippet.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:

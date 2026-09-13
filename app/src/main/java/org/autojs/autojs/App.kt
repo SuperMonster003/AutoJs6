@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -146,6 +147,14 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     private fun setUpDebugEnvironment() {
+        if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= 36) {
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder(StrictMode.getVmPolicy())
+                    .detectBlockedBackgroundActivityLaunch()
+                    .penaltyLog()
+                    .build(),
+            )
+        }
         val crashHandler = CrashHandler(CrashReportActivity::class.java)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
     }
