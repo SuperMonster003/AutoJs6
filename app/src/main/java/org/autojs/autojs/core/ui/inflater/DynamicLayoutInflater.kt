@@ -29,6 +29,7 @@ import com.google.android.material.tabs.TabLayout
 import com.makeramen.roundedimageview.RoundedImageView
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.core.automator.filter.ClassNameFilter
 import org.autojs.autojs.core.ui.inflater.inflaters.BaseViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsActionMenuViewInflater
@@ -794,12 +795,20 @@ open class DynamicLayoutInflater {
         return attributes
     }
 
-    private fun inflationBaseContext(context: InflateContext, parent: ViewGroup?): Context =
+    private fun inflationBaseContext(context: InflateContext, parent: ViewGroup?): Context {
         (context.get(ANDROID_BASE_CONTEXT) as? InflationBaseContext)
             ?.takeIf { it.parent === parent }
             ?.context
-            ?: parent?.context
-            ?: this.context
+            ?.let { return it }
+        val baseContext = this.context
+        val activity = baseContext.findActivity()
+        // DecorView can hold a DecorContext whose wrapper chain does not retain the Activity.
+        // Keep the Activity for root inflation so children can launch file choosers and dialogs.
+        // zh-CN: DecorView 的 DecorContext 包装链可能不包含 Activity. 根布局保留 Activity,
+        // 以便子视图能启动文件选择器和对话框; 普通子布局仍继承父视图的主题.
+        return if (activity != null && parent === activity.window.decorView) baseContext
+        else parent?.context ?: baseContext
+    }
 
     private inline fun withInflationBaseContext(
         context: InflateContext,

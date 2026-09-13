@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 13 日.
+数据更新于 2026 年 9 月 14 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `新增` Android 17 本地网络权限管理, 支持抽屉, 设置页与 VS Code 连接时按需申请, 并按实际 targetSdk 声明权限
 * `新增` MCP 工作目录能力支持 Android 应用查询, 编辑器行列定位, 按配置策略自动启用无障碍, Shell 输出限制与大 JSON 结果的只读文件描述符传输; root 执行使用独立 shell.root 授权和手机端开关
@@ -338,6 +338,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息不再自动写入 README 通用数据的问题
 * `修复` 使实验性远程单文件构建编号与旧构建器保持一致，并新增失败关闭的工作区空间预检：交叉核对输入解压大小、使用构建期验证的模板展开上限，并保留 256 MiB 空间
 * `修复` Ace WebView 在宿主主题与首份文档生效前可能短暂暴露纯白背景, 尤其会在深色编辑器主题下产生明显闪烁; 首屏现由主题已应用, 文档已提交及稳定绘制信号共同放行, 不依赖固定延迟
+* `修复` UI 脚本中的 WebView 文件选择器可能无法打开, 因布局根节点使用的 context 丢失了 Activity 关联
 * `修复` Ace 编辑器首次打开 Lua 文件时可能因同步探测 LuaLS 原生运行时阻塞首屏并回退到旧引擎的问题
 * `修复` 预览字体时, AutoJs6 宿主与 Ace 插件并发访问共享字体存储可能触发 JVM 重叠文件锁异常并导致应用崩溃的问题
 * `修复` 修复 APK Builder 生成 TypeScript/TSX 启动器时丢失 Rhino 执行模式指令（包括 `ui`）的问题，编译后的 UI 项目现在能以正确的 Activity 模式启动
@@ -886,7 +887,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 13 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 14 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

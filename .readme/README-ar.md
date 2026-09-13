@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 13 September 2026.
+تم تحديث البيانات في 14 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,7 +168,7 @@
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `إضافة جديدة` إدارة إذن الشبكة المحلية في Android 17 من الدرج والإعدادات واتصالات VS Code التي يبدأها المستخدم, مع التصريح بالإذن حسب targetSdk الفعلي
 * `إضافة جديدة` تضيف قدرات MCP استعلام تطبيقات Android وتحديد سطر وعمود المحرر وتفعيل إمكانية الوصول بالطرق المضبوطة وحدود مخرجات Shell وواصفات للقراءة فقط لنتائج JSON الكبيرة; يستخدم root منح shell.root وإعدادا مستقلا على الهاتف
@@ -362,6 +362,7 @@
 * `تصليح` توقف تسجيل معلومات تنزيل Android Studio تلقائيا في بيانات README المشتركة بعد ترحيل أدوات الجمع
 * `تصليح` تمت محاذاة ترقيم البناء التجريبي عن بُعد للملف الواحد مع أداة البناء القديمة، وأضيف فحص مسبق لمساحة العمل يفشل بشكل مغلق ويستخدم أحجام الإدخال بعد فك الضغط التي تم التحقق منها، وحدًا لتوسّع القالب تم التحقق منه أثناء البناء، واحتياطيًا قدره 256 MiB
 * `تصليح` كان WebView الخاص ب Ace قد يعرض صفحة بيضاء بالكامل لفترة وجيزة قبل تطبيق سمة المضيف والمستند الأولي, مما يسبب وميضا واضحا مع سمات المحرر الداكنة; ينتظر العرض الأول الآن إشارات صريحة لتطبيق السمة وإرسال المستند واستقرار الرسم بدلا من تأخير ثابت
+* `تصليح` قد يتعذر فتح منتقي ملفات WebView في نصوص UI عند فقدان ارتباط context الخاص بجذر التخطيط مع Activity
 * `تصليح` كان Ace قد يعود إلى المحرك القديم عند فتح ملف Lua لأول مرة إذا أخر الفحص المتزامن لوقت تشغيل LuaLS الأصلي العرض الأول
 * `تصليح` كان الوصول المتزامن من مضيف AutoJs6 وملحق Ace إلى مخزن الخطوط المشترك أثناء المعاينة قد يسبب OverlappingFileLockException في JVM وانهيار التطبيق
 * `تصليح` يحافظ APK Builder الآن على توجيه وضع تنفيذ Rhino لمدخل TypeScript/TSX (بما في ذلك `ui`) داخل المشغّل المُنشأ، بحيث تبدأ مشاريع الواجهة المترجمة في وضع Activity الصحيح
@@ -907,7 +908,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 13 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 14 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

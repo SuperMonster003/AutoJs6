@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 13 일.
+데이터 갱신일: 2026 년 9 월 14 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` MCP 작업 디렉터리 기능에 Android 앱 조회, 편집기 행과 열 지정, 설정된 방식의 접근성 자동 활성화, Shell 출력 제한, 큰 JSON 결과의 읽기 전용 파일 디스크립터 전송 추가. root 실행은 별도 shell.root 권한과 휴대전화 설정 사용
@@ -362,6 +362,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 스크레이퍼 이전 후 Android Studio 다운로드 정보가 README 공통 데이터에 자동으로 기록되지 않던 문제
 * `수정` 실험적 원격 단일 파일 빌드 번호를 기존 빌더와 일치시키고, 교차 검증한 압축 해제 입력 크기와 빌드 시 검증한 템플릿 확장 한도 및 256 MiB 예약 공간을 사용하는 실패 차단형 작업 공간 저장소 사전 검사를 추가
 * `수정` 호스트 테마와 초기 문서가 적용되기 전에 Ace WebView가 잠시 순백색 페이지를 노출하여 어두운 편집기 테마에서 눈에 띄는 깜박임이 발생하는 문제; 최초 표시는 고정 지연 대신 테마 적용, 문서 제출 및 안정된 그리기 신호를 명시적으로 기다림
+* `수정` UI 스크립트에서 레이아웃 루트의 context와 Activity 연결이 끊어지면 WebView 파일 선택기가 열리지 않을 수 있는 문제
 * `수정` Lua 파일을 처음 열 때 동기식 LuaLS 네이티브 런타임 탐지가 최초 표시를 지연시켜 Ace가 기존 엔진으로 폴백할 수 있던 문제
 * `수정` 글꼴 미리보기 중 AutoJs6 호스트와 Ace 플러그인이 공유 글꼴 저장소에 동시에 접근하면 JVM OverlappingFileLockException이 발생해 앱이 종료될 수 있던 문제
 * `수정` APK Builder가 생성한 런처에서 TypeScript/TSX 진입점의 Rhino 실행 모드 지시어(`ui` 포함)를 보존하도록 수정하여 컴파일된 UI 프로젝트가 올바른 Activity 모드로 시작됩니다
@@ -907,7 +908,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 13 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 14 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

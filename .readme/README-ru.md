@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 13 September 2026 года.
+Данные обновлены на 14 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -168,7 +168,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `Новое` Управление разрешением локальной сети Android 17 в боковой панели, настройках и соединениях VS Code, инициированных пользователем, с объявлением согласно фактическому targetSdk
 * `Новое` Возможности MCP включают поиск приложений Android, позиции редактора, автоматическое включение специальных возможностей настроенными способами, ограничение вывода Shell и дескрипторы только для чтения больших результатов JSON; root использует отдельные разрешение shell.root и настройку телефона
@@ -362,6 +362,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Исправление` После переноса сборщиков сведения о загрузках Android Studio перестали автоматически записываться в общие данные README
 * `Исправление` Нумерация экспериментальной удалённой сборки одного файла приведена в соответствие с прежним сборщиком; добавлена закрытая при ошибке предварительная проверка места в рабочем каталоге с перекрёстно проверенными распакованными размерами, проверенным при сборке пределом расширения шаблона и резервом 256 МиБ
 * `Исправление` Ace WebView могла кратковременно показывать полностью белую страницу до применения темы хоста и начального документа, что создавало заметную вспышку при темных темах редактора; первая отрисовка теперь ожидает явных сигналов применения темы, передачи документа и стабильного кадра вместо фиксированной задержки
+* `Исправление` Диалог выбора файлов WebView в UI-скриптах мог не открываться при потере связи context корневого элемента разметки с Activity
 * `Исправление` При первом открытии файла Lua Ace мог откатиться к прежнему движку, если синхронная проверка нативного runtime LuaLS задерживала первую отрисовку
 * `Исправление` Одновременный доступ хоста AutoJs6 и плагина Ace к общему хранилищу шрифтов во время предпросмотра мог вызвать JVM OverlappingFileLockException и аварийное завершение приложения
 * `Исправление` APK Builder теперь сохраняет директиву режима выполнения Rhino входного файла TypeScript/TSX (включая `ui`) в создаваемом запускателе, поэтому скомпилированные UI-проекты запускаются в правильном режиме Activity
@@ -907,7 +908,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 13 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 14 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

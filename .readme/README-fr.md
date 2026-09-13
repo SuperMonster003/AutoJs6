@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 13 September 2026.
+Données mises à jour le 14 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Les capacités MCP ajoutent la recherche des applications Android, les positions dans un éditeur, une activation de l'accessibilité selon les stratégies configurées, une sortie Shell limitée et des descripteurs en lecture seule pour les grands résultats JSON; root utilise une autorisation shell.root et un réglage distincts sur le téléphone
@@ -362,6 +362,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les informations de téléchargement d'Android Studio n'étaient plus écrites automatiquement dans les données README communes après la migration des scrapers
 * `Correction` Alignement de la numérotation des constructions distantes expérimentales à fichier unique sur le constructeur historique, et ajout d’un contrôle préalable de l’espace de travail à échec fermé fondé sur les tailles décompressées recoupées, une limite d’expansion du modèle vérifiée à la compilation et une réserve de 256 Mio
 * `Correction` La WebView Ace pouvait afficher brièvement une page entièrement blanche avant l'application du thème hôte et du document initial, provoquant un flash marqué avec les thèmes sombres; la première présentation attend désormais des signaux explicites de thème appliqué, document soumis et rendu stable au lieu d'un délai fixe
+* `Correction` Le sélecteur de fichiers WebView des scripts UI pouvait ne pas s'ouvrir lorsque le context de la racine de la mise en page perdait son association avec l'Activity
 * `Correction` Ace pouvait revenir à l'ancien moteur lors de la première ouverture d'un fichier Lua lorsque la détection synchrone du runtime natif LuaLS retardait le premier affichage
 * `Correction` L'accès simultané au stockage de polices partagé par l'hôte AutoJs6 et le plugin Ace pouvait déclencher une OverlappingFileLockException JVM et faire planter l'application pendant l'aperçu des polices
 * `Correction` APK Builder préserve désormais la directive de mode d'exécution Rhino (dont `ui`) de l'entrée TypeScript/TSX dans le lanceur généré, afin que les projets UI compilés démarrent dans le bon mode Activity
@@ -907,7 +908,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 13 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 14 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

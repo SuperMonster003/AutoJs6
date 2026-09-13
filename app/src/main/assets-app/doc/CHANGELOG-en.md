@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/13
+###### 2026/09/14
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` MCP workspace capabilities add Android application queries, editor line and column positioning, automatic accessibility activation using configured strategies, bounded Shell output, and read-only descriptors for large JSON results; root execution uses a separate shell.root grant and phone setting
@@ -200,6 +200,7 @@
 * `Fix` Android Studio download information was no longer written automatically to shared README data after the scraper migration
 * `Fix` Aligned experimental remote single-file build numbering with the legacy builder, and added fail-closed workspace storage preflight using cross-checked expanded input sizes, a build-verified template expansion bound, and a 256 MiB reserve
 * `Fix` Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay
+* `Fix` WebView file choosers in UI scripts could fail to open when the root layout context lost its Activity association
 * `Fix` Ace could fall back to the legacy engine on the first Lua-file open when synchronous LuaLS native-runtime probing delayed initial presentation
 * `Fix` Concurrent access to the shared font store by the AutoJs6 host and Ace plugin could throw a JVM OverlappingFileLockException and crash the app during font preview
 * `Fix` APK Builder now preserves a TypeScript/TSX entry's Rhino execution-mode directive (including `ui`) in the generated launcher, so compiled UI projects start in the correct Activity mode
