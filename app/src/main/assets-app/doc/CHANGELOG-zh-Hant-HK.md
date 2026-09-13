@@ -336,6 +336,7 @@
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 插件的座標手勢) 在被重用的 broker 派發線程上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在調用線程上準備 Looper 並在首個手勢完成後退出它, 該線程上的下一次調用立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主循環 handler 交給 automator
 * `修復` OpenCV 與 ImageQuant 插件策略將以 NDK r28c (28.2.13676358) 構建的原生庫判定為原生 NDK 版本不匹配, 導致重編後的 OpenCV 插件 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 構建
+* `修復` OpenCV 與 Image Quantization 插件在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
 * `優化` 專案 compileSdk 提升至 37 (Android 17), 完善 SDK 遷移的偵錯建置與 lint 驗證
 * `優化` 安裝套件檢查統一支援 262144 個封存項目, 提高單一套件, 巢狀掃描, 資訊清單與中繼資料預算以兼容大型 APK/AAB/APKS

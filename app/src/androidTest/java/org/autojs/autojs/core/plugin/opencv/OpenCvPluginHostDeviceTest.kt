@@ -1,12 +1,15 @@
 package org.autojs.autojs.core.plugin.opencv
 
 import android.content.pm.PackageManager
+import android.system.Os
+import android.system.OsConstants
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import java.io.File
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.CvException
@@ -36,6 +39,10 @@ class OpenCvPluginHostDeviceTest {
         assertTrue(runtime.nativeNdkVersion, runtime.nativeNdkVersion in OpenCvPluginContract.SUPPORTED_NATIVE_NDK_VERSIONS)
         assertTrue((runtime.nativeMinLoadAlign ?: 0) >= org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
+        val nativeFile = File(checkNotNull(runtime.nativeLibraryPath))
+        assertTrue("Staged native file must be read-only", !nativeFile.canWrite())
+        val writeBits = OsConstants.S_IWUSR or OsConstants.S_IWGRP or OsConstants.S_IWOTH
+        assertEquals("Native file must have no write mode bits", 0, Os.stat(nativeFile.path).st_mode and writeBits)
 
         val matrix = Mat(2, 3, CvType.CV_8UC1, Scalar(7.0))
         try {

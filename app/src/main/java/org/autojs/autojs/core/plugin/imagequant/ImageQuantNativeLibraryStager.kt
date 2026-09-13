@@ -42,6 +42,7 @@ internal object ImageQuantNativeLibraryStager {
         packageIdentity: String,
         supportedAbis: List<String>,
         nativeLibraryFileName: String,
+        makeReadOnly: (File) -> Boolean = File::setReadOnly,
     ): StagedLibrary {
         require(apkPaths.isNotEmpty()) { "Image Quantization plugin has no APK code paths" }
         require(supportedAbis.isNotEmpty()) { "Current process does not report a supported ABI" }
@@ -69,9 +70,9 @@ internal object ImageQuantNativeLibraryStager {
                     }
                     val destination = File(destinationDir, nativeLibraryFileName)
                     if (!isReusable(destination, entry, abi)) {
-                        extractAtomically(zip, entry, destination, abi)
+                        extractAtomically(zip, entry, destination, abi, makeReadOnly)
                     }
-                    destination.setWritable(false, false)
+                    ensureReadOnly(destination, makeReadOnly)
                     pruneObsoleteRuntimes(destinationRoot, safeIdentity)
                     return StagedLibrary(destination, abi, apkFile.absolutePath, entryName)
                 }
@@ -82,6 +83,15 @@ internal object ImageQuantNativeLibraryStager {
             "Image Quantization plugin does not contain $nativeLibraryFileName for any process ABI: " +
                     supportedAbis.joinToString(),
         )
+    }
+
+    private fun ensureReadOnly(file: File, makeReadOnly: (File) -> Boolean) {
+        if (!makeReadOnly(file) || file.canWrite()) {
+            throw ImageQuantPluginLoadException(
+                ImageQuantPluginLoadError.NATIVE_LIBRARY_EXTRACTION_FAILED,
+                "Unable to make staged Image Quantization runtime read-only: ${file.path}",
+            )
+        }
     }
 
     private fun validateEntry(entry: ZipEntry, entryName: String) {
@@ -114,6 +124,7 @@ internal object ImageQuantNativeLibraryStager {
         entry: ZipEntry,
         destination: File,
         abi: String,
+        makeReadOnly: (File) -> Boolean,
     ) {
         val tempFile = File.createTempFile("${destination.name}.", ".tmp", destination.parentFile)
         try {
@@ -121,6 +132,9 @@ internal object ImageQuantNativeLibraryStager {
             var copied = 0L
             zip.getInputStream(entry).buffered().use { input ->
                 FileOutputStream(tempFile, false).use { output ->
+                    // Keep only this open descriptor writable until the verified copy is published.
+                    // zh-CN: 路径先设为只读, 仅保留当前已打开的描述符写入, 校验后再发布.
+                    ensureReadOnly(tempFile, makeReadOnly)
                     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                     while (true) {
                         val count = input.read(buffer)
@@ -152,7 +166,6 @@ internal object ImageQuantNativeLibraryStager {
             }
             tempFile.setReadable(true, true)
             tempFile.setExecutable(true, true)
-            tempFile.setWritable(false, false)
             if (destination.exists()) {
                 destination.setWritable(true, true)
                 if (!destination.delete()) {
@@ -168,7 +181,6 @@ internal object ImageQuantNativeLibraryStager {
                     "Unable to publish staged Image Quantization runtime: ${destination.path}",
                 )
             }
-            destination.setWritable(false, false)
         } finally {
             if (tempFile.exists()) {
                 tempFile.setWritable(true, true)

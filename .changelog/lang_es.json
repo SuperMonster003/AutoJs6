@@ -333,6 +333,7 @@
         "Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea",
         "`accessibility.swipe` / `accessibility.gesture` del Node bridge (los gestos por coordenadas de los plugins MCP Server y Node) respondian `false` (cancelado) a cada gesto posterior al primero en un hilo de despacho del broker reutilizado: el automata de gestos sin handler preparaba un Looper en el hilo llamador y lo cerraba al completarse el primer gesto, por lo que la siguiente llamada en ese hilo volvia de inmediato y su resultado real iba a un handler muerto; el bridge ahora entrega al automata el handler del bucle principal, como hace el broker Python del host",
         "Las políticas de los plugins OpenCV e ImageQuant rechazaban las bibliotecas nativas compiladas con NDK r28c (28.2.13676358) por discrepancia de versión del NDK, lo que bloqueaba el plugin OpenCV v1.1.2 reconstruido; ahora se aceptan tanto las compilaciones r26b como r28c",
+        "Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17",
         "Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento"
       ],
       "improvement": [

@@ -41,6 +41,7 @@ internal object OpenCvNativeLibraryStager {
         packageIdentity: String,
         supportedAbis: List<String>,
         nativeLibraryFileName: String,
+        makeReadOnly: (File) -> Boolean = File::setReadOnly,
     ): StagedLibrary {
         require(apkPaths.isNotEmpty()) { "OpenCV plugin has no APK code paths" }
         require(supportedAbis.isNotEmpty()) { "Current process does not report a supported ABI" }
@@ -68,9 +69,9 @@ internal object OpenCvNativeLibraryStager {
                     }
                     val destination = File(destinationDir, nativeLibraryFileName)
                     if (!isReusable(destination, entry)) {
-                        extractAtomically(zip, entry, destination)
+                        extractAtomically(zip, entry, destination, makeReadOnly)
                     }
-                    destination.setWritable(false, false)
+                    ensureReadOnly(destination, makeReadOnly)
                     pruneObsoleteRuntimes(destinationRoot, safeIdentity)
                     return StagedLibrary(destination, abi, apkFile.absolutePath, entryName)
                 }
@@ -80,6 +81,15 @@ internal object OpenCvNativeLibraryStager {
             OpenCvPluginLoadError.ABI_NOT_SUPPORTED,
             "OpenCV plugin does not contain $nativeLibraryFileName for any process ABI: ${supportedAbis.joinToString()}",
         )
+    }
+
+    private fun ensureReadOnly(file: File, makeReadOnly: (File) -> Boolean) {
+        if (!makeReadOnly(file) || file.canWrite()) {
+            throw OpenCvPluginLoadException(
+                OpenCvPluginLoadError.NATIVE_LIBRARY_EXTRACTION_FAILED,
+                "Unable to make staged OpenCV runtime read-only: ${file.path}",
+            )
+        }
     }
 
     private fun validateEntry(entry: ZipEntry, entryName: String) {
@@ -107,7 +117,12 @@ internal object OpenCvNativeLibraryStager {
         }
     }
 
-    private fun extractAtomically(zip: ZipFile, entry: ZipEntry, destination: File) {
+    private fun extractAtomically(
+        zip: ZipFile,
+        entry: ZipEntry,
+        destination: File,
+        makeReadOnly: (File) -> Boolean,
+    ) {
         val tempFile = File.createTempFile("${destination.name}.", ".tmp", destination.parentFile)
         try {
             val crc = CRC32()
@@ -116,6 +131,9 @@ internal object OpenCvNativeLibraryStager {
             var prefixCount = 0
             zip.getInputStream(entry).buffered().use { input ->
                 FileOutputStream(tempFile, false).use { output ->
+                    // Keep only this open descriptor writable until the verified copy is published.
+                    // zh-CN: 路径先设为只读, 仅保留当前已打开的描述符写入, 校验后再发布.
+                    ensureReadOnly(tempFile, makeReadOnly)
                     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                     while (true) {
                         val count = input.read(buffer)
@@ -152,7 +170,6 @@ internal object OpenCvNativeLibraryStager {
             }
             tempFile.setReadable(true, true)
             tempFile.setExecutable(true, true)
-            tempFile.setWritable(false, false)
             if (destination.exists()) {
                 destination.setWritable(true, true)
                 if (!destination.delete()) {
@@ -168,7 +185,6 @@ internal object OpenCvNativeLibraryStager {
                     "Unable to publish staged OpenCV runtime: ${destination.path}",
                 )
             }
-            destination.setWritable(false, false)
         } finally {
             if (tempFile.exists()) {
                 tempFile.setWritable(true, true)

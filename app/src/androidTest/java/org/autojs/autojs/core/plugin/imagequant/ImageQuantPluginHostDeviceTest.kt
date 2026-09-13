@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.plugin.imagequant
 
 import android.content.pm.PackageManager
+import android.system.Os
+import android.system.OsConstants
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.platform.app.InstrumentationRegistry
@@ -84,6 +86,10 @@ class ImageQuantPluginHostDeviceTest {
         assertTrue(runtime.optionsApiVersion >= ImageQuantPluginContract.RESOURCE_CONTROL_API_VERSION)
         assertEquals(ImageQuantPluginContract.RUNTIME_PROBE_VALUE, runtime.runtimeProbe)
         assertTrue(runtime.nativeLibraryPath.orEmpty(), runtime.nativeLibraryPath?.isNotBlank() == true)
+        val nativeFile = File(checkNotNull(runtime.nativeLibraryPath))
+        assertTrue("Staged native file must be read-only", !nativeFile.canWrite())
+        val writeBits = OsConstants.S_IWUSR or OsConstants.S_IWGRP or OsConstants.S_IWOTH
+        assertEquals("Native file must have no write mode bits", 0, Os.stat(nativeFile.path).st_mode and writeBits)
 
         val bitmap = Bitmap.createBitmap(3, 2, Bitmap.Config.ARGB_8888).apply {
             setPixels(

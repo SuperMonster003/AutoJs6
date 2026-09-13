@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.imagequant
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -126,15 +127,68 @@ class ImageQuantNativeLibraryStagerTest {
         assertTrue(error.message.orEmpty().contains("Unsafe Image Quantization native library name"))
     }
 
+    @Test
+    fun `new files and writable legacy cache entries are read only before returning`() {
+        val payload = fakeElf("arm64-v8a", 0x01)
+        val apk = zip("read-only.apk", "lib/arm64-v8a/${ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME}" to payload)
+        val staged = stage(listOf(apk.absolutePath), listOf("arm64-v8a"))
+        assertFalse("New runtime is writable", staged.file.canWrite())
+        val modified = staged.file.lastModified()
+        assertTrue(staged.file.setWritable(true, true))
+        assertTrue("Fixture must simulate a writable legacy cache", staged.file.canWrite())
+
+        val reused = stage(listOf(apk.absolutePath), listOf("arm64-v8a"))
+        assertEquals(staged.file.path, reused.file.path)
+        assertEquals("Permission repair must reuse validated bytes", modified, reused.file.lastModified())
+        assertArrayEquals(payload, reused.file.readBytes())
+        assertFalse("Reused runtime is writable", reused.file.canWrite())
+    }
+
+    @Test
+    fun `read only failure rejects extraction and removes the temporary payload`() {
+        val apk = zip("read-only-failure.apk", "lib/arm64-v8a/${ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME}" to fakeElf("arm64-v8a", 0x01))
+        val error = assertThrows(ImageQuantPluginLoadException::class.java) {
+            stage(listOf(apk.absolutePath), listOf("arm64-v8a"), makeReadOnly = { false })
+        }
+        assertEquals(ImageQuantPluginLoadError.NATIVE_LIBRARY_EXTRACTION_FAILED, error.code)
+        assertTrue(error.message.orEmpty().contains("read-only"))
+        assertTrue(temporaryFolder.root.resolve("staged").walkTopDown().none { it.isFile })
+    }
+
+    @Test
+    fun `writable cached runtime is never returned when permission repair fails`() {
+        val payload = fakeElf("arm64-v8a", 0x01)
+        val apk = zip("cached-read-only-failure.apk", "lib/arm64-v8a/${ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME}" to payload)
+        val staged = stage(listOf(apk.absolutePath), listOf("arm64-v8a"))
+        assertTrue(staged.file.setWritable(true, true))
+        val error = assertThrows(ImageQuantPluginLoadException::class.java) {
+            stage(listOf(apk.absolutePath), listOf("arm64-v8a"), makeReadOnly = { false })
+        }
+        assertEquals(ImageQuantPluginLoadError.NATIVE_LIBRARY_EXTRACTION_FAILED, error.code)
+        assertArrayEquals("Failed repair must not replace the validated cache", payload, staged.file.readBytes())
+    }
+
+    @Test
+    fun `reported permission success does not allow a still writable runtime`() {
+        val apk = zip("writable.apk", "lib/arm64-v8a/${ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME}" to fakeElf("arm64-v8a", 0x01))
+        val error = assertThrows(ImageQuantPluginLoadException::class.java) {
+            stage(listOf(apk.absolutePath), listOf("arm64-v8a"), makeReadOnly = { true })
+        }
+        assertEquals(ImageQuantPluginLoadError.NATIVE_LIBRARY_EXTRACTION_FAILED, error.code)
+        assertTrue(temporaryFolder.root.resolve("staged").walkTopDown().none { it.isFile })
+    }
+
     private fun stage(
         apkPaths: List<String>,
         supportedAbis: List<String>,
+        makeReadOnly: (File) -> Boolean = File::setReadOnly,
     ): ImageQuantNativeLibraryStager.StagedLibrary = ImageQuantNativeLibraryStager.stage(
         apkPaths = apkPaths,
         destinationRoot = temporaryFolder.root.resolve("staged"),
         packageIdentity = "test-package",
         supportedAbis = supportedAbis,
         nativeLibraryFileName = ImageQuantPluginContract.NATIVE_LIBRARY_FILE_NAME,
+        makeReadOnly = makeReadOnly,
     )
 
     private fun zip(name: String, vararg entries: Pair<String, ByteArray>): File =
