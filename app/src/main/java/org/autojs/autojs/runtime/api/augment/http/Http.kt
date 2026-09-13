@@ -545,7 +545,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             // Apply OkHttp runtime configs (retries/client builder).
             // zh-CN: 应用 OkHttp 运行时配置 (重试/Client Builder).
-            scriptRuntime.http.okhttp.apply {
+            val client = scriptRuntime.http.okhttp.run {
                 maxRetries = coerceIntNumber(opt.prop(KEY_MAX_RETRIES), DEFAULT_MAX_RETRIES)
                 applyOkHttpClientBuilder(opt)
             }
@@ -558,7 +558,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             // Build request with normalized options and create call.
             // zh-CN: 使用规范化后的 options 构建 Request 并创建 Call.
             val request = buildRequestRhinoWithRuntime(scriptRuntime, url, opt)
-            val call = scriptRuntime.http.client().newCall(request)
+            val call = client.newCall(request)
 
             return PreparedRequest(
                 call = call,

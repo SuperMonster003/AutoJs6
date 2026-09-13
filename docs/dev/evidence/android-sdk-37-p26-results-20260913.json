@@ -1,0 +1,1149 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-13",
+  "implementationBaseCommit": "0dc6928858f465c304a8ec4de33e4104102cd85a",
+  "normalSdk": {
+    "compile": 37,
+    "hostTarget": 36,
+    "inrtTarget": 29
+  },
+  "finalInstrumentation": {
+    "caseCount": 7,
+    "methodExecutions": 42,
+    "allPassed": true,
+    "cases": [
+      {
+        "case": "verified37-default",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T09:55:49.847218+00:00",
+          "ended": "2026-09-13T09:56:09.938377+00:00",
+          "target": 37,
+          "defaultCt": "true",
+          "echMode": 2,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37)",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37)"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified37-default/result.json",
+            "sha256": "8788049320b08f41bdce5e272e12a17f92e2242ef62d63aff6748b759be27438"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-default/instrumentation.txt",
+            "sha256": "c980702bde45e47521c3a42ccd426f3b2b5616bf5fdaf3a5923523ae84081071"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-default/logcat-tail.txt",
+            "sha256": "065ba1b3c96ab4f1c6920167927ae3720a8c72889bce4040d8db6c2a3aa2eb23"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-default/before/platform-compat.txt",
+            "sha256": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-default/after/platform-compat.txt",
+            "sha256": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528"
+          }
+        ]
+      },
+      {
+        "case": "verified37-ct-disabled",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T09:56:54.713116+00:00",
+          "ended": "2026-09-13T09:57:17.934590+00:00",
+          "target": 37,
+          "defaultCt": "false",
+          "echMode": 2,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt false -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37)"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified37-ct-disabled/result.json",
+            "sha256": "667ec802bc7c107e69d92587afed9143b579da9d615a95a8184a95ac9a1f0f93"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ct-disabled/instrumentation.txt",
+            "sha256": "56fa8d03bbdbb2930ee5737af83c16e951f24fbede879fc0188ec0c4074f3700"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ct-disabled/logcat-tail.txt",
+            "sha256": "59de7071f82907dd1dcbba2eafd2619e4da7e4409d65c197d687e9f95b5d7e4f"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ct-disabled/before/platform-compat.txt",
+            "sha256": "63f62ca2420a65054c4898863dee5d14605a12e49f91ee14140a7a1eff21ed75"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ct-disabled/after/platform-compat.txt",
+            "sha256": "63f62ca2420a65054c4898863dee5d14605a12e49f91ee14140a7a1eff21ed75"
+          }
+        ]
+      },
+      {
+        "case": "verified37-ech-disabled",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T09:57:38.018346+00:00",
+          "ended": "2026-09-13T09:58:00.222334+00:00",
+          "target": 37,
+          "defaultCt": "true",
+          "echMode": 1,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37)",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified37-ech-disabled/result.json",
+            "sha256": "a887e24533fcdde28bb4d4c72a71e17db784ec2656fda69166b1fb3f08056872"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ech-disabled/instrumentation.txt",
+            "sha256": "b56b7940e7c907bd930e8e46a0c578944c2c0bc88b3c10bbb8367d54de0e6f68"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ech-disabled/logcat-tail.txt",
+            "sha256": "4e8db217944ad34cbe01f4c95d00e63a003f278820db9180ff3ae9e5c1271df5"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ech-disabled/before/platform-compat.txt",
+            "sha256": "2d5a0fea0840f79216d188e19ff47ff497397879a5f2250652659584bdd86b69"
+          },
+          {
+            "path": "build/sdk37-p26/verified37-ech-disabled/after/platform-compat.txt",
+            "sha256": "2d5a0fea0840f79216d188e19ff47ff497397879a5f2250652659584bdd86b69"
+          }
+        ]
+      },
+      {
+        "case": "verified36-default",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T09:59:04.936403+00:00",
+          "ended": "2026-09-13T09:59:37.518989+00:00",
+          "target": 36,
+          "defaultCt": "false",
+          "echMode": 1,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37)",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37)"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified36-default/result.json",
+            "sha256": "5c79b7e78591853dc55ece7afcd106fb28719913af3d7d7733275086aec1d9b2"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-default/instrumentation.txt",
+            "sha256": "dad2611b8b346340261d063d0d60a2d2b96c21a1d84f36d0ae272bc76143481e"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-default/logcat-tail.txt",
+            "sha256": "0cf9e7f4768019e99ba589b3980e9aafc17b07e382f09373ed297125c2482408"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-default/before/platform-compat.txt",
+            "sha256": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-default/after/platform-compat.txt",
+            "sha256": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528"
+          }
+        ]
+      },
+      {
+        "case": "verified36-ct-enabled",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T10:00:11.191875+00:00",
+          "ended": "2026-09-13T10:00:31.000709+00:00",
+          "target": 36,
+          "defaultCt": "true",
+          "echMode": 1,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37)"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified36-ct-enabled/result.json",
+            "sha256": "f0ae50e74ce73d1c763c0c85e46d52a8e98ee1228daef18b53cf0717fdac255e"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ct-enabled/instrumentation.txt",
+            "sha256": "fc0b888a4c771d57eb9267f166f1d7494017ef92c62fae201d661a98aab93256"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ct-enabled/logcat-tail.txt",
+            "sha256": "2a9e2102c743ab843bd5a2c2ef987327cebfbfeeb269deea4579d7206ce4b47e"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ct-enabled/before/platform-compat.txt",
+            "sha256": "b1f4718ec117b710128573068bd88b38c14458151678fc8854a9394bb030fd9c"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ct-enabled/after/platform-compat.txt",
+            "sha256": "b1f4718ec117b710128573068bd88b38c14458151678fc8854a9394bb030fd9c"
+          }
+        ]
+      },
+      {
+        "case": "verified36-ech-enabled",
+        "device": {
+          "serial": "emulator-5572",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "result": {
+          "started": "2026-09-13T10:01:08.122151+00:00",
+          "ended": "2026-09-13T10:01:27.493475+00:00",
+          "target": 36,
+          "defaultCt": "false",
+          "echMode": 2,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5572",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt false -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [
+          "ChangeId(407952621; name=DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY; enableSinceTargetSdk=37)",
+          "ChangeId(419020719; name=ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+        ],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified36-ech-enabled/result.json",
+            "sha256": "01246460ae3c05c602c0296d540e069dd9db312ce636a4c51cf6d56fdb5b025a"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ech-enabled/instrumentation.txt",
+            "sha256": "cb21fe76c638cd6a7baf0ee863bf814e0b4b506aa666b277fae632cb522bdf30"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ech-enabled/logcat-tail.txt",
+            "sha256": "c3f5b3f8d94c10e06f8a4e59fa2c5879f2e39053f14676ecdc937c75739dc8fc"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ech-enabled/before/platform-compat.txt",
+            "sha256": "02805cb865a1e9bddf8fd2aa8e8b7855534f7fc8c8325962625f362be8b112d9"
+          },
+          {
+            "path": "build/sdk37-p26/verified36-ech-enabled/after/platform-compat.txt",
+            "sha256": "02805cb865a1e9bddf8fd2aa8e8b7855534f7fc8c8325962625f362be8b112d9"
+          }
+        ]
+      },
+      {
+        "case": "verified24-target37",
+        "device": {
+          "serial": "emulator-5574",
+          "model": "Android SDK built for x86",
+          "manufacturer": "Google",
+          "sdk": "24",
+          "release": "7.0",
+          "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+          "abiList": "x86",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": null,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": [
+            {
+              "command": [
+                "E:/.android/sdk/platform-tools/adb.exe",
+                "-s",
+                "emulator-5574",
+                "shell",
+                "getconf PAGE_SIZE"
+              ],
+              "exitCode": 127,
+              "stdout": "",
+              "stderr": "/system/bin/sh: getconf: not found\n"
+            }
+          ]
+        },
+        "result": {
+          "started": "2026-09-13T09:56:21.237803+00:00",
+          "ended": "2026-09-13T09:56:26.631103+00:00",
+          "target": 37,
+          "defaultCt": "false",
+          "echMode": 0,
+          "exitCode": 0,
+          "timeout": false,
+          "waitForDebugger": false,
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5574",
+            "shell",
+            "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt false -e sdk37.echMode 0 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+          ],
+          "success": true,
+          "expected": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+          ],
+          "finished": [
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+            "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+          ],
+          "statusCodes": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "compatBefore": [],
+        "evidence": [
+          {
+            "path": "build/sdk37-p26/verified24-target37/result.json",
+            "sha256": "72822273db89e07b12e9c6ea4359f9a03954468a6814860160e43c5cd338fdfe"
+          },
+          {
+            "path": "build/sdk37-p26/verified24-target37/instrumentation.txt",
+            "sha256": "9b5db9dc6c2231b8d6fe39dce5095b752a2ee2d2bd4e331bc85d25a9787f3bdc"
+          },
+          {
+            "path": "build/sdk37-p26/verified24-target37/logcat-tail.txt",
+            "sha256": "80056747d1d8d2d5adaee823c59e22af58c10bdde8aee28f2f5618f9ae5d57ec"
+          },
+          {
+            "path": "build/sdk37-p26/verified24-target37/before/platform-compat.txt",
+            "sha256": "80e7c5a9fc6b97bfe53e510849790e849f8fec9037cf8d339d0e1974698d97bc"
+          },
+          {
+            "path": "build/sdk37-p26/verified24-target37/after/platform-compat.txt",
+            "sha256": "80e7c5a9fc6b97bfe53e510849790e849f8fec9037cf8d339d0e1974698d97bc"
+          }
+        ]
+      }
+    ]
+  },
+  "apks": {
+    "baseline37": [
+      {
+        "path": "build/sdk37-p26/apks/baseline37/app.apk",
+        "sha256": "24f2ec0ea3dbd9ffe8b91117ce636057e4df7db6906326212c1d2cc825e9f0b5"
+      },
+      {
+        "path": "build/sdk37-p26/apks/baseline37/test.apk",
+        "sha256": "b2eb030a28f94b9dc48de89ec3f12bda24214b4527b128d1f9b41bee1e2db71b"
+      }
+    ],
+    "verified37": [
+      {
+        "path": "build/sdk37-p26/apks/verified37/app-x86.apk",
+        "sha256": "ef1347f4af18d109977af96157d5ce48ba5d6bf7355365d744a4128ecf4b01e7"
+      },
+      {
+        "path": "build/sdk37-p26/apks/verified37/app.apk",
+        "sha256": "22d582e8a52b7178526bf119f4feddb9278e0c0c8359f0f86bfdc152aa9f4018"
+      },
+      {
+        "path": "build/sdk37-p26/apks/verified37/test.apk",
+        "sha256": "4b05e507b8a2b894ef33853d61fe055e6b8f23c9a4c4e9258f9514791806e849"
+      }
+    ],
+    "normal36": [
+      {
+        "path": "build/sdk37-p26/apks/normal36/app.apk",
+        "sha256": "3781ae4d6c69a1b945b5cf6a2dd90132f240a72832c981fcc2849fdc7d4a174a"
+      },
+      {
+        "path": "build/sdk37-p26/apks/normal36/test.apk",
+        "sha256": "ac0b4d513b4298bc8b9516402fb83c17904402c562a8468e31cfa2f5b8927dcc"
+      }
+    ]
+  },
+  "normalApkResources": [
+    {
+      "variant": "appDebug",
+      "apk": "app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-universal.apk",
+      "sha256": "3781ae4d6c69a1b945b5cf6a2dd90132f240a72832c981fcc2849fdc7d4a174a",
+      "testCaResources": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "badging": [
+        "package: name='org.autojs.autojs6' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "targetSdkVersion:'36'"
+      ]
+    },
+    {
+      "variant": "appRelease",
+      "apk": "app\\build\\outputs\\apk\\app\\release\\autojs6-v6.8.0-universal.apk",
+      "sha256": "7f29fdd02bf3661aaf068c1289efcf8ea0060061bc756e297167d5542f41397a",
+      "testCaResources": [],
+      "badging": [
+        "package: name='org.autojs.autojs6' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "targetSdkVersion:'36'"
+      ]
+    },
+    {
+      "variant": "inrtDebug",
+      "apk": "app\\build\\outputs\\apk\\inrt\\debug\\inrt-v6.8.0-universal.apk",
+      "sha256": "ecc0d48c1e238390bc98d24398118ddbbeb4a49e8da6762be3e0bbd71a5a176b",
+      "testCaResources": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "badging": [
+        "package: name='org.autojs.autojs6.inrt' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "targetSdkVersion:'29'"
+      ]
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "app/src/main/java/org/autojs/autojs/runtime/api/augment/http/RequestBuilder.kt",
+      "sha256": "c57eaafc164b753dc4a323b7b470a89bad6937269b3b6215c31a4c8775193103"
+    },
+    {
+      "path": "app/src/main/java/org/autojs/autojs/runtime/api/augment/http/Http.kt",
+      "sha256": "50dea4ee1c0463aae1d1d8cb0425bbb5fa5aca93db954aee6ac175f7b650dc43"
+    },
+    {
+      "path": "app/src/androidTest/java/org/autojs/autojs/core/http/NetworkSecurityCompatibilityDeviceTest.kt",
+      "sha256": "0e703fb318220258b83162cec5a31e592910c600b22937d42ef581eb8255cb4d"
+    },
+    {
+      "path": "app/src/debug/res/xml/network_security_config.xml",
+      "sha256": "47f1fb024c68a9fd045ef886ac9305ae5b9c32fe9275d4a6abc974884bf4f681"
+    },
+    {
+      "path": "app/src/main/res/xml/network_security_config.xml",
+      "sha256": "da93d5b69ea9e155999a1c207e6c3298c8c9cb76bb2f26bf48b3d93ca100c339"
+    },
+    {
+      "path": "app/src/debug/res/raw/sdk37_test_ca.pem",
+      "sha256": "f0278b81325aba5f14ff34f63df67eff7853b4af652b586ba687316bc2e65a57"
+    },
+    {
+      "path": "tools/sdk37/tls_fixture.py",
+      "sha256": "e2ed5c40e989a4bff051fafdcf8fb805d3c4b5aa8fb8104828f9e912a6705fb7"
+    },
+    {
+      "path": "tools/sdk37/run_tls_tests.py",
+      "sha256": "3d456471e9153c1da3d3a89682e3b2893a6fbb8648b5f36857d4278e434ec297"
+    },
+    {
+      "path": "tools/sdk37/test_tls_fixture.py",
+      "sha256": "55d3feb62a6bcf8111fc30fbbc4a754ce44047723a680ce8639ed6e3b9a2d9ab"
+    },
+    {
+      "path": "tools/sdk37/fixtures/tls/server-cert.pem",
+      "sha256": "ac6ff120259bb42811c389dadf9624a3e75a8cff8d515e5bd9e594c60bda3859"
+    },
+    {
+      "path": "tools/sdk37/fixtures/tls/server-key.pem",
+      "sha256": "0e0a498b110d34d71698a638b6b8207302da994b0a7eaafb9dcfc7caf07c16c2"
+    },
+    {
+      "path": "tools/sdk37/fixtures/tls/server.cnf",
+      "sha256": "c60026855446a50a943d0443aa40ba3681c48a88d55cc6c7b7d660cdea98029c"
+    }
+  ],
+  "wire": {
+    "serverSupportsEch": false,
+    "clientHelloCount": 253,
+    "hellosWithEchExtension": 0,
+    "incompleteHellos": 0,
+    "visibleSniNames": [
+      "ct.sdk37.test",
+      "mismatch.sdk37.test",
+      "trusted.sdk37.test",
+      "untrusted.sdk37.test"
+    ],
+    "successfulResponseTlsVersions": [
+      "TLSv1.2",
+      "TLSv1.3"
+    ],
+    "scope": "All requests recorded by this local fixture, including failing baselines; this server cannot prove ECH negotiation",
+    "evidence": {
+      "path": "build/sdk37-p26/tls-final-stdout.jsonl",
+      "sha256": "29b68ad068de01851040ab63ac194b0f96a1577e2ed4c0caa0f543b9ce1e0d98"
+    }
+  },
+  "explorationFailures": {
+    "baseline37": {
+      "result": {
+        "started": "2026-09-13T09:44:09.920898+00:00",
+        "ended": "2026-09-13T09:44:21.576472+00:00",
+        "target": 37,
+        "defaultCt": "true",
+        "defaultEch": "true",
+        "waitForDebugger": false,
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5572",
+          "shell",
+          "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.defaultEch true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+        ],
+        "success": false,
+        "expected": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+        ],
+        "finished": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+        ],
+        "statusCodes": [
+          1,
+          -2,
+          1,
+          0,
+          1,
+          0,
+          1,
+          -2,
+          1,
+          -2,
+          1,
+          0
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "build/sdk37-p26/baseline37/result.json",
+          "sha256": "4021b21a7f476a608ee7afefab7d21db2554ff9fe05ccb6a04b8bf7fd820174f"
+        },
+        {
+          "path": "build/sdk37-p26/baseline37/instrumentation.txt",
+          "sha256": "c9535a322ca3a0032d48a34f90e89fdd60f35f4e86639f71cdd49fc76b25f8fe"
+        }
+      ]
+    },
+    "debugger-baseline37": {
+      "result": {
+        "started": "2026-09-13T09:44:53.015406+00:00",
+        "ended": "2026-09-13T09:48:58.894437+00:00",
+        "target": 37,
+        "defaultCt": "true",
+        "defaultEch": "true",
+        "waitForDebugger": true,
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5572",
+          "shell",
+          "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.defaultEch true -e debug true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+        ],
+        "success": false,
+        "expected": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+        ],
+        "finished": [],
+        "statusCodes": [
+          1
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "build/sdk37-p26/debugger-baseline37/result.json",
+          "sha256": "c0d9aa9c54d0623ca1002f4dd9b5966ca33867e72777b2ed14ac500b7bb6e49a"
+        },
+        {
+          "path": "build/sdk37-p26/debugger-baseline37/instrumentation.txt",
+          "sha256": "a8b79a32a4f68b13352b3533776fb963ec65d88fafd54825ce349da5bc15fa48"
+        }
+      ]
+    },
+    "fixed37-default": {
+      "result": {
+        "started": "2026-09-13T09:52:07.539237+00:00",
+        "ended": "2026-09-13T09:53:14.112288+00:00",
+        "target": 37,
+        "defaultCt": "true",
+        "echMode": 2,
+        "exitCode": 0,
+        "timeout": false,
+        "waitForDebugger": false,
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5572",
+          "shell",
+          "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+        ],
+        "success": false,
+        "expected": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+        ],
+        "finished": [],
+        "statusCodes": [
+          1,
+          -2,
+          1
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "build/sdk37-p26/fixed37-default/result.json",
+          "sha256": "4f20806b927f08cd1c1e0124f052ae81540c7151e4642d464f6f7024c54849d1"
+        },
+        {
+          "path": "build/sdk37-p26/fixed37-default/instrumentation.txt",
+          "sha256": "71a9346cbdd548cace95e07e296b41e9969f322b95e12b793aebc15280eaf3c7"
+        }
+      ]
+    },
+    "final37-default": {
+      "result": {
+        "started": "2026-09-13T09:54:16.578254+00:00",
+        "ended": "2026-09-13T09:54:39.383183+00:00",
+        "target": 37,
+        "defaultCt": "true",
+        "echMode": 2,
+        "exitCode": 0,
+        "timeout": false,
+        "waitForDebugger": false,
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5572",
+          "shell",
+          "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 10.0.2.2 -e sdk37.defaultCt true -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+        ],
+        "success": false,
+        "expected": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+        ],
+        "finished": [
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+          "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+        ],
+        "statusCodes": [
+          1,
+          -2,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          -2,
+          1,
+          0
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "build/sdk37-p26/final37-default/result.json",
+          "sha256": "11f97de5c06cab00b2af130f577daa2af0aa4066d7c601d0e62415e7521e8611"
+        },
+        {
+          "path": "build/sdk37-p26/final37-default/instrumentation.txt",
+          "sha256": "d86311c4ec7b12a52db75a159540a0fe75385ec290ffcafd85a3a195809503b8"
+        }
+      ]
+    }
+  },
+  "hostJvmTests": [
+    {
+      "name": "org.autojs.autojs.core.http.LocalNetworkDiagnosticsTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "org.autojs.autojs.runtime.api.augment.http.HttpContinuationCompatibilityTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "pythonTlsTests": {
+    "tests": 2,
+    "passed": 2,
+    "evidence": {
+      "path": "build/sdk37-p26/python-tls-tests.log",
+      "sha256": "8db7b6fb7f791379f4a57dea6de7d7762abb8bd77d90fd0556236be9c1778410"
+    }
+  },
+  "okhttpSourceAudit": {
+    "version": "4.12.0",
+    "jarSha256": "d91a769a4140e542cddbac4e67fcf279299614e8bfd53bd23b85e60c2861341c",
+    "kotlinSourceCount": 123,
+    "filesContainingSymbol": {
+      "setEchConfigList": 0,
+      "getDomainEncryptionMode": 0,
+      "EchConfigList": 0
+    },
+    "inferenceScope": "No direct use of these ECH APIs found in this archive; actual fixture connections are recorded separately"
+  },
+  "documentation": {
+    "commit": "6d24cee179b65cf7f10f7ae16eed6880bab5f853",
+    "contentVersion": "6.8.0",
+    "modules": 128,
+    "searchEntries": 5747
+  },
+  "offlineDocs": {
+    "commit": "d9f48d709e79364cd174a735319e89981e2ddb70",
+    "versionName": "6.8.1",
+    "versionBuild": 38,
+    "compileSdk": 36,
+    "targetSdk": 36,
+    "documentFileCount": 184,
+    "documentTotalBytes": 10570151,
+    "contentSha256": "2331d9f04557e9cde2eadc79c8daec32bc732c8ac6316aa82ff6e10f522fd5b4",
+    "jvmTests": [
+      {
+        "name": "io.github.supermonster003.autojs6.plugin.offlinedocs.OfflineDocsContractTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ]
+  },
+  "cleanup": {
+    "ownedEmulatorsStopped": true,
+    "tlsFixtureStopped": true,
+    "compatOverridesRestored": true,
+    "jdwpForwardRemoved": true,
+    "temporaryRunConfigurationRemoved": true,
+    "debuggerSessions": 0,
+    "remainingUserBreakpoints": 5,
+    "enabledUserBreakpoints": 2,
+    "physicalDevicesMutated": false
+  },
+  "rawArtifacts": [
+    {
+      "path": "build/sdk37-p26/build-baseline37.log",
+      "sha256": "d0a81cae6a5a87a200b286b7e5510c2448a27991b9d5a9ea66148cda82be26b7"
+    },
+    {
+      "path": "build/sdk37-p26/build-baseline37-retry.log",
+      "sha256": "3659ddb2d6074f523db021bc15ef63f6533f5f6163ff04b96810157b7e95fd74"
+    },
+    {
+      "path": "build/sdk37-p26/build-fixed37.log",
+      "sha256": "781153908b0d56f06b0a802dd0bd6386944a209f88a3231e14d577af551e19db"
+    },
+    {
+      "path": "build/sdk37-p26/build-fixed37-retry.log",
+      "sha256": "81e20349634e2919f8076f68a873e69d66de8403911091238f13dc6b757b61fd"
+    },
+    {
+      "path": "build/sdk37-p26/build-fixed37-test-lifecycle.log",
+      "sha256": "6470a13d6cce775d827426a69fa14474e03398e0886a07b05cb54ec54e0b5001"
+    },
+    {
+      "path": "build/sdk37-p26/build-fixed37-test-body.log",
+      "sha256": "b545aaf3d04b5c374294e77324d95b319282c0cd50ce530530eaa45710bb3bc6"
+    },
+    {
+      "path": "build/sdk37-p26/build-normal.log",
+      "sha256": "0dabb5450b59d1e9a405559ef3e92f529e8d1702dc08081a4a6406a9d77e2b98"
+    },
+    {
+      "path": "build/sdk37-p26/python-tls-tests.log",
+      "sha256": "8db7b6fb7f791379f4a57dea6de7d7762abb8bd77d90fd0556236be9c1778410"
+    },
+    {
+      "path": "build/sdk37-p26/docs-check.log",
+      "sha256": "e0798bd9138311269e3231e2d07c45a2015174d34324142cd6f99554b3123762"
+    },
+    {
+      "path": "build/sdk37-p26/docs-verify-offline.log",
+      "sha256": "d1e37ce76cd95a73f50de23b9f23b6909dc24fb1dcffa4074e7027aee142db39"
+    },
+    {
+      "path": "build/sdk37-p26/plugin-final38-verify.log",
+      "sha256": "efd03867ea256fc7a22b25f3da25da3d5cfc9c9e04e230d14d41c02d7c362aa4"
+    },
+    {
+      "path": "build/sdk37-p26/plugin-markdown-provenance.log",
+      "sha256": "c2fbe5e3dccc02913335c549a512d18506c40f679e44589e3aa902b46ab2099c"
+    },
+    {
+      "path": "build/sdk37-p26/plugin-readme-final.log",
+      "sha256": "c2fbe5e3dccc02913335c549a512d18506c40f679e44589e3aa902b46ab2099c"
+    },
+    {
+      "path": "build/sdk37-p26/compat-final.txt",
+      "sha256": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528"
+    },
+    {
+      "path": "build/sdk37-p26/adb-final.txt",
+      "sha256": "30f009b38448533dce2f7362cf6634d65e9709ac5e7b613eeff045250f8137dc"
+    }
+  ],
+  "limitations": [
+    "No physical API 37 or real ARM 16 KB acceptance",
+    "No enterprise proxy or public endpoint certificate-chain acceptance",
+    "No ECH-capable endpoint negotiation",
+    "No final Runtime Kit / generated user APK TLS run",
+    "No whole-project lint or remote CI run",
+    "Host release minification remains disabled",
+    "IDE debugger produced no variable or stack evidence"
+  ],
+  "primarySources": [
+    "https://developer.android.com/privacy-and-security/security-config",
+    "https://developer.android.com/reference/android/security/NetworkSecurityPolicy",
+    "https://developer.android.com/about/versions/17/behavior-changes-17"
+  ]
+}

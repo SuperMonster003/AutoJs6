@@ -64,6 +64,99 @@ The comparison matches issue ID, severity, message and location files, ignoring 
 
 ## Device compatibility changes
 
+### TLS trust, CT, ECH and request-scoped insecure options
+
+The [P2.6 evidence](../../docs/dev/evidence/android-sdk-37-p26-20260913.md)
+records actual HTTPS requests before and after the fix. Use a disposable emulator:
+instrumentation restarts the host and runs Rhino scripts. The helper refuses phone
+serials and does not install APKs, grant permissions or change compatibility flags.
+For physical network / enterprise proxy acceptance, keep case O02 in the
+[physical-device checklist](../../docs/dev/android-sdk-37-physical-device-tests.md) open.
+
+In a separate terminal, start the Python standard-library fixture:
+
+```powershell
+py tools/sdk37/tls_fixture.py
+```
+
+It binds only to the PC's `127.0.0.1:17647`; the emulator connects using
+`10.0.2.2`. Its committed server key is a disposable identity for reserved `.test`
+names. The matching CA is trusted only by three debug domains. Never install it
+in a device's certificate store. `trusted.sdk37.test` proves chain trust,
+`mismatch.sdk37.test` has the same trusted CA but is absent from the certificate
+SANs, `ct.sdk37.test` requires CT explicitly, and `untrusted.sdk37.test` retains
+normal system-only trust. The leaf has no SCTs. Release resources contain no test CA.
+
+Build and install matching appDebug / appDebugAndroidTest APKs, preserving a separate
+copy for each target. On API 37 with target 37, explicitly grant the test host
+`android.permission.ACCESS_LOCAL_NETWORK` before using the host alias. Then run:
+
+```powershell
+py tools/sdk37/run_tls_tests.py --adb E:/.android/sdk/platform-tools/adb.exe --serial emulator-5572 --expected-target 37 --default-ct true --ech-mode 2 --output build/sdk37-tls/target37-default
+```
+
+Choose the explicit emulator serial and a new output directory. The six cases
+cover certificate-chain rejection, domain-limited CA trust, explicit CT rejection,
+policy queries, and both `isInsecure` / `insecure` through synchronous, traditional
+callback and Promise requests. Normal requests after every insecure request must
+reject the unknown CA; the hostname check and trusted-domain access must also
+remain intact. Promise response bodies are consumed on the script thread.
+
+The API 37.0 image tested here uses the following defaults and isolated overrides:
+
+| Actual target | Override | `--default-ct` | `--ech-mode` |
+| --- | --- | --- | --- |
+| 37 | None | true | 2 |
+| 37 | Disable `DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY` | false | 2 |
+| 37 | Disable `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` | true | 1 |
+| 36 | None | false | 1 |
+| 36 | Enable `DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY` | true | 1 |
+| 36 | Enable `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` | false | 2 |
+
+For example, on an exclusively owned emulator with no initial overrides:
+
+```powershell
+$Sdk37Adb = 'E:/.android/sdk/platform-tools/adb.exe'
+$Sdk37Serial = 'emulator-5572'
+& $Sdk37Adb -s $Sdk37Serial shell am compat disable DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY org.autojs.autojs6
+try {
+    py tools/sdk37/run_tls_tests.py --adb $Sdk37Adb --serial $Sdk37Serial --expected-target 37 --default-ct false --ech-mode 2 --output build/sdk37-tls/target37-ct-disabled
+    if ($LASTEXITCODE -ne 0) { throw 'TLS suite failed; inspect result.json and instrumentation.txt' }
+} finally {
+    & $Sdk37Adb -s $Sdk37Serial shell am compat reset DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY org.autojs.autojs6
+}
+```
+
+Use one override at a time and restore the recorded initial state. `reset` restores
+the target-dependent default, so it is not a substitute for restoring a preexisting
+explicit override. `before` / `after` snapshots include the package and compatibility
+state; results also record exact test names, exit status and timeout. `--suite
+policies`, `transport` or `rhino` selects a smaller group. Before API 36, CT is
+unsupported; before API 37, ECH policy queries are unsupported. On API 24 the same
+suite verifies TLS / Rhino behavior and that the newer CT element is ignored.
+
+ECH mode values must stay explicit: UNKNOWN=0, DISABLED=1, OPPORTUNISTIC=2 and
+ENABLED=3 in API 37.0. Online reference pages already contain 37.2 additions and
+deprecations; do not copy their later default assumptions into a 37.0 assertion.
+The fixture records ClientHello extension types, SNI and TLS version. It cannot
+negotiate ECH. Even the presence of extension `0xfe0d` could be GREASE; successful
+ECH requires evidence from a compatible library and server. The recorded OkHttp
+4.12.0 fixture connections carried cleartext SNI and no ECH extension.
+
+Host-side checks require no Android device:
+
+```powershell
+py -m unittest discover -s tools/sdk37 -p test_tls_fixture.py -v
+py -m py_compile tools/sdk37/tls_fixture.py tools/sdk37/run_tls_tests.py
+```
+
+`--wait-for-debugger` starts the selected instrumentation methods with
+`-e debug true` and allows 900 seconds for an explicit JDWP attachment. It does not
+attach a debugger or create port forwards. A stalled / aborted debugger run is
+recorded as failure, not accepted as functional evidence.
+
+### General compatibility controls
+
 Use Git Bash on Windows. Set `ADB` to the SDK executable when it is not on PATH. The scripts pass an explicit serial on every adb invocation and disable MSYS argument conversion.
 
 ```bash

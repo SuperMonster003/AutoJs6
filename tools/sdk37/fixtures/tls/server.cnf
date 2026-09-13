@@ -1,0 +1,15 @@
+[req]
+distinguished_name = subject
+prompt = no
+
+[subject]
+CN = trusted.sdk37.test
+O = AutoJs6 test fixture only
+
+[server]
+basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+subjectAltName = DNS:trusted.sdk37.test,DNS:ct.sdk37.test,DNS:untrusted.sdk37.test

@@ -46,7 +46,7 @@ class RequestBuilder(
 
     companion object {
 
-        fun MutableOkHttp.applyOkHttpClientBuilder(opt: NativeObject) {
+        fun MutableOkHttp.applyOkHttpClientBuilder(opt: NativeObject): OkHttpClient {
             val clientProp = opt.prop(KEY_CLIENT).takeUnless { it.isJsNullish() }
             require(clientProp is NativeObject?) { "Argument \"client\" ${clientProp.jsBrief()} for http.request must be a JavaScript Object" }
 
@@ -119,6 +119,10 @@ class RequestBuilder(
                 )
             }
 
+            // Persist ordinary client options before applying the request-only TLS override.
+            // zh-CN: 先保存常规客户端配置, 再应用仅对当前请求生效的 TLS 配置.
+            muteClient(builder)
+
             if (isInsecure) {
                 @SuppressLint("CustomX509TrustManager")
                 val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -134,9 +138,7 @@ class RequestBuilder(
                 builder.hostnameVerifier { _, _ -> true }
             }
 
-            // Apply the new Builder to the internal client.
-            // zh-CN: 应用新的 Builder 到内部客户端.
-            muteClient(builder)
+            return builder.build()
         }
 
     }

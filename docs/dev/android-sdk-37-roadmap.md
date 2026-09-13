@@ -7,6 +7,8 @@
 
 实体机执行入口: [完整测试清单](android-sdk-37-physical-device-tests.md), 共 99 行, 含宿主 / 系统 51 行、inrt 用户 APK 6 行、全部插件 42 行. 每行列出设备、步骤、预期和本 Roadmap 的对应项; `tools/sdk37/physical_device.py checklist` 可导出带状态 / 证据列的 CSV. 现有 5 台真机只提供旧系统回归, API 37 与真实 16 KB 内核设备仍需补齐; 整理清单与工具自测不关闭功能验收项.
 
+P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 NSC 保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
@@ -19,7 +21,7 @@
 
 ## 1. 固定决策
 
-D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D12 是据此拟定或按既有默认项落实的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
+D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D13 是据此拟定或按既有默认项落实的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
@@ -35,6 +37,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | D10 | `app/src/main/java/com/stardust/**` 兼容包保持冻结 | 探针编译显示 android.jar 37 未在该包内引发错误; 若后续 lint / 构建暴露必须修改的项, 仅允许 35 -> 36 先例 (`2ab13f3c7` 注释掉 `MainThreadProxy` 的 `Thread.stop` 系列) 那种 "最小编译修正", 不做其它改动. |
 | D11 | 插件仓库的节奏 | 纯 JVM 且无行为暴露的插件 (附录 E "暴露" 列为空) 可在一次发布内同时完成 compileSdk 与 targetSdk; 存在本地网络 / 动态加载 / 后台音频 / 屏幕捕获暴露的插件与宿主一样两步走. 各仓库脏工作区 (附录 E) 先由维护者处理或按会话惯例分开提交, 本 Roadmap 的提交不得混入. |
 | D12 | Q1 按既有推荐项 (a) 实施 | P2.1 原条目已写明 "默认按推荐项". 用户显式连接 VS Code / 开启服务或操作权限入口时引导, 自动连接与脚本网络调用不弹窗; 复用 `runtime.requestPermissions` 的通用名称数组. 只有 OS >= 37 且实际 target >= 37 才需要权限; manifest 声明也仅进入 target >= 37 的 flavor, 旧 target 不声明或申请. `d9465be13`, [P2.1 证据](evidence/android-sdk-37-p21-20260913.md). |
+| D13 | P2.6 沿用 Q2 推荐项 (a) 的现有默认配置 | 不添加生产 CT / ECH 例外. debug 私有 CA 仅限三个保留测试域; `isInsecure` 只对当前请求生效. 真实域如确需局部 CT 例外, 先补齐信任链 / CT 失败证据再评估 (b). 这是保持现状的实现记录, 不代表维护者另行批准新的生产域例外. |
 
 由 D1-D3 派生的硬约束:
 
@@ -92,7 +95,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | OpenCV / ImageQuant stager 原已尝试 `setWritable(false, false)`, 但忽略结果; P2.3 改为在写入临时文件前及返回最终文件前强制验证只读, 修复旧缓存. `AndroidClassLoader` 的 DEX 已有只读处理, 本轮另修复 API 24 / 25 优化输出覆盖原始 DEX; Ace Editor 从已安装的插件 APK 构造 `PathClassLoader` | P2.3 (完成, 见实施记录) |
 | I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 公开 API 不变, 新实现中反射 `mMessages` 恒为 null; `LOOPER_CLEARS_THREAD_INTERRUPTED` 清除消息派发时的原生中断标记; `OVERRIDDEN_THREAD_START_METHOD` 使线程池绕过工作线程 start 覆写, 仍执行 run, 普通直接 start 调用不变 (后两项为 PLATFORM_CONFIG + DEVICE-37 对照结论) | target 37, 可在 target 36 调试包强制测试 | `Loopers` 的公开 IdleHandler、`MainThreadProxy` / `TimerThread` 中断、`exit()` / `threads.*` / `sleep()`; 宿主 Thread 子类未覆写 start. P2.4 修复了取消回调后历史时间阻止脚本退出的既有问题; 用户反射限制见附录 F | P2.4 |
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); 本机 ASM target 37 门控已实测, 同任务下层启动还受顶部应用的保护声明与 Activity 例外影响 (DEVICE-37); BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `AndroidPackageSessionInstaller` 现用私有广播接收回调, `PackageInstallStatusCoordinator` 保存会话并提供通知 / 返回应用入口, `PackageInstallStatusActivity` 在可见时发送系统确认 token; `ActivityLaunchOptions` 处理发送方版本分支; 固定快捷方式, 抽屉 ActivityResult 与脚本 `app.launch` / `app.startActivity` 另行覆盖 | P2.5 |
-| I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); NSC 可按域关闭 (`<certificateTransparency enabled="false"/>`, `<domainEncryption>`) | target 37 | `network_security_config.xml`; 脚本访问私有 CA / 自签名服务器与企业 TLS 代理; 用户安装 CA 是否豁免 CT 为 UNVERIFIED | P2.6 |
+| I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); API 37.0 实测 ECH 默认模式为 OPPORTUNISTIC(2), 策略值不证明已协商 | target 37 | `network_security_config.xml`; 私有 CA / 企业代理; NSC 配置用户 / 资源 CA 的默认 CT 豁免已核实, 但 CA 仍需先被信任; `isInsecure` 后续请求污染已修复, 实际公网链与 ECH 待补证 | P2.6 |
 | I7 | `PARCEL_HARDENING` (名称 VERIFIED, 语义 UNVERIFIED): Parcel 读写更严格 | target 37 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `core/plugin/center/InstalledPluginRepository.kt:351` (`BundleCompat.getSerializable`), `engine/NodeModuleSourceFileTransportSession.kt`, Tasker / 快捷方式 extras | P2.7 |
 | I8 | 存储: `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` (名称 VERIFIED, 语义 UNVERIFIED); `MediaStore` / `DocumentsContract` API 面有变化 | target 37 | 文件管理器与 `files.*` / `media.*`: `model/script/PathChecker.java:56`, `permission/AllFilesAccessPermission.kt`, MediaStore 查询点 (代码内未直接引用 `DATA` 列); `MANAGE_EXTERNAL_STORAGE` 语义不变 | P2.8 |
 | I9 | 小组件 RemoteViews 内存上限 (VERIFIED, 超限抛 `IllegalArgumentException`), 通知自定义视图尺寸限制 (`CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS`, 细节 UNVERIFIED) | target 37 | `external/widget/ScriptWidget.java:49`; `engine/NodeBridgeProviderRegistry.kt` 的 RemoteViews; 通知构建点 (`util/NotificationUtils.kt`) | P2.9 |
@@ -250,9 +253,11 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.6 网络安全配置 (I6)
 
-- [ ] 按附录 C 分别启用 CT / ECH 开关. 当前 NSC 仅信任系统 CA, 安装用户 CA 本身不会使其受信任; 先记录 target 36 的证书链基线, 再用独立 debug 域的显式 CA 测试配置区分链验证失败与 CT 失败. 局域网测试先授予 LNP; 默认客户端与 `RequestBuilder.isInsecure` 的自定义 TrustManager 路径分别记录. (SOURCE; DEVICE-37)
-- [ ] 默认保留 CT / ECH 配置. CT 例外只针对已验证的域与信任链, 不因证书不受信任而全局关闭 CT; 当前 `githubusercontent.com` 还含资源 CA, 记录实际验证链. ECH 需当前网络库及对端支持, 仅 target 升级或添加 `<domainEncryption>` 不证明已启用. 依据测试与 Q2 决定必要的局部配置. (SOURCE; DEVICE-37)
-- [ ] 文档说明证书信任、CT、ECH、LNP 是不同条件, 不写成 "安装用户 CA 即可"; 涉及脚本公开行为时同步 P4. ([官方 NSC 文档](https://developer.android.com/privacy-and-security/security-config); DOCS)
+- [x] 完成受控 TLS 夹具与 target 36 / 37 的 CT / ECH 独立开关对照. 未知 CA 拒绝、指定 debug CA 信任、主机名不匹配和强制 CT 缺 SCT 拒绝分别验证; target 37 的 LNP 前提单独满足. API 37 的 6 组各 6/6, API 24 回归 6/6 (旧系统不宣称支持 CT / ECH), 见 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). (SOURCE; DEVICE-37; DEVICE-24)
+- [x] 修复真实 Rhino 请求中 `isInsecure` / `insecure` 对共享客户端的污染. 同步、传统回调和 Promise 请求后, 后续默认或显式 false 请求恢复校验, 可信域与主机名检查保留. `timeout` / `client` 普通配置继续共享, 不擅自重置脚本显式配置的自定义 TrustManager. (DEVICE-37; DEVICE-24)
+- [x] 生产 NSC 保持默认 CT / ECH, 不添加全局关闭或新域例外; `githubusercontent.com` 资源 CA 的 CT 策略查询为 false. debug 测试 CA 不进入实际 appRelease APK. 当前 OkHttp 4.12.0 夹具连接无 ECH 扩展且可见 SNI, 不凭策略值宣称 ECH 生效. D13 记录 Q2 推荐默认的落实范围. (SOURCE; APK; DEVICE-37)
+- [x] 公共 HTTP 文档区分证书信任、CT、ECH、LNP, 说明 `isInsecure` 的请求范围与旧行为; 已生成 Documentation 与 Offline Docs, 更新双份 provenance 及 10 语言 changelog. d.ts 的两个 boolean 签名无变化, 无需生成 / 发布声明. ([官方 NSC 文档](https://developer.android.com/privacy-and-security/security-config); DOCS)
+- [ ] 对实际公网系统 CA 端点、`githubusercontent.com` 的实际验证链、企业 TLS 代理 / 私有域补证; 使用支持 ECH 的真实网络库与服务端记录协商, 明确与 GREASE 的区别. 需要目标地址、公开 CA 链 / 代理配置和 D37 网络环境, 对应实体机 O02. 当前夹具和策略查询不能替代此项. (DEVICE-37; PHYSICAL)
 
 ### P2.7 Parcel 与插件 IPC (I7)
 
@@ -425,7 +430,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | 编号 | 事项 | 选项 | 推荐 |
 | --- | --- | --- | --- |
 | Q1 | 本地网络权限的申请时机 (P2.1, 已按原条目的默认项实施) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a) 已实施, 见 D12 / `d9465be13`; 不把执行默认项记为维护者另行投票 |
-| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), 有证据时 (b); 复核修正原推荐的全局关闭方案 |
+| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | 本轮保持 (a), 见 D13; 有真实域证据时再评估 (b), 未增加生产例外 |
 | Q3 | 后台音频策略 (P2.2) | (a) 保持常驻服务, 提供可见界面恢复操作与已知限制; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | 本轮按原推荐采用 (a), 可见界面恢复已验证; 无人值守播放与完整设备门禁仍开放, 不以日志警告代替功能通过 |
 | Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a): 无共享存储需求的脚本允许跳过, 拒绝权限后仍有可理解的结果 |
 | Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a): AutoJs6 是自动化工具, 声明会与其定义不符 |
@@ -699,3 +704,11 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 新增只读设备清点 / 快照、CSV 导出和选定 instrumentation 入口. 实际 LAN fixture 支持指定 PC 接口 / 手机来源 IPv4, BAL 与安装恢复探针通过显式 `--physical-device` 参数支持测试手机. 权限页自动点击、完整 Looper 与音频全局诊断仍按原工具边界运行.
 - 只读清点确认 API 28 / 31 / 33 / 35 的 5 台真机在线, 均为真实 4 KB 内核页, Xiaomi 平板为 sw720dp; 另完成 API 35 的只读快照验证. 没有在线 API 37 真机或真实 16 KB 设备. 本轮未安装测试 APK、运行手机 instrumentation、修改权限或执行功能验收. 缺少新硬件记为实体机证据待补, 不另加原 Roadmap 未约定的发布前置条件.
 - 本轮修改仅为测试工具与研发文档, 正常 SDK 配置不变, 无产品 changelog / JS API / 插件版本变化. Python 与工具验证结果见清单第 8 节; 不能以工具检查或 AVD 结果关闭实体机、最终用户 APK 与插件验收门禁.
+
+### 2026-09-13: P2.6 TLS / CT / ECH 与 HTTP 请求范围
+
+- 真实 TLS 基线复现两个 insecure 选项污染共享客户端的缺陷. 调整为当前请求使用独立 TLS 配置, 常规 client / timeout 配置继续共享. 两种选项的同步、回调和 Promise 连续请求均验证恢复链与主机名校验.
+- API 37 同机 target 36 / 37 的默认、CT 独立开关、ECH 独立开关共 6 组, API 24 回归 1 组, 合计 42 次方法执行通过. API 37.0 ECH 的实测模式为 2 / 1, 没有套用 37.2 文档预期; 当前夹具连接无 ECH 扩展, 不宣称实际协商通过.
+- 正常 app debug / release, androidTest 与 inrt debug 构建通过, 相关 JVM 测试 6/6, Python TLS 测试 2/2. 生产 NSC 不增加 CT / ECH 例外, appRelease 无测试 CA. [实施记录](evidence/android-sdk-37-p26-20260913.md) 与 [机器结果](evidence/android-sdk-37-p26-results-20260913.json) 保留失败探索、APK / 源码哈希和最终矩阵.
+- HTTP 文档与 Offline Docs 已同步, 后者的 debug / release 内容门禁和 JVM 测试通过, 文档版本 6.8.0 / 插件发行版本 6.8.1 各自保留. d.ts boolean 签名无需调整. 宿主及插件的多语言 changelog 已生成, 未发布 APK 或远程推送.
+- 正常配置仍为 compile 37 / host target 36 / inrt target 29; 两个独占只读 AVD、TLS helper 与临时调试资源已清理, 手机未做变更. P2.6 的真实域证书链、企业代理和 ECH 协商保留为待补, 后续可继续 P2.7, 不将 P2 / P3 整体关闭.

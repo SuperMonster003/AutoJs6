@@ -13,4 +13,20 @@
             <certificates src="@raw/isrg_root_x1" />
         </trust-anchors>
     </domain-config>
+
+    <!-- Reserved test names only. Never add this CA to base-config or debug-overrides. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain>trusted.sdk37.test</domain>
+        <domain>mismatch.sdk37.test</domain>
+        <trust-anchors>
+            <certificates src="@raw/sdk37_test_ca" />
+        </trust-anchors>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain>ct.sdk37.test</domain>
+        <trust-anchors>
+            <certificates src="@raw/sdk37_test_ca" />
+        </trust-anchors>
+        <certificateTransparency enabled="true" />
+    </domain-config>
 </network-security-config>
