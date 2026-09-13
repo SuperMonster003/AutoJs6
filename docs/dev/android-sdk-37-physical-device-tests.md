@@ -31,6 +31,8 @@ O02 的受控 TLS 对照已提供 [自动化方法](../../tools/sdk37/README.md#
 
 UI04 的 UA 与基本渲染已有 [模拟器复跑工具](../../tools/sdk37/README.md#webview-user-agent-reduction-and-rendering) 与 [P2.11 证据](evidence/android-sdk-37-p211-20260913.md), API 37 / WebView 145 的 28 个场景通过. 此结果不关闭真机的输入、复杂字体、文件选择、Markdown / Ace 或最终插件包验收. HTML Previewer 按自身包的 target / UA 开关测试; File System Access 只有符号暴露观测, 仍需实际 chooser / 授权证据.
 
+S01-S03 与小组件 / 通知现有 [框架复跑工具](../../tools/sdk37/README.md#storage-widgets-and-notification-views)、[P2.8 存储证据](evidence/android-sdk-37-p28-20260913.md) 和 [P2.9 小组件 / 通知证据](evidence/android-sdk-37-p29-20260913.md). 普通模拟 SD 卡不关闭 OTG 拔插 / 不可靠卷验收. `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` 是联系人目录提供方规则, 不作为文件管理器权限开关. 当前镜像的小组件 Icon 上限与官方 target 37 公告存在差异, 需记录设备实际结果; 通知自定义视图按渲染后的图片内存判断, `notify()` 返回或通知记录 active 均不能单独作为显示通过证据. 所有实体机行继续保持 NOT_RUN.
+
 ## 2. 包与证据准备
 
 同源对照至少准备宿主正常 target 36 / debug target 37、inrt 正常 target 29 / debug target 37. 用户生成 APK 和插件另存实际 applicationId、签名、versionCode、compile/target/min、SHA-256、源码提交和 ABI. 同机覆盖安装前后必须保留原文件与授权状态; 首次安装和升级分开记录. 测试安装 / 卸载仅针对专用测试 applicationId, 不为制造“干净状态”卸载日用包.

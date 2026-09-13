@@ -1,0 +1,2223 @@
+{
+  "date": "2026-09-13",
+  "sessionStart": "16ba3901f",
+  "section": "p29",
+  "rawDirectory": "build/sdk37-p28-p210",
+  "normalConfig": {
+    "compile": 37,
+    "hostTarget": 36,
+    "inrtTarget": 29
+  },
+  "cleanup": {
+    "time": "2026-09-13T13:14:16.282695+00:00",
+    "scope": "Only the disposable emulator and host used in this session",
+    "actions": [
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset EXCLUDE_UNRELIABLE_STORAGE_VOLUMES org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 391360514.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 157720069.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset TRASH_BEHAVIOR_CHANGE org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 461429441.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 270553691.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appwidget revokebind --package org.autojs.autojs6 --user 0"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.POST_NOTIFICATIONS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.READ_SMS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.RECEIVE_SMS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appops set --uid org.autojs.autojs6 MANAGE_EXTERNAL_STORAGE default"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appops set org.autojs.autojs6 MANAGE_EXTERNAL_STORAGE default"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "finalCompat": {
+      "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+      },
+      "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+      },
+      "TRASH_BEHAVIOR_CHANGE": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+      },
+      "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+      }
+    },
+    "debugApp": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "settings get global debug_app"
+      ],
+      "exitCode": 0,
+      "stdout": "null\n",
+      "stderr": ""
+    },
+    "waitForDebugger": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "settings get global wait_for_debugger"
+      ],
+      "exitCode": 0,
+      "stdout": "0\n",
+      "stderr": ""
+    },
+    "forwards": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "forward",
+        "--list"
+      ],
+      "exitCode": 0,
+      "stdout": "\n",
+      "stderr": ""
+    },
+    "snapshot": "cleanup-final",
+    "complete": true
+  },
+  "windowsCleanup": {
+    "time": "2026-09-13T21:15:56.3504168+08:00",
+    "emulatorBefore": {
+      "ProcessId": 44628,
+      "ParentProcessId": 33776,
+      "Name": "qemu-system-x86_64-headless.exe",
+      "CommandLine": "E:\\.android\\sdk\\emulator\\qemu\\windows-x86_64\\qemu-system-x86_64-headless.exe -avd AVD_API_37 -port 5586 -no-snapshot-load -no-snapshot-save -read-only -no-window -no-audio -memory 4096 -cores 4 -gpu swiftshader_indirect",
+      "CreationDate": "2026-09-13T19:11:04.023393+08:00"
+    },
+    "launcherBefore": {
+      "ProcessId": 33776,
+      "Name": "emulator.exe",
+      "CommandLine": "\"E:\\.android\\sdk\\emulator\\emulator.exe\" -avd AVD_API_37 -port 5586 -no-snapshot-load -no-snapshot-save -read-only -no-window -no-audio -memory 4096 -cores 4 -gpu swiftshader_indirect"
+    },
+    "adbBefore": {
+      "ProcessId": 42340,
+      "Name": "adb.exe",
+      "CommandLine": "adb -L tcp:5053 fork-server server --reply-fd 692",
+      "CreationDate": "2026-09-13T19:59:07.109102+08:00"
+    },
+    "sharedAdb5037Modified": false,
+    "physicalDevicesModified": false,
+    "emulatorStopped": true,
+    "launcherStopped": true,
+    "privateAdbStopped": true
+  },
+  "device": {
+    "serial": "127.0.0.1:5587",
+    "model": "sdk_gphone16k_x86_64",
+    "manufacturer": "Google",
+    "sdk": "37",
+    "release": "17",
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+    "abiList": "x86_64,arm64-v8a",
+    "buildType": "userdebug",
+    "emulator": true,
+    "getconfPageSize": 16384,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "cases": [
+    {
+      "name": "widgets37-final",
+      "record": {
+        "started": "2026-09-13T12:30:27.414629+00:00",
+        "caseId": "de72680750be4da79a6dea164e4cc281",
+        "suite": "widgets",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "de72680750be4da79a6dea164e4cc281",
+          "suite": "widgets",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-de72680750be4da79a6dea164e4cc281",
+          "expectWidgetIconRejected": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "94ebc5a402ab4c8c633bae9d9ec6f2c7af0230d57d92cc13d3b56cb35f6f5c5d",
+        "deviceLogStart": "09-13 20:30:28.000",
+        "removedHostTasks": [
+          875,
+          874
+        ],
+        "receipt": {
+          "caseId": "de72680750be4da79a6dea164e4cc281",
+          "suite": "widgets",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "widgetMappings",
+              "ok": true,
+              "value": [
+                {
+                  "id": 86,
+                  "path": "/storage/emulated/0/sdk37-widget-de72680750be4da79a6dea164e4cc281/first-de72680750be4da79a6dea164e4cc281.js",
+                  "requestCode": 1
+                },
+                {
+                  "id": 87,
+                  "path": "/storage/emulated/0/sdk37-widget-de72680750be4da79a6dea164e4cc281/first-de72680750be4da79a6dea164e4cc281.js",
+                  "requestCode": 2
+                }
+              ]
+            },
+            {
+              "name": "widgetFirstClick",
+              "ok": true,
+              "value": {
+                "label": "first-de72680750be4da79a6dea164e4cc281",
+                "marker": "first"
+              }
+            },
+            {
+              "name": "widgetUpdateClick",
+              "ok": true,
+              "value": {
+                "label": "second-de72680750be4da79a6dea164e4cc281",
+                "marker": "second"
+              }
+            },
+            {
+              "name": "widgetLargeIcon",
+              "ok": true,
+              "value": {
+                "allocatedBytes": 16757280,
+                "limit": 15707520,
+                "rejected": false,
+                "error": null
+              }
+            },
+            {
+              "name": "widgetLargeBitmap",
+              "ok": true,
+              "value": {
+                "allocatedBytes": 16757280,
+                "rejected": true,
+                "error": "JavaException: java.lang.IllegalArgumentException: RemoteViews for widget update exceeds maximum bitmap memory usage (used: 16757280, max: 15707520)"
+              }
+            }
+          ],
+          "complete": true,
+          "widgetIds": [
+            {
+              "id": 86,
+              "path": "/storage/emulated/0/sdk37-widget-de72680750be4da79a6dea164e4cc281/first-de72680750be4da79a6dea164e4cc281.js",
+              "requestCode": 1
+            },
+            {
+              "id": 87,
+              "path": "/storage/emulated/0/sdk37-widget-de72680750be4da79a6dea164e4cc281/first-de72680750be4da79a6dea164e4cc281.js",
+              "requestCode": 2
+            }
+          ],
+          "widgetPattern": {
+            "source": "[a-zA-Z]+_([0-9]+)",
+            "matches": [
+              {
+                "widgetId": 86,
+                "capturedId": "86"
+              },
+              {
+                "widgetId": 87,
+                "capturedId": "87"
+              }
+            ]
+          }
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:31:15.954426+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "b3933055cca28e1f367b37a230e760f4c88297691ca95cd64cd3f89b9ca8f902",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "a34075472231685b17d125e9a9623f1a55396bba23303745113926ba36794db8",
+        "after/org.autojs.autojs6-package.txt": "81c7303aac92184beb61dc09d74137b239af19e26fff6f438c02c27a91481dbb",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "a067bb65e88c34f53ca09516c152c034eb452c1ce1deb5ab8c4b647da3b858a1",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "3340387e777b56d8a36e1994cf7d99f7148c7e03b2103dc38b85986a052fa7f1",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "ce557a2b1a973deb845d88e4973a94a9f648e974d1e07c0074786d66b6448ac7",
+        "before/org.autojs.autojs6-package.txt": "206ca84d5bf52fd593c6aacc5e50bcb7402cb35c7b3bab8ca9b9a407bdca9cc9",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "5624ae5e74ee93af9abfdbd739bb13024d6ab61e42f4c593fa4245dd293ddd33",
+        "launch.json": "f5e144f0b57e15157089a27db0a45b8d7db14adc27370758e8873c316c7a0e56",
+        "launched-script.js": "8b54b00f4d1a1f10bbee1232a26ff35cdb67e0183c02fcbde031724c05a6e48e",
+        "logcat-tail.txt": "2130a31102b27d7964db11d87c9765cf55bd1c167c111bc339b94f5233536e9b",
+        "result.json": "8069306bd545fa0d45a167beae8044174c2f9b621a4e09520ca655b3fb640753",
+        "screen.png": "2539f17f73e0e373336c0096eb1e3aaecbcc5ca851ef13ce4aca0d6577943e62",
+        "windows.txt": "b639d113cbec51097fdf7a1f704f20772d78c37554315a70ee65845c139b8de8"
+      }
+    },
+    {
+      "name": "widgets36-final",
+      "record": {
+        "started": "2026-09-13T12:59:08.058704+00:00",
+        "caseId": "b82e810aa33445a383d58476f4d52996",
+        "suite": "widgets",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "b82e810aa33445a383d58476f4d52996",
+          "suite": "widgets",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-b82e810aa33445a383d58476f4d52996",
+          "expectWidgetIconRejected": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "9d1e57c6e607594f7bbf6294ad2475b75bad1d972cd16de264ee434f70dc6a65",
+        "deviceLogStart": "09-13 20:59:09.000",
+        "removedHostTasks": [
+          899
+        ],
+        "receipt": {
+          "caseId": "b82e810aa33445a383d58476f4d52996",
+          "suite": "widgets",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "widgetMappings",
+              "ok": true,
+              "value": [
+                {
+                  "id": 98,
+                  "path": "/storage/emulated/0/sdk37-widget-b82e810aa33445a383d58476f4d52996/first-b82e810aa33445a383d58476f4d52996.js",
+                  "requestCode": 1
+                },
+                {
+                  "id": 99,
+                  "path": "/storage/emulated/0/sdk37-widget-b82e810aa33445a383d58476f4d52996/first-b82e810aa33445a383d58476f4d52996.js",
+                  "requestCode": 2
+                }
+              ]
+            },
+            {
+              "name": "widgetFirstClick",
+              "ok": true,
+              "value": {
+                "label": "first-b82e810aa33445a383d58476f4d52996",
+                "marker": "first"
+              }
+            },
+            {
+              "name": "widgetUpdateClick",
+              "ok": true,
+              "value": {
+                "label": "second-b82e810aa33445a383d58476f4d52996",
+                "marker": "second"
+              }
+            },
+            {
+              "name": "widgetLargeIcon",
+              "ok": true,
+              "value": {
+                "allocatedBytes": 16757280,
+                "limit": 15707520,
+                "rejected": false,
+                "error": null
+              }
+            },
+            {
+              "name": "widgetLargeBitmap",
+              "ok": true,
+              "value": {
+                "allocatedBytes": 16757280,
+                "rejected": true,
+                "error": "JavaException: java.lang.IllegalArgumentException: RemoteViews for widget update exceeds maximum bitmap memory usage (used: 16757280, max: 15707520)"
+              }
+            }
+          ],
+          "complete": true,
+          "widgetIds": [
+            {
+              "id": 98,
+              "path": "/storage/emulated/0/sdk37-widget-b82e810aa33445a383d58476f4d52996/first-b82e810aa33445a383d58476f4d52996.js",
+              "requestCode": 1
+            },
+            {
+              "id": 99,
+              "path": "/storage/emulated/0/sdk37-widget-b82e810aa33445a383d58476f4d52996/first-b82e810aa33445a383d58476f4d52996.js",
+              "requestCode": 2
+            }
+          ],
+          "widgetPattern": {
+            "source": "[a-zA-Z]+_([0-9]+)",
+            "matches": [
+              {
+                "widgetId": 98,
+                "capturedId": "98"
+              },
+              {
+                "widgetId": 99,
+                "capturedId": "99"
+              }
+            ]
+          }
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:59:43.139445+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "e8aeb0ff3eae4e09db0a59a019a8a768a0bbbf76e1b0d69603c9b741c7df3ea3",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "00b939439ab7c2e9a851204b2899d7d46b9065ae02079f524803cfc3ad28ea47",
+        "after/org.autojs.autojs6-package.txt": "196e3307bdc79dc02e6d601d01f64382cedcc17f5a763842a8f143b4e6570f0d",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "f07a1fc9588656c3ca6734481650f9fc95fac681d406150ffeceda5dfb773735",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "8d02af67bf153e082f924502776d338987527ed439b7881df7e77be76dacfb5d",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "d5f4468f7711c8efbc88913c304f22a4f3e3a46b42972e24690f1212749b47d8",
+        "before/org.autojs.autojs6-package.txt": "d25fac7c63e045aa2bc52c3b3ecb33eb1d2343afc4c686b89e88fd29cf26dccc",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "68bb1d12680c8a805e9ec85ffec02f892f29f1686ffa41b4eccfb750898fd5ec",
+        "launch.json": "af513ab01ced34cbacc0236b39507fcd867e1c178907408bc30e76d57b00eaef",
+        "launched-script.js": "b3012af5ec55055e891103c5c438230f715359a95b14cf6e8331b4ff9a67e725",
+        "logcat-tail.txt": "a5f87d29d08f0192fd022549c4c0baf0e1d69b8da2b06f1aeef9326055ab9809",
+        "result.json": "f43bcb3002eefe91eaa2cafca3002586f8d69ab45bd12ffc523fa9cfb37d3ef8",
+        "screen.png": "e45ac0f3c2934bd7119cf9520fc53387774717b3a705df74ec88af462a136f74",
+        "windows.txt": "688fc0d257d3cfe8364f2b84a88d9b752f9f0e22b58d6b1cc0de8958979c8c78"
+      }
+    },
+    {
+      "name": "notifications37-final",
+      "record": {
+        "started": "2026-09-13T12:35:20.842211+00:00",
+        "caseId": "d5a3e0fb53514e8c8c279f03b1fafd6a",
+        "suite": "notifications",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "d5a3e0fb53514e8c8c279f03b1fafd6a",
+          "suite": "notifications",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-d5a3e0fb53514e8c8c279f03b1fafd6a"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "6b060d3b77c781c75af0b07a415e80b5501dbd8ca1a9aaa89ea6756e1c86dd7b",
+        "deviceLogStart": "09-13 20:35:22.000",
+        "removedHostTasks": [],
+        "receipt": {
+          "caseId": "d5a3e0fb53514e8c8c279f03b1fafd6a",
+          "suite": "notifications",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "standard",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "template": "android.app.Notification$BigTextStyle"
+              }
+            },
+            {
+              "name": "foreground",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+                "flags": 131138
+              }
+            },
+            {
+              "name": "custom",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "bytesPerImage": 4096,
+                "copies": 1
+              }
+            },
+            {
+              "name": "oversized",
+              "ok": true,
+              "value": {
+                "notifyReturned": true,
+                "activeAfterInflation": true
+              }
+            }
+          ],
+          "complete": true,
+          "notificationIds": {
+            "standard": 224017935,
+            "custom": 224017936,
+            "oversized": 224017937,
+            "foreground": 191
+          },
+          "customMemory": {
+            "strip": 5000000,
+            "warn": 2000000,
+            "bytesPerImage": 262144,
+            "copies": 21,
+            "expectedImageBytes": 5505024
+          },
+          "cleaned": true
+        },
+        "errors": [],
+        "notificationMemoryLog": [
+          "09-13 20:36:12.694   959   959 W NotificationService: Dropped notification due to too large RemoteViews (5591460 bytes) on pkg: org.autojs.autojs6 tag: null id: 224017937"
+        ],
+        "ended": "2026-09-13T12:36:30.014421+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "1f66f05e945163cede5681e53f19d9f32474bce0c6c7202c0d7bb6f508ec6b7d",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "88eb238b41ff8c63f252eb8595c7ae4b6fc3909d216e211ca0b0ae81423a9ada",
+        "after/org.autojs.autojs6-package.txt": "43b252bb16d963d003339acf7a5ea55ec55b0ffbd092f775b97ebe40acb62791",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "e1349959e16eb53a4ba2b29f144e677ed86ed68318843896a05308d8b68a7019",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "3b98d2b0c9611118719318b65cf27b7e916d92f9494ae81450c2051714c5b96a",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "b69f64ef01e7c3ee3ef14f6caad287c806fd66341fc84f76908f70aebd912d8d",
+        "before/org.autojs.autojs6-package.txt": "ddc650eb3d31c252e9967d78288cdb303cb4e8013213fac91f3e948abdc877f8",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "39ca843ea3363e5be4056c728125fb2d9fb0e65d91e7ade8c80c3a7035d3388f",
+        "launch.json": "ff7abd755b73e4383834c190f8b454f3cd76eeec0095eeacbae2a1b2d8b73c75",
+        "launched-script.js": "b52d68bef0e8e149fb1788b45526b2cca6a52e6495a2d015640626867bf2f22e",
+        "logcat-tail.txt": "1e86fc033a40d3050b1ed91f5601f194d492e53d43c9b8db6c41b973e7cad0f0",
+        "notification-shade-expanded.xml": "a4b8269ce8c18f416ad193a140a33327ec214b06ceb2dd15cfa933ac1692ed2d",
+        "notification-shade.xml": "447a908d665694317649bd41efe3e3bb98e8c97f736b9c2951c8875008b44ea3",
+        "notifications.txt": "e5181b289c19216f11b7e4a040f9f41015ff2aff152bc0b05fa4ded0cb40d5d6",
+        "result.json": "351dfd2bfa74f3674ab836c00802c1984cbabbc483a12c6a8522029330e05e93",
+        "screen.png": "1107b60f71057f3bf742f117fa6d05bc36f8218130733b28764330417f925f3d",
+        "windows.txt": "460236a666f408a0b2b2be3b96dd874e1d6c2abfb2db5655482490f0ee2ab40d"
+      }
+    },
+    {
+      "name": "notifications37-disabled-final",
+      "record": {
+        "started": "2026-09-13T12:36:31.000170+00:00",
+        "caseId": "4899a59e4edf495384b38d0e7eeaa6de",
+        "suite": "notifications",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "4899a59e4edf495384b38d0e7eeaa6de",
+          "suite": "notifications",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-4899a59e4edf495384b38d0e7eeaa6de"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "packageOverrides",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "28518cce2831a2b40b112b8167824424b3aa1ae0a4b1db888f2f480ad1867ff1",
+        "deviceLogStart": "09-13 20:36:33.000",
+        "removedHostTasks": [],
+        "receipt": {
+          "caseId": "4899a59e4edf495384b38d0e7eeaa6de",
+          "suite": "notifications",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "standard",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "template": "android.app.Notification$BigTextStyle"
+              }
+            },
+            {
+              "name": "foreground",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+                "flags": 131138
+              }
+            },
+            {
+              "name": "custom",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "bytesPerImage": 4096,
+                "copies": 1
+              }
+            },
+            {
+              "name": "oversized",
+              "ok": true,
+              "value": {
+                "notifyReturned": true,
+                "activeAfterInflation": true
+              }
+            }
+          ],
+          "complete": true,
+          "notificationIds": {
+            "standard": 76126809,
+            "custom": 76126810,
+            "oversized": 76126811,
+            "foreground": 191
+          },
+          "customMemory": {
+            "strip": 5000000,
+            "warn": 2000000,
+            "bytesPerImage": 262144,
+            "copies": 21,
+            "expectedImageBytes": 5505024
+          },
+          "cleaned": true
+        },
+        "errors": [],
+        "notificationMemoryLog": [
+          "09-13 20:37:16.031   959   959 W NotificationService: RemoteViews too large on pkg: org.autojs.autojs6 (5591460 bytes)tag: null id: 76126811 this WILL notification WILL be dropped when targetSdk is set to 37!",
+          "09-13 20:37:16.089   959   959 W NotificationService: RemoteViews too large on pkg: org.autojs.autojs6 (5623212 bytes)tag: null id: 76126811 this WILL notification WILL be dropped when targetSdk is set to 37!"
+        ],
+        "ended": "2026-09-13T12:37:32.478805+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "packageOverrides",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "22d8a89eca4a11a93ceb2afbbfdfd1dcb31cada4429f93f8c34de3d5395cc5af",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "79d26f2510cff5bb4ddd898cb68cc9b39461639663825ecd6d5c137b1dc8fab6",
+        "after/org.autojs.autojs6-package.txt": "2e406a89ff419ac98b3280bbdf036b5b01a149241a57b072907e3e53eb2b81be",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "299a9d5f14397ca657c242cdcc86e6ca9ff77182e459d6d79d1d64a4f49805f0",
+        "after/snapshot.json": "ee016cd8a75f4e7f39e812b9edc52687c86f8fb27829fb961bccb3952ac976c7",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "c8394c8bbc7844bab6aa23d0405719f6b1c2a917b6d31b6567567c182f498aad",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "7515a51db1448f0e8e7b3c16e28eccc2078fba604e1261946cf33964daac690a",
+        "before/org.autojs.autojs6-package.txt": "fe40e0204a2b80f6bafda6c04b4cfd03d4e0feca1d993bc9ad602452cdc5f62b",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "299a9d5f14397ca657c242cdcc86e6ca9ff77182e459d6d79d1d64a4f49805f0",
+        "before/snapshot.json": "d7775b403ef7da08264d9b9de6977feb5e9c5144e5ca202fa1630402cfee56b9",
+        "launch.json": "1e88d35f3fe6cb39c651942e89872a007d25b01d4bfa7ff85b8d7c85dc1e6017",
+        "launched-script.js": "ef6780def5a96655c089ae33c0943c1d3bb489a043effe1d7af51d33ecb283af",
+        "logcat-tail.txt": "b7b9117575f10b39a690503b8dd6280acda7081279954fcdc127be4e17e7b35d",
+        "notification-shade-expanded.xml": "495a1f367b4eedcc325fc40aff9d40633ecbdd59b30625eae875ebfb9fabf525",
+        "notification-shade.xml": "60b203a7bf077ad6d00bb2281506025dd5e7c1c1c4b80c8b80e2837e37119865",
+        "notifications.txt": "0cb30a071bd3b627513344328ae41bbfe3690e7c0deabe9a0a130a092e0ecaad",
+        "result.json": "513b97a7b5630604dbacc3d1867b415293ad903e68a59955e371d8843538de65",
+        "screen.png": "651c2248be7c720e6c9f3012a0de6ea371729a9d152c043f4f322a0cb27d75cd",
+        "windows.txt": "dde9da54bb121d683c310f26d876fb5bb9c107f5223b6e371f3a79aa79cf6c67"
+      }
+    },
+    {
+      "name": "notifications36-default-final",
+      "record": {
+        "started": "2026-09-13T13:11:30.814173+00:00",
+        "caseId": "06c1af06c66743b7bc6605fe87678c79",
+        "suite": "notifications",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "06c1af06c66743b7bc6605fe87678c79",
+          "suite": "notifications",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-06c1af06c66743b7bc6605fe87678c79"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "44d36a21f19532484f530c1fdaa41982d70628e6f596e5d4a9502be1e1a34bde",
+        "deviceLogStart": "09-13 21:11:34.000",
+        "removedHostTasks": [
+          911
+        ],
+        "receipt": {
+          "caseId": "06c1af06c66743b7bc6605fe87678c79",
+          "suite": "notifications",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "standard",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "template": "android.app.Notification$BigTextStyle"
+              }
+            },
+            {
+              "name": "foreground",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+                "flags": 131138
+              }
+            },
+            {
+              "name": "custom",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "bytesPerImage": 4096,
+                "copies": 1
+              }
+            },
+            {
+              "name": "oversized",
+              "ok": true,
+              "value": {
+                "notifyReturned": true,
+                "activeAfterInflation": true
+              }
+            }
+          ],
+          "complete": true,
+          "notificationIds": {
+            "standard": 7084784,
+            "custom": 7084785,
+            "oversized": 7084786,
+            "foreground": 191
+          },
+          "customMemory": {
+            "strip": 5000000,
+            "warn": 2000000,
+            "bytesPerImage": 262144,
+            "copies": 21,
+            "expectedImageBytes": 5505024
+          },
+          "cleaned": true
+        },
+        "errors": [],
+        "notificationMemoryLog": [
+          "09-13 21:12:10.048   959   959 W NotificationService: RemoteViews too large on pkg: org.autojs.autojs6 (5591460 bytes)tag: null id: 7084786 this WILL notification WILL be dropped when targetSdk is set to 37!",
+          "09-13 21:12:10.218   959   959 W NotificationService: RemoteViews too large on pkg: org.autojs.autojs6 (5623212 bytes)tag: null id: 7084786 this WILL notification WILL be dropped when targetSdk is set to 37!"
+        ],
+        "ended": "2026-09-13T13:12:31.857530+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "754b8a32bd6e92b5a38b1fec1739d851c98af0c8ade7863e68daf3f2f1b03c9b",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "2be8a285c970aa46a5c2811da04582b51f737907a490d9fd02cc420659ec5658",
+        "after/org.autojs.autojs6-package.txt": "b1c6e0ba36544145721bb9d8fc08f0bfc53dc7c0d5fa949991a3e03265b3c431",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "f09a586cbcc95d5ac19f9ad073f3ce441a419a1b2e1aa8caeba8f736973f8c63",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "24be127c1b9ccb352fbc04cf53485bc73e5d4dd09bb2ff6c7d8079c6e44f963f",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "ec576a7a1aaffd923b380e7ecc6b72d6dc37be826c359570a2bfaade959ba023",
+        "before/org.autojs.autojs6-package.txt": "2106a45c74a5d724471ddd56f6016fe936bc8812dca9e29eafc5fa1ad250fd0e",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "e3431ae71f4bdf2948b00e0a0defcb3fc2df402e5fdd295d90588d80ac8343a5",
+        "launch.json": "e1e6a3a870620141f67516374bbacab3c171216b87bfd708a5c4c6adfbaeea4f",
+        "launched-script.js": "00da812f38dcefb7940b1a079d5172ea67764114b0ae99d4272a4c07284db1f6",
+        "logcat-tail.txt": "ec826c35344f7b6ec8fb622b91d988c81dcf3327db44a496eaf25abb81dfbca8",
+        "notification-shade-expanded.xml": "2fe3f4d01b86677a3b5ef1e6f1f2f1d18f0cad38eaf5c0783676326fefa02d9b",
+        "notification-shade.xml": "8079a53b263dc19b16db3198c30657e11b129a644a16f79e66f8a6b84b75ef4c",
+        "notifications.txt": "a382a6b9a3beb7926aea231212d8736b828cc968e6ba8395b7d27b6af6375343",
+        "result.json": "83ffba8b41a734a4adfe01e51fcf613136f33666562243e75d172268ef63bba5",
+        "screen.png": "9acd77de176aa7002138e0ed5e0deec5a1f0cf95a9552a01088c21f9cf18b32a",
+        "windows.txt": "c7b27d1dd057ea7017585fe587fe895a36083fc62e64c8a23988e12e28c59bcd"
+      }
+    },
+    {
+      "name": "notifications36-enabled-final",
+      "record": {
+        "started": "2026-09-13T13:12:34.015781+00:00",
+        "caseId": "65fa44206c88464f9848ccf0d1090c9a",
+        "suite": "notifications",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "65fa44206c88464f9848ccf0d1090c9a",
+          "suite": "notifications",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-65fa44206c88464f9848ccf0d1090c9a"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "3647230e0ff2b76fde62a8dbbc6826b6f827fad6db481ce5e5c41aa9eefdbbfc",
+        "deviceLogStart": "09-13 21:12:38.000",
+        "removedHostTasks": [],
+        "receipt": {
+          "caseId": "65fa44206c88464f9848ccf0d1090c9a",
+          "suite": "notifications",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "standard",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "template": "android.app.Notification$BigTextStyle"
+              }
+            },
+            {
+              "name": "foreground",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+                "flags": 131138
+              }
+            },
+            {
+              "name": "custom",
+              "ok": true,
+              "value": {
+                "posted": true,
+                "bytesPerImage": 4096,
+                "copies": 1
+              }
+            },
+            {
+              "name": "oversized",
+              "ok": true,
+              "value": {
+                "notifyReturned": true,
+                "activeAfterInflation": true
+              }
+            }
+          ],
+          "complete": true,
+          "notificationIds": {
+            "standard": 106931266,
+            "custom": 106931267,
+            "oversized": 106931268,
+            "foreground": 191
+          },
+          "customMemory": {
+            "strip": 5000000,
+            "warn": 2000000,
+            "bytesPerImage": 262144,
+            "copies": 21,
+            "expectedImageBytes": 5505024
+          },
+          "cleaned": true
+        },
+        "errors": [],
+        "notificationMemoryLog": [
+          "09-13 21:13:07.569   959   959 W NotificationService: Dropped notification due to too large RemoteViews (5591460 bytes) on pkg: org.autojs.autojs6 tag: null id: 106931268"
+        ],
+        "ended": "2026-09-13T13:13:26.746771+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "9dc200434bfa0639abfec8502c19196c8017a56d0076fffaaa027b87ebd5daab",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "7f68d2b54ed9ed199a4b5c7b5f0211cd6f6fce790b98333d82d046cc2850b020",
+        "after/org.autojs.autojs6-package.txt": "915ee985d2411b75dcc124a7519f228d471f40c038cb91575733e54d0a868893",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "c6418db238d20c37774ff0f6b31a5164f6679142810cfb40e3c28111bac5f84c",
+        "after/snapshot.json": "46e3ad8e4ce061195c46c2750dfa47bd5edd006fe8f31a813b0269c4c1b2a88c",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "2cc2ba7185a958a5a32b6d74a2e454f93eb7952d150a15727ebf094f92ad8c9d",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "26c91a4d2a948ae42efec9d7f3e04ffc9304def05f03de0f13bce6a09ea3d0b0",
+        "before/org.autojs.autojs6-package.txt": "5a5dc17d2b9d67d961e4e063ec90d6fe6313c36479f378a1d362cfc0ea94e17c",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "c6418db238d20c37774ff0f6b31a5164f6679142810cfb40e3c28111bac5f84c",
+        "before/snapshot.json": "ce036b0f248aabe777dcb8ee1979f957c86f430b829096a11f95ad067f5be195",
+        "launch.json": "9e7ed9c1bfca0722c8e0e0e849f4b6d61627c863731ce89c5170008e89b6cf0d",
+        "launched-script.js": "13f0d02dbabad43fae15baebdc330830e0daee64494d228b23194d6633a2c694",
+        "logcat-tail.txt": "40e18487b8e5f18b578e02306da19957b371858df9d3e0ac9ade62e9b0f56bc5",
+        "notification-shade-expanded.xml": "9e4e2fafc41c953cc612a6051ca5f4971b194ce7cd8bfc16e6de2a8e0da4a609",
+        "notification-shade.xml": "ea67cc8f206152971871ded0c46bc5c375b5721e7cbd055c3f81c89632284386",
+        "notifications.txt": "6417df460792fbbb84473c8ac3519d09467f538105337bb66d39af0c327c754c",
+        "result.json": "d856dc29a9f9722ec001e19c3e49e579410bb0ad108d3d9e9f3888f1d9bd5403",
+        "screen.png": "0e144c5ec0d5b28330d9cd5bc0506791ae46ac3f212c6533a0c663a60d9a129f",
+        "windows.txt": "3ccbedd25b1391716db7569ede8cdf4c7b01353d9badc8b67e4794e1e1144394"
+      }
+    }
+  ],
+  "diagnosticsNotCounted": [
+    {
+      "name": "debug-widgets36",
+      "sha256": "f0e0df886220a53a09cc0a2c8ebf6ec077e3c4b548727b5f4ec26043491e9d2e",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-notifications37-disabled",
+      "sha256": "af1b097f0c19cabdbdebe42e1ca7517862794a7831b5adeb6dc2df389d74319f",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "a5c9bec38e5449a1afe3a07e0adc725a",
+        "suite": "notifications",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "standard",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "template": "android.app.Notification$BigTextStyle"
+            }
+          },
+          {
+            "name": "foreground",
+            "ok": false,
+            "error": "Error: Notification not posted: 191\n\tat Tmp.js:38 (waitActive)\n\tat Tmp.js:64\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:62\n"
+          },
+          {
+            "name": "custom",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "bytesPerImage": 4096,
+              "copies": 1
+            }
+          },
+          {
+            "name": "oversized",
+            "ok": true,
+            "value": {
+              "notifyReturned": true,
+              "activeAfterInflation": true
+            }
+          }
+        ],
+        "complete": true,
+        "notificationIds": {
+          "standard": 173841388,
+          "custom": 173841389,
+          "oversized": 173841390,
+          "foreground": 191
+        },
+        "customMemory": {
+          "strip": 5000000,
+          "warn": 2000000,
+          "bytesPerImage": 262144,
+          "copies": 21,
+          "expectedImageBytes": 5505024
+        },
+        "cleaned": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-notifications37-disabled-v2",
+      "sha256": "adc5c4669be9da73f4be83271919df55b7975540b95ec2f88b737c03eca23fc0",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "704cc0ea4af045e985aa73bdc290ab2e",
+        "suite": "notifications",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "standard",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "template": "android.app.Notification$BigTextStyle"
+            }
+          },
+          {
+            "name": "foreground",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+              "flags": 131138
+            }
+          },
+          {
+            "name": "custom",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "bytesPerImage": 4096,
+              "copies": 1
+            }
+          },
+          {
+            "name": "oversized",
+            "ok": true,
+            "value": {
+              "notifyReturned": true,
+              "activeAfterInflation": true
+            }
+          }
+        ],
+        "complete": true,
+        "notificationIds": {
+          "standard": 117754894,
+          "custom": 117754895,
+          "oversized": 117754896,
+          "foreground": 191
+        },
+        "customMemory": {
+          "strip": 5000000,
+          "warn": 2000000,
+          "bytesPerImage": 262144,
+          "copies": 21,
+          "expectedImageBytes": 5505024
+        },
+        "cleaned": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-widget-pattern36",
+      "sha256": "5adc688508ab110b2288aacdbca5a09d0c0e38e2d9ae3775d32b05248ca37079",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "5b6b05450b80433b92fe51b7a448466d",
+        "suite": "widgets",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": false,
+            "error": "JavaException: java.lang.ClassNotFoundException: org.autojs.autojs.external.widget.ScriptWidgets\n\tat Tmp.js:59\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:48\n"
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-5b6b05450b80433b92fe51b7a448466d",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-5b6b05450b80433b92fe51b7a448466d",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": true,
+            "value": {
+              "allocatedBytes": 16757280,
+              "limit": 15707520,
+              "rejected": false,
+              "error": null
+            }
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 26,
+            "path": "null",
+            "requestCode": -1
+          },
+          {
+            "id": 27,
+            "path": "null",
+            "requestCode": -1
+          }
+        ]
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-widget-pattern36-v2",
+      "sha256": "b03df75ddcdd6f7e600aac0d911ce77d294c661d1dd14724c6001504f6f949ad",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "3dc4f7430c8b439d8dbbac88af526bbb",
+        "suite": "widgets",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": false,
+            "error": "Error: onUpdate lost a live multi-digit widget mapping: [{\"id\":38,\"path\":\"null\",\"requestCode\":-1},{\"id\":39,\"path\":\"null\",\"requestCode\":-1}]\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:67\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:48\n"
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-3dc4f7430c8b439d8dbbac88af526bbb",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-3dc4f7430c8b439d8dbbac88af526bbb",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": true,
+            "value": {
+              "allocatedBytes": 16757280,
+              "limit": 15707520,
+              "rejected": false,
+              "error": null
+            }
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 38,
+            "path": "null",
+            "requestCode": -1
+          },
+          {
+            "id": 39,
+            "path": "null",
+            "requestCode": -1
+          }
+        ],
+        "widgetPattern": {
+          "source": "[a-zA-Z]+_([0-9])+",
+          "matches": [
+            {
+              "widgetId": 38,
+              "capturedId": "8"
+            },
+            {
+              "widgetId": 39,
+              "capturedId": "9"
+            }
+          ]
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-widgets36",
+      "sha256": "1205ca02541b25196f1ad13c0a68ec1b9807d76cfa81d5dcb05b96a385e423ba",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "ce60b193b47243549ca04273450d66a5",
+        "suite": "widgets",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": false,
+            "error": "Error: onUpdate lost a live multi-digit widget mapping: [{\"id\":14,\"path\":\"null\",\"requestCode\":-1},{\"id\":15,\"path\":\"null\",\"requestCode\":-1}]\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:59\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:48\n"
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-ce60b193b47243549ca04273450d66a5",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-ce60b193b47243549ca04273450d66a5",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": true,
+            "value": {
+              "allocatedBytes": 16757280,
+              "limit": 15707520,
+              "rejected": false,
+              "error": null
+            }
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 14,
+            "path": "null",
+            "requestCode": -1
+          },
+          {
+            "id": 15,
+            "path": "null",
+            "requestCode": -1
+          }
+        ]
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "notifications37-default",
+      "sha256": "20981612a697d277e4e683c75d2a7adfa29e7f1de3ae44d8174310cdfda86645",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "ad171c4fbec747d2973b988e6d4d3c6d",
+        "suite": "notifications",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "standard",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "template": "android.app.Notification$BigTextStyle"
+            }
+          },
+          {
+            "name": "foreground",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "channel": "org.autojs.autojs.external.foreground.AppForegroundService.foreground",
+              "flags": 131138
+            }
+          },
+          {
+            "name": "custom",
+            "ok": true,
+            "value": {
+              "posted": true,
+              "bytesPerImage": 4096,
+              "copies": 1
+            }
+          },
+          {
+            "name": "oversized",
+            "ok": true,
+            "value": {
+              "notifyReturned": true,
+              "activeAfterInflation": true
+            }
+          }
+        ],
+        "complete": true,
+        "notificationIds": {
+          "standard": 181498308,
+          "custom": 181498309,
+          "oversized": 181498310,
+          "foreground": 191
+        },
+        "customMemory": {
+          "strip": 5000000,
+          "warn": 2000000,
+          "bytesPerImage": 262144,
+          "copies": 21,
+          "expectedImageBytes": 5505024
+        },
+        "cleaned": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "widgets36-fixed",
+      "sha256": "1bea62d410a311788c157ac2e63227ad4a1a7f25c457f9f7731909279f459926",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "ee35d1d60c084095ae2c559b56b8dcd6",
+        "suite": "widgets",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": true,
+            "value": [
+              {
+                "id": 50,
+                "path": "/storage/emulated/0/sdk37-widget-ee35d1d60c084095ae2c559b56b8dcd6/first-ee35d1d60c084095ae2c559b56b8dcd6.js",
+                "requestCode": 1
+              },
+              {
+                "id": 51,
+                "path": "/storage/emulated/0/sdk37-widget-ee35d1d60c084095ae2c559b56b8dcd6/first-ee35d1d60c084095ae2c559b56b8dcd6.js",
+                "requestCode": 2
+              }
+            ]
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-ee35d1d60c084095ae2c559b56b8dcd6",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-ee35d1d60c084095ae2c559b56b8dcd6",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": true,
+            "value": {
+              "allocatedBytes": 16757280,
+              "limit": 15707520,
+              "rejected": false,
+              "error": null
+            }
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 50,
+            "path": "/storage/emulated/0/sdk37-widget-ee35d1d60c084095ae2c559b56b8dcd6/first-ee35d1d60c084095ae2c559b56b8dcd6.js",
+            "requestCode": 1
+          },
+          {
+            "id": 51,
+            "path": "/storage/emulated/0/sdk37-widget-ee35d1d60c084095ae2c559b56b8dcd6/first-ee35d1d60c084095ae2c559b56b8dcd6.js",
+            "requestCode": 2
+          }
+        ],
+        "widgetPattern": {
+          "source": "[a-zA-Z]+_([0-9]+)",
+          "matches": [
+            {
+              "widgetId": 50,
+              "capturedId": "50"
+            },
+            {
+              "widgetId": 51,
+              "capturedId": "51"
+            }
+          ]
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "widgets37-fixed",
+      "sha256": "18abe4c47e2326bdc8dbb48f1751962bfbee2256740f228550d5e5fbd928eb2f",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "5b6a096de76e4af0ad22814adad72c8c",
+        "suite": "widgets",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": true,
+            "value": [
+              {
+                "id": 62,
+                "path": "/storage/emulated/0/sdk37-widget-5b6a096de76e4af0ad22814adad72c8c/first-5b6a096de76e4af0ad22814adad72c8c.js",
+                "requestCode": 1
+              },
+              {
+                "id": 63,
+                "path": "/storage/emulated/0/sdk37-widget-5b6a096de76e4af0ad22814adad72c8c/first-5b6a096de76e4af0ad22814adad72c8c.js",
+                "requestCode": 2
+              }
+            ]
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-5b6a096de76e4af0ad22814adad72c8c",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-5b6a096de76e4af0ad22814adad72c8c",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": false,
+            "error": "Error: Unexpected Icon memory-limit result: null\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:109\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:98\n"
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 62,
+            "path": "/storage/emulated/0/sdk37-widget-5b6a096de76e4af0ad22814adad72c8c/first-5b6a096de76e4af0ad22814adad72c8c.js",
+            "requestCode": 1
+          },
+          {
+            "id": 63,
+            "path": "/storage/emulated/0/sdk37-widget-5b6a096de76e4af0ad22814adad72c8c/first-5b6a096de76e4af0ad22814adad72c8c.js",
+            "requestCode": 2
+          }
+        ],
+        "widgetPattern": {
+          "source": "[a-zA-Z]+_([0-9]+)",
+          "matches": [
+            {
+              "widgetId": 62,
+              "capturedId": "62"
+            },
+            {
+              "widgetId": 63,
+              "capturedId": "63"
+            }
+          ]
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "widgets37-verified",
+      "sha256": "bb3521f9e540732fc5b587c71e4a75a4a640c45a725c7afd9a68336c4c60b913",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "e15a0cdaf0014d73a22c8136047f26a8",
+        "suite": "widgets",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "widgetMappings",
+            "ok": true,
+            "value": [
+              {
+                "id": 74,
+                "path": "/storage/emulated/0/sdk37-widget-e15a0cdaf0014d73a22c8136047f26a8/first-e15a0cdaf0014d73a22c8136047f26a8.js",
+                "requestCode": 1
+              },
+              {
+                "id": 75,
+                "path": "/storage/emulated/0/sdk37-widget-e15a0cdaf0014d73a22c8136047f26a8/first-e15a0cdaf0014d73a22c8136047f26a8.js",
+                "requestCode": 2
+              }
+            ]
+          },
+          {
+            "name": "widgetFirstClick",
+            "ok": true,
+            "value": {
+              "label": "first-e15a0cdaf0014d73a22c8136047f26a8",
+              "marker": "first"
+            }
+          },
+          {
+            "name": "widgetUpdateClick",
+            "ok": true,
+            "value": {
+              "label": "second-e15a0cdaf0014d73a22c8136047f26a8",
+              "marker": "second"
+            }
+          },
+          {
+            "name": "widgetLargeIcon",
+            "ok": true,
+            "value": {
+              "allocatedBytes": 16757280,
+              "limit": 15707520,
+              "rejected": false,
+              "error": null
+            }
+          }
+        ],
+        "complete": true,
+        "widgetIds": [
+          {
+            "id": 74,
+            "path": "/storage/emulated/0/sdk37-widget-e15a0cdaf0014d73a22c8136047f26a8/first-e15a0cdaf0014d73a22c8136047f26a8.js",
+            "requestCode": 1
+          },
+          {
+            "id": 75,
+            "path": "/storage/emulated/0/sdk37-widget-e15a0cdaf0014d73a22c8136047f26a8/first-e15a0cdaf0014d73a22c8136047f26a8.js",
+            "requestCode": 2
+          }
+        ],
+        "widgetPattern": {
+          "source": "[a-zA-Z]+_([0-9]+)",
+          "matches": [
+            {
+              "widgetId": 74,
+              "capturedId": "74"
+            },
+            {
+              "widgetId": 75,
+              "capturedId": "75"
+            }
+          ]
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    }
+  ],
+  "counts": {
+    "groups": 6,
+    "rowExecutions": 26,
+    "distinctRows": 9
+  },
+  "platform": {
+    "sha256": {
+      "services.jar": "2485eb8cdea19bd5f95ce9366bd594d7e6c99f3851d2655df041cbdfb3ca4dc0",
+      "SystemUIGoogle.apk": "a6340f94dc027dc396a891b2ddb78997a9470e863e1f35cbb9568e6edfb01304",
+      "AppWidgetServiceImpl-classes.dex-bytecode.txt": "8dd8b45555691ad5bc7e50e70c4d0e4cefd45644b708c89522271c67bfc09dd5",
+      "SystemUI-classes2.dex-checksize.txt": "8a072a984fba3b88f5084b04b13612fc104e5a151f0f9898e069f259aa0f2470",
+      "NotificationCustomContentMemoryVerifier-bytecode.txt": "06f40bab6a5005f337f5f7e8a8e286a6c586119bb626dfd2f1dcdb5a4123eea4"
+    },
+    "evidenceKind": "Bytecode from the tested emulator, not AOSP main"
+  },
+  "productFixCommit": "6ab016582",
+  "baseToolCommit": "14a594b10",
+  "pickerDriverCommit": "855134388",
+  "validation": {
+    "frameworkEvidenceUnitTests": {
+      "passed": 8,
+      "total": 8
+    },
+    "physicalDeviceToolUnitTests": {
+      "passed": 4,
+      "total": 4
+    },
+    "pythonCompilation": "PASS",
+    "nativeAlignmentBuildGate": "PASS"
+  },
+  "testEnvironmentActions": {
+    "compile36Speed": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "cmd package compile -m speed -f org.autojs.autojs6"
+      ],
+      "exitCode": 0,
+      "stdout": "Success\n",
+      "stderr": "",
+      "elapsedSeconds": 92.11067220000405
+    },
+    "startupAnrSummarySha256": "318a6a5e1379e8e022e84e90c5c93ba75ba95a7b93f6636c9d6225e3f4d8585d",
+    "startupAnrMainFrames": [
+      {
+        "header": "2026-09-13 20:45:53 data_app_anr (compressed text, 13123 bytes)\nSystemUptimeMs: 5683784\nProcess: org.autojs.autojs6\nPID: 27126\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:45:45.521+0800\nFlags: 0x38f83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: No\nProcess-Runtime: 24396\nErrorId: 330a4ba0-bb52-47ec-b3ad-e9f8158f58d3\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at org.autojs.autojs.execution.ExecutionConfig.<clinit>(unavailable:0)",
+          "  at org.autojs.autojs.external.ScriptIntents.createIntentExecutionConfig(ScriptIntents.kt:283)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch(ScriptIntents.kt:110)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch$default(ScriptIntents.kt:56)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch(unavailable:7)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.handleIntent(RunIntentActivity.java:53)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.onCreate(RunIntentActivity.java:39)",
+          "  at android.app.Activity.performCreate(Activity.java:9340)",
+          "  at android.app.Activity.performCreate(Activity.java:9318)",
+          "  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1543)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4559)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:46:15 data_app_anr (compressed text, 15363 bytes)\nSystemUptimeMs: 5705654\nProcess: org.autojs.autojs6\nPID: 27300\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:46:10.805+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: No\nProcess-Runtime: 21333\nErrorId: 8a6ca8a7-73fa-4bc6-af9a-6cee2fa08429\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at android.os.MessageQueue.nativePollOnce(Native method)",
+          "  at android.os.MessageQueue.nextLegacy(MessageQueue.java:871)",
+          "  at android.os.MessageQueue.next(MessageQueue.java:773)",
+          "  at android.os.Looper.loopOnce(Looper.java:232)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:48:32 data_app_anr (compressed text, 12307 bytes)\nSystemUptimeMs: 5843110\nProcess: org.autojs.autojs6\nPID: 27898\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:48:25.415+0800\nFlags: 0x38f83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 24412\nErrorId: f230700a-9d3b-4de8-aa1f-559bc9c95370\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at org.autojs.autojs.external.open.RunIntentActivity.handleIntent(RunIntentActivity.java:64)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.onCreate(RunIntentActivity.java:39)",
+          "  at android.app.Activity.performCreate(Activity.java:9340)",
+          "  at android.app.Activity.performCreate(Activity.java:9318)",
+          "  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1543)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4559)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:48:54 data_app_anr (compressed text, 13374 bytes)\nSystemUptimeMs: 5865331\nProcess: org.autojs.autojs6\nPID: 28044\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:48:50.244+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 21524\nErrorId: 784b6152-9a39-4d65-93b1-2483fc22d2d6\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at androidx.appcompat.widget.ResourceManagerInternal.<clinit>(ResourceManagerInternal.java:115)",
+          "  at androidx.appcompat.widget.AppCompatDrawableManager.preload(AppCompatDrawableManager.java:60)",
+          "  at androidx.appcompat.app.AppCompatDelegateImpl.<init>(AppCompatDelegateImpl.java:343)",
+          "  at androidx.appcompat.app.AppCompatDelegateImpl.<init>(AppCompatDelegateImpl.java:293)",
+          "  at androidx.appcompat.app.AppCompatDelegate.create(AppCompatDelegate.java:312)",
+          "  at androidx.appcompat.app.AppCompatActivity.getDelegate(AppCompatActivity.java:576)",
+          "  at androidx.appcompat.app.AppCompatActivity.attachBaseContext(AppCompatActivity.java:137)",
+          "  at android.app.Activity.attach(Activity.java:9227)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4528)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:49:16 data_app_anr (compressed text, 12924 bytes)\nSystemUptimeMs: 5887402\nProcess: org.autojs.autojs6\nPID: 28180\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:49:12.268+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 21765\nErrorId: 9b227be8-25d5-49cf-bc87-1d10319cbc02\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  native: #04 pc 00aa832d  /apex/com.android.art/lib64/libart.so (art::verifier::ClassVerifier::VerifyClass+3981) (BuildId: 6f501445ab44be8f30fb680128550143)",
+          "  at java.lang.Class.newInstance(Native method)",
+          "  at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:99)",
+          "  at androidx.core.app.CoreComponentFactory.instantiateActivity(CoreComponentFactory.java:44)",
+          "  at android.app.Instrumentation.newActivity(Instrumentation.java:1460)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4471)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:49:36 data_app_anr (compressed text, 10766 bytes)\nSystemUptimeMs: 5906899\nProcess: org.autojs.autojs6\nPID: 28336\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:49:33.634+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 18989\nErrorId: f34789da-bc40-4ab4-b663-ccccd8870738\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at android.os.BinderProxy.transactNative(Native method)",
+          "  at android.os.BinderProxy.transact(BinderProxy.java:626)",
+          "  at android.app.IActivityManager$Stub$Proxy.finishAttachApplication(IActivityManager.java:6524)",
+          "  at android.app.ActivityThread.handleBindApplication(ActivityThread.java:8360)",
+          "  at android.app.ActivityThread.-$$Nest$mhandleBindApplication(unavailable:0)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2761)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      }
+    ]
+  },
+  "committedScreenshots": {
+    "notifications36-enabled-final.png": "0e144c5ec0d5b28330d9cd5bc0506791ae46ac3f212c6533a0c663a60d9a129f",
+    "notifications37-disabled-final.png": "651c2248be7c720e6c9f3012a0de6ea371729a9d152c043f4f322a0cb27d75cd",
+    "notifications37-final.png": "1107b60f71057f3bf742f117fa6d05bc36f8218130733b28764330417f925f3d",
+    "widgets37-final.png": "2539f17f73e0e373336c0096eb1e3aaecbcc5ca851ef13ce4aca0d6577943e62"
+  },
+  "apkSha256": {
+    "apks/final36/app.apk": "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6",
+    "apks/final37/app.apk": "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af",
+    "apks/fixed36/app.apk": "4ba1a66342b6cb531fd9ef0259df0648816ea16276d317398b79d4563e9b16df",
+    "apks/fixed37/app.apk": "f717c27e0056f29191f79e188c001d7c3886c8bfe888dc9bc650542c7bbf4023"
+  },
+  "toolFilesAtCommit": {
+    "framework-probe-common.js": "5d9360f225c1d96042a5945865ed33d5949be702c2c7c8426125a2c43785d4d1",
+    "run_framework_probe.py": "48abfbb10a6f840adaec7bb2c9cff2e41c6840fda61b2db888f72ed3ffeaf7da",
+    "smoke-allfiles.js": "f9d7e98e7c77e37e1ffbc89836009ae196634703ea39c5460c044b96f990e8e1",
+    "smoke-notifications.js": "05e6e13bf9d05afece876f36a75548174a1c60e8205d7244fc04ac0095998bb0",
+    "smoke-pickers.js": "5800f1d2e90d38383cdd600d81465f70c691db138e99b9f9ff93210beca3c7c4",
+    "smoke-storage.js": "250d3f6bce9b03e91809e5e14cb84f456312bfdf4586fd2187598c8eb01b628c",
+    "smoke-widgets.js": "f114a51d8be86c6c617ab231ec292dd44d339f1215eb1e85972eb481957511c9",
+    "test_framework_probe.py": "1b0db00f127f473c64990be9e5885a546719107f371ade1da9b2149e7d2c364d"
+  },
+  "buildLogs": {
+    "build-final36.log": "c0b132a7ed92f2f02fa986df72452f31270339c22f1be8c912741493a827f73b",
+    "build-final37.log": "8783f0229c069aad430af55298d56991100b1cd9865b5aca57c9e734b8c75097",
+    "build-fixed36.log": "eb6df9c43ca510e9afb6d590e2344bc0e87ba153f3773fad73f0ff93091ca206",
+    "build-fixed37.log": "88ce18a043081bf786ed4ed2ec761ba8a785bdf19b4087e5501b040b660a111a",
+    "build-restored36.log": "4004537e7668c4cec6944ed23cb58231838debbb77932f7f02dfd71a09d757ea"
+  },
+  "limitations": [
+    "AVD x86_64 only",
+    "Actual kernel page size is 4096, not 16384",
+    "No physical checklist rows closed",
+    "Normal target remains 36"
+  ],
+  "debuggerAttempt": {
+    "path": "debugger-attempt.json",
+    "sha256": "0c1f4e02730e75cb02ef4507cdeda7f2ce49588a2f908504f124bdaca3b633d4",
+    "outcome": "No debugger runtime values: event stream empty and PAUSE / STOP timed out; temporary resources cleaned"
+  }
+}

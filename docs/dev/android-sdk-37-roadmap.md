@@ -13,6 +13,8 @@ P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-
 
 P2.11 的 UA 与基本渲染验证已完成: [WebView 实施记录](evidence/android-sdk-37-p211-20260913.md). API 37 / WebView 145 的宿主 target 36 / 37 及独立兼容开关共 24 个场景通过, HTML Previewer 按自身 target / 开关另有 4 个场景通过. File System Access 行为与实体机 UI04 继续保留, 不将 P2.11 整体关闭.
 
+P2.8 的存储调用与开关作用范围、系统选择器和权限状态验证已落地: [存储实施记录](evidence/android-sdk-37-p28-20260913.md). P2.9 修复了多位小组件 ID 导致的路径 / 点击映射误删, 并完成代表通知路径与内存限制对照: [小组件 / 通知实施记录](evidence/android-sdk-37-p29-20260913.md). 不可靠 USB / OTG、真实 Launcher / OEM 行为及 Icon 上限的公告 / 镜像差异继续保留, P2.8 / P2.9 不整体关闭.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
@@ -101,8 +103,8 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); 本机 ASM target 37 门控已实测, 同任务下层启动还受顶部应用的保护声明与 Activity 例外影响 (DEVICE-37); BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `AndroidPackageSessionInstaller` 现用私有广播接收回调, `PackageInstallStatusCoordinator` 保存会话并提供通知 / 返回应用入口, `PackageInstallStatusActivity` 在可见时发送系统确认 token; `ActivityLaunchOptions` 处理发送方版本分支; 固定快捷方式, 抽屉 ActivityResult 与脚本 `app.launch` / `app.startActivity` 另行覆盖 | P2.5 |
 | I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); API 37.0 实测 ECH 默认模式为 OPPORTUNISTIC(2), 策略值不证明已协商 | target 37 | `network_security_config.xml`; 私有 CA / 企业代理; NSC 配置用户 / 资源 CA 的默认 CT 豁免已核实, 但 CA 仍需先被信任; `isInsecure` 后续请求污染已修复, 实际公网链与 ECH 待补证 | P2.6 |
 | I7 | `PARCEL_HARDENING` (PLATFORM_CONFIG; DEVICE-37): 所测镜像中, `Parcel.readValue` 的长度前缀与实际消费字节数不一致时, 由平台 feature flag 和此兼容开关共同决定是否抛 BadParcelableException; 不泛化为所有 Binder 读取 | target 37, 可在 target 36 调试包强制测试 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `InstalledPluginRepository`, Tasker / 快捷方式 extras; 11 个指定插件在两种启用条件下通过, 宿主数据往返及少读字段负例完成; 实际入口仍待 IPC01 | P2.7 ([证据](evidence/android-sdk-37-p27-20260913.md)) |
-| I8 | 存储: `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` (名称 VERIFIED, 语义 UNVERIFIED); `MediaStore` / `DocumentsContract` API 面有变化 | target 37 | 文件管理器与 `files.*` / `media.*`: `model/script/PathChecker.java:56`, `permission/AllFilesAccessPermission.kt`, MediaStore 查询点 (代码内未直接引用 `DATA` 列); `MANAGE_EXTERNAL_STORAGE` 语义不变 | P2.8 |
-| I9 | 小组件 RemoteViews 内存上限 (VERIFIED, 超限抛 `IllegalArgumentException`), 通知自定义视图尺寸限制 (`CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS`, 细节 UNVERIFIED) | target 37 | `external/widget/ScriptWidget.java:49`; `engine/NodeBridgeProviderRegistry.kt` 的 RemoteViews; 通知构建点 (`util/NotificationUtils.kt`) | P2.9 |
+| I8 | 存储开关作用范围已由镜像实现与对照核实: 卷过滤在 `MediaStore.getExternalVolumeNames()`, 媒体回收目录受调用者 target 与 MediaProvider 自身 compat 共同控制; `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` 实为联系人目录提供方权限检查 | 按实际调用方 / provider 判断, 不能统一对宿主 enable 代替 | 文件管理器 / `files.*` / 图片保存扫描 / 应用回收站与历史已回归; 普通模拟 SD 卡通过, 不可靠 USB / OTG 待测. 宿主不是联系人目录提供方 | P2.8; [证据](evidence/android-sdk-37-p28-20260913.md) |
+| I9 | 小组件 Bitmap 上限已验证; Icon 合计限制的公告为 target >= 37, 当前镜像实际 target > 37 才抛错, 差异保留. 通知开关按发送应用 UID 检查渲染后 ImageView 内存, 非简单布局尺寸限制 | target / 镜像实现及发送 UID 分别核验 | `ScriptWidget` 多位 ID 映射误删已修复; 内建通知为标准模板, `notice(builder)` 可传自定义视图, 已有正反例与用法说明 | P2.9; [证据](evidence/android-sdk-37-p29-20260913.md) |
 | I10 | 短信 OTP 保护 (VERIFIED): 含 OTP 的短信对非默认短信应用延迟 3 小时 (`FILTER_GENERIC_OTP`, target 37; WebOTP 格式对全体); 通知监听器的 OTP 脱敏延续 Android 15 | target 37 / 全体 | 宿主代码不直接读短信, 但声明 `READ_SMS` / `RECEIVE_SMS` 供脚本 (`content://sms`, 广播) 使用; `core/notification/NotificationListenerService.kt:46` (`events.observeNotification`) | P2.10 |
 | I11 | WebView UA 缩减 (`ENABLE_USER_AGENT_REDUCTION`, VERIFIED; API 37 / WebView 145 实测) 与 File System Access API (`ENABLE_FILE_SYSTEM_ACCESS`, 行为 UNVERIFIED) | target 37; UA 按 WebView 所属应用的 target / override 生效, 独立插件不继承宿主开关 | `core/ui/attribute/WebViewAttributes.kt:36` (`userAgentString` 属性), 文档 / 预览 WebView (34 个文件) | P2.11 (UA / 基本渲染已验证, 见实施记录) |
 | I12 | 大屏: 方向 / 可调整大小限制在 sw >= 600dp 被忽略且不可豁免 (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`, VERIFIED); 全体: 旋转后不再自动恢复输入法, 更少的 Activity 重建 (键盘 / 导航 / 触摸屏 / 色彩模式 / 桌面 UI 模式配置变化改为 `onConfigurationChanged`) | target 37 / 全体 | 宿主未使用 Android 16 豁免, 增量为零; `MainActivity` / `EditActivity` 的 `configChanges` 已含 `orientation|screenSize`; 脚本 UI 模式 `activity.setRequestedOrientation` 在平板上继续无效 (与 36 相同) | P2.12 |
@@ -273,13 +275,18 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.8 存储与文件管理器 (I8)
 
-- [ ] 按附录 C 分别启用 `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` 后: 文件管理器根目录与外部存储卷列举 (`PathChecker`, 含插入 OTG / 模拟 SD 卡的 AVD 配置), 回收站, 版本历史, `files.*` 读写 `/sdcard`, `media.scanFile`, `images.save` 到相册, 相册 / 文档选择器; 先核实各开关实际约束的 provider / API, 再记录行为差异. (DEVICE-37)
-- [ ] 修正与记录; `MANAGE_EXTERNAL_STORAGE` 引导 (`AllFilesAccessPermission`) 在 API 37 上流程不变. (SOURCE / DOCS)
+- [x] 从实际 API 37 MediaProvider / ContactsProvider 和 framework-mediaprovider 字节码核实三个开关. 卷过滤只改变 MediaStore 卷名枚举, 联系人目录权限按目录提供方判断, 系统媒体回收受调用方 target > 36 与 provider compat 共同控制. 已纠正 I8、附录 B 与 P5 存储插件范围. (PLATFORM_CONFIG; SOURCE: [作用范围](evidence/android-sdk-37-p28-20260913.md#1-三个开关的实际作用范围))
+- [x] target 36 默认及三个宿主开关分别独立 enable, target 37 默认与宿主 TRASH disable, 均完成九项真实 Rhino / 生产存储路径断言: 文件读写 / Explorer / 主卷与模拟 SD 卡 / 版本历史 / 应用回收站 / 图片保存扫描 / MediaStore trash-restore / 联系人权限基线 / 所有文件访问入口. 36 与 37 的媒体回收路径差异有实际 URI / 文件记录; 普通联系人查询不冒充远程目录门控命中. 未发现需修改生产存储代码的 SDK 37 回归. (DEVICE-37; SOURCE; DOCS)
+- [x] target 36 / 37 均完成系统文档 / 相册选择和取消的完整 UI 回执, 文档实际字节与持久读权限、相册唯一像素内容均核验; Settings 关闭 / 重新开启后分别验证生产权限助手状态与真实页面. 12 组 84 次存储 / UI 断言执行通过, 含重复对照, 失败探索单列. (DEVICE-37; [机器结果](evidence/android-sdk-37-p28-results-20260913.json))
+- [ ] 实体机 S01-S03: 不可靠 USB / OTG、拔出 / 重插 / 只读切换、OEM 选择器与旧 API / inrt 成品回归. AVD 普通模拟 SD 卡不证明 `/mnt/` 卷过滤或外设生命周期通过. (PHYSICAL; P3; P5)
 
 ### P2.9 小组件与通知 (I9)
 
-- [ ] `ScriptWidget` 在 `AVD_API_37` (target 37 覆盖包) 上添加 / 更新 / 点击; `am compat enable CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS` 下检查宿主全部通知 (前台服务, 脚本通知 API, 崩溃通知) 无异常. (DEVICE-37)
-- [ ] 若脚本通知 API 允许自定义视图, 增加尺寸保护或文档说明. (SOURCE / DOCS)
+- [x] 修复 `ScriptWidgets` 正则只捕获多位 ID 最后一位而误删路径 / requestCode 的既有缺陷. 修复前实际 widget 38 / 39 被解析为 8 / 9 并丢失映射; 修复后 target 36 / 37 的系统注册、批量更新、过期清理、实际 PendingIntent 点击和换脚本后点击均通过. 十语言 fix 日志与生成文件已同步. (SOURCE; DEVICE-37; ANDROID_BUILD; `6ab016582`; [证据](evidence/android-sdk-37-p29-20260913.md))
+- [x] 定位 SystemUI `CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS`: 按发送应用 UID 检查自定义视图中的 ImageView 内存. 标准 `notice` / BigText、真实 AppForegroundService、小型自定义视图与超限负例在 target 36 / 37 的默认及相反 compat 状态下均符合预期, 日志匹配本次通知 ID. `notice()` 返回和记录 active 不代表自定义内容显示成功. 小组件与通知合计 6 组 26 次行断言执行通过, 含重复对照. (DEVICE-37; PLATFORM_CONFIG; [机器结果](evidence/android-sdk-37-p29-results-20260913.json))
+- [x] 审计全部内建通知构建点, 均使用标准模板; CrashHandler 打开报告 Activity, 没有独立的崩溃通知入口. `notice(builder, options)` 支持自定义视图, 已补充图片缩放、逐 ImageView 累计、标准内容与异步渲染失败的说明, 不硬编码当前镜像阈值或关闭兼容开关. (SOURCE; DOCS: [通知用法](evidence/android-sdk-37-p29-20260913.md#4-生产通知构建点与脚本用法))
+- [ ] 用更新的 API 37 镜像 / 真机复核小组件 Icon 上限: 官方称 target >= 37, 当前 CE2A.260420.019 的字节码与实际日志仅在 target > 37 抛错, 36 / 37 仍警告并接受. 原有 Bitmap 超限负例单独验证, 不用其代替 Icon 拒绝分支. (DEVICE-37; PHYSICAL)
+- [ ] 实际 launcher 添加 / 进程重建 / 删除, OEM SystemUI / 方向 / 密度回归, 以及 Python 长任务、Node / Python 录音等全部业务通知触发链路. 本轮标准模板审计和代表路径不关闭完整业务生命周期验收. (PHYSICAL; P2.2; P3; P5)
 
 ### P2.10 短信 / 通知监听 (I10)
 
@@ -420,7 +427,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ### P5.5 其余插件 (MLKit-Barcode, MLKit-OCR, Yolo-NCNN, MediaInfo, OpenCC, ImGui, Archive-Manager, Image-Tools, Image-Viewer, File-Inspector, APK-Inspector, Pinyin, Pinyin4j, Accessibility-Compat)
 
-- [ ] 通用条目; Binder 协议在 `PARCEL_HARDENING` 下复测 (MLKit x2, Yolo, MediaInfo, OpenCC, ImGui); 存储类插件 (Archive-Manager, File-Inspector, Image-*) 在 P2.8 的三个开关下复测; Archive-Manager 已是 compileSdk 37, 只做 targetSdk 步骤. (DEVICE-37)
+- [ ] 通用条目; Binder 协议在 `PARCEL_HARDENING` 下复测 (MLKit x2, Yolo, MediaInfo, OpenCC, ImGui); 存储类插件 (Archive-Manager, File-Inspector, Image-*) 按 P2.8 已核实的 MediaStore 卷枚举 / 媒体回收行为及 SAF / OTG 生命周期复测, 分别记录插件自身 target 与 provider 条件; 联系人目录权限开关不套用到存储插件. Archive-Manager 已是 compileSdk 37, 只做 targetSdk 步骤. (DEVICE-37)
 
 P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验证设备; 官方索引在发布后刷新.
 
@@ -458,7 +465,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `BACK_DISPOSITION_CONTROLS_BACK_INTERCEPTION` (454542168) | 输入法 `setBackDisposition` 决定是否拦截返回 (UNVERIFIED) | 无 (非输入法) | P2.15 | |
 | `BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION` (401333807) | Bluetooth 绑定类 API 需要特权权限 (UNVERIFIED) | 脚本蓝牙 API (代码内无 `createBond`) | P2.15 | |
 | `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` (378605160) | 创建镜像虚拟显示需权限检查 (UNVERIFIED) | `ScreenCapturer.java:284-289` 经 MediaProjection 创建 `AUTO_MIRROR` 显示 | P2.15 | |
-| `CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS` (270553691) | 通知自定义视图尺寸限制 (公告 VERIFIED, 细节 UNVERIFIED) | 通知构建点 | P2.9 | |
+| `CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS` (270553691) | SystemUI 按通知发送 UID 检查自定义 View 层级中 ImageView 内存 (DEVICE-37 VERIFIED); 本镜像 warn / strip 为 2,000,000 / 5,000,000 bytes | 内建标准模板不走此分支; `notice(builder)` 可触发 | P2.9 | [实现与实际正反例](evidence/android-sdk-37-p29-20260913.md#3-通知自定义视图检查) |
 | `COVER_INTENT_SENDER` (405995292) | 旧 `sendIntent` 重载在 target 37 默认被拦截, disable 后放行. API 37 options 重载与 ActivityResult 分开评估; 宿主可见时通过实际 AndroidX 回传, 后台发送负例被拦截 (DEVICE-37). 广播成功回调不追加 Activity 授权 (SOURCE) | 安装会话, 固定快捷方式, 抽屉 IntentSender | P2.5 | [P2.5 证据](evidence/android-sdk-37-p25-20260913.md) |
 | `DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY` (407952621) | CT 默认开启, NSC 可按域关闭 (VERIFIED) | 私有 CA 场景 | P2.6 | |
 | `DEPRECATE_SET_CONTENT_CAPTURE_ENABLED` (454307959) | `setContentCaptureEnabled(false)` 不再生效, 改用 `FLAG_SECURE` (VERIFIED) | 无 | P2.15 | |
@@ -472,7 +479,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `ENABLE_RESTRICT_ASSIST_STRUCTURE` (437416500) | 助手结构访问受限 (UNVERIFIED) | 无 | P2.15 | |
 | `ENABLE_USER_AGENT_REDUCTION` (371034303) | WebView 默认 UA 缩减 (VERIFIED); API 37 / WebView 145 的 target 36 默认不缩减, enable 缩减; target 37 默认缩减, disable 恢复. 独立预览插件按自身包生效 | 文档 / 预览 / `ui.webview` | P2.11 | [28/28 场景与 UA-CH 观测](evidence/android-sdk-37-p211-20260913.md) |
 | `ENFORCE_STRICT_SQL_CHECKS` (484953293) | ContactsContract 查询严格 SQL 检查 (VERIFIED, 仅联系人) | `QuickContactBadgeAttributes.kt` | P2.15 | |
-| `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES` (391360514) | `getStorageVolumes()` 排除不可靠卷 (UNVERIFIED) | 文件管理器卷列举 | P2.8 | |
+| `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES` (391360514) | `MediaStore.getExternalVolumeNames()` 在应用 compat 与平台 flag 均开启时过滤目录以 `/mnt/` 开头的卷; 不改变 StorageManager 列表本身 (实现 VERIFIED) | 宿主无直接生产调用; 脚本可调用 Android API | P2.8 | [普通 SD 卡通过, 不可靠卷待测](evidence/android-sdk-37-p28-20260913.md) |
 | `EXPAND_DEVICE_MANAGED_SCOPE` (451607072) | 设备策略范围变化 (UNVERIFIED) | 无 | P2.15 | |
 | `FILTER_GENERIC_OTP` (437043173) | 含 OTP 的短信延迟 3 小时 (VERIFIED) | 脚本读短信 | P2.10 | |
 | `LOOPER_CLEARS_THREAD_INTERRUPTED` (458413887, overridable) | 消息派发时清除原生中断标记, ThreadCompat 保留脚本取消状态 (PLATFORM_CONFIG; DEVICE-37) | 脚本引擎中断语义 | P2.4 | 单项 / 组合 / target 37 默认实测通过, 见 P2.4 证据 |
@@ -481,17 +488,17 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `PARCEL_HARDENING` (416031865) | 所测镜像中, 长度前缀 readValue 的字节数不匹配由 feature flag 与 compat 共同控制抛错 (PLATFORM_CONFIG; DEVICE-37) | 插件 IPC, Bundle extras | P2.7 | `a6d037516`; enable / disable / target 37 默认负例对照, 两组 11 插件最短链路通过; 见 P2.7 证据 |
 | `REBOOT_MODEM_THROW_EXCEPTIONS` (476225321) | 电话调制解调器重启 API 抛异常 (UNVERIFIED) | 无 | P2.15 | |
 | `RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID` (297019750) | RenderScript ScriptC 停用 (UNVERIFIED) | 无 (代码无 RenderScript) | P2.15 | |
-| `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` (157720069) | MediaStore / 文档目录查询需对应权限 (UNVERIFIED) | `media.*`, 文件管理器 | P2.8 | |
+| `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` (157720069) | ContactsProvider2 转发目录查询前, 按目录提供方 package / user 检查 compat 和提供方的联系人 / 通话记录权限 (实现 VERIFIED) | 宿主不是联系人目录提供方; 非 MediaStore / DocumentsContract 规则 | P2.8 范围核实 / P2.15 联系人 | [提供方范围](evidence/android-sdk-37-p28-20260913.md#1-三个开关的实际作用范围) |
 | `RESTRICT_DATA_URI_COLUMNS` (437318646) | `ContactsContract.Data` 移除账户列 (VERIFIED) | `QuickContactBadgeAttributes.kt` | P2.15 | |
 | `RESTRICT_DEPRECATED_DATA_BUILDER_CONSTRUCTORS` (424093067) | 弃用的 Data Builder 构造器受限 (UNVERIFIED) | 待定位 | P2.15 | |
 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` (417951523) | 显示密码设置拆分为触摸 / 物理键盘 (VERIFIED) | 无 | P2.15 | |
 | `THROW_ERROR_FOR_WRITABLE_DCL` (463348571) | `System.load()` 可写文件抛 `UnsatisfiedLinkError` (VERIFIED) | OpenCV / 量化插件 staging | P2.3 | `a784273d2`; target 36 强制 / target 37 默认加载通过; 可写副本按预期被拒绝, 见 P2.3 实施记录 |
-| `TRASH_BEHAVIOR_CHANGE` (461429441) | MediaStore 回收站语义变化 (UNVERIFIED) | `media.*`, 相册相关 | P2.8 | |
+| `TRASH_BEHAVIOR_CHANGE` (461429441) | 当前镜像 target > 36 的调用者与 MediaProvider 自身 compat 共同决定 `.trash-storage` 路径; 单独切换宿主 compat 不能替代该组合 (DEVICE-37 VERIFIED) | 图片扫描后 MediaStore 回收 / 恢复; 应用回收站与历史独立 | P2.8 | [路径与恢复对照](evidence/android-sdk-37-p28-20260913.md#2-实际功能断言) |
 | `USE_NEW_MESSAGEQUEUE` (421623328) | 无锁 MessageQueue (VERIFIED) | 脚本引擎 Looper | P2.4 | 单项 / 组合 / target 37 默认实测通过, 见 P2.4 证据 |
 | `USE_NSD_PICKER_WHEN_NO_LOCAL_NET_PERMISSION` (490596785) | 无本地网络权限时 NSD 走系统选择器 (VERIFIED) | 无 (未用 `NsdManager`) | P2.1 | |
 | `WEAROS_WALLPAPER_HANDLES_SCALING` (272527315) | Wear 壁纸缩放 (UNVERIFIED) | 无 | P2.15 | |
 
-不经兼容框架门控但与本次相关的项: `ACCESS_LOCAL_NETWORK` 权限 (I1), 后台音频强化 (I2), `static final` 反射写入抛 `IllegalAccessException` (I4, VERIFIED, 无开关), 小组件 RemoteViews 内存上限 (I9, VERIFIED), 密钥库上限, 应用内存上限 (I13), Advanced Protection (I14). 面向 38 的 `NETWORK_BLOCKED_WITHOUT_INTERNET_PERMISSION` 与 `enableSinceTargetSdk=10000` 的 4 项不在本次范围.
+不经兼容框架门控但与本次相关的项: `ACCESS_LOCAL_NETWORK` 权限 (I1), 后台音频强化 (I2), `static final` 反射写入抛 `IllegalAccessException` (I4, VERIFIED, 无开关), 小组件 RemoteViews 内存上限 (I9, Bitmap 负例 VERIFIED, Icon 的 target 门槛存在公告 / 镜像差异, 见 P2.9), 密钥库上限, 应用内存上限 (I13), Advanced Protection (I14). 面向 38 的 `NETWORK_BLOCKED_WITHOUT_INTERNET_PERMISSION` 与 `enableSinceTargetSdk=10000` 的 4 项不在本次范围.
 
 ---
 
@@ -739,3 +746,12 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 新增标准库复跑工具、8 项证据判定测试、机器结果与 8 张代表截图. 13 个探索结果单独保留, 包括被系统对话框遮挡的早期页面, 不计入正式通过. [完整记录](evidence/android-sdk-37-p211-20260913.md).
 - 无生产代码或公开 API 变更, 无需产品 changelog / 关联文档生成 / 插件版本调整. 正常 compile 37 / host target 36 / inrt target 29 保持. UA override 已恢复, 独占 AVD 与 adb server 5038 已关闭.
 - P2.11 的 File System Access 行为、实体机 UI04 与 P5 最终插件包仍待验证, P2 / P3 不整体关闭.
+
+### 2026-09-13: P2.8 存储与 P2.9 小组件 / 通知
+
+- 会话从干净的 `16ba3901f` 开始. `6ab016582` 修复多位小组件 ID 在批量更新时被截成末位、导致路径与点击映射误删的问题, 同步 6.8.0 十语言 fix 日志并生成 Markdown. 公开 API、权限模型和 Gradle 依赖未变, 无需关联文档站 / d.ts 发布.
+- P2.8 的 MediaStore 卷枚举、媒体回收目录与 ContactsProvider 目录权限已按实际镜像实现重新定位, 修正原先笼统的存储权限归类. target 36 / 37 的存储、系统选择器与权限状态共 12 组 84 次行断言执行通过. 普通 SD 卡与普通联系人查询不冒充不可靠卷过滤 / 远程目录门控命中. `768325c80`, [完整证据](evidence/android-sdk-37-p28-20260913.md).
+- P2.9 完成真实小组件注册 / 更新 / 两次脚本点击, 以及标准、前台服务、小型自定义和超限通知对照, 共 6 组 26 次行断言执行通过. 通知开关按发送 UID 生效; 自定义内容被剥离时通知记录及标准标题仍可存在. Bitmap 超限负例与 Icon 公告 / 镜像差异分别记录. [完整证据](evidence/android-sdk-37-p29-20260913.md).
+- `14a594b10` / `855134388` 增加可复跑工具与严格证据判定. 后台冻结、启动 ANR、元数据发布和选择器加载 / 取消时序等失败探索单列保存, 不计入有效矩阵. 最终 target 36 对照使用同一 APK 的显式 speed 编译, 不证明冷启动性能全面验收. Python 工具测试 8/8 + 4/4、正常 / target 37 debug 构建与原生对齐门禁通过; 未重跑完整 release / 远程 CI.
+- 正常配置与最终构建输出仍为 compile 37 / host target 36 / inrt target 29. 临时权限 / 小组件绑定授权及四个所测 compat 已恢复, 本轮调试资源、独占只读 AVD 和 ADB 5053 已清理. 手机、共享 ADB 与关联插件仓库未做修改.
+- 不可靠 USB / OTG 与外设生命周期、真实 Launcher / OEM 通知、Icon 上限差异以及完整业务通知生命周期继续开放. 99 行实体机清单仍为 NOT_RUN, P2.8 / P2.9 / P3 不整体关闭; 下一轮可继续 P2.10 短信 / 通知监听.
