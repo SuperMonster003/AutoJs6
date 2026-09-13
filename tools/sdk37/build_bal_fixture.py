@@ -13,6 +13,8 @@ def main():
     parser.add_argument("--sdk", type=Path, required=True)
     parser.add_argument("--jdk", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--allow-cross-uid-from-below", choices=("default", "true", "false"), default="default",
+                        help="Application manifest opt-in for ASM; false enables protection, true permits switches")
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -36,7 +38,12 @@ def main():
     run(build_tools / f"d8{bat}", "--min-api", "24", "--lib", android, "--output", dex,
         *sorted(classes.rglob("*.class")))
     unsigned, apk = output / "unsigned.apk", output / "bal-fixture.apk"
-    run(build_tools / f"aapt2{exe}", "link", "--manifest", source / "AndroidManifest.xml",
+    manifest = (source / "AndroidManifest.xml").read_text(encoding="utf-8")
+    if args.allow_cross_uid_from_below != "default":
+        manifest = manifest.replace("<application ", "<application android:allowCrossUidActivitySwitchFromBelow=\""
+                                    + args.allow_cross_uid_from_below + "\" ", 1)
+    (output / "AndroidManifest.xml").write_text(manifest, encoding="utf-8")
+    run(build_tools / f"aapt2{exe}", "link", "--manifest", output / "AndroidManifest.xml",
         "-I", android, "-o", unsigned)
     with zipfile.ZipFile(unsigned, "a") as archive:
         archive.write(dex / "classes.dex", "classes.dex")
@@ -49,7 +56,10 @@ def main():
     run(build_tools / f"apksigner{bat}", "sign", "--ks", key, "--ks-pass", "pass:android",
         "--key-pass", "pass:android", "--out", apk, aligned)
     run(build_tools / f"apksigner{bat}", "verify", apk)
-    print(json.dumps({"apk": str(apk), "sha256": hashlib.sha256(apk.read_bytes()).hexdigest()}))
+    result = {"apk": str(apk), "sha256": hashlib.sha256(apk.read_bytes()).hexdigest(),
+              "allowCrossUidActivitySwitchFromBelow": args.allow_cross_uid_from_below}
+    (output / "build.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":

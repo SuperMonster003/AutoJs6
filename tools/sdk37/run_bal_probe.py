@@ -51,6 +51,9 @@ def main():
     (output / "compat.txt").write_text(adb("shell", "dumpsys", "platform_compat"), encoding="utf-8")
     (output / "device.txt").write_text(adb("shell", "getprop", "ro.build.fingerprint") + adb("shell", "getconf", "PAGE_SIZE"), encoding="utf-8")
     (output / "appops.txt").write_text(adb("shell", "appops", "get", args.package), encoding="utf-8")
+    if args.route == "asm":
+        (output / "fixture-package-before.txt").write_text(
+            adb("shell", "dumpsys", "package", "org.autojs.sdk37.balfixture"), encoding="utf-8")
     removed_tasks = []
     if args.reuse_process:
         stacks = adb("shell", "am", "stack", "list")
@@ -86,6 +89,13 @@ def main():
             except json.JSONDecodeError:
                 time.sleep(1)
                 continue
+            if args.route == "asm" and result.get("probeStoppedAt") and not result.get("belowAttempted") \
+                    and "taskBeforeBelow" not in record:
+                activities = adb("shell", "dumpsys", "activity", "activities")
+                (output / "activities-before-below.txt").write_text(activities, encoding="utf-8")
+                tops = re.findall(r"(?:topResumedActivity|mResumedActivity)\s*[:=]\s*ActivityRecord\{[^\n]*?\s"
+                                  r"org\.autojs\.sdk37\.balfixture/\.TargetActivity\s+t(\d+)\b", activities)
+                record["taskBeforeBelow"] = [int(task) for task in tops]
             if result.get("completed"):
                 break
             time.sleep(1)
@@ -109,6 +119,26 @@ def main():
         }
         # An exception or failed fixture read is not proof that BAL blocked an Activity.
         errors = [k for k in ("error", "scriptError", "belowError", "installError", "fixtureReadError") if k in result]
+        if args.route == "asm":
+            record["asmScenarioValid"] = bool(activity and event.get("uid") != result["uid"]
+                and event.get("taskId") == result["taskId"]
+                and result["taskId"] in record.get("taskBeforeBelow", [])
+                and result.get("belowAttemptedAt", 0) - result.get("probeStoppedAt", 0) >= 10_000)
+            platform_log = (output / "logcat.txt").read_text(encoding="utf-8", errors="replace")
+            # The fixture event has this run's unique case ID. Use it as the boundary
+            # even if logcat attached after the initial shell Activity launch.
+            events = list(re.finditer(r"^.*SDK37-BAL-Fixture: .*\"case\":\"" + re.escape(case)
+                                     + r"\".*$", platform_log, re.MULTILINE))
+            current_log = platform_log[events[-1].end():] if events else ""
+            record["asmBlockEvidence"] = [line for line in current_log.splitlines()
+                if "[ASM] Abort Launching" in line and args.package in line
+                and "ActivityLaunchProbeLandingActivity" in line
+                and re.search(r"\bt" + str(result["taskId"]) + r"\b", line)]
+            checks["landing"] = checks["landing"] and record["asmScenarioValid"] \
+                and result.get("landing", {}).get("taskId") == result["taskId"] \
+                and not record["asmBlockEvidence"]
+            checks["no-landing"] = checks["no-landing"] and record["asmScenarioValid"] \
+                and bool(record["asmBlockEvidence"])
         if args.expect == "blocked":
             # -T 1 can include the final line from a preceding case. Only accept a
             # diagnostic after this probe's launch, attributed to its actual PID.

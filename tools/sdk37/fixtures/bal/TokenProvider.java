@@ -60,7 +60,13 @@ public class TokenProvider extends ContentProvider {
         try {
             JSONObject event = new JSONObject().put("case", id).put("kind", kind)
                     .put("pid", Process.myPid()).put("uid", Process.myUid())
-                    .put("time", System.currentTimeMillis());
+                    .put("time", System.currentTimeMillis())
+                    .put("targetSdk", context.getApplicationInfo().targetSdkVersion);
+            if (context instanceof android.app.Activity) {
+                event.put("taskId", ((android.app.Activity) context).getTaskId())
+                        .put("allowBelow", intent.hasExtra("allowBelow")
+                                ? intent.getBooleanExtra("allowBelow", false) : JSONObject.NULL);
+            }
             context.getSharedPreferences("events", 0).edit().putString(id, event.toString()).commit();
             android.util.Log.i("SDK37-BAL-Fixture", event.toString());
         } catch (org.json.JSONException e) { throw new IllegalStateException(e); }
