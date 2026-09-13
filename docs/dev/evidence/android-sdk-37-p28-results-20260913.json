@@ -1,0 +1,3946 @@
+{
+  "date": "2026-09-13",
+  "sessionStart": "16ba3901f",
+  "section": "p28",
+  "rawDirectory": "build/sdk37-p28-p210",
+  "normalConfig": {
+    "compile": 37,
+    "hostTarget": 36,
+    "inrtTarget": 29
+  },
+  "cleanup": {
+    "time": "2026-09-13T13:14:16.282695+00:00",
+    "scope": "Only the disposable emulator and host used in this session",
+    "actions": [
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am force-stop org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset EXCLUDE_UNRELIABLE_STORAGE_VOLUMES org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 391360514.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 157720069.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset TRASH_BEHAVIOR_CHANGE org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 461429441.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "am compat reset CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "No override exists for changeId 270553691.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appwidget revokebind --package org.autojs.autojs6 --user 0"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.POST_NOTIFICATIONS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.READ_SMS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "pm revoke org.autojs.autojs6 android.permission.RECEIVE_SMS"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appops set --uid org.autojs.autojs6 MANAGE_EXTERNAL_STORAGE default"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5587",
+          "shell",
+          "appops set org.autojs.autojs6 MANAGE_EXTERNAL_STORAGE default"
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "finalCompat": {
+      "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+      },
+      "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+      },
+      "TRASH_BEHAVIOR_CHANGE": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+      },
+      "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+        "enabled": false,
+        "source": "targetSdk",
+        "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+      }
+    },
+    "debugApp": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "settings get global debug_app"
+      ],
+      "exitCode": 0,
+      "stdout": "null\n",
+      "stderr": ""
+    },
+    "waitForDebugger": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "settings get global wait_for_debugger"
+      ],
+      "exitCode": 0,
+      "stdout": "0\n",
+      "stderr": ""
+    },
+    "forwards": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "forward",
+        "--list"
+      ],
+      "exitCode": 0,
+      "stdout": "\n",
+      "stderr": ""
+    },
+    "snapshot": "cleanup-final",
+    "complete": true
+  },
+  "windowsCleanup": {
+    "time": "2026-09-13T21:15:56.3504168+08:00",
+    "emulatorBefore": {
+      "ProcessId": 44628,
+      "ParentProcessId": 33776,
+      "Name": "qemu-system-x86_64-headless.exe",
+      "CommandLine": "E:\\.android\\sdk\\emulator\\qemu\\windows-x86_64\\qemu-system-x86_64-headless.exe -avd AVD_API_37 -port 5586 -no-snapshot-load -no-snapshot-save -read-only -no-window -no-audio -memory 4096 -cores 4 -gpu swiftshader_indirect",
+      "CreationDate": "2026-09-13T19:11:04.023393+08:00"
+    },
+    "launcherBefore": {
+      "ProcessId": 33776,
+      "Name": "emulator.exe",
+      "CommandLine": "\"E:\\.android\\sdk\\emulator\\emulator.exe\" -avd AVD_API_37 -port 5586 -no-snapshot-load -no-snapshot-save -read-only -no-window -no-audio -memory 4096 -cores 4 -gpu swiftshader_indirect"
+    },
+    "adbBefore": {
+      "ProcessId": 42340,
+      "Name": "adb.exe",
+      "CommandLine": "adb -L tcp:5053 fork-server server --reply-fd 692",
+      "CreationDate": "2026-09-13T19:59:07.109102+08:00"
+    },
+    "sharedAdb5037Modified": false,
+    "physicalDevicesModified": false,
+    "emulatorStopped": true,
+    "launcherStopped": true,
+    "privateAdbStopped": true
+  },
+  "device": {
+    "serial": "127.0.0.1:5587",
+    "model": "sdk_gphone16k_x86_64",
+    "manufacturer": "Google",
+    "sdk": "37",
+    "release": "17",
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+    "abiList": "x86_64,arm64-v8a",
+    "buildType": "userdebug",
+    "emulator": true,
+    "getconfPageSize": 16384,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "cases": [
+    {
+      "name": "storage36-default",
+      "record": {
+        "started": "2026-09-13T11:38:42.516089+00:00",
+        "caseId": "745fe3857d5e48968223e3b9721a8499",
+        "suite": "storage",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "745fe3857d5e48968223e3b9721a8499",
+          "suite": "storage",
+          "expectTrashDirectory": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "apkSha256": [
+          "3781ae4d6c69a1b945b5cf6a2dd90132f240a72832c981fcc2849fdc7d4a174a"
+        ],
+        "scriptSha256": "f7747c3e00915fd3127d94ee29a6733e10f675730fc105759a2ef01b539a5471",
+        "receipt": {
+          "caseId": "745fe3857d5e48968223e3b9721a8499",
+          "suite": "storage",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-745fe3857d5e48968223e3b9721a8499/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-745fe3857d5e48968223e3b9721a8499"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/291a6c1d-428f-4487-9b89-7ea7690c096e.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/522",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791891552-sdk37-745fe3857d5e48968223e3b9721a8499.png",
+                "dateExpires": 1791891552,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-745fe3857d5e48968223e3b9721a8499.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{a5c6541 7375:org.autojs.autojs6/u0a340} (pid=7375, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:39:23.784383+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "84e104833c22167368e2ea1b6e4fb110af23f50d20e6456a100cc0a748c96e90",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "0c3c9806132954f5f470371dfe24b1f9704c0e299ee637bf3efb3c891afb05f5",
+        "after/org.autojs.autojs6-package.txt": "cd16d3d5b02260a218ac1c6c7ff2f8d4abfa5528d291cbc0800e3a1825a95436",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "ed0673e462f3e98da26bd81d80c50c1ed81b7d5b6a5f0c65c5953cf51032ede9",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "58d8109f9cfb2fa7d30bcf54652d5f6762ed84326a6a562fae7f571baeafcada",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "38f8cc4c7dcededfc811c987af31f4dfcd38ec67afc26be8669fc92faa590947",
+        "before/org.autojs.autojs6-package.txt": "d80ddd8ea385dd72334c790a35f460abef450543a3f21fe9889570693df47f61",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "0b4a7075d5fb0c534faca166fd68ce9638ea7a0f5360586ef6fe640a7a87a5ca",
+        "launch.json": "4cc389e46023037dc9641e55f2daf17fa51f61951539846d5fced096ad78f42c",
+        "launched-script.js": "4b8ef3d98f45f994bf841fd9bdc86e552e0cb505ffd7c82fe5ea0de65b0c417a",
+        "logcat-tail.txt": "5253e9c25665916f7b74a74e231aa4005a0e29e5e557fc692d9d0bf231e03e9e",
+        "result.json": "06c77bb6f3f25c73aa693346f09e00c58dce1293b16fc7ef5c49868227390450",
+        "screen.png": "02a0fa3cc99e8274739646c227d7118dd7468d594168711a1f9b9d62bdd1ab52",
+        "windows.txt": "1f8344389c7ec1353ee2e86de53939593e5b88839021c389a0c5904e842e453b"
+      }
+    },
+    {
+      "name": "storage36-exclude",
+      "record": {
+        "started": "2026-09-13T11:42:44.119550+00:00",
+        "caseId": "8525d1dfbd46454191176b19a80efa64",
+        "suite": "storage",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "8525d1dfbd46454191176b19a80efa64",
+          "suite": "storage",
+          "expectTrashDirectory": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "4ba1a66342b6cb531fd9ef0259df0648816ea16276d317398b79d4563e9b16df"
+        ],
+        "scriptSha256": "b1f0caba94f27480f09b6ee1a9f6aa6587c625fd62256ccae89d8c930ee49243",
+        "receipt": {
+          "caseId": "8525d1dfbd46454191176b19a80efa64",
+          "suite": "storage",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-8525d1dfbd46454191176b19a80efa64/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-8525d1dfbd46454191176b19a80efa64"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/c3e9de6d-6a70-42fb-8d13-137ef5fa2b28.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/531",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791891770-sdk37-8525d1dfbd46454191176b19a80efa64.png",
+                "dateExpires": 1791891770,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-8525d1dfbd46454191176b19a80efa64.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{88101c9 8236:org.autojs.autojs6/u0a340} (pid=8236, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:42:53.158407+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "5cd21a825ebd2fb7505bd8ef37cceb5872ba06fc05f11d1f180a0ba56a0e988d",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "a4048ebb7a4214cb7d626e0beae9412ee4f4ac8bc5a0554e1346ca13bd35a03a",
+        "after/org.autojs.autojs6-package.txt": "b93006c7f636cb0eb4e970ed6f7d50fa0148554a0cdbb24f7cbdc7e60b628758",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "b4e1d65c9d0523e2334f879d52714dc425c4ee6694fe2b99ad4b07405ad2bc58",
+        "after/snapshot.json": "e0d805cbb0228cb2a575d067ffb997bdc061fbf3d74f2b8df27d469717b7ac8a",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "03080d539900e0e6093d837be8b0825af16907fb115c44ecfb97a7d1ac8e301d",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "70cc23c6a8194098c193b365f1a7ef90ddef2da25c6b565536c3948ccc60a384",
+        "before/org.autojs.autojs6-package.txt": "b16302f27bf727e42979a5fbc6e818280abd95755636b3cd7c19d3d278d65ac2",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "b4e1d65c9d0523e2334f879d52714dc425c4ee6694fe2b99ad4b07405ad2bc58",
+        "before/snapshot.json": "3cf250e4321e25bc762b329ab94e3a395ce15f5a1daae6df6ed3f67ec9ad99c5",
+        "launch.json": "683a012c14fc88b151862ade5bab073acddc00547e3705399f9c7989d4416041",
+        "launched-script.js": "f68d890c4aedb67fa05e388348f41dbc888e6465958076986950b41c1bebe6df",
+        "logcat-tail.txt": "79522749b6a0c60bff518bfdb85461caade2ba1a06ca88dfa8f93b98e21387b7",
+        "result.json": "2a49af99257d6d822b9b146b801e09d0285dc24a467c9af3cbade343954d778a",
+        "screen.png": "93c2260c65b32c88d950550b528341561be69b74c46ffc54db619f8e2851c1b2",
+        "windows.txt": "010da9101fbe6d5b1f98d85ff879e99edb11d988b7e558a96b66dee6df8bcb97"
+      }
+    },
+    {
+      "name": "storage36-directory",
+      "record": {
+        "started": "2026-09-13T11:43:18.211260+00:00",
+        "caseId": "e191f938f7494d02ac2c285dd8085f37",
+        "suite": "storage",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "e191f938f7494d02ac2c285dd8085f37",
+          "suite": "storage",
+          "expectTrashDirectory": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "4ba1a66342b6cb531fd9ef0259df0648816ea16276d317398b79d4563e9b16df"
+        ],
+        "scriptSha256": "f7925f3808cd0b54a4ac0a40a844f1c8b6e67cfdefee9515a2c967a935978702",
+        "receipt": {
+          "caseId": "e191f938f7494d02ac2c285dd8085f37",
+          "suite": "storage",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-e191f938f7494d02ac2c285dd8085f37/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-e191f938f7494d02ac2c285dd8085f37"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/29f9c420-ea10-4ba1-b6ee-4c07e699aedc.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/537",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791891804-sdk37-e191f938f7494d02ac2c285dd8085f37.png",
+                "dateExpires": 1791891804,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-e191f938f7494d02ac2c285dd8085f37.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{fab6816 8610:org.autojs.autojs6/u0a340} (pid=8610, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:43:26.805342+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "49af8ef47fdb3a6bc783b1379a641478309b342f90c1a3b7df6ef6a4d0d55737",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "69fb6f75ff1f954f12172066da6e9465502ad257ac7509ad026153407871dda2",
+        "after/org.autojs.autojs6-package.txt": "4ea2330b317d16f6b8f4a1683742fc94ae4e90486cccd6df8aaaf4088439cdb7",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0012fc4a7852bcdf4eeaab3f412029fbf8795aad1e2a7253bfbbf7a8b8106f1b",
+        "after/snapshot.json": "70d4a164a737ed18d46a04b1e25dd7bda460b2d1da875323abfd74d500e2f3f0",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "f7fc269e5de6b68628439f99b559bc81414037c480f2838dadda5914521983b4",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "b5a87cf4b9a544d0f09478f06887c6fbfa1fcae27ad21e105da83fe47d87b8dc",
+        "before/org.autojs.autojs6-package.txt": "0aca4bae1d1e932cef1b4560b133b4c694823668d0c1fcabf4be2faed520cf1c",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0012fc4a7852bcdf4eeaab3f412029fbf8795aad1e2a7253bfbbf7a8b8106f1b",
+        "before/snapshot.json": "1a431a1e7d92d69c60341a1c53fc100543457009a42b6b1c79643e1b23eb3b3e",
+        "launch.json": "68efbe8faad06592483a02c7becd85e9c9e9f0fa7af2a6aedd9c2354635aaefb",
+        "launched-script.js": "a4310b3a0501ab83b89ab63e2b8a1951ab03e629bfee8516836d308bfb11841e",
+        "logcat-tail.txt": "ea75b2e7fc75694a49f11e09ec7d96e7ff2f2698a14456bcc1c022a01dff31bd",
+        "result.json": "8a86c4df3ac04058938c41ca80a15951eb2fcea3cf949b8d47feb96cddde2d79",
+        "screen.png": "80186f4aebbed3a2507ce21d5bb7cef08762b1fb82152bcde1fb61d0d68b6d52",
+        "windows.txt": "1884c871ddd9746b94005693bee5d895feb925957ed711ad5dd9199ef5e6db8a"
+      }
+    },
+    {
+      "name": "storage36-trash",
+      "record": {
+        "started": "2026-09-13T11:43:51.992627+00:00",
+        "caseId": "3f7de1efce8145e2931cc7b47c6c01ee",
+        "suite": "storage",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "3f7de1efce8145e2931cc7b47c6c01ee",
+          "suite": "storage",
+          "expectTrashDirectory": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "4ba1a66342b6cb531fd9ef0259df0648816ea16276d317398b79d4563e9b16df"
+        ],
+        "scriptSha256": "011a2a747f532371d211fe9f9a956f241ec60ed9a2bd00c09c3d017b2f13c46a",
+        "receipt": {
+          "caseId": "3f7de1efce8145e2931cc7b47c6c01ee",
+          "suite": "storage",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-3f7de1efce8145e2931cc7b47c6c01ee/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-3f7de1efce8145e2931cc7b47c6c01ee"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/1702d759-b756-4d7f-9281-a1bcdc44aaa1.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/543",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791891837-sdk37-3f7de1efce8145e2931cc7b47c6c01ee.png",
+                "dateExpires": 1791891837,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-3f7de1efce8145e2931cc7b47c6c01ee.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{449fa7f 8979:org.autojs.autojs6/u0a340} (pid=8979, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:44:00.467608+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "packageOverrides",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "7547b36ed681345ba217285bdcdbafeb77af84b2ae824bcbf392000144c44cc6",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "a83b0ff524adf10a4057aa7fdbb9be5159a91dffd099d9a37de66f3e18b503f6",
+        "after/org.autojs.autojs6-package.txt": "d73b755c5c68c70fffbff010af7d3acf0293b4596d28c823b3384e55c51c48fb",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "91ffc1bf400f5ee32ede930d83398745e3292eccd21708d4f8ccc7e847477312",
+        "after/snapshot.json": "e1425e6cc8a7b579275d45e8d33216aff8a160c6d4145891717504f1357b3217",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "386923a5daed91da21934cf1e508a0aee45d3ab35f897bc24eec65b75fd62004",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "cae0086a989f239e95471326bdf85b24044f822d117d739e13722ace7e91316e",
+        "before/org.autojs.autojs6-package.txt": "1f4f545b1d932a9c4c051b046c35efe5bf8c0cf49aabe60501f559ddb14dc833",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "91ffc1bf400f5ee32ede930d83398745e3292eccd21708d4f8ccc7e847477312",
+        "before/snapshot.json": "53e4e545faab147194dd6829996c977f83d22beb9d96581f73bd68b7869fe9c9",
+        "launch.json": "9a56a957012272c78b9c2d0010aca71172d43fa814cfca3d3fbf9f201bb1fac7",
+        "launched-script.js": "dbc20e84ba4948bc733077917e4a77549a53c338ad3d30a8e8789e75e72ad4f5",
+        "logcat-tail.txt": "8708a3e3f5e03e665a61146edf102457c1c397fd7c85f7f0c60c0158f089c834",
+        "result.json": "ac648dc8584e086c4146f61325ea5df25840528e7361b96ea751b1a03cf8efed",
+        "screen.png": "24dbe3efec94c361ae8d39f6857705ec2f954f049b57800ffeeb85db10847cfd",
+        "windows.txt": "3b1044008e69cdfeea75eae838984a13521f45aca8726f9f5f7935b47c9b1a35"
+      }
+    },
+    {
+      "name": "storage37-default",
+      "record": {
+        "started": "2026-09-13T11:45:20.968519+00:00",
+        "caseId": "77197811faae423f81375c2ec78fd844",
+        "suite": "storage",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "77197811faae423f81375c2ec78fd844",
+          "suite": "storage",
+          "expectTrashDirectory": true
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "f717c27e0056f29191f79e188c001d7c3886c8bfe888dc9bc650542c7bbf4023"
+        ],
+        "scriptSha256": "f90662b7071688731685999a52af62bbb10d8f1c3c9910f147e18080e23f0579",
+        "receipt": {
+          "caseId": "77197811faae423f81375c2ec78fd844",
+          "suite": "storage",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-77197811faae423f81375c2ec78fd844/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-77197811faae423f81375c2ec78fd844"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/b0d581be-40f7-46b1-8621-63271b6a2fd6.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/549",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/.trash-storage/Pictures/.trashed-1791891931-sdk37-77197811faae423f81375c2ec78fd844.png",
+                "dateExpires": 1791891931,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-77197811faae423f81375c2ec78fd844.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{bd50b16 9406:org.autojs.autojs6/u0a340} (pid=9406, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:45:34.548984+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "3a1a7781da3808289e1365e51245efb186bc24cfc268990c8fb9482389142d4d",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "28fd160ed422c5557bff1d35385ebd4ce2f06c9886a4bee044ac798467237b9b",
+        "after/org.autojs.autojs6-package.txt": "b2f725e2b06674779b4b282aa1029e053312a4a99acad27add6072a6ea76d584",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "bc17cef53a965de3aa926be3a949974e40ae864a2efda8a5bad8ae9acd743156",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "ebbd24cadd4028653a081ab041e4cc469d63e8d813626d7197e2f1db899b98b1",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "ae7b3738939f50ff3a797f06e9fc308a7b9196ab209a91a54d3a25ce00252aba",
+        "before/org.autojs.autojs6-package.txt": "ba864aaa270c16cbd9d2176621130fca7f4026e08c00469ffaa6c4fac3186e94",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "5295ef17e5c39d7d700ec554c96ad492f5d7c5fdadc3fbf69bc688c325b0a588",
+        "launch.json": "e7d653a545bd40c5ead4f22d1132a2eb51394d4feba83bbf94b11b96e792c510",
+        "launched-script.js": "b5c929362eeaecb6f6e4fe0ab689056be94e080f8b215e43c56bdb770cf3597f",
+        "logcat-tail.txt": "450e997064e86e0fdc0581a03dce1f5302f9d7176ee4240200aa3f2b43531cf0",
+        "result.json": "a74b021e45fef7e7c026328d781f6d5dafbb85b9eb362769a22c30a9e02b0935",
+        "screen.png": "dea6b234d21ce109d2145b44deae86907f05cc7c3083f1adae3533a873008f04",
+        "windows.txt": "dfb72876bd902955b1a375a9d5b0e49c962c5ca4a8fbcf77dcb37aec86a2fc84"
+      }
+    },
+    {
+      "name": "storage37-host-trash-disabled",
+      "record": {
+        "started": "2026-09-13T11:47:36.255705+00:00",
+        "caseId": "e025930fa6e74be8a7e39591422885cd",
+        "suite": "storage",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "e025930fa6e74be8a7e39591422885cd",
+          "suite": "storage",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-e025930fa6e74be8a7e39591422885cd",
+          "expectTrashDirectory": true
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "packageOverrides",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "f717c27e0056f29191f79e188c001d7c3886c8bfe888dc9bc650542c7bbf4023"
+        ],
+        "scriptSha256": "fa0f20511838f023dd3f1b979d8b1282b310ced8a10e2c9b4e3e73c528d1d48c",
+        "receipt": {
+          "caseId": "e025930fa6e74be8a7e39591422885cd",
+          "suite": "storage",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-e025930fa6e74be8a7e39591422885cd/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-e025930fa6e74be8a7e39591422885cd"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/8df0e62d-265b-4201-9231-50ab9e388f80.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/558",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/.trash-storage/Pictures/.trashed-1791892062-sdk37-e025930fa6e74be8a7e39591422885cd.png",
+                "dateExpires": 1791892062,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-e025930fa6e74be8a7e39591422885cd.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{16fa6d2 10182:org.autojs.autojs6/u0a340} (pid=10182, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T11:47:45.070615+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "packageOverrides",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "aea57f54f88672657624f2ff429178c6ca9c3b6c6c5bbd040490ff71ab003c17",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "80cdadafeb5e6d10a79e61941b90e86e763dd631478a090a8812b496cf9c99b0",
+        "after/org.autojs.autojs6-package.txt": "2d550fa6092c6134c0b1e147533c5a14f23a6e29034d7c3bcdc12028025ccbf6",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "a3fffc0925d3a41f8031eebf6f33848673ba4423252c5385af8bd6708e555a50",
+        "after/snapshot.json": "d4cfffb742998d5cd6b6f6ea5454d19eb341efedbf21a7f6568fe35c26930e3b",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "435012173cc37bc006481491bfe517b002820f5120adc9444376481261d6582c",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "2cb0b3b481b84ca3c25c305d4f02b0eb772e19309658a290e5e5b04f3ed7c682",
+        "before/org.autojs.autojs6-package.txt": "dec085e14490e16e5e3e94c2cecbb7d944979ab632b992957831cbf7917c73e6",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "a3fffc0925d3a41f8031eebf6f33848673ba4423252c5385af8bd6708e555a50",
+        "before/snapshot.json": "43cb912d405fc859db7d7dd300421a82259cac6714d77926363ef07322b7173a",
+        "launch.json": "2053494d9c051324fce49e2ab5bf40d6ff7a7279b2c9807c13fd300eff0ec515",
+        "launched-script.js": "585ce62faf220483b4046504127eb44cd178d735781ac846254f8994c02bb596",
+        "logcat-tail.txt": "499c662b7dc7fc04a994a623c158e7b94011635a5287bbc745bec9e84ad8e98a",
+        "result.json": "749da6cabac676bad746bb95bf8d57a16712a926f23ba70af10fce2f77c7db26",
+        "screen.png": "ae5c33b4adfd1aba2c60e4bf54d1027891e026c74a7478ea71020ebca885181b",
+        "windows.txt": "3e0609a1d80526a21bdf0bdb032609d5c81d53d61316a0886a9637ab19e9a293"
+      }
+    },
+    {
+      "name": "storage37-final",
+      "record": {
+        "started": "2026-09-13T12:34:36.755159+00:00",
+        "caseId": "d0b48083c0a541fb8975640e520356dc",
+        "suite": "storage",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "d0b48083c0a541fb8975640e520356dc",
+          "suite": "storage",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-d0b48083c0a541fb8975640e520356dc",
+          "expectTrashDirectory": true
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "64d880bb15c89161c91975312b3e6ce62c7b8d49c32fdd8df0fbf7980e2fb2c5",
+        "deviceLogStart": "09-13 20:34:38.000",
+        "removedHostTasks": [],
+        "receipt": {
+          "caseId": "d0b48083c0a541fb8975640e520356dc",
+          "suite": "storage",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-d0b48083c0a541fb8975640e520356dc/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-d0b48083c0a541fb8975640e520356dc"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/ee318a83-871c-4670-af5e-667ca8da292f.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/602",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/.trash-storage/Pictures/.trashed-1791894915-sdk37-d0b48083c0a541fb8975640e520356dc.png",
+                "dateExpires": 1791894915,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-d0b48083c0a541fb8975640e520356dc.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{bfc85d4 24590:org.autojs.autojs6/u0a340} (pid=24590, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:35:20.492798+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "86c67ed88ea848f4329ebf7f9b94e6f7633e5b3e73a71e6e5bca86669ddbcac3",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "cc039fd1ef49f75c4bfb6bf4049efe4d38afdc6bf5a1fbfc2b8a46e17e877548",
+        "after/org.autojs.autojs6-package.txt": "d6deaa581a4498e24d2804eed3274c23480fa3042876458f3c02b879872d5863",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "20952e408e343aa54b729b9ed60c4994f642e91da474ce1b725ac6696e8f680b",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "9d5cfaede72240865a4710b554ebce4f2566cd6e6161a1a15e81bc00e1d91711",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "b9efe61a8783e81b3918f92ad392adeec2d19c0131e3b678a5535885be8ded03",
+        "before/org.autojs.autojs6-package.txt": "7ff892adcb6dc74a1f7d96185f4930fa66546e20c9c5455b2103c2297111c89c",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "2b109200397bb6018bd2e696f4d0333d10ddf3f7211081723e24b8a1e966e860",
+        "launch.json": "fe6eb51fd90528660906b79ba8b22ea98a2c01a27005e0664a1c21d72f8bb1b3",
+        "launched-script.js": "5ddb2de42f445d526e3bd9576015f3399f6ed897063781390bd26add29bfa547",
+        "logcat-tail.txt": "1f817aeece1ba0250f400cad26d4e5fb9597549c239bda68b403bed2066374dd",
+        "result.json": "f69a4932b5a005fdd5ea62ab421ae7d219f61ee587f35b5f39cda38f2b74db8e",
+        "screen.png": "6ca6e1a3598f9a388e12aebba20f3f52cfc4a4fc881e815d29ddc9947a88a857",
+        "windows.txt": "8ec6887d1d55a066c7b170860052dc2dc2caa950060f8659f792806f44b0d27f"
+      }
+    },
+    {
+      "name": "storage36-foreground-complete",
+      "record": {
+        "started": "2026-09-13T12:55:31.737285+00:00",
+        "caseId": "ad897678f107456ab7c54364f9764a84",
+        "suite": "storage",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "ad897678f107456ab7c54364f9764a84",
+          "suite": "storage",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-ad897678f107456ab7c54364f9764a84",
+          "expectTrashDirectory": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "09ca453851e8b1e5ef1abee9eebb70809a98f1d951ddd671e50b57ea554fff39",
+        "deviceLogStart": "09-13 20:55:33.000",
+        "removedHostTasks": [
+          893
+        ],
+        "receipt": {
+          "caseId": "ad897678f107456ab7c54364f9764a84",
+          "suite": "storage",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "files",
+              "ok": true,
+              "value": {
+                "path": "/storage/emulated/0/sdk37-storage-ad897678f107456ab7c54364f9764a84/中文-file.js",
+                "names": [
+                  "中文-file.js"
+                ],
+                "bytes": 64
+              }
+            },
+            {
+              "name": "explorer",
+              "ok": true,
+              "value": {
+                "children": 1,
+                "path": "/storage/emulated/0/sdk37-storage-ad897678f107456ab7c54364f9764a84"
+              }
+            },
+            {
+              "name": "volumes",
+              "ok": true,
+              "value": {
+                "storageManager": [
+                  {
+                    "uuid": "null",
+                    "path": "/storage/emulated/0",
+                    "state": "mounted",
+                    "primary": true,
+                    "removable": false
+                  },
+                  {
+                    "uuid": "0000-0000",
+                    "path": "/storage/0000-0000",
+                    "state": "mounted",
+                    "primary": false,
+                    "removable": true,
+                    "readWrite": true
+                  }
+                ],
+                "mediaStore": [
+                  "0000-0000",
+                  "external_primary"
+                ]
+              }
+            },
+            {
+              "name": "history",
+              "ok": true,
+              "value": {
+                "revisions": 1,
+                "restored": true
+              }
+            },
+            {
+              "name": "trash",
+              "ok": true,
+              "value": {
+                "restored": true,
+                "blob": "trash/blob/94f366c1-271d-487c-ad9d-e122a990fa46.bin"
+              }
+            },
+            {
+              "name": "media",
+              "ok": true,
+              "value": {
+                "uri": "content://media/external/images/media/622",
+                "width": 16,
+                "height": 12
+              }
+            },
+            {
+              "name": "mediaTrash",
+              "ok": true,
+              "value": {
+                "trashRestore": true,
+                "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791896162-sdk37-ad897678f107456ab7c54364f9764a84.png",
+                "dateExpires": 1791896162,
+                "restoredPath": "/storage/emulated/0/Pictures/sdk37-ad897678f107456ab7c54364f9764a84.png"
+              }
+            },
+            {
+              "name": "contacts",
+              "ok": true,
+              "value": {
+                "readContacts": false,
+                "directories": {
+                  "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{4f6114b 29634:org.autojs.autojs6/u0a340} (pid=29634, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+                }
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:56:08.551117+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "5892b1213980b7b0a57ae3fe4b854305a7457ff290ad2ac17fd665407a2eba2e",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "d7f01985368400e4ac32a0b09adf52639f11b304b502c3347faabe69e72e7219",
+        "after/org.autojs.autojs6-package.txt": "1b36569ee92c7f7867ef6103968d0b916309522ad1b9f1f4d0090cdef5fb2f6a",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "163f6bf4178cbc3970c73057769b1b9ae691515582d4ff83edcadf3b04cab51b",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "6637241c1fbab63de495e7a6fc2344ea10571d74de7f55091bbef5c7f9c3097f",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "dd148ed4644eb66153dc6df4509ce7e7761f838de512fd6252f4e0301f54c975",
+        "before/org.autojs.autojs6-package.txt": "1ce52d1b0d9e80049b449fd12fda96ede64eec26d15b9ed65b37a62922233982",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "22cf3fe3f3119afab722f8d0a1c6d9fb6dae2835843aac7d8ec8c8167f5550e2",
+        "launch.json": "cb635a364cb7d87ff572df431e3c377047a4bd5d2ccd529ff389b54653b0b14c",
+        "launched-script.js": "9b706cc36d832f890eecdd0af6d07c79e4bcb04df8d663f7a98edae0d21436ac",
+        "logcat-tail.txt": "0387aa24475987b0b23a0ded34af5a8059201bc700a88c3f9866232f5c01b68e",
+        "result.json": "a2be74df6ebe00fe168a059f0114cf9b12862ca939963cc174d5b878a1c98431",
+        "screen.png": "9c5b7047854c8ea22a641a142748b6b231e36b3beecd5b41e96b807e2e5d7ff0",
+        "windows.txt": "c4a14d769a39d1594755943dede9157537f8795c74d2d585f26265c25c4e7fcf"
+      }
+    },
+    {
+      "name": "pickers37-final-verified",
+      "record": {
+        "started": "2026-09-13T12:31:28.265553+00:00",
+        "caseId": "0efb318a6df742c8871524a538edbe9b",
+        "suite": "pickers",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "0efb318a6df742c8871524a538edbe9b",
+          "suite": "pickers",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-0efb318a6df742c8871524a538edbe9b"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "946a72eb4fcd5e0b91253393282a5d35fb547fb7dca50a91fa2159aeff3cfe05",
+        "deviceLogStart": "09-13 20:31:29.000",
+        "removedHostTasks": [
+          877
+        ],
+        "receipt": {
+          "caseId": "0efb318a6df742c8871524a538edbe9b",
+          "suite": "pickers",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "documentSelect",
+              "ok": true,
+              "value": {
+                "code": -1,
+                "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-0efb318a6df742c8871524a538edbe9b%2Fsdk37-0efb318a6df742c8871524a538edbe9b.txt",
+                "flags": 67
+              }
+            },
+            {
+              "name": "documentCancel",
+              "ok": true,
+              "value": {
+                "code": 0,
+                "uri": null,
+                "flags": 0
+              }
+            },
+            {
+              "name": "photoSelect",
+              "ok": true,
+              "value": {
+                "code": -1,
+                "uri": "content://media/picker/0/com.android.providers.media.photopicker/media/595",
+                "flags": 65,
+                "displayName": "595.png",
+                "color": -15795407
+              }
+            },
+            {
+              "name": "photoCancel",
+              "ok": true,
+              "value": {
+                "code": 0,
+                "uri": null,
+                "flags": 0
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:32:47.564720+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "c07f3d455aabac5d4226cd9c868fdf00fb7e909b0b2eb528d393d2f4f85bd3e6",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "eb929c08b726eac9a23d910719a2098c02252b17ce04e0991874e657bba103d0",
+        "after/org.autojs.autojs6-package.txt": "5a738915b64d9d8c2288ae7b167c2be1cd61fee5fa1219fa35a754be13f3c78c",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "bde508b283a8820b26ba042689bd625c78395fb47987b954e480f04558c9798c",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "c613d5bf0dbaa841a90d15448dec109e0c5491a2258bce7516791e30faff4d7a",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "8dc5f5d5fd8c1f69de137d2f9fcc7e792f148050bc6ea63e31654a1e1f5126d3",
+        "before/org.autojs.autojs6-package.txt": "9ef1bde2d321c73cebc31887a5e5a21f357434ffc8e835d0e2c6ea0d60b38a8a",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "a867608bde0223d5ad902c07fc36783fad304c55802fc2dc558107d0be391c95",
+        "documentCancel-dump-0.json": "e466a88efb4d9e6b65f53ab22279736160dc871582698fea00a57693fffb823d",
+        "documentCancel.xml": "ef9a1ac92598d59a5a02291670609a5b0d6684a3105b1487f78cf6a8247e2eff",
+        "documentSelect-dump-0.json": "e466a88efb4d9e6b65f53ab22279736160dc871582698fea00a57693fffb823d",
+        "documentSelect.xml": "ef9a1ac92598d59a5a02291670609a5b0d6684a3105b1487f78cf6a8247e2eff",
+        "launch.json": "ccdc8d969e6dd3c3ca3bb1aeec978bd6d8e6c1e22c8838482402114b25545201",
+        "launched-script.js": "9189e5f589e4d685669c5b47339628b7cfda40bb0e8cc3d88efdf3043fece9a8",
+        "logcat-tail.txt": "6367a6379fe469b34ef3342f8da3e132230a95b04d5b90356797b251b275c6b4",
+        "photoCancel-dump-0.json": "e466a88efb4d9e6b65f53ab22279736160dc871582698fea00a57693fffb823d",
+        "photoCancel.xml": "3c231c5e4be6743359add8378a34ff76d891e19afbc917eb0f719c7d4e7938bd",
+        "photoSelect-confirm.xml": "c4cfc72adc64c0e88b3081153630c08082b99adc1d578d5119bab2bcc7b3c2c2",
+        "photoSelect-dump-0.json": "e466a88efb4d9e6b65f53ab22279736160dc871582698fea00a57693fffb823d",
+        "photoSelect.xml": "40ef2044037b6b21d4777a84251acd02975a8ad4912ce51815c07de5dea35ce5",
+        "result.json": "e9e2c2a9358b206b30d8458f2e36e2711213f82535cacbbefef69faff559b24b",
+        "screen.png": "9038fa69beea06c594b0f02ccd6cd05e14b65d0af7da6ad45c93b6795b9139b8",
+        "windows.txt": "72a4ce5b19598d0686a0248a03234f5aa9cd842e05c4125fe87cebc9460410cb"
+      }
+    },
+    {
+      "name": "pickers36-callback-verified",
+      "record": {
+        "started": "2026-09-13T13:09:48.185895+00:00",
+        "caseId": "6b0a23904f5247119c79d687a11526b0",
+        "suite": "pickers",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "6b0a23904f5247119c79d687a11526b0",
+          "suite": "pickers",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-6b0a23904f5247119c79d687a11526b0"
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "ad59183984bb52098afc0fe0a45f3e34f4f2e0b2e9155ab53165ee39915a62c6",
+        "deviceLogStart": "09-13 21:09:51.000",
+        "removedHostTasks": [],
+        "receipt": {
+          "caseId": "6b0a23904f5247119c79d687a11526b0",
+          "suite": "pickers",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "documentSelect",
+              "ok": true,
+              "value": {
+                "code": -1,
+                "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-6b0a23904f5247119c79d687a11526b0%2Fsdk37-6b0a23904f5247119c79d687a11526b0.txt",
+                "flags": 67
+              }
+            },
+            {
+              "name": "documentCancel",
+              "ok": true,
+              "value": {
+                "code": 0,
+                "uri": null,
+                "flags": 0
+              }
+            },
+            {
+              "name": "photoSelect",
+              "ok": true,
+              "value": {
+                "code": -1,
+                "uri": "content://media/picker/0/com.android.providers.media.photopicker/media/641",
+                "flags": 65,
+                "displayName": "641.png",
+                "color": -9762269
+              }
+            },
+            {
+              "name": "photoCancel",
+              "ok": true,
+              "value": {
+                "code": 0,
+                "uri": null,
+                "flags": 0
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T13:11:29.868854+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "a6b850304ec866afd18ef442a4b73b4f6b1cc29d743ce2b83eebb7afcdd5866f",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "745bc8e6a2c5cd8d2f55de105ceec9ad984490151a19c6847918272498284cb9",
+        "after/org.autojs.autojs6-package.txt": "dfa85802c04b5eab97b2cc2d67580ba5dd403628bda0739b1d7a2fbee6e8f509",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "de796a7f5ed83afe5e39bd111aab3921c6485cbdf6dce3080537423da6cdca83",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "548e8df9044c099673dc6bb358d380d4b412e0635f1699b12a183915931dcd88",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "c2ac5d6cc83d5138cc25b8998981092213c06f906299ea30a74cb5a5ea34f63f",
+        "before/org.autojs.autojs6-package.txt": "1e02c61be9586d3c25259c0c01045e6070443e8992e36791643a85ebfeacdb4c",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "deb68ede029a7608394fd15776b2f8df9515676b1bd9a29c2fe68f12961fdce9",
+        "documentCancel-dump-0.json": "f3345ccf4fad1236f0ec19183eb52d288932e1d9d6b10855e6c8fa777a09b889",
+        "documentCancel.xml": "b74ac8fd6d63f872a8344f2056e78e9f90965e994c790c2032c20f8b858a4ec5",
+        "documentSelect-dump-0.json": "f3345ccf4fad1236f0ec19183eb52d288932e1d9d6b10855e6c8fa777a09b889",
+        "documentSelect.xml": "b74ac8fd6d63f872a8344f2056e78e9f90965e994c790c2032c20f8b858a4ec5",
+        "launch.json": "a5237aa3bd39eed43be0ca24f2818e6f72488b38a3057bc0cb394427fe0ab531",
+        "launched-script.js": "12d4d3a71f620d5afa5b20a111897075406135446ea7a743ff0e3c0ab3ec7a71",
+        "logcat-tail.txt": "b3724ba30ac056e8db01402f07d9eff37f66f9a7507720e605e225a7acac807e",
+        "photoCancel-dump-0.json": "f3345ccf4fad1236f0ec19183eb52d288932e1d9d6b10855e6c8fa777a09b889",
+        "photoCancel.xml": "3cccc2ce7997da93244f6150035ce5ca2583fc9dd8b27c1ca020d072af39809b",
+        "photoSelect-confirm-0.xml": "42a14b4d8bb281d723b31c59ebf4aab6f335e36d5fb48de146cc42044805d9af",
+        "photoSelect-dump-0.json": "f3345ccf4fad1236f0ec19183eb52d288932e1d9d6b10855e6c8fa777a09b889",
+        "photoSelect.xml": "3cccc2ce7997da93244f6150035ce5ca2583fc9dd8b27c1ca020d072af39809b",
+        "result.json": "1843965e59c0e9f4fcce0a2d450ad7b8c8ed52abec1452947e99298d153d1f33",
+        "screen.png": "1f32d7a651a1d73b07369737b6f94e232f0afe4f8b59f2b8a373f7935f96ef56",
+        "windows.txt": "d2adacc54352b8ae70d077c728365313ecf6707e0c3b07c11b8ce2d2aab25a14"
+      }
+    },
+    {
+      "name": "allfiles37-denied-verified",
+      "record": {
+        "started": "2026-09-13T12:20:00.990665+00:00",
+        "caseId": "e4aa7b51848f40d18c84a0f6e7f27d0a",
+        "suite": "allfiles",
+        "expectedTarget": 37,
+        "config": {
+          "caseId": "e4aa7b51848f40d18c84a0f6e7f27d0a",
+          "suite": "allfiles",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-e4aa7b51848f40d18c84a0f6e7f27d0a",
+          "expectAllFiles": false
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af"
+        ],
+        "scriptSha256": "f3a1c726638b124e2a9c218a97a61b3ea6509d93f2492944c2228231dc3a8f23",
+        "deviceLogStart": "09-13 20:20:02.000",
+        "receipt": {
+          "caseId": "e4aa7b51848f40d18c84a0f6e7f27d0a",
+          "suite": "allfiles",
+          "target": 37,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "allFilesState",
+              "ok": true,
+              "value": {
+                "allFiles": false,
+                "platform": false,
+                "pid": 19799
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "launched": true
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:21:39.335784+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": true,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "beeec3f6f27d79124396b48a4b25a7af6a5080bf37556a4426e1e5df5235e895",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "3953b244f37d8705c8235c886d1689bf8b92b7184060606702952b30c6fc0b21",
+        "after/org.autojs.autojs6-package.txt": "b8b39224869525ea52986fe905fd20dbb2996d64acff01fe42352475552b9cbf",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "42c25da4484ef9b1f0e422c9d3b05695bd22317d276cafedeb147079d3bac43d",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "45b72222a1ef7a60d6a9b08edf486a5dc30101c6ac93db9b3c3d87c8e703f27d",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "7217b495a9ca97be28948bea99561db3c81838489c80617b442b1fe505315673",
+        "before/org.autojs.autojs6-package.txt": "59e99efb00c849335be6d4582a14a9b037ee974af887b2ee2acfeccf051e6e10",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "68ae05e26d1bd99658cadb0e808b1e02a213eacca4edc5eaa00f7d8a5e43d662",
+        "launch.json": "f81e3e8713b4a779dce2ce2ee457ffe6b6ca697980ee4ec9ea1bb59262a3e7d0",
+        "launched-script.js": "7d834a3b17c9c344d39804102163bef5a5466649f55f3bbc33b3a612c591f67d",
+        "logcat-tail.txt": "8055f09828c2adb4be44c2f7ce58332a22aeedf5a4bb040142aedd45b7a08a9f",
+        "result.json": "838a6a82b4160dc13caefcc134c23eb7cc25c2cec92d71a0225fb3d49d15ee6a",
+        "screen.png": "32a4cbe4cb50ce2cad8e3164938f93c365fe1e7d795f89f0c0ac97f7089173a4",
+        "windows.txt": "2a1fab7e3faaac95eed0b5f9024864f8335569a2b2e7bf0d3070dddea78b7309"
+      }
+    },
+    {
+      "name": "allfiles36-granted-verified",
+      "record": {
+        "started": "2026-09-13T12:58:30.276068+00:00",
+        "caseId": "47e6dda4f40f43ee9027b33ba24759bb",
+        "suite": "allfiles",
+        "expectedTarget": 36,
+        "config": {
+          "caseId": "47e6dda4f40f43ee9027b33ba24759bb",
+          "suite": "allfiles",
+          "ackPath": "/data/user/0/org.autojs.autojs6/files/sdk37-framework-ack-47e6dda4f40f43ee9027b33ba24759bb",
+          "expectAllFiles": true
+        },
+        "device": {
+          "serial": "127.0.0.1:5587",
+          "model": "sdk_gphone16k_x86_64",
+          "manufacturer": "Google",
+          "sdk": "37",
+          "release": "17",
+          "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+          "abiList": "x86_64,arm64-v8a",
+          "buildType": "userdebug",
+          "emulator": true,
+          "getconfPageSize": 16384,
+          "kernelPageSize": 4096,
+          "pageSizeReadErrors": []
+        },
+        "success": true,
+        "hostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        },
+        "apkSha256": [
+          "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6"
+        ],
+        "scriptSha256": "ab67276430ae5e7b09f0009594593a687bf780cdd6d107eeb1636452c61483d7",
+        "deviceLogStart": "09-13 20:58:32.000",
+        "removedHostTasks": [
+          897
+        ],
+        "receipt": {
+          "caseId": "47e6dda4f40f43ee9027b33ba24759bb",
+          "suite": "allfiles",
+          "target": 36,
+          "sdk": 37,
+          "rows": [
+            {
+              "name": "allFilesState",
+              "ok": true,
+              "value": {
+                "allFiles": true,
+                "platform": true,
+                "pid": 30813
+              }
+            },
+            {
+              "name": "permissionEntry",
+              "ok": true,
+              "value": {
+                "requestedFromActivity": true
+              }
+            }
+          ],
+          "complete": true
+        },
+        "errors": [],
+        "ended": "2026-09-13T12:59:07.594590+00:00",
+        "recordedHostCompat": {
+          "EXCLUDE_UNRELIABLE_STORAGE_VOLUMES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(391360514; name=EXCLUDE_UNRELIABLE_STORAGE_VOLUMES; enableSinceTargetSdk=37)"
+          },
+          "REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(157720069; name=REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES; enableSinceTargetSdk=37)"
+          },
+          "TRASH_BEHAVIOR_CHANGE": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(461429441; name=TRASH_BEHAVIOR_CHANGE; enableSinceTargetSdk=37)"
+          },
+          "CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS": {
+            "enabled": false,
+            "source": "targetSdk",
+            "definition": "ChangeId(270553691; name=CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS; enableSinceTargetSdk=37)"
+          }
+        }
+      },
+      "rawSha256": {
+        "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "after/audio.txt": "0c79590e6b55f403400e97dcdc808285a9310a62bda3ac215640dac38195cf44",
+        "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "after/org.autojs.autojs6-appops.txt": "7db975475ca18e6c2eb11efe3e501351a93d8161131f6769fed3586eadd9cd2c",
+        "after/org.autojs.autojs6-package.txt": "eba5fedb2019a31e2f69cff4119c00aad84531c6a9fb49c62d62d368825868df",
+        "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "after/snapshot.json": "3478d88048eda468b34d94bf88697a72833d8118b64dc9059994c88511c4373c",
+        "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+        "before/audio.txt": "9fc13765350fe70a9299e8e67af07d34eb4e186cc0567c13888fb2c3c0920d0d",
+        "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+        "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+        "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+        "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+        "before/org.autojs.autojs6-appops.txt": "0b18d6c26c76564851a66557d7569978c6d31684f3c959897f843be3a3cb7c20",
+        "before/org.autojs.autojs6-package.txt": "0eb0c10766532b847b90adc49858988bbdb568c27f7933b12030640a4c0571b9",
+        "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+        "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+        "before/snapshot.json": "de2aca19c534973be908ec0e0da7f772e97c6f2026c70088373c312afa955df0",
+        "launch.json": "f11a3b13b0a7b586f7e7953ed3ba20f09df51ac3b568785ca50fc242b95071e9",
+        "launched-script.js": "6178619b7f6ed861d509ef1c137a0d8baf3f038081c574d097a4960293ecc401",
+        "logcat-tail.txt": "eb7c71ca5f486e49ef13c7591cc44da1aa38ed648679b96ac828048c77a0c760",
+        "permission-page.xml": "b51320c453282a5c29dee19602310fa5487e55cd3719a89f1858ae551da5e546",
+        "result.json": "8b85938343b684895dfab0e73c533902dfd7105ec03e0f6fbbfd9ac66fc92b22",
+        "screen.png": "03032856df441c62834d62bc070b8c44e93e0d5cc00d9845498f01e0fb970bc6",
+        "windows.txt": "e5b317994678d4c2fc1a3197b9cd401b082eb5950a43cd4ff390773bb41e5cc5"
+      }
+    }
+  ],
+  "diagnosticsNotCounted": [
+    {
+      "name": "allfiles36-granted-final",
+      "sha256": "df6011ba4d7af78e29ebd96a405b2aaff429479b35aa3a62dbd34c1af6cbf924",
+      "successAtTime": false,
+      "reason": [
+        "The app-specific all-files Settings page is not in the foreground"
+      ],
+      "receipt": {
+        "caseId": "7810256bec8c4e85be69bb7834c5db8c",
+        "suite": "allfiles",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "allFilesState",
+            "ok": true,
+            "value": {
+              "allFiles": true,
+              "platform": true,
+              "pid": 30088
+            }
+          },
+          {
+            "name": "permissionEntry",
+            "ok": true,
+            "value": {
+              "requestedFromActivity": true
+            }
+          }
+        ],
+        "complete": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "allfiles37-denied",
+      "sha256": "bcc542d970e87f57fe6862623c2b8298282d22f2847a2df74277def7935e0f3c",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "allfiles37-final",
+      "sha256": "c3a23b0ffea269afe8a0c2dab8cc5910abd59f3bedd26adab3d16881957e11b3",
+      "successAtTime": false,
+      "reason": [
+        "Receipt identity, target or completion mismatch",
+        "Missing, extra or duplicate result rows",
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "91151f192af849f28ec6b086b4d78179",
+        "suite": "allfiles",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "allFilesRevoke",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "allFilesRevoke",
+          "enabled": false
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "allfiles37-granted-final",
+      "sha256": "0721c8eb2be13a0ca08021e8d0a53a518d680c85ec37135f6504ba77cac80639",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "35c4e4434d9f453da413dab584c3d0c8",
+        "suite": "allfiles",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "allFilesState",
+            "ok": true,
+            "value": {
+              "allFiles": true,
+              "platform": true,
+              "pid": 24145
+            }
+          },
+          {
+            "name": "permissionEntry",
+            "ok": true,
+            "value": {
+              "launched": true
+            }
+          }
+        ],
+        "complete": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "allfiles37-granted-verified",
+      "sha256": "02ab784a9b99798410924df0bf0bb365c7bc473d01c77d9b8a2a45c2ebb7b895",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37",
+      "sha256": "8ed198140372a570a6f8a37ade5d7bc3ff3fb662606c456e5758d63e4239076e",
+      "successAtTime": false,
+      "reason": [
+        "Missing, extra or duplicate result rows",
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "712e6c9f33f745989006ea4516271960",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [],
+        "complete": true,
+        "error": "JavaException: java.lang.IllegalArgumentException: Invalid ID: 63\n\tat Tmp.js:52\n"
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v2",
+      "sha256": "9701fba411898ca76525d7ef891c178e44a0f484d640a7cacc02381f26ff7d17",
+      "successAtTime": false,
+      "reason": [
+        "Receipt identity, target or completion mismatch",
+        "Missing, extra or duplicate result rows",
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "1e268580ddf449778dd6bcf1522ff57a",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": false,
+            "error": "Error: Picker did not return: documentSelect\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:43 (choose)\n\tat Tmp.js:70\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:69\n"
+          },
+          {
+            "name": "documentCancel",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "documentCancel",
+          "documentName": "sdk37-1e268580ddf449778dd6bcf1522ff57a.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v3",
+      "sha256": "e908647383e30e8f07ac3dc226c690e1fc46092eede67c6bfd648f5dcafd1506",
+      "successAtTime": false,
+      "reason": "RuntimeError: {\"command\": [\"E:/.android/sdk/platform-tools/adb.exe\", \"-s\", \"127.0.0.1:5587\", \"shell\", \"dumpsys platform_compat\"], \"exitCode\": 1, \"stdout\": \"\", \"stderr\": \"adb.exe: device '127.0.0.1:5587' not found\\n\"}",
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v4",
+      "sha256": "219eaab9e408a1c32a0f2dfd6ff38b275b9715ba58c5c41e3af7f7fd4461c1d4",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v5",
+      "sha256": "ecd050d3ae037d12c0580d4307d58799dd1a29d6b5844065e45cd2962a9acc59",
+      "successAtTime": false,
+      "reason": "RuntimeError: {\"command\": [\"E:/.android/sdk/platform-tools/adb.exe\", \"-s\", \"127.0.0.1:5587\", \"shell\", \"cat /sdcard/sdk37-picker-ui-c034fd79fe9b4cac97ee95605e18be83.xml\"], \"exitCode\": 1, \"stdout\": \"\", \"stderr\": \"cat: /sdcard/sdk37-picker-ui-c034fd79fe9b4cac97ee95605e18be83.xml: No such file or directory\\n\"}",
+      "receipt": {
+        "caseId": "c034fd79fe9b4cac97ee95605e18be83",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "documentSelect",
+          "documentName": "sdk37-c034fd79fe9b4cac97ee95605e18be83.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v6",
+      "sha256": "8b5dc98c0eb4d5c1ac87e60220060361c4e9ab8c9dca4e430a4e7c403e3a09eb",
+      "successAtTime": false,
+      "reason": "RuntimeError: Expected exactly one identifiable test item for photoSelect, found 0",
+      "receipt": {
+        "caseId": "99aa1f62d2cb4ac3b6b53cdb3f35ccc4",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-99aa1f62d2cb4ac3b6b53cdb3f35ccc4%2Fsdk37-99aa1f62d2cb4ac3b6b53cdb3f35ccc4.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": false,
+            "error": "Error: Picker did not return: documentCancel\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:43 (choose)\n\tat Tmp.js:80\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:80\n"
+          },
+          {
+            "name": "photoSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "photoSelect",
+          "documentName": "sdk37-99aa1f62d2cb4ac3b6b53cdb3f35ccc4.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-pickers37-v7",
+      "sha256": "d53b99bdea55bbb0e2f79240b71f1d73579533284acf33bd62ca2875d2dec799",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-storage36",
+      "sha256": "641a557d3090cfd9542262d89f5b3094ecf50e661a11995aee79ff8a3f15e32d",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "766566e92e7647c1885c0b8a10abf5db",
+        "suite": "storage",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "files",
+            "ok": true,
+            "value": {
+              "path": "/storage/emulated/0/sdk37-storage-766566e92e7647c1885c0b8a10abf5db/中文-file.js",
+              "names": [
+                "中文-file.js"
+              ],
+              "bytes": 64
+            }
+          },
+          {
+            "name": "explorer",
+            "ok": true,
+            "value": {
+              "children": 1,
+              "path": "/storage/emulated/0/sdk37-storage-766566e92e7647c1885c0b8a10abf5db"
+            }
+          },
+          {
+            "name": "volumes",
+            "ok": true,
+            "value": {
+              "storageManager": [
+                {
+                  "uuid": "null",
+                  "path": "/storage/emulated/0",
+                  "state": "mounted",
+                  "primary": true,
+                  "removable": false
+                },
+                {
+                  "uuid": "0000-0000",
+                  "path": "/storage/0000-0000",
+                  "state": "mounted",
+                  "primary": false,
+                  "removable": true
+                }
+              ],
+              "mediaStore": [
+                "0000-0000",
+                "external_primary"
+              ]
+            }
+          },
+          {
+            "name": "history",
+            "ok": true,
+            "value": {
+              "revisions": 1,
+              "restored": true
+            }
+          },
+          {
+            "name": "trash",
+            "ok": true,
+            "value": {
+              "restored": true,
+              "blob": "trash/blob/23d26347-304b-4eb8-b4cb-914d8d3856e3.bin"
+            }
+          },
+          {
+            "name": "media",
+            "ok": false,
+            "error": "InternalError: Can't find method org.autojs.autojs.core.image.ImageWrapper.ofBitmap(android.graphics.Bitmap). (Tmp.js#93)\n\tat Tmp.js:93\n\tat Tmp.js:11 (probe)\n\tat Tmp.js:90\n"
+          },
+          {
+            "name": "mediaTrash",
+            "ok": false,
+            "error": "Error: Missing new MediaStore row\n\tat Tmp.js:7 (requireProbe)\n\tat Tmp.js:112\n\tat Tmp.js:11 (probe)\n\tat Tmp.js:111\n"
+          },
+          {
+            "name": "contacts",
+            "ok": true,
+            "value": {
+              "readContacts": false,
+              "directories": {
+                "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{7ddf901 4672:org.autojs.autojs6/u0a340} (pid=4672, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+              }
+            }
+          },
+          {
+            "name": "permissionEntry",
+            "ok": true,
+            "value": {
+              "allFiles": true,
+              "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+            }
+          }
+        ],
+        "complete": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "explore-storage36-v2",
+      "sha256": "6a2a0217b47de5d0336914cfe024e88925f0008fb8a9dedd4d3495ad2d301b83",
+      "successAtTime": true,
+      "reason": [],
+      "receipt": {
+        "caseId": "9fef23bd7e9d405da33f23d5334b0405",
+        "suite": "storage",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "files",
+            "ok": true,
+            "value": {
+              "path": "/storage/emulated/0/sdk37-storage-9fef23bd7e9d405da33f23d5334b0405/中文-file.js",
+              "names": [
+                "中文-file.js"
+              ],
+              "bytes": 64
+            }
+          },
+          {
+            "name": "explorer",
+            "ok": true,
+            "value": {
+              "children": 1,
+              "path": "/storage/emulated/0/sdk37-storage-9fef23bd7e9d405da33f23d5334b0405"
+            }
+          },
+          {
+            "name": "volumes",
+            "ok": true,
+            "value": {
+              "storageManager": [
+                {
+                  "uuid": "null",
+                  "path": "/storage/emulated/0",
+                  "state": "mounted",
+                  "primary": true,
+                  "removable": false
+                },
+                {
+                  "uuid": "0000-0000",
+                  "path": "/storage/0000-0000",
+                  "state": "mounted",
+                  "primary": false,
+                  "removable": true,
+                  "readWrite": true
+                }
+              ],
+              "mediaStore": [
+                "0000-0000",
+                "external_primary"
+              ]
+            }
+          },
+          {
+            "name": "history",
+            "ok": true,
+            "value": {
+              "revisions": 1,
+              "restored": true
+            }
+          },
+          {
+            "name": "trash",
+            "ok": true,
+            "value": {
+              "restored": true,
+              "blob": "trash/blob/10f83a6d-3c45-4610-a410-f81a5f52807e.bin"
+            }
+          },
+          {
+            "name": "media",
+            "ok": true,
+            "value": {
+              "uri": "content://media/external/images/media/507",
+              "width": 16,
+              "height": 12
+            }
+          },
+          {
+            "name": "mediaTrash",
+            "ok": true,
+            "value": {
+              "trashRestore": true
+            }
+          },
+          {
+            "name": "contacts",
+            "ok": true,
+            "value": {
+              "readContacts": false,
+              "directories": {
+                "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{48bbc6b 5144:org.autojs.autojs6/u0a340} (pid=5144, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+              }
+            }
+          },
+          {
+            "name": "permissionEntry",
+            "ok": true,
+            "value": {
+              "allFiles": true,
+              "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+            }
+          }
+        ],
+        "complete": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers36-complete",
+      "sha256": "39d5249549d2f41f881afd1b5b20bb09be4f5d7920c2555f36565a65890b269e",
+      "successAtTime": false,
+      "reason": [
+        "Receipt identity, target or completion mismatch",
+        "Missing, extra or duplicate result rows",
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "5d995d58d67349b08a0e448783fcfc3d",
+        "suite": "pickers",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-5d995d58d67349b08a0e448783fcfc3d%2Fsdk37-5d995d58d67349b08a0e448783fcfc3d.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": true,
+            "value": {
+              "code": 0,
+              "uri": null,
+              "flags": 0
+            }
+          },
+          {
+            "name": "photoSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "photoSelect",
+          "documentName": "sdk37-5d995d58d67349b08a0e448783fcfc3d.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers36-final",
+      "sha256": "55c8364716f2266804fc6dd290167f26b47702c8bfb23e9a7553ca0d574af5f5",
+      "successAtTime": false,
+      "reason": "RuntimeError: Expected the Photo Picker's explicit Done confirmation",
+      "receipt": {
+        "caseId": "cecb5de16341411f8b57dc35ef3b0864",
+        "suite": "pickers",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-cecb5de16341411f8b57dc35ef3b0864%2Fsdk37-cecb5de16341411f8b57dc35ef3b0864.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": true,
+            "value": {
+              "code": 0,
+              "uri": null,
+              "flags": 0
+            }
+          },
+          {
+            "name": "photoSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "photoSelect",
+          "documentName": "sdk37-cecb5de16341411f8b57dc35ef3b0864.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers36-verified",
+      "sha256": "632702b86c666d47041541809dbb2a5f2f1243196b423e599331357257328e92",
+      "successAtTime": false,
+      "reason": "RuntimeError: Expected exactly one identifiable test item for photoSelect, found 0",
+      "receipt": {
+        "caseId": "ceb46c82c66f462f97861fa19e7baef5",
+        "suite": "pickers",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-ceb46c82c66f462f97861fa19e7baef5%2Fsdk37-ceb46c82c66f462f97861fa19e7baef5.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": true,
+            "value": {
+              "code": 0,
+              "uri": null,
+              "flags": 0
+            }
+          },
+          {
+            "name": "photoSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "photoSelect",
+          "documentName": "sdk37-ceb46c82c66f462f97861fa19e7baef5.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers37-accepted",
+      "sha256": "42a7130032f245d5b4c410c75f5ed60ebe0b8b0c96870adfa05eeb1ae8dd936f",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers37-complete",
+      "sha256": "6478547278717ba16b4f68f7cad151717e0e3643be7f4a831a77f1d7595aa5f7",
+      "successAtTime": false,
+      "reason": [
+        "Receipt identity, target or completion mismatch",
+        "Missing, extra or duplicate result rows",
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "32f36967c7fd49488431c11199d0d744",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-32f36967c7fd49488431c11199d0d744%2Fsdk37-32f36967c7fd49488431c11199d0d744.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": true,
+            "value": {
+              "code": 0,
+              "uri": null,
+              "flags": 0
+            }
+          },
+          {
+            "name": "photoSelect",
+            "ok": false,
+            "error": "Error: Picker did not return: photoSelect\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:50 (choose)\n\tat Tmp.js:89\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:88\n"
+          }
+        ],
+        "complete": false
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers37-final",
+      "sha256": "9700afcb1442eacb42f3918cec8e6f1731d7c8fb83130197f1877860ad387623",
+      "successAtTime": false,
+      "reason": "RuntimeError: uiautomator did not produce a hierarchy: ERROR: null root node returned by UiTestAutomationBridge.\n",
+      "receipt": {
+        "caseId": "6f442135a0944418b608638de0ec456d",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "documentSelect",
+          "documentName": "sdk37-6f442135a0944418b608638de0ec456d.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "pickers37-verified",
+      "sha256": "00d7a682633d8e1b1b57d573bff3fdb646f961c0cf61311086a28f8fa8fe2b28",
+      "successAtTime": false,
+      "reason": "RuntimeError: The expected system picker is not foreground: {'org.autojs.autojs6'}",
+      "receipt": {
+        "caseId": "838a1428754a4319a80750d5eff3cf38",
+        "suite": "pickers",
+        "target": 37,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "documentSelect",
+            "ok": true,
+            "value": {
+              "code": -1,
+              "uri": "content://com.android.externalstorage.documents/document/primary%3ADownload%2Fsdk37-838a1428754a4319a80750d5eff3cf38%2Fsdk37-838a1428754a4319a80750d5eff3cf38.txt",
+              "flags": 67
+            }
+          },
+          {
+            "name": "documentCancel",
+            "ok": true,
+            "value": {
+              "code": 0,
+              "uri": null,
+              "flags": 0
+            }
+          },
+          {
+            "name": "photoSelect",
+            "ok": false
+          }
+        ],
+        "complete": false,
+        "pending": {
+          "name": "photoSelect",
+          "documentName": "sdk37-838a1428754a4319a80750d5eff3cf38.txt"
+        }
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "storage36-final",
+      "sha256": "303923f19e9fb9eb2bdcf62655b4cc8609f4659f1011556a6d045b2dcbb97b37",
+      "successAtTime": false,
+      "reason": [
+        "Receipt identity, target or completion mismatch",
+        "Missing, extra or duplicate result rows"
+      ],
+      "receipt": {
+        "caseId": "df55309285174e78b12f05e06517ab3b",
+        "suite": "storage",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "files",
+            "ok": true,
+            "value": {
+              "path": "/storage/emulated/0/sdk37-storage-df55309285174e78b12f05e06517ab3b/中文-file.js",
+              "names": [
+                "中文-file.js"
+              ],
+              "bytes": 64
+            }
+          },
+          {
+            "name": "explorer",
+            "ok": true,
+            "value": {
+              "children": 1,
+              "path": "/storage/emulated/0/sdk37-storage-df55309285174e78b12f05e06517ab3b"
+            }
+          },
+          {
+            "name": "volumes",
+            "ok": true,
+            "value": {
+              "storageManager": [
+                {
+                  "uuid": "null",
+                  "path": "/storage/emulated/0",
+                  "state": "mounted",
+                  "primary": true,
+                  "removable": false
+                },
+                {
+                  "uuid": "0000-0000",
+                  "path": "/storage/0000-0000",
+                  "state": "mounted",
+                  "primary": false,
+                  "removable": true,
+                  "readWrite": true
+                }
+              ],
+              "mediaStore": [
+                "0000-0000",
+                "external_primary"
+              ]
+            }
+          },
+          {
+            "name": "history",
+            "ok": true,
+            "value": {
+              "revisions": 1,
+              "restored": true
+            }
+          }
+        ],
+        "complete": false
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "storage36-final-verified",
+      "sha256": "dbe49dd28ec9be78e000f4fe6345017569136a3e72897c0afa108b6d2dedaf5f",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "storage36-foreground-final",
+      "sha256": "a8d203baa14ddf614a2d2ce174f03478d96fce94e9738f855c1fd50688e93fda",
+      "successAtTime": false,
+      "reason": [
+        "Missing receipt",
+        "Probe host Activity is not in the foreground"
+      ],
+      "receipt": null,
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    },
+    {
+      "name": "storage36-foreground-verified",
+      "sha256": "baf2311c8966d20d660e1281cae40d3d2abb4d734f0cca66206764a5ae1f8c7d",
+      "successAtTime": false,
+      "reason": [
+        "Script assertion failed"
+      ],
+      "receipt": {
+        "caseId": "598b4d4af986440788181d0c71a484cc",
+        "suite": "storage",
+        "target": 36,
+        "sdk": 37,
+        "rows": [
+          {
+            "name": "files",
+            "ok": true,
+            "value": {
+              "path": "/storage/emulated/0/sdk37-storage-598b4d4af986440788181d0c71a484cc/中文-file.js",
+              "names": [
+                "中文-file.js"
+              ],
+              "bytes": 64
+            }
+          },
+          {
+            "name": "explorer",
+            "ok": true,
+            "value": {
+              "children": 1,
+              "path": "/storage/emulated/0/sdk37-storage-598b4d4af986440788181d0c71a484cc"
+            }
+          },
+          {
+            "name": "volumes",
+            "ok": true,
+            "value": {
+              "storageManager": [
+                {
+                  "uuid": "null",
+                  "path": "/storage/emulated/0",
+                  "state": "mounted",
+                  "primary": true,
+                  "removable": false
+                },
+                {
+                  "uuid": "0000-0000",
+                  "path": "/storage/0000-0000",
+                  "state": "mounted",
+                  "primary": false,
+                  "removable": true,
+                  "readWrite": true
+                }
+              ],
+              "mediaStore": [
+                "0000-0000",
+                "external_primary"
+              ]
+            }
+          },
+          {
+            "name": "history",
+            "ok": true,
+            "value": {
+              "revisions": 1,
+              "restored": true
+            }
+          },
+          {
+            "name": "trash",
+            "ok": true,
+            "value": {
+              "restored": true,
+              "blob": "trash/blob/dd9fc435-5b35-428b-852c-1baea61d8946.bin"
+            }
+          },
+          {
+            "name": "media",
+            "ok": false,
+            "error": "Error: Media dimensions changed\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:117\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:104\n"
+          },
+          {
+            "name": "mediaTrash",
+            "ok": false,
+            "error": "Error: Trashed row is not readable when explicitly included\n\tat Tmp.js:8 (requireProbe)\n\tat Tmp.js:134\n\tat Tmp.js:12 (probe)\n\tat Tmp.js:125\n"
+          },
+          {
+            "name": "contacts",
+            "ok": true,
+            "value": {
+              "readContacts": false,
+              "directories": {
+                "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{5bdebb7 29180:org.autojs.autojs6/u0a340} (pid=29180, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+              }
+            }
+          },
+          {
+            "name": "permissionEntry",
+            "ok": true,
+            "value": {
+              "allFiles": true,
+              "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+            }
+          }
+        ],
+        "complete": true
+      },
+      "notCounted": "Exploration, incomplete run, older probe schema or superseded validation"
+    }
+  ],
+  "counts": {
+    "groups": 12,
+    "rowExecutions": 84,
+    "distinctRows": 14
+  },
+  "platform": {
+    "sha256": {
+      "framework-mediaprovider.jar": "479c823cb8cf16ed0ec1a75c34c70f2f166415077acde9521000e0e1202c27f8",
+      "com.google.android.providers.media.module.apk": "ca00246fc6c2fa21778982bf434b8e3b484083084762e049b758428b88546c81",
+      "com.android.providers.contacts.apk": "49eb8e70d35b2665948922c1a85c9f9f92c94809d1ccb62ece9b5ef1486e3023",
+      "MediaStore-bytecode.txt": "11596a6d6aa805cc3ff8184c3d3e8d31eae18c5ad73150eb51e573eebfbcc880",
+      "MediaFileUtils-bytecode.txt": "7e58c41c07b5dcb1970910a853b4ec11d91d1220be668cee225f1e04b6b60495",
+      "com.google.android.providers.media.module-bytecode.txt": "def175dd5badfa2f9420d230c8aa1d2f8653c583014d0360921159721a4bd4de",
+      "com.android.providers.contacts-bytecode.txt": "c7d5a1eef08f889dd33c7c0d8a4d378409f7d48a88034c7b9d2b14ae40faee9f"
+    },
+    "evidenceKind": "Bytecode from the tested emulator, not AOSP main"
+  },
+  "productFixCommit": "6ab016582",
+  "baseToolCommit": "14a594b10",
+  "pickerDriverCommit": "855134388",
+  "validation": {
+    "frameworkEvidenceUnitTests": {
+      "passed": 8,
+      "total": 8
+    },
+    "physicalDeviceToolUnitTests": {
+      "passed": 4,
+      "total": 4
+    },
+    "pythonCompilation": "PASS",
+    "nativeAlignmentBuildGate": "PASS"
+  },
+  "testEnvironmentActions": {
+    "compile36Speed": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "127.0.0.1:5587",
+        "shell",
+        "cmd package compile -m speed -f org.autojs.autojs6"
+      ],
+      "exitCode": 0,
+      "stdout": "Success\n",
+      "stderr": "",
+      "elapsedSeconds": 92.11067220000405
+    },
+    "startupAnrSummarySha256": "318a6a5e1379e8e022e84e90c5c93ba75ba95a7b93f6636c9d6225e3f4d8585d",
+    "startupAnrMainFrames": [
+      {
+        "header": "2026-09-13 20:45:53 data_app_anr (compressed text, 13123 bytes)\nSystemUptimeMs: 5683784\nProcess: org.autojs.autojs6\nPID: 27126\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:45:45.521+0800\nFlags: 0x38f83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: No\nProcess-Runtime: 24396\nErrorId: 330a4ba0-bb52-47ec-b3ad-e9f8158f58d3\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at org.autojs.autojs.execution.ExecutionConfig.<clinit>(unavailable:0)",
+          "  at org.autojs.autojs.external.ScriptIntents.createIntentExecutionConfig(ScriptIntents.kt:283)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch(ScriptIntents.kt:110)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch$default(ScriptIntents.kt:56)",
+          "  at org.autojs.autojs.external.ScriptIntents.prepareLaunch(unavailable:7)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.handleIntent(RunIntentActivity.java:53)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.onCreate(RunIntentActivity.java:39)",
+          "  at android.app.Activity.performCreate(Activity.java:9340)",
+          "  at android.app.Activity.performCreate(Activity.java:9318)",
+          "  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1543)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4559)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:46:15 data_app_anr (compressed text, 15363 bytes)\nSystemUptimeMs: 5705654\nProcess: org.autojs.autojs6\nPID: 27300\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:46:10.805+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: No\nProcess-Runtime: 21333\nErrorId: 8a6ca8a7-73fa-4bc6-af9a-6cee2fa08429\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at android.os.MessageQueue.nativePollOnce(Native method)",
+          "  at android.os.MessageQueue.nextLegacy(MessageQueue.java:871)",
+          "  at android.os.MessageQueue.next(MessageQueue.java:773)",
+          "  at android.os.Looper.loopOnce(Looper.java:232)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:48:32 data_app_anr (compressed text, 12307 bytes)\nSystemUptimeMs: 5843110\nProcess: org.autojs.autojs6\nPID: 27898\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:48:25.415+0800\nFlags: 0x38f83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 24412\nErrorId: f230700a-9d3b-4de8-aa1f-559bc9c95370\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at org.autojs.autojs.external.open.RunIntentActivity.handleIntent(RunIntentActivity.java:64)",
+          "  at org.autojs.autojs.external.open.RunIntentActivity.onCreate(RunIntentActivity.java:39)",
+          "  at android.app.Activity.performCreate(Activity.java:9340)",
+          "  at android.app.Activity.performCreate(Activity.java:9318)",
+          "  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1543)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4559)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:48:54 data_app_anr (compressed text, 13374 bytes)\nSystemUptimeMs: 5865331\nProcess: org.autojs.autojs6\nPID: 28044\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:48:50.244+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 21524\nErrorId: 784b6152-9a39-4d65-93b1-2483fc22d2d6\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at androidx.appcompat.widget.ResourceManagerInternal.<clinit>(ResourceManagerInternal.java:115)",
+          "  at androidx.appcompat.widget.AppCompatDrawableManager.preload(AppCompatDrawableManager.java:60)",
+          "  at androidx.appcompat.app.AppCompatDelegateImpl.<init>(AppCompatDelegateImpl.java:343)",
+          "  at androidx.appcompat.app.AppCompatDelegateImpl.<init>(AppCompatDelegateImpl.java:293)",
+          "  at androidx.appcompat.app.AppCompatDelegate.create(AppCompatDelegate.java:312)",
+          "  at androidx.appcompat.app.AppCompatActivity.getDelegate(AppCompatActivity.java:576)",
+          "  at androidx.appcompat.app.AppCompatActivity.attachBaseContext(AppCompatActivity.java:137)",
+          "  at android.app.Activity.attach(Activity.java:9227)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4528)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:49:16 data_app_anr (compressed text, 12924 bytes)\nSystemUptimeMs: 5887402\nProcess: org.autojs.autojs6\nPID: 28180\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:49:12.268+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 21765\nErrorId: 9b227be8-25d5-49cf-bc87-1d10319cbc02\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  native: #04 pc 00aa832d  /apex/com.android.art/lib64/libart.so (art::verifier::ClassVerifier::VerifyClass+3981) (BuildId: 6f501445ab44be8f30fb680128550143)",
+          "  at java.lang.Class.newInstance(Native method)",
+          "  at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:99)",
+          "  at androidx.core.app.CoreComponentFactory.instantiateActivity(CoreComponentFactory.java:44)",
+          "  at android.app.Instrumentation.newActivity(Instrumentation.java:1460)",
+          "  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4471)",
+          "  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4781)",
+          "  at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)",
+          "  at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)",
+          "  at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)",
+          "  at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3032)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      },
+      {
+        "header": "2026-09-13 20:49:36 data_app_anr (compressed text, 10766 bytes)\nSystemUptimeMs: 5906899\nProcess: org.autojs.autojs6\nPID: 28336\nUID: 10340\nFrozen: false\nTimestamp: 2026-09-13 20:49:33.634+0800\nFlags: 0x38d83e46\nPackage: org.autojs.autojs6 v5280 (6.8.0)\nForeground: Yes\nProcess-Runtime: 18989\nErrorId: f34789da-bc40-4ab4-b663-ccccd8870738\nBuild: google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys\nPageSize: 16384\nDefaultScreen-State: ON\nKeyguard-Locked: false\nLoading-Progress: 1.0\nDropped-Count: 0",
+        "frames": [
+          "  at android.os.BinderProxy.transactNative(Native method)",
+          "  at android.os.BinderProxy.transact(BinderProxy.java:626)",
+          "  at android.app.IActivityManager$Stub$Proxy.finishAttachApplication(IActivityManager.java:6524)",
+          "  at android.app.ActivityThread.handleBindApplication(ActivityThread.java:8360)",
+          "  at android.app.ActivityThread.-$$Nest$mhandleBindApplication(unavailable:0)",
+          "  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2761)",
+          "  at android.os.Handler.dispatchMessageImpl(Handler.java:142)",
+          "  at android.os.Handler.dispatchMessage(Handler.java:125)",
+          "  at android.os.Looper.loopOnce(Looper.java:296)",
+          "  at android.os.Looper.loop(Looper.java:397)",
+          "  at android.app.ActivityThread.main(ActivityThread.java:9523)",
+          "  at java.lang.reflect.Method.invoke(Native method)",
+          "  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:575)",
+          "  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:939)"
+        ]
+      }
+    ]
+  },
+  "committedScreenshots": {
+    "allfiles36-granted-verified.png": "03032856df441c62834d62bc070b8c44e93e0d5cc00d9845498f01e0fb970bc6",
+    "allfiles37-denied-verified.png": "32a4cbe4cb50ce2cad8e3164938f93c365fe1e7d795f89f0c0ac97f7089173a4"
+  },
+  "apkSha256": {
+    "apks/final36/app.apk": "9ef1069620999e9264f3ca28f0f1cb55a8a419e81bf9bb27a21e2782456882d6",
+    "apks/final37/app.apk": "8a919b92141e6e917b1a719ce3c6e165ff60b755248efab86df8efd680d548af",
+    "apks/fixed36/app.apk": "4ba1a66342b6cb531fd9ef0259df0648816ea16276d317398b79d4563e9b16df",
+    "apks/fixed37/app.apk": "f717c27e0056f29191f79e188c001d7c3886c8bfe888dc9bc650542c7bbf4023"
+  },
+  "toolFilesAtCommit": {
+    "framework-probe-common.js": "5d9360f225c1d96042a5945865ed33d5949be702c2c7c8426125a2c43785d4d1",
+    "run_framework_probe.py": "48abfbb10a6f840adaec7bb2c9cff2e41c6840fda61b2db888f72ed3ffeaf7da",
+    "smoke-allfiles.js": "f9d7e98e7c77e37e1ffbc89836009ae196634703ea39c5460c044b96f990e8e1",
+    "smoke-notifications.js": "05e6e13bf9d05afece876f36a75548174a1c60e8205d7244fc04ac0095998bb0",
+    "smoke-pickers.js": "5800f1d2e90d38383cdd600d81465f70c691db138e99b9f9ff93210beca3c7c4",
+    "smoke-storage.js": "250d3f6bce9b03e91809e5e14cb84f456312bfdf4586fd2187598c8eb01b628c",
+    "smoke-widgets.js": "f114a51d8be86c6c617ab231ec292dd44d339f1215eb1e85972eb481957511c9",
+    "test_framework_probe.py": "1b0db00f127f473c64990be9e5885a546719107f371ade1da9b2149e7d2c364d"
+  },
+  "buildLogs": {
+    "build-final36.log": "c0b132a7ed92f2f02fa986df72452f31270339c22f1be8c912741493a827f73b",
+    "build-final37.log": "8783f0229c069aad430af55298d56991100b1cd9865b5aca57c9e734b8c75097",
+    "build-fixed36.log": "eb6df9c43ca510e9afb6d590e2344bc0e87ba153f3773fad73f0ff93091ca206",
+    "build-fixed37.log": "88ce18a043081bf786ed4ed2ec761ba8a785bdf19b4087e5501b040b660a111a",
+    "build-restored36.log": "4004537e7668c4cec6944ed23cb58231838debbb77932f7f02dfd71a09d757ea"
+  },
+  "limitations": [
+    "AVD x86_64 only",
+    "Actual kernel page size is 4096, not 16384",
+    "No physical checklist rows closed",
+    "Normal target remains 36"
+  ],
+  "backgroundFreezeDiagnostic": {
+    "case": "storage36-final",
+    "lateReceiptNotCounted": {
+      "caseId": "df55309285174e78b12f05e06517ab3b",
+      "suite": "storage",
+      "target": 36,
+      "sdk": 37,
+      "rows": [
+        {
+          "name": "files",
+          "ok": true,
+          "value": {
+            "path": "/storage/emulated/0/sdk37-storage-df55309285174e78b12f05e06517ab3b/中文-file.js",
+            "names": [
+              "中文-file.js"
+            ],
+            "bytes": 64
+          }
+        },
+        {
+          "name": "explorer",
+          "ok": true,
+          "value": {
+            "children": 1,
+            "path": "/storage/emulated/0/sdk37-storage-df55309285174e78b12f05e06517ab3b"
+          }
+        },
+        {
+          "name": "volumes",
+          "ok": true,
+          "value": {
+            "storageManager": [
+              {
+                "uuid": "null",
+                "path": "/storage/emulated/0",
+                "state": "mounted",
+                "primary": true,
+                "removable": false
+              },
+              {
+                "uuid": "0000-0000",
+                "path": "/storage/0000-0000",
+                "state": "mounted",
+                "primary": false,
+                "removable": true,
+                "readWrite": true
+              }
+            ],
+            "mediaStore": [
+              "0000-0000",
+              "external_primary"
+            ]
+          }
+        },
+        {
+          "name": "history",
+          "ok": true,
+          "value": {
+            "revisions": 1,
+            "restored": true
+          }
+        },
+        {
+          "name": "trash",
+          "ok": true,
+          "value": {
+            "restored": true,
+            "blob": "trash/blob/60d19c27-c519-4dbc-bf39-dd340450c10d.bin"
+          }
+        },
+        {
+          "name": "media",
+          "ok": true,
+          "value": {
+            "uri": "content://media/external/images/media/610",
+            "width": 16,
+            "height": 12
+          }
+        },
+        {
+          "name": "mediaTrash",
+          "ok": true,
+          "value": {
+            "trashRestore": true,
+            "trashedPath": "/storage/emulated/0/Pictures/.trashed-1791895372-sdk37-df55309285174e78b12f05e06517ab3b.png",
+            "dateExpires": 1791895372,
+            "restoredPath": "/storage/emulated/0/Pictures/sdk37-df55309285174e78b12f05e06517ab3b.png"
+          }
+        },
+        {
+          "name": "contacts",
+          "ok": true,
+          "value": {
+            "readContacts": false,
+            "directories": {
+              "error": "JavaException: java.lang.SecurityException: Permission Denial: opening provider com.android.providers.contacts.ContactsProvider2 from ProcessRecord{f4e3b97 26306:org.autojs.autojs6/u0a340} (pid=26306, uid=10340) requires android.permission.READ_CONTACTS or android.permission.WRITE_CONTACTS"
+            }
+          }
+        },
+        {
+          "name": "permissionEntry",
+          "ok": true,
+          "value": {
+            "allFiles": true,
+            "component": "com.android.settings/.Settings$AppManageExternalStorageActivity"
+          }
+        }
+      ],
+      "complete": true
+    },
+    "systemLog": "09-13 20:37:43.114   667   688 I ActivityManager: Force stopping org.autojs.autojs6 appid=10340 user=0: from pid 26290\n09-13 20:37:43.127   667   688 I ActivityManager: Killing 26181:org.autojs.autojs6/u0a340 (adj 0): stop org.autojs.autojs6 due to from pid 26290\n09-13 20:37:43.661   667   698 W ActivityManager: ProcessRecord{dd137c4 0:org.autojs.autojs6/u0a340} is attached to a previous process 26181\n09-13 20:37:43.926   667   698 W ActivityManager: ProcessRecord{dd137c4 0:org.autojs.autojs6/u0a340} is attached to a previous process 26181\n09-13 20:37:43.926   667   698 W ActivityManager: ProcessRecord{dd137c4 0:org.autojs.autojs6/u0a340} is attached to a previous process 26181\n09-13 20:37:44.519   667   705 I ActivityManager: Start proc 26306:org.autojs.autojs6/u0a340 for next-top-activity {org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity}\n09-13 20:37:59.537   667  1167 W ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 20:38:00.382   667   704 I ActivityManager: Extending process start timeout by 1470ms for ProcessRecord{f4e3b97 26306:org.autojs.autojs6/u0a340}\n09-13 20:38:05.598   667  1927 W ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 20:38:26.122   667   778 D ActivityManager: freezing 26306 org.autojs.autojs6\n09-13 20:42:50.273   667   766 D ActivityManager: sync unfroze 26306 org.autojs.autojs6 for 6\n09-13 20:42:53.891   667  1499 W ActivityManager: Skipping manifest association check for null package. SourceUid: 10340, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 20:43:01.941   667   778 D ActivityManager: freezing 26306 org.autojs.autojs6",
+    "rawSha256": {
+      "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+      "after/audio.txt": "336a994ab2d44afba35cdd2516dab2968e33ee35d0a58e16c92eaef2afbf33c9",
+      "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+      "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+      "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+      "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+      "after/org.autojs.autojs6-appops.txt": "8dca8a0afbf5bcb2b3e9f4dc5cb2de1d549da05ad487ca176404eddddd183eb4",
+      "after/org.autojs.autojs6-package.txt": "b1ec20e08d0b5100c23a5dd0dede58a8986fd19fa3e77fd86a9dab3a629d3d77",
+      "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+      "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+      "after/snapshot.json": "8844fba8fa149ed31a57e2429c2d7e201e4876c1aa6a12fb1a5f0acd06d7ed22",
+      "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+      "before/audio.txt": "7baf748b005a73491ef7b5ea01d3c4bf09ba5cb96b9028b8242a81510cdecc68",
+      "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+      "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+      "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+      "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+      "before/org.autojs.autojs6-appops.txt": "bea9707a942152bfc017d0c99fb34c2a648e2158a60f4f93df0e546ef72e3c7f",
+      "before/org.autojs.autojs6-package.txt": "ce3226afe3f63e5cfd88d366cc3a924bf5988f4ecfe7c2db10e68e63376301b2",
+      "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+      "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+      "before/snapshot.json": "be3bc2aec2f75c4bc31c9e24547aaa19f3f2c8bf66d5f02464be725b751583e2",
+      "late-activity.log": "90e0c3dd67743314cd151a1f36fcbc87d691c9fd864a8658f25cb3473a707b53",
+      "late-process-log.json": "cc1a805ca649aeaaea25521c0b7ca025c203dd7caa16b2ca868ded70f0163deb",
+      "late-receipt.json": "698aa52f3e258d97c5b4f086b6312475f52d038a233a70b69c85c70f69432aec",
+      "launch.json": "5695851e5d74bc9cdda6282bc459fcad87ece898585cc0f35f2ee61e75ccd2d8",
+      "launched-script.js": "6adb19e3a61626ae39cbc829f642f1935b066f8b7d0292a1f019ee9c6417f6ae",
+      "logcat-tail.txt": "1ec617fd0cbb57ce85d5e6d6420c393e79a47fe84bc42073a910a93cd2d7a91a",
+      "result.json": "303923f19e9fb9eb2bdcf62655b4cc8609f4659f1011556a6d045b2dcbb97b37",
+      "screen.png": "35a064a21ae0388aca0da998d79b76f3c03039b8c3f431446807960399636b43",
+      "windows.txt": "eae0e5e98bdccb54e7c3e45bcdddddac405d8a0e873f8084e8fd3cb3fbe286d7"
+    }
+  },
+  "pickerCancellationDiagnostic": {
+    "case": "pickers36-complete",
+    "activityLog": "--------- beginning of system\n09-13 21:05:12.286   667   698 W ActivityManager: setHasOverlayUi called on unknown pid: 32441\n09-13 21:05:12.379   667  2276 W ActivityTaskManager: callingPackage for (uid=2000, pid=1027) has no WPC\n09-13 21:05:12.436   667  2276 I ActivityTaskManager: START u0 {flg=0x10008000 xflg=0x5 cmp=org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (com.android.shell) (BAL_ALLOW_PERMISSION) result code=0\n09-13 21:05:12.577   667   705 W ActivityManager: Slow operation: 132ms so far, now at startProcess: asking zygote to start proc\n09-13 21:05:12.577   667   698 W ActivityManager: Slow operation: 170ms so far, now at startProcess: done starting proc!\n09-13 21:05:13.001   667   705 W ActivityManager: Slow operation: 556ms so far, now at startProcess: returned from zygote!\n09-13 21:05:13.010   667   705 W ActivityManager: Slow operation: 565ms so far, now at startProcess: done updating battery stats\n09-13 21:05:13.011   667   705 W ActivityManager: Slow operation: 566ms so far, now at startProcess: building log message\n09-13 21:05:13.011   667   705 I ActivityManager: Start proc 1037:org.autojs.autojs6/u0a340 for next-top-activity {org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity}\n09-13 21:05:13.011   667   705 W ActivityManager: Slow operation: 566ms so far, now at startProcess: starting to update pids map\n09-13 21:05:13.011   667   705 W ActivityManager: Slow operation: 566ms so far, now at startProcess: done updating pids map\n09-13 21:05:13.183   667   698 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{66390248 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t6}\n09-13 21:05:13.568   667  2276 W ActivityManager: pid 667 system sent binder code 7 with flags 1 and got error -32\n09-13 21:05:13.613   667   922 W ActivityManager: Slow operation: 110ms so far, now at attachApplicationLocked: before bindApplication\n09-13 21:05:13.613   667   922 W ActivityManager: Slow operation: 111ms so far, now at attachApplicationLocked: immediately before bindApplication\n09-13 21:05:13.843   667   922 W ActivityManager: Slow operation: 340ms so far, now at attachApplicationLocked: immediately after bindApplication\n09-13 21:05:13.843   667   922 W ActivityManager: Slow operation: 340ms so far, now at attachApplicationLocked: after updateLruProcessLocked\n09-13 21:05:13.863   667   922 W ActivityManager: Slow operation: 360ms so far, now at attachApplicationLocked: after updateOomAdjLocked\n09-13 21:05:15.634   667   778 D ActivityManager: freezing 1654 com.google.android.gms\n09-13 21:05:17.235   667  2276 W ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 21:05:17.242   667   778 D ActivityManager: freezing 1700 com.google.android.apps.photos\n09-13 21:05:17.746   667  1215 W ActivityManager: Slow operation: 160ms so far, now at finishAttachApplicationInner: after mServices.attachApplicationLocked\n09-13 21:05:17.749   667  1215 W ActivityManager: Slow operation: 170ms so far, now at finishAttachApplicationInner: after dispatching broadcasts\n09-13 21:05:19.382   667  2276 I ActivityTaskManager: START u0 {flg=0x10000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.execution.ScriptExecuteActivity (has extras)} with LAUNCH_MULTIPLE from uid 10340 (org.autojs.autojs6) (BAL_ALLOW_VISIBLE_WINDOW) result code=0\n09-13 21:05:19.953   667   698 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{191986771 u0 org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity t908 f}}\n09-13 21:05:19.953   667   698 W ActivityTaskManager: Activity pause timeout for ActivityRecord{191986771 u0 org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity t908 f}}\n09-13 21:05:20.968   667  1499 D ActivityManager: sync unfroze 4855 io.github.supermonster003.autojs6.plugin.typescript:typescript_compiler for 6\n09-13 21:05:20.970   667  1499 D ActivityManager: sync unfroze 4867 io.github.supermonster003.autojs6.plugin.typescript:typescript_supervisor for 6\n09-13 21:05:21.579   667   778 D ActivityManager: freezing 1750 android.process.media\n09-13 21:05:22.411   667   698 W ActivityTaskManager: Launch timeout has expired, giving up wake lock!\n09-13 21:05:30.043   667   922 D ActivityManager: sync unfroze 2381 com.google.android.apps.messaging for 7\n--------- beginning of main\n09-13 21:05:34.135   667   695 I ActivityTaskManager: Displayed org.autojs.autojs6/org.autojs.autojs.execution.ScriptExecuteActivity for user 0: +21s661ms\n09-13 21:05:34.274   667  1499 D ActivityManager: sync unfroze 1654 com.google.android.gms for 6\n09-13 21:05:35.861   667  2276 W ActivityManager: Slow operation: 91ms so far, now at startProcess: done creating new process record\n09-13 21:05:35.865   667  2276 W ActivityManager: Slow operation: 96ms so far, now at startProcess: stepping in to startProcess\n09-13 21:05:35.868   667  2276 W ActivityManager: Slow operation: 99ms so far, now at startProcess: done starting proc!\n09-13 21:05:36.058   667   688 W ActivityManager: Slow operation: 191ms so far, now at startProcess: done updating battery stats\n09-13 21:05:36.061   667   688 W ActivityManager: Slow operation: 196ms so far, now at startProcess: building log message\n09-13 21:05:36.063   667   688 I ActivityManager: Start proc 1727:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:47/u0i48 for bound-service {io.github.supermonster003.autojs6.plugin.typescript/org.chromium.content.app.SandboxedProcessService0:47}\n09-13 21:05:36.066   667   688 W ActivityManager: Slow operation: 201ms so far, now at startProcess: starting to update pids map\n09-13 21:05:36.070   667   688 W ActivityManager: Slow operation: 205ms so far, now at startProcess: done updating pids map\n09-13 21:05:36.407   667   688 W ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 21:05:36.418   667   705 W ActivityManager: Slow operation: 553ms so far, now at startProcess: returned from zygote!\n09-13 21:05:36.666   667  1499 I ActivityTaskManager: START u0 {act=android.intent.action.OPEN_DOCUMENT cat=[android.intent.category.OPENABLE] typ=text/plain xflg=0x4 cmp=com.google.android.documentsui/com.android.documentsui.picker.PickActivity (has extras)} with LAUNCH_MULTIPLE from uid 10340 (org.autojs.autojs6) (rr=15543413) (BAL_ALLOW_VISIBLE_WINDOW) result code=0\n09-13 21:05:37.042   667  1927 W ActivityManager: Slow operation: 144ms so far, now at finishAttachApplicationInner: after mServices.attachApplicationLocked\n09-13 21:05:37.042   667  1927 W ActivityManager: Slow operation: 144ms so far, now at finishAttachApplicationInner: after dispatching broadcasts\n09-13 21:05:37.109   667  1918 D ActivityManager: quick sync unfreeze 21263 for 1\n09-13 21:05:37.229   667  1927 D ActivityManager: sync unfroze 21263 com.google.android.documentsui for 6\n09-13 21:05:37.429   667   698 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{15543413 u0 org.autojs.autojs6/org.autojs.autojs.execution.ScriptExecuteActivity t909}\n09-13 21:05:37.758   667  1918 D ActivityManager: sync unfroze 4356 com.google.android.apps.docs for 7\n09-13 21:05:37.877   667   778 D ActivityManager: freezing 21595 com.google.android.photopicker\n09-13 21:05:38.277   667  1918 D ActivityManager: sync unfroze 12763 com.android.externalstorage for 7\n09-13 21:05:39.962   667   695 I ActivityTaskManager: Displayed com.google.android.documentsui/com.android.documentsui.picker.PickActivity for user 0: +3s348ms\n09-13 21:05:48.893   667  2276 I ActivityTaskManager: START u0 {act=android.intent.action.OPEN_DOCUMENT cat=[android.intent.category.OPENABLE] typ=text/plain xflg=0x4 cmp=com.google.android.documentsui/com.android.documentsui.picker.PickActivity (has extras)} with LAUNCH_MULTIPLE from uid 10340 (org.autojs.autojs6) (rr=15543413) (BAL_ALLOW_VISIBLE_WINDOW) result code=0\n09-13 21:05:50.855   667   695 I ActivityTaskManager: Displayed com.google.android.documentsui/com.android.documentsui.picker.PickActivity for user 0: +2s65ms\n09-13 21:06:00.967   667  1887 I ActivityTaskManager: START u0 {act=android.provider.action.PICK_IMAGES typ=image/* xflg=0x4 cmp=com.google.android.photopicker/com.android.photopicker.MainActivity} with LAUNCH_MULTIPLE from uid 10340 (org.autojs.autojs6) (rr=15543413) (BAL_ALLOW_VISIBLE_WINDOW) result code=0\n09-13 21:06:01.332   667  2288 D ActivityManager: quick sync unfreeze 21595 for 1\n09-13 21:06:01.494   667   698 D ActivityManager: sync unfroze 21595 com.google.android.photopicker for 9\n09-13 21:06:01.563   667   698 I ActivityManager: updateOomAdj start time is before than pendingPid added, don't delete it\n09-13 21:06:02.319   667  3660 I ActivityManager: Killing 1727:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:47/u0a268i48 (adj 0): isolated not needed\n09-13 21:06:03.146   667  1886 D ActivityManager: sync unfroze 1700 com.google.android.apps.photos for 7\n09-13 21:06:04.409   667   778 D ActivityManager: freezing 1654 com.google.android.gms\n09-13 21:06:05.202   667   695 I ActivityTaskManager: Displayed com.google.android.photopicker/com.android.photopicker.MainActivity for user 0: +4s607ms\n09-13 21:06:07.095   667  2289 W ActivityManager: Skipping manifest association check for null package. SourceUid: 10340, SourcePkg: null, TargetUid: 10340, TargetPkg: org.autojs.autojs6\n09-13 21:06:07.811   667  2289 D ActivityManager: sync unfroze 1750 android.process.media for 7\n09-13 21:06:12.231   667   778 D ActivityManager: freezing 4855 io.github.supermonster003.autojs6.plugin.typescript:typescript_compiler\n09-13 21:06:12.359   667   778 D ActivityManager: freezing 4867 io.github.supermonster003.autojs6.plugin.typescript:typescript_supervisor\n09-13 21:06:14.477   667  2289 D ActivityManager: sync unfroze 1654 com.google.android.gms for 6\n09-13 21:06:15.546   667   778 D ActivityManager: freezing 21263 com.google.android.documentsui\n09-13 21:06:15.694   667   778 D ActivityManager: freezing 12763 com.android.externalstorage\n09-13 21:06:17.101   667   778 D ActivityManager: freezing 2890 io.github.supermonster003.autojs6.plugin.nodejs:nodejs_runtime\n09-13 21:06:17.252   667   778 D ActivityManager: freezing 1037 org.autojs.autojs6\n09-13 21:06:21.798   667   778 D ActivityManager: freezing 4356 com.google.android.apps.docs\n09-13 21:06:22.967   667  1927 W ActivityManager: Skipping manifest association check for null package. SourceUid: 10216, SourcePkg: com.google.android.providers.media.module, TargetUid: 10340, TargetPkg: null\n09-13 21:06:23.015   667  1927 W ActivityManager: Skipping manifest association check for null package. SourceUid: 10216, SourcePkg: com.google.android.providers.media.module, TargetUid: 10215, TargetPkg: null\n09-13 21:06:32.774   667   778 D ActivityManager: freezing 1654 com.google.android.gms\n09-13 21:06:33.939   667   778 D ActivityManager: freezing 21595 com.google.android.photopicker\n09-13 21:06:34.093   667  2289 D ActivityManager: sync unfroze 1654 com.google.android.gms for 6\n09-13 21:06:44.394   667   778 D ActivityManager: freezing 1654 com.google.android.gms\n09-13 21:06:44.890   667   778 D ActivityManager: freezing 1750 android.process.media\n09-13 21:06:50.791   667   778 D ActivityManager: freezing 1700 com.google.android.apps.photos\n09-13 21:06:52.102   667   778 D ActivityManager: freezing 2381 com.google.android.apps.messaging\n09-13 21:07:11.650   667  2289 D ActivityManager: sync unfroze 2381 com.google.android.apps.messaging for 7\n",
+    "hostLifecycleLines": [
+      "09-13 21:06:00.989  1037  1037 D GlobalConsole: 21:06:00.986/V: [Tmp.js] finished in 30.393 seconds.",
+      "09-13 21:06:06.839  1037  1037 D ScriptExecuteActivity: onDestroy",
+      "09-13 21:06:06.839  1037  1037 D ScriptRuntime: on exit",
+      "09-13 21:06:07.127  1037  1037 W LegacyMessageQueue: \tat org.autojs.autojs.execution.ScriptExecuteActivity.onDestroy(ScriptExecuteActivity.kt:261)"
+    ],
+    "rawSha256": {
+      "after/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+      "after/audio.txt": "2ab0a22fe034b854a4ccab5839a1401a8dd4051954e930cf72aa4615045f8e4f",
+      "after/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+      "after/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+      "after/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+      "after/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+      "after/org.autojs.autojs6-appops.txt": "0841106eed6a98416e825353ebce951747748fb4d67bab59f28d415fb2d83456",
+      "after/org.autojs.autojs6-package.txt": "83f7c8836662697474d0bb0dbe6a64910af3913ca9499e32c615aa06289233a3",
+      "after/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+      "after/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+      "after/snapshot.json": "1d9b320563c084caf9adf50d1f8775f5f7f1dd617443a79e4afd9343941183a1",
+      "before/accessibility-enabled.txt": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789",
+      "before/audio.txt": "a9ac49698e32f0fb8ea12fdee114bf10167b98a12569ff7fc471e37b196e9954",
+      "before/device.json": "6c3ea6177eac7d8208306cfd9fc16716857019fa0addc3574f2338e24b589549",
+      "before/display-density.txt": "c252d19a6bf08b5b18710f68001b75de60771a803b1a48db6080477268948a74",
+      "before/display-size.txt": "c67c50b878a1fc3f4411ebdf384dc2e3913f7cee0e10012c2362ed38d12e1251",
+      "before/memory-limiter.txt": "f856c0377fd363e8a09ee947576ca1d3c081cc84df0cb9f11abaa4f30bdbe011",
+      "before/org.autojs.autojs6-appops.txt": "ee6a531959d1afd3646e480387211859e2801f085b2205cf720b6894091e37b1",
+      "before/org.autojs.autojs6-package.txt": "a6295e1d4d69de66ec1c3656b6147783ca36abc469588715f9ba87357f642422",
+      "before/org.autojs.autojs6-services.txt": "44009d1664d1b66d17ec4859a9e03642b0125d242c05eac9c101806e2397fb7c",
+      "before/platform-compat.txt": "0e0b776470e49336ce563f653545e8bcc595c9ae941c5419a537ec5f35598528",
+      "before/snapshot.json": "f98cf97b2eb1e0f693540bccb9ed97d9b843c77f0317be29edcd2c49766f7be1",
+      "documentCancel-dump-0.json": "54dcaa5e21f01164a2bd89caafcda250f3049685ab028281c4e3fb1399e8fe5c",
+      "documentCancel.xml": "2bb4dbb626472fd3d4bd285f11547b25a36fc0950d8920e515e5a1dccf3b6b7a",
+      "documentSelect-dump-0.json": "54dcaa5e21f01164a2bd89caafcda250f3049685ab028281c4e3fb1399e8fe5c",
+      "documentSelect.xml": "2bb4dbb626472fd3d4bd285f11547b25a36fc0950d8920e515e5a1dccf3b6b7a",
+      "late-activity.json": "bd2cab7fb993199cdec0bd2fe9d25fc7a5585a0c8e9e830868ee34d5b7f51aba",
+      "late-host-log.json": "6ad2597695ea1e21b19d39ad45e80507b76c19a6d0fe0c760baae7a9b7f2a73f",
+      "late-receipt.json": "756f2e2df1eab46cf40f3cb8a79e969d97837d9c502e314fa0810c7f68d7f723",
+      "late-tasks.json": "1f0c39aa12bd1922f5acd55395bb0acad11aa77a5fe38facff20de6457f1557b",
+      "launch.json": "838378ce2d8651bdc3ed3f7a9c8ab564859f27347add48077547c5ebd353afab",
+      "launched-script.js": "c982c95b496b0c909bf3636f7bd79037fb3f5676d6a5759f77cfeb1992496f85",
+      "logcat-tail.txt": "66df9247ee5967858f254f87fb56e1b747151f182d9f6a2777233e2bb68a0706",
+      "photoSelect-confirm-0.xml": "299229564471f75a319ea9654979a5dc3cec3582d956983339af75b330384ab8",
+      "photoSelect-confirm-1.xml": "404c98728383eb19c38922803ef7a4141bc69e28e2b79bbcc802ef9f988470e7",
+      "photoSelect-dump-0.json": "54dcaa5e21f01164a2bd89caafcda250f3049685ab028281c4e3fb1399e8fe5c",
+      "photoSelect.xml": "7d12e40eed33e6b8359f04ee72d93dd5ea3256f66a0cc64d810dddd9dd9310aa",
+      "result.json": "39d5249549d2f41f881afd1b5b20bb09be4f5d7920c2555f36565a65890b269e",
+      "screen.png": "5e2a5797f01a6b69c4307879a0f9168503e7db69b54e67c1105213897df9a4b6",
+      "windows.txt": "f70f2e16306e1a0ed516a123b716fa891ee249c557ef44a32648860a00498d0f"
+    }
+  },
+  "permissionUi": {
+    "revokeBeforeXml": "b51320c453282a5c29dee19602310fa5487e55cd3719a89f1858ae551da5e546",
+    "revocationLog": "44dab6d2b2040a5d92b9f043fd5c11ffe17658b6311f16d94e9768648fdc6533",
+    "grant": {
+      "after.xml": "b51320c453282a5c29dee19602310fa5487e55cd3719a89f1858ae551da5e546",
+      "appops.json": "0ebf7efadd465143d82ab7bf0a86ed61000f943ffb4321c8e7f84790568f277c",
+      "before.xml": "2024daad7d4eb80501551709c4c9264b6f608e8c2a93e7261dd2462b61d17bd1",
+      "dump.json": "388d5073378dd35f7f9c9e7c14544e46b069f5dc23c0ea468811aaa4c0007301",
+      "tap.json": "e2c240ca59bc30f08d64a8c30dec4287b2372c5ff1816da96b1cfd658e1e7999"
+    }
+  }
+}
