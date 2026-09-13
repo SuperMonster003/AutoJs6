@@ -464,6 +464,66 @@ Every output includes the installed target / APK hash, exact launched script and
 python -m unittest discover -s tools/sdk37 -p test_framework_probe.py -v
 ```
 
+## SMS and notification listeners
+
+`run_sms_probe.py` injects three fictional incoming messages with `adb emu sms send`
+on an **exclusively owned API 37 emulator**. Each run reserves a new sender number.
+The host must already be debuggable, have `READ_SMS` / `RECEIVE_SMS` and notification
+listener access, and must not hold the default SMS role. Use an English, unlocked
+AVD with a working default SMS app and notification assistant. This tool stops host
+work but does not install, grant permissions, switch roles, change clocks or delete
+SMS. Dispose of the read-only AVD overlay after the session.
+
+```powershell
+python tools/sdk37/run_sms_probe.py --adb "$Sdk37Adb" --serial emulator-5590 --expected-target 37 --output build/sdk37-sms37-default
+```
+
+Use the same code with target 36 default / `FILTER_GENERIC_OTP` enabled and target
+37 default / disabled. Change only this host override between runs. The runner
+checks the effective override, platform classification (`0`, `1`, `513`), actual
+app-UID query and `SMS_RECEIVED` visibility, ordinary-notification delivery, and
+English OTP redaction callbacks. A missing callback fails the run even if the SMS
+query / broadcast subset passed. Preserve the receipt and system notification dump
+to distinguish platform publication from delivery to `events.observeNotification`.
+The 45-second observation after injection does **not** verify three-hour expiry,
+delayed broadcast release, SMS Retriever or any exemption. System-side queries are
+fixture delivery controls, not proof that scripts can read those rows.
+
+## WebView file access
+
+`run_web_files_probe.py` uses the production `ui.webview` chooser implementation,
+with observation-only `show_file_chooser` / `file_chooser_result` handlers. It uses
+locally supplied HTML with an HTTPS base origin, actual taps and system DocumentsUI.
+Use an exclusively owned, unlocked English API 37 emulator with an installed
+debuggable host of the expected target. The runner interrupts that host's work;
+preflight rejection does not stop it or create files on the device.
+It creates and removes one unique Download document via adb, without giving the
+host broad storage access. An isolated DevTools forward reads DOM results and is
+removed after the run. It also verifies root Activity association and ordinary
+parent theme inheritance.
+
+```powershell
+python tools/sdk37/run_web_files_probe.py --adb "$Sdk37Adb" --serial emulator-5590 --expected-target 37 --output build/sdk37-web-files37-default
+```
+
+Each run covers HTML file selection / cancellation and File System Access open /
+cancellation, save cancellation and directory cancellation. It records actual
+`FileChooserParams` modes, intents, result URI flags, read / write permission checks,
+persisted grants, browser file content or cancellation results, XML and chooser
+screenshots. The validator requires the intent and actual grants to match the
+observed gate, as well as exact fixture content. HTML input cancellation may produce a `change` with an empty file
+list; File System Access cancellation rejects its promise with `AbortError`.
+Repeat with `ENABLE_FILE_SYSTEM_ACCESS` default / explicit override for both host
+targets. With this gate disabled, save and directory calls are expected to reject
+before the native chooser callback; those rows are marked `blocked-before-chooser`,
+not counted as successful user cancellation. Save writes, directory selection / traversal, persisted browser handles,
+physical input, documentation widgets and the independent HTML plugin need their
+own cases. An API name exposed by JavaScript is not sufficient evidence of support.
+
+These probes require the actual host window to be focused. Retain startup ANR or
+loading failures as diagnostics and use a new output directory for a clean rerun.
+They never dismiss application-error dialogs or count such an attempt as a pass.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
