@@ -180,9 +180,8 @@
 
         <android.widget.TextView
             android:id="@+id/btn_delete"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:drawablePadding="4dp"
             android:drawableStart="@drawable/ic_delete_forever_black_48dp"
@@ -198,11 +197,15 @@
             android:textSize="13sp"
             android:translationY="-0.5dp" />
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
         <android.widget.TextView
             android:id="@+id/btn_update"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:drawablePadding="4dp"
             android:drawableStart="@drawable/ic_cloud_download_black_48dp"
@@ -220,11 +223,15 @@
             tools:backgroundTint="#03A5EF"
             tools:textColor="#03A5EF" />
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
         <android.widget.TextView
             android:id="@+id/btn_settings"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:drawablePadding="4dp"
             android:drawableStart="@drawable/ic_circular_menu_settings"
@@ -240,11 +247,15 @@
             android:textSize="13sp"
             android:translationY="-0.5dp" />
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
         <android.widget.TextView
             android:id="@+id/btn_details"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:drawablePadding="4dp"
             android:drawableStart="@drawable/ic_info_black_48dp"

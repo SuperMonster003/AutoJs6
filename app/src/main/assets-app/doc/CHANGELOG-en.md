@@ -297,6 +297,9 @@
 * `Fix` The code editor information bar could omit file extensions or briefly display a temporary end-of-file cursor position while opening a document, and a light-colored gap could flash between the multifunction key bar and the soft keyboard when app and editor themes used different brightness
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
+* `Fix` Plugin Center action icons were spaced too far from their labels after the row layout was flattened
+* `Fix` Plugin Center left September dates such as `Sept 13, 2026` unnormalized instead of displaying `yyyy-MM-dd`
+* `Fix` Plugin Center could display a stale remote icon instead of the current installed icon when a plugin had no online icon URL
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
 * `Fix` A single local plugin process failure could leave Plugin Center with a completely blank list
 * `Fix` Returning to Plugin Center from another screen or the background could make a concurrent refresh transiently remove installed legacy SDK plugins or replace them with disabled index-only entries, reordering rows, rebinding switches, and shifting the scroll position

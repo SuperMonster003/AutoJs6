@@ -6,6 +6,19 @@ import org.junit.Test
 class PluginVersionSummaryFormatterTest {
 
     @Test
+    fun `September aliases from Android and desktop JDKs share an ISO date`() {
+        listOf(
+            "Sep 13, 2026", "Sept 13, 2026", "September 13, 2026",
+            "SEPT 13, 2026", "Sept 3, 2026", "13 Sept 2026", "Sept 13 2026",
+        ).forEach { input ->
+            val expectedDate = if (input == "Sept 3, 2026") "2026-09-03" else "2026-09-13"
+            assertEquals(input, "1.0.0 (27) | $expectedDate", PluginVersionSummaryFormatter.format("1.0.0", 27L, input))
+        }
+        assertEquals("1.0.0 | Sept someday", PluginVersionSummaryFormatter.format("1.0.0", null, "Sept someday"))
+        assertEquals("1.0.0 | Sept 31, 2026", PluginVersionSummaryFormatter.format("1.0.0", null, "Sept 31, 2026"))
+    }
+
+    @Test
     fun `supported dates are normalized without changing the existing precedence`() {
         val cases = linkedMapOf(
             "Nov 21, 2025" to "2025-11-21",

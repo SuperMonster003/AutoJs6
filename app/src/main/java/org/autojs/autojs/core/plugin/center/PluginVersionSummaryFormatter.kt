@@ -32,8 +32,12 @@ internal object PluginVersionSummaryFormatter {
 
     private val isoDateTimeParser = ISODateTimeFormat.dateTimeParser().withOffsetParsed()
 
+    // English locale data differs between Android and desktop JDKs for September.
+    // zh-CN: Android 与桌面 JDK 的英语区域数据使用不同的九月缩写.
+    private val septemberAbbreviation = Regex("\\bSept\\b", RegexOption.IGNORE_CASE)
+
     private val inputFormatters = listOf(
-        formatter("MMM dd, yyyy", Locale.ENGLISH),
+        formatter("MMM dd, yyyy", Locale.US),
         formatter("yyyy-MM-dd"),
         formatter("yyyy/MM/dd"),
         formatter("dd/MM/yyyy"),
@@ -45,8 +49,8 @@ internal object PluginVersionSummaryFormatter {
         formatter("yyyy/MM/dd HH:mm:ss"),
         formatter("yyyy-MM-dd HH:mm"),
         formatter("yyyy/MM/dd HH:mm"),
-        formatter("dd MMM yyyy", Locale.ENGLISH),
-        formatter("MMM dd yyyy", Locale.ENGLISH),
+        formatter("dd MMM yyyy", Locale.US),
+        formatter("MMM dd yyyy", Locale.US),
     )
 
     fun format(versionName: String, versionCode: Long?, versionDate: String?): String {
@@ -64,8 +68,9 @@ internal object PluginVersionSummaryFormatter {
     }
 
     private fun normalizeDate(value: String): String {
+        val input = septemberAbbreviation.replace(value, "Sep")
         return inputFormatters.firstNotNullOfOrNull { formatter ->
-            runCatching { outputFormatter.print(formatter.parseDateTime(value)) }.getOrNull()
+            runCatching { outputFormatter.print(formatter.parseDateTime(input)) }.getOrNull()
         } ?: normalizeIsoDateTime(value) ?: value
     }
 

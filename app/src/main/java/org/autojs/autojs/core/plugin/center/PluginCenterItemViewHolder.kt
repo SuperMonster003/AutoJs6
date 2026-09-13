@@ -86,7 +86,7 @@ class PluginCenterItemViewHolder(
             ?: getCachedRemotePackageIcon(item.packageName, isNightModeEnabled = !ViewUtils.isNightModeEnabled)
         item.icon?.let {
             clearRemoteIconRequest()
-            iconView.setImageDrawable(if (item.remoteIconUrl.isNullOrBlank()) cachedPackageIcon ?: it else it)
+            iconView.setImageDrawable(it)
         } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
             val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url, item.remoteNightIconUrl) ?: url
             val fallbackUrl = listOfNotNull(url, item.remoteNightIconUrl)
