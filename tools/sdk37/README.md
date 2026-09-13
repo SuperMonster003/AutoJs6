@@ -313,6 +313,66 @@ Check the ledger in `no_backup/package-install-status.json`, callback logs, noti
 
 The receiver and recovery Activity are private in release manifests. Callback identity, durable multi-session state and terminal-status replay protection are separately tested by `PackageInstallStatusStoreDeviceTest` and `PackageInstallStatusRecordTest`. The [recovery evidence](../../docs/dev/evidence/android-sdk-37-p25-recovery-20260913.md) records exact APKs, outcomes and the distinction between process death and force-stop.
 
+## Parcel and plugin IPC
+
+`run_parcel_tests.py` runs on an explicitly selected Android 17 device with the normal debug host and matching androidTest APK already installed. Instrumentation restarts the host and interrupts scripts. The helper does not install packages, clear data, grant permissions or change compat settings. Use a disposable device profile for the real plugin suites, which start native runtimes and services. Each invocation includes two deliberate negative controls, checks every selected test's completion identity, rejects skips, records installed APK hashes and snapshots the host and selected plugins before and after the run.
+
+Use a new output directory for every run. If instrumentation times out, inspect and stop that selected test before starting another suite; an adb client timeout does not prove that the device-side test has exited. `logcatExitCode` records diagnostic collection separately from the functional assertions.
+
+The negative fixture writes two integers and reads only one from a length-prefixed `Parcel.writeValue` payload. With hardening disabled, both the host and a private debug receiver process must accept it. With hardening enabled, both must throw `BadParcelableException` with the length-mismatch diagnostic. The test checks that the receiver PID differs from the host PID. Normal `ExecutionConfig`, nested `PluginInfo`, Tasker JSON and shortcut extras must still round-trip unchanged. Tasker and shortcut tests cover their serialized payloads; they do not launch the external Tasker app or verify a launcher shortcut UI.
+
+On the tested API 37.0 image the effective gate is `PARCEL_HARDENING` / `416031865`, enabled since target 37. The executor checks `packageOverrides` and each package's actual target; a host override cannot stand in for an independent plugin's override. A `rawOverrides` entry alone is not counted as effective. The platform feature flag is also necessary; the negative controls detect an image on which changing compat state has no semantic effect. This test concerns length-prefixed reads; it does not claim that every typed AIDL read, native Binder implementation or recycled-Parcel check uses this gate.
+
+Record existing overrides before changing them. For a target 36 control, set the selected host and plugin to the same state, then run with the corresponding expectation:
+
+```powershell
+$Sdk37Adb = 'E:/.android/sdk/platform-tools/adb.exe'
+$Sdk37Serial = 'emulator-5572' # Replace with the selected test device.
+$Sdk37Host = 'org.autojs.autojs6'
+$Sdk37Plugin = 'io.github.supermonster003.autojs6.plugin.quickjs.runtime'
+
+& $Sdk37Adb -s $Sdk37Serial shell am compat disable PARCEL_HARDENING $Sdk37Host
+& $Sdk37Adb -s $Sdk37Serial shell am compat disable PARCEL_HARDENING $Sdk37Plugin
+py tools/sdk37/run_parcel_tests.py --adb $Sdk37Adb --serial $Sdk37Serial --expected-target 36 --hardening false --suite quickjs --output build/sdk37-parcel/t36-disabled-quickjs
+
+& $Sdk37Adb -s $Sdk37Serial shell am compat enable PARCEL_HARDENING $Sdk37Host
+& $Sdk37Adb -s $Sdk37Serial shell am compat enable PARCEL_HARDENING $Sdk37Plugin
+py tools/sdk37/run_parcel_tests.py --adb $Sdk37Adb --serial $Sdk37Serial --expected-target 36 --hardening true --suite quickjs --output build/sdk37-parcel/t36-enabled-quickjs
+```
+
+For the target 37 default control, build with `'-Pautojs.sdk.target.override=37'`, install the corresponding host and test APKs, and reset only the host override. The still-target-36 plugins must retain their explicit enable override until their own P5 migration. Run with `--expected-target 37 --hardening true`. After testing, restore each recorded original override, or `am compat reset PARCEL_HARDENING <package>` if that package originally had no override. Do not reset unrelated changes.
+
+| Suite | Required provider or fixture | Expected result beyond the two negative controls |
+| --- | --- | --- |
+| `controls` | Debug-only private receiver included in the host | Both local and remote mismatched reads follow the selected policy |
+| `wire` | Same receiver | Existing six-field `ExecutionConfig` consumes exactly its written bytes; nullable / populated `PluginInfo` and nested capabilities, Tasker JSON and Lua shortcut extras retain their values |
+| `metadata` | Repeat `--plugin-package <applicationId>` for every package to check | Production `InstalledPluginRepository` finds each selected package in its package-manager snapshot and complete discovery, with a title, version and no binding error |
+| `opencv` | `.plugin.opencv`, matching device ABI | Host loads the installed JNI implementation and obtains the expected matrix mean; this is a host-process load, not a separate-provider Binder execution |
+| `imagequant` | `.plugin.imagequant`, matching device ABI | Host loads the JNI implementation and produces a valid indexed PNG |
+| `barcode` | `.plugin.mlkit.barcode` | Image PFD goes to the provider; structured result decodes the fixed EAN-8 `96385074`, format, bounds and corner points |
+| `node` | `.plugin.nodejs`, matching signer / ABI | Real provider executes the source and returns the exact console marker |
+| `lua` | `.plugin.lua.runtime`, runnable provider with matching signer / ABI | Real provider executes sequential sessions, including host callbacks and module loading; it is not the fake conformance service |
+| `quickjs` | `.plugin.quickjs.runtime`, matching signer / ABI | Source PFD executes with exit code 0 and a returned console line; callback text can include line terminators |
+| `python` | `.plugin.python.runtime`, matching signer / ABI | Current production host engine negotiates the protocol, executes a temporary `.py` file, returns exit code 0, exact stdout byte count, no stderr and the expected console line |
+| `yolo` | `.plugin.yolo.ncnn`, matching signer / ABI, local model fixtures | Existing R2 acceptance validates remote Binder, owned PFDs, reference detections, idempotent close and reopen |
+| `mcp` | `.plugin.mcp.server` | Real server reaches RUNNING on loopback with the host attached, reports endpoints and stops cleanly |
+
+All `.plugin.*` suffixes in the table have prefix `io.github.supermonster003.autojs6`. The YOLO case additionally requires `model-manifest-v1.json`, `model.ncnn.param`, `model.ncnn.bin`, `bus.jpg` and `expected-bus-detections.json` in the host-private `files/yolo-r2-fixture` directory. Verify the files against the existing provider repository's `fixtures/yolo11n/fixture.lock.json` before staging; untracked model/image bytes can be under `fixtures/local/yolo11n`. See `tools/yolo/verify-yolo-r2.ps1` for that fixture contract. A missing fixture is a failure, not a skip or pass. No model is bundled by this SDK check.
+
+Paddle v4 and Rapid v6 reuse the public-script runner. Enable `PARCEL_HARDENING` separately for the host, `io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile` and `io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6`, retain their package/compat snapshots, then run:
+
+```powershell
+py tools/16kb/ocr_provider_smoke.py $Sdk37Serial --adb $Sdk37Adb --jobs paddle:v4 rapid:v6 --image generated --enable-packages io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6 --label sdk37-parcel-ocr --out build/sdk37-parcel/ocr
+```
+
+The OCR runner restarts the host, enables those plugins in Plugin Center, clears logcat and writes a test receipt. Run it after instrumentation has finished. Expected receipt: `complete=true`, both rows `ok=true`, and recognized text containing `TEST 16 KB` and `Hello World` (word segmentation may differ). These results cover the selected ABI and plugin artifacts; they do not close the 42-plugin P5 release or physical-device gates. The [P2.7 evidence](../../docs/dev/evidence/android-sdk-37-p27-20260913.md) also retains unsuccessful exploratory tests and their explanations.
+
+Host-side checks, without adb:
+
+```powershell
+py -m unittest discover -s tools/sdk37 -p test_parcel_evidence.py -v
+```
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
