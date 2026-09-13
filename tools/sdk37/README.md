@@ -1,6 +1,36 @@
 # SDK 37 migration checks
 
-See [the Roadmap](../../docs/dev/android-sdk-37-roadmap.md) for the acceptance matrix.
+See [the Roadmap](../../docs/dev/android-sdk-37-roadmap.md) for migration status and [the physical-device checklist](../../docs/dev/android-sdk-37-physical-device-tests.md) for device assignments, test methods, expected results and all 42 plugin rows.
+
+## Physical devices
+
+`physical_device.py` uses only the Python standard library. `inventory` queries online devices and records offline entries without querying them. `snapshot` saves read-only package, service, app-op, compat, audio, display and kernel-page information. Unsupported device commands retain their exit codes. Neither action asserts a functional pass. `checklist` exports every case in the physical-device document to a UTF-8 CSV with result and evidence columns, initially `NOT_RUN`. Use a new output directory each time:
+
+```powershell
+$Sdk37Adb = 'E:/.android/sdk/platform-tools/adb.exe'
+$Sdk37Serial = 'QV770340J7' # Replace with the selected test device.
+py tools/sdk37/physical_device.py inventory --adb $Sdk37Adb --output build/sdk37-physical/inventory
+py tools/sdk37/physical_device.py checklist --output build/sdk37-physical/checklist
+py tools/sdk37/physical_device.py snapshot --adb $Sdk37Adb --serial $Sdk37Serial --output build/sdk37-physical/before
+```
+
+After manual testing, take another snapshot with `--include-logs` in a different directory. The log is a bounded historical tail, not evidence that a particular case ran. Save observed behavior, APK hashes / targets, timestamps and relevant screenshots separately.
+
+The `instrument` action runs only the named suite against an already installed, debuggable app and matching test APK. It verifies the actual `targetSdk` and each method's completion identity, rejecting missing, duplicate, skipped, failed or crashed tests. Instrumentation restarts the app and interrupts scripts. This helper does not install APKs, grant permissions, change settings, rebind accessibility, force-stop, clear data or reboot:
+
+```powershell
+py tools/sdk37/physical_device.py instrument --adb $Sdk37Adb --serial $Sdk37Serial --expected-target 37 --suite dex --output build/sdk37-physical/dex
+```
+
+Suites are `dex` (1 method), `native` (3; compatible OpenCV and Image Quantization plugins required), `install-state` (2; state storage and callback identity only), and `looper-platform` (2). Looper tests require explicit `--clear-interrupt` and `--pool-starts`; use the platform expectation table below. Pass `--package` for a matching inrt test build. The helper never substitutes host tests for a separately generated user APK. The default instrumentation timeout is 300 seconds and accepts 30-900 seconds; an adb timeout may leave device instrumentation running, so inspect it before launching another suite.
+
+The complete 14-test `run_looper_tests.py`, `run_audio_probe.py`, and local-network permission-dialog suites remain emulator-only because they manipulate services, volume, reboot state or system dialogs. Physical audibility, OEM permission pages, touch / keyboard behavior, actual capture pixels and external hardware need the checklist's manual observations.
+
+Host-only tests for result parsing and LAN peer filtering, with no adb calls:
+
+```powershell
+py -m unittest discover -s tools/sdk37 -p test_physical_device.py -v
+```
 
 ## Build configuration
 
@@ -100,7 +130,7 @@ Run `sample/accessibility/smoke-legacy-api.js` separately after instrumentation 
 
 `ACCESS_LOCAL_NETWORK` is included through the `src/target37/AndroidManifest.xml` flavor overlay only when that flavor actually targets API 37 or later. Normal host target 36 / inrt target 29 builds must not declare or request it. Use `-Pautojs.sdk.target.override=37` for debug experiments, and inspect the APK with `aapt2 dump badging` before granting a permission. Keep the host and its matching instrumentation APK together. `assembleInrtDebug` disables ABI splits for that invocation, including a host built in the same invocation; use the filenames in `output-metadata.json` instead of picking an older APK left in the directory.
 
-On a disposable emulator, start `python tools/sdk37/local_network_fixture.py` on the host. It binds only `127.0.0.1`: HTTP/WebSocket on 17637, UDP echo on 17638, a minimal MQTT CONNECT responder on 17639 and a VS Code hello responder on 17640. It neither executes scripts nor provides a general MQTT broker. Configure emulator network redirection for the two inbound probes:
+On a disposable emulator, start `python tools/sdk37/local_network_fixture.py` on the host. By default it binds only `127.0.0.1`: HTTP/WebSocket on 17637, UDP echo on 17638, a minimal MQTT CONNECT responder on 17639 and a VS Code hello responder on 17640. It neither executes scripts nor provides a general MQTT broker. Configure emulator network redirection for the two inbound probes:
 
 ```powershell
 $env:ADB = 'E:/.android/sdk/platform-tools/adb.exe'
@@ -122,9 +152,20 @@ For permission UI tests, first revoke ACCESS_LOCAL_NETWORK and clear its `user-s
 
 For upgrade coverage, install a normal target 36 APK, record its implicit permission state and successful traffic, then install the target 37 APK with `-r` and record the resulting state before any grant or revoke. Test legacy target APKs with `--expect granted`. Keep fresh installs, upgrades and existing Nearby Devices grants distinct. Actual Wi-Fi / Ethernet, VPN, managed-profile and separate plugin-UID tests remain separate device matrix rows; the emulator fixture does not claim those environments.
 
+For a physical IPv4 LAN, choose the PC interface and phone peer explicitly. The fixture listens only on that PC address, accepts only the selected phone source address, and connects directly from that PC interface to the phone's ports 17643 / 7347. It does not configure routing, firewall rules or permissions. Replace both example addresses:
+
+```powershell
+# Terminal 1; stop with Ctrl+C.
+py tools/sdk37/local_network_fixture.py --bind 192.168.1.10 --device 192.168.1.20
+# Terminal 2, after checking permission state on the phone.
+py tools/sdk37/run_local_network_tests.py --adb $Sdk37Adb --serial $Sdk37Serial --host 192.168.1.10 --expect granted --output build/sdk37-physical/lan-granted
+```
+
+Physical serials require an explicit IPv4 `--host`; emulator alias `10.0.2.2` is rejected. Do not use adb tunnels for these runs. On API 37 / target 37, prove a granted connection first, deny in the device UI and run `--expect denied`, then grant and verify recovery in a third directory. A TCP timeout alone cannot distinguish a permission denial from a firewall or routing problem. IPv6 LAN, multicast / mDNS, profiles, full MQTT message delivery and real VS Code execution remain separate checklist cases; IPv6 loopback does not cover an IPv6 LAN.
+
 ## Background Activity launches
 
-Use a disposable API 37 emulator with the host debug APK and the independent BAL fixture. The fixture is intentionally debuggable, has no network access, accepts provider calls only from the debuggable host / inrt, and creates tokens for its own fixed Activity or receiver. Its Activity tokens explicitly deny creator-side delegation, so sender tests cannot pass by borrowing creator privileges. Build it offline with the installed API 37 SDK and Build Tools:
+Use a disposable API 37 emulator, or an explicitly selected API 37 test phone with `--physical-device`, with the host debug APK and the independent BAL fixture. The fixture is intentionally debuggable, has no network access, accepts provider calls only from the debuggable host / inrt, and creates tokens for its own fixed Activity or receiver. Its Activity tokens explicitly deny creator-side delegation, so sender tests cannot pass by borrowing creator privileges. Build it offline with the installed API 37 SDK and Build Tools:
 
 ```powershell
 python tools/sdk37/build_bal_fixture.py --sdk E:/.android/sdk --jdk E:/.java/jdk-21.0.1 --output build/sdk37-bal-fixture
@@ -136,7 +177,7 @@ python tools/sdk37/run_bal_probe.py --serial emulator-5566 --route sender --send
 python tools/sdk37/run_bal_probe.py --serial emulator-5566 --route broadcast --background --sender-mode none --expect broadcast --output build/sdk37-bal/broadcast
 ```
 
-Pass `--adb` if adb is not on PATH. The helper does not install packages or modify permissions / compat overrides. It force-stops the selected probe package and the disposable fixture, uses a fresh case ID and output directory, and records actual target creation and result delivery separately from the return of the send call. `--reuse-process` retains the host process after removing only tasks belonging to the host / fixture; the fixture is still force-stopped so an old Activity cannot be uncovered during a background case. `--timeout` sets the completion deadline (120 seconds by default). Default and explicit enable / disable runs must use separate output directories. Snapshot the existing `COVER_INTENT_SENDER` and `ASM_RESTRICTIONS` overrides before changing them; restore each original override, or reset it if none existed.
+Pass `--adb` if adb is not on PATH. The helper rejects non-emulator serials unless `--physical-device` is supplied. It does not install packages or modify permissions / compat overrides. It force-stops the selected probe package and the disposable fixture, interrupting their work, uses a fresh case ID and output directory, and records actual target creation and result delivery separately from the return of the send call. `--reuse-process` retains the host process after removing only tasks belonging to the host / fixture; the fixture is still force-stopped so an old Activity cannot be uncovered during a background case. `--timeout` sets the completion deadline (120 seconds by default). Default and explicit enable / disable runs must use separate output directories. Snapshot the existing `COVER_INTENT_SENDER` and `ASM_RESTRICTIONS` overrides before changing them; restore each original override, or reset it if none existed.
 
 `--background` moves the probe task to the background and waits 12 seconds before sending. Before interpreting a blocked / allowed result, inspect the saved app-ops, process state and system BAL log for overlay / accessibility / recent-launch exceptions. Granting options does not itself grant an app background-launch eligibility. A blocked assertion requires a platform BAL block / StrictMode violation, not just a missing target.
 
@@ -146,7 +187,7 @@ Pass `--adb` if adb is not on PATH. The helper does not install packages or modi
 python tools/sdk37/build_bal_fixture.py --sdk E:/.android/sdk --jdk E:/.java/jdk-21.0.1 --allow-cross-uid-from-below false --output build/sdk37-bal/fixture-protected
 ```
 
-The builder saves the generated manifest and `build.json` alongside the APK. `false` opts the top app into ASM protection; `true` permits switches; `default` omits the manifest attribute. Each build creates its own disposable signing key, so uninstall only the dedicated fixture package on the disposable emulator before installing a differently signed variant. Do not replace the fixture during an installation-recovery test.
+The builder saves the generated manifest and `build.json` alongside the APK. `false` opts the top app into ASM protection; `true` permits switches; `default` omits the manifest attribute. Each build creates its own disposable signing key, so uninstall only the dedicated fixture package on the selected test device before installing a differently signed variant. Do not replace the fixture during an installation-recovery test.
 
 On the tested API 37 image, a target 37 caller is blocked only when the different-UID top app is also subject to `ASM_RESTRICTIONS`, its application manifest opts into protection, and the Activity has not granted the `true` exception. Calling the Activity setter with `false` alone did not enable application protection. Test the caller and top package compat overrides independently, plus the manifest-default and Activity-exception controls. Record `default / enable / disable` separately; `overridable` in a compat dump does not mean disabled. See the [ASM evidence](../../docs/dev/evidence/android-sdk-37-p25-asm-20260913.md) for this image's results and documentation differences.
 
@@ -160,7 +201,7 @@ The probe Activity requires `android.permission.DUMP`, and its landing Activity 
 
 ## Installation confirmation recovery
 
-Use `run_install_recovery_probe.py` for installation recovery cases. It preserves the application process and pending sessions, does not require the BAL token fixture, and never force-stops either package. It requires an explicit disposable emulator serial and a debuggable host or inrt APK. The `install` route submits through the production archive inspector and session installer; `install-ui` opens the production `PackageInstallerActivity`; `install-recovery` records persisted sessions and whether their system confirmation tokens still exist.
+Use `run_install_recovery_probe.py` for installation recovery cases. It preserves the application process and pending sessions, does not require the BAL token fixture, and never force-stops either package. It requires an explicit disposable emulator serial, or `--physical-device` with a selected test phone, and a debuggable host or inrt APK. The `install` route submits through the production archive inspector and session installer; `install-ui` opens the production `PackageInstallerActivity`; `install-recovery` records persisted sessions and whether their system confirmation tokens still exist.
 
 Copy a signed, compatible test APK into `files/sdk37-bal-install.apk` in the selected app. For multiple sessions, use distinct filenames and `--apk-name`. For example:
 

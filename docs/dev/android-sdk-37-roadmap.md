@@ -5,6 +5,8 @@
 
 2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 [P2.3 动态加载只读适配](evidence/android-sdk-37-p23-20260913.md)、[P2.4 Looper / 线程适配](evidence/android-sdk-37-p24-20260913.md). [P2.1 本地网络权限](evidence/android-sdk-37-p21-20260913.md) 的代码、模拟器验证及关联文档 / 声明同步已落地, 真机网络、跨 profile 与完整 MqttService 流程仍待验收. 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 的整体目标仍未完成.
 
+实体机执行入口: [完整测试清单](android-sdk-37-physical-device-tests.md), 共 99 行, 含宿主 / 系统 51 行、inrt 用户 APK 6 行、全部插件 42 行. 每行列出设备、步骤、预期和本 Roadmap 的对应项; `tools/sdk37/physical_device.py checklist` 可导出带状态 / 证据列的 CSV. 现有 5 台真机只提供旧系统回归, API 37 与真实 16 KB 内核设备仍需补齐; 整理清单与工具自测不关闭功能验收项.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
@@ -277,7 +279,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.12 大屏, 输入法与配置变化 (I12)
 
-- [ ] 在 Xiaomi 23046RP50C (API 35, sw >= 600dp) 与 `AVD_API_37` 上以 target 37 覆盖包运行 UI 模式脚本 (含 `activity.setRequestedOrientation`), 悬浮窗, 控制台, 编辑器旋转 / 分屏; 确认与 target 36 行为一致 (宿主无豁免属性, 预期零差异), 旋转后输入法可见性与 `EditActivity` 的 `adjustResize` 表现. (DEVICE; DEVICE-37)
+- [ ] 在 Xiaomi 23046RP50C (API 35, sw >= 600dp) 与 `AVD_API_37` 上以 target 37 覆盖包运行 UI 模式脚本 (含 `activity.setRequestedOrientation`), 悬浮窗, 控制台, 编辑器旋转 / 分屏; 同机对照 target 36, 检查布局、状态保留、旋转后输入法可见性与 `EditActivity` 的 `adjustResize`. 宿主无 manifest 豁免只说明没有该属性的迁移工作, 不能代替运行时方向 / 窗口验收; API 35 不用于证明 Android 17 新规. 真机步骤见 [UI01-UI03](android-sdk-37-physical-device-tests.md#46-存储输入webview-与其他系统能力). (DEVICE; DEVICE-37)
 - [ ] 复核 `MainActivity` / `EditActivity` / `LogActivity` 的 `configChanges` 与 IME 恢复, 记录 Activity 重建 / `onConfigurationChanged` 次数; "更少 Activity 重建" 的具体触发条件补官方或源码证据后再确认. UI 脚本还需测试物理键盘、触摸板捕获、返回与边到边布局, 不以 Java / Kotlin 编译通过代替输入行为验证. (SOURCE; DEVICE-37)
 
 ### P2.13 内存上限 (I13)
@@ -690,3 +692,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 复跑工具提交 `45741a160`, 新增 fixture manifest 参数、UID / target / task 记录和启动前 resumed task 快照; 拦截要求本 case 的系统 ASM 日志, 不凭调用返回或目标缺失推断. [机器结果与复跑说明](evidence/android-sdk-37-p25-asm-20260913.md).
 - 生产 manifest 与启动代码保持现状, 不添加通用放行例外. 本轮只有测试工具与研发文档, 不触发产品 changelog 或关联插件 / 文档仓库更新. target 37 inrt 调试构建、正常宿主 / inrt 构建、16 KB native 对齐和 release 主 manifest 检查通过; 不代表完整 release / R8 验收.
 - 正常配置与输出仍为 compile 37 / 宿主 target 36 / inrt target 29. 兼容开关已恢复, 独占只读 AVD 已关闭. 最终镜像 / 真机 ASM 复跑及真实 Launcher、其他通知 / 小组件、取色回传、a11y 与 inrt 其余入口继续保持开放; P2.5 与 P3 尚未整体完成.
+
+### 2026-09-13: 实体机测试工作汇总与执行工具
+
+- [实体机清单](android-sdk-37-physical-device-tests.md) 汇总 99 个可勾选验收行, 每行含设备、操作、预期和阶段映射, 42 个官方插件各有独立记录. 生成的 CSV 全部初始化为 NOT_RUN, 一个测试行的多种设备 / 权限 / 包场景需要分别保存证据.
+- 新增只读设备清点 / 快照、CSV 导出和选定 instrumentation 入口. 实际 LAN fixture 支持指定 PC 接口 / 手机来源 IPv4, BAL 与安装恢复探针通过显式 `--physical-device` 参数支持测试手机. 权限页自动点击、完整 Looper 与音频全局诊断仍按原工具边界运行.
+- 只读清点确认 API 28 / 31 / 33 / 35 的 5 台真机在线, 均为真实 4 KB 内核页, Xiaomi 平板为 sw720dp; 另完成 API 35 的只读快照验证. 没有在线 API 37 真机或真实 16 KB 设备. 本轮未安装测试 APK、运行手机 instrumentation、修改权限或执行功能验收. 缺少新硬件记为实体机证据待补, 不另加原 Roadmap 未约定的发布前置条件.
+- 本轮修改仅为测试工具与研发文档, 正常 SDK 配置不变, 无产品 changelog / JS API / 插件版本变化. Python 与工具验证结果见清单第 8 节; 不能以工具检查或 AVD 结果关闭实体机、最终用户 APK 与插件验收门禁.
