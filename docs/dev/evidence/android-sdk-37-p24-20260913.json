@@ -1,0 +1,797 @@
+{
+  "date": "2026-09-13",
+  "normalSdk": {
+    "compile": 37,
+    "hostTarget": 36,
+    "inrtTarget": 29,
+    "min": 24
+  },
+  "sourceHashesEncoding": "UTF-8 text with LF newlines",
+  "sourceSha256": {
+    "app/src/main/java/org/autojs/autojs/core/looper/Timer.kt": "b3098047115b2bea65f0733a169bfcd365dcaae24d68260b6914a02a6f0639f0",
+    "app/src/main/java/org/autojs/autojs/core/looper/TimerThread.kt": "51496073910cf4050d76cf93c4dfc9425788e8876bbe92f2934d847dbe791dbe",
+    "app/src/main/java/org/autojs/autojs/runtime/api/Timers.kt": "779e41ab5dd00fc8b822f3d3602a0de7c0e6997ea18b0e436d660edc38247d91",
+    "app/src/androidTest/java/org/autojs/autojs/core/looper/LooperPlatformCompatibilityDeviceTest.kt": "33783f27939eb23354823928d4fceebbefb81c6dc6de926c965a7ec2ec9a2773",
+    "app/src/androidTest/java/org/autojs/autojs/core/looper/ScriptLooperCompatibilityDeviceTest.kt": "ea90b2059883a6566043e090100b59e20cdac088d56b26aabed307b9061c8b14",
+    "app/src/androidTest/assets/sdk37/looper/callback-lifecycle.js": "57906b85a777072ed9af7667c40db3a79088a2ff46e38edfa02d9287516598df",
+    "app/src/androidTest/assets/sdk37/looper/cancelled-timers.js": "d57afb6accbe2b604eb9099868f5986d5b5df9af614e2a9ff3da9276b672b72c",
+    "app/src/androidTest/assets/sdk37/looper/cross-thread-cancel.js": "30e79dc49790f9cae7544ca2594c6343ec21d6774808561db0fd654404b2a597",
+    "app/src/androidTest/assets/sdk37/looper/exit.js": "c53e5e90fd0463ca14a9fed17926e77062d16e0f78f48e1e263ad9455635e95e",
+    "app/src/androidTest/assets/sdk37/looper/main-interrupt.js": "d88659e9e3d8feba87d0f8e02cae26009582719ee2fca6fd8e62009d62eae3ab",
+    "app/src/androidTest/assets/sdk37/looper/shutdown-finder.js": "0fe329ce540f888be040c5af75f1ffa80568b2e702243fd9f857ce45a7b29441",
+    "app/src/androidTest/assets/sdk37/looper/soak.js": "0f2a81c4667f494ea1c9e0ca9a6597292d3e8a5778367f89d7a4ee47ddc7ac91",
+    "app/src/androidTest/assets/sdk37/looper/thread-pool.js": "dd750c294636f34986d4afc3c0ff6667e407543a1257056051474b5f9292969e",
+    "app/src/androidTest/assets/sdk37/looper/threads.js": "d158b8e341f9a4f8fd8ccf2271cc9ebcbd285c40e1b4bb9b678f3aabccf7e166",
+    "app/src/androidTest/assets/sdk37/looper/timers.js": "19b7708f366b02e6e9f9d27ea6f153df634ad2285ce68c40619ec7602df8b1ef",
+    "app/src/androidTest/assets/sdk37/looper/ui-overlay.js": "757240316b8d21c219dafa19797cbd63043643b34c75e3eac116d281685690b3",
+    "app/src/androidTest/assets/sdk37/looper/ui-pending.js": "2e2d78072c9ac7caccbe5d45744a05597bfc85b20e137f8999d92853f5aa7c84",
+    "tools/sdk37/run_looper_tests.py": "186ef7ed863d9e98f670a13e24715b37e6431c9acea66f079295dd23ec4a2ffb",
+    "sample/accessibility/smoke-legacy-api.js": "743b7069e4df7281e71db7686837ad1ee965f38435a4a520ef0ce43a26e8a184"
+  },
+  "apkArtifacts": {
+    "fixed-normal": [
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\autojs6-v6.8.0-arm64-v8a.apk",
+        "sha256": "db69a6235c0483618fcb50b179c141ab564c5495f194a61937be280f48dccf61"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\autojs6-v6.8.0-armeabi-v7a.apk",
+        "sha256": "b7a83fd18e13ce824c8d2a1cb31d6ea00a6d4532c82e6f7ca0f8ff4d220bea5d"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\autojs6-v6.8.0-universal.apk",
+        "sha256": "3a43117c1cbe2746408fd1acc6372c3a6537917547998f1e3eb1bf9915284b8a"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\autojs6-v6.8.0-x86.apk",
+        "sha256": "4d5e27c8d503e79e280bcd0e9177084f70d649245d1c1c0d714877f4c8026201"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\autojs6-v6.8.0-x86_64.apk",
+        "sha256": "d3f40f6876f042beeaf917e981ef14b77d0fa16f5e0709f691983bc7e0079ef6"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-normal\\app-app-debug-androidTest.apk",
+        "sha256": "65b9f8552a633c2fbfe10f3b9257e8a2ec64d88a8289f20344393d7182ed0a1f"
+      }
+    ],
+    "fixed-target37": [
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\autojs6-v6.8.0-arm64-v8a.apk",
+        "sha256": "06781a14d56c0453ff3796d75007476128dcab769a6ac7201d9fc11f376f3fb4"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\autojs6-v6.8.0-armeabi-v7a.apk",
+        "sha256": "78b5312b5deaa7d5acf4af9613410701f9020e0c6f2ae71846da92f41e2cf610"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\autojs6-v6.8.0-universal.apk",
+        "sha256": "91581fb0a8da0a25ae2ddd87588446290f9c16b9079ba52a381ca875e9e9202b"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\autojs6-v6.8.0-x86.apk",
+        "sha256": "37fb03db9d16ebdb68e4b374ffcf947d65a9ad8d37fba32f34803ac9e109e6f8"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\autojs6-v6.8.0-x86_64.apk",
+        "sha256": "642a6269071b39c81d106b58f213e476d4dbb0b38677f29844cadec1e9aa5715"
+      },
+      {
+        "apk": "build\\sdk37-p24\\fixed-target37\\app-app-debug-androidTest.apk",
+        "sha256": "1ba04a9ebe242c3f19b388e41056ddf73a67e4d04ed07a2ab64ee6569cb4acf4"
+      }
+    ]
+  },
+  "finalNormalManifest": [
+    "package: name='org.autojs.autojs6' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+    "minSdkVersion:'24'",
+    "targetSdkVersion:'36'"
+  ],
+  "inrtManifest": [
+    "package: name='org.autojs.autojs6.inrt' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+    "minSdkVersion:'24'",
+    "targetSdkVersion:'29'"
+  ],
+  "builds": [
+    {
+      "name": "build-fix-normal",
+      "summary": "BUILD SUCCESSFUL in 1m 24s",
+      "logSha256": "889453538f4d7f1c5986c09bbf2a7d3a74eb2bb7ccde2a934266c91e96f41b5b"
+    },
+    {
+      "name": "build-fix-target37",
+      "summary": "BUILD SUCCESSFUL in 17s",
+      "logSha256": "206cb25ec39ce3f6344170740a5397705831701c4b56b7efae40a777f7daeb96"
+    },
+    {
+      "name": "build-fix-inrt",
+      "summary": "BUILD SUCCESSFUL in 1m 29s",
+      "logSha256": "9a8287f676ad267506c8ace51439d839135efa965fe628d44f64afc03d9cad4d"
+    },
+    {
+      "name": "build-final-normal",
+      "summary": "BUILD SUCCESSFUL in 19s",
+      "logSha256": "c5d829e63768ea125469bf66330662fe462ae8a518d6742a4065b3200547c84d"
+    },
+    {
+      "name": "build-final-unit",
+      "summary": "BUILD SUCCESSFUL in 9s",
+      "logSha256": "7bfb0d888527a00f5f46e83136f41f2b49c43ea232744bd02b073f1391702fbc"
+    }
+  ],
+  "unitTests": [
+    {
+      "name": "org.autojs.autojs.core.looper.LoopersWaitTokenTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-09-13T02:48:38.610Z",
+      "hostname": "HELLODOG009",
+      "time": "0.008"
+    },
+    {
+      "name": "org.autojs.autojs.core.looper.ServantLooperHolderTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-09-13T02:48:38.623Z",
+      "hostname": "HELLODOG009",
+      "time": "0.017"
+    }
+  ],
+  "deviceTests": [
+    {
+      "name": "fixed-baseline",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "false",
+        "poolStarts": "1",
+        "soakMillis": 5000
+      },
+      "log": "build\\sdk37-p24\\fixed-baseline.log",
+      "logSha256": "4e2df9c00757552966d740dc9f7794c6e18f092a942c4679d240a0835214ccb9",
+      "observations": [
+        "09-13 10:27:50.839  6493  6510 I SDK37-Looper: dispatch: clear=false, ordinary=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false)",
+        "09-13 10:27:50.848  6493  6510 I SDK37-Looper: pool: expectedStarts=1, executor=1/1, forkJoin=1/1",
+        "09-13 10:27:53.462  6493  6510 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:27:54.880  6493  6510 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:27:55.125  6493  6510 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:27:55.489  6493  6510 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:27:56.005  6493  6510 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:27:56.694  6493  6510 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:27:56.840  6493  6510 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:27:57.043  6493  6510 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:27:57.867  6493  6510 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:27:58.134  6493  6510 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:28:03.311  6493  6722 D GlobalConsole: 10:28:03.311/D: [SDK37-Looper] soak elapsed=5014, main=228, worker=228",
+        "09-13 10:28:03.341  6493  6510 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:28:04.010  6493  6510 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    },
+    {
+      "name": "fixed-new-queue",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "false",
+        "poolStarts": "1",
+        "soakMillis": 5000
+      },
+      "log": "build\\sdk37-p24\\fixed-new-queue.log",
+      "logSha256": "79a717560ea596ab63cc92c7e0e5e25287af9c85b05599501e811dc1706d0b02",
+      "observations": [
+        "09-13 10:28:59.695  6787  6802 I SDK37-Looper: dispatch: clear=false, ordinary=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false)",
+        "09-13 10:28:59.704  6787  6802 I SDK37-Looper: pool: expectedStarts=1, executor=1/1, forkJoin=1/1",
+        "09-13 10:29:02.336  6787  6802 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:29:03.770  6787  6802 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:29:03.987  6787  6802 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:29:04.367  6787  6802 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:29:04.922  6787  6802 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:29:05.590  6787  6802 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:29:05.801  6787  6802 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:29:05.962  6787  6802 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:29:06.754  6787  6802 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:29:06.937  6787  6802 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:29:12.095  6787  7015 D GlobalConsole: 10:29:12.094/D: [SDK37-Looper] soak elapsed=5007, main=234, worker=234",
+        "09-13 10:29:12.100  6787  6802 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:29:12.547  6787  6802 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    },
+    {
+      "name": "fixed-clear-interrupt",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "true",
+        "poolStarts": "1",
+        "soakMillis": 5000
+      },
+      "log": "build\\sdk37-p24\\fixed-clear-interrupt.log",
+      "logSha256": "b98a07c38358d7294977a69c3da8f87d3d0d02e36a32b5b4664629974bac9aa6",
+      "observations": [
+        "09-13 10:29:18.959  7114  7130 I SDK37-Looper: dispatch: clear=true, ordinary=InterruptSnapshot(before=true, nativeAfter=false, after=false, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=false, after=true, afterExplicitClear=false)",
+        "09-13 10:29:18.969  7114  7130 I SDK37-Looper: pool: expectedStarts=1, executor=1/1, forkJoin=1/1",
+        "09-13 10:29:21.974  7114  7130 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:29:23.468  7114  7130 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:29:23.687  7114  7130 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:29:24.084  7114  7130 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:29:24.632  7114  7130 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:29:25.305  7114  7130 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:29:25.419  7114  7130 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:29:25.553  7114  7130 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:29:26.302  7114  7130 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:29:26.512  7114  7130 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:29:31.616  7114  7336 D GlobalConsole: 10:29:31.616/D: [SDK37-Looper] soak elapsed=5005, main=234, worker=233",
+        "09-13 10:29:31.621  7114  7130 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:29:32.021  7114  7130 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    },
+    {
+      "name": "fixed-pool-start-verified",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "false",
+        "poolStarts": "0",
+        "soakMillis": 5000
+      },
+      "log": "build\\sdk37-p24\\fixed-pool-start-verified.log",
+      "logSha256": "f9cd2b85f7625cc71e469ec01bccba00cbb2253efc1b4b0fa7ad5e80dc970fe6",
+      "observations": [
+        "09-13 10:32:20.408  7771  7789 I SDK37-Looper: dispatch: clear=false, ordinary=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false)",
+        "09-13 10:32:20.418  7771  7789 I SDK37-Looper: pool: expectedStarts=0, executor=0/1, forkJoin=0/1",
+        "09-13 10:32:24.791  7771  7789 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:32:26.838  7771  7789 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:32:27.590  7771  7789 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:32:28.193  7771  7789 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:32:29.333  7771  7789 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:32:30.434  7771  7789 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:32:30.868  7771  7789 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:32:31.248  7771  7789 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:32:32.255  7771  7789 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:32:32.497  7771  7789 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:32:37.759  7771  8000 D GlobalConsole: 10:32:37.756/D: [SDK37-Looper] soak elapsed=5009, main=213, worker=212",
+        "09-13 10:32:37.782  7771  7789 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:32:38.402  7771  7789 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    },
+    {
+      "name": "fixed-combined",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "true",
+        "poolStarts": "0",
+        "soakMillis": 120000
+      },
+      "log": "build\\sdk37-p24\\fixed-combined.log",
+      "logSha256": "cfc9727a010bccae2e25ac075726fb9fd7d235a736f204044ca3ea352c4fa653",
+      "observations": [
+        "09-13 10:32:46.454  8115  8131 I SDK37-Looper: dispatch: clear=true, ordinary=InterruptSnapshot(before=true, nativeAfter=false, after=false, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=false, after=true, afterExplicitClear=false)",
+        "09-13 10:32:46.464  8115  8131 I SDK37-Looper: pool: expectedStarts=0, executor=0/1, forkJoin=0/1",
+        "09-13 10:32:49.845  8115  8131 I SDK37-Looper: PASS script=ui-overlay, soakMillis=120000",
+        "09-13 10:32:51.256  8115  8131 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=120000",
+        "09-13 10:32:51.435  8115  8131 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=120000",
+        "09-13 10:32:51.690  8115  8131 I SDK37-Looper: PASS script=threads, soakMillis=120000",
+        "09-13 10:32:52.433  8115  8131 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=120000",
+        "09-13 10:32:53.137  8115  8131 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=120000",
+        "09-13 10:32:53.408  8115  8131 I SDK37-Looper: PASS script=main-interrupt, soakMillis=120000",
+        "09-13 10:32:53.645  8115  8131 I SDK37-Looper: PASS script=thread-pool, soakMillis=120000",
+        "09-13 10:32:54.470  8115  8131 I SDK37-Looper: PASS script=timers, soakMillis=120000",
+        "09-13 10:32:54.668  8115  8131 I SDK37-Looper: PASS script=exit, soakMillis=120000",
+        "09-13 10:34:54.955  8115  8341 D GlobalConsole: 10:34:54.955/D: [SDK37-Looper] soak elapsed=120006, main=5633, worker=5613",
+        "09-13 10:34:54.959  8115  8131 I SDK37-Looper: PASS script=soak, soakMillis=120000",
+        "09-13 10:34:55.357  8115  8131 I SDK37-Looper: PASS script=ui-pending, soakMillis=120000"
+      ]
+    },
+    {
+      "name": "fixed-api24",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "false",
+        "poolStarts": "1",
+        "soakMillis": 5000
+      },
+      "log": "build\\sdk37-p24\\fixed-api24.log",
+      "logSha256": "2b8b67bbfe895b8d2178c851d97e299f509c8f7076c71dd6914ead5520943e01",
+      "observations": [
+        "09-13 10:30:24.223  4774  4792 I SDK37-Looper: dispatch: clear=false, ordinary=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false)",
+        "09-13 10:30:24.229  4774  4792 I SDK37-Looper: pool: expectedStarts=1, executor=1/1, forkJoin=1/1",
+        "09-13 10:30:26.856  4774  4792 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:30:27.690  4774  4792 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:30:27.827  4774  4792 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:30:28.032  4774  4792 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:30:28.449  4774  4792 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:30:29.056  4774  4792 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:30:29.173  4774  4792 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:30:29.268  4774  4792 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:30:29.975  4774  4792 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:30:30.070  4774  4792 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:30:35.165  4774  4930 D GlobalConsole: 10:30:35.164/D: [SDK37-Looper] soak elapsed=5005, main=229, worker=228",
+        "09-13 10:30:35.173  4774  4792 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:30:35.602  4774  4792 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    },
+    {
+      "name": "runner-target37",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "true",
+        "poolStarts": "0",
+        "soakMillis": 120000
+      },
+      "device": [
+        "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "37",
+        "16384"
+      ],
+      "log": "build\\sdk37-p24\\runner-target37\\instrumentation.log",
+      "logSha256": "e0c81757ef9abba19342d19c61c758c99cf06635254dddc4b92dfa16f62ef0a9",
+      "observations": [
+        "09-13 10:38:26.563 11004 11023 I SDK37-Looper: dispatch: clear=true, ordinary=InterruptSnapshot(before=true, nativeAfter=false, after=false, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=false, after=true, afterExplicitClear=false)",
+        "09-13 10:38:26.572 11004 11023 I SDK37-Looper: pool: expectedStarts=0, executor=0/1, forkJoin=0/1",
+        "09-13 10:38:29.145 11004 11023 I SDK37-Looper: PASS script=ui-overlay, soakMillis=120000",
+        "09-13 10:38:31.154 11004 11023 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=120000",
+        "09-13 10:38:31.364 11004 11023 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=120000",
+        "09-13 10:38:31.630 11004 11023 I SDK37-Looper: PASS script=threads, soakMillis=120000",
+        "09-13 10:38:32.086 11004 11023 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=120000",
+        "09-13 10:38:32.778 11004 11023 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=120000",
+        "09-13 10:38:32.978 11004 11023 I SDK37-Looper: PASS script=main-interrupt, soakMillis=120000",
+        "09-13 10:38:33.117 11004 11023 I SDK37-Looper: PASS script=thread-pool, soakMillis=120000",
+        "09-13 10:38:33.862 11004 11023 I SDK37-Looper: PASS script=timers, soakMillis=120000",
+        "09-13 10:38:34.119 11004 11023 I SDK37-Looper: PASS script=exit, soakMillis=120000",
+        "09-13 10:40:34.345 11004 11231 D GlobalConsole: 10:40:34.344/D: [SDK37-Looper] soak elapsed=120010, main=4931, worker=4938",
+        "09-13 10:40:34.351 11004 11023 I SDK37-Looper: PASS script=soak, soakMillis=120000",
+        "09-13 10:40:34.791 11004 11023 I SDK37-Looper: PASS script=ui-pending, soakMillis=120000"
+      ]
+    },
+    {
+      "name": "runner-api24-final",
+      "result": {
+        "success": true,
+        "testsExpected": 14,
+        "statusCodes": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "exitCode": 0,
+        "clearInterrupt": "false",
+        "poolStarts": "1",
+        "soakMillis": 5000
+      },
+      "device": [
+        "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "24",
+        "4096"
+      ],
+      "log": "build\\sdk37-p24\\runner-api24-final\\instrumentation.log",
+      "logSha256": "17b48c67e2f33babae2af51d4bc39867cd902f8ff46ddb16f069133911857907",
+      "observations": [
+        "09-13 10:35:43.603  5151  5168 I SDK37-Looper: dispatch: clear=false, ordinary=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false), compat=InterruptSnapshot(before=true, nativeAfter=true, after=true, afterExplicitClear=false)",
+        "09-13 10:35:43.608  5151  5168 I SDK37-Looper: pool: expectedStarts=1, executor=1/1, forkJoin=1/1",
+        "09-13 10:35:46.079  5151  5168 I SDK37-Looper: PASS script=ui-overlay, soakMillis=5000",
+        "09-13 10:35:46.962  5151  5168 I SDK37-Looper: PASS script=shutdown-finder, soakMillis=5000",
+        "09-13 10:35:47.120  5151  5168 I SDK37-Looper: PASS script=cancelled-timers, soakMillis=5000",
+        "09-13 10:35:47.339  5151  5168 I SDK37-Looper: PASS script=threads, soakMillis=5000",
+        "09-13 10:35:47.769  5151  5168 I SDK37-Looper: PASS script=cross-thread-cancel, soakMillis=5000",
+        "09-13 10:35:48.389  5151  5168 I SDK37-Looper: PASS script=callback-lifecycle, soakMillis=5000",
+        "09-13 10:35:48.515  5151  5168 I SDK37-Looper: PASS script=main-interrupt, soakMillis=5000",
+        "09-13 10:35:48.628  5151  5168 I SDK37-Looper: PASS script=thread-pool, soakMillis=5000",
+        "09-13 10:35:49.330  5151  5168 I SDK37-Looper: PASS script=timers, soakMillis=5000",
+        "09-13 10:35:49.442  5151  5168 I SDK37-Looper: PASS script=exit, soakMillis=5000",
+        "09-13 10:35:54.544  5151  5307 D GlobalConsole: 10:35:54.544/D: [SDK37-Looper] soak elapsed=5006, main=230, worker=229",
+        "09-13 10:35:54.550  5151  5168 I SDK37-Looper: PASS script=soak, soakMillis=5000",
+        "09-13 10:35:54.980  5151  5168 I SDK37-Looper: PASS script=ui-pending, soakMillis=5000"
+      ]
+    }
+  ],
+  "legacyAccessibilitySmoke": [
+    {
+      "name": "legacy-normal",
+      "result": {
+        "success": true,
+        "passed": 53,
+        "total": 53
+      },
+      "log": "build\\sdk37-p24\\legacy-normal.log",
+      "logSha256": "2a6c28e21e0fa3a6c08d433e99533e3ef54a68df559cb9c24a222266084d9531"
+    },
+    {
+      "name": "legacy-combined",
+      "result": {
+        "success": true,
+        "passed": 53,
+        "total": 53
+      },
+      "log": "build\\sdk37-p24\\legacy-combined.log",
+      "logSha256": "7d43638947e0aed0b9cb95126f0a9ee7a3df9a6b60282b4bee9ad613b9c10310"
+    },
+    {
+      "name": "legacy-target37",
+      "result": {
+        "success": true,
+        "passed": 53,
+        "total": 53
+      },
+      "log": "build\\sdk37-p24\\legacy-target37.log",
+      "logSha256": "a01c6aec6b17f8b5457459a61c1b3024ed79c5ef2944c32cae417e0e98a23144"
+    },
+    {
+      "name": "legacy-api24",
+      "result": {
+        "success": true,
+        "passed": 53,
+        "total": 53
+      },
+      "log": "build\\sdk37-p24\\legacy-api24.log",
+      "logSha256": "b316af9a5d4303c17b0eb5fdb355edf60a62df6a395f9a212041c4113fe68197"
+    }
+  ],
+  "negativeBaseline": {
+    "cancelledFutureTimer": {
+      "success": false,
+      "testsExpected": 1,
+      "statusCodes": [
+        1,
+        -2
+      ],
+      "exitCode": 0,
+      "clearInterrupt": "false",
+      "poolStarts": "1",
+      "soakMillis": 5000
+    },
+    "initialScripts": {
+      "success": false,
+      "testsExpected": 9,
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        -2,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        -2
+      ],
+      "exitCode": 0,
+      "clearInterrupt": "false",
+      "poolStarts": "1",
+      "soakMillis": 5000
+    }
+  },
+  "correctedProbeExpectation": {
+    "run": "fixed-pool-start",
+    "reason": "Forced OVERRIDDEN_THREAD_START_METHOD also bypasses start on target 36; expected value changed from 1 to 0 in the runner command only"
+  },
+  "debugger": {
+    "frameValues": "├─ + this = org.autojs.autojs.core.looper.LooperPlatformCompatibilityDeviceTest@f91d831 {LooperPlatformCompatibilityDeviceTest@25279}\n├─ + ordinary = InterruptSnapshot(before=true, nativeAfter=false, after=false, afterExplicitClear=false) {LooperPlatformCompatibilityDeviceTest$InterruptSnapshot@25348}\n├─ + compat = InterruptSnapshot(before=true, nativeAfter=false, after=true, afterExplicitClear=false) {LooperPlatformCompatibilityDeviceTest$InterruptSnapshot@25349}\n└─ expectedClear = true\n",
+    "events": [
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419081,
+        "timestampIso": "2026-09-13T02:10:19.081Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "dispatch: native=false, sticky=false, compat=false\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/androidTest/java/org/autojs/autojs/core/looper/LooperPlatformCompatibilityDeviceTest.kt|106",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/androidTest/java/org/autojs/autojs/core/looper/LooperPlatformCompatibilityDeviceTest.kt",
+        "line": 107
+      },
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419227,
+        "timestampIso": "2026-09-13T02:10:19.227Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "sdk37-compat-dispatch: native=true, sticky=true\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java|55",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java",
+        "line": 56
+      },
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419280,
+        "timestampIso": "2026-09-13T02:10:19.280Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "sdk37-compat-dispatch: native=false, sticky=true\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java|55",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java",
+        "line": 56
+      },
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419333,
+        "timestampIso": "2026-09-13T02:10:19.333Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "sdk37-compat-dispatch: native=false, sticky=true\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java|55",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java",
+        "line": 56
+      },
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419382,
+        "timestampIso": "2026-09-13T02:10:19.382Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "sdk37-compat-dispatch: native=false, sticky=true\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java|55",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/main/java/org/autojs/autojs/lang/ThreadCompat.java",
+        "line": 56
+      },
+      {
+        "type": "TRACEPOINT_OUTPUT",
+        "timestampMs": 1789265419428,
+        "timestampIso": "2026-09-13T02:10:19.428Z",
+        "sessionId": "SDK37 P2.4 temporary JDWP",
+        "message": "dispatch: native=false, sticky=true, compat=true\n",
+        "breakpointId": "line|file://D:/idea-projects/AutoJs6/app/src/androidTest/java/org/autojs/autojs/core/looper/LooperPlatformCompatibilityDeviceTest.kt|106",
+        "filePath": "file://D:/idea-projects/AutoJs6/app/src/androidTest/java/org/autojs/autojs/core/looper/LooperPlatformCompatibilityDeviceTest.kt",
+        "line": 107
+      }
+    ]
+  },
+  "implementationCommit": "705cb04adec1b524f687468353be346b42575b8e",
+  "cleanup": {
+    "ownedEmulatorsClosed": true,
+    "deviceListMatchesBefore": true,
+    "threeCompatOverridesReset": true,
+    "ownedJdwpForwardRemoved": true,
+    "userExceptionBreakpointsPreserved": 5
+  }
+}

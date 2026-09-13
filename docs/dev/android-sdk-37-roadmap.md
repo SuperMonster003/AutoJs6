@@ -87,7 +87,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I1 | 本地网络权限 `android.permission.ACCESS_LOCAL_NETWORK` (VERIFIED): targetSdk >= 37 默认阻断到局域网地址的出站 TCP / UDP, 入站 TCP accept, mDNS `.local` 解析; targetSdk <= 36 随 `INTERNET` 隐式授予; 同一 profile 内回环不受此权限限制. 跨 profile 的回环在 Android 17 上另受限制, 与 targetSdk 无关 ([官方说明](https://developer.android.com/about/versions/17/behavior-changes-all#block-cross-profile-loopback-traffic)) | 权限系统, 非兼容开关 (`RESTRICT_LOCAL_NETWORK` 仍为 disabled, 仅测试用); 跨 profile 另测 | VS Code 扩展连接两种模式 (`pluginclient/JsonSocketServer.kt:24` `ServerSocket`, `pluginclient/JsonSocketClient.kt:64-65` 连接电脑); 脚本 `http.*` / `web.*` / `$web.newWebSocket` (`runtime/api/augment/web/Web.kt`, `core/web/WebSocket.kt`); MQTT (`org.eclipse.paho.android.service.MqttService`); Node 桥 (`engine/NodeBridgeProtocol.kt` 的 `newWebSocket`); 用户脚本自建 socket | P2.1 |
 | I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务; targetSdk 37 的后台路径还需 while-in-use 能力, 但精确闹钟授权 + `USAGE_ALARM` 可豁免 WIU 条件. 播放 / 音量调用可静默失败, 焦点请求返回 `AUDIOFOCUS_REQUEST_FAILED`; `throw` 测试模式比默认规则更严 ([官方说明](https://developer.android.com/about/versions/17/changes/bg-audio)) | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本在 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 下运行 | P2.2 |
 | I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | OpenCV / ImageQuant stager 原已尝试 `setWritable(false, false)`, 但忽略结果; P2.3 改为在写入临时文件前及返回最终文件前强制验证只读, 修复旧缓存. `AndroidClassLoader` 的 DEX 已有只读处理, 本轮另修复 API 24 / 25 优化输出覆盖原始 DEX; Ace Editor 从已安装的插件 APK 构造 `PathClassLoader` | P2.3 (完成, 见实施记录) |
-| I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 与 `LOOPER_CLEARS_THREAD_INTERRUPTED`, `OVERRIDDEN_THREAD_START_METHOD` (名称 VERIFIED, 语义 UNVERIFIED): 公开 API 不变, 反射 `mMessages` 恒为 null; Looper 派发前清除中断标志; 覆写 `Thread.start()` 的子类行为变化 | target 37 | 脚本引擎的 Looper 体系: `core/looper/Loopers.kt:20-25` (公开 `IdleHandler`), `core/looper/MainThreadProxy.java:68,86`, `core/looper/TimerThread.kt:74-76` (覆写 `interrupt()`), `exit()` / `threads.*` / `sleep()` 的中断语义 (127 处 `interrupt` / `isInterrupted`); 8 个含 `start()` 方法的文件需筛出 Thread 子类; 用户脚本对 Looper 内部的反射 | P2.4 |
+| I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 公开 API 不变, 新实现中反射 `mMessages` 恒为 null; `LOOPER_CLEARS_THREAD_INTERRUPTED` 清除消息派发时的原生中断标记; `OVERRIDDEN_THREAD_START_METHOD` 使线程池绕过工作线程 start 覆写, 仍执行 run, 普通直接 start 调用不变 (后两项为 PLATFORM_CONFIG + DEVICE-37 对照结论) | target 37, 可在 target 36 调试包强制测试 | `Loopers` 的公开 IdleHandler、`MainThreadProxy` / `TimerThread` 中断、`exit()` / `threads.*` / `sleep()`; 宿主 Thread 子类未覆写 start. P2.4 修复了取消回调后历史时间阻止脚本退出的既有问题; 用户反射限制见附录 F | P2.4 |
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); `ASM_RESTRICTIONS` 在本镜像为 target 37 门控且未标 disabled, 行为待核验; BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `ui/main/scripts/AndroidPackageSessionInstaller.kt:173,176` (`MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED`), `external/shortcut/ShortcutManager.java:46` 与 `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163` (`requestPinShortcut(IntentSender)`), `ui/main/drawer/DrawerFragment.kt:160` (`StartIntentSenderForResult`); 脚本 `app.launch` / `app.startActivity` 从后台启动 | P2.5 |
 | I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); NSC 可按域关闭 (`<certificateTransparency enabled="false"/>`, `<domainEncryption>`) | target 37 | `network_security_config.xml`; 脚本访问私有 CA / 自签名服务器与企业 TLS 代理; 用户安装 CA 是否豁免 CT 为 UNVERIFIED | P2.6 |
 | I7 | `PARCEL_HARDENING` (名称 VERIFIED, 语义 UNVERIFIED): Parcel 读写更严格 | target 37 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `core/plugin/center/InstalledPluginRepository.kt:351` (`BundleCompat.getSerializable`), `engine/NodeModuleSourceFileTransportSession.kt`, Tasker / 快捷方式 extras | P2.7 |
@@ -220,9 +220,10 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.4 Looper / 线程 (I4)
 
-- [ ] 依附录 C 逐个启用 `USE_NEW_MESSAGEQUEUE`, `LOOPER_CLEARS_THREAD_INTERRUPTED`, `OVERRIDDEN_THREAD_START_METHOD`, 先分别测试再组合测试: `sample/` 中的定时器 / `threads` / `sleep` / `exit()` / `events` / UI 模式 / 悬浮窗 / 长时间 `setInterval` 脚本与 a11y 冒烟; 重点验证 `exit()` 与 `threads.shutDownAll()` 能中断 `sleep` 与阻塞查找, `MainThreadProxy` / `TimerThread` 的 `interrupt()` 语义. (DEVICE-37: 用例清单与结果)
-- [ ] 筛查含 `start()` 的 8 个文件, 列出其中的 `Thread` 子类并说明覆写方式; 若确有覆写 `Thread.start()` 的子类, 改为组合或在 `run()` 内完成前置逻辑. (SOURCE)
-- [ ] 文档: 在 `docs/dev/accessibility-architecture.md` 的 "已知平台行为" 或本文附录 F 记录 "Android 17 上脚本反射 `MessageQueue.mMessages` 恒为 null, `static final` 字段反射写入抛 `IllegalAccessException`" 供用户脚本参考; 对 `util.java` / 反射相关文档页评估是否需要提示 (P4). (DOCS)
+- [x] API 37 / target 36 默认、三个开关分别启用、组合启用, 以及实际 target 37 默认状态下, 每组 14/14 通过. 其中 12 个真实 Rhino 脚本覆盖定时器、线程池、sleep、exit、events、UI、悬浮窗、阻塞查找取消和 MainThreadProxy 中断; 组合 / target 37 持续 interval 各运行 2 分钟并正常退出. API 24 同组 14/14 通过. 原样执行 `sample/accessibility/smoke-legacy-api.js`, API 37 target 36 默认 / 组合、target 37 默认和 API 24 各 53/53. (DEVICE; DEVICE-37: [设备矩阵](evidence/android-sdk-37-p24-20260913.md#设备矩阵))
+- [x] 按当前声明与继承关系复查 start 方法, 修正初始 "8 个文件" 估计: ThreadCompat、两层 TimerThread、FlowWorkerPool.WorkerThread 均未覆写 start, 初始化位于构造或 run; MainThreadProxy 是包装类, Media 覆写的是 MediaPlayer.start, 录制 / 会话 / 服务入口不是 Thread.start. 平台探针确认线程池 start/run 为 0/1 时真实 threads.pool 仍正常工作. (SOURCE; DEVICE-37: [复核表](evidence/android-sdk-37-p24-20260913.md#start-覆写与非-sdk-接口复核))
+- [x] 修复基线复现的脚本不退出问题: 取消的远期回调留下历史最大时间, 导致空队列无法再次检查退出. Timer 改为登记实际排队 / 执行中的回调, 取消或完成时唤醒检查, 线程退出清理 Timer, UI / 直接 postDelayed 同样纳入. 取消 60 秒回调由 20 秒内无法结束变为正常即时结束; JVM 6/6, app / instrumentation 两种 target 与正常 inrt debug 构建通过, 16 KB 门禁通过. (SOURCE; JVM; ANDROID_BUILD; DEVICE; DEVICE-37)
+- [x] 附录 F 记录新 MessageQueue 的 mMessages 与 target 37 static final 反射限制及生效条件. 已检查关联 util.java / threads 文档, 无受影响示例或 JS API 签名需要同步; P4 统一发布迁移提示. 当前 6.8.0 的 fix 日志已更新 10 语言并生成 README / CHANGELOG. (DOCS: [P2.4 证据](evidence/android-sdk-37-p24-20260913.md), [复跑工具](../../tools/sdk37/README.md#looper-and-thread-compatibility))
 
 ### P2.5 后台活动启动 (I5)
 
@@ -444,9 +445,9 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES` (391360514) | `getStorageVolumes()` 排除不可靠卷 (UNVERIFIED) | 文件管理器卷列举 | P2.8 | |
 | `EXPAND_DEVICE_MANAGED_SCOPE` (451607072) | 设备策略范围变化 (UNVERIFIED) | 无 | P2.15 | |
 | `FILTER_GENERIC_OTP` (437043173) | 含 OTP 的短信延迟 3 小时 (VERIFIED) | 脚本读短信 | P2.10 | |
-| `LOOPER_CLEARS_THREAD_INTERRUPTED` (458413887, overridable) | Looper 派发前清除线程中断标志 (UNVERIFIED) | 脚本引擎中断语义 | P2.4 | |
+| `LOOPER_CLEARS_THREAD_INTERRUPTED` (458413887, overridable) | 消息派发时清除原生中断标记, ThreadCompat 保留脚本取消状态 (PLATFORM_CONFIG; DEVICE-37) | 脚本引擎中断语义 | P2.4 | 单项 / 组合 / target 37 默认实测通过, 见 P2.4 证据 |
 | `MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT` (383671392) | `BluetoothSocket` RFCOMM `read()` 断开返回 -1 (VERIFIED) | 脚本蓝牙 socket | P2.15 | |
-| `OVERRIDDEN_THREAD_START_METHOD` (418924588) | 覆写 `Thread.start()` 的子类行为变化 (UNVERIFIED) | 含 `start()` 的 8 个文件 | P2.4 | |
+| `OVERRIDDEN_THREAD_START_METHOD` (418924588) | 线程池跳过工作线程 start 覆写, run 仍执行; 直接 start 调用不变 (PLATFORM_CONFIG; DEVICE-37) | 宿主 Thread 子类及线程池工厂 | P2.4 | 宿主无 start 覆写; 单项 / 组合 / target 37 默认实测通过 |
 | `PARCEL_HARDENING` (416031865) | Parcel 读写更严格 (UNVERIFIED) | 插件 IPC, Bundle extras | P2.7 | |
 | `REBOOT_MODEM_THROW_EXCEPTIONS` (476225321) | 电话调制解调器重启 API 抛异常 (UNVERIFIED) | 无 | P2.15 | |
 | `RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID` (297019750) | RenderScript ScriptC 停用 (UNVERIFIED) | 无 (代码无 RenderScript) | P2.15 | |
@@ -456,7 +457,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` (417951523) | 显示密码设置拆分为触摸 / 物理键盘 (VERIFIED) | 无 | P2.15 | |
 | `THROW_ERROR_FOR_WRITABLE_DCL` (463348571) | `System.load()` 可写文件抛 `UnsatisfiedLinkError` (VERIFIED) | OpenCV / 量化插件 staging | P2.3 | `a784273d2`; target 36 强制 / target 37 默认加载通过; 可写副本按预期被拒绝, 见 P2.3 实施记录 |
 | `TRASH_BEHAVIOR_CHANGE` (461429441) | MediaStore 回收站语义变化 (UNVERIFIED) | `media.*`, 相册相关 | P2.8 | |
-| `USE_NEW_MESSAGEQUEUE` (421623328) | 无锁 MessageQueue (VERIFIED) | 脚本引擎 Looper | P2.4 | |
+| `USE_NEW_MESSAGEQUEUE` (421623328) | 无锁 MessageQueue (VERIFIED) | 脚本引擎 Looper | P2.4 | 单项 / 组合 / target 37 默认实测通过, 见 P2.4 证据 |
 | `USE_NSD_PICKER_WHEN_NO_LOCAL_NET_PERMISSION` (490596785) | 无本地网络权限时 NSD 走系统选择器 (VERIFIED) | 无 (未用 `NsdManager`) | P2.1 | |
 | `WEAROS_WALLPAPER_HANDLES_SCALING` (272527315) | Wear 壁纸缩放 (UNVERIFIED) | 无 | P2.15 | |
 
@@ -530,7 +531,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 | `ANDROID_COMPILE` | 指定 variant 的 Kotlin / Java 编译任务通过 | 完整 APK, release R8, lint, 未编译的 variant, 运行时行为 |
 | `ANDROID_BUILD` | `assemble*` / `generateRuntimeKit` 通过且 16 KB 门禁通过 (或 CI 绿) | 真机行为 |
 | `LINT` | 检查未被跳过, 新报告与基线 diff 已记录, 无新增 error / fatal | `SKIPPED` / `abortOnError=false` 下仅凭构建成功不能证明无问题; 不能证明运行时行为 |
-| `DEVICE` | 指定 4 KB 真机与 API 级别 (28 / 31 / 33 / 35) 上的冒烟通过 | Android 17 行为 |
+| `DEVICE` | 指定设备或 AVD 上列明用例通过, 记录 API 级别、页大小与真机 / 模拟器类型 | 未列出的系统或设备; 旧系统证据不能证明 Android 17 行为 |
 | `DEVICE-37` | `AVD_API_37` (或 Android 17 真机, 注明型号) 上, 注明 targetSdk (36 + 覆盖 / 37) 与打开的兼容开关, 冒烟通过 | 未列出设备 / 开关组合 |
 | `DEVICE-16K` | `aj6-ps16k-37-x86_64` 上安装无兼容模式警告 | - |
 | `DOCS` | 本条所要求的文档 / changelog / d.ts 已更新, 需要生成或递增的产物已完成 | 未执行的构建 / 设备用例; 纯 roadmap 修订不要求版本递增 |
@@ -592,6 +593,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 
 ## 附录 F: 后续建议 (不阻塞本 Roadmap)
 
+- Android 17 新 MessageQueue 生效时, 私有 `mMessages` 字段虽然保留但恒为 null, 不能据此判断队列内容; 宿主使用公开 Handler / Looper / IdleHandler, Espresso 已为 3.7.0. Android 17 上 target 37 应用反射写入 `static final` 字段会抛 `IllegalAccessException`, JNI 写入也可能崩溃. 两项限制分别来自 [MessageQueue 官方说明](https://developer.android.com/about/versions/17/changes/messagequeue) 与 [target 37 官方行为变更](https://developer.android.com/about/versions/17/behavior-changes-17), 不泛化为所有旧 target 的反射读取限制. 当前 util.java / threads 文档无受影响示例, P4 汇总升级说明时提示用户脚本; [P2.4 评估](evidence/android-sdk-37-p24-20260913.md#start-覆写与非-sdk-接口复核).
 - androidx.core 1.19.0 (2026-06-03) 要求 compileSdk 37, 且 `core-ktx` 已并入 `core`; 当前 `gradle/libs.versions.toml` 的 `core-ktx = "1.15.0"` 是为 AGP 8.2.2 时代保留的过期钉子, P1 之后可在独立的依赖升级中解除 (D7).
 - androidx.activity 1.14.0-alpha02 起 Compose 系列库要求 compileSdk 37.1 (次级 SDK); 届时需要 `compileSdk { version = release(37) { minorApiLevel = 1 } }` 语法, `Versions.kt` 与 `autojs6-platform-versions` 数据表都要支持 "37.1" 形式. 本机尚未安装 `platforms;android-37.1`.
 - `usesCleartextTraffic="true"` 已被官方标记为未来移除, 应把允许明文的域迁入 `network_security_config.xml` (待决 Q7 选 (a) 时记于此).
@@ -627,3 +629,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - `a784273d2`: OpenCV / ImageQuant 原生库临时文件, 发布文件与旧缓存均强制验证只读; 38 项 JVM 测试通过, API 37 target 36 强制 / target 37 默认及 API 24 的 JNI 测试通过. 修正初稿 "未设只读" 为 "已有尝试但忽略失败结果".
 - 旧系统回归发现 API 24 原始 DEX 优化输出与输入重合并复现; API 24 / 25 改用独立目录, API 26+ 保持原路径. 新增原始 DEX 设备测试及实际 DEX / JAR 两次加载脚本. 既有 Java 8 JAR 编译器限制另列附录 F.
 - 完成范围与 APK / 设备 / 日志详见 [P2.3 实施记录](evidence/android-sdk-37-p23-20260913.md). 正常 target 保持 36 / 29, P2.3 已勾选; 其余 P2 项目与 P3-P6 待实施, P1 的远程 CI 与既有 lint 状态保持原记录.
+
+### 2026-09-13 P2.4 实施
+
+- 完成三个 Looper / 线程开关的单项、组合与真实 target 37 默认行为验证, 增加 14 项设备测试及专用模拟器复跑工具. 组合与 target 37 的持续 interval 均运行 2 分钟, 完整 a11y 冒烟四组各 53/53.
+- `705cb04ad`: 基线发现取消远期定时器后脚本不退出, 修复 Timer 实际工作登记、唤醒与线程退出清理. API 24 回归、6 项 Looper JVM 测试及 app / inrt debug 构建通过.
+- 复核 start 的声明与继承关系, 没有宿主 Thread.start 初始化需要迁移. 调试器确认 ThreadCompat 取消状态能跨平台原生标记清除而保留; 平台反射限制与 util.java 文档评估写入附录 F.
+- P2.4 已勾选, 正常 target 仍为 host 36 / inrt 29. 同时进行的 MCP / Node 改动由对应会话维护, 不混入本轮逻辑提交. [完整证据](evidence/android-sdk-37-p24-20260913.md).

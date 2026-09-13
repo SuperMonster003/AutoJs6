@@ -68,6 +68,34 @@ Run `sample/accessibility/smoke-legacy-api.js` with accessibility enabled, the s
 
 Also open Symbols Settings, edit a symbol and verify that the keyboard appears and dismisses on Back on the old-API devices. The generic script UI probe does not exercise that activity's keyboard helper. Record the installed APK hash, compile / target SDK, device fingerprint, build type and test results together.
 
+## Looper and thread compatibility
+
+Build the host and instrumentation APKs with `:app:assembleAppDebug :app:assembleAppDebugAndroidTest`. Install the matching ABI APK and `app-app-debug-androidTest.apk` on a disposable emulator. Enable AutoJs6 accessibility, allow overlay windows, unlock the screen and disable guard mode. The full legacy accessibility smoke also needs an unattended service restart strategy, such as the configured secure-settings strategy with `WRITE_SECURE_SETTINGS` granted.
+
+The two device test classes under `app/src/androidTest/java/org/autojs/autojs/core/looper` run 14 probes, including 12 actual Rhino scripts in `app/src/androidTest/assets/sdk37/looper`. The helper requires an explicit emulator serial and expected platform behavior; it restarts the app through instrumentation and rebinds only the already-enabled AutoJs6 accessibility service while preserving other enabled services. It does not install APKs, grant permissions or change compat flags. Use a new output directory for each run:
+
+```powershell
+python tools/sdk37/run_looper_tests.py emulator-5560 --adb E:/.android/sdk/platform-tools/adb.exe --output build/sdk37-looper-baseline --clear-interrupt false --pool-starts 1
+```
+
+Use `compat.sh` above to enable one change at a time, restore its original state, then test all three together. On API 37, the expected arguments are:
+
+| Installed target / overrides | `--clear-interrupt` | `--pool-starts` |
+| --- | --- | --- |
+| target 36, defaults | `false` | `1` |
+| target 36, `USE_NEW_MESSAGEQUEUE` | `false` | `1` |
+| target 36, `LOOPER_CLEARS_THREAD_INTERRUPTED` | `true` | `1` |
+| target 36, `OVERRIDDEN_THREAD_START_METHOD` | `false` | `0` |
+| target 36, all three | `true` | `0` |
+| target 37, defaults | `true` | `0` |
+| API 24, target 36 | `false` | `1` |
+
+For the combined and actual target 37 runs, add `--soak-ms 120000`. Build the actual target 37 APK and its test APK with `-Pautojs.sdk.target.override=37`, install both, reset the three overrides to their recorded defaults and run the helper with `--clear-interrupt true --pool-starts 0`. The override remains debug-only; do not edit the normal targets for this probe.
+
+The pool value counts calls to an overridden `Thread.start()` for one `ThreadPoolExecutor` worker and one `ForkJoinPool` worker. Both must still execute `run()`, and an ordinary direct `thread.start()` must still call its override. The interrupt probe separately checks the native flag, the sticky `ThreadCompat` cancellation flag and explicit clearing. A successful adb process exit alone is insufficient: the helper checks all 14 instrumentation results and rejects failures, skips or missing tests.
+
+Run `sample/accessibility/smoke-legacy-api.js` separately after instrumentation exits; a full pass includes service stop/start, a new service instance and selectors after the rebind. See [the P2.4 evidence](../../docs/dev/evidence/android-sdk-37-p24-20260913.md) for exact coverage and APK hashes.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
