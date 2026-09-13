@@ -235,11 +235,15 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.5 后台活动启动 (I5)
 
-- [ ] 逐调用点区分 PendingIntent 的创建方、发送方与目标类型. 安装器 `createPendingIntentOptions()` 是 creator opt-in, token 交给系统 `PackageInstaller.Session.commit()` 发送, 代码明确支持界面离开前台后的确认回调; 保留此需求, 不能直接将 `ALLOW_ALWAYS` 改为 `ALLOW_IF_VISIBLE`. SDK 34 / 35 的 `ALLOWED` 兼容分支也不能改用仅 SDK 36 才存在的常量. 自己实际发送的 Activity token 优先使用可见条件 opt-in. (SOURCE)
-- [ ] `ShortcutUtils` / `external/shortcut/ShortcutManager` 的成功回调使用 `PendingIntent.getBroadcast()`, 先确认是否真的启动 Activity; `DrawerFragment` 的 `StartIntentSenderForResult` 核对 ActivityResult 实际发送路径与 options 传递. 不能看到 `IntentSender` 就统一加 Activity BAL 授权. (SOURCE)
-- [ ] `am compat enable COVER_INTENT_SENDER` + `StrictMode.VmPolicy.detectBlockedBackgroundActivityLaunch()` (debug 构建) 下: 安装 APK 会话, 固定快捷方式, 抽屉的 IntentSender 流程, 脚本从后台 `app.launch` / `app.startActivity` (悬浮窗豁免), 均无 "Background activity launch blocked". (DEVICE-37)
+- [x] 逐调用点区分 PendingIntent 的创建方、发送方与目标类型. 安装器 `createPendingIntentOptions()` 是 creator opt-in, token 交给系统 `PackageInstaller.Session.commit()` 发送, 代码明确支持界面离开前台后的确认回调; 保留此需求, 不能直接将 `ALLOW_ALWAYS` 改为 `ALLOW_IF_VISIBLE`. SDK 34 / 35 的 `ALLOWED` 兼容分支也不能改用仅 SDK 36 才存在的常量. 自己实际发送的 Activity token 优先使用可见条件 opt-in. (SOURCE; 见 [P2.5 调用点清单](evidence/android-sdk-37-p25-20260913.md))
+- [x] `ShortcutUtils` / `external/shortcut/ShortcutManager` 的成功回调是广播且不启动 Activity; 取色器通过 AndroidX ActivityResult 转交 options. `DrawerFragment` 使用发送方适配器: API 36+ `ALLOW_IF_VISIBLE`, API 34 / 35 `ALLOWED`, 更旧系统不传 options. 未扩大安装器的创建方授权或其他广播 / Service token 的权限. (SOURCE)
+- [x] API 36+ debug 构建基于既有 VmPolicy 添加 `detectBlockedBackgroundActivityLaunch()` 与日志诊断; 使用实际宿主 UID 和独立插件 UID 探针, 不以 send 返回或脚本返回代替目标创建证据. (SOURCE; DEVICE-37)
+- [x] 对照默认 / enable / disable 的 `COVER_INTENT_SENDER`, 分开验证旧 `sendIntent` 重载, API 37 options 重载与 ActivityResult 路径. target 37 的旧重载默认拦截 / disable 放行; 显式 enable 时可见 ActivityResult 回传成功, 后台 options 发送负例被拦截. (DEVICE-37; [证据](evidence/android-sdk-37-p25-20260913.md))
+- [x] 实际 Rhino `app.launch` / `app.startActivity` 后台负例被拦截, 授予 SYSTEM_ALERT_WINDOW 后目标创建且系统记录 `BAL_ALLOW_SAW_PERMISSION`. `app.launch` 的 true 不代表窗口已显示. 真实抽屉开关已启动插件 `PickerRequestActivity`, 到达其权限说明页后取消. 前台安装会话已完成系统确认并成功安装实际取色器插件. (DEVICE-37)
+- [ ] 无 BAL 资格时的后台安装确认恢复: 同源 target 36 / 37 的 session 均提交成功, 但私有 `PackageInstallStatusActivity` 均被拦截, 属于当前路径已有的限制. 现有 creator `ALLOW_ALWAYS` 不会创造启动资格. 补充用户可恢复的确认入口, 覆盖通知拒绝, 返回前台, 进程重建, 多 session 及取消 / 失败回调; 不把 session 提交算作安装成功. (DEVICE-37; SOURCE)
+- [ ] 完整 Launcher 固定快捷方式, 小组件 / 通知点击, 真实取色与颜色回传, a11y 启动例外, inrt 专属设备用例及旧系统真机回归. 广播 fixture 收到回调不代替完整固定快捷方式流程; BAL 的 SYSTEM_ALERT_WINDOW 权限例外不代替 FGS 的可见悬浮窗条件. (DEVICE-37; DEVICE-LEGACY)
 - [ ] `ASM_RESTRICTIONS` 的 dump 含 `enableSinceTargetSdk=37; overridable`, 未含 `disabled`; 核对最终镜像的默认状态与行为后复测跨应用启动, 分别记录默认 / enable / disable 结果, 不把 `overridable` 解释为默认关闭. 是否需要 `allowCrossUidActivitySwitchFromBelow` 由调用链证据决定. (PLATFORM_CONFIG; DEVICE-37)
-- [ ] changelog `fix`. (DOCS)
+- [x] changelog `improvement`, 10 种语言及生成文档同步. 可见 ActivityResult 不传 options 的对照也成功, 因此不把授权策略完善描述为已经复现并修复的取色器故障. (DOCS; DEVICE-37)
 
 ### P2.6 网络安全配置 (I6)
 
@@ -433,12 +437,12 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 
 | 变更 (ID) | 含义 | 宿主影响 | 条目 | 结论 |
 | --- | --- | --- | --- | --- |
-| `ASM_RESTRICTIONS` (230590090, overridable) | dump 为 target 37 门控且未标 disabled (PLATFORM_CONFIG); `overridable` 不等于默认关闭, 完整行为与有效状态待核验 (UNVERIFIED) | 脚本跨应用启动 Activity | P2.5 | |
+| `ASM_RESTRICTIONS` (230590090, overridable) | dump 为 target 37 门控且未标 disabled (PLATFORM_CONFIG). 本轮同任务下层页面停止 12 秒后启动同 UID 页面, default / enable / disable 均放行, 尚未得到有效的限制对照; 不据此推断默认关闭 (DEVICE-37; 完整行为仍待核验) | 脚本跨应用启动 Activity | P2.5 | [P2.5 证据](evidence/android-sdk-37-p25-20260913.md) |
 | `BACK_DISPOSITION_CONTROLS_BACK_INTERCEPTION` (454542168) | 输入法 `setBackDisposition` 决定是否拦截返回 (UNVERIFIED) | 无 (非输入法) | P2.15 | |
 | `BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION` (401333807) | Bluetooth 绑定类 API 需要特权权限 (UNVERIFIED) | 脚本蓝牙 API (代码内无 `createBond`) | P2.15 | |
 | `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` (378605160) | 创建镜像虚拟显示需权限检查 (UNVERIFIED) | `ScreenCapturer.java:284-289` 经 MediaProjection 创建 `AUTO_MIRROR` 显示 | P2.15 | |
 | `CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS` (270553691) | 通知自定义视图尺寸限制 (公告 VERIFIED, 细节 UNVERIFIED) | 通知构建点 | P2.9 | |
-| `COVER_INTENT_SENDER` (405995292) | `IntentSender.sendIntent()` 需发送方 BAL opt-in (VERIFIED) | 安装会话, 固定快捷方式, 抽屉 IntentSender | P2.5 | |
+| `COVER_INTENT_SENDER` (405995292) | 旧 `sendIntent` 重载在 target 37 默认被拦截, disable 后放行. API 37 options 重载与 ActivityResult 分开评估; 宿主可见时通过实际 AndroidX 回传, 后台发送负例被拦截 (DEVICE-37). 广播成功回调不追加 Activity 授权 (SOURCE) | 安装会话, 固定快捷方式, 抽屉 IntentSender | P2.5 | [P2.5 证据](evidence/android-sdk-37-p25-20260913.md) |
 | `DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY` (407952621) | CT 默认开启, NSC 可按域关闭 (VERIFIED) | 私有 CA 场景 | P2.6 | |
 | `DEPRECATE_SET_CONTENT_CAPTURE_ENABLED` (454307959) | `setContentCaptureEnabled(false)` 不再生效, 改用 `FLAG_SECURE` (VERIFIED) | 无 | P2.15 | |
 | `DETECT_IMPLICIT_URI_PERMISSION_GRANT` (460838111) | StrictMode 检测隐式 URI 授权, Android 18 起限制 (VERIFIED) | `app.viewFile` / 分享路径 | P2.15 | |
@@ -660,3 +664,12 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 宿主帮助 11 份资源与 10 语言 changelog 已提交 `c703a7953`; API 文档与生成物已提交 `7769e6d`, 文档生成器防止插件版本回退的修复已提交 `2d0ed0d`. 离线插件 `ad2f7cc` 保留 6.8.1 发行版, 内容版为 6.8.0, 构建号 33 与 Git 提交数一致.
 - 宿主 / inrt debug 构建和 release Manifest 检查通过, 正常 target 仍为 36 / 29; 文档 128 模块 freshness, 离线插件 debug / release APK 内容门禁通过. 详细范围见 [P2.2 实施记录](evidence/android-sdk-37-p22-20260913.md).
 - P2.2 仍需开机与完整脚本调度链, 真机可听性, API 35 组合及有效 `throw` 模式验收. 本轮开机启动 ANR, `throw` 命令未改变覆盖状态, 均未勾选完成. 可继续推进 P2.5 后台活动启动, 同时保留上述设备门禁.
+
+### 2026-09-13: P2.5 发送方适配与实际启动对照
+
+- 取色器增加按系统版本分支的可见发送方 options, 生产改动与 10 种语言 changelog 已提交 `1c284c9e0`. 安装器保留创建方授权, 广播 / Service 回调没有扩大 Activity 授权. Debug 增加 BAL StrictMode 日志与真实 UID 探针.
+- `COVER_INTENT_SENDER` 的两方向对照通过: target 37 默认拦截 / disable 放行, 同源 target 36 默认放行 / enable 拦截. 可见 AndroidX ActivityResult 在 enable 下实际回传, 后台负例与真实 Rhino 脚本的 SYSTEM_ALERT_WINDOW 权限例外已分别记录.
+- 通过真实前台安装确认安装了取色器插件, 并从实际抽屉开关启动到插件权限说明页. 完整取色与颜色回传未计通过. 无资格后台安装确认在 target 36 / 37 均被拦截, 属于当前安装路径已有的恢复缺口.
+- ASM 的默认 / enable / disable 用例均放行, 保留最初错误预期及后续生命周期记录, 未把兼容配置 dump 当成限制生效证据. 下一步需构造能区分前台任务 / 调用链例外的对照.
+- 宿主 target 37 调试包及正常宿主 / inrt 调试包构建通过, 16 KB 对齐检查通过; release 主 manifest 不含探针. [P2.5 实施记录与机器结果](evidence/android-sdk-37-p25-20260913.md) 保留 34 次探针记录, 包括超时, 辅助观测与错误预期, 不将它们统一计为通过.
+- 后续优先补后台安装确认的恢复入口, 再关闭 ASM 与真实 Launcher / a11y / 旧系统 / inrt 设备项. 正常配置保持 compileSdk 37 / target 36 (宿主) / target 29 (inrt), P2.5 与 P3 的整体门禁仍开放.

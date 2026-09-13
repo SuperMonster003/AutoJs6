@@ -1,0 +1,2656 @@
+{
+  "date": "2026-09-13",
+  "sourceBaseline": "e756973f9",
+  "productionCommit": "1c284c9e0",
+  "normalConfiguration": {
+    "compileSdk": 37,
+    "hostTarget": 36,
+    "inrtTarget": 29
+  },
+  "environment": {
+    "avd": "aj6-ps16k-37-x86_64",
+    "readOnly": true,
+    "pageBytes": 16384,
+    "probeUsesInstrumentation": false,
+    "actualPickerUid": 10260,
+    "primarySerial": "emulator-5568",
+    "primaryHostUid": 10259,
+    "primaryFixtureUid": 10251,
+    "earlierEmulator": "emulator-5566; see each original command and result for its actual UID / PID"
+  },
+  "scope": "Assertions are probe observations. Session submission, ASM characterization and auxiliary runs do not close their end-to-end gates.",
+  "artifacts": {
+    "baseline-target36.apk": {
+      "sha256": "eb253790458cb83707fa7c1b78e923625430fcef94cb556c06a262101496f42d",
+      "bytes": 47914256
+    },
+    "inrt-target37.apk": {
+      "sha256": "c051351502be06b9603cb580de4e6456eab13c7cbbd7fdeb0f44d08a195faa5a",
+      "bytes": 54266203
+    },
+    "normal-app-target36.apk": {
+      "sha256": "2486dff4a1aa5e8aff00d2a4ca4feb87fce7aed5e4381875dceebfbe9a42352c",
+      "bytes": 47923972
+    },
+    "normal-inrt-target29.apk": {
+      "sha256": "21a9844806d0053f65c5c80d9b50841a5a893f7ea7b4566a32bd4bea4cf1d18e",
+      "bytes": 54266203
+    },
+    "target37-v2.apk": {
+      "sha256": "613ce4a2040a45d07b81096a39069ebbabbd1111ed53ab4b3daf418917ecc5c2",
+      "bytes": 46632701
+    },
+    "target37.apk": {
+      "sha256": "17af2588ffd5e5bbb1d72246f65dfcabfda84684873169e645ac2daa1e5adef5",
+      "bytes": 48979828
+    },
+    "fixture-v1/bal-fixture.apk": {
+      "sha256": "dbc40ac4ed374f7e98f9be6a112a3f9d6675ba974a065bc13ff708f5e478d31f"
+    },
+    "fixture/bal-fixture.apk": {
+      "sha256": "ab96467baf7154a0b3eff76ef2eb244fb307f163b144817399a69a1648ba8b5d",
+      "note": "Initial fixture with no versionCode; not used for package installation."
+    },
+    "actual-picker-source.apk": {
+      "sha256": "c55dd575cd331e24bd5a57326314bc4e133bc414501ddf0bd80d821532f55444",
+      "bytes": 6716225,
+      "note": "Source copy retained at final audit; see actualPicker for timing."
+    }
+  },
+  "buildVerification": {
+    "app": {
+      "target": 36,
+      "file": "normal-app-target36.apk",
+      "bytes": 47923972,
+      "sha256": "2486dff4a1aa5e8aff00d2a4ca4feb87fce7aed5e4381875dceebfbe9a42352c"
+    },
+    "inrt": {
+      "target": 29,
+      "file": "normal-inrt-target29.apk",
+      "bytes": 54266203,
+      "sha256": "21a9844806d0053f65c5c80d9b50841a5a893f7ea7b4566a32bd4bea4cf1d18e"
+    },
+    "releaseManifest": {
+      "sha256": "ed93115e3465c1f56da3f605b9bad1638e4cc769b594f24fbe13476af2d8da63",
+      "target": 36,
+      "probeAbsent": true,
+      "fixtureQueryAbsent": true
+    }
+  },
+  "cases": [
+    {
+      "name": "37-result-none",
+      "classification": "not_completed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789280919389205500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5566",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789280919389205500",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "37-result-none/result.json": "b542c7845ceb8c66a9ce4df304ca7ae62cea5d2f216cf2e72983005baf2aa19c",
+        "37-result-none/logcat.txt": "6fa6821dec225043ffcdeefa788bf7fc645aeb87e1d5cd0b507ff8639ca4016e",
+        "37-result-none/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "37-result-visible",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789280802928302200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5566",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789280802928302200",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "result",
+        "result": {
+          "case": "bal_1789280802928302200",
+          "route": "result",
+          "sdk": 37,
+          "startedAt": 1789280851034,
+          "targetSdk": 37,
+          "uid": 10342,
+          "pid": 4900,
+          "taskId": 816,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10340,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "resultCode": -1,
+          "resultCase": "bal_1789280802928302200",
+          "fixtureEvent": {
+            "case": "bal_1789280802928302200",
+            "kind": "activity-created",
+            "pid": 5293,
+            "uid": 10340,
+            "time": 1789280865022
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "note": "Positive ActivityResult amid host-GPU emulator instability; auxiliary only.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:27:43.092   754  2331 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10340 (org.autojs.sdk37.balfixture) (realCallingUid=10342) (rr=174967899) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "37-result-visible/result.json": "832d70218e1802fbaffe78a30a3f4b7bf24e691e85b7832c6f9f9c9522848da0",
+        "37-result-visible/logcat.txt": "17c810e26a54222e51bfc0c5783f19aec3df87f78c99a7030d6cf7f2cd666a69",
+        "37-result-visible/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "37-sender-none",
+      "classification": "not_completed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281015749581300",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5566",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281015749581300",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "37-sender-none/result.json": "a07e97c8b95178b2afda809c2e0fe72af7a98ab23c77895a2d3fd340b8ac8fe4",
+        "37-sender-none/logcat.txt": "bf77d1739c39a53266fe49118810e6a8cdb77ff9e341bfd5ae5930f17cf7eba5",
+        "37-sender-none/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-asm-allow-below",
+      "classification": "superseded_timing",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281903037195600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281903037195600",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "true"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          36
+        ],
+        "result": {
+          "case": "bal_1789281903037195600",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789281907192,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9074,
+          "taskId": 37,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789281903037195600",
+            "kind": "activity-created",
+            "pid": 9428,
+            "uid": 10251,
+            "time": 1789281908795
+          },
+          "landing": {
+            "case": "bal_1789281903037195600",
+            "uid": 10259,
+            "pid": 9074,
+            "taskId": 37
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:45:08.041   766   794 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=47001237) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:45:10.182   766  2072 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=47001237) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "small37-asm-allow-below/result.json": "10752bee598522d4f54dec9f6768df2524a5c9a136f83b8b1a95cbb6f16db336",
+        "small37-asm-allow-below/logcat.txt": "d3b81b8222cfb811338738d6a70b31bb4e7c8ca69fb7c084cc6c5cbb3adc587b",
+        "small37-asm-allow-below/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-asm-default",
+      "classification": "superseded_timing",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281861125436500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281861125436500",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          34
+        ],
+        "result": {
+          "case": "bal_1789281861125436500",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789281874862,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9074,
+          "taskId": 35,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789281861125436500",
+            "kind": "activity-created",
+            "pid": 9169,
+            "uid": 10251,
+            "time": 1789281879872
+          },
+          "landing": {
+            "case": "bal_1789281861125436500",
+            "uid": 10259,
+            "pid": 9074,
+            "taskId": 35
+          },
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:44:36.581   766  2168 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=132124994) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:44:38.714   766  2120 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=132124994) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "small37-asm-default/result.json": "59c0ae4fba2c2da421352d0e5eb8e97902d0228aa4beff85571b61a97f766039",
+        "small37-asm-default/logcat.txt": "48b8156f7453764b39378416835b41c829aa7fbfbbbb77d3892e650749765502",
+        "small37-asm-default/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-asm-deny-below",
+      "classification": "superseded_timing",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281886365404100",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281886365404100",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          35
+        ],
+        "result": {
+          "case": "bal_1789281886365404100",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789281890674,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9074,
+          "taskId": 36,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789281886365404100",
+            "kind": "activity-created",
+            "pid": 9335,
+            "uid": 10251,
+            "time": 1789281893387
+          },
+          "landing": {
+            "case": "bal_1789281886365404100",
+            "uid": 10259,
+            "pid": 9074,
+            "taskId": 36
+          },
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:44:52.450   766  1435 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=117707919) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:44:54.497   766  1124 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=117707919) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "small37-asm-deny-below/result.json": "b2668fb2c73d5e645fff38501b1063b81a00d274b56a7a34e47d3996c754a22f",
+        "small37-asm-deny-below/logcat.txt": "84c1edc7dcda81f25912ab002405677d67591a361ca7ad0b1f42df5ddd3a1f7b",
+        "small37-asm-deny-below/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-broadcast-background",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281574527658600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281574527658600",
+          "--es",
+          "route",
+          "broadcast",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "broadcast",
+        "result": {
+          "case": "bal_1789281574527658600",
+          "route": "broadcast",
+          "sdk": 37,
+          "startedAt": 1789281585847,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 7460,
+          "taskId": 30,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 300,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "fixtureEvent": {
+            "case": "bal_1789281574527658600",
+            "kind": "broadcast-received",
+            "pid": 4706,
+            "uid": 10251,
+            "time": 1789281600789
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "small37-broadcast-background/result.json": "d74e8b882eb5d4c581f7198e1f84977eecc8e0b6cb9d9b307034f6ccbba49ba1",
+        "small37-broadcast-background/logcat.txt": "60606ebe6545709504347abda7de24e88d77c1696605eda283d7694c6b20e3be",
+        "small37-broadcast-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-cover-disabled",
+      "classification": "observed_expectation_mismatch",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789282076532243600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282076532243600",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          37
+        ],
+        "result": {
+          "case": "bal_1789282076532243600",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789282087307,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9602,
+          "taskId": 38,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.autojs6 could opt in to grant BAL privileges when sending. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "note": "The API 37 options overload remains blocked with null options even when COVER is disabled. Do not equate this overload with the legacy overload.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:48:09.636   766  2346 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: BOUND_TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 9602; realCallingUidHasVisibleActivity: true; realCallingUidHasVisibleNotPinnedActivity: true; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TOP; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{c096750 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{cd30994 9602:org.autojs.autojs6/u0a259}; realInVisibleTask: true; balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:48:09.660   766  2346 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "small37-cover-disabled/result.json": "4d54227218ddb1a5113faf3a71c66bee5d79dde761394ee64e8f896f2399169c",
+        "small37-cover-disabled/logcat.txt": "418a6bdd998845cc3df3c5b260dca170220ae5e78ebac2f8c3653e43780a0f97",
+        "small37-cover-disabled/compat.txt": "7ad618413e84f60e16fed96f728b690d5eb94ea70162d1d243309f9806e2986f"
+      }
+    },
+    {
+      "name": "small37-cover-reset",
+      "classification": "assertion_passed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789282098657733400",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282098657733400",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789282098657733400",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789282107141,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9847,
+          "taskId": 39,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.autojs6 could opt in to grant BAL privileges when sending. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:48:31.476   766   794 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: BOUND_TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 9847; realCallingUidHasVisibleActivity: true; realCallingUidHasVisibleNotPinnedActivity: true; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TOP; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{e237381 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{1b57371 9847:org.autojs.autojs6/u0a259}; realInVisibleTask: true; balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:48:31.489   766   794 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "small37-cover-reset/result.json": "261f1fef3d3b9ff9b9d2a0b19b36d6056e1d9a137c603145ed555ce7a8802b19",
+        "small37-cover-reset/logcat.txt": "b7001b6dfa49dddccff6918927d68ed7d70aa41be3a2222b55be5604f53056f5",
+        "small37-cover-reset/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-result-none",
+      "classification": "observed_expectation_mismatch",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281372283085400",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281372283085400",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked",
+        "result": {
+          "case": "bal_1789281372283085400",
+          "route": "result",
+          "sdk": 37,
+          "startedAt": 1789281391823,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 5265,
+          "taskId": 21,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "resultCode": -1,
+          "resultCase": "bal_1789281372283085400",
+          "fixtureEvent": {
+            "case": "bal_1789281372283085400",
+            "kind": "activity-created",
+            "pid": 4706,
+            "uid": 10251,
+            "time": 1789281394523
+          },
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "note": "Original blocked expectation was too strict: visible ActivityResult delivered RESULT_OK without options.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:36:34.294   766  2360 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (rr=107757001) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "small37-result-none/result.json": "df201eb527d7d18915e2fb1c13dd25fe793ccf3f4fddc9e7cf58c89d8f2988c6",
+        "small37-result-none/logcat.txt": "224bc23ab1f8405f80f983c15029313b7084beaef7a9e63fe1e90f4da8b4f982",
+        "small37-result-none/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-result-visible",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281485265528800",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281485265528800",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "result",
+        "result": {
+          "case": "bal_1789281485265528800",
+          "route": "result",
+          "sdk": 37,
+          "startedAt": 1789281492801,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 6956,
+          "taskId": 28,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "resultCode": -1,
+          "resultCase": "bal_1789281485265528800",
+          "fixtureEvent": {
+            "case": "bal_1789281485265528800",
+            "kind": "activity-created",
+            "pid": 4706,
+            "uid": 10251,
+            "time": 1789281494415
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:38:14.323   766  1337 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (rr=183296321) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "small37-result-visible/result.json": "82e48d98368972f04dc2f1f8483e8f77b498df6f85e19fba81e7ebfa564247af",
+        "small37-result-visible/logcat.txt": "2a61ff180c24c276796fb642d9602f4376c9c21a15dec235f1f516ff82f328be",
+        "small37-result-visible/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-result-visible-background",
+      "classification": "not_completed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281613023879100",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281613023879100",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "result": null,
+        "failure": "RuntimeError('Probe did not complete: None')"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "small37-result-visible-background/result.json": "2ffb5fa575b68b24cf79175794a4cfbcf8f9f3de4ca07c497a69d1811f8d58b1",
+        "small37-result-visible-background/logcat.txt": "474c50cb01dd6202570489e391756ecc70c6880fc08f2702c457f96ca513e7cf",
+        "small37-result-visible-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-script-launch-background",
+      "classification": "assertion_passed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281770835548500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281770835548500",
+          "--es",
+          "route",
+          "script-launch",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "result": {
+          "case": "bal_1789281770835548500",
+          "route": "script-launch",
+          "sdk": 37,
+          "startedAt": 1789281775418,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 8533,
+          "taskId": 33,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "fixtureEvent": {},
+          "completed": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: Activity start blocked. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "scriptCompleted": true,
+          "scriptResult": "true"
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:43:15.015   766  2168 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.autojs6; callingPackageTargetSdk: 37; callingUid: 10259; callingPid: 8533; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: LAST_ACTIVITY; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 xflg=0x4 pkg=org.autojs.sdk37.balfixture cmp=org.autojs.sdk37.balfixture/.TargetActivity }; callerApp: ProcessRecord{e047c2e 8533:org.autojs.autojs6/u0a259}; inVisibleTask: false; balAllowedByPiCreator: BSP.ALLOW_BAL; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; hasRealCaller: true; isCallForResult: false; isPendingIntent: false; autoOptInReason: notPendingIntent; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 8533; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: LAST_ACTIVITY; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: null; realCallerApp: ProcessRecord{e047c2e 8533:org.autojs.autojs6/u0a259}; realInVisibleTask: false; balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:43:15.037   766  2168 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 xflg=0x4 pkg=org.autojs.sdk37.balfixture cmp=org.autojs.sdk37.balfixture/.TargetActivity} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "small37-script-launch-background/result.json": "890ffaefab6def8630241ce98cf1e8d362835b0e876cc25371d74c5438204347",
+        "small37-script-launch-background/logcat.txt": "ffd783400f83e626697160eaac0da27f3f7008b535e1fc4cafcba08704166cb5",
+        "small37-script-launch-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-script-launch-overlay",
+      "classification": "not_completed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789282208861286000",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282208861286000",
+          "--es",
+          "route",
+          "script-launch",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          40
+        ],
+        "result": null,
+        "failure": "RuntimeError('Probe did not complete: None')"
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "small37-script-launch-overlay/result.json": "0f733149efadaec6f0660c2b44d6d35306965093be6a9c7bb529ec634d8db758",
+        "small37-script-launch-overlay/logcat.txt": "a5a3940d1f6db5329eafcae44fb9bf9a70b95d0ec2e4b6e243d62a0047662ac5",
+        "small37-script-launch-overlay/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-script-start-background",
+      "classification": "assertion_passed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281741250135400",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281741250135400",
+          "--es",
+          "route",
+          "script-start",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "result": {
+          "case": "bal_1789281741250135400",
+          "route": "script-start",
+          "sdk": 37,
+          "startedAt": 1789281748466,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 8267,
+          "taskId": 32,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: Activity start blocked. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "scriptCompleted": true,
+          "scriptResult": "org.mozilla.javascript.Undefined@b3ea860",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:42:46.320   766   922 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.autojs6; callingPackageTargetSdk: 37; callingUid: 10259; callingPid: 8267; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: LAST_ACTIVITY; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { flg=0x10000000 xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: ProcessRecord{734d473 8267:org.autojs.autojs6/u0a259}; inVisibleTask: false; balAllowedByPiCreator: BSP.ALLOW_BAL; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; hasRealCaller: true; isCallForResult: false; isPendingIntent: false; autoOptInReason: notPendingIntent; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 8267; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: LAST_ACTIVITY; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: null; realCallerApp: ProcessRecord{734d473 8267:org.autojs.autojs6/u0a259}; realInVisibleTask: false; balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:42:46.338   766   922 I ActivityTaskManager: START u0 {flg=0x10000000 xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "small37-script-start-background/result.json": "9a2f99486f1e72e39f830871cf976b51e7302ac22a105490fe3538cb60af5eec",
+        "small37-script-start-background/logcat.txt": "6775024a266d992359ccb44e01955006b42ddbba9c693004522aa882fa98b1c0",
+        "small37-script-start-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-script-start-overlay",
+      "classification": "superseded_script_completion",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789282176528303600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282176528303600",
+          "--es",
+          "route",
+          "script-start",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          39
+        ],
+        "result": {
+          "case": "bal_1789282176528303600",
+          "route": "script-start",
+          "sdk": 37,
+          "startedAt": 1789282179649,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 9847,
+          "taskId": 40,
+          "overlayPermission": true,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "note": "v1 completed before the script callback. Replaced by v2 waiting for the real callback.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [],
+      "rawHashes": {
+        "small37-script-start-overlay/result.json": "e54acaa5b8e87de39370522788212ace9049e9aa114288375b7f0d932caf7422",
+        "small37-script-start-overlay/logcat.txt": "50299783941149853a97ca6e121a4338a41424a764976753908bdee81ad6012e",
+        "small37-script-start-overlay/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-sender-none",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281449457434200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281449457434200",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked",
+        "result": {
+          "case": "bal_1789281449457434200",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789281457471,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 6293,
+          "taskId": 26,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.autojs6 could opt in to grant BAL privileges when sending. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:37:39.050   766  2584 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 6293; realCallingUidHasVisibleActivity: true; realCallingUidHasVisibleNotPinnedActivity: true; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TOP; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{8a1ef44 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{ab47b24 6293:org.autojs.autojs6/u0a259}; realInVisibleTask: true; balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:37:39.131   766  2584 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=0"
+      ],
+      "rawHashes": {
+        "small37-sender-none/result.json": "4380aee7176ad54377e72fff8f2cfdbfdc3f66eccaa3d5a0b71268480f69fd67",
+        "small37-sender-none/logcat.txt": "fd1aa316a3e39fab3bada1b20bc079b643abfcadeb29aa5dce1b4d048fd4dddb",
+        "small37-sender-none/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-sender-visible",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281467691139400",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281467691139400",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "activity",
+        "result": {
+          "case": "bal_1789281467691139400",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789281476067,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 6576,
+          "taskId": 27,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "fixtureEvent": {
+            "case": "bal_1789281467691139400",
+            "kind": "activity-created",
+            "pid": 4706,
+            "uid": 10251,
+            "time": 1789281477643
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:37:57.015   766  2072 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "small37-sender-visible/result.json": "86d74ccff1fa858d581b5093775a76ae4a457099c4385587948ba0621eb3363f",
+        "small37-sender-visible/logcat.txt": "2df309b924bebe5341151a30f9f1feaf38d99326d00a3a3febe77bc14bf87c2c",
+        "small37-sender-visible/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-sender-visible-background",
+      "classification": "auxiliary_without_fixture_isolation",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281543876354200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281543876354200",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "result": {
+          "case": "bal_1789281543876354200",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789281550555,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 7214,
+          "taskId": 29,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "visible",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.sdk37.balfixture could opt in to grant BAL privileges when creating.The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "note": "Initial observation contained BAL_BLOCK; a later run recorded this Activity appearing after the observation window. Superseded by fixture-isolated v2 background evidence.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:39:23.515   766  2105 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: true; callingUidHasVisibleNotPinnedActivity: true; callingUidHasNonAppVisibleWindow: false; callingUidProcState: TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 7214; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: LAST_ACTIVITY; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{8fc1472 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{d9e9d01 7214:org.autojs.autojs6/u0a259}; realInVisibleTask: false; balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:39:23.535   766  2105 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=0"
+      ],
+      "rawHashes": {
+        "small37-sender-visible-background/result.json": "e3aae520f78024cb494655d9467f8e96eb2ef5e85869da3f1cf76fe2a081cb4f",
+        "small37-sender-visible-background/logcat.txt": "ceef5cfd3ca1dae32428a7c50ee4009cc4bc8b0ce5dbe87e0e7f32fa8cd89b03",
+        "small37-sender-visible-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "small37-warm-result-background",
+      "classification": "assertion_passed",
+      "artifact": "target37.apk",
+      "original": {
+        "case": "bal_1789281827155496800",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789281827155496800",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          33
+        ],
+        "result": {
+          "case": "bal_1789281827155496800",
+          "route": "result",
+          "sdk": 37,
+          "startedAt": 1789281837563,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 8806,
+          "taskId": 34,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "visible",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:44:11.604   766  2105 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: TRANSIENT_BACKGROUND; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: true; isPendingIntent: true; autoOptInReason: callForResult; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 8806; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TRANSIENT_BACKGROUND; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{d98d0d2 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{e8e0f08 8806:org.autojs.autojs6/u0a259}; realInVisibleTask: false; balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:44:11.619   766  2105 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (rr=188871152) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "small37-warm-result-background/result.json": "083d050a3b6903511ae7c14a40f0306c5e9d71d5a1242369d85a1b63b88aa2bd",
+        "small37-warm-result-background/logcat.txt": "fae645676b98eaabf353c33159c65fa5a64a31e8a60f9e64a2d96241c180ca68",
+        "small37-warm-result-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-36-install-background",
+      "classification": "session_submission_only",
+      "artifact": "normal-app-target36.apk",
+      "original": {
+        "case": "bal_1789283293882013400",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789283293882013400",
+          "--es",
+          "route",
+          "install",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "install",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789283293882013400",
+          "route": "install",
+          "sdk": 37,
+          "startedAt": 1789283300826,
+          "targetSdk": 36,
+          "uid": 10259,
+          "pid": 14914,
+          "taskId": 61,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "installSession": 1345951798,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in null. PendingIntent was created in org.autojs.autojs6. The intent would have started org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 15:08:34.929   766   902 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.autojs6; callingPackageTargetSdk: 36; callingUid: 10259; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: LAST_ACTIVITY; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { act=org.autojs.autojs.action.PACKAGE_INSTALL_STATUS dat=autojs6://package-install-status/... flg=0x50000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.ALLOW_BAL; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_ALWAYS; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: android.uid.system:1000; realCallingPackageTargetSdk: -1; realCallingUid: 1000; realCallingPid: 766; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: PERSISTENT; isRealCallingUidPersistentSystemProcess: true; originatingPendingIntent: PendingIntentRecord{c6112a7 org.autojs.autojs6 startActivity}; realCallerApp: null; balAllowedByPiSender: BSP.NONE; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 15:08:34.940   766   902 I ActivityTaskManager: START u0 {act=org.autojs.autojs.action.PACKAGE_INSTALL_STATUS dat=autojs6://package-install-status/... flg=0x50000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (realCallingUid=1000) (BAL_BLOCK) result code=102"
+      ],
+      "confirmationActivityBlocked": true,
+      "systemConfirmationStarted": false,
+      "rawHashes": {
+        "v2-36-install-background/result.json": "3a25bd3574c46d6cccd3a9a7b5af45a619869251ae63bc67af9937522c7e473c",
+        "v2-36-install-background/logcat.txt": "2c115ef414e36ba09ec7f41f0dcb1aa2a9755ff7471fdbc6e38dca7c11980217",
+        "v2-36-install-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-36-legacy-default",
+      "classification": "assertion_passed",
+      "artifact": "normal-app-target36.apk",
+      "original": {
+        "case": "bal_1789283198578018700",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789283198578018700",
+          "--es",
+          "route",
+          "sender-legacy",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789283198578018700",
+          "route": "sender-legacy",
+          "sdk": 37,
+          "startedAt": 1789283216349,
+          "targetSdk": 36,
+          "uid": 10259,
+          "pid": 14311,
+          "taskId": 58,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "fixtureEvent": {
+            "case": "bal_1789283198578018700",
+            "kind": "activity-created",
+            "pid": 14416,
+            "uid": 10251,
+            "time": 1789283233562
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 15:07:05.960   766  1337 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "v2-36-legacy-default/result.json": "64e86c6380e562a70617849bfe57461c7ca1d4ae62e5190fa3e60be580fe8a9a",
+        "v2-36-legacy-default/logcat.txt": "d396f25c18ce74868bd43367852e8a594881a7ee6502de1ed57ab20c1c637324",
+        "v2-36-legacy-default/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-36-legacy-enabled",
+      "classification": "assertion_passed",
+      "artifact": "normal-app-target36.apk",
+      "original": {
+        "case": "bal_1789283256144993600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789283256144993600",
+          "--es",
+          "route",
+          "sender-legacy",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789283256144993600",
+          "route": "sender-legacy",
+          "sdk": 37,
+          "startedAt": 1789283279773,
+          "targetSdk": 36,
+          "uid": 10259,
+          "pid": 14675,
+          "taskId": 60,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.autojs6 could opt in to grant BAL privileges when sending. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "platformBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 15:08:03.489   766   922 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: BOUND_TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 36; realCallingUid: 10259; realCallingPid: 14675; realCallingUidHasVisibleActivity: true; realCallingUidHasVisibleNotPinnedActivity: true; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TOP; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{dc87cdf org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{dc229fe 14675:org.autojs.autojs6/u0a259}; realInVisibleTask: true; balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 15:08:03.511   766   922 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "v2-36-legacy-enabled/result.json": "ac3dc824ed2018ac845221fb14f5a909ef8fbcfbb055711f082cc0077d1e23d1",
+        "v2-36-legacy-enabled/logcat.txt": "5b160b7d4e554607e59e0f895b7a80d1fcaf4691b6f966cc4cbcec8a42c9b57e",
+        "v2-36-legacy-enabled/compat.txt": "33ab6e2331a10c413a3bd0078c87edb90e3bf4fc019ea2a9544e58ae8f02fad3"
+      }
+    },
+    {
+      "name": "v2-37-asm-default-deny",
+      "classification": "observed_expectation_mismatch",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282510230277500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282510230277500",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          46
+        ],
+        "result": {
+          "case": "bal_1789282510230277500",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789282523384,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 11551,
+          "taskId": 47,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "probeStoppedAt": 1789282530489,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789282542498,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789282510230277500",
+            "kind": "activity-created",
+            "pid": 11726,
+            "uid": 10251,
+            "time": 1789282528958
+          },
+          "landing": {
+            "case": "bal_1789282510230277500",
+            "uid": 10259,
+            "pid": 11551,
+            "taskId": 47
+          },
+          "completed": true
+        },
+        "assertionPassed": false,
+        "errors": [],
+        "failure": "AssertionError('Probe expectation failed; inspect the saved platform evidence')"
+      },
+      "note": "Lower Activity was stopped for 12009 ms; the landing Activity still started. The original no-landing expectation failed; ASM gate stays open.",
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:55:26.185   766   922 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=33310197) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:55:42.518   766  1412 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=33310197) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-asm-default-deny/result.json": "b3d1b4e362063681dbd9e1df3e8c0bd8dac41429eac03bc803ea40d5d31574ed",
+        "v2-37-asm-default-deny/logcat.txt": "d0ac8627925297bcbe7a9fed08d1f7273ff4027133990a5d3ee5579bfabdba2c",
+        "v2-37-asm-default-deny/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-asm-disable",
+      "classification": "asm_characterization_only",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282620701009700",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282620701009700",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789282620701009700",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789282625670,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 12210,
+          "taskId": 49,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "probeStoppedAt": 1789282629117,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789282641123,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789282620701009700",
+            "kind": "activity-created",
+            "pid": 12252,
+            "uid": 10251,
+            "time": 1789282627516
+          },
+          "landing": {
+            "case": "bal_1789282620701009700",
+            "uid": 10259,
+            "pid": 12210,
+            "taskId": 49
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false, org.autojs.sdk37.balfixture=false}; rawOverrides={org.autojs.autojs6=false, org.autojs.sdk37.balfixture=false}; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:57:06.616   766  2128 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=64892296) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:57:21.137   766  1435 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=64892296) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-asm-disable/result.json": "88727a355f0ed3f45585cabf287327fbf796bba409a340076ade7a86b6c02a53",
+        "v2-37-asm-disable/logcat.txt": "9e09183c01b193c609722d3a84b8248ec3dffe7c97f8283f3104826f9d00da4d",
+        "v2-37-asm-disable/compat.txt": "d81c2fe734e0f6bdeba1ad43c15cbf6614fa5efe459875ca834762581a26a1e8"
+      }
+    },
+    {
+      "name": "v2-37-asm-enable",
+      "classification": "asm_characterization_only",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282589633974200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282589633974200",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          47
+        ],
+        "result": {
+          "case": "bal_1789282589633974200",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789282593467,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 11863,
+          "taskId": 48,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789282596522,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789282608527,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789282589633974200",
+            "kind": "activity-created",
+            "pid": 11961,
+            "uid": 10251,
+            "time": 1789282595250
+          },
+          "landing": {
+            "case": "bal_1789282589633974200",
+            "uid": 10259,
+            "pid": 11863,
+            "taskId": 48
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true, org.autojs.sdk37.balfixture=true}; rawOverrides={org.autojs.autojs6=true, org.autojs.sdk37.balfixture=true}; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:56:34.336   766   904 I ActivityTaskManager: START u0 {xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=146295085) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 14:56:48.546   766   904 I ActivityTaskManager: START u0 {xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=146295085) (BAL_ALLOW_FOREGROUND) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-asm-enable/result.json": "4c18b1abaf15437910ea1b40b0f6a4967793e08f05635a5ca6d0666fec97ee37",
+        "v2-37-asm-enable/logcat.txt": "3234a12fcb9b91eb9bebab8c9a48bfd3f1c2467e5b7a3e8101a31b6f25815d4f",
+        "v2-37-asm-enable/compat.txt": "14d9b81250d15c5fb24c6e53da3e44bfe18bab7672ed62d6f3ccb9b09573f46a"
+      }
+    },
+    {
+      "name": "v2-37-install-background",
+      "classification": "session_submission_only",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282719415105000",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282719415105000",
+          "--es",
+          "route",
+          "install",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "install",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          52
+        ],
+        "result": {
+          "case": "bal_1789282719415105000",
+          "route": "install",
+          "sdk": 37,
+          "startedAt": 1789282723161,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 13093,
+          "taskId": 54,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "installSession": 1414614009,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in null. PendingIntent was created in org.autojs.autojs6. The intent would have started org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:58:56.890   766   902 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.autojs6; callingPackageTargetSdk: 37; callingUid: 10259; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: LAST_ACTIVITY; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { act=org.autojs.autojs.action.PACKAGE_INSTALL_STATUS dat=autojs6://package-install-status/... flg=0x50000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.ALLOW_BAL; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_ALWAYS; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: android.uid.system:1000; realCallingPackageTargetSdk: -1; realCallingUid: 1000; realCallingPid: 766; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: PERSISTENT; isRealCallingUidPersistentSystemProcess: true; originatingPendingIntent: PendingIntentRecord{92227b org.autojs.autojs6 startActivity}; realCallerApp: null; balAllowedByPiSender: BSP.NONE; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:58:56.919   766   902 I ActivityTaskManager: START u0 {act=org.autojs.autojs.action.PACKAGE_INSTALL_STATUS dat=autojs6://package-install-status/... flg=0x50000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (realCallingUid=1000) (BAL_BLOCK) result code=102"
+      ],
+      "confirmationActivityBlocked": true,
+      "systemConfirmationStarted": false,
+      "rawHashes": {
+        "v2-37-install-background/result.json": "5f055a277f95fe4562cbc2823579206a66eece11e45fa39410d8e5544ef28d00",
+        "v2-37-install-background/logcat.txt": "625f6b4a7050541f3a5b6f6a494810ebd8ffd1c2b1126dafed231422fb1a4e57",
+        "v2-37-install-background/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-install-visible",
+      "classification": "session_submission_only",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282801038014100",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282801038014100",
+          "--es",
+          "route",
+          "install",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "install",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          54
+        ],
+        "result": {
+          "case": "bal_1789282801038014100",
+          "route": "install",
+          "sdk": 37,
+          "startedAt": 1789282806408,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 13390,
+          "taskId": 55,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "installSession": 2123417489,
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 15:00:08.019   766   902 I ActivityTaskManager: START u0 {act=org.autojs.autojs.action.PACKAGE_INSTALL_STATUS dat=autojs6://package-install-status/... flg=0x50000000 xflg=0x4 cmp=org.autojs.autojs6/org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (realCallingUid=1000) (BAL_ALLOW_VISIBLE_WINDOW [onlyCaller]) result code=0",
+        "09-13 15:00:08.270   766  2072 I ActivityTaskManager: START u0 {act=android.content.pm.action.CONFIRM_INSTALL xflg=0x4 pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.InstallStart (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (sr=194046818) (BAL_ALLOW_VISIBLE_WINDOW) result code=0",
+        "09-13 15:00:08.882   766  2072 I ActivityTaskManager: START u0 {act=android.content.pm.action.CONFIRM_INSTALL flg=0x2000000 xflg=0x4 pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.v2.ui.InstallLaunch (has extras)} with LAUNCH_MULTIPLE from uid 10119 (com.google.android.packageinstaller) (sr=102547941) (BAL_ALLOW_VISIBLE_WINDOW) result code=0"
+      ],
+      "confirmationActivityBlocked": false,
+      "systemConfirmationStarted": true,
+      "rawHashes": {
+        "v2-37-install-visible/result.json": "13e776bf10978947028bf766806daa141590aeb1041cfc900a4728b77a42f6d4",
+        "v2-37-install-visible/logcat.txt": "91b8af05dcb8bc3d256f0bba0cb63828bcdbe76e04218d64beeb2a09d8e6639c",
+        "v2-37-install-visible/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-legacy-default",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282385080519800",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282385080519800",
+          "--es",
+          "route",
+          "sender-legacy",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789282385080519800",
+          "route": "sender-legacy",
+          "sdk": 37,
+          "startedAt": 1789282398944,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 10601,
+          "taskId": 42,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "strictMode": "android.os.strictmode.BackgroundActivityLaunchViolation: PendingIntent Activity start blocked in org.autojs.autojs6. PendingIntent was created in org.autojs.sdk37.balfixture. org.autojs.autojs6 could opt in to grant BAL privileges when sending. The intent would have started org.autojs.sdk37.balfixture/.TargetActivity",
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:53:21.253   766  1412 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: BOUND_TOP; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 10601; realCallingUidHasVisibleActivity: true; realCallingUidHasVisibleNotPinnedActivity: true; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: TOP; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{8da3d2f org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{8db2bd3 10601:org.autojs.autojs6/u0a259}; realInVisibleTask: true; balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: BAL_ALLOW_VISIBLE_WINDOW; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:53:21.280   766  1412 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "v2-37-legacy-default/result.json": "0987ee377e3bc8b80a0d5ab23f79338e4c3843a5435325ee4e1cb7e37f10a2ae",
+        "v2-37-legacy-default/logcat.txt": "a460f6fbfedb1246a61a35cb4cf79d97a7996df79bfee4c244472e09f7d27368",
+        "v2-37-legacy-default/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-legacy-disabled",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282410656812900",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282410656812900",
+          "--es",
+          "route",
+          "sender-legacy",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789282410656812900",
+          "route": "sender-legacy",
+          "sdk": 37,
+          "startedAt": 1789282417843,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 10903,
+          "taskId": 43,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "none",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {},
+          "sendReturned": true,
+          "fixtureEvent": {
+            "case": "bal_1789282410656812900",
+            "kind": "activity-created",
+            "pid": 10967,
+            "uid": 10251,
+            "time": 1789282419693
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false})",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:53:39.469   766  2001 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-legacy-disabled/result.json": "7b0e2c188017412341a8b5523f4de102ede9e0923253774a86323c352cc88829",
+        "v2-37-legacy-disabled/logcat.txt": "c2425e4e56c5e22830093777852e62e97629aec1a6370f1e2e65d9b9ba78af40",
+        "v2-37-legacy-disabled/compat.txt": "7ad618413e84f60e16fed96f728b690d5eb94ea70162d1d243309f9806e2986f"
+      }
+    },
+    {
+      "name": "v2-37-result-enabled",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282451371964700",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282451371964700",
+          "--es",
+          "route",
+          "result",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "result",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [],
+        "result": {
+          "case": "bal_1789282451371964700",
+          "route": "result",
+          "sdk": 37,
+          "startedAt": 1789282469620,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 11175,
+          "taskId": 45,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "resultCode": -1,
+          "resultCase": "bal_1789282451371964700",
+          "fixtureEvent": {
+            "case": "bal_1789282451371964700",
+            "kind": "activity-created",
+            "pid": 11286,
+            "uid": 10251,
+            "time": 1789282472482
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:54:32.242   766  1412 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (rr=256890330) (BAL_ALLOW_VISIBLE_WINDOW [realCaller]) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-result-enabled/result.json": "21bb9ae13e2152d23bc74a70b22f835db5e73b07853fe52e9cbfcb5aad059207",
+        "v2-37-result-enabled/logcat.txt": "1fb04d409f531f0c296c040807cc8fc1d6dba50e20b1c6e4b6defc4f8f142293",
+        "v2-37-result-enabled/compat.txt": "33ab6e2331a10c413a3bd0078c87edb90e3bf4fc019ea2a9544e58ae8f02fad3"
+      }
+    },
+    {
+      "name": "v2-37-script-launch-overlay",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282676539430200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282676539430200",
+          "--es",
+          "route",
+          "script-launch",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          50
+        ],
+        "result": {
+          "case": "bal_1789282676539430200",
+          "route": "script-launch",
+          "sdk": 37,
+          "startedAt": 1789282679611,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 12786,
+          "taskId": 52,
+          "overlayPermission": true,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "scriptCompleted": true,
+          "scriptResult": "true",
+          "fixtureEvent": {
+            "case": "launcher",
+            "kind": "activity-created",
+            "pid": 12980,
+            "uid": 10251,
+            "time": 1789282696276
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:58:15.920   766  2486 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 xflg=0x4 pkg=org.autojs.sdk37.balfixture cmp=org.autojs.sdk37.balfixture/.TargetActivity} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (BAL_ALLOW_SAW_PERMISSION) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-script-launch-overlay/result.json": "6188485d802726da41cc9cd9a26304fa658b59b21c3210641b707e4fc4efff7c",
+        "v2-37-script-launch-overlay/logcat.txt": "2f312c1f68bda7d2681edb4197823d678e2e7e3437cbe8b2035adf0a84ea4be3",
+        "v2-37-script-launch-overlay/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-script-start-overlay",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282649452610100",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282649452610100",
+          "--es",
+          "route",
+          "script-start",
+          "--es",
+          "senderMode",
+          "none",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "activity",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          49
+        ],
+        "result": {
+          "case": "bal_1789282649452610100",
+          "route": "script-start",
+          "sdk": 37,
+          "startedAt": 1789282652192,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 12456,
+          "taskId": 50,
+          "overlayPermission": true,
+          "background": true,
+          "senderMode": "none",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "scriptCompleted": true,
+          "scriptResult": "org.mozilla.javascript.Undefined@e203463",
+          "fixtureEvent": {
+            "case": "bal_1789282649452610100",
+            "kind": "activity-created",
+            "pid": 12697,
+            "uid": 10251,
+            "time": 1789282669083
+          },
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:57:48.534   766  1337 I ActivityTaskManager: START u0 {flg=0x10000000 xflg=0x5 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10259 (org.autojs.autojs6) (BAL_ALLOW_SAW_PERMISSION) result code=0"
+      ],
+      "rawHashes": {
+        "v2-37-script-start-overlay/result.json": "785f9ef55bd0d323102e8c8d627f2c77f354d58a12f92d53f390b71c17b211b0",
+        "v2-37-script-start-overlay/logcat.txt": "9a0a1c8c2b4b0b58fba06477ebd20c016c72811c1c9e9ce15dc1028145c34f31",
+        "v2-37-script-start-overlay/compat.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+      }
+    },
+    {
+      "name": "v2-37-sender-background-enabled",
+      "classification": "assertion_passed",
+      "artifact": "target37-v2.apk",
+      "original": {
+        "case": "bal_1789282480766279000",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789282480766279000",
+          "--es",
+          "route",
+          "sender",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "true"
+        ],
+        "expected": "blocked",
+        "fixtureForceStopped": true,
+        "reuseProcess": true,
+        "removedRootTasks": [
+          45
+        ],
+        "result": {
+          "case": "bal_1789282480766279000",
+          "route": "sender",
+          "sdk": 37,
+          "startedAt": 1789282485018,
+          "targetSdk": 37,
+          "uid": 10259,
+          "pid": 11175,
+          "taskId": 46,
+          "overlayPermission": false,
+          "background": true,
+          "senderMode": "visible",
+          "sendImportance": 400,
+          "windowFocusAtSend": false,
+          "creatorPackage": "org.autojs.sdk37.balfixture",
+          "creatorUid": 10251,
+          "creatorTarget": 37,
+          "senderOptions": {
+            "android.activity.splashScreenStyle": -1,
+            "android.pendingIntent.backgroundActivityAllowed": 4
+          },
+          "sendReturned": true,
+          "fixtureEvent": {},
+          "completed": true
+        },
+        "assertionPassed": true,
+        "errors": []
+      },
+      "compat": [
+        "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true})",
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "platformEvents": [
+        "09-13 14:54:58.516   766  1412 E ActivityTaskManager: Background activity launch blocked! goo.gle/android-bal [callingPackage: org.autojs.sdk37.balfixture; callingPackageTargetSdk: 37; callingUid: 10251; callingPid: -1; appSwitchState: 2; callingUidHasVisibleActivity: false; callingUidHasVisibleNotPinnedActivity: false; callingUidHasNonAppVisibleWindow: false; callingUidProcState: LAST_ACTIVITY; isCallingUidPersistentSystemProcess: false; allowBalExemptionForSystemProcess: false; intent: Intent { dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras) }; callerApp: null; balAllowedByPiCreator: BSP.NONE; resultIfPiCreatorAllowsBal: BAL_BLOCK; callerStartMode: MODE_BACKGROUND_ACTIVITY_START_DENIED; hasRealCaller: true; isCallForResult: false; isPendingIntent: true; autoOptInReason: null; realCallingPackage: org.autojs.autojs6; realCallingPackageTargetSdk: 37; realCallingUid: 10259; realCallingPid: 11175; realCallingUidHasVisibleActivity: false; realCallingUidHasVisibleNotPinnedActivity: false; realCallingUidHasNonAppVisibleWindow: false; realCallingUidProcState: LAST_ACTIVITY; isRealCallingUidPersistentSystemProcess: false; originatingPendingIntent: PendingIntentRecord{7ee98d4 org.autojs.sdk37.balfixture startActivity}; realCallerApp: ProcessRecord{1b43e3d 11175:org.autojs.autojs6/u0a259}; realInVisibleTask: false; balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: BAL_BLOCK; realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE; balDontBringExistingBackgroundTaskStackToFg: true]",
+        "09-13 14:54:58.646   766  1412 I ActivityTaskManager: START u0 {dat=sdk37-bal://fixture/... xflg=0x4 cmp=org.autojs.sdk37.balfixture/.TargetActivity (has extras)} with LAUNCH_MULTIPLE from uid 10251 (org.autojs.sdk37.balfixture) (realCallingUid=10259) (BAL_BLOCK) result code=102"
+      ],
+      "rawHashes": {
+        "v2-37-sender-background-enabled/result.json": "23f8f3d7b3f2693abc1c34abaf3bcfb91b65444a5a3dc792a12263762e53308c",
+        "v2-37-sender-background-enabled/logcat.txt": "e4f33402b9c319d0d67d7865bab2304dc3e7ceb2d68f7158381b5cd57444dbfe",
+        "v2-37-sender-background-enabled/compat.txt": "33ab6e2331a10c413a3bd0078c87edb90e3bf4fc019ea2a9544e58ae8f02fad3"
+      }
+    }
+  ],
+  "actualPicker": {
+    "package": "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+    "versionCode": 12,
+    "targetSdk": 36,
+    "apkSha256": "c55dd575cd331e24bd5a57326314bc4e133bc414501ddf0bd80d821532f55444",
+    "foregroundInstallSession": 2123417489,
+    "confirmedInstalledAt": "2026-09-13 15:01:07",
+    "installerPackage": "org.autojs.autojs6",
+    "realDrawerReachedPermissionDialog": true,
+    "permissionDialogCancelled": true,
+    "fullScreenCaptureVerified": false,
+    "sourceApkLastModified": "2026-09-13T14:32:38.957447",
+    "apkHashVerifiedAt": "2026-09-13 15:14",
+    "artifactNote": "Source APK hash checked at final audit; source modification time precedes the 14:58 adb push. Earlier hash belonged to an older local build and is not assigned to this installed version."
+  },
+  "otherEvidenceHashes": {
+    "install-confirmation.png": "e73d72ea3f7b8f454c11f52cd6330faf1b7c578abea78888cc37caa8f2388632",
+    "install-visible-confirmation.png": "c78eccd912798041ea1650eb6774a39d8f26a52759b9aee7b311c046e1495543",
+    "actual-picker-after-cancel.txt": "8916964cc7001ec2fb3d8aefed090fd00f80f649fbcddfbecbbefe92af93c2f8",
+    "actual-picker-package.txt": "11913bcc4869cb3008c6f7fae9a36ea54c8d5a95a9b2e033fc1213aa369cbfbe",
+    "actual-picker.log": "56b701da49b24264dc7bdfb1f6b9a7f2caa7cfca9c6a7994384d5026c9a3cc2a",
+    "picker-before-install.txt": "4016cd9ceac42322d2cc118d8c4134ddfc9d160adce2264948de287625fd157e",
+    "picker-after-install.txt": "e33d4c3933a5a2d0b5246cb120c3083a977efd87b98c529d12f3989261ca1f31",
+    "picker-request-loaded.png": "e25b0df2beeb7851502e046976677050fd6c40875bfa6b713ceeba86ef64e2cb",
+    "build-normal-final.log": "f0939c376f4bf34bd34b03bd33dcc188cfff7f98e8987a33e831c3b8c050c593",
+    "build-target37-retry.log": "ac1c5284be8c80be1acd84e920033a7a1b98010902a8956b22882fd67282b612",
+    "build-target37-v2.log": "7dd83251a0594aa3e1a03063e94010190a906f5c4f7b51fb2b7bfd84203a7541",
+    "build-target37.log": "5248d98e6aeb615126ec493520f64077225cd8ee52a412e246f8750e7274d3e1",
+    "normal-build-verification.json": "f7da9cfdb72fdabfefb83b5e4a91518a244614900738d86fb992874c73f284db",
+    "compat-after-restore.txt": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce",
+    "overlay-after-restore.txt": "ddd1e704a66534f25ad24e429cd32df611cedbce01c21ef7737360a36bdb2fb8",
+    "installer-appop-after-restore.txt": "8faa9b825fd6a26c17e070b25d9eb0043c2dee5b6ff78e098bfb381ee8f9ba34",
+    "cleanup-avd-name.txt": "667de2da7a82ca87f844d69c1188dfc6e041834f7f0afa7edab5de0b749c192d",
+    "devices-at-end.txt": "2cce70d522bae27398a7a4f1c323ddb98f9bb37fc3af263e9e026d5ff8024eac"
+  },
+  "cleanup": {
+    "ownedAvdClosed": true,
+    "savedSnapshot": false,
+    "compatAfterRestore": [
+      "ChangeId(405995292; name=COVER_INTENT_SENDER; enableSinceTargetSdk=37)",
+      "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+    ],
+    "debugSessionActive": false,
+    "temporaryRunConfigurationRemoved": true,
+    "userExceptionBreakpoints": 5,
+    "enabledUserExceptionBreakpoints": 2
+  },
+  "additionalIncompleteRun": {
+    "name": "37-sender-visible",
+    "reason": "Device was unavailable before the probe could start; no result.json. Not a BAL block.",
+    "stdoutSha256": "4f053088333f039772bd6968c11f7b8fcb0b49089550019700db8aa9c4b41467"
+  },
+  "testToolCommit": "1ce93f3e0"
+}
