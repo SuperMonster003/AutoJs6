@@ -3,7 +3,7 @@
 本文是 AutoJs6 宿主 (含 inrt 打包模板与仓内 modules / plugin-api / test-apps) 以及同目录 42 个官方插件仓库把 `compileSdk` / `targetSdk` 从 36 升到 37 的可执行状态表.
 以 2026-09-13 的本地代码快照 (宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`) 与同日的 [探针记录](evidence/android-sdk-37-probe-20260913.md) (compileSdk 37 探针编译, API 37 模拟器 `dumpsys platform_compat` 清单) 为起点, 每个条目均可独立 Check 并落地.
 
-2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后已完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 P2.3 动态加载只读适配, 见 [P2.3 实施记录](evidence/android-sdk-37-p23-20260913.md). 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 尚未实施.
+2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 [P2.3 动态加载只读适配](evidence/android-sdk-37-p23-20260913.md)、[P2.4 Looper / 线程适配](evidence/android-sdk-37-p24-20260913.md). [P2.1 本地网络权限](evidence/android-sdk-37-p21-20260913.md) 的代码、模拟器验证及关联文档 / 声明同步已落地, 真机网络、跨 profile 与完整 MqttService 流程仍待验收. 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 的整体目标仍未完成.
 
 使用方式:
 
@@ -17,7 +17,7 @@
 
 ## 1. 固定决策
 
-D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D11 是据此拟定的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
+D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D12 是据此拟定或按既有默认项落实的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
@@ -32,6 +32,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | D9 | changelog 写法 | SDK 日志参考既有 35 -> 36 升级记录, 最终分类以各仓库 `AGENTS.md` 为准; 当前宿主规定 `dependency` 仅统计 Gradle 依赖声明, SDK 平台升级记入 `improvement` (例如 "编译 SDK 版本调整为 37", 英文 "Updated compile SDK to 37"). P1 只描述编译版本, P3 再描述宿主与打包应用的目标版本及用户可见变化; 行为适配按性质写入 `fix` / `improvement`. 不提前宣称 targetSdk 已升级. |
 | D10 | `app/src/main/java/com/stardust/**` 兼容包保持冻结 | 探针编译显示 android.jar 37 未在该包内引发错误; 若后续 lint / 构建暴露必须修改的项, 仅允许 35 -> 36 先例 (`2ab13f3c7` 注释掉 `MainThreadProxy` 的 `Thread.stop` 系列) 那种 "最小编译修正", 不做其它改动. |
 | D11 | 插件仓库的节奏 | 纯 JVM 且无行为暴露的插件 (附录 E "暴露" 列为空) 可在一次发布内同时完成 compileSdk 与 targetSdk; 存在本地网络 / 动态加载 / 后台音频 / 屏幕捕获暴露的插件与宿主一样两步走. 各仓库脏工作区 (附录 E) 先由维护者处理或按会话惯例分开提交, 本 Roadmap 的提交不得混入. |
+| D12 | Q1 按既有推荐项 (a) 实施 | P2.1 原条目已写明 "默认按推荐项". 用户显式连接 VS Code / 开启服务或操作权限入口时引导, 自动连接与脚本网络调用不弹窗; 复用 `runtime.requestPermissions` 的通用名称数组. 只有 OS >= 37 且实际 target >= 37 才需要权限; manifest 声明也仅进入 target >= 37 的 flavor, 旧 target 不声明或申请. `d9465be13`, [P2.1 证据](evidence/android-sdk-37-p21-20260913.md). |
 
 由 D1-D3 派生的硬约束:
 
@@ -141,9 +142,9 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | --- | --- | --- | --- | --- |
 | P0 | 基线与工具 | 无 | 宿主 | 完成 (2026-09-13): 覆盖开关, 分发拒绝, compat 工具, 有效 lint 基线 |
 | P1 | 宿主 compileSdk 37 | P0 | 宿主 | 本地实现 / 构建 / 测试 / 冒烟完成; lint 零增量但有既有错误, 远程 CI 待验证 |
-| P2 | 宿主 targetSdk 37 行为变更适配 (target 仍为 36) | P0.2 (覆盖开关), P1 | 宿主 | 进行中: P2.3 已完成, 其余条目待实施 |
+| P2 | 宿主 targetSdk 37 行为变更适配 (target 仍为 36) | P0.2 (覆盖开关), P1 | 宿主 | 进行中: P2.3 / P2.4 已完成; P2.1 代码与模拟器验证完成, 其余设备验收项保留 |
 | P3 | 宿主 targetSdk 37 切换 (app + inrt) | P2 全部 | 宿主, APK-Builder-Template (只读验证) | 未开始 |
-| P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 未开始 |
+| P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 进行中: P2.1 文档 / 声明 / LSP 已同步, 其余迁移说明与 CI 待完成 |
 | P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案 | 42 个插件仓库 | 未开始 |
 | P6 | 验收与关闭 | P1-P5 | 全部 | 未开始 |
 
@@ -196,12 +197,17 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.1 本地网络权限 (I1)
 
-- [ ] 事实核对: target 37 debug 包先声明 `ACCESS_LOCAL_NETWORK`, 确认合并 manifest 与实际包名后再做 grant / revoke 对照 (未声明的权限不能直接授予). 分别执行 VS Code 服务端 / 客户端, LAN TCP / UDP / WebSocket, 同 profile 的 `127.0.0.1` / `[::1]`, 记录拒绝, 授予, 撤销及重新进入功能的结果. HTTP 明文策略, TLS 证书, AVD NAT / 主机防火墙先独立排除, 不能把所有连接错误归因于 LNP. (DEVICE-37: 失败与恢复的两组日志)
-- [ ] manifest 声明 `android.permission.ACCESS_LOCAL_NETWORK`; 新增 `permission/LocalNetworkPermission.kt` (沿用 `PostNotificationsPermission` 的 `Base` / `AbleToUrge` 结构, 常规 target <= 36 兼容路径不主动申请新权限, target 37 走标准运行时权限流程). 兼容开关强制测试的条件另外记录. (SOURCE; DEVICE-37)
-- [ ] 申请时机 (待决 Q1, 默认按推荐项): VS Code 扩展连接入口 (`DevPluginService` 两种模式) 在启动前确保权限, 缺失时弹出说明并引导; 抽屉与设置页增加权限开关行 (与 "显示在其它应用上层" 同款 UI); 脚本层 `http` / `web` / socket 调用不主动弹窗, 但在目标为局域网地址且权限缺失时抛出带解释的错误 (文案 x 11 文件, 按 name 升序), 并提供 `runtime.requestPermissions(["access_local_network"])` (若既有权限申请 API 已支持通用权限名则复用, 不新增函数). (SOURCE; DEVICE-37)
-- [ ] MQTT (`MqttService`) 与 Node 桥的局域网路径: 复测 broker 在局域网时的连接错误提示. (DEVICE-37)
-- [ ] 对拒绝后重试、不再询问、既有 Nearby Devices 授权组以及 target 36 -> 37 覆盖安装分别记录权限状态; 系统选择器适用于用户选择的设备, 不能替代任意脚本 socket / 服务端权限. 工作资料中的宿主与个人资料中的插件若依赖回环, 单列跨 profile 受限用例, 不承诺 localhost 在所有安装组合中可达. (DEVICE-37)
-- [ ] 文档: 若 JS 层出现新权限名或新错误码, 同步文档 / d.ts / LSP (P4); changelog `feature` (权限流程) 与 `improvement` (错误提示). (DOCS)
+- [x] 官方事实与 APK 核对: target <= 36 不声明也不申请新权限, 保留 INTERNET 的隐式 LAN 访问; target 37 包按 flavor 合并 `src/target37/AndroidManifest.xml`. 普通 host 36 / inrt 29 与覆盖 target 37 的 app / test APK 元数据及 SHA-256 均归档. 未使用 compat 强制开关. (VERIFIED; SOURCE; ANDROID_BUILD: [P2.1 证据](evidence/android-sdk-37-p21-20260913.md))
+- [x] `LocalNetworkPermission`、抽屉、宿主设置与 inrt 设置接入标准运行时权限流程. 申请时机按 Q1 推荐项 (a) 实施, 见 D12: 显式 VS Code 连接 / 开启服务才引导, 自动连接与脚本调用不主动弹窗. 复用 `runtime.requestPermissions(["access_local_network"])`, 保持异步 void API. (SOURCE: `d9465be13`; DEVICE-37)
+- [x] HTTP 同步 / 异步、WebSocket、Node controlled fetch 在实际网络失败后附加条件式恢复提示并保留 cause; TLS 与主动取消不误判. 修复 Node 将 OkHttp 整次调用超时归类为取消的问题, 保留 TIMEOUT / ABORTED 各自错误码. 原生 Socket / Paho 保留原始异常, 文档提供显式申请和重试步骤. (JVM: 5/5; DEVICE-37: 网络 suite 与既有取消回归 1/1)
+- [x] API 37 / 16 KB AVD: LAN TCP / UDP、入站 accept、HTTP、WebSocket、Paho CONNECT、VS Code 双向 hello、Node fetch 及同 profile 的 IPv4 / IPv6 loopback. 拒绝组 9 通过 / 2 个成功场景跳过, 授权恢复组 11/11. 通过 emulator redir 验证入站接口, 不以 adb tunnel 冒充 LAN; 未修改防火墙. (DEVICE-37: [矩阵与边界](evidence/android-sdk-37-p21-20260913.md#构建与用例))
+- [x] host 拒绝后重试、连续拒绝后的设置入口、已有 Nearby Devices 授权、inrt 设置页重试, 四轮 UI 各 1/1. target 36 -> 37 覆盖安装且没有 Nearby 授权时, 新权限为未授予; 请求授权后恢复访问. 不把无弹窗的权限组复用与覆盖升级视为同一条件. (DEVICE-37)
+- [x] 旧系统回归: API 24 上 normal host 36 / inrt 29 与 target 37 覆盖 host / inrt 各 11/11, 新权限门槛未误拦. API 37 上 normal host 36 两轮各 11/11. inrt 37 的 API 37 权限识别 / HTTP / loopback 拒绝与授权两轮各 3/3, 另有真实设置页重试测试. (DEVICE; DEVICE-37)
+- [x] 文档 / d.ts / Offline-Docs / Ace LSP 已同步并递增各仓版本; 66 个手工声明文件与 3 个生成文件一致, 通用权限数组正反例、离线文档 APK 门禁与 LSP runtime 校验通过. 宿主及相关插件 10 语言 changelog 已生成, 11 个字符串文件检查通过. SDK 37 暴露的 d.ts 导出器平台目录拼接缺陷另仓修复. (DOCS; ANDROID_BUILD: [关联提交](evidence/android-sdk-37-p21-20260913.md#关联仓库))
+- [ ] Android `org.eclipse.paho.android.service.MqttService` 与完整 broker 的 publish / subscribe / reconnect / lifecycle, 及拒绝后的恢复体验. 已通过的是 Paho MqttClient CONNECT 最小握手, 不据此关闭本项. (DEVICE-37)
+- [ ] Android 17 真机 Wi-Fi / Ethernet / VPN、Wi-Fi Direct / hotspot、实际 IPv6 LAN 与 mDNS / multicast、公网回归. AVD NAT 结果不能替代这些网络拓扑. (DEVICE-37)
+- [ ] 跨 profile loopback 与独立插件 UID 授权隔离; 系统选择器的有限授权不替代任意脚本 socket / 服务器权限. (DEVICE-37; P5)
+- [ ] inrt 最终 target 37 的完整网络 suite 及最终打包 APK 回归, 与 P3.3 共同验收. (DEVICE-37)
 
 ### P2.2 后台音频 (I2)
 
@@ -342,8 +348,9 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ## P4: 关联项目, 文档与 CI
 
-- [ ] 文档仓库 (`AutoJs6-Documentation`): 若 P2.1 引入新权限名 / 错误码或 P2 新增任何 JS API, 执行 `auto-generate-for-autojs6.bat` 并提交 (含 `AutoJs6-Plugin-Offline-Docs`); 无 API 变化时只在文档增加 "Android 17 适配说明" 页 (本地网络权限, 后台音频, OTP 短信延迟, WebView UA, 反射限制, 私有 CA). (DOCS)
-- [ ] d.ts 与 LSP (`AutoJs6-TypeScript-Declarations`, `AutoJs6-Plugin-Ace-Editor`): 仅当 JS API 变化时执行 `aj6dts.bat -Publish` 与 `:app:generateAutoJs6LspDeclarations`, 版本号加一. (DOCS)
+- [x] P2.1 权限文档: `auto-generate-for-autojs6.bat --verify-offline` 已运行, Documentation `b46c52d` / `ecb72eb`, Offline-Docs `28c2284`; 版本与来源记录同步. (DOCS; ANDROID_BUILD)
+- [x] P2.1 d.ts / LSP: 既有 requestPermissions 的通用名称数组纠正、异步说明及示例同步; `aj6dts.bat -Publish`、`:app:generateAutoJs6LspDeclarations` 与 `:app:verifyAutoJs6LspRuntime` 通过. DTS `acd8b62` (4.11.1), Ace `0d9e9a0` (1.1.28 / 39), 导出器 `525bebd`. (DOCS; ANDROID_BUILD)
+- [ ] P2 其余条目完成后, 补齐 "Android 17 适配说明" (后台音频、OTP、WebView UA、反射限制、私有 CA 等已验证变化), 如有 JS API / 权限模型变化继续同步文档与声明. P2.1 的同步不代替最终迁移说明. (DOCS)
 - [ ] VS Code 扩展 (`AutoJs6-VSCode-Ext`): README / 故障排查增加 "Android 17 设备需授予本地网络权限" 说明 (不改代码, `VSCODE_EXT_REQUIRED_VERSION` 不变). (DOCS)
 - [ ] CI: P1 / P3 各自推送后验证远程 `android.yml`, 记录 runner 是否自动下载 `android-37.0`; `release-runtime-kit.yml` 的外部发布与插件触发随正常发布验证, 构建步骤可先本地运行. (ANDROID_BUILD)
 - [ ] `AutoJs6-Official-Plugins-Index`: 确认生成器无 targetSdk 字段假设; 插件发布时按既有流程刷新. (SOURCE)
@@ -408,7 +415,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 
 | 编号 | 事项 | 选项 | 推荐 |
 | --- | --- | --- | --- |
-| Q1 | 本地网络权限的申请时机 (P2.1) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a): 与既有 "按功能引导权限" 的模式一致, 不打扰不用局域网功能的用户 |
+| Q1 | 本地网络权限的申请时机 (P2.1, 已按原条目的默认项实施) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a) 已实施, 见 D12 / `d9465be13`; 不把执行默认项记为维护者另行投票 |
 | Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), 有证据时 (b); 复核修正原推荐的全局关闭方案 |
 | Q3 | 后台音频策略 (P2.2) | (a) 保持前台服务常驻模式 + 诊断警告; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | (a): 改动最小, 且脚本音频并非媒体应用语义 |
 | Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a): 无共享存储需求的脚本允许跳过, 拒绝权限后仍有可理解的结果 |
@@ -636,3 +643,11 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - `705cb04ad`: 基线发现取消远期定时器后脚本不退出, 修复 Timer 实际工作登记、唤醒与线程退出清理. API 24 回归、6 项 Looper JVM 测试及 app / inrt debug 构建通过.
 - 复核 start 的声明与继承关系, 没有宿主 Thread.start 初始化需要迁移. 调试器确认 ThreadCompat 取消状态能跨平台原生标记清除而保留; 平台反射限制与 util.java 文档评估写入附录 F.
 - P2.4 已勾选, 正常 target 仍为 host 36 / inrt 29. 同时进行的 MCP / Node 改动由对应会话维护, 不混入本轮逻辑提交. [完整证据](evidence/android-sdk-37-p24-20260913.md).
+
+### 2026-09-13 P2.1 实施
+
+- 会话开始时宿主为干净的 `cc1383376`, 本轮按逻辑分别提交代码、关联仓库与证据. `d9465be13` 接入 target 37 本地网络权限流程、错误诊断及回归测试; 正常 target 36 / 29 包不声明新权限.
+- 验证拒绝 / 授予、覆盖升级、Nearby Devices 组复用及真实设置页重试; API 37 拒绝组 9 通过 / 2 跳过、恢复组 11/11, API 24 的四种 host / inrt / target 组合各 11/11. 修复 Node 整次调用超时被误报取消, 主动取消回归仍通过.
+- Documentation、Offline-Docs、DTS 与 Ace 已同步提交. d.ts 导出遇到 `android-37` / `android-37.0` 差异, 在 android-dts-generator `525bebd` 中改为读取 AGP 实际 bootClasspath, 严格导出与类型校验通过.
+- [实施记录与机器索引](evidence/android-sdk-37-p21-20260913.md) 保留完整构建 / 设备条件及限制. P2.1 的真机拓扑、跨 profile / UID、完整 MqttService 与最终 inrt 网络验收仍未勾选; P5 插件 SDK 迁移未因本轮内容同步而完成.
+- 已停止本轮两个只读临时 AVD 与 LAN fixture, 清理自建转发. 下一项可推进 P2.2 后台音频; P2.1 剩余设备项在具备相应环境时继续补验.

@@ -1,0 +1,1736 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-13",
+  "scope": "SDK 37 P2.1 implementation and the documented emulator matrix; remaining device gates are open",
+  "normalConfiguration": {
+    "compileSdk": 37,
+    "hostTargetSdk": 36,
+    "inrtTargetSdk": 29,
+    "minSdk": 24,
+    "versionName": "6.8.0",
+    "versionBuild": 5280
+  },
+  "sourceCommits": {
+    "host": "d9465be13b36b39e76c77eab9f09f9ed6cf144e7",
+    "documentation": "ecb72eb988f5699d0705773e6853fe180b9bc78e",
+    "offlineDocs": "28c22843648126c415380c32617a7d2a1208b6ad",
+    "declarations": "acd8b625afaf82312c23346f781ad18dfb7d34a8",
+    "aceEditor": "0d9e9a0375eddac7bdb032c5fdbc5ba5632724b4",
+    "dtsGenerator": "525bebdaa157087b1295d80cef0dae861152eda5"
+  },
+  "sources": [
+    {
+      "status": "VERIFIED",
+      "url": "https://developer.android.com/privacy-and-security/local-network-permission"
+    },
+    {
+      "status": "VERIFIED",
+      "url": "https://developer.android.com/privacy-and-security/local-network-definition"
+    },
+    {
+      "status": "VERIFIED",
+      "url": "https://developer.android.com/about/versions/17/behavior-changes-17"
+    },
+    {
+      "status": "VERIFIED",
+      "url": "https://developer.android.com/work/versions/android-17"
+    }
+  ],
+  "apks": [
+    {
+      "snapshot": "normal-final",
+      "flavor": "app",
+      "kind": "app",
+      "name": "autojs6-v6.8.0-universal.apk",
+      "sha256": "abb9da5494ebbfb7d40b5553415ac8a84425c6458ae069b527642eec0a4f0c2d",
+      "size": 51207054,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'36'",
+      "file": "build/sdk37-p21/normal-final/autojs6-v6.8.0-universal.apk"
+    },
+    {
+      "snapshot": "normal-final",
+      "flavor": "app",
+      "kind": "test",
+      "name": "app-app-debug-androidTest.apk",
+      "sha256": "2ec6108e59996d7cf6fc09291125dedac9a7486ab940bd31dc3bfc8efafdb09a",
+      "size": 2874784,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'36'",
+      "file": "build/sdk37-p21/normal-final/app-app-debug-androidTest.apk"
+    },
+    {
+      "snapshot": "normal-final",
+      "flavor": "inrt",
+      "kind": "app",
+      "name": "inrt-v6.8.0-universal.apk",
+      "sha256": "d414e950bb5e024e06f30950a17016c7767dbf1a6765ba20d012f6a12bcf239f",
+      "size": 54262619,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'29'",
+      "file": "build/sdk37-p21/normal-final/inrt-v6.8.0-universal.apk"
+    },
+    {
+      "snapshot": "normal-final",
+      "flavor": "inrt",
+      "kind": "test",
+      "name": "app-inrt-debug-androidTest.apk",
+      "sha256": "b20eeb9f65d8ad054b090a7bba27e14d16a1e3eb7e00713c8e5eea7f39fbb038",
+      "size": 2226255,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'29'",
+      "file": "build/sdk37-p21/normal-final/app-inrt-debug-androidTest.apk"
+    },
+    {
+      "snapshot": "target37-final",
+      "flavor": "app",
+      "kind": "app",
+      "name": "autojs6-v6.8.0-universal.apk",
+      "sha256": "e691fef568a5fa0e78476a28d58b9891506a9a329364b01a6f3695031c438e89",
+      "size": 51207054,
+      "localNetworkPermission": true,
+      "target": "targetSdkVersion:'37'",
+      "file": "build/sdk37-p21/target37-final/autojs6-v6.8.0-universal.apk"
+    },
+    {
+      "snapshot": "target37-final",
+      "flavor": "app",
+      "kind": "test",
+      "name": "app-app-debug-androidTest.apk",
+      "sha256": "9a9d80dcc18acdb28fb60247793914c4d28cd1c4f3ffc57dafb63bf4a65e4d29",
+      "size": 2874784,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'37'",
+      "file": "build/sdk37-p21/target37-final/app-app-debug-androidTest.apk"
+    },
+    {
+      "snapshot": "target37-final",
+      "flavor": "inrt",
+      "kind": "app",
+      "name": "inrt-v6.8.0-universal.apk",
+      "sha256": "4971fd9520ba2b5dc441469a62cc30b99e02ca1795d64aba6e02686256b19820",
+      "size": 54262619,
+      "localNetworkPermission": true,
+      "target": "targetSdkVersion:'37'",
+      "file": "build/sdk37-p21/target37-final/inrt-v6.8.0-universal.apk"
+    },
+    {
+      "snapshot": "target37-final",
+      "flavor": "inrt",
+      "kind": "test",
+      "name": "app-inrt-debug-androidTest.apk",
+      "sha256": "383f2d8ad4f86bc950fc4d6924ceb034ecc11cb52f6d0fb4d7eacd064778ecce",
+      "size": 2226255,
+      "localNetworkPermission": false,
+      "target": "targetSdkVersion:'37'",
+      "file": "build/sdk37-p21/target37-final/app-inrt-debug-androidTest.apk"
+    }
+  ],
+  "buildsAndChecks": [
+    {
+      "label": "build37-all",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/build37-all.log",
+        "bytes": 78826,
+        "sha256": "13cff8a942f141dd8d092c15ea0ad2e5aaa37f8943fdea6ce2e15601bee0c629"
+      }
+    },
+    {
+      "label": "build37-resources",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/build37-resources.log",
+        "bytes": 72030,
+        "sha256": "a789aac279a25900beecfac709f34b50ebafab8e5dc436c06f50b7c22d6f1b38"
+      }
+    },
+    {
+      "label": "build37-uitests",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/build37-uitests.log",
+        "bytes": 69491,
+        "sha256": "744a37462b0b42c6921bc269cfc38d0390535031e51c14be41e1c393f376eb79"
+      }
+    },
+    {
+      "label": "build-normal-final",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/build-normal-final.log",
+        "bytes": 72149,
+        "sha256": "21ed2eb2a7b65af85c0542461137bfbbf5226e738ef2c1a0be75b1e997c71174"
+      }
+    },
+    {
+      "label": "docs-check",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/docs-check.log",
+        "bytes": 66,
+        "sha256": "e0798bd9138311269e3231e2d07c45a2015174d34324142cd6f99554b3123762"
+      }
+    },
+    {
+      "label": "docs-dry-run",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/docs-dry-run.log",
+        "bytes": 401,
+        "sha256": "90a0f34079ab41e00df9052bc7b77652f708a4c4c7ecf0878683c90fc29da87f"
+      }
+    },
+    {
+      "label": "docs-sync",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/docs-sync.log",
+        "bytes": 8270,
+        "sha256": "02cf97cf49fe846dbe6e1ef1ab0528e983996a57e88c743a842108af345da1ac"
+      }
+    },
+    {
+      "label": "offline-final-verify",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/offline-final-verify.log",
+        "bytes": 8259,
+        "sha256": "a6ce7261b72394b756223dda2e67fec6f265d8e8ff77e059dd13d46194014a84"
+      }
+    },
+    {
+      "label": "dts-publish2",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/dts-publish2.log",
+        "bytes": 52287,
+        "sha256": "e5486c0d33ed1aef8dd5264f51a63a1436a2748a81256787f1fbe2c07e548c26"
+      }
+    },
+    {
+      "label": "dts-types",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/dts-types.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "ace-lsp-final",
+      "exitCode": 0,
+      "log": {
+        "file": "build/sdk37-p21/ace-lsp-final.log",
+        "bytes": 10339,
+        "sha256": "8eb21cfffd763cd1db8bb680f3a14c5cca19034a994364da7de8d5030dfc35b7"
+      }
+    }
+  ],
+  "unitTests": {
+    "name": "org.autojs.autojs.core.http.LocalNetworkDiagnosticsTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      "privateLinkLocalSharedAndMulticastAddressesCanGetHints",
+      "namesAndIpv6RoutesAreOnlyCandidatesNotAuthorizationDecisions",
+      "tlsAndCancellationFailuresAreNotDiagnosedAsPermissionFailures",
+      "loopbackAndUnspecifiedAddressesDoNotGetPermissionHints",
+      "publicIpv4BoundariesDoNotGetHints"
+    ],
+    "report": {
+      "file": "app/build/test-results/testAppDebugUnitTest/TEST-org.autojs.autojs.core.http.LocalNetworkDiagnosticsTest.xml",
+      "bytes": 1126,
+      "sha256": "64db57f045f866e799b3dcb99ee71144ecb49c312113d2ae9dc34928c8d62fe0"
+    }
+  },
+  "deviceRuns": [
+    {
+      "label": "final36-on37",
+      "targetSdk": 36,
+      "time": "2026-09-13T03:34:14.353422+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final36-on37/metadata.json",
+          "bytes": 2047,
+          "sha256": "4b0724294655202459f67881fd76bd75dfa9cd7d499c2db69ac18c23b7d280c9"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on37/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "184ce7fbd4475df87e6e5d9cc4ae4c00875b7272c0f546ac22f80e014ee0c1d9"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on37/package-before.txt",
+          "bytes": 98160,
+          "sha256": "05e2dce259532a5e9707ae55f2bf15d5c49aba953cf74df9db40084b0341a849"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on37/package-after.txt",
+          "bytes": 98948,
+          "sha256": "e38ceb2a14aa8b4199eda9e7560a327bdc1ed7f5de39aa2f36afa08dce692cdc"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on37/logcat.txt",
+          "bytes": 146076,
+          "sha256": "e486a43926fdf244252fc13a6bc8ef14c6974f55a3df259b3910adbc1a9a4586"
+        }
+      ]
+    },
+    {
+      "label": "final36-fresh-on37",
+      "targetSdk": 36,
+      "time": "2026-09-13T03:34:23.583024+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final36-fresh-on37/metadata.json",
+          "bytes": 2047,
+          "sha256": "7756ea4911beae665b78f3bf2d3211224e269fcb59516a9075b30a219cd8ee6d"
+        },
+        {
+          "file": "build/sdk37-p21/final36-fresh-on37/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "a0eadd72158ae22d68c85914cd9a2c5cc705519c46e794cb511766fb0e5b6b88"
+        },
+        {
+          "file": "build/sdk37-p21/final36-fresh-on37/package-before.txt",
+          "bytes": 98939,
+          "sha256": "882c8f20ff516d7de747cd56950370e9f9059fc521092d9a3d60c51dcb6781da"
+        },
+        {
+          "file": "build/sdk37-p21/final36-fresh-on37/package-after.txt",
+          "bytes": 98940,
+          "sha256": "6434ca65eccddbd0011b9ae5b8b13b37ea9a1a1001843aab0624a2e744d61918"
+        },
+        {
+          "file": "build/sdk37-p21/final36-fresh-on37/logcat.txt",
+          "bytes": 147675,
+          "sha256": "4ff2d8d43f2e7b4537583b39082aeba7e59a18a17b763ce797c4eb6f8c14f527"
+        }
+      ]
+    },
+    {
+      "label": "upgrade36-to37-verified",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:38:59.787504+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "denied",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "false",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 9,
+      "skipped": 2,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": -4,
+          "status": "skipped"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": -4,
+          "status": "skipped"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/upgrade36-to37-verified/metadata.json",
+          "bytes": 2046,
+          "sha256": "8f5f6fbe0f97b589a49ae26628bc495c2ff3e424d11a39e37bda044002ac0f4a"
+        },
+        {
+          "file": "build/sdk37-p21/upgrade36-to37-verified/instrumentation.txt",
+          "bytes": 8833,
+          "sha256": "8ee5dcc7ea7b0fcaf96847f0de62b850c68cf9b79633557c20eceb54e391ea69"
+        },
+        {
+          "file": "build/sdk37-p21/upgrade36-to37-verified/package-before.txt",
+          "bytes": 98964,
+          "sha256": "6c74a3a55ca8822ff7d6521a5b63211b253679468b2a22304f22525924d0fd84"
+        },
+        {
+          "file": "build/sdk37-p21/upgrade36-to37-verified/package-after.txt",
+          "bytes": 98963,
+          "sha256": "e9bd4d614bd46ea733ad2fbad4f3477e01c6da84e833b2ed3c9879b928cfa48c"
+        },
+        {
+          "file": "build/sdk37-p21/upgrade36-to37-verified/logcat.txt",
+          "bytes": 227187,
+          "sha256": "7073d91e170f8546a8738cdb0c9911072cff03a6d850dcc322d852b1c9a6c9c1"
+        }
+      ]
+    },
+    {
+      "label": "final37-restored",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:39:21.446485+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-restored/metadata.json",
+          "bytes": 2047,
+          "sha256": "6d4998b21e9ebf6936531b3c953c6fbc3fcbf0c12c57b53cd03472cb3fbfcb82"
+        },
+        {
+          "file": "build/sdk37-p21/final37-restored/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "edc4daeea4cd8f46f4106a0ac403d02bca678166a8881ede28d589fd08172e6c"
+        },
+        {
+          "file": "build/sdk37-p21/final37-restored/package-before.txt",
+          "bytes": 98962,
+          "sha256": "6785d70bf01d579de1de40b4b73ae8b8b755a9b9dd541ec973a395de2977b0e1"
+        },
+        {
+          "file": "build/sdk37-p21/final37-restored/package-after.txt",
+          "bytes": 98963,
+          "sha256": "d85b564efdbdf96a879923a2fd59e2d537c212c56847ea1d6d026c65897fbdf8"
+        },
+        {
+          "file": "build/sdk37-p21/final37-restored/logcat.txt",
+          "bytes": 228786,
+          "sha256": "81632031923f7a3fbae0e3f1d9033499572f103a12eac680c7721727a174694e"
+        }
+      ]
+    },
+    {
+      "label": "final36-on24b",
+      "targetSdk": 36,
+      "time": "2026-09-13T03:36:14.974146+00:00",
+      "serial": "emulator-5562",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "sdk": "24",
+      "pageSize": "4096",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5562",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final36-on24b/metadata.json",
+          "bytes": 2035,
+          "sha256": "6bc67130706827c956ea21027f5c7257151c7c101d28b0e1b68df76d744abf27"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on24b/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "5bbcc5f7f6827f8d52b74708c8e99cd3b6c9254e7664fa4e135455d5e255b076"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on24b/package-before.txt",
+          "bytes": 89421,
+          "sha256": "13f800d426e42c95de868951cb405ee1d95c7791a922f8838ad00968954a0aeb"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on24b/package-after.txt",
+          "bytes": 89585,
+          "sha256": "872328dd786fee44926e676c1f89efcde7683ba59067fefdded8f3f3ace989f9"
+        },
+        {
+          "file": "build/sdk37-p21/final36-on24b/logcat.txt",
+          "bytes": 1659,
+          "sha256": "08347e74cf883f825e356b3a72f5a48ccf002734f83f2a8760ec2cb56e5fc6e5"
+        }
+      ]
+    },
+    {
+      "label": "final29-inrt-on24",
+      "targetSdk": 29,
+      "time": "2026-09-13T03:36:19.997214+00:00",
+      "serial": "emulator-5562",
+      "package": "org.autojs.autojs6.inrt",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "sdk": "24",
+      "pageSize": "4096",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5562",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final29-inrt-on24/metadata.json",
+          "bytes": 2045,
+          "sha256": "d5873d4978430ffaa68938d39d2c6439f1ef3edf7ca0516e987295b3025bb23d"
+        },
+        {
+          "file": "build/sdk37-p21/final29-inrt-on24/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "d20b193f4814bbd28a30d88a46cd3b849c049d681cc684780cc5a52b967cae84"
+        },
+        {
+          "file": "build/sdk37-p21/final29-inrt-on24/package-before.txt",
+          "bytes": 89979,
+          "sha256": "96038cfad395f0866c9d63dbd1e726a8149ca5cfe315ff05e9a1cceeb9b6720c"
+        },
+        {
+          "file": "build/sdk37-p21/final29-inrt-on24/package-after.txt",
+          "bytes": 90143,
+          "sha256": "370a093df7cbbde6b7ad3bc7b28d5874c5892f8c02fc0a1d96b686a05a206efb"
+        },
+        {
+          "file": "build/sdk37-p21/final29-inrt-on24/logcat.txt",
+          "bytes": 3258,
+          "sha256": "1531f84fa4b6cf48b4f3feeb15e89d5047dfd999fd43cb03d1b9e79e044a82b0"
+        }
+      ]
+    },
+    {
+      "label": "final37-on24",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:37:13.725637+00:00",
+      "serial": "emulator-5562",
+      "package": "org.autojs.autojs6",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "sdk": "24",
+      "pageSize": "4096",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5562",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-on24/metadata.json",
+          "bytes": 2035,
+          "sha256": "511cb5ac916ed50d720f535f1fbfda00a942e0fb3b74285cf3db70425cbbd306"
+        },
+        {
+          "file": "build/sdk37-p21/final37-on24/instrumentation.txt",
+          "bytes": 8115,
+          "sha256": "0255d23d38f82b9d64780704139bd1db92fed3f72a49ee3ed06242193add06c2"
+        },
+        {
+          "file": "build/sdk37-p21/final37-on24/package-before.txt",
+          "bytes": 89672,
+          "sha256": "de4db21c1480edbe44e202b2ab0add4885ae2e65be9b8803082591584f713765"
+        },
+        {
+          "file": "build/sdk37-p21/final37-on24/package-after.txt",
+          "bytes": 89672,
+          "sha256": "de4db21c1480edbe44e202b2ab0add4885ae2e65be9b8803082591584f713765"
+        },
+        {
+          "file": "build/sdk37-p21/final37-on24/logcat.txt",
+          "bytes": 4857,
+          "sha256": "549946e182c95d643765385ad82e42f25fa0f226fd793647048cd0211eb22c15"
+        }
+      ]
+    },
+    {
+      "label": "final37-inrt-on24",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:37:40.191763+00:00",
+      "serial": "emulator-5562",
+      "package": "org.autojs.autojs6.inrt",
+      "suite": "transports",
+      "expectedAccess": "granted",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "sdk": "24",
+      "pageSize": "4096",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5562",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawTcpAndUdpFollowTheSystemPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#inboundAcceptIsProtectedEvenWhenBindSucceeds,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#webSocketUpgradeUsesTheSamePermissionDiagnostics,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerReportsMissingPermissionBeforeAdvertisingAListener,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devServerAcceptsTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#devClientCompletesTheVsCodeHandshakeAfterGrant,org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+        "-e",
+        "sdk37.lanAllowed",
+        "true",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 11,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "runtimePermissionNameUsesTheExistingApiAndSkipsLegacyTargets",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "scriptHttpSyncAndAsyncFailuresKeepTheCauseAndExplainRecovery",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawPahoMqttFollowsTheSystemPermissionWithoutAnAutomaticPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "inboundAcceptIsProtectedEvenWhenBindSucceeds",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerAcceptsTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devClientCompletesTheVsCodeHandshakeAfterGrant",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "devServerReportsMissingPermissionBeforeAdvertisingAListener",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "ipv4AndIpv6LoopbackRemainUsableWithoutLocalNetworkPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "nodeControlledFetchPreservesItsErrorCodeAndAddsThePermissionHint",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "rawTcpAndUdpFollowTheSystemPermission",
+          "statusCode": 0,
+          "status": "passed"
+        },
+        {
+          "test": "webSocketUpgradeUsesTheSamePermissionDiagnostics",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-inrt-on24/metadata.json",
+          "bytes": 2045,
+          "sha256": "0b80ba2a5572201c74233721fe43dbdf154eac2da9245c25244407976e37b51c"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-on24/instrumentation.txt",
+          "bytes": 8116,
+          "sha256": "c2f552953d381b9559e4907d3eab403841c9fc89c52a921a4692e37268f7e26c"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-on24/package-before.txt",
+          "bytes": 90193,
+          "sha256": "07a8e72f0c89d31128d98006b59fac7b36272b010d31cc26183ba5503ea7cbe6"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-on24/package-after.txt",
+          "bytes": 90193,
+          "sha256": "07a8e72f0c89d31128d98006b59fac7b36272b010d31cc26183ba5503ea7cbe6"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-on24/logcat.txt",
+          "bytes": 4857,
+          "sha256": "f9715577336093ebe8b6ac3d354e247de76a5bf9c365ce26b52245309b68211f"
+        }
+      ]
+    },
+    {
+      "label": "final37-ui-retry",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:32:23.408492+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "retry",
+      "expectedAccess": "denied",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#permissionRequestCanBeDeniedRetriedAndGranted",
+        "-e",
+        "sdk37.lanAllowed",
+        "false",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "permissionRequestCanBeDeniedRetriedAndGranted",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-ui-retry/metadata.json",
+          "bytes": 873,
+          "sha256": "c74684e25bacd8f60c0eefb8e3ba90884288fed93dbe1e2247a8bc3b4a3ba237"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-retry/instrumentation.txt",
+          "bytes": 861,
+          "sha256": "9d66d5e9630e06b8f047706093814034ffbc6a859e9227eeadfca8893b8943a3"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-retry/package-before.txt",
+          "bytes": 99174,
+          "sha256": "b3cfcbfe211590535f98df17f8b9b4834d934fe0bb6fc48ac7c8f5907755accb"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-retry/package-after.txt",
+          "bytes": 99182,
+          "sha256": "dc41f5d429fdd250ec4f130cb785930a9901269624e6bb03ea2783ffb3d40a43"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-retry/logcat.txt",
+          "bytes": 144477,
+          "sha256": "cbfe720108ccf5c441a4abf99efef3b6090497682c0160c9d91ab1e9281c8e34"
+        }
+      ]
+    },
+    {
+      "label": "final37-inrt-ui-retry",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:32:40.087040+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6.inrt",
+      "suite": "retry",
+      "expectedAccess": "denied",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#permissionRequestCanBeDeniedRetriedAndGranted",
+        "-e",
+        "sdk37.lanAllowed",
+        "false",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "permissionRequestCanBeDeniedRetriedAndGranted",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-inrt-ui-retry/metadata.json",
+          "bytes": 883,
+          "sha256": "8895d02c4de93ec760ab3e7ef9a619dd3c6d7007a3f6a3759c3dc6484cb5d574"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-ui-retry/instrumentation.txt",
+          "bytes": 862,
+          "sha256": "5f54aa0eb61a691d647e3491a5af8ae5e1024feadae9a49b77dc5486cdc77dac"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-ui-retry/package-before.txt",
+          "bytes": 96453,
+          "sha256": "156f1a2f151c3e68b1a3195c95ec16724c5c6ed6b3e0548de772a5b088119dd7"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-ui-retry/package-after.txt",
+          "bytes": 97377,
+          "sha256": "f7fd99cea162b1164c5abaacad8a63b32b401edea59ff8038b7059d4bde9f83f"
+        },
+        {
+          "file": "build/sdk37-p21/final37-inrt-ui-retry/logcat.txt",
+          "bytes": 144477,
+          "sha256": "cbfe720108ccf5c441a4abf99efef3b6090497682c0160c9d91ab1e9281c8e34"
+        }
+      ]
+    },
+    {
+      "label": "final37-ui-denial2",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:31:46.437476+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "denial",
+      "expectedAccess": "denied",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#repeatedDenialOffersSettingsWithoutOpeningItAutomatically",
+        "-e",
+        "sdk37.lanAllowed",
+        "false",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "repeatedDenialOffersSettingsWithoutOpeningItAutomatically",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SET|USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-ui-denial2/metadata.json",
+          "bytes": 886,
+          "sha256": "24c9a6abd6c20dd8644dcfa26a9f3ddbb1e2d16b6da745f02b40b10e198726f2"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-denial2/instrumentation.txt",
+          "bytes": 886,
+          "sha256": "b515226679b6e4466eef838966bc5b708da8a5bee51fc64031578c5353d26a43"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-denial2/package-before.txt",
+          "bytes": 98178,
+          "sha256": "cf15b18ad81b659fd9d2be0e84ce54741391f624663948ca4d6066d82dd0b40b"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-denial2/package-after.txt",
+          "bytes": 99193,
+          "sha256": "bab242ce0a062421e9c77c1b04beeac8abf4159f285f3e019f8e089da18e7496"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-denial2/logcat.txt",
+          "bytes": 144477,
+          "sha256": "cbfe720108ccf5c441a4abf99efef3b6090497682c0160c9d91ab1e9281c8e34"
+        }
+      ]
+    },
+    {
+      "label": "final37-ui-nearby",
+      "targetSdk": 37,
+      "time": "2026-09-13T03:33:18.540236+00:00",
+      "serial": "emulator-5560",
+      "package": "org.autojs.autojs6",
+      "suite": "nearby",
+      "expectedAccess": "denied",
+      "host": "10.0.2.2",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "sdk": "37",
+      "pageSize": "16384",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5560",
+        "shell",
+        "am",
+        "instrument",
+        "-w",
+        "-r",
+        "-e",
+        "class",
+        "org.autojs.autojs.permission.LocalNetworkPermissionDeviceTest#existingNearbyDevicesGrantAvoidsAnotherSystemPrompt",
+        "-e",
+        "sdk37.lanAllowed",
+        "false",
+        "-e",
+        "sdk37.lanHost",
+        "10.0.2.2",
+        "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "success": true,
+      "tests": [
+        {
+          "test": "existingNearbyDevicesGrantAvoidsAnotherSystemPrompt",
+          "statusCode": 0,
+          "status": "passed"
+        }
+      ],
+      "permissionLinesBefore": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "permissionLinesAfter": [
+        "android.permission.ACCESS_LOCAL_NETWORK",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_LOCAL_NETWORK: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+        "android.permission.BLUETOOTH_CONNECT: granted=true, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+      ],
+      "artifacts": [
+        {
+          "file": "build/sdk37-p21/final37-ui-nearby/metadata.json",
+          "bytes": 880,
+          "sha256": "1ff36017ed2229eabc4007636c56098301f483d65cc52e5f095ba0f39a38b175"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-nearby/instrumentation.txt",
+          "bytes": 874,
+          "sha256": "e071657f9a367d706fc1a1253e41c707b4b46ee25279a14f039c3b628ab82b58"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-nearby/package-before.txt",
+          "bytes": 99172,
+          "sha256": "bbc71c49c409e67e5cdc38f5f4aac8b4caaaeaa444866f19ceb06d47745b798b"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-nearby/package-after.txt",
+          "bytes": 99178,
+          "sha256": "929ae5f44df151a734a81f39b00b27e26689ed083bf8ce27bfeee59a9b741680"
+        },
+        {
+          "file": "build/sdk37-p21/final37-ui-nearby/logcat.txt",
+          "bytes": 144477,
+          "sha256": "cbfe720108ccf5c441a4abf99efef3b6090497682c0160c9d91ab1e9281c8e34"
+        }
+      ]
+    }
+  ],
+  "additionalLogs": [
+    {
+      "file": "build/sdk37-p21/node-cancel-regression.log",
+      "bytes": 872,
+      "sha256": "9c1c6d4635a0aadc9d65587090fff12454ec4fe048df18b38ce9143b19129ee9"
+    },
+    {
+      "file": "build/sdk37-p21/node-failure-detail.log",
+      "bytes": 5230,
+      "sha256": "01bd17df294a1c91d666695b86323cd13ffbbcd5d1840d72c96defce44022bdc"
+    },
+    {
+      "file": "build/sdk37-p21/inrt37-denied.log",
+      "bytes": 2363,
+      "sha256": "bbdc7aa90ee27d2bb4d2e822f29e17c46896930fedc9613590512e9b2dd2e406"
+    },
+    {
+      "file": "build/sdk37-p21/inrt37-granted.log",
+      "bytes": 2363,
+      "sha256": "8956350ef40271642bb9892d3e3ffe45984f2f9bc08e02f00e8364a3517503ad"
+    },
+    {
+      "file": "build/sdk37-p21/dts-publish.log",
+      "bytes": 55734,
+      "sha256": "df4a8a26124e4508a89f3336caaaefdebf8bd1464fc6b495035587d9b93fd32b"
+    },
+    {
+      "file": "build/sdk37-p21/upgrade36-to37-package.txt",
+      "bytes": 98175,
+      "sha256": "7fd427ba7a06ac96a0afcc8ae8612cfffec514ec61f6f5502c0bdbad5ad8a49e"
+    },
+    {
+      "file": "build/sdk37-p21/platform-compat.txt",
+      "bytes": 43290,
+      "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+    },
+    {
+      "file": "build/sdk37-p21/devices-before.txt",
+      "bytes": 516,
+      "sha256": "c409c29dc00179d1cb7a04827f275971991d09632f10ee5943f6ee55d1d8c473"
+    },
+    {
+      "file": "build/sdk37-p21/devices-after.txt",
+      "bytes": 726,
+      "sha256": "deda2b08b1dd70a94eb099fe5799fc006e1a95b5b20a3c6d438ac9dc9b6f0e6b"
+    }
+  ],
+  "tools": [
+    {
+      "file": "tools/sdk37/local_network_fixture.py",
+      "bytes": 5612,
+      "sha256": "52b1479bf3d9027a3dc82c61e28dec5cfbf95fae7479e60a78a1f0adabca5bee"
+    },
+    {
+      "file": "tools/sdk37/run_local_network_tests.py",
+      "bytes": 5633,
+      "sha256": "919b1ace90eba3398b642309ec3c0544b53e8d119eda3a82b3361da427d81e16"
+    }
+  ],
+  "associatedTypes": {
+    "manualDeclarationFilesEqual": 66,
+    "generatedDeclarationFilesEqual": 3,
+    "packageVersion": "4.11.1",
+    "generatedManifests": [
+      {
+        "file": "app/build/generated/aceLspAssets/editor/ace-builds-1.4.12/autojs6/types/generated/manifest.json",
+        "sha256": "e209e4318c1be6e5336150949fcfbd0a9627bba84908d4417034dac401b46aa4"
+      }
+    ],
+    "success": true
+  },
+  "declarationGeneration": {
+    "autoJs6": {
+      "commit": "d9465be13b36b39e76c77eab9f09f9ed6cf144e7"
+    },
+    "generator": {
+      "commit": "bc171e9aa0c94fb86997c792e3a26bced3c7c1fc",
+      "sha256": "8911024b5c0da0a169f09591901602983bb5e8cf892d810e202e62bb9d4c2626"
+    },
+    "outputs": {
+      "main": {
+        "file": "generated/declarations/autojs6/aj6-main-app.d.ts",
+        "size": 1063125,
+        "sha256": "ce0c5e71b35b9d43c4835b55308070b4bf190bffa6c175b1cad8756e22163871"
+      },
+      "resources": {
+        "file": "generated/declarations/autojs6/aj6-resources.d.ts",
+        "size": 378632,
+        "sha256": "2f9bbeff2c884f67aa202a5445ae01a1885d9ba058bba18f018bb8abb6152f98"
+      },
+      "libraries": {
+        "file": "generated/declarations/libraries.d.ts",
+        "size": 1703573,
+        "sha256": "2ce2d1b8139d3745118bf64a4f893aad8518738f0343b59caa69920d3c7cd573"
+      }
+    },
+    "workflowFixCommit": "525bebdaa157087b1295d80cef0dae861152eda5",
+    "workflowFixSha256": "4e9d5f52f03dafb51d22cf5ce856f3920b7e04d08f077e719686bccbc15e9d85",
+    "note": "The strict successful export ran with the workflow fix in the working tree before its commit; the recorded generator HEAD alone predates the fix. Publish copied to local checkouts, not npm."
+  },
+  "limitations": [
+    "AVD NAT only; no Android 17 physical Wi-Fi/Ethernet, VPN, hotspot/Wi-Fi Direct, LAN IPv6 or mDNS/multicast validation.",
+    "Paho MqttClient CONNECT only; Android MqttService, full publish/subscribe, reconnect and lifecycle remain open.",
+    "No managed-profile or separate plugin-UID authorization matrix.",
+    "Final inrt target 37 full API 37 transport suite and final packaged APK remain P3 gates.",
+    "Tag-filtered logcat includes previous runs; per-run results come from instrumentation and package snapshots.",
+    "No full lint, release rebuild, remote CI, persistent target switch, plugin release or npm publication in this turn."
+  ],
+  "cleanup": {
+    "ownedEmulatorsStopped": [
+      "emulator-5560",
+      "emulator-5562"
+    ],
+    "fixtureStopped": true,
+    "ownedRedirectionsRemoved": [
+      "tcp:17645",
+      "tcp:17646"
+    ],
+    "debuggerEvidenceAvailable": false,
+    "temporaryDebuggerProbesRemoved": true
+  }
+}

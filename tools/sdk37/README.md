@@ -96,6 +96,32 @@ The pool value counts calls to an overridden `Thread.start()` for one `ThreadPoo
 
 Run `sample/accessibility/smoke-legacy-api.js` separately after instrumentation exits; a full pass includes service stop/start, a new service instance and selectors after the rebind. See [the P2.4 evidence](../../docs/dev/evidence/android-sdk-37-p24-20260913.md) for exact coverage and APK hashes.
 
+## Local network permission
+
+`ACCESS_LOCAL_NETWORK` is included through the `src/target37/AndroidManifest.xml` flavor overlay only when that flavor actually targets API 37 or later. Normal host target 36 / inrt target 29 builds must not declare or request it. Use `-Pautojs.sdk.target.override=37` for debug experiments, and inspect the APK with `aapt2 dump badging` before granting a permission. Keep the host and its matching instrumentation APK together. `assembleInrtDebug` disables ABI splits for that invocation, including a host built in the same invocation; use the filenames in `output-metadata.json` instead of picking an older APK left in the directory.
+
+On a disposable emulator, start `python tools/sdk37/local_network_fixture.py` on the host. It binds only `127.0.0.1`: HTTP/WebSocket on 17637, UDP echo on 17638, a minimal MQTT CONNECT responder on 17639 and a VS Code hello responder on 17640. It neither executes scripts nor provides a general MQTT broker. Configure emulator network redirection for the two inbound probes:
+
+```powershell
+$env:ADB = 'E:/.android/sdk/platform-tools/adb.exe'
+$Sdk37Serial = 'emulator-5560'
+& $env:ADB -s $Sdk37Serial emu redir add tcp:17645:17643
+& $env:ADB -s $Sdk37Serial emu redir add tcp:17646:7347
+python tools/sdk37/run_local_network_tests.py --serial $Sdk37Serial --expect denied --output build/sdk37-lan/denied
+& $env:ADB -s $Sdk37Serial shell pm grant org.autojs.autojs6 android.permission.ACCESS_LOCAL_NETWORK
+python tools/sdk37/run_local_network_tests.py --serial $Sdk37Serial --expect granted --output build/sdk37-lan/granted
+& $env:ADB -s $Sdk37Serial shell pm revoke org.autojs.autojs6 android.permission.ACCESS_LOCAL_NETWORK
+python tools/sdk37/run_local_network_tests.py --serial $Sdk37Serial --expect denied --output build/sdk37-lan/revoked
+```
+
+Use emulator `redir`, not `adb forward` or `adb reverse`, for the inbound evidence: an adb tunnel would test on-device loopback instead of the emulator's network interface. The fixture waits for the guest before closing each inbound probe, avoiding data loss from a prematurely closed redirection. Stop the fixture after testing and remove only these redirections with `emu redir del tcp:17645` / `tcp:17646`. Do not change host firewall rules to make a failing permission test pass.
+
+The helper records device identity, package permission states, the exact command, instrumentation results and logcat. It requires an explicit serial, a debuggable installed app and an expected access state. It does not install APKs or modify permissions. The denied suite runs nine test methods and deliberately skips the two VS Code handshake success cases; the granted suite runs all eleven. Original Java Socket / Paho exceptions remain visible; HTTP, WebSocket and the Node controlled fetch path also verify recovery hints. The MQTT fixture covers only Paho MqttClient CONNECT, not Android MqttService, message delivery or reconnection. The tests separately exercise IPv4 and IPv6 loopback. A protocol error or assertion failure does not count as permission enforcement. Logcat is a cumulative tag-filtered buffer and may contain previous runs; use instrumentation and each package snapshot for per-run conclusions.
+
+For permission UI tests, first revoke ACCESS_LOCAL_NETWORK and clear its `user-set` / `user-fixed` flags on the disposable emulator, preserving the dump from the previous scenario. `--suite retry --expect denied` clicks the first denial and then grants the retry. `--suite denial --expect denied` denies twice and checks that the app offers settings without opening them automatically. To test an existing Nearby Devices grant, prepare BLUETOOTH_CONNECT as granted and run `--suite nearby`, passing the actual starting local-network state. These suites operate system dialogs and are restricted to emulator serials. The retry suite also supports `--package org.autojs.autojs6.inrt` and opens the inrt settings Activity.
+
+For upgrade coverage, install a normal target 36 APK, record its implicit permission state and successful traffic, then install the target 37 APK with `-r` and record the resulting state before any grant or revoke. Test legacy target APKs with `--expect granted`. Keep fresh installs, upgrades and existing Nearby Devices grants distinct. Actual Wi-Fi / Ethernet, VPN, managed-profile and separate plugin-UID tests remain separate device matrix rows; the emulator fixture does not claim those environments.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
