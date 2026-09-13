@@ -170,6 +170,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 ###### 2026/09/13
 
+* `新增` MCP 工作目錄能力支援 Android 應用程式查詢, 編輯器行列定位, 按設定策略自動啟用無障礙, Shell 輸出限制與大型 JSON 結果的唯讀檔案描述符傳輸; root 執行使用獨立 shell.root 授權和手機端開關
 * `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` `device.pageSize` 唯讀屬性, 傳回目前系統的記憶體頁大小 (位元組), 支援識別 4 KB / 16 KB 執行環境
 * `新增` 獨立 Bun Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 TypeScript, 透過 "bun" 指令或 `.bun.js/.bun.ts/.bun.tsx` 標記路由, 且不會回退至 Rhino 或 Node.js
@@ -347,6 +348,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 載入 OpenCV 與 Image Quantization 外掛程式前檢查原生函式庫 ELF 對齊, 頁面大小不相容時提供明確錯誤
 * `新增` 外掛程式中心讀取官方索引與已安裝 manifest 的原生頁面對齊資訊, 在 16 KB 裝置安裝或啟用不相容版本前提示
 * `新增` MCP 螢幕擷取備援: image.captureScreen(options) 接受無障礙螢幕擷取的裁切, 縮放, 格式和品質參數, 傳回經檔案描述元傳輸的編碼圖片一次性負載; captureScreen() 保留圖片控制代碼傳回方式, MediaProjection 授權缺失或撤銷時傳回權限錯誤.
+* `修復` MCP 檔案操作與 Shell 在 Android 24 / 25 上避免呼叫新版 Java 檔案系統和行程方法; 遞迴刪除只移除符號連結而不刪除其目標
 * `修復` CI 編輯器外掛檢查固定要求舊協定版本 1, 導致支援新版相容協定的宿主無法通過檢查的問題
 * `修復` 在同一個打包應用中依序使用 Paddle OCR 和 Rapid OCR 時可能崩潰的問題
 * `修復` MediaInfo 與圖片檔案路徑支援絕對路徑, 父目錄和合法檔名; 錄音輸出同步交由更新後的宿主依 Android 檔案權限處理

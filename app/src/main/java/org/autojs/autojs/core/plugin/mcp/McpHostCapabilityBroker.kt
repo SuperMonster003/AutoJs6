@@ -190,7 +190,7 @@ class McpHostCapabilityBroker(
     }
 
     private fun sendResponse(callback: IMcpHostCapabilityCallback, response: NodeBridgeResponse) {
-        val payload = if (response.ok) extractOneShotPayload(response) else null
+        val payload = if (response.ok) extractOneShotPayload(response) ?: extractJsonPayload(response) else null
         var effective = payload?.response ?: response
         var responseJson = effective.toJson()
         if (responseJson.toByteArray(StandardCharsets.UTF_8).size > McpServerContract.MAX_BRIDGE_INLINE_JSON_BYTES) {
@@ -278,6 +278,28 @@ class McpHostCapabilityBroker(
         val mime: String,
         val response: NodeBridgeResponse,
     )
+
+    /** Large JSON results (file content and bounded shell output) reuse the read-only payload channel. */
+    private fun extractJsonPayload(response: NodeBridgeResponse): OneShotPayload? {
+        val bytes = response.resultJson?.toByteArray(StandardCharsets.UTF_8) ?: return null
+        if (bytes.size <= 64 * 1024) return null
+        if (bytes.size > McpServerContract.MAX_BRIDGE_PAYLOAD_BYTES) return OneShotPayload(null, bytes.size.toLong(), "application/json",
+            NodeBridgeResponse.failure(response.id, NodeBridgeError.resourceLimit("AutoJs6 MCP JSON result exceeds the payload limit.")))
+        var file: File? = null
+        return try {
+            file = File.createTempFile("mcp-json-", ".payload", appContext.cacheDir)
+            file.writeBytes(bytes)
+            val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            val result = JSONObject().put(KEY_PAYLOAD, JSONObject().put(KEY_PAYLOAD_KIND, PAYLOAD_KIND_DESCRIPTOR)
+                .put(KEY_PAYLOAD_MIME, "application/json").put("bytes", bytes.size).put(KEY_PAYLOAD_ONE_SHOT, true))
+            OneShotPayload(descriptor, bytes.size.toLong(), "application/json", NodeBridgeResponse.success(response.id, result.toString()))
+        } catch (_: Exception) {
+            OneShotPayload(null, 0, "application/json", NodeBridgeResponse.failure(response.id,
+                NodeBridgeError.resourceLimit("AutoJs6 MCP could not allocate a JSON payload descriptor.")))
+        } finally {
+            file?.delete()
+        }
+    }
 
     private fun recoverId(requestJson: String): String = NodeBridgeRequest.recoverId(requestJson) ?: "invalid"
 

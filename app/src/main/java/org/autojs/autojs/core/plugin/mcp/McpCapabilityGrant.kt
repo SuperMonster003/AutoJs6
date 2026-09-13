@@ -116,7 +116,7 @@ data class McpCapabilityGrant(
             addAll(methodsOf("console", "tail"))
             addAll(methodsOf("files", "list", "stat", "read", "write", "mkdir", "rename", "delete"))
             addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample"))
-            addAll(methodsOf("package_manager", "list", "verify"))
+            addAll(methodsOf("package_manager", "list", "verify", "listApps"))
             addAll(methodsOf("clipboard", "getText", "setText", "hasText"))
             addAll(methodsOf("device", "info", "isScreenOn", "wakeUp", "isIgnoringBatteryOptimizations"))
             addAll(methodsOf("media_projection", "requestScreenCapture", "stop"))
@@ -143,6 +143,7 @@ data class McpCapabilityGrant(
             NodeBridgePermissionManifest.DEVICE,
             NodeBridgePermissionManifest.DEVICE_POWER,
             NodeBridgePermissionManifest.SHELL,
+            NodeBridgePermissionManifest.SHELL_ROOT,
             NodeBridgePermissionManifest.TOAST,
             NodeBridgePermissionManifest.PACKAGE_MANAGER,
             TOKEN_FILES,

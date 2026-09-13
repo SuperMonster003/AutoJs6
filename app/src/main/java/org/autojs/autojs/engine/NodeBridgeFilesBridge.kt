@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import org.autojs.autojs.model.explorer.Explorers
@@ -34,7 +35,7 @@ internal class NodeBridgeFilesBridge(
     fun dispatch(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = runCatching { JSONArray(request.argsJson) }.getOrDefault(JSONArray())
         return try {
-            val scope = NodeBridgeFileScope(rootProvider())
+            val scope = NodeBridgeFileScope(rootProvider(), legacyFileApi = Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             when (request.method) {
                 "list" -> list(request, scope, args)
                 "stat" -> stat(request, scope, args)

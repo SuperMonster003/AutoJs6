@@ -21,6 +21,20 @@ class NodeBridgeFileScopeTest {
     }
 
     @Test
+    fun legacyRenamePreservesAnExistingTargetAndMovesFilesAndDirectories() = withTempRoot { root ->
+        val scope = NodeBridgeFileScope(root, legacyFileApi = true)
+        scope.write("a.txt", "first")
+        scope.write("b.txt", "second")
+        assertEquals(NodeBridgeFileScope.Kind.EXISTS, failure { scope.rename("a.txt", "b.txt") })
+        assertEquals("first", scope.read("a.txt").content)
+        assertEquals("second", scope.read("b.txt").content)
+        scope.mkdir("new")
+        scope.rename("a.txt", "new/a.txt")
+        scope.rename("new", "renamed")
+        assertEquals("first", scope.read("renamed/a.txt").content)
+    }
+
+    @Test
     fun writeReadStatListRenameDeleteRoundTrip() = withTempRoot { root ->
         val scope = NodeBridgeFileScope(root)
         val written = scope.write("notes/today.txt", "hello\nworld")
@@ -144,6 +158,10 @@ class NodeBridgeFileScopeTest {
             assertEquals(NodeBridgeFileScope.Kind.ESCAPE, failure { scope.list("link") })
             val listed = scope.list(".", recursive = true)
             assertTrue(listed.entries.none { it.path.startsWith("link/") })
+            scope.mkdir("nested")
+            Files.createSymbolicLink(File(root, "nested/link").toPath(), outside.toPath())
+            assertEquals(2, scope.delete("nested", recursive = true).deleted)
+            assertTrue(File(outside, "secret.txt").exists())
         } finally {
             outside.deleteRecursively()
         }

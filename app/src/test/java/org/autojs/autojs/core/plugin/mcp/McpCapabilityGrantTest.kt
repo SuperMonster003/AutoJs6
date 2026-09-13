@@ -13,6 +13,15 @@ class McpCapabilityGrantTest {
     private val grant = McpCapabilityGrant.DEFAULT
 
     @Test
+    fun workspaceToolsHaveAnAppQueryAndRootRequiresItsOwnToken() {
+        assertTrue(grant.allowsMethod("package_manager", "listApps"))
+        assertTrue(NodeBridgePermissionManifest.SHELL_ROOT in grant.permissions)
+        val restricted = grant.copy(permissions = grant.permissions - NodeBridgePermissionManifest.SHELL_ROOT)
+        assertEquals(McpCapabilityGrant.Decision.Allowed, restricted.evaluate("shell", "exec", listOf("shell"), 100))
+        assertTrue(restricted.evaluate("shell", "exec", listOf("shell", "shell.root"), 100) is McpCapabilityGrant.Decision.Denied)
+    }
+
+    @Test
     fun defaultGrantCoversTheRoadmapToolGroupsOnly() {
         assertTrue(grant.allowsMethod("accessibility", "dump"))
         assertTrue(grant.allowsMethod("engines", "execScript"))

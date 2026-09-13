@@ -170,6 +170,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/13
 
+* `Nuevo` Las capacidades MCP incorporan consultas de aplicaciones Android, posiciones del editor, activación de accesibilidad mediante las estrategias configuradas, salida Shell limitada y descriptores de solo lectura para resultados JSON grandes; root usa un permiso shell.root y un ajuste del teléfono independientes
 * `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
 * `Nuevo` Propiedad de solo lectura `device.pageSize` que devuelve el tamaño de página de memoria del sistema en bytes, para identificar entornos de 4 KB / 16 KB
 * `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
@@ -347,6 +348,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Comprobacion de la alineacion ELF antes de cargar complementos OpenCV e Image Quantization, con un error claro si el tamano de pagina no es compatible
 * `Nuevo` El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB
 * `Nuevo` Alternativa de captura MCP: image.captureScreen(options) acepta las opciones de recorte, escala, formato y calidad de las capturas de accesibilidad y devuelve una imagen codificada de un solo uso mediante descriptor de archivo. captureScreen() mantiene el identificador de imagen; la autorización MediaProjection ausente o revocada devuelve un error de permisos.
+* `Corrección` Las operaciones de archivos MCP y Shell funcionan en Android 24 / 25 sin métodos Java recientes; el borrado recursivo elimina enlaces simbólicos sin borrar sus destinos
 * `Corrección` La comprobación CI del complemento de editor exigía la versión 1 del contrato y rechazaba hosts compatibles con versiones más recientes
 * `Corrección` Un cierre inesperado al usar Paddle OCR y Rapid OCR consecutivamente en la misma aplicación empaquetada
 * `Corrección` Las rutas de MediaInfo e imágenes admiten rutas absolutas, directorios superiores y nombres válidos; las grabaciones siguen las mismas reglas de acceso de Android con el anfitrión actualizado

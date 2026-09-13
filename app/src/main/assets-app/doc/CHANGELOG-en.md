@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `Feature` MCP workspace capabilities add Android application queries, editor line and column positioning, automatic accessibility activation using configured strategies, bounded Shell output, and read-only descriptors for large JSON results; root execution uses a separate shell.root grant and phone setting
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` `device.pageSize` read-only property returns the running system memory page size in bytes, identifying 4 KB / 16 KB environments
 * `Feature` Independent Bun Runtime plugin engine for local single-file JavaScript and TypeScript, routed by the "bun" directive or `.bun.js/.bun.ts/.bun.tsx` markers without falling back to Rhino or Node.js
@@ -185,6 +186,7 @@
 * `Feature` Checks native ELF alignment before loading OpenCV and Image Quantization plugins, with a clear error for incompatible device page sizes
 * `Feature` Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices
 * `Feature` MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error.
+* `Fix` MCP file operations and Shell support Android 24 / 25 without newer Java filesystem or process methods; recursive deletion unlinks symbolic links without deleting their targets
 * `Fix` The CI editor plugin gate required legacy contract version 1 and rejected hosts supporting newer compatible contract versions
 * `Fix` A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app
 * `Fix` MediaInfo and image file paths now allow absolute paths, parent directories and valid filenames; recording outputs use the same Android file access rules with the updated host

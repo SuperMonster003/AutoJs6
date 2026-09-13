@@ -725,6 +725,7 @@ object NodeBridgeModules {
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
     val packageManagerMethods = setOf(
         "list",
+        "listApps",
         "verify",
         "prune",
         "planInstall",
@@ -1595,8 +1596,16 @@ class AndroidNodeBridgeCapabilityProvider(
             dispatchAccessibilityScreenshot(request, callback)
             return
         }
+        if (request.method == "ensureEnabled") {
+            org.autojs.autojs.core.accessibility.AccessibilityTool(appContext).ensureServiceAsync(
+                level = org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State.OPERATIONAL,
+                timeoutMillis = minOf(request.timeoutMs, 10_000L),
+                launchSettingsIfNeeded = false,
+            ) { result -> callback(NodeBridgeResponse.success(request.id, result.isSatisfied.toString())) }
+            return
+        }
         val response = when (request.method) {
-            "isEnabled", "ensureEnabled" -> NodeBridgeResponse.success(request.id, accessibilityBridgeOperational().toString())
+            "isEnabled" -> NodeBridgeResponse.success(request.id, accessibilityBridgeOperational().toString())
             else -> dispatchAccessibilityOperation(request)
         }
         callback(response)
@@ -3833,6 +3842,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchPackageManager(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val response = runCatching {
             when (request.method) {
+                "listApps" -> NodeBridgeResponse.success(request.id, NodeBridgeDeviceActions.listApps(appContext, request.firstObjectArg()).toString())
                 "list" -> NodeBridgeResponse.success(
                     request.id,
                     NodeAndroidPackageInstallManager.recordsToJson(packageInstallManager.list()).toString(),
@@ -4741,7 +4751,12 @@ class AndroidNodeBridgeCapabilityProvider(
                     )
                 }
                 "editFile" -> dispatchScopedAppFileAction(request, "editFile") { file ->
-                    IntentUtils.editFile(
+                    val args = request.argsArray()
+                    if (args.length() > 1) {
+                        NodeBridgeFileScope.normalizeRelative(request.firstStringArg())
+                        val (line, column) = NodeBridgeDeviceActions.editorPosition(args.getJSONObject(1))
+                        org.autojs.autojs.ui.edit.EditActivity.editFileAt(appContext, file.name, file.absolutePath, line - 1, column - 1, true)
+                    } else IntentUtils.editFile(
                         context = appContext,
                         path = file.absolutePath,
                         fileProviderAuthority = appFileProviderAuthority(),
@@ -4876,6 +4891,11 @@ class AndroidNodeBridgeCapabilityProvider(
         val options = args.optJSONObject(1) ?: JSONObject()
         val root = options.optBoolean("root", false)
         val timeoutMs = parseShellTimeoutMs(options.opt("timeoutMs"))
+        val maxOutputBytes = try {
+            NodeBridgeShellOutput.limit(options.opt("maxOutputBytes"))
+        } catch (_: IllegalArgumentException) {
+            return NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest("shell.exec maxOutputBytes must be an integer from 1 to ${NodeBridgeShellOutput.MAX_BYTES}.", module = request.module, method = request.method))
+        }
         val cwd = resolveShellCwd(options.optString("cwd", ""))
             ?: return shellPolicyFailure(request, "shell.exec cwd must stay inside the scoped working directory.")
         val env = parseShellEnv(options.optJSONObject("env"))
@@ -4888,6 +4908,7 @@ class AndroidNodeBridgeCapabilityProvider(
             cwd = cwd,
             env = env,
             timeoutMs = timeoutMs,
+            maxOutputBytes = maxOutputBytes,
         )
         return NodeBridgeResponse.success(request.id, result.toJson())
     }
@@ -4955,6 +4976,7 @@ class AndroidNodeBridgeCapabilityProvider(
         cwd: File,
         env: Map<String, String>,
         timeoutMs: Long,
+        maxOutputBytes: Int?,
     ): ShellExecResult {
         val commandLine = if (root) {
             listOf("su", "-c", command)
@@ -4970,7 +4992,7 @@ class AndroidNodeBridgeCapabilityProvider(
             return ShellExecResult(
                 code = 1,
                 stdout = "",
-                stderr = error.message ?: error.javaClass.name,
+                stderr = NodeBridgeShellOutput.text((error.message ?: error.javaClass.name).toByteArray(Charsets.UTF_8), maxOutputBytes ?: SHELL_OUTPUT_LIMIT_BYTES),
             )
         }
         val resource = resourceRegistry.register(
@@ -4981,15 +5003,16 @@ class AndroidNodeBridgeCapabilityProvider(
                 "root" to root.toString(),
             ),
         ) {
-            if (process.isAlive) {
-                process.destroyForcibly()
-            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) process.destroyForcibly() else process.destroy()
         }
-        val stdout = StreamCapture(process.inputStream)
-        val stderr = StreamCapture(process.errorStream)
+        val stdout = StreamCapture(process.inputStream, maxOutputBytes)
+        val stderr = StreamCapture(process.errorStream, maxOutputBytes)
         val stdoutThread = thread(name = "AutoJs6NodeShellStdout", isDaemon = true) { stdout.read() }
         val stderrThread = thread(name = "AutoJs6NodeShellStderr", isDaemon = true) { stderr.read() }
-        val finished = runCatching { process.waitFor(timeoutMs, TimeUnit.MILLISECONDS) }.getOrDefault(false)
+        val finished = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
+            else NodeBridgeShellOutput.awaitExit(process, timeoutMs)
+        }.getOrDefault(false)
         val code = if (finished) {
             process.exitValue().also { exitCode ->
                 resource.release("exit:$exitCode")
@@ -5005,12 +5028,15 @@ class AndroidNodeBridgeCapabilityProvider(
         } else {
             "AutoJs6 shell command timed out after ${timeoutMs}ms."
         }
+        val output = if (maxOutputBytes == null) stdout.text() to listOf(stderr.text(), timeoutMessage).filter { it.isNotBlank() }.joinToString("\n")
+            else NodeBridgeShellOutput.bound(stdout.text(), stderr.text(), maxOutputBytes)
         return ShellExecResult(
             code = code,
-            stdout = stdout.text(),
-            stderr = listOf(stderr.text(), timeoutMessage)
-                .filter { it.isNotBlank() }
-                .joinToString(separator = "\n"),
+            stdout = output.first,
+            stderr = output.second,
+            truncated = stdout.truncated || stderr.truncated || (maxOutputBytes != null &&
+                stdout.text().toByteArray(Charsets.UTF_8).size + stderr.text().toByteArray(Charsets.UTF_8).size > maxOutputBytes),
+            timedOut = !finished,
         )
     }
 
@@ -5857,12 +5883,17 @@ private data class ShellExecResult(
     val code: Int,
     val stdout: String,
     val stderr: String,
+    val truncated: Boolean = false,
+    val timedOut: Boolean = false,
 ) {
     fun toJson(): String {
         return JSONObject().apply {
             put("code", code)
             put("stdout", stdout)
             put("stderr", stderr)
+            put("truncated", truncated)
+            put("timedOut", timedOut)
+            put("outputBytes", stdout.toByteArray(Charsets.UTF_8).size + stderr.toByteArray(Charsets.UTF_8).size)
         }.toString()
     }
 }
@@ -8490,10 +8521,12 @@ private const val SHELL_OUTPUT_LIMIT_BYTES = 1024 * 1024
 
 private class StreamCapture(
     private val inputStream: InputStream,
+    private val maximum: Int? = null,
 ) {
     private val output = ByteArrayOutputStream()
     @Volatile
-    private var truncated = false
+    var truncated = false
+        private set
     @Volatile
     private var failure: Throwable? = null
 
@@ -8506,7 +8539,7 @@ private class StreamCapture(
                     if (read <= 0) {
                         break
                     }
-                    val remaining = SHELL_OUTPUT_LIMIT_BYTES - output.size()
+                    val remaining = (maximum ?: SHELL_OUTPUT_LIMIT_BYTES) - output.size()
                     if (remaining > 0) {
                         output.write(buffer, 0, read.coerceAtMost(remaining))
                     }
@@ -8521,6 +8554,7 @@ private class StreamCapture(
     }
 
     fun text(): String {
+        if (maximum != null) return synchronized(output) { NodeBridgeShellOutput.text(output.toByteArray(), maximum) }
         val base = output.toByteArray().toString(Charsets.UTF_8)
         val suffix = when {
             truncated -> "\n[AutoJs6 shell output truncated]\n"

@@ -8,6 +8,7 @@
 
 ###### 2026/09/13
 
+* `新增` MCP 工作目录能力支持 Android 应用查询, 编辑器行列定位, 按配置策略自动启用无障碍, Shell 输出限制与大 JSON 结果的只读文件描述符传输; root 执行使用独立 shell.root 授权和手机端开关
 * `新增` `ocr` 默认按 ML Kit/Paddle/Rapid 顺序动态选择引擎; `ocr.mode` 返回选中的引擎或空字符串, 显式模式保持固定, 可通过 `mode` 或 `tap` 设置 `auto`, 空字符串或 nullish 值以恢复自动选择
 * `新增` `device.pageSize` 只读属性, 返回当前系统的内存页大小 (字节), 支持识别 4 KB / 16 KB 运行环境
 * `新增` 独立 QuickJS Runtime 插件引擎, 用于本地单文件 JavaScript 和 ES module, 通过 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 标记路由, 且不会回退到 Rhino, Node.js 或 Bun
@@ -161,6 +162,7 @@
 * `新增` 加载 OpenCV 与 Image Quantization 插件前检查原生库 ELF 对齐, 页大小不兼容时提供明确错误
 * `新增` 插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示
 * `新增` MCP 截图回退: image.captureScreen(options) 接受无障碍截图的裁剪, 缩放, 格式和质量参数, 返回经文件描述符传输的编码图片一次性负载; captureScreen() 保留图片句柄返回方式, MediaProjection 授权缺失或撤销时返回权限错误.
+* `修复` MCP 文件操作与 Shell 在 Android 24 / 25 上避免调用新版 Java 文件系统和进程方法; 递归删除只移除符号链接而不删除其目标
 * `修复` CI 编辑器插件检查固定要求旧协议版本 1, 导致支持新版兼容协议的宿主无法通过检查的问题
 * `修复` 在同一个打包应用中依次使用 Paddle OCR 和 Rapid OCR 时可能崩溃的问题
 * `修复` MediaInfo 与图片文件路径支持绝对路径, 父目录和合法文件名; 录音输出同步交由更新后的宿主按 Android 文件权限处理

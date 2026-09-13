@@ -8,7 +8,8 @@ import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.util.Base64
+import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.toByteString
 
 /**
  * The path-restricted file surface behind the Node Bridge's `files` module (MCP roadmap P1.3,
@@ -24,7 +25,7 @@ import java.util.Base64
  *
  * Created by SuperMonster003 on Sep 8, 2026.
  */
-class NodeBridgeFileScope(root: File) {
+class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false) {
 
     val rootDirectory: File = root.canonicalFile.also { candidate ->
         if (!candidate.isDirectory) {
@@ -84,7 +85,7 @@ class NodeBridgeFileScope(root: File) {
         val bytes = readHead(file, limit)
         val truncated = total > bytes.size
         val content = when (codec) {
-            ENCODING_BASE64 -> Base64.getEncoder().encodeToString(bytes)
+            ENCODING_BASE64 -> bytes.toByteString().base64()
             else -> decodeUtf8(bytes, allowCutTail = truncated)
         }
         return ReadResult(relativePathOf(file), content, codec, bytes.size, total, truncated)
@@ -100,7 +101,10 @@ class NodeBridgeFileScope(root: File) {
     ): WriteResult {
         val codec = requireEncoding(encoding)
         val bytes = when (codec) {
-            ENCODING_BASE64 -> runCatching { Base64.getDecoder().decode(content) }
+            ENCODING_BASE64 -> runCatching {
+                require(content.none { it.isWhitespace() || it == '-' || it == '_' }) { "invalid base64" }
+                content.decodeBase64()?.toByteArray() ?: throw IllegalArgumentException("invalid base64")
+            }
                 .getOrElse { throw NodeBridgeFileScopeException(Kind.INVALID_PATH, "content is not valid base64") }
             else -> encodeUtf8(content)
         }
@@ -150,7 +154,10 @@ class NodeBridgeFileScope(root: File) {
         val parent = target.parentFile ?: throw NodeBridgeFileScopeException(Kind.IO, "target has no parent directory: $to")
         if (!parent.isDirectory) throw NodeBridgeFileScopeException(Kind.NOT_FOUND, "target parent directory does not exist: $to")
         try {
-            if (targetExisted) {
+            if (legacyFileApi) {
+                // Android 24 / 25 have neither File.toPath nor java.nio.file. Never pre-delete the destination.
+                if (!source.renameTo(target)) throw IOException("filesystem refused rename")
+            } else if (targetExisted) {
                 Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
             } else {
                 Files.move(source.toPath(), target.toPath())
@@ -169,9 +176,7 @@ class NodeBridgeFileScope(root: File) {
             if (children > 0 && !recursive) {
                 throw NodeBridgeFileScopeException(Kind.WRONG_TYPE, "directory is not empty (pass recursive to delete it): $path")
             }
-            val count = countTree(file)
-            if (!file.deleteRecursively()) throw NodeBridgeFileScopeException(Kind.IO, "unable to delete directory: $path")
-            return DeleteResult(relativePathOf(file), count)
+            return DeleteResult(relativePathOf(file), deleteTree(file))
         }
         if (!file.delete()) throw NodeBridgeFileScopeException(Kind.IO, "unable to delete file: $path")
         return DeleteResult(relativePathOf(file), 1)
@@ -204,12 +209,19 @@ class NodeBridgeFileScope(root: File) {
         return true
     }
 
-    private fun countTree(file: File): Int {
-        if (!file.isDirectory || isSymbolicLink(file)) return 1
-        return 1 + (file.listFiles()?.sumOf { countTree(it) } ?: 0)
+    private fun deleteTree(file: File): Int {
+        val descendants = if (!isSymbolicLink(file) && file.isDirectory) {
+            val children = file.listFiles() ?: throw NodeBridgeFileScopeException(Kind.IO, "unable to list a directory for deletion")
+            children.sumOf { deleteTree(it) }
+        } else 0
+        if (!file.delete()) throw NodeBridgeFileScopeException(Kind.IO, "unable to delete a workspace entry")
+        return descendants + 1
     }
 
-    private fun isSymbolicLink(file: File): Boolean = runCatching { Files.isSymbolicLink(file.toPath()) }.getOrDefault(false)
+    private fun isSymbolicLink(file: File): Boolean = if (legacyFileApi) {
+        val entry = File(file.parentFile.canonicalFile, file.name)
+        entry.canonicalFile != entry.absoluteFile
+    } else Files.isSymbolicLink(file.toPath())
 
     private fun requireRegularFile(path: String): File {
         val file = resolve(path)

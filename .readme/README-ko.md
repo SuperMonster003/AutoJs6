@@ -170,6 +170,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ###### 2026/09/13
 
+* `추가` MCP 작업 디렉터리 기능에 Android 앱 조회, 편집기 행과 열 지정, 설정된 방식의 접근성 자동 활성화, Shell 출력 제한, 큰 JSON 결과의 읽기 전용 파일 디스크립터 전송 추가. root 실행은 별도 shell.root 권한과 휴대전화 설정 사용
 * `추가` 로컬 단일 파일 JavaScript 및 ES module을 위한 독립 QuickJS Runtime 플러그인 엔진, "quickjs"/"qjs" 지시문 또는 `.quickjs.js/.quickjs.mjs` 마커로 라우팅하며 Rhino, Node.js, Bun으로 폴백하지 않음
 * `추가` 현재 시스템의 메모리 페이지 크기를 바이트 단위로 반환하는 읽기 전용 `device.pageSize` 속성, 4 KB / 16 KB 실행 환경 식별 지원
 * `추가` 로컬 단일 파일 JavaScript 및 TypeScript를 위한 독립 Bun Runtime 플러그인 엔진, "bun" 지시문 또는 `.bun.js/.bun.ts/.bun.tsx` 마커로 라우팅하며 Rhino나 Node.js로 폴백하지 않음
@@ -347,6 +348,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` OpenCV 및 Image Quantization 플러그인을 로드하기 전에 ELF 정렬을 검사하고 기기 페이지 크기와 호환되지 않으면 명확한 오류 표시
 * `추가` 플러그인 센터에서 공식 인덱스와 설치된 manifest의 페이지 정렬을 읽고, 16 KB 기기에서 호환되지 않는 버전을 설치하거나 활성화하기 전에 경고
 * `추가` MCP 스크린샷 대체 경로: image.captureScreen(options)는 접근성 스크린샷의 자르기, 배율, 형식, 품질 옵션을 받아 파일 디스크립터로 전송하는 인코딩 이미지를 반환합니다. captureScreen()은 이미지 핸들 반환을 유지하며 MediaProjection 승인이 없거나 취소되면 권한 오류를 반환합니다.
+* `수정` Android 24 / 25의 MCP 파일 작업과 Shell에서 새로운 Java 파일 시스템 및 프로세스 메서드 호출 방지. 재귀 삭제 시 심볼릭 링크의 대상은 보존하고 링크만 삭제
 * `수정` CI 편집기 플러그인 검사가 기존 계약 버전 1을 요구하여 새로운 호환 계약 버전을 지원하는 호스트를 거부하는 문제
 * `수정` 동일한 패키징 앱에서 Paddle OCR과 Rapid OCR을 순서대로 사용할 때 발생할 수 있는 충돌
 * `수정` MediaInfo 및 이미지 파일 경로가 절대 경로, 상위 디렉터리 및 유효한 파일 이름을 지원; 녹음 출력도 업데이트된 호스트에서 동일한 Android 파일 접근 규칙 적용

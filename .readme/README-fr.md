@@ -170,6 +170,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 ###### 2026/09/13
 
+* `Fonctionnalité` Les capacités MCP ajoutent la recherche des applications Android, les positions dans un éditeur, une activation de l'accessibilité selon les stratégies configurées, une sortie Shell limitée et des descripteurs en lecture seule pour les grands résultats JSON; root utilise une autorisation shell.root et un réglage distincts sur le téléphone
 * `Fonctionnalité` Moteur de plugin QuickJS Runtime indépendant pour JavaScript local à fichier unique et les modules ES, routé par la directive "quickjs"/"qjs" ou les marqueurs `.quickjs.js/.quickjs.mjs`, sans repli vers Rhino, Node.js ou Bun
 * `Fonctionnalité` Propriété en lecture seule `device.pageSize` renvoyant la taille des pages mémoire du système en octets, pour identifier les environnements de 4 KB / 16 KB
 * `Fonctionnalité` Moteur de plugin Bun Runtime indépendant pour les fichiers JavaScript et TypeScript locaux uniques, routés par la directive "bun" ou les marqueurs `.bun.js/.bun.ts/.bun.tsx`, sans repli vers Rhino ou Node.js
@@ -347,6 +348,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Vérification de l'alignement ELF avant le chargement des plugins OpenCV et Image Quantization, avec une erreur claire si la taille des pages est incompatible
 * `Fonctionnalité` Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB
 * `Fonctionnalité` Repli de capture MCP: image.captureScreen(options) accepte les options de recadrage, taille, format et qualité de la capture d'accessibilité et renvoie une image encodée à usage unique par descripteur de fichier. captureScreen() conserve son handle d'image; une autorisation MediaProjection absente ou révoquée produit une erreur de permission.
+* `Correction` Les fichiers MCP et Shell fonctionnent sur Android 24 / 25 sans méthodes Java récentes; la suppression récursive retire les liens symboliques en préservant leurs cibles
 * `Correction` Le contrôle CI du plugin éditeur exigeait la version 1 du contrat et rejetait les hôtes prenant en charge des versions compatibles plus récentes
 * `Correction` Un plantage lors de l'utilisation successive de Paddle OCR et Rapid OCR dans la même application empaquetée
 * `Correction` Les chemins MediaInfo et image acceptent les chemins absolus, les dossiers parents et les noms valides; les enregistrements suivent les mêmes droits Android avec un hôte mis à jour
