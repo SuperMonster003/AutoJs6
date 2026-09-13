@@ -402,6 +402,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
 * `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
 * `Corrección` La aplicación podía cerrarse inesperadamente al cerrar un diálogo de script mientras el Looper de su hilo estaba terminando porque no se podía programar un callback de timer
+* `Corrección` Los scripts podían seguir ejecutándose tras cancelar temporizadores o detener hilos de trabajo porque los plazos obsoletos de las llamadas de retorno impedían que Looper terminara
 * `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
 * `Corrección` La búsqueda de controles con el algoritmo BFS devolvía un resultado más que el máximo solicitado, `find(0)` devolvía un resultado en lugar de una colección vacía, y los nodos ya obtenidos al alcanzar el máximo no se reciclaban
 * `Corrección` Los segmentos de brújula de padre o clicable de varios tramos (como `p4ppp12p` o `k2k3`) pasados a `UiObject.compass` solo contaban el primer tramo

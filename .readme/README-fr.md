@@ -402,6 +402,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root
 * `Correction` Les résultats de sélection multiple renvoyés par dialogs.multiChoice étaient convertis à tort en chaînes _[`issue #518`](http://issues.autojs6.com/518)_
 * `Correction` L'application pouvait planter lorsqu'une boîte de dialogue de script était fermée pendant l'arrêt du Looper de son thread, car un callback de timer ne pouvait plus être planifié
+* `Correction` Les scripts pouvaient rester actifs après l'annulation de minuteurs ou l'arrêt de threads de travail car des échéances de rappels obsolètes empêchaient Looper de se terminer
 * `Correction` Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion
 * `Correction` La recherche de contrôles avec l'algorithme BFS renvoyait un résultat de plus que le maximum demandé, `find(0)` renvoyait un résultat au lieu d'une collection vide, et les nœuds déjà récupérés lorsque le maximum était atteint n'étaient pas recyclés
 * `Correction` Les segments de boussole parent ou cliquable à plusieurs tronçons (comme `p4ppp12p` ou `k2k3`) passés à `UiObject.compass` ne comptaient que le premier tronçon

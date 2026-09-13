@@ -65,6 +65,7 @@ open class TimerThread(
         }
 
         runCatching { Looper.loop() }.onFailure(exceptionHandler)
+        runCatching { mTimer?.removeAllCallbacks() }.onFailure(exceptionHandler)
         runCatching { onExit() }.onFailure(exceptionHandler)
         mTimer = null
         runCatching { Context.exit() }.onFailure(exceptionHandler)

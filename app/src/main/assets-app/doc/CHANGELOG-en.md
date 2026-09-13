@@ -240,6 +240,7 @@
 * `Fix` Shell-related methods could become unresponsive on devices without Root access
 * `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
 * `Fix` The app could crash when a script dialog was dismissed while its thread Looper was exiting because a timer callback could no longer be scheduled
+* `Fix` Scripts could remain running after timers were cancelled or worker threads stopped because stale callback deadlines prevented the Looper from exiting
 * `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
 * `Fix` Widget search with the BFS algorithm returned one result more than the requested maximum, `find(0)` returned one result instead of an empty collection, and nodes already fetched when the maximum was reached were not recycled
 * `Fix` Multi-segment parent or clickable compass segments (such as `p4ppp12p` or `k2k3`) passed to `UiObject.compass` only counted the first segment

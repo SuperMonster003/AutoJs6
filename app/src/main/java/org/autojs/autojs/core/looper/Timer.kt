@@ -22,10 +22,12 @@ class Timer {
     private var mCallbackMaxId = 0
     private var mHandler: Handler
     private var mHandlerCallbacks = SparseArray<Runnable>()
+    private val mPendingCallbacks = HashSet<PendingCallback>()
     private var mMaxCallbackMillisForAllThread: VolatileBox<Long>
-    private var mMaxCallbackUptimeMillis = 0L
     private var mRuntime: WeakReference<ScriptRuntime>
     private var mTimerId = 0
+
+    internal var onPendingCallbacksChanged: (() -> Unit)? = null
 
     constructor(scriptRuntime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, timerId: Int) : this(scriptRuntime, maxCallbackMillisForAllThread, currentOrPreparedLooper(), timerId)
 
@@ -69,10 +71,15 @@ class Timer {
             val id = (mCallbackMaxId + 1).also { mCallbackMaxId = it }
             val r = object : Runnable {
                 override fun run() {
-                    if (mHandlerCallbacks[id] == null) return
+                    synchronized(this@Timer) {
+                        if (mHandlerCallbacks[id] !== this) return
+                    }
                     try {
                         callFunction(callback, null, args)
-                        postDelayed(this, interval)
+                        synchronized(this@Timer) {
+                            // A callback can cancel itself, or be cancelled by another thread.
+                            if (mHandlerCallbacks[id] === this) postDelayed(this, interval)
+                        }
                     } catch (error: Throwable) {
                         synchronized(this@Timer) {
                             mHandlerCallbacks.remove(id)
@@ -126,10 +133,14 @@ class Timer {
     fun postDelayed(r: Runnable, interval: Long) {
         synchronized(this) {
             val uptime = interval + SystemClock.uptimeMillis()
-            check(mHandler.postAtTime(r, uptime)) {
-                "Unable to schedule a timer callback because its looper is exiting"
+            val pending = PendingCallback(r)
+            mPendingCallbacks.add(pending)
+            if (!mHandler.postAtTime(pending, uptime)) {
+                mPendingCallbacks.remove(pending)
+                throw IllegalStateException("Unable to schedule a timer callback because its looper is exiting")
             }
-            mMaxCallbackUptimeMillis = mMaxCallbackUptimeMillis.coerceAtLeast(uptime)
+            // Retain the historical high-water mark for callers, but never use it to decide
+            // whether work remains: cancelled callbacks can leave this far in the future.
             synchronized(mMaxCallbackMillisForAllThread) {
                 mMaxCallbackMillisForAllThread.set(max(mMaxCallbackMillisForAllThread.get(), uptime))
             }
@@ -137,11 +148,16 @@ class Timer {
     }
 
     fun hasPendingCallbacks(): Boolean {
-        return mMaxCallbackUptimeMillis > SystemClock.uptimeMillis()
+        return synchronized(this) { mPendingCallbacks.isNotEmpty() }
     }
 
     fun removeAllCallbacks() {
-        synchronized(this) { mHandler.removeCallbacksAndMessages(null) }
+        synchronized(this) {
+            mHandler.removeCallbacksAndMessages(null)
+            mHandlerCallbacks.clear()
+            mPendingCallbacks.removeAll { !it.running }
+            wakeForIdleCheck()
+        }
     }
 
     @Suppress("SameParameterValue")
@@ -162,11 +178,45 @@ class Timer {
     private fun clearCallback(id: Int): Boolean {
         val runnable = mHandlerCallbacks[id]
         if (runnable != null) {
-            mHandler.removeCallbacks(runnable)
             mHandlerCallbacks.remove(id)
+            val iterator = mPendingCallbacks.iterator()
+            while (iterator.hasNext()) {
+                val pending = iterator.next()
+                if (pending.callback === runnable && !pending.running) {
+                    mHandler.removeCallbacks(pending)
+                    iterator.remove()
+                }
+            }
+            wakeForIdleCheck()
             return true
         }
         return false
+    }
+
+    internal fun wakeForIdleCheck() {
+        // Removing a future message does not guarantee another IdleHandler invocation.
+        // A UI/worker timer also keeps the script's main looper alive until it finishes.
+        mHandler.post(EMPTY_RUNNABLE)
+        onPendingCallbacksChanged?.invoke()
+    }
+
+    private inner class PendingCallback(val callback: Runnable) : Runnable {
+        var running = false
+
+        override fun run() {
+            synchronized(this@Timer) {
+                if (this !in mPendingCallbacks) return
+                running = true
+            }
+            try {
+                callback.run()
+            } finally {
+                synchronized(this@Timer) {
+                    mPendingCallbacks.remove(this)
+                    if (mPendingCallbacks.isEmpty()) wakeForIdleCheck()
+                }
+            }
+        }
     }
 
     private fun wrapId(n: Int) = ((mTimerId.toLong() shl 32) + n).toDouble()

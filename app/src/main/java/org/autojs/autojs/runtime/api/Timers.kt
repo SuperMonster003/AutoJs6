@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api
 
 import android.os.Looper
-import android.os.SystemClock
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.core.looper.Timer.Companion.getTimerId
@@ -38,6 +37,7 @@ class Timers(scriptRuntime: ScriptRuntime) {
     init {
         mainTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, TIMER_ID_MAIN)
         mUiTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, Looper.getMainLooper(), TIMER_ID_UI)
+        mUiTimer.onPendingCallbacksChanged = mainTimer::wakeForIdleCheck
     }
 
     fun getTimerForThread(thread: Thread): Timer? = when {
@@ -94,29 +94,23 @@ class Timers(scriptRuntime: ScriptRuntime) {
 
     fun recycle() {
         mainTimer.removeAllCallbacks()
+        mUiTimer.removeAllCallbacks()
+        mTimers.values.forEach { it.get()?.removeAllCallbacks() }
     }
 
     fun hasPendingCallbacks(): Boolean {
-        val mainThread = mThreads.mainThread
-        val currentThread = Thread.currentThread()
-        var hasPendingCallbacks = false
-        if (mainThread == currentThread) {
-            val upTime = maxCallbackUptimeMillisForAllThreads.get()
-            if (upTime > SystemClock.uptimeMillis()) {
-                hasPendingCallbacks = true
-            }
+        return if (mThreads.mainThread == Thread.currentThread()) {
+            mainTimer.hasPendingCallbacks() || mUiTimer.hasPendingCallbacks() ||
+                mTimers.values.any { it.get()?.hasPendingCallbacks() == true }
         } else {
-            val timer = timerForCurrentThread
-            if (timer != null) {
-                hasPendingCallbacks = timer.hasPendingCallbacks()
-            }
+            timerForCurrentThread?.hasPendingCallbacks() == true
         }
-        return hasPendingCallbacks
     }
 
     fun newTimer(scriptRuntime: ScriptRuntime): Timer {
         val id = mNextTimerId.getAndIncrement()
         return Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, id).also {
+            it.onPendingCallbacksChanged = mainTimer::wakeForIdleCheck
             mTimers[id] = WeakReference(it)
         }
     }
