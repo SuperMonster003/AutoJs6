@@ -63,6 +63,7 @@ import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
+import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
@@ -284,6 +285,7 @@ open class DrawerFragment : Fragment() {
         mScreenColorPickerTool = ScreenColorPickerTool(mContext) { pendingIntent ->
             screenColorPickerLauncher.launch(
                 IntentSenderRequest.Builder(pendingIntent.intentSender).build(),
+                ActivityLaunchOptions.forVisibleSender(),
             )
         }
         mScreenColorPickerItem = DrawerMenuToggleableItem(
