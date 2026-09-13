@@ -168,7 +168,7 @@ VERIFIED: Android 17 + target 37 的广泛 LAN 访问使用 ACCESS_LOCAL_NETWORK
 | [ ] N07 | 完整 MQTT 服务 | D33 或 D35 + D37 | 使用真实 broker, 经 Android MqttService CONNECT、订阅、发布带 case ID 的消息; 断网 / 杀连接后重连、前后台切换、拒绝再恢复 | 双端确认消息内容 / topic, 重连后无重复订阅泄漏; 权限拒绝与 broker 凭据错误区分; CONNECT fixture 成功不够 | P2.1 |
 | [ ] N08 | 公网、DNS 与同资料回环 | 全部 + D37 | 访问固定可用 HTTPS 公网端点, 本地 DNS 解析, IPv4 / IPv6 loopback; D37 的 LAN 授权 / 拒绝两态重复, 移动数据另测 | 不因拒绝 LAN 破坏公网 / 普通 DNS / 同资料回环; 移动数据与 Wi-Fi 记录实际路由; 站点或证书故障单列 | P2.1 / P2.11 |
 | [ ] N09 | 真正 VS Code 双模式与 MCP | 全部 + D37 | 电脑连手机服务端、手机连电脑服务端各执行带唯一 console 标记的脚本; 停止、重连、发送文件; MCP 插件用只读工具请求并断线恢复 | 除握手外确实执行 / 返回正确标记; 断线状态及时更新; D37 拒绝后按宿主 / 插件 UID 给出正确授权入口 | P2.1 / P3.2 / P5.4 |
-| [ ] IPC01 | Parcel / Bundle 与 Tasker 参数 | 有 Tasker 的 D33 或 D35 + D37 | 用自有 Tasker 测试任务调用 AutoJs6, 传含中文 / 数组的固定参数并核对脚本收到值; 插件元数据、快捷方式 extras 与各 PL 行的 Binder 返回分别读取; D37 默认状态和专用 debug 的 PARCEL_HARDENING 对照分开保存 | 参数 / 返回值完整且类型一致, 没有 BadParcelableException 或读写错位; metadata 不只检查存在, 要核对协议版本与能力值; 缺 Tasker 则该子场景 BLOCKED | P2.7 / P5 |
+| [ ] IPC01 | Parcel / Bundle 与 Tasker 参数 | 有 Tasker 的 D33 或 D35 + D37 | D37 先按 [Parcel 自动化说明](../../tools/sdk37/README.md#parcel-and-plugin-ipc) 跑 wire / metadata 与所选插件 suite, 分别记录宿主和插件的开关; 再用真实 Tasker 编辑、保存并执行含中文路径的任务, 核对选定脚本和前置脚本; 真实桌面创建并点击 JS / Lua 快捷方式, 含旋转和应用进程重建; 各 PL 行的 Binder 返回仍单独核验 | 自动化正例保持字段 / 类型完整, 两个故意少读字段的负例随开关被接受或抛 BadParcelableException; Tasker 保存 / 执行和桌面点击须有实际脚本标记, 不能用 extras 往返替代; metadata 核对版本与能力值; 缺 Tasker 则该子场景 BLOCKED; [AVD 证据](evidence/android-sdk-37-p27-20260913.md) 不关闭本行 | P2.7 / P5 |
 
 ### 4.4 音频与定时 / 开机
 

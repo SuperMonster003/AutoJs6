@@ -9,6 +9,8 @@
 
 P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 NSC 保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
 
+P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-sdk-37-p27-20260913.md). 所测 API 37 镜像的 `PARCEL_HARDENING` 长度检查已用设备字节码和正反例核实; 宿主 target 36 强制开启与 target 37 默认状态下, 11 个指定插件的最短链路均通过. 所测生产序列化路径无需修正; 真实 Tasker / 桌面操作、其它 ABI / OEM 及 P5 插件 target 37 发布验证继续开放.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
@@ -96,7 +98,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 公开 API 不变, 新实现中反射 `mMessages` 恒为 null; `LOOPER_CLEARS_THREAD_INTERRUPTED` 清除消息派发时的原生中断标记; `OVERRIDDEN_THREAD_START_METHOD` 使线程池绕过工作线程 start 覆写, 仍执行 run, 普通直接 start 调用不变 (后两项为 PLATFORM_CONFIG + DEVICE-37 对照结论) | target 37, 可在 target 36 调试包强制测试 | `Loopers` 的公开 IdleHandler、`MainThreadProxy` / `TimerThread` 中断、`exit()` / `threads.*` / `sleep()`; 宿主 Thread 子类未覆写 start. P2.4 修复了取消回调后历史时间阻止脚本退出的既有问题; 用户反射限制见附录 F | P2.4 |
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); 本机 ASM target 37 门控已实测, 同任务下层启动还受顶部应用的保护声明与 Activity 例外影响 (DEVICE-37); BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `AndroidPackageSessionInstaller` 现用私有广播接收回调, `PackageInstallStatusCoordinator` 保存会话并提供通知 / 返回应用入口, `PackageInstallStatusActivity` 在可见时发送系统确认 token; `ActivityLaunchOptions` 处理发送方版本分支; 固定快捷方式, 抽屉 ActivityResult 与脚本 `app.launch` / `app.startActivity` 另行覆盖 | P2.5 |
 | I6 | Certificate Transparency 默认开启 (`DEFAULT_ENABLE_CERTIFICATE_TRANSPARENCY`, VERIFIED), ECH 默认开启 (`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`, VERIFIED); API 37.0 实测 ECH 默认模式为 OPPORTUNISTIC(2), 策略值不证明已协商 | target 37 | `network_security_config.xml`; 私有 CA / 企业代理; NSC 配置用户 / 资源 CA 的默认 CT 豁免已核实, 但 CA 仍需先被信任; `isInsecure` 后续请求污染已修复, 实际公网链与 ECH 待补证 | P2.6 |
-| I7 | `PARCEL_HARDENING` (名称 VERIFIED, 语义 UNVERIFIED): Parcel 读写更严格 | target 37 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `core/plugin/center/InstalledPluginRepository.kt:351` (`BundleCompat.getSerializable`), `engine/NodeModuleSourceFileTransportSession.kt`, Tasker / 快捷方式 extras | P2.7 |
+| I7 | `PARCEL_HARDENING` (PLATFORM_CONFIG; DEVICE-37): 所测镜像中, `Parcel.readValue` 的长度前缀与实际消费字节数不一致时, 由平台 feature flag 和此兼容开关共同决定是否抛 BadParcelableException; 不泛化为所有 Binder 读取 | target 37, 可在 target 36 调试包强制测试 | 插件 Binder 协议 (TaggedWire `byte[]`, `ParcelFileDescriptor`), `InstalledPluginRepository`, Tasker / 快捷方式 extras; 11 个指定插件在两种启用条件下通过, 宿主数据往返及少读字段负例完成; 实际入口仍待 IPC01 | P2.7 ([证据](evidence/android-sdk-37-p27-20260913.md)) |
 | I8 | 存储: `EXCLUDE_UNRELIABLE_STORAGE_VOLUMES`, `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES`, `TRASH_BEHAVIOR_CHANGE` (名称 VERIFIED, 语义 UNVERIFIED); `MediaStore` / `DocumentsContract` API 面有变化 | target 37 | 文件管理器与 `files.*` / `media.*`: `model/script/PathChecker.java:56`, `permission/AllFilesAccessPermission.kt`, MediaStore 查询点 (代码内未直接引用 `DATA` 列); `MANAGE_EXTERNAL_STORAGE` 语义不变 | P2.8 |
 | I9 | 小组件 RemoteViews 内存上限 (VERIFIED, 超限抛 `IllegalArgumentException`), 通知自定义视图尺寸限制 (`CHECK_SIZE_OF_INFLATED_CUSTOM_VIEWS`, 细节 UNVERIFIED) | target 37 | `external/widget/ScriptWidget.java:49`; `engine/NodeBridgeProviderRegistry.kt` 的 RemoteViews; 通知构建点 (`util/NotificationUtils.kt`) | P2.9 |
 | I10 | 短信 OTP 保护 (VERIFIED): 含 OTP 的短信对非默认短信应用延迟 3 小时 (`FILTER_GENERIC_OTP`, target 37; WebOTP 格式对全体); 通知监听器的 OTP 脱敏延续 Android 15 | target 37 / 全体 | 宿主代码不直接读短信, 但声明 `READ_SMS` / `RECEIVE_SMS` 供脚本 (`content://sms`, 广播) 使用; `core/notification/NotificationListenerService.kt:46` (`events.observeNotification`) | P2.10 |
@@ -261,8 +263,11 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.7 Parcel 与插件 IPC (I7)
 
-- [ ] `am compat enable PARCEL_HARDENING` 下运行插件 instrumentation / 冒烟: OpenCV, Image-Quantization, Paddle v4, Rapid v6, MLKit-Barcode, Yolo, Node, Lua, QuickJS, Python, MCP-Server 各一条最短链路 (复用 16 KB Roadmap 的 `ocr_provider_smoke.py` 与各 `*DeviceTest`); Tasker 插件 extras, 快捷方式 extras, `InstalledPluginRepository` 的 metaData 读取. (DEVICE-37)
-- [ ] 若有失败, 修正读写不对称的 Parcelable / Bundle 用法; 无失败则记录 "无影响". (SOURCE / DOCS)
+- [x] 从实际 API 37 framework 字节码核实 `PARCEL_HARDENING` (416031865) 的长度前缀检查及平台 feature flag 条件. 在宿主与私有独立接收进程中, 故意少读一个字段的 Parcelable 于 target 36 disable 被接受、enable 抛 BadParcelableException、target 37 默认抛同类异常; 接收进程 PID 与 target 均有断言. 不把兼容配置存在等同于行为生效. (PLATFORM_CONFIG; DEVICE-37: [门控与负例](evidence/android-sdk-37-p27-20260913.md#1-门控与负例))
+- [x] `ExecutionConfig` 现有六字段及读取边界、nullable / 完整 `PluginInfo` 与嵌套能力值、Tasker JSON 和 Lua 快捷方式 extras 均跨进程往返完整. `InstalledPluginRepository` 的 package-manager snapshot 与完整发现覆盖 11 个插件, 无 bindError, 日志 `info=true` 且版本与所装 APK 一致. 不扩展生产 wire 格式或修改冻结兼容包. (SOURCE; DEVICE-37)
+- [x] OpenCV, Image-Quantization, Paddle v4 mobile, Rapid v6, MLKit-Barcode, Yolo, Node, Lua, QuickJS, Python, MCP-Server 各一条真实最短链路通过. 宿主 target 36 + enable 与 target 37 默认分别为 instrumentation 35/35、OCR 2/2; 插件仍 target 36, 单独 enable. 最终 target 36 disable 的 wire / QuickJS / Python 为 11/11. 共 81 次方法执行含重复负例, 去重为 15 个方法, 另有 4 次 OCR. (DEVICE-37: [结果矩阵](evidence/android-sdk-37-p27-20260913.md#3-有效结果矩阵))
+- [x] 所测路径未发现需要修改生产序列化代码的 SDK 37 回归. 修正 QuickJS 控制台匹配和 Python 结果类型测试夹具; 旧 Python R2 诊断在 enable / disable 均失败, 与当前协议入口不匹配的源码分析及维护事项保留于证据 / 附录 F, 不记作已通过. 新增严格复跑工具与机器结果; 正常 / target 37 debug 构建、Python 工具测试 8/8、release 合并 manifest 的 debug 服务隔离检查通过. (SOURCE; ANDROID_BUILD; DOCS; `a6d037516`; [工具](../../tools/sdk37/README.md#parcel-and-plugin-ipc))
+- [ ] 按实体机 [IPC01](android-sdk-37-physical-device-tests.md#43-本地网络资料隔离与-tls) 完成真实 Tasker 编辑 / 保存 / 触发与桌面 JS / Lua 快捷方式创建 / 点击, 含旋转和进程重建; 其它 ABI / OEM、inrt 成品及全部插件 target 37 发布验证仍按 P3 / P5 执行. 本轮 x86_64 AVD 与 extras 往返不代替这些入口或真实 16 KB 内核验证. (PHYSICAL; P3; P5)
 
 ### P2.8 存储与文件管理器 (I8)
 
@@ -469,7 +474,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `LOOPER_CLEARS_THREAD_INTERRUPTED` (458413887, overridable) | 消息派发时清除原生中断标记, ThreadCompat 保留脚本取消状态 (PLATFORM_CONFIG; DEVICE-37) | 脚本引擎中断语义 | P2.4 | 单项 / 组合 / target 37 默认实测通过, 见 P2.4 证据 |
 | `MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT` (383671392) | `BluetoothSocket` RFCOMM `read()` 断开返回 -1 (VERIFIED) | 脚本蓝牙 socket | P2.15 | |
 | `OVERRIDDEN_THREAD_START_METHOD` (418924588) | 线程池跳过工作线程 start 覆写, run 仍执行; 直接 start 调用不变 (PLATFORM_CONFIG; DEVICE-37) | 宿主 Thread 子类及线程池工厂 | P2.4 | 宿主无 start 覆写; 单项 / 组合 / target 37 默认实测通过 |
-| `PARCEL_HARDENING` (416031865) | Parcel 读写更严格 (UNVERIFIED) | 插件 IPC, Bundle extras | P2.7 | |
+| `PARCEL_HARDENING` (416031865) | 所测镜像中, 长度前缀 readValue 的字节数不匹配由 feature flag 与 compat 共同控制抛错 (PLATFORM_CONFIG; DEVICE-37) | 插件 IPC, Bundle extras | P2.7 | `a6d037516`; enable / disable / target 37 默认负例对照, 两组 11 插件最短链路通过; 见 P2.7 证据 |
 | `REBOOT_MODEM_THROW_EXCEPTIONS` (476225321) | 电话调制解调器重启 API 抛异常 (UNVERIFIED) | 无 | P2.15 | |
 | `RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID` (297019750) | RenderScript ScriptC 停用 (UNVERIFIED) | 无 (代码无 RenderScript) | P2.15 | |
 | `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` (157720069) | MediaStore / 文档目录查询需对应权限 (UNVERIFIED) | `media.*`, 文件管理器 | P2.8 | |
@@ -623,6 +628,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - APK 签名方案 v3.2 (混合后量子, ML-DSA) 对内置 APK 打包器 / `modules/apk-signer` 是可选能力, 与本次无关.
 - Advanced Protection Mode 对无障碍服务的限制若被实测确认, 需要在用户文档 FAQ 与插件中心 "无障碍兼容" 页面长期维护说明.
 - P2.3 在 API 24 发现既有 JAR 编译器边界: 本地 D8 引用系统尚无的 `java.nio.file.Paths`, legacy dx 回退拒绝 Java 8 class major 52; Java 6 major 50 夹具可正常转换与加载. 后续独立修复旧系统编译器兼容性及失败诊断, 不因本次原始 DEX 目录修复或 API 37 冒烟通过而宣称此限制已解除. 见 [P2.3 证据](evidence/android-sdk-37-p23-20260913.md#jar-夹具与既有限制).
+- 旧 `PythonRuntimeRealPluginDiagnosticTest` 的 R2 诊断对当前 0.5.2 插件返回 `INVALID_REQUEST/SESSION_OPEN`, Parcel enable / disable 均可复现. 源码显示它协商新协议后调用不带 host broker 的旧 openSession, provider 在协议 1.5+ 要求 broker. 后续按该诊断的协议验收范围维护; P2.7 使用当前生产 PythonPluginScriptEngine 已完成三个条件的实际 CPython 往返, 没有删除或掩盖旧诊断失败. 见 [失败探索](evidence/android-sdk-37-p27-20260913.md#5-失败探索与处理).
 
 ---
 
@@ -712,3 +718,12 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 正常 app debug / release, androidTest 与 inrt debug 构建通过, 相关 JVM 测试 6/6, Python TLS 测试 2/2. 生产 NSC 不增加 CT / ECH 例外, appRelease 无测试 CA. [实施记录](evidence/android-sdk-37-p26-20260913.md) 与 [机器结果](evidence/android-sdk-37-p26-results-20260913.json) 保留失败探索、APK / 源码哈希和最终矩阵.
 - HTTP 文档与 Offline Docs 已同步, 后者的 debug / release 内容门禁和 JVM 测试通过, 文档版本 6.8.0 / 插件发行版本 6.8.1 各自保留. d.ts boolean 签名无需调整. 宿主及插件的多语言 changelog 已生成, 未发布 APK 或远程推送.
 - 正常配置仍为 compile 37 / host target 36 / inrt target 29; 两个独占只读 AVD、TLS helper 与临时调试资源已清理, 手机未做变更. P2.6 的真实域证书链、企业代理和 ECH 协商保留为待补, 后续可继续 P2.7, 不将 P2 / P3 整体关闭.
+
+### 2026-09-13: P2.7 Parcel 与真实插件往返
+
+- 会话开始时宿主为干净的 `4422786ab`. `a6d037516` 增加 debug 私有独立进程接收器、Parcel 字段 / 边界与负例测试、当前生产 QuickJS / Python / Barcode 链路及复跑工具; 没有生产 API / SDK 配置 / Gradle 依赖变化, 不触发产品 changelog 或关联文档 / d.ts 发布.
+- 实际 API 37 字节码及双进程负例核实 `PARCEL_HARDENING` 的具体范围和门控. 两个启用条件分别 35/35 instrumentation + 2/2 OCR, 最终关闭对照 11/11; 11 个指定插件及元数据读取通过. 计数包含重复负例, 初版失败单列保存, 不用总数代替覆盖范围. [实施记录](evidence/android-sdk-37-p27-20260913.md) 与 [机器结果](evidence/android-sdk-37-p27-results-20260913.json) 保存 APK / 源码哈希、状态和失败探索.
+- QuickJS 文本匹配与新的 Python 结果类型夹具已修正, 所测生产路径无 Parcel 回归; 旧 Python R2 诊断维护事项另列附录 F. IDE Remote JVM 调试会话未能建立, 没有取得 logpoint 值, 结论来自无调试器对照、既有日志和源码; 临时调试资源已移除.
+- 正常 app / androidTest 与 target 37 覆盖构建通过, 最终恢复正常 target 36 产物并完成 enable / disable 对照. 原生对齐门禁、release 合并 manifest 隔离检查及 Python 工具测试通过; 没有重跑全量 release 或远程 CI, 99 行实体机清单保持未验收状态.
+- 本轮仅用独占只读 x86_64 AVD, 实际内核页为 4096, 不当作真实 16 KB 验证. Lua 仅在本地测试副本重签名; 插件仓库的既有修改未触碰. 默认 ADB 5037 异常后改用独立 5049, 结束前恢复所测包的兼容状态并关闭本轮 AVD / ADB, 手机与其它模拟器未改动. 正常配置仍为 compile 37 / host target 36 / inrt target 29.
+- P2.7 本地自动化条目已勾选, IPC01 的真实 Tasker / 桌面流程及 P3 / P5 的其它 ABI、inrt、42 插件发布验收保持开放; 后续继续 P2.8 存储与文件管理器. P2 / P3 尚未整体完成.

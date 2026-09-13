@@ -1,0 +1,1716 @@
+{
+  "date": "2026-09-13",
+  "baselineCommit": "4422786ab",
+  "codeCommit": "a6d03751617075386464cef3d56353c27edf6949",
+  "normalSdkConfiguration": {
+    "compile": 37,
+    "target": 36,
+    "inrtTarget": 29
+  },
+  "device": {
+    "serial": "127.0.0.1:5573",
+    "model": "sdk_gphone16k_x86_64",
+    "manufacturer": "Google",
+    "sdk": "37",
+    "release": "17",
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+    "abiList": "x86_64,arm64-v8a",
+    "buildType": "userdebug",
+    "emulator": true,
+    "getconfPageSize": 16384,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "connection": {
+    "adbServerPort": 5049,
+    "emulatorConsolePort": 5572,
+    "usbDiscoveryFilter": "sdk37-p27-no-usb",
+    "emulatorAutomaticScanMaxPort": 0
+  },
+  "framework": {
+    "source": "/system/framework/framework.jar",
+    "sha256": "cfd8c422620cf584b5f190d8e5a211b83468a5ffd2bdb5cad1e0e410a22f30d8",
+    "dexEntry": "classes3.dex",
+    "changeId": 416031865,
+    "gate": "failOnParcelSizeMismatch() && CompatChanges.isChangeEnabled(416031865L)",
+    "scope": "length-prefixed Parcel.readValue payload byte count; not a claim about all Parcel/Binder operations"
+  },
+  "negativeControl": {
+    "writtenPayloadBytes": 108,
+    "consumedPayloadBytes": 104,
+    "enabledException": "android.os.BadParcelableException",
+    "disabledException": null,
+    "separateReceiverPidAsserted": true
+  },
+  "summary": {
+    "target36EnabledInstrumentationExecutions": 35,
+    "target37DefaultInstrumentationExecutions": 35,
+    "disabledControlInstrumentationExecutions": 11,
+    "uniqueInstrumentationMethods": 15,
+    "ocrExecutions": 4,
+    "pluginsPerMatrix": 11,
+    "metadataVersionsMatchInstalledApks": true
+  },
+  "cases": [
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-wire-final",
+      "suite": "wire",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-wire-final/result.json",
+      "receiptSha256": "ece0339ada109c5731af88041c76aaa2f608b3dad6142f727eb76f0010303425",
+      "instrumentationSha256": "52bf0aff6c865eb8cf26ae70ad0596c7e37ace1c95c3b6c75a55d9ec1b4a3791",
+      "started": "2026-09-13T10:46:34.504009+00:00",
+      "ended": "2026-09-13T10:46:45.432803+00:00",
+      "success": true,
+      "testCount": 5,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#taskerJsonAndShortcutExtrasSurviveRemoteUnparcelling",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#pluginInfoPreservesNullableArraysLongsAndNestedCapabilities",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#executionConfigPreservesItsExistingWireFieldsAndBoundary"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "15ec15d9a6dbf7eccfd30252d3e6f6e1ef17c2d0100fd333660be8cbc413b0ed"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-opencv",
+      "suite": "opencv",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-opencv/result.json",
+      "receiptSha256": "7b4bf9c4f854c6cbf8a2573b8ecd622437579616c70442be125a397d748dbd52",
+      "instrumentationSha256": "e6aab54968f0e5a35109458766825b8cde952646abf9d877fbe7efbc76ebb3f0",
+      "started": "2026-09-13T10:30:03.192345+00:00",
+      "ended": "2026-09-13T10:30:14.331800+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.opencv.OpenCvPluginHostDeviceTest#installedOpenCvPluginLoadsAndRunsThroughHostJavaAbi"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.opencv": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb"
+      ],
+      "logcatExitCode": 1,
+      "logcatSha256": "14899859ccf2129e818c44732ab8aa70a7fd752f3ad882e67f2301d37b33df9f"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-imagequant",
+      "suite": "imagequant",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-imagequant/result.json",
+      "receiptSha256": "090fa73ece2016a59393f0b1733456c19435bd7364216421d413784a6d850ec8",
+      "instrumentationSha256": "7160a3fef89c662119e545f3a4aca75dd75b65b79f0a9a011b376a0a05023a1c",
+      "started": "2026-09-13T10:30:17.082917+00:00",
+      "ended": "2026-09-13T10:30:26.902382+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHostDeviceTest#installedPluginLoadsAndProducesIndexedPng"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.imagequant": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0"
+      ],
+      "logcatExitCode": 1,
+      "logcatSha256": "14899859ccf2129e818c44732ab8aa70a7fd752f3ad882e67f2301d37b33df9f"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-barcode",
+      "suite": "barcode",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-barcode/result.json",
+      "receiptSha256": "e5945305b834857846e5ad8f62a641c997f168b24a61e46593d297f858ddef99",
+      "instrumentationSha256": "3c5743816e4681d4c7e50dd2f980580e1627262088bdf447378d3205b1ad4f41",
+      "started": "2026-09-13T10:30:29.340546+00:00",
+      "ended": "2026-09-13T10:30:41.080152+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#barcodeDecodesImagePfdAndReturnsStructuredResults"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mlkit.barcode": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3"
+      ],
+      "logcatExitCode": 1,
+      "logcatSha256": "14899859ccf2129e818c44732ab8aa70a7fd752f3ad882e67f2301d37b33df9f"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-node",
+      "suite": "node",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-node/result.json",
+      "receiptSha256": "0d416c0a54c3e2853182f620b9f3e9ddffa136bcb7da1f4cb65fba8646685de3",
+      "instrumentationSha256": "3f5866ca4e6efd3236f5cdab21c559b8406b14e0e23f4449435c8dcd7ec619ac",
+      "started": "2026-09-13T10:30:45.688745+00:00",
+      "ended": "2026-09-13T10:31:01.050642+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.engine.NodeHostPluginIntegrationInstrumentationTest#pluginExecutionRoundTripRuns"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.nodejs": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd"
+      ],
+      "logcatExitCode": 1,
+      "logcatSha256": "14899859ccf2129e818c44732ab8aa70a7fd752f3ad882e67f2301d37b33df9f"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-lua",
+      "suite": "lua",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-lua/result.json",
+      "receiptSha256": "b25b597a46732175842acbbe22e8a051d48f6e73938a890ad634dc0330e8b57c",
+      "instrumentationSha256": "5b4d8a6c7360f0f753c65349c968ca5845859e118180e9e559543cf1ac91d58b",
+      "started": "2026-09-13T10:31:05.406370+00:00",
+      "ended": "2026-09-13T10:31:49.056263+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.lua.LuaOfficialRuntimeSmokeTest#officialProviderExecutesAndReleasesSequentialSessions"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.lua.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808"
+      ],
+      "logcatExitCode": 1,
+      "logcatSha256": "14899859ccf2129e818c44732ab8aa70a7fd752f3ad882e67f2301d37b33df9f"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-quickjs-final",
+      "suite": "quickjs",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-quickjs-final/result.json",
+      "receiptSha256": "d405ed03281e0f63ee90285a8dff1418b4039978a04cb5fd7bb088ab8d34dfb2",
+      "instrumentationSha256": "172ff45175b8fa98fccf88565d1d8914b79ee0f4d3aa682df17b2c21f1e0be51",
+      "started": "2026-09-13T10:46:48.180545+00:00",
+      "ended": "2026-09-13T10:47:03.027023+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#quickJsExecutesSourcePfdAndReturnsConsoleCallback"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078",
+        "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "20771b11a6507749a0671d5bfb99b716e82ccf33ce929d4558bb90b812dc2894"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-python-final",
+      "suite": "python",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-python-final/result.json",
+      "receiptSha256": "6acc4dbf85bb35f964312861d5de0695c52d1c6fb37a8e7e7de4ce3d99b9e0ff",
+      "instrumentationSha256": "c9238931c76ad989d552371ea08cfb849a14c2c80b1174e8ebf069e88a50d4b1",
+      "started": "2026-09-13T10:47:05.858433+00:00",
+      "ended": "2026-09-13T10:47:21.984811+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#pythonExecutesThroughTheCurrentHostProtocolAndReturnsOutput"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.python.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078",
+        "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "af20425b39f18650484120944ae172a9ae5422ed05a1bd6bbd4de93177c55ce5"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-yolo",
+      "suite": "yolo",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-yolo/result.json",
+      "receiptSha256": "68d30fe0de133e14dea2f1092987588bb2f5181ce567c3d269558880d6fdad93",
+      "instrumentationSha256": "568d833ae4fa38ca4a993e4306a6803e0be033034050b5b7bcfc577f8bb53b2d",
+      "started": "2026-09-13T10:32:15.467018+00:00",
+      "ended": "2026-09-13T10:32:28.513858+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR2AndroidTest#productionHostUsesRemoteBinderOwnsPfdAndReopensAfterIdempotentClose"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.yolo.ncnn": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "36c65da329255df92491c1259f50751b77fda744c6dda09c3dc508f3df06a02d"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-mcp",
+      "suite": "mcp",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-mcp/result.json",
+      "receiptSha256": "a113028349906260a8a4b74ef7417f641f9bbff03681d016b8dd4c062772d34c",
+      "instrumentationSha256": "d94c91459ada51da7a7ebc8b2f7eb5eb3f30958e170fde768bf727298f253614",
+      "started": "2026-09-13T10:32:32.022695+00:00",
+      "ended": "2026-09-13T10:32:46.744307+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.mcp.McpServerPluginRoundTripTest#openServerReachesRunningWithTheHostAttachedAndStopsCleanly"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mcp.server": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "634b2a0d38c36a9bfc747e9c7de3dd7e6e796417f98101390ddc81a1cc699f83"
+    },
+    {
+      "group": "target36Enabled",
+      "name": "t36-enabled-metadata",
+      "suite": "metadata",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-metadata/result.json",
+      "receiptSha256": "e5c37d45752c23485223be047a10404f1e7dfb08bf22310ee49a56a9feebfd28",
+      "instrumentationSha256": "29bbca2ccb4ea53c06a8c8fcf3cf8d51f744c186d74eee41cbe717151884f395",
+      "started": "2026-09-13T10:32:51.093092+00:00",
+      "ended": "2026-09-13T10:33:19.344962+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#installedPluginMetadataIsReadThroughTheProductionRepository"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.imagequant": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.lua.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mcp.server": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mlkit.barcode": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.nodejs": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.opencv": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.python.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.yolo.ncnn": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7",
+        "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091",
+        "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0",
+        "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808",
+        "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8",
+        "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3",
+        "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd",
+        "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb",
+        "8a58372708d38c48545d5397e16eed62c4f86cb8e056aa051570d082d04acdcf",
+        "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1",
+        "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5",
+        "ab61aa0d44d0eeb5b3aae176cc3e61786b392724fd99298afd72b28ea59192cf",
+        "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "24d516574aabeaaf8b3c8ca4a504cfd01cb59e7f17dabc0f3a1a0f050ea45728"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-wire",
+      "suite": "wire",
+      "sourceReceipt": "build/sdk37-p27/t37-default-wire/result.json",
+      "receiptSha256": "3a75e8c12c94d6d360b84f0f490f81074b716ef3094f89153dc83f54b47312a1",
+      "instrumentationSha256": "b5a47181c3aeed4c9556529c96971f10cddc9a7deb0c69f757af1b0562d3f316",
+      "started": "2026-09-13T10:41:22.800693+00:00",
+      "ended": "2026-09-13T10:41:33.089473+00:00",
+      "success": true,
+      "testCount": 5,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#taskerJsonAndShortcutExtrasSurviveRemoteUnparcelling",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#pluginInfoPreservesNullableArraysLongsAndNestedCapabilities",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#executionConfigPreservesItsExistingWireFieldsAndBoundary"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "e36f61e41050caac2f86b3bb4c9d198ebf980dbe7a55efa832048087945a3f8d"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-opencv",
+      "suite": "opencv",
+      "sourceReceipt": "build/sdk37-p27/t37-default-opencv/result.json",
+      "receiptSha256": "78cbbea689d8ba336326bf18511df31f71a7090e2560c77ad416a5330971b5a4",
+      "instrumentationSha256": "8e28e51de068864d89de8e5b19043fee1c32ff2126f877fcb05ee5efd6a80feb",
+      "started": "2026-09-13T10:41:54.517654+00:00",
+      "ended": "2026-09-13T10:42:05.890630+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.opencv.OpenCvPluginHostDeviceTest#installedOpenCvPluginLoadsAndRunsThroughHostJavaAbi"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.opencv": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "215e3fb29f97527b4daf9fc744ce7609cec1ee9bc2d65b8263a060d862b9419e"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-imagequant",
+      "suite": "imagequant",
+      "sourceReceipt": "build/sdk37-p27/t37-default-imagequant/result.json",
+      "receiptSha256": "c0a2d897a1764853c44b83a75ee666776ec14999ee050576b0d824ac972326f6",
+      "instrumentationSha256": "52eb524cb19217f5e30d426f9b01605552dd6bd9928cca74758b750b6d50df7c",
+      "started": "2026-09-13T10:42:08.361448+00:00",
+      "ended": "2026-09-13T10:42:17.580256+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHostDeviceTest#installedPluginLoadsAndProducesIndexedPng"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.imagequant": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "adac9f74365dd5fb0298da4caa8971ae9ddb97dd08ec5fca46a56429d29a0589"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-barcode",
+      "suite": "barcode",
+      "sourceReceipt": "build/sdk37-p27/t37-default-barcode/result.json",
+      "receiptSha256": "a476ae0a44f1cde416e84aaf4e5e8865cc5f73dde06c9a56b7ebf0c042bf2fab",
+      "instrumentationSha256": "5aa3e0e6f68353c5aa10cc6bbee6e9393177f0007eda9b223c7f9d2c419a8e87",
+      "started": "2026-09-13T10:42:20.045137+00:00",
+      "ended": "2026-09-13T10:42:29.086965+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#barcodeDecodesImagePfdAndReturnsStructuredResults"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.mlkit.barcode": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "b61df7f48dd39f0d4a4e16cd75c1f95482e5572f0c1a6dd1914868b85a4f0b65"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-node",
+      "suite": "node",
+      "sourceReceipt": "build/sdk37-p27/t37-default-node/result.json",
+      "receiptSha256": "2796f856d8c4f2ff6bf93d37dfa40f6d2104b43ef2f3559ef1e3adbee74bcd5e",
+      "instrumentationSha256": "c804e292d1f052a29cf84bdd53983774649a96a06e60048992b2066890b3e23d",
+      "started": "2026-09-13T10:42:32.356986+00:00",
+      "ended": "2026-09-13T10:42:42.977079+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.engine.NodeHostPluginIntegrationInstrumentationTest#pluginExecutionRoundTripRuns"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.nodejs": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "f6bae49b2c3ca5aa02c84fd96d74c5217f3b60ea1ba95a71bc17540fd53eef49"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-lua",
+      "suite": "lua",
+      "sourceReceipt": "build/sdk37-p27/t37-default-lua/result.json",
+      "receiptSha256": "f0d6472f4e398e70cbde2161cd3e1f787509b393a022059282fb4adf45e858e3",
+      "instrumentationSha256": "a203072e99e29ca100c34edea3d70a1adb025d86ad8a0e9c669b566e38132e41",
+      "started": "2026-09-13T10:42:45.296490+00:00",
+      "ended": "2026-09-13T10:43:22.666775+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.lua.LuaOfficialRuntimeSmokeTest#officialProviderExecutesAndReleasesSequentialSessions"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.lua.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "81bc96c05d13b908a194a46abd531dcb93225cd8166305408468715ea0b68600"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-quickjs",
+      "suite": "quickjs",
+      "sourceReceipt": "build/sdk37-p27/t37-default-quickjs/result.json",
+      "receiptSha256": "480db11c4ffa30f2555f251a6512a60d35a115ed373b7d853c2efd48c01c87c0",
+      "instrumentationSha256": "74c83960dafc51cfeab524285e7c97aa1807acaa6b07f47ab494ff0a07e39997",
+      "started": "2026-09-13T10:43:27.297485+00:00",
+      "ended": "2026-09-13T10:43:40.136766+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#quickJsExecutesSourcePfdAndReturnsConsoleCallback"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "e00a4a7660e1ed25a18adcf26dee34b25fdf4d0d5ace9fc322fa2ca5367238a0"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-python",
+      "suite": "python",
+      "sourceReceipt": "build/sdk37-p27/t37-default-python/result.json",
+      "receiptSha256": "689e211d636905a54f69475d39cc5a092dd5658779327dfdc9911973d9d3532a",
+      "instrumentationSha256": "907b9644e214ba2caab0c965fb24e029d9f2016a1ef4ecf81893307e6674a5e9",
+      "started": "2026-09-13T10:41:35.672724+00:00",
+      "ended": "2026-09-13T10:41:50.467617+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#pythonExecutesThroughTheCurrentHostProtocolAndReturnsOutput"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.python.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "f9f808573d34d20f91b5bc6a0b60b5e9324b9186fd37e50131ab504b3208c233"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-yolo",
+      "suite": "yolo",
+      "sourceReceipt": "build/sdk37-p27/t37-default-yolo/result.json",
+      "receiptSha256": "aeff3fe5802d714c215421c727067611cf17e36d27657648223eeb66bcd34594",
+      "instrumentationSha256": "2d3f81237b6b99f09f24f7341673fabfe41c5483d55d315c3a1b1bbc2b0b43bd",
+      "started": "2026-09-13T10:43:42.672311+00:00",
+      "ended": "2026-09-13T10:43:56.277675+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.yolo.YoloRealProviderR2AndroidTest#productionHostUsesRemoteBinderOwnsPfdAndReopensAfterIdempotentClose"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.yolo.ncnn": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "57c14d15fbfff526757f391ab627ae8affec84b656e93a381bea52083f7b24eb"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-mcp",
+      "suite": "mcp",
+      "sourceReceipt": "build/sdk37-p27/t37-default-mcp/result.json",
+      "receiptSha256": "86fa340126b32f282a380bd98495381ede328dc86a466f11ab3a7d8c0000c016",
+      "instrumentationSha256": "98b974e31e07b9eb7df59ef71ded4816f6f52d7f99d5a98526a39be9b33a1499",
+      "started": "2026-09-13T10:43:58.954721+00:00",
+      "ended": "2026-09-13T10:44:10.656129+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.core.plugin.mcp.McpServerPluginRoundTripTest#openServerReachesRunningWithTheHostAttachedAndStopsCleanly"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.mcp.server": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "9e58173c41655d1305fcd7748e7b1d9e8c8f51035162537a67d4c8e0f2f643f1"
+    },
+    {
+      "group": "target37Default",
+      "name": "t37-default-metadata",
+      "suite": "metadata",
+      "sourceReceipt": "build/sdk37-p27/t37-default-metadata/result.json",
+      "receiptSha256": "3e48f27a78bc3900c35022eee2e7b9db1a6db4ccf9ea164b73206c9a5f671e01",
+      "instrumentationSha256": "a1a343f87474a5fa869b390c036b610f9fb8c59767ca87592057b9e4eb185fc7",
+      "started": "2026-09-13T10:44:13.228993+00:00",
+      "ended": "2026-09-13T10:44:36.835169+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#installedPluginMetadataIsReadThroughTheProductionRepository"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.imagequant": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.lua.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mcp.server": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.mlkit.barcode": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.nodejs": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.opencv": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.python.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.yolo.ncnn": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da",
+        "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34",
+        "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0",
+        "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808",
+        "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8",
+        "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3",
+        "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd",
+        "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb",
+        "8a58372708d38c48545d5397e16eed62c4f86cb8e056aa051570d082d04acdcf",
+        "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1",
+        "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5",
+        "ab61aa0d44d0eeb5b3aae176cc3e61786b392724fd99298afd72b28ea59192cf",
+        "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "5594f6081553f7ed65e47b74eb2c9525e400ab7bea351920b3f88f4c3d3142aa"
+    },
+    {
+      "group": "disabledControls",
+      "name": "t36-disabled-wire-final",
+      "suite": "wire",
+      "sourceReceipt": "build/sdk37-p27/t36-disabled-wire-final/result.json",
+      "receiptSha256": "8d4a0a13a549f628978822e84718e7ae40e2a558394fb9517f666acf81bf7357",
+      "instrumentationSha256": "c0ff69aac443a09875b1c51657eeb8141cb0a96f3ed9e64274517ff4c3563328",
+      "started": "2026-09-13T10:45:42.488491+00:00",
+      "ended": "2026-09-13T10:45:52.331310+00:00",
+      "success": true,
+      "testCount": 5,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#taskerJsonAndShortcutExtrasSurviveRemoteUnparcelling",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#pluginInfoPreservesNullableArraysLongsAndNestedCapabilities",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#executionConfigPreservesItsExistingWireFieldsAndBoundary"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": false,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "9f802680d797615163dee72c58e1da84f51a03458af535dc187a2e22e877a06d"
+    },
+    {
+      "group": "disabledControls",
+      "name": "t36-disabled-quickjs-final",
+      "suite": "quickjs",
+      "sourceReceipt": "build/sdk37-p27/t36-disabled-quickjs-final/result.json",
+      "receiptSha256": "3697eca80d484f8534c8270df4be9f757cd7035a3c341676fd4ed7380f8d61d5",
+      "instrumentationSha256": "ef8c19297859586fdd57a136cf063f508dbf4b9426465be83373523da679f7f8",
+      "started": "2026-09-13T10:45:55.677541+00:00",
+      "ended": "2026-09-13T10:46:08.325833+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#quickJsExecutesSourcePfdAndReturnsConsoleCallback"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": false,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime": {
+          "enabled": false,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078",
+        "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "e9618f3ca8afd9f9a6e2dbae76a132f826fe5dea212ca892718b4571f351428f"
+    },
+    {
+      "group": "disabledControls",
+      "name": "t36-disabled-python-final",
+      "suite": "python",
+      "sourceReceipt": "build/sdk37-p27/t36-disabled-python-final/result.json",
+      "receiptSha256": "0714114af2c6fab38ce809c0df5c1582ac4b0df01eccba06e080cace604167b5",
+      "instrumentationSha256": "d6b953bd46ff1dd241087ea9a88ca88bacd9ce32ea597765607b8e83b3d6ef2b",
+      "started": "2026-09-13T10:46:13.099024+00:00",
+      "ended": "2026-09-13T10:46:27.981720+00:00",
+      "success": true,
+      "testCount": 3,
+      "methods": [
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheRemoteCompatPolicy",
+        "org.autojs.autojs.compat.ParcelCompatibilityDeviceTest#underReadingParcelableMatchesTheLocalCompatPolicy",
+        "org.autojs.autojs.compat.ParcelPluginRoundTripDeviceTest#pythonExecutesThroughTheCurrentHostProtocolAndReturnsOutput"
+      ],
+      "effectivePolicies": {
+        "org.autojs.autojs6": {
+          "enabled": false,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.python.runtime": {
+          "enabled": false,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "installedApkSha256": [
+        "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88",
+        "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078",
+        "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1"
+      ],
+      "logcatExitCode": 0,
+      "logcatSha256": "2f735b44cd32407abd4a600be3a3a8100de54f85197fafc1ce92eade14f358b8"
+    }
+  ],
+  "ocr": [
+    {
+      "group": "t36-enabled",
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-ocr/recognition/ocr-provider-smoke-sdk37-p27-t36-enabled.json",
+      "receiptSha256": "2d7061e9cfecc0a218722b9d1a90b6670c47c504b60891ef45baa3aeb8500941",
+      "policies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "receipt": {
+        "label": "sdk37-p27-t36-enabled",
+        "image": "generated",
+        "pageSize": 16384,
+        "results": [
+          {
+            "mode": "paddle",
+            "variant": "v4",
+            "width": 1000,
+            "height": 320,
+            "text": [
+              "TEST 16 KB",
+              "Hello",
+              "World"
+            ],
+            "ok": true,
+            "milliseconds": 3471
+          },
+          {
+            "mode": "rapid",
+            "variant": "v6",
+            "width": 1000,
+            "height": 320,
+            "text": [
+              "TEST 16 KB",
+              "Hello World"
+            ],
+            "ok": true,
+            "milliseconds": 1262
+          }
+        ],
+        "enabledPackages": [
+          "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile",
+          "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6"
+        ],
+        "width": 1000,
+        "height": 320,
+        "ok": true,
+        "complete": true,
+        "serial": "127.0.0.1:5573",
+        "hostApkSha256": "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7"
+      }
+    },
+    {
+      "group": "t37-default",
+      "sourceReceipt": "build/sdk37-p27/t37-default-ocr/recognition/ocr-provider-smoke-sdk37-p27-t37-default.json",
+      "receiptSha256": "ffa349df84d2af7a6dd578e74f3d4ba4389d8734afa74f43e42b333e5c26bd3a",
+      "policies": {
+        "org.autojs.autojs6": {
+          "enabled": true,
+          "source": "enableSinceTargetSdk=37",
+          "target": 37
+        },
+        "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        },
+        "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6": {
+          "enabled": true,
+          "source": "packageOverrides",
+          "target": 36
+        }
+      },
+      "receipt": {
+        "label": "sdk37-p27-t37-default",
+        "image": "generated",
+        "pageSize": 16384,
+        "results": [
+          {
+            "mode": "paddle",
+            "variant": "v4",
+            "width": 1000,
+            "height": 320,
+            "text": [
+              "TEST 16 KB",
+              "Hello",
+              "World"
+            ],
+            "ok": true,
+            "milliseconds": 3436
+          },
+          {
+            "mode": "rapid",
+            "variant": "v6",
+            "width": 1000,
+            "height": 320,
+            "text": [
+              "TEST 16 KB",
+              "Hello World"
+            ],
+            "ok": true,
+            "milliseconds": 1161
+          }
+        ],
+        "enabledPackages": [
+          "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile",
+          "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6"
+        ],
+        "width": 1000,
+        "height": 320,
+        "ok": true,
+        "complete": true,
+        "serial": "127.0.0.1:5573",
+        "hostApkSha256": "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da"
+      }
+    }
+  ],
+  "plugins": [
+    {
+      "name": "OpenCV",
+      "package": "io.github.supermonster003.autojs6.plugin.opencv",
+      "versionName": "1.1.3",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.opencv' versionCode='21' versionName='1.1.3' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb",
+      "originalSha256": "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb",
+      "testResigned": false,
+      "sourceHeadAtInventory": "5f9423b24a79c5011f893f61829b7ab495aa624e",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/OpenCV.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Image-Quantization",
+      "package": "io.github.supermonster003.autojs6.plugin.imagequant",
+      "versionName": "1.0.1",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.imagequant' versionCode='19' versionName='1.0.1' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0",
+      "originalSha256": "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0",
+      "testResigned": false,
+      "sourceHeadAtInventory": "673e30bfc8a55d04c07cbf8c8b8b34f27d7d5f32",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Image-Quantization.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Paddle-OCR-PP-OCRv4",
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile",
+      "versionName": "1.0.3-mobile",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile' versionCode='19' versionName='1.0.3-mobile' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "8a58372708d38c48545d5397e16eed62c4f86cb8e056aa051570d082d04acdcf",
+      "originalSha256": "8a58372708d38c48545d5397e16eed62c4f86cb8e056aa051570d082d04acdcf",
+      "testResigned": false,
+      "sourceHeadAtInventory": "be361447dc0dffb79c0cd03c073aea71caf9dd2f",
+      "sourceDirtyPathCountAtInventory": 6,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Paddle-OCR-PP-OCRv4.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Rapid-OCR-PP-OCRv6",
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+      "versionName": "1.0.3",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6' versionCode='22' versionName='1.0.3' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "ab61aa0d44d0eeb5b3aae176cc3e61786b392724fd99298afd72b28ea59192cf",
+      "originalSha256": "ab61aa0d44d0eeb5b3aae176cc3e61786b392724fd99298afd72b28ea59192cf",
+      "testResigned": false,
+      "sourceHeadAtInventory": "698bd5d80f976ef025b2e285fb94184e8fe0586e",
+      "sourceDirtyPathCountAtInventory": 56,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Rapid-OCR-PP-OCRv6.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "MLKit-Barcode",
+      "package": "io.github.supermonster003.autojs6.plugin.mlkit.barcode",
+      "versionName": "1.0.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.mlkit.barcode' versionCode='12' versionName='1.0.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3",
+      "originalSha256": "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3",
+      "testResigned": false,
+      "sourceHeadAtInventory": "2bf2b9514945b21544ed65806924707ade95bcf8",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/MLKit-Barcode.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Yolo-NCNN",
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+      "versionName": "0.1.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.yolo.ncnn' versionCode='32' versionName='0.1.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b",
+      "originalSha256": "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b",
+      "testResigned": false,
+      "sourceHeadAtInventory": "090409f427fcbb6172122b230e88713cf240ec1e",
+      "sourceDirtyPathCountAtInventory": 36,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Yolo-NCNN.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "NodeJs-Runtime",
+      "package": "io.github.supermonster003.autojs6.plugin.nodejs",
+      "versionName": "1.4.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.nodejs' versionCode='164' versionName='1.4.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd",
+      "originalSha256": "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd",
+      "testResigned": false,
+      "sourceHeadAtInventory": "ceba7ab89afc976c885401443b82df79f8ec0363",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/NodeJs-Runtime.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Lua-Runtime",
+      "package": "io.github.supermonster003.autojs6.plugin.lua.runtime",
+      "versionName": "0.1.1-rc.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.lua.runtime' versionCode='63' versionName='0.1.1-rc.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808",
+      "originalSha256": "2a5f99c4d7d852a70275976e62b27db5a6fc46232efba51b06b362f83724407f",
+      "testResigned": true,
+      "sourceHeadAtInventory": "fafc3a130ff708c35f6123ed35c80406de59cca9",
+      "sourceDirtyPathCountAtInventory": 30,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Lua-Runtime.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "QuickJS-Runtime",
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+      "versionName": "1.0.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.quickjs.runtime' versionCode='13' versionName='1.0.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5",
+      "originalSha256": "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5",
+      "testResigned": false,
+      "sourceHeadAtInventory": "33c3dd6046a9cf64e75b53b95acbbf69bcab4e18",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/QuickJS-Runtime.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "Python-Runtime",
+      "package": "io.github.supermonster003.autojs6.plugin.python.runtime",
+      "versionName": "0.5.2",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.python.runtime' versionCode='106' versionName='0.5.2' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'",
+        "native-code: 'x86_64'"
+      ],
+      "sha256": "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1",
+      "originalSha256": "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1",
+      "testResigned": false,
+      "sourceHeadAtInventory": "1c5c32e9e61eca9d21e81b577452af8249569c96",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/Python-Runtime.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    },
+    {
+      "name": "MCP-Server",
+      "package": "io.github.supermonster003.autojs6.plugin.mcp.server",
+      "versionName": "1.0.0",
+      "badging": [
+        "package: name='io.github.supermonster003.autojs6.plugin.mcp.server' versionCode='25' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "targetSdkVersion:'36'"
+      ],
+      "sha256": "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8",
+      "originalSha256": "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8",
+      "testResigned": false,
+      "sourceHeadAtInventory": "0f56aa756f250fb396d972116ac2465a7d3453f2",
+      "sourceDirtyPathCountAtInventory": 0,
+      "artifactPath": "build/sdk37-p27/apks/plugins/MCP-Server.apk",
+      "sourceIsNotClaimedToReproducePrebuiltApk": true
+    }
+  ],
+  "installedApks": [
+    {
+      "package": "org.autojs.autojs6",
+      "sha256": "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88"
+    },
+    {
+      "package": "org.autojs.autojs6.test",
+      "sha256": "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078"
+    },
+    {
+      "package": "org.autojs.autojs6",
+      "sha256": "02a41dc8a48f6e8d702d3d703e33d9d481b775aa5eb6ad2e0d78983f4a1e05c7"
+    },
+    {
+      "package": "org.autojs.autojs6.test",
+      "sha256": "91bee634c8076d7d3164205ab3935644756ef82ea73fc82e2117e78f9b7cf091"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.opencv",
+      "sha256": "8e8d4477528ad291462a313914f45890f8502a9bb7ad75800d0437da028b2ddb"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.imagequant",
+      "sha256": "bd20fc412d8740a3f181b2f8c362754a83fea96bece404cd0f95ca7f38000ed0"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.mlkit.barcode",
+      "sha256": "41cd1219ac89d3be16e716e69a8274396b33de5f9381e80a129138b145271bb3"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.nodejs",
+      "sha256": "7cb8d80e96412efec81f5f2a21fe5f117c200db0e4a089e43e64c7568b86f7cd"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.lua.runtime",
+      "sha256": "13c456b039bca7f07469a53de4264ce2aaeee13083797a56b2a539f90396e808"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+      "sha256": "95498ff777b9ed5082f7102875466e381fae81b2c6bd47c6ba276844268141f5"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.python.runtime",
+      "sha256": "2c2990bc959690033c84b1486a1a482eaa50e2fc0695183beb0bf35b1980fec1"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.yolo.ncnn",
+      "sha256": "a9397a2f56c1dfbba1040741eb91a2e3a882691d6e1c635974bfb2b60633906b"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.mcp.server",
+      "sha256": "3551669cc3287a68e930a66387af539e3953a23d284bd7c58e8648e900fb69d8"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile",
+      "sha256": "8a58372708d38c48545d5397e16eed62c4f86cb8e056aa051570d082d04acdcf"
+    },
+    {
+      "package": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6",
+      "sha256": "ab61aa0d44d0eeb5b3aae176cc3e61786b392724fd99298afd72b28ea59192cf"
+    },
+    {
+      "package": "org.autojs.autojs6",
+      "sha256": "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da"
+    },
+    {
+      "package": "org.autojs.autojs6.test",
+      "sha256": "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34"
+    }
+  ],
+  "exploratoryFailures": [
+    {
+      "name": "t36-enabled-quickjs",
+      "success": false,
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-quickjs/result.json",
+      "receiptSha256": "ff3b732a2863dfc0d25e5aec1165c49b71e765ec17e18b956a078c8a6ca2fd70",
+      "firstFailure": "java.lang.AssertionError: Missing real provider console callback"
+    },
+    {
+      "name": "t36-disabled-quickjs",
+      "success": false,
+      "sourceReceipt": "build/sdk37-p27/t36-disabled-quickjs/result.json",
+      "receiptSha256": "08750a82b786ca935024bb1c26d2d6f97b06b00e5e777867e31aedca0ab2e00d",
+      "firstFailure": "java.lang.AssertionError: Missing real provider console callback"
+    },
+    {
+      "name": "t36-enabled-python",
+      "success": false,
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-python/result.json",
+      "receiptSha256": "26a51a5823fba8e725d333c05d9146a6fba6239e0b896bfbdaabbd01ecb0158e",
+      "firstFailure": "java.lang.AssertionError: Real CPython callback validation failed"
+    },
+    {
+      "name": "t36-disabled-python",
+      "success": false,
+      "sourceReceipt": "build/sdk37-p27/t36-disabled-python/result.json",
+      "receiptSha256": "842346cfc432940a00e3374a8a5c87b5e7b3f4792ae915c22757aa5eb067a0b1",
+      "firstFailure": "java.lang.AssertionError: Real CPython callback validation failed"
+    },
+    {
+      "name": "t36-enabled-python-revised",
+      "success": false,
+      "sourceReceipt": "build/sdk37-p27/t36-enabled-python-revised/result.json",
+      "receiptSha256": "97f43d922a000bc68adc28b26f458c8364d23d721fca909e9a4f0b0161c61928",
+      "firstFailure": "java.lang.ClassCastException: org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionResult cannot be cast to org.autojs.plugin.python.runtime.api.PythonExecutionResult"
+    }
+  ],
+  "sourceSha256": {
+    "app/src/debug/AndroidManifest.xml": "5c78876cd5f619afe3c85790b6fc51ff44c7e26e294e938f2bbb0d58e0bf9000",
+    "app/src/debug/java/org/autojs/autojs/compat/ParcelCompatibilityProbeService.kt": "7e0aa0ea794b2f3e1c05960312580dcf6a69c81dc9d2935e0af9b5be7963b175",
+    "app/src/androidTest/java/org/autojs/autojs/compat/ParcelCompatibilityDeviceTest.kt": "615ad72d886cd7576a9d8e83efa33fd80bb903d8ff2fb1a78480fa7e1d1e0a45",
+    "app/src/androidTest/java/org/autojs/autojs/compat/ParcelPluginRoundTripDeviceTest.kt": "96fa2a943254b0b1faf3bee83703b42baba7adbcc9912fda70f88070604b83f7",
+    "tools/sdk37/run_parcel_tests.py": "f258f2dc3b6655ed1cb811cacaf04bad556b7f37ac29d47c5d3c804f3e08da00",
+    "tools/sdk37/test_parcel_evidence.py": "346a86d8b67a531d6cf6ab2b230ea267cca599d796d25d0c151c85ee6dd2eaf8"
+  },
+  "knownLimits": [
+    "Emulator only, x86_64 plugin artifacts",
+    "getconf page size 16384, actual kernel page size 4096",
+    "Plugins still target 36 and use their own explicit Parcel override; not P5 target-37 release acceptance",
+    "Tasker and launcher UI end-to-end cases not executed",
+    "Lua APK was re-signed only as a local test fixture",
+    "Initial native/Node/Lua groups used an invalid logcat filter; functional instrumentation results are retained, later target-37 groups have valid timed logs",
+    "Legacy Python R2 diagnostic fails with both compat states; source analysis indicates a session entry incompatible with newer protocol negotiation; no debugger negotiation value captured; not repaired by this change",
+    "IDE remote debugger ended immediately and instrumentation reported Process crashed; no debugger value evidence was obtained"
+  ],
+  "finalApks": [
+    {
+      "path": "build/sdk37-p27/apks/final36/app.apk",
+      "sha256": "03f1b272464cdc79f3c2a8a0341b8f86fe5b2ae76cc3a71c4bd5d3aa7e825f88"
+    },
+    {
+      "path": "build/sdk37-p27/apks/final36/test.apk",
+      "sha256": "16e9d251ca416b14f2963b6925785a34e5044834b6a827432cb6c7ebc4a76078"
+    },
+    {
+      "path": "build/sdk37-p27/apks/verified37/app.apk",
+      "sha256": "f129c1b8e041ac6849675b5279842c72a06822c5d31019f0c2e0e408f3d748da"
+    },
+    {
+      "path": "build/sdk37-p27/apks/verified37/test.apk",
+      "sha256": "b9ca7e20c0e32dc997b61e06c99783721d19637cbc344b63297d621ec03fda34"
+    }
+  ],
+  "cleanup": {
+    "ownedProcesses": {
+      "emulatorQemuPid": 24768,
+      "launcherPid": 22680,
+      "adbServerPid": 42256,
+      "emulatorStopped": true,
+      "isolatedAdbStopped": true,
+      "scope": "owned read-only AVD console 5572 and isolated adb 5049 only"
+    },
+    "compatResetCommands": [
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING org.autojs.autojs6"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for org.autojs.autojs6 to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.opencv"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.opencv to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.imagequant"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.imagequant to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6 to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.mlkit.barcode"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.mlkit.barcode to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.yolo.ncnn"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.yolo.ncnn to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.nodejs"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.nodejs to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.lua.runtime"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.lua.runtime to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.quickjs.runtime"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.quickjs.runtime to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.python.runtime"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.python.runtime to default value.\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "127.0.0.1:5573",
+          "shell",
+          "am compat reset PARCEL_HARDENING io.github.supermonster003.autojs6.plugin.mcp.server"
+        ],
+        "exitCode": 0,
+        "stdout": "Reset change 416031865 for io.github.supermonster003.autojs6.plugin.mcp.server to default value.\n",
+        "stderr": ""
+      }
+    ],
+    "finalParcelDefinition": "ChangeId(416031865; name=PARCEL_HARDENING; enableSinceTargetSdk=37)",
+    "rawReceipt": "build/sdk37-p27/compat-reset-before-shutdown.json",
+    "rawReceiptSha256": "eca89a8d6c1272d761684bc1083462c9d72f90bb3a8f6fd2608d2328e89d8309",
+    "sharedAdb5037Repaired": false,
+    "physicalDevicesModified": false
+  },
+  "buildLogs": [
+    {
+      "path": "build/sdk37-p27/build-final-normal.log",
+      "sha256": "15423096146aec049a4652eaf1b53dad7cf0b94b9e8c6f13b12fdb5d28cf98c9",
+      "result": "BUILD SUCCESSFUL in 40s"
+    },
+    {
+      "path": "build/sdk37-p27/build-verified37.log",
+      "sha256": "af401daeaa879eddaece594db3e7a38702d6d9f43e603746e43f107175b2224d",
+      "result": "BUILD SUCCESSFUL in 29s"
+    },
+    {
+      "path": "build/sdk37-p27/build-final-restored.log",
+      "sha256": "eeecaaf7d4687a5c404a71a764b4b52e459bc45ed18ff45af7992906754edd0c",
+      "result": "BUILD SUCCESSFUL in 31s"
+    }
+  ],
+  "staticChecks": {
+    "releaseMergedManifest": {
+      "path": "app/build/intermediates/merged_manifest/appRelease/processAppReleaseMainManifest/AndroidManifest.xml",
+      "sha256": "32c1821ad1f5bc7db378349a4064f43da9dc10aaae284e009d6224b3b0f71334",
+      "parcelDebugServiceAbsent": true
+    },
+    "physicalChecklistExport": {
+      "source": "docs/dev/android-sdk-37-physical-device-tests.md",
+      "sha256": "e7594ec9c6a314861961f08508038076dc0352d94e3df9d7e685fdba62dab546",
+      "caseCount": 99,
+      "functionalResult": "NOT_RUN"
+    }
+  }
+}
