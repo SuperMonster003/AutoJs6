@@ -1,0 +1,1466 @@
+{
+  "date": "2026-09-13",
+  "scope": "P2.5 ASM same-task launches from a stopped lower Activity",
+  "productionSourceCommit": "1ac2ecb37",
+  "reviewedToolingCommit": "45741a160",
+  "finalLogMatchingReview": "All 12 raw logs were rechecked with the unique fixture event boundary and exact task token matching; all matched the saved decisions.",
+  "device": {
+    "serial": "emulator-5568",
+    "avd": "aj6-ps16k-37-x86_64",
+    "platform": "android-37.0",
+    "imageRevision": 6,
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+    "getconfPageSize": "16384",
+    "kernelPageSize": "KernelPageSize:        4 kB",
+    "adbIdentity": "uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0",
+    "enabledAccessibilityServices": "null",
+    "deviceConfigWindowManager": [
+      "AlwaysOnMagnifier__enable_always_on_magnifier=true",
+      "DefaultRescindBalPrivilegesFromPendingIntentSender__enable_default_rescind_bal_privileges_from_pending_intent_sender=true",
+      "MagnificationJoystick__enable_magnification_joystick=false",
+      "SinglePointerPanning__enable_single_pointer_panning=false",
+      "enable_non_linear_font_scaling=false",
+      "system_gesture_exclusion_log_debounce_millis=1500"
+    ],
+    "globalAsmFlagsModified": false,
+    "readOnly": true,
+    "snapshotsLoadedOrSaved": false
+  },
+  "counts": {
+    "total": 12,
+    "passed": 12,
+    "systemAsmBlocked": 5,
+    "landingCreated": 7
+  },
+  "artifacts": {
+    "host37": {
+      "path": "build/sdk37-p25-recovery/target37-reviewed.apk",
+      "sha256": "17ffb30dca14cb0388591e7175d40f7da010df26ca15a4e30912672e4a4f5de0",
+      "bytes": 47739284,
+      "badging": [
+        "package: name='org.autojs.autojs6' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'37'"
+      ]
+    },
+    "host36": {
+      "path": "build/sdk37-p25-asm/normal-app.apk",
+      "sha256": "9545ac7ef76812e622b73d3338f952c07c5dd9f3233c9f5c41539e8947118a66",
+      "bytes": 47946808,
+      "badging": [
+        "package: name='org.autojs.autojs6' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'36'"
+      ]
+    },
+    "inrt37": {
+      "path": "build/sdk37-p25-asm/inrt-target37.apk",
+      "sha256": "c9244d119f8fbae421e3cfd9cb1982db4c1a8057d3bb6007607c54f924b2f45d",
+      "bytes": 54270331,
+      "badging": [
+        "package: name='org.autojs.autojs6.inrt' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'37'"
+      ]
+    },
+    "inrt29": {
+      "path": "build/sdk37-p25-asm/normal-inrt.apk",
+      "sha256": "55c6c973de673825fba8ccac65c4d43cbf4b3c57e92c8ca24b6bc73f025f06ad",
+      "bytes": 54270331,
+      "badging": [
+        "package: name='org.autojs.autojs6.inrt' versionCode='5280' versionName='6.8.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'29'"
+      ]
+    },
+    "fixtureDefault": {
+      "path": "build/sdk37-p25-asm/fixture-default/bal-fixture.apk",
+      "sha256": "f7ceb40166d4d19eebee4d108f1ae69a91e708cdc65f4f4f88340b9fd0938507",
+      "bytes": 16785,
+      "badging": [
+        "package: name='org.autojs.sdk37.balfixture' versionCode='1' versionName='1.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'37'"
+      ]
+    },
+    "fixtureProtected": {
+      "path": "build/sdk37-p25-asm/fixture-protected/bal-fixture.apk",
+      "sha256": "29d21d61281345b6005487772ea324cd13d6a48a87eee01be459f6a01ae1f2f1",
+      "bytes": 16785,
+      "badging": [
+        "package: name='org.autojs.sdk37.balfixture' versionCode='1' versionName='1.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+        "minSdkVersion:'24'",
+        "targetSdkVersion:'37'"
+      ]
+    }
+  },
+  "builds": [
+    {
+      "path": "build/sdk37-p25-asm/inrt-target37-build.log",
+      "sha256": "881b98019125e94328aa9e6605e9d80c934a9f5f85f0fb392de59443d561fbfc",
+      "tasks": [
+        "assembleInrtDebug (target override 37)"
+      ],
+      "summary": [
+        "Native page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6\\app\\build\\reports\\native-alignment\\InrtDebug.json",
+        "BUILD SUCCESSFUL in 26s"
+      ]
+    },
+    {
+      "path": "build/sdk37-p25-asm/normal-build.log",
+      "sha256": "982dbb208b8b79b6d6965640aa6e02c35c463c463c7735c74bae08f66d61b3f0",
+      "tasks": [
+        "assembleAppDebug",
+        "assembleInrtDebug",
+        "processAppReleaseMainManifest",
+        "processInrtReleaseMainManifest"
+      ],
+      "summary": [
+        "Native page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6\\app\\build\\reports\\native-alignment\\AppDebug.json",
+        "Native page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6\\app\\build\\reports\\native-alignment\\InrtDebug.json",
+        "BUILD SUCCESSFUL in 27s"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "name": "t37-no-manifest-default",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureDefault",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{97811202 u0 org.autojs.sdk37.balfixture/.TargetActivity t20}"
+      ],
+      "record": {
+        "case": "bal_1789287761068248200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287761068248200",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          20
+        ],
+        "result": {
+          "case": "bal_1789287761068248200",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287764777,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 5023,
+          "taskId": 20,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789287767668,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287779671,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287761068248200",
+            "kind": "activity-created",
+            "pid": 5259,
+            "uid": 10251,
+            "time": 1789287766325,
+            "targetSdk": 37,
+            "taskId": 20,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789287761068248200",
+            "uid": 10231,
+            "pid": 5023,
+            "taskId": 20
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-no-manifest-default/activities-before-below.txt",
+          "sha256": "b72628d4b3553ce84e79bf826d3c31f078da9320dedb38cf2e16731d05c673b0"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-no-manifest-default/activities.txt",
+          "sha256": "84c94735145a7e3d4cbff7ce0c8211e28c158ab030c3a63534d4075b67e1812c"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-no-manifest-default/processes.txt",
+          "sha256": "81d807ba3346d3ea0fece22c870e8c226bb2fd145add9ea5040aadca7a6d510f"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-no-manifest-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-no-manifest-default/logcat.txt",
+          "sha256": "3b917a7cd5850e21b527378e5fc04a05fd533eeab84d9c1cf4fbfe12449066d5"
+        }
+      }
+    },
+    {
+      "name": "t37-protected-default",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{207197407 u0 org.autojs.sdk37.balfixture/.TargetActivity t21}"
+      ],
+      "record": {
+        "case": "bal_1789287798369416600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287798369416600",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          21
+        ],
+        "result": {
+          "case": "bal_1789287798369416600",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287801633,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 5680,
+          "taskId": 21,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789287804073,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287816077,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287798369416600",
+            "kind": "activity-created",
+            "pid": 5756,
+            "uid": 10259,
+            "time": 1789287803027,
+            "targetSdk": 37,
+            "taskId": 21,
+            "allowBelow": false
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [
+          "09-13 16:23:36.083   722  1890 E ActivityTaskManager: [ASM] Abort Launching r: ActivityRecord{254389551 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity t-1} as source: ActivityRecord{261661182 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity t21} is in background. New task: false. Top activity: ActivityRecord{207197407 u0 org.autojs.sdk37.balfixture/.TargetActivity t21}. BAL Verdict: BAL_ALLOW_FOREGROUND"
+        ],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-protected-default/activities-before-below.txt",
+          "sha256": "2094fe9bf20eb926fd087d55c1c2e96223315fae4ccf0e83bb13c3ab94ffbfa6"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-protected-default/activities.txt",
+          "sha256": "714db6e3a0c9a70885e033e42238fe6b90928281d0b13cbc1d93e425f1a6dd9a"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-protected-default/processes.txt",
+          "sha256": "0df7d055cf414e4196ae0208d4d0dbfde291f9aaed2e0911558bf7fd2020d407"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-protected-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-protected-default/logcat.txt",
+          "sha256": "e5242744e201b1b61bbf8262fecbcb30103195e687eae29e0af231760bb06392"
+        }
+      }
+    },
+    {
+      "name": "t37-caller-disabled",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "disabled",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=false}; rawOverrides={org.autojs.autojs6=false}; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{255659411 u0 org.autojs.sdk37.balfixture/.TargetActivity t22}"
+      ],
+      "record": {
+        "case": "bal_1789287858690599700",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287858690599700",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          22
+        ],
+        "result": {
+          "case": "bal_1789287858690599700",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287862735,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 6035,
+          "taskId": 22,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789287865556,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287877561,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287858690599700",
+            "kind": "activity-created",
+            "pid": 6090,
+            "uid": 10259,
+            "time": 1789287864253,
+            "targetSdk": 37,
+            "taskId": 22,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789287858690599700",
+            "uid": 10231,
+            "pid": 6035,
+            "taskId": 22
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-disabled/activities-before-below.txt",
+          "sha256": "8d04607dcefc48510c02e07fba93452487f47d4b5ade51a687ffe56deaf9fa77"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-disabled/activities.txt",
+          "sha256": "d7165094c446a841397b27eae38028b8a01fb1266348978daf24fb3dc09335be"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-disabled/processes.txt",
+          "sha256": "c89ffe90d8e59d50001138dfeecd743efc57c9132d7156df4124c35387f7b0b0"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-disabled/compat.txt",
+          "sha256": "07d861c794061f8ab43d445f5ac175dc9e1c9616dae87c7c3317bc4a3f3cb984"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-disabled/logcat.txt",
+          "sha256": "51cf465182d5eaf402441ee34862aed01ea5570249522ef71fbe7dd70082728a"
+        }
+      }
+    },
+    {
+      "name": "t37-caller-enabled",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "enabled",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true}; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{121823148 u0 org.autojs.sdk37.balfixture/.TargetActivity t23}"
+      ],
+      "record": {
+        "case": "bal_1789287885717369600",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287885717369600",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          23
+        ],
+        "result": {
+          "case": "bal_1789287885717369600",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287888618,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 6361,
+          "taskId": 23,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "probeStoppedAt": 1789287892400,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287904408,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287885717369600",
+            "kind": "activity-created",
+            "pid": 6400,
+            "uid": 10259,
+            "time": 1789287890607,
+            "targetSdk": 37,
+            "taskId": 23,
+            "allowBelow": false
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [
+          "09-13 16:25:04.419   722  2110 E ActivityTaskManager: [ASM] Abort Launching r: ActivityRecord{211268279 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity t-1} as source: ActivityRecord{121025164 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity t23} is in background. New task: false. Top activity: ActivityRecord{121823148 u0 org.autojs.sdk37.balfixture/.TargetActivity t23}. BAL Verdict: BAL_ALLOW_FOREGROUND"
+        ],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-enabled/activities-before-below.txt",
+          "sha256": "4750b0340b179efa32b9cdf013f43144f39f7b2e62bc839acadc867b1df4423c"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-enabled/activities.txt",
+          "sha256": "c8930e2e1a7ff092db719589b0e561f0647e9857d8aadf20882d4c9ff44f03c3"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-enabled/processes.txt",
+          "sha256": "bb84f73bdcf406c223a9448b34ed82f9f367787e1026d02b94c15605e2f072bc"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-enabled/compat.txt",
+          "sha256": "c75fb14d3231eec37bb83f2bf17c5134ccd6cb6c7a265d828769024f7a9765dd"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-caller-enabled/logcat.txt",
+          "sha256": "7d7b451ff098b097ecd6cbbb2ce660764a04b470969b0a4c3abac157df498f1b"
+        }
+      }
+    },
+    {
+      "name": "t37-top-disabled",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "disabled",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.sdk37.balfixture=false}; rawOverrides={org.autojs.sdk37.balfixture=false}; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{121752801 u0 org.autojs.sdk37.balfixture/.TargetActivity t24}"
+      ],
+      "record": {
+        "case": "bal_1789287932712371700",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287932712371700",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          24
+        ],
+        "result": {
+          "case": "bal_1789287932712371700",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287938358,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 6708,
+          "taskId": 24,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "probeStoppedAt": 1789287942331,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287954343,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287932712371700",
+            "kind": "activity-created",
+            "pid": 6764,
+            "uid": 10259,
+            "time": 1789287940402,
+            "targetSdk": 37,
+            "taskId": 24,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789287932712371700",
+            "uid": 10231,
+            "pid": 6708,
+            "taskId": 24
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-top-disabled/activities-before-below.txt",
+          "sha256": "a45ab28b562fee2f838e90c7cbf17d7377d65e4c7c6cc77a93d82a74cc1d5225"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-top-disabled/activities.txt",
+          "sha256": "7e5d3688a6055ae44930f454871b88fd564158effec7aad6bb43eb6c13fcc348"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-top-disabled/processes.txt",
+          "sha256": "59cc69090e4b042b113ce3a832660540785fc377352658aa47137bf7b398ca0f"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-top-disabled/compat.txt",
+          "sha256": "0bdacac04b2eeccccd122ab8c6baa099a69878e189ba32a7ae820a7cf164a0cc"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-top-disabled/logcat.txt",
+          "sha256": "66fb34e7bd23b05db975282c00bcd6b986e2c4f3ab89d5a4a8e7d00121a1b208"
+        }
+      }
+    },
+    {
+      "name": "t37-activity-exception",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{204974343 u0 org.autojs.sdk37.balfixture/.TargetActivity t25}"
+      ],
+      "record": {
+        "case": "bal_1789287962388519900",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287962388519900",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "true"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          25
+        ],
+        "result": {
+          "case": "bal_1789287962388519900",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287967243,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 7068,
+          "taskId": 25,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789287970142,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789287982160,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287962388519900",
+            "kind": "activity-created",
+            "pid": 7140,
+            "uid": 10259,
+            "time": 1789287968775,
+            "targetSdk": 37,
+            "taskId": 25,
+            "allowBelow": true
+          },
+          "landing": {
+            "case": "bal_1789287962388519900",
+            "uid": 10231,
+            "pid": 7068,
+            "taskId": 25
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-exception/activities-before-below.txt",
+          "sha256": "5379840de6fd414c3db832cdf96c316dabf10600e9e7935d2f1b1620f2129856"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-exception/activities.txt",
+          "sha256": "4549db99d221ceeb97365070da318bc595074e53a1263686df1399d13f7ddc56"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-exception/processes.txt",
+          "sha256": "8d3e0201a0ee26772a6bc7c1083cf8b034d0c915e13276fb82f8ae5a6cb32019"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-exception/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-exception/logcat.txt",
+          "sha256": "c87f202ffc340a0d91bd7a55d5ce6be694b17641ba0366a035dee94380f22936"
+        }
+      }
+    },
+    {
+      "name": "t37-activity-default",
+      "callerArtifact": "host37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{141179560 u0 org.autojs.sdk37.balfixture/.TargetActivity t26}"
+      ],
+      "record": {
+        "case": "bal_1789287990548639300",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789287990548639300",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          26
+        ],
+        "result": {
+          "case": "bal_1789287990548639300",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789287997775,
+          "targetSdk": 37,
+          "uid": 10231,
+          "pid": 7427,
+          "taskId": 26,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": false,
+          "probeStoppedAt": 1789288002695,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288014709,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789287990548639300",
+            "kind": "activity-created",
+            "pid": 7471,
+            "uid": 10259,
+            "time": 1789288000124,
+            "targetSdk": 37,
+            "taskId": 26,
+            "allowBelow": null
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [
+          "09-13 16:26:54.725   722   809 E ActivityTaskManager: [ASM] Abort Launching r: ActivityRecord{148452894 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity t-1} as source: ActivityRecord{59073323 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity t26} is in background. New task: false. Top activity: ActivityRecord{141179560 u0 org.autojs.sdk37.balfixture/.TargetActivity t26}. BAL Verdict: BAL_ALLOW_FOREGROUND"
+        ],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-default/activities-before-below.txt",
+          "sha256": "61b1c65a2e99a37e21840c9a8bd8e56c27ab77096cd9c050f081b69cbdb1927e"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-default/activities.txt",
+          "sha256": "2eb26e244f8e178301e52f76890e54425b4eda59c28916aa0f919c626223880d"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-default/processes.txt",
+          "sha256": "5651a32594e4731ffad7e560f1220ece32fcde7844ce4c0932dd8cd95d7d8a32"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t37-activity-default/logcat.txt",
+          "sha256": "8e07c2fe0469826bd58fb038a6c4d236b604b8ae5754793555bcea7e338091d5"
+        }
+      }
+    },
+    {
+      "name": "t36-protected-default",
+      "callerArtifact": "host36",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{5194329 u0 org.autojs.sdk37.balfixture/.TargetActivity t27}"
+      ],
+      "record": {
+        "case": "bal_1789288047541660500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789288047541660500",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          27
+        ],
+        "result": {
+          "case": "bal_1789288047541660500",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789288050965,
+          "targetSdk": 36,
+          "uid": 10231,
+          "pid": 7803,
+          "taskId": 27,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789288052534,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288064537,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789288047541660500",
+            "kind": "activity-created",
+            "pid": 7844,
+            "uid": 10259,
+            "time": 1789288052107,
+            "targetSdk": 37,
+            "taskId": 27,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789288047541660500",
+            "uid": 10231,
+            "pid": 7803,
+            "taskId": 27
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t36-protected-default/activities-before-below.txt",
+          "sha256": "11a79c55d6d867ed7c423692746edbf39c318798b57e02c78420d170e2898bca"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t36-protected-default/activities.txt",
+          "sha256": "e7a117680f58a7966b8f1edb3f9c4e62770bb1b6bf802a7cac2ee4842e632b7b"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t36-protected-default/processes.txt",
+          "sha256": "0a2908634c16d9365ff9e10e715ff20ab9441d128c14efa3ebf736c85f9304ac"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t36-protected-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t36-protected-default/logcat.txt",
+          "sha256": "d41c8482adbd5d5355a0fe01a32da9ebc0be007593ca104dcd41e56938bcd960"
+        }
+      }
+    },
+    {
+      "name": "t36-caller-enabled",
+      "callerArtifact": "host36",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "enabled",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6=true}; rawOverrides={org.autojs.autojs6=true}; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{263991818 u0 org.autojs.sdk37.balfixture/.TargetActivity t28}"
+      ],
+      "record": {
+        "case": "bal_1789288071802116200",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789288071802116200",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          28
+        ],
+        "result": {
+          "case": "bal_1789288071802116200",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789288073011,
+          "targetSdk": 36,
+          "uid": 10231,
+          "pid": 8123,
+          "taskId": 28,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789288074426,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288086430,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789288071802116200",
+            "kind": "activity-created",
+            "pid": 8162,
+            "uid": 10259,
+            "time": 1789288074076,
+            "targetSdk": 37,
+            "taskId": 28,
+            "allowBelow": false
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [
+          "09-13 16:28:06.435   722  1500 E ActivityTaskManager: [ASM] Abort Launching r: ActivityRecord{29591880 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity t-1} as source: ActivityRecord{217000171 u0 org.autojs.autojs6/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity t28} is in background. New task: false. Top activity: ActivityRecord{263991818 u0 org.autojs.sdk37.balfixture/.TargetActivity t28}. BAL Verdict: BAL_ALLOW_FOREGROUND"
+        ],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/t36-caller-enabled/activities-before-below.txt",
+          "sha256": "13b8fc654df8c8f4cbb31d6d6695273c9731376b5692c61f1439c60d89fff419"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/t36-caller-enabled/activities.txt",
+          "sha256": "cc65aee6711ddff1d2807277e1787152a72091cf451535104ee08867ac664e5d"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/t36-caller-enabled/processes.txt",
+          "sha256": "3c6c5cdadf4f0de56c4141e63773829fb29b3079494fb8f19a8dc58b831db3cc"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/t36-caller-enabled/compat.txt",
+          "sha256": "c75fb14d3231eec37bb83f2bf17c5134ccd6cb6c7a265d828769024f7a9765dd"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/t36-caller-enabled/logcat.txt",
+          "sha256": "da4a5ad1271bf3892b9e497c4b77fd3b231ad34b1e85fac1c866f1bf74fee1fb"
+        }
+      }
+    },
+    {
+      "name": "inrt29-protected-default",
+      "callerArtifact": "inrt29",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{114571156 u0 org.autojs.sdk37.balfixture/.TargetActivity t29}"
+      ],
+      "record": {
+        "case": "bal_1789288111205898800",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6.inrt/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789288111205898800",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          29
+        ],
+        "result": {
+          "case": "bal_1789288111205898800",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789288112722,
+          "targetSdk": 29,
+          "uid": 10260,
+          "pid": 8506,
+          "taskId": 29,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789288114272,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288126276,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789288111205898800",
+            "kind": "activity-created",
+            "pid": 8631,
+            "uid": 10259,
+            "time": 1789288113929,
+            "targetSdk": 37,
+            "taskId": 29,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789288111205898800",
+            "uid": 10260,
+            "pid": 8506,
+            "taskId": 29
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/inrt29-protected-default/activities-before-below.txt",
+          "sha256": "34640a773048c82c49f1b800ba7de102a05d387bcaf3e172aec2c40f08c9432c"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/inrt29-protected-default/activities.txt",
+          "sha256": "360bff1175c2a0c5be2264807c4dba75c6445e5b54c14b1b28fff273ef65179d"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/inrt29-protected-default/processes.txt",
+          "sha256": "a9786b1f3ae6672bd8be8d73c93c81ef2b2a7ea4046204eca7749ff55fee1ff8"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/inrt29-protected-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/inrt29-protected-default/logcat.txt",
+          "sha256": "2c6b0653f27207e7af20cab7dedd87e27604dfa39b313b05cd0efb904d1ed274"
+        }
+      }
+    },
+    {
+      "name": "inrt37-protected-default",
+      "callerArtifact": "inrt37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "default",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{45917026 u0 org.autojs.sdk37.balfixture/.TargetActivity t30}"
+      ],
+      "record": {
+        "case": "bal_1789288134841600500",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6.inrt/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789288134841600500",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "no-landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          30
+        ],
+        "result": {
+          "case": "bal_1789288134841600500",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789288136239,
+          "targetSdk": 37,
+          "uid": 10260,
+          "pid": 8994,
+          "taskId": 30,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789288138072,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288150076,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789288134841600500",
+            "kind": "activity-created",
+            "pid": 9033,
+            "uid": 10259,
+            "time": 1789288137480,
+            "targetSdk": 37,
+            "taskId": 30,
+            "allowBelow": false
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [
+          "09-13 16:29:10.080   722  1262 E ActivityTaskManager: [ASM] Abort Launching r: ActivityRecord{86419110 u0 org.autojs.autojs6.inrt/org.autojs.autojs.compat.ActivityLaunchProbeLandingActivity t-1} as source: ActivityRecord{134789847 u0 org.autojs.autojs6.inrt/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity t30} is in background. New task: false. Top activity: ActivityRecord{45917026 u0 org.autojs.sdk37.balfixture/.TargetActivity t30}. BAL Verdict: BAL_ALLOW_FOREGROUND"
+        ],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-protected-default/activities-before-below.txt",
+          "sha256": "93767d511878eb41bf3149f71cd615b15940a9ee907f0d9951686c27ca894bc8"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-protected-default/activities.txt",
+          "sha256": "7b2cc5d992196254cfcbc71cb2f48dae37f472707921f8ecd6843a43711186bb"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-protected-default/processes.txt",
+          "sha256": "c8f1f2ef8b60cf6b8666ffffaf7c65895236cdc607ac8fe1487fec5744a10174"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-protected-default/compat.txt",
+          "sha256": "1a22125ee8ad968c4cfbc73c5daf4038bae616596f418b57666fc5030cf174ce"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-protected-default/logcat.txt",
+          "sha256": "ea14e2bee4425dfce5b795180db0d6ac361b1fbaa5fb0c8c2dfad920e527ee57"
+        }
+      }
+    },
+    {
+      "name": "inrt37-caller-disabled",
+      "callerArtifact": "inrt37",
+      "fixtureArtifact": "fixtureProtected",
+      "callerAsmOverride": "disabled",
+      "fixtureAsmOverride": "default",
+      "compatChange": [
+        "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; packageOverrides={org.autojs.autojs6.inrt=false}; rawOverrides={org.autojs.autojs6.inrt=false}; overridable)"
+      ],
+      "resumedBeforeAttempt": [
+        "topResumedActivity=ActivityRecord{229953563 u0 org.autojs.sdk37.balfixture/.TargetActivity t31}"
+      ],
+      "record": {
+        "case": "bal_1789288157790961100",
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5568",
+          "shell",
+          "am",
+          "start",
+          "-n",
+          "org.autojs.autojs6.inrt/org.autojs.autojs.compat.ActivityLaunchCompatibilityProbeActivity",
+          "-f",
+          "0x18000000",
+          "--es",
+          "case",
+          "bal_1789288157790961100",
+          "--es",
+          "route",
+          "asm",
+          "--es",
+          "senderMode",
+          "visible",
+          "--ez",
+          "background",
+          "false",
+          "--ez",
+          "allowBelow",
+          "false"
+        ],
+        "expected": "landing",
+        "fixtureForceStopped": true,
+        "reuseProcess": false,
+        "removedRootTasks": [],
+        "taskBeforeBelow": [
+          31
+        ],
+        "result": {
+          "case": "bal_1789288157790961100",
+          "route": "asm",
+          "sdk": 37,
+          "startedAt": 1789288158839,
+          "targetSdk": 37,
+          "uid": 10260,
+          "pid": 9291,
+          "taskId": 31,
+          "overlayPermission": false,
+          "background": false,
+          "senderMode": "visible",
+          "sendImportance": 100,
+          "windowFocusAtSend": true,
+          "probeStoppedAt": 1789288160236,
+          "belowImportance": 400,
+          "belowAttemptedAt": 1789288172240,
+          "belowAttempted": true,
+          "fixtureEvent": {
+            "case": "bal_1789288157790961100",
+            "kind": "activity-created",
+            "pid": 9331,
+            "uid": 10259,
+            "time": 1789288159954,
+            "targetSdk": 37,
+            "taskId": 31,
+            "allowBelow": false
+          },
+          "landing": {
+            "case": "bal_1789288157790961100",
+            "uid": 10260,
+            "pid": 9291,
+            "taskId": 31
+          },
+          "completed": true
+        },
+        "asmScenarioValid": true,
+        "asmBlockEvidence": [],
+        "assertionPassed": true,
+        "errors": []
+      },
+      "snapshots": {
+        "activities-before-below.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-caller-disabled/activities-before-below.txt",
+          "sha256": "b6ad24d03b88306187297018864d01d98ac84b7dfa6c07d54a3fec58ede43500"
+        },
+        "activities.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-caller-disabled/activities.txt",
+          "sha256": "efe9ba6e4ee98bea9468979c2dd9eeb149bfe69e51cb360ad92a487dd8e06763"
+        },
+        "processes.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-caller-disabled/processes.txt",
+          "sha256": "8eef739aeab87e96e414d45cedbe8c9615db447793c564632749dcac0dec66d6"
+        },
+        "compat.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-caller-disabled/compat.txt",
+          "sha256": "926f9ce1471d05f63945ec52d4539ef4bdd5cd9caafbbb46048af743403f8966"
+        },
+        "logcat.txt": {
+          "path": "build/sdk37-p25-asm/inrt37-caller-disabled/logcat.txt",
+          "sha256": "80139652601dcd56677a087505ab53a5c3c67e022d1da9a245ef1f7bcc9602d5"
+        }
+      }
+    }
+  ],
+  "cleanup": {
+    "asmCompatBefore": [
+      "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+    ],
+    "asmCompatAfter": [
+      "ChangeId(230590090; name=ASM_RESTRICTIONS; enableSinceTargetSdk=37; overridable)"
+    ],
+    "deviceConfigUnchanged": true,
+    "installedHostTargetRestored": 36,
+    "installedInrtTargetRestored": 29,
+    "emulatorCloseOutput": "OK: killing emulator, bye bye\n\nOK"
+  },
+  "notes": [
+    "The first two cases preceded the runner refinement adding a fixture package dump and using the unique fixture event as the log boundary. Both retained matching UID/task/lifecycle evidence; the blocked case also contained the probe launch and ASM diagnostic.",
+    "Source is unchanged for the production app and its debug Activity. Fixture Java now records targetSdk, taskId and requested Activity exception.",
+    "This is a specific installed image, not a claim about a final release fingerprint, physical devices, complete user flows or QPR behavior.",
+    "One test APK intentionally omits the application ASM attribute. All other tests use the protected fixture with the attribute false."
+  ]
+}
