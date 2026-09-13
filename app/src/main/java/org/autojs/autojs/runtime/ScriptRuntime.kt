@@ -455,6 +455,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     internal val js_mod_cheerio by lazy { rhinoRequire("cheerio") as ScriptableObject }
     internal val js_mod_dayjs by lazy { rhinoRequire("dayjs") as BaseFunction }
     internal val js_mod_i18n by lazy { rhinoRequire("i18n") as BaseFunction }
+    internal val js_mod_pangu by lazy { rhinoRequire("pangu") as ScriptableObject }
 
     internal val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
     internal val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }

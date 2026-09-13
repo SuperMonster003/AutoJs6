@@ -19,6 +19,7 @@
 * `추가` `mediainfo`에 명시적 버전의 `snapshot`/`capabilities` API와 v1/v2 schema 상수를 추가; Rhino는 기존 `read` 결과를 유지하고 Node.js는 호스트 v1을 기본값으로 유지하며, 플러그인이 기능을 명시적으로 광고한 경우에만 플러그인 v2와 짧은 엔진 정보를 노출
 * `추가` 압축 파일 내부 항목을 클릭하면 실행 환경 파일명 접미사를 유지하여 전용 임시 폴더에 압축 해제한 후 실행하거나 열 수 있음; APK/APKS/XAPK/APKM/APKZ/AAB는 기존 행 버튼을 유지하며 파일 메뉴와 정보 대화상자 메뉴에서 보기 및 압축 해제를 지원
 * `추가` Explorer Action 호스트 파일 정보 capability v1을 통해 신뢰된 읽기 전용 플러그인이 기존 APK 정보 대화상자에 SHA-256으로 결합된 제한형 현지화 요약을 추가할 수 있습니다; 플러그인이 없거나 비활성화되거나 호환되지 않거나 실패하면 기존 필드, 설치/manifest 작업 및 실패 처리는 그대로 유지됩니다
+* `추가` pangu.js 10.1.0 을 내장한 전역 객체 `pangu`, CJK 혼합 텍스트 간격을 처리하는 `spaceText` 와 `hasProperSpacing` 검사 지원, TypeScript 선언 및 문서 동기화
 * `추가` `pinyin` 에 호출 단위 `customDictionary` 발음 재정의를 추가하고 `compare` 와 `compact` 를 완성하며, 명시적 `pinyin` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개
 * `추가` `pinyin4j` 에 capability 협상형 `readings` 전체 발음 행렬을 추가하고 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 및 Gwoyeu Romatzyh 를 지원합니다; 이전 플러그인은 Hanyu 에서만 안전하게 대체되며, 명시적 `pinyin4j` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개합니다
 * `추가` Image Quantization 옵션은 `OPTIONS_API_VERSION>=4`를 통해 `maxPixels`와 `maxMemoryBytes`를 추가하고 기본 16000000 픽셀 및 256 MiB 추가 작업 메모리 예산을 적용합니다; 예산 초과는 리소스 세부 정보가 있는 형식화 예외로 실패하고, 결과는 계산된 최대 메모리를 보고하며, 스크립트 중지는 활성 네이티브 양자화를 취소합니다

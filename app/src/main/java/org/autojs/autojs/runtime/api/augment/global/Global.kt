@@ -128,6 +128,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         "cheerio" to Supplier { scriptRuntime.js_mod_cheerio },
         "dayjs" to Supplier { scriptRuntime.js_mod_dayjs },
         "i18n" to Supplier { scriptRuntime.js_mod_i18n },
+        "pangu" to Supplier { scriptRuntime.js_mod_pangu },
     )
 
     companion object : ArgumentGuards() {

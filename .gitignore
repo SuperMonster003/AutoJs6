@@ -39,6 +39,7 @@ AGENTS.md
 /release/
 /releases/
 /tools/*
+!/tools/pangu/
 !/tools/lua/
 /tools/lua/*
 !/tools/lua/verify-lua-static-roadmap.ps1

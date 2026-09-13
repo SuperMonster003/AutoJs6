@@ -19,6 +19,7 @@
 * `新機能` `mediainfo` に明示的なバージョン付き `snapshot`/`capabilities` API と v1/v2 schema 定数を追加; Rhino は従来の `read` 結果を維持し, Node.js はホスト v1 を既定値とし, プラグインが能力を明示した場合にのみプラグイン v2 と短いエンジン情報を公開
 * `新機能` アーカイブ内のファイルをクリックすると実行環境のファイル名接尾辞を保ったまま専用の一時ディレクトリに展開して実行または開く. APK/APKS/XAPK/APKM/APKZ/AAB は既存の行ボタンを維持し, ファイルメニューと情報ダイアログのメニューから閲覧と展開が可能
 * `新機能` Explorer Action のホストファイル情報 capability v1 により, 信頼済みの読み取り専用プラグインは既存の APK 情報ダイアログへ SHA-256 に結び付いた上限付きローカライズ概要を追加できます; プラグインが未導入, 無効, 非互換, または失敗した場合, 元の項目, インストール/manifest 操作, 失敗処理は変わりません
+* `新機能` 組み込み pangu.js 10.1.0 のグローバルオブジェクト `pangu`, CJK 混在テキストの間隔を整える `spaceText` と `hasProperSpacing` による確認, TypeScript 型宣言とドキュメントを同期
 * `新機能` `pinyin` に呼び出し単位の `customDictionary` 読み上書きを追加し, `compare` と `compact` を完成させ, 明示的な `pinyin` capability を伴う `autojs6:bridge.callAutoJs` から同じ外部プラグイン provider を Node.js に公開
 * `新機能` `pinyin4j` に capability 交渉付きの `readings` 全読み行列を追加し, Hanyu, Tongyong, Wade-Giles, MPS2, Yale, Gwoyeu Romatzyh に対応; 旧プラグインは Hanyu のみ安全にフォールバックし, 明示的な `pinyin4j` capability を伴う `autojs6:bridge.callAutoJs` から同じ外部プラグイン provider を Node.js に公開
 * `新機能` Image Quantization オプションは `OPTIONS_API_VERSION>=4` により `maxPixels` と `maxMemoryBytes` を追加し, 既定で 16000000 ピクセルと 256 MiB の追加作業メモリを上限にします; 予算超過はリソース詳細付きの型付き例外となり, 結果は計上済みピークメモリを返し, スクリプト停止時は実行中のネイティブ量子化をキャンセルします

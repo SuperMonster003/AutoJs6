@@ -20,6 +20,7 @@
 * `新增` `mediainfo` 新增显式版本化的 `snapshot`/`capabilities` API 与 v1/v2 schema 常量; Rhino 保持旧 `read` 结果不变, Node.js 保持宿主 v1 缺省结果, 仅在插件明确宣告支持时透传插件 v2 并公开简短引擎版本
 * `新增` 档案内单文件点击可解压到私有临时目录并执行或打开, 保留运行时文件名后缀; APK/APKS/XAPK/APKM/APKZ/AAB 可通过文件菜单及信息对话框更多菜单查看和解压, 保留原有文件行按钮
 * `新增` Explorer Action 宿主文件信息能力 v1 允许已信任的只读插件在现有 APK 信息对话框中追加有界、经 SHA-256 绑定的本地化摘要; 插件缺失、停用、不兼容或失败时, 原有字段、安装/清单操作与失败处理均保持不变
+* `新增` `pangu` 全局对象, 内置 pangu.js 10.1.0, 支持 `spaceText` 文本混排间距处理与 `hasProperSpacing` 检查, 同步 TypeScript 声明与文档
 * `新增` `pinyin` 新增仅当前调用生效的 `customDictionary` 自定义读音覆盖, 完善 `compare` 与 `compact`, 并通过带显式 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放同一外置插件能力
 * `新增` `pinyin4j` 新增经 capability 协商的 `readings` 全读音矩阵, 支持 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 与 Gwoyeu Romatzyh; 旧插件仅对 Hanyu 安全回退, 同一外置插件能力通过带显式 `pinyin4j` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放
 * `新增` Image Quantization 选项通过 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 与 `maxMemoryBytes`, 默认限制 16000000 像素和 256 MiB 附加工作内存; 超出预算时返回带资源详情的类型化异常, 结果报告计入预算的峰值内存, 停止脚本会取消其活动原生量化

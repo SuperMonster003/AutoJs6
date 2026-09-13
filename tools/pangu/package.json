@@ -1,0 +1,13 @@
+{
+  "name": "autojs6-pangu-assets",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs",
+    "check": "node build.cjs --check"
+  },
+  "devDependencies": {
+    "pangu": "10.1.0",
+    "terser": "5.51.2",
+    "typescript": "6.0.3"
+  }
+}

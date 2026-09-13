@@ -181,6 +181,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` `mediainfo` 新增顯式版本化的 `snapshot`/`capabilities` API 與 v1/v2 schema 常量; Rhino 保持舊 `read` 結果不變, Node.js 保持宿主 v1 預設結果, 僅在插件明確宣告支援時透傳插件 v2 並公開簡短引擎版本
 * `新增` 檔案內單一檔案可點選解壓至私有暫存目錄並執行或開啟, 保留執行環境檔名後綴; APK/APKS/XAPK/APKM/APKZ/AAB 可透過檔案選單及資訊對話框更多選單查看和解壓, 保留原有檔案列按鈕
 * `新增` Explorer Action 宿主檔案資訊能力 v1 允許已信任的唯讀插件在現有 APK 資訊對話框中附加有界、經 SHA-256 綁定的本地化摘要; 插件缺失、停用、不相容或失敗時, 原有欄位、安裝/清單操作與失敗處理均保持不變
+* `新增` `pangu` 全域物件, 內置 pangu.js 10.1.0, 支援 `spaceText` 文字混排間距處理與 `hasProperSpacing` 檢查, 同步 TypeScript 宣告與文件
 * `新增` `pinyin` 新增僅當前調用生效的 `customDictionary` 自訂讀音覆蓋, 完善 `compare` 與 `compact`, 並透過帶明確 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 開放同一外置外掛能力
 * `新增` `pinyin4j` 新增經 capability 協商的 `readings` 全讀音矩陣, 支援 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 與 Gwoyeu Romatzyh; 舊插件僅對 Hanyu 安全回退, 同一外置外掛能力透過帶明確 `pinyin4j` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 開放
 * `新增` Image Quantization 選項透過 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 與 `maxMemoryBytes`, 預設限制 16000000 像素和 256 MiB 額外工作記憶體; 超出預算時傳回帶資源詳情的類型化異常, 結果報告計入預算的峰值記憶體, 停止腳本會取消其活動原生量化
