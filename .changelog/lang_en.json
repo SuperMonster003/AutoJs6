@@ -183,6 +183,7 @@
         "MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error."
       ],
       "fix": [
+        "Binary reads of built-in samples through the host bridge use the existing Okio base64 encoder on Android 7.0 / 7.1, avoiding an API 26-only Java method and supporting MCP sample resources",
         "MCP file operations and Shell support Android 24 / 25 without newer Java filesystem or process methods; recursive deletion unlinks symbolic links without deleting their targets",
         "The CI editor plugin gate required legacy contract version 1 and rejected hosts supporting newer compatible contract versions",
         "A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app",

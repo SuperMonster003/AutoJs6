@@ -324,6 +324,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 加载 OpenCV 与 Image Quantization 插件前检查原生库 ELF 对齐, 页大小不兼容时提供明确错误
 * `新增` 插件中心读取官方索引与已安装 manifest 的原生页对齐信息, 在 16 KB 设备安装或启用不兼容版本前提示
 * `新增` MCP 截图回退: image.captureScreen(options) 接受无障碍截图的裁剪, 缩放, 格式和质量参数, 返回经文件描述符传输的编码图片一次性负载; captureScreen() 保留图片句柄返回方式, MediaProjection 授权缺失或撤销时返回权限错误.
+* `修复` 宿主 bridge 的内置示例二进制读取在 Android 7.0 / 7.1 上使用已有 Okio base64 编码器, 避免调用仅 API 26 起可用的 Java 方法, 支持 MCP 示例资源
 * `修复` MCP 文件操作与 Shell 在 Android 24 / 25 上避免调用新版 Java 文件系统和进程方法; 递归删除只移除符号链接而不删除其目标
 * `修复` CI 编辑器插件检查固定要求旧协议版本 1, 导致支持新版兼容协议的宿主无法通过检查的问题
 * `修复` 在同一个打包应用中依次使用 Paddle OCR 和 Rapid OCR 时可能崩溃的问题

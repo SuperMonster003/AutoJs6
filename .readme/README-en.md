@@ -348,6 +348,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Checks native ELF alignment before loading OpenCV and Image Quantization plugins, with a clear error for incompatible device page sizes
 * `Feature` Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices
 * `Feature` MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error.
+* `Fix` Binary reads of built-in samples through the host bridge use the existing Okio base64 encoder on Android 7.0 / 7.1, avoiding an API 26-only Java method and supporting MCP sample resources
 * `Fix` MCP file operations and Shell support Android 24 / 25 without newer Java filesystem or process methods; recursive deletion unlinks symbolic links without deleting their targets
 * `Fix` The CI editor plugin gate required legacy contract version 1 and rejected hosts supporting newer compatible contract versions
 * `Fix` A crash when Paddle OCR and Rapid OCR are used sequentially in the same packaged app

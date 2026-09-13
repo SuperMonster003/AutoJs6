@@ -322,6 +322,15 @@ inline. Unclaimed one-shot files are swept from the cache after ten minutes.
 
 ## R0 Scope And Non-Goals
 
+P3.5 resource consumers use the existing files.read, app.listSamples,
+app.readSample, device.info, and console.tail methods. The plugin owns URI
+parsing, pairing, group checks, pagination, and prompt text. Sample binary
+encoding uses the existing Okio base64 codec on API 24 and later. Large JSON
+sample results use the P3.4 read-only descriptor path. No AIDL or permission
+grant changes are needed. Text / binary resource data remains bounded to
+1 MiB and carries truncation metadata. Offline-Docs resources remain optional
+and are not exposed by this phase.
+
 - The `dual` protocol mode (stateless MCP model of the 2026-07-28 specification)
   is reserved until the Kotlin SDK supports it (roadmap D9); the host rejects it.
 - Pairing (token, first-connection confirmation) and tool toggles are plugin-side

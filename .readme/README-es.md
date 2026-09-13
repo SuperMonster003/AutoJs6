@@ -348,6 +348,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Comprobacion de la alineacion ELF antes de cargar complementos OpenCV e Image Quantization, con un error claro si el tamano de pagina no es compatible
 * `Nuevo` El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB
 * `Nuevo` Alternativa de captura MCP: image.captureScreen(options) acepta las opciones de recorte, escala, formato y calidad de las capturas de accesibilidad y devuelve una imagen codificada de un solo uso mediante descriptor de archivo. captureScreen() mantiene el identificador de imagen; la autorización MediaProjection ausente o revocada devuelve un error de permisos.
+* `Corrección` La lectura binaria de ejemplos integrados mediante el bridge usa el codificador base64 Okio existente en Android 7.0 / 7.1, evitando un método Java exclusivo de API 26 y permitiendo los recursos MCP de ejemplos
 * `Corrección` Las operaciones de archivos MCP y Shell funcionan en Android 24 / 25 sin métodos Java recientes; el borrado recursivo elimina enlaces simbólicos sin borrar sus destinos
 * `Corrección` La comprobación CI del complemento de editor exigía la versión 1 del contrato y rechazaba hosts compatibles con versiones más recientes
 * `Corrección` Un cierre inesperado al usar Paddle OCR y Rapid OCR consecutivamente en la misma aplicación empaquetada

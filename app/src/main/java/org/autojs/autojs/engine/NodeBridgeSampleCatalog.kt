@@ -2,7 +2,7 @@ package org.autojs.autojs.engine
 
 import java.io.IOException
 import java.io.InputStream
-import java.util.Base64
+import okio.ByteString.Companion.toByteString
 
 /**
  * Read-only catalog of the host's built-in sample scripts (assets `sample/`) behind
@@ -64,7 +64,7 @@ class NodeBridgeSampleCatalog(
             throw NodeBridgeFileScopeException(NodeBridgeFileScope.Kind.IO, "unable to read sample $path: ${error.message}")
         }
         val content = when (codec) {
-            NodeBridgeFileScope.ENCODING_BASE64 -> Base64.getEncoder().encodeToString(bytes)
+            NodeBridgeFileScope.ENCODING_BASE64 -> bytes.toByteString().base64()
             else -> NodeBridgeFileScope.decodeUtf8(bytes, allowCutTail = truncated)
         }
         return ReadResult(relative, content, codec, bytes.size, truncated)

@@ -348,6 +348,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Vérification de l'alignement ELF avant le chargement des plugins OpenCV et Image Quantization, avec une erreur claire si la taille des pages est incompatible
 * `Fonctionnalité` Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB
 * `Fonctionnalité` Repli de capture MCP: image.captureScreen(options) accepte les options de recadrage, taille, format et qualité de la capture d'accessibilité et renvoie une image encodée à usage unique par descripteur de fichier. captureScreen() conserve son handle d'image; une autorisation MediaProjection absente ou révoquée produit une erreur de permission.
+* `Correction` La lecture binaire des exemples intégrés par le bridge utilise l'encodeur base64 Okio existant sous Android 7.0 / 7.1, sans appeler une méthode Java réservée à l'API 26, pour les ressources MCP des exemples
 * `Correction` Les fichiers MCP et Shell fonctionnent sur Android 24 / 25 sans méthodes Java récentes; la suppression récursive retire les liens symboliques en préservant leurs cibles
 * `Correction` Le contrôle CI du plugin éditeur exigeait la version 1 du contrat et rejetait les hôtes prenant en charge des versions compatibles plus récentes
 * `Correction` Un plantage lors de l'utilisation successive de Paddle OCR et Rapid OCR dans la même application empaquetée
