@@ -2,6 +2,18 @@
 
     <application>
         <activity
+            android:name="org.autojs.autojs.compat.AudioCompatibilityProbeActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <receiver
+            android:name="org.autojs.autojs.compat.AudioCompatibilityProbeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <activity
             android:name="org.autojs.autojs.engine.NodeAccessibilitySmokeActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />

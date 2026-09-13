@@ -1,0 +1,810 @@
+{
+  "recordedOn": "2026-09-13",
+  "baselineCommit": "8f2c26afd",
+  "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+  "package": "org.autojs.autojs6",
+  "rawEvidenceLocation": "build/sdk37-p22 (ignored)",
+  "note": "Baseline APKs predate final probe hardening (DUMP permission, private receiver, boot TTS persistence and independent volume readback). Production audio code was unchanged. Track counters and TTS callbacks do not prove audible output. throw37-background did not enable the override and is excluded from diagnostic-mode acceptance.",
+  "apks": {
+    "36": {
+      "file": "build/sdk37-p22/baseline36/autojs6-v6.8.0-x86_64.apk",
+      "sha256": "c76e78b0117f056f690a6b31fed4bc836af7e06cae806867a2df8a0c4eeb45b7",
+      "bytes": 46618533,
+      "target": "targetSdkVersion:'36'"
+    },
+    "37": {
+      "file": "build/sdk37-p22/baseline37/autojs6-v6.8.0-x86_64.apk",
+      "sha256": "cb549ea742d96a512b16198e1ebc706e3d9e23ec1bb4c17de1486e8c4d0f2693",
+      "bytes": 46631047,
+      "target": "targetSdkVersion:'37'"
+    }
+  },
+  "cases": [
+    {
+      "case": "normal36-visible-retry",
+      "startedAt": "2026-09-13T04:33:32.851175+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "visible",
+        "sdk": 37,
+        "target": 36,
+        "uid": 10340,
+        "pid": 6465,
+        "importance": 100,
+        "foregroundService": false,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 5,
+        "volumeRequested": 4,
+        "volumeAfter": 4,
+        "volumeCall": 4,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:33:53:572 new player piid:279 uid/pid:10340/6465 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:297"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=PROC_STATE_TOP",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED"
+      ],
+      "rawFileSha256": {
+        "result.json": "547008dcc9422f9e2794483c2c0bbf9ab97013622ab1f6a2354fc0e170d42bf6",
+        "audio-before.txt": "5388dedde5e6cc081ccf671b4dfc6d917cc02eb8db51664e02c7cb5b24a54073",
+        "audio-after.txt": "557b4604a6fa44fece9736ef1bb29459402f298698da007fcd339fde7ceef203",
+        "services.txt": "1d65d98a8544626f8655d991ea5df46075d658cf53889c3e52416e43677b9c24",
+        "logcat.txt": "88d5b6a78a9bcdda1a53da16492881bdcfde307c770b6f5a7ff41f283337fd72"
+      }
+    },
+    {
+      "case": "normal36-visible-service-retry",
+      "startedAt": "2026-09-13T04:39:31.675267+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "visible-service",
+        "sdk": 37,
+        "target": 36,
+        "uid": 10340,
+        "pid": 7507,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:40:09:151 new player piid:295 uid/pid:10340/7507 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:313"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=PROC_STATE_TOP",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=PROC_STATE_TOP",
+        "getFgsAllowWiu_forCapabilities=PROC_STATE_TOP",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)",
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=PROC_STATE_TOP",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED",
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=PROC_STATE_TOP",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED"
+      ],
+      "rawFileSha256": {
+        "result.json": "66a251a8b555b847c2397ed998e70dd4f9dad18ec2668fba112386dc2765c1a4",
+        "audio-before.txt": "89b8e6067dac80f06419cee24569e73c56857b1ae96c5f538d831ec0ceec8d4d",
+        "audio-after.txt": "67e0e33fcdee1932d08937d547742dfcb3944f99597c0ccb081aec23ca533558",
+        "services.txt": "ffbc8be54223b3c28f6d2716288376036afdc8ad08c722ac68de8b0ce94d61a6",
+        "logcat.txt": "304dfecb6d798526a0e3b5c2a526610b19293340af30e1eebbe2683c880dc637"
+      }
+    },
+    {
+      "case": "normal36-alarm-service",
+      "startedAt": "2026-09-13T04:41:13.531220+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "alarm-service",
+        "sdk": 37,
+        "target": 36,
+        "uid": 10340,
+        "pid": 7799,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:41:49:656 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4",
+        "09-13 12:41:50:077 AudioHardening focus request for req 3 would be ignored for org.autojs.autojs6 (10340), android.media.AudioManager@74fac7dorg.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@928b772, level: full usage: 1 exemption: 6",
+        "09-13 12:41:50:311 AudioHardening background playback would be muted for org.autojs.autojs6 (10340), level: full, reason: 6, usage: USAGE_MEDIA",
+        "09-13 12:41:52:324 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:41:50:192 new player piid:303 uid/pid:10340/7799 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:321"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "3f5b604988840666dcb84a957e508451aeb6de28324fe94041cf8e2b12915631",
+        "audio-before.txt": "55e332ee7e7b42c1db530b2d5e86f102d6687a00b7a7de8de5333922ff8595a5",
+        "audio-after.txt": "23334f0f23995b9935cc4d8bb241f87466c977b57494aae138fb836b0e61dc9c",
+        "services.txt": "ee5d91ec09b2244ddedef1f40d1ceaed63160202c8604a65efe3ab6938c6ed1c",
+        "logcat.txt": "6891ce49319600ec5857d25cea730a794f32ecfd846a225652e55ad37d567aaa"
+      }
+    },
+    {
+      "case": "normal36-background",
+      "startedAt": "2026-09-13T04:41:59.988642+00:00",
+      "initialExpectation": "blocked",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "background",
+        "sdk": 37,
+        "target": 36,
+        "uid": 10340,
+        "pid": 8073,
+        "importance": 400,
+        "foregroundService": false,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 4,
+        "volumeCall": 4,
+        "focus": 0,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:42:24:184 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4",
+        "09-13 12:42:24:585 AudioHardening focus request for req 3 ignored for org.autojs.autojs6 (10340), android.media.AudioManager@e521609org.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@fa0500e, level: partial usage: 1 exemption: 6",
+        "09-13 12:42:24:754 AudioHardening background playback muted for org.autojs.autojs6 (10340), level: partial, reason: 6, usage: USAGE_MEDIA",
+        "09-13 12:42:26:302 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:42:24:703 new player piid:311 uid/pid:10340/8073 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:329"
+      ],
+      "currentServiceState": [],
+      "rawFileSha256": {
+        "result.json": "234e66ec7077407f5fdfae03a61b51bb2f5dab153cef62917480993235894975",
+        "audio-before.txt": "8d711fcfccf5978f5785784d40e3d150d0104b7f00d6385825fe8db8f14c888f",
+        "audio-after.txt": "51090825d2d039bbbc08eb2ab039026d6d8c514cc3086a6b90024caa7086bc9a",
+        "services.txt": "4af479da59f2d20c9308f0334db536488d957a3aae6bbb0ba0ea149629681268",
+        "logcat.txt": "cf6147d8f285404ea6752877ec4e0c778fbff24aebd8f073151a5f1cc19482ec"
+      }
+    },
+    {
+      "case": "normal36-alarm-stream",
+      "startedAt": "2026-09-13T04:42:31.931933+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "alarm-stream",
+        "sdk": 37,
+        "target": 36,
+        "uid": 10340,
+        "pid": 8365,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 4,
+        "exactAlarm": true,
+        "volumeBefore": 6,
+        "volumeRequested": 5,
+        "volumeAfter": 5,
+        "volumeCall": 5,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:43:06:567 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4",
+        "09-13 12:43:06:957 AudioHardening focus request for req 3 would be ignored for org.autojs.autojs6 (10340), android.media.AudioManager@74fac7dorg.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@928b772, level: full usage: 4 exemption: 4",
+        "09-13 12:43:07:270 AudioHardening background playback would be muted for org.autojs.autojs6 (10340), level: full, reason: 4, usage: USAGE_ALARM",
+        "09-13 12:43:09:079 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:43:07:192 new player piid:319 uid/pid:10340/8365 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_ALARM content=CONTENT_TYPE_MUSIC flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null session:337"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=36",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "c33203bdc0942187a5b96e8c1dcebe484a05c08b51d9b4f9dcd72cced1f9817d",
+        "audio-before.txt": "6aec75f3a09c81d0f76c2789fcd4fb34939d8bd89a4edf9bca03a4e0e66fc491",
+        "audio-after.txt": "238ac0f3eff35df82b7b86b20d97f3391a3c98f9455a531e46f5de9469215fb7",
+        "services.txt": "1719b47eeeb872d1d655c71a0516e7eb71b939763fadccfce25226f8b6fa8737",
+        "logcat.txt": "b18c7e980f3aa1ff34c84c5ab81fe9ad610c2039ea336ed1c8d96bc1815ade37"
+      }
+    },
+    {
+      "case": "normal37-visible",
+      "startedAt": "2026-09-13T04:44:00.461807+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "visible",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 8707,
+        "importance": 100,
+        "foregroundService": false,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:44:14:497 new player piid:327 uid/pid:10340/8707 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:345"
+      ],
+      "currentServiceState": [],
+      "rawFileSha256": {
+        "result.json": "d6aa9c7bc83fca5a3412ddb1d3c328e150a52ff3eed5eb9a08b94299a1a0acc9",
+        "audio-before.txt": "19cee96fcf385f9e1cdc6981a7360a161de0ea08493a86d11b711985471fa842",
+        "audio-after.txt": "56727331adc4a08c3fa766afa1f37e4cf244f3de82ef4e515a6d7e5e02f3b551",
+        "services.txt": "4af479da59f2d20c9308f0334db536488d957a3aae6bbb0ba0ea149629681268",
+        "logcat.txt": "cc7008e2252044c1d95b6ef06e9be733398a9d0af7602238b7275efdeeb2dec6"
+      }
+    },
+    {
+      "case": "normal37-visible-service",
+      "startedAt": "2026-09-13T04:44:20.654884+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "visible-service",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 8963,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:44:46:944 new player piid:335 uid/pid:10340/8963 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:353"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=37",
+        "mAllowWiu_noBinding=PROC_STATE_TOP",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=PROC_STATE_TOP",
+        "getFgsAllowWiu_forCapabilities=PROC_STATE_TOP",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "aefec863fe69bace17ef9631913921f8e568a19fb826f5c6b33f0dd2bd5b9365",
+        "audio-before.txt": "174ef8961495f90a27f3b2fdeb2189555e944417494f730b9414a9e902006a17",
+        "audio-after.txt": "97d3c59d8441a2b6bd13c0a47a0ca7a97d67a301acab24c8dae93ff288c6dea0",
+        "services.txt": "77274895eae02019695b9b22fdf49a48e6614ec66025ada5f1f791c8f4cb71d1",
+        "logcat.txt": "f294023ca2a5edb4180ef948f078db3873d54ce7481d8ed29a15ba2a5faf6c5a"
+      }
+    },
+    {
+      "case": "normal37-alarm-service",
+      "startedAt": "2026-09-13T04:44:54.387689+00:00",
+      "initialExpectation": "blocked",
+      "initialAssertionPassed": false,
+      "result": {
+        "scenario": "alarm-service",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 9238,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 0,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:45:33:640 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4",
+        "09-13 12:45:34:264 AudioHardening focus request for req 3 ignored for org.autojs.autojs6 (10340), android.media.AudioManager@e0de840org.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@a2f9379, level: full usage: 1 exemption: 0",
+        "09-13 12:45:34:593 AudioHardening background playback muted for org.autojs.autojs6 (10340), level: full, reason: 0, usage: USAGE_MEDIA",
+        "09-13 12:45:36:651 AudioHardening volume control for api 100 would be ignored for org.autojs.autojs6 (10340), level: full usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:45:34:561 new player piid:343 uid/pid:10340/9238 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:361"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=37",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "bc6adbd634ef99af0826cf4a9cd76f8589a893f0d27babe5851d138065290029",
+        "audio-before.txt": "0a7a94d60678b10b95e46281e4ba841acb496977eaadd242f6a8df6a4d750c11",
+        "audio-after.txt": "3303709ce737aaa615868f3dacb4cffa4369a1fc2d18c824e3d77dfa0392152e",
+        "services.txt": "05999033291ce3b2285ff6e22fb88a4e4dc8a4c8ebfe1c30edca1a6dfc1f0953",
+        "logcat.txt": "d3beef25bdc8c4dd71a02f1486102339ef50229e420c98b006bf32e58da6391a"
+      }
+    },
+    {
+      "case": "normal37-recover-service",
+      "startedAt": "2026-09-13T04:45:44.641458+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "recover-service",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 9238,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:46:00:185 new player piid:351 uid/pid:10340/9238 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:369"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=37",
+        "mAllowWiu_noBinding=PROC_STATE_TOP",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=PROC_STATE_TOP",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "d8088a303e79ece0c24e4170fc695761b67e0c6eac34c5ca04d6bd0ec7e0bfd9",
+        "audio-before.txt": "027c226d678f865b34ce9100319e305a8c096f9bb30218a7d75021f9b3fe6525",
+        "audio-after.txt": "64ba23c7c93feac81515c395420c5aa0cd270cb3d374745e2b12cd9f5b745aba",
+        "services.txt": "d8a4eea79515d8d76c70cbd4ca7165eec5204d3c568b797ef73472908c8a98c2",
+        "logcat.txt": "8966bbcc85ac41c98617afe44e9c9e2d542d50ac8c2ea0a720e6d6cecc9da0dd"
+      }
+    },
+    {
+      "case": "normal37-background",
+      "startedAt": "2026-09-13T04:46:09.844961+00:00",
+      "initialExpectation": "blocked",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "background",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 9584,
+        "importance": 230,
+        "foregroundService": false,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 4,
+        "volumeCall": 4,
+        "focus": 0,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 13418
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:46:54:835 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4",
+        "09-13 12:46:55:985 AudioHardening focus request for req 3 ignored for org.autojs.autojs6 (10340), android.media.AudioManager@928b772org.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@26707c3, level: partial usage: 1 exemption: 0",
+        "09-13 12:46:59:690 AudioHardening background playback muted for org.autojs.autojs6 (10340), level: partial, reason: 0, usage: USAGE_MEDIA",
+        "09-13 12:47:04:434 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:46:58:180 new player piid:359 uid/pid:10340/9584 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:377"
+      ],
+      "currentServiceState": [],
+      "rawFileSha256": {
+        "result.json": "e383376dcd79442e8f5b20b4b193579d8ca4a8a99af2de0890f11107de4b5d07",
+        "audio-before.txt": "e7cf0477a4009c5036b948a42976563944d685bd542330c0f0c2a46da1989130",
+        "audio-after.txt": "e5cb459371aaeaedfcc3ab744eac7d231671ae32336a4c41c4b4e69a9bcf4cbe",
+        "services.txt": "4af479da59f2d20c9308f0334db536488d957a3aae6bbb0ba0ea149629681268",
+        "logcat.txt": "416b46e7fc9b3f8202c86c121a5bb3b4abf1cb9ddc5f44203c94f8c46866c966"
+      }
+    },
+    {
+      "case": "normal37-alarm-stream",
+      "startedAt": "2026-09-13T04:47:24.791720+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "alarm-stream",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 9855,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 4,
+        "exactAlarm": true,
+        "volumeBefore": 6,
+        "volumeRequested": 5,
+        "volumeAfter": 5,
+        "volumeCall": 5,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:48:07:947 new player piid:367 uid/pid:10340/9855 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_ALARM content=CONTENT_TYPE_MUSIC flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null session:385"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=37",
+        "mAllowWiu_noBinding=DENIED",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=DENIED",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "a909624b4de7d7eaabaacf6fd53390ccca2a1553b7e39f03c828b5766e3da564",
+        "audio-before.txt": "eb9168dc78ca1ef984ad922fbe72ed1fa217287ff21f864eb8c0d5f8a0b0946e",
+        "audio-after.txt": "14eea10b79b32c398649d578c7bb265e2aa1a2da192fa03ca156de97f321f670",
+        "services.txt": "59d9db065d3d17a0ea58bfb3fca11e94a73057aa7abaf94776d89fae8ddc049b",
+        "logcat.txt": "67444c7a3c3710e2e2a7d2c84b38dfbd7c44c0e225d9e1c7151b19cbc5ce49db"
+      }
+    },
+    {
+      "case": "normal37-visible-tts",
+      "startedAt": "2026-09-13T04:48:24.637625+00:00",
+      "initialExpectation": "allowed",
+      "initialAssertionPassed": true,
+      "result": {
+        "scenario": "visible-service",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 10124,
+        "importance": 125,
+        "foregroundService": true,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 3,
+        "volumeCall": 3,
+        "focus": 1,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 16000
+        },
+        "tts": {
+          "initStatus": 0,
+          "engine": "com.google.android.tts",
+          "speakStatus": 0,
+          "completed": true,
+          "events": [
+            "start",
+            "done"
+          ]
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [],
+      "newPlayers": [
+        "09-13 12:48:46:172 new player piid:375 uid/pid:10340/10124 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:393",
+        "09-13 12:48:50:475 new player piid:383 uid/pid:10164/4131 package:com.google.android.tts type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_SPEECH flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:401"
+      ],
+      "currentServiceState": [
+        "targetSdkVersion=37",
+        "mAllowWiu_noBinding=PROC_STATE_TOP",
+        "mAllowWiu_inBindService=DENIED",
+        "mAllowWiu_byBindings=DENIED",
+        "getFgsAllowWiu_forCapabilities=PROC_STATE_TOP",
+        "isForeground=true foregroundId=191 types=0x40000000 foregroundNoti=Notification(channel=org.autojs.autojs.external.foreground.AppForegroundService.foreground shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE|SILENT color=0x00000000 vis=PRIVATE)"
+      ],
+      "rawFileSha256": {
+        "result.json": "760377ca6102b3e36fb2fa6b1fb540a0f0322687657036341f802ccfd0e3382f",
+        "audio-before.txt": "3650057428a31bca9920057fd241121ddd91101f51189cdfeb544aa5451aa742",
+        "audio-after.txt": "1ce5a0008163ecf509d48cc0814155863b357efff8796be4c04c25bc6cb1c04f",
+        "services.txt": "115cc88f742f424d76c1a0199d3c34cf7f841594efbd549eb9f67ec752c1a6bb",
+        "logcat.txt": "089f7002598acf56fe12a4ac14551f289370c5c24dcb8ea1e594cb4cd28af9bc"
+      }
+    },
+    {
+      "case": "throw37-background",
+      "startedAt": "2026-09-13T04:52:41.732079+00:00",
+      "initialExpectation": "diagnostic-errors",
+      "initialAssertionPassed": false,
+      "result": {
+        "scenario": "background",
+        "sdk": 37,
+        "target": 37,
+        "uid": 10340,
+        "pid": 10918,
+        "importance": 400,
+        "foregroundService": false,
+        "usage": 1,
+        "exactAlarm": true,
+        "volumeBefore": 4,
+        "volumeRequested": 3,
+        "volumeAfter": 4,
+        "volumeCall": 4,
+        "focus": 0,
+        "track": {
+          "written": 16000,
+          "playState": 3,
+          "headFrames": 15594
+        }
+      },
+      "overrideBefore": [
+        "mHardeningOverride=0"
+      ],
+      "overrideAfter": [
+        "mHardeningOverride=0"
+      ],
+      "newAudioHardeningEvents": [
+        "09-13 12:53:10:721 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4",
+        "09-13 12:53:11:131 AudioHardening focus request for req 3 ignored for org.autojs.autojs6 (10340), android.media.AudioManager@3a97d41org.autojs.autojs.compat.AudioCompatibilityProbe$$ExternalSyntheticLambda1@49a52e6, level: partial usage: 1 exemption: 0",
+        "09-13 12:53:11:692 AudioHardening background playback muted for org.autojs.autojs6 (10340), level: partial, reason: 0, usage: USAGE_MEDIA",
+        "09-13 12:53:13:244 AudioHardening volume control for api 100 ignored for org.autojs.autojs6 (10340), level: partial usage: 0 exemption: 4"
+      ],
+      "newPlayers": [
+        "09-13 12:53:11:601 new player piid:391 uid/pid:10340/10918 package:org.autojs.autojs6 type:android.media.AudioTrack attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0xA00(FLAG_DEEP_BUFFER+FLAG_MUTE_HAPTIC)  tags= bundle=null session:409"
+      ],
+      "currentServiceState": [],
+      "rawFileSha256": {
+        "result.json": "fbf667b7d6ddfb339b67eba3cf0c98edd6c8b5943ecc12fd1ae22b6c4fc8b4fa",
+        "audio-before.txt": "1f8d5cb77a513464b8d392da2c8b97fbbbbe10869fe6e2cf35dbdc41269a11af",
+        "audio-after.txt": "27ab070f3a1cd3a9bd37defb89ce35ae89079c3ffe754dd2631d8ab748ecd42f",
+        "services.txt": "4af479da59f2d20c9308f0334db536488d957a3aae6bbb0ba0ea149629681268",
+        "logcat.txt": "3ce5d66e99c14511805d6573f3ae258057782087d33a29697e566c923a2299e2"
+      }
+    }
+  ],
+  "finalBuildValidation": [
+    {
+      "variant": "appDebug",
+      "target": 36,
+      "manifest": "app\\build\\intermediates\\merged_manifest\\appDebug\\processAppDebugMainManifest\\AndroidManifest.xml",
+      "probeComponents": 2
+    },
+    {
+      "variant": "inrtDebug",
+      "target": 29,
+      "manifest": "app\\build\\intermediates\\merged_manifest\\inrtDebug\\processInrtDebugMainManifest\\AndroidManifest.xml",
+      "probeComponents": 2
+    },
+    {
+      "variant": "appRelease",
+      "target": 36,
+      "manifest": "app\\build\\intermediates\\merged_manifest\\appRelease\\processAppReleaseMainManifest\\AndroidManifest.xml",
+      "probeComponents": 0
+    },
+    {
+      "apk": "app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-universal.apk",
+      "bytes": 47914256,
+      "sha256": "eb253790458cb83707fa7c1b78e923625430fcef94cb556c06a262101496f42d",
+      "target": 36
+    },
+    {
+      "apk": "app\\build\\outputs\\apk\\inrt\\debug\\inrt-v6.8.0-universal.apk",
+      "bytes": 54266203,
+      "sha256": "19e03de61e679178a3235a0dfb6078ab4f9ad5e21677c37bc5733a60dc73e059",
+      "target": 29
+    }
+  ],
+  "offlineBuildValidation": {
+    "apks": [
+      {
+        "variant": "debug",
+        "apk": "autojs6-plugin-offline-docs-v6.8.1-universal.apk",
+        "sha256": "5e0a76a1c90a0cb8524b16d8387efeff2cd7ff448bea20d3a4a77d4c5ebb64bd",
+        "bytes": 4694526
+      },
+      {
+        "variant": "release",
+        "apk": "autojs6-plugin-offline-docs-v6.8.1-universal.apk",
+        "sha256": "489d98ec15448191d0ef658386f3b7bda7ba9f38c53adda8166a7beccf18b654",
+        "bytes": 3524566
+      }
+    ],
+    "unitTests": [
+      {
+        "name": "io.github.supermonster003.autojs6.plugin.offlinedocs.OfflineDocsContractTest",
+        "tests": "2",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0"
+      }
+    ],
+    "documentationCommit": "7769e6d428a44fc872f5746b12edc4306a3e5aec"
+  },
+  "relatedCommits": {
+    "hostGuidance": "c703a7953",
+    "documentationGenerator": "2d0ed0d",
+    "documentation": "7769e6d428a44fc872f5746b12edc4306a3e5aec",
+    "offlinePlugin": "ad2f7cc18e8217c6fe4b82ebb371c348f2526cd3"
+  },
+  "excludedAttempts": [
+    {
+      "case": "normal36-visible",
+      "outcome": "No completed result; BIND APPLICATION ANR before the audio probe."
+    },
+    {
+      "case": "debugger36-visible-service",
+      "outcome": "No logpoint values; debugger pause timed out and foreground service startup timed out. All accepted comparisons ran without debugger attachment."
+    },
+    {
+      "case": "normal36-visible-service",
+      "outcome": "No completed result; startup ANR. The separately recorded retry completed."
+    },
+    {
+      "case": "normal37-boot",
+      "outcome": "No completed result or observed reboot; startup ANRs for PID 10403 at 12:49:19 and PID 10429 at 12:49:53. No BOOT_COMPLETED acceptance claim.",
+      "exitInfoSha256": "d1da338dfdf0280787bb8d08b456ef2e7969bc6f385e8904eb6c53ee8854e21c"
+    },
+    {
+      "case": "throw37-background",
+      "outcome": "The official command returned exit 0 but mHardeningOverride stayed 0; the expected diagnostic errors did not occur.",
+      "commandCheck": "exit=0\n  mHardeningOverride=0"
+    }
+  ]
+}

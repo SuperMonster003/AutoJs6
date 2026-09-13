@@ -86,7 +86,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | 编号 | 变更 | 生效条件 | 宿主暴露点 | 条目 |
 | --- | --- | --- | --- | --- |
 | I1 | 本地网络权限 `android.permission.ACCESS_LOCAL_NETWORK` (VERIFIED): targetSdk >= 37 默认阻断到局域网地址的出站 TCP / UDP, 入站 TCP accept, mDNS `.local` 解析; targetSdk <= 36 随 `INTERNET` 隐式授予; 同一 profile 内回环不受此权限限制. 跨 profile 的回环在 Android 17 上另受限制, 与 targetSdk 无关 ([官方说明](https://developer.android.com/about/versions/17/behavior-changes-all#block-cross-profile-loopback-traffic)) | 权限系统, 非兼容开关 (`RESTRICT_LOCAL_NETWORK` 仍为 disabled, 仅测试用); 跨 profile 另测 | VS Code 扩展连接两种模式 (`pluginclient/JsonSocketServer.kt:24` `ServerSocket`, `pluginclient/JsonSocketClient.kt:64-65` 连接电脑); 脚本 `http.*` / `web.*` / `$web.newWebSocket` (`runtime/api/augment/web/Web.kt`, `core/web/WebSocket.kt`); MQTT (`org.eclipse.paho.android.service.MqttService`); Node 桥 (`engine/NodeBridgeProtocol.kt` 的 `newWebSocket`); 用户脚本自建 socket | P2.1 |
-| I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务; targetSdk 37 的后台路径还需 while-in-use 能力, 但精确闹钟授权 + `USAGE_ALARM` 可豁免 WIU 条件. 播放 / 音量调用可静默失败, 焦点请求返回 `AUDIOFOCUS_REQUEST_FAILED`; `throw` 测试模式比默认规则更严 ([官方说明](https://developer.android.com/about/versions/17/changes/bg-audio)) | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本在 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 下运行 | P2.2 |
+| I2 | 后台音频强化 (VERIFIED): 全体应用需要可见 Activity 或非 `SHORT_SERVICE` 前台服务; targetSdk 37 的后台路径还需 while-in-use 能力, 但精确闹钟授权 + `USAGE_ALARM` 可豁免 WIU 条件. 播放 / 音量调用可静默失败, 焦点请求返回 `AUDIOFOCUS_REQUEST_FAILED`; `throw` 测试模式比默认规则更严 ([官方说明](https://developer.android.com/about/versions/17/changes/bg-audio)) | 全体 + target 37 加严 | `runtime/api/Media.java`, `runtime/api/Device.java` (音量), `runtime/api/tts/*.kt` (TTS), Node 桥音频; 定时任务 / 开机自启 / 广播触发的脚本需复核 `AppForegroundService` (`external/foreground/AppForegroundService.kt`) 的实际启动状态 | P2.2 |
 | I3 | 动态加载的原生库必须只读 (`THROW_ERROR_FOR_WRITABLE_DCL`, VERIFIED): `System.load()` 可写文件抛 `UnsatisfiedLinkError` | target 37 | OpenCV / ImageQuant stager 原已尝试 `setWritable(false, false)`, 但忽略结果; P2.3 改为在写入临时文件前及返回最终文件前强制验证只读, 修复旧缓存. `AndroidClassLoader` 的 DEX 已有只读处理, 本轮另修复 API 24 / 25 优化输出覆盖原始 DEX; Ace Editor 从已安装的插件 APK 构造 `PathClassLoader` | P2.3 (完成, 见实施记录) |
 | I4 | 无锁 `MessageQueue` (`USE_NEW_MESSAGEQUEUE`, VERIFIED) 公开 API 不变, 新实现中反射 `mMessages` 恒为 null; `LOOPER_CLEARS_THREAD_INTERRUPTED` 清除消息派发时的原生中断标记; `OVERRIDDEN_THREAD_START_METHOD` 使线程池绕过工作线程 start 覆写, 仍执行 run, 普通直接 start 调用不变 (后两项为 PLATFORM_CONFIG + DEVICE-37 对照结论) | target 37, 可在 target 36 调试包强制测试 | `Loopers` 的公开 IdleHandler、`MainThreadProxy` / `TimerThread` 中断、`exit()` / `threads.*` / `sleep()`; 宿主 Thread 子类未覆写 start. P2.4 修复了取消回调后历史时间阻止脚本退出的既有问题; 用户反射限制见附录 F | P2.4 |
 | I5 | 后台活动启动: `IntentSender` 的 Activity 启动需核对 creator / sender 的显式授权 (VERIFIED); `ASM_RESTRICTIONS` 在本镜像为 target 37 门控且未标 disabled, 行为待核验; BAL 与后台启动前台服务是两套规则, 悬浮窗例外分别检查 | target 37 | `ui/main/scripts/AndroidPackageSessionInstaller.kt:173,176` (`MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` / `ALLOWED`), `external/shortcut/ShortcutManager.java:46` 与 `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163` (`requestPinShortcut(IntentSender)`), `ui/main/drawer/DrawerFragment.kt:160` (`StartIntentSenderForResult`); 脚本 `app.launch` / `app.startActivity` 从后台启动 | P2.5 |
@@ -211,10 +211,12 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.2 后台音频 (I2)
 
-- [ ] 事实核对: 先在默认系统状态对 target 36 / 37 包分别测试 (a) 前台启动后切后台, (b) 定时任务, (c) 开机 / 广播入口的播放、焦点、音量、TTS; 对精确闹钟授权 + `USAGE_ALARM` 独立测试. 然后在可恢复的专用 AVD 上用 `cmd audio set-enable-hardening throw` 定位失败. `enable` / `throw` 会对所有 target 强制 WIU 且覆盖闹钟例外, 不能用其结果断言默认行为; 保存 `AudioHardening` 日志并恢复设备原状态. (DEVICE-37)
-- [ ] 策略 (待决 Q3): 验证现有 `specialUse` 服务在用户可见 / 用户交互时启动后的能力; 按后台播放实际用途评估 `mediaPlayback` 类型. 诊断覆盖 Android 17 的全体应用规则及 target 37 的额外规则, 不能仅凭服务存活推断 WIU, 也不能假设存在公开的 WIU 查询 API. 定时任务 / 开机后无法自动播放的路径给出用户可执行的恢复入口或明确记录已知限制; 只打印警告不能算功能通过. TTS 另外记录实际合成 / 播放进程. (SOURCE; DEVICE-37)
-- [ ] 定时任务 / 开机自启入口的前台服务启动方式复核 (`timing/**`, `external/foreground/**`), 确认与 Android 15 的 `FGS_BOOT_COMPLETED_RESTRICTIONS` / `FGS_SAW_RESTRICTIONS` 组合下仍可启动 `specialUse` 服务. (DEVICE-37; DEVICE: API 35 真机)
-- [ ] changelog `improvement`. (DOCS)
+- [x] 默认状态下完成 target 36 / 37 的前台, 可见启动 FGS 后切后台, 无 FGS 后台, 精确闹钟接收器普通媒体 / 闹钟用途对照, 以及 target 37 同一进程恢复和 Google TTS, 共 12 组有效记录. 11 组符合最初联合断言; target 37 普通媒体闹钟入口出现 "焦点失败 / 系统静音, 但媒体音量改变" 的镜像例外, 保留失败断言与 `AudioHardening` 证据. 不合并播放 / 焦点 / 音量为一个资格判断. (DEVICE-37: [矩阵与边界](evidence/android-sdk-37-p22-20260913.md); [结构化结果](evidence/android-sdk-37-p22-20260913-results.json))
+- [x] Q3 本轮采用原推荐方案 (a): 保留通用 `specialUse`, 补齐可见界面启动 / 重启服务后重试脚本的恢复指引和无人值守播放限制. target 37 同一 PID 的服务 WIU 从 `DENIED` 恢复为 `PROC_STATE_TOP`, 焦点由 0 恢复为 1. 不通过服务存活, 音量读回, 播放器进度或额外抢占焦点推断播放资格. TTS 记录实际 Google 引擎 UID / PID, 文件合成不增加宿主播放资格拦截. (SOURCE; DEVICE-37)
+- [x] 源码复核定时 / 开机入口: Alarm / WorkManager / Job 调度链与宿主 / inrt 开机接收器不保证已经启动音频 FGS; `settings.setEnabled('foreground_service', true)` 仅写偏好, 不直接启动服务. 已写入用户 API 文档. (SOURCE)
+- [ ] 完整端到端验收: Rhino `media.playMusic` / TTS, 全部实际定时后端, 宿主与 inrt 的开机链, TTS 后台可听性, 独立音频插件, 以及 API 35 真机与 `FGS_BOOT_COMPLETED_RESTRICTIONS` / `FGS_SAW_RESTRICTIONS` 的组合. 本轮开机探针启动 ANR, 不计入完成; 原生探针不代替脚本与打包应用验收. (DEVICE-37; DEVICE: API 35 真机)
+- [ ] 在支持命令的专用镜像中完成 `cmd audio set-enable-hardening throw` 验证. 本轮命令 exit 0 但 `mHardeningOverride` 始终为 0, 异常模式断言失败, 不把该轮标为 throw 验收. 探针已加入覆盖状态检查. `enable` / `throw` 会加严所有 target 并覆盖闹钟例外; `disable` 不等于恢复默认. 已关闭本轮只读 AVD. (DEVICE-37)
+- [x] 前台服务帮助的 11 份资源和当前版本 10 语言 `improvement`, README / CHANGELOG, Media / Device / TTS / Settings 文档已补齐; 文档同步和最终构建门禁见实施记录. 无 API 签名变化, 无需 d.ts 更新. (DOCS)
 
 ### P2.3 动态加载只读 (I3)
 
@@ -417,7 +419,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | --- | --- | --- | --- |
 | Q1 | 本地网络权限的申请时机 (P2.1, 已按原条目的默认项实施) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a) 已实施, 见 D12 / `d9465be13`; 不把执行默认项记为维护者另行投票 |
 | Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), 有证据时 (b); 复核修正原推荐的全局关闭方案 |
-| Q3 | 后台音频策略 (P2.2) | (a) 保持前台服务常驻模式 + 诊断警告; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | (a): 改动最小, 且脚本音频并非媒体应用语义 |
+| Q3 | 后台音频策略 (P2.2) | (a) 保持常驻服务, 提供可见界面恢复操作与已知限制; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | 本轮按原推荐采用 (a), 可见界面恢复已验证; 无人值守播放与完整设备门禁仍开放, 不以日志警告代替功能通过 |
 | Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a): 无共享存储需求的脚本允许跳过, 拒绝权限后仍有可理解的结果 |
 | Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a): AutoJs6 是自动化工具, 声明会与其定义不符 |
 | Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (a) |
@@ -651,3 +653,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - Documentation、Offline-Docs、DTS 与 Ace 已同步提交. d.ts 导出遇到 `android-37` / `android-37.0` 差异, 在 android-dts-generator `525bebd` 中改为读取 AGP 实际 bootClasspath, 严格导出与类型校验通过.
 - [实施记录与机器索引](evidence/android-sdk-37-p21-20260913.md) 保留完整构建 / 设备条件及限制. P2.1 的真机拓扑、跨 profile / UID、完整 MqttService 与最终 inrt 网络验收仍未勾选; P5 插件 SDK 迁移未因本轮内容同步而完成.
 - 已停止本轮两个只读临时 AVD 与 LAN fixture, 清理自建转发. 下一项可推进 P2.2 后台音频; P2.1 剩余设备项在具备相应环境时继续补验.
+
+### 2026-09-13: P2.2 默认行为对照与恢复指引
+
+- 完成 12 组默认系统状态记录, 保留 11 组原预期通过和 1 组媒体音量豁免差异. target 37 同一服务在可见界面重新启动后, WIU 与音频焦点恢复已验证; Google TTS 的实际引擎进程另行记录.
+- 宿主帮助 11 份资源与 10 语言 changelog 已提交 `c703a7953`; API 文档与生成物已提交 `7769e6d`, 文档生成器防止插件版本回退的修复已提交 `2d0ed0d`. 离线插件 `ad2f7cc` 保留 6.8.1 发行版, 内容版为 6.8.0, 构建号 33 与 Git 提交数一致.
+- 宿主 / inrt debug 构建和 release Manifest 检查通过, 正常 target 仍为 36 / 29; 文档 128 模块 freshness, 离线插件 debug / release APK 内容门禁通过. 详细范围见 [P2.2 实施记录](evidence/android-sdk-37-p22-20260913.md).
+- P2.2 仍需开机与完整脚本调度链, 真机可听性, API 35 组合及有效 `throw` 模式验收. 本轮开机启动 ANR, `throw` 命令未改变覆盖状态, 均未勾选完成. 可继续推进 P2.5 后台活动启动, 同时保留上述设备门禁.
