@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 14, 2026.
+Data updated on Sept 14, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -364,6 +364,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay
 * `Fix` WebView file choosers in UI scripts could fail to open when the root layout context lost its Activity association
 * `Fix` UI scripts could unexpectedly exit when entering split screen or resizing a window because Activity recreation discarded the running script
+* `Fix` Native and Ace editors could lose cursor positions and selections after Activity recreation, and large documents opened without a file path could lose unsaved text
+* `Fix` The editor text area could collapse in landscape with the keyboard open, and the Log page input could be covered by the keyboard
+* `Fix` The Main page search query and expanded search field could be lost when split-screen changes recreated the Activity
 * `Fix` Ace could fall back to the legacy engine on the first Lua-file open when synchronous LuaLS native-runtime probing delayed initial presentation
 * `Fix` Concurrent access to the shared font store by the AutoJs6 host and Ace plugin could throw a JVM OverlappingFileLockException and crash the app during font preview
 * `Fix` APK Builder now preserves a TypeScript/TSX entry's Rhino execution-mode directive (including `ui`) in the generated launcher, so compiled UI projects start in the correct Activity mode
@@ -858,7 +861,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -909,7 +912,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 14, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 14, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

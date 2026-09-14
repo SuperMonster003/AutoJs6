@@ -64,6 +64,7 @@ interface ScriptEditorEngine {
     fun markUndoRedoBaselineAsUnchanged()
 
     fun jumpTo(line: Int, column: Int = 0)
+    fun selectRange(startOffset: Int, endOffset: Int)
     fun jumpToStart()
     fun jumpToEnd()
     fun jumpToLineStart()

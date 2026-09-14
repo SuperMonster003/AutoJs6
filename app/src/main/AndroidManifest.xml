@@ -554,6 +554,7 @@
             android:label="@string/text_app_shortcut_log_long_label"
             android:taskAffinity="org.autojs.autojs.ui.log.LogActivity"
             android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.FullScreen" />
 
         <activity

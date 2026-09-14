@@ -154,6 +154,9 @@ open class EditActivity :
         val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH)
             ?.let { Uri.fromFile(File(it)).editorDocumentIdentity() }
             ?: intent.data?.editorDocumentIdentity()
+            // Content-only editors also need a stable, distinct key once their draft
+            // exceeds the Bundle threshold. The session ID survives Activity recreation.
+            ?: "editor-session:$mEditorSessionId"
 
         draftService = EditorDraftService(
             context = this,

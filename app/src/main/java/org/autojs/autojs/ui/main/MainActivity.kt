@@ -128,6 +128,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private val mBackPressedObserver = BackPressedHandler.Observer()
     private val mForeGroundService = ForegroundService(this)
     private var mSearchViewItem: SearchViewItem? = null
+    private var mPendingSearchState: Bundle? = null
     private val mA11yTool = AccessibilityTool(this)
 
     private val isCurrentPageDocs: Boolean
@@ -159,6 +160,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mPendingSearchState = savedInstanceState?.getBundle(STATE_SEARCH)
 
         ActivityMainBinding.inflate(layoutInflater).also {
             val drawerLayout = it.drawerLayout
@@ -406,6 +408,16 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         menuInflater.inflate(R.menu.menu_main, menu)
         mLogMenuItem = menu.findItem(R.id.action_log)
         setUpSearchMenuItem(menu)
+        mPendingSearchState?.let { state ->
+            mPendingSearchState = null
+            if (state.getBoolean(STATE_SEARCH_EXPANDED)) {
+                mSearchViewItem?.expand()
+                (mSearchMenuItem.actionView as? SearchView)?.apply {
+                    setQuery(state.getString(STATE_SEARCH_QUERY).orEmpty(), false)
+                    if (!state.getBoolean(STATE_SEARCH_FOCUSED)) clearFocus()
+                }
+            }
+        }
         setUpToolbarColors()
         return true
     }
@@ -489,12 +501,27 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         ViewUtils.configKeepScreenOnWhenInForeground(this)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        val search = if (::mSearchMenuItem.isInitialized) mSearchMenuItem.actionView as? SearchView else null
+        outState.putBundle(STATE_SEARCH, mPendingSearchState ?: Bundle().apply {
+            putBoolean(STATE_SEARCH_EXPANDED, mSearchViewItem?.isExpanded == true)
+            putString(STATE_SEARCH_QUERY, search?.query?.toString())
+            putBoolean(STATE_SEARCH_FOCUSED, search?.hasFocus() == true)
+        })
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mSearchViewItem = null
     }
 
     companion object {
+
+        private const val STATE_SEARCH = "main_search"
+        private const val STATE_SEARCH_EXPANDED = "expanded"
+        private const val STATE_SEARCH_QUERY = "query"
+        private const val STATE_SEARCH_FOCUSED = "focused"
 
         private var sIsActionBarDrawerOpened = false
 

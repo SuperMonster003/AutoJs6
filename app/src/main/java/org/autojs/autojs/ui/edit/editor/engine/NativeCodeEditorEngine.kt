@@ -231,6 +231,12 @@ class NativeCodeEditorEngine(
         codeEditor.jumpToStart()
     }
 
+    override fun selectRange(startOffset: Int, endOffset: Int) {
+        val input = codeEditor.codeEditText
+        val length = input.text?.length ?: 0
+        input.setSelection(startOffset.coerceIn(0, length), endOffset.coerceIn(0, length))
+    }
+
     override fun jumpToEnd() {
         codeEditor.jumpToEnd()
     }

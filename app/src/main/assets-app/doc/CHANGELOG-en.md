@@ -202,6 +202,9 @@
 * `Fix` Ace WebView could briefly expose a pure-white page before the host theme and initial document took effect, producing a conspicuous flash with dark editor themes; first presentation now waits for explicit theme-applied, document-committed, and stable-paint signals instead of a fixed delay
 * `Fix` WebView file choosers in UI scripts could fail to open when the root layout context lost its Activity association
 * `Fix` UI scripts could unexpectedly exit when entering split screen or resizing a window because Activity recreation discarded the running script
+* `Fix` Native and Ace editors could lose cursor positions and selections after Activity recreation, and large documents opened without a file path could lose unsaved text
+* `Fix` The editor text area could collapse in landscape with the keyboard open, and the Log page input could be covered by the keyboard
+* `Fix` The Main page search query and expanded search field could be lost when split-screen changes recreated the Activity
 * `Fix` Ace could fall back to the legacy engine on the first Lua-file open when synchronous LuaLS native-runtime probing delayed initial presentation
 * `Fix` Concurrent access to the shared font store by the AutoJs6 host and Ace plugin could throw a JVM OverlappingFileLockException and crash the app during font preview
 * `Fix` APK Builder now preserves a TypeScript/TSX entry's Rhino execution-mode directive (including `ui`) in the generated launcher, so compiled UI projects start in the correct Activity mode

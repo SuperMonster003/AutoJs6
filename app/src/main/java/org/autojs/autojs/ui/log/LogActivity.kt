@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,7 +20,6 @@ import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.util.IntentUtils.startSafelyWithOptions
-import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -56,6 +57,14 @@ class LogActivity : BaseActivity() {
 
         setContentView(mBinding.root)
         setToolbarAsBack(R.string.text_log)
+        ViewCompat.setOnApplyWindowInsetsListener(mBinding.root) { view, insets ->
+            val bottom = insets.getInsets(
+                WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.navigationBars(),
+            ).bottom
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(mBinding.root)
 
         mBinding.console.apply {
             setConsole(instance.globalConsole.also { mConsoleImpl = it })
@@ -77,7 +86,6 @@ class LogActivity : BaseActivity() {
 
         mBinding.fab.apply {
             setOnClickListener { mConsoleImpl.clear() }
-            excludeFloatingActionButtonFromBottomNavigationBar()
         }
     }
 

@@ -463,6 +463,8 @@ class AceScriptEditorEngine private constructor(
 
     override fun jumpToStart() = session.jumpToStart()
 
+    override fun selectRange(startOffset: Int, endOffset: Int) = session.selectRange(startOffset, endOffset)
+
     override fun jumpToEnd() = session.jumpToEnd()
 
     override fun jumpToLineStart() = session.jumpToLineStart()

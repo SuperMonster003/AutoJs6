@@ -572,6 +572,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
 
     private var mPendingInitialPosition: InitialPositionRequest? = null
+    private var mPendingRestoredSelection: Pair<Int, Int>? = null
 
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
@@ -595,6 +596,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
     private val mEditorAppBar: View = binding.editorAppBar
     private val mEditorStatusBar: View = binding.editorStatusBar
+    private val mExpandedStatusBarHeight = mEditorStatusBar.layoutParams.height
     private val mEditorFileNameStatus: TextView = binding.editorFileNameStatus
     private val mEditorCursorStatus: TextView = binding.editorCursorStatus
     private val mEditorEncodingStatus: TextView = binding.editorEncodingStatus
@@ -1141,6 +1143,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
         if (!pending) {
             tryFinalizeCompletedSaveAsAdoption()
+            scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor = true)
         }
     }
 
@@ -1216,6 +1219,35 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onConfigurationChanged(newConfig: Configuration) {
         resetStableDecorBaseline()
         super.onConfigurationChanged(newConfig)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // Measure the requested chrome first. Temporarily reclaim its space only when the
+        // keyboard leaves too little room for text; keep read-only/debug visibility intact.
+        setChromeHeightForMeasure(mInputMethodEnhanceBar, LayoutParams.WRAP_CONTENT)
+        setChromeHeightForMeasure(mEditorStatusBar, mExpandedStatusBarHeight)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val minimumViewport = (48 * resources.displayMetrics.density).toInt()
+        if (mLastImeVisible && binding.editorContainer.measuredHeight < minimumViewport) {
+            setChromeHeightForMeasure(mInputMethodEnhanceBar, 0)
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            if (binding.editorContainer.measuredHeight < minimumViewport) {
+                setChromeHeightForMeasure(mEditorStatusBar, 0)
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            }
+        }
+    }
+
+    private fun setChromeHeightForMeasure(view: View, height: Int) {
+        if (view.layoutParams.height == height) return
+        view.layoutParams.height = height
+        // Invalidate the nested layout's measurement cache without scheduling another
+        // traversal: the next super.onMeasure call must see the changed child height.
+        var child: View? = view
+        while (child != null && child !== this) {
+            child.forceLayout()
+            child = child.parent as? View
+        }
     }
 
     override fun onSizeChanged(
@@ -1795,19 +1827,34 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (
             mDestroyed ||
             mEditorLoading ||
+            mDraftRestoreInProgress ||
+            !editor.isReady ||
             editor.isLoadingText ||
             mLargeFileFrameCallback != null ||
-            (mCursorStatusReady && mPendingInitialPosition == null)
+            (mCursorStatusReady && mPendingInitialPosition == null && mPendingRestoredSelection == null)
         ) {
             return
         }
 
+        // Restore after both asynchronous document/draft loading and engine readiness.
+        // A restored range takes precedence over the original launch location, which may
+        // have been consumed long before this Activity was recreated.
+        val restoredSelection = mPendingRestoredSelection
+        if (restoredSelection != null) {
+            val length = editor.textSnapshot.length
+            editor.selectRange(
+                restoredSelection.first.coerceIn(0, length),
+                restoredSelection.second.coerceIn(0, length),
+            )
+            mPendingRestoredSelection = null
+            mPendingInitialPosition = null
+        }
         val requestedPosition = mPendingInitialPosition
         val appliedInitialPosition = applyPendingInitialPositionIfPossible(clearOutOfRange = true)
         val finalPosition = when {
             appliedInitialPosition && requestedPosition != null ->
                 initialPositionForStatus(requestedPosition)
-            preserveCurrentCursor -> editor.selection.let { it.endLine to it.endColumn }
+            preserveCurrentCursor || restoredSelection != null -> editor.selection.let { it.endLine to it.endColumn }
             else -> {
                 runCatching { editor.jumpToStart() }
                 0 to 0
@@ -4225,6 +4272,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         (editor as? AceScriptEditorEngine)?.let { aceEditor ->
             aceEditor.onAceStateChanged = {
                 schedulePrimaryMenuStateSync()
+                if (!mCursorStatusReady || mPendingRestoredSelection != null) {
+                    scheduleCursorStatusAfterInitialLoad()
+                }
             }
             aceEditor.onSelectionAction = { action ->
                 actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
@@ -7577,6 +7627,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onSaveInstanceState() = Bundle().apply {
         putParcelable(STATE_SUPER_DATA, super.onSaveInstanceState())
         putInt(STATE_SCRIPT_EXECUTION_ID, scriptExecutionId)
+        val selection = mPendingRestoredSelection ?: editor.selection.let {
+            it.startOffset to it.endOffset
+        }
+        putInt(STATE_SELECTION_START, selection.first)
+        putInt(STATE_SELECTION_END, selection.second)
         // The Activity persists draft text/path separately. Keeping this metadata in the view
         // state avoids duplicating large text while preserving a deferred Convert across process
         // recreation. It is ignored unless a draft is actually restored.
@@ -7605,6 +7660,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val superData = bundle.getParcelable<Parcelable>(STATE_SUPER_DATA)
         scriptExecutionId = bundle.getInt(STATE_SCRIPT_EXECUTION_ID, ScriptExecution.NO_ID)
         super.onRestoreInstanceState(superData)
+        if (bundle.containsKey(STATE_SELECTION_START) && bundle.containsKey(STATE_SELECTION_END)) {
+            mPendingRestoredSelection = bundle.getInt(STATE_SELECTION_START) to
+                bundle.getInt(STATE_SELECTION_END)
+            scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor = true)
+        }
         bundle.getString(STATE_DRAFT_CHARSET)
             ?.let { charsetName -> runCatching { Charset.forName(charsetName) }.getOrNull() }
             ?.let { charset ->
@@ -7800,6 +7860,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 内部存储根目录 (不访问外置 SD).
 
         private const val STATE_SUPER_DATA = "super_data"
+        private const val STATE_SELECTION_START = "selection_start"
+        private const val STATE_SELECTION_END = "selection_end"
         private const val STATE_SCRIPT_EXECUTION_ID = "script_execution_id"
         private const val STATE_DRAFT_CHARSET = "draft_charset"
         private const val STATE_DRAFT_CHARSET_CONFIDENCE = "draft_charset_confidence"
