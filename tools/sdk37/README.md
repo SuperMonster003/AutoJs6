@@ -524,6 +524,58 @@ These probes require the actual host window to be focused. Retain startup ANR or
 loading failures as diagnostics and use a new output directory for a clean rerun.
 They never dismiss application-error dialogs or count such an attempt as a pass.
 
+## Configuration changes, large screens and IME
+
+`run_configuration_probe.py` observes actual UI-script, Main, Edit and Log
+activities through Activity lifecycle and component callbacks. Use an exclusively
+owned API 37 emulator with a debuggable host of the expected target, an English
+unlocked UI, software IME enabled, and test overlay / all-files / notification
+access already configured. The Ace route requires a working installed Ace plugin;
+falling back to the native editor fails the run.
+
+```powershell
+python tools/sdk37/run_configuration_probe.py --adb "$Sdk37Adb" --serial emulator-5592 --expected-target 37 --route script --form tablet --output build/sdk37-config-script37-tablet
+```
+
+Routes are `script`, `main`, `edit-native`, `edit-ace` and `log`; forms are `phone`
+(1080x2424, 420 dpi, sw411dp) and `tablet` (1200x1920, 240 dpi, sw800dp).
+The runner stops host work, warms its Main Activity, launches a separate observer
+script, seeds unique unsaved text and explicitly opens the IME. It rotates the
+display, observes Back when the IME is visible, and on tablets enters / leaves
+actual split screen with Settings. The UI-script route also requests landscape:
+the default API 37 image honors this on the phone and ignores it on the tablet
+for both host targets. No compatibility override is changed by this tool.
+
+Every stage records Activity identity, task, window configuration, multi-window
+state, IME insets, actual input / editor bounds, text, dirty flag and editor
+selection, with a focused-window dump and screenshot. Editor restoration gets a
+bounded wait before state is judged. The validator rejects missing lifecycle
+evidence, script recreation, changed text / dirty flag / cursor, wrong editor,
+obstructing windows and inputs under an inset-bearing IME. Fullscreen IME
+extraction can report a zero bottom inset; review its screenshot. Passing these
+checks does not establish general layout, font, composing-text or hardware-input
+coverage. Main SearchView handling of Back is also recorded and must be interpreted
+separately from restoration after a configuration change.
+
+Display size, density and rotation are restored and the host is stopped after
+each run. The tool does not install packages, grant permissions, change roles,
+clear application data or stop Settings. It changes editor preferences and can
+leave uniquely named private observer / draft files; retain the output and then
+dispose of the read-only AVD overlay. Never use this on a shared emulator or phone.
+`--pause-before-split PATH` is a diagnostic-only rendezvous: after `debug-ready.json`
+appears, attach a debugger to the reported PID and create that new marker within
+120 seconds. It does not itself create a debugger session or adb forward.
+
+```powershell
+python -m unittest discover -s tools/sdk37 -p test_configuration_probe.py -v
+```
+
+See the [P2.12 evidence](../../docs/dev/evidence/android-sdk-37-p212-20260914.md)
+for the script lifecycle fix, remaining Main / editor / Log observations, exact
+APK / plugin versions, and the distinction between an older runner's success flag
+and the final validation result. The separate memory-limiter status captured at
+preflight is an environment observation, not a memory-pressure workload test.
+
 ## Dynamic loading
 
 Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
