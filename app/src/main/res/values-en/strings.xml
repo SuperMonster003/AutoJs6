@@ -272,6 +272,9 @@
     <string name="entry_root_mode_force_root">Force set root mode</string>
     <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
+    <string name="entry_terminal_npm_registry_custom">Custom URL</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (default)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (China mirror)</string>
     <string name="error_a11y_service_not_operational">Accessibility service is connected but not operational yet (no event has been received)</string>
     <string name="error_a_runtime_has_been_set">A runtime has been set</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
@@ -555,6 +558,7 @@
     <string name="hint_plugin_process_failed_to_start">The plugin process could not start reliably. Update or reinstall the plugin; if the problem persists, contact the plugin developer.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Plugin protocol is incompatible with current AutoJs6, plugin version upgrade required.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
     <string name="image_editor_brightness">Brightness</string>
     <string name="image_editor_brush">Brush</string>
@@ -715,7 +719,9 @@
     <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
+    <string name="summary_terminal_clear_data">Remove the terminal home, installed packages and npm caches</string>
     <string name="summary_terminal_node_probe">Check whether the terminal can run node from the Node.js Runtime plugin</string>
+    <string name="summary_terminal_npm_ignore_scripts">Run npm with --ignore-scripts so packages cannot execute install hooks (native binaries cannot run here anyway)</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by \"Volume Down\" key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
@@ -1936,10 +1942,13 @@
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
     <string name="text_terminal">Terminal</string>
+    <string name="text_terminal_clear_data">Clear terminal data</string>
     <string name="text_terminal_close_session">Close session</string>
+    <string name="text_terminal_confirm_clear_data">Delete all terminal data under %1$s? Running sessions will be closed.</string>
     <string name="text_terminal_confirm_close_running">A process is still running in this session. Close it anyway?</string>
     <string name="text_terminal_copy_home_path">Copy home path</string>
     <string name="text_terminal_copy_transcript">Copy transcript</string>
+    <string name="text_terminal_data_cleared">Terminal data cleared</string>
     <string name="text_terminal_no_npm_scripts">package.json declares no scripts</string>
     <string name="text_terminal_no_package_json">No package.json found in the current directory</string>
     <string name="text_terminal_node_exec_denied">This device refused to run the Node.js launcher of the plugin, so only the system shell is available</string>
@@ -1949,13 +1958,19 @@
     <string name="text_terminal_node_plugin_too_old">The installed Node.js Runtime plugin has no terminal launcher, update it to use node and npm here</string>
     <string name="text_terminal_node_probe">Node.js launcher check</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Checking the Node.js launcher...</string>
+    <string name="text_terminal_npm_ignore_scripts">Ignore npm lifecycle scripts</string>
     <string name="text_terminal_npm_init">Initialize project (npm init)</string>
     <string name="text_terminal_npm_install">Install dependencies (npm install)</string>
     <string name="text_terminal_npm_install_package">Install package (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">npm registry</string>
+    <string name="text_terminal_npm_registry_custom_url">Custom registry URL</string>
+    <string name="text_terminal_npm_registry_https_only">The registry URL must start with https://</string>
     <string name="text_terminal_npm_run_script">Run script (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">npm and corepack could not be prepared from the Node.js Runtime plugin, so only node and the system shell are available</string>
     <string name="text_terminal_other_package_managers">Other package managers (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">yarn and pnpm are provided through corepack and are downloaded from the registry on first use. Run "yarn --version" or "pnpm --version" to activate them.</string>
+    <string name="text_terminal_other_package_managers_content">yarn and pnpm are provided through corepack and are downloaded from the registry on first use. Run \"yarn --version\" or \"pnpm --version\" to activate them.</string>
     <string name="text_terminal_package_name_hint">Package name, e.g. is-odd</string>
+    <string name="text_terminal_preparing_npm">Preparing npm and corepack from the Node.js Runtime plugin...</string>
     <string name="text_terminal_search_npm">Search npm packages</string>
     <string name="text_terminal_select_text">Select text</string>
     <string name="text_terminal_session_ended">Session ended</string>

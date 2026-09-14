@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026/09/14.
+데이터 갱신일: 2026/09/15.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공
@@ -358,6 +358,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 파일 관리자 스크립트 메뉴의 "플로팅 실행" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다
 * `추가` 레이아웃 분석: 노드 정보 대화상자에서 속성을 길게 누르면 여러 개를 선택해 하나의 체인 선택자 (id('x').text('y')) 또는 pickup() / detect() 가 받아들이는 객체 선택자로 복사할 수 있고, "레이아웃을 파일로 저장" 은 캡처한 노드 트리를 <작업 디렉터리>/layouts/<시각>.layout.json 에 기록하며, 파일 관리자에서 해당 파일을 탭하면 오프라인으로 분석할 수 있습니다
 * `추가` 터미널: 앱 내 셸 (드로어 "도구" 그룹, 디렉터리 메뉴 "터미널에서 열기", 프로젝트 툴바). pty 에서 /system/bin/sh 를 실행하며, Esc / Tab / Ctrl / Alt 와 커서 키 바, 핀치 줌 글자 크기, 출력 기록 복사 / 공유, npm 보조 메뉴, Node.js 런타임 플러그인의 node 를 사용할 수 없는 이유를 알리는 배너를 제공합니다
+* `추가` 터미널: Node.js 런타임 플러그인 (1.5.0 이상) 의 node, npm, npx, corepack, yarn, pnpm. npm / corepack 자산은 SHA-256 으로 검증하여 플러그인 빌드마다 한 번 설치하고, 명령 링크는 세션마다 재구성하며, npm 캐시와 전역 설치는 터미널 프리픽스 안에 유지. 새 "터미널" 설정 그룹 (npm 레지스트리: npmjs.org / npmmirror.com / 사용자 지정 https URL, 라이프사이클 스크립트 무시, 터미널 데이터 지우기)
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
 * `수정` 호스트 및 패키징 앱의 릴리스 빌드에서 네트워크 보안 설정이 HTTP 요청을 차단하던 문제에 대응하여 평문 통신 정책을 디버그 빌드와 통일하고 GitHub 리소스 도메인의 HTTPS 제한은 유지
 * `수정` 시스템이 확인 화면 실행을 차단하면 백그라운드 APK 설치를 계속할 수 없던 문제; 세션별 상태를 저장하고 알림이나 앱 복귀 시 확인을 재개하며, 알림 거부 또는 프로세스 재생성 후에도 대기 중인 확인 복원 가능
@@ -938,7 +939,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026/09/14 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026/09/15 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

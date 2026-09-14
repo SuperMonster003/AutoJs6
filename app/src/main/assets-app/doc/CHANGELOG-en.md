@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -196,6 +196,7 @@
 * `Feature` Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color
 * `Feature` Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); "Save layout to file" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline
 * `Feature` Terminal: an in-app shell (drawer "Tools" group, directory menu "Open in terminal", project toolbar) running /system/bin/sh in a pty, with a key bar for Esc / Tab / Ctrl / Alt and the cursor keys, pinch-to-zoom text size, transcript copy / share, an npm helper menu, and a banner explaining why node from the Node.js Runtime plugin is unavailable
+* `Feature` Terminal: node, npm, npx, corepack, yarn and pnpm from the Node.js Runtime plugin (1.5.0+), with the npm / corepack archive verified by SHA-256 and installed once per plugin build, command links rebuilt on every session, npm caches and global installs kept under the terminal prefix, and a new "Terminal" settings group (npm registry: npmjs.org / npmmirror.com / custom https URL, ignore lifecycle scripts, clear terminal data)
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
 * `Fix` HTTP requests in host and packaged release apps could be blocked by the network security configuration; cleartext policy now matches debug builds while keeping GitHub resource domains restricted to HTTPS
 * `Fix` Background APK installations could not continue when the system blocked the confirmation activity; session status is now saved, with confirmation available through a notification or on returning to the app, including after notification denial or process recreation

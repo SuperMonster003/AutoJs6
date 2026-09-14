@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/14",
+      "released_date": "2026/09/15",
       "feature": [
         "Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif",
         "Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables",
@@ -190,7 +190,8 @@
         "`images.matchTemplate` et `images.findPointByImage` acceptent l'option `scales` (un facteur ou une liste) pour rechercher des modèles capturés à d'autres résolutions; chaque correspondance expose désormais `width`, `height`, `scale`, `center` et `rect`, et `MatchingResult` gagne `size`, `isEmpty()`, `isNotEmpty()` et `filter()`",
         "Entrée \"Exécution flottante\" dans le menu de script de l'explorateur de fichiers, avec une barre flottante translucide pour démarrer / arrêter, modifier et consulter le journal du script, suivant le mode nuit et la couleur du thème",
         "Analyse de mise en page : appuyez longuement sur un attribut dans la boîte de dialogue d'informations du nœud pour en cocher plusieurs et les copier comme un sélecteur chaîné (id('x').text('y')) ou un sélecteur objet accepté par pickup() / detect() ; \"Enregistrer la mise en page dans un fichier\" écrit l'arbre de nœuds capturé dans <répertoire de travail>/layouts/<heure>.layout.json, et appuyer sur ce fichier dans l'explorateur de fichiers l'analyse hors ligne",
-        "Terminal : un shell intégré (groupe \"Outils\" du menu latéral, \"Ouvrir dans le terminal\" dans le menu de répertoire, barre du projet) exécutant /system/bin/sh dans un pty, avec une barre de touches Esc / Tab / Ctrl / Alt et touches de curseur, taille du texte par pincement, copie / partage de la transcription, un menu d'aides npm et une bannière expliquant pourquoi node du plugin Node.js Runtime est indisponible"
+        "Terminal : un shell intégré (groupe \"Outils\" du menu latéral, \"Ouvrir dans le terminal\" dans le menu de répertoire, barre du projet) exécutant /system/bin/sh dans un pty, avec une barre de touches Esc / Tab / Ctrl / Alt et touches de curseur, taille du texte par pincement, copie / partage de la transcription, un menu d'aides npm et une bannière expliquant pourquoi node du plugin Node.js Runtime est indisponible",
+        "Terminal : node, npm, npx, corepack, yarn et pnpm depuis le plugin Node.js Runtime (1.5.0+) ; l'archive npm / corepack est vérifiée par SHA-256 et installée une fois par build du plugin, les liens de commandes sont reconstruits à chaque session, les caches npm et les installations globales restent sous le préfixe du terminal, et un nouveau groupe de réglages \"Terminal\" (registre npm : npmjs.org / npmmirror.com / URL https personnalisée, ignorer les scripts de cycle de vie, effacer les données du terminal)"
       ],
       "fix": [
         "L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours",

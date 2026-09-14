@@ -273,6 +273,9 @@
     <string name="entry_root_mode_force_root">強制 Root 模式</string>
     <string name="entry_root_record_out_file_type_binary">二進位制檔案 (不可編輯)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript 檔案 (可編輯)</string>
+    <string name="entry_terminal_npm_registry_custom">自訂 URL</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (預設)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (中國鏡像)</string>
     <string name="error_a11y_service_not_operational">無障礙服務已連線但尚未可操作 (未收到任何事件)</string>
     <string name="error_a_runtime_has_been_set">執行時已存在</string>
     <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
@@ -556,6 +559,7 @@
     <string name="hint_plugin_process_failed_to_start">外掛程序無法穩定啟動. 請更新或重新安裝外掛; 如問題持續, 請聯絡外掛開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前外掛需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">外掛協議與當前 AutoJs6 不相容, 需升級外掛版本.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
     <string name="image_editor_brightness">亮度</string>
     <string name="image_editor_brush">畫筆</string>
@@ -719,7 +723,9 @@
     <string name="summary_release_history_preference">檢視發行版本歷史更新記錄與統計資料</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始型別在指令碼中將被包裝為對應的 Java 物件</string>
     <string name="summary_stable_mode">增強佈局分析穩定性但降低程式碼相容性 (需重啟無障礙服務)</string>
+    <string name="summary_terminal_clear_data">刪除終端機主目錄, 已安裝的套件與 npm 快取</string>
     <string name="summary_terminal_node_probe">檢測終端機能否執行 Node.js 執行階段外掛程式提供的 node</string>
+    <string name="summary_terminal_npm_ignore_scripts">以 --ignore-scripts 執行 npm, 使套件無法執行安裝掛鉤 (原生二進位檔在此本來也無法執行)</string>
     <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止指令碼錄製 (需開啟浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在執行的指令碼</string>
@@ -1945,10 +1951,13 @@
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
     <string name="text_terminal">終端機</string>
+    <string name="text_terminal_clear_data">清除終端機資料</string>
     <string name="text_terminal_close_session">關閉工作階段</string>
+    <string name="text_terminal_confirm_clear_data">刪除 %1$s 下的全部終端機資料? 執行中的工作階段將被關閉.</string>
     <string name="text_terminal_confirm_close_running">工作階段中仍有程序在執行, 確定關閉?</string>
     <string name="text_terminal_copy_home_path">複製主目錄路徑</string>
     <string name="text_terminal_copy_transcript">複製終端機記錄</string>
+    <string name="text_terminal_data_cleared">終端機資料已清除</string>
     <string name="text_terminal_no_npm_scripts">package.json 未宣告 scripts</string>
     <string name="text_terminal_no_package_json">目前目錄未找到 package.json</string>
     <string name="text_terminal_node_exec_denied">此裝置拒絕執行外掛程式的 Node.js 啟動器, 目前僅可使用系統 shell</string>
@@ -1958,13 +1967,19 @@
     <string name="text_terminal_node_plugin_too_old">已安裝的 Node.js 執行階段外掛程式不含終端機啟動器, 更新外掛程式後方可在此使用 node 與 npm</string>
     <string name="text_terminal_node_probe">Node.js 啟動器檢測</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在檢測 Node.js 啟動器...</string>
+    <string name="text_terminal_npm_ignore_scripts">忽略 npm 生命週期指令碼</string>
     <string name="text_terminal_npm_init">初始化專案 (npm init)</string>
     <string name="text_terminal_npm_install">安裝相依套件 (npm install)</string>
     <string name="text_terminal_npm_install_package">安裝套件 (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">npm 鏡像來源</string>
+    <string name="text_terminal_npm_registry_custom_url">自訂鏡像來源 URL</string>
+    <string name="text_terminal_npm_registry_https_only">鏡像來源 URL 必須以 https:// 開頭</string>
     <string name="text_terminal_npm_run_script">執行指令碼 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">無法從 Node.js 執行階段外掛程式準備 npm 與 corepack, 目前僅可使用 node 與系統 shell</string>
     <string name="text_terminal_other_package_managers">其他套件管理器 (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 "yarn --version" 或 "pnpm --version" 即可啟用.</string>
+    <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 \"yarn --version\" 或 \"pnpm --version\" 即可啟用.</string>
     <string name="text_terminal_package_name_hint">套件名稱, 如 is-odd</string>
+    <string name="text_terminal_preparing_npm">正在從 Node.js 執行階段外掛程式準備 npm 與 corepack...</string>
     <string name="text_terminal_search_npm">搜尋 npm 套件</string>
     <string name="text_terminal_select_text">選取文字</string>
     <string name="text_terminal_session_ended">工作階段已結束</string>

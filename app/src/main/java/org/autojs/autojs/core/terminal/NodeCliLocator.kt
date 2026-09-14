@@ -55,6 +55,9 @@ object NodeCliLocator {
             /** The device refused to run the launcher, or it failed to report a version. zh-CN: 设备拒绝运行启动器, 或启动器未能报告版本. */
             data class ExecDenied(val launcher: Launcher, val probe: NodeCliProbe.Result) : Unavailable()
 
+            /** The launcher runs, but installing the npm / corepack archive or linking commands failed. zh-CN: 启动器可运行, 但安装 npm / corepack 资产或创建命令链接失败. */
+            data class SetupFailed(val launcher: Launcher, val message: String) : Unavailable()
+
         }
 
     }

@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 14 September 2026.
+Données mises à jour le 15 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -358,6 +358,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Entrée "Exécution flottante" dans le menu de script de l'explorateur de fichiers, avec une barre flottante translucide pour démarrer / arrêter, modifier et consulter le journal du script, suivant le mode nuit et la couleur du thème
 * `Fonctionnalité` Analyse de mise en page : appuyez longuement sur un attribut dans la boîte de dialogue d'informations du nœud pour en cocher plusieurs et les copier comme un sélecteur chaîné (id('x').text('y')) ou un sélecteur objet accepté par pickup() / detect() ; "Enregistrer la mise en page dans un fichier" écrit l'arbre de nœuds capturé dans <répertoire de travail>/layouts/<heure>.layout.json, et appuyer sur ce fichier dans l'explorateur de fichiers l'analyse hors ligne
 * `Fonctionnalité` Terminal : un shell intégré (groupe "Outils" du menu latéral, "Ouvrir dans le terminal" dans le menu de répertoire, barre du projet) exécutant /system/bin/sh dans un pty, avec une barre de touches Esc / Tab / Ctrl / Alt et touches de curseur, taille du texte par pincement, copie / partage de la transcription, un menu d'aides npm et une bannière expliquant pourquoi node du plugin Node.js Runtime est indisponible
+* `Fonctionnalité` Terminal : node, npm, npx, corepack, yarn et pnpm depuis le plugin Node.js Runtime (1.5.0+) ; l'archive npm / corepack est vérifiée par SHA-256 et installée une fois par build du plugin, les liens de commandes sont reconstruits à chaque session, les caches npm et les installations globales restent sous le préfixe du terminal, et un nouveau groupe de réglages "Terminal" (registre npm : npmjs.org / npmmirror.com / URL https personnalisée, ignorer les scripts de cycle de vie, effacer les données du terminal)
 * `Correction` L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours
 * `Correction` La configuration de sécurité réseau pouvait bloquer les requêtes HTTP dans les versions de distribution de l'hôte et des applications empaquetées; la politique du trafic en clair correspond désormais aux versions de débogage tout en limitant les domaines de ressources GitHub à HTTPS
 * `Correction` Les installations APK en arrière-plan ne pouvaient pas continuer lorsque le système bloquait la page de confirmation; l'état est désormais enregistré par session, avec reprise depuis une notification ou au retour dans l'application, même après un refus des notifications ou une recréation du processus
@@ -938,7 +939,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 14 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 15 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

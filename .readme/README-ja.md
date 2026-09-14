@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 14 日 に更新されました.
+データは 2026 年 9 月 15 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -168,7 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `新機能` Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言
 * `新機能` Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応
@@ -358,6 +358,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` ファイルマネージャーのスクリプトメニューに "フローティング実行" 項目を追加. 半透明のフローティングツールバーでスクリプトの開始 / 停止, 編集, ログ表示ができ, ナイトモードとテーマカラーに追従します
 * `新機能` レイアウト解析: ノード情報ダイアログで属性を長押しすると複数を選択し, 1 つのチェーン形式セレクタ (id('x').text('y')) または pickup() / detect() が受け付けるオブジェクト形式セレクタとしてコピーできます. "レイアウトをファイルに保存" はキャプチャしたノードツリーを <作業ディレクトリ>/layouts/<時刻>.layout.json に書き出し, ファイルマネージャーでそのファイルをタップするとオフラインで解析できます
 * `新機能` ターミナル: アプリ内シェル (ドロワーの "ツール" グループ, ディレクトリメニューの "ターミナルで開く", プロジェクトツールバー). pty 上で /system/bin/sh を実行し, Esc / Tab / Ctrl / Alt とカーソルキーのキーバー, ピンチによる文字サイズ変更, 出力ログのコピー / 共有, npm 補助メニュー, Node.js ランタイムプラグインの node が使えない理由を示すバナーを備えます
+* `新機能` ターミナル: Node.js ランタイムプラグイン (1.5.0 以降) による node, npm, npx, corepack, yarn, pnpm. npm / corepack アセットは SHA-256 で検証しプラグインビルドごとに一度インストール, コマンドリンクはセッションごとに再構築, npm キャッシュとグローバルインストールはターミナルのプレフィックス内に保持. 新しい "ターミナル" 設定グループ (npm レジストリ: npmjs.org / npmmirror.com / カスタム https URL, ライフサイクルスクリプトの無視, ターミナルデータの消去)
 * `修正` HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用
 * `修正` ホストとパッケージ化アプリのリリース版でネットワークセキュリティ設定により HTTP リクエストが拒否される問題に対応し, 平文通信ポリシーをデバッグ版と統一, GitHub リソースドメインの HTTPS 制限は維持
 * `修正` バックグラウンドでの APK インストールでシステムが確認画面の起動を制限すると続行できない問題; 状態をセッションごとに保存し, 通知またはアプリに戻った際に確認を再開でき, 通知の拒否やプロセスの再生成後も復元可能
@@ -938,7 +939,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 14 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 15 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

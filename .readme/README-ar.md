@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 14 September 2026.
+تم تحديث البيانات في 15 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,7 +168,7 @@
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `إضافة جديدة` إدارة إذن الشبكة المحلية في Android 17 من الدرج والإعدادات واتصالات VS Code التي يبدأها المستخدم, مع التصريح بالإذن حسب targetSdk الفعلي
 * `إضافة جديدة` سجل خروج العمليات في الإعدادات على Android 11 والإصدارات الأحدث, مع أسباب النظام الحديثة عبر عمليات التطبيق وتحديد محدد الذاكرة وتقارير قابلة للنسخ
@@ -358,6 +358,7 @@
 * `إضافة جديدة` عنصر "تشغيل عائم" في قائمة السكربت بمدير الملفات, يعرض شريط أدوات عائما شبه شفاف لبدء / إيقاف السكربت وتحريره وعرض سجله, ويتبع الوضع الليلي ولون السمة
 * `إضافة جديدة` تحليل التخطيط: اضغط مطولا على سمة في مربع حوار معلومات العقدة لتحديد عدة سمات ونسخها كمحدد متسلسل واحد (id('x').text('y')) أو كمحدد كائن واحد يقبله pickup() / detect(); "حفظ التخطيط في ملف" يكتب شجرة العقد الملتقطة إلى <دليل العمل>/layouts/<الوقت>.layout.json, والنقر على هذا الملف في مدير الملفات يحلله دون اتصال
 * `إضافة جديدة` الطرفية: shell داخل التطبيق (مجموعة "الأدوات" في القائمة الجانبية, "فتح في الطرفية" في قائمة الدليل, شريط أدوات المشروع) يشغل /system/bin/sh في pty, مع شريط مفاتيح Esc / Tab / Ctrl / Alt ومفاتيح المؤشر, وتكبير النص بالقرص, ونسخ / مشاركة النص الكامل, وقائمة مساعدة npm, ولافتة توضح سبب عدم توفر node من إضافة Node.js Runtime
+* `إضافة جديدة` الطرفية: node و npm و npx و corepack و yarn و pnpm من إضافة Node.js Runtime (1.5.0+), مع التحقق من أرشيف npm / corepack عبر SHA-256 وتثبيته مرة لكل بناء للإضافة, وإعادة إنشاء روابط الأوامر في كل جلسة, وإبقاء ذاكرة npm المؤقتة والتثبيتات العامة ضمن بادئة الطرفية, ومجموعة إعدادات "الطرفية" الجديدة (سجل npm: npmjs.org / npmmirror.com / عنوان https مخصص, تجاهل نصوص دورة الحياة, مسح بيانات الطرفية)
 * `تصليح` كان خيار HTTP isInsecure / insecure قد يبقي التحقق من الشهادات وأسماء المضيفين معطلا للطلبات اللاحقة; أصبح يطبق على الطلب الحالي فقط
 * `تصليح` قد تحجب إعدادات أمان الشبكة طلبات HTTP في إصدارات التطبيق المضيف والتطبيقات المجمعة للنشر; أصبحت سياسة الاتصالات غير المشفرة متوافقة مع إصدارات التصحيح مع إبقاء نطاقات موارد GitHub مقيدة باتصالات HTTPS
 * `تصليح` تعذر متابعة تثبيت APK في الخلفية عندما يمنع النظام فتح شاشة التأكيد; يتم الآن حفظ حالة كل جلسة مع إمكانية المتابعة من الإشعار أو عند العودة إلى التطبيق, حتى بعد رفض الإشعارات أو إعادة إنشاء العملية
@@ -938,7 +939,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 14 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 15 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -20,6 +20,8 @@ class NodeCliMetadataTest {
         NodeCliMetadata.KEY_ARCHIVE to "nodejs/cli/node-cli-24.21.0.bin",
         NodeCliMetadata.KEY_ARCHIVE_SHA256 to sha,
         NodeCliMetadata.KEY_ARCHIVE_ROOT to "lib/node_modules/",
+        NodeCliMetadata.KEY_ARCHIVE_ENTRY_COUNT to 1699,
+        NodeCliMetadata.KEY_ARCHIVE_BYTES to 10068758,
         NodeCliMetadata.KEY_NPM_VERSION to "11.6.0",
         NodeCliMetadata.KEY_COREPACK_VERSION to "0.34.0",
     )
@@ -35,6 +37,26 @@ class NodeCliMetadataTest {
         assertEquals("lib/node_modules", descriptor.archiveRoot)
         assertEquals("11.6.0", descriptor.npmVersion)
         assertEquals("0.34.0", descriptor.corepackVersion)
+    }
+
+    @Test
+    fun declaredLimitsAreParsedAndOptional() {
+        val descriptor = (NodeCliMetadata.parse(valid()) as ParseResult.Valid).descriptor
+        assertEquals(1699, descriptor.archiveEntryCount)
+        assertEquals(10068758L, descriptor.archiveBytes)
+        val without = (NodeCliMetadata.parse(valid().apply {
+            remove(NodeCliMetadata.KEY_ARCHIVE_ENTRY_COUNT)
+            put(NodeCliMetadata.KEY_ARCHIVE_BYTES, "not a number")
+        }) as ParseResult.Valid).descriptor
+        assertNull(without.archiveEntryCount)
+        assertNull(without.archiveBytes)
+    }
+
+    @Test
+    fun keysMirrorThePluginContract() {
+        assertEquals("org.autojs.plugin.nodejs.NODE_CLI_SCHEMA", NodeCliMetadata.KEY_SCHEMA)
+        assertEquals("org.autojs.plugin.nodejs.NODE_CLI_ARCHIVE_BYTES", NodeCliMetadata.KEY_ARCHIVE_BYTES)
+        assertEquals("1", NodeCliMetadata.SUPPORTED_SCHEMA)
     }
 
     @Test

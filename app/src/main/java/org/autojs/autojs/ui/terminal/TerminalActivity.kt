@@ -26,12 +26,16 @@ import org.autojs.autojs.core.terminal.NodeCliLocator
 import org.autojs.autojs.core.terminal.NodeCliLocator.Resolution
 import org.autojs.autojs.core.terminal.ShellQuoting
 import org.autojs.autojs.core.terminal.TerminalKeySequences
+import org.autojs.autojs.core.terminal.TerminalNodeSetup
+import org.autojs.autojs.core.terminal.TerminalPaths
+import org.autojs.autojs.core.terminal.TerminalPreferences
 import org.autojs.autojs.core.terminal.TerminalSessionManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.settings.TerminalNodeProbePreference
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -73,14 +77,54 @@ class TerminalActivity : BaseActivity() {
         npmActions = TerminalNpmActions(this, ::typeCommand) { session?.pty?.currentDirectory() }
 
         val directory = resolveDirectory(intent)
-        val restored = savedInstanceState?.getString(STATE_SESSION_ID)?.let(TerminalSessionManager::get)
-        attachSession(restored ?: TerminalSessionManager.create(this, directory))
-        updateSubtitle(directory)
         setUpKeyBar()
         setUpBackHandling()
         setUpNodeBanner()
+        val restored = savedInstanceState?.getString(STATE_SESSION_ID)?.let(TerminalSessionManager::get)
+        if (restored != null) {
+            attachSession(restored)
+            updateSubtitle(directory)
+            refreshNodeAvailability()
+        } else {
+            startSession(directory)
+        }
         showTipsIfNeeded()
-        refreshNodeAvailability()
+    }
+
+    /**
+     * Resolves the plugin launcher first so the shell starts with node / npm on its PATH; the
+     * archive extraction (first run after a plugin install or update) shows a progress dialog.
+     * zh-CN: 先解析插件启动器, 让 shell 启动时 PATH 中即有 node / npm; 资产解压 (插件安装或更新后的首次) 显示进度对话框.
+     */
+    private fun startSession(directory: String) {
+        lifecycleScope.launch {
+            val paths = TerminalPaths.of(this@TerminalActivity).ensureLayout()
+            val resolution = withContext(Dispatchers.IO) {
+                runCatching { NodeCliLocator.resolve(applicationContext) }
+                    .getOrElse { Resolution.Unavailable.PluginMissing }
+            }
+            val progress = if (TerminalNodeSetup.needsInstall(paths, resolution)) {
+                MaterialDialog.Builder(this@TerminalActivity)
+                    .content(R.string.text_terminal_preparing_npm)
+                    .progress(true, 0)
+                    .cancelable(false)
+                    .widgetThemeColor()
+                    .showAdaptive()
+            } else {
+                null
+            }
+            val options = TerminalPreferences.nodeEnvironmentOptions()
+            val prepared = withContext(Dispatchers.IO) {
+                TerminalNodeSetup.prepare(applicationContext, paths, resolution, options)
+            }
+            progress?.dismiss()
+            if (isFinishing || isDestroyed) return@launch
+            nodeResolution = prepared.resolution
+            attachSession(TerminalSessionManager.create(this@TerminalActivity, directory, prepared.environment))
+            updateSubtitle(directory)
+            renderNodeBanner(prepared.resolution)
+            invalidateOptionsMenu()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -97,6 +141,7 @@ class TerminalActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         binding.terminal.onResume()
+        refreshSubtitle()
     }
 
     override fun onPause() {
@@ -155,6 +200,8 @@ class TerminalActivity : BaseActivity() {
         binding.keyBar.setModifiers(pty.ctrlArmed, pty.altArmed)
         if (pty.exitCode != null) {
             onSessionEnded()
+        } else {
+            view.postDelayed({ if (!isDestroyed) refreshSubtitle() }, SUBTITLE_REFRESH_DELAY_MILLIS)
         }
     }
 
@@ -222,6 +269,18 @@ class TerminalActivity : BaseActivity() {
         binding.toolbar.subtitle = paths.toTildePath(directory)
     }
 
+    /**
+     * Shows where the shell actually is: the requested directory may be unreadable (no storage
+     * permission), in which case the launcher falls back to `$HOME`.
+     * zh-CN: 显示 shell 实际所在目录: 请求的目录可能不可读 (无存储权限), 此时启动命令会回退到 `$HOME`.
+     */
+    private fun refreshSubtitle() {
+        val pty = session?.pty ?: return
+        if (!pty.isProcessAlive) return
+        val current = pty.currentDirectory()?.path ?: return
+        updateSubtitle(current)
+    }
+
     // region Node availability
 
     private fun setUpNodeBanner() {
@@ -231,6 +290,11 @@ class TerminalActivity : BaseActivity() {
         }
     }
 
+    /**
+     * For restored sessions only: the environment of a running shell cannot change, so this just
+     * refreshes the banner and menu state.
+     * zh-CN: 仅用于恢复的会话: 运行中 shell 的环境无法更改, 这里只刷新横幅与菜单状态.
+     */
     private fun refreshNodeAvailability() {
         lifecycleScope.launch {
             val resolution = withContext(Dispatchers.IO) {
@@ -259,6 +323,11 @@ class TerminalActivity : BaseActivity() {
             )
             is Resolution.Unavailable.ExecDenied -> {
                 banner.nodeBannerText.setText(R.string.text_terminal_node_exec_denied)
+                banner.nodeBannerAction.setText(R.string.text_details)
+                banner.nodeBannerAction.setOnClickListener { showProbeDetails(resolution) }
+            }
+            is Resolution.Unavailable.SetupFailed -> {
+                banner.nodeBannerText.setText(R.string.text_terminal_npm_setup_failed)
                 banner.nodeBannerAction.setText(R.string.text_details)
                 banner.nodeBannerAction.setOnClickListener { showProbeDetails(resolution) }
             }
@@ -293,6 +362,7 @@ class TerminalActivity : BaseActivity() {
             is Resolution.Unavailable.PluginTooOld -> getString(R.string.text_terminal_node_plugin_too_old)
             is Resolution.Unavailable.ExecutableMissing -> getString(R.string.text_terminal_node_executable_missing, resolution.abi)
             is Resolution.Unavailable.ExecDenied -> getString(R.string.text_terminal_node_exec_denied)
+            is Resolution.Unavailable.SetupFailed -> getString(R.string.text_terminal_npm_setup_failed)
             else -> getString(R.string.text_terminal_node_missing)
         }
         val builder = MaterialDialog.Builder(this)
@@ -301,7 +371,7 @@ class TerminalActivity : BaseActivity() {
             .negativeText(R.string.dialog_button_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .widgetThemeColor()
-        if (resolution is Resolution.Unavailable.ExecDenied) {
+        if (resolution is Resolution.Unavailable.ExecDenied || resolution is Resolution.Unavailable.SetupFailed) {
             builder.positiveText(R.string.text_details).onPositive { _, _ -> showProbeDetails(resolution) }
         } else {
             builder.positiveText(R.string.text_plugin_center)
@@ -438,7 +508,9 @@ class TerminalActivity : BaseActivity() {
     private fun showTipsIfNeeded() = showTips(force = false)
 
     private fun showTips(force: Boolean) {
-        val home = session?.paths?.home?.path.orEmpty()
+        // The first-run tip appears before the session exists, so the home comes from the layout itself.
+        // zh-CN: 首次提示在会话创建之前弹出, 因此主目录直接取自目录布局.
+        val home = TerminalPaths.of(this).home.path
         val content = getString(R.string.text_terminal_tips_content, home)
         if (force) {
             MaterialDialog.Builder(this)
@@ -464,6 +536,7 @@ class TerminalActivity : BaseActivity() {
         private const val CONTEXT_SELECT_TEXT = 1
         private const val CONTEXT_COPY_ALL = 2
         private const val CONTEXT_PASTE = 3
+        private const val SUBTITLE_REFRESH_DELAY_MILLIS = 800L
 
         private val TEXT_SIZE_CHOICES = listOf(8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 28, 32)
 

@@ -272,6 +272,9 @@
     <string name="entry_root_mode_force_root">强制 Root 模式</string>
     <string name="entry_root_record_out_file_type_binary">二进制文件 (不可编辑)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript 文件 (可编辑)</string>
+    <string name="entry_terminal_npm_registry_custom">自定义 URL</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (默认)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (中国镜像)</string>
     <string name="error_a11y_service_not_operational">无障碍服务已连接但尚未可操作 (未收到任何事件)</string>
     <string name="error_a_runtime_has_been_set">运行时已存在</string>
     <string name="error_abandoned_method">方法 %s 已被废弃, 应避免使用</string>
@@ -555,6 +558,7 @@
     <string name="hint_plugin_process_failed_to_start">插件进程无法稳定启动. 请更新或重新安装插件; 如问题持续, 请联系插件开发者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">当前插件需要更高版本的 AutoJs6 宿主环境 (要求 versionCode: %1$d, 当前 versionCode: %2$d), 需要升级 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">插件协议与当前 AutoJs6 不兼容, 需升级插件版本.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可尝试点击 \"激活\" 按钮激活一次插件.\n如激活成功, 按钮将在一定时间内自动开启.</string>
     <string name="image_editor_brightness">亮度</string>
     <string name="image_editor_brush">画笔</string>
@@ -718,7 +722,9 @@
     <string name="summary_release_history_preference">查看发行版本历史更新记录与统计数据</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始类型在脚本中将被包装为对应的 Java 对象</string>
     <string name="summary_stable_mode">增强布局分析稳定性但降低代码兼容性 (需重启无障碍服务)</string>
+    <string name="summary_terminal_clear_data">删除终端主目录, 已安装的包与 npm 缓存</string>
     <string name="summary_terminal_node_probe">检测终端能否运行 Node.js 运行时插件提供的 node</string>
+    <string name="summary_terminal_npm_ignore_scripts">以 --ignore-scripts 运行 npm, 使包无法执行安装钩子 (原生二进制在此本来也无法运行)</string>
     <string name="summary_text_launcher_shortcuts">添加快捷方式到启动器</string>
     <string name="summary_use_volume_control_record">按 \"音量减\" 键开始或停止脚本录制 (需开启浮动按钮)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 键停止所有正在运行的脚本</string>
@@ -1945,10 +1951,13 @@
     <string name="text_tailor_made_developer">二次开发者</string>
     <string name="text_task">任务</string>
     <string name="text_terminal">终端</string>
+    <string name="text_terminal_clear_data">清除终端数据</string>
     <string name="text_terminal_close_session">关闭会话</string>
+    <string name="text_terminal_confirm_clear_data">删除 %1$s 下的全部终端数据? 运行中的会话将被关闭.</string>
     <string name="text_terminal_confirm_close_running">会话中仍有进程在运行, 确定关闭?</string>
     <string name="text_terminal_copy_home_path">复制主目录路径</string>
     <string name="text_terminal_copy_transcript">复制终端记录</string>
+    <string name="text_terminal_data_cleared">终端数据已清除</string>
     <string name="text_terminal_no_npm_scripts">package.json 未声明 scripts</string>
     <string name="text_terminal_no_package_json">当前目录未找到 package.json</string>
     <string name="text_terminal_node_exec_denied">此设备拒绝运行插件的 Node.js 启动器, 当前仅可使用系统 shell</string>
@@ -1958,13 +1967,19 @@
     <string name="text_terminal_node_plugin_too_old">已安装的 Node.js 运行时插件不含终端启动器, 更新插件后方可在此使用 node 与 npm</string>
     <string name="text_terminal_node_probe">Node.js 启动器检测</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在检测 Node.js 启动器...</string>
+    <string name="text_terminal_npm_ignore_scripts">忽略 npm 生命周期脚本</string>
     <string name="text_terminal_npm_init">初始化项目 (npm init)</string>
     <string name="text_terminal_npm_install">安装依赖 (npm install)</string>
     <string name="text_terminal_npm_install_package">安装包 (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">npm 镜像源</string>
+    <string name="text_terminal_npm_registry_custom_url">自定义镜像源 URL</string>
+    <string name="text_terminal_npm_registry_https_only">镜像源 URL 必须以 https:// 开头</string>
     <string name="text_terminal_npm_run_script">运行脚本 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">无法从 Node.js 运行时插件准备 npm 与 corepack, 目前仅可使用 node 与系统 shell</string>
     <string name="text_terminal_other_package_managers">其他包管理器 (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">yarn 与 pnpm 由 corepack 提供, 首次使用时从 registry 下载. 运行 "yarn --version" 或 "pnpm --version" 即可启用.</string>
+    <string name="text_terminal_other_package_managers_content">yarn 与 pnpm 由 corepack 提供, 首次使用时从 registry 下载. 运行 \"yarn --version\" 或 \"pnpm --version\" 即可启用.</string>
     <string name="text_terminal_package_name_hint">包名, 如 is-odd</string>
+    <string name="text_terminal_preparing_npm">正在从 Node.js 运行时插件准备 npm 与 corepack...</string>
     <string name="text_terminal_search_npm">搜索 npm 包</string>
     <string name="text_terminal_select_text">选择文本</string>
     <string name="text_terminal_session_ended">会话已结束</string>

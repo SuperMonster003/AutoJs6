@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 14 日.
+数据更新于 2026 年 9 月 15 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/14
+###### 2026/09/15
 
 * `新增` Android 17 本地网络权限管理, 支持抽屉, 设置页与 VS Code 连接时按需申请, 并按实际 targetSdk 声明权限
 * `新增` 设置页支持查看 Android 11 及以上的进程退出记录, 包含多进程近期系统原因, 内存限制器识别与可复制报告
@@ -334,6 +334,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 文件管理器脚本菜单 "悬浮运行" 项, 以半透明悬浮工具栏进行脚本启停 / 编辑 / 查看日志, 跟随夜间模式与主题色
 * `新增` 布局分析: 节点信息对话框中长按属性可勾选多项, 并合并复制为链式选择器 (id('x').text('y')) 或 pickup() / detect() 可接受的对象选择器; "保存布局为文件" 把捕获的节点树写入 <工作目录>/layouts/<时间>.layout.json, 在文件管理器中点击该文件即可离线分析
 * `新增` 终端: 应用内 shell (侧拉菜单 "工具" 组, 目录菜单 "在终端中打开", 项目工具栏), 以 pty 运行 /system/bin/sh, 带 Esc / Tab / Ctrl / Alt 及方向键按键栏, 捏合缩放字号, 复制 / 分享终端记录, npm 辅助菜单, 以及说明 Node.js 运行时插件的 node 为何不可用的横幅
+* `新增` 终端: 由 Node.js 运行时插件 (1.5.0+) 提供 node, npm, npx, corepack, yarn 与 pnpm, npm / corepack 资产经 SHA-256 校验并按插件构建安装一次, 每次会话重建命令链接, npm 缓存与全局安装保持在终端前缀目录内, 并新增 "终端" 设置组 (npm 镜像源: npmjs.org / npmmirror.com / 自定义 https URL, 忽略生命周期脚本, 清除终端数据)
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
 * `修复` 宿主与打包应用发行版的 HTTP 请求可能被网络安全配置意外拦截, 明文策略现与调试版保持一致, 并保留 GitHub 资源域的 HTTPS 限制
 * `修复` 后台 APK 安装被系统限制启动确认页时无法继续的问题; 安装状态按会话保存, 支持通知及返回应用后继续确认, 通知被拒绝或进程重建后仍可恢复待确认事项
@@ -917,7 +918,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 14 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 15 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

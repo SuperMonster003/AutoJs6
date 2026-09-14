@@ -276,6 +276,9 @@
     <string name="entry_root_mode_force_root">Forcer le mode root</string>
     <string name="entry_root_record_out_file_type_binary">Type binaire (non éditable)</string>
     <string name="entry_root_record_out_file_type_js">Type JavaScript (modifiable)</string>
+    <string name="entry_terminal_npm_registry_custom">URL personnalisée</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (par défaut)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (miroir en Chine)</string>
     <string name="error_a11y_service_not_operational">Le service d\'accessibilité est connecté mais pas encore opérationnel (aucun événement reçu)</string>
     <string name="error_a_runtime_has_been_set">Un runtime a été défini</string>
     <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
@@ -559,6 +562,7 @@
     <string name="hint_plugin_process_failed_to_start">Le processus du plugin n\'a pas pu démarrer de manière fiable. Mettez à jour ou réinstallez le plugin; si le problème persiste, contactez le développeur du plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Le protocole du plugin n\'est pas compatible avec la version actuelle d\'AutoJs6. Une mise à niveau du plugin est requise.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
     <string name="image_editor_brightness">Luminosité</string>
     <string name="image_editor_brush">Pinceau</string>
@@ -722,7 +726,9 @@
     <string name="summary_release_history_preference">Voir l\'historique des versions et les statistiques</string>
     <string name="summary_rhino_java_primitive_wrap">Les types primitifs Java seront exposés comme objets Java dans les scripts</string>
     <string name="summary_stable_mode">Analyse de la mise en page plus stable mais moins bonne compatibilité du code (redémarrage du service a11y nécessaire).</string>
+    <string name="summary_terminal_clear_data">Supprimer le répertoire personnel du terminal, les paquets installés et les caches npm</string>
     <string name="summary_terminal_node_probe">Vérifier si le terminal peut exécuter node depuis le plugin Node.js Runtime</string>
+    <string name="summary_terminal_npm_ignore_scripts">Exécuter npm avec --ignore-scripts pour que les paquets ne puissent pas lancer de hooks d\'installation (les binaires natifs ne peuvent de toute façon pas s\'exécuter ici)</string>
     <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
     <string name="summary_use_volume_control_record">Démarrer ou arrêter l\'enregistrement contrôlé par la touche de réduction du volume lorsque le bouton flottant est affiché.</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Appuyez sur la touche \"Volume fort\" pour arrêter tous les scripts en cours d\'exécution.</string>
@@ -1948,10 +1954,13 @@
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Tâche</string>
     <string name="text_terminal">Terminal</string>
+    <string name="text_terminal_clear_data">Effacer les données du terminal</string>
     <string name="text_terminal_close_session">Fermer la session</string>
+    <string name="text_terminal_confirm_clear_data">Supprimer toutes les données du terminal dans %1$s ? Les sessions en cours seront fermées.</string>
     <string name="text_terminal_confirm_close_running">Un processus est encore en cours dans cette session. Fermer quand même ?</string>
     <string name="text_terminal_copy_home_path">Copier le chemin du répertoire personnel</string>
     <string name="text_terminal_copy_transcript">Copier la transcription</string>
+    <string name="text_terminal_data_cleared">Données du terminal effacées</string>
     <string name="text_terminal_no_npm_scripts">package.json ne déclare aucun script</string>
     <string name="text_terminal_no_package_json">Aucun package.json trouvé dans le répertoire courant</string>
     <string name="text_terminal_node_exec_denied">Cet appareil a refusé d\'exécuter le lanceur Node.js du plugin, seul le shell système est disponible</string>
@@ -1961,13 +1970,19 @@
     <string name="text_terminal_node_plugin_too_old">Le plugin Node.js Runtime installé n\'a pas de lanceur de terminal, mettez-le à jour pour utiliser node et npm ici</string>
     <string name="text_terminal_node_probe">Vérification du lanceur Node.js</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Vérification du lanceur Node.js...</string>
+    <string name="text_terminal_npm_ignore_scripts">Ignorer les scripts de cycle de vie npm</string>
     <string name="text_terminal_npm_init">Initialiser le projet (npm init)</string>
     <string name="text_terminal_npm_install">Installer les dépendances (npm install)</string>
     <string name="text_terminal_npm_install_package">Installer un paquet (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">Registre npm</string>
+    <string name="text_terminal_npm_registry_custom_url">URL de registre personnalisée</string>
+    <string name="text_terminal_npm_registry_https_only">L\'URL du registre doit commencer par https://</string>
     <string name="text_terminal_npm_run_script">Exécuter un script (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">npm et corepack n\'ont pas pu être préparés depuis le plugin Node.js Runtime, seuls node et le shell système sont disponibles</string>
     <string name="text_terminal_other_package_managers">Autres gestionnaires de paquets (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">yarn et pnpm sont fournis via corepack et téléchargés depuis le registre à la première utilisation. Exécutez "yarn --version" ou "pnpm --version" pour les activer.</string>
+    <string name="text_terminal_other_package_managers_content">yarn et pnpm sont fournis via corepack et téléchargés depuis le registre à la première utilisation. Exécutez \"yarn --version\" ou \"pnpm --version\" pour les activer.</string>
     <string name="text_terminal_package_name_hint">Nom du paquet, par ex. is-odd</string>
+    <string name="text_terminal_preparing_npm">Préparation de npm et corepack depuis le plugin Node.js Runtime...</string>
     <string name="text_terminal_search_npm">Rechercher des paquets npm</string>
     <string name="text_terminal_select_text">Sélectionner du texte</string>
     <string name="text_terminal_session_ended">Session terminée</string>

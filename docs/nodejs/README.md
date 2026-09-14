@@ -1,6 +1,6 @@
 # AutoJs6 Node.js
 
-Last reviewed: 2026-08-26.
+Last reviewed: 2026-09-15.
 
 AutoJs6 runs Node.js scripts through the separately installed AutoJs6 Node.js
 Runtime Plugin. The host APK contains no libnode, Node JNI bindings, embedded Node
@@ -50,23 +50,57 @@ The host ships an in-app terminal (drawer > Tools > Terminal, directory menu >
 user inside a host-owned pty (jackpal libtermexec) with `HOME` / `PREFIX` under
 `<filesDir>/terminal`. The shell itself never depends on the plugin.
 
-`node`, `npm` and `corepack` are provided by the Node.js Runtime plugin once it
-declares the terminal-launcher contract as `<meta-data>` on its runtime service:
+`node`, `npm`, `npx`, `corepack`, `yarn` and `pnpm` come from the Node.js Runtime
+plugin (1.5.0 and later), which declares the terminal-launcher contract as
+`<meta-data>` on its runtime service. The constants live in the mirrored
+`NodeJsPluginCapabilityKeys` / `NodeJsRuntimeContract` (plugin repository
+[docs/nodejs/TERMINAL.md](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/TERMINAL.md)):
 
 | Key (`org.autojs.plugin.nodejs.` prefix) | Meaning |
 | --- | --- |
 | `NODE_CLI_SCHEMA` | contract schema, currently `1` |
-| `NODE_CLI_EXECUTABLE` | multi-call ELF launcher in the plugin's native library dir, e.g. `libnodexe.so` |
-| `NODE_CLI_COMMANDS` | comma-separated names the launcher dispatches on (`node,npm,npx,corepack,yarn,pnpm`) |
+| `NODE_CLI_EXECUTABLE` | multi-call ELF launcher in the plugin's native library dir, `libnodexe.so` |
+| `NODE_CLI_COMMANDS` | comma-separated names the launcher dispatches on (`node,npm,npx,corepack,yarn,yarnpkg,pnpm,pnpx`) |
 | `NODE_CLI_ARCHIVE` / `NODE_CLI_ARCHIVE_SHA256` / `NODE_CLI_ARCHIVE_ROOT` | npm + corepack asset archive, its digest, and the archive directory holding `npm/` and `corepack/` |
+| `NODE_CLI_ARCHIVE_ENTRY_COUNT` / `NODE_CLI_ARCHIVE_BYTES` | declared entry count and uncompressed size, used as extraction limits |
 | `NODE_CLI_NPM_VERSION` / `NODE_CLI_COREPACK_VERSION` | informational versions shown in diagnostics |
 
-The host reads the declaration from `ServiceInfo.metaData` (no Binder call), checks
-that the launcher exists and is a real ELF, runs it once with `--version`, and caches
-the outcome per plugin build. Until a plugin with the contract is installed and the
-check succeeds, the terminal is shell-only and shows a banner explaining why.
-"Developer options > Node.js > Node.js launcher check" re-runs the check and prints
-the raw result.
+Host flow on every session start (`core/terminal`):
+
+1. `NodeCliLocator` reads the declaration from `ServiceInfo.metaData` (no Binder
+   call), checks that the launcher exists and is a real ELF, runs it once with
+   `--version`, and caches the outcome per plugin build.
+2. `NodeCliInstaller` streams the archive from the plugin's assets through a
+   SHA-256 digest into `<filesDir>/terminal/usr/lib/autojs6-node-cli.tmp`, writes
+   only entries below the archive root (path traversal and the declared limits are
+   enforced), stamps the plugin package / version code / digest, and swaps the
+   directory into place. A plugin update triggers a reinstall; a failure leaves the
+   previous install untouched.
+3. `usr/bin/<command>` symbolic links to the launcher are rebuilt (the plugin's
+   native library directory changes on update) and `TerminalNodeEnvironment`
+   exports `AUTOJS6_NODE_CLI_ROOT`, `npm_config_prefix` / `npm_config_cache` under
+   `usr`, `npm_config_bin_links=false`, `COREPACK_HOME`,
+   `COREPACK_DEFAULT_TO_LATEST=0` (pnpm 12+ is a native binary without an
+   Android build, so corepack sticks to its bundled Yarn 1.x / pnpm 11.x defaults
+   unless a version is named), and, when chosen in Settings > Terminal, the
+   registry (`npm_config_registry`, `COREPACK_NPM_REGISTRY`) and
+   `npm_config_ignore_scripts`.
+
+Until a plugin with the contract is installed and the check succeeds, the terminal
+is shell-only and shows a banner explaining why. "Developer options > Node.js >
+Node.js launcher check" re-runs the check and prints the raw result.
+
+Limits: files written by the host cannot be executed on Android (W^X), so
+`node_modules/.bin` links and native binaries from packages do not run; use
+`node node_modules/<pkg>/<entry>.js` or `npx`. Everything runs under the AutoJs6
+uid with the host's permissions and cannot call the AutoJs6 Java API. Settings >
+Terminal > "Clear terminal data" removes the home, installed packages and caches.
+Runtime plugin 1.5.0 is built without ICU (`--with-intl=none`): `Intl` is absent
+and regular expressions with Unicode property escapes (`\p{...}`) do not parse,
+so Yarn 2+ and pnpm (which bundle such expressions) exit without output there,
+while npm and Yarn 1 work; Node's own fatal-error text goes to logcat (tag
+`nodejs`) instead of the terminal. Both are addressed by a runtime rebuild
+tracked in the plugin repository.
 
 ## Cross-Repository Guards
 

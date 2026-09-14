@@ -166,6 +166,33 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_terminal">
+
+        <org.autojs.autojs.ui.settings.TerminalNpmRegistryPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_terminal_npm_registry"
+            app:title="@string/text_terminal_npm_registry"
+            app:itemKeys="@array/keys_terminal_npm_registry"
+            app:itemValues="@array/values_terminal_npm_registry"
+            app:itemDefaultKey="@string/default_key_terminal_npm_registry" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_terminal_npm_ignore_scripts"
+            app:defaultValue="false"
+            app:title="@string/text_terminal_npm_ignore_scripts"
+            app:summary="@string/summary_terminal_npm_ignore_scripts" />
+
+        <org.autojs.autojs.ui.settings.TerminalClearDataPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_terminal_clear_data"
+            app:title="@string/text_terminal_clear_data"
+            app:summary="@string/summary_terminal_clear_data" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_timed_task">
 
         <org.autojs.autojs.ui.settings.TimedTaskBackendPreference

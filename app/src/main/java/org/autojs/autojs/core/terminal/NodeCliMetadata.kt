@@ -1,29 +1,32 @@
 package org.autojs.autojs.core.terminal
 
+import org.autojs.plugin.nodejs.api.NodeJsPluginCapabilityKeys
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import java.io.File
 
 /**
  * Parses the terminal-launcher contract a Node.js Runtime plugin declares as manifest
- * `<meta-data>` on its runtime service. The keys are the host-side mirror of the plugin contract;
- * they are read from `ServiceInfo.metaData`, so no Binder call is needed to decide availability.
+ * `<meta-data>` on its runtime service. The key names come from the mirrored plugin contract
+ * ([NodeJsPluginCapabilityKeys]); they are read from `ServiceInfo.metaData`, so no Binder call
+ * is needed to decide availability.
  *
  * zh-CN: 解析 Node.js 运行时插件在其运行时服务上以 manifest `<meta-data>` 声明的终端启动器契约.
- * 键名为插件契约的宿主侧镜像; 直接从 `ServiceInfo.metaData` 读取, 判定可用性无需 Binder 调用.
+ * 键名来自镜像的插件契约 ([NodeJsPluginCapabilityKeys]); 直接从 `ServiceInfo.metaData` 读取, 判定可用性无需 Binder 调用.
  */
 object NodeCliMetadata {
 
-    private const val PREFIX = "org.autojs.plugin.nodejs."
+    const val KEY_SCHEMA = NodeJsPluginCapabilityKeys.NODE_CLI_SCHEMA
+    const val KEY_EXECUTABLE = NodeJsPluginCapabilityKeys.NODE_CLI_EXECUTABLE
+    const val KEY_COMMANDS = NodeJsPluginCapabilityKeys.NODE_CLI_COMMANDS
+    const val KEY_ARCHIVE = NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE
+    const val KEY_ARCHIVE_SHA256 = NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_SHA256
+    const val KEY_ARCHIVE_ROOT = NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_ROOT
+    const val KEY_ARCHIVE_ENTRY_COUNT = NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_ENTRY_COUNT
+    const val KEY_ARCHIVE_BYTES = NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_BYTES
+    const val KEY_NPM_VERSION = NodeJsPluginCapabilityKeys.NODE_CLI_NPM_VERSION
+    const val KEY_COREPACK_VERSION = NodeJsPluginCapabilityKeys.NODE_CLI_COREPACK_VERSION
 
-    const val KEY_SCHEMA = PREFIX + "NODE_CLI_SCHEMA"
-    const val KEY_EXECUTABLE = PREFIX + "NODE_CLI_EXECUTABLE"
-    const val KEY_COMMANDS = PREFIX + "NODE_CLI_COMMANDS"
-    const val KEY_ARCHIVE = PREFIX + "NODE_CLI_ARCHIVE"
-    const val KEY_ARCHIVE_SHA256 = PREFIX + "NODE_CLI_ARCHIVE_SHA256"
-    const val KEY_ARCHIVE_ROOT = PREFIX + "NODE_CLI_ARCHIVE_ROOT"
-    const val KEY_NPM_VERSION = PREFIX + "NODE_CLI_NPM_VERSION"
-    const val KEY_COREPACK_VERSION = PREFIX + "NODE_CLI_COREPACK_VERSION"
-
-    const val SUPPORTED_SCHEMA = "1"
+    const val SUPPORTED_SCHEMA = NodeJsRuntimeContract.NODE_CLI_SCHEMA_VERSION
     const val DEFAULT_ARCHIVE_ROOT = "lib/node_modules"
 
     private val SHA256_HEX = Regex("[0-9a-fA-F]{64}")
@@ -32,10 +35,12 @@ object NodeCliMetadata {
     private val ELF_MAGIC = byteArrayOf(0x7f, 'E'.code.toByte(), 'L'.code.toByte(), 'F'.code.toByte())
 
     /**
-     * @param executableName file name of the multi-call launcher inside the plugin's native library dir
-     * @param commands       names the launcher dispatches on (`argv[0]`), e.g. `node`, `npm`
-     * @param archivePath    asset path of the npm / corepack archive inside the plugin APK
-     * @param archiveRoot    directory inside the archive that holds `npm/` and `corepack/`
+     * @param executableName    file name of the multi-call launcher inside the plugin's native library dir
+     * @param commands          names the launcher dispatches on (`argv[0]`), e.g. `node`, `npm`
+     * @param archivePath       asset path of the npm / corepack archive inside the plugin APK
+     * @param archiveRoot       directory inside the archive that holds `npm/` and `corepack/`
+     * @param archiveEntryCount declared entry count, used as the extraction limit when present
+     * @param archiveBytes      declared uncompressed size, used as the extraction limit when present
      */
     data class Descriptor(
         val executableName: String,
@@ -43,6 +48,8 @@ object NodeCliMetadata {
         val archivePath: String,
         val archiveSha256: String,
         val archiveRoot: String,
+        val archiveEntryCount: Int?,
+        val archiveBytes: Long?,
         val npmVersion: String?,
         val corepackVersion: String?,
     )
@@ -84,6 +91,8 @@ object NodeCliMetadata {
         if (archiveRoot.isEmpty() || archiveRoot.startsWith("/") || archiveRoot.split('/').any { it == ".." || it.isEmpty() }) {
             return ParseResult.Missing("invalid archive root $archiveRoot")
         }
+        val entryCount = meta.string(KEY_ARCHIVE_ENTRY_COUNT)?.toIntOrNull()?.takeIf { it > 0 }
+        val bytes = meta.string(KEY_ARCHIVE_BYTES)?.toLongOrNull()?.takeIf { it > 0 }
         return ParseResult.Valid(
             Descriptor(
                 executableName = executable,
@@ -91,6 +100,8 @@ object NodeCliMetadata {
                 archivePath = archive,
                 archiveSha256 = sha256.lowercase(),
                 archiveRoot = archiveRoot,
+                archiveEntryCount = entryCount,
+                archiveBytes = bytes,
                 npmVersion = meta.string(KEY_NPM_VERSION),
                 corepackVersion = meta.string(KEY_COREPACK_VERSION),
             ),

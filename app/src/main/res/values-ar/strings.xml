@@ -278,6 +278,9 @@
     <string name="entry_root_mode_force_root">وضع الجذر تعيين القوة</string>
     <string name="entry_root_record_out_file_type_binary">النوع الثنائي (غير قابل للتطبيق)</string>
     <string name="entry_root_record_out_file_type_js">نوع JavaScript (قابل للتحرير)</string>
+    <string name="entry_terminal_npm_registry_custom">عنوان URL مخصص</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (الافتراضي)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (مرآة الصين)</string>
     <string name="error_a11y_service_not_operational">خدمة امكانية الوصول متصلة لكنها ليست جاهزة للعمل بعد (لم يتم استلام اي حدث)</string>
     <string name="error_a_runtime_has_been_set">تم تعيين وقت التشغيل</string>
     <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
@@ -561,6 +564,7 @@
     <string name="hint_plugin_process_failed_to_start">تعذر بدء عملية المكون الإضافي بشكل موثوق. حدّث المكون الإضافي أو أعد تثبيته; وإذا استمرت المشكلة, فاتصل بمطور المكون الإضافي.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">يتطلب المكون الإضافي الحالي إصدارا أعلى من بيئة المضيف AutoJs6 (versionCode المطلوب: %1$d, versionCode الحالي: %2$d). يجب ترقية AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">بروتوكول المكون الإضافي غير متوافق مع إصدار AutoJs6 الحالي. يجب ترقية إصدار المكون الإضافي.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
     <string name="image_editor_brightness">السطوع</string>
     <string name="image_editor_brush">فرشاة</string>
@@ -724,7 +728,9 @@
     <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
+    <string name="summary_terminal_clear_data">إزالة الدليل الرئيسي للطرفية والحزم المثبتة وذاكرة npm المؤقتة</string>
     <string name="summary_terminal_node_probe">التحقق مما إذا كانت الطرفية تستطيع تشغيل node من إضافة Node.js Runtime</string>
+    <string name="summary_terminal_npm_ignore_scripts">تشغيل npm مع --ignore-scripts حتى لا تتمكن الحزم من تنفيذ خطافات التثبيت (الثنائيات الأصلية لا يمكن تشغيلها هنا على أي حال)</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">اضغط على مفتاح \"رفع الصوت\" لإيقاف تشغيل جميع البرامج النصية</string>
@@ -1950,10 +1956,13 @@
     <string name="text_tailor_made_developer">مطور مصممة خصيصا</string>
     <string name="text_task">مهمة</string>
     <string name="text_terminal">الطرفية</string>
+    <string name="text_terminal_clear_data">مسح بيانات الطرفية</string>
     <string name="text_terminal_close_session">إغلاق الجلسة</string>
+    <string name="text_terminal_confirm_clear_data">هل تريد حذف كل بيانات الطرفية ضمن %1$s? سيتم إغلاق الجلسات قيد التشغيل.</string>
     <string name="text_terminal_confirm_close_running">لا تزال هناك عملية قيد التشغيل في هذه الجلسة. هل تريد الإغلاق على أي حال?</string>
     <string name="text_terminal_copy_home_path">نسخ مسار الدليل الرئيسي</string>
     <string name="text_terminal_copy_transcript">نسخ النص الكامل</string>
+    <string name="text_terminal_data_cleared">تم مسح بيانات الطرفية</string>
     <string name="text_terminal_no_npm_scripts">لا يعلن package.json عن أي scripts</string>
     <string name="text_terminal_no_package_json">لم يتم العثور على package.json في الدليل الحالي</string>
     <string name="text_terminal_node_exec_denied">رفض هذا الجهاز تشغيل مشغل Node.js الخاص بالإضافة, لذا لا يتوفر سوى shell النظام</string>
@@ -1963,13 +1972,19 @@
     <string name="text_terminal_node_plugin_too_old">إضافة Node.js Runtime المثبتة لا تحتوي على مشغل للطرفية, حدثها لاستخدام node و npm هنا</string>
     <string name="text_terminal_node_probe">فحص مشغل Node.js</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">جار فحص مشغل Node.js...</string>
+    <string name="text_terminal_npm_ignore_scripts">تجاهل نصوص دورة حياة npm</string>
     <string name="text_terminal_npm_init">تهيئة المشروع (npm init)</string>
     <string name="text_terminal_npm_install">تثبيت التبعيات (npm install)</string>
     <string name="text_terminal_npm_install_package">تثبيت حزمة (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">سجل npm</string>
+    <string name="text_terminal_npm_registry_custom_url">عنوان URL لسجل مخصص</string>
+    <string name="text_terminal_npm_registry_https_only">يجب أن يبدأ عنوان URL للسجل بـ https://</string>
     <string name="text_terminal_npm_run_script">تشغيل سكربت (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">تعذر تحضير npm و corepack من إضافة Node.js Runtime, لذا لا يتوفر سوى node و shell النظام</string>
     <string name="text_terminal_other_package_managers">مديرو حزم آخرون (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">يتم توفير yarn و pnpm عبر corepack ويتم تنزيلهما من السجل عند أول استخدام. شغل "yarn --version" أو "pnpm --version" لتفعيلهما.</string>
+    <string name="text_terminal_other_package_managers_content">يتم توفير yarn و pnpm عبر corepack ويتم تنزيلهما من السجل عند أول استخدام. شغل \"yarn --version\" أو \"pnpm --version\" لتفعيلهما.</string>
     <string name="text_terminal_package_name_hint">اسم الحزمة, مثل is-odd</string>
+    <string name="text_terminal_preparing_npm">جارٍ تحضير npm و corepack من إضافة Node.js Runtime...</string>
     <string name="text_terminal_search_npm">البحث عن حزم npm</string>
     <string name="text_terminal_select_text">تحديد النص</string>
     <string name="text_terminal_session_ended">انتهت الجلسة</string>

@@ -81,6 +81,11 @@ class TerminalNodeProbePreference : MaterialPreference {
                     appendLine("ABI: ${resolution.abi}")
                     appendLine("Expected: ${resolution.executableName}")
                 }
+                is Resolution.Unavailable.SetupFailed -> {
+                    appendLine("Result: npm / corepack setup failed")
+                    appendLauncher(resolution.launcher)
+                    appendLine("Error: ${resolution.message}")
+                }
                 is Resolution.Unavailable.ExecDenied -> {
                     appendLine("Result: launcher could not run")
                     appendLauncher(resolution.launcher)

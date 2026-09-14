@@ -212,4 +212,23 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_HOST_TYPESCRIPT_ON_DEMAND_COMPILATION =
         "hostTypeScriptOnDemandCompilation"
     const val CAPABILITY_SCOPED_WORKSPACE_ARCHIVE_TRANSPORT = "scopedWorkspaceArchiveTransport"
+
+    /**
+     * The plugin ships the multi-call terminal launcher (`libnodexe.so`) plus the npm / corepack
+     * asset archive; the same facts are mirrored into runtimeInfo / PluginInfo for diagnostics.
+     * zh-CN: 插件附带多入口终端启动器 (`libnodexe.so`) 与 npm / corepack 资产; 同样的信息镜像到
+     * runtimeInfo / PluginInfo 供诊断.
+     */
+    const val CAPABILITY_NODE_CLI = "nodeCli"
+    const val NODE_CLI_SCHEMA_VERSION = "1"
+    const val KEY_NODE_CLI_SCHEMA = "nodeCliSchema"
+    const val KEY_NODE_CLI_EXECUTABLE = "nodeCliExecutable"
+    const val KEY_NODE_CLI_COMMANDS = "nodeCliCommands"
+    const val KEY_NODE_CLI_ARCHIVE = "nodeCliArchive"
+    const val KEY_NODE_CLI_ARCHIVE_SHA256 = "nodeCliArchiveSha256"
+    const val KEY_NODE_CLI_ARCHIVE_ROOT = "nodeCliArchiveRoot"
+    const val KEY_NODE_CLI_ARCHIVE_ENTRY_COUNT = "nodeCliArchiveEntryCount"
+    const val KEY_NODE_CLI_ARCHIVE_BYTES = "nodeCliArchiveBytes"
+    const val KEY_NODE_CLI_NPM_VERSION = "nodeCliNpmVersion"
+    const val KEY_NODE_CLI_COREPACK_VERSION = "nodeCliCorepackVersion"
 }

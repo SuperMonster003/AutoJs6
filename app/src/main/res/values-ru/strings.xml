@@ -276,6 +276,9 @@
     <string name="entry_root_mode_force_root">Принудительно установить режим root</string>
     <string name="entry_root_record_out_file_type_binary">Бинарный тип (нередактируемый)</string>
     <string name="entry_root_record_out_file_type_js">Тип JavaScript (редактируемый)</string>
+    <string name="entry_terminal_npm_registry_custom">Свой URL</string>
+    <string name="entry_terminal_npm_registry_npmjs">npmjs.org (по умолчанию)</string>
+    <string name="entry_terminal_npm_registry_npmmirror">npmmirror.com (зеркало в Китае)</string>
     <string name="error_a11y_service_not_operational">Служба специальных возможностей подключена, но ещё не готова к работе (события не получены)</string>
     <string name="error_a_runtime_has_been_set">Установлено время выполнения</string>
     <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
@@ -559,6 +562,7 @@
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
+    <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
     <string name="image_editor_brightness">Яркость</string>
     <string name="image_editor_brush">Кисть</string>
@@ -722,7 +726,9 @@
     <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
     <string name="summary_stable_mode">Более стабильный анализ макета, но худшая совместимость кода (требуется перезапуск службы доступности)</string>
+    <string name="summary_terminal_clear_data">Удалить домашний каталог терминала, установленные пакеты и кэш npm</string>
     <string name="summary_terminal_node_probe">Проверить, может ли терминал запускать node из плагина Node.js Runtime</string>
+    <string name="summary_terminal_npm_ignore_scripts">Запускать npm с --ignore-scripts, чтобы пакеты не выполняли хуки установки (нативные бинарники здесь все равно не запускаются)</string>
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="summary_use_volume_control_record">Запуск или остановка записи, управляемая клавишей уменьшения громкости, когда отображается плавающая кнопка</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
@@ -1948,10 +1954,13 @@
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
     <string name="text_terminal">Терминал</string>
+    <string name="text_terminal_clear_data">Очистить данные терминала</string>
     <string name="text_terminal_close_session">Закрыть сеанс</string>
+    <string name="text_terminal_confirm_clear_data">Удалить все данные терминала в %1$s? Запущенные сеансы будут закрыты.</string>
     <string name="text_terminal_confirm_close_running">В этом сеансе все еще выполняется процесс. Все равно закрыть?</string>
     <string name="text_terminal_copy_home_path">Копировать путь домашнего каталога</string>
     <string name="text_terminal_copy_transcript">Копировать вывод</string>
+    <string name="text_terminal_data_cleared">Данные терминала очищены</string>
     <string name="text_terminal_no_npm_scripts">В package.json нет раздела scripts</string>
     <string name="text_terminal_no_package_json">В текущем каталоге нет package.json</string>
     <string name="text_terminal_node_exec_denied">Устройство отказалось запускать загрузчик Node.js плагина, доступна только системная оболочка</string>
@@ -1961,13 +1970,19 @@
     <string name="text_terminal_node_plugin_too_old">Установленный плагин Node.js Runtime не содержит загрузчика для терминала, обновите его, чтобы использовать здесь node и npm</string>
     <string name="text_terminal_node_probe">Проверка загрузчика Node.js</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Проверка загрузчика Node.js...</string>
+    <string name="text_terminal_npm_ignore_scripts">Игнорировать скрипты жизненного цикла npm</string>
     <string name="text_terminal_npm_init">Инициализировать проект (npm init)</string>
     <string name="text_terminal_npm_install">Установить зависимости (npm install)</string>
     <string name="text_terminal_npm_install_package">Установить пакет (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_registry">Реестр npm</string>
+    <string name="text_terminal_npm_registry_custom_url">URL своего реестра</string>
+    <string name="text_terminal_npm_registry_https_only">URL реестра должен начинаться с https://</string>
     <string name="text_terminal_npm_run_script">Запустить скрипт (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_npm_setup_failed">Не удалось подготовить npm и corepack из плагина Node.js Runtime, поэтому доступны только node и системная оболочка</string>
     <string name="text_terminal_other_package_managers">Другие менеджеры пакетов (yarn / pnpm)</string>
-    <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните "yarn --version" или "pnpm --version", чтобы активировать их.</string>
+    <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните \"yarn --version\" или \"pnpm --version\", чтобы активировать их.</string>
     <string name="text_terminal_package_name_hint">Имя пакета, например is-odd</string>
+    <string name="text_terminal_preparing_npm">Подготовка npm и corepack из плагина Node.js Runtime...</string>
     <string name="text_terminal_search_npm">Поиск пакетов npm</string>
     <string name="text_terminal_select_text">Выделить текст</string>
     <string name="text_terminal_session_ended">Сеанс завершен</string>

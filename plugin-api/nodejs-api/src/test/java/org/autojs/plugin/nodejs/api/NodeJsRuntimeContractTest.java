@@ -71,6 +71,41 @@ public class NodeJsRuntimeContractTest {
     }
 
     @Test
+    public void terminalLauncherContractIsAdditiveAndStable() {
+        assertEquals("nodeCli", NodeJsRuntimeContract.CAPABILITY_NODE_CLI);
+        assertEquals("1", NodeJsRuntimeContract.NODE_CLI_SCHEMA_VERSION);
+        assertEquals("nodeCliSchema", NodeJsRuntimeContract.KEY_NODE_CLI_SCHEMA);
+        assertEquals("nodeCliExecutable", NodeJsRuntimeContract.KEY_NODE_CLI_EXECUTABLE);
+        assertEquals("nodeCliCommands", NodeJsRuntimeContract.KEY_NODE_CLI_COMMANDS);
+        assertEquals("nodeCliArchive", NodeJsRuntimeContract.KEY_NODE_CLI_ARCHIVE);
+        assertEquals("nodeCliArchiveSha256", NodeJsRuntimeContract.KEY_NODE_CLI_ARCHIVE_SHA256);
+        assertEquals("nodeCliArchiveRoot", NodeJsRuntimeContract.KEY_NODE_CLI_ARCHIVE_ROOT);
+        assertEquals("nodeCliArchiveEntryCount", NodeJsRuntimeContract.KEY_NODE_CLI_ARCHIVE_ENTRY_COUNT);
+        assertEquals("nodeCliArchiveBytes", NodeJsRuntimeContract.KEY_NODE_CLI_ARCHIVE_BYTES);
+        assertEquals("nodeCliNpmVersion", NodeJsRuntimeContract.KEY_NODE_CLI_NPM_VERSION);
+        assertEquals("nodeCliCorepackVersion", NodeJsRuntimeContract.KEY_NODE_CLI_COREPACK_VERSION);
+        // The manifest contract is read without Binder, so the AIDL contract range is untouched.
+        assertEquals(2, NodeJsRuntimeContract.CONTRACT_VERSION);
+        assertEquals(3, NodeJsRuntimeContract.MAX_CONTRACT_VERSION);
+    }
+
+    @Test
+    public void terminalLauncherMetaDataNamesShareThePluginPrefix() {
+        String prefix = "org.autojs.plugin.nodejs.";
+        assertEquals(prefix, NodeJsPluginCapabilityKeys.NODE_CLI_META_DATA_PREFIX);
+        assertEquals(prefix + "NODE_CLI_SCHEMA", NodeJsPluginCapabilityKeys.NODE_CLI_SCHEMA);
+        assertEquals(prefix + "NODE_CLI_EXECUTABLE", NodeJsPluginCapabilityKeys.NODE_CLI_EXECUTABLE);
+        assertEquals(prefix + "NODE_CLI_COMMANDS", NodeJsPluginCapabilityKeys.NODE_CLI_COMMANDS);
+        assertEquals(prefix + "NODE_CLI_ARCHIVE", NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE);
+        assertEquals(prefix + "NODE_CLI_ARCHIVE_SHA256", NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_SHA256);
+        assertEquals(prefix + "NODE_CLI_ARCHIVE_ROOT", NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_ROOT);
+        assertEquals(prefix + "NODE_CLI_ARCHIVE_ENTRY_COUNT", NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_ENTRY_COUNT);
+        assertEquals(prefix + "NODE_CLI_ARCHIVE_BYTES", NodeJsPluginCapabilityKeys.NODE_CLI_ARCHIVE_BYTES);
+        assertEquals(prefix + "NODE_CLI_NPM_VERSION", NodeJsPluginCapabilityKeys.NODE_CLI_NPM_VERSION);
+        assertEquals(prefix + "NODE_CLI_COREPACK_VERSION", NodeJsPluginCapabilityKeys.NODE_CLI_COREPACK_VERSION);
+    }
+
+    @Test
     public void rawTypeScriptCompilerRequirementHasAStableFailureCode() {
         assertEquals(
                 "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED",
