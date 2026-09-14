@@ -2,6 +2,39 @@
 
 See [the Roadmap](../../docs/dev/android-sdk-37-roadmap.md) for migration status and [the physical-device checklist](../../docs/dev/android-sdk-37-physical-device-tests.md) for device assignments, test methods, expected results and all 42 plugin rows.
 
+## One-command gate
+
+`run_gate.py` is the stage gate defined by Roadmap D19: one command per device produces `gate.json` and `gate.md` with the APK badging / SHA-256, the installation results, every unattended instrumentation suite that applies to the device, and (optionally) the JVM unit test totals. It uses only the Python standard library plus the helpers in this directory.
+
+```powershell
+$Sdk37Adb = 'E:/.android/sdk/platform-tools/adb.exe'
+./gradlew :app:assembleAppDebug :app:assembleAppDebugAndroidTest :app:assembleInrtDebug
+# Emulator (AVD_API_37): install, all unattended suites, full Looper matrix, accessibility smoke, JVM totals.
+py tools/sdk37/run_gate.py --adb $Sdk37Adb --serial emulator-5554 --expected-target 37 --install --with-inrt --reinstall-on-mismatch --enable-a11y --junit-results app/build/test-results --output build/sdk37-gate/avd37
+# Physical phone: install and the suites that apply; nothing is uninstalled, no permission or compat change.
+py tools/sdk37/run_gate.py --adb $Sdk37Adb --serial BH900ASK9E --expected-target 37 --install --with-inrt --output build/sdk37-gate/api28
+```
+
+Suite selection with the default `--suite auto`:
+
+| Suite | Tests | Selected when | Expectations derived from |
+| --- | --- | --- | --- |
+| `cleartext` | 4 | always | installed NSC, in-process loopback fixture |
+| `dex` | 1 | always | - |
+| `install-state` | 2 | always | - |
+| `looper-platform` | 2 | always | API level and installed target (README table below); refuses if the host has compat overrides |
+| `media` | 11 | always | `@Test` methods listed from `ScriptMusicDeviceTest.kt` |
+| `parcel` | 5 | API 37 or newer | effective `PARCEL_HARDENING` policy from the compat dump |
+| `native` | 3 | OpenCV and Image Quantization plugins installed | - |
+| `looper-full` | 14 | emulator; accessibility enabled or `--enable-a11y` | as `looper-platform`, plus `--soak-ms` |
+| `a11y-smoke` | 53 checks | emulator; accessibility enabled or `--enable-a11y` | `sample/accessibility/smoke-legacy-api.js` run through `gate-a11y-wrapper.js`, console lines read back with `run-as` |
+
+`--with-inrt` additionally checks the inrt debug template's badging, installs it and confirms its installed target. The bare template has no `assets/project/project.json` and its `SplashActivity` cannot start, so the launch step is skipped unless `--inrt-apk` names a packaged fixture (for example one produced by `build_inrt_storage_fixtures.py`); with a fixture the launcher must stay alive with no `AndroidRuntime` crash logged since the launch. Expected method lists come from the checked-out sources, so a stale test APK fails the gate; the installed test APK must also match the built one by SHA-256. Suites run back to back with a short settle delay and one retry when the runner process dies before any test starts (observed on API 28).
+
+Emulator-only steps use `--enable-a11y`: the gate removes and re-adds the AutoJs6 service in `enabled_accessibility_services` (a service whose process was killed by instrumentation stays in the system's "Crashed services" set until the setting changes), allows `SYSTEM_ALERT_WINDOW`, wakes the screen and waits until `dumpsys accessibility` lists the service as bound. `looper-full` delegates to `run_looper_tests.py`, which performs the mid-run rebind and restores the service list. The accessibility smoke runs `sample/accessibility/smoke-legacy-api.js` inside `gate-a11y-wrapper.js`, which tees console output into the app's `files/` directory; the gate reads it back with `run-as` and requires the `N/N checks passed` summary with no `[FAIL]` line. Without an unattended restart strategy the script skips its service-restart checks, which the report lists under `skipped`.
+
+A PASS means every selected step passed or was skipped with a stated reason; it does not cover real LAN topologies, audibility, OEM launchers or manual UI, which the Roadmap keeps as RC-SMOKE or WATCH items. Host-side self-checks: `py -m unittest discover -s tools/sdk37 -p test_run_gate.py`.
+
 ## Physical devices
 
 `physical_device.py` uses only the Python standard library. `inventory` queries online devices and records offline entries without querying them. `snapshot` saves read-only package, service, app-op, compat, audio, display and kernel-page information. Unsupported device commands retain their exit codes. Neither action asserts a functional pass. `checklist` exports every case in the physical-device document to a UTF-8 CSV with result and evidence columns, initially `NOT_RUN`. Use a new output directory each time:
