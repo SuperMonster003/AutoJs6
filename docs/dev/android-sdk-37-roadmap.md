@@ -17,6 +17,8 @@ P2.8 的存储调用与开关作用范围、系统选择器和权限状态验证
 
 P2.10 的 [短信即时可见性对照](evidence/android-sdk-37-p210-20260914.md) 已完成: 普通短信 / 普通 OTP / WebOTP 在四组 target / compat 下共 24 项查询 / 广播比较符合预期. 通知监听仅首个正式 target 36 默认组收到两个脱敏更新, 后续 target 36 / 37 都有回调缺失, 原因未定位; 真实三小时恢复也未实测, P2.10 保持部分完成.
 
+P2.12 已修复 UI 脚本进入分屏时因 Activity 重建而退出的问题: [大屏 / 配置 / 输入记录](evidence/android-sdk-37-p212-20260914.md). target 36 / 37 的手机、平板共 4 组 UI 脚本通过; 其余 16 组主页 / 编辑器 / 日志页记录了搜索恢复、光标 / dirty、横屏 viewport 和 IME 遮挡等待处理项. P2.13 完成 [环境与报告入口核对](evidence/android-sdk-37-p213-preflight-20260914.md): 当前镜像内存限制器 disabled, 现有报告页没有历史进程退出读取能力, 重负载和报告实现继续开放. 两节均保持部分完成.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
@@ -109,8 +111,8 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I9 | 小组件 Bitmap 上限已验证; Icon 合计限制的公告为 target >= 37, 当前镜像实际 target > 37 才抛错, 差异保留. 通知开关按发送应用 UID 检查渲染后 ImageView 内存, 非简单布局尺寸限制 | target / 镜像实现及发送 UID 分别核验 | `ScriptWidget` 多位 ID 映射误删已修复; 内建通知为标准模板, `notice(builder)` 可传自定义视图, 已有正反例与用法说明 | P2.9; [证据](evidence/android-sdk-37-p29-20260913.md) |
 | I10 | 短信 OTP 保护 (VERIFIED): 对非豁免应用过滤查询并延迟广播, 普通 OTP 受 `FILTER_GENERIC_OTP` target 37 门控, WebOTP 对全体; 四组即时行为已实测, 三小时恢复待测. 通知 OTP 脱敏延续 Android 15, 后续回调在 target 36 / 37 均有缺失, 未定位 | target 37 / 全体 | 宿主代码不直接读短信, 但声明 `READ_SMS` / `RECEIVE_SMS` 供脚本 (`content://sms`, 广播) 使用; `core/notification/NotificationListenerService.kt:46` (`events.observeNotification`) | P2.10 ([即时矩阵与通知保留项](evidence/android-sdk-37-p210-20260914.md)) |
 | I11 | WebView UA 缩减 (`ENABLE_USER_AGENT_REDUCTION`, VERIFIED) 与 File System Access API (`ENABLE_FILE_SYSTEM_ACCESS`, DEVICE-37: 选择 / 取消 / Intent / URI 授权门控已验证, 写入与持久化待测) | target 37; 按 WebView 所属应用的 target / override 生效, 独立插件不继承宿主开关 | `core/ui/attribute/WebViewAttributes.kt:36` (`userAgentString` 属性), 文档 / 预览 WebView; UI 根布局的 Activity context 丢失已修复 | P2.11 ([文件门控与边界](evidence/android-sdk-37-p211-files-20260914.md)) |
-| I12 | 大屏: 方向 / 可调整大小限制在 sw >= 600dp 被忽略且不可豁免 (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`, VERIFIED); 全体: 旋转后不再自动恢复输入法, 更少的 Activity 重建 (键盘 / 导航 / 触摸屏 / 色彩模式 / 桌面 UI 模式配置变化改为 `onConfigurationChanged`) | target 37 / 全体 | 宿主未使用 Android 16 豁免, 增量为零; `MainActivity` / `EditActivity` 的 `configChanges` 已含 `orientation|screenSize`; 脚本 UI 模式 `activity.setRequestedOrientation` 在平板上继续无效 (与 36 相同) | P2.12 |
-| I13 | 应用内存上限 (全体, VERIFIED): 按 RAM 的每应用限制, 被杀时 `ApplicationExitInfo` 描述含 `MemoryLimiter:AnonSwap` | 全体 | `largeHeap` 应用 + 脚本引擎 + 进程内 OpenCV; 崩溃报告 (`ui/error/CrashReportActivity`) 对退出原因的展示 | P2.13 |
+| I12 | 大屏: sw >= 600dp 的方向 / 尺寸限制旧豁免在 target 37 失效 (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`, VERIFIED); 全体: 配置变化导致 Activity 重建后默认不恢复 IME; 减少重建的具体范围已核对官方说明 | target 37 / 全体 | 无旧豁免; UI 脚本补齐 screenLayout / smallestScreenSize, target 36 / 37 手机和平板通过. Main / Edit / Log 的状态和 IME 布局仍有待处理项, 不以已有 orientation / screenSize 声明替代验收 | P2.12 |
+| I13 | 应用内存上限 (全体, VERIFIED): 按 RAM 的每应用限制, 被杀时 `ApplicationExitInfo` 描述含 `MemoryLimiter:AnonSwap` | 全体 | `largeHeap` 应用 + 脚本引擎 + 进程内 OpenCV; 当前 AVD 限制器 disabled, `CrashReportActivity` 仅展示 Intent 异常信息, 历史退出诊断尚未实现 | P2.13 |
 | I14 | Android Advanced Protection Mode 下, 未声明 `isAccessibilityTool="true"` 的无障碍服务被系统撤销且不可启用 (二手来源, UNVERIFIED) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明该属性 (AutoJs6 是自动化工具, 不应伪装为残障辅助工具, 见待决 Q5); `core/accessibility/control/A11yServiceController` 的 "启用失败" 诊断 | P2.14 |
 | I15 | 低影响项: Bluetooth 绑定 API 需特权 (`BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`), RFCOMM `read()` 断开返回 -1 (`MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, 仅 `BluetoothSocket`), 联系人 `Data` 视图移除账户列与严格 SQL 检查 (`RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, 仅 ContactsContract), 密钥库每应用 5 万把上限, RenderScript ScriptC 停用 (本仓库无 RenderScript), 镜像虚拟显示权限检查 (`CHECK_ADD_MIRROR_DISPLAY_PERMISSION`, 宿主经 MediaProjection 创建 `VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR`, `core/image/capture/ScreenCapturer.java:284-289`), `ContentCaptureManager.setContentCaptureEnabled(false)` 失效, 物理键盘密码显示拆分 | target 37 | 逐项验证即可, 预期无代码改动 | P2.15 |
 
@@ -306,12 +308,19 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.12 大屏, 输入法与配置变化 (I12)
 
-- [ ] 在 Xiaomi 23046RP50C (API 35, sw >= 600dp) 与 `AVD_API_37` 上以 target 37 覆盖包运行 UI 模式脚本 (含 `activity.setRequestedOrientation`), 悬浮窗, 控制台, 编辑器旋转 / 分屏; 同机对照 target 36, 检查布局、状态保留、旋转后输入法可见性与 `EditActivity` 的 `adjustResize`. 宿主无 manifest 豁免只说明没有该属性的迁移工作, 不能代替运行时方向 / 窗口验收; API 35 不用于证明 Android 17 新规. 真机步骤见 [UI01-UI03](android-sdk-37-physical-device-tests.md#46-存储输入webview-与其他系统能力). (DEVICE; DEVICE-37)
-- [ ] 复核 `MainActivity` / `EditActivity` / `LogActivity` 的 `configChanges` 与 IME 恢复, 记录 Activity 重建 / `onConfigurationChanged` 次数; "更少 Activity 重建" 的具体触发条件补官方或源码证据后再确认. UI 脚本还需测试物理键盘、触摸板捕获、返回与边到边布局, 不以 Java / Kotlin 编译通过代替输入行为验证. (SOURCE; DEVICE-37)
+- [x] 修复 `ScriptExecuteActivity` 缺少 `screenLayout` / `smallestScreenSize` 导致分屏时销毁脚本的问题. 无调试器复现与 IDEA 日志点取得 `changingConfigurations=true`, mask 2432, 新实例 execution=null; manifest 补齐两项后保留脚本与视图树. `38522f5c5`, [根因、APK 清单与回归](evidence/android-sdk-37-p212-20260914.md). (SOURCE; DEVICE-37)
+- [x] API 37 的 target 36 / 37 默认态, 手机 sw411dp / 平板 sw800dp 共 4 组 UI 脚本通过: 手机响应 `setRequestedOrientation(LANDSCAPE)`, 平板忽略, 旋转与实际分屏往返保留同一 Activity 和输入文本; IME 显示 / Back 收起与配置回调均留证. 未使用旧豁免或 compat override, 不算独立开关正反测试. [机器记录](evidence/android-sdk-37-p212-results-20260914.json). (DEVICE-37)
+- [x] 记录 Main / 原生 Edit / Ace Edit / Log 在两个 target、两种尺寸下的 16 组生命周期、状态、IME 与 viewport 观察. 完成测试执行不等于验收通过: 原生编辑器平板文本 / dirty 保留但光标归零, Ace 平板还丢 dirty, 主页分屏搜索未恢复, 手机横屏编辑器 viewport 为 0, 日志输入被 IME 遮挡. [逐组结果与截图](evidence/android-sdk-37-p212-20260914.md#3-target-36--37-的实际矩阵). (SOURCE; DEVICE-37)
+- [x] 核对 "更少 Activity 重建" 的具体范围: keyboard / keyboardHidden / navigation / touchscreen / colorMode, 以及进入 / 离开 desk 的 uiMode; 非所有屏幕尺寸变化. IME 默认不恢复限定于配置变化导致 Activity 重建, 本轮 Log 旋转后消失而 Script / Edit 自行处理旋转时仍可见. [官方配置说明](https://developer.android.com/guide/topics/resources/runtime-changes), [IME 官方说明](https://developer.android.com/about/versions/17/behavior-changes-all). (DOCS; SOURCE; DEVICE-37)
+- [ ] 定位并修复上述 Main / Edit / Log 状态与布局问题. Main 手机横屏 Back 收起搜索框需与配置恢复分开判断, 不直接认定产品行为错误; Ace 需核对当前插件与宿主的异步恢复链路, 不用旧插件结果代替 P5 最终包验收. 保留实际光标 / dirty / viewport 和截图判定, 不只检查文本仍在内存.
+- [ ] 补齐悬浮窗 / 悬浮控制台、拖动分屏分隔条 / 自由窗口、物理键盘、触摸板捕获、IME 组合输入、返回手势与边到边布局. 在 Xiaomi 23046RP50C API 35 平板及 API 37 真机执行 [UI01-UI04](android-sdk-37-physical-device-tests.md#46-存储输入webview-与其他系统能力); API 35 不证明 Android 17 新规, 本轮没有操作实体机.
 
 ### P2.13 内存上限 (I13)
 
-- [ ] `AVD_API_37` 上 `am memory-limiter status`, 运行 OpenCV 大图 / OCR / Node 桥重负载脚本, 观察是否触发 `MemoryLimiter:AnonSwap`; 崩溃报告页对 `ApplicationExitInfo.REASON_OTHER` 的描述展示可读. (DEVICE-37)
+- [x] `AVD_API_37` / CE2A.260420.019 / RAM 4096 MiB 的 `am memory-limiter status` 实测为 disabled, target 36 / 37 一致. 只完成环境核对, 未执行重负载或修改全局内存策略. [前置记录](evidence/android-sdk-37-p213-preflight-20260914.md). (DEVICE-37; DOCS)
+- [x] 复核 `CrashHandler` / `CrashReportActivity`: 当前只处理 Java 异常与 Intent `message` / `error`, 生产代码没有 `getHistoricalProcessExitReasons` / `ApplicationExitInfo` 读取. 将原先误作既有能力验收的报告项拆为待实现. [源码依据](evidence/android-sdk-37-p213-preflight-20260914.md#2-现有报告链路). (SOURCE)
+- [ ] 在内存限制器已启用的 API 37 镜像 / 设备运行有界的 OpenCV 大图 / OCR / Node 桥代表负载, 核对真实退出 reason=`REASON_OTHER`、description 包含 `MemoryLimiter:AnonSwap`, 并与被测进程和内存采样对应. disabled、普通 OOM、LMKD、手动结束均不能代替该证据. (DEVICE-37)
+- [ ] 实现历史进程退出诊断与用户可到达的展示入口, 处理多进程、旧记录、重复展示和正常退出, 再验证限制器终止后的可读报告. (SOURCE; DEVICE-37)
 
 ### P2.14 Advanced Protection Mode (I14)
 
@@ -477,7 +486,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | `DEPRECATE_SET_CONTENT_CAPTURE_ENABLED` (454307959) | `setContentCaptureEnabled(false)` 不再生效, 改用 `FLAG_SECURE` (VERIFIED) | 无 | P2.15 | |
 | `DETECT_IMPLICIT_URI_PERMISSION_GRANT` (460838111) | StrictMode 检测隐式 URI 授权, Android 18 起限制 (VERIFIED) | `app.viewFile` / 分享路径 | P2.15 | |
 | `DETECT_INSTANCE_COUNT_VIOLATIONS_WHEN_LISTENER_SET` (333566037) | StrictMode 实例计数检测 (UNVERIFIED) | 无 | P2.15 | |
-| `DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT` (447301631) | 大屏方向 / 尺寸豁免失效 (VERIFIED) | 宿主未用豁免, 增量为零 | P2.12 | |
+| `DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT` (447301631) | 大屏方向 / 尺寸豁免失效 (VERIFIED) | 无旧豁免; 默认 target 36 / 37 的手机 / 平板 UI 脚本方向对照通过, 分屏退出缺陷已修复; 其他状态 / 输入布局继续开放 | P2.12 | [配置与输入证据](evidence/android-sdk-37-p212-20260914.md) |
 | `DONOT_STEAL_AUDIO_ON_GATT_CONN` (455594702) | BLE GATT 连接不再抢占音频路由 (UNVERIFIED) | 无 | P2.15 | |
 | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` (419020719) | TLS ECH 默认开启, NSC `<domainEncryption>` 可关 (VERIFIED) | TLS 拦截代理环境 | P2.6 | |
 | `ENABLE_FILE_SYSTEM_ACCESS` (364980165) | API 37 / WebView 145 实测: 关闭时 open 用 GET_CONTENT / 只读, save / directory 提前拒绝; 开启时 open 用 OPEN_DOCUMENT / 读写授权, save / directory 打开对应选择器. 两种状态均暴露 JS function; 写入与持久化待测 (DEVICE-37) | WebView 页面 | P2.11 | [24 场景与授权边界](evidence/android-sdk-37-p211-files-20260914.md) |
@@ -775,3 +784,12 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 复跑工具提交 `71db66ed1`. 正常宿主与 target 37 覆盖 debug 构建、native 对齐门禁通过, 最终恢复 compile 37 / host target 36 / inrt target 29 的正常配置与宿主产物. Python 证据判定和预检隔离测试 25/25 通过; 未重跑完整 release / R8 或远程 CI.
 - 临时两个 compat、SMS 权限与通知监听访问已恢复, 本轮断点 / Remote 配置 / adb forward 已清理, 五个用户断点保持原状态. 独占只读 AVD 与私有 ADB 5054 已关闭, 共享 ADB 和实体机未改动.
 - P2.10 / P2.11 均保持部分完成, 99 行实体机清单继续 NOT_RUN. 后续可继续 P2.12 大屏 / 输入 / 配置变化, 同时补通知投递、真实文件写入与持久化证据; P2 / P3 / P5 不整体关闭.
+
+### 2026-09-14: P2.12 UI 脚本分屏与输入状态, P2.13 前置核对
+
+- 从干净的 `8ce71de0e` 开始. `38522f5c5` 补齐 UI 脚本 Activity 的 screenLayout / smallestScreenSize 声明, 修复进入分屏时销毁脚本引擎的问题. 调试器实际读到配置掩码 2432 与新实例 `execution=null`, 无调试器对照同样复现. 十语言 changelog 与生成的 Markdown 已同步.
+- API 37 / target 36 与 37 的 20 组主矩阵中, 4 组 UI 脚本通过; 其余 16 组的搜索、光标 / dirty、viewport 与 IME 遮挡问题如实保留. 旧工具 reportedSuccess 与最终校验结果分别保存, 不以文本幸存替代完整状态和布局验收. [实施记录](evidence/android-sdk-37-p212-20260914.md).
+- 正常宿主 / inrt debug、target 37 宿主覆盖构建、恢复后的正常 debug 与 release 清单任务通过; 二进制 configChanges 均为 0xda4. Python 探针测试 38/38 通过. 未重跑完整 release / R8 / 远程 CI, 无公开 API 或关联插件发布变化.
+- P2.13 的镜像状态为 memory limiter disabled; 现有报告页未实现历史退出读取. [前置核对](evidence/android-sdk-37-p213-preflight-20260914.md) 将条件检查、真实重负载与报告实现拆开, 没有修改全局内存策略制造替代结果.
+- 正常构建包的 UI 脚本另有手机 / 平板 2/2 复验通过. 显示、IME 和测试权限已恢复, 独占只读 AVD / 私有 adb 5055 关闭, 五个用户断点、共享 adb 与实体机保持原状; 正常 SDK 配置仍为 compile 37 / host target 36 / inrt target 29.
+- P2.12 / P2.13 仍为部分完成. 下一步优先定位已复现的编辑器状态和输入布局, 同时保留悬浮 UI / 外设 / 实体机及限制器启用设备的验收; P2 / P3 / P5 和 99 行实体机清单不整体关闭.
