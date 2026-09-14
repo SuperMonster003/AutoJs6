@@ -2,7 +2,7 @@
 
 日期: 2026-09-13. 源于 [SDK 37 Roadmap](android-sdk-37-roadmap.md) 的 P2、P3、P5、P6, 覆盖宿主、inrt 用户 APK 与全部 42 个官方插件. 共 99 个验收行: 宿主 / 系统 51 行, inrt 6 行, 插件 42 行. 本文汇总待做的实体机工作, 不把模拟器通过项改记为真机通过. 每行有独立 ID, 可导出 CSV 填写状态与证据.
 
-2026-09-14 执行约定: 维护者集中进行实体设备测试并反馈结果, 并于同日提供新的 API 37 设备 `localhost:37478`. 开测前按实际待测 APK / 插件版本冻结一批清单, 明确设备、步骤、预期与回传材料; 开发会话继续推进源码、独占模拟器和新设备上适用的受控验证. 以下 99 行没有因模拟器结果而改为 PASS. 真实 16 KB 内核及物理键盘 / 触摸板的可用性仍待集中测试时确认.
+2026-09-14 执行约定: 维护者集中进行实体设备测试并反馈结果, 并于同日提供新的 API 37 设备 `localhost:37478`. 开测前按实际待测 APK / 插件版本冻结一批清单, 明确设备、步骤、预期与回传材料; 开发会话继续推进源码、独占模拟器和新设备上适用的受控验证. 新设备恢复连接后已取得网络与 DEX / Looper 的 62/62 真机结果, O02 / A05 等只完成部分范围, 以下 99 个完整验收行仍未勾选. 真实 16 KB 内核及物理键盘 / 触摸板的可用性仍待集中测试时确认.
 
 ## 1. 设备与执行顺序
 
@@ -18,7 +18,7 @@
 | D37 | Samsung SM-F776B / `localhost:37478`, API 37, ARM64, 4 KB 内核 | 2026-09-14 接入; 新权限、新限制及 ARM64 / OEM 补证. 当前内存限制器 disabled, Advanced Protection false; 网络拓扑与外设另行记录 |
 | D16K | 待接入真实 16 KB 内核设备, 最好同时为 API 37 | ARM 原生库与实际页大小回归; 不能仅凭模拟器 `getconf` 或 APK 对齐通过认定 |
 
-2026-09-14 后续状态: 新 D37 在只读识别后断连, `adb connect localhost:37478` 返回失败, 收尾时为 offline. 本轮未安装 APK、改设置或执行真机功能测试; 已请维护者在端口变化时提供新地址或恢复连接. 详见 [Q7 与设备记录](evidence/android-sdk-37-q7-20260914.md).
+2026-09-14 状态记录: 新 D37 曾在只读识别后断连, 见 [首次 Q7 记录](evidence/android-sdk-37-q7-20260914.md). 随后维护者恢复相同地址, 已完成 [Samsung 真机补验](evidence/android-sdk-37-q7-samsung-20260914.md): 宿主 / inrt 正常 debug、target 37 debug 和正常 release 六组共 62/62. 结束时设备仍在线; 开测时不存在的四个应用 / 测试包已按哈希核验后移除, 自建 reverse / TLS 服务已清理, 未改权限或系统保护设置. 当前无需再次提供连接地址.
 
 执行顺序:
 
@@ -29,15 +29,23 @@
 
 所有用例初始状态为 NOT_RUN. PASS 要有实际结果; FAIL 是与已确认预期不符; 缺少系统版本、外设、待适配代码或签名 APK 时记 BLOCKED; N/A 需说明具体不适用条件. 系统按设计阻止某项操作, 可以判为“限制负例通过”, 不能写成“该业务功能可用”. 未确认的 Android 17 变化只设观察目标, 不预设错误码或系统行为.
 
+复选框以整行完整验收为准. 某行只有部分实测时, 在该行证据中明确已测与剩余范围, 暂不勾选.
+`checklist` 导出的 CSV 是待填写模板, 其默认 NOT_RUN 不代表已有部分证据被撤销或所有子项从未执行.
+
 D37 / D16K 行用于补齐实体机证据. 缺设备时保留未覆盖项, 不把本次清单整理解释为新增硬件发布前置条件; 发布门禁以主 Roadmap 的原定 AVD / 旧系统矩阵为准.
 
 O02 的受控 TLS 对照已提供 [自动化方法](../../tools/sdk37/README.md#tls-trust-ct-ech-and-request-scoped-insecure-options) 与 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). API 37 / API 24 的模拟器结果不关闭 O02. 真机仍需真实公网 / 企业代理端点与实际协商证据, 不在日用手机安装测试 CA; 现有 TLS helper 限模拟器, 不能直接把 serial 改成手机后使用.
 
 Q7 明文迁移的 [API 24 / 37 对照](evidence/android-sdk-37-q7-20260914.md) 已完成 HTTP 40/40 与 TLS 40/40, 包含实际宿主 / inrt release. `physical_device.py instrument --suite cleartext` 可在选定且已安装匹配 debug / androidTest 包的真机上运行四个回环用例; 不申请 LAN 权限, 不访问真实 GitHub, 不安装证书. 该套件仍不能替代 O02 的真实端点与发行包业务入口验收.
 
+随后 D37 已完成 HTTP 24/24、TLS 26/26、DEX 4/4、Looper / 线程池 8/8,
+详见 [分组与范围](evidence/android-sdk-37-q7-samsung-20260914.md). O02 的明文与受控 TLS 子项已通过,
+真实公网 / 企业代理、ECH 和最终用户 APK 入口仍开放; A05 只补齐平台中断 / 线程池探针,
+N01 只补充实际权限状态和未授权时的 IPv4 回环. 没有完成无障碍重绑、真实 LAN、原生插件或人工听音.
+
 UI04 的 UA 与基本渲染已有 [模拟器复跑工具](../../tools/sdk37/README.md#webview-user-agent-reduction-and-rendering) 与 [P2.11 证据](evidence/android-sdk-37-p211-20260913.md), API 37 / WebView 145 的 28 个场景通过. 此结果不关闭真机的输入、复杂字体、文件选择、Markdown / Ace 或最终插件包验收. HTML Previewer 按自身包的 target / UA 开关测试; File System Access 只有符号暴露观测, 仍需实际 chooser / 授权证据.
 
-S01-S03 与小组件 / 通知现有 [框架复跑工具](../../tools/sdk37/README.md#storage-widgets-and-notification-views)、[P2.8 存储证据](evidence/android-sdk-37-p28-20260913.md) 和 [P2.9 小组件 / 通知证据](evidence/android-sdk-37-p29-20260913.md). 普通模拟 SD 卡不关闭 OTG 拔插 / 不可靠卷验收. `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` 是联系人目录提供方规则, 不作为文件管理器权限开关. 当前镜像的小组件 Icon 上限与官方 target 37 公告存在差异, 需记录设备实际结果; 通知自定义视图按渲染后的图片内存判断, `notify()` 返回或通知记录 active 均不能单独作为显示通过证据. 所有实体机行继续保持 NOT_RUN.
+S01-S03 与小组件 / 通知现有 [框架复跑工具](../../tools/sdk37/README.md#storage-widgets-and-notification-views)、[P2.8 存储证据](evidence/android-sdk-37-p28-20260913.md) 和 [P2.9 小组件 / 通知证据](evidence/android-sdk-37-p29-20260913.md). 普通模拟 SD 卡不关闭 OTG 拔插 / 不可靠卷验收. `REQUIRE_PERMISSIONS_FOR_DIRECTORY_QUERIES` 是联系人目录提供方规则, 不作为文件管理器权限开关. 当前镜像的小组件 Icon 上限与官方 target 37 公告存在差异, 需记录设备实际结果; 通知自定义视图按渲染后的图片内存判断, `notify()` 返回或通知记录 active 均不能单独作为显示通过证据. 这些存储 / 小组件 / 通知的实体机行继续保持 NOT_RUN.
 
 ## 2. 包与证据准备
 
@@ -160,7 +168,7 @@ ASM 的 fixture 构建、默认 / enable / disable 对照与顶部 Activity 例�
 | [ ] A02 | 中日韩越输入法事件 | D35 + D37, 其他机抽查 | 在自有输入框分别用中文拼音组合、日文、韩文、越南语组合 / 提交 / 删除; 记录 TYPE_VIEW_TEXT_CHANGED 和 API 37 的 textChangeTypes 可用信息 | 已有文本监听器能处理组合及提交; 不因新字段丢事件或崩溃; 事件序列以实际 IME 为证据 | P2.15 |
 | [ ] A03 | 手势、全局动作与服务截图 | 全部 | 在自有测试页做 click、长按、滑动、多点手势, Home / Back / Recents; 分别测试 MediaProjection 与 AccessibilityService 截图可用路径 | 操作作用于正确控件, 回调对应成功 / 取消; 老 API 缺少截图接口可识别, 不用另一种截图成功替代 | P2.15 / P3.2 |
 | [ ] A04 | Advanced Protection | 有该设置的专用 D37, API 36 可辅助 | 记录保护状态, 手动开启后检查服务是否停用 / 不能启用及宿主提示, 再关闭并恢复服务 | 记录真实系统行为; 若受保护限制, 应有可理解提示并不误称已启用; 此项当前仍待实测 / 适配, 不预设系统必定撤销 | P2.14 |
-| [ ] A05 | 取消、OEM 服务恢复、Shizuku / root | 全部, 特权分支按实际设备 | interval / sleep / 阻塞选择器 / 线程池脚本各启动后停止, 取消远期回调; 用 looper-platform 辅助; 对已配置的 Shizuku / root / secure-settings 启停路径分别测试可用、授权取消、服务断开 | 脚本停止后不再产生副作用, 正常退出无历史回调挂起; 特权不可用明确失败, 不默默改用更高权限; 无障碍恢复结果真实 | P2.4 / P3.2 |
+| [ ] A05 | 取消、OEM 服务恢复、Shizuku / root | 全部, 特权分支按实际设备 | interval / sleep / 阻塞选择器 / 线程池脚本各启动后停止, 取消远期回调; 用 looper-platform 辅助; 对已配置的 Shizuku / root / secure-settings 启停路径分别测试可用、授权取消、服务断开 | 脚本停止后不再产生副作用, 正常退出无历史回调挂起; 特权不可用明确失败, 不默默改用更高权限; 无障碍恢复结果真实 | P2.4 / P3.2; [D37 部分证据](evidence/android-sdk-37-q7-samsung-20260914.md) |
 | [ ] A06 | 悬浮窗、控制台与布局分析 | 全部, D35 / D37 补多窗口 | 从实际入口显示悬浮按钮、可编辑控制台和布局分析; 拖动、点击、透传、输入、关闭后重开; 旋转 / 分屏 / 锁屏恢复, 撤销再授予悬浮窗权限 | 窗口坐标和触摸命中正确, 控制台可输入, 分析树对应当前页面; 权限失效有提示, 关闭后无残留窗口; SAW 已授权、overlay 实际可见和 FGS 启动资格分别记录 | P2.5 / P2.12 / P2.15 / P3.2 |
 
 ### 4.3 本地网络、资料隔离与 TLS
@@ -169,7 +177,7 @@ VERIFIED: Android 17 + target 37 的广泛 LAN 访问使用 ACCESS_LOCAL_NETWORK
 
 | ID | 测试项 | 设备 | 测试方法 / 自动化 | 预期结果 | Roadmap |
 | --- | --- | --- | --- | --- | --- |
-| [ ] N01 | 实际 IPv4 网络传输 | 全部 + D37 | 第 3.3 节 11 项 suite, PC 使用真实 LAN 地址; 同时保存 fixture 日志 | 授权基线 11/11, 含入站 accept、TCP / UDP、HTTP、WS、回环、握手与宿主 Node bridge fetch; 没有绕经 adb 隧道 | P2.1 / P3.2 |
+| [ ] N01 | 实际 IPv4 网络传输 | 全部 + D37 | 第 3.3 节 11 项 suite, PC 使用真实 LAN 地址; 同时保存 fixture 日志 | 授权基线 11/11, 含入站 accept、TCP / UDP、HTTP、WS、回环、握手与宿主 Node bridge fetch; 没有绕经 adb 隧道 | P2.1 / P3.2; [D37 部分证据](evidence/android-sdk-37-q7-samsung-20260914.md) |
 | [ ] N02 | 本地网络权限完整 UI | D37 | 首次安装拒绝、再次请求、反复拒绝后设置入口、设置撤销、重新授权; 从抽屉 / 设置 / VS Code 主动连接分别触发; 另测已有蓝牙组授权与 target 36 -> 37 覆盖安装 | 懒申请可恢复, 后台脚本不擅自弹窗; 拒绝不假报连接成功; 升级与权限组状态按实际记录, 不强行清空后当作升级结果 | P2.1 |
 | [ ] N03 | Wi-Fi / Ethernet / VPN / 热点 / Wi-Fi Direct | 有对应接口的 D37; D35 辅助 | 每种拓扑先保存两端地址、路由和实际接口, 跑 N01 授权 / 拒绝 / 恢复; Wi-Fi Direct 先建立真实 P2P 链接; VPN 分全隧道和 LAN 绕行 | 授权后在可达路径双向工作, 拒绝时符合该实际 LAN 路径的系统限制; AP 隔离或路由失败记环境问题; 缺外设记 BLOCKED | P2.1 |
 | [ ] N04 | 真正 IPv6 LAN | IPv6 路由可用的 D37 | 使用 PC / 手机的 ULA 或链路本地地址, 标注 scope/interface; 原始 Socket / UDP 双向收发唯一标记, HTTP / WS 用带方括号的 IPv6 URL另测; 重复权限三态 | 成功有对端标记, 拒绝有系统 / 异常证据并能恢复; ::1 仅是回环, 不能代替 IPv6 LAN; 当前 IPv4 fixture 不覆盖 | P2.1 |
@@ -225,7 +233,7 @@ VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 F
 | [ ] UI03 | 物理键盘 / 触摸板 / Back / 边到边 | 有键盘 / 触摸板的 D35 + D37 | 键盘导航、Meta / Back 等系统快捷键、密码可见设置, touchpad捕获, 手势返回取消 / 完成, 三键导航, 刘海 / 系统栏 | 无焦点陷阱或输入吞噬, 文字和按钮不被系统栏遮挡; 系统保留快捷键不误判为应用丢键; 记录具体映射 / OS版本 | P2.12 / P2.15 / P3.3 |
 | [ ] UI04 | WebView、字体与默认 UA | 全部 + D37 | 文档、HTML / Markdown 预览、ui.webview、Ace / LSP; 默认 / 自定义 UA、CJKV与符号字体、文件选择; 记录 WebView版本 | 正确渲染和输入, 默认 UA按实际版本记录; 自定义后缀不被当作恢复完整UA; 同资料回环服务可用, File System Access 未确认能力单列 | P2.11 / P5.4 |
 | [ ] O01 | 测试短信 / OTP / 通知监听 | 有测试 SIM 和发送端的 D37 | 发送自有普通短信与测试 OTP, 记录时间; 用已获权限的脚本读取 content://sms / 广播与 observeNotification, 对照普通文本、验证码及恢复窗口 | 按实际平台过滤 / 延迟记录可见性, 不把过滤当丢包; 不读取真实账号 OTP; 真机没有 emu sms send, 未识别为OTP不能证明无过滤 | P2.10 |
-| [ ] O02 | 明文策略、CT / ECH 与企业 / 私有 CA | D37, D35 基线 | 宿主 / 用户 APK 的普通 HTTP 正例与 GitHub 资源域 HTTP 拒绝分别验证; 对固定公网TLS端点、显式配置的debug私有CA域、企业代理分别请求; 记录信任链、CT、协商和服务端ECH证据; LAN先满足N01 | 普通 HTTP 能访问, GitHub 资源域仍限 HTTPS; 链信任失败与CT失败区分; 不靠全局关闭CT使测试变绿; 只有网络库 / 对端支持且有协商证据才记录ECH生效 | P2.6 / Q7 |
+| [ ] O02 | 明文策略、CT / ECH 与企业 / 私有 CA | D37, D35 基线 | 宿主 / 用户 APK 的普通 HTTP 正例与 GitHub 资源域 HTTP 拒绝分别验证; 对固定公网TLS端点、显式配置的debug私有CA域、企业代理分别请求; 记录信任链、CT、协商和服务端ECH证据; LAN先满足N01 | 普通 HTTP 能访问, GitHub 资源域仍限 HTTPS; 链信任失败与CT失败区分; 不靠全局关闭CT使测试变绿; 只有网络库 / 对端支持且有协商证据才记录ECH生效 | P2.6 / Q7; [D37 部分证据](evidence/android-sdk-37-q7-samsung-20260914.md) |
 | [ ] O03 | 蓝牙 RFCOMM / 联系人查询 | 有测试外设 / 测试联系人的 D37 | 已配对外设收发后主动断开读流; 绑定特权API用普通UID负例; 查询 ContactsContract.Data 合法列和旧账户列 / 非法SQL | EOF / 权限 / 查询结果按已核实平台行为记录; 不把RFCOMM变化套到普通TCP, 不对实际联系人做修改 | P2.15 |
 | [ ] O04 | 内存压力与退出原因 | 专用 D37 + D16K | 先保存 am memory-limiter status; 仅在实际启用限制器时运行有界、可取消的 OpenCV大图 / OCR / Node逐级负载, 记录输入大小 / PID / PSS / swap / thermal; 重开宿主进入设置 > 关于 > 进程退出记录并复制报告 | 正常规模可用; 系统历史的 PID / 时间对应被测负载, 按实际镜像核对 reason / MemoryLimiter:AnonSwap 描述; disabled 或手动停止不算限制器命中, PSS / RSS 不当退出瞬间精确值; 不用 ignore all 改全设备限制 | P2.13 / P5.3 |
 | [ ] O05 | 真实16KB安装与原生链 | D16K | 独立记录getconf和内核页大小, 安装最终宿主 / 用户APK / 所有适用原生插件, 跑dex/native/OCR和独立runtime最短链路 | 真内核16KB下无兼容模式依赖和dlopen / JNI错误; 每个插件单独证据, APK对齐或4KB真机成功不能替代 | P3.2 / P5 / P6 |

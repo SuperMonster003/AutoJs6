@@ -9,7 +9,7 @@
 
 P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 CT / ECH 策略保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
 
-2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. 新 Samsung D37 只读识别后断连, 未进行真机功能测试; Media3、inrt 存储引导和全部插件独立发版按确认方案继续实施.
+2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. Samsung D37 恢复连接后另完成 [真机 62/62](evidence/android-sdk-37-q7-samsung-20260914.md): HTTP 24、TLS 26、DEX 4、Looper / 线程池 8, 含实际 release; target 37 未获 LAN 授权时回环仍通过. O02 / A05 等完整业务与网络拓扑验收继续保留, Media3、inrt 存储引导和全部插件独立发版按确认方案继续实施.
 
 P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-sdk-37-p27-20260913.md). 所测 API 37 镜像的 `PARCEL_HARDENING` 长度检查已用设备字节码和正反例核实; 宿主 target 36 强制开启与 target 37 默认状态下, 11 个指定插件的最短链路均通过. 所测生产序列化路径无需修正; 真实 Tasker / 桌面操作、其它 ABI / OEM 及 P5 插件 target 37 发布验证继续开放.
 
@@ -221,6 +221,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.1 本地网络权限 (I1)
 
+- [x] Samsung SM-F776B / API 37 的宿主与 inrt 覆盖安装补证: 正常 target 36 / 29 为系统隐式 granted=true, 升至 target 37 为 false, 恢复正常 release 后又为 true; 未人为授予 / 撤销权限. target 37 的 HTTP / TLS 回环在测试前后均未获 LAN 授权时通过. 此项只覆盖权限状态与同设备 IPv4 回环, 权限 UI 和真实 LAN 仍在后续条目. (PHYSICAL; [D37 证据](evidence/android-sdk-37-q7-samsung-20260914.md))
 - [x] 官方事实与 APK 核对: target <= 36 不声明也不申请新权限, 保留 INTERNET 的隐式 LAN 访问; target 37 包按 flavor 合并 `src/target37/AndroidManifest.xml`. 普通 host 36 / inrt 29 与覆盖 target 37 的 app / test APK 元数据及 SHA-256 均归档. 未使用 compat 强制开关. (VERIFIED; SOURCE; ANDROID_BUILD: [P2.1 证据](evidence/android-sdk-37-p21-20260913.md))
 - [x] `LocalNetworkPermission`、抽屉、宿主设置与 inrt 设置接入标准运行时权限流程. 申请时机按已确认的 Q1=(a) / D12: 显式 VS Code 连接 / 开启服务才引导, 自动连接与脚本调用不主动弹窗. 复用 `runtime.requestPermissions(["access_local_network"])`, 保持异步 void API. (SOURCE: `d9465be13`; DEVICE-37)
 - [x] HTTP 同步 / 异步、WebSocket、Node controlled fetch 在实际网络失败后附加条件式恢复提示并保留 cause; TLS 与主动取消不误判. 修复 Node 将 OkHttp 整次调用超时归类为取消的问题, 保留 TIMEOUT / ABORTED 各自错误码. 原生 Socket / Paho 保留原始异常, 文档提供显式申请和重试步骤. (JVM: 5/5; DEVICE-37: 网络 suite 与既有取消回归 1/1)
@@ -245,6 +246,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.3 动态加载只读 (I3)
 
+- [x] Samsung SM-F776B / API 37 / ARM64 的 `AndroidClassLoaderRawDexDeviceTest` 补验 4/4: 宿主正常 target 36 / 覆盖 37, inrt 正常 29 / 覆盖 37, 两次加载均保持原始 DEX / 缓存字节和只读 staging. 本轮不包含原生插件 `.so` 或最终用户 APK. (PHYSICAL; [D37 证据](evidence/android-sdk-37-q7-samsung-20260914.md))
 - [x] OpenCV / ImageQuant stager 强制验证只读设置的返回值与 `canWrite()`: 临时文件先打开写入句柄, 再设只读并写入, 发布后再次校验; 命中旧缓存时也修复并校验. 失败复用各自 `NATIVE_LIBRARY_EXTRACTION_FAILED`, 不再交给 `System.load` 才发现. 原有代码已尝试去除写权限, 本项修复的是忽略失败结果的缺口. (SOURCE: `a784273d2`; JVM: 38/38; DEVICE-37: target 36 + `THROW_ERROR_FOR_WRITABLE_DCL`, 首次及旧缓存两轮各 3/3, target 37 默认行为 3/3; DEVICE: API 24 3/3)
 - [x] 其余加载点复核: `app/src/main` 的 `System.load` 仅上述两处; `AndroidClassLoader` 有 3 个 `DexClassLoader` 构造点; Ace Editor 读取已安装的 APK; Node / Lua / QuickJS / Bun / Python 宿主侧为 Binder 调用, 未发现同类原生库 staging. 仓内 Paddle `OpenCLGuard` 另有一个 `System.load`, 仅尝试固定系统 / vendor / odm / apex 库路径. 插件进程内部仍由 P5 逐仓核验. (SOURCE: [调用点与边界](evidence/android-sdk-37-p23-20260913.md#调用点复核))
 - [x] 实际脚本 `runtime.loadDex` / `runtime.loadJar` 在 API 37 target 36 + `THROW_ERROR_FOR_WRITABLE_DCL` 与 target 37 默认行为下通过; `tools/sdk37/smoke-dynamic-loading.js` 补充同一进程首次加载 / 缓存复用探针. (DEVICE-37: [测试矩阵](evidence/android-sdk-37-p23-20260913.md#设备验证))
@@ -253,6 +255,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.4 Looper / 线程 (I4)
 
+- [x] Samsung SM-F776B / API 37 / ARM64 的基础平台探针补验 8/8: 宿主 / inrt 的正常与覆盖 target 37 四组, 消息派发后的原生 / ThreadCompat 中断、显式清除、线程池 start 覆写与 run、普通直接 start 均符合预期. 未替代完整 Rhino / 无障碍 / OEM 恢复矩阵. (PHYSICAL; [D37 证据](evidence/android-sdk-37-q7-samsung-20260914.md))
 - [x] API 37 / target 36 默认、三个开关分别启用、组合启用, 以及实际 target 37 默认状态下, 每组 14/14 通过. 其中 12 个真实 Rhino 脚本覆盖定时器、线程池、sleep、exit、events、UI、悬浮窗、阻塞查找取消和 MainThreadProxy 中断; 组合 / target 37 持续 interval 各运行 2 分钟并正常退出. API 24 同组 14/14 通过. 原样执行 `sample/accessibility/smoke-legacy-api.js`, API 37 target 36 默认 / 组合、target 37 默认和 API 24 各 53/53. (DEVICE; DEVICE-37: [设备矩阵](evidence/android-sdk-37-p24-20260913.md#设备矩阵))
 - [x] 按当前声明与继承关系复查 start 方法, 修正初始 "8 个文件" 估计: ThreadCompat、两层 TimerThread、FlowWorkerPool.WorkerThread 均未覆写 start, 初始化位于构造或 run; MainThreadProxy 是包装类, Media 覆写的是 MediaPlayer.start, 录制 / 会话 / 服务入口不是 Thread.start. 平台探针确认线程池 start/run 为 0/1 时真实 threads.pool 仍正常工作. (SOURCE; DEVICE-37: [复核表](evidence/android-sdk-37-p24-20260913.md#start-覆写与非-sdk-接口复核))
 - [x] 修复基线复现的脚本不退出问题: 取消的远期回调留下历史最大时间, 导致空队列无法再次检查退出. Timer 改为登记实际排队 / 执行中的回调, 取消或完成时唤醒检查, 线程退出清理 Timer, UI / 直接 postDelayed 同样纳入. 取消 60 秒回调由 20 秒内无法结束变为正常即时结束; JVM 6/6, app / instrumentation 两种 target 与正常 inrt debug 构建通过, 16 KB 门禁通过. (SOURCE; JVM; ANDROID_BUILD; DEVICE; DEVICE-37)
@@ -273,7 +276,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.6 网络安全配置 (I6)
 
-- [x] 按 Q7=(b) / D18 将 Manifest 的明文开关迁至 NSC, 修复 release 自定义 HTTP 端点被默认策略拒绝的问题, 保留 GitHub 资源域 HTTPS 限制. API 24 / 37 的宿主 / inrt debug、release 和 target 37 debug 覆盖包共 HTTP 40/40、TLS 回归 40/40; 12 个应用 APK 配置与 CA 边界、16 个应用 / 测试 APK 签名核验通过. 新 D37 断连后的真机补验保留到实体机 O02. (SOURCE: `494a048df`; APK; DEVICE-24; DEVICE-37; [Q7 证据](evidence/android-sdk-37-q7-20260914.md))
+- [x] 按 Q7=(b) / D18 将 Manifest 的明文开关迁至 NSC, 修复 release 自定义 HTTP 端点被默认策略拒绝的问题, 保留 GitHub 资源域 HTTPS 限制. API 24 / 37 AVD 的宿主 / inrt debug、release 和 target 37 debug 覆盖包共 HTTP 40/40、TLS 回归 40/40; 12 个应用 APK 配置与 CA 边界、16 个应用 / 测试 APK 签名核验通过. Samsung D37 恢复连接后, 同批产物补齐真机 HTTP 24/24、TLS 26/26; 实际公网、企业代理、ECH 与最终用户 APK 等剩余门禁继续保留到 O02. (SOURCE: `494a048df`; APK; DEVICE-24; DEVICE-37; PHYSICAL; [Q7 证据](evidence/android-sdk-37-q7-20260914.md); [D37 补验](evidence/android-sdk-37-q7-samsung-20260914.md))
 - [x] 完成受控 TLS 夹具与 target 36 / 37 的 CT / ECH 独立开关对照. 未知 CA 拒绝、指定 debug CA 信任、主机名不匹配和强制 CT 缺 SCT 拒绝分别验证; target 37 的 LNP 前提单独满足. API 37 的 6 组各 6/6, API 24 回归 6/6 (旧系统不宣称支持 CT / ECH), 见 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). (SOURCE; DEVICE-37; DEVICE-24)
 - [x] 修复真实 Rhino 请求中 `isInsecure` / `insecure` 对共享客户端的污染. 同步、传统回调和 Promise 请求后, 后续默认或显式 false 请求恢复校验, 可信域与主机名检查保留. `timeout` / `client` 普通配置继续共享, 不擅自重置脚本显式配置的自定义 TrustManager. (DEVICE-37; DEVICE-24)
 - [x] 生产 NSC 保持默认 CT / ECH, 不添加全局关闭或新域例外; `githubusercontent.com` 资源 CA 的 CT 策略查询为 false. debug 测试 CA 不进入实际 appRelease APK. 当前 OkHttp 4.12.0 夹具连接无 ECH 扩展且可见 SNI, 不凭策略值宣称 ECH 生效. D13 记录 Q2=(a) 的确认与落实范围. (SOURCE; APK; DEVICE-37)
@@ -481,7 +484,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a), D15. 无共享存储需求可跳过, 待实现与升级矩阵验证 |
 | Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a), D16. 保持不声明, 实际限制及准确提示仍待验证 / 实现 |
 | Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (b), D17. 全部 42 仓单独为 SDK 升级发版, 各自门禁与发布记录仍待完成 |
-| Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (b), D18. 迁移与 API 24 / 37 本地验证已完成 (`494a048df`); 真机 O02 和 P2.6 其他验收继续保留 |
+| Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (b), D18. 迁移、API 24 / 37 AVD 与 Samsung D37 受控验证已完成 (`494a048df`); O02 剩余场景和 P2.6 其他验收继续保留 |
 
 ---
 
@@ -830,3 +833,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - debug / release / target 37 覆盖构建通过, 最后恢复正常 target 36 / 29. 最终宿主 APK 仅比已测包多出生成日志内容, DEX / 编译资源相同; inrt 与已测包完全相同. 全量 Lint 和 R8 不在本次通过范围.
 - 新 Samsung SM-F776B (`localhost:37478`, API 37, ARM64, 内核 4 KB) 初次只读检查成功, 随后断连且重连失败; 未安装 APK 或改设置, 99 行实体机验收仍 NOT_RUN. 需要维护者恢复连接或提供变化后的端口. 两个临时 AVD、TLS 服务和 reverse 已清理, 原共享 adb server 保留.
 - [实现与证据](evidence/android-sdk-37-q7-20260914.md). 后续优先落实 Q3 Media3 与 P2.16 的 Q4 存储引导, 新机恢复后补齐适用的 API 37 真机项目.
+
+### 2026-09-14: Samsung D37 恢复连接后的真机补验
+
+- 维护者恢复 `localhost:37478` 后, 核对仍为相同指纹的 Samsung SM-F776B / API 37 / ARM64 / 4 KB 内核. 六组同批 APK 共 62/62: HTTP 24/24、TLS / CT / insecure 隔离 26/26、DEX 4/4、Looper / 线程池 8/8. 宿主 / inrt 正常 debug、target 37 debug 和正常 release 均有实际结果.
+- 两个包从旧 target 升至 37 后 LAN 权限均为未授予, HTTP / TLS 回环仍通过; 恢复旧 target release 后系统恢复隐式授权. 未人为改权限或 compat, 未把 ADB 回环当作真实 LAN 或 ECH 证据.
+- 结束前核对手机上最终四个 APK 的哈希, 移除本轮独占安装的包与 reverse, 关闭自建 TLS fixture. 设备仍在线, 内存限制器 disabled / Advanced Protection false 与初始一致, 共享 adb 保留. 本轮未改生产代码或构建版本, 不重复新增 changelog.
+- [真机实施记录](evidence/android-sdk-37-q7-samsung-20260914.md) 与 [机器记录](evidence/android-sdk-37-q7-samsung-results-20260914.json). O02 / A05 已有部分真机证据, 完整验收行仍未勾选; 原集中人工测试安排继续有效, 无需再次提供连接地址.
