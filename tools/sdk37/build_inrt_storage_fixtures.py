@@ -1,15 +1,17 @@
 """Create disposable storage-test APKs from an inrt debug APK, without changing runtime code.
 
 Only assets/project and manifest versionCode/storage declarations are changed. The
-fixtures keep the template package name and use a separate test key: install only
-on an exclusively owned, disposable emulator. This does not test the APK Builder
-plugin, encryption, RuntimeKit distribution, or release signing.
+fixtures keep the template package name and use a separate test key. Physical
+testing requires --disable-boot and the runner's explicit physical-device mode.
+This does not test the APK Builder plugin, encryption, RuntimeKit distribution,
+or release signing.
 """
 import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import struct
 import subprocess
 import zipfile
@@ -85,8 +87,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--version-code', type=int, required=True)
     parser.add_argument('--shared-file', required=True)
+    parser.add_argument('--disable-boot', action='store_true', help='Disable fixture boot execution; required for physical tests')
     args = parser.parse_args()
-    assert args.shared_file.startswith('/sdcard/Download/autojs6-sdk37-storage-')
+    assert re.fullmatch(r'/sdcard/Download/autojs6-sdk37-storage-[\w-]+\.txt', args.shared_file)
     assert 0 < args.version_code < 2 ** 31 - 4
     args.output.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ, JAVA_HOME=str(args.jdk.resolve()))
@@ -110,7 +113,7 @@ def main():
             'versionName': '1.0.0', 'versionCode': version, 'main': 'main.js',
             'build': {'id': f'storage-{version}-{case}', 'number': version, 'time': 0},
             'launchConfig': {'requiresSharedStorage': shared, 'splashVisible': False,
-                             'logsVisible': False, 'launcherVisible': case != 'hidden', 'runOnBoot': True},
+                             'logsVisible': False, 'launcherVisible': case != 'hidden', 'runOnBoot': not args.disable_boot},
         }
         script = '''let env = android.os.Environment;
 let result = {case: CASE, target: context.getApplicationInfo().targetSdkVersion,
@@ -150,10 +153,14 @@ files.append(String(context.getFilesDir().getPath()) + '/storage-result.jsonl', 
         if case == 'missing':
             assert "uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'" not in badging
         (args.output / (case + '-badging.txt')).write_text(badging, encoding='utf-8')
-        records.append({'case': case, 'versionCode': version, 'sha256': hashlib.sha256(apk.read_bytes()).hexdigest(), 'signer': signer})
+        target = int(re.search(r"targetSdkVersion:'(\d+)'", badging)[1])
+        records.append({'case': case, 'versionCode': version, 'target': target,
+                        'sha256': hashlib.sha256(apk.read_bytes()).hexdigest(), 'signer': signer})
         unsigned.unlink()
         aligned.unlink()
-    (args.output / 'fixtures.json').write_text(json.dumps({'templateSha256': hashlib.sha256(args.template.read_bytes()).hexdigest(), 'fixtures': records}, indent=2), encoding='utf-8')
+    metadata = {'templateSha256': hashlib.sha256(args.template.read_bytes()).hexdigest(),
+                'sharedFile': args.shared_file, 'runOnBoot': not args.disable_boot, 'fixtures': records}
+    (args.output / 'fixtures.json').write_text(json.dumps(metadata, indent=2), encoding='utf-8')
     print(json.dumps(records))
 
 

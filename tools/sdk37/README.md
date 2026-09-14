@@ -726,9 +726,52 @@ actual private/shared reads and writes; XML and command logs capture the UI and
 system state. `SharedStorageBuildConfigDeviceTest` separately checks project JSON,
 remote serialization, and saved/exported/imported build profiles.
 
+For an explicitly provided test phone, generate a new fixture set with
+`build_inrt_storage_fixtures.py --disable-boot`. The phone runner requires its
+exact fingerprint, English UI, owner user 0 as its only user, and no AutoJs6 host,
+inrt, plugin or retained-data package at the initial check. It verifies all fixture
+hashes and embedded boot settings before creating anything on the phone:
+
+```powershell
+python tools/sdk37/run_inrt_storage_probe.py `
+  --adb E:/.android/sdk/platform-tools/adb.exe `
+  --serial localhost:37478 --physical-device `
+  --expected-fingerprint '<getprop ro.build.fingerprint for this test phone>' `
+  --fixtures build/sdk37-storage/phone-fixtures `
+  --output build/sdk37-storage/phone-results --target 29 `
+  --shared-file /sdcard/Download/autojs6-sdk37-storage-phone.txt
+```
+
+Physical mode changes only the newly installed fixture's storage grant. It uses
+streamed installation, wakes the screen and dismisses an ordinary swipe lock
+before UI operations; a credential-protected phone must already be unlocked.
+It does not change the lock configuration, locale, screen timeout or compatibility
+overrides. To verify Settings-result recreation, it terminates only the fixture
+process with its own UID if `am kill` leaves that process alive. It never reboots
+the phone. On completion or test failure, it removes the installed APK only if its
+hash matches a supplied fixture, then removes the unique UI XML and the shared
+file only if its contents match the test's writes. Both test success and
+`cleanup.success` must be true. A disconnected device or changed package/file
+identity leaves an explicit cleanup failure requiring inspection.
+
+Run the device ownership and cleanup checks locally with
+`python -m unittest discover -s tools/sdk37 -p test_inrt_storage_probe.py -v`.
+These use a fake ADB endpoint and never contact a device.
+
+`--upgrade-fixtures <target-37-fixture-directory>` runs the four upgrade checks
+instead of the eight UI checks. Build that second set with the same signing key
+and shared filename, a larger versionCode, and a target 37 debug template; both
+sets must disable boot execution for physical mode. Supply the target 29 set as
+`--fixtures` and keep `--target 29`. This creates a target 29 shared project,
+grants its all-files app-op, verifies actual file I/O, updates to target 37 without
+granting again, verifies the retained files and authorization, then checks
+revocation and regrant. It does not establish a historical READ/WRITE legacy
+baseline. Physical mode removes its final upgrade APK after hash verification.
+
 The normal template limits `READ_EXTERNAL_STORAGE` to API 32 and
 `WRITE_EXTERNAL_STORAGE` to API 29. A successful shell `pm grant` alone does not
 establish legacy access on newer systems. The upgrade fixture must record actual
 grants and file I/O before updating. `preserveLegacyExternalStorage`, real boot,
-physical devices, and the complete user-APK migration matrix remain separate
-acceptance items. See the [P2.16 evidence](../../docs/dev/evidence/android-sdk-37-inrt-storage-20260914.md).
+and the complete user-APK migration matrix remain separate acceptance items. See the
+[P2.16 evidence](../../docs/dev/evidence/android-sdk-37-inrt-storage-20260914.md) and
+[Samsung checks](../../docs/dev/evidence/android-sdk-37-inrt-storage-samsung-20260914.md).

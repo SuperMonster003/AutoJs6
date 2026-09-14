@@ -1,0 +1,750 @@
+{
+  "date": "2026-09-14",
+  "runtimeSourceCommit": "e2e4d599d448307ac8f7cbfe527c2e96cfc63309",
+  "worktreeHeadAtEnd": "a968da723cc367025ccfbe650a0eac44ba23a4d0",
+  "serial": "localhost:37478",
+  "runtimeRebuilt": false,
+  "normalTargets": {
+    "app": 36,
+    "inrt": 29
+  },
+  "runs": [
+    {
+      "target": 29,
+      "serial": "localhost:37478",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "processKilledWhileAway": true
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "physicalDevice": true,
+      "fixtures": {
+        "templateSha256": "ebbb7ad4684ad98a8037fc24a1794eb641f2b667f97372e9cf1f556466038064",
+        "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-normal-20260914.txt",
+        "runOnBoot": false,
+        "fixtures": [
+          {
+            "case": "private",
+            "versionCode": 11000,
+            "target": 29,
+            "sha256": "519d7f4f0955cf0c6a7341e3b164a7a15d36fc7707eaf38f8e670035af0e5482",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "shared",
+            "versionCode": 11001,
+            "target": 29,
+            "sha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "hidden",
+            "versionCode": 11002,
+            "target": 29,
+            "sha256": "50c82d92a8c7589b560588e18f406e709d1b888909601db962e5e4abc6c8a1c2",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "missing",
+            "versionCode": 11003,
+            "target": 29,
+            "sha256": "45390a644a968d247626f581b813385facce67b18f36532d68d1fb6c37bb0995",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          }
+        ]
+      },
+      "baselinePackagesAbsent": true,
+      "api": 37,
+      "fingerprint": "samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys",
+      "cleanup": {
+        "success": true,
+        "removedApkSha256": "45390a644a968d247626f581b813385facce67b18f36532d68d1fb6c37bb0995",
+        "sharedFileContent": "legacy-fixture\nshared-write-ok\nshared-write-ok\nshared-write-ok"
+      },
+      "commandAudit": {
+        "fixtureOnlyPermissionChanges": true,
+        "noCompatOrSettingsWrites": true,
+        "noReboot": true,
+        "commandCount": 116,
+        "rawSha256": "5c74c383aae9e0eac1621ca7a4801faf5271f74a0ade676e505c62fd16cea4be"
+      },
+      "name": "normal-verified",
+      "rawDirectory": "build/sdk37-inrt-storage-samsung-20260914/normal-verified"
+    },
+    {
+      "target": 37,
+      "serial": "localhost:37478",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "processKilledWhileAway": true
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "physicalDevice": true,
+      "fixtures": {
+        "templateSha256": "a1e9e0f955bd716c18fabd96b60027f343783932c431c639af37302cc6ba3b60",
+        "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-target37-20260914.txt",
+        "runOnBoot": false,
+        "fixtures": [
+          {
+            "case": "private",
+            "versionCode": 12000,
+            "target": 37,
+            "sha256": "c401624053da5ad039d7953a89c7381688c1ce9950862080c90cfaefbccbd861",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "shared",
+            "versionCode": 12001,
+            "target": 37,
+            "sha256": "8d092d42589af34957756d4d263af5133cce371a7947235297258314cae65587",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "hidden",
+            "versionCode": 12002,
+            "target": 37,
+            "sha256": "107f2d31fed4afbf3f8af79b6ae980ded8c56b498fd8e7305ffc9a5c3c3ee285",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "missing",
+            "versionCode": 12003,
+            "target": 37,
+            "sha256": "ea24a5ea9e97be1b86b84ec18d3b75f8d9cda6a0886d570461266c755fefd200",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          }
+        ]
+      },
+      "baselinePackagesAbsent": true,
+      "api": 37,
+      "fingerprint": "samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys",
+      "cleanup": {
+        "success": true,
+        "removedApkSha256": "ea24a5ea9e97be1b86b84ec18d3b75f8d9cda6a0886d570461266c755fefd200",
+        "sharedFileContent": "legacy-fixture\nshared-write-ok\nshared-write-ok\nshared-write-ok"
+      },
+      "commandAudit": {
+        "fixtureOnlyPermissionChanges": true,
+        "noCompatOrSettingsWrites": true,
+        "noReboot": true,
+        "commandCount": 116,
+        "rawSha256": "771e88dc2d7fa7aad04a1b86ce43abed27ed657d9af5b1138192fa3647efc5fb"
+      },
+      "name": "target37",
+      "rawDirectory": "build/sdk37-inrt-storage-samsung-20260914/target37"
+    },
+    {
+      "target": 29,
+      "serial": "localhost:37478",
+      "checks": [
+        {
+          "name": "target29-all-files-shared-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "file": "legacy-fixture\nshared-write-ok"
+        },
+        {
+          "name": "target37-update-preserves-files-and-all-files-grant",
+          "receipt": {
+            "case": "shared",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "oldPrivateReceiptPreserved": true
+        },
+        {
+          "name": "revocation-after-upgrade-stops-script-without-changing-files"
+        },
+        {
+          "name": "target37-update-resumes-old-shared-file-after-regrant",
+          "receipt": {
+            "case": "shared",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "file": "legacy-fixture\nshared-write-ok\nshared-write-ok\nshared-write-ok"
+        }
+      ],
+      "success": true,
+      "physicalDevice": true,
+      "fixtures": {
+        "templateSha256": "ebbb7ad4684ad98a8037fc24a1794eb641f2b667f97372e9cf1f556466038064",
+        "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-normal-20260914.txt",
+        "runOnBoot": false,
+        "fixtures": [
+          {
+            "case": "private",
+            "versionCode": 11000,
+            "target": 29,
+            "sha256": "519d7f4f0955cf0c6a7341e3b164a7a15d36fc7707eaf38f8e670035af0e5482",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "shared",
+            "versionCode": 11001,
+            "target": 29,
+            "sha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "hidden",
+            "versionCode": 11002,
+            "target": 29,
+            "sha256": "50c82d92a8c7589b560588e18f406e709d1b888909601db962e5e4abc6c8a1c2",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          },
+          {
+            "case": "missing",
+            "versionCode": 11003,
+            "target": 29,
+            "sha256": "45390a644a968d247626f581b813385facce67b18f36532d68d1fb6c37bb0995",
+            "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+          }
+        ]
+      },
+      "baselinePackagesAbsent": true,
+      "upgradeFixtures": {
+        "before": {
+          "case": "shared",
+          "versionCode": 11001,
+          "target": 29,
+          "sha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        "after": {
+          "case": "shared",
+          "versionCode": 13001,
+          "target": 37,
+          "sha256": "391a052e9f4128b8aab00b1e43ffda86d1a7be99bab180b5a12f24f4c9d7d40a",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      },
+      "api": 37,
+      "fingerprint": "samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys",
+      "cleanup": {
+        "success": true,
+        "removedApkSha256": "391a052e9f4128b8aab00b1e43ffda86d1a7be99bab180b5a12f24f4c9d7d40a",
+        "sharedFileContent": "legacy-fixture\nshared-write-ok\nshared-write-ok\nshared-write-ok"
+      },
+      "commandAudit": {
+        "fixtureOnlyPermissionChanges": true,
+        "noCompatOrSettingsWrites": true,
+        "noReboot": true,
+        "commandCount": 64,
+        "rawSha256": "555bb4526a717a9efc10f01b708e081501c9ebe446cc2964f1cf63834e24a650"
+      },
+      "name": "upgrade",
+      "rawDirectory": "build/sdk37-inrt-storage-samsung-20260914/upgrade"
+    }
+  ],
+  "artifactChecks": [
+    {
+      "group": "normal-fixtures",
+      "case": "private",
+      "target": 29,
+      "sha256": "519d7f4f0955cf0c6a7341e3b164a7a15d36fc7707eaf38f8e670035af0e5482",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "normal-fixtures",
+      "case": "shared",
+      "target": 29,
+      "sha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "normal-fixtures",
+      "case": "hidden",
+      "target": 29,
+      "sha256": "50c82d92a8c7589b560588e18f406e709d1b888909601db962e5e4abc6c8a1c2",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "normal-fixtures",
+      "case": "missing",
+      "target": 29,
+      "sha256": "45390a644a968d247626f581b813385facce67b18f36532d68d1fb6c37bb0995",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "target37-fixtures",
+      "case": "private",
+      "target": 37,
+      "sha256": "c401624053da5ad039d7953a89c7381688c1ce9950862080c90cfaefbccbd861",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "target37-fixtures",
+      "case": "shared",
+      "target": 37,
+      "sha256": "8d092d42589af34957756d4d263af5133cce371a7947235297258314cae65587",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "target37-fixtures",
+      "case": "hidden",
+      "target": 37,
+      "sha256": "107f2d31fed4afbf3f8af79b6ae980ded8c56b498fd8e7305ffc9a5c3c3ee285",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "target37-fixtures",
+      "case": "missing",
+      "target": 37,
+      "sha256": "ea24a5ea9e97be1b86b84ec18d3b75f8d9cda6a0886d570461266c755fefd200",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "upgrade-fixtures",
+      "case": "private",
+      "target": 37,
+      "sha256": "1d4194791009e3923c41da8d525746208cfc6b2148d202b80a1d5053c632757a",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "upgrade-fixtures",
+      "case": "shared",
+      "target": 37,
+      "sha256": "391a052e9f4128b8aab00b1e43ffda86d1a7be99bab180b5a12f24f4c9d7d40a",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "upgrade-fixtures",
+      "case": "hidden",
+      "target": 37,
+      "sha256": "b865553d9e89259996c2129a4d6bf47b3302e0b043a1af0c625d1aefc8e78ff1",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    },
+    {
+      "group": "upgrade-fixtures",
+      "case": "missing",
+      "target": 37,
+      "sha256": "865b0f53acf5f6dd4fc5a2bef70b31426934d8c315d79fc7ae73859ac088bd35",
+      "runtimeEntryCount": 53,
+      "runtimeBytesEqual": true,
+      "bootDisabled": true
+    }
+  ],
+  "fixtureSets": {
+    "normal-fixtures": {
+      "templateSha256": "ebbb7ad4684ad98a8037fc24a1794eb641f2b667f97372e9cf1f556466038064",
+      "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-normal-20260914.txt",
+      "runOnBoot": false,
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 11000,
+          "target": 29,
+          "sha256": "519d7f4f0955cf0c6a7341e3b164a7a15d36fc7707eaf38f8e670035af0e5482",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 11001,
+          "target": 29,
+          "sha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 11002,
+          "target": 29,
+          "sha256": "50c82d92a8c7589b560588e18f406e709d1b888909601db962e5e4abc6c8a1c2",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 11003,
+          "target": 29,
+          "sha256": "45390a644a968d247626f581b813385facce67b18f36532d68d1fb6c37bb0995",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    },
+    "target37-fixtures": {
+      "templateSha256": "a1e9e0f955bd716c18fabd96b60027f343783932c431c639af37302cc6ba3b60",
+      "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-target37-20260914.txt",
+      "runOnBoot": false,
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 12000,
+          "target": 37,
+          "sha256": "c401624053da5ad039d7953a89c7381688c1ce9950862080c90cfaefbccbd861",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 12001,
+          "target": 37,
+          "sha256": "8d092d42589af34957756d4d263af5133cce371a7947235297258314cae65587",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 12002,
+          "target": 37,
+          "sha256": "107f2d31fed4afbf3f8af79b6ae980ded8c56b498fd8e7305ffc9a5c3c3ee285",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 12003,
+          "target": 37,
+          "sha256": "ea24a5ea9e97be1b86b84ec18d3b75f8d9cda6a0886d570461266c755fefd200",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    },
+    "upgrade-fixtures": {
+      "templateSha256": "a1e9e0f955bd716c18fabd96b60027f343783932c431c639af37302cc6ba3b60",
+      "sharedFile": "/sdcard/Download/autojs6-sdk37-storage-samsung-normal-20260914.txt",
+      "runOnBoot": false,
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 13000,
+          "target": 37,
+          "sha256": "1d4194791009e3923c41da8d525746208cfc6b2148d202b80a1d5053c632757a",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 13001,
+          "target": 37,
+          "sha256": "391a052e9f4128b8aab00b1e43ffda86d1a7be99bab180b5a12f24f4c9d7d40a",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 13002,
+          "target": 37,
+          "sha256": "b865553d9e89259996c2129a4d6bf47b3302e0b043a1af0c625d1aefc8e78ff1",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 13003,
+          "target": 37,
+          "sha256": "865b0f53acf5f6dd4fc5a2bef70b31426934d8c315d79fc7ae73859ac088bd35",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    }
+  },
+  "deviceAfter": [
+    {
+      "command": [
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "code": 0,
+      "stdout": "samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "getprop",
+        "ro.product.model"
+      ],
+      "code": 0,
+      "stdout": "SM-F776B\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "getprop",
+        "ro.product.cpu.abilist"
+      ],
+      "code": 0,
+      "stdout": "arm64-v8a\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "code": 0,
+      "stdout": "37\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "getprop",
+        "persist.sys.locale"
+      ],
+      "code": 0,
+      "stdout": "en-US\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "getconf",
+        "PAGESIZE"
+      ],
+      "code": 0,
+      "stdout": "4096\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "pm",
+        "list",
+        "users"
+      ],
+      "code": 0,
+      "stdout": "Users:\n\tUserInfo{0:Owner:4c13} running\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "pm",
+        "list",
+        "packages",
+        "-u",
+        "org.autojs.autojs6"
+      ],
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "am",
+        "memory-limiter",
+        "status"
+      ],
+      "code": 0,
+      "stdout": "Memory limiter\n  disabled\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "dumpsys",
+        "advanced_protection"
+      ],
+      "code": 0,
+      "stdout": "AdvancedProtectionService\n  isAdvancedProtectionEnabled: false\n  mHooks.size(): 3\n  mCallbacks.size(): 3\n  mProviders.size(): 1\nHooks: \n    DisallowInstallUnknownSourcesAdvancedProtectionHook available: true provisioning status: 0\n    MemoryTaggingExtensionHook available: false provisioning status: 0\n    DisallowCellular2GAdvancedProtectionHook available: true provisioning status: 0\n  Providers: \n    AccessibilityServiceAdvancedProtectionProvider\n      DISALLOW_NON_TOOL_ACCESSIBILITY_SERVICES\n  mSharedPreferences: {}\nAdvancedProtectionConfigLoader:\n  System Config:\n    All defined protections: [DISALLOW_CELLULAR_2G, DISALLOW_INSECURE_WIFI_AUTOJOIN, DISALLOW_INSTALL_UNKNOWN_SOURCES, DISALLOW_NON_TOOL_ACCESSIBILITY_SERVICES, DISALLOW_USB, ENABLE_MTE]\n    Available protections: [DISALLOW_CELLULAR_2G, DISALLOW_INSECURE_WIFI_AUTOJOIN, DISALLOW_INSTALL_UNKNOWN_SOURCES, DISALLOW_NON_TOOL_ACCESSIBILITY_SERVICES, DISALLOW_USB, ENABLE_MTE]\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "settings",
+        "get",
+        "system",
+        "screen_off_timeout"
+      ],
+      "code": 0,
+      "stdout": "300000\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "settings",
+        "get",
+        "global",
+        "stay_on_while_plugged_in"
+      ],
+      "code": 0,
+      "stdout": "15\n",
+      "stderr": ""
+    }
+  ],
+  "earlierAttempt": {
+    "name": "normal",
+    "countedAsSuccess": false,
+    "checksBeforeInterruption": [
+      {
+        "name": "private-without-storage-grant",
+        "receipt": {
+          "case": "private",
+          "target": 29,
+          "api": 37,
+          "private": true,
+          "shared": null,
+          "manager": false,
+          "legacy": false
+        }
+      }
+    ],
+    "reason": "The shared prompt UI dump showed the ordinary Samsung swipe lock screen. Later runs wake the screen and dismiss the noncredential keyguard before UI operations.",
+    "cleanup": {
+      "success": true,
+      "removedApkSha256": "ac7d5e9c4ca617aee6aedcd35377e64b2b62f3dae7876e5f3b0ace6b0b2eb8e8",
+      "sharedFileContent": "legacy-fixture"
+    }
+  },
+  "helperUnitTests": {
+    "passed": 8,
+    "output": "test_boot_enabled_fixture_stops_before_mutation (test_inrt_storage_probe.PhysicalStorageProbeTest.test_boot_enabled_fixture_stops_before_mutation) ... ok\ntest_changed_fingerprint_stops_before_mutation (test_inrt_storage_probe.PhysicalStorageProbeTest.test_changed_fingerprint_stops_before_mutation) ... ok\ntest_changed_fixture_bytes_stop_before_mutation (test_inrt_storage_probe.PhysicalStorageProbeTest.test_changed_fixture_bytes_stop_before_mutation) ... ok\ntest_cleanup_leaves_an_unrecognized_installed_package (test_inrt_storage_probe.PhysicalStorageProbeTest.test_cleanup_leaves_an_unrecognized_installed_package) ... ok\ntest_cleanup_removes_only_the_known_fixture_after_install_failure (test_inrt_storage_probe.PhysicalStorageProbeTest.test_cleanup_removes_only_the_known_fixture_after_install_failure) ... ok\ntest_phone_without_explicit_physical_mode_never_contacts_adb (test_inrt_storage_probe.PhysicalStorageProbeTest.test_phone_without_explicit_physical_mode_never_contacts_adb) ... ok\ntest_preexisting_host_is_not_uninstalled (test_inrt_storage_probe.PhysicalStorageProbeTest.test_preexisting_host_is_not_uninstalled) ... ok\ntest_second_profile_stops_before_mutation (test_inrt_storage_probe.PhysicalStorageProbeTest.test_second_profile_stops_before_mutation) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.116s\n\nOK\n"
+  },
+  "totals": {
+    "uiChecks": 16,
+    "upgradeChecks": 4,
+    "physicalChecks": 20,
+    "helperUnitTests": 8,
+    "physicalRowsClosed": 0
+  },
+  "limitations": [
+    "Frozen debug runtime fixtures, not final APK Builder/Runtime Kit user APKs or release execution.",
+    "No real reboot, complete headless chain, historical READ/WRITE legacy migration, preserveLegacyExternalStorage decision, separate final-user-APK fresh install/reinstall, other OEM/API matrix, or real 16 KB kernel acceptance.",
+    "Image/color implementation committed concurrently as a968da723 was not rebuilt into these artifacts.",
+    "Both normal UI runs and the upgrade use the template package identity. All fixtures were absent before each run and removed by hash afterward."
+  ]
+}

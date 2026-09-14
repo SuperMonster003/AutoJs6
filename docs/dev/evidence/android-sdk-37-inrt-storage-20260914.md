@@ -2,6 +2,8 @@
 
 日期: 2026-09-14. 源码基线: `af962199e`, 实现与本记录一并提交. 对应 Q4=(a) / D15. 本轮完成启动配置、权限引导与提前回归, P2.16 / P3.3 的完整用户 APK 和升级矩阵仍开放. 正式 compile 为 37, 宿主 / inrt target 仍为 36 / 29.
 
+补记: Samsung 随后再次恢复连接, 已完成 [16 项 UI / 实际读写与 4 项覆盖升级真机补验](android-sdk-37-inrt-storage-samsung-20260914.md). 下文保留本轮 AVD 实施过程, 新证据仍不关闭完整用户 APK 或开机矩阵.
+
 ## 实现与配置
 
 - `LaunchConfig.requiresSharedStorage` 默认 `false`, 写入 `project.json` 的 `launchConfig`. 仅访问打包 assets / 应用私有文件的项目直接启动. 需要直接读写共享路径的项目由作者显式开启, 不分析脚本来推断需求. SAF / MediaStore 项目继续按各自授权规则处理.
