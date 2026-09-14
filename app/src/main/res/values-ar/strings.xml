@@ -724,6 +724,7 @@
     <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
+    <string name="summary_terminal_node_probe">التحقق مما إذا كانت الطرفية تستطيع تشغيل node من إضافة Node.js Runtime</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">اضغط على مفتاح \"رفع الصوت\" لإيقاف تشغيل جميع البرامج النصية</string>
@@ -1515,6 +1516,7 @@
     <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
     <string name="text_open">فتح</string>
     <string name="text_open_by_other_apps">افتح من قبل التطبيقات الأخرى</string>
+    <string name="text_open_in_terminal">فتح في الطرفية</string>
     <string name="text_open_main_activity">فتح النشاط الرئيسي</string>
     <string name="text_open_with">مفتوحة مع</string>
     <string name="text_operation_aborted">تم الإيقاف</string>
@@ -1947,6 +1949,34 @@
     <string name="text_system_settings">إعدادات النظام</string>
     <string name="text_tailor_made_developer">مطور مصممة خصيصا</string>
     <string name="text_task">مهمة</string>
+    <string name="text_terminal">الطرفية</string>
+    <string name="text_terminal_close_session">إغلاق الجلسة</string>
+    <string name="text_terminal_confirm_close_running">لا تزال هناك عملية قيد التشغيل في هذه الجلسة. هل تريد الإغلاق على أي حال?</string>
+    <string name="text_terminal_copy_home_path">نسخ مسار الدليل الرئيسي</string>
+    <string name="text_terminal_copy_transcript">نسخ النص الكامل</string>
+    <string name="text_terminal_no_npm_scripts">لا يعلن package.json عن أي scripts</string>
+    <string name="text_terminal_no_package_json">لم يتم العثور على package.json في الدليل الحالي</string>
+    <string name="text_terminal_node_exec_denied">رفض هذا الجهاز تشغيل مشغل Node.js الخاص بالإضافة, لذا لا يتوفر سوى shell النظام</string>
+    <string name="text_terminal_node_executable_missing">إضافة Node.js Runtime لا تحتوي على مشغل لـ ABI %1$s</string>
+    <string name="text_terminal_node_missing">إضافة Node.js Runtime غير مثبتة, لذا لا يتوفر سوى shell النظام</string>
+    <string name="text_terminal_node_plugin_not_authorized">إضافة Node.js Runtime مثبتة لكنها غير مفعلة أو غير مصرح بها في مركز الإضافات</string>
+    <string name="text_terminal_node_plugin_too_old">إضافة Node.js Runtime المثبتة لا تحتوي على مشغل للطرفية, حدثها لاستخدام node و npm هنا</string>
+    <string name="text_terminal_node_probe">فحص مشغل Node.js</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">جار فحص مشغل Node.js...</string>
+    <string name="text_terminal_npm_init">تهيئة المشروع (npm init)</string>
+    <string name="text_terminal_npm_install">تثبيت التبعيات (npm install)</string>
+    <string name="text_terminal_npm_install_package">تثبيت حزمة (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">تشغيل سكربت (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">مديرو حزم آخرون (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">يتم توفير yarn و pnpm عبر corepack ويتم تنزيلهما من السجل عند أول استخدام. شغل "yarn --version" أو "pnpm --version" لتفعيلهما.</string>
+    <string name="text_terminal_package_name_hint">اسم الحزمة, مثل is-odd</string>
+    <string name="text_terminal_search_npm">البحث عن حزم npm</string>
+    <string name="text_terminal_select_text">تحديد النص</string>
+    <string name="text_terminal_session_ended">انتهت الجلسة</string>
+    <string name="text_terminal_share_transcript">مشاركة النص الكامل</string>
+    <string name="text_terminal_show_keyboard">إظهار لوحة المفاتيح</string>
+    <string name="text_terminal_tips">تلميحات الطرفية</string>
+    <string name="text_terminal_tips_content">يعمل الـ shell بصفة مستخدم تطبيق AutoJs6 وله دليل رئيسي خاص (%1$s). يوفر شريط المفاتيح Esc / Tab / Ctrl / Alt ومفاتيح المؤشر, والضغط المطول على الشاشة يحدد النص, والقائمة تنسخ النص الكامل أو تشاركه. يصبح node و npm متاحين بعد تثبيت إضافة Node.js Runtime التي تدعم الطرفية.</string>
     <string name="text_text_size">حجم الخط</string>
     <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>

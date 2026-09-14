@@ -165,7 +165,8 @@
         "`images.readPixels` 除文件路径外还接受 ImageWrapper 参数, 且传入的图片保持可用",
         "`images.matchTemplate` 和 `images.findPointByImage` 支持 `scales` 选项 (单个比例或比例数组), 用于匹配在其他分辨率下截取的模板; 每个匹配项新增 `width`, `height`, `scale`, `center` 和 `rect` 属性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 和 `filter()`",
         "文件管理器脚本菜单 \"悬浮运行\" 项, 以半透明悬浮工具栏进行脚本启停 / 编辑 / 查看日志, 跟随夜间模式与主题色",
-        "布局分析: 节点信息对话框中长按属性可勾选多项, 并合并复制为链式选择器 (id('x').text('y')) 或 pickup() / detect() 可接受的对象选择器; \"保存布局为文件\" 把捕获的节点树写入 <工作目录>/layouts/<时间>.layout.json, 在文件管理器中点击该文件即可离线分析"
+        "布局分析: 节点信息对话框中长按属性可勾选多项, 并合并复制为链式选择器 (id('x').text('y')) 或 pickup() / detect() 可接受的对象选择器; \"保存布局为文件\" 把捕获的节点树写入 <工作目录>/layouts/<时间>.layout.json, 在文件管理器中点击该文件即可离线分析",
+        "终端: 应用内 shell (侧拉菜单 \"工具\" 组, 目录菜单 \"在终端中打开\", 项目工具栏), 以 pty 运行 /system/bin/sh, 带 Esc / Tab / Ctrl / Alt 及方向键按键栏, 捏合缩放字号, 复制 / 分享终端记录, npm 辅助菜单, 以及说明 Node.js 运行时插件的 node 为何不可用的横幅"
       ],
       "fix": [
         "HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效",

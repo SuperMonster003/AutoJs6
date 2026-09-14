@@ -718,6 +718,7 @@
     <string name="summary_release_history_preference">查看发行版本历史更新记录与统计数据</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始类型在脚本中将被包装为对应的 Java 对象</string>
     <string name="summary_stable_mode">增强布局分析稳定性但降低代码兼容性 (需重启无障碍服务)</string>
+    <string name="summary_terminal_node_probe">检测终端能否运行 Node.js 运行时插件提供的 node</string>
     <string name="summary_text_launcher_shortcuts">添加快捷方式到启动器</string>
     <string name="summary_use_volume_control_record">按 \"音量减\" 键开始或停止脚本录制 (需开启浮动按钮)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 键停止所有正在运行的脚本</string>
@@ -1510,6 +1511,7 @@
     <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
     <string name="text_open">打开</string>
     <string name="text_open_by_other_apps">用其他应用打开</string>
+    <string name="text_open_in_terminal">在终端中打开</string>
     <string name="text_open_main_activity">打开主界面</string>
     <string name="text_open_with">打开方式</string>
     <string name="text_operation_aborted">已中止</string>
@@ -1942,6 +1944,34 @@
     <string name="text_system_settings">系统设置</string>
     <string name="text_tailor_made_developer">二次开发者</string>
     <string name="text_task">任务</string>
+    <string name="text_terminal">终端</string>
+    <string name="text_terminal_close_session">关闭会话</string>
+    <string name="text_terminal_confirm_close_running">会话中仍有进程在运行, 确定关闭?</string>
+    <string name="text_terminal_copy_home_path">复制主目录路径</string>
+    <string name="text_terminal_copy_transcript">复制终端记录</string>
+    <string name="text_terminal_no_npm_scripts">package.json 未声明 scripts</string>
+    <string name="text_terminal_no_package_json">当前目录未找到 package.json</string>
+    <string name="text_terminal_node_exec_denied">此设备拒绝运行插件的 Node.js 启动器, 当前仅可使用系统 shell</string>
+    <string name="text_terminal_node_executable_missing">Node.js 运行时插件缺少 ABI %1$s 的启动器</string>
+    <string name="text_terminal_node_missing">未安装 Node.js 运行时插件, 当前仅可使用系统 shell</string>
+    <string name="text_terminal_node_plugin_not_authorized">Node.js 运行时插件已安装, 但未在插件中心启用或授权</string>
+    <string name="text_terminal_node_plugin_too_old">已安装的 Node.js 运行时插件不含终端启动器, 更新插件后方可在此使用 node 与 npm</string>
+    <string name="text_terminal_node_probe">Node.js 启动器检测</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在检测 Node.js 启动器...</string>
+    <string name="text_terminal_npm_init">初始化项目 (npm init)</string>
+    <string name="text_terminal_npm_install">安装依赖 (npm install)</string>
+    <string name="text_terminal_npm_install_package">安装包 (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">运行脚本 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">其他包管理器 (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn 与 pnpm 由 corepack 提供, 首次使用时从 registry 下载. 运行 "yarn --version" 或 "pnpm --version" 即可启用.</string>
+    <string name="text_terminal_package_name_hint">包名, 如 is-odd</string>
+    <string name="text_terminal_search_npm">搜索 npm 包</string>
+    <string name="text_terminal_select_text">选择文本</string>
+    <string name="text_terminal_session_ended">会话已结束</string>
+    <string name="text_terminal_share_transcript">分享终端记录</string>
+    <string name="text_terminal_show_keyboard">显示键盘</string>
+    <string name="text_terminal_tips">终端提示</string>
+    <string name="text_terminal_tips_content">shell 以 AutoJs6 应用用户身份运行, 拥有独立的主目录 (%1$s). 按键栏提供 Esc / Tab / Ctrl / Alt 及方向键, 长按屏幕可选择文本, 菜单可复制或分享终端记录. 安装支持终端的 Node.js 运行时插件后即可使用 node 与 npm.</string>
     <string name="text_text_size">字体大小</string>
     <string name="text_text_size_current_value" formatted="true">字体大小: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">可参考以下解决方案</string>

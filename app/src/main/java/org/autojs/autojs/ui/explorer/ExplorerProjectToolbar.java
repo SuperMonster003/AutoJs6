@@ -23,6 +23,7 @@ import org.autojs.autojs.script.PythonProjectLaunchPolicy;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
 import org.autojs.autojs.ui.python.PythonRuntimePluginUi;
+import org.autojs.autojs.ui.terminal.TerminalActivity;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
@@ -79,12 +80,14 @@ public class ExplorerProjectToolbar extends CardView {
         ImageView projectRun = binding.projectRun;
         ImageView projectBuild = binding.projectBuild;
         ImageView projectEdit = binding.projectEdit;
+        ImageView projectTerminal = binding.projectTerminal;
 
         projectRun.setOnClickListener(v -> run());
         projectBuild.setOnClickListener(v -> build());
         projectEdit.setOnClickListener(v -> edit());
+        projectTerminal.setOnClickListener(v -> openInTerminal());
 
-        List.of(projectRun, projectBuild, projectEdit).forEach(imageView -> {
+        List.of(projectRun, projectBuild, projectEdit, projectTerminal).forEach(imageView -> {
             ImageViewCompat.setImageTintList(imageView, mActionIconTint);
         });
 
@@ -171,6 +174,16 @@ public class ExplorerProjectToolbar extends CardView {
             return;
         }
         BuildActivity.launch(getContext(), directory.getPath());
+    }
+
+    void openInTerminal() {
+        PFile directory = mDirectory;
+        if (directory == null) {
+            clearProject();
+            return;
+        }
+        notifyOperated();
+        TerminalActivity.launch(getContext(), directory.getPath());
     }
 
     @Override

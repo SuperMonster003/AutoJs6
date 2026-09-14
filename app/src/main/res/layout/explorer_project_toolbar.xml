@@ -53,6 +53,16 @@
             app:tint="@color/project_toolbar_button" />
 
         <ImageView
+            android:id="@+id/project_terminal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_open_in_terminal"
+            android:paddingVertical="9dp"
+            android:src="@drawable/ic_terminal_black_48dp"
+            app:tint="@color/project_toolbar_button" />
+
+        <ImageView
             android:id="@+id/project_build"
             android:layout_width="40dp"
             android:layout_height="40dp"

@@ -562,6 +562,15 @@
             android:theme="@style/AppTheme.FullScreen" />
 
         <activity
+            android:name="org.autojs.autojs.ui.terminal.TerminalActivity"
+            android:exported="false"
+            android:label="@string/text_terminal"
+            android:taskAffinity="org.autojs.autojs.ui.terminal.TerminalActivity"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:theme="@style/AppTheme.FullScreen" />
+
+        <activity
             android:name="org.autojs.autojs.ui.doc.DocumentationActivity"
             android:exported="true"
             android:label="@string/text_app_shortcut_docs_long_label"

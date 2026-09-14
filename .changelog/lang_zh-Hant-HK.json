@@ -189,7 +189,8 @@
         "`images.readPixels` 除文件路徑外還接受 ImageWrapper 參數, 且傳入的圖片保持可用",
         "`images.matchTemplate` 和 `images.findPointByImage` 支持 `scales` 選項 (單個比例或比例數組), 用於匹配在其他分辨率下截取的模板; 每個匹配項新增 `width`, `height`, `scale`, `center` 和 `rect` 屬性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 和 `filter()`",
         "檔案管理器腳本選單 \"懸浮運行\" 項, 以半透明懸浮工具列進行腳本啟停 / 編輯 / 查看日誌, 跟隨夜間模式與主題色",
-        "佈局分析: 節點資訊對話框中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; \"儲存佈局為檔案\" 把捕獲的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點擊該檔案即可離線分析"
+        "佈局分析: 節點資訊對話框中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; \"儲存佈局為檔案\" 把捕獲的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點擊該檔案即可離線分析",
+        "終端: 應用內 shell (側拉選單 \"工具\" 組, 目錄選單 \"在終端中開啟\", 專案工具列), 以 pty 執行 /system/bin/sh, 帶 Esc / Tab / Ctrl / Alt 及方向鍵按鍵欄, 捏合縮放字號, 複製 / 分享終端記錄, npm 輔助選單, 以及說明 Node.js 執行階段外掛的 node 為何不可用的橫幅"
       ],
       "fix": [
         "HTTP 請求的 isInsecure / insecure 選項可能令後續請求繼續跳過憑證和主機名稱驗證, 現僅對目前請求生效",

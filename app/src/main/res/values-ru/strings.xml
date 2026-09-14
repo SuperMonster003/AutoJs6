@@ -722,6 +722,7 @@
     <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
     <string name="summary_stable_mode">Более стабильный анализ макета, но худшая совместимость кода (требуется перезапуск службы доступности)</string>
+    <string name="summary_terminal_node_probe">Проверить, может ли терминал запускать node из плагина Node.js Runtime</string>
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="summary_use_volume_control_record">Запуск или остановка записи, управляемая клавишей уменьшения громкости, когда отображается плавающая кнопка</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
@@ -1513,6 +1514,7 @@
     <string name="text_only_latest_few_items_will_be_sent">Будут отправлены только последние %d элементов</string>
     <string name="text_open">Открыть</string>
     <string name="text_open_by_other_apps">Открыто другими приложениями</string>
+    <string name="text_open_in_terminal">Открыть в терминале</string>
     <string name="text_open_main_activity">Открыть основную деятельность</string>
     <string name="text_open_with">Открыть с</string>
     <string name="text_operation_aborted">Прервано</string>
@@ -1945,6 +1947,34 @@
     <string name="text_system_settings">Системные настройки</string>
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
+    <string name="text_terminal">Терминал</string>
+    <string name="text_terminal_close_session">Закрыть сеанс</string>
+    <string name="text_terminal_confirm_close_running">В этом сеансе все еще выполняется процесс. Все равно закрыть?</string>
+    <string name="text_terminal_copy_home_path">Копировать путь домашнего каталога</string>
+    <string name="text_terminal_copy_transcript">Копировать вывод</string>
+    <string name="text_terminal_no_npm_scripts">В package.json нет раздела scripts</string>
+    <string name="text_terminal_no_package_json">В текущем каталоге нет package.json</string>
+    <string name="text_terminal_node_exec_denied">Устройство отказалось запускать загрузчик Node.js плагина, доступна только системная оболочка</string>
+    <string name="text_terminal_node_executable_missing">У плагина Node.js Runtime нет загрузчика для ABI %1$s</string>
+    <string name="text_terminal_node_missing">Плагин Node.js Runtime не установлен, доступна только системная оболочка</string>
+    <string name="text_terminal_node_plugin_not_authorized">Плагин Node.js Runtime установлен, но не включен или не авторизован в Центре плагинов</string>
+    <string name="text_terminal_node_plugin_too_old">Установленный плагин Node.js Runtime не содержит загрузчика для терминала, обновите его, чтобы использовать здесь node и npm</string>
+    <string name="text_terminal_node_probe">Проверка загрузчика Node.js</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Проверка загрузчика Node.js...</string>
+    <string name="text_terminal_npm_init">Инициализировать проект (npm init)</string>
+    <string name="text_terminal_npm_install">Установить зависимости (npm install)</string>
+    <string name="text_terminal_npm_install_package">Установить пакет (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">Запустить скрипт (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">Другие менеджеры пакетов (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните "yarn --version" или "pnpm --version", чтобы активировать их.</string>
+    <string name="text_terminal_package_name_hint">Имя пакета, например is-odd</string>
+    <string name="text_terminal_search_npm">Поиск пакетов npm</string>
+    <string name="text_terminal_select_text">Выделить текст</string>
+    <string name="text_terminal_session_ended">Сеанс завершен</string>
+    <string name="text_terminal_share_transcript">Поделиться выводом</string>
+    <string name="text_terminal_show_keyboard">Показать клавиатуру</string>
+    <string name="text_terminal_tips">Подсказки по терминалу</string>
+    <string name="text_terminal_tips_content">Оболочка работает от имени пользователя приложения AutoJs6 и имеет собственный домашний каталог (%1$s). Панель клавиш содержит Esc / Tab / Ctrl / Alt и клавиши курсора, долгое нажатие на экран выделяет текст, а меню копирует или отправляет вывод. node и npm становятся доступны после установки плагина Node.js Runtime с поддержкой терминала.</string>
     <string name="text_text_size">Размер текста</string>
     <string name="text_text_size_current_value" formatted="true">Размер текста: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">Можно воспользоваться следующими решениями</string>

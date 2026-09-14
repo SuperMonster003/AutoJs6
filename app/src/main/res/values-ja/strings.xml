@@ -723,6 +723,7 @@
     <string name="summary_release_history_preference">リリース履歴と統計を表示</string>
     <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
     <string name="summary_stable_mode">レイアウト解析はより安定するが, コードの互換性は低下 (アクセシビリティサービスの再起動が必要)</string>
+    <string name="summary_terminal_node_probe">ターミナルが Node.js ランタイムプラグインの node を実行できるか確認します</string>
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">\"Volume Up\" キーを押すと, 実行中のスクリプトをすべて停止します</string>
@@ -1514,6 +1515,7 @@
     <string name="text_only_latest_few_items_will_be_sent">最新の %d 個の項目のみが送信されます</string>
     <string name="text_open">開く</string>
     <string name="text_open_by_other_apps">他のアプリで開く</string>
+    <string name="text_open_in_terminal">ターミナルで開く</string>
     <string name="text_open_main_activity">メインのアクティビティを開く</string>
     <string name="text_open_with">で開く</string>
     <string name="text_operation_aborted">中止</string>
@@ -1946,6 +1948,34 @@
     <string name="text_system_settings">システム設定</string>
     <string name="text_tailor_made_developer">テーラーメイド開発者</string>
     <string name="text_task">タスク</string>
+    <string name="text_terminal">ターミナル</string>
+    <string name="text_terminal_close_session">セッションを閉じる</string>
+    <string name="text_terminal_confirm_close_running">このセッションではまだプロセスが実行中です. それでも閉じますか?</string>
+    <string name="text_terminal_copy_home_path">ホームディレクトリのパスをコピー</string>
+    <string name="text_terminal_copy_transcript">出力ログをコピー</string>
+    <string name="text_terminal_no_npm_scripts">package.json に scripts が定義されていません</string>
+    <string name="text_terminal_no_package_json">現在のディレクトリに package.json が見つかりません</string>
+    <string name="text_terminal_node_exec_denied">このデバイスはプラグインの Node.js ランチャーの実行を拒否したため, システムシェルのみ使用できます</string>
+    <string name="text_terminal_node_executable_missing">Node.js ランタイムプラグインに ABI %1$s 用のランチャーがありません</string>
+    <string name="text_terminal_node_missing">Node.js ランタイムプラグインがインストールされていないため, システムシェルのみ使用できます</string>
+    <string name="text_terminal_node_plugin_not_authorized">Node.js ランタイムプラグインはインストールされていますが, プラグインセンターで有効化または承認されていません</string>
+    <string name="text_terminal_node_plugin_too_old">インストール済みの Node.js ランタイムプラグインにはターミナルランチャーがありません. ここで node と npm を使うにはプラグインを更新してください</string>
+    <string name="text_terminal_node_probe">Node.js ランチャーの確認</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Node.js ランチャーを確認しています...</string>
+    <string name="text_terminal_npm_init">プロジェクトを初期化 (npm init)</string>
+    <string name="text_terminal_npm_install">依存関係をインストール (npm install)</string>
+    <string name="text_terminal_npm_install_package">パッケージをインストール (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">スクリプトを実行 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">他のパッケージマネージャー (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn と pnpm は corepack を通じて提供され, 初回使用時にレジストリからダウンロードされます. "yarn --version" または "pnpm --version" を実行すると有効になります.</string>
+    <string name="text_terminal_package_name_hint">パッケージ名 (例: is-odd)</string>
+    <string name="text_terminal_search_npm">npm パッケージを検索</string>
+    <string name="text_terminal_select_text">テキストを選択</string>
+    <string name="text_terminal_session_ended">セッションが終了しました</string>
+    <string name="text_terminal_share_transcript">出力ログを共有</string>
+    <string name="text_terminal_show_keyboard">キーボードを表示</string>
+    <string name="text_terminal_tips">ターミナルのヒント</string>
+    <string name="text_terminal_tips_content">シェルは AutoJs6 アプリのユーザーとして実行され, 専用のホームディレクトリ (%1$s) を持ちます. キーバーには Esc / Tab / Ctrl / Alt とカーソルキーがあり, 画面を長押しするとテキストを選択でき, メニューから出力ログをコピーまたは共有できます. ターミナル対応の Node.js ランタイムプラグインをインストールすると node と npm が使えるようになります.</string>
     <string name="text_text_size">文字サイズ</string>
     <string name="text_text_size_current_value" formatted="true">テキストサイズ: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">次の解決策を参照できます</string>

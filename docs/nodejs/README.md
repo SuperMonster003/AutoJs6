@@ -43,6 +43,31 @@ that the host embeds or loads a runtime.
 - [Example projects](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/EXAMPLES.md)
 - [Error catalog](https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/blob/master/docs/nodejs/ERROR_CATALOG.md)
 
+## Terminal
+
+The host ships an in-app terminal (drawer > Tools > Terminal, directory menu >
+"Open in terminal", project toolbar). It runs `/system/bin/sh` as the AutoJs6 app
+user inside a host-owned pty (jackpal libtermexec) with `HOME` / `PREFIX` under
+`<filesDir>/terminal`. The shell itself never depends on the plugin.
+
+`node`, `npm` and `corepack` are provided by the Node.js Runtime plugin once it
+declares the terminal-launcher contract as `<meta-data>` on its runtime service:
+
+| Key (`org.autojs.plugin.nodejs.` prefix) | Meaning |
+| --- | --- |
+| `NODE_CLI_SCHEMA` | contract schema, currently `1` |
+| `NODE_CLI_EXECUTABLE` | multi-call ELF launcher in the plugin's native library dir, e.g. `libnodexe.so` |
+| `NODE_CLI_COMMANDS` | comma-separated names the launcher dispatches on (`node,npm,npx,corepack,yarn,pnpm`) |
+| `NODE_CLI_ARCHIVE` / `NODE_CLI_ARCHIVE_SHA256` / `NODE_CLI_ARCHIVE_ROOT` | npm + corepack asset archive, its digest, and the archive directory holding `npm/` and `corepack/` |
+| `NODE_CLI_NPM_VERSION` / `NODE_CLI_COREPACK_VERSION` | informational versions shown in diagnostics |
+
+The host reads the declaration from `ServiceInfo.metaData` (no Binder call), checks
+that the launcher exists and is a real ELF, runs it once with `--version`, and caches
+the outcome per plugin build. Until a plugin with the contract is installed and the
+check succeeds, the terminal is shell-only and shows a banner explaining why.
+"Developer options > Node.js > Node.js launcher check" re-runs the check and prints
+the raw result.
+
 ## Cross-Repository Guards
 
 Run ownership and alignment guards from the runtime-plugin repository. When the

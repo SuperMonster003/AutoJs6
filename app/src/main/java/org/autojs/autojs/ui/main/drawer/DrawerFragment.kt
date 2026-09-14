@@ -63,6 +63,7 @@ import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
+import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
@@ -128,6 +129,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mFloatingButtonItem: DrawerMenuToggleableItem
     private lateinit var mPointerLocationItem: DrawerMenuToggleableItem
     private lateinit var mScreenColorPickerItem: DrawerMenuToggleableItem
+    private lateinit var mTerminalItem: DrawerMenuShortcutItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
@@ -674,6 +676,13 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_keep_screen_on_when_in_foreground,
         )
 
+        mTerminalItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_terminal_black_48dp,
+            title = R.string.text_terminal,
+        ).apply {
+            setAction { TerminalActivity.launch(mContext) }
+        }
+
         mThemeColorItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_personalize_thicker,
             title = R.string.text_theme_color,
@@ -947,6 +956,7 @@ open class DrawerFragment : Fragment() {
             mFloatingButtonItem,
             mPointerLocationItem,
             mScreenColorPickerItem,
+            mTerminalItem,
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,

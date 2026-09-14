@@ -189,7 +189,8 @@
         "`images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable",
         "`images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`",
         "Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color",
-        "Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); \"Save layout to file\" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline"
+        "Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); \"Save layout to file\" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline",
+        "Terminal: an in-app shell (drawer \"Tools\" group, directory menu \"Open in terminal\", project toolbar) running /system/bin/sh in a pty, with a key bar for Esc / Tab / Ctrl / Alt and the cursor keys, pinch-to-zoom text size, transcript copy / share, an npm helper menu, and a banner explaining why node from the Node.js Runtime plugin is unavailable"
       ],
       "fix": [
         "The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request",

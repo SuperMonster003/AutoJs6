@@ -722,6 +722,7 @@
     <string name="summary_release_history_preference">Ver historial de lanzamientos y estadisticas</string>
     <string name="summary_rhino_java_primitive_wrap">Los tipos primitivos de Java se envolverán como objetos Java en los scripts</string>
     <string name="summary_stable_mode">Análisis de diseño más estable pero peor compatibilidad de código (se necesita reiniciar el servicio de accesibilidad)</string>
+    <string name="summary_terminal_node_probe">Comprobar si la terminal puede ejecutar node desde el plugin Node.js Runtime</string>
     <string name="summary_text_launcher_shortcuts">Añadir accesos directos al lanzador</string>
     <string name="summary_use_volume_control_record">Iniciar o detener la grabación controlada por la tecla de bajar el volumen cuando se muestra el botón flotante</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Pulse la tecla \"Subir volumen\" para detener todos los scripts en ejecución</string>
@@ -1513,6 +1514,7 @@
     <string name="text_only_latest_few_items_will_be_sent">Sólo se enviarán los últimos %d elementos</string>
     <string name="text_open">Abrir</string>
     <string name="text_open_by_other_apps">Abierto por otras aplicaciones</string>
+    <string name="text_open_in_terminal">Abrir en la terminal</string>
     <string name="text_open_main_activity">Abrir la actividad principal</string>
     <string name="text_open_with">Abrir con</string>
     <string name="text_operation_aborted">Abortado</string>
@@ -1945,6 +1947,34 @@
     <string name="text_system_settings">Ajustes del sistema</string>
     <string name="text_tailor_made_developer">Desarrollador a medida</string>
     <string name="text_task">Tarea</string>
+    <string name="text_terminal">Terminal</string>
+    <string name="text_terminal_close_session">Cerrar sesión</string>
+    <string name="text_terminal_confirm_close_running">Todavía hay un proceso en ejecución en esta sesión. ¿Cerrar de todos modos?</string>
+    <string name="text_terminal_copy_home_path">Copiar ruta del directorio personal</string>
+    <string name="text_terminal_copy_transcript">Copiar transcripción</string>
+    <string name="text_terminal_no_npm_scripts">package.json no declara scripts</string>
+    <string name="text_terminal_no_package_json">No se encontró package.json en el directorio actual</string>
+    <string name="text_terminal_node_exec_denied">Este dispositivo rechazó ejecutar el lanzador de Node.js del plugin, solo está disponible el shell del sistema</string>
+    <string name="text_terminal_node_executable_missing">El plugin Node.js Runtime no tiene lanzador para la ABI %1$s</string>
+    <string name="text_terminal_node_missing">El plugin Node.js Runtime no está instalado, solo está disponible el shell del sistema</string>
+    <string name="text_terminal_node_plugin_not_authorized">El plugin Node.js Runtime está instalado pero no está habilitado ni autorizado en el Centro de plugins</string>
+    <string name="text_terminal_node_plugin_too_old">El plugin Node.js Runtime instalado no tiene lanzador de terminal, actualízalo para usar node y npm aquí</string>
+    <string name="text_terminal_node_probe">Comprobación del lanzador de Node.js</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Comprobando el lanzador de Node.js...</string>
+    <string name="text_terminal_npm_init">Inicializar proyecto (npm init)</string>
+    <string name="text_terminal_npm_install">Instalar dependencias (npm install)</string>
+    <string name="text_terminal_npm_install_package">Instalar paquete (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">Ejecutar script (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">Otros gestores de paquetes (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn y pnpm se proporcionan a través de corepack y se descargan del registro en el primer uso. Ejecuta "yarn --version" o "pnpm --version" para activarlos.</string>
+    <string name="text_terminal_package_name_hint">Nombre del paquete, p. ej. is-odd</string>
+    <string name="text_terminal_search_npm">Buscar paquetes npm</string>
+    <string name="text_terminal_select_text">Seleccionar texto</string>
+    <string name="text_terminal_session_ended">Sesión finalizada</string>
+    <string name="text_terminal_share_transcript">Compartir transcripción</string>
+    <string name="text_terminal_show_keyboard">Mostrar teclado</string>
+    <string name="text_terminal_tips">Consejos de la terminal</string>
+    <string name="text_terminal_tips_content">El shell se ejecuta como el usuario de la app AutoJs6 con su propio directorio personal (%1$s). La barra de teclas ofrece Esc / Tab / Ctrl / Alt y las teclas de cursor, una pulsación larga en la pantalla selecciona texto y el menú copia o comparte la transcripción. node y npm estarán disponibles cuando se instale un plugin Node.js Runtime compatible con la terminal.</string>
     <string name="text_text_size">Tamaño del texto</string>
     <string name="text_text_size_current_value" formatted="true">Tamaño del texto: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">Puede recurrir a las siguientes soluciones</string>

@@ -724,6 +724,7 @@
     <string name="summary_release_history_preference">릴리스 기록과 통계를 보기</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
     <string name="summary_stable_mode">보다 안정적인 레이아웃 분석이지만 더 나쁜 코드 호환성 (접근성 서비스 재시작 필요)</string>
+    <string name="summary_terminal_node_probe">터미널이 Node.js 런타임 플러그인의 node 를 실행할 수 있는지 확인합니다</string>
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
@@ -1515,6 +1516,7 @@
     <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
     <string name="text_open">열려 있는</string>
     <string name="text_open_by_other_apps">다른 앱으로 열립니다</string>
+    <string name="text_open_in_terminal">터미널에서 열기</string>
     <string name="text_open_main_activity">열린 주요 활동</string>
     <string name="text_open_with">함께 열립니다</string>
     <string name="text_operation_aborted">중지됨</string>
@@ -1947,6 +1949,34 @@
     <string name="text_system_settings">시스템 설정</string>
     <string name="text_tailor_made_developer">맞춤형 개발자</string>
     <string name="text_task">일</string>
+    <string name="text_terminal">터미널</string>
+    <string name="text_terminal_close_session">세션 닫기</string>
+    <string name="text_terminal_confirm_close_running">이 세션에서 아직 프로세스가 실행 중입니다. 그래도 닫을까요?</string>
+    <string name="text_terminal_copy_home_path">홈 디렉터리 경로 복사</string>
+    <string name="text_terminal_copy_transcript">출력 기록 복사</string>
+    <string name="text_terminal_no_npm_scripts">package.json 에 scripts 가 선언되어 있지 않습니다</string>
+    <string name="text_terminal_no_package_json">현재 디렉터리에서 package.json 을 찾을 수 없습니다</string>
+    <string name="text_terminal_node_exec_denied">이 기기가 플러그인의 Node.js 런처 실행을 거부하여 시스템 셸만 사용할 수 있습니다</string>
+    <string name="text_terminal_node_executable_missing">Node.js 런타임 플러그인에 ABI %1$s 용 런처가 없습니다</string>
+    <string name="text_terminal_node_missing">Node.js 런타임 플러그인이 설치되어 있지 않아 시스템 셸만 사용할 수 있습니다</string>
+    <string name="text_terminal_node_plugin_not_authorized">Node.js 런타임 플러그인이 설치되어 있지만 플러그인 센터에서 활성화 또는 승인되지 않았습니다</string>
+    <string name="text_terminal_node_plugin_too_old">설치된 Node.js 런타임 플러그인에 터미널 런처가 없습니다. 여기서 node 와 npm 을 사용하려면 플러그인을 업데이트하세요</string>
+    <string name="text_terminal_node_probe">Node.js 런처 확인</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Node.js 런처를 확인하는 중...</string>
+    <string name="text_terminal_npm_init">프로젝트 초기화 (npm init)</string>
+    <string name="text_terminal_npm_install">의존성 설치 (npm install)</string>
+    <string name="text_terminal_npm_install_package">패키지 설치 (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">스크립트 실행 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">다른 패키지 관리자 (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn 과 pnpm 은 corepack 을 통해 제공되며 처음 사용할 때 레지스트리에서 다운로드됩니다. "yarn --version" 또는 "pnpm --version" 을 실행하면 활성화됩니다.</string>
+    <string name="text_terminal_package_name_hint">패키지 이름, 예: is-odd</string>
+    <string name="text_terminal_search_npm">npm 패키지 검색</string>
+    <string name="text_terminal_select_text">텍스트 선택</string>
+    <string name="text_terminal_session_ended">세션이 종료되었습니다</string>
+    <string name="text_terminal_share_transcript">출력 기록 공유</string>
+    <string name="text_terminal_show_keyboard">키보드 표시</string>
+    <string name="text_terminal_tips">터미널 도움말</string>
+    <string name="text_terminal_tips_content">셸은 AutoJs6 앱 사용자로 실행되며 자체 홈 디렉터리 (%1$s) 를 가집니다. 키 바에서 Esc / Tab / Ctrl / Alt 와 커서 키를 사용할 수 있고, 화면을 길게 누르면 텍스트를 선택할 수 있으며, 메뉴에서 출력 기록을 복사하거나 공유할 수 있습니다. 터미널을 지원하는 Node.js 런타임 플러그인을 설치하면 node 와 npm 을 사용할 수 있습니다.</string>
     <string name="text_text_size">텍스트 크기</string>
     <string name="text_text_size_current_value" formatted="true">텍스트 크기: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>

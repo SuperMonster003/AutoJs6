@@ -128,6 +128,7 @@
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
     <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
+    <string name="key_dialog_terminal_tips" translatable="false">key_$_dialog_terminal_tips</string>
     <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
     <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
     <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
@@ -256,6 +257,8 @@
     <string name="key_server_address" translatable="false">key_$_server_address</string>
     <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
     <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
+    <string name="key_terminal_node_probe" translatable="false">key_$_terminal_node_probe</string>
+    <string name="key_terminal_text_size" translatable="false">key_$_terminal_text_size</string>
     <string name="key_theme_color" translatable="false">key_$_theme_color</string>
     <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
     <string name="key_theme_color_primary" translatable="false">key_$_theme_color_primary</string>

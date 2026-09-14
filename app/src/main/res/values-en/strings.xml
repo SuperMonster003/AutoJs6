@@ -715,6 +715,7 @@
     <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
+    <string name="summary_terminal_node_probe">Check whether the terminal can run node from the Node.js Runtime plugin</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by \"Volume Down\" key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
@@ -1501,6 +1502,7 @@
     <string name="text_only_latest_few_items_will_be_sent">Only latest %d items will be sent</string>
     <string name="text_open">Open</string>
     <string name="text_open_by_other_apps">Open by other apps</string>
+    <string name="text_open_in_terminal">Open in terminal</string>
     <string name="text_open_main_activity">Open main activity</string>
     <string name="text_open_with">Open with</string>
     <string name="text_operation_aborted">Aborted</string>
@@ -1933,6 +1935,34 @@
     <string name="text_system_settings">System settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
+    <string name="text_terminal">Terminal</string>
+    <string name="text_terminal_close_session">Close session</string>
+    <string name="text_terminal_confirm_close_running">A process is still running in this session. Close it anyway?</string>
+    <string name="text_terminal_copy_home_path">Copy home path</string>
+    <string name="text_terminal_copy_transcript">Copy transcript</string>
+    <string name="text_terminal_no_npm_scripts">package.json declares no scripts</string>
+    <string name="text_terminal_no_package_json">No package.json found in the current directory</string>
+    <string name="text_terminal_node_exec_denied">This device refused to run the Node.js launcher of the plugin, so only the system shell is available</string>
+    <string name="text_terminal_node_executable_missing">The Node.js Runtime plugin has no launcher for ABI %1$s</string>
+    <string name="text_terminal_node_missing">Node.js Runtime plugin is not installed, so only the system shell is available</string>
+    <string name="text_terminal_node_plugin_not_authorized">Node.js Runtime plugin is installed but not enabled or authorized in Plugin Center</string>
+    <string name="text_terminal_node_plugin_too_old">The installed Node.js Runtime plugin has no terminal launcher, update it to use node and npm here</string>
+    <string name="text_terminal_node_probe">Node.js launcher check</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Checking the Node.js launcher...</string>
+    <string name="text_terminal_npm_init">Initialize project (npm init)</string>
+    <string name="text_terminal_npm_install">Install dependencies (npm install)</string>
+    <string name="text_terminal_npm_install_package">Install package (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">Run script (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">Other package managers (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn and pnpm are provided through corepack and are downloaded from the registry on first use. Run "yarn --version" or "pnpm --version" to activate them.</string>
+    <string name="text_terminal_package_name_hint">Package name, e.g. is-odd</string>
+    <string name="text_terminal_search_npm">Search npm packages</string>
+    <string name="text_terminal_select_text">Select text</string>
+    <string name="text_terminal_session_ended">Session ended</string>
+    <string name="text_terminal_share_transcript">Share transcript</string>
+    <string name="text_terminal_show_keyboard">Show keyboard</string>
+    <string name="text_terminal_tips">Terminal tips</string>
+    <string name="text_terminal_tips_content">The shell runs as the AutoJs6 app user with its own home directory (%1$s). The key bar provides Esc / Tab / Ctrl / Alt and the cursor keys, a long press on the screen selects text, and the menu copies or shares the transcript. node and npm become available once a Node.js Runtime plugin with terminal support is installed.</string>
     <string name="text_text_size">Text size</string>
     <string name="text_text_size_current_value" formatted="true">Text size: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">The following solutions can be referred to</string>

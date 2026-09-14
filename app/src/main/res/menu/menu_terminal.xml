@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:popupTheme="@style/Widget.AppCompat.PopupMenu">
+
+    <item
+        android:id="@+id/action_npm_init"
+        android:title="@string/text_terminal_npm_init"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_npm_install"
+        android:title="@string/text_terminal_npm_install"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_npm_install_package"
+        android:title="@string/text_terminal_npm_install_package"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_npm_run_script"
+        android:title="@string/text_terminal_npm_run_script"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_other_package_managers"
+        android:title="@string/text_terminal_other_package_managers"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_search_npm"
+        android:title="@string/text_terminal_search_npm"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_copy_transcript"
+        android:title="@string/text_terminal_copy_transcript"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_paste"
+        android:title="@string/text_paste"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_share_transcript"
+        android:title="@string/text_terminal_share_transcript"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_copy_home_path"
+        android:title="@string/text_terminal_copy_home_path"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_text_size"
+        android:title="@string/text_text_size"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_show_keyboard"
+        android:title="@string/text_terminal_show_keyboard"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clear"
+        android:title="@string/text_clear"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_tips"
+        android:title="@string/text_terminal_tips"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_close_session"
+        android:title="@string/text_terminal_close_session"
+        app:showAsAction="never" />
+
+</menu>

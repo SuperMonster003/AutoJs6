@@ -719,6 +719,7 @@
     <string name="summary_release_history_preference">查看發行版本歷史更新記錄與統計數據</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始類型在腳本中將被包裝為對應的 Java 對象</string>
     <string name="summary_stable_mode">增強佈局分析穩定性但降低代碼兼容性 (需重啓無障礙服務)</string>
+    <string name="summary_terminal_node_probe">檢測終端能否執行 Node.js 執行階段外掛提供的 node</string>
     <string name="summary_text_launcher_shortcuts">添加快捷方式到啓動器</string>
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止腳本錄製 (需開啓浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在運行的腳本</string>
@@ -1510,6 +1511,7 @@
     <string name="text_only_latest_few_items_will_be_sent">僅最新的 %d 個條目將被髮送</string>
     <string name="text_open">打開</string>
     <string name="text_open_by_other_apps">用其他應用打開</string>
+    <string name="text_open_in_terminal">在終端中開啟</string>
     <string name="text_open_main_activity">打開主界面</string>
     <string name="text_open_with">打開方式</string>
     <string name="text_operation_aborted">已中止</string>
@@ -1942,6 +1944,34 @@
     <string name="text_system_settings">系統設置</string>
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
+    <string name="text_terminal">終端</string>
+    <string name="text_terminal_close_session">關閉工作階段</string>
+    <string name="text_terminal_confirm_close_running">工作階段中仍有程序在執行, 確定關閉?</string>
+    <string name="text_terminal_copy_home_path">複製主目錄路徑</string>
+    <string name="text_terminal_copy_transcript">複製終端記錄</string>
+    <string name="text_terminal_no_npm_scripts">package.json 未宣告 scripts</string>
+    <string name="text_terminal_no_package_json">目前目錄未找到 package.json</string>
+    <string name="text_terminal_node_exec_denied">此裝置拒絕執行外掛的 Node.js 啟動器, 目前僅可使用系統 shell</string>
+    <string name="text_terminal_node_executable_missing">Node.js 執行階段外掛缺少 ABI %1$s 的啟動器</string>
+    <string name="text_terminal_node_missing">未安裝 Node.js 執行階段外掛, 目前僅可使用系統 shell</string>
+    <string name="text_terminal_node_plugin_not_authorized">Node.js 執行階段外掛已安裝, 但未在外掛中心啟用或授權</string>
+    <string name="text_terminal_node_plugin_too_old">已安裝的 Node.js 執行階段外掛不含終端啟動器, 更新外掛後方可在此使用 node 與 npm</string>
+    <string name="text_terminal_node_probe">Node.js 啟動器檢測</string>
+    <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在檢測 Node.js 啟動器...</string>
+    <string name="text_terminal_npm_init">初始化專案 (npm init)</string>
+    <string name="text_terminal_npm_install">安裝依賴 (npm install)</string>
+    <string name="text_terminal_npm_install_package">安裝套件 (npm install &lt;pkg&gt;)</string>
+    <string name="text_terminal_npm_run_script">執行指令碼 (npm run &lt;script&gt;)</string>
+    <string name="text_terminal_other_package_managers">其他套件管理器 (yarn / pnpm)</string>
+    <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 "yarn --version" 或 "pnpm --version" 即可啟用.</string>
+    <string name="text_terminal_package_name_hint">套件名稱, 如 is-odd</string>
+    <string name="text_terminal_search_npm">搜尋 npm 套件</string>
+    <string name="text_terminal_select_text">選擇文字</string>
+    <string name="text_terminal_session_ended">工作階段已結束</string>
+    <string name="text_terminal_share_transcript">分享終端記錄</string>
+    <string name="text_terminal_show_keyboard">顯示鍵盤</string>
+    <string name="text_terminal_tips">終端提示</string>
+    <string name="text_terminal_tips_content">shell 以 AutoJs6 應用程式使用者身份執行, 擁有獨立的主目錄 (%1$s). 按鍵欄提供 Esc / Tab / Ctrl / Alt 及方向鍵, 長按螢幕可選擇文字, 選單可複製或分享終端記錄. 安裝支援終端的 Node.js 執行階段外掛後即可使用 node 與 npm.</string>
     <string name="text_text_size">字體大小</string>
     <string name="text_text_size_current_value" formatted="true">字體大小: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">可參考以下解決方案</string>
