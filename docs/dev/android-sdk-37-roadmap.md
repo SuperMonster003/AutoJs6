@@ -9,7 +9,7 @@
 
 P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 CT / ECH 策略保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
 
-2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. Samsung D37 恢复连接后另完成 [真机 62/62](evidence/android-sdk-37-q7-samsung-20260914.md): HTTP 24、TLS 26、DEX 4、Looper / 线程池 8, 含实际 release; target 37 未获 LAN 授权时回环仍通过. O02 / A05 等完整业务与网络拓扑验收继续保留, Media3、inrt 存储引导和全部插件独立发版按确认方案继续实施.
+2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. Samsung D37 恢复连接后另完成 [真机 62/62](evidence/android-sdk-37-q7-samsung-20260914.md): HTTP 24、TLS 26、DEX 4、Looper / 线程池 8, 含实际 release; target 37 未获 LAN 授权时回环仍通过. O02 / A05 等完整业务与网络拓扑验收继续保留, [Media3 脚本音乐服务](evidence/android-sdk-37-media3-20260914.md) 已接入宿主 / inrt, API 24 / 37 最终自动化 66/66; 后台独立启动与真机听音仍待验. inrt 存储引导和全部插件独立发版继续实施.
 
 P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-sdk-37-p27-20260913.md). 所测 API 37 镜像的 `PARCEL_HARDENING` 长度检查已用设备字节码和正反例核实; 宿主 target 36 强制开启与 target 37 默认状态下, 11 个指定插件的最短链路均通过. 所测生产序列化路径无需修正; 真实 Tasker / 桌面操作、其它 ABI / OEM 及 P5 插件 target 37 发布验证继续开放.
 
@@ -238,7 +238,8 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 - [x] 默认状态下完成 target 36 / 37 的前台, 可见启动 FGS 后切后台, 无 FGS 后台, 精确闹钟接收器普通媒体 / 闹钟用途对照, 以及 target 37 同一进程恢复和 Google TTS, 共 12 组有效记录. 11 组符合最初联合断言; target 37 普通媒体闹钟入口出现 "焦点失败 / 系统静音, 但媒体音量改变" 的镜像例外, 保留失败断言与 `AudioHardening` 证据. 不合并播放 / 焦点 / 音量为一个资格判断. (DEVICE-37: [矩阵与边界](evidence/android-sdk-37-p22-20260913.md); [结构化结果](evidence/android-sdk-37-p22-20260913-results.json))
 - [x] 2026-09-13 按原推荐方案 (a) 完成可见界面启动 / 重启服务后重试脚本的恢复指引和无人值守播放限制. target 37 同一 PID 的服务 WIU 从 `DENIED` 恢复为 `PROC_STATE_TOP`, 焦点由 0 恢复为 1. 不通过服务存活, 音量读回, 播放器进度或额外抢占焦点推断播放资格. TTS 记录实际 Google 引擎 UID / PID, 文件合成不增加宿主播放资格拦截. 此项保留历史证据; 2026-09-14 的 Q3=(b) 已替代最终方案. (SOURCE; DEVICE-37)
-- [ ] 按 Q3=(b) / D14 引入 Media3 `MediaSessionService`, 接入脚本播放 / 暂停 / 恢复 / 定位与结束清理, 管理媒体焦点与通知. 覆盖宿主 / inrt / Node 桥、多个脚本的所有权、后台拒绝与可见恢复, 单独验证 TTS 和开机 / 定时触发. 不以服务存在或播放器进度代替实际播放资格与可听性. (SOURCE; JVM; DEVICE-37; PHYSICAL; DOCS)
+- [x] 按 Q3=(b) / D14 引入 Media3 1.11.0 `MediaSessionService`, 接入宿主 / inrt 的脚本播放 / 暂停 / 恢复 / 定位, 媒体焦点与通知, 请求接管和退出清理. API 24 / 37、正常 target 36 / 29 与 debug 双 37 共 66/66, 含 Rhino, 平台媒体控制和真实暂时焦点丢失 / 恢复. UI 线程阻塞限制、工作线程同步准备、打包权限和单一所有权已同步 API / 离线文档. Node 仍只开放原音量桥, 不宣称有播放入口. (SOURCE; DEVICE-37; DEVICE-24; DOCS: [实现和边界](evidence/android-sdk-37-media3-20260914.md); [结构化结果](evidence/android-sdk-37-media3-results-20260914.json))
+- [ ] 对 Media3 最终实现补验无 instrumentation 的后台启动拒绝与可见恢复, 真机锁屏 / 路由 / 可听性, 最终用户打包项目, 实际 TTS 与开机 / 定时触发. 不以服务存在、播放器进度或上述可见 Activity 自动化替代播放资格与可听性. (DEVICE-37; PHYSICAL; P2.16)
 - [x] 源码复核定时 / 开机入口: Alarm / WorkManager / Job 调度链与宿主 / inrt 开机接收器不保证已经启动音频 FGS; `settings.setEnabled('foreground_service', true)` 仅写偏好, 不直接启动服务. 已写入用户 API 文档. (SOURCE)
 - [ ] 完整端到端验收: Rhino `media.playMusic` / TTS, 全部实际定时后端, 宿主与 inrt 的开机链, TTS 后台可听性, 独立音频插件, 以及 API 35 真机与 `FGS_BOOT_COMPLETED_RESTRICTIONS` / `FGS_SAW_RESTRICTIONS` 的组合. 本轮开机探针启动 ANR, 不计入完成; 原生探针不代替脚本与打包应用验收. (DEVICE-37; DEVICE: API 35 真机)
 - [ ] 在支持命令的专用镜像中完成 `cmd audio set-enable-hardening throw` 验证. 本轮命令 exit 0 但 `mHardeningOverride` 始终为 0, 异常模式断言失败, 不把该轮标为 throw 验收. 探针已加入覆盖状态检查. `enable` / `throw` 会加严所有 target 并覆盖闹钟例外; `disable` 不等于恢复默认. 已关闭本轮只读 AVD. (DEVICE-37)
@@ -840,3 +841,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 两个包从旧 target 升至 37 后 LAN 权限均为未授予, HTTP / TLS 回环仍通过; 恢复旧 target release 后系统恢复隐式授权. 未人为改权限或 compat, 未把 ADB 回环当作真实 LAN 或 ECH 证据.
 - 结束前核对手机上最终四个 APK 的哈希, 移除本轮独占安装的包与 reverse, 关闭自建 TLS fixture. 设备仍在线, 内存限制器 disabled / Advanced Protection false 与初始一致, 共享 adb 保留. 本轮未改生产代码或构建版本, 不重复新增 changelog.
 - [真机实施记录](evidence/android-sdk-37-q7-samsung-20260914.md) 与 [机器记录](evidence/android-sdk-37-q7-samsung-results-20260914.json). O02 / A05 已有部分真机证据, 完整验收行仍未勾选; 原集中人工测试安排继续有效, 无需再次提供连接地址.
+
+### 2026-09-14: Q3 Media3 播放后端与生命周期
+
+- 完成专用 `MediaSessionService` / ExoPlayer 接入, 显式媒体 FGS 类型与权限, 新项目默认权限与多语言说明. `media` 签名不变, 新请求接管单一播放器, 旧脚本退出不影响新脚本. 工作线程同步准备, 中断 / 超时 / 退出可取消迟到请求.
+- 最终 66/66: API 37 宿主 / inrt 的正常 target 与双 target 37, API 24 的正常双 flavor, 每组 11 项. 初始自然完成测试把 BUFFERING 当成结束, IntelliJ 字段证据确认后修正断言; 不掩盖早期 10/11 或调试附加产生的启动 ANR.
+- 正常 debug / release, 双 target 37 debug, 6 个应用 APK 的 Manifest / 签名检查通过; 最终输出恢复 target 36 / 29. 文档 129 模块和离线插件 debug / release 内容门禁通过, 无 d.ts 签名变更.
+- Samsung 连接已离线, 本轮仅使用两个已关闭的只读 AVD. 真机听音、后台拒绝 / 恢复、TTS、开机 / 定时链、最终打包项目及 P2.16 继续开放. [完整记录](evidence/android-sdk-37-media3-20260914.md).

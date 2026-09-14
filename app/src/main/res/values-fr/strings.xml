@@ -1555,6 +1555,7 @@
     <string name="text_permission_desc_expand_status_bar">Autoriser l\'application à développer/réduire la barre d\'état</string>
     <string name="text_permission_desc_flashlight">Autoriser l\'application à contrôler la lampe de poche</string>
     <string name="text_permission_desc_foreground_service">Autoriser l\'application à exécuter des services au premier plan</string>
+    <string name="text_permission_desc_foreground_service_media_playback">Lire des médias dans un service de premier plan</string>
     <string name="text_permission_desc_foreground_service_media_projection">Autoriser l\'application à utiliser l\'enregistrement d\'écran et la projection multimédia dans un service au premier plan</string>
     <string name="text_permission_desc_foreground_service_special_use">Autoriser l\'application à effectuer des opérations spéciales dans un service au premier plan</string>
     <string name="text_permission_desc_get_accounts">Autoriser l\'application à accéder aux comptes sur l\'appareil</string>
@@ -1816,6 +1817,7 @@
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
     <string name="text_screen_color_picker">Sélecteur de couleur d\'écran</string>
+    <string name="text_script_music">Musique du script</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script en cours d\'exécution</string>
     <string name="text_search">Recherche</string>

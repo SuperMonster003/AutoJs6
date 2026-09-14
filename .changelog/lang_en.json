@@ -358,6 +358,7 @@
         "MediaProjection bridge captures retry transient missing frames up to six times, allowing consecutive screenshots after the capture pipeline refreshes without requesting consent again"
       ],
       "improvement": [
+        "media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits",
         "Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback",
         "Make the Screen Color Picker plugin's Activity launch delegation explicit, using sender options tied to host visibility on Android 16 and later",
         "LAN connection recovery hints for HTTP, WebSocket and the Node controlled network bridge preserve original errors and explain retry after authorization; generic permission-name conversion is independent of the system language",
@@ -479,7 +480,7 @@
         "Modularized Spongy Castle Prov version 1.58.0.0",
         "Modularized Image Quantization version 2.17.0",
         "Modularized OpenCV version 4.8.0",
-        "Modularized AndroidX Media3 version 1.10.1",
+        "Added AndroidX Media3 ExoPlayer / Session version 1.11.0",
         "Added Apache Commons Codec version 1.15",
         "Added juniversalchardet version 2.0.4",
         "Added AndroidX AsyncLayoutInflater version 1.1.0",

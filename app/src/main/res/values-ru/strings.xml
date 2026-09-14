@@ -1555,6 +1555,7 @@
     <string name="text_permission_desc_expand_status_bar">Разрешить приложению разворачивать/сворачивать строку состояния</string>
     <string name="text_permission_desc_flashlight">Разрешить приложению управлять фонариком</string>
     <string name="text_permission_desc_foreground_service">Разрешить приложению запускать службы переднего плана</string>
+    <string name="text_permission_desc_foreground_service_media_playback">Воспроизведение медиа в службе переднего плана</string>
     <string name="text_permission_desc_foreground_service_media_projection">Разрешить приложению использовать запись экрана и функции медиапроекции в службе переднего плана</string>
     <string name="text_permission_desc_foreground_service_special_use">Разрешить приложению выполнять некоторые специальные операции в службе переднего плана</string>
     <string name="text_permission_desc_get_accounts">Разрешить приложению доступ к учетным записям на устройстве</string>
@@ -1816,6 +1817,7 @@
     <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
     <string name="text_screen_color_picker">Пипетка цвета экрана</string>
+    <string name="text_script_music">Музыка скрипта</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
     <string name="text_search">Поиск</string>

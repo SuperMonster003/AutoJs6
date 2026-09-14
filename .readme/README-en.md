@@ -521,6 +521,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The OpenCV and Image Quantization plugin loaders continued after read-only cache protection failed; native files are now verified as read-only before loading for Android 17 compatibility
 * `Fix` runtime.loadDex on Android 7.0 / 7.1 could overwrite the staged DEX with ART's optimized output, causing class loading to fail
 * `Fix` MediaProjection bridge captures retry transient missing frames up to six times, allowing consecutive screenshots after the capture pipeline refreshes without requesting consent again
+* `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback
 * `Improvement` Make the Screen Color Picker plugin's Activity launch delegation explicit, using sender options tied to host visibility on Android 16 and later
 * `Improvement` LAN connection recovery hints for HTTP, WebSocket and the Node controlled network bridge preserve original errors and explain retry after authorization; generic permission-name conversion is independent of the system language

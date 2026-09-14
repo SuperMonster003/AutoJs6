@@ -1552,6 +1552,7 @@
     <string name="text_permission_desc_expand_status_bar">允許應用展開/摺疊狀態欄</string>
     <string name="text_permission_desc_flashlight">允許應用控制閃光燈</string>
     <string name="text_permission_desc_foreground_service">允許應用運行前台服務</string>
+    <string name="text_permission_desc_foreground_service_media_playback">透過前景服務播放媒體</string>
     <string name="text_permission_desc_foreground_service_media_projection">允許應用在前台服務中使用屏幕錄製和媒體投影功能</string>
     <string name="text_permission_desc_foreground_service_special_use">允許應用在前台服務中執行一些特殊操作</string>
     <string name="text_permission_desc_get_accounts">允許應用訪問設備上的賬户</string>
@@ -1813,6 +1814,7 @@
     <string name="text_scheduled_restart_start_delay">啓動延遲</string>
     <string name="text_screen_capture_request_delay">屏幕捕獲權限申請延遲</string>
     <string name="text_screen_color_picker">屏幕取色</string>
+    <string name="text_script_music">指令碼音樂</string>
     <string name="text_script_record">錄製腳本</string>
     <string name="text_script_running">腳本運行</string>
     <string name="text_search">搜索</string>

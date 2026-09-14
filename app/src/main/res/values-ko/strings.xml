@@ -1557,6 +1557,7 @@
     <string name="text_permission_desc_expand_status_bar">앱이 상태 표시줄을 펼치거나 접도록 허용합니다</string>
     <string name="text_permission_desc_flashlight">앱이 플래시를 제어하도록 허용합니다</string>
     <string name="text_permission_desc_foreground_service">앱이 포그라운드 서비스를 실행하도록 허용합니다</string>
+    <string name="text_permission_desc_foreground_service_media_playback">포그라운드 서비스에서 미디어 재생</string>
     <string name="text_permission_desc_foreground_service_media_projection">앱이 포그라운드 서비스에서 화면 녹화 및 미디어 프로젝션 기능을 사용하도록 허용합니다</string>
     <string name="text_permission_desc_foreground_service_special_use">앱이 포그라운드 서비스에서 일부 특수 작업을 수행하도록 허용합니다</string>
     <string name="text_permission_desc_get_accounts">앱이 기기의 계정에 접근하도록 허용합니다</string>
@@ -1818,6 +1819,7 @@
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
     <string name="text_screen_color_picker">화면 색상 선택기</string>
+    <string name="text_script_music">스크립트 음악</string>
     <string name="text_script_record">스크립트 녹음</string>
     <string name="text_script_running">스크립트 실행</string>
     <string name="text_search">검색</string>

@@ -1543,6 +1543,7 @@
     <string name="text_permission_desc_expand_status_bar">Allow the app to expand/collapse status bar</string>
     <string name="text_permission_desc_flashlight">Allow the app to control the flashlight</string>
     <string name="text_permission_desc_foreground_service">Allow the app to run foreground services</string>
+    <string name="text_permission_desc_foreground_service_media_playback">Play media in a foreground service</string>
     <string name="text_permission_desc_foreground_service_media_projection">Allow the app to use screen recording and media projection in foreground services</string>
     <string name="text_permission_desc_foreground_service_special_use">Allow the app to perform special operations in foreground services</string>
     <string name="text_permission_desc_get_accounts">Allow the app to access accounts on the device</string>
@@ -1804,6 +1805,7 @@
     <string name="text_scheduled_restart_start_delay">Start delay</string>
     <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
     <string name="text_screen_color_picker">Screen color picker</string>
+    <string name="text_script_music">Script music</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
     <string name="text_search">Search</string>

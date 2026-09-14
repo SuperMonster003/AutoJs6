@@ -1556,6 +1556,7 @@
     <string name="text_permission_desc_expand_status_bar">アプリがステータスバーを展開/折りたたむことを許可します</string>
     <string name="text_permission_desc_flashlight">アプリがフラッシュライトを制御することを許可します</string>
     <string name="text_permission_desc_foreground_service">アプリがフォアグラウンドサービスを実行することを許可します</string>
+    <string name="text_permission_desc_foreground_service_media_playback">フォアグラウンドサービスでメディアを再生</string>
     <string name="text_permission_desc_foreground_service_media_projection">アプリがフォアグラウンドサービスで画面録画とメディア投影機能を使用することを許可します</string>
     <string name="text_permission_desc_foreground_service_special_use">アプリがフォアグラウンドサービスでいくつかの特別な操作を実行することを許可します</string>
     <string name="text_permission_desc_get_accounts">アプリがデバイス上のアカウントにアクセスすることを許可します</string>
@@ -1817,6 +1818,7 @@
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
     <string name="text_screen_color_picker">画面カラーピッカー</string>
+    <string name="text_script_music">スクリプトの音楽</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
     <string name="text_search">検索</string>

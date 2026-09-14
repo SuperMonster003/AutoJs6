@@ -359,6 +359,7 @@
 * `Correction` Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17
 * `Correction` runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes
 * `Correction` Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement
+* `Amélioration` media.playMusic utilise un service musical de premier plan Media3 avec gestion du focus audio, commandes de notification, propriété de lecture du script et libération à sa fin
 * `Amélioration` L'aide du service au premier plan explique les restrictions audio en arrière-plan d'Android 17 et comment redémarrer le service depuis l'application visible avant de relancer la lecture
 * `Amélioration` Rendre explicite la délégation de lancement de l'Activity du plugin Sélecteur de couleur, avec des options de l'expéditeur liées à la visibilité de l'hôte sous Android 16 et versions ultérieures
 * `Amélioration` Conseils de reprise des connexions LAN HTTP, WebSocket et du pont réseau contrôlé Node, conservant les erreurs originales et expliquant la reprise après autorisation; conversion des noms de permissions indépendante de la langue du système
@@ -478,7 +479,7 @@
 * `Dépendance` Spongy Castle Prov modularise version 1.58.0.0
 * `Dépendance` Image Quantization modularise version 2.17.0
 * `Dépendance` OpenCV modularise version 4.8.0
-* `Dépendance` AndroidX Media3 version 1.10.1 modularise
+* `Dépendance` Ajout de AndroidX Media3 ExoPlayer / Session version 1.11.0
 * `Dépendance` Ajout de Apache Commons Codec version 1.15
 * `Dépendance` Ajout de juniversalchardet version 2.0.4
 * `Dépendance` Ajout de AndroidX AsyncLayoutInflater version 1.1.0

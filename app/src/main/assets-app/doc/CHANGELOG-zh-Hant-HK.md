@@ -359,6 +359,7 @@
 * `修復` OpenCV 與 Image Quantization 插件在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
 * `修復` Android 7.0 / 7.1 的 runtime.loadDex 因 ART 最佳化輸出與輸入路徑重合, 損壞 DEX 快取並導致類別載入失敗的問題
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
+* `優化` media.playMusic 使用 Media3 音樂前景服務, 管理音訊焦點, 通知控制, 指令碼播放擁有權與結束清理
 * `優化` 前台服務説明補充 Android 17 後台音頻限制, 以及在可見介面重啓服務後重試播放的操作指引
 * `優化` 完善螢幕取色器外掛程式的 Activity 啟動授權, Android 16 及以上使用宿主可見時生效的發送方選項
 * `優化` 區域網絡 HTTP, WebSocket 及 Node 受控網絡橋的連接失敗提示, 保留原始錯誤並說明授權後的重試方式; 通用權限名稱轉換不受系統語言影響
@@ -478,7 +479,7 @@
 * `依賴` 模塊化 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 模塊化 Image Quantization 版本 2.17.0
 * `依賴` 模塊化 OpenCV 版本 4.8.0
-* `依賴` 模塊化 AndroidX Media3 版本 1.10.1
+* `依賴` 附加 AndroidX Media3 ExoPlayer / Session 版本 1.11.0
 * `依賴` 附加 Apache Commons Codec 版本 1.15
 * `依賴` 附加 juniversalchardet 版本 2.0.4
 * `依賴` 附加 AndroidX AsyncLayoutInflater 版本 1.1.0

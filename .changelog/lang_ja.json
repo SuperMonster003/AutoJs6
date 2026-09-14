@@ -358,6 +358,7 @@
         "MediaProjection ブリッジの撮影で一時的にフレームを取得できない場合は最大 6 回再試行し, 撮影パイプライン更新後も再認可なしで連続撮影できるようにする"
       ],
       "improvement": [
+        "media.playMusic が Media3 の音楽フォアグラウンドサービスを使用し, オーディオフォーカス, 通知操作, スクリプトの再生所有権と終了時の解放を管理",
         "フォアグラウンドサービスの説明に Android 17 のバックグラウンド音声制限と, アプリ表示中にサービスを再起動して再生を再試行する手順を記載",
         "画面カラーピッカープラグインの Activity 起動権限の委譲を明示し, Android 16 以降ではホストの表示状態に応じた送信側オプションを使用",
         "LAN の HTTP, WebSocket, Node 制御ネットワークブリッジの接続失敗に元のエラーを保持した復旧案内を追加し, 許可後の再試行を説明; 権限名の変換をシステム言語に依存しない処理に改善",
@@ -479,7 +480,7 @@
         "モジュール化 Spongy Castle Prov バージョン 1.58.0.0",
         "モジュール化 Image Quantization バージョン 2.17.0",
         "モジュール化 OpenCV バージョン 4.8.0",
-        "モジュール化 AndroidX Media3 バージョン 1.10.1",
+        "AndroidX Media3 ExoPlayer / Session バージョン 1.11.0 を追加",
         "Apache Commons Codec バージョン 1.15 を追加",
         "juniversalchardet バージョン 2.0.4 を追加",
         "AndroidX AsyncLayoutInflater バージョン 1.1.0 を追加",

@@ -1552,6 +1552,7 @@
     <string name="text_permission_desc_expand_status_bar">允许应用展开/折叠状态栏</string>
     <string name="text_permission_desc_flashlight">允许应用控制闪光灯</string>
     <string name="text_permission_desc_foreground_service">允许应用运行前台服务</string>
+    <string name="text_permission_desc_foreground_service_media_playback">通过前台服务播放媒体</string>
     <string name="text_permission_desc_foreground_service_media_projection">允许应用在前台服务中使用屏幕录制和媒体投影功能</string>
     <string name="text_permission_desc_foreground_service_special_use">允许应用在前台服务中执行一些特殊操作</string>
     <string name="text_permission_desc_get_accounts">允许应用访问设备上的账户</string>
@@ -1813,6 +1814,7 @@
     <string name="text_scheduled_restart_start_delay">启动延迟</string>
     <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
     <string name="text_screen_color_picker">屏幕取色</string>
+    <string name="text_script_music">脚本音乐</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_running">脚本运行</string>
     <string name="text_search">搜索</string>

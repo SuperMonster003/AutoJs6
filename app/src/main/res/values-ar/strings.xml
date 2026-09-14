@@ -1557,6 +1557,7 @@
     <string name="text_permission_desc_expand_status_bar">يسمح للتطبيق بتوسيع/طي شريط الحالة</string>
     <string name="text_permission_desc_flashlight">يسمح للتطبيق بالتحكم في ضوء الفلاش</string>
     <string name="text_permission_desc_foreground_service">يسمح للتطبيق بتشغيل خدمة في المقدمة</string>
+    <string name="text_permission_desc_foreground_service_media_playback">تشغيل الوسائط في خدمة في المقدمة</string>
     <string name="text_permission_desc_foreground_service_media_projection">يسمح للتطبيق باستخدام ميزة تسجيل الشاشة وعرض الوسائط في خدمة تعمل في المقدمة</string>
     <string name="text_permission_desc_foreground_service_special_use">يسمح للتطبيق بتنفيذ بعض العمليات الخاصة في خدمة تعمل في المقدمة</string>
     <string name="text_permission_desc_get_accounts">يسمح للتطبيق بالوصول إلى الحسابات الموجودة على الجهاز</string>
@@ -1818,6 +1819,7 @@
     <string name="text_scheduled_restart_start_delay">تأخير البدء</string>
     <string name="text_screen_capture_request_delay">تأخير طلب إذن التقاط الشاشة</string>
     <string name="text_screen_color_picker">منتقي ألوان الشاشة</string>
+    <string name="text_script_music">موسيقى البرنامج النصي</string>
     <string name="text_script_record">تسجيل السيناريو</string>
     <string name="text_script_running">البرنامج النصي</string>
     <string name="text_search">يبحث</string>

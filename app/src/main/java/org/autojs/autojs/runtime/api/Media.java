@@ -1,13 +1,10 @@
 package org.autojs.autojs.runtime.api;
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.core.media.ScriptMusicPlayer;
 import org.autojs.autojs.runtime.ScriptRuntime;
-
-import java.io.IOException;
 
 /**
  * Created by Stardust on Feb 12, 2018.
@@ -15,12 +12,13 @@ import java.io.IOException;
 public class Media implements MediaScannerConnection.MediaScannerConnectionClient {
 
     private MediaScannerConnection mScannerConnection;
-    private MediaPlayerWrapper mMediaPlayer;
+    private final ScriptMusicPlayer mMusicPlayer;
     private final ScriptRuntime mRuntime;
 
     public Media(Context context, ScriptRuntime runtime) {
         mScannerConnection = new MediaScannerConnection(context, this);
         mRuntime = runtime;
+        mMusicPlayer = new ScriptMusicPlayer(context);
         mScannerConnection.connect();
     }
 
@@ -43,61 +41,35 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
     }
 
     public void playMusic(String path, float volume, boolean looping) {
-        path = mRuntime.files.nonNullPath(path);
-        if (mMediaPlayer == null) {
-            mMediaPlayer = new MediaPlayerWrapper();
-        }
-        mMediaPlayer.stopAndReset();
-        try {
-            mMediaPlayer.setDataSource(path);
-            mMediaPlayer.setVolume(volume, volume);
-            mMediaPlayer.setLooping(looping);
-            mMediaPlayer.prepare();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        mMediaPlayer.start();
+        mMusicPlayer.play(mRuntime.files.nonNullPath(path), volume, looping);
     }
 
     public void musicSeekTo(int m) {
-        if (mMediaPlayer == null)
-            return;
-        mMediaPlayer.seekTo(m);
+        mMusicPlayer.seekTo(m);
     }
 
     public boolean isMusicPlaying() {
-        return mMediaPlayer != null && mMediaPlayer.isPlaying();
+        return mMusicPlayer.isPlaying();
     }
 
     public void pauseMusic() {
-        if (mMediaPlayer == null)
-            return;
-        mMediaPlayer.pause();
+        mMusicPlayer.pause();
     }
 
     public void resumeMusic() {
-        if (mMediaPlayer == null)
-            return;
-        mMediaPlayer.start();
+        mMusicPlayer.resume();
     }
 
     public int getMusicDuration() {
-        if (mMediaPlayer == null) {
-            return 0;
-        }
-        return mMediaPlayer.getDuration();
+        return mMusicPlayer.duration();
     }
 
     public int getMusicCurrentPosition() {
-        if (mMediaPlayer == null)
-            return -1;
-        return mMediaPlayer.getCurrentPosition();
+        return mMusicPlayer.position();
     }
 
     public void stopMusic() {
-        if (mMediaPlayer == null)
-            return;
-        mMediaPlayer.stop();
+        mMusicPlayer.stop();
     }
 
     @Override
@@ -106,84 +78,13 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
     }
 
     public void recycle() {
-        if (mScannerConnection != null) {
-            mScannerConnection.disconnect();
-            mScannerConnection = null;
-        }
-        if (mMediaPlayer != null) {
-            mMediaPlayer.release();
-        }
-    }
-
-    private static class MediaPlayerWrapper extends MediaPlayer {
-
-        static final int STATE_NOT_INITIALIZED = 0;
-        static final int STATE_PREPARING = 1;
-        static final int STATE_PREPARED = 2;
-        static final int STATE_START = 3;
-        static final int STATE_PAUSED = 4;
-        static final int STATE_STOPPED = 5;
-        static final int STATE_RELEASED = 6;
-
-        private int mState = STATE_NOT_INITIALIZED;
-
-        public int getState() {
-            return mState;
-        }
-
-        @Override
-        public void prepare() throws IOException, IllegalStateException {
-            mState = STATE_PREPARING;
-            super.prepare();
-            mState = STATE_PREPARED;
-        }
-
-        @Override
-        public void prepareAsync() throws IllegalStateException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void start() throws IllegalStateException {
-            super.start();
-            mState = STATE_START;
-        }
-
-        @Override
-        public void stop() throws IllegalStateException {
-            super.stop();
-            mState = STATE_STOPPED;
-        }
-
-        @Override
-        public void pause() throws IllegalStateException {
-            super.pause();
-            mState = STATE_PAUSED;
-        }
-
-        @Override
-        public void release() {
-            super.release();
-            mState = STATE_RELEASED;
-        }
-
-        @Override
-        public void reset() {
-            super.reset();
-            mState = STATE_NOT_INITIALIZED;
-        }
-
-        public void stopAndReset() {
-            try {
-                if (mState == STATE_START || mState == STATE_PAUSED) {
-                    stop();
-                }
-                if (mState != STATE_NOT_INITIALIZED) {
-                    reset();
-                }
-            } catch (IllegalStateException ignored) {
-                /* Ignored. */
+        try {
+            if (mScannerConnection != null) {
+                mScannerConnection.disconnect();
+                mScannerConnection = null;
             }
+        } finally {
+            mMusicPlayer.close();
         }
     }
 }

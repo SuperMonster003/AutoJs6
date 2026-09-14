@@ -359,6 +359,7 @@
 * `Corrección` Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17
 * `Corrección` runtime.loadDex en Android 7.0 / 7.1 podía sobrescribir el DEX en caché con la salida optimizada de ART, provocando errores al cargar clases
 * `Corrección` Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento
+* `Mejora` media.playMusic utiliza un servicio de música en primer plano Media3 con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
 * `Mejora` Explicitar la delegación de inicio de Activity del complemento Selector de color de pantalla, con opciones del emisor vinculadas a la visibilidad del anfitrión en Android 16 y posteriores
 * `Mejora` Indicaciones para recuperar conexiones LAN HTTP, WebSocket y del puente de red controlado de Node, conservando los errores originales y explicando el reintento tras la autorización; conversión de permisos independiente del idioma del sistema
@@ -478,7 +479,6 @@
 * `Dependencia` Spongy Castle Prov modularizado version 1.58.0.0
 * `Dependencia` Image Quantization modularizado version 2.17.0
 * `Dependencia` OpenCV modularizado version 4.8.0
-* `Dependencia` AndroidX Media3 version 1.10.1 modularizado
 * `Dependencia` Se agrega Apache Commons Codec version 1.15
 * `Dependencia` Se agrega juniversalchardet version 2.0.4
 * `Dependencia` Se agrega AndroidX AsyncLayoutInflater version 1.1.0
@@ -500,6 +500,7 @@
 * `Dependencia` Se elimina Pinyin4j version 2.5.1
 * `Dependencia` Se elimina Jieba Analysis version 1.0.3-SNAPSHOT (modificada)
 * `Dependencia` Se elimina la biblioteca local Rapid OCR
+* `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 
 # v6.7.0
 

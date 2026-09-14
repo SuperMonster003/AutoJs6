@@ -1,0 +1,696 @@
+{
+  "schema": "autojs6.sdk37.media3.v1",
+  "date": "2026-09-14",
+  "sourceBaseCommit": "a98ed81b3",
+  "media3Version": "1.11.0",
+  "finalPassed": 66,
+  "finalExpected": 66,
+  "matrix": [
+    {
+      "serial": "emulator-5598",
+      "variant": "target37-final",
+      "flavor": "app",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/target37-final/autojs6-v6.8.0-universal.apk",
+          "sha256": "f14d5dd0980b310332a6a5dd6f70f8b92568a9f5b248eea71cf4eabc561d8f94"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/target37-final/app-app-debug-androidTest.apk",
+          "sha256": "17e0be1e3694bd22dc89e1c58300b25a632129270c8970d1b0395799590bfa0d"
+        }
+      ],
+      "durationSeconds": 32.92,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "958f5830339148dab399af8ad922447343e1a081e4128dfea4f26c43eb20c66e",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 30.388\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "serial": "emulator-5598",
+      "variant": "target37-final",
+      "flavor": "inrt",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6.inrt",
+          "apk": "build/sdk37-media3-20260914/apks/target37-final/inrt-v6.8.0-universal.apk",
+          "sha256": "3a7d6d32100f78465311cf035154ed9c07b6d1af406d1d474b743bd0414354c8"
+        },
+        {
+          "package": "org.autojs.autojs6.inrt.test",
+          "apk": "build/sdk37-media3-20260914/apks/target37-final/app-inrt-debug-androidTest.apk",
+          "sha256": "ca9820010a44718a30e159e84a6dbeb290c872ffb2ee46938a55dea654bec62a"
+        }
+      ],
+      "durationSeconds": 30.53,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "e3c3c5b1ac29a8241ced59b1ffedc958c34d980ebbcd778aa38565be540df067",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 26.958\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "serial": "emulator-5598",
+      "variant": "restored",
+      "flavor": "app",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/restored/autojs6-v6.8.0-universal.apk",
+          "sha256": "34f98a025c942128a1c9cb9a312bc31f82a312daa18ece2f53be6928662639bf"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/restored/app-app-debug-androidTest.apk",
+          "sha256": "fc1f46f2938e97929b4519bc1679c7e34875878198c0e5f0c3dd3af65dffb978"
+        }
+      ],
+      "durationSeconds": 25.15,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "4d64acab0968cf02754581a4d5c6b460089d40469cd8e6cf1412a804e5785731",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 22.598\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "serial": "emulator-5598",
+      "variant": "restored",
+      "flavor": "inrt",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6.inrt",
+          "apk": "build/sdk37-media3-20260914/apks/restored/inrt-v6.8.0-universal.apk",
+          "sha256": "82979426865cd1200cb58cd09eedd13a992eafa71f2f58bc728dede8f8ce7225"
+        },
+        {
+          "package": "org.autojs.autojs6.inrt.test",
+          "apk": "build/sdk37-media3-20260914/apks/restored/app-inrt-debug-androidTest.apk",
+          "sha256": "117246855057c15d5122d69bf15252b5d8584b01f99b9fc8daaadce8b0d9d5a0"
+        }
+      ],
+      "durationSeconds": 28.86,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "dcd670318b1d4e3733a9740639dd1700a5a99bed480d604fd3c736f4e5b0228d",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 26.46\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "serial": "emulator-5594",
+      "variant": "restored",
+      "flavor": "app",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/restored/autojs6-v6.8.0-universal.apk",
+          "sha256": "34f98a025c942128a1c9cb9a312bc31f82a312daa18ece2f53be6928662639bf"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/restored/app-app-debug-androidTest.apk",
+          "sha256": "fc1f46f2938e97929b4519bc1679c7e34875878198c0e5f0c3dd3af65dffb978"
+        }
+      ],
+      "durationSeconds": 11.32,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "3137ee9735ef55ce783b6c75d8d803f787f18a0ab8645a598602d6a21e4affbe",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 9.024\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "serial": "emulator-5594",
+      "variant": "restored",
+      "flavor": "inrt",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6.inrt",
+          "apk": "build/sdk37-media3-20260914/apks/restored/inrt-v6.8.0-universal.apk",
+          "sha256": "82979426865cd1200cb58cd09eedd13a992eafa71f2f58bc728dede8f8ce7225"
+        },
+        {
+          "package": "org.autojs.autojs6.inrt.test",
+          "apk": "build/sdk37-media3-20260914/apks/restored/app-inrt-debug-androidTest.apk",
+          "sha256": "117246855057c15d5122d69bf15252b5d8584b01f99b9fc8daaadce8b0d9d5a0"
+        }
+      ],
+      "durationSeconds": 21.31,
+      "passed": 11,
+      "expected": 11,
+      "success": true,
+      "tests": [
+        {
+          "name": "uiThreadAndClosedRuntimeRejectWithoutStartingMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "rhinoRuntimeExitReleasesItsMusic",
+          "status": "PASS"
+        },
+        {
+          "name": "controlsKeepSynchronousDurationAndReleaseNotification",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedPlayReplacesOnlyThePreviousRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "supersededRuntimeCannotControlOrReleaseTheNewOwner",
+          "status": "PASS"
+        },
+        {
+          "name": "transientAudioFocusLossPausesAndFocusGainResumes",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidRequestDoesNotTakeAnotherScriptsPlayback",
+          "status": "PASS"
+        },
+        {
+          "name": "systemSessionControlsUseTheOwnedPlayer",
+          "status": "PASS"
+        },
+        {
+          "name": "unreadableAndInvalidAudioCleanUpAndAllowRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "interruptedQueuedRequestCannotStartAfterCallerHasExited",
+          "status": "PASS"
+        },
+        {
+          "name": "naturalCompletionRetainsDurationAndCanRestart",
+          "status": "PASS"
+        }
+      ],
+      "instrumentationOutputSha256": "df7d0f64a7e23c1ed89ebbe6dfb0cd050e40ed98bef871f3230af6698499c043",
+      "musicServicePresentAfter": false,
+      "instrumentationOutput": "INSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.core.media.ScriptMusicDeviceTest:\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=uiThreadAndClosedRuntimeRejectWithoutStartingMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=rhinoRuntimeExitReleasesItsMusic\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=controlsKeepSynchronousDurationAndReleaseNotification\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=repeatedPlayReplacesOnlyThePreviousRequest\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=4\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=supersededRuntimeCannotControlOrReleaseTheNewOwner\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=5\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=transientAudioFocusLossPausesAndFocusGainResumes\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=6\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=invalidRequestDoesNotTakeAnotherScriptsPlayback\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=7\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=systemSessionControlsUseTheOwnedPlayer\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=8\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=unreadableAndInvalidAudioCleanUpAndAllowRetry\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=9\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=interruptedQueuedRequestCannotStartAfterCallerHasExited\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=10\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=11\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=naturalCompletionRetainsDurationAndCanRestart\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.core.media.ScriptMusicDeviceTest\nINSTRUMENTATION_STATUS: current=11\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 18.281\n\nOK (11 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    }
+  ],
+  "applicationApkChecks": [
+    {
+      "variant": "release",
+      "flavor": "app",
+      "apk": "build/sdk37-media3-20260914/apks/release/autojs6-v6.8.0-universal.apk",
+      "sha256": "4e80401d06dc3d4296eb35ea0094c84752bd43079908e2286922f3378a0758f5",
+      "bytes": 40157723,
+      "targetSdk": 36,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "variant": "release",
+      "flavor": "inrt",
+      "apk": "build/sdk37-media3-20260914/apks/release/inrt-v6.8.0-universal.apk",
+      "sha256": "053290e66413808018105c1317a588d5b1575ef48043e25fbbf046028a4b714e",
+      "bytes": 38951796,
+      "targetSdk": 29,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "variant": "restored",
+      "flavor": "app",
+      "apk": "build/sdk37-media3-20260914/apks/restored/autojs6-v6.8.0-universal.apk",
+      "sha256": "34f98a025c942128a1c9cb9a312bc31f82a312daa18ece2f53be6928662639bf",
+      "bytes": 52197298,
+      "targetSdk": 36,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "variant": "restored",
+      "flavor": "inrt",
+      "apk": "build/sdk37-media3-20260914/apks/restored/inrt-v6.8.0-universal.apk",
+      "sha256": "82979426865cd1200cb58cd09eedd13a992eafa71f2f58bc728dede8f8ce7225",
+      "bytes": 50752999,
+      "targetSdk": 29,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "variant": "target37-final",
+      "flavor": "app",
+      "apk": "build/sdk37-media3-20260914/apks/target37-final/autojs6-v6.8.0-universal.apk",
+      "sha256": "f14d5dd0980b310332a6a5dd6f70f8b92568a9f5b248eea71cf4eabc561d8f94",
+      "bytes": 52197264,
+      "targetSdk": 37,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "variant": "target37-final",
+      "flavor": "inrt",
+      "apk": "build/sdk37-media3-20260914/apks/target37-final/inrt-v6.8.0-universal.apk",
+      "sha256": "3a7d6d32100f78465311cf035154ed9c07b6d1af406d1d474b743bd0414354c8",
+      "bytes": 50752965,
+      "targetSdk": 37,
+      "serviceType": "mediaPlayback",
+      "exported": false,
+      "foregroundMediaPlaybackPermission": true,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    }
+  ],
+  "earlierAttempts": [
+    {
+      "serial": "emulator-5598",
+      "variant": "normal",
+      "flavor": "app",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/normal/autojs6-v6.8.0-universal.apk",
+          "sha256": "e94e96e4fcc248ace8e58968e7a74cde33c0bc7c270cee77e085da59d5655361"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/normal/app-app-debug-androidTest.apk",
+          "sha256": "90198289b18a5a1fd344b5a72fdb31c5da988fe1f97f6c5287ab89e3db8f4c4d"
+        }
+      ],
+      "durationSeconds": 30.57,
+      "passed": 9,
+      "expected": 9,
+      "success": true,
+      "note": "Initial nine-case suite"
+    },
+    {
+      "serial": "emulator-5594",
+      "variant": "normal",
+      "flavor": "app",
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/normal/autojs6-v6.8.0-universal.apk",
+          "sha256": "e94e96e4fcc248ace8e58968e7a74cde33c0bc7c270cee77e085da59d5655361"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/normal/app-app-debug-androidTest.apk",
+          "sha256": "90198289b18a5a1fd344b5a72fdb31c5da988fe1f97f6c5287ab89e3db8f4c4d"
+        }
+      ],
+      "durationSeconds": 19.81,
+      "passed": 9,
+      "expected": 9,
+      "success": true,
+      "note": "Initial nine-case suite"
+    },
+    {
+      "serial": "emulator-5598",
+      "variant": "target37",
+      "flavor": "app",
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "apks": [
+        {
+          "package": "org.autojs.autojs6",
+          "apk": "build/sdk37-media3-20260914/apks/target37/autojs6-v6.8.0-universal.apk",
+          "sha256": "f14d5dd0980b310332a6a5dd6f70f8b92568a9f5b248eea71cf4eabc561d8f94"
+        },
+        {
+          "package": "org.autojs.autojs6.test",
+          "apk": "build/sdk37-media3-20260914/apks/target37/app-app-debug-androidTest.apk",
+          "sha256": "0d89b0e7ffa8e13a222ab0a4dace2f678e0eea9f861ecb768d5fc75a927d72ca"
+        }
+      ],
+      "durationSeconds": 45.69,
+      "passed": 10,
+      "expected": 11,
+      "success": false,
+      "note": "Natural completion test confused BUFFERING with ENDED; corrected test waits for position >= 4999 ms"
+    }
+  ],
+  "debugger": {
+    "mode": "IntelliJ remote JDWP after instrumentation startup; initial wait-for-debugger attempts produced BIND APPLICATION ANRs and are excluded",
+    "logpointError": "Kotlin evaluator could not resolve playbackState; inspected suspended ExoPlayer fields instead",
+    "stack": [
+      "ExoPlayerImpl.getPlaybackState:570",
+      "ScriptMusicService.resume:118",
+      "ScriptMusicPlayer.resume:58"
+    ],
+    "state": {
+      "playbackState": 2,
+      "stateName": "BUFFERING",
+      "playWhenReady": true,
+      "positionUs": 4700000,
+      "durationUs": 5000000,
+      "playbackSuppressionReason": 0,
+      "playbackError": null
+    },
+    "productionFixRequired": false,
+    "userBreakpointsUnchanged": {
+      "total": 5,
+      "enabled": 2
+    },
+    "agentBreakpointsRemoved": true
+  },
+  "limits": [
+    "Silent local PCM at player volume 0, without changing system volume; no audibility claim",
+    "Instrumentation launched a visible Activity; no claim of standalone background denial or while-in-use recovery",
+    "No TTS engine, boot, scheduler, external player plugin, physical route, or packaged project end-to-end validation",
+    "Samsung localhost:37478 was disconnected before installation; no physical-device mutation in this session",
+    "Release APK manifest/signature/build checks only; music instrumentation ran against debug APKs",
+    "Target37 application APKs are pinned to the preceding production build; corrected test APKs were rebuilt separately"
+  ],
+  "cleanup": {
+    "time": "2026-09-14T14:02:04.8093653+08:00",
+    "emulators": [
+      {
+        "serial": "emulator-5594",
+        "avd": "AVD_API_24",
+        "pid": 29216,
+        "startTime": "2026-09-14T13:37:35.0085872+08:00",
+        "result": "OK: killing emulator, bye bye\n\nOK\n"
+      },
+      {
+        "serial": "emulator-5598",
+        "avd": "AVD_API_37",
+        "pid": 42628,
+        "startTime": "2026-09-14T13:30:33.4198204+08:00",
+        "result": "OK: killing emulator, bye bye\n\nOK\n"
+      }
+    ],
+    "sharedAdbPid": 31400,
+    "sharedAdbStillRunning": true,
+    "forwardsAfter": "",
+    "debugForwardRemoved": true,
+    "temporaryRunConfigurationRemoved": true,
+    "status": "COMPLETE"
+  },
+  "documentationCommit": "b20d960",
+  "offlineDocumentationCommit": "2cc6692",
+  "finalOutputChecks": [
+    {
+      "flavor": "app",
+      "buildType": "debug",
+      "sha256": "baa5069f64c5fac7aba41bdc091ed98ddb92a8d326c812cd31ba6ac0e35f0508",
+      "apk": "app/build/outputs/apk/app/debug/autojs6-v6.8.0-universal.apk",
+      "bytes": 52197298,
+      "changesFromTestedApk": [
+        "assets/doc/CHANGELOG-ar.md",
+        "assets/doc/CHANGELOG-en.md",
+        "assets/doc/CHANGELOG-es.md",
+        "assets/doc/CHANGELOG-fr.md",
+        "assets/doc/CHANGELOG-ja.md",
+        "assets/doc/CHANGELOG-ko.md",
+        "assets/doc/CHANGELOG-ru.md",
+        "assets/doc/CHANGELOG-zh-Hans.md",
+        "assets/doc/CHANGELOG-zh-Hant-HK.md",
+        "assets/doc/CHANGELOG-zh-Hant-TW.md",
+        "assets/doc/CHANGELOG.md"
+      ],
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "flavor": "app",
+      "buildType": "release",
+      "sha256": "70581854406b1b5f41066379b5afbded31d6f5d82b0726d506ab6d460fd6b840",
+      "apk": "app/build/outputs/apk/app/release/autojs6-v6.8.0-universal.apk",
+      "bytes": 40157423,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "flavor": "inrt",
+      "buildType": "debug",
+      "sha256": "82979426865cd1200cb58cd09eedd13a992eafa71f2f58bc728dede8f8ce7225",
+      "apk": "app/build/outputs/apk/inrt/debug/inrt-v6.8.0-universal.apk",
+      "bytes": 50752999,
+      "changesFromTestedApk": [],
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    },
+    {
+      "flavor": "inrt",
+      "buildType": "release",
+      "sha256": "6126f5cf33ac919cacdd642d9e418313872298f02e96e900109ad770e86679e7",
+      "apk": "app/build/outputs/apk/inrt/release/inrt-v6.8.0-universal.apk",
+      "bytes": 38951716,
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213"
+    }
+  ],
+  "lint": {
+    "fullLintRun": false,
+    "releaseVitalIssue": "RemoveWorkManagerInitializer",
+    "issuesPerFlavor": 1,
+    "knownBaseline": "android-sdk-37-p0-p1-20260913.md",
+    "abortOnError": false,
+    "suppressedInThisChange": false
+  }
+}

@@ -358,6 +358,7 @@
         "MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權"
       ],
       "improvement": [
+        "media.playMusic 使用 Media3 音樂前景服務, 管理音訊焦點, 通知控制, 指令碼播放擁有權與結束清理",
         "前台服務説明補充 Android 17 後台音頻限制, 以及在可見介面重啓服務後重試播放的操作指引",
         "完善螢幕取色器外掛程式的 Activity 啟動授權, Android 16 及以上使用宿主可見時生效的發送方選項",
         "區域網絡 HTTP, WebSocket 及 Node 受控網絡橋的連接失敗提示, 保留原始錯誤並說明授權後的重試方式; 通用權限名稱轉換不受系統語言影響",
@@ -479,7 +480,7 @@
         "模塊化 Spongy Castle Prov 版本 1.58.0.0",
         "模塊化 Image Quantization 版本 2.17.0",
         "模塊化 OpenCV 版本 4.8.0",
-        "模塊化 AndroidX Media3 版本 1.10.1",
+        "附加 AndroidX Media3 ExoPlayer / Session 版本 1.11.0",
         "附加 Apache Commons Codec 版本 1.15",
         "附加 juniversalchardet 版本 2.0.4",
         "附加 AndroidX AsyncLayoutInflater 版本 1.1.0",

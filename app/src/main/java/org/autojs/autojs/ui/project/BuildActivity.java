@@ -189,6 +189,7 @@ public class BuildActivity extends BaseActivity {
         put("android.permission.EXPAND_STATUS_BAR", R.string.text_permission_desc_expand_status_bar);
         put("android.permission.FLASHLIGHT", R.string.text_permission_desc_flashlight);
         put("android.permission.FOREGROUND_SERVICE", R.string.text_permission_desc_foreground_service);
+        put("android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK", R.string.text_permission_desc_foreground_service_media_playback);
         put("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION", R.string.text_permission_desc_foreground_service_media_projection);
         put("android.permission.FOREGROUND_SERVICE_SPECIAL_USE", R.string.text_permission_desc_foreground_service_special_use);
         put("android.permission.GET_ACCOUNTS", R.string.text_permission_desc_get_accounts);

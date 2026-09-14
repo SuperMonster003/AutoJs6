@@ -359,6 +359,7 @@
 * `수정` OpenCV 및 Image Quantization 플러그인이 네이티브 라이브러리 캐시를 읽기 전용으로 설정하지 못해도 로드를 계속하던 문제, Android 17의 동적 코드 로드 제한 지원
 * `수정` Android 7.0 / 7.1의 runtime.loadDex에서 ART 최적화 출력과 입력 경로가 겹쳐 DEX 캐시가 손상되고 클래스 로드에 실패하는 문제
 * `수정` MediaProjection 브리지 캡처에서 일시적으로 프레임이 없으면 최대 6회 재시도하여, 캡처 경로가 갱신된 뒤에도 재승인 없이 연속 촬영 지원
+* `개선` media.playMusic이 Media3 음악 포그라운드 서비스를 사용하여 오디오 포커스, 알림 제어, 스크립트 재생 소유권 및 종료 시 정리를 관리
 * `개선` 포그라운드 서비스 도움말에 Android 17 백그라운드 오디오 제한과 앱이 표시된 상태에서 서비스를 다시 시작한 후 재생을 재시도하는 방법 설명
 * `개선` 화면 색상 선택기 플러그인의 Activity 실행 권한 위임을 명시하고, Android 16 이상에서는 호스트의 표시 상태에 따른 발신자 옵션 사용
 * `개선` LAN HTTP, WebSocket 및 Node 제어 네트워크 브리지 연결 실패 시 원래 오류를 유지하고 권한 허용 후 재시도 안내 제공; 권한 이름 변환이 시스템 언어에 영향을 받지 않도록 개선
@@ -478,7 +479,7 @@
 * `의존성` 모듈화 Spongy Castle Prov 버전 1.58.0.0
 * `의존성` 모듈화 Image Quantization 버전 2.17.0
 * `의존성` 모듈화 OpenCV 버전 4.8.0
-* `의존성` 모듈화 AndroidX Media3 버전 1.10.1
+* `의존성` AndroidX Media3 ExoPlayer / Session 버전 1.11.0 추가
 * `의존성` Apache Commons Codec 버전 1.15 추가
 * `의존성` juniversalchardet 버전 2.0.4 추가
 * `의존성` AndroidX AsyncLayoutInflater 버전 1.1.0 추가
