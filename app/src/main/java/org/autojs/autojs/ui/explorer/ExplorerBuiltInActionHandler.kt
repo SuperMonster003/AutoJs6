@@ -12,6 +12,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
+import org.autojs.autojs.ui.floating.controller.FloatingControllerManager
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs6.R
@@ -67,6 +68,11 @@ internal class ExplorerBuiltInActionHandler(
             R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(host.context, host.selectedItem!!.toScriptFile()).show()
                 host.notifyItemOperated()
+            }
+            R.id.action_floating_run -> {
+                FloatingControllerManager.start(host.context, host.selectedItem!!.toScriptFile())
+                host.notifyItemOperated()
+                host.hideHostDialog()
             }
             R.id.action_create_shortcut -> {
                 ScriptOperations(host.context, host.explorerView, host.currentPage)

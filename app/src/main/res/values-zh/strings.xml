@@ -1263,6 +1263,7 @@
     <string name="text_find_prev_simplified">上一个</string>
     <string name="text_first_and_last_name">姓名</string>
     <string name="text_floating_button">浮动按钮</string>
+    <string name="text_floating_run">悬浮运行</string>
     <string name="text_folder">文件夹</string>
     <string name="text_folder_colon_value">文件夹: %1$s</string>
     <string name="text_force_stop">强制停止</string>

@@ -355,6 +355,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` `colors.distance(colorA, colorB, algorithm?)`는 각 검출 알고리즘의 임계값과 같은 척도로 색상 거리를 반환하고, `colors.invert(color)`는 alpha를 유지한 채 RGB를 반전하며, `colors.blend(colorA, colorB, ratio?)`는 두 색상을 혼합하고, `colors.contrast(foreground, background)`는 WCAG 대비율을 계산합니다; 네 메서드 모두 Color 인스턴스에서도 사용할 수 있습니다
 * `추가` `images.readPixels`는 파일 경로 외에 ImageWrapper도 받으며, 전달한 이미지는 계속 사용할 수 있습니다
 * `추가` `images.matchTemplate`와 `images.findPointByImage`가 `scales` 옵션 (단일 배율 또는 배율 배열)을 받아 다른 해상도에서 캡처한 템플릿을 매칭합니다; 각 매치는 `width`, `height`, `scale`, `center`, `rect`를 제공하고 `MatchingResult`에 `size`, `isEmpty()`, `isNotEmpty()`, `filter()`가 추가되었습니다
+* `추가` 파일 관리자 스크립트 메뉴의 "플로팅 실행" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
 * `수정` 호스트 및 패키징 앱의 릴리스 빌드에서 네트워크 보안 설정이 HTTP 요청을 차단하던 문제에 대응하여 평문 통신 정책을 디버그 빌드와 통일하고 GitHub 리소스 도메인의 HTTPS 제한은 유지
 * `수정` 시스템이 확인 화면 실행을 차단하면 백그라운드 APK 설치를 계속할 수 없던 문제; 세션별 상태를 저장하고 알림이나 앱 복귀 시 확인을 재개하며, 알림 거부 또는 프로세스 재생성 후에도 대기 중인 확인 복원 가능

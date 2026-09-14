@@ -1266,6 +1266,7 @@
     <string name="text_find_prev_simplified">Précé</string>
     <string name="text_first_and_last_name">Nom complet</string>
     <string name="text_floating_button">Bouton flottant</string>
+    <string name="text_floating_run">Exécution flottante</string>
     <string name="text_folder">Dossier</string>
     <string name="text_folder_colon_value">Dossier: %1$s</string>
     <string name="text_force_stop">Forcer l\'arrêt</string>

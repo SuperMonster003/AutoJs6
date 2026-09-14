@@ -1266,6 +1266,7 @@
     <string name="text_find_prev_simplified">Преды</string>
     <string name="text_first_and_last_name">Полное имя</string>
     <string name="text_floating_button">Плавающая кнопка</string>
+    <string name="text_floating_run">Плавающий запуск</string>
     <string name="text_folder">Папка</string>
     <string name="text_folder_colon_value">Папка: %1$s</string>
     <string name="text_force_stop">Принудительная остановка</string>

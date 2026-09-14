@@ -187,7 +187,8 @@
         "`images.countPointsByColor(image, color, options?)` は OpenCV マスクで指定色に一致するピクセル数を数え, `images.getMeanColor(image, region?)` は画像または領域の平均色を返します",
         "`colors.distance(colorA, colorB, algorithm?)` は各検出アルゴリズムのしきい値と同じ尺度で色の距離を返し, `colors.invert(color)` は alpha を保持したまま RGB を反転し, `colors.blend(colorA, colorB, ratio?)` は 2 色を混合し, `colors.contrast(foreground, background)` は WCAG コントラスト比を計算します; 4 つのメソッドはいずれも Color インスタンスでも利用できます",
         "`images.readPixels` はファイルパスに加えて ImageWrapper を受け付け, 渡した画像は引き続き利用できます",
-        "`images.matchTemplate` と `images.findPointByImage` が `scales` オプション (単一の倍率または倍率の配列) を受け付け, 他の解像度で取得したテンプレートを照合できます; 各マッチは `width`, `height`, `scale`, `center`, `rect` を公開し, `MatchingResult` に `size`, `isEmpty()`, `isNotEmpty()`, `filter()` が加わりました"
+        "`images.matchTemplate` と `images.findPointByImage` が `scales` オプション (単一の倍率または倍率の配列) を受け付け, 他の解像度で取得したテンプレートを照合できます; 各マッチは `width`, `height`, `scale`, `center`, `rect` を公開し, `MatchingResult` に `size`, `isEmpty()`, `isNotEmpty()`, `filter()` が加わりました",
+        "ファイルマネージャーのスクリプトメニューに \"フローティング実行\" 項目を追加. 半透明のフローティングツールバーでスクリプトの開始 / 停止, 編集, ログ表示ができ, ナイトモードとテーマカラーに追従します"
       ],
       "fix": [
         "HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用",

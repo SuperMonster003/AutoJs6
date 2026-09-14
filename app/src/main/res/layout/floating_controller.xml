@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/floating_controller_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
+
+    <ImageView
+            android:id="@+id/drag_handle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:importantForAccessibility="no"
+            android:padding="6dp"
+            android:src="@drawable/ic_drag_indicator_24dp" />
+
+    <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxWidth="140dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="6dp"
+            android:singleLine="true"
+            android:textSize="13sp"
+            tools:text="script.js" />
+
+    <LinearLayout
+            android:id="@+id/button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+        <ImageButton
+                android:id="@+id/run_or_stop"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_run"
+                android:padding="6dp"
+                android:src="@drawable/ic_play_arrow_24dp" />
+
+        <ImageButton
+                android:id="@+id/edit"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_edit"
+                android:padding="7dp"
+                android:src="@drawable/ic_edit_24dp" />
+
+        <ImageButton
+                android:id="@+id/log"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_log"
+                android:padding="7dp"
+                android:src="@drawable/ic_receipt_long_24dp" />
+
+        <ImageButton
+                android:id="@+id/close"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_close"
+                android:padding="7dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

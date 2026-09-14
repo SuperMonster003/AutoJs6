@@ -331,6 +331,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` `colors.distance(colorA, colorB, algorithm?)` 按各颜色检测算法的阈值量纲返回颜色距离, `colors.invert(color)` 反转 RGB 并保留 alpha, `colors.blend(colorA, colorB, ratio?)` 按权重混合两个颜色, `colors.contrast(foreground, background)` 计算 WCAG 对比度; 以上四个方法同样可用于 Color 实例
 * `新增` `images.readPixels` 除文件路径外还接受 ImageWrapper 参数, 且传入的图片保持可用
 * `新增` `images.matchTemplate` 和 `images.findPointByImage` 支持 `scales` 选项 (单个比例或比例数组), 用于匹配在其他分辨率下截取的模板; 每个匹配项新增 `width`, `height`, `scale`, `center` 和 `rect` 属性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 和 `filter()`
+* `新增` 文件管理器脚本菜单 "悬浮运行" 项, 以半透明悬浮工具栏进行脚本启停 / 编辑 / 查看日志, 跟随夜间模式与主题色
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
 * `修复` 宿主与打包应用发行版的 HTTP 请求可能被网络安全配置意外拦截, 明文策略现与调试版保持一致, 并保留 GitHub 资源域的 HTTPS 限制
 * `修复` 后台 APK 安装被系统限制启动确认页时无法继续的问题; 安装状态按会话保存, 支持通知及返回应用后继续确认, 通知被拒绝或进程重建后仍可恢复待确认事项

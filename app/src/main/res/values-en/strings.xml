@@ -1254,6 +1254,7 @@
     <string name="text_find_prev_simplified">Prev</string>
     <string name="text_first_and_last_name">Full Name</string>
     <string name="text_floating_button">Floating button</string>
+    <string name="text_floating_run">Floating run</string>
     <string name="text_folder">Folder</string>
     <string name="text_folder_colon_value">Folder: %1$s</string>
     <string name="text_force_stop">Force stop</string>

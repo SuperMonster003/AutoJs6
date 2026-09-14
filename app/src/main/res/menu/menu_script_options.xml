@@ -41,5 +41,8 @@
     <item
         android:id="@+id/action_run_repeatedly"
         android:title="@string/text_run_repeatedly" />
+    <item
+        android:id="@+id/action_floating_run"
+        android:title="@string/text_floating_run" />
 
 </menu>

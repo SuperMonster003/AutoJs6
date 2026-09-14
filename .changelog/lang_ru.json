@@ -187,7 +187,8 @@
         "`images.countPointsByColor(image, color, options?)` подсчитывает пиксели, совпадающие с цветом, через маску OpenCV, а `images.getMeanColor(image, region?)` возвращает средний цвет изображения или области",
         "`colors.distance(colorA, colorB, algorithm?)` возвращает расстояние между цветами в шкале порога каждого алгоритма обнаружения, `colors.invert(color)` инвертирует RGB с сохранением alpha, `colors.blend(colorA, colorB, ratio?)` смешивает два цвета, а `colors.contrast(foreground, background)` вычисляет коэффициент контрастности WCAG; все четыре метода доступны и у экземпляров Color",
         "`images.readPixels` принимает ImageWrapper в дополнение к пути к файлу, а переданное изображение остаётся пригодным для использования",
-        "`images.matchTemplate` и `images.findPointByImage` принимают опцию `scales` (один коэффициент или список) для поиска шаблонов, снятых в другом разрешении; каждое совпадение теперь содержит `width`, `height`, `scale`, `center` и `rect`, а `MatchingResult` получил `size`, `isEmpty()`, `isNotEmpty()` и `filter()`"
+        "`images.matchTemplate` и `images.findPointByImage` принимают опцию `scales` (один коэффициент или список) для поиска шаблонов, снятых в другом разрешении; каждое совпадение теперь содержит `width`, `height`, `scale`, `center` и `rect`, а `MatchingResult` получил `size`, `isEmpty()`, `isNotEmpty()` и `filter()`",
+        "Пункт \"Плавающий запуск\" в меню скрипта файлового менеджера: полупрозрачная плавающая панель для запуска / остановки, редактирования и просмотра журнала скрипта, следующая ночному режиму и цвету темы"
       ],
       "fix": [
         "Параметр HTTP isInsecure / insecure мог отключать проверку сертификата и имени узла для последующих запросов; теперь он действует только на текущий запрос",

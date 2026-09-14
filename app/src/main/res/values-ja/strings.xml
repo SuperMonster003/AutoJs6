@@ -1267,6 +1267,7 @@
     <string name="text_find_prev_simplified">前へ</string>
     <string name="text_first_and_last_name">氏名</string>
     <string name="text_floating_button">フローティングボタン</string>
+    <string name="text_floating_run">フローティング実行</string>
     <string name="text_folder">フォルダー</string>
     <string name="text_folder_colon_value">フォルダー: %1$s</string>
     <string name="text_force_stop">強制停止</string>

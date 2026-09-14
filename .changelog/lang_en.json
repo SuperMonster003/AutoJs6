@@ -187,7 +187,8 @@
         "`images.countPointsByColor(image, color, options?)` counts the pixels matching a color through an OpenCV mask, and `images.getMeanColor(image, region?)` returns the average color of an image or region",
         "`colors.distance(colorA, colorB, algorithm?)` returns the color distance on the threshold scale of each detection algorithm, `colors.invert(color)` inverts RGB while keeping alpha, `colors.blend(colorA, colorB, ratio?)` mixes two colors and `colors.contrast(foreground, background)` computes the WCAG contrast ratio; all four are also available on Color instances",
         "`images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable",
-        "`images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`"
+        "`images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`",
+        "Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color"
       ],
       "fix": [
         "The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request",

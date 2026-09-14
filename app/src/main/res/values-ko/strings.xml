@@ -1268,6 +1268,7 @@
     <string name="text_find_prev_simplified">이전을</string>
     <string name="text_first_and_last_name">성명</string>
     <string name="text_floating_button">플로팅 버튼</string>
+    <string name="text_floating_run">플로팅 실행</string>
     <string name="text_folder">폴더</string>
     <string name="text_folder_colon_value">폴더: %1$s</string>
     <string name="text_force_stop">강제 정지</string>

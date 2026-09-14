@@ -193,6 +193,7 @@
 * `新機能` `colors.distance(colorA, colorB, algorithm?)` は各検出アルゴリズムのしきい値と同じ尺度で色の距離を返し, `colors.invert(color)` は alpha を保持したまま RGB を反転し, `colors.blend(colorA, colorB, ratio?)` は 2 色を混合し, `colors.contrast(foreground, background)` は WCAG コントラスト比を計算します; 4 つのメソッドはいずれも Color インスタンスでも利用できます
 * `新機能` `images.readPixels` はファイルパスに加えて ImageWrapper を受け付け, 渡した画像は引き続き利用できます
 * `新機能` `images.matchTemplate` と `images.findPointByImage` が `scales` オプション (単一の倍率または倍率の配列) を受け付け, 他の解像度で取得したテンプレートを照合できます; 各マッチは `width`, `height`, `scale`, `center`, `rect` を公開し, `MatchingResult` に `size`, `isEmpty()`, `isNotEmpty()`, `filter()` が加わりました
+* `新機能` ファイルマネージャーのスクリプトメニューに "フローティング実行" 項目を追加. 半透明のフローティングツールバーでスクリプトの開始 / 停止, 編集, ログ表示ができ, ナイトモードとテーマカラーに追従します
 * `修正` HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用
 * `修正` ホストとパッケージ化アプリのリリース版でネットワークセキュリティ設定により HTTP リクエストが拒否される問題に対応し, 平文通信ポリシーをデバッグ版と統一, GitHub リソースドメインの HTTPS 制限は維持
 * `修正` バックグラウンドでの APK インストールでシステムが確認画面の起動を制限すると続行できない問題; 状態をセッションごとに保存し, 通知またはアプリに戻った際に確認を再開でき, 通知の拒否やプロセスの再生成後も復元可能

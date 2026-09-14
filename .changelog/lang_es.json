@@ -187,7 +187,8 @@
         "`images.countPointsByColor(image, color, options?)` cuenta los píxeles que coinciden con un color mediante una máscara de OpenCV, e `images.getMeanColor(image, region?)` devuelve el color medio de una imagen o región",
         "`colors.distance(colorA, colorB, algorithm?)` devuelve la distancia de color en la escala de umbral de cada algoritmo de detección, `colors.invert(color)` invierte RGB conservando alpha, `colors.blend(colorA, colorB, ratio?)` mezcla dos colores y `colors.contrast(foreground, background)` calcula la relación de contraste WCAG; los cuatro métodos también están disponibles en las instancias de Color",
         "`images.readPixels` acepta un ImageWrapper además de una ruta de archivo, y la imagen pasada sigue siendo utilizable",
-        "`images.matchTemplate` e `images.findPointByImage` aceptan la opción `scales` (un factor o una lista) para buscar plantillas capturadas en otras resoluciones; cada coincidencia expone ahora `width`, `height`, `scale`, `center` y `rect`, y `MatchingResult` incorpora `size`, `isEmpty()`, `isNotEmpty()` y `filter()`"
+        "`images.matchTemplate` e `images.findPointByImage` aceptan la opción `scales` (un factor o una lista) para buscar plantillas capturadas en otras resoluciones; cada coincidencia expone ahora `width`, `height`, `scale`, `center` y `rect`, y `MatchingResult` incorpora `size`, `isEmpty()`, `isNotEmpty()` y `filter()`",
+        "Entrada \"Ejecución flotante\" en el menú de script del explorador de archivos, con una barra flotante translúcida para iniciar / detener, editar y ver el registro del script, que sigue el modo nocturno y el color del tema"
       ],
       "fix": [
         "La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual",

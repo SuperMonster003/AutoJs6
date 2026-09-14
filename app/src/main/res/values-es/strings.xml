@@ -1266,6 +1266,7 @@
     <string name="text_find_prev_simplified">Anter</string>
     <string name="text_first_and_last_name">Nombre completo</string>
     <string name="text_floating_button">Botón flotante</string>
+    <string name="text_floating_run">Ejecución flotante</string>
     <string name="text_folder">Carpeta</string>
     <string name="text_folder_colon_value">Carpeta: %1$s</string>
     <string name="text_force_stop">Forzar parada</string>

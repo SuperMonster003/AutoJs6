@@ -1268,6 +1268,7 @@
     <string name="text_find_prev_simplified">سابق</string>
     <string name="text_first_and_last_name">الاسم</string>
     <string name="text_floating_button">زر عائم</string>
+    <string name="text_floating_run">تشغيل عائم</string>
     <string name="text_folder">مجلد</string>
     <string name="text_folder_colon_value">المجلد: %1$s</string>
     <string name="text_force_stop">توقف إجباري</string>
