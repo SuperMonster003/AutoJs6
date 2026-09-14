@@ -171,6 +171,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 ###### 2026/09/14
 
 * `新增` Android 17 本機網路權限管理, 支援側欄, 設定頁及 VS Code 連線時按需申請, 並按實際 targetSdk 宣告權限
+* `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別與可複製報告
 * `新增` MCP 工作目錄能力支援 Android 應用程式查詢, 編輯器行列定位, 按設定策略自動啟用無障礙, Shell 輸出限制與大型 JSON 結果的唯讀檔案描述符傳輸; root 執行使用獨立 shell.root 授權和手機端開關
 * `新增` 獨立 QuickJS Runtime 外掛引擎, 用於本機單一檔案 JavaScript 和 ES module, 透過 "quickjs"/"qjs" 指令或 `.quickjs.js/.quickjs.mjs` 標記路由, 且不會回退至 Rhino, Node.js 或 Bun
 * `新增` `device.pageSize` 唯讀屬性, 傳回目前系統的記憶體頁大小 (位元組), 支援識別 4 KB / 16 KB 執行環境

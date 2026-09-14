@@ -4,6 +4,7 @@
       "released_date": "2026/09/14",
       "feature": [
         "Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言",
+        "Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応",
         "MCP の作業ディレクトリ機能に Android アプリ検索, エディターの行列指定, 設定済み方式によるアクセシビリティの有効化, Shell 出力制限, 大きな JSON 結果の読み取り専用ディスクリプター転送を追加. root 実行には個別の shell.root 許可と端末設定が必要",
         "ローカルの単一ファイル JavaScript/ES module を対象に, \"quickjs\"/\"qjs\" ディレクティブまたは `.quickjs.js/.quickjs.mjs` マーカーでルーティングし, Rhino, Node.js, Bun にフォールバックしない独立 QuickJS Runtime プラグインエンジン",
         "現在のシステムのメモリページサイズをバイト単位で返す読み取り専用プロパティ `device.pageSize`, 4 KB / 16 KB の実行環境を識別可能",

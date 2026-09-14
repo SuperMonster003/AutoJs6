@@ -516,6 +516,10 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.error.ProcessExitHistoryActivity"
+            android:exported="false" />
+
+        <activity
             android:name="org.autojs.autojs.ui.error.CrashReportActivity"
             android:process=":crash_report"
             android:exported="false"

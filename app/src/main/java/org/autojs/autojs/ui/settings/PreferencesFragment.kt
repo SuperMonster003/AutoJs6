@@ -1,10 +1,12 @@
 package org.autojs.autojs.ui.settings
 
 import android.content.SharedPreferences
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EdgeEffect
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
@@ -12,6 +14,7 @@ import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.LocalNetworkPermissionSwitchPreference
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.error.ProcessExitHistoryActivity
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
@@ -20,6 +23,10 @@ class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnShar
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         EditorEnginePreferences.initialize(requireContext())
         setPreferencesFromResource(R.xml.fragment_preferences, rootKey)
+        findPreference<Preference>("process_exit_history")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), ProcessExitHistoryActivity::class.java))
+            true
+        }
     }
 
     override fun onResume() {

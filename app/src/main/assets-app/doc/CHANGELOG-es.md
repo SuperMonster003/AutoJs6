@@ -9,6 +9,7 @@
 ###### 2026/09/14
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
+* `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
 * `Nuevo` Las capacidades MCP incorporan consultas de aplicaciones Android, posiciones del editor, activación de accesibilidad mediante las estrategias configuradas, salida Shell limitada y descriptores de solo lectura para resultados JSON grandes; root usa un permiso shell.root y un ajuste del teléfono independientes
 * `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
 * `Nuevo` Propiedad de solo lectura `device.pageSize` que devuelve el tamaño de página de memoria del sistema en bytes, para identificar entornos de 4 KB / 16 KB
