@@ -5,7 +5,9 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,21 +22,32 @@ import org.autojs.autojs6.databinding.NodeInfoViewHeaderBinding
 import org.autojs.autojs6.databinding.NodeInfoViewItemBinding
 import org.opencv.core.Point
 import java.lang.reflect.Field
-import kotlin.math.ceil
-import kotlin.math.floor
 
 /**
+ * Attribute table of one node. A tap copies the attribute as a selector call; a long press enters
+ * selection mode, where several attributes are ticked and turned into one chained selector
+ * (`id('x').text('y')`) or one object selector (`{ id: 'x', text: 'y' }`) by the hosting dialog.
+ * zh-CN: 单个节点的属性表. 单击把该属性复制为选择器调用; 长按进入多选模式, 勾选若干属性后由宿主对话框合并为链式选择器
+ * (`id('x').text('y')`) 或对象选择器 (`{ id: 'x', text: 'y' }`).
+ *
  * Created by Stardust on Mar 10, 2017.
- * Modified by SuperMonster003 as of Dec 1, 2021.
+ * Modified by SuperMonster003 as of Sep 14, 2026.
  */
 class NodeInfoView : RecyclerView {
 
-    // TODO by 抠脚本人 on Jul 12, 2023.
-    //  ! 调整数据结构, 对话框关闭后根据已勾选的属性, 生成选择器.
-    //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
-    //  ! Adjust the data structure.
-    //  ! When the dialog is dismissed, generate selectors based on the selected attributes.
-    private val data = Array(FIELDS.size + 1) { Array(2) { "" } }
+    class Row(val name: String, var value: String = "", var checked: Boolean = false)
+
+    private val mHeader: Row
+    private val mRows: List<Row> = FIELD_NAMES.map { Row(it) }
+
+    /** Whether check boxes are shown and taps toggle them. zh-CN: 是否显示复选框且单击切换勾选. */
+    var isSelectionMode = false
+        private set
+
+    var onSelectionModeChanged: ((Boolean) -> Unit)? = null
+
+    val checkedRows: List<Row>
+        get() = mRows.filter { it.checked }
 
     constructor(context: Context) : super(context)
 
@@ -43,7 +56,7 @@ class NodeInfoView : RecyclerView {
     constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
     init {
-        initData()
+        mHeader = Row(resources.getString(R.string.text_attribute), resources.getString(R.string.text_value))
         adapter = Adapter()
         layoutManager = LinearLayoutManager(context)
         addItemDecoration(
@@ -56,50 +69,67 @@ class NodeInfoView : RecyclerView {
 
     @SuppressLint("NotifyDataSetChanged")
     fun setNodeInfo(nodeInfo: NodeInfo) {
-        for (i in FIELDS.indices) {
-            try {
-                data[i + 1][1] = when (val value = FIELDS[i].get(nodeInfo)) {
-                    is List<*> -> {
-                        when (FIELDS[i].name) {
-                            "actionNames" -> value.joinToString("\n") {
-                                it.toString().replace("^ACTION_".toRegex(), "")
-                            }
-                            else -> value.joinToString("\n")
-                        }
-                    }
-                    else -> {
-                        when (FIELDS[i].name) {
-                            "bounds" -> (value as? Rect)?.let { "[ ${it.left}, ${it.top}, ${it.right}, ${it.bottom} ]" } ?: value?.toString() ?: ""
-                            "center" -> (value as? Point)?.let { "[ ${it.x.jsString}, ${it.y.jsString} ]" } ?: value?.toString() ?: ""
-                            else -> value?.toString() ?: ""
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                throw RuntimeException(e)
-            }
+        mRows.forEachIndexed { i, row ->
+            row.value = formatValue(FIELDS[i], nodeInfo)
+            row.checked = false
         }
+        setSelectionMode(false)
         adapter!!.notifyDataSetChanged()
     }
 
-    private fun initData() {
-        data[0][0] = resources.getString(R.string.text_attribute)
-        data[0][1] = resources.getString(R.string.text_value)
-        for (i in 1 until data.size) {
-            data[i][0] = FIELD_NAMES[i - 1]
-            data[i][1] = ""
-        }
+    @SuppressLint("NotifyDataSetChanged")
+    fun deselectAll() {
+        mRows.forEach { it.checked = false }
+        setSelectionMode(false)
+        adapter!!.notifyDataSetChanged()
     }
 
-    fun getCheckedDate(): Array<String> {
-        // TODO by 抠脚本人 on Jul 12, 2023.
-        //  ! 数据增加 checked 属性, 区分已选中项目.
-        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
-        //  ! Add the checked attribute to the data to distinguish the selected items.
-        val checkedArr = data.filter { it[0] == "id" || it[0] == "text" }
-        return Array(checkedArr.size) {
-            dataToFx(checkedArr[it])
+    /** `id('x').text('y').clickable(true)` from the ticked rows. zh-CN: 由勾选行生成 `id('x').text('y').clickable(true)`. */
+    fun buildChainedSelector(): String = NodeSelectorSnippets.chainedSelector(checkedRows.map { it.name to it.value })
+
+    /**
+     * `{ id: 'x', bounds: [l, t, r, b], ... }` from the ticked rows, in the object form accepted by
+     * `pickup()` / `detect()`.
+     * zh-CN: 由勾选行生成 `pickup()` / `detect()` 接受的对象形式 `{ id: 'x', bounds: [l, t, r, b], ... }`.
+     */
+    fun buildObjectSelector(): String = NodeSelectorSnippets.objectSelector(checkedRows.map { it.name to it.value })
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun setSelectionMode(enabled: Boolean) {
+        if (isSelectionMode == enabled) return
+        isSelectionMode = enabled
+        adapter!!.notifyDataSetChanged()
+        onSelectionModeChanged?.invoke(enabled)
+    }
+
+    private fun toggle(row: Row, position: Int) {
+        row.checked = !row.checked
+        when {
+            row.checked -> setSelectionMode(true)
+            checkedRows.isEmpty() -> setSelectionMode(false)
         }
+        adapter!!.notifyItemChanged(position)
+    }
+
+    private fun copySingle(row: Row) {
+        ClipboardUtils.setClip(context, NodeSelectorSnippets.selectorCall(row.name, row.value))
+        ViewUtils.showSnack(this, R.string.text_already_copied_to_clip)
+    }
+
+    private fun formatValue(field: Field, nodeInfo: NodeInfo): String = try {
+        when (val value = field.get(nodeInfo)) {
+            is List<*> -> when (field.name) {
+                "actionNames" -> value.joinToString("\n") { it.toString().replace("^ACTION_".toRegex(), "") }
+                else -> value.joinToString("\n")
+            }
+            else -> when (field.name) {
+                "bounds" -> (value as? Rect)?.let { "[ ${it.left}, ${it.top}, ${it.right}, ${it.bottom} ]" } ?: value?.toString() ?: ""
+                "center" -> (value as? Point)?.let { "[ ${it.x.jsString}, ${it.y.jsString} ]" } ?: value?.toString() ?: ""
+                else -> value?.toString() ?: ""
+            }
+        }
+    } catch (e: Exception) {
+        throw RuntimeException(e)
     }
 
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
@@ -113,16 +143,16 @@ class NodeInfoView : RecyclerView {
         }.let { ViewHolder(it) }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.apply {
-                data[position].let {
-                    // attrChecked.isChecked = false
-                    attrName.text = it[0]
-                    attrValue.text = it[1]
-                }
+            val row = if (position == 0) mHeader else mRows[position - 1]
+            holder.attrName.text = row.name
+            holder.attrValue.text = row.value
+            holder.check?.apply {
+                visibility = if (isSelectionMode) View.VISIBLE else View.GONE
+                isChecked = row.checked
             }
         }
 
-        override fun getItemCount(): Int = data.size
+        override fun getItemCount(): Int = mRows.size + 1
 
         override fun getItemViewType(position: Int): Int = if (position == 0) mViewTypeHeader else mViewTypeItem
 
@@ -132,61 +162,39 @@ class NodeInfoView : RecyclerView {
 
         val attrName: TextView
         val attrValue: TextView
+        val check: CheckBox?
+
+        private fun rowAt(): Pair<Row, Int>? = bindingAdapterPosition
+            .takeIf { it in 1..mRows.size }
+            ?.let { mRows[it - 1] to it }
 
         init {
-            itemViewBinding.root.setOnClickListener {
-                bindingAdapterPosition.takeIf { it in 1.until(data.size) }?.let { i ->
-                    ClipboardUtils.setClip(context, dataToFx(this@NodeInfoView.data[i]))
-                    ViewUtils.showSnack(this@NodeInfoView, R.string.text_already_copied_to_clip)
-                }
-            }
             when (itemViewBinding) {
                 is NodeInfoViewHeaderBinding -> {
                     attrName = itemViewBinding.name
                     attrValue = itemViewBinding.value
+                    check = null
                 }
                 is NodeInfoViewItemBinding -> {
                     attrName = itemViewBinding.name
                     attrValue = itemViewBinding.value
+                    check = itemViewBinding.check
+                    itemViewBinding.root.setOnClickListener {
+                        rowAt()?.let { (row, position) ->
+                            if (isSelectionMode) toggle(row, position) else copySingle(row)
+                        }
+                    }
+                    itemViewBinding.root.setOnLongClickListener {
+                        rowAt()?.let { (row, position) ->
+                            if (row.checked) setSelectionMode(true) else toggle(row, position)
+                            true
+                        } ?: false
+                    }
                 }
                 else -> throw IllegalArgumentException("Unknown binding: $itemViewBinding")
             }
         }
 
-    }
-
-    private fun dataToFx(data: Array<String>): String {
-        val attr = data[0]
-        var value = data[1]
-        when (attr) {
-            "className" -> value = value.replace("^android\\.widget\\.".toRegex(), "")
-            "actionNames" -> return "action(${value.split("\n").joinToString(", ") { "'$it'" }})"
-            "bounds" -> return "$attr(${value.replace("[^\\d,]".toRegex(), "").replace(",", ", ")})"
-            "center" -> {
-                val (x, y) = value.split(Regex(",\\s*")).map {
-                    it.replace(Regex("[^\\d.]+"), "").toDouble()
-                }
-                var result = "centerX(%X%).centerY(%Y%)"
-
-                result = if (x == x.toLong().toDouble()) {
-                    result.replace("%X%", x.toLong().toString())
-                } else {
-                    result.replace("%X%", "${floor(x).jsString}, ${ceil(x).jsString}")
-                }
-
-                result = if (y == y.toLong().toDouble()) {
-                    result.replace("%Y%", y.toLong().toString())
-                } else {
-                    result.replace("%Y%", "${floor(y).jsString}, ${ceil(y).jsString}")
-                }
-
-                return result
-            }
-        }
-        return when (NodeInfo::class.java.getDeclaredField(attr).type) {
-            String::class.java -> "$attr('$value')"
-            else -> "$attr($value)"
-        }
     }
 
     companion object {

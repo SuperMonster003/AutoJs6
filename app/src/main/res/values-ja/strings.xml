@@ -1018,11 +1018,13 @@
     <string name="text_copy_ace_diagnostics">Ace 診断情報をコピー</string>
     <string name="text_copy_all">すべてコピー</string>
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
+    <string name="text_copy_chained_selector">チェーン形式セレクタをコピー</string>
     <string name="text_copy_command">cmd をコピー</string>
     <string name="text_copy_debug_info">デバッグログをコピー</string>
     <string name="text_copy_file">ファイルをコピー</string>
     <string name="text_copy_folder">フォルダーをコピー</string>
     <string name="text_copy_line">行をコピー</string>
+    <string name="text_copy_object_selector">オブジェクト形式セレクタをコピー</string>
     <string name="text_copy_same_path_confirm">ソースパスと宛先パスが同じです. コピーを続行しますか?\n\n新しい名前: \"%1$s\".</string>
     <string name="text_copy_to">コピー先</string>
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
@@ -1226,10 +1228,12 @@
     <string name="text_failed_to_install">インストールに失敗</string>
     <string name="text_failed_to_locate">見つかりませんでした</string>
     <string name="text_failed_to_login">ログインに失敗しました</string>
+    <string name="text_failed_to_open_layout_file">レイアウトファイルを開けませんでした</string>
     <string name="text_failed_to_register">登録の失敗</string>
     <string name="text_failed_to_report">投稿の失敗</string>
     <string name="text_failed_to_restart_a11y_service">アクセシビリティサービスの再起動に失敗しました</string>
     <string name="text_failed_to_retrieve">取得に失敗</string>
+    <string name="text_failed_to_save_layout">レイアウトの保存に失敗しました</string>
     <string name="text_failed_to_save_project_json">project.json の保存に失敗しました</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">リモートプロジェクトをローカルストレージに保存できませんでした</string>
     <string name="text_failed_to_send_log_entries">ログエントリの送信に失敗しました</string>
@@ -1394,6 +1398,7 @@
     <string name="text_launcher_shortcuts">ランチャーショートカット</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">一部のデバイスでランチャーアイコンを切り替えると既存の AutoJs6 ショートカットがすべて失われる可能性があります, 注意して操作してください</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
+    <string name="text_layout_saved_to">レイアウトを %1$s に保存しました</string>
     <string name="text_licenses">オープンソースライセンス</string>
     <string name="text_listeners">リスナー</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
@@ -1408,6 +1413,7 @@
     <string name="text_login">ログイン</string>
     <string name="text_login_succeed">ログインに成功しました</string>
     <string name="text_logout">ログアウト</string>
+    <string name="text_long_press_to_select_multiple_attributes">属性を長押しすると複数選択して 1 つのセレクタとしてコピーできます</string>
     <string name="text_loop_delay">ループ遅延時間 (秒)</string>
     <string name="text_loop_interval">ループ間隔 (秒)</string>
     <string name="text_loop_times">ループ回数</string>
@@ -1817,6 +1823,7 @@
     <string name="text_save">保存する</string>
     <string name="text_save_and_exit">保存して終了</string>
     <string name="text_save_configuration_as">設定を別名で保存</string>
+    <string name="text_save_layout_to_file">レイアウトをファイルに保存</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存先</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">保存中...</string>

@@ -188,7 +188,8 @@
         "`colors.distance(colorA, colorB, algorithm?)`는 각 검출 알고리즘의 임계값과 같은 척도로 색상 거리를 반환하고, `colors.invert(color)`는 alpha를 유지한 채 RGB를 반전하며, `colors.blend(colorA, colorB, ratio?)`는 두 색상을 혼합하고, `colors.contrast(foreground, background)`는 WCAG 대비율을 계산합니다; 네 메서드 모두 Color 인스턴스에서도 사용할 수 있습니다",
         "`images.readPixels`는 파일 경로 외에 ImageWrapper도 받으며, 전달한 이미지는 계속 사용할 수 있습니다",
         "`images.matchTemplate`와 `images.findPointByImage`가 `scales` 옵션 (단일 배율 또는 배율 배열)을 받아 다른 해상도에서 캡처한 템플릿을 매칭합니다; 각 매치는 `width`, `height`, `scale`, `center`, `rect`를 제공하고 `MatchingResult`에 `size`, `isEmpty()`, `isNotEmpty()`, `filter()`가 추가되었습니다",
-        "파일 관리자 스크립트 메뉴의 \"플로팅 실행\" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다"
+        "파일 관리자 스크립트 메뉴의 \"플로팅 실행\" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다",
+        "레이아웃 분석: 노드 정보 대화상자에서 속성을 길게 누르면 여러 개를 선택해 하나의 체인 선택자 (id('x').text('y')) 또는 pickup() / detect() 가 받아들이는 객체 선택자로 복사할 수 있고, \"레이아웃을 파일로 저장\" 은 캡처한 노드 트리를 <작업 디렉터리>/layouts/<시각>.layout.json 에 기록하며, 파일 관리자에서 해당 파일을 탭하면 오프라인으로 분석할 수 있습니다"
       ],
       "fix": [
         "HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용",

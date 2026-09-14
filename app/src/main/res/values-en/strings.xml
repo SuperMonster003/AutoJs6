@@ -1010,11 +1010,13 @@
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
+    <string name="text_copy_chained_selector">Copy chained selector</string>
     <string name="text_copy_command">Copy cmd</string>
     <string name="text_copy_debug_info">Copy debugging log</string>
     <string name="text_copy_file">Copy file</string>
     <string name="text_copy_folder">Copy folder</string>
     <string name="text_copy_line">Copy line</string>
+    <string name="text_copy_object_selector">Copy object selector</string>
     <string name="text_copy_same_path_confirm">Source path is the same as destination path. Continue copying?\n\nNew name: \"%1$s\".</string>
     <string name="text_copy_to">Copy to</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
@@ -1213,10 +1215,12 @@
     <string name="text_failed_to_install">Failed to install</string>
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="text_failed_to_login">Failed to login</string>
+    <string name="text_failed_to_open_layout_file">Failed to open layout file</string>
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
     <string name="text_failed_to_restart_a11y_service">Failed to restart accessibility service</string>
     <string name="text_failed_to_retrieve">Failed to retrieve</string>
+    <string name="text_failed_to_save_layout">Failed to save layout</string>
     <string name="text_failed_to_save_project_json">Failed to save project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Failed to save remote project to local storage</string>
     <string name="text_failed_to_send_log_entries">Failed to send log entries</string>
@@ -1381,6 +1385,7 @@
     <string name="text_launcher_shortcuts">Launcher shortcuts</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Switching launcher icons on some devices may cause all existing AutoJs6 shortcuts to be lost, please proceed with caution</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
+    <string name="text_layout_saved_to">Layout saved to %1$s</string>
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_listeners">Listeners</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
@@ -1395,6 +1400,7 @@
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login succeeded</string>
     <string name="text_logout">Logout</string>
+    <string name="text_long_press_to_select_multiple_attributes">Long press an attribute to select several and copy them as one selector</string>
     <string name="text_loop_delay">Loop delay (sec)</string>
     <string name="text_loop_interval">Loop interval (sec)</string>
     <string name="text_loop_times">Loop times</string>
@@ -1804,6 +1810,7 @@
     <string name="text_save">Save</string>
     <string name="text_save_and_exit">Save and exit</string>
     <string name="text_save_configuration_as">Save configuration as</string>
+    <string name="text_save_layout_to_file">Save layout to file</string>
     <string name="text_save_simplified">Save</string>
     <string name="text_save_to">Save to</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Saving...</string>

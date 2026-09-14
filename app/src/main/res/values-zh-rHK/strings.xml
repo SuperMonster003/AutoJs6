@@ -1014,11 +1014,13 @@
     <string name="text_copy_ace_diagnostics">複製 Ace 診斷資料</string>
     <string name="text_copy_all">複製全部</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄文件到新目錄</string>
+    <string name="text_copy_chained_selector">複製鏈式選擇器</string>
     <string name="text_copy_command">複製指令</string>
     <string name="text_copy_debug_info">複製調試信息</string>
     <string name="text_copy_file">複製文件</string>
     <string name="text_copy_folder">複製文件夾</string>
     <string name="text_copy_line">複製行</string>
+    <string name="text_copy_object_selector">複製物件選擇器</string>
     <string name="text_copy_same_path_confirm">源路徑與目標路徑相同, 是否繼續複製.\n\n新名稱: \"%1$s\"</string>
     <string name="text_copy_to">複製到</string>
     <string name="text_copy_to_clip">複製到剪貼板</string>
@@ -1222,10 +1224,12 @@
     <string name="text_failed_to_install">安裝失敗</string>
     <string name="text_failed_to_locate">定位失敗</string>
     <string name="text_failed_to_login">登錄失敗</string>
+    <string name="text_failed_to_open_layout_file">開啟佈局檔案失敗</string>
     <string name="text_failed_to_register">註冊失敗</string>
     <string name="text_failed_to_report">提交失敗</string>
     <string name="text_failed_to_restart_a11y_service">重啓無障礙服務失敗</string>
     <string name="text_failed_to_retrieve">獲取失敗</string>
+    <string name="text_failed_to_save_layout">儲存佈局失敗</string>
     <string name="text_failed_to_save_project_json">保存 project.json 失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">無法保存遠程項目至本地</string>
     <string name="text_failed_to_send_log_entries">日誌條目發送失敗</string>
@@ -1390,6 +1394,7 @@
     <string name="text_launcher_shortcuts">啓動器快捷方式</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">部分設備切換啓動器圖標可能導致已創建的 AutoJs6 快捷方式全部丟失, 需謹慎操作</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
+    <string name="text_layout_saved_to">佈局已儲存到 %1$s</string>
     <string name="text_licenses">開源許可信息</string>
     <string name="text_listeners">監聽者</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
@@ -1404,6 +1409,7 @@
     <string name="text_login">登錄</string>
     <string name="text_login_succeed">登錄成功</string>
     <string name="text_logout">退出登錄</string>
+    <string name="text_long_press_to_select_multiple_attributes">長按屬性可多選並合併複製為一個選擇器</string>
     <string name="text_loop_delay">延遲執行 (秒)</string>
     <string name="text_loop_interval">循環間隔 (秒)</string>
     <string name="text_loop_times">循環次數</string>
@@ -1813,6 +1819,7 @@
     <string name="text_save">保存</string>
     <string name="text_save_and_exit">保存並退出</string>
     <string name="text_save_configuration_as">配置另存為</string>
+    <string name="text_save_layout_to_file">儲存佈局為檔案</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存到</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">正在保存...</string>

@@ -33,6 +33,7 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
         R.string.text_hide_same_frame_nodes to ::excludeAllBoundsSameNodeInternal,
         SPLIT_LINE,
         R.string.text_switch_window to ::switchWindow,
+        R.string.text_save_layout_to_file to ::saveLayoutToFile,
         R.string.text_exit to ::close,
     )
 

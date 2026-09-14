@@ -1017,11 +1017,13 @@
     <string name="text_copy_ace_diagnostics">Copiar diagnóstico de Ace</string>
     <string name="text_copy_all">Copiar todo</string>
     <string name="text_copy_all_files_to_new_directory">Copiar todos los archivos en el nuevo directorio</string>
+    <string name="text_copy_chained_selector">Copiar selector encadenado</string>
     <string name="text_copy_command">Copiar cmd</string>
     <string name="text_copy_debug_info">Copiar el registro de depuración</string>
     <string name="text_copy_file">Copiar archivo</string>
     <string name="text_copy_folder">Copiar carpeta</string>
     <string name="text_copy_line">Copiar línea</string>
+    <string name="text_copy_object_selector">Copiar selector de objeto</string>
     <string name="text_copy_same_path_confirm">La ruta de origen es la misma que la de destino. ¿Continuar copiando?\n\nNuevo nombre: \"%1$s\".</string>
     <string name="text_copy_to">Copiar a</string>
     <string name="text_copy_to_clip">Copiar al portapapeles</string>
@@ -1225,10 +1227,12 @@
     <string name="text_failed_to_install">Error al instalar</string>
     <string name="text_failed_to_locate">No se pudo localizar</string>
     <string name="text_failed_to_login">Fallo en el inicio de sesión</string>
+    <string name="text_failed_to_open_layout_file">No se pudo abrir el archivo de diseño</string>
     <string name="text_failed_to_register">Fallo en el registro</string>
     <string name="text_failed_to_report">Fallo al enviar</string>
     <string name="text_failed_to_restart_a11y_service">No se pudo reiniciar el servicio de accesibilidad</string>
     <string name="text_failed_to_retrieve">Error al obtener</string>
+    <string name="text_failed_to_save_layout">No se pudo guardar el diseño</string>
     <string name="text_failed_to_save_project_json">No se pudo guardar project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Error al guardar el proyecto remoto en el almacenamiento local</string>
     <string name="text_failed_to_send_log_entries">Error al enviar entradas de registro</string>
@@ -1393,6 +1397,7 @@
     <string name="text_launcher_shortcuts">Atajos del lanzador</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Cambiar los íconos del iniciador en algunos dispositivos puede provocar la pérdida de todos los accesos directos existentes de AutoJs6, proceda con precaución</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspeccionando el diseño...</string>
+    <string name="text_layout_saved_to">Diseño guardado en %1$s</string>
     <string name="text_licenses">Licencias de fuentes abiertas</string>
     <string name="text_listeners">Oyentes</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Intentando una solución alternativa...</string>
@@ -1407,6 +1412,7 @@
     <string name="text_login">Inicio de sesión</string>
     <string name="text_login_succeed">Inicio de sesión exitoso</string>
     <string name="text_logout">Cierre de sesión</string>
+    <string name="text_long_press_to_select_multiple_attributes">Mantén pulsado un atributo para seleccionar varios y copiarlos como un solo selector</string>
     <string name="text_loop_delay">Retraso del bucle (segundos)</string>
     <string name="text_loop_interval">Intervalo de bucle (segundos)</string>
     <string name="text_loop_times">Tiempos de bucle</string>
@@ -1816,6 +1822,7 @@
     <string name="text_save">Guardar</string>
     <string name="text_save_and_exit">Guardar y salir</string>
     <string name="text_save_configuration_as">Guardar configuracion como</string>
+    <string name="text_save_layout_to_file">Guardar diseño en archivo</string>
     <string name="text_save_simplified">Guarda</string>
     <string name="text_save_to">Guardar en</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Guardando...</string>

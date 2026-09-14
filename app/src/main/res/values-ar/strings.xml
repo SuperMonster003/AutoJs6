@@ -1019,11 +1019,13 @@
     <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
     <string name="text_copy_all">نسخ جميع</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
+    <string name="text_copy_chained_selector">نسخ المحدد المتسلسل</string>
     <string name="text_copy_command">نسخ CMD</string>
     <string name="text_copy_debug_info">نسخ سجل الأخطاء</string>
     <string name="text_copy_file">نسخ الملف</string>
     <string name="text_copy_folder">نسخ المجلد</string>
     <string name="text_copy_line">خط النسخ</string>
+    <string name="text_copy_object_selector">نسخ محدد الكائن</string>
     <string name="text_copy_same_path_confirm">مسار المصدر هو نفسه مسار الوجهة. هل تريد متابعة النسخ?\n\nالاسم الجديد: \"%1$s\".</string>
     <string name="text_copy_to">نسخ إلى</string>
     <string name="text_copy_to_clip">نسخ إلى الحافظة</string>
@@ -1227,10 +1229,12 @@
     <string name="text_failed_to_install">فشل التثبيت</string>
     <string name="text_failed_to_locate">فشل في تحديد الموقع</string>
     <string name="text_failed_to_login">فشل في تسجيل الدخول</string>
+    <string name="text_failed_to_open_layout_file">فشل فتح ملف التخطيط</string>
     <string name="text_failed_to_register">فشل في تسجيل</string>
     <string name="text_failed_to_report">فشل في تقديم</string>
     <string name="text_failed_to_restart_a11y_service">فشلت إعادة تشغيل خدمة إمكانية الوصول</string>
     <string name="text_failed_to_retrieve">فشل الجلب</string>
+    <string name="text_failed_to_save_layout">فشل حفظ التخطيط</string>
     <string name="text_failed_to_save_project_json">فشل حفظ project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">فشل حفظ المشروع البعيد في التخزين المحلي</string>
     <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
@@ -1395,6 +1399,7 @@
     <string name="text_launcher_shortcuts">اختصارات المشغل</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">قد يؤدي تبديل رموز المشغّل على بعض الأجهزة إلى فقدان جميع اختصارات AutoJs6 الحالية, يرجى المتابعة بحذر</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">فحص التصميم ...</string>
+    <string name="text_layout_saved_to">تم حفظ التخطيط في %1$s</string>
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
     <string name="text_listeners">المستمعون</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">جارٍ تجربة حل بديل...</string>
@@ -1409,6 +1414,7 @@
     <string name="text_login">تسجيل الدخول</string>
     <string name="text_login_succeed">نجح تسجيل الدخول</string>
     <string name="text_logout">تسجيل خروج</string>
+    <string name="text_long_press_to_select_multiple_attributes">اضغط مطولا على سمة لتحديد عدة سمات ونسخها كمحدد واحد</string>
     <string name="text_loop_delay">تأخير حلقة (ثانية)</string>
     <string name="text_loop_interval">فاصل الحلقة (ثانية)</string>
     <string name="text_loop_times">أوقات حلقة</string>
@@ -1818,6 +1824,7 @@
     <string name="text_save">احفظ</string>
     <string name="text_save_and_exit">حفظ وخروج</string>
     <string name="text_save_configuration_as">حفظ الاعدادات باسم</string>
+    <string name="text_save_layout_to_file">حفظ التخطيط في ملف</string>
     <string name="text_save_simplified">احفظ</string>
     <string name="text_save_to">حفظ في</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>

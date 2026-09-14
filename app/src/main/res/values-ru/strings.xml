@@ -1017,11 +1017,13 @@
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
     <string name="text_copy_all">Скопировать все</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
+    <string name="text_copy_chained_selector">Копировать цепочечный селектор</string>
     <string name="text_copy_command">Копировать cmd</string>
     <string name="text_copy_debug_info">Копировать журнал отладки</string>
     <string name="text_copy_file">Копировать файл</string>
     <string name="text_copy_folder">Копировать папку</string>
     <string name="text_copy_line">Копировать строку</string>
+    <string name="text_copy_object_selector">Копировать объектный селектор</string>
     <string name="text_copy_same_path_confirm">Исходный путь совпадает с путем назначения. Продолжить копирование?\n\nНовое имя: \"%1$s\".</string>
     <string name="text_copy_to">Копировать в</string>
     <string name="text_copy_to_clip">Копировать в буфер обмена</string>
@@ -1225,10 +1227,12 @@
     <string name="text_failed_to_install">Не удалось установить</string>
     <string name="text_failed_to_locate">Не удалось найти</string>
     <string name="text_failed_to_login">Не удалось войти в систему</string>
+    <string name="text_failed_to_open_layout_file">Не удалось открыть файл компоновки</string>
     <string name="text_failed_to_register">Не удалось зарегистрироваться</string>
     <string name="text_failed_to_report">Не удалось отправить</string>
     <string name="text_failed_to_restart_a11y_service">Не удалось перезапустить службу специальных возможностей</string>
     <string name="text_failed_to_retrieve">Не удалось получить</string>
+    <string name="text_failed_to_save_layout">Не удалось сохранить компоновку</string>
     <string name="text_failed_to_save_project_json">Не удалось сохранить project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
@@ -1393,6 +1397,7 @@
     <string name="text_launcher_shortcuts">Ярлыки лаунчера</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Смена значков запуска на некоторых устройствах может привести к потере всех существующих ярлыков AutoJs6, действуйте с осторожностью</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
+    <string name="text_layout_saved_to">Компоновка сохранена в %1$s</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
     <string name="text_listeners">Слушатели</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
@@ -1407,6 +1412,7 @@
     <string name="text_login">Вход</string>
     <string name="text_login_succeed">Вход выполнен успешно</string>
     <string name="text_logout">Выход из системы</string>
+    <string name="text_long_press_to_select_multiple_attributes">Долгое нажатие на атрибут позволяет выбрать несколько и скопировать их как один селектор</string>
     <string name="text_loop_delay">Задержка цикла (сек)</string>
     <string name="text_loop_interval">Интервал между циклами (сек)</string>
     <string name="text_loop_times">Время выполнения цикла</string>
@@ -1816,6 +1822,7 @@
     <string name="text_save">Сохранить</string>
     <string name="text_save_and_exit">Сохранить и выйти</string>
     <string name="text_save_configuration_as">Сохранить конфигурацию как</string>
+    <string name="text_save_layout_to_file">Сохранить компоновку в файл</string>
     <string name="text_save_simplified">Сохран</string>
     <string name="text_save_to">Сохранить в</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Сохранение...</string>

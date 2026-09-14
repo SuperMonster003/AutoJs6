@@ -22,6 +22,7 @@ import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionExecution
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
+import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerItem
@@ -31,6 +32,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.theme.ThemeColorManagerCompat
+import org.autojs.autojs.ui.floating.layoutinspector.LayoutSnapshotViewer
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
@@ -319,6 +321,13 @@ internal class ExplorerItemViewHolder(
     private fun onItemClick() {
         if (host.isInSelectionMode) {
             host.toggleItemSelection(mExplorerItem)
+            return
+        }
+        // A saved layout opens in the layout inspector rather than in the text editor.
+        // zh-CN: 已保存的布局在布局分析中打开, 而非文本编辑器.
+        if (mExplorerItem !is ArchiveExplorerItem && LayoutSnapshotFiles.isLayoutFile(mExplorerItem.name)) {
+            LayoutSnapshotViewer.open(host.context, mExplorerItem.path)
+            host.notifyItemOperated(mExplorerItem)
             return
         }
         if (mExplorerItem is ArchiveExplorerFileItem) {

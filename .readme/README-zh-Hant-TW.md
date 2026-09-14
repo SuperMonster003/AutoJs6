@@ -356,6 +356,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` `images.readPixels` 除檔案路徑外也接受 ImageWrapper 參數, 且傳入的圖片保持可用
 * `新增` `images.matchTemplate` 與 `images.findPointByImage` 支援 `scales` 選項 (單一比例或比例陣列), 用於比對在其他解析度下擷取的範本; 每個比對項新增 `width`, `height`, `scale`, `center` 與 `rect` 屬性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 與 `filter()`
 * `新增` 檔案管理器指令碼選單 "懸浮執行" 項, 以半透明懸浮工具列進行指令碼啟停 / 編輯 / 檢視日誌, 跟隨夜間模式與主題色
+* `新增` 版面分析: 節點資訊對話方塊中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; "儲存版面配置為檔案" 把擷取的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點選該檔案即可離線分析
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網路安全設定意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制
 * `修復` 背景 APK 安裝被系統限制啟動確認頁時無法繼續的問題; 安裝狀態依工作階段儲存, 支援通知及返回應用程式後繼續確認, 通知遭拒或程序重建後仍可恢復待確認事項

@@ -33,6 +33,7 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
         R.string.text_select_parent_node to ::selectParentNode,
         SPLIT_LINE,
         R.string.text_switch_window to ::switchWindow,
+        R.string.text_save_layout_to_file to ::saveLayoutToFile,
         R.string.text_exit to ::close,
     )
 

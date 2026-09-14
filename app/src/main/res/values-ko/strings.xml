@@ -1019,11 +1019,13 @@
     <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
+    <string name="text_copy_chained_selector">체인 선택자 복사</string>
     <string name="text_copy_command">CMD 를 복사하십시오</string>
     <string name="text_copy_debug_info">디버깅 로그를 복사하십시오</string>
     <string name="text_copy_file">파일 복사</string>
     <string name="text_copy_folder">폴더 복사</string>
     <string name="text_copy_line">사본 라인</string>
+    <string name="text_copy_object_selector">객체 선택자 복사</string>
     <string name="text_copy_same_path_confirm">원본 경로와 대상 경로가 같습니다. 계속 복사하시겠습니까?\n\n새 이름: \"%1$s\".</string>
     <string name="text_copy_to">복사 위치</string>
     <string name="text_copy_to_clip">클립 보드에 복사</string>
@@ -1227,10 +1229,12 @@
     <string name="text_failed_to_install">설치 실패</string>
     <string name="text_failed_to_locate">찾을 수 없음</string>
     <string name="text_failed_to_login">로그인 실패</string>
+    <string name="text_failed_to_open_layout_file">레이아웃 파일 열기 실패</string>
     <string name="text_failed_to_register">등록하지 못했습니다</string>
     <string name="text_failed_to_report">제출하지 못했습니다</string>
     <string name="text_failed_to_restart_a11y_service">접근성 서비스를 재시작하지 못했습니다</string>
     <string name="text_failed_to_retrieve">가져오기 실패</string>
+    <string name="text_failed_to_save_layout">레이아웃 저장 실패</string>
     <string name="text_failed_to_save_project_json">project.json 저장에 실패했습니다</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">원격 프로젝트를 로컬 저장소에 저장하지 못했습니다</string>
     <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
@@ -1395,6 +1399,7 @@
     <string name="text_launcher_shortcuts">런처 바로 가기</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">일부 기기에서 런처 아이콘을 변경하면 기존 AutoJs6 바로가기가 모두 삭제될 수 있으니 주의하십시오</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
+    <string name="text_layout_saved_to">레이아웃이 %1$s 에 저장되었습니다</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
     <string name="text_listeners">리스너</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
@@ -1409,6 +1414,7 @@
     <string name="text_login">로그인</string>
     <string name="text_login_succeed">로그인이 성공했습니다</string>
     <string name="text_logout">로그 아웃</string>
+    <string name="text_long_press_to_select_multiple_attributes">속성을 길게 누르면 여러 개를 선택해 하나의 선택자로 복사할 수 있습니다</string>
     <string name="text_loop_delay">루프 지연 (초)</string>
     <string name="text_loop_interval">루프 간격 (초)</string>
     <string name="text_loop_times">루프 시간</string>
@@ -1818,6 +1824,7 @@
     <string name="text_save">구하다</string>
     <string name="text_save_and_exit">저장하고 종료</string>
     <string name="text_save_configuration_as">다른 이름으로 저장</string>
+    <string name="text_save_layout_to_file">레이아웃을 파일로 저장</string>
     <string name="text_save_simplified">구하다</string>
     <string name="text_save_to">저장</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>

@@ -1,15 +1,23 @@
 package org.autojs.autojs.ui.floating
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
+import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.accessibility.Capture
+import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.WindowInfo
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataItem
@@ -25,6 +33,7 @@ import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
 import org.autojs.autojs.util.ContextUtils.withHostConfiguration
 import org.autojs.autojs6.R
+import kotlin.concurrent.thread
 import kotlin.reflect.KFunction0
 
 abstract class LayoutFloatyWindow(
@@ -39,26 +48,60 @@ abstract class LayoutFloatyWindow(
 
     private var mLayoutSelectedNode: NodeInfo? = null
 
-    private val mNodeInfoView by lazy { NodeInfoView(mServiceContext) }
+    /** True for a layout loaded from a file: there are no live windows to switch to or to save. zh-CN: 从文件读入的布局为 true: 没有可切换或可保存的实时窗口. */
+    var isOffline = false
 
+    private val mMainHandler = Handler(Looper.getMainLooper())
+
+    private val mNodeInfoView by lazy {
+        NodeInfoView(mServiceContext).also { view ->
+            view.onSelectionModeChanged = { enabled -> applyNodeInfoDialogButtons(enabled) }
+        }
+    }
+
+    /**
+     * The dialog does not dismiss itself: in selection mode the buttons copy the ticked attributes
+     * as a chained or an object selector, or clear the selection.
+     * zh-CN: 对话框不自动关闭: 多选模式下按钮把勾选的属性复制为链式或对象选择器, 或清除勾选.
+     */
     private val mNodeInfoDialog by lazy {
         AppLevelThemeDialogBuilder(mServiceContext)
             .customView(mNodeInfoView, false)
-
-            // @Overruled by SuperMonster003 on Jul 21, 2023.
-            //  ! Author: 抠脚本人
-            //  ! Related PR: http://pr.autojs6.com/98
-            //  ! Reason: Pending processing [zh-CN: 将于后续版本继续处理].
-            //  !
-            //  # .positiveText("生成")
-            //  # .onPositive { _, _ ->
-            //  #     ViewUtils.showToast(context, "TODO")
-            //  #     val selector = mNodeInfoView.getCheckedDate().joinToString(".")
-            //  #     if (selector.isNotEmpty()) ClipboardUtils.setClip(context, selector)
-            //  # }
-
+            .autoDismiss(false)
+            .positiveText(R.string.dialog_button_dismiss)
+            .onAny { dialog, which -> onNodeInfoDialogButton(dialog, which) }
             .build()
             .also { it.window!!.setType(FloatyWindowManger.getWindowType()) }
+    }
+
+    private fun onNodeInfoDialogButton(dialog: MaterialDialog, which: DialogAction) {
+        when (which) {
+            DialogAction.POSITIVE -> when {
+                mNodeInfoView.isSelectionMode -> copySelectorAndDismiss(dialog, mNodeInfoView.buildChainedSelector())
+                else -> dialog.dismiss()
+            }
+            DialogAction.NEUTRAL -> copySelectorAndDismiss(dialog, mNodeInfoView.buildObjectSelector())
+            DialogAction.NEGATIVE -> mNodeInfoView.deselectAll()
+        }
+    }
+
+    private fun copySelectorAndDismiss(dialog: MaterialDialog, selector: String) {
+        ClipboardUtils.setClip(mServiceContext, selector)
+        ViewUtils.showToast(mServiceContext, R.string.text_already_copied_to_clip)
+        dialog.dismiss()
+    }
+
+    private fun applyNodeInfoDialogButtons(selectionMode: Boolean) {
+        val dialog = mNodeInfoDialog
+        if (selectionMode) {
+            dialog.setActionButton(DialogAction.POSITIVE, R.string.text_copy_chained_selector)
+            dialog.setActionButton(DialogAction.NEUTRAL, R.string.text_copy_object_selector)
+            dialog.setActionButton(DialogAction.NEGATIVE, R.string.text_deselect_all)
+        } else {
+            dialog.setActionButton(DialogAction.POSITIVE, R.string.dialog_button_dismiss)
+            dialog.setActionButton(DialogAction.NEUTRAL, null)
+            dialog.setActionButton(DialogAction.NEGATIVE, null)
+        }
     }
 
     fun onCreate(floatyService: FloatyService) {
@@ -97,8 +140,9 @@ abstract class LayoutFloatyWindow(
      * of the menu instead of being shown disabled.
      * zh-CN: 弹出菜单动作是否适用于当前选中节点; 不适用的动作直接不进菜单, 而非置灰显示.
      */
-    private fun isActionAvailable(@Suppress("SameParameterValue") titleRes: Int) = when (titleRes) {
+    private fun isActionAvailable(titleRes: Int) = when (titleRes) {
         R.string.text_select_parent_node -> mLayoutSelectedNode?.parent != null
+        R.string.text_switch_window, R.string.text_save_layout_to_file -> !isOffline
         else -> true
     }
 
@@ -127,21 +171,54 @@ abstract class LayoutFloatyWindow(
 
     protected fun showNodeInfo() {
         mLayoutSelectedNode?.let { mNodeInfoView.setNodeInfo(it) }
+        applyNodeInfoDialogButtons(mNodeInfoView.isSelectionMode)
         mNodeInfoDialog.show()
+        if (!sMultiSelectHintShown) {
+            sMultiSelectHintShown = true
+            ViewUtils.showToast(mServiceContext, R.string.text_long_press_to_select_multiple_attributes, true)
+        }
     }
 
     protected fun showLayoutBounds() {
         close()
         LayoutBoundsFloatyWindow(capture, context, isServiceRelied)
-            .apply { setLayoutSelectedNode(mLayoutSelectedNode) }
+            .apply {
+                setLayoutSelectedNode(mLayoutSelectedNode)
+                isOffline = this@LayoutFloatyWindow.isOffline
+            }
             .let { FloatyService.addWindow(it) }
     }
 
     protected fun showLayoutHierarchy() {
         close()
         LayoutHierarchyFloatyWindow(capture, context, isServiceRelied)
-            .apply { setLayoutSelectedNode(mLayoutSelectedNode) }
+            .apply {
+                setLayoutSelectedNode(mLayoutSelectedNode)
+                isOffline = this@LayoutFloatyWindow.isOffline
+            }
             .let { FloatyService.addWindow(it) }
+    }
+
+    /**
+     * Closes the window, then writes the captured tree to a layout file in the background and
+     * reports the path; the explorer is refreshed so the new file shows up.
+     * zh-CN: 关闭窗口, 然后在后台把捕获的节点树写入布局文件并提示路径; 刷新文件管理器以显示新文件.
+     */
+    protected fun saveLayoutToFile() {
+        val root = capture.root
+        close()
+        thread(name = "LayoutSnapshotSave") {
+            val result = runCatching { LayoutSnapshotFiles.save(root) }
+            mMainHandler.post {
+                result.onSuccess { file ->
+                    Explorers.workspace().refreshAll()
+                    ViewUtils.showToast(mServiceContext, mServiceContext.getString(R.string.text_layout_saved_to, file.path), true)
+                }.onFailure { e ->
+                    e.printStackTrace()
+                    ViewUtils.showToast(mServiceContext, R.string.text_failed_to_save_layout, true)
+                }
+            }
+        }
     }
 
     protected fun generateCode() {
@@ -211,6 +288,8 @@ abstract class LayoutFloatyWindow(
         protected val SPLIT_LINE: Nothing? = null
 
         private var sExitTipsShownInProcess = false
+
+        private var sMultiSelectHintShown = false
 
     }
 

@@ -1017,11 +1017,13 @@
     <string name="text_copy_ace_diagnostics">Copier les diagnostics Ace</string>
     <string name="text_copy_all">Copier tout</string>
     <string name="text_copy_all_files_to_new_directory">Copier tous les fichiers dans un nouveau répertoire</string>
+    <string name="text_copy_chained_selector">Copier le sélecteur chaîné</string>
     <string name="text_copy_command">Copie de cmd</string>
     <string name="text_copy_debug_info">Copie du journal de débogage</string>
     <string name="text_copy_file">Copier le fichier</string>
     <string name="text_copy_folder">Copier le dossier</string>
     <string name="text_copy_line">Copie de la ligne</string>
+    <string name="text_copy_object_selector">Copier le sélecteur objet</string>
     <string name="text_copy_same_path_confirm">Le chemin source est identique au chemin de destination. Continuer la copie?\n\nNouveau nom : \"%1$s\".</string>
     <string name="text_copy_to">Copier vers</string>
     <string name="text_copy_to_clip">Copie vers le presse-papiers</string>
@@ -1225,10 +1227,12 @@
     <string name="text_failed_to_install">Échec de l\'installation</string>
     <string name="text_failed_to_locate">Échec de la localisation</string>
     <string name="text_failed_to_login">Fail to login</string>
+    <string name="text_failed_to_open_layout_file">Échec de l\'ouverture du fichier de mise en page</string>
     <string name="text_failed_to_register">Échec de l\'inscription</string>
     <string name="text_failed_to_report">Échec de l\'envoi</string>
     <string name="text_failed_to_restart_a11y_service">Impossible de redémarrer le service d\'accessibilité</string>
     <string name="text_failed_to_retrieve">Échec de la récupération</string>
+    <string name="text_failed_to_save_layout">Échec de l\'enregistrement de la mise en page</string>
     <string name="text_failed_to_save_project_json">Echec de l\'enregistrement de project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
     <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
@@ -1393,6 +1397,7 @@
     <string name="text_launcher_shortcuts">Raccourcis du lanceur</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Le changement de l\'icône du lanceur sur certains appareils peut entraîner la perte de tous les raccourcis AutoJs6 existants, veuillez procéder avec prudence</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
+    <string name="text_layout_saved_to">Mise en page enregistrée dans %1$s</string>
     <string name="text_licenses">Licences Open Sources</string>
     <string name="text_listeners">Écouteurs</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
@@ -1407,6 +1412,7 @@
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login réussi</string>
     <string name="text_logout">Déconnexion</string>
+    <string name="text_long_press_to_select_multiple_attributes">Appuyez longuement sur un attribut pour en sélectionner plusieurs et les copier comme un seul sélecteur</string>
     <string name="text_loop_delay">Délai de boucle (sec)</string>
     <string name="text_loop_interval">Intervalle de boucle (sec)</string>
     <string name="text_loop_times">Temps de boucle</string>
@@ -1816,6 +1822,7 @@
     <string name="text_save">Enregistrer</string>
     <string name="text_save_and_exit">Enregistrer et quitter</string>
     <string name="text_save_configuration_as">Enregistrer la config sous</string>
+    <string name="text_save_layout_to_file">Enregistrer la mise en page dans un fichier</string>
     <string name="text_save_simplified">Enreg</string>
     <string name="text_save_to">Enregistrer dans</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Enregistrement...</string>
