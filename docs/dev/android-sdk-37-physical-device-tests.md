@@ -2,11 +2,11 @@
 
 日期: 2026-09-13. 源于 [SDK 37 Roadmap](android-sdk-37-roadmap.md) 的 P2、P3、P5、P6, 覆盖宿主、inrt 用户 APK 与全部 42 个官方插件. 共 99 个验收行: 宿主 / 系统 51 行, inrt 6 行, 插件 42 行. 本文汇总待做的实体机工作, 不把模拟器通过项改记为真机通过. 每行有独立 ID, 可导出 CSV 填写状态与证据.
 
-2026-09-14 执行约定: 维护者集中进行实体设备测试并反馈结果. 开测前按实际待测 APK / 插件版本冻结一批清单, 明确设备、步骤、预期与回传材料; 开发会话继续推进源码和独占模拟器验证. 以下 99 行没有因模拟器结果而改为 PASS. API 37 真机、真实 16 KB 内核及物理键盘 / 触摸板的可用性仍待集中测试时确认.
+2026-09-14 执行约定: 维护者集中进行实体设备测试并反馈结果, 并于同日提供新的 API 37 设备 `localhost:37478`. 开测前按实际待测 APK / 插件版本冻结一批清单, 明确设备、步骤、预期与回传材料; 开发会话继续推进源码、独占模拟器和新设备上适用的受控验证. 以下 99 行没有因模拟器结果而改为 PASS. 真实 16 KB 内核及物理键盘 / 触摸板的可用性仍待集中测试时确认.
 
 ## 1. 设备与执行顺序
 
-本轮只读清点确认以下 5 台设备在线, 均为 4 KB 内核页. 没有在线 API 37 真机. 原始清点位于 `build/sdk37-physical-20260913/inventory`; `localhost:50781` 离线, 未访问. Xiaomi 的 `am get-config` 当前含 `sw720dp`.
+2026-09-13 只读清点确认原 5 台设备在线, 均为 4 KB 内核页; 原始清点位于 `build/sdk37-physical-20260913/inventory`, 当时 `localhost:50781` 离线, 未访问, Xiaomi 的 `am get-config` 含 `sw720dp`. 2026-09-14 另确认维护者提供的 Samsung SM-F776B 在线, API 37 / Android 17 / ARM64, `getconf PAGE_SIZE` 与 `/proc/self/smaps` 均为 4096. 新机指纹为 `samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys`; 初次只读检查中内存限制器 disabled、Advanced Protection false、宿主未安装. 清点不保证后续连接持续在线, 实际开测仍需重新检查.
 
 | 标记 | 当前设备 / adb serial | 用途 |
 | --- | --- | --- |
@@ -15,14 +15,16 @@
 | D33S | Sony XQ-DQ72 / `QV770340J7`, API 33 | 通知授权、inrt 29 -> 37、插件通用验收 |
 | D33R | Redmi 22120RN86C / `bek749scrwv4wo8h`, API 33 | 第二 OEM 的后台保活、权限页、安装、存储与性能对照 |
 | D35 | Xiaomi 23046RP50C / `968e9f18`, API 35, sw720dp | 平板 / 输入法 / 分屏, 已知单应用截图问题, FGS 与后台音频旧系统回归 |
-| D37 | 待接入 Android 17 / API 37 真机 | 新权限、新限制和真实网络的必要补证; 旧系统上安装 target 37 APK 不能代替 |
+| D37 | Samsung SM-F776B / `localhost:37478`, API 37, ARM64, 4 KB 内核 | 2026-09-14 接入; 新权限、新限制及 ARM64 / OEM 补证. 当前内存限制器 disabled, Advanced Protection false; 网络拓扑与外设另行记录 |
 | D16K | 待接入真实 16 KB 内核设备, 最好同时为 API 37 | ARM 原生库与实际页大小回归; 不能仅凭模拟器 `getconf` 或 APK 对齐通过认定 |
+
+2026-09-14 后续状态: 新 D37 在只读识别后断连, `adb connect localhost:37478` 返回失败, 收尾时为 offline. 本轮未安装 APK、改设置或执行真机功能测试; 已请维护者在端口变化时提供新地址或恢复连接. 详见 [Q7 与设备记录](evidence/android-sdk-37-q7-20260914.md).
 
 执行顺序:
 
 1. **现有设备先做**: B、A01-A03、N01/N09、T、M、S、UI 与各自适用的 L; 每台至少完成无障碍 + VS Code 双向连接 + 截图 + 定时任务. D35 的单应用截图缺口优先单独复现.
 2. **D33S 或 D33R + D35**: 完成用户 APK 安装 / 升级矩阵与全部插件的 4 KB 验收. Bun 的 minSdk 为 33, Kotlin / 部分 Paddle 为 26, 以实际 APK 为准.
-3. **获得 D37 后**: 在同一设备 / 网络 / 设置下对比正常 target 36 与 target 37, 完成本地网络权限、音频、ASM、资料隔离、大屏输入等新规则. 已完成的 AVD 记录作为对照材料.
+3. **D37 已接入**: 在同一设备 / 网络 / 设置下对比正常 target 36 与 target 37, 完成本地网络权限、音频、ASM、资料隔离、大屏输入等新规则. 已完成的 AVD 记录作为对照材料; ADB 隧道上的回环测试不代替真实 LAN / VPN / multicast 拓扑.
 4. **最终包复跑**: P3 正式 target 37 包、最终 Runtime Kit 生成的用户 APK 和 P5 各插件最终提交重新验收. 调试探针通过不等于发布包的真实入口通过.
 
 所有用例初始状态为 NOT_RUN. PASS 要有实际结果; FAIL 是与已确认预期不符; 缺少系统版本、外设、待适配代码或签名 APK 时记 BLOCKED; N/A 需说明具体不适用条件. 系统按设计阻止某项操作, 可以判为“限制负例通过”, 不能写成“该业务功能可用”. 未确认的 Android 17 变化只设观察目标, 不预设错误码或系统行为.
@@ -30,6 +32,8 @@
 D37 / D16K 行用于补齐实体机证据. 缺设备时保留未覆盖项, 不把本次清单整理解释为新增硬件发布前置条件; 发布门禁以主 Roadmap 的原定 AVD / 旧系统矩阵为准.
 
 O02 的受控 TLS 对照已提供 [自动化方法](../../tools/sdk37/README.md#tls-trust-ct-ech-and-request-scoped-insecure-options) 与 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). API 37 / API 24 的模拟器结果不关闭 O02. 真机仍需真实公网 / 企业代理端点与实际协商证据, 不在日用手机安装测试 CA; 现有 TLS helper 限模拟器, 不能直接把 serial 改成手机后使用.
+
+Q7 明文迁移的 [API 24 / 37 对照](evidence/android-sdk-37-q7-20260914.md) 已完成 HTTP 40/40 与 TLS 40/40, 包含实际宿主 / inrt release. `physical_device.py instrument --suite cleartext` 可在选定且已安装匹配 debug / androidTest 包的真机上运行四个回环用例; 不申请 LAN 权限, 不访问真实 GitHub, 不安装证书. 该套件仍不能替代 O02 的真实端点与发行包业务入口验收.
 
 UI04 的 UA 与基本渲染已有 [模拟器复跑工具](../../tools/sdk37/README.md#webview-user-agent-reduction-and-rendering) 与 [P2.11 证据](evidence/android-sdk-37-p211-20260913.md), API 37 / WebView 145 的 28 个场景通过. 此结果不关闭真机的输入、复杂字体、文件选择、Markdown / Ace 或最终插件包验收. HTML Previewer 按自身包的 target / UA 开关测试; File System Access 只有符号暴露观测, 仍需实际 chooser / 授权证据.
 
@@ -180,6 +184,8 @@ VERIFIED: Android 17 + target 37 的广泛 LAN 访问使用 ACCESS_LOCAL_NETWORK
 
 VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 FGS 还需 WIU 能力; 合格的精确闹钟 + USAGE_ALARM 有特定例外. 播放或音量调用可能静默失败. 以下既验收用户可用流程, 也保留应被阻止的负例. [官方后台音频说明](https://developer.android.com/about/versions/17/changes/bg-audio).
 
+2026-09-14 的 Q3=(b) 已确定使用 Media3 `MediaSessionService` 承载脚本音频, 实现仍待完成. AU01-AU03 后续使用该实现的最终包, 同时检查媒体通知控制、暂停 / 恢复 / 定位、多个脚本的播放归属和脚本停止后的服务清理; 原通用 FGS 恢复用例不关闭 Media3 验收. TTS 继续单独记录实际引擎进程与人工听音结果.
+
 | ID | 测试项 | 设备 | 测试方法 / 自动化 | 预期结果 | Roadmap |
 | --- | --- | --- | --- | --- | --- |
 | [ ] AU01 | 实际 Rhino 音乐 / TTS 可听性 | 全部, 重点 D35 / D37 | 用项目现有 media.playMusic / tts 文档样例和固定本地音频, 前台开始后切后台、锁屏, 播放至少 2 分钟; 两个可用 TTS 引擎分别记录 | 合法前台 / 用户发起 FGS 路径实际可听, 无异常停顿; 有人工听音结果与引擎包名 / UID, start/done 回调本身不算可听 | P2.2 |
@@ -219,7 +225,7 @@ VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 F
 | [ ] UI03 | 物理键盘 / 触摸板 / Back / 边到边 | 有键盘 / 触摸板的 D35 + D37 | 键盘导航、Meta / Back 等系统快捷键、密码可见设置, touchpad捕获, 手势返回取消 / 完成, 三键导航, 刘海 / 系统栏 | 无焦点陷阱或输入吞噬, 文字和按钮不被系统栏遮挡; 系统保留快捷键不误判为应用丢键; 记录具体映射 / OS版本 | P2.12 / P2.15 / P3.3 |
 | [ ] UI04 | WebView、字体与默认 UA | 全部 + D37 | 文档、HTML / Markdown 预览、ui.webview、Ace / LSP; 默认 / 自定义 UA、CJKV与符号字体、文件选择; 记录 WebView版本 | 正确渲染和输入, 默认 UA按实际版本记录; 自定义后缀不被当作恢复完整UA; 同资料回环服务可用, File System Access 未确认能力单列 | P2.11 / P5.4 |
 | [ ] O01 | 测试短信 / OTP / 通知监听 | 有测试 SIM 和发送端的 D37 | 发送自有普通短信与测试 OTP, 记录时间; 用已获权限的脚本读取 content://sms / 广播与 observeNotification, 对照普通文本、验证码及恢复窗口 | 按实际平台过滤 / 延迟记录可见性, 不把过滤当丢包; 不读取真实账号 OTP; 真机没有 emu sms send, 未识别为OTP不能证明无过滤 | P2.10 |
-| [ ] O02 | CT / ECH 与企业 / 私有 CA | D37, D35 基线 | 对固定公网TLS端点、显式配置的debug私有CA域、企业代理分别请求; 记录信任链、CT、协商和服务端ECH证据; LAN先满足N01 | 链信任失败与CT失败区分; 不靠全局关闭CT使测试变绿; 只有网络库 / 对端支持且有协商证据才记录ECH生效 | P2.6 |
+| [ ] O02 | 明文策略、CT / ECH 与企业 / 私有 CA | D37, D35 基线 | 宿主 / 用户 APK 的普通 HTTP 正例与 GitHub 资源域 HTTP 拒绝分别验证; 对固定公网TLS端点、显式配置的debug私有CA域、企业代理分别请求; 记录信任链、CT、协商和服务端ECH证据; LAN先满足N01 | 普通 HTTP 能访问, GitHub 资源域仍限 HTTPS; 链信任失败与CT失败区分; 不靠全局关闭CT使测试变绿; 只有网络库 / 对端支持且有协商证据才记录ECH生效 | P2.6 / Q7 |
 | [ ] O03 | 蓝牙 RFCOMM / 联系人查询 | 有测试外设 / 测试联系人的 D37 | 已配对外设收发后主动断开读流; 绑定特权API用普通UID负例; 查询 ContactsContract.Data 合法列和旧账户列 / 非法SQL | EOF / 权限 / 查询结果按已核实平台行为记录; 不把RFCOMM变化套到普通TCP, 不对实际联系人做修改 | P2.15 |
 | [ ] O04 | 内存压力与退出原因 | 专用 D37 + D16K | 先保存 am memory-limiter status; 仅在实际启用限制器时运行有界、可取消的 OpenCV大图 / OCR / Node逐级负载, 记录输入大小 / PID / PSS / swap / thermal; 重开宿主进入设置 > 关于 > 进程退出记录并复制报告 | 正常规模可用; 系统历史的 PID / 时间对应被测负载, 按实际镜像核对 reason / MemoryLimiter:AnonSwap 描述; disabled 或手动停止不算限制器命中, PSS / RSS 不当退出瞬间精确值; 不用 ignore all 改全设备限制 | P2.13 / P5.3 |
 | [ ] O05 | 真实16KB安装与原生链 | D16K | 独立记录getconf和内核页大小, 安装最终宿主 / 用户APK / 所有适用原生插件, 跑dex/native/OCR和独立runtime最短链路 | 真内核16KB下无兼容模式依赖和dlopen / JNI错误; 每个插件单独证据, APK对齐或4KB真机成功不能替代 | P3.2 / P5 / P6 |
@@ -239,7 +245,7 @@ VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 F
 
 ## 6. 全部 42 个插件的实机验收行
 
-每行都要在 **至少一台真实 4 KB API 33 或 35 设备**上跑最终 target 37 插件, D37 到位后再完成其新规则暴露项; 原生插件再关联 O05. 每行保存插件与宿主双方 APK / 提交, 以插件实际 minSdk 和 ABI 选择设备. 共用宿主进程、独立插件 UID、嵌入用户 APK 三种运行方式分开记录. 下面最短功能链不能替代该仓库已有更完整的 DeviceTest; 反过来, 缺少插件导致 instrumentation skip 也不算通过.
+每行都要在 **至少一台真实 4 KB API 33 或 35 设备**上跑最终 target 37 插件, D37 恢复连接后完成其新规则暴露项; 原生插件再关联 O05. Q6=(b) 已确定全部 42 仓各自发布 SDK 升级版本, 每行保存插件与宿主双方 APK / 提交及最终发布版本, 以插件实际 minSdk 和 ABI 选择设备. 共用宿主进程、独立插件 UID、嵌入用户 APK 三种运行方式分开记录. 下面最短功能链不能替代该仓库已有更完整的 DeviceTest; 反过来, 缺少插件导致 instrumentation skip 也不算通过.
 
 自动发现 runner 用 `adb -s SERIAL shell pm list instrumentation`; 从该插件仓库 README / androidTest 确认类名与预置样本后执行 `am instrument -w -r -e class 完整测试类 PLUGIN_TEST_PACKAGE/androidx.test.runner.AndroidJUnitRunner`. 不猜测42个包共享同一个类名, 也不使用宿主native套件替代独立runtime测试.
 

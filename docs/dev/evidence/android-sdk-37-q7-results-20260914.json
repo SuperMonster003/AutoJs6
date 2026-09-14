@@ -1,0 +1,2199 @@
+{
+  "date": "2026-09-14",
+  "collected": "2026-09-14T04:42:40.762694+00:00",
+  "sourceCommit": "494a048df696fcf271d1c1bb99cf41e7490c7578",
+  "decisions": {
+    "Q1": "a",
+    "Q2": "a",
+    "Q3": "b",
+    "Q4": "a",
+    "Q5": "a",
+    "Q6": "b",
+    "Q7": "b"
+  },
+  "scope": "Q7 / P2.6 NSC migration; no release target switch, no Media3 implementation or plugin publication",
+  "sources": [
+    {
+      "path": "app\\src\\main\\AndroidManifest.xml",
+      "sha256": "780ecf38403070f28266f1b0346d53fc9d0429025e46c19b1bf0b63f8a794b5d"
+    },
+    {
+      "path": "app\\src\\main\\res\\xml\\network_security_config.xml",
+      "sha256": "891f05e506e9f26acb30d05376593925bde4de3acbc11e6a6ba009cc1497cf9e"
+    },
+    {
+      "path": "app\\src\\debug\\res\\xml\\network_security_config.xml",
+      "sha256": "deeb533c5db68afe50581cfe20d8a066814799b32c277271bcccb4478a58fba3"
+    },
+    {
+      "path": "app\\src\\androidTest\\java\\org\\autojs\\autojs\\core\\http\\CleartextTrafficDeviceTest.kt",
+      "sha256": "6d8f7592b1581cb4ba1b7c8e20755e93af82cc63dee0f044d028befb9126ae2f"
+    },
+    {
+      "path": "app\\src\\androidTest\\java\\org\\autojs\\autojs\\core\\http\\NetworkSecurityCompatibilityDeviceTest.kt",
+      "sha256": "0e703fb318220258b83162cec5a31e592910c600b22937d42ef581eb8255cb4d"
+    },
+    {
+      "path": "tools\\sdk37\\physical_device.py",
+      "sha256": "fa8df755025d83755a54380fa04ded67a6a03625d530db1e35d16015809326b7"
+    },
+    {
+      "path": "tools\\sdk37\\tls_fixture.py",
+      "sha256": "e2ed5c40e989a4bff051fafdcf8fb805d3c4b5aa8fb8104828f9e912a6705fb7"
+    },
+    {
+      "path": "version.properties",
+      "sha256": "9907d6a7d30f50931c62cdc78b6d830b6ecbd9852d48e9fad00d9b5e20d25164"
+    }
+  ],
+  "newPhysicalDevice": {
+    "identity": {
+      "serial": "localhost:37478",
+      "model": "SM-F776B",
+      "manufacturer": "samsung",
+      "sdk": "37",
+      "release": "17",
+      "fingerprint": "samsung/b8sxeea/b8s:17/CP2A.260605.016/F776BXXU1AZGI_OXM1AZGI:user/release-keys",
+      "abiList": "arm64-v8a",
+      "buildType": "user",
+      "emulator": false,
+      "getconfPageSize": 4096,
+      "kernelPageSize": 4096,
+      "pageSizeReadErrors": []
+    },
+    "initialMemoryLimiter": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "localhost:37478",
+        "shell",
+        "am memory-limiter status"
+      ],
+      "exitCode": 0,
+      "stdout": "Memory limiter\n  disabled\n",
+      "stderr": ""
+    },
+    "initialAdvancedProtection": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "localhost:37478",
+        "shell",
+        "cmd advanced_protection is-protection-enabled"
+      ],
+      "exitCode": 0,
+      "stdout": "false\n",
+      "stderr": ""
+    },
+    "initialHostInstalled": false,
+    "functionalTests": "NOT_RUN",
+    "writesPerformed": false,
+    "connectionLostBeforeInstallation": true,
+    "finalState": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "localhost:37478",
+        "get-state"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "error: device offline\n"
+    }
+  },
+  "builds": [
+    {
+      "command": [
+        "gradlew.bat",
+        ":app:assembleAppDebug",
+        ":app:assembleInrtDebug",
+        ":app:assembleAppDebugAndroidTest",
+        ":app:assembleInrtDebugAndroidTest",
+        ":app:assembleAppRelease",
+        ":app:assembleInrtRelease",
+        "--console=plain"
+      ],
+      "log": "build\\sdk37-q7-20260914\\build-normal.log",
+      "sha256": "529df3f775f175f6f30d730debb1e9f5fae0044a5a79add177e9c1e762669530",
+      "result": "BUILD SUCCESSFUL in 3m 58s"
+    },
+    {
+      "command": [
+        "gradlew.bat",
+        ":app:assembleAppDebug",
+        ":app:assembleInrtDebug",
+        ":app:assembleAppDebugAndroidTest",
+        ":app:assembleInrtDebugAndroidTest",
+        "-Pautojs.sdk.target.override=37",
+        "--console=plain"
+      ],
+      "log": "build\\sdk37-q7-20260914\\build-target37.log",
+      "sha256": "b6f7932ef5426055de47a0394c3c78f83929ae868b4d14b0cedb77b8b47043ed",
+      "result": "BUILD SUCCESSFUL in 18s"
+    },
+    {
+      "command": [
+        "gradlew.bat",
+        ":app:assembleAppDebug",
+        ":app:assembleInrtDebug",
+        ":app:assembleAppRelease",
+        ":app:assembleInrtRelease",
+        "--console=plain"
+      ],
+      "log": "build\\sdk37-q7-20260914\\build-restored.log",
+      "sha256": "5ecaa54c219e5291fad89fc84a8a01b411791eacb93be2e72c67236b6ee9277a",
+      "result": "BUILD SUCCESSFUL in 16s"
+    }
+  ],
+  "apkInspection": [
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\baseline\\app-release.apk",
+      "sha256": "7f29fdd02bf3661aaf068c1289efcf8ea0060061bc756e297167d5542f41397a",
+      "bytes": 37553092,
+      "target": 36,
+      "debuggable": false,
+      "manifestCleartextFlag": true,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": false,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=3)\n        E: trust-anchors (line=4)\n            E: certificates (line=5)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=9)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=10)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=11)\n            E: certificates (line=12)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=13)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\baseline\\inrt-release.apk",
+      "sha256": "56941b0abf7b7e13e37465e71c0129ce72d7af1c4404f00235c6e59ef203e4d4",
+      "bytes": 36301373,
+      "target": 29,
+      "debuggable": false,
+      "manifestCleartextFlag": true,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": false,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=3)\n        E: trust-anchors (line=4)\n            E: certificates (line=5)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=9)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=10)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=11)\n            E: certificates (line=12)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=13)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-debug.apk",
+      "sha256": "dcbc841750f7a2a972869b15b41573b63b33748150e767b7c5df70750838203c",
+      "bytes": 52160159,
+      "target": 36,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-release.apk",
+      "sha256": "75f0aed31663df16babbdd70e63d34facc7b691a28b27cabd98d9cca76c322e8",
+      "bytes": 37596997,
+      "target": 36,
+      "debuggable": false,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-debug.apk",
+      "sha256": "b6f841bde84e8d3c91c79abd0c6c8ed6b3597ab1fdad19c4027c2b5cf3cae0fb",
+      "bytes": 54288888,
+      "target": 29,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-release.apk",
+      "sha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5",
+      "bytes": 36381674,
+      "target": 29,
+      "debuggable": false,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\restored\\app-debug.apk",
+      "sha256": "9af3127501c976cb71892c6a5697698915bdf4db14c25ecc545e25de43cd693a",
+      "bytes": 52160159,
+      "target": 36,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\restored\\app-release.apk",
+      "sha256": "9ae684f0e240a739e2ee992be998ec9b653500c9e7e1d5b8a646cfb2ffd637bb",
+      "bytes": 37597981,
+      "target": 36,
+      "debuggable": false,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\restored\\inrt-debug.apk",
+      "sha256": "03231f1597f3787aae7110f81ba3009766ac7d9ae994dd790ad188c1645572c2",
+      "bytes": 54288888,
+      "target": 29,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\restored\\inrt-release.apk",
+      "sha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5",
+      "bytes": 36381674,
+      "target": 29,
+      "debuggable": false,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/8G.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [],
+      "testCaResourceDefined": false,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\target37\\app-debug.apk",
+      "sha256": "a1da177d9ded1d387f3785ea11a360689851a3887f0a5527130be20132b9fd40",
+      "bytes": 52160159,
+      "target": 37,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    },
+    {
+      "apk": "build\\sdk37-q7-20260914\\apks\\target37\\inrt-debug.apk",
+      "sha256": "60ba447d8d2f1512b17d3ccc2f595d7da5825ce4614e3b3170def48eddc89cfe",
+      "bytes": 54288888,
+      "target": 37,
+      "debuggable": true,
+      "manifestCleartextFlag": false,
+      "manifestNscReference": true,
+      "nscResource": "res/xml/network_security_config.xml",
+      "baseCleartextExplicitTrue": true,
+      "githubHttpsOnly": true,
+      "testCaEntries": [
+        "res/raw/sdk37_test_ca.pem"
+      ],
+      "testCaResourceDefined": true,
+      "nscDump": "E: network-security-config (line=2)\n    E: base-config (line=4)\n      A: cleartextTrafficPermitted=true\n        E: trust-anchors (line=5)\n            E: certificates (line=6)\n              A: src=\"system\" (Raw: \"system\")\n    E: domain-config (line=10)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=11)\n          A: includeSubdomains=true\n            T: 'githubusercontent.com'\n        E: trust-anchors (line=12)\n            E: certificates (line=13)\n              A: src=\"system\" (Raw: \"system\")\n            E: certificates (line=14)\n              A: src=@0x7f110017\n    E: domain-config (line=19)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=20)\n            T: 'trusted.sdk37.test'\n        E: domain (line=21)\n            T: 'mismatch.sdk37.test'\n        E: trust-anchors (line=22)\n            E: certificates (line=23)\n              A: src=@0x7f110024\n    E: domain-config (line=26)\n      A: cleartextTrafficPermitted=false\n        E: domain (line=27)\n            T: 'ct.sdk37.test'\n        E: trust-anchors (line=28)\n            E: certificates (line=29)\n              A: src=@0x7f110024\n        E: certificateTransparency (line=31)\n          A: enabled=true\n"
+    }
+  ],
+  "restoredArtifactsComparedToTestedNormalArtifacts": [
+    {
+      "apk": "app-debug.apk",
+      "changedZipEntries": [
+        "assets/doc/CHANGELOG-ar.md",
+        "assets/doc/CHANGELOG-en.md",
+        "assets/doc/CHANGELOG-es.md",
+        "assets/doc/CHANGELOG-fr.md",
+        "assets/doc/CHANGELOG-ja.md",
+        "assets/doc/CHANGELOG-ko.md",
+        "assets/doc/CHANGELOG-ru.md",
+        "assets/doc/CHANGELOG-zh-Hans.md",
+        "assets/doc/CHANGELOG-zh-Hant-HK.md",
+        "assets/doc/CHANGELOG-zh-Hant-TW.md",
+        "assets/doc/CHANGELOG.md"
+      ]
+    },
+    {
+      "apk": "app-release.apk",
+      "changedZipEntries": [
+        "assets/doc/CHANGELOG-ar.md",
+        "assets/doc/CHANGELOG-en.md",
+        "assets/doc/CHANGELOG-es.md",
+        "assets/doc/CHANGELOG-fr.md",
+        "assets/doc/CHANGELOG-ja.md",
+        "assets/doc/CHANGELOG-ko.md",
+        "assets/doc/CHANGELOG-ru.md",
+        "assets/doc/CHANGELOG-zh-Hans.md",
+        "assets/doc/CHANGELOG-zh-Hant-HK.md",
+        "assets/doc/CHANGELOG-zh-Hant-TW.md",
+        "assets/doc/CHANGELOG.md"
+      ]
+    },
+    {
+      "apk": "inrt-debug.apk",
+      "changedZipEntries": []
+    },
+    {
+      "apk": "inrt-release.apk",
+      "changedZipEntries": []
+    }
+  ],
+  "testSigning": {
+    "sameCertificateForAppInrtAndTests": true,
+    "sha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+    "releaseInstrumentation": "Installed ordinary debug androidTest APK against the matching signed, non-minified release app; no release-test or target-override guard bypass",
+    "verifiedApkCount": 16,
+    "logSha256": "217d2755073a21ce0ec280dd2605e7e756c5462eb9b8fddb0ff608e8713f7aa5"
+  },
+  "counts": {
+    "baseline": {
+      "runs": 4,
+      "expectedTests": 16,
+      "passedTests": 10,
+      "allPassed": false
+    },
+    "cleartext": {
+      "runs": 10,
+      "expectedTests": 40,
+      "passedTests": 40,
+      "allPassed": true
+    },
+    "tls": {
+      "runs": 10,
+      "expectedTests": 40,
+      "passedTests": 40,
+      "allPassed": true
+    }
+  },
+  "runs": [
+    {
+      "started": "2026-09-14T04:34:09.877625+00:00",
+      "ended": "2026-09-14T04:34:13.284017+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\baseline\\app-release.apk",
+        "sha256": "7f29fdd02bf3661aaf068c1289efcf8ea0060061bc756e297167d5542f41397a"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-baseline\\app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-baseline\\app-release-instrumentation.txt",
+      "logSha256": "b65c68834343712fea5942af05631d3a20f685eca1a6b9a5db1f8e8c562e2cc1",
+      "mode": "baseline",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:34:26.852866+00:00",
+      "ended": "2026-09-14T04:34:30.593116+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\baseline\\inrt-release.apk",
+        "sha256": "56941b0abf7b7e13e37465e71c0129ce72d7af1c4404f00235c6e59ef203e4d4"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-baseline\\inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-baseline\\inrt-release-instrumentation.txt",
+      "logSha256": "f6b4034a23ed0acd7ae7f50282b148e3ac321533da90e7d70be5bf5c57662117",
+      "mode": "baseline",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:34:57.151100+00:00",
+      "ended": "2026-09-14T04:35:01.778622+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-debug.apk",
+        "sha256": "dcbc841750f7a2a972869b15b41573b63b33748150e767b7c5df70750838203c"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\app-debug-instrumentation.txt",
+      "logSha256": "3c1315ca5e70ce3a965975da4edce0fe74c33aa2469a1d20b7bc1d1892f66d21",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:35:16.195693+00:00",
+      "ended": "2026-09-14T04:35:19.526329+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-release.apk",
+        "sha256": "75f0aed31663df16babbdd70e63d34facc7b691a28b27cabd98d9cca76c322e8"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\app-release-instrumentation.txt",
+      "logSha256": "40d5912e8920b1ccda409d4c1d47eec05295b6523a2501c60ddf674a1ff13c66",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:35:33.040963+00:00",
+      "ended": "2026-09-14T04:35:36.719143+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-debug.apk",
+        "sha256": "b6f841bde84e8d3c91c79abd0c6c8ed6b3597ab1fdad19c4027c2b5cf3cae0fb"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\inrt-debug-instrumentation.txt",
+      "logSha256": "6a4f18d9f2b0d45fb5cebb3574c6a221169cce0055dc74c22d19242548e0897b",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:35:49.887684+00:00",
+      "ended": "2026-09-14T04:35:53.345101+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-release.apk",
+        "sha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-normal\\inrt-release-instrumentation.txt",
+      "logSha256": "b5259e0f7fef71e4a5b3fbbd0e1d1fdced32174e1bc0902e842c1d4af861a3de",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:37:23.235617+00:00",
+      "ended": "2026-09-14T04:37:27.493294+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-debug.apk",
+      "apkSha256": "dcbc841750f7a2a972869b15b41573b63b33748150e767b7c5df70750838203c",
+      "target": 36,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+      "testApkSha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-app-debug-instrumentation.txt",
+      "logSha256": "4b4842fd2c249da952b329728dcddc9b2a5f464dd6992655b30a170d63c6d429",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:37:57.536537+00:00",
+      "ended": "2026-09-14T04:37:59.388001+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-release.apk",
+      "apkSha256": "75f0aed31663df16babbdd70e63d34facc7b691a28b27cabd98d9cca76c322e8",
+      "target": 36,
+      "variant": "release",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+      "testApkSha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-app-release-instrumentation.txt",
+      "logSha256": "5e1698f5926353810382b66678381a511d055731ab3ba129dd788a8a1f36a99c",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:37:40.692608+00:00",
+      "ended": "2026-09-14T04:37:45.056383+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-debug.apk",
+      "apkSha256": "b6f841bde84e8d3c91c79abd0c6c8ed6b3597ab1fdad19c4027c2b5cf3cae0fb",
+      "target": 29,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+      "testApkSha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-inrt-debug-instrumentation.txt",
+      "logSha256": "826a5972da46fbfc0f94445e32ddf028b4e7e58c23b3b913d2cf06c8d97c4fe0",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:38:11.961516+00:00",
+      "ended": "2026-09-14T04:38:13.855816+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-release.apk",
+      "apkSha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5",
+      "target": 29,
+      "variant": "release",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+      "testApkSha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5594",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5594-tls\\normal-inrt-release-instrumentation.txt",
+      "logSha256": "c36b8d41134b144a5a32bf1e6cabdba6e12c3e7e8b7b595f4a653de8600bbcb5",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5594",
+        "model": "Android SDK built for x86",
+        "manufacturer": "Google",
+        "sdk": "24",
+        "release": "7.0",
+        "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+        "abiList": "x86",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": null,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": [
+          {
+            "command": [
+              "E:/.android/sdk/platform-tools/adb.exe",
+              "-s",
+              "emulator-5594",
+              "shell",
+              "getconf PAGE_SIZE"
+            ],
+            "exitCode": 127,
+            "stdout": "",
+            "stderr": "/system/bin/sh: getconf: not found\n"
+          }
+        ]
+      }
+    },
+    {
+      "started": "2026-09-14T04:33:51.041748+00:00",
+      "ended": "2026-09-14T04:33:52.040605+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\baseline\\app-release.apk",
+        "sha256": "7f29fdd02bf3661aaf068c1289efcf8ea0060061bc756e297167d5542f41397a"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": false,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        -2,
+        1,
+        -2,
+        1,
+        -2
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-baseline-retry\\app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-baseline-retry\\app-release-instrumentation.txt",
+      "logSha256": "29f86f7cfb4fc5e5b57d05907ccbf120e558df39432aea1958adeee26cbe33c5",
+      "mode": "baseline",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "failureExcerpt": [
+        "INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: HTTP policy for script.sdk37.test",
+        "java.lang.AssertionError: HTTP policy for script.sdk37.test",
+        "Caused by: Failed to call method \"http.get\". CLEARTEXT communication to script.sdk37.test not permitted by network security policy.",
+        "java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy (sdk37-cleartext.js#7)",
+        "INSTRUMENTATION_STATUS: stack=java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy",
+        "java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy",
+        "Tests run: 4,  Failures: 3"
+      ]
+    },
+    {
+      "started": "2026-09-14T04:33:54.357027+00:00",
+      "ended": "2026-09-14T04:33:55.505819+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\baseline\\inrt-release.apk",
+        "sha256": "56941b0abf7b7e13e37465e71c0129ce72d7af1c4404f00235c6e59ef203e4d4"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": false,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        -2,
+        1,
+        -2,
+        1,
+        -2
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-baseline-retry\\inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-baseline-retry\\inrt-release-instrumentation.txt",
+      "logSha256": "dc603689c7eedb73f62a0b8d42233c139b78f83c6468d79f66d3976b39e532bb",
+      "mode": "baseline",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "failureExcerpt": [
+        "INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: HTTP policy for script.sdk37.test",
+        "java.lang.AssertionError: HTTP policy for script.sdk37.test",
+        "Caused by: Failed to call method \"http.get\". CLEARTEXT communication to script.sdk37.test not permitted by network security policy.",
+        "java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy (sdk37-cleartext.js#7)",
+        "INSTRUMENTATION_STATUS: stack=java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy",
+        "java.net.UnknownServiceException: CLEARTEXT communication to script.sdk37.test not permitted by network security policy",
+        "Tests run: 4,  Failures: 3"
+      ]
+    },
+    {
+      "started": "2026-09-14T04:34:20.062540+00:00",
+      "ended": "2026-09-14T04:34:23.472897+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-debug.apk",
+        "sha256": "dcbc841750f7a2a972869b15b41573b63b33748150e767b7c5df70750838203c"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\app-debug-instrumentation.txt",
+      "logSha256": "f535017b23293b814557c75bd5008b08bfae3a0cdf9c96afec9e350afed5c21c",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:34:25.641398+00:00",
+      "ended": "2026-09-14T04:34:26.583746+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-release.apk",
+        "sha256": "75f0aed31663df16babbdd70e63d34facc7b691a28b27cabd98d9cca76c322e8"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+        "sha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\app-release-instrumentation.txt",
+      "logSha256": "d67142469487ae22d7646a5a212b3334f9231e84ff494e67d2d166762c2a22d9",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:34:27.513436+00:00",
+      "ended": "2026-09-14T04:34:30.814850+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-debug.apk",
+        "sha256": "b6f841bde84e8d3c91c79abd0c6c8ed6b3597ab1fdad19c4027c2b5cf3cae0fb"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\inrt-debug-instrumentation.txt",
+      "logSha256": "06b0de5da92688a5f5adc8bdf3fff6637d6a71629192e89cfd92cfe41147549d",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:34:32.919073+00:00",
+      "ended": "2026-09-14T04:34:33.787317+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-release.apk",
+        "sha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+        "sha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "debuggable": false,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-normal\\inrt-release-instrumentation.txt",
+      "logSha256": "71a9197b207d5c4558204b7442bb65ec28e4fc5b94d7d01517a305807e1c7d9a",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:35:38.881991+00:00",
+      "ended": "2026-09-14T04:35:42.396470+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\target37\\app-debug.apk",
+        "sha256": "a1da177d9ded1d387f3785ea11a360689851a3887f0a5527130be20132b9fd40"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\target37\\app-test.apk",
+        "sha256": "3e1bf2eaf0f9ed342735d61eb51762a6fbaf2ebfd077549f96c28654f470fdf5"
+      },
+      "package": "org.autojs.autojs6",
+      "target": 37,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-target37\\app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-target37\\app-debug-instrumentation.txt",
+      "logSha256": "c091e6cb63621aeb96290cca41330ad2e8267bd61f35bb2943c6b3e147d0c037",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:35:43.317509+00:00",
+      "ended": "2026-09-14T04:35:46.602112+00:00",
+      "apk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\target37\\inrt-debug.apk",
+        "sha256": "60ba447d8d2f1512b17d3ccc2f595d7da5825ce4614e3b3170def48eddc89cfe"
+      },
+      "testApk": {
+        "path": "build\\sdk37-q7-20260914\\apks\\target37\\inrt-test.apk",
+        "sha256": "b13d825da0ed6e042dc3e67e4e43ac93a0df65f3f757b50aafd44e6866700ed2"
+      },
+      "package": "org.autojs.autojs6.inrt",
+      "target": 37,
+      "debuggable": true,
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer,org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy' org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#githubHttpIsRejectedBeforeAnyRequestReachesTheServer",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#rhinoHttpUsesTheInstalledPolicy",
+        "org.autojs.autojs.core.http.CleartextTrafficDeviceTest#httpToAnOrdinaryHostnameReceivesTheFixtureResponse"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-target37\\inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-target37\\inrt-debug-instrumentation.txt",
+      "logSha256": "29f65640a09977e33d7cfd3ebfa85c67fcd365920660939124d87df7d483cb53",
+      "mode": "cleartext",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:36:46.333946+00:00",
+      "ended": "2026-09-14T04:36:50.330290+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-debug.apk",
+      "apkSha256": "dcbc841750f7a2a972869b15b41573b63b33748150e767b7c5df70750838203c",
+      "target": 36,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+      "testApkSha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-app-debug-instrumentation.txt",
+      "logSha256": "4f35d2ffddf2b4eed6203f3b349c0ca38ba6322789bbbb4ea34736e44ae28b14",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:36:57.225807+00:00",
+      "ended": "2026-09-14T04:36:57.732003+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\app-release.apk",
+      "apkSha256": "75f0aed31663df16babbdd70e63d34facc7b691a28b27cabd98d9cca76c322e8",
+      "target": 36,
+      "variant": "release",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\app-test.apk",
+      "testApkSha256": "6d3c841a1de9dec7f61861578a8fe498b349b4a33d6f2c40408c4c02f71d8e50",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-app-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-app-release-instrumentation.txt",
+      "logSha256": "8a8516875b882ec1d2b49b79b426d9ac59923d4d7531aa8593cc798bccf7fa23",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:36:51.290754+00:00",
+      "ended": "2026-09-14T04:36:55.013836+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-debug.apk",
+      "apkSha256": "b6f841bde84e8d3c91c79abd0c6c8ed6b3597ab1fdad19c4027c2b5cf3cae0fb",
+      "target": 29,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+      "testApkSha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-inrt-debug-instrumentation.txt",
+      "logSha256": "b7fca51288415e0df4ad9cccc3e5a2192e1d77889b9e2c89f694f308d7f152c1",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:36:59.707916+00:00",
+      "ended": "2026-09-14T04:37:00.251102+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-release.apk",
+      "apkSha256": "f2750a101c0f5b3c40acc051924fdc27be17bd6d1b3ce9521fdc5d53a9ee8de5",
+      "target": 29,
+      "variant": "release",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\normal\\inrt-test.apk",
+      "testApkSha256": "1598162ff0e03609d2e61e0f50fa9a063cb47ce24a60b3169dfb256880c88a08",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt false -e sdk37.echMode 1 org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-inrt-release-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\normal-inrt-release-instrumentation.txt",
+      "logSha256": "280d4d09121d2a7c7481a1c0b937c4779553c8a6508cd6cbca7e6f77d7baef4c",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:37:01.057537+00:00",
+      "ended": "2026-09-14T04:37:04.843153+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\target37\\app-debug.apk",
+      "apkSha256": "a1da177d9ded1d387f3785ea11a360689851a3887f0a5527130be20132b9fd40",
+      "target": 37,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\target37\\app-test.apk",
+      "testApkSha256": "3e1bf2eaf0f9ed342735d61eb51762a6fbaf2ebfd077549f96c28654f470fdf5",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt true -e sdk37.echMode 2 org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\target37-app-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\target37-app-debug-instrumentation.txt",
+      "logSha256": "1a055730311b6a100c6535a1ef62b2a271a7ed1ee5e05ce7659b33ec8892f5c6",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    },
+    {
+      "started": "2026-09-14T04:37:05.620555+00:00",
+      "ended": "2026-09-14T04:37:09.311281+00:00",
+      "apk": "build\\sdk37-q7-20260914\\apks\\target37\\inrt-debug.apk",
+      "apkSha256": "60ba447d8d2f1512b17d3ccc2f595d7da5825ce4614e3b3170def48eddc89cfe",
+      "target": 37,
+      "variant": "debug",
+      "testApk": "build\\sdk37-q7-20260914\\apks\\target37\\inrt-test.apk",
+      "testApkSha256": "b13d825da0ed6e042dc3e67e4e43ac93a0df65f3f757b50aafd44e6866700ed2",
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5598",
+        "shell",
+        "am instrument -w -r -e class 'org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest,org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest' -e sdk37.tlsHost 127.0.0.1 -e sdk37.defaultCt true -e sdk37.echMode 2 org.autojs.autojs6.inrt.test/androidx.test.runner.AndroidJUnitRunner"
+      ],
+      "success": true,
+      "expected": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest"
+      ],
+      "finished": [
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureAliasDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#debugCaTrustIsLimitedToItsDeclaredDomains",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#explicitCtRejectsAnUnloggedButTrustedChain",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#ctAndEchPolicyDefaultsMatchTheRecordedCompatState",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#insecureOptionDoesNotLeakToTheNextRhinoRequest",
+        "org.autojs.autojs.core.http.NetworkSecurityCompatibilityDeviceTest#defaultTrustRejectsThePrivateCa"
+      ],
+      "statusCodes": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "recordPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\target37-inrt-debug-result.json",
+      "logPath": "build\\sdk37-q7-20260914\\emulator-5598-tls\\target37-inrt-debug-instrumentation.txt",
+      "logSha256": "daeff0efbc71c06ae4fa76b714e61624b0c970d7c8dbe95540de641945ad3168",
+      "mode": "tls",
+      "device": {
+        "serial": "emulator-5598",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      }
+    }
+  ],
+  "tlsFixture": {
+    "host": "127.0.0.1",
+    "port": 17647,
+    "transport": "one explicit adb reverse per owned emulator",
+    "systemOrUserCaInstalled": false,
+    "localNetworkPermissionChanged": false,
+    "compatOverridesChanged": false,
+    "clientHelloCount": 178,
+    "echExtensionPresentCount": 0,
+    "echNegotiated": false,
+    "stderr": "",
+    "log": "build\\sdk37-q7-20260914\\tls.stdout.jsonl",
+    "logSha256": "d040422931229f1e5c56d19e64fcbd7306bb590a47020fe538f5d9a5a6d538a8"
+  },
+  "toolTests": {
+    "command": "python -m unittest discover -s tools/sdk37 -p test_physical_device.py -v",
+    "passed": 4,
+    "expected": 4,
+    "logSha256": "473651386c5690cc248856069de1acd52b1a0dc256336aa4b20a702e35419c62"
+  },
+  "changelog": {
+    "version": "6.8.0",
+    "date": "2026/09/14",
+    "languages": 10,
+    "generatorExitCode": 0,
+    "logSha256": "d52ab03ac9d72aa05970a319cc65bab41886eea8db69d934d9db053f1917e340"
+  },
+  "preflightFailure": {
+    "kind": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+    "phase": "before baseline tests on disposable API 37 clone",
+    "resolution": "Removed snapshot app/test packages only in owned read-only AVD overlays before installing the same-signer matrix"
+  },
+  "cleanup": {
+    "emulators": [
+      {
+        "Id": 35676,
+        "StartTime": "2026-09-14T12:30:02.7594879+08:00",
+        "Path": "E:\\.android\\sdk\\emulator\\emulator.exe"
+      },
+      {
+        "Id": 49784,
+        "StartTime": "2026-09-14T12:30:27.2261946+08:00",
+        "Path": "E:\\.android\\sdk\\emulator\\emulator.exe"
+      }
+    ],
+    "fixture": {
+      "ProcessId": 32688,
+      "CreationDate": "2026-09-14T12:36:44.741614+08:00",
+      "CommandLine": "\"C:\\Users\\wu2du\\AppData\\Local\\Programs\\Python\\Python313\\python.exe\" -u tools/sdk37/tls_fixture.py"
+    },
+    "commands": {
+      "started": "2026-09-14T04:40:30.776704+00:00",
+      "commands": [
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5598",
+            "emu",
+            "avd",
+            "name"
+          ],
+          "exitCode": 0,
+          "stdout": "AVD_API_37\n\nOK\n\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5598",
+            "reverse",
+            "--remove",
+            "tcp:17647"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5598",
+            "reverse",
+            "--list"
+          ],
+          "exitCode": 0,
+          "stdout": "\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5598",
+            "emu",
+            "kill"
+          ],
+          "exitCode": 0,
+          "stdout": "OK: killing emulator, bye bye\n\nOK\n\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5594",
+            "emu",
+            "avd",
+            "name"
+          ],
+          "exitCode": 0,
+          "stdout": "AVD_API_24\n\nOK\n\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5594",
+            "reverse",
+            "--remove",
+            "tcp:17647"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5594",
+            "reverse",
+            "--list"
+          ],
+          "exitCode": 0,
+          "stdout": "\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "E:/.android/sdk/platform-tools/adb.exe",
+            "-s",
+            "emulator-5594",
+            "emu",
+            "kill"
+          ],
+          "exitCode": 0,
+          "stdout": "OK: killing emulator, bye bye\n\nOK\n\n",
+          "stderr": ""
+        }
+      ],
+      "newPhoneFinalState": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "localhost:37478",
+          "get-state"
+        ],
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "error: device offline\n"
+      },
+      "ended": "2026-09-14T04:40:31.066629+00:00"
+    },
+    "remainingAdbEmulatorProcesses": {
+      "ProcessId": 31400,
+      "CreationDate": "2026-09-14T03:02:08.007368+08:00",
+      "CommandLine": "adb -L tcp:5037 fork-server server --reply-fd 692"
+    },
+    "note": "Emulators registered with the existing 5037 server; unused private 5059 server was stopped before tests. Shared server PID 31400 was preserved. No listeners remain on 5059, 5594/5595, 5598/5599 or 17647.",
+    "remainingTestListeners": []
+  },
+  "notCovered": [
+    "Physical Samsung functional tests: device disconnected after read-only identification",
+    "Real LAN/VPN/multicast or enterprise proxy routing; adb loopback is not LAN evidence",
+    "Real ECH negotiation, WebView/media cleartext transport, generated APK launcher and Runtime Kit publication",
+    "Full Lint and R8 optimization; release currently has minify disabled",
+    "Media3/Q3, inrt storage/Q4, Advanced Protection diagnostic/Q5, plugin releases/Q6"
+  ]
+}

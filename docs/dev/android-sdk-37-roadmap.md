@@ -5,9 +5,11 @@
 
 2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 [P2.3 动态加载只读适配](evidence/android-sdk-37-p23-20260913.md)、[P2.4 Looper / 线程适配](evidence/android-sdk-37-p24-20260913.md). [P2.1 本地网络权限](evidence/android-sdk-37-p21-20260913.md) 的代码、模拟器验证及关联文档 / 声明同步已落地, 真机网络、跨 profile 与完整 MqttService 流程仍待验收. 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 的整体目标仍未完成.
 
-实体机执行入口: [完整测试清单](android-sdk-37-physical-device-tests.md), 共 99 行, 含宿主 / 系统 51 行、inrt 用户 APK 6 行、全部插件 42 行. 每行列出设备、步骤、预期和本 Roadmap 的对应项; `tools/sdk37/physical_device.py checklist` 可导出带状态 / 证据列的 CSV. 现有 5 台真机只提供旧系统回归, API 37 与真实 16 KB 内核设备仍需补齐; 整理清单与工具自测不关闭功能验收项.
+实体机执行入口: [完整测试清单](android-sdk-37-physical-device-tests.md), 共 99 行, 含宿主 / 系统 51 行、inrt 用户 APK 6 行、全部插件 42 行. 每行列出设备、步骤、预期和本 Roadmap 的对应项; `tools/sdk37/physical_device.py checklist` 可导出带状态 / 证据列的 CSV. 2026-09-14 维护者另提供 Samsung SM-F776B (`localhost:37478`, API 37, ARM64, 实际 4 KB 内核), 原 5 台真机继续承担旧系统回归; 真实 16 KB 内核设备仍待补齐. 接入设备本身不关闭功能验收项.
 
-P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 NSC 保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
+P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 CT / ECH 策略保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
+
+2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. 新 Samsung D37 只读识别后断连, 未进行真机功能测试; Media3、inrt 存储引导和全部插件独立发版按确认方案继续实施.
 
 P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-sdk-37-p27-20260913.md). 所测 API 37 镜像的 `PARCEL_HARDENING` 长度检查已用设备字节码和正反例核实; 宿主 target 36 强制开启与 target 37 默认状态下, 11 个指定插件的最短链路均通过. 所测生产序列化路径无需修正; 真实 Tasker / 桌面操作、其它 ABI / OEM 及 P5 插件 target 37 发布验证继续开放.
 
@@ -26,30 +28,35 @@ P2.13 已实现设置页进程退出记录, target 36 / 37 共 12 个页面检�
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目, 优先级按阶段顺序; 宿主先行, 被宿主进程加载或打包进用户 APK 的插件其次, 独立进程插件再次, 纯 JVM 插件最后.
 2. 条目完成后勾选 `[x]`, 并在条目后追加证据 (提交 hash / 测试类名 / 设备型号 / lint 报告路径), 证据等级见附录 D.
 3. 涉及 JS 公开 API 或权限模型的条目 (如 P2.1 的本地网络权限), 完成后必须同步 `AGENTS.md` 列出的关联仓库 (文档 / d.ts / Ace LSP 声明) 与 `.changelog` (10 语言) 并重新生成 README.
-4. 附录 A 的待决事项在进入对应阶段前由维护者拍板, 拍板结果回填到第 1 节.
+4. 附录 A 的 Q1-Q7 已由维护者于 2026-09-14 确认, 结果回填到第 1 节; 按对应决策实施, 不重复征询.
 5. 附录 B 是指定 API 37 镜像中 36 项 targetSdk 门控变更的逐项评估, 不是 Android 17 全部行为变更的全集. `dumpsys` 只能证明变更名称 / ID / 配置存在, 不能证明行为语义或功能通过. 官方文档的核对状态 (VERIFIED / UNVERIFIED) 随条目标注; 页面未提及不能作为 "明确未变" 的证据, 网络失败时保留待核验状态.
 
 ---
 
 ## 1. 固定决策
 
-D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征询. D5-D13 是据此拟定或按既有默认项落实的执行约定, 遇到源码证据不符时修正文档并记录原因, 不把派生约定当作额外的维护者拍板:
+D1-D4 已由维护者于 2026-09-13 确认. 2026-09-14 又明确选择 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 见 D12-D18, 后续不重复征询. D5-D11 仍为执行约定. D12-D13 在本次明确确认前曾按原推荐默认实施; D14 替代早先 Q3=(a) 的最终方案, 不改写早先验证的历史:
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
 | D1 | 范围 = 宿主 + 全部 42 个官方插件仓库 | 宿主 (app 两个 flavor, 仓内 modules / plugin-api / test-apps / plugins 子项目随 `version.properties` 自动跟随) 先行; 42 个插件仓库作为 P5 逐仓推进, 每仓独立条目, 独立提交, 独立版本递增与 changelog. `AutoJs6-Gradle-Platform-Versions` 无需改动 (数据表已含 `37.0=9.1.1`), `AutoJs6-Official-Plugins-Index` 仅在插件发布时按既有流程刷新. |
 | D2 | 两步走 | 宿主先把 `COMPILE_SDK_VERSION` 升到 37 (P1, `TARGET_SDK_VERSION` 保持 36) 单独提交并回归; 行为变更适配在 targetSdk 仍为 36 时借助兼容开关与临时 target 覆盖完成 (P2); 最后单独提交 `TARGET_SDK_VERSION=37` (P3). 每一步可独立回滚, 与 Archive-Manager 插件 2026-08-23 的做法一致. |
-| D3 | inrt 模板 `TARGET_SDK_VERSION_INRT` 29 -> 37 | 用户打包的 APK 与宿主同步以 37 为目标, 在 P3 与宿主 targetSdk 同一提交切换. 由于 inrt 一次跨越 8 个 API 等级 (30-37), P3.3 单列 "打包应用 29 -> 37 清单", 存储引导与旧版升级保护见待决 Q4. |
+| D3 | inrt 模板 `TARGET_SDK_VERSION_INRT` 29 -> 37 | 用户打包的 APK 与宿主同步以 37 为目标, 在 P3 与宿主 targetSdk 同一提交切换. 由于 inrt 一次跨越 8 个 API 等级 (30-37), P3.3 单列 "打包应用 29 -> 37 清单", 存储引导与旧版升级保护按 Q4=(a) / D15. |
 | D4 | 探针编译作为 P0 基线 | 2026-09-13 已完成所列 Kotlin / Java 任务的 compileSdk 37 探针 (0 错误, 仅 1 处新增弃用告警) 与 36 基线对照, 结果记入 [探针记录](evidence/android-sdk-37-probe-20260913.md); P1 独立补齐 inrt / release / lint / 出包与设备验证. 源码复核确认 release 的 `isMinifyEnabled=false`, 因此 R8 优化不在当前产物路径中; 将来启用时另建基线. |
-| D5 | 验证矩阵 | Android 17 证据只来自本机 AVD (`AVD_API_37` / `aj6-ps16k-37-x86_64`, `android-37.0` google_apis_ps16k x86_64 镜像); 真机 (Xiaomi 23046RP50C API 35, Sony XQ-DQ72 API 33, Redmi 22120RN86C API 33, Sony XQ-AT72 API 31, Sony G8441 API 28) 提供 targetSdk 提升后在旧系统上的回归; 16 KB 门禁 (`verifyNativePageAlignment`) 在每次 assemble 时继续生效. 无 Android 17 真机, 有则由维护者回填. |
+| D5 | 验证矩阵 | Android 17 使用本机 AVD (`AVD_API_37` / `aj6-ps16k-37-x86_64`) 与 2026-09-14 接入的 Samsung SM-F776B (`localhost:37478`, API 37, ARM64, 内核 4 KB); Xiaomi 23046RP50C API 35, Sony XQ-DQ72 API 33, Redmi 22120RN86C API 33, Sony XQ-AT72 API 31, Sony G8441 API 28 提供旧系统回归. 每次执行记录实际指纹与状态, 不把旧清点当作当前在线证明; `verifyNativePageAlignment` 在每次 assemble 时继续生效, 实际 16 KB 内核验证仍开放. |
 | D6 | 落地位置 = master, 每个子条目一个提交 | 与 a11y / 16 KB Roadmap 一致; 提交时按显式文件清单暂存, 不 `git add -A` (多会话工作区). |
 | D7 | 不捆绑无关依赖升级 | 本 Roadmap 只改 SDK 版本与由此强制或直接相关的代码; androidx.core 1.19 (要求 compileSdk 37) 等 "被解锁" 的升级记入附录 F, 不在本 Roadmap 实施. |
 | D8 | `autojs6-platform-versions` 保持 1.8.0 | 1.8.0 与 1.8.1 的 `android-api-agp-compat.properties` 相同 (`37.0=9.1.1`), 当前解析出的 AGP 9.4.0 / Gradle 9.7.1 / Kotlin 2.4.0 / KSP 2.3.12 全部满足 API 37; 不因本次升级改动 `settings.gradle.kts` 的插件版本. |
 | D9 | changelog 写法 | SDK 日志参考既有 35 -> 36 升级记录, 最终分类以各仓库 `AGENTS.md` 为准; 当前宿主规定 `dependency` 仅统计 Gradle 依赖声明, SDK 平台升级记入 `improvement` (例如 "编译 SDK 版本调整为 37", 英文 "Updated compile SDK to 37"). P1 只描述编译版本, P3 再描述宿主与打包应用的目标版本及用户可见变化; 行为适配按性质写入 `fix` / `improvement`. 不提前宣称 targetSdk 已升级. |
 | D10 | `app/src/main/java/com/stardust/**` 兼容包保持冻结 | 探针编译显示 android.jar 37 未在该包内引发错误; 若后续 lint / 构建暴露必须修改的项, 仅允许 35 -> 36 先例 (`2ab13f3c7` 注释掉 `MainThreadProxy` 的 `Thread.stop` 系列) 那种 "最小编译修正", 不做其它改动. |
 | D11 | 插件仓库的节奏 | 纯 JVM 且无行为暴露的插件 (附录 E "暴露" 列为空) 可在一次发布内同时完成 compileSdk 与 targetSdk; 存在本地网络 / 动态加载 / 后台音频 / 屏幕捕获暴露的插件与宿主一样两步走. 各仓库脏工作区 (附录 E) 先由维护者处理或按会话惯例分开提交, 本 Roadmap 的提交不得混入. |
-| D12 | Q1 按既有推荐项 (a) 实施 | P2.1 原条目已写明 "默认按推荐项". 用户显式连接 VS Code / 开启服务或操作权限入口时引导, 自动连接与脚本网络调用不弹窗; 复用 `runtime.requestPermissions` 的通用名称数组. 只有 OS >= 37 且实际 target >= 37 才需要权限; manifest 声明也仅进入 target >= 37 的 flavor, 旧 target 不声明或申请. `d9465be13`, [P2.1 证据](evidence/android-sdk-37-p21-20260913.md). |
-| D13 | P2.6 沿用 Q2 推荐项 (a) 的现有默认配置 | 不添加生产 CT / ECH 例外. debug 私有 CA 仅限三个保留测试域; `isInsecure` 只对当前请求生效. 真实域如确需局部 CT 例外, 先补齐信任链 / CT 失败证据再评估 (b). 这是保持现状的实现记录, 不代表维护者另行批准新的生产域例外. |
+| D12 | Q1=(a), 按需申请本地网络权限 | 2026-09-14 明确确认既有实现. 用户显式连接 VS Code / 开启服务或操作权限入口时引导, 自动连接与脚本网络调用不弹窗; 复用 `runtime.requestPermissions` 的通用名称数组. 只有 OS >= 37 且实际 target >= 37 才需要权限; manifest 声明也仅进入 target >= 37 的 flavor, 旧 target 不声明或申请. `d9465be13`, [P2.1 证据](evidence/android-sdk-37-p21-20260913.md). |
+| D13 | Q2=(a), 保持默认 CT 策略 | 2026-09-14 明确确认. 不添加生产 CT / ECH 例外. debug 私有 CA 仅限三个保留测试域; `isInsecure` 只对当前请求生效. 真实域如确需局部 CT 例外, 先补齐信任链 / CT 失败证据再评估, 本次选择不授权未知生产域豁免. |
+| D14 | Q3=(b), Media3 `MediaSessionService` 承载脚本音频 | 2026-09-14 明确确认, 替代原推荐 (a) 作为 P2.2 最终方案; 引入本项直接需要的 Media3 依赖符合 D7. 需落实播放控制、焦点、媒体通知、脚本结束清理与宿主 / inrt / Node 入口, 单独验证 TTS 引擎进程及开机 / 定时链. Media3 不自动豁免 FGS 启动和 Android 17 的音频资格限制; 已有可见界面恢复指引仍保留, 不作为 (b) 完成证据. |
+| D15 | Q4=(a), 按共享存储需求引导并验证旧安装迁移 | 2026-09-14 明确确认. 无共享存储需求的 assets / 私有目录脚本可跳过所有文件访问授权; 有需求时提供可理解的引导与拒绝结果. `preserveLegacyExternalStorage` 是否采用由 P2.16 / P3.3 升级矩阵决定, 不能视为首次安装的兼容保证. |
+| D16 | Q5=(a), 不声明 `isAccessibilityTool` | 2026-09-14 明确确认. 在 P2.14 检测 Advanced Protection 并提供准确说明, 区分全局模式、实际非辅助工具限制及其他启用失败原因; 不把全局 mode=true 直接等同于服务被限制. |
+| D17 | Q6=(b), 全部 42 个官方插件单独发布 SDK 升级版本 | 2026-09-14 明确确认. 每仓完成 P5 的版本、适配、构建、测试及 changelog 门禁后独立发版, 随发布更新官方索引. 保持 D11 的分步规则, 不将只改 compileSdk 或提交代码记作已发布. |
+| D18 | Q7=(b), 本 Roadmap 内完成明文流量配置迁移 | 2026-09-14 明确确认, 纳入 P2.6. 将脚本自定义 HTTP 端点的允许策略明确写入主 NSC, 移除 Manifest 旧开关, 统一宿主 / inrt 的 debug 与 release 行为; 保留 GitHub 资源域 HTTPS 限制和证书策略, 验证实际 APK 与网络请求. |
 
 由 D1-D3 派生的硬约束:
 
@@ -67,11 +74,11 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 - 打包链路: inrt flavor (`TARGET_SDK_VERSION_INRT`), `generateRuntimeKit` 产物, `plugins/apk-builder-template`, `AutoJs6-Plugin-APK-Builder-Template` (模板与测试夹具中的 targetSdk 期望值).
 - 42 个官方插件仓库 (附录 E), 每仓的 `version.properties`, changelog, README, 以及暴露列对应的适配代码.
 - 关联项目 (仅当 JS 公开 API 或权限模型变化时): `AutoJs6-Documentation`, `AutoJs6-TypeScript-Declarations`, `AutoJs6-Plugin-Ace-Editor` (LSP 声明), `AutoJs6-Plugin-Offline-Docs`.
+- Q7=(b) 的 `usesCleartextTraffic` -> Network Security Config 迁移, 以及 Q3=(b) 的 Media3 脚本音频服务.
 
 非目标:
 
 - Android 17 QPR1 / QPR2 的次级 SDK (37.1 / 37.2, 本机已装 `android-36.1` 平台但未装 37.1) 与 `compileSdk { minorApiLevel }` 语法; 待 androidx (activity 1.14 / Compose) 真正要求 37.1 时另立条目 (附录 F).
-- `usesCleartextTraffic` 迁移到 network security config (Android 17 未强制, 附录 F).
 - Google Play 政策本身 (宿主经 GitHub 分发; Play 对 targetSdk 37 的要求预计 2027-08, 见附录 C 参考); 本 Roadmap 以平台行为正确为验收标准.
 - `AutoJs6-Gradle-Platform-Versions` 的数据刷新 (37.1 出现后再做), `AutoJs6-Official-Plugins-Index` 的字段变更 (无需要).
 - 归档 / 验证 / 第三方目录 (`.a6-*`, `AutoJs6-m9-*`, `AutoJs4`, `AutoX*`, `Rhino-For-AutoJs6`, `TempApplication`, `Auto.js-SDK-Plugins-Garage` 等).
@@ -115,7 +122,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I11 | WebView UA 缩减 (`ENABLE_USER_AGENT_REDUCTION`, VERIFIED) 与 File System Access API (`ENABLE_FILE_SYSTEM_ACCESS`, DEVICE-37: 选择 / 取消 / Intent / URI 授权门控已验证, 写入与持久化待测) | target 37; 按 WebView 所属应用的 target / override 生效, 独立插件不继承宿主开关 | `core/ui/attribute/WebViewAttributes.kt:36` (`userAgentString` 属性), 文档 / 预览 WebView; UI 根布局的 Activity context 丢失已修复 | P2.11 ([文件门控与边界](evidence/android-sdk-37-p211-files-20260914.md)) |
 | I12 | 大屏: sw >= 600dp 的方向 / 尺寸限制旧豁免在 target 37 失效 (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`, VERIFIED); 全体: 配置变化导致 Activity 重建后默认不恢复 IME; 减少重建的具体范围已核对官方说明 | target 37 / 全体 | 无旧豁免; UI 脚本分屏退出、Main 搜索、Edit 选区 / 大草稿、IME 与 Log 布局已修复, target 36 / 37 共 32 组模拟器用例通过; 悬浮 UI、外设和实体机仍待验收 | P2.12 |
 | I13 | 应用内存上限 (全体, VERIFIED): 按 RAM 的每应用限制, 被杀时 `ApplicationExitInfo` 描述含 `MemoryLimiter:AnonSwap` | 全体 | `largeHeap` 应用 + 脚本引擎 + 进程内 OpenCV; 设置页历史退出诊断已实现并验证, 当前 AVD 限制器 disabled, 真实限制器负载 / 报告仍待验收 | P2.13 |
-| I14 | Android 17 Advanced Protection 限制非辅助工具的无障碍服务 (官方规则 VERIFIED; 当前镜像 mode=true 时仍可绑定, 限制未复现) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明 `isAccessibilityTool` (见待决 Q5); 后续在可复现环境验证 `A11yServiceController` 启用失败诊断, 区分全局模式与实际限制 | P2.14 |
+| I14 | Android 17 Advanced Protection 限制非辅助工具的无障碍服务 (官方规则 VERIFIED; 当前镜像 mode=true 时仍可绑定, 限制未复现) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明 `isAccessibilityTool` (见 Q5=(a) / D16); 后续在可复现环境验证 `A11yServiceController` 启用失败诊断, 区分全局模式与实际限制 | P2.14 |
 | I15 | 低影响项: Bluetooth 绑定 API 需特权 (`BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`), RFCOMM `read()` 断开返回 -1 (`MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, 仅 `BluetoothSocket`), 联系人 `Data` 视图移除账户列与严格 SQL 检查 (`RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, 仅 ContactsContract), 密钥库每应用 5 万把上限, RenderScript ScriptC 停用 (本仓库无 RenderScript), 镜像虚拟显示权限检查 (`CHECK_ADD_MIRROR_DISPLAY_PERMISSION`, 宿主经 MediaProjection 创建 `VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR`, `core/image/capture/ScreenCapturer.java:284-289`), `ContentCaptureManager.setContentCaptureEnabled(false)` 失效, 物理键盘密码显示拆分 | target 37 | 逐项验证即可, 预期无代码改动 | P2.15 |
 
 需要继续核验的部分 (UNVERIFIED): 前台服务类型 / 超时, `SYSTEM_ALERT_WINDOW` / `TYPE_APPLICATION_OVERLAY`, MediaProjection, JobScheduler / AlarmManager, 预测性返回, 边到边, `android.accessibilityservice` 包与最低可安装 targetSdk. 当前主文档未列某项新限制, 不等于该项没有变化; P2.15 用 API diff / 对应专题文档 / 实机回归分别给出结论. 已有 Android 14-16 限制仍纳入 inrt 29 -> 37 回归.
@@ -130,7 +137,7 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | 动态加载 (I3) | `core/plugin/opencv/OpenCvPluginHost.kt:219-229`, `core/plugin/imagequant/ImageQuantPluginHost.kt:226-231`, `rhino/AndroidClassLoader.kt:93-122`, `core/plugin/editor/AceEditorPluginHost.kt:316-326` |
 | Looper / 线程 (I4) | `core/looper/{Loopers.kt,MainThreadProxy.java,TimerThread.kt}`, `engine/LoopBasedJavaScriptEngine*`, `inrt/autojs/LoopBasedJavaScriptEngineWithDecryption.kt`; 含 `start()` 的文件: `core/record/{GlobalActionRecorder,Recorder}.java`, `engine/LuaEngineRuntimeBackend.kt`, `runtime/api/Media.java`, `service/{AccessibilityServiceItemHelper.kt,ForegroundService.kt}`, `inrt/theme/preference/ForegroundServiceSwitchPreference.kt` |
 | BAL (I5) | `ui/main/scripts/AndroidPackageSessionInstaller.kt:119-180`, `external/shortcut/ShortcutManager.java:46`, `ui/settings/LauncherShortcutsPreference.kt:35-68`, `ui/shortcut/ShortcutCreateActivity.java:161-163`, `ui/main/drawer/DrawerFragment.kt:160`; 13 处 `PendingIntent.get*`, 41 处 `FLAG_ACTIVITY_NEW_TASK` |
-| 网络安全 (I6) | `app/src/main/res/xml/network_security_config.xml`, manifest `:297` `usesCleartextTraffic` |
+| 网络安全 (I6) | `app/src/main/res/xml/network_security_config.xml`, debug 同名覆盖; Manifest 旧开关已由 Q7 迁移 (`494a048df`) |
 | IPC (I7) | `core/plugin/**/*Host.kt` 的 Binder 协议, `plugin-api/protocol-wire-api`, `core/plugin/center/InstalledPluginRepository.kt:351`, `engine/NodeModuleSourceFileTransportSession.kt`, `external/tasker/**` |
 | 存储 (I8) | `model/script/PathChecker.java:56`, `permission/AllFilesAccessPermission.kt`, `ui/storage/{TrashActivity,VersionHistoryActivity}`, `runtime/api/augment/{files,media}/**`, `ui/main/scripts/**` (文件管理器) |
 | 小组件 / 通知 (I9) | `external/widget/ScriptWidget.java:49`, `res/xml/script_widget_config.xml`, `util/NotificationUtils.kt:137`, `engine/NodeBridgeProviderRegistry.kt` |
@@ -215,7 +222,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 ### P2.1 本地网络权限 (I1)
 
 - [x] 官方事实与 APK 核对: target <= 36 不声明也不申请新权限, 保留 INTERNET 的隐式 LAN 访问; target 37 包按 flavor 合并 `src/target37/AndroidManifest.xml`. 普通 host 36 / inrt 29 与覆盖 target 37 的 app / test APK 元数据及 SHA-256 均归档. 未使用 compat 强制开关. (VERIFIED; SOURCE; ANDROID_BUILD: [P2.1 证据](evidence/android-sdk-37-p21-20260913.md))
-- [x] `LocalNetworkPermission`、抽屉、宿主设置与 inrt 设置接入标准运行时权限流程. 申请时机按 Q1 推荐项 (a) 实施, 见 D12: 显式 VS Code 连接 / 开启服务才引导, 自动连接与脚本调用不主动弹窗. 复用 `runtime.requestPermissions(["access_local_network"])`, 保持异步 void API. (SOURCE: `d9465be13`; DEVICE-37)
+- [x] `LocalNetworkPermission`、抽屉、宿主设置与 inrt 设置接入标准运行时权限流程. 申请时机按已确认的 Q1=(a) / D12: 显式 VS Code 连接 / 开启服务才引导, 自动连接与脚本调用不主动弹窗. 复用 `runtime.requestPermissions(["access_local_network"])`, 保持异步 void API. (SOURCE: `d9465be13`; DEVICE-37)
 - [x] HTTP 同步 / 异步、WebSocket、Node controlled fetch 在实际网络失败后附加条件式恢复提示并保留 cause; TLS 与主动取消不误判. 修复 Node 将 OkHttp 整次调用超时归类为取消的问题, 保留 TIMEOUT / ABORTED 各自错误码. 原生 Socket / Paho 保留原始异常, 文档提供显式申请和重试步骤. (JVM: 5/5; DEVICE-37: 网络 suite 与既有取消回归 1/1)
 - [x] API 37 / 16 KB AVD: LAN TCP / UDP、入站 accept、HTTP、WebSocket、Paho CONNECT、VS Code 双向 hello、Node fetch 及同 profile 的 IPv4 / IPv6 loopback. 拒绝组 9 通过 / 2 个成功场景跳过, 授权恢复组 11/11. 通过 emulator redir 验证入站接口, 不以 adb tunnel 冒充 LAN; 未修改防火墙. (DEVICE-37: [矩阵与边界](evidence/android-sdk-37-p21-20260913.md#构建与用例))
 - [x] host 拒绝后重试、连续拒绝后的设置入口、已有 Nearby Devices 授权、inrt 设置页重试, 四轮 UI 各 1/1. target 36 -> 37 覆盖安装且没有 Nearby 授权时, 新权限为未授予; 请求授权后恢复访问. 不把无弹窗的权限组复用与覆盖升级视为同一条件. (DEVICE-37)
@@ -229,7 +236,8 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 ### P2.2 后台音频 (I2)
 
 - [x] 默认状态下完成 target 36 / 37 的前台, 可见启动 FGS 后切后台, 无 FGS 后台, 精确闹钟接收器普通媒体 / 闹钟用途对照, 以及 target 37 同一进程恢复和 Google TTS, 共 12 组有效记录. 11 组符合最初联合断言; target 37 普通媒体闹钟入口出现 "焦点失败 / 系统静音, 但媒体音量改变" 的镜像例外, 保留失败断言与 `AudioHardening` 证据. 不合并播放 / 焦点 / 音量为一个资格判断. (DEVICE-37: [矩阵与边界](evidence/android-sdk-37-p22-20260913.md); [结构化结果](evidence/android-sdk-37-p22-20260913-results.json))
-- [x] Q3 本轮采用原推荐方案 (a): 保留通用 `specialUse`, 补齐可见界面启动 / 重启服务后重试脚本的恢复指引和无人值守播放限制. target 37 同一 PID 的服务 WIU 从 `DENIED` 恢复为 `PROC_STATE_TOP`, 焦点由 0 恢复为 1. 不通过服务存活, 音量读回, 播放器进度或额外抢占焦点推断播放资格. TTS 记录实际 Google 引擎 UID / PID, 文件合成不增加宿主播放资格拦截. (SOURCE; DEVICE-37)
+- [x] 2026-09-13 按原推荐方案 (a) 完成可见界面启动 / 重启服务后重试脚本的恢复指引和无人值守播放限制. target 37 同一 PID 的服务 WIU 从 `DENIED` 恢复为 `PROC_STATE_TOP`, 焦点由 0 恢复为 1. 不通过服务存活, 音量读回, 播放器进度或额外抢占焦点推断播放资格. TTS 记录实际 Google 引擎 UID / PID, 文件合成不增加宿主播放资格拦截. 此项保留历史证据; 2026-09-14 的 Q3=(b) 已替代最终方案. (SOURCE; DEVICE-37)
+- [ ] 按 Q3=(b) / D14 引入 Media3 `MediaSessionService`, 接入脚本播放 / 暂停 / 恢复 / 定位与结束清理, 管理媒体焦点与通知. 覆盖宿主 / inrt / Node 桥、多个脚本的所有权、后台拒绝与可见恢复, 单独验证 TTS 和开机 / 定时触发. 不以服务存在或播放器进度代替实际播放资格与可听性. (SOURCE; JVM; DEVICE-37; PHYSICAL; DOCS)
 - [x] 源码复核定时 / 开机入口: Alarm / WorkManager / Job 调度链与宿主 / inrt 开机接收器不保证已经启动音频 FGS; `settings.setEnabled('foreground_service', true)` 仅写偏好, 不直接启动服务. 已写入用户 API 文档. (SOURCE)
 - [ ] 完整端到端验收: Rhino `media.playMusic` / TTS, 全部实际定时后端, 宿主与 inrt 的开机链, TTS 后台可听性, 独立音频插件, 以及 API 35 真机与 `FGS_BOOT_COMPLETED_RESTRICTIONS` / `FGS_SAW_RESTRICTIONS` 的组合. 本轮开机探针启动 ANR, 不计入完成; 原生探针不代替脚本与打包应用验收. (DEVICE-37; DEVICE: API 35 真机)
 - [ ] 在支持命令的专用镜像中完成 `cmd audio set-enable-hardening throw` 验证. 本轮命令 exit 0 但 `mHardeningOverride` 始终为 0, 异常模式断言失败, 不把该轮标为 throw 验收. 探针已加入覆盖状态检查. `enable` / `throw` 会加严所有 target 并覆盖闹钟例外; `disable` 不等于恢复默认. 已关闭本轮只读 AVD. (DEVICE-37)
@@ -265,9 +273,10 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 
 ### P2.6 网络安全配置 (I6)
 
+- [x] 按 Q7=(b) / D18 将 Manifest 的明文开关迁至 NSC, 修复 release 自定义 HTTP 端点被默认策略拒绝的问题, 保留 GitHub 资源域 HTTPS 限制. API 24 / 37 的宿主 / inrt debug、release 和 target 37 debug 覆盖包共 HTTP 40/40、TLS 回归 40/40; 12 个应用 APK 配置与 CA 边界、16 个应用 / 测试 APK 签名核验通过. 新 D37 断连后的真机补验保留到实体机 O02. (SOURCE: `494a048df`; APK; DEVICE-24; DEVICE-37; [Q7 证据](evidence/android-sdk-37-q7-20260914.md))
 - [x] 完成受控 TLS 夹具与 target 36 / 37 的 CT / ECH 独立开关对照. 未知 CA 拒绝、指定 debug CA 信任、主机名不匹配和强制 CT 缺 SCT 拒绝分别验证; target 37 的 LNP 前提单独满足. API 37 的 6 组各 6/6, API 24 回归 6/6 (旧系统不宣称支持 CT / ECH), 见 [P2.6 证据](evidence/android-sdk-37-p26-20260913.md). (SOURCE; DEVICE-37; DEVICE-24)
 - [x] 修复真实 Rhino 请求中 `isInsecure` / `insecure` 对共享客户端的污染. 同步、传统回调和 Promise 请求后, 后续默认或显式 false 请求恢复校验, 可信域与主机名检查保留. `timeout` / `client` 普通配置继续共享, 不擅自重置脚本显式配置的自定义 TrustManager. (DEVICE-37; DEVICE-24)
-- [x] 生产 NSC 保持默认 CT / ECH, 不添加全局关闭或新域例外; `githubusercontent.com` 资源 CA 的 CT 策略查询为 false. debug 测试 CA 不进入实际 appRelease APK. 当前 OkHttp 4.12.0 夹具连接无 ECH 扩展且可见 SNI, 不凭策略值宣称 ECH 生效. D13 记录 Q2 推荐默认的落实范围. (SOURCE; APK; DEVICE-37)
+- [x] 生产 NSC 保持默认 CT / ECH, 不添加全局关闭或新域例外; `githubusercontent.com` 资源 CA 的 CT 策略查询为 false. debug 测试 CA 不进入实际 appRelease APK. 当前 OkHttp 4.12.0 夹具连接无 ECH 扩展且可见 SNI, 不凭策略值宣称 ECH 生效. D13 记录 Q2=(a) 的确认与落实范围. (SOURCE; APK; DEVICE-37)
 - [x] 公共 HTTP 文档区分证书信任、CT、ECH、LNP, 说明 `isInsecure` 的请求范围与旧行为; 已生成 Documentation 与 Offline Docs, 更新双份 provenance 及 10 语言 changelog. d.ts 的两个 boolean 签名无变化, 无需生成 / 发布声明. ([官方 NSC 文档](https://developer.android.com/privacy-and-security/security-config); DOCS)
 - [ ] 对实际公网系统 CA 端点、`githubusercontent.com` 的实际验证链、企业 TLS 代理 / 私有域补证; 使用支持 ECH 的真实网络库与服务端记录协商, 明确与 GREASE 的区别. 需要目标地址、公开 CA 链 / 代理配置和 D37 网络环境, 对应实体机 O02. 当前夹具和策略查询不能替代此项. (DEVICE-37; PHYSICAL)
 
@@ -328,7 +337,7 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 ### P2.14 Advanced Protection Mode (I14)
 
 - [x] 用 [Google 官方说明](https://blog.google/security/whats-new-in-android-security-privacy-2026/) 核对 Android 17 非辅助工具无障碍限制. 在独占 `AVD_API_37` 对 target 36 / 37 各执行开启 / 关闭保护、保护中解绑再绑定及设置页观察, 共 16 个状态快照: mode=true 时仍可绑定, 无 `no_non_tool_accessibility_service`, 设置页无拒绝文案. [实测与边界](evidence/android-sdk-37-p213-p214-20260914.md#4-p214-的实测边界). (DEVICE-37; SOURCE; DOCS)
-- [ ] 在实际实施限制的镜像 / 设备复现撤销与启用失败, 再为 `A11yServiceController` 失败路径增加准确检测和提示, 同步文档 FAQ. `AdvancedProtectionManager.isAdvancedProtectionEnabled()` 要求 SDK >= 36 与 QUERY_ADVANCED_PROTECTION_MODE; 全局 mode=true 不等于具体无障碍限制生效, 不能据此误报. 不声明 `isAccessibilityTool` (待决 Q5). (DEVICE-37; SOURCE; DOCS)
+- [ ] 在实际实施限制的镜像 / 设备复现撤销与启用失败, 再为 `A11yServiceController` 失败路径增加准确检测和提示, 同步文档 FAQ. `AdvancedProtectionManager.isAdvancedProtectionEnabled()` 要求 SDK >= 36 与 QUERY_ADVANCED_PROTECTION_MODE; 全局 mode=true 不等于具体无障碍限制生效, 不能据此误报. 不声明 `isAccessibilityTool` (Q5=(a) / D16). (DEVICE-37; SOURCE; DOCS)
 
 ### P2.15 低影响项逐项验证 (I15)
 
@@ -417,7 +426,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 3. 暴露适配: 按附录 E 暴露列处理 (本地网络 -> 复用 P2.1 权限助手模式; 动态加载 -> 只读; 前台服务 / 音频 -> P2.2 结论; 屏幕捕获 -> P2.15 结论; WebView -> P2.11 结论). (SOURCE)
 4. targetSdk: `TARGET_SDK_VERSION=37`; 在 `AVD_API_37` 与一台 4 KB 真机 (API 33 或 35) 上跑该插件的 instrumentation / 冒烟 (16 KB Roadmap 用过的 `*DeviceTest`, `ocr_provider_smoke.py` 等). (DEVICE-37; DEVICE)
 5. 版本递增 (各仓库惯例), changelog 按 D9 与各仓库规则记录已完成的 compile / target 步骤及适配, README 重新生成, 单独提交. (DOCS)
-6. 发布节奏按待决 Q6.
+6. 发布节奏按 Q6=(b) / D17: 全部 42 仓各自发布 SDK 升级版本, 完成各自门禁后发布并刷新官方索引; 提交、构建与发布分别记录.
 
 ### P5.1 被宿主进程加载 (OpenCV, Image-Quantization)
 
@@ -455,22 +464,24 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 ## P6: 验收与关闭
 
 - [ ] 宿主全矩阵 (P3.2) 与舰队 (P5) 证据齐备; `git log` 中每个子条目一个提交; 远程 CI 绿. (DOCS)
-- [ ] 本文 "阶段总览" 状态列更新为 "完成"; 附录 A 全部待决事项回填到第 1 节; 附录 F 的后续建议移交给各自的 Roadmap 或 backlog. (DOCS)
+- [ ] 本文 "阶段总览" 状态列更新为 "完成"; 附录 A 已确认事项的实施状态均有结论; 附录 F 的后续建议移交给各自的 Roadmap 或 backlog. Q1-Q7 的决策本身已于 2026-09-14 回填到第 1 节. (DOCS)
 - [ ] 自动记忆索引 (`MEMORY.md`) 中本 Roadmap 条目更新为已关闭. (DOCS)
 
 ---
 
-## 附录 A: 待决事项
+## 附录 A: 已确认事项 (2026-09-14)
 
-| 编号 | 事项 | 选项 | 推荐 |
+维护者已明确选择 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b. 下表保留原选项供追溯; 确认决策不等于实现或验收完成.
+
+| 编号 | 事项 | 选项 | 已确认结果 / 实施状态 |
 | --- | --- | --- | --- |
-| Q1 | 本地网络权限的申请时机 (P2.1, 已按原条目的默认项实施) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a) 已实施, 见 D12 / `d9465be13`; 不把执行默认项记为维护者另行投票 |
-| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | 本轮保持 (a), 见 D13; 有真实域证据时再评估 (b), 未增加生产例外 |
-| Q3 | 后台音频策略 (P2.2) | (a) 保持常驻服务, 提供可见界面恢复操作与已知限制; (b) 引入 media3 `MediaSessionService` 承载脚本音频 | 本轮按原推荐采用 (a), 可见界面恢复已验证; 无人值守播放与完整设备门禁仍开放, 不以日志警告代替功能通过 |
-| Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a): 无共享存储需求的脚本允许跳过, 拒绝权限后仍有可理解的结果 |
-| Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a): AutoJs6 是自动化工具, 声明会与其定义不符 |
-| Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (a) |
-| Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (a): Android 17 未强制, 与 SDK 升级解耦 |
+| Q1 | 本地网络权限的申请时机 (P2.1) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a), D12. 既有实现 `d9465be13` 获明确确认; 剩余真机拓扑验收见 P2.1 |
+| Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), D13. 保持默认, 未增加生产例外 |
+| Q3 | 后台音频策略 (P2.2) | (a) 保持常驻服务, 提供可见界面恢复操作与已知限制; (b) 引入 Media3 `MediaSessionService` 承载脚本音频 | (b), D14. 已调整 P2.2 待办; 原 (a) 恢复指引的通过证据不关闭 Media3 迁移 |
+| Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a), D15. 无共享存储需求可跳过, 待实现与升级矩阵验证 |
+| Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a), D16. 保持不声明, 实际限制及准确提示仍待验证 / 实现 |
+| Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (b), D17. 全部 42 仓单独为 SDK 升级发版, 各自门禁与发布记录仍待完成 |
+| Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (b), D18. 迁移与 API 24 / 37 本地验证已完成 (`494a048df`); 真机 O02 和 P2.6 其他验收继续保留 |
 
 ---
 
@@ -652,7 +663,6 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - Android 17 新 MessageQueue 生效时, 私有 `mMessages` 字段虽然保留但恒为 null, 不能据此判断队列内容; 宿主使用公开 Handler / Looper / IdleHandler, Espresso 已为 3.7.0. Android 17 上 target 37 应用反射写入 `static final` 字段会抛 `IllegalAccessException`, JNI 写入也可能崩溃. 两项限制分别来自 [MessageQueue 官方说明](https://developer.android.com/about/versions/17/changes/messagequeue) 与 [target 37 官方行为变更](https://developer.android.com/about/versions/17/behavior-changes-17), 不泛化为所有旧 target 的反射读取限制. 当前 util.java / threads 文档无受影响示例, P4 汇总升级说明时提示用户脚本; [P2.4 评估](evidence/android-sdk-37-p24-20260913.md#start-覆写与非-sdk-接口复核).
 - androidx.core 1.19.0 (2026-06-03) 要求 compileSdk 37, 且 `core-ktx` 已并入 `core`; 当前 `gradle/libs.versions.toml` 的 `core-ktx = "1.15.0"` 是为 AGP 8.2.2 时代保留的过期钉子, P1 之后可在独立的依赖升级中解除 (D7).
 - androidx.activity 1.14.0-alpha02 起 Compose 系列库要求 compileSdk 37.1 (次级 SDK); 届时需要 `compileSdk { version = release(37) { minorApiLevel = 1 } }` 语法, `Versions.kt` 与 `autojs6-platform-versions` 数据表都要支持 "37.1" 形式. 本机尚未安装 `platforms;android-37.1`.
-- `usesCleartextTraffic="true"` 已被官方标记为未来移除, 应把允许明文的域迁入 `network_security_config.xml` (待决 Q7 选 (a) 时记于此).
 - Android 18 起 `ACTION_SEND` / `ACTION_IMAGE_CAPTURE` 不再隐式授予 URI 权限, P2.15 的 `detectImplicitUriPermissionGrant()` 检查结果可提前修正.
 - 本机 `android-36/android.jar` 有 4 个 `android/hardware/fingerprint/*.class`, `android-37.0/android.jar` 为 0 (SOURCE: [复核记录](evidence/android-sdk-37-review-20260913.md)); 这证明 SDK 编译符号移除, 不等于设备运行时一定无此类. `InputMethodManager.SHOW_IMPLICIT` 之外的弃用由 lint 逐版跟踪.
 - APK 签名方案 v3.2 (混合后量子, ML-DSA) 对内置 APK 打包器 / `modules/apk-signer` 是可选能力, 与本次无关.
@@ -812,3 +822,11 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - P2.14 两个 target 各 8 个状态快照显示 mode=true 时仍可绑定, 保护中解绑再启用成功, 未观察到对应 user restriction 或设置页拒绝. 官方规则已确认, 当前镜像的差异保持开放; 未据全局模式误报启用失败, 未声明 isAccessibilityTool.
 - 正常与 target 37 覆盖 debug 构建、正常 release 主 manifest 合并通过. 额外全量 Lint 运行约 19 分 50 秒后仍停留在应用源码分析, 已取消且没有本轮报告; 不引用旧报告作为通过结果.
 - [实现、设备证据与范围](evidence/android-sdk-37-p213-p214-20260914.md). 正常输出仍为 compile 37 / target 36 / inrt 29. 内存限制器仍 disabled, 真正的限制器负载报告、实际高级保护拒绝与旧系统 / OEM 验证继续保留; O04 已指向新的报告入口, 99 行实体机清单仍为 NOT_RUN. 下一步可继续 P2.15 / P2.16, 无需维护者本轮立即操作设备.
+
+### 2026-09-14: Q1-Q7 确认、Q7 明文迁移与新 D37 接入
+
+- 维护者确认 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 已回填 D12-D18 和各阶段待办. Q3 改为 Media3 最终方案, Q6 改为全部 42 仓独立 SDK 升级发版, Q7 从后续建议转入 P2.6.
+- `494a048df` 将明文策略写入主 NSC 并移除 Manifest 旧开关, 复现并修复 API 37 上宿主 / inrt release 普通 HTTP 被拒绝的问题. API 24 / 37 的 HTTP 40/40、TLS / CT / insecure 隔离 40/40, 工具测试 4/4; 同步 10 语言日志及生成文档.
+- debug / release / target 37 覆盖构建通过, 最后恢复正常 target 36 / 29. 最终宿主 APK 仅比已测包多出生成日志内容, DEX / 编译资源相同; inrt 与已测包完全相同. 全量 Lint 和 R8 不在本次通过范围.
+- 新 Samsung SM-F776B (`localhost:37478`, API 37, ARM64, 内核 4 KB) 初次只读检查成功, 随后断连且重连失败; 未安装 APK 或改设置, 99 行实体机验收仍 NOT_RUN. 需要维护者恢复连接或提供变化后的端口. 两个临时 AVD、TLS 服务和 reverse 已清理, 原共享 adb server 保留.
+- [实现与证据](evidence/android-sdk-37-q7-20260914.md). 后续优先落实 Q3 Media3 与 P2.16 的 Q4 存储引导, 新机恢复后补齐适用的 API 37 真机项目.
