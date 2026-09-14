@@ -1844,6 +1844,7 @@
     <string name="text_select_file_to_upload">Sélectionnez le fichier à télécharger</string>
     <string name="text_select_icon">Sélectionner l\'icône</string>
     <string name="text_select_image">Sélectionner une image</string>
+    <string name="text_select_parent_node">Sélectionner le nœud parent</string>
     <string name="text_selected_items" formatted="true">%1$d sélectionnés</string>
     <string name="text_selected_plugin">Plugin selectionne</string>
     <string name="text_self_check">Autovérification</string>
@@ -2041,6 +2042,7 @@
     <string name="text_view">Voir</string>
     <string name="text_view_docs">Voir les documents</string>
     <string name="text_vivo_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
+    <string name="text_volume_down_to_exit_layout_inspector">Appuyez sur la touche volume bas pour quitter l\'inspecteur de mise en page</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>

@@ -1846,6 +1846,7 @@
     <string name="text_select_file_to_upload">업로드 할 파일을 선택하십시오</string>
     <string name="text_select_icon">아이콘을 선택하십시오</string>
     <string name="text_select_image">이미지를 선택하십시오</string>
+    <string name="text_select_parent_node">부모 노드 선택</string>
     <string name="text_selected_items" formatted="true">%1$d개 선택됨</string>
     <string name="text_selected_plugin">선택된 플러그인</string>
     <string name="text_self_check">자체 점검</string>
@@ -2043,6 +2044,7 @@
     <string name="text_view">보기</string>
     <string name="text_view_docs">문서를 봅니다</string>
     <string name="text_vivo_background_popup_permission">백그라운드 팝업</string>
+    <string name="text_volume_down_to_exit_layout_inspector">볼륨 낮추기 키를 눌러 레이아웃 분석을 종료할 수 있습니다</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 확장 버전이 요구 사항을 충족하지 않습니다</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">모든 데이터 처리가 완료될 때까지 대기 중입니다...</string>
     <string name="text_weekly_task">주간 과제</string>

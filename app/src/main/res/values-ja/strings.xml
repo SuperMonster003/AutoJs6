@@ -1845,6 +1845,7 @@
     <string name="text_select_file_to_upload">アップロードするファイルを選択します</string>
     <string name="text_select_icon">アイコンを選択する</string>
     <string name="text_select_image">画像を選択する</string>
+    <string name="text_select_parent_node">親ノードを選択</string>
     <string name="text_selected_items" formatted="true">%1$d 件を選択済み</string>
     <string name="text_selected_plugin">選択したプラグイン</string>
     <string name="text_self_check">セルフチェック</string>
@@ -2042,6 +2043,7 @@
     <string name="text_view">表示</string>
     <string name="text_view_docs">ドキュメントを見る</string>
     <string name="text_vivo_background_popup_permission">バックグラウンドでのポップアップ表示</string>
+    <string name="text_volume_down_to_exit_layout_inspector">音量ダウンキーでレイアウト分析を終了できます</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">すべてのデータ処理が完了するのを待機しています...</string>
     <string name="text_weekly_task">週次タスク</string>

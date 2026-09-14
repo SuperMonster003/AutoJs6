@@ -490,7 +490,8 @@
         "La recherche multicolore (`images.findPointByColors`, `images.findPointsByColors`) préfiltre les candidats avec des masques OpenCV vectorisés, s'exécutant des dizaines de fois plus vite sur les images denses avec des résultats identiques",
         "Les détecteurs de couleur exposent une méthode `distance` partagée par `colors.isSimilar`, `images.detectColor` et la recherche multicolore; l'algorithme `hs` utilise la distance circulaire de teinte et les noms d'algorithme inconnus lèvent une erreur explicite",
         "L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération",
-        "Les niveaux de pyramide de la recherche de modèles utilisent l'interpolation par aire, la recherche masquée conserve le coefficient de corrélation normalisé, et les petites valeurs de `max` affinent toujours plusieurs candidats afin de ne pas perdre la meilleure correspondance aux niveaux grossiers"
+        "Les niveaux de pyramide de la recherche de modèles utilisent l'interpolation par aire, la recherche masquée conserve le coefficient de corrélation normalisé, et les petites valeurs de `max` affinent toujours plusieurs candidats afin de ne pas perdre la meilleure correspondance aux niveaux grossiers",
+        "Fenêtre de hiérarchie de mise en page : les lignes résument id / text / desc / clickable et d'autres indicateurs, le nœud sélectionné et tous ses ancêtres sont mis en évidence dans l'arbre et encadrés à l'écran, l'arbre défile horizontalement, l'élément de menu \"Sélectionner le nœud parent\" remonte la sélection niveau par niveau, et une astuce affichée une seule fois explique la sortie avec la touche volume bas"
       ],
       "dependency": [
         "Android AXML modularise",

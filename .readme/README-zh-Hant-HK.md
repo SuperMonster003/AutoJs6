@@ -654,6 +654,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 顏色檢測器提供 `distance` 方法, 由 `colors.isSimilar`, `images.detectColor` 和多點找色共用; `hs` 算法使用環形色相距離, 未知算法名稱拋出明確的錯誤
 * `優化` 屏幕截圖器狀態讀取不再加鎖, `images.releaseScreenCapturer` 釋放期間不再阻塞並發的圖片調用
 * `優化` 模板匹配的金字塔層級改用區域插值, 遮罩匹配沿用歸一化相關系數, 較小的 `max` 也會精化多個候選點, 避免最佳匹配在粗層級被丟棄
+* `優化` 佈局層次視窗: 行內摘要顯示 id / text / desc / clickable 等屬性, 選中節點及其全部父級在樹中高亮並在屏幕上勾出邊框, 樹支援橫向滾動, 選單新增 "選擇父控件" 逐級上溯, 首次進入提示可用音量減鍵退出
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

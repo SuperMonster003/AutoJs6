@@ -1841,6 +1841,7 @@
     <string name="text_select_file_to_upload">選擇要上傳的檔案</string>
     <string name="text_select_icon">選擇圖示</string>
     <string name="text_select_image">選擇圖片</string>
+    <string name="text_select_parent_node">選擇父控制項</string>
     <string name="text_selected_items" formatted="true">已選取 %1$d 項</string>
     <string name="text_selected_plugin">已選擇外掛</string>
     <string name="text_self_check">自檢</string>
@@ -2038,6 +2039,7 @@
     <string name="text_view">檢視</string>
     <string name="text_view_docs">檢視文件</string>
     <string name="text_vivo_background_popup_permission">後臺彈出介面</string>
+    <string name="text_volume_down_to_exit_layout_inspector">按音量減鍵可結束版面配置分析</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 外掛版本不符合要求</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">正在等待全部資料處理完畢...</string>
     <string name="text_weekly_task">每週任務</string>

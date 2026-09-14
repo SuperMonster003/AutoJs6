@@ -164,10 +164,16 @@ open class LayoutBoundsView : View {
     }
 
     companion object {
+        /**
+         * Draws [rect] (screen coordinates) onto [canvas], shifted up by [statusBarHeight] and
+         * right by [dx] (the horizontal scroll offset of a scrolled list drawing over the screen).
+         * zh-CN: 把屏幕坐标的 [rect] 画到 [canvas] 上, 上移 [statusBarHeight], 右移 [dx] (横向滚动列表叠加屏幕绘制时的滚动偏移).
+         */
         @JvmStatic
-        fun drawRect(canvas: Canvas, rect: Rect?, statusBarHeight: Int, paint: Paint?) {
+        @JvmOverloads
+        fun drawRect(canvas: Canvas, rect: Rect?, statusBarHeight: Int, paint: Paint?, dx: Int = 0) {
             val offsetRect = Rect(rect)
-            offsetRect.offset(0, -statusBarHeight)
+            offsetRect.offset(dx, -statusBarHeight)
             canvas.drawRect(offsetRect, paint!!)
         }
     }

@@ -1844,6 +1844,7 @@
     <string name="text_select_file_to_upload">Выберите файл для загрузки</string>
     <string name="text_select_icon">Выбрать значок</string>
     <string name="text_select_image">Выбрать изображение</string>
+    <string name="text_select_parent_node">Выбрать родительский узел</string>
     <string name="text_selected_items" formatted="true">Выбрано: %1$d</string>
     <string name="text_selected_plugin">Выбранный плагин</string>
     <string name="text_self_check">Самопроверка</string>
@@ -2041,6 +2042,7 @@
     <string name="text_view">Просмотр</string>
     <string name="text_view_docs">Просмотр документов</string>
     <string name="text_vivo_background_popup_permission">Всплывающие окна в фоне</string>
+    <string name="text_volume_down_to_exit_layout_inspector">Нажмите клавишу уменьшения громкости, чтобы выйти из анализа компоновки</string>
     <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_weekly_task">Недельное задание</string>

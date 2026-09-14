@@ -492,6 +492,7 @@
 * `Amélioration` Les détecteurs de couleur exposent une méthode `distance` partagée par `colors.isSimilar`, `images.detectColor` et la recherche multicolore; l'algorithme `hs` utilise la distance circulaire de teinte et les noms d'algorithme inconnus lèvent une erreur explicite
 * `Amélioration` L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération
 * `Amélioration` Les niveaux de pyramide de la recherche de modèles utilisent l'interpolation par aire, la recherche masquée conserve le coefficient de corrélation normalisé, et les petites valeurs de `max` affinent toujours plusieurs candidats afin de ne pas perdre la meilleure correspondance aux niveaux grossiers
+* `Amélioration` Fenêtre de hiérarchie de mise en page : les lignes résument id / text / desc / clickable et d'autres indicateurs, le nœud sélectionné et tous ses ancêtres sont mis en évidence dans l'arbre et encadrés à l'écran, l'arbre défile horizontalement, l'élément de menu "Sélectionner le nœud parent" remonte la sélection niveau par niveau, et une astuce affichée une seule fois explique la sortie avec la touche volume bas
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

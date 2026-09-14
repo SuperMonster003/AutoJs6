@@ -110,6 +110,66 @@ public abstract class MultiLevelListAdapter {
     }
 
     /**
+     * Gets the position of the row currently displaying the given object.
+     *
+     * @param object The object.
+     * @return The flat list position, or -1 when the object is not displayed (collapsed or absent).
+     */
+    public int indexOfObject(Object object) {
+        for (int i = 0; i < mFlatItems.size(); i++) {
+            if (mFlatItems.get(i).getObject() == object) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the number of rows currently displayed (collapsed sub-trees excluded).
+     *
+     * @return The displayed row count.
+     */
+    public int getDisplayedItemCount() {
+        return mFlatItems.size();
+    }
+
+    /**
+     * Gets the object displayed at the given row.
+     *
+     * @param position The row position.
+     * @return The object.
+     */
+    public Object getDisplayedObject(int position) {
+        return mFlatItems.get(position).getObject();
+    }
+
+    /**
+     * Gets the nesting information of the row at the given position.
+     *
+     * @param position The row position.
+     * @return The item info.
+     */
+    public ItemInfo getDisplayedItemInfo(int position) {
+        return mFlatItems.get(position).getItemInfo();
+    }
+
+    /**
+     * Gets the objects whose rows are currently expanded, so that a {@link #reloadData()} can
+     * restore them through {@link #isInitiallyExpanded(Object)}.
+     *
+     * @return The expanded objects in display order.
+     */
+    public List<Object> getExpandedObjects() {
+        List<Object> result = new ArrayList<>();
+        for (Node node : mFlatItems) {
+            if (node.isExpanded()) {
+                result.add(node.getObject());
+            }
+        }
+        return result;
+    }
+
+    /**
      * Throws IllegalStateException if adapter is not attached to view.
      */
     private void checkState() {

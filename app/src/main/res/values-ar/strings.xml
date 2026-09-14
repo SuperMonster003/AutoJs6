@@ -1846,6 +1846,7 @@
     <string name="text_select_file_to_upload">حدد ملف للتحميل</string>
     <string name="text_select_icon">حدد أيقونة</string>
     <string name="text_select_image">حدد صورة</string>
+    <string name="text_select_parent_node">تحديد العقدة الأصل</string>
     <string name="text_selected_items" formatted="true">تم تحديد %1$d</string>
     <string name="text_selected_plugin">الاضافة المحددة</string>
     <string name="text_self_check">فحص ذاتي</string>
@@ -2043,6 +2044,7 @@
     <string name="text_view">عرض</string>
     <string name="text_view_docs">عرض المستندات</string>
     <string name="text_vivo_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
+    <string name="text_volume_down_to_exit_layout_inspector">اضغط على مفتاح خفض الصوت للخروج من محلل التخطيط</string>
     <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">بانتظار اكتمال معالجة جميع البيانات...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>

@@ -471,6 +471,7 @@
 * `优化` 颜色检测器提供 `distance` 方法, 由 `colors.isSimilar`, `images.detectColor` 和多点找色共用; `hs` 算法使用环形色相距离, 未知算法名称抛出明确的错误
 * `优化` 屏幕截图器状态读取不再加锁, `images.releaseScreenCapturer` 释放期间不再阻塞并发的图片调用
 * `优化` 模板匹配的金字塔层级改用区域插值, 遮罩匹配沿用归一化相关系数, 较小的 `max` 也会精化多个候选点, 避免最佳匹配在粗层级被丢弃
+* `优化` 布局层次窗口: 行内摘要显示 id / text / desc / clickable 等属性, 选中节点及其全部父级在树中高亮并在屏幕上勾出边框, 树支持横向滚动, 菜单新增 "选择父控件" 逐级上溯, 首次进入提示可用音量减键退出
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

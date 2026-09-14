@@ -1840,6 +1840,7 @@
     <string name="text_select_file_to_upload">Select file to upload</string>
     <string name="text_select_icon">Select icon</string>
     <string name="text_select_image">Select an image</string>
+    <string name="text_select_parent_node">Select parent node</string>
     <string name="text_selected_items" formatted="true">%1$d selected</string>
     <string name="text_selected_plugin">Selected plugin</string>
     <string name="text_self_check">Self-check</string>
@@ -2037,6 +2038,7 @@
     <string name="text_view">View</string>
     <string name="text_view_docs">View documents</string>
     <string name="text_vivo_background_popup_permission">Background pop-ups</string>
+    <string name="text_volume_down_to_exit_layout_inspector">Press the volume down key to exit the layout inspector</string>
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>

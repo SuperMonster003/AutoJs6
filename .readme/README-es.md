@@ -654,6 +654,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Los detectores de color exponen un método `distance` compartido por `colors.isSimilar`, `images.detectColor` y la búsqueda multicolor; el algoritmo `hs` usa la distancia circular de tono y los nombres de algoritmo desconocidos lanzan un error descriptivo
 * `Mejora` El estado del capturador de pantalla se lee sin bloqueo, e `images.releaseScreenCapturer` ya no bloquea las llamadas de imagen concurrentes durante la liberación
 * `Mejora` Los niveles de la pirámide de búsqueda de plantillas usan interpolación por área, la búsqueda con máscara conserva el coeficiente de correlación normalizado, y los valores pequeños de `max` siguen refinando varios candidatos para no perder la mejor coincidencia en los niveles gruesos
+* `Mejora` Ventana de jerarquía de diseño: las filas resumen id / text / desc / clickable y otros indicadores, el nodo seleccionado y todos sus ancestros se resaltan en el árbol y se enmarcan en pantalla, el árbol se desplaza horizontalmente, el elemento de menú "Seleccionar nodo padre" sube la selección nivel a nivel, y un aviso único explica cómo salir con la tecla de bajar volumen
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

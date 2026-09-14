@@ -123,6 +123,7 @@
     <string name="key_delete_permanently_also_clear_history" translatable="false">key_$_delete_permanently_also_clear_history</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
+    <string name="key_dialog_layout_inspector_exit_tips" translatable="false">key_$_dialog_layout_inspector_exit_tips</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
