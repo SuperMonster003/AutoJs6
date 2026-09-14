@@ -221,7 +221,7 @@ VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 F
 | [ ] O01 | 测试短信 / OTP / 通知监听 | 有测试 SIM 和发送端的 D37 | 发送自有普通短信与测试 OTP, 记录时间; 用已获权限的脚本读取 content://sms / 广播与 observeNotification, 对照普通文本、验证码及恢复窗口 | 按实际平台过滤 / 延迟记录可见性, 不把过滤当丢包; 不读取真实账号 OTP; 真机没有 emu sms send, 未识别为OTP不能证明无过滤 | P2.10 |
 | [ ] O02 | CT / ECH 与企业 / 私有 CA | D37, D35 基线 | 对固定公网TLS端点、显式配置的debug私有CA域、企业代理分别请求; 记录信任链、CT、协商和服务端ECH证据; LAN先满足N01 | 链信任失败与CT失败区分; 不靠全局关闭CT使测试变绿; 只有网络库 / 对端支持且有协商证据才记录ECH生效 | P2.6 |
 | [ ] O03 | 蓝牙 RFCOMM / 联系人查询 | 有测试外设 / 测试联系人的 D37 | 已配对外设收发后主动断开读流; 绑定特权API用普通UID负例; 查询 ContactsContract.Data 合法列和旧账户列 / 非法SQL | EOF / 权限 / 查询结果按已核实平台行为记录; 不把RFCOMM变化套到普通TCP, 不对实际联系人做修改 | P2.15 |
-| [ ] O04 | 内存压力与退出原因 | 专用 D37 + D16K | 固定 OpenCV大图、OCR、Node负载逐级增加并记录输入大小 / PSS / swap / thermal; 查看退出原因与崩溃报告, 默认限制先测 | 正常规模可用; 达限制的系统终止或应用拒绝有可读原因, 无残留执行; 不用 ignore all 改全设备限制, 不把实验强制杀进程当实际默认结果 | P2.13 / P5.3 |
+| [ ] O04 | 内存压力与退出原因 | 专用 D37 + D16K | 先保存 am memory-limiter status; 仅在实际启用限制器时运行有界、可取消的 OpenCV大图 / OCR / Node逐级负载, 记录输入大小 / PID / PSS / swap / thermal; 重开宿主进入设置 > 关于 > 进程退出记录并复制报告 | 正常规模可用; 系统历史的 PID / 时间对应被测负载, 按实际镜像核对 reason / MemoryLimiter:AnonSwap 描述; disabled 或手动停止不算限制器命中, PSS / RSS 不当退出瞬间精确值; 不用 ignore all 改全设备限制 | P2.13 / P5.3 |
 | [ ] O05 | 真实16KB安装与原生链 | D16K | 独立记录getconf和内核页大小, 安装最终宿主 / 用户APK / 所有适用原生插件, 跑dex/native/OCR和独立runtime最短链路 | 真内核16KB下无兼容模式依赖和dlopen / JNI错误; 每个插件单独证据, APK对齐或4KB真机成功不能替代 | P3.2 / P5 / P6 |
 
 ## 5. inrt 用户 APK 专属清单

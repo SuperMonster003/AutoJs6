@@ -1,0 +1,1729 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-14",
+  "baseCommit": "de4bc5347",
+  "p213": {
+    "probe36-retry": {
+      "started": "2026-09-14T03:44:02.556543+00:00",
+      "device": {
+        "serial": "emulator-5596",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "target": 36,
+      "success": true,
+      "stages": {
+        "initial": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 97827805,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{90141aa u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "refreshed": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 97827805,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{90141aa u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "recreated": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 109397990,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{90141aa u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "self-exit": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 28408358,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{a4f8a3e u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "multiple-processes": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 82347399,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{64e9d88 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "user-stop": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 43794225,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{c0956b9 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        }
+      },
+      "observers": [
+        {
+          "caseId": "03cadf62a9d44d16b5be63cc92183b7c",
+          "scriptSha256": "6f5363e891ac273faba1b1d1b16849b08f95c0ea2f735e3ce2674162d6ee5e91"
+        },
+        {
+          "caseId": "cf13f27517954359bd17e1f9d9b01a07",
+          "scriptSha256": "8287f3da42384a06af69c7e7078185d1d226788c7770aee6081a5a37649eab48"
+        },
+        {
+          "caseId": "ac6e56c00b9f41debbaba20b52ef14c7",
+          "scriptSha256": "00e78ea9e02da554b2141f8705f8253c26263fcccb4bab772d1a620c001514ce"
+        }
+      ],
+      "installedApkSha256": "4bf66bd2008ae70915f573a55c9efcc40b2424c1da274ce41e6e714cb65d415b",
+      "memoryLimiter": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5596",
+          "shell",
+          "am memory-limiter status"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory limiter\n  disabled\n",
+        "stderr": ""
+      },
+      "clipboardMatches": true,
+      "selfExitPid": 5445,
+      "crashReportPid": 6401,
+      "forceStopPid": 5980,
+      "finished": "2026-09-14T03:44:56.334865+00:00"
+    },
+    "probe37": {
+      "started": "2026-09-14T03:45:31.079530+00:00",
+      "device": {
+        "serial": "emulator-5596",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "target": 37,
+      "success": true,
+      "stages": {
+        "initial": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 225635156,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{4e5a7a5 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "refreshed": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 225635156,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{4e5a7a5 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "recreated": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 236305199,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{4e5a7a5 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "self-exit": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 234391957,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:45:57 +0800\nProcess: org.autojs.autojs6 (PID 7068)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:45:57 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 7123)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{242d743 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "multiple-processes": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 79701416,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:46:11 +0800\nProcess: org.autojs.autojs6:crash_report (PID 7963)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:45:57 +0800\nProcess: org.autojs.autojs6 (PID 7068)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:45:57 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 7123)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{3e56d0d u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "user-stop": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 232243694,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\n2026-09-14 11:46:17 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 7623)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:46:17 +0800\nProcess: org.autojs.autojs6 (PID 7553)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 8054\n\n2026-09-14 11:46:11 +0800\nProcess: org.autojs.autojs6:crash_report (PID 7963)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:45:57 +0800\nProcess: org.autojs.autojs6 (PID 7068)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:45:57 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 7123)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6595)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:56 +0800\nProcess: org.autojs.autojs6 (PID 6540)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6947\n\n2026-09-14 11:44:41 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 6062)\nSystem termination; see the reason and description\nSystem reason: REASON_OTHER (13), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:44:41 +0800\nProcess: org.autojs.autojs6 (PID 5980)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 6527\n\n2026-09-14 11:44:35 +0800\nProcess: org.autojs.autojs6:crash_report (PID 6401)\nUnclassified exit; see the reason and description\nSystem reason: REASON_SIGNALED (2), status: 9\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: org.autojs.autojs6 (PID 5445)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\nNo system description.\n\n2026-09-14 11:44:18 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 5500)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 (PID 4903)\nProcess exited on its own\nSystem reason: REASON_EXIT_SELF (1), status: 0\nPSS / RSS: 0 / 0 KiB\n[ISOLATED NOT NEEDED] isolated not needed\n\n2026-09-14 11:43:02 +0800\nProcess: org.autojs.autojs6 (PID 4818)\nUser or system stop request\nSystem reason: REASON_USER_REQUESTED (10), status: 0\nPSS / RSS: 0 / 0 KiB\n[FORCE STOP] stop org.autojs.autojs6 due to from pid 5347\n\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{e61c842 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        }
+      },
+      "observers": [
+        {
+          "caseId": "9c85e2405fdf489088d0d266fd191925",
+          "scriptSha256": "e9ba8088f4cbd118cc29011a6c7da168a167dd643b401c6a0cccf4848c10eb65"
+        },
+        {
+          "caseId": "54d0d25970574043af86280999dddaae",
+          "scriptSha256": "e00f5da98e01db0789181eaceecfc2b9c39402ba370bf36acea9508c96fd191a"
+        },
+        {
+          "caseId": "7d3ad58711ce471f800503414309cca9",
+          "scriptSha256": "d5f9c6da925bb90332f852caf8f35132e9ec6bf3b1ee1679350581a2e4937010"
+        }
+      ],
+      "installedApkSha256": "c7d4809e3cdc3e3f8a47399d8cc3da74e095180450927a3b313f44729ec24206",
+      "memoryLimiter": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5596",
+          "shell",
+          "am memory-limiter status"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory limiter\n  disabled\n",
+        "stderr": ""
+      },
+      "clipboardMatches": true,
+      "selfExitPid": 7068,
+      "crashReportPid": 7963,
+      "forceStopPid": 7553,
+      "finished": "2026-09-14T03:46:33.370617+00:00"
+    },
+    "probe-empty36": {
+      "started": "2026-09-14T03:56:11.803164+00:00",
+      "device": {
+        "serial": "emulator-5596",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "target": 36,
+      "success": true,
+      "stages": {
+        "initial": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 114887691,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\nNo system exit records in this time range.\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{146b0d6 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "refreshed": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 114887691,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\nNo system exit records in this time range.\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{146b0d6 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        },
+        "recreated": {
+          "activity": "org.autojs.autojs.ui.error.ProcessExitHistoryActivity",
+          "instance": 9725005,
+          "report": "Current app: AutoJs6 6.8.0 (5280)\nAPI Lv.37 (Android 17) [Cinnamon Bun]\norg.autojs.autojs6\n\nUp to 20 system records from the last 7 days of this installation, across processes associated with this app. Normal exits and system stops are included; a record does not always indicate a crash. History may be incomplete. PSS / RSS are the last system samples, not memory usage at exit; 0 means no sample. Records may belong to an earlier app version.\n\nNo system exit records in this time range.\n",
+          "copyEnabled": true,
+          "refreshEnabled": true,
+          "title": "Process exit history",
+          "focusedWindow": "mCurrentFocus=Window{146b0d6 u0 org.autojs.autojs6/org.autojs.autojs.ui.error.ProcessExitHistoryActivity}"
+        }
+      },
+      "observers": [
+        {
+          "caseId": "61e9d625d9d6493397b6e6c0c4b3174c",
+          "scriptSha256": "536ff607ed0dfc16383aafa58e8dbf71821503815d1f75b887135dbad6826f6b"
+        }
+      ],
+      "installedApkSha256": "f519c58da6f3d9ce4d18217724126d4a829a1fdaba690ecbfb215940ce1ad234",
+      "memoryLimiter": {
+        "command": [
+          "E:/.android/sdk/platform-tools/adb.exe",
+          "-s",
+          "emulator-5596",
+          "shell",
+          "am memory-limiter status"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory limiter\n  disabled\n",
+        "stderr": ""
+      },
+      "emptyHistoryVerified": true,
+      "clipboardMatches": true,
+      "finished": "2026-09-14T03:56:28.860209+00:00"
+    },
+    "attempts": [
+      {
+        "path": {
+          "path": "build/sdk37-p213-20260914/probe36/result.json",
+          "sha256": "0802020f3ecad48a52154de4fb1745c25ffc072bedfbd234e14e001aa93ff7e6"
+        },
+        "success": false,
+        "error": "ValueError: substring not found"
+      },
+      {
+        "path": {
+          "path": "build/sdk37-p213-20260914/probe36-retry/result.json",
+          "sha256": "6463ceb75e6f2006ec937a7bafc251555e17e57a3e15a321b76eab7f6f762490"
+        },
+        "success": true,
+        "error": null
+      },
+      {
+        "path": {
+          "path": "build/sdk37-p213-20260914/probe37/result.json",
+          "sha256": "2b31c3b7aa756da9ef179d90382f66a6653b3f7b4976fc87c6ad70eb7168dc43"
+        },
+        "success": true,
+        "error": null
+      },
+      {
+        "path": {
+          "path": "build/sdk37-p213-20260914/probe-empty36/result.json",
+          "sha256": "a45e5982975cda14fb7e0e4534a5450bc4af25228b495abf0dc46545552737eb"
+        },
+        "success": true,
+        "error": null
+      }
+    ],
+    "memoryLimiterEndToEndVerified": false
+  },
+  "p214": {
+    "p214-rebind36": {
+      "started": "2026-09-14T03:53:50.499621+00:00",
+      "initialEnabled": "null",
+      "initialFlag": "0",
+      "initialProtection": "false",
+      "stages": {
+        "initial": {
+          "protection": "false",
+          "enabled": "null",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        },
+        "enabled-before-protection": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "protection-enabled": {
+          "protection": "true",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "disabled-while-protected": {
+          "protection": "true",
+          "enabled": "",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        },
+        "enable-request-while-protected": {
+          "protection": "true",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "protection-disabled": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "enabled-after-protection": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "restored": {
+          "protection": "false",
+          "enabled": "null",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        }
+      },
+      "device": {
+        "serial": "emulator-5596",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "installedApkSha256": "f519c58da6f3d9ce4d18217724126d4a829a1fdaba690ecbfb215940ce1ad234",
+      "settingsTexts": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Use AutoJs6",
+        "",
+        "",
+        "",
+        "Options",
+        "",
+        "",
+        "",
+        "AutoJs6 shortcut",
+        "Off",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "App info",
+        "",
+        "",
+        "",
+        "",
+        "Required by the script automatic operation (click, long press, slide, etc.)."
+      ],
+      "finished": "2026-09-14T03:54:25.266229+00:00",
+      "target": 36
+    },
+    "p214-rebind37": {
+      "started": "2026-09-14T03:52:57.980350+00:00",
+      "initialEnabled": "null",
+      "initialFlag": "0",
+      "initialProtection": "false",
+      "stages": {
+        "initial": {
+          "protection": "false",
+          "enabled": "null",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        },
+        "enabled-before-protection": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "protection-enabled": {
+          "protection": "true",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "disabled-while-protected": {
+          "protection": "true",
+          "enabled": "",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        },
+        "enable-request-while-protected": {
+          "protection": "true",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "protection-disabled": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "enabled-after-protection": {
+          "protection": "false",
+          "enabled": "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher",
+          "boundLine": "Bound services:{Service[label=AutoJs6, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=169, eventTypes=TYPES_ALL_MASK, notificationTimeout=0, requestA11yBtn=false]}",
+          "hostBound": true,
+          "nonToolRestriction": false
+        },
+        "restored": {
+          "protection": "false",
+          "enabled": "null",
+          "boundLine": "Bound services:{}",
+          "hostBound": false,
+          "nonToolRestriction": false
+        }
+      },
+      "device": {
+        "serial": "emulator-5596",
+        "model": "sdk_gphone16k_x86_64",
+        "manufacturer": "Google",
+        "sdk": "37",
+        "release": "17",
+        "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+        "abiList": "x86_64,arm64-v8a",
+        "buildType": "userdebug",
+        "emulator": true,
+        "getconfPageSize": 16384,
+        "kernelPageSize": 4096,
+        "pageSizeReadErrors": []
+      },
+      "installedApkSha256": "c7d4809e3cdc3e3f8a47399d8cc3da74e095180450927a3b313f44729ec24206",
+      "settingsTexts": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Use AutoJs6",
+        "",
+        "",
+        "",
+        "Options",
+        "",
+        "",
+        "",
+        "AutoJs6 shortcut",
+        "Off",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "App info",
+        "",
+        "",
+        "",
+        "",
+        "Required by the script automatic operation (click, long press, slide, etc.)."
+      ],
+      "finished": "2026-09-14T03:53:26.064860+00:00",
+      "target": 37
+    },
+    "restrictionReproduced": false,
+    "failedDetailIntent": "Direct ACCESSIBILITY_DETAILS_SETTINGS was denied to shell by OPEN_ACCESSIBILITY_DETAILS_SETTINGS; final runs navigated from ACCESSIBILITY_SETTINGS through Downloaded apps and AutoJs6.",
+    "officialSources": [
+      "https://blog.google/security/whats-new-in-android-security-privacy-2026/",
+      "https://developer.android.com/privacy-and-security/advanced-protection-mode",
+      "https://developer.android.com/reference/android/security/advancedprotection/AdvancedProtectionManager"
+    ],
+    "platformSource": {
+      "jar": {
+        "path": "build/sdk37-p28-p210/platform-source/services.jar",
+        "sha256": "2485eb8cdea19bd5f95ce9366bd594d7e6c99f3851d2655df041cbdfb3ca4dc0"
+      },
+      "bytecode": {
+        "path": "build/sdk37-p213-20260914/advanced-protection-bytecode.txt",
+        "sha256": "30aa9b145695d53d0638f39ef7662e415a766fd42d037a0d830a184fae97f068"
+      },
+      "note": "Reused earlier CE2A.260420.019 platform extraction for source reading; this run did not pull or hash the live system jar again."
+    }
+  },
+  "apks": {
+    "target36/app": {
+      "path": "build/sdk37-p213-20260914/apks/target36/app.apk",
+      "sha256": "4bf66bd2008ae70915f573a55c9efcc40b2424c1da274ce41e6e714cb65d415b",
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    },
+    "target36/inrt": {
+      "path": "build/sdk37-p213-20260914/apks/target36/inrt.apk",
+      "sha256": "453bc438c1c52cb6818fdd116b043466a0677c533961d627130f1a8723746d65",
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    },
+    "target37/app": {
+      "path": "build/sdk37-p213-20260914/apks/target37/app.apk",
+      "sha256": "c7d4809e3cdc3e3f8a47399d8cc3da74e095180450927a3b313f44729ec24206",
+      "package": "org.autojs.autojs6",
+      "target": 37,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    },
+    "target37/inrt": {
+      "path": "build/sdk37-p213-20260914/apks/target37/inrt.apk",
+      "sha256": "d9e4a354daa33b111bd2a45fd83edf099a63d2235923cfa04bf108cbb8d50cf4",
+      "package": "org.autojs.autojs6.inrt",
+      "target": 37,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    },
+    "restored36/app": {
+      "path": "build/sdk37-p213-20260914/apks/restored36/app.apk",
+      "sha256": "f519c58da6f3d9ce4d18217724126d4a829a1fdaba690ecbfb215940ce1ad234",
+      "package": "org.autojs.autojs6",
+      "target": 36,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    },
+    "restored36/inrt": {
+      "path": "build/sdk37-p213-20260914/apks/restored36/inrt.apk",
+      "sha256": "bc3574473836cb251c646442226907b8d1d1d65b7d191a8ba66663f1d71a52ec",
+      "package": "org.autojs.autojs6.inrt",
+      "target": 29,
+      "versionCode": 5280,
+      "versionName": "6.8.0"
+    }
+  },
+  "validation": {
+    "jvm": {
+      "name": "org.autojs.autojs.tool.ProcessExitHistoryTest",
+      "tests": "12",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-09-14T03:37:58.102Z",
+      "hostname": "HELLODOG009",
+      "time": "0.108",
+      "testCases": [
+        "knownReasonNameDoesNotDependOnCategory",
+        "distinguishesCrashAnrAndLowMemory",
+        "preservesFuturePlatformReasonAndRawEvidence",
+        "routineExitsAreRetainedWithoutCallingThemCrashes",
+        "keepsMemoryEvidenceAndDescriptionForClassificationBeforeDisplayTruncation",
+        "deduplicatesBeforeApplyingLimit",
+        "retainsDifferentProcessesAndReusedPids",
+        "memoryLimiterRequiresBothDocumentedFields",
+        "rejectsRecordsFromBeforeThisInstallation",
+        "sortsAndBoundsRecentRecords",
+        "dropsOldFutureAndInvalidTimestampsWithInclusiveAgeBoundary",
+        "refreshingTheSameHistoryIsStable"
+      ]
+    },
+    "localizedResources": {
+      "resourceSets": 11,
+      "languages": 10,
+      "newResourcesPerSet": 17,
+      "defaultEnglishEqual": true,
+      "formatArgumentsMatch": true,
+      "sortedInsertion": true,
+      "noFullWidthPunctuation": true
+    },
+    "build36.log": {
+      "path": "build/sdk37-p213-20260914/build36.log",
+      "sha256": "4dac51369155da5c8b49c897630aa354400a493a3add255de983ae1ab3cc03af"
+    },
+    "build37.log": {
+      "path": "build/sdk37-p213-20260914/build37.log",
+      "sha256": "2e54d20cd554a151bd853d3f9ef7954d949ed72cd1868b714fba28348dc95f5d"
+    },
+    "build-restored.log": {
+      "path": "build/sdk37-p213-20260914/build-restored.log",
+      "sha256": "1905b17a84d906876c6f9b29a8e4911bfccfb680764245427ab25a60643cf28a"
+    },
+    "generate-markdown.log": {
+      "path": "build/sdk37-p213-20260914/generate-markdown.log",
+      "sha256": "fa796c2618a7107dea18fea7d2247373f15c71457b5ca86c51cbc490879344f8"
+    },
+    "lint": {
+      "status": "CANCELLED_INCOMPLETE",
+      "task": ":app:lintAppDebug",
+      "started": "2026-09-14T11:48:20.213986+08:00",
+      "cancelled": "2026-09-14T12:08:10+08:00",
+      "elapsedSeconds": 1189.786,
+      "lastTask": ":app:lintAnalyzeAppDebug",
+      "exitCode": 1,
+      "cancellationConfirmed": "Gradle daemon log: client disconnection detected, canceling the build",
+      "report": "No new report generated; existing 2026-09-13 XML was not used as a result for this change",
+      "log": {
+        "path": "build/sdk37-p213-20260914/lint36.log",
+        "sha256": "cc829e864ad8aad3dc7cf4e4e13d961d3eb43ec26bc71b52b76aebd62fddff89"
+      }
+    }
+  },
+  "sources": {
+    "app/src/main/java/org/autojs/autojs/tool/ProcessExitHistory.kt": "30dc8427146fc8244d3159364397411d6d18a7ceae709e5edb556ea506072eb3",
+    "app/src/main/java/org/autojs/autojs/ui/error/ProcessExitHistoryActivity.kt": "558c955644dbe3aa0d9e5addcfbe022dcacd81931bd7b017e9f76a606ead02c2",
+    "app/src/main/res/layout/activity_process_exit_history.xml": "97867914b394fb1caa61a769f416fd7f1854f8ebd46c7e5d5034d27f3e2dc799",
+    "tools/sdk37/run_exit_history_probe.py": "dcfb545738e9d0aa6223465346b060142977449bf1c68980c524a56a7a8a5244",
+    "tools/sdk37/smoke-exit-history.js": "2028e41596d2929ba8e1633d26846447bf1f00104a0b7b3d9716da533341dc18",
+    "app/src/test/java/org/autojs/autojs/tool/ProcessExitHistoryTest.kt": "119a2259e39d34bcea718077af2fbac3231173fa070c5fc46cd0c4ee330413ac"
+  },
+  "rawArtifacts": [
+    {
+      "path": "build/sdk37-p213-20260914/probe36/2c91efb4d8b146049fa06bed120b14dc-receipt.json",
+      "sha256": "d5eed8d0ef80019c2428c39f8656a2ff7c1325a9c9d327776517dc977b14ac04"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36/2c91efb4d8b146049fa06bed120b14dc.js",
+      "sha256": "a98fe8a502fdd6046dd9e0c00830ce4a99c8cc46e1512ed9943dfffa66a4e2b0"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36/result.json",
+      "sha256": "0802020f3ecad48a52154de4fb1745c25ffc072bedfbd234e14e001aa93ff7e6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/03cadf62a9d44d16b5be63cc92183b7c-receipt.json",
+      "sha256": "4521b34173590b462bbae1ed4d69f3aaa0b318e3c67bfdf6e2a8be3f7dd5aab8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/03cadf62a9d44d16b5be63cc92183b7c-settings.xml",
+      "sha256": "35be20a2a10ef1047163163dc36f685c71fb858689e3b9974881f00d8f687b81"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/03cadf62a9d44d16b5be63cc92183b7c.js",
+      "sha256": "170b1c22338c96804b7a20f2e483c14264684282919804359721ac82ba66cde8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/ac6e56c00b9f41debbaba20b52ef14c7-receipt.json",
+      "sha256": "89180cb417cb051275e16f0c7b7ca4bad9b5b0571c27c7b3ea6ed2629c1234a9"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/ac6e56c00b9f41debbaba20b52ef14c7-settings.xml",
+      "sha256": "35be20a2a10ef1047163163dc36f685c71fb858689e3b9974881f00d8f687b81"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/ac6e56c00b9f41debbaba20b52ef14c7.js",
+      "sha256": "603ce4eee7abc256c1b6139e5c7d09a8f480a84f19c81243983efcd7befd37f2"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/cf13f27517954359bd17e1f9d9b01a07-receipt.json",
+      "sha256": "6fc5ad066b5f310a118e9f7fa1b1b4e46301d65c294a8c18fc00f6a46479cc12"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/cf13f27517954359bd17e1f9d9b01a07-settings.xml",
+      "sha256": "383512e744181b5f6a3e11e00f88dbb607e7c568515150fce7754d026820e5d7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/cf13f27517954359bd17e1f9d9b01a07.js",
+      "sha256": "d92d46f1e794457e39e0410e896c24fc70b371dc6ef5b4d3310d15fcc34c5a71"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/initial-system-history.txt",
+      "sha256": "3d779a72c357c8935a075ca52db4248a0b730e1e1d4f6f206be51b502b1a08ec"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/initial.png",
+      "sha256": "f930e9bb935126fe656b84ea3e4b2cb7446c42c7e60e4ccd9595208e79409374"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/multiple-processes-system-history.txt",
+      "sha256": "956a7865a8d50d1468e16aa1a08ad4979995725c449a770e927730fc06f93f92"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/multiple-processes.png",
+      "sha256": "53414f956a0d430edc4e9e91e1720397434314d855958fbfad0d23da5b20430a"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/recreated-system-history.txt",
+      "sha256": "3d779a72c357c8935a075ca52db4248a0b730e1e1d4f6f206be51b502b1a08ec"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/recreated.png",
+      "sha256": "730c34f2a0076561931834cd11e7854e433d9dd766ea685e4f6e8e56a8eb4a16"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/refreshed-system-history.txt",
+      "sha256": "3d779a72c357c8935a075ca52db4248a0b730e1e1d4f6f206be51b502b1a08ec"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/refreshed.png",
+      "sha256": "f930e9bb935126fe656b84ea3e4b2cb7446c42c7e60e4ccd9595208e79409374"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/result.json",
+      "sha256": "6463ceb75e6f2006ec937a7bafc251555e17e57a3e15a321b76eab7f6f762490"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/self-exit-system-history.txt",
+      "sha256": "bdadab3c0a23d5ce9a64d1e396f7ee3324358a8a35f44438edaeb228e1e27eac"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/self-exit.png",
+      "sha256": "6e2b2c30e22db1942cf24dc25df206b0c078099bd9b438b217231be8563fd2e3"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/user-stop-system-history.txt",
+      "sha256": "1949f34ac7f921781898773ea5ab5a48a874f62885ab8b3b969be01e7d17c4b9"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe36-retry/user-stop.png",
+      "sha256": "d95d5ead15d649aeee1215d1bf112f0c40c82325c972a5cb64483e5f25590731"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/54d0d25970574043af86280999dddaae-receipt.json",
+      "sha256": "a01562d44877030515c06545930101de5fc101a1fedb1aef4a9f799f8a3b02f0"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/54d0d25970574043af86280999dddaae-settings.xml",
+      "sha256": "f1936482b7031311fdcc103eaa9f6ebe9201da9e2d75c213622ff482ac2c708b"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/54d0d25970574043af86280999dddaae.js",
+      "sha256": "661578683fd925895ce2fdb5f281cf0455728aa52918c1d024dce1a5be3487a8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/7d3ad58711ce471f800503414309cca9-receipt.json",
+      "sha256": "83aa0c69fbeb88d5329d90a3caf51af04b17ea452069db1984fa4da6d65da76f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/7d3ad58711ce471f800503414309cca9-settings.xml",
+      "sha256": "839c2dc8b53b62a72dd136ff98b83ab11e4e8b5c1702e7c3dd808795d6587075"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/7d3ad58711ce471f800503414309cca9.js",
+      "sha256": "a585af9add11258126797a594544131243ce0d5924b460fb87e49a0f47c3ce70"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/9c85e2405fdf489088d0d266fd191925-receipt.json",
+      "sha256": "896bb8e885817f8cf2e65ca9b4a92bb263271c66e0d28c1bc2e85f54273f0c3e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/9c85e2405fdf489088d0d266fd191925-settings.xml",
+      "sha256": "4d1353a5617367826ddb420a697dc1f028d8bda8865ffe0f414ac4e60ecee9f6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/9c85e2405fdf489088d0d266fd191925.js",
+      "sha256": "47072e75caa6b61b92c1e55458facf18941f3c804eb23f4e75a430e6ef3e96b8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/initial-system-history.txt",
+      "sha256": "211b79dbe1e6b01ac2cc1a1049779a893f5969d8835fd44f837dd256a2ec345a"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/initial.png",
+      "sha256": "cdd5e4e8472c015a9b9c51fa06f1939ae2b42ef3152b0fe79c63568a6fd8f764"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/multiple-processes-system-history.txt",
+      "sha256": "34c548e87244c28366b59e095520768fc91b9a16a8318219a7cddf30cda720dd"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/multiple-processes.png",
+      "sha256": "fe462a3d5f5e711b21d75f73572ce2362ed5911d8c5ffd9bb6029101c764c4d6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/recreated-system-history.txt",
+      "sha256": "211b79dbe1e6b01ac2cc1a1049779a893f5969d8835fd44f837dd256a2ec345a"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/recreated.png",
+      "sha256": "9181410706b2efbeb7b53253fb4f7f1dacafb4dab00bfa4fcaa2778c7bd731f8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/refreshed-system-history.txt",
+      "sha256": "211b79dbe1e6b01ac2cc1a1049779a893f5969d8835fd44f837dd256a2ec345a"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/refreshed.png",
+      "sha256": "b7e8803173c2edf5ab49679d829f9ac8324d3aada50a2e1015038de83fa5ccc1"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/result.json",
+      "sha256": "2b31c3b7aa756da9ef179d90382f66a6653b3f7b4976fc87c6ad70eb7168dc43"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/self-exit-system-history.txt",
+      "sha256": "6db2c818494f477dd28be91c5aa37af1c32a02410c5892edd3606d5d5b64dd94"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/self-exit.png",
+      "sha256": "a5a3b175eaf78db7778a7838b41691b01f711724ebb980b5a0053b6d72a6b96f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/user-stop-system-history.txt",
+      "sha256": "69c083ac5c25e590b802117074949b98ed5852c9ec889400737ad38077c9ec34"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe37/user-stop.png",
+      "sha256": "0b5b2e07a3674e5a81d52023bd056fcf70d5045b006bcad6791498873552058d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/61e9d625d9d6493397b6e6c0c4b3174c-receipt.json",
+      "sha256": "8fabcccf5bfd1182871ddfe3237a16377f9dd941743d4f7b6e33ffec88a087a0"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/61e9d625d9d6493397b6e6c0c4b3174c-settings.xml",
+      "sha256": "33e0eb30a2c951bcdb922c0f8d4f9d0e6366bbf4d4e788c16482655ec24be858"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/61e9d625d9d6493397b6e6c0c4b3174c.js",
+      "sha256": "1d9d9830b999e6a4878cb2f19a4d2419fd4f2700d24277fd2a2b08a6f0007413"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/initial-system-history.txt",
+      "sha256": "d5a540c080213d91c8557d35b22d3c866dacf5b5447733db6db01bda25d09a37"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/initial.png",
+      "sha256": "d8b356e105d81662543ee22e283669b9d4a89dd432cc1bc48620d3923c1459d2"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/recreated-system-history.txt",
+      "sha256": "d5a540c080213d91c8557d35b22d3c866dacf5b5447733db6db01bda25d09a37"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/recreated.png",
+      "sha256": "1df9304861bdcc7854abcc5d94ecd29d2bca06a15a5ffa3e143af1976348053f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/refreshed-system-history.txt",
+      "sha256": "d5a540c080213d91c8557d35b22d3c866dacf5b5447733db6db01bda25d09a37"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/refreshed.png",
+      "sha256": "d8b356e105d81662543ee22e283669b9d4a89dd432cc1bc48620d3923c1459d2"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/probe-empty36/result.json",
+      "sha256": "a45e5982975cda14fb7e0e4534a5450bc4af25228b495abf0dc46545552737eb"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-accessibility.json",
+      "sha256": "d557fdf4f4e7d9282ac14c63f78f3bbff36db79ac8c7121967d67f4db5b454c9"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-protectionDetails.json",
+      "sha256": "ac4cd98f478abce31e1627c09affddc060d9393b2a8471a6ff607750848e04ea"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-services.json",
+      "sha256": "961f1a7f8bc61eac383d3734f2b39cbcd59b6a3fca12581a516a7b80af15b8b1"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/enabled-before-protection-user.json",
+      "sha256": "ea4519917d5de204b2c78c4beb414a96701955e27f9cdf2dc2ec11a9f77282fa"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-accessibility.json",
+      "sha256": "16e714371249dbd44c27b45ce876b57bce8e8c854248a23d1fca150b27c10ea9"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-protectionDetails.json",
+      "sha256": "ac4cd98f478abce31e1627c09affddc060d9393b2a8471a6ff607750848e04ea"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-services.json",
+      "sha256": "d0cf35e7f02e0f2f2f200d2e252a4569fcdaee7382693dcedf050a7c09fc2ff8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/initial-user.json",
+      "sha256": "49c740a4a8bd116087b0029c872ad772d813a5b2b88e3b36dc563438529fe748"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-accessibility.json",
+      "sha256": "d557fdf4f4e7d9282ac14c63f78f3bbff36db79ac8c7121967d67f4db5b454c9"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-protectionDetails.json",
+      "sha256": "0470e36172783ded993ada3d0e878a3029edd859d68961bceb97991e43c86213"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-services.json",
+      "sha256": "46ffbb56cfd7c7047e0bfa3b6eba01a828287eb0e802a6f83ca0e43472bffd17"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/protection-enabled-user.json",
+      "sha256": "d12b250ece6abc64cee5190bdd0fb7602e8c3b9ee6862482496a258989dfe7b8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-accessibility.json",
+      "sha256": "7ed561ce5d1d57e5aa9feb8f6510a7c696d790de5e361fae9a10a47c73bb29f1"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-protectionDetails.json",
+      "sha256": "f1b3ba4f9fce919ae03430b461901c8eb71b26fa777a7d023259e2c760dd73f4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-services.json",
+      "sha256": "1bebfa04d1b65ddba4e4b9493ef553c200761615eeabecb32f184df9f9210725"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/restored-user.json",
+      "sha256": "d511bc28dbc719c4acbf108ab3927c061cfd82127bdb877ac669c322a242c636"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-preflight37/result.json",
+      "sha256": "f2cbaca88b7ea2b519d1995873450089a6d5f2fcbb92e5fcd12e675f38a78722"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-accessibility.json",
+      "sha256": "46e4df1c5667f104c3d8caed37443c3535b7abd3504a8d6be0c4445d240183a6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-protectionDetails.json",
+      "sha256": "7c2257496a447232931192ff384b9feee060e3f2483f91189f9826e8f26b805c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-services.json",
+      "sha256": "ebdfb3858f73eb59ffebfa6dc08a26d86b0027c4eb2ab9fc97c781348d536b9e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enable-request-while-protected-user.json",
+      "sha256": "68109097ea5b95296f5027fd125d69cb6955eb6be1921b96cc995f3be2b2629e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-accessibility.json",
+      "sha256": "46e4df1c5667f104c3d8caed37443c3535b7abd3504a8d6be0c4445d240183a6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-protectionDetails.json",
+      "sha256": "2954cebca548af65b27d0cedf569210706f414dbeb0afc8bf90bfd964f040b5c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-services.json",
+      "sha256": "37eddf41046e9acc372928a90eefcca530ae9011fa1c2601e88491eb2a4e1df0"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-after-protection-user.json",
+      "sha256": "33a09dad89ad55777b532927c18a1fe2e10a753649ca29b8ef36ca067e931f05"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-accessibility.json",
+      "sha256": "54169054b3693a1cca24a234573596545d6a4a4352dc4aa12c68b9accccb8dfc"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-protectionDetails.json",
+      "sha256": "f1b3ba4f9fce919ae03430b461901c8eb71b26fa777a7d023259e2c760dd73f4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-services.json",
+      "sha256": "4e9368413831c50213c0ef51e61402ab9faee193276e4c6cc7c0aedff4d937ad"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/enabled-before-protection-user.json",
+      "sha256": "9db5142798e98b68added1a6fc122f0865889e8b20cba6726a0042eb1084bc5d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-accessibility.json",
+      "sha256": "7ed561ce5d1d57e5aa9feb8f6510a7c696d790de5e361fae9a10a47c73bb29f1"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-protectionDetails.json",
+      "sha256": "f1b3ba4f9fce919ae03430b461901c8eb71b26fa777a7d023259e2c760dd73f4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-services.json",
+      "sha256": "f46063e4d91502b18de5338d720edfb3690e37de0fa904f8c8939e2cb0ce202d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/initial-user.json",
+      "sha256": "ee6aed5fe49114b53ee209333f443dac885cbd0f7dbcd44277c0edf66c9dc86c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-accessibility.json",
+      "sha256": "46e4df1c5667f104c3d8caed37443c3535b7abd3504a8d6be0c4445d240183a6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-protectionDetails.json",
+      "sha256": "2954cebca548af65b27d0cedf569210706f414dbeb0afc8bf90bfd964f040b5c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-services.json",
+      "sha256": "e574a39c631b711d74e1fc5203e48d23e25213886e955b25f89d4ace3cb91529"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-disabled-user.json",
+      "sha256": "5414ed81fc66abf5131be2cd0de59dee30c8dc2cedf41b5d38c9442c8b023e32"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-accessibility.json",
+      "sha256": "54169054b3693a1cca24a234573596545d6a4a4352dc4aa12c68b9accccb8dfc"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-protectionDetails.json",
+      "sha256": "7c2257496a447232931192ff384b9feee060e3f2483f91189f9826e8f26b805c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-services.json",
+      "sha256": "13df82c8a63e1abc9252f674c66c02f3095d316aee09648fa690d27612ac40e7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/protection-enabled-user.json",
+      "sha256": "cc1cbc6f9aacbfc6a08a1630ed5b47466eda4c64e02a55701022e274dcb98dfa"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-accessibility.json",
+      "sha256": "113431d5e9fd59fc7be85630026a79d5641651560e87981b18fa676d0ffc7759"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-protectionDetails.json",
+      "sha256": "2954cebca548af65b27d0cedf569210706f414dbeb0afc8bf90bfd964f040b5c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-services.json",
+      "sha256": "e4bbb5bd4c8c1a71751ed601d693f936db09e931c720ba992dc38f57c442df13"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/restored-user.json",
+      "sha256": "96f07fdca75c975bbb506829542e8b24118e7fe90fb0004e495de90980c9120c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/result.json",
+      "sha256": "4a89b64a553c2da5c79fab9842ae619cc5d4f35bf8226808984a46726b73f1d3"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/settings-protected-0.xml",
+      "sha256": "41c1dbb483c54e238e4ba48ec78440e541e57c17132140978aeaa05903da6d60"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/settings-protected-1.xml",
+      "sha256": "f3c8a1825f90c5405bca9530f3f057c722dcebe6647e39ff0908003f91896aa7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-retry37/settings-protected.png",
+      "sha256": "e15560e4599c49cef27a9343babcde8cbf389f16a9b11bb14d1c519ac3571417"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-accessibility.json",
+      "sha256": "113431d5e9fd59fc7be85630026a79d5641651560e87981b18fa676d0ffc7759"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-enabled.json",
+      "sha256": "6ec046402735d6008a8214b198d0765fb22e88bf4a5511adf5d9783402f17c1d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-protectionDetails.json",
+      "sha256": "d8036b52eb867badab1c12e0b72262163b051d90a6209bad58b84682fb1d4767"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-services.json",
+      "sha256": "e97662cabd7e35db72cae32e964c2ab917180f4935e1656ad274e97113a0cb0c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/disabled-while-protected-user.json",
+      "sha256": "dc051c593ed5b2859c1ce05db2f57a6e651eea2e2459d2595e05f9288e33e89e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-accessibility.json",
+      "sha256": "822bbd6a259a74f538fa3bf8dff31e0d33d26520fd9f40b7e783ecb216fde7e3"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-protectionDetails.json",
+      "sha256": "d8036b52eb867badab1c12e0b72262163b051d90a6209bad58b84682fb1d4767"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-services.json",
+      "sha256": "a139390f1ab7eaae857cb6cd1f08e6dfbca7b710d1e7defc794866301baed6e5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enable-request-while-protected-user.json",
+      "sha256": "75f88ba03bb6d58f07a64701412a56a4567dfd3372216aa752d50b99bc6b4916"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-accessibility.json",
+      "sha256": "822bbd6a259a74f538fa3bf8dff31e0d33d26520fd9f40b7e783ecb216fde7e3"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-protectionDetails.json",
+      "sha256": "636aa383e8cb003a6846411cb56bee45396fccbb588d599de9b4bbfff09a62f5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-services.json",
+      "sha256": "ebff57a4cd0dd87afab4826f1265aa82a85751aa5ab393ccbc2bc3d6cda3eec7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-after-protection-user.json",
+      "sha256": "f9859c7fd0eec1517150c5fb59d2f0b5b71f4c6d128800fe5f1401b2b0f40fea"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-accessibility.json",
+      "sha256": "c0b671e3888a6651dd2a7d01833f1eb9dff2cc80f900a4f7824ba4f1cbc2871f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-protectionDetails.json",
+      "sha256": "2954cebca548af65b27d0cedf569210706f414dbeb0afc8bf90bfd964f040b5c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-services.json",
+      "sha256": "305b39aa150dcdcd95a8dbfd4d1e32caebc1e00975af3b6d3a25965348e62b8e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/enabled-before-protection-user.json",
+      "sha256": "0a6871d0a56631ed30a35233e0405467673f1dd6ac918645642242545d99449b"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-accessibility.json",
+      "sha256": "113431d5e9fd59fc7be85630026a79d5641651560e87981b18fa676d0ffc7759"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-protectionDetails.json",
+      "sha256": "2954cebca548af65b27d0cedf569210706f414dbeb0afc8bf90bfd964f040b5c"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-services.json",
+      "sha256": "85de35b505501309df2df9aaad61232d735edd9ff3a0a85cec0cf75876f5aba5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/initial-user.json",
+      "sha256": "78c87a11ae5c1d3ef5908d9115e71b2c8b937c8023f68aba07e4caad0fe75f7b"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-accessibility.json",
+      "sha256": "822bbd6a259a74f538fa3bf8dff31e0d33d26520fd9f40b7e783ecb216fde7e3"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-protectionDetails.json",
+      "sha256": "636aa383e8cb003a6846411cb56bee45396fccbb588d599de9b4bbfff09a62f5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-services.json",
+      "sha256": "7005d03d63c63b22000d857884b4c1e38ffa7b9e5af70baa0d4f026e7a6d7580"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-disabled-user.json",
+      "sha256": "739c6933e3aea3531d7490bf1530392b2b6644ae5bfd93022ccea96f15274df0"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-accessibility.json",
+      "sha256": "c0b671e3888a6651dd2a7d01833f1eb9dff2cc80f900a4f7824ba4f1cbc2871f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-protectionDetails.json",
+      "sha256": "d8036b52eb867badab1c12e0b72262163b051d90a6209bad58b84682fb1d4767"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-services.json",
+      "sha256": "beef16c7ef5059ce14b8531ae39d53d31c685086535b6254f72f9b12da26befa"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/protection-enabled-user.json",
+      "sha256": "ba6468e3b2e4f341364cafe4978b6228bb59a76518dbdb245f46e5fcc1eb50e4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-accessibility.json",
+      "sha256": "113431d5e9fd59fc7be85630026a79d5641651560e87981b18fa676d0ffc7759"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-protectionDetails.json",
+      "sha256": "636aa383e8cb003a6846411cb56bee45396fccbb588d599de9b4bbfff09a62f5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-services.json",
+      "sha256": "ec2584885ba7ea24a8637e56ae76f03bdf879b62c6f2ee22e0f7c6d8cf59585b"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/restored-user.json",
+      "sha256": "a4e9b2c8b6297e727c3f8176ba15210cf38703047b307db5ccac11864273b164"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/result.json",
+      "sha256": "e58902c2b817c358985a86e3a2882f3a2799ad77757c464fe2e784c395af22d1"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/settings-protected-0.xml",
+      "sha256": "f3c8a1825f90c5405bca9530f3f057c722dcebe6647e39ff0908003f91896aa7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind37/settings-protected.png",
+      "sha256": "09b20d45ab0df8313e8c7dca9ff48e5bb0577acec9f0a707dd47c9694dab4d36"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-accessibility.json",
+      "sha256": "2d26012803ebd8719b2babc0ae66cb4afd580437973d8b442a5cf6070037aab5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-enabled.json",
+      "sha256": "6ec046402735d6008a8214b198d0765fb22e88bf4a5511adf5d9783402f17c1d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-protectionDetails.json",
+      "sha256": "2f461e98477df855bb398b58b4aba7ff7df05011b043798963ee361aa1af0f21"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-services.json",
+      "sha256": "5650a7b66cfbcb8b651b7a84708b1b697de17da34728ee87e9915577c480a927"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/disabled-while-protected-user.json",
+      "sha256": "58c4c3032bda5dd0d885f6d3e0be600e52168f4631e7cca3701b424b70dddb5f"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-accessibility.json",
+      "sha256": "3496c7e1a90bcbd0ba9697fd2ff8351832f0bd6e3e46bdcfe346e0ec00d5ce15"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-protectionDetails.json",
+      "sha256": "2f461e98477df855bb398b58b4aba7ff7df05011b043798963ee361aa1af0f21"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-services.json",
+      "sha256": "15f18851129fb19a649515b87f517c1942cfa74c161266bf3647f7e439090999"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enable-request-while-protected-user.json",
+      "sha256": "2d7942d11c386fdeb6c21aab7a16e9226d19f3414e550bbc39446cacd8c8a882"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-accessibility.json",
+      "sha256": "3496c7e1a90bcbd0ba9697fd2ff8351832f0bd6e3e46bdcfe346e0ec00d5ce15"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-protectionDetails.json",
+      "sha256": "c77a5feeb577a9c23c2c4d8eb7e49f8dc013a6209e97194df124b93ae4344857"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-services.json",
+      "sha256": "e818266d55e9bbcdf24d377fd70393d52e4bb9f869296c367cb95df8d92f5d7d"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-after-protection-user.json",
+      "sha256": "08a9b5aaf814979f6acb6f5d0563eebf7795de95904adb07f5a385defae7b1dd"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-accessibility.json",
+      "sha256": "2d1d08f945313f92e7696119ea12f9f82699d71d1eb145af88e600b95a80f99e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-protectionDetails.json",
+      "sha256": "636aa383e8cb003a6846411cb56bee45396fccbb588d599de9b4bbfff09a62f5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-services.json",
+      "sha256": "6f9edb72e83ba698be10e984972c6170b29b51f6874deca1f784f0b93fc9360b"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/enabled-before-protection-user.json",
+      "sha256": "b76a529181cb91df72dc1d23bf4c4194a0ac02327aca19265bfa8eda4eeed6b2"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-accessibility.json",
+      "sha256": "f4bf2604f727721c745221328270d9d1629a05a02a827e27f7b67ccf86a6aa01"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-protectionDetails.json",
+      "sha256": "636aa383e8cb003a6846411cb56bee45396fccbb588d599de9b4bbfff09a62f5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-services.json",
+      "sha256": "d0cf35e7f02e0f2f2f200d2e252a4569fcdaee7382693dcedf050a7c09fc2ff8"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/initial-user.json",
+      "sha256": "b5b962a67b2af312145d9400747ab1247347df92a9feb13e1364205dfe1fdbd6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-accessibility.json",
+      "sha256": "3496c7e1a90bcbd0ba9697fd2ff8351832f0bd6e3e46bdcfe346e0ec00d5ce15"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-protectionDetails.json",
+      "sha256": "c77a5feeb577a9c23c2c4d8eb7e49f8dc013a6209e97194df124b93ae4344857"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-services.json",
+      "sha256": "e005714d4de6ea760974778f04509a0300b67e5cf886a51e77979cafaa96b7b4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-disabled-user.json",
+      "sha256": "6b0ef73c6c972898e065982471ea0b483df49cca4486e4087337ffe998b0f1f4"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-accessibility.json",
+      "sha256": "2d1d08f945313f92e7696119ea12f9f82699d71d1eb145af88e600b95a80f99e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-enabled.json",
+      "sha256": "d1f2759efa28736bf43f0294ad006bc7d11e370bf4e4fe4781b4fa020f625a69"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-protection.json",
+      "sha256": "584dc488f3e64eb295ed75edd6239a3bce4632a6d593f61458d8f3b2d90220b7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-protectionDetails.json",
+      "sha256": "2f461e98477df855bb398b58b4aba7ff7df05011b043798963ee361aa1af0f21"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-services.json",
+      "sha256": "aca50afd769495bbaf20595eaaa41a14f664b9144864353d8dd68df44cf93040"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/protection-enabled-user.json",
+      "sha256": "9a5da2c2f2f171053757f2de24bf25bb187dc180f752ea41da676db3243a71f6"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-accessibility.json",
+      "sha256": "2d26012803ebd8719b2babc0ae66cb4afd580437973d8b442a5cf6070037aab5"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-enabled.json",
+      "sha256": "110df3209e6c3ac71a85a35681563c27452915123b702d201479a7b701c84461"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-protection.json",
+      "sha256": "3a87055e874f2a9b530434043b8c810a151d981605211c3ff97aa151ed964107"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-protectionDetails.json",
+      "sha256": "c77a5feeb577a9c23c2c4d8eb7e49f8dc013a6209e97194df124b93ae4344857"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-services.json",
+      "sha256": "1807a684eeee7b520752a59912c0b65c53fcbc9f1b83789185c2312bfba4b127"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/restored-user.json",
+      "sha256": "b548eff3f088529b65248572695de4ab4e54e17ccceda5779623cc273abd8b92"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/result.json",
+      "sha256": "9a4b9334b2c05c1ce929202204fb2d299dcf042208438b2f5b5ce2f635adf54e"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/settings-protected-0.xml",
+      "sha256": "41c1dbb483c54e238e4ba48ec78440e541e57c17132140978aeaa05903da6d60"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/settings-protected-1.xml",
+      "sha256": "f3c8a1825f90c5405bca9530f3f057c722dcebe6647e39ff0908003f91896aa7"
+    },
+    {
+      "path": "build/sdk37-p213-20260914/p214-rebind36/settings-protected.png",
+      "sha256": "b482cefe1c32fcba2c78f63c1c54bd0102f880a69a51a645e7468b10fa36a074"
+    }
+  ],
+  "productionCommit": "25d34694e",
+  "cleanup": {
+    "shutdown": {
+      "CompletedAt": "2026-09-14T11:58:15.754875+08:00",
+      "EmulatorPid": 56380,
+      "PrivateAdbPid": 45840,
+      "RemainingProcesses": [
+        {
+          "ProcessId": 31400,
+          "CreationDate": "2026-09-14T03:02:08.007368+08:00",
+          "CommandLine": "adb -L tcp:5037 fork-server server --reply-fd 692"
+        },
+        {
+          "ProcessId": 56380,
+          "CreationDate": "2026-09-14T11:37:13.525342+08:00",
+          "CommandLine": "\"E:\\.android\\sdk\\emulator\\emulator.exe\" -avd AVD_API_37 -port 5596 -no-snapshot-load -no-snapshot-save -read-only -no-window -no-audio -memory 4096 -cores 4 -gpu swiftshader_indirect"
+        },
+        {
+          "ProcessId": 37972,
+          "CreationDate": "2026-09-14T11:58:15.651205+08:00",
+          "CommandLine": "E:\\.android\\sdk\\emulator/emulator  -kill 52516 -sleep 20 "
+        }
+      ],
+      "VerifiedAt": "2026-09-14T12:00:18.6062380+08:00",
+      "RemainingAfterExit": [
+        {
+          "ProcessId": 31400,
+          "CreationDate": "2026-09-14T03:02:08.007368+08:00",
+          "CommandLine": "adb -L tcp:5037 fork-server server --reply-fd 692"
+        }
+      ]
+    },
+    "advancedProtection": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5596",
+        "shell",
+        "cmd advanced_protection is-protection-enabled"
+      ],
+      "exitCode": 0,
+      "stdout": "false\n",
+      "stderr": ""
+    },
+    "privateForwards": {
+      "command": [
+        "E:/.android/sdk/platform-tools/adb.exe",
+        "-s",
+        "emulator-5596",
+        "forward",
+        "--list"
+      ],
+      "exitCode": 0,
+      "stdout": "\n",
+      "stderr": ""
+    }
+  },
+  "figures": [
+    {
+      "path": "docs/dev/evidence/android-sdk-37-p213-p214-20260914/advanced-protection-target36.png",
+      "sha256": "b482cefe1c32fcba2c78f63c1c54bd0102f880a69a51a645e7468b10fa36a074"
+    },
+    {
+      "path": "docs/dev/evidence/android-sdk-37-p213-p214-20260914/advanced-protection-target37.png",
+      "sha256": "09b20d45ab0df8313e8c7dca9ff48e5bb0577acec9f0a707dd47c9694dab4d36"
+    },
+    {
+      "path": "docs/dev/evidence/android-sdk-37-p213-p214-20260914/history-empty-target36.png",
+      "sha256": "d8b356e105d81662543ee22e283669b9d4a89dd432cc1bc48620d3923c1459d2"
+    },
+    {
+      "path": "docs/dev/evidence/android-sdk-37-p213-p214-20260914/history-target36.png",
+      "sha256": "53414f956a0d430edc4e9e91e1720397434314d855958fbfad0d23da5b20430a"
+    },
+    {
+      "path": "docs/dev/evidence/android-sdk-37-p213-p214-20260914/history-target37.png",
+      "sha256": "0b5b2e07a3674e5a81d52023bd056fcf70d5045b006bcad6791498873552058d"
+    }
+  ]
+}

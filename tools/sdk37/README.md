@@ -622,3 +622,38 @@ Put `sdk37-probe.dex`, `sdk37-probe.jar` and [smoke-dynamic-loading.js](smoke-dy
 `AndroidClassLoaderRawDexDeviceTest` separately verifies that loading and reusing a raw DEX preserves both the original bytes and the read-only staged copy. Its embedded DEX comes from `fixtures/DexProbe.java` with the commands above. On API 24 / 25 the optimized output directory must differ from the input directory; ART can otherwise overwrite a raw `.dex` with its optimized output. The optimized-directory argument is unused starting with API 26.
 
 For native libraries, install compatible OpenCV and Image Quantization plugins and run `OpenCvPluginHostDeviceTest` plus `ImageQuantPluginHostDeviceTest#installedPluginLoadsAndProducesIndexedPng`. These tests exercise JNI and verify the staged file has no write mode bits. To test legacy cache repair, use a temporary AVD: record hash / size / mtime / mode of the two staged libraries, make only those files owner-writable, rerun in a fresh process, then confirm the same bytes and timestamps with read-only mode restored. Do not change cached library permissions on a user's active device.
+
+## Historical process exit reports
+
+`run_exit_history_probe.py` and `smoke-exit-history.js` exercise the production
+Settings > About > Process exit history entry on an exclusively owned API 37 AVD.
+The runner requires the expected debuggable host target, an English unlocked UI,
+and already configured overlay / all-files / notification test access. It does
+not install packages or grant permissions. Use a disposable read-only clone and
+a private adb server; provide its actual serial and AVD name explicitly.
+
+```powershell
+$env:ANDROID_ADB_SERVER_PORT = '5058'
+$env:ADB_LOCAL_TRANSPORT_MAX_PORT = '5597'
+python tools/sdk37/run_exit_history_probe.py `
+  --adb E:/.android/sdk/platform-tools/adb.exe `
+  --serial emulator-5596 --owned-avd AVD_API_37 `
+  --expected-target 36 --output build/sdk37-exit-history/target36
+```
+
+Repeat with an installed target 37 override APK and `--expected-target 37`.
+Ports above are examples for the owned clone, not discovery defaults. Each output
+directory must be new. The runner clicks the visible settings row, checks the
+full clipboard text, refreshes, recreates the Activity, and verifies real
+`EXIT_SELF`, `SIGNALED` and `USER_REQUESTED` records against the terminated PIDs.
+It opens the existing crash-report Activity only to create a second app process,
+then sends signal 9 to that owned process. Both full and UI-only runs stop the
+host during cleanup, so they must not run on a shared emulator.
+
+After a separate fresh installation on the clone, `--require-empty-initial
+--ui-only` checks the empty-history page, refresh, copy and recreation without
+the subsequent exit scenarios. The runner saves JSON receipts, system exit
+history, UI XML, screenshots and installed APK SHA-256. It does not allocate
+memory under pressure; none of these injected exits establishes a memory-limiter
+event. The actual limiter workload still requires `am memory-limiter status` to
+report an enabled mechanism. See the [P2.13 / P2.14 evidence](../../docs/dev/evidence/android-sdk-37-p213-p214-20260914.md).

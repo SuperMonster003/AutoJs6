@@ -17,7 +17,9 @@ P2.8 的存储调用与开关作用范围、系统选择器和权限状态验证
 
 P2.10 的 [短信即时可见性对照](evidence/android-sdk-37-p210-20260914.md) 已完成: 普通短信 / 普通 OTP / WebOTP 在四组 target / compat 下共 24 项查询 / 广播比较符合预期. 通知监听仅首个正式 target 36 默认组收到两个脱敏更新, 后续 target 36 / 37 都有回调缺失, 原因未定位; 真实三小时恢复也未实测, P2.10 保持部分完成.
 
-P2.12 已修复 UI 脚本进入分屏时因 Activity 重建而退出的问题: [大屏 / 配置 / 输入记录](evidence/android-sdk-37-p212-20260914.md). target 36 / 37 的手机、平板共 4 组 UI 脚本通过; 其余 16 组主页 / 编辑器 / 日志页记录了搜索恢复、光标 / dirty、横屏 viewport 和 IME 遮挡等待处理项. P2.13 完成 [环境与报告入口核对](evidence/android-sdk-37-p213-preflight-20260914.md): 当前镜像内存限制器 disabled, 现有报告页没有历史进程退出读取能力, 重负载和报告实现继续开放. 两节均保持部分完成.
+P2.12 已修复 UI 脚本进入分屏时因 Activity 重建而退出的问题: [大屏 / 配置 / 输入记录](evidence/android-sdk-37-p212-20260914.md). 后续补齐 Main 搜索、原生 / Ace 选区、大草稿恢复及编辑器 / 日志 IME 布局修复, [32 个检查点通过](evidence/android-sdk-37-p212-followup-20260914.md); 实体机、外设和连续窗口调整等项目继续开放.
+
+P2.13 已实现设置页进程退出记录, target 36 / 37 共 12 个页面检查点通过, 最终正常包空历史另 3/3, JVM 12/12. 当前镜像内存限制器仍 disabled, 真实限制器负载及退出报告验收未完成. P2.14 已有官方依据和两个 target 的 16 个状态快照; mode=true 时服务仍可绑定, 未复现非辅助工具限制, 不据此误报启用失败. [实现、证据与后续条件](evidence/android-sdk-37-p213-p214-20260914.md). 额外全量 Lint 约 19 分 50 秒后取消且未生成本轮报告, 不标为通过; P2.13 / P2.14 均保持部分完成.
 
 使用方式:
 
@@ -112,8 +114,8 @@ D1-D4 已由维护者于 2026-09-13 以选择题形式确认, 后续不重复征
 | I10 | 短信 OTP 保护 (VERIFIED): 对非豁免应用过滤查询并延迟广播, 普通 OTP 受 `FILTER_GENERIC_OTP` target 37 门控, WebOTP 对全体; 四组即时行为已实测, 三小时恢复待测. 通知 OTP 脱敏延续 Android 15, 后续回调在 target 36 / 37 均有缺失, 未定位 | target 37 / 全体 | 宿主代码不直接读短信, 但声明 `READ_SMS` / `RECEIVE_SMS` 供脚本 (`content://sms`, 广播) 使用; `core/notification/NotificationListenerService.kt:46` (`events.observeNotification`) | P2.10 ([即时矩阵与通知保留项](evidence/android-sdk-37-p210-20260914.md)) |
 | I11 | WebView UA 缩减 (`ENABLE_USER_AGENT_REDUCTION`, VERIFIED) 与 File System Access API (`ENABLE_FILE_SYSTEM_ACCESS`, DEVICE-37: 选择 / 取消 / Intent / URI 授权门控已验证, 写入与持久化待测) | target 37; 按 WebView 所属应用的 target / override 生效, 独立插件不继承宿主开关 | `core/ui/attribute/WebViewAttributes.kt:36` (`userAgentString` 属性), 文档 / 预览 WebView; UI 根布局的 Activity context 丢失已修复 | P2.11 ([文件门控与边界](evidence/android-sdk-37-p211-files-20260914.md)) |
 | I12 | 大屏: sw >= 600dp 的方向 / 尺寸限制旧豁免在 target 37 失效 (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`, VERIFIED); 全体: 配置变化导致 Activity 重建后默认不恢复 IME; 减少重建的具体范围已核对官方说明 | target 37 / 全体 | 无旧豁免; UI 脚本分屏退出、Main 搜索、Edit 选区 / 大草稿、IME 与 Log 布局已修复, target 36 / 37 共 32 组模拟器用例通过; 悬浮 UI、外设和实体机仍待验收 | P2.12 |
-| I13 | 应用内存上限 (全体, VERIFIED): 按 RAM 的每应用限制, 被杀时 `ApplicationExitInfo` 描述含 `MemoryLimiter:AnonSwap` | 全体 | `largeHeap` 应用 + 脚本引擎 + 进程内 OpenCV; 当前 AVD 限制器 disabled, `CrashReportActivity` 仅展示 Intent 异常信息, 历史退出诊断尚未实现 | P2.13 |
-| I14 | Android Advanced Protection Mode 下, 未声明 `isAccessibilityTool="true"` 的无障碍服务被系统撤销且不可启用 (二手来源, UNVERIFIED) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明该属性 (AutoJs6 是自动化工具, 不应伪装为残障辅助工具, 见待决 Q5); `core/accessibility/control/A11yServiceController` 的 "启用失败" 诊断 | P2.14 |
+| I13 | 应用内存上限 (全体, VERIFIED): 按 RAM 的每应用限制, 被杀时 `ApplicationExitInfo` 描述含 `MemoryLimiter:AnonSwap` | 全体 | `largeHeap` 应用 + 脚本引擎 + 进程内 OpenCV; 设置页历史退出诊断已实现并验证, 当前 AVD 限制器 disabled, 真实限制器负载 / 报告仍待验收 | P2.13 |
+| I14 | Android 17 Advanced Protection 限制非辅助工具的无障碍服务 (官方规则 VERIFIED; 当前镜像 mode=true 时仍可绑定, 限制未复现) | 与 targetSdk 无关 | `res/xml/accessibility_service_config.xml` 未声明 `isAccessibilityTool` (见待决 Q5); 后续在可复现环境验证 `A11yServiceController` 启用失败诊断, 区分全局模式与实际限制 | P2.14 |
 | I15 | 低影响项: Bluetooth 绑定 API 需特权 (`BONDING_APIS_REQUIRE_PRIVILEGED_PERMISSION`), RFCOMM `read()` 断开返回 -1 (`MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`, 仅 `BluetoothSocket`), 联系人 `Data` 视图移除账户列与严格 SQL 检查 (`RESTRICT_DATA_URI_COLUMNS`, `ENFORCE_STRICT_SQL_CHECKS`, 仅 ContactsContract), 密钥库每应用 5 万把上限, RenderScript ScriptC 停用 (本仓库无 RenderScript), 镜像虚拟显示权限检查 (`CHECK_ADD_MIRROR_DISPLAY_PERMISSION`, 宿主经 MediaProjection 创建 `VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR`, `core/image/capture/ScreenCapturer.java:284-289`), `ContentCaptureManager.setContentCaptureEnabled(false)` 失效, 物理键盘密码显示拆分 | target 37 | 逐项验证即可, 预期无代码改动 | P2.15 |
 
 需要继续核验的部分 (UNVERIFIED): 前台服务类型 / 超时, `SYSTEM_ALERT_WINDOW` / `TYPE_APPLICATION_OVERLAY`, MediaProjection, JobScheduler / AlarmManager, 预测性返回, 边到边, `android.accessibilityservice` 包与最低可安装 targetSdk. 当前主文档未列某项新限制, 不等于该项没有变化; P2.15 用 API diff / 对应专题文档 / 实机回归分别给出结论. 已有 Android 14-16 限制仍纳入 inrt 29 -> 37 回归.
@@ -320,11 +322,13 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 - [x] `AVD_API_37` / CE2A.260420.019 / RAM 4096 MiB 的 `am memory-limiter status` 实测为 disabled, target 36 / 37 一致. 只完成环境核对, 未执行重负载或修改全局内存策略. [前置记录](evidence/android-sdk-37-p213-preflight-20260914.md). (DEVICE-37; DOCS)
 - [x] 复核 `CrashHandler` / `CrashReportActivity`: 当前只处理 Java 异常与 Intent `message` / `error`, 生产代码没有 `getHistoricalProcessExitReasons` / `ApplicationExitInfo` 读取. 将原先误作既有能力验收的报告项拆为待实现. [源码依据](evidence/android-sdk-37-p213-preflight-20260914.md#2-现有报告链路). (SOURCE)
 - [ ] 在内存限制器已启用的 API 37 镜像 / 设备运行有界的 OpenCV 大图 / OCR / Node 桥代表负载, 核对真实退出 reason=`REASON_OTHER`、description 包含 `MemoryLimiter:AnonSwap`, 并与被测进程和内存采样对应. disabled、普通 OOM、LMKD、手动结束均不能代替该证据. (DEVICE-37)
-- [ ] 实现历史进程退出诊断与用户可到达的展示入口, 处理多进程、旧记录、重复展示和正常退出, 再验证限制器终止后的可读报告. (SOURCE; DEVICE-37)
+- [x] 实现设置页 "进程退出记录" (`25d34694e`): Android 11+ 后台读取当前安装以来最近 7 天 / 最多 20 条系统历史, 按时间 / 进程 / PID 去重, 保留正常退出、关联 WebView 与未知原因; 提供原始 reason / status / 描述、采样及复制, 不自动弹窗. target 36 / 37 各 6 个页面检查点通过, 最终正常包的空历史另 3/3, JVM 12/12. [实现与证据](evidence/android-sdk-37-p213-p214-20260914.md), [机器结果](evidence/android-sdk-37-p213-p214-results-20260914.json). (SOURCE; DEVICE-37)
+- [ ] 在真正启用限制器的环境中核对负载 PID 与设置页报告, 验证限制器终止后的可读内容; 本轮手动停止 / signal 9 / 正常退出仅验证历史读取, 不替代限制器事件. 后续 SDK / 镜像若提供新的退出 reason, 同步核对判据; 旧系统不可用提示与 OEM 保留策略仍需设备验证. (DEVICE-37; PHYSICAL)
 
 ### P2.14 Advanced Protection Mode (I14)
 
-- [ ] 在 `AVD_API_37` 开启 Advanced Protection, 观察无障碍服务是否被撤销及设置页文案; 若确认 (二手来源转为实测), 在 `A11yServiceController` 的启用失败路径增加检测 (`AdvancedProtectionManager.isAdvancedProtectionEnabled()`, SDK >= 36) 与明确提示; 不声明 `isAccessibilityTool` (待决 Q5). (DEVICE-37; SOURCE; DOCS: 文档 FAQ)
+- [x] 用 [Google 官方说明](https://blog.google/security/whats-new-in-android-security-privacy-2026/) 核对 Android 17 非辅助工具无障碍限制. 在独占 `AVD_API_37` 对 target 36 / 37 各执行开启 / 关闭保护、保护中解绑再绑定及设置页观察, 共 16 个状态快照: mode=true 时仍可绑定, 无 `no_non_tool_accessibility_service`, 设置页无拒绝文案. [实测与边界](evidence/android-sdk-37-p213-p214-20260914.md#4-p214-的实测边界). (DEVICE-37; SOURCE; DOCS)
+- [ ] 在实际实施限制的镜像 / 设备复现撤销与启用失败, 再为 `A11yServiceController` 失败路径增加准确检测和提示, 同步文档 FAQ. `AdvancedProtectionManager.isAdvancedProtectionEnabled()` 要求 SDK >= 36 与 QUERY_ADVANCED_PROTECTION_MODE; 全局 mode=true 不等于具体无障碍限制生效, 不能据此误报. 不声明 `isAccessibilityTool` (待决 Q5). (DEVICE-37; SOURCE; DOCS)
 
 ### P2.15 低影响项逐项验证 (I15)
 
@@ -801,3 +805,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - API 37 的 target 36 / 37 最终 32/32 用例通过; 正常配置恢复包另有 Log 手机与 Ace 平板大草稿 2/2 复验. 编辑器 JVM 测试 161/161, Python 工具测试 54/54; 正常和覆盖 app / inrt debug、恢复后的 release manifest 与页对齐门禁通过. APK 来源与早期失败尝试见 [后续记录](evidence/android-sdk-37-p212-followup-20260914.md).
 - 两个临时日志点、Remote 配置和 adb forward 已移除, 五个用户断点仍为 2 启用 / 3 禁用; 显示、IME 和测试权限已恢复. 独占只读 AVD 5594 与私有 adb 5056 已关闭, 共享 adb 5037 未变, 没有操作实体机.
 - 按维护者约定集中开展实体设备测试, 开测前明确固定版本的 APK / 插件、设备、步骤、预期和回传材料. 99 行实体机清单保持 NOT_RUN; P2.12 的悬浮 UI、连续调整窗口、外设与实际 IME composing text 仍待补齐. 可继续推进 P2.13 历史退出诊断和 P2.14 / P2.15, 内存限制器启用设备仍是独立条件; 不提前关闭 P2 / P3 / P5 或切换正式 target 36 / 29.
+
+### 2026-09-14 (P2.13 历史退出报告与 P2.14 环境对照)
+
+- 设置页的进程退出记录已实现, 具备后台读取、7 天 / 20 条上限、多进程去重、原始系统原因与复制. target 36 / 37 的 12 个页面检查点通过, 最终正常包空历史另 3/3, JVM 12/12; 十语言资源 / changelog 及生成 Markdown 已同步.
+- P2.14 两个 target 各 8 个状态快照显示 mode=true 时仍可绑定, 保护中解绑再启用成功, 未观察到对应 user restriction 或设置页拒绝. 官方规则已确认, 当前镜像的差异保持开放; 未据全局模式误报启用失败, 未声明 isAccessibilityTool.
+- 正常与 target 37 覆盖 debug 构建、正常 release 主 manifest 合并通过. 额外全量 Lint 运行约 19 分 50 秒后仍停留在应用源码分析, 已取消且没有本轮报告; 不引用旧报告作为通过结果.
+- [实现、设备证据与范围](evidence/android-sdk-37-p213-p214-20260914.md). 正常输出仍为 compile 37 / target 36 / inrt 29. 内存限制器仍 disabled, 真正的限制器负载报告、实际高级保护拒绝与旧系统 / OEM 验证继续保留; O04 已指向新的报告入口, 99 行实体机清单仍为 NOT_RUN. 下一步可继续 P2.15 / P2.16, 无需维护者本轮立即操作设备.
