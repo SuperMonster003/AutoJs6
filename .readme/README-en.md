@@ -540,6 +540,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Make the Screen Color Picker plugin's Activity launch delegation explicit, using sender options tied to host visibility on Android 16 and later
 * `Improvement` LAN connection recovery hints for HTTP, WebSocket and the Node controlled network bridge preserve original errors and explain retry after authorization; generic permission-name conversion is independent of the system language
 * `Improvement` Raise project compileSdk to 37 (Android 17) and improve debug builds and lint verification for SDK migration
+* `Improvement` Raise the targetSdk of the app and packaged apps (inrt) to 37 (Android 17); packaged apps move from targetSdk 29 to 37, local network permission is requested on demand on Android 17 and packaged apps guide shared storage access when needed
 * `Improvement` Unify package inspection at 262144 archive entries and raise package, nested scan, manifest, and metadata budgets for large APK/AAB/APKS files
 * `Improvement` Information dialogs share a reusable item component with key:value insertion at any position, automatic key column alignment, and cancellation of asynchronous reads on dismissal
 * `Improvement` APK/APKS/XAPK/APKM/APKZ/AAB component information moves to the "More information" dialog in the top-right menu, sharing the main dialog item style and updating as metadata is loaded

@@ -3,7 +3,7 @@
 本文是 AutoJs6 宿主 (含 inrt 打包模板与仓内 modules / plugin-api / test-apps) 以及同目录 42 个官方插件仓库把 `compileSdk` / `targetSdk` 从 36 升到 37 的可执行状态表.
 以 2026-09-13 的本地代码快照 (宿主 `master@60b147716`, `VERSION_NAME=6.8.0`, `VERSION_BUILD=5280`) 与同日的 [探针记录](evidence/android-sdk-37-probe-20260913.md) (compileSdk 37 探针编译, API 37 模拟器 `dumpsys platform_compat` 清单) 为起点, 每个条目均可独立 Check 并落地.
 
-2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 [P2.3 动态加载只读适配](evidence/android-sdk-37-p23-20260913.md)、[P2.4 Looper / 线程适配](evidence/android-sdk-37-p24-20260913.md). [P2.1 本地网络权限](evidence/android-sdk-37-p21-20260913.md) 的代码、模拟器验证及关联文档 / 声明同步已落地, 真机网络、跨 profile 与完整 MqttService 流程仍待验收. 当前正常配置为 compileSdk 37 / 宿主 targetSdk 36 / inrt targetSdk 29; P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 的整体目标仍未完成.
+2026-09-13 复核: [执行条件与证据校正](evidence/android-sdk-37-review-20260913.md). 随后完成 P0.2 与 P1 本地实现和验证, 见 [P0.2 / P1 实施记录](evidence/android-sdk-37-p0-p1-20260913.md), 以及 [P2.3 动态加载只读适配](evidence/android-sdk-37-p23-20260913.md)、[P2.4 Looper / 线程适配](evidence/android-sdk-37-p24-20260913.md). [P2.1 本地网络权限](evidence/android-sdk-37-p21-20260913.md) 的代码、模拟器验证及关联文档 / 声明同步已落地, 真机网络、跨 profile 与完整 MqttService 流程仍待验收. 2026-09-14 下午按第 0 节的调整执行 P3.1: 当前正常配置为 compileSdk 37 / 宿主 targetSdk 37 / inrt targetSdk 37, 见 [P3.1 切换与门禁记录](evidence/android-sdk-37-p3-20260914.md); P1 的 SDK 36 / 37 lint 差异为零, 但既有错误仍存在, 远程 CI 尚未验证, P1 不标记整体关闭. 当前 release 未启用 minify, P1 的 release 冒烟不构成 R8 优化验证. P2 其余条目及 P3-P6 的整体目标仍未完成.
 
 实体机执行入口: [完整测试清单](android-sdk-37-physical-device-tests.md), 共 99 行, 含宿主 / 系统 51 行、inrt 用户 APK 6 行、全部插件 42 行. 每行列出设备、步骤、预期和本 Roadmap 的对应项; `tools/sdk37/physical_device.py checklist` 可导出带状态 / 证据列的 CSV. 2026-09-14 维护者另提供 Samsung SM-F776B (`localhost:37478`, API 37, ARM64, 实际 4 KB 内核), 原 5 台真机继续承担旧系统回归; 真实 16 KB 内核设备仍待补齐. 接入设备本身不关闭功能验收项.
 
@@ -222,7 +222,7 @@ D1-D4 已由维护者于 2026-09-13 确认. 2026-09-14 又明确选择 Q1=a / Q2
 | P0 | 基线与工具 | 无 | 宿主 | 完成 (2026-09-13): 覆盖开关, 分发拒绝, compat 工具, 有效 lint 基线 |
 | P1 | 宿主 compileSdk 37 | P0 | 宿主 | 本地实现 / 构建 / 测试 / 冒烟完成; lint 零增量但有既有错误, 远程 CI 待验证 |
 | P2 | 宿主 targetSdk 37 行为变更适配 | P0.2 (覆盖开关), P1 | 宿主 | 代码适配完成 (16 子项 83 项勾选); 剩余条目按 D20 标注为 RC-SMOKE / WATCH / CI, 不再门控 P3 |
-| P3 | 宿主 targetSdk 37 切换 (app + inrt) | P1, 门禁 (D19) | 宿主, APK-Builder-Template (只读验证) | 进行中 (2026-09-14): P3.1 切换与门禁执行中, 见本节下方 P3 回填 |
+| P3 | 宿主 targetSdk 37 切换 (app + inrt) | P1, 门禁 (D19) | 宿主, APK-Builder-Template (只读验证) | P3.1 完成 (2026-09-14, chore(sdk): raise targetSdk to 37 for app and inrt): 门禁在 AVD_API_37 (16 KB) 与 API 28 / 31 / 33 / 33 / 35 五台真机执行; P3.3 / P3.4 / P3.5 的 inrt 夹具、Runtime Kit 与 CI 待后续 |
 | P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 进行中: P2.1 文档 / 声明 / LSP 已同步, 其余迁移说明与 CI 待完成 |
 | P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案, D21 批处理脚本 | 42 个插件仓库 | 未开始; 按 D21 脚本批量推进 |
 | P6 | 验收与关闭 | P1-P5 | 全部 | 未开始 |
@@ -423,15 +423,15 @@ P2 验收: I1-I15 与 P2.16 每项有结论, 附录 B 对应行回填; target 37
 
 ### P3.1 切换
 
-- [ ] `version.properties`: `TARGET_SDK_VERSION=37`, `TARGET_SDK_VERSION_INRT=37`; 移除 P0.2 覆盖开关的使用 (开关本身保留). (SOURCE)
-- [ ] manifest 复核: 在 Android 11+ 且 target >= 30 时 `requestLegacyExternalStorage` 失效. `preserveLegacyExternalStorage` 是既有安装的数据迁移机制, 不保证 target 29 -> 37 在所有系统上保留访问, 也不覆盖首次安装 / 卸载重装; 按 Q4 与升级测试决定是否使用, 仅作用于 inrt. `tools:targetApi` 是否需要调整由 lint 决定. (SOURCE; LINT)
-- [ ] 出包与门禁同 P1 (`aapt2` 显示 app 与 inrt 均 `targetSdkVersion:'37'`); 单元测试全量; lint 对比 P1 结果. (ANDROID_BUILD; JVM; LINT)
+- [x] `version.properties`: `TARGET_SDK_VERSION=37`, `TARGET_SDK_VERSION_INRT=37`; P0.2 覆盖开关未再使用 (开关本身保留). `src/target37/AndroidManifest.xml` 随 `versions.sdkVersionTarget >= 37` 自动并入 app 与 inrt. (SOURCE: chore(sdk): raise targetSdk to 37 for app and inrt)
+- [x] manifest 复核 (2026-09-14): `requestLegacyExternalStorage="true"` 保留, 仅对 API 29 及 target <= 29 的旧安装有效, 对 target 37 在 Android 11+ 无作用, 无需移除; `preserveLegacyExternalStorage` 未添加, 依据 D15 与 P3.3 已有的升级证据 (无该属性时 AVD / Samsung 各 4 项通过), 若真实用户升级反馈需要再评估 (WATCH); `tools:targetApi="tiramisu"` 由 lint 结果决定, 本轮 lint 见下条. (SOURCE)
+- [x] 出包与门禁: `assembleAppDebug` / `assembleAppDebugAndroidTest` / `assembleInrtDebug` 成功, aapt2 badging app / inrt 均 compile 37 / target 37 / min 24 且声明 `ACCESS_LOCAL_NETWORK`; 单元测试 app 2612 (0 失败, 5 跳过), 全部模块 3246 (0 失败); lint: `lintAppDebug` / `lintVitalAppRelease` / `lintVitalInrtRelease` (`-Pautojs.sdk.lint.verify=true`, 52 分钟) 与 2026-09-13 的 compile 36 基线 `build/sdk37-lint-36` 用 `compare_lint.py` 对比: 两个 vital 报告不变 (各 1 项既有 Fatal `RemoveWorkManagerInitializer`); debug 报告 Error 546 -> 544, Fatal 1 -> 4 (计数含重复), Warning 2437 -> 2496, 新增 70 / 移除 10. 新增 Error / Fatal 只有两处, 均来自 P2 期间的代码而非 targetSdk 本身: `NetworkSecurityConfig` (debug NSC 三个 `.sdk37.test` 域缺 `includeSubdomains`) 与 `NewApi` (`DevPluginService` 调用 API 29 的 `RouteInfo.hasGateway`, 实际只在需要本地网络权限的 API 37 路径可达), 两处已随后修正 (`includeSubdomains="false"`, SDK_INT 分支), 未重新跑完整 lint. 新增 Warning 以 `InlinedApi` 18、`GradleDependency` / `NewerVersionAvailable` 各 10 为主, 与 target 无关; `tools:targetApi` 无新告警, 保持不变. 命令因既有错误退出 1, 与 P1 相同. ([记录](evidence/android-sdk-37-p3-20260914.md); ANDROID_BUILD; JVM; LINT)
 
 ### P3.2 宿主回归矩阵
 
-- [ ] (AUTO) `AVD_API_37` 门禁: `run_gate.py --install --with-inrt --reinstall-on-mismatch --enable-a11y --junit-results` 全部 PASS (a11y 冒烟、完整 Looper 14、media 11、parcel 5、cleartext 4、dex 1、install-state 2, inrt 安装 / 启动). 原列出的悬浮窗 / OCR / VS Code / 定时 / 小组件 / 文件管理器 / 安装会话 / 快捷方式 / WebView / 预测性返回项归入第 0.4 节 RC-SMOKE 或各 P2 条目的 WATCH. (DEVICE-37)
-- [ ] (AUTO) 旧系统真机门禁: Sony G8441 (API 28), Sony XQ-AT72 (API 31), Sony XQ-DQ72 (API 33) 各跑一次 `run_gate.py --install --with-inrt` (cleartext / dex / install-state / looper-platform / media, 装有 OpenCV + ImageQuant 时 native); 人工只做 RC-SMOKE #2. Xiaomi API 35 平板由 RC-SMOKE #7 覆盖. (DEVICE)
-- [ ] (AUTO) 16 KB: `AVD_API_37` 即 `google_apis_ps16k` 16 KB 镜像 (fingerprint `sdk_gphone16k_x86_64`), 门禁 PASS 同时覆盖本项; 真实 16 KB 内核设备为 RC-SMOKE #10. (DEVICE-16K)
+- [x] (AUTO) `AVD_API_37` 门禁 (16 KB 镜像 `sdk_gphone16k_x86_64` CE2A.260420.019, target 37 正式包): cleartext 4/4, dex 1/1, install-state 2/2, looper-platform 2/2 (clearInterrupt=true / poolStarts=0), media 11/11, parcel 5/5, JVM 2612; looper-full 14/14 (ui-overlay 夹具改为从首个 tick 计时后); a11y 冒烟 42/42 (服务重启检查因无无人值守启动策略 SKIP). 原列出的悬浮窗 / OCR / VS Code / 定时 / 小组件 / 文件管理器 / 安装会话 / 快捷方式 / WebView / 预测性返回项归入第 0.4 节 RC-SMOKE 或各 P2 条目的 WATCH. (DEVICE-37: [记录](evidence/android-sdk-37-p3-20260914.md))
+- [x] (AUTO) 旧系统真机门禁 (2026-09-14, target 37 正式 debug 包 + 同源测试包覆盖安装): Sony G8441 API 28、Sony XQ-AT72 API 31、Sony XQ-DQ72 API 33、Redmi 22120RN86C API 33、Xiaomi 23046RP50C API 35 各 cleartext 4/4, dex 1/1, install-state 2/2, looper-platform 2/2 (clearInterrupt=false / poolStarts=1), media 11/11 (Xiaomi 首轮 10/11 为首个用例通知超时, 重跑 11/11); native 3/3 仅 Xiaomi (两插件均安装), XQ-DQ72 因 Image Quantization 插件 1.0.0 过旧 (optionsApiVersion 0) 失败, 非 target 回归. API 28 首轮两个套件在连续 instrumentation 下出现 runner 进程未起即亡, 加入沉降与重试后全部通过. 人工只做 RC-SMOKE #2. (DEVICE: [记录](evidence/android-sdk-37-p3-20260914.md))
+- [x] (AUTO) 16 KB: `AVD_API_37` 即 `google_apis_ps16k` 16 KB 镜像 (fingerprint `sdk_gphone16k_x86_64`, 内核页 16384), 上一条门禁即在该镜像执行; 真实 16 KB 内核设备为 RC-SMOKE #10. (DEVICE-16K)
 
 ### P3.3 打包应用 (inrt) 29 -> 37 清单 (D3)
 
@@ -664,6 +664,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 | `DEVICE-37` | `AVD_API_37` (或 Android 17 真机, 注明型号) 上, 注明 targetSdk (36 + 覆盖 / 37) 与打开的兼容开关, 冒烟通过 | 未列出设备 / 开关组合 |
 | `DEVICE-16K` | `aj6-ps16k-37-x86_64` 上安装无兼容模式警告 | - |
 | `DOCS` | 本条所要求的文档 / changelog / d.ts 已更新, 需要生成或递增的产物已完成 | 未执行的构建 / 设备用例; 纯 roadmap 修订不要求版本递增 |
+| `GATE` | `tools/sdk37/run_gate.py` 在指定设备上 overall PASS: 产物 badging / SHA-256 与安装身份一致, 所选无人值守套件逐方法完成, SKIP 均有原因 | 真实 LAN 拓扑、可听性、OEM 桌面、人工 UI, 以及未被选中的套件; 模拟器 PASS 不证明真机 OEM 行为 |
 
 条目勾选时在其后追加证据, 格式示例: `[x] ... (DEVICE-37: AVD_API_37, target 37 覆盖包, compat USE_NEW_MESSAGEQUEUE on, 12/12 用例; commit abc1234)`.
 
@@ -919,3 +920,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 冻结 `e2e4d599d` 对应的正常 / target 37 inrt 运行时, 重新生成关闭开机运行的存储夹具. Samsung SM-F776B / API 37 / ARM64 / 4 KB 上两组 UI、权限往返、进程退出恢复、隐藏入口与实际读写共 16/16, 同签名 target 29 -> 37 的所有文件访问授权升级另有 4/4.
 - 复跑工具增加显式真机模式、设备 / 初始包 / boot 配置 / APK 哈希校验与清理; 8 项工具测试通过. 首轮被普通滑动锁屏中断的部分结果保留但不计入通过, 后续操作前唤醒并关闭滑动锁屏. 四次运行均按哈希清理测试包及专用文件, 结束时设备在线、AutoJs6 包清单为空, 未重启手机或改系统设置 / compat.
 - 本轮没有重新编译生产代码, 同期图像 / 颜色改动不在冻结产物内. 正式 target 仍为宿主 36 / inrt 29; 未将提前 fixture 当作真实 APK Builder / Runtime Kit 用户包, 历史 legacy、完整开机、其他设备和首装 / 重装继续开放. S01 / I02 / I03 / I05 增补部分真机证据, 99 行不作整体勾选. [完整记录](evidence/android-sdk-37-inrt-storage-samsung-20260914.md).
+
+### 2026-09-14: Roadmap 调整与 P3.1 targetSdk 37 切换
+
+- 诊断: P2 代码适配已完成但每项挂着开放式真机补证, P3 被 "P2 全部" 门控, 99 行实体机清单零勾选; 维护者要求减少实体机测试并提供自动化. 新增第 0 节与 D19-D21, 29 条未关闭条目就地标注 CI / RC-SMOKE / WATCH, 实体机清单降级为深度验证目录, 固定 10 行 RC-SMOKE 清单.
+- 工具: `tools/sdk37/run_gate.py` (+ `gate-a11y-wrapper.js`, `test_run_gate.py` 12 项主机侧自检). 一条命令完成 badging / 安装 / 无人值守套件 / 模拟器专属步骤 / JVM 汇总, 输出 gate.json / gate.md. 开发中修正: 测试包 badging 无 versionCode, aapt2 的 `minSdkVersion:` 拼写, 裸 inrt 模板无 `assets/project` 时 SplashActivity 必然 NPE (改为 SKIP 并提供 `--inrt-apk`), 连续 instrumentation 在 API 28 上 runner 进程未起即亡 (沉降 + 重试), 被 instrumentation 杀死的无障碍服务停留在系统 "Crashed services" 需切换设置重绑, AutoJs6 `console` 为不可赋值代理 (包装脚本改用函数作用域遮蔽).
+- 切换: `version.properties` 宿主 / inrt 均 37; 构建、单测、lint 与六台设备门禁见 [P3.1 记录](evidence/android-sdk-37-p3-20260914.md). changelog 十种语言 `improvement` 各增一条, README / CHANGELOG 重新生成.
+- 下次起点: P3.3 用 `build_inrt_storage_fixtures.py` 产出 target 37 夹具后跑 `run_gate.py --with-inrt --inrt-apk` 与 `run_inrt_storage_probe.py`; P3.4 Runtime Kit 重新生成; P4 CI 推送验证; P5 按 D21 写批处理脚本.
