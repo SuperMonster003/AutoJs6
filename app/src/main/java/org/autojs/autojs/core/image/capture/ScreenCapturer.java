@@ -69,7 +69,7 @@ public class ScreenCapturer {
     private final int mOrientation;
     private final Object mImageAvailableLock = new Object();
     private final Options mOptions;
-    private ImageReader mImageReader;
+    private volatile ImageReader mImageReader;
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
     private OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
@@ -77,7 +77,7 @@ public class ScreenCapturer {
     private int mAppliedOrientation = ORIENTATION_AUTO;
     private int mPixelFormat = PixelFormat.RGBA_8888;
     private volatile boolean mImageAvailable = false;
-    private boolean mShouldRefreshVirtualDisplayOnNextCapture = false;
+    private volatile boolean mShouldRefreshVirtualDisplayOnNextCapture = false;
     private volatile boolean mReleased = false;
     private boolean mDisplayListenerRegistered = false;
     private boolean mEventBusRegistered = false;

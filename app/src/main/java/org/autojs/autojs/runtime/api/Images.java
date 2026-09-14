@@ -48,6 +48,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -57,8 +58,10 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,6 +109,10 @@ public class Images {
 
     private static final String TAG = Images.class.getSimpleName();
     private static volatile boolean sOpenCvInitialized;
+
+    // Connection and read timeout for images.load(); a stalled server must not block a script forever.
+    // zh-CN: images.load() 的连接与读取超时, 避免无响应的服务器永久阻塞脚本.
+    private static final int LOAD_TIMEOUT_MILLIS = 30_000;
 
     // Gate first captures/frames until this time.
     // zh-CN: 在该时间点之前, 首次截图/异步帧回调将被延迟或丢弃, 以避开授权弹窗渐隐动画.
@@ -223,9 +230,9 @@ public class Images {
     }
 
     public static void saveBitmap(@NonNull Bitmap bitmap, String path) {
-        try {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(path));
-        } catch (FileNotFoundException e) {
+        try (FileOutputStream stream = new FileOutputStream(path)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -756,7 +763,21 @@ public class Images {
     private ImageWrapper rotateInternal(@NonNull ImageWrapper image, float x, float y, float degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree, x, y);
-        return ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(image.getBitmap(), 0, 0, image.getWidth(), image.getHeight(), matrix, true));
+        Bitmap source = image.getBitmap();
+        return ImageWrapper.ofBitmap(mScriptRuntime, copyIfShared(Bitmap.createBitmap(source, 0, 0, image.getWidth(), image.getHeight(), matrix, true), source));
+    }
+
+    /**
+     * {@link Bitmap#createBitmap} returns the source itself when the requested transformation is a no-op.
+     * A wrapper must own its bitmap, otherwise recycling one image would recycle the other as well.
+     * zh-CN: 变换为恒等操作时 {@link Bitmap#createBitmap} 会直接返回源位图; 包装对象必须独占位图, 否则回收一个图像会连带回收另一个.
+     */
+    private static Bitmap copyIfShared(@NonNull Bitmap result, @NonNull Bitmap source) {
+        if (result != source) {
+            return result;
+        }
+        Bitmap.Config config = source.getConfig() != null ? source.getConfig() : Bitmap.Config.ARGB_8888;
+        return source.copy(config, true);
     }
 
     @ScriptInterface
@@ -786,7 +807,7 @@ public class Images {
         // zh-CN: 垂直方向翻转后, 平移到图像高度的位置.
         if (vertical) matrix.postTranslate(0, original.getHeight());
 
-        Bitmap flipped = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
+        Bitmap flipped = copyIfShared(Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true), original);
         return ImageWrapper.ofBitmap(mScriptRuntime, flipped);
     }
 
@@ -799,7 +820,11 @@ public class Images {
     }
 
     private ImageWrapper clipInternal(@NonNull ImageWrapper image, int x, int y, int w, int h) {
-        return ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(image.getBitmap(), x, y, w, h));
+        Bitmap source = image.getBitmap();
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || (long) x + w > source.getWidth() || (long) y + h > source.getHeight()) {
+            throw new IllegalArgumentException("Clip region [" + x + ", " + y + ", " + w + ", " + h + "] is out of image bounds [" + source.getWidth() + ", " + source.getHeight() + "]");
+        }
+        return ImageWrapper.ofBitmap(mScriptRuntime, copyIfShared(Bitmap.createBitmap(source, x, y, w, h), source));
     }
 
     public ImageWrapper read(String path) {
@@ -821,7 +846,9 @@ public class Images {
     @Contract("_ -> new")
     public static Mat imread(String path) {
         initOpenCvIfNeeded();
-        return new Mat(Imgcodecs.imread(path).nativeObj);
+        // Mat.from() keeps the pixel data alive through reference counting without sharing the native header.
+        // zh-CN: Mat.from() 通过引用计数保留像素数据, 且不共享原生头部.
+        return Mat.from(Imgcodecs.imread(path));
     }
 
     public ImageWrapper fromBase64(String data) {
@@ -880,11 +907,24 @@ public class Images {
         };
     }
 
+    @Nullable
     public ImageWrapper load(String src) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(src).openConnection();
+        URLConnection connection = new URL(src).openConnection();
+        connection.setConnectTimeout(LOAD_TIMEOUT_MILLIS);
+        connection.setReadTimeout(LOAD_TIMEOUT_MILLIS);
         connection.setDoInput(true);
-        connection.connect();
-        return ImageWrapper.ofBitmap(mScriptRuntime, BitmapFactory.decodeStream(connection.getInputStream()));
+        try {
+            connection.connect();
+            Bitmap bitmap;
+            try (InputStream stream = connection.getInputStream()) {
+                bitmap = BitmapFactory.decodeStream(stream);
+            }
+            return bitmap != null ? ImageWrapper.ofBitmap(mScriptRuntime, bitmap) : null;
+        } finally {
+            if (connection instanceof HttpURLConnection httpConnection) {
+                httpConnection.disconnect();
+            }
+        }
     }
 
     public ImageWrapper invert(@NonNull ImageWrapper image) {
@@ -899,39 +939,74 @@ public class Images {
         initOpenCvIfNeeded();
 
         Bitmap originalBitmap = image.getBitmap();
-        int originalWidth = originalBitmap.getWidth();
-        int originalHeight = originalBitmap.getHeight();
-
         org.opencv.core.Mat srcMat = new org.opencv.core.Mat();
-        Utils.bitmapToMat(originalBitmap, srcMat);
+        org.opencv.core.Mat invertedMat = new org.opencv.core.Mat();
+        org.opencv.core.Mat alphaChannel = new org.opencv.core.Mat();
+        try {
+            Utils.bitmapToMat(originalBitmap, srcMat);
 
-        // 分离原始 Mat 的通道
-        List<org.opencv.core.Mat> channels = new ArrayList<>(4);
-        Core.split(srcMat, channels);
-        org.opencv.core.Mat alphaChannel = channels.get(3); // 提取 alpha 通道
+            // Invert every channel, then put the original alpha channel back.
+            // zh-CN: 反转全部通道, 再恢复原始 alpha 通道.
+            Core.bitwise_not(srcMat, invertedMat);
+            if (srcMat.channels() == 4) {
+                Core.extractChannel(srcMat, alphaChannel, 3);
+                Core.insertChannel(alphaChannel, invertedMat, 3);
+            }
 
-        // 对 BGR 通道进行反色操作
-        org.opencv.core.Mat bgrMat = new org.opencv.core.Mat();
-        Imgproc.cvtColor(srcMat, bgrMat, Imgproc.COLOR_BGRA2BGR);
-        org.opencv.core.Mat invertedBGRMat = new org.opencv.core.Mat();
-        Core.bitwise_not(bgrMat, invertedBGRMat);
+            Bitmap invertedBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(invertedMat, invertedBitmap);
+            return ImageWrapper.ofBitmap(mScriptRuntime, invertedBitmap);
+        } finally {
+            srcMat.release();
+            invertedMat.release();
+            alphaChannel.release();
+        }
+    }
 
-        // 合并反色后的 BGR 通道与原始的 alpha 通道
-        channels.set(0, new org.opencv.core.Mat());
-        channels.set(1, new org.opencv.core.Mat());
-        channels.set(2, new org.opencv.core.Mat());
-        channels.subList(0, 3).clear(); // 清除前 3 个通道并加入反色后的 BGR 通道
-        Core.split(invertedBGRMat, channels); // 拆分并自动添加到 channels 的前 3 个位置
-        channels.add(3, alphaChannel); // 将原来的 alpha 通道放回最后一个位置
+    /**
+     * Average color of the image (or of a region of it) as an ARGB int.
+     * zh-CN: 图像 (或其中一个区域) 的平均颜色 (ARGB).
+     */
+    public int getMeanColor(@NonNull ImageWrapper image, @Nullable Rect rect) {
+        try {
+            initOpenCvIfNeeded();
+            Mat source = image.getMat();
+            Mat roi = rect != null ? new Mat(source, rect) : null;
+            try {
+                return meanScalarToColor(Core.mean(roi != null ? roi : source), source.channels());
+            } finally {
+                OpenCVHelper.release(roi);
+            }
+        } finally {
+            shoot(image);
+        }
+    }
 
-        org.opencv.core.Mat destMat = new org.opencv.core.Mat();
-        Core.merge(channels, destMat); // 合并 4 个通道 (BGR + 原始 alpha)
+    /**
+     * Converts a per-channel mean of an RGBA / RGB / GRAY Mat into an ARGB color int.
+     * zh-CN: 将 RGBA / RGB / 灰度 Mat 的各通道均值转换为 ARGB 颜色值.
+     */
+    static int meanScalarToColor(@NonNull Scalar mean, int channels) {
+        double[] values = mean.val;
+        int r;
+        int g;
+        int b;
+        int a = 255;
+        if (channels == 1) {
+            r = g = b = roundChannel(values[0]);
+        } else {
+            r = roundChannel(values[0]);
+            g = roundChannel(values[1]);
+            b = roundChannel(values[2]);
+            if (channels >= 4) {
+                a = roundChannel(values[3]);
+            }
+        }
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
 
-        // 转换反色后的 Mat 回 Bitmap
-        Bitmap invertedBitmap = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(destMat, invertedBitmap);
-
-        return ImageWrapper.ofBitmap(mScriptRuntime, invertedBitmap);
+    private static int roundChannel(double value) {
+        return (int) Math.max(0, Math.min(255, Math.round(value)));
     }
 
     public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
@@ -988,6 +1063,14 @@ public class Images {
     public void releaseScreenCapturer() {
         final ScreenCapturer screenCapturer;
         final List<ScriptPromiseAdapter> cancelledWaiters;
+
+        // Release the capturer before taking the monitor: a capture in progress holds the monitor for up to
+        // several seconds while waiting for frames, and releasing makes it bail out immediately.
+        // zh-CN: 先释放采集器再获取监视器: 进行中的截图会持有监视器等待帧长达数秒, 释放后其会立即退出.
+        ScreenCapturer current = mScreenCapturer;
+        if (current != null) {
+            current.release();
+        }
 
         synchronized (this) {
             ++mScreenCaptureRequestEpoch;
@@ -1074,27 +1157,17 @@ public class Images {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.findImage", "template"));
         }
         Mat src = image.getMat();
-        if (rect != null) {
-            if (template.getWidth() > rect.width) {
-                throw new Exception(mContext.getString(R.string.error_excessive_width_for_template_n_region, template.getWidth(), rect.width));
-            }
-            if (template.getHeight() > rect.height) {
-                throw new Exception(mContext.getString(R.string.error_excessive_height_for_template_n_region, template.getHeight(), rect.height));
-            }
-            src = new Mat(src, rect);
-        }
+        Mat roi = rect != null ? createTemplateRegion(src, template, rect) : null;
         @Nullable
         org.opencv.core.Point point;
         try {
             point = TemplateMatching.singleTemplateMatching(
-                    src,
+                    roi != null ? roi : src,
                     template.getMat(),
                     new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel)
             );
         } finally {
-            if (src != image.getMat()) {
-                OpenCVHelper.release(src);
-            }
+            OpenCVHelper.release(roi);
         }
         if (point != null) {
             if (rect != null) {
@@ -1102,12 +1175,22 @@ public class Images {
                 point.y += rect.y;
             }
             point.x = mScreenMetrics.scaleX((int) point.x);
-            point.y = mScreenMetrics.scaleX((int) point.y);
+            point.y = mScreenMetrics.scaleY((int) point.y);
         }
         return point;
     }
 
-    public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) {
+    private Mat createTemplateRegion(Mat src, ImageWrapper template, Rect rect) throws Exception {
+        if (template.getWidth() > rect.width) {
+            throw new Exception(mContext.getString(R.string.error_excessive_width_for_template_n_region, template.getWidth(), rect.width));
+        }
+        if (template.getHeight() > rect.height) {
+            throw new Exception(mContext.getString(R.string.error_excessive_height_for_template_n_region, template.getHeight(), rect.height));
+        }
+        return new Mat(src, rect);
+    }
+
+    public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) throws Exception {
         try {
             return matchTemplateInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel, limit, useTransparentMask);
         } finally {
@@ -1115,7 +1198,7 @@ public class Images {
         }
     }
 
-    private List<TemplateMatching.Match> matchTemplateInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) {
+    private List<TemplateMatching.Match> matchTemplateInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) throws Exception {
         initOpenCvIfNeeded();
         if (image == null) {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.matchTemplate", "image"));
@@ -1124,17 +1207,16 @@ public class Images {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.matchTemplate", "template"));
         }
         Mat src = image.getMat();
-        if (rect != null) {
-            src = new Mat(src, rect);
-        }
-        List<TemplateMatching.Match> result = TemplateMatching.fastTemplateMatching(
-                src,
-                template.getMat(),
-                new TemplateMatching.Options(-1, weakThreshold, strictThreshold, maxLevel, useTransparentMask, limit)
-        );
-
-        if (src != image.getMat()) {
-            OpenCVHelper.release(src);
+        Mat roi = rect != null ? createTemplateRegion(src, template, rect) : null;
+        List<TemplateMatching.Match> result;
+        try {
+            result = TemplateMatching.fastTemplateMatching(
+                    roi != null ? roi : src,
+                    template.getMat(),
+                    new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel, useTransparentMask, limit)
+            );
+        } finally {
+            OpenCVHelper.release(roi);
         }
 
         for (TemplateMatching.Match match : result) {
@@ -1144,7 +1226,7 @@ public class Images {
                 point.y += rect.y;
             }
             point.x = mScreenMetrics.scaleX((int) point.x);
-            point.y = mScreenMetrics.scaleX((int) point.y);
+            point.y = mScreenMetrics.scaleY((int) point.y);
         }
         return result;
     }

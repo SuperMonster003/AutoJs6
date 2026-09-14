@@ -6,6 +6,8 @@ import android.graphics.Paint
 import android.os.Build
 import androidx.core.graphics.ColorUtils.HSLToColor
 import androidx.core.graphics.ColorUtils.RGBToHSL
+import androidx.core.graphics.ColorUtils.blendARGB
+import androidx.core.graphics.ColorUtils.calculateContrast
 import androidx.core.graphics.ColorUtils.calculateLuminance
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
@@ -137,6 +139,10 @@ object Colors : Augmentable() {
         ::toHslaString.name,
         ::isSimilar.name,
         ::isEqual.name,
+        ::distance.name,
+        ::invert.name,
+        ::blend.name,
+        ::contrast.name,
         ::toColorStateList.name,
         ::setPaintColor.name,
         ::luminance.name,
@@ -1277,6 +1283,95 @@ object Colors : Augmentable() {
         else -> throw WrappedIllegalArgumentException("Invalid argument alphaMatters (value: ${Context.toString(alphaMatters)}, species: ${alphaMatters.jsSpecies()}) for colors.isEqual")
     }
 
+    /**
+     * Distance between two colors measured by a color detection algorithm, on the 0..255 threshold scale,
+     * so that `colors.isSimilar(a, b, threshold, algorithm)` is equivalent to `colors.distance(a, b, algorithm) <= threshold`.
+     *
+     * zh-CN: 使用颜色检测算法度量两个颜色的距离 (0..255, 与阈值同量纲),
+     * 因此 `colors.isSimilar(a, b, threshold, algorithm)` 等价于 `colors.distance(a, b, algorithm) <= threshold`.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun distance(args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 2..3) {
+        val (colorA, colorB, algorithm) = it
+        distanceRhino(colorA, colorB, algorithm)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun distanceRhino(colorA: Any?, colorB: Any?, algorithm: Any? = null): Double {
+        val name = when {
+            algorithm.isJsNullish() -> DEFAULT_COLOR_ALGORITHM
+            algorithm is NativeObject -> algorithm.inquire("algorithm") { Context.toString(it) } ?: DEFAULT_COLOR_ALGORITHM
+            else -> Context.toString(algorithm)
+        }
+        return ColorDetector.get(toIntRhino(colorA), name, 0).distance(
+            redRhino(colorB).roundToInt(),
+            greenRhino(colorB).roundToInt(),
+            blueRhino(colorB).roundToInt(),
+        )
+    }
+
+    /**
+     * Inverts the RGB channels of a color, keeping its alpha channel.
+     * zh-CN: 反转颜色的 RGB 通道, 保留 alpha 通道.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun invert(args: Array<out Any?>): Int = ensureArgumentsOnlyOne(args) {
+        invertRhino(it)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun invertRhino(color: Any?): Int = toIntRhino(color) xor 0x00FFFFFF
+
+    /**
+     * Blends two colors (including their alpha channels); `ratio` is the weight of the second color (0..1 or a percentage).
+     * zh-CN: 混合两个颜色 (含 alpha 通道); `ratio` 为第二个颜色的权重 (0..1 或百分比).
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun blend(args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 2..3) {
+        val (colorA, colorB, ratio) = it
+        blendRhino(colorA, colorB, ratio)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun blendRhino(colorA: Any?, colorB: Any?, ratio: Any? = null): Int {
+        val weight = when {
+            ratio.isJsNullish() -> 0.5
+            else -> Numberx.parseAnyRhino(ratio).also {
+                require(!it.isNaN() && it in 0.0..1.0) { "Argument \"ratio\" ${ratio.jsBrief()} for colors.blend must be a number in range 0..1 or a percentage" }
+            }
+        }
+        return blendARGB(toIntRhino(colorA), toIntRhino(colorB), weight.toFloat())
+    }
+
+    /**
+     * WCAG contrast ratio (1..21) between a foreground color and an opaque background color.
+     * zh-CN: 前景色与不透明背景色之间的 WCAG 对比度 (1..21).
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun contrast(args: Array<out Any?>): Double = ensureArgumentsLength(args, 2) {
+        val (foreground, background) = it
+        contrastRhino(foreground, background)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun contrastRhino(foreground: Any?, background: Any?): Double {
+        val backgroundInt = toIntRhino(background)
+        require(alphaRhino(backgroundInt) == 255.0) {
+            "Argument \"background\" ${background.jsBrief()} for colors.contrast must be an opaque color"
+        }
+        return calculateContrast(toIntRhino(foreground), backgroundInt)
+    }
+
     @JvmStatic
     @RhinoSingletonFunctionInterface
     fun toColorStateList(args: Array<out Any?>) = ensureArgumentsAtLeast(args, 1) {
@@ -1359,11 +1454,13 @@ object Colors : Augmentable() {
         }
     }
 
-    private fun toUnit8RgbList(components: Array<Any?>): List<Int> {
+    internal fun toUnit8RgbList(components: Array<Any?>): List<Int> {
         val compList = toComponents(components)
-        val isPercentNums = compList.all { it <= 1 } && compList.any { it != 1 }
+        // Components must stay unrounded here: a fraction such as 0.5 means 50% and rounding it first would turn it into 1.
+        // zh-CN: 此处分量不能提前取整: 0.5 这样的小数表示 50%, 先取整会把它变成 1.
+        val isPercentNums = compList.all { it <= 1.0 } && compList.any { it != 1.0 }
         return when {
-            isPercentNums -> compList.map { if (it == 1) 255 else toUnit8(it) }
+            isPercentNums -> compList.map { if (it == 1.0) 255 else toUnit8(it) }
             else -> compList.map { toUnit8(it) }
         }
     }
@@ -1390,12 +1487,12 @@ object Colors : Augmentable() {
         }
     }
 
-    private fun toComponents(components: Array<Any?>): Array<Int> {
+    private fun toComponents(components: Array<Any?>): List<Double> {
         return components.map { comp ->
             val num = Numberx.parseAnyRhino(comp)
             require(!num.isNaN()) { "Cannot convert $comp into a color component" }
-            num.roundToInt()
-        }.toTypedArray()
+            num
+        }
     }
 
     private fun toPercentage(o: Any?): Float {

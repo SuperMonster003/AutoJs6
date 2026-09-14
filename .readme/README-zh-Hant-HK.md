@@ -351,6 +351,9 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 載入 OpenCV 與 Image Quantization 外掛程式前檢查原生程式庫 ELF 對齊, 頁面大小不相容時提供明確錯誤
 * `新增` 外掛程式中心讀取官方索引與已安裝 manifest 的原生頁面對齊資訊, 在 16 KB 裝置安裝或啟用不相容版本前提示
 * `新增` MCP 截圖回退: image.captureScreen(options) 接受無障礙截圖的裁剪, 縮放, 格式和品質參數, 傳回經檔案描述符傳輸的編碼圖片一次性負載; captureScreen() 保留圖片控制代碼傳回方式, MediaProjection 授權缺失或撤銷時傳回權限錯誤.
+* `新增` `images.countPointsByColor(image, color, options?)` 透過 OpenCV 掩碼統計與指定顏色匹配的像素數量, `images.getMeanColor(image, region?)` 返回圖片或區域的平均顏色
+* `新增` `colors.distance(colorA, colorB, algorithm?)` 按各顏色檢測算法的閾值量綱返回顏色距離, `colors.invert(color)` 反轉 RGB 並保留 alpha, `colors.blend(colorA, colorB, ratio?)` 按權重混合兩個顏色, `colors.contrast(foreground, background)` 計算 WCAG 對比度; 以上四個方法同樣可用於 Color 實例
+* `新增` `images.readPixels` 除文件路徑外還接受 ImageWrapper 參數, 且傳入的圖片保持可用
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能令後續請求繼續跳過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網絡安全配置意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制
 * `修復` 背景 APK 安裝被系統限制啟動確認頁時無法繼續的問題; 安裝狀態按工作階段儲存, 支援通知及返回應用程式後繼續確認, 通知遭拒或程序重建後仍可恢復待確認事項
@@ -521,6 +524,13 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` OpenCV 與 Image Quantization 插件在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
 * `修復` Android 7.0 / 7.1 的 runtime.loadDex 因 ART 最佳化輸出與輸入路徑重合, 損壞 DEX 快取並導致類別載入失敗的問題
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
+* `修復` `images.imread`, `images.matToImage` 及基於 Mat 的圖片所使用的 OpenCV 矩陣要麼從未釋放, 要麼與可能被垃圾回收的來源共享原生句柄, 導致原生記憶體洩漏和懸空指針
+* `修復` 腳本結束時會回收其他正在運行腳本的圖片; 現在圖片按腳本運行時分別登記和回收
+* `修復` `colors.isSimilar` 和 `images.detectColor` 使用 `hs` 算法時匹配任何顏色, `colors.rgb` / `colors.rgba` 將小數或百分比分量當作整數處理
+* `修復` `images.isEqual` 對僅單個通道不同的圖片返回 true, `images.mse` 結果在 `255` 處飽和, `images.ncc` / `images.isGrayscale` 無法正確處理灰度或 RGBA 輸入
+* `修復` `images.invert` 丟失 alpha 通道, `ImageWrapper.saveTo` 保存基於 Mat 的圖片時紅藍通道顛倒, `images.clip` 對超出圖片範圍的區域靜默返回錯誤結果
+* `修復` 以路徑傳入 `images.clip`, `images.findCircles` 和 `images.readPixels` 的圖片可能在使用前被回收, `images.findImage` / `images.matchTemplate` 在模板靠近圖片邊緣或大於搜索區域時可能拋出異常或返回錯誤結果
+* `修復` `images.load` 採用 30 秒超時並關閉連接, `images.saveBitmap`, 特徵匹配和直方圖比較會釋放臨時流和矩陣
 * `優化` 封裝應用程式按專案共用路徑需求引導儲存空間授權, 拒絕授權, 設定返回, 隱藏桌面入口恢復及開機啟動均檢查實際存取狀態
 * `優化` media.playMusic 使用 Media3 音樂前景服務, 管理音訊焦點, 通知控制, 指令碼播放擁有權與結束清理
 * `優化` 前台服務説明補充 Android 17 後台音頻限制, 以及在可見介面重啓服務後重試播放的操作指引
@@ -635,6 +645,9 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 宿主與 runtime-kit 原生程式庫支援 16 KB 對齊, 重編 jackpal JNI 程式庫並使用 NDK r28.2 libc++, 附帶來源記錄與共用建置校驗
 * `優化` APK 打包器在進度與結果中提示不相容的原生程式庫, 在本機建置輸入中繼資料中記錄對齊資訊, 保持壓縮打包
 * `優化` 插件中心的版本摘要同樣將 `2026-09-11T14:30:00+08:00` 這類 ISO 8601 日期時間字串規範化為 `yyyy-MM-dd`, 並保留字串自身時區偏移下的日曆日期
+* `優化` 多點找色 (`images.findPointByColors`, `images.findPointsByColors`) 使用向量化的 OpenCV 掩碼預篩候選點, 在密集圖片上快數十倍且結果完全一致
+* `優化` 顏色檢測器提供 `distance` 方法, 由 `colors.isSimilar`, `images.detectColor` 和多點找色共用; `hs` 算法使用環形色相距離, 未知算法名稱拋出明確的錯誤
+* `優化` 屏幕截圖器狀態讀取不再加鎖, `images.releaseScreenCapturer` 釋放期間不再阻塞並發的圖片調用
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

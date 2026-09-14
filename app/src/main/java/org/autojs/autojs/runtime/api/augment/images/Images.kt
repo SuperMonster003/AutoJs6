@@ -135,6 +135,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::findPointByColors.name,
         ::findMultiColors.name to AS_GLOBAL,
         ::findPointsByColors.name,
+        ::countPointsByColor.name,
+        ::getMeanColor.name,
         ::findPointByImage.name,
         ::findImage.name to AS_GLOBAL,
         ::findImageInRegion.name to AS_GLOBAL,
@@ -274,8 +276,14 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     when {
                         region.isJsNullish() -> throw WrappedIllegalArgumentException("Argument \"region\" ${region.jsBrief()} for images.clip must be non-nullish")
                         else -> try {
-                            val rect = buildRegion(scriptRuntime, arrayOf(image, region))
-                            clip(scriptRuntime, arrayOf(image, rect.x, rect.y, rect.width, rect.height))
+                            require(region.isJsArray() || region is OpencvRect || region is AndroidRect) {
+                                "Argument region ${region.jsSpecies()} is invalid for images.clip"
+                            }
+                            // Build the region directly: going through images.buildRegion() would shoot
+                            // a one-shot image (e.g. one loaded from a path) before it is clipped.
+                            // zh-CN: 直接构建区域: 经由 images.buildRegion() 会在裁剪前回收一次性图像 (如从路径加载的图像).
+                            val rect = buildRegionInternal(image, region)
+                            scriptRuntime.images.clip(image, rect.x, rect.y, rect.width, rect.height)
                         } finally {
                             image.shoot()
                         }
@@ -457,29 +465,55 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         fun isGrayscale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             ApiImages.initOpenCvIfNeeded()
-            val mat = when (image) {
-                is OpencvMat -> image
-                is ImageWrapper -> image.mat
-                else -> throw WrappedIllegalArgumentException("Argument \"image\" ${image.jsBrief()} for images.isGrayscale must be a ImageWrapper or a Mat")
-            }
             try {
-                if (mat.channels() == 1) {
-                    return@ensureArgumentsOnlyOne true
+                when (image) {
+                    is OpencvMat -> isGrayscaleInternal(image)
+                    is ImageWrapper -> isGrayscaleInternal(image.mat)
+                    else -> throw WrappedIllegalArgumentException("Argument \"image\" ${image.jsBrief()} for images.isGrayscale must be a ImageWrapper or a Mat")
                 }
-                // 检查每个像素的所有通道值是否相同
-                val channels: List<OpencvMat> = mutableListOf()
-                OpencvCore.split(mat, channels)
-                for (i in 1 until channels.size) {
-                    val result = OpencvMat()
-                    OpencvCore.compare(channels[0], channels[i], result, OpencvCore.CMP_NE)
-                    if (OpencvCore.countNonZero(result) > 0) {
-                        return@ensureArgumentsOnlyOne false
-                    }
-                }
-                return@ensureArgumentsOnlyOne true
             } finally {
                 (image as? ImageWrapper)?.shoot()
             }
+        }
+
+        private fun isGrayscaleInternal(mat: OpencvMat): Boolean {
+            if (mat.channels() == 1) {
+                return true
+            }
+            // 检查每个像素的所有颜色通道值是否相同 (alpha 通道不是颜色通道, 不参与比较)
+            val channels = mutableListOf<OpencvMat>()
+            val result = OpencvMat()
+            try {
+                OpencvCore.split(mat, channels)
+                val colorChannels = if (channels.size == 4) 3 else channels.size
+                for (i in 1 until colorChannels) {
+                    OpencvCore.compare(channels[0], channels[i], result, OpencvCore.CMP_NE)
+                    if (OpencvCore.countNonZero(result) > 0) {
+                        return false
+                    }
+                }
+                return true
+            } finally {
+                channels.forEach { it.release() }
+                result.release()
+            }
+        }
+
+        /**
+         * Creates an image from a freshly allocated output Mat filled by [block];
+         * the Mat is released instead of leaked when [block] throws.
+         * zh-CN: 由 [block] 填充新分配的输出 Mat 并包装为图像; [block] 抛出异常时释放该 Mat 而非泄漏.
+         */
+        private inline fun newImageFromMat(scriptRuntime: ScriptRuntime, block: (AutoJsMat) -> Unit): ImageWrapper {
+            ApiImages.initOpenCvIfNeeded()
+            val mat = AutoJsMat()
+            try {
+                block(mat)
+            } catch (t: Throwable) {
+                mat.release()
+                throw t
+            }
+            return matToImage(scriptRuntime, arrayOf(mat))
         }
 
         @JvmStatic
@@ -489,10 +523,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.threshold must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val mat = AutoJsMat()
-                Imgproc.threshold(image.mat, mat, coerceNumber(threshold), coerceNumber(maxVal), parseThresholdType(type))
-                matToImage(scriptRuntime, arrayOf(mat))
+                newImageFromMat(scriptRuntime) { mat ->
+                    Imgproc.threshold(image.mat, mat, coerceNumber(threshold), coerceNumber(maxVal), parseThresholdType(type))
+                }
             } finally {
                 image.shoot()
             }
@@ -505,10 +538,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.inRange must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val dst = AutoJsMat()
-                OpencvCore.inRange(image.mat, parseScalar(Colors.toIntRhino(lowerBound)), parseScalar(Colors.toIntRhino(upperBound)), dst)
-                matToImage(scriptRuntime, arrayOf(dst))
+                newImageFromMat(scriptRuntime) { dst ->
+                    OpencvCore.inRange(image.mat, parseScalar(Colors.toIntRhino(lowerBound)), parseScalar(Colors.toIntRhino(upperBound)), dst)
+                }
             } finally {
                 image.shoot()
             }
@@ -521,11 +553,10 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.interval must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
                 val (lowerBound, upperBound) = parseScalars(Colors.toIntRhino(color), coerceNumber(threshold))
-                val dst = AutoJsMat()
-                OpencvCore.inRange(image.mat, lowerBound, upperBound, dst)
-                matToImage(scriptRuntime, arrayOf(dst))
+                newImageFromMat(scriptRuntime) { dst ->
+                    OpencvCore.inRange(image.mat, lowerBound, upperBound, dst)
+                }
             } finally {
                 image.shoot()
             }
@@ -539,12 +570,11 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.adaptiveThreshold must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val mat = AutoJsMat()
                 val adaptiveThresholdValue = Imgproc::class.java.getField("ADAPTIVE_THRESH_${coerceString(adaptiveMethod).uppercase()}").getInt(null)
                 val thresholdValue = Imgproc::class.java.getField("THRESH_${coerceString(thresholdType).uppercase()}").getInt(null)
-                Imgproc.adaptiveThreshold(image.mat, mat, coerceNumber(maxValue), adaptiveThresholdValue, thresholdValue, coerceIntNumber(blockSize), coerceNumber(C))
-                matToImage(scriptRuntime, arrayOf(mat))
+                newImageFromMat(scriptRuntime) { mat ->
+                    Imgproc.adaptiveThreshold(image.mat, mat, coerceNumber(maxValue), adaptiveThresholdValue, thresholdValue, coerceIntNumber(blockSize), coerceNumber(C))
+                }
             } finally {
                 image.shoot()
             }
@@ -557,15 +587,14 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.blur must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val mat = AutoJsMat()
-                when (anchor) {
-                    null -> Imgproc.blur(image.mat, mat, parseSize(ksize))
-                    else -> Imgproc.blur(image.mat, mat, parseSize(ksize), S13n.point(arrayOf(anchor)).run {
-                        OpencvPoint(x.toDouble(), y.toDouble())
-                    }, parseBorderType(type))
+                newImageFromMat(scriptRuntime) { mat ->
+                    when (anchor) {
+                        null -> Imgproc.blur(image.mat, mat, parseSize(ksize))
+                        else -> Imgproc.blur(image.mat, mat, parseSize(ksize), S13n.point(arrayOf(anchor)).run {
+                            OpencvPoint(x.toDouble(), y.toDouble())
+                        }, parseBorderType(type))
+                    }
                 }
-                matToImage(scriptRuntime, arrayOf(mat))
             } finally {
                 image.shoot()
             }
@@ -600,9 +629,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     }
                     else -> coerceIntNumber(size)
                 }
-                val mat = AutoJsMat()
-                Imgproc.medianBlur(image.mat, mat, ksize)
-                matToImage(scriptRuntime, arrayOf(mat))
+                newImageFromMat(scriptRuntime) { mat ->
+                    Imgproc.medianBlur(image.mat, mat, ksize)
+                }
             } finally {
                 image.shoot()
             }
@@ -615,10 +644,6 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.gaussianBlur must be a ImageWrapper" }
             try {
-                /* 按需初始化 OpenCV. */
-                ApiImages.initOpenCvIfNeeded()
-                /* Mat (矩阵) 对象. */
-                val mat = AutoJsMat()
                 /* sigmaX. */
                 val x = parseNumber(sigmaX)
                 /* sigmaY. */
@@ -626,8 +651,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 /* 边缘点插值类型. */
                 val borderType = parseBorderType(type)
                 /* 高斯模糊. */
-                Imgproc.GaussianBlur(image.mat, mat, parseSize(size), x, y, borderType)
-                matToImage(scriptRuntime, arrayOf(mat))
+                newImageFromMat(scriptRuntime) { mat ->
+                    Imgproc.GaussianBlur(image.mat, mat, parseSize(size), x, y, borderType)
+                }
             } finally {
                 image.shoot()
             }
@@ -640,13 +666,12 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.bilateralFilter must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val mat = AutoJsMat()
                 val dValue = parseIntNumber(d, 0)
                 val sigmaColorValue = parseNumber(sigmaColor, 40)
                 val sigmaSpaceValue = parseNumber(sigmaSpace, 20)
-                Imgproc.bilateralFilter(image.mat, mat, dValue, sigmaColorValue, sigmaSpaceValue, parseBorderType(borderType))
-                matToImage(scriptRuntime, arrayOf(mat))
+                newImageFromMat(scriptRuntime) { mat ->
+                    Imgproc.bilateralFilter(image.mat, mat, dValue, sigmaColorValue, sigmaSpaceValue, parseBorderType(borderType))
+                }
             } finally {
                 image.shoot()
             }
@@ -659,16 +684,19 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.cvtColor must be a ImageWrapper" }
             try {
-                ApiImages.initOpenCvIfNeeded()
-                val mat = AutoJsMat()
                 val colorCode = Imgproc::class.java.getField("COLOR_$code").getInt(null)
-                when (dstCn) {
-                    null -> Imgproc.cvtColor(image.mat, mat, colorCode)
-                    else -> Imgproc.cvtColor(image.mat, mat, colorCode, coerceIntNumber(dstCn))
-                }
-                matToImage(scriptRuntime, arrayOf(mat))
+                cvtColorInternal(scriptRuntime, image, colorCode, dstCn?.let { coerceIntNumber(it) })
             } finally {
                 image.shoot()
+            }
+        }
+
+        private fun cvtColorInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, colorCode: Int, dstCn: Int?): ImageWrapper {
+            return newImageFromMat(scriptRuntime) { mat ->
+                when (dstCn) {
+                    null -> Imgproc.cvtColor(image.mat, mat, colorCode)
+                    else -> Imgproc.cvtColor(image.mat, mat, colorCode, dstCn)
+                }
             }
         }
 
@@ -686,7 +714,13 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             try {
                 ApiImages.initOpenCvIfNeeded()
                 val output = AutoJsMat().also { circles = it }
-                grayImage = if (isGrayscale(scriptRuntime, arrayOf(image))) image else grayscale(scriptRuntime, arrayOf(image)).oneShot()
+                // HoughCircles requires a single-channel image; convert without shooting the source,
+                // which may be a one-shot image loaded from a path.
+                // zh-CN: HoughCircles 需要单通道图像; 转换时不回收源图像 (可能是从路径加载的一次性图像).
+                grayImage = when (image.mat.channels()) {
+                    1 -> image
+                    else -> cvtColorInternal(scriptRuntime, image, Imgproc.COLOR_BGR2GRAY, null).oneShot()
+                }
                 val regionRect = region.takeUnless { it.isJsNullish() }?.let {
                     buildRegionInternal(grayImage, it)
                 }
@@ -1099,6 +1133,53 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
+        /**
+         * Counts the pixels matching a color (per-channel threshold) in the image or in `options.region`.
+         * zh-CN: 统计图像 (或 `options.region` 区域) 中匹配指定颜色 (各通道阈值) 的像素数量.
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun countPointsByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 2..3) { argList ->
+            val (o, color, options) = argList
+            var imageRef: ImageWrapper? = null
+            try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.countPointsByColor must be a ImageWrapper" }
+                imageRef = image
+                ApiImages.initOpenCvIfNeeded()
+                val opt = options as? NativeObject ?: newNativeObject()
+                scriptRuntime.images.colorFinder.countPointsByColor(
+                    image,
+                    Colors.toIntRhino(color),
+                    parseThreshold(opt).roundToInt(),
+                    opt.inquire("region") { region -> buildRegionInternal(image, region) },
+                )
+            } finally {
+                ApiImages.shoot(imageRef)
+            }
+        }
+
+        /**
+         * Average color of the image or of a region of it, as a color int.
+         * zh-CN: 图像或其中一个区域的平均颜色 (颜色整数).
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getMeanColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+            val (o, region) = argList
+            var imageRef: ImageWrapper? = null
+            try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.getMeanColor must be a ImageWrapper" }
+                imageRef = image
+                ApiImages.initOpenCvIfNeeded()
+                val rect = region.takeUnless { it.isJsNullish() }?.let { buildRegionInternal(image, it) }
+                scriptRuntime.images.getMeanColor(image, rect)
+            } finally {
+                ApiImages.shoot(imageRef)
+            }
+        }
+
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun findPointByImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
@@ -1235,20 +1316,23 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun readPixels(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLength(args, 1) { argList ->
-            var image: ImageWrapper? = null
-            var bitmap: Bitmap? = null
+            val (o) = argList
+            val image = when {
+                o.isJsString() -> read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot()
+                else -> o
+            }
+            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.readPixels must be a ImageWrapper or a path" }
             try {
-                image = read(scriptRuntime, argList)
-                requireNotNull(image) { "Image path ${argList[0]} is invalid for images.readPixels" }
-                bitmap = image.bitmap
+                val bitmap = image.bitmap
                 val w = bitmap.width
                 val h = bitmap.height
                 val pixels = IntArray(w * h)
                 bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
                 mapOf("data" to pixels, "width" to w, "height" to h).toNativeObject()
             } finally {
-                image?.recycle()
-                bitmap?.recycle()
+                // An image read from a path is one-shot and gets recycled here; a caller-owned image is kept.
+                // zh-CN: 从路径读取的图像为一次性图像, 在此回收; 调用方持有的图像保持不变.
+                image.shoot()
             }
         }
 

@@ -189,6 +189,9 @@
 * `추가` OpenCV 및 Image Quantization 플러그인을 로드하기 전에 ELF 정렬을 검사하고 기기 페이지 크기와 호환되지 않으면 명확한 오류 표시
 * `추가` 플러그인 센터에서 공식 인덱스와 설치된 manifest의 페이지 정렬을 읽고, 16 KB 기기에서 호환되지 않는 버전을 설치하거나 활성화하기 전에 경고
 * `추가` MCP 스크린샷 대체 경로: image.captureScreen(options)는 접근성 스크린샷의 자르기, 배율, 형식, 품질 옵션을 받아 파일 디스크립터로 전송하는 인코딩 이미지를 반환합니다. captureScreen()은 이미지 핸들 반환을 유지하며 MediaProjection 승인이 없거나 취소되면 권한 오류를 반환합니다.
+* `추가` `images.countPointsByColor(image, color, options?)`는 OpenCV 마스크로 지정 색상과 일치하는 픽셀 수를 세고, `images.getMeanColor(image, region?)`는 이미지 또는 영역의 평균 색상을 반환합니다
+* `추가` `colors.distance(colorA, colorB, algorithm?)`는 각 검출 알고리즘의 임계값과 같은 척도로 색상 거리를 반환하고, `colors.invert(color)`는 alpha를 유지한 채 RGB를 반전하며, `colors.blend(colorA, colorB, ratio?)`는 두 색상을 혼합하고, `colors.contrast(foreground, background)`는 WCAG 대비율을 계산합니다; 네 메서드 모두 Color 인스턴스에서도 사용할 수 있습니다
+* `추가` `images.readPixels`는 파일 경로 외에 ImageWrapper도 받으며, 전달한 이미지는 계속 사용할 수 있습니다
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
 * `수정` 호스트 및 패키징 앱의 릴리스 빌드에서 네트워크 보안 설정이 HTTP 요청을 차단하던 문제에 대응하여 평문 통신 정책을 디버그 빌드와 통일하고 GitHub 리소스 도메인의 HTTPS 제한은 유지
 * `수정` 시스템이 확인 화면 실행을 차단하면 백그라운드 APK 설치를 계속할 수 없던 문제; 세션별 상태를 저장하고 알림이나 앱 복귀 시 확인을 재개하며, 알림 거부 또는 프로세스 재생성 후에도 대기 중인 확인 복원 가능
@@ -359,6 +362,13 @@
 * `수정` OpenCV 및 Image Quantization 플러그인이 네이티브 라이브러리 캐시를 읽기 전용으로 설정하지 못해도 로드를 계속하던 문제, Android 17의 동적 코드 로드 제한 지원
 * `수정` Android 7.0 / 7.1의 runtime.loadDex에서 ART 최적화 출력과 입력 경로가 겹쳐 DEX 캐시가 손상되고 클래스 로드에 실패하는 문제
 * `수정` MediaProjection 브리지 캡처에서 일시적으로 프레임이 없으면 최대 6회 재시도하여, 캡처 경로가 갱신된 뒤에도 재승인 없이 연속 촬영 지원
+* `수정` `images.imread`, `images.matToImage` 및 Mat 기반 이미지가 사용하는 OpenCV 행렬이 해제되지 않거나 가비지 수집될 수 있는 원본과 네이티브 핸들을 공유하여 네이티브 메모리 누수와 댕글링 포인터를 일으켰습니다
+* `수정` 스크립트가 종료될 때 실행 중인 다른 스크립트의 이미지까지 회수했습니다; 이제 이미지는 스크립트 런타임별로 등록하고 회수합니다
+* `수정` `hs` 알고리즘을 사용하는 `colors.isSimilar`와 `images.detectColor`가 모든 색상과 일치했고, `colors.rgb` / `colors.rgba`가 소수 또는 백분율 성분을 정수로 처리했습니다
+* `수정` `images.isEqual`이 한 채널만 다른 이미지에 true를 반환하고, `images.mse`가 `255`에서 포화되며, `images.ncc` / `images.isGrayscale`이 그레이스케일 또는 RGBA 입력을 잘못 처리했습니다
+* `수정` `images.invert`가 alpha 채널을 잃고, `ImageWrapper.saveTo`가 Mat 기반 이미지를 빨강과 파랑이 바뀐 채 저장하며, `images.clip`이 이미지 밖 영역에 대해 잘못된 결과를 조용히 반환했습니다
+* `수정` 경로로 `images.clip`, `images.findCircles`, `images.readPixels`에 전달한 이미지가 사용 전에 회수될 수 있었고, `images.findImage` / `images.matchTemplate`이 템플릿이 이미지 가장자리에 가깝거나 검색 영역보다 클 때 예외를 던지거나 잘못된 결과를 반환했습니다
+* `수정` `images.load`는 30초 시간 제한을 적용하고 연결을 닫으며, `images.saveBitmap`, 특징 매칭, 히스토그램 비교는 임시 스트림과 행렬을 해제합니다
 * `개선` 패키징된 앱은 프로젝트의 공유 경로 요구에 따라 저장소 권한을 안내하며 거부, 설정 복귀, 숨겨진 실행 아이콘 복원 및 부팅 시 실제 접근 상태를 확인
 * `개선` media.playMusic이 Media3 음악 포그라운드 서비스를 사용하여 오디오 포커스, 알림 제어, 스크립트 재생 소유권 및 종료 시 정리를 관리
 * `개선` 포그라운드 서비스 도움말에 Android 17 백그라운드 오디오 제한과 앱이 표시된 상태에서 서비스를 다시 시작한 후 재생을 재시도하는 방법 설명
@@ -473,6 +483,9 @@
 * `개선` 호스트와 runtime-kit 네이티브 라이브러리의 16 KB 정렬 지원, jackpal JNI 재빌드 및 NDK r28.2 libc++ 적용, 출처 기록과 공통 빌드 검증 제공
 * `개선` APK 빌더가 진행 상황과 결과에 호환되지 않는 네이티브 라이브러리를 표시하고, 압축 패키징을 유지하면서 로컬 빌드 입력에 정렬 정보 기록
 * `개선` 플러그인 센터의 버전 요약이 `2026-09-11T14:30:00+08:00` 같은 ISO 8601 날짜-시간 문자열도 `yyyy-MM-dd`로 정규화하며 문자열 자체 오프셋 기준의 달력 날짜를 유지
+* `개선` 다중 색상 찾기 (`images.findPointByColors`, `images.findPointsByColors`)는 벡터화된 OpenCV 마스크로 후보를 사전 선별하여 조밀한 이미지에서 수십 배 빠르면서 동일한 결과를 반환합니다
+* `개선` 색상 검출기가 `distance` 메서드를 제공하며 `colors.isSimilar`, `images.detectColor`, 다중 색상 찾기가 이를 공유합니다; `hs` 알고리즘은 원형 색상 거리를 사용하고 알 수 없는 알고리즘 이름은 설명적인 오류를 던집니다
+* `개선` 화면 캡처 상태를 잠금 없이 읽고, `images.releaseScreenCapturer`가 해제 중에 동시 이미지 호출을 더 이상 차단하지 않습니다
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

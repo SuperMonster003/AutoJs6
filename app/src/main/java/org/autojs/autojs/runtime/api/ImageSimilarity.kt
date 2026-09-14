@@ -227,98 +227,9 @@ object ImageSimilarity {
      * - 0.1 到 0.4 表示图像有较大差异, 有少量相似区域.
      * - 0 表示图像完全不同.
      */
-    @Suppress("LocalVariableName")
     @JvmStatic
     @JvmOverloads
-    fun mssim(imgA: Mat, imgB: Mat, tolerance: Double = 1e-6): Double {
-        ensureSameSize(imgA, imgB)
-
-        val C1 = 6.5025
-        val C2 = 58.5225
-
-        val imgAConverted = Mat()
-        val imgBConverted = Mat()
-        imgA.convertTo(imgAConverted, CvType.CV_32F)
-        imgB.convertTo(imgBConverted, CvType.CV_32F)
-
-        val mu1 = Mat()
-        val mu2 = Mat()
-        val sigma1_2 = Mat()
-        val sigma2_2 = Mat()
-        val sigma12 = Mat()
-
-        val mu1Square = Mat()
-        val mu2Square = Mat()
-        val mu1Mu2 = Mat()
-
-        // Gaussian blur
-        Imgproc.GaussianBlur(imgAConverted, mu1, Size(11.0, 11.0), 1.5)
-        Imgproc.GaussianBlur(imgBConverted, mu2, Size(11.0, 11.0), 1.5)
-
-        Core.multiply(mu1, mu1, mu1Square)
-        Core.multiply(mu2, mu2, mu2Square)
-        Core.multiply(mu1, mu2, mu1Mu2)
-
-        val sigma1Mat = Mat()
-        Core.multiply(imgAConverted, imgAConverted, sigma1Mat)
-        Imgproc.GaussianBlur(sigma1Mat, sigma1_2, Size(11.0, 11.0), 1.5)
-        Core.subtract(sigma1_2, mu1Square, sigma1_2)
-
-        val sigma2Mat = Mat()
-        Core.multiply(imgBConverted, imgBConverted, sigma2Mat)
-        Imgproc.GaussianBlur(sigma2Mat, sigma2_2, Size(11.0, 11.0), 1.5)
-        Core.subtract(sigma2_2, mu2Square, sigma2_2)
-
-        val sigma12Mat = Mat()
-        Core.multiply(imgAConverted, imgBConverted, sigma12Mat)
-        Imgproc.GaussianBlur(sigma12Mat, sigma12, Size(11.0, 11.0), 1.5)
-        Core.subtract(sigma12, mu1Mu2, sigma12)
-
-        val t1 = Mat()
-        val t2 = Mat()
-        val t3 = Mat()
-
-        // Solve the error by using Core.multiply
-        val mu1Mu2Multiplied = Mat()
-        val sigma12Multiplied = Mat()
-
-        Core.multiply(mu1Mu2, Scalar(2.0), mu1Mu2Multiplied)
-        Core.multiply(sigma12, Scalar(2.0), sigma12Multiplied)
-
-        Core.add(mu1Mu2Multiplied, Scalar(C1), t1)
-        Core.add(sigma12Multiplied, Scalar(C2), t2)
-        Core.multiply(t1, t2, t3)
-
-        val t1_2 = Mat()
-        Core.add(mu1Square, mu2Square, t1)
-        Core.add(t1, Scalar(C1), t1_2)
-
-        val t2_2 = Mat()
-        Core.add(sigma1_2, sigma2_2, t2)
-        Core.add(t2, Scalar(C2), t2_2)
-
-        val t3_2 = Mat()
-        Core.multiply(t1_2, t2_2, t3_2)
-
-        val ssim_map = Mat()
-        Core.divide(t3, t3_2, ssim_map)
-
-        var result = Core.mean(ssim_map).`val`[0]
-
-        // Adjust result if it's within tolerance range to 1
-        if (abs(result - 1.0) < tolerance) {
-            result = 1.0
-        }
-
-        // Release all Mats from memory
-        listOf(
-            imgAConverted, imgBConverted, mu1, mu2, sigma1_2, sigma2_2, sigma12,
-            mu1Square, mu2Square, mu1Mu2, sigma1Mat, sigma2Mat, sigma12Mat,
-            t1, t2, t3, t1_2, t2_2, t3_2, ssim_map, mu1Mu2Multiplied, sigma12Multiplied
-        ).forEach { it.release() }
-
-        return result
-    }
+    fun mssim(imgA: Mat, imgB: Mat, tolerance: Double = 1e-6): Double = ssim(imgA, imgB, tolerance)
 
     // /**
     //  * Linearizes MSSIM value to a range of [0, 1].
@@ -355,7 +266,12 @@ object ImageSimilarity {
         ensureSameSize(imgA, imgB)
         val hist1 = calcHist(imgA)
         val hist2 = calcHist(imgB)
-        return Imgproc.compareHist(hist1, hist2, Imgproc.CV_COMP_CORREL)
+        try {
+            return Imgproc.compareHist(hist1, hist2, Imgproc.CV_COMP_CORREL)
+        } finally {
+            hist1.release()
+            hist2.release()
+        }
     }
 
     // /**
@@ -457,23 +373,26 @@ object ImageSimilarity {
 
         // 计算两个图像的差值并存储在 diff 中
         val diff = Mat()
-        Core.absdiff(imgA, imgB, diff)  // 计算两个图像之间的绝对差异
-
-        // 转换为平方
+        val diffFloat = Mat()
         val squaredDiff = Mat()
-        Core.multiply(diff, diff, squaredDiff)
+        try {
+            Core.absdiff(imgA, imgB, diff)  // 计算两个图像之间的绝对差异
 
-        // 计算平方差的和
-        val s = Core.sumElems(squaredDiff)
+            // Square in floating point: squaring 8-bit differences in place saturates at 255.
+            // zh-CN: 以浮点计算平方, 8 位差值直接平方会在 255 处饱和截断.
+            diff.convertTo(diffFloat, CvType.CV_32F)
+            Core.multiply(diffFloat, diffFloat, squaredDiff)
 
-        // 计算均方误差
-        val mseValue = s.`val`.sum() / (imgA.total() * imgA.channels())
+            // 计算平方差的和
+            val s = Core.sumElems(squaredDiff)
 
-        // 释放资源
-        diff.release()
-        squaredDiff.release()
-
-        return mseValue
+            // 计算均方误差
+            return s.`val`.sum() / (imgA.total() * imgA.channels())
+        } finally {
+            diff.release()
+            diffFloat.release()
+            squaredDiff.release()
+        }
     }
 
     // /**
@@ -561,40 +480,48 @@ object ImageSimilarity {
 
         ensureSameSize(imgA, imgB)
 
-        // Step 1: Convert images to grayscale
-        val imgAGray = Mat()
-        val imgBGray = Mat()
-        Imgproc.cvtColor(imgA, imgAGray, Imgproc.COLOR_BGR2GRAY)
-        Imgproc.cvtColor(imgB, imgBGray, Imgproc.COLOR_BGR2GRAY)
-
-        // Step 2: Compute mean of the images
-        val meanA = Core.mean(imgAGray).`val`[0]
-        val meanB = Core.mean(imgBGray).`val`[0]
-
-        // Step 3: Subtract the mean from all elements
+        // Step 1: Convert images to single-channel floating point
+        // zh-CN: 转换为单通道浮点图 (均值相减后会出现负值, 8 位无符号会截断)
+        val imgAGray = toGrayFloat(imgA)
+        val imgBGray = toGrayFloat(imgB)
         val imgAZeroMean = Mat()
         val imgBZeroMean = Mat()
-        Core.subtract(imgAGray, Scalar(meanA), imgAZeroMean)
-        Core.subtract(imgBGray, Scalar(meanB), imgBZeroMean)
-
-        // Step 4: Compute numerator and denominators for NCC
         val numeratorMat = Mat()
-        Core.multiply(imgAZeroMean, imgBZeroMean, numeratorMat)
-        val numerator = Core.sumElems(numeratorMat).`val`[0]
-
         val denominatorLeftMat = Mat()
-        Core.multiply(imgAZeroMean, imgAZeroMean, denominatorLeftMat)
-        val denominatorLeft = Core.sumElems(denominatorLeftMat).`val`[0]
-
         val denominatorRightMat = Mat()
-        Core.multiply(imgBZeroMean, imgBZeroMean, denominatorRightMat)
-        val denominatorRight = Core.sumElems(denominatorRightMat).`val`[0]
+        try {
+            // Step 2: Compute mean of the images
+            val meanA = Core.mean(imgAGray).`val`[0]
+            val meanB = Core.mean(imgBGray).`val`[0]
 
-        // Step 5: Calculate NCC
-        val ncc = numerator / sqrt(denominatorLeft * denominatorRight)
+            // Step 3: Subtract the mean from all elements
+            Core.subtract(imgAGray, Scalar(meanA), imgAZeroMean)
+            Core.subtract(imgBGray, Scalar(meanB), imgBZeroMean)
 
-        // Ensure the value is within valid range [-1, 1]
-        return ncc.coerceIn(-1.0, 1.0)
+            // Step 4: Compute numerator and denominators for NCC
+            Core.multiply(imgAZeroMean, imgBZeroMean, numeratorMat)
+            val numerator = Core.sumElems(numeratorMat).`val`[0]
+
+            Core.multiply(imgAZeroMean, imgAZeroMean, denominatorLeftMat)
+            val denominatorLeft = Core.sumElems(denominatorLeftMat).`val`[0]
+
+            Core.multiply(imgBZeroMean, imgBZeroMean, denominatorRightMat)
+            val denominatorRight = Core.sumElems(denominatorRightMat).`val`[0]
+
+            // Step 5: Calculate NCC
+            val denominator = sqrt(denominatorLeft * denominatorRight)
+            if (denominator == 0.0) {
+                // A flat image has no variance; it correlates perfectly only with another flat image of the same mean.
+                // zh-CN: 纯色图像无方差, 仅与均值相同的纯色图像视为完全相关.
+                return if (denominatorLeft == 0.0 && denominatorRight == 0.0 && meanA == meanB) 1.0 else 0.0
+            }
+            val ncc = numerator / denominator
+
+            // Ensure the value is within valid range [-1, 1]
+            return ncc.coerceIn(-1.0, 1.0)
+        } finally {
+            listOf(imgAGray, imgBGray, imgAZeroMean, imgBZeroMean, numeratorMat, denominatorLeftMat, denominatorRightMat).forEach { it.release() }
+        }
     }
 
     // /**
@@ -636,23 +563,20 @@ object ImageSimilarity {
             return false
         }
 
-        val diff = Mat().apply { Core.bitwise_xor(imgA, imgB, this) }
+        val diff = Mat()
+        var diffFlat: Mat? = null
+        try {
+            Core.bitwise_xor(imgA, imgB, diff)
 
-        // Convert diff to grayscale if it is not already single channel
-        val diffGray = when {
-            diff.channels() == 1 -> diff
-            else -> Mat().apply { Imgproc.cvtColor(diff, this, Imgproc.COLOR_BGR2GRAY) }
+            // View every channel as its own column instead of converting to grayscale, which would
+            // weight the channels (and drop alpha) and could round a small difference away to zero.
+            // zh-CN: 将各通道展开为独立列而非转灰度, 灰度转换会加权各通道 (并丢弃 alpha), 可能把微小差异舍入为 0.
+            diffFlat = if (diff.channels() == 1) diff else diff.reshape(1)
+            return Core.countNonZero(diffFlat) == 0
+        } finally {
+            if (diffFlat != null && diffFlat !== diff) diffFlat.release()
+            diff.release()
         }
-
-        val nonZeroCount = Core.countNonZero(diffGray)
-
-        // Release resources
-        if (diff !== diffGray) {
-            diffGray.release()
-        }
-        diff.release()
-
-        return nonZeroCount == 0
     }
 
     private fun ensureSameSize(imgA: Mat, imgB: Mat) {
@@ -672,11 +596,41 @@ object ImageSimilarity {
         val histSize = MatOfInt(256) // Number of bins
         val ranges = MatOfFloat(0f, 256f) // Histogram value range
         val channels = MatOfInt(0) // Channel to be measured (0 for grayscale or first color channel)
-
-        Imgproc.calcHist(mutableListOf(image), channels, Mat(), hist, histSize, ranges)
-        Core.normalize(hist, hist, 0.0, 1.0, Core.NORM_MINMAX) // Normalize the histogram
-
+        val mask = Mat()
+        try {
+            Imgproc.calcHist(mutableListOf(image), channels, mask, hist, histSize, ranges)
+            Core.normalize(hist, hist, 0.0, 1.0, Core.NORM_MINMAX) // Normalize the histogram
+        } finally {
+            histSize.release()
+            ranges.release()
+            channels.release()
+            mask.release()
+        }
         return hist
+    }
+
+    /**
+     * Converts an image of 1, 3 or 4 channels into a single-channel CV_32F Mat owned by the caller.
+     * zh-CN: 将 1, 3 或 4 通道图像转换为由调用方持有的单通道 CV_32F Mat.
+     */
+    private fun toGrayFloat(image: Mat): Mat {
+        val gray = Mat()
+        when (image.channels()) {
+            1 -> image.convertTo(gray, CvType.CV_32F)
+            3, 4 -> Mat().let { tmp ->
+                try {
+                    Imgproc.cvtColor(image, tmp, if (image.channels() == 3) Imgproc.COLOR_BGR2GRAY else Imgproc.COLOR_BGRA2GRAY)
+                    tmp.convertTo(gray, CvType.CV_32F)
+                } finally {
+                    tmp.release()
+                }
+            }
+            else -> {
+                gray.release()
+                throw IllegalArgumentException("Unsupported channel count (${image.channels()}) for grayscale conversion")
+            }
+        }
+        return gray
     }
 
     private fun sumChannels(s: Scalar) = s.`val`.sum()

@@ -24,11 +24,19 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
+import java.util.WeakHashMap
 
 /**
  * Created by Stardust on Nov 25, 2017.
- * Modified by SuperMonster003 as of May 16, 2023.
+ * Modified by SuperMonster003 as of Sep 14, 2026.
  * Transformed by SuperMonster003 on May 16, 2023.
+ *
+ * Pixel data conventions (zh-CN: 像素数据约定):
+ * - [bitmap] is an ARGB_8888 Android bitmap.
+ * - [mat] follows the channel order produced by `Utils.bitmapToMat`, i.e. RGBA (or RGB / GRAY for
+ *   images produced by OpenCV based operations), NOT the BGR order of `Imgcodecs.imread`.
+ * - zh-CN: [bitmap] 为 ARGB_8888 位图; [mat] 与 `Utils.bitmapToMat` 的通道顺序一致, 即 RGBA
+ *   (OpenCV 操作产生的图像也可能是 RGB / 灰度), 而非 `Imgcodecs.imread` 的 BGR 顺序.
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 20, 2023.
 open class ImageWrapper : Shootable<ImageWrapper> {
@@ -43,6 +51,8 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     private var mWidth = 0
     private var mHeight = 0
+
+    @Volatile
     private var mIsRecycled = false
     private var mIsOneShot = false
 
@@ -93,15 +103,24 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             throw AssertionError("Both bitmap and image are null")
         }
 
+    /**
+     * The image without its alpha channel (3 channels for color images).
+     * Grayscale and 3-channel images are returned as they are.
+     *
+     * zh-CN: 去除 alpha 通道的图像 (彩色图为 3 通道); 灰度图与 3 通道图原样返回.
+     */
     val bgrMat: Mat
         get() {
             ensureNotRecycled()
             Images.initOpenCvIfNeeded()
             mBgrMat?.let { return it }
-            return Mat().also {
-                Imgproc.cvtColor(mat, it, Imgproc.COLOR_BGRA2BGR)
-                mBgrMat = it
-                addToList(it)
+            val source = mat
+            return when (source.channels()) {
+                4 -> Mat().also {
+                    Imgproc.cvtColor(source, it, Imgproc.COLOR_BGRA2BGR)
+                    mBgrMat = it
+                }
+                else -> source.also { mBgrMat = it }
             }
         }
 
@@ -115,34 +134,37 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap) {
         mScriptRuntime = scriptRuntime
-        mBitmap = bitmap.also { addToList(it) }
+        mBitmap = bitmap
         mWidth = bitmap.width
         mHeight = bitmap.height
+        register(this)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mat: Mat) {
         mScriptRuntime = scriptRuntime
-        mMat = mat.also { addToList(it) }
+        mMat = mat
         mWidth = mat.cols()
         mHeight = mat.rows()
+        register(this)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mat: org.opencv.core.Mat) {
         mScriptRuntime = scriptRuntime
-        mMat = when (mat.nativeObj != 0L) {
-            true -> Mat(mat.nativeObj)
-            else -> Mat(mat.rows(), mat.cols(), mat.type())
-        }.also { addToList(it) }
+        // Never share the native header with the caller's Mat, whose finalizer would delete it under our feet.
+        // zh-CN: 不与调用方的 Mat 共享原生头部, 否则其 finalizer 会在我们仍在使用时删除该头部.
+        mMat = Mat.from(mat)
         mWidth = mat.cols()
         mHeight = mat.rows()
+        register(this)
     }
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap, mat: Mat?) {
         mScriptRuntime = scriptRuntime
-        mMat = mat?.also { addToList(it) }
-        mBitmap = bitmap.also { addToList(it) }
+        mMat = mat
+        mBitmap = bitmap
         mWidth = bitmap.width
         mHeight = bitmap.height
+        register(this)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mediaImage: Image) {
@@ -152,7 +174,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
         // Detach from ImageReader lifecycle by copying pixels immediately.
         // zh-CN: 通过立即拷贝像素来与 ImageReader 的生命周期解耦.
-        mBitmap = toBitmap(mediaImage).also { addToList(it) }
+        mBitmap = toBitmap(mediaImage)
 
         // Close the original Image ASAP to avoid holding unstable buffers.
         // zh-CN: 尽快关闭原始 Image, 避免持有不稳定的底层 buffer.
@@ -162,10 +184,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         // zh-CN: 解耦后不再保留 media 引用.
         mMediaImage = null
         mPlane = null
-    }
-
-    private fun addToList(image: Any) {
-        imageList.add(WeakReference(image))
+        register(this)
     }
 
     fun saveTo(path: String): Boolean {
@@ -179,19 +198,40 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             }
         }
         if (mBitmap == null) {
-            if (mMat != null) {
+            val mat = mMat
+            if (mat != null) {
                 Images.initOpenCvIfNeeded()
-                return Imgcodecs.imwrite(fullPath, mMat)
+                return imwrite(fullPath, mat)
             }
             bitmap /* Getter, for initializing `mBitmap`. */
         }
-        return runCatching { saveWithBitmap(fullPath) }.isSuccess
+        return runCatching { saveWithBitmap(fullPath) }.getOrDefault(false)
     }
 
-    private fun saveWithBitmap(fullPath: String) {
+    private fun imwrite(fullPath: String, mat: Mat): Boolean {
+        // Wrapper Mats use the RGB(A) order of Android bitmaps, whereas imwrite expects BGR(A);
+        // writing them directly would swap red and blue in the file.
+        // zh-CN: 包装的 Mat 采用 Android 位图的 RGB(A) 通道顺序, 而 imwrite 需要 BGR(A), 直接写入会导致红蓝互换.
+        val code = when (mat.channels()) {
+            3 -> Imgproc.COLOR_RGB2BGR
+            4 -> Imgproc.COLOR_RGBA2BGRA
+            else -> return Imgcodecs.imwrite(fullPath, mat)
+        }
+        val converted = org.opencv.core.Mat()
         try {
-            val bitmap = mBitmap ?: throw Exception("Member \"bitmap\" cannot be null")
-            bitmap.compress(CompressFormat.PNG, 100, FileOutputStream(fullPath))
+            Imgproc.cvtColor(mat, converted, code)
+            return Imgcodecs.imwrite(fullPath, converted)
+        } finally {
+            converted.release()
+        }
+    }
+
+    private fun saveWithBitmap(fullPath: String): Boolean {
+        val bitmap = mBitmap ?: throw Exception("Member \"bitmap\" cannot be null")
+        try {
+            FileOutputStream(fullPath).use { stream ->
+                return bitmap.compress(CompressFormat.PNG, 100, stream)
+            }
         } catch (e: FileNotFoundException) {
             throw UncheckedIOException(e)
         }
@@ -199,7 +239,7 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     fun pixel(x: Int, y: Int): Int {
         ensureNotRecycled()
-        if (x < 0 || y < 0 || x >= width || y >= height) {
+        if (x < 0 || y < 0 || x >= mWidth || y >= mHeight) {
             throw ArrayIndexOutOfBoundsException("Point ($x, $y) out of bounds of $this")
         }
         mBitmap?.let { oBitmap ->
@@ -214,46 +254,33 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             //  ! zh-CN:
             //  ! 这里需要注意不能传入 (x, y), 而需要传入 (y, x).
             //  ! 注意 `org.opencv.core.Mat.get(row, col)` 方法参数, "row" 对应 "y", "col" 对应 "x".
-            val pixelList = oMat.get(/* row = */ y, /* col = */ x) ?: throw Exception("Channel list is null at ($x, $y) of $this")
+            val channels = oMat.get(/* row = */ y, /* col = */ x) ?: throw Exception("Channel list is null at ($x, $y) of $this")
 
             // @Hint by SuperMonster003 on Apr 9, 2025.
-            //  ! Here we assume that pixelList contains ARGB channels.
-            //  ! If mMat does not have these channels, an IndexOutOfBoundsException will be triggered:
+            //  ! Here we assume that the channels are RGBA (or RGB / GRAY for fewer channels).
+            //  ! If mMat does not have these channels, an IndexOutOfBoundsException would be triggered:
             //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
             //  ! Therefore, it is necessary to consider cases with different numbers of channels.
             //  !
             //  ! Refer to: http://issues.autojs6.com/350
             //  !
             //  ! zh-CN:
-            //  ! 此处默认 pixelList 为 ARGB 通道, 当 mMat 不是上述通道时, 将触发索引越界异常:
+            //  ! 此处默认通道为 RGBA (通道更少时为 RGB / 灰度), 当 mMat 不是上述通道时, 将触发索引越界异常:
             //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
             //  ! 因此需要考虑不同通道数量的情况.
             //  !
             //  ! 参阅: http://issues.autojs6.com/350
-            //  !
-            //  # val (r, g, b, a) = pixelList.map { pixelValue -> pixelValue.toInt() }
-            //  # return Color.argb(a, r, g, b)
 
-            return when (pixelList.size) {
+            return when (channels.size) {
                 1 -> {
                     // Single-channel image (grayscale/binary/...)
                     // zh-CN: 单通道图像 (灰度图/二值图/...)
-                    val value = pixelList[0].toInt()
+                    val value = channels[0].toInt()
                     Color.argb(255, value, value, value)
                 }
-                3 -> {
-                    // RGB
-                    val (r, g, b) = pixelList.map { it.toInt() }
-                    Color.argb(255, r, g, b)
-                }
-                in 4..Int.MAX_VALUE -> {
-                    // RGBA
-                    val (r, g, b, a) = pixelList.map { it.toInt() }
-                    Color.argb(a, r, g, b)
-                }
-                else -> {
-                    throw Exception("Unsupported pixel channel count (${pixelList.size}) at ($x, $y) of $this")
-                }
+                3 -> Color.argb(255, channels[0].toInt(), channels[1].toInt(), channels[2].toInt())
+                in 4..Int.MAX_VALUE -> Color.argb(channels[3].toInt(), channels[0].toInt(), channels[1].toInt(), channels[2].toInt())
+                else -> throw Exception("Unsupported pixel channel count (${channels.size}) at ($x, $y) of $this")
             }
         }
         plane?.let { oPlane ->
@@ -265,17 +292,18 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     override fun recycle() {
         synchronized(this) {
+            if (mIsRecycled) return
             mBitmap?.let {
                 it.recycle()
                 mBitmap = null
             }
-            mMat?.let {
-                OpenCVHelper.release(it)
-                mMat = null
-            }
-            mBgrMat?.let {
-                OpenCVHelper.release(it)
-                mBgrMat = null
+            val mat = mMat
+            val bgrMat = mBgrMat
+            mMat = null
+            mBgrMat = null
+            mat?.let { OpenCVHelper.release(it) }
+            if (bgrMat != null && bgrMat !== mat) {
+                OpenCVHelper.release(bgrMat)
             }
             mMediaImage?.let {
                 it.close()
@@ -309,20 +337,44 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     companion object {
 
-        private val imageList = ArrayList<WeakReference<Any>>()
+        // Images are tracked per script runtime, so that a finishing script only recycles its own images
+        // and never the ones still in use by other running scripts.
+        // zh-CN: 按脚本运行时分别记录图像, 脚本结束时只回收自己的图像, 不影响其他仍在运行的脚本.
+        private val registry = WeakHashMap<ScriptRuntime, MutableList<WeakReference<ImageWrapper>>>()
 
-        @JvmStatic
-        @Synchronized
-        fun recycleAll() {
-            imageList.forEach {
-                when (val o = it.get()) {
-                    is Shootable<*> -> o.recycle()
-                    is Bitmap -> o.recycle()
-                    is org.opencv.core.Mat -> OpenCVHelper.release(o)
-                    is Image -> o.close()
+        private const val REGISTRY_PRUNE_INTERVAL = 256
+
+        private fun register(image: ImageWrapper) {
+            synchronized(registry) {
+                val list = registry.getOrPut(image.mScriptRuntime) { ArrayList() }
+                // Drop references to images already collected by the GC, so long-running capture loops
+                // do not accumulate stale entries.
+                // zh-CN: 定期清理已被 GC 回收的引用, 避免长时间截图循环累积无效条目.
+                if (list.size % REGISTRY_PRUNE_INTERVAL == REGISTRY_PRUNE_INTERVAL - 1) {
+                    list.removeAll { it.get() == null }
                 }
+                list.add(WeakReference(image))
             }
-            imageList.clear()
+        }
+
+        /**
+         * Recycles every image created by the given script runtime which is still reachable.
+         * zh-CN: 回收指定脚本运行时创建且仍可达的全部图像.
+         */
+        @JvmStatic
+        fun recycleAll(scriptRuntime: ScriptRuntime) {
+            val list = synchronized(registry) { registry.remove(scriptRuntime) } ?: return
+            list.forEach { it.get()?.recycle() }
+        }
+
+        /**
+         * Recycles every tracked image of every script runtime.
+         * zh-CN: 回收所有脚本运行时记录的全部图像.
+         */
+        @JvmStatic
+        fun recycleAll() {
+            val lists = synchronized(registry) { registry.values.toList().also { registry.clear() } }
+            lists.forEach { list -> list.forEach { it.get()?.recycle() } }
         }
 
         @JvmStatic

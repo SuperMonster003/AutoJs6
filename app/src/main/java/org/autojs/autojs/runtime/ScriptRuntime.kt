@@ -789,9 +789,9 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         ignoresException { RootUtils.resetRuntimeOverriddenRootModeState() }
 
-        // Recycle all recorded ImageWrapper instances.
-        // zh-CN: 回收全部记录的 ImageWrapper 实例.
-        ignoresException { CoreImageWrapper.recycleAll() }
+        // Recycle all ImageWrapper instances recorded for this runtime (never those of other running scripts).
+        // zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本).
+        ignoresException { CoreImageWrapper.recycleAll(this) }
 
         // Clear interrupt status.
         // zh-CN: 清除 interrupt 状态.

@@ -11,6 +11,22 @@ import org.opencv.imgproc.Imgproc;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
+/**
+ * A {@link org.opencv.core.Mat} whose lifecycle is owned by AutoJs6.
+ * <p>
+ * Invariant: every instance owns its own native {@code cv::Mat} header, it never shares the header
+ * with another Java object. Data buffers may still be shared through OpenCV's reference counting,
+ * which is exactly what {@link #from(org.opencv.core.Mat)} relies on. This invariant makes it safe
+ * for {@link #finalize()} to delete the header when the Java object becomes unreachable, so that
+ * a wrapper the script forgot to release does not leak native memory for the rest of the process.
+ * <p>
+ * zh-CN:
+ * <p>
+ * 由 AutoJs6 管理生命周期的 {@link org.opencv.core.Mat}.
+ * 不变式: 每个实例都拥有独立的原生 {@code cv::Mat} 头部, 绝不与其他 Java 对象共享同一个头部
+ * (数据缓冲区仍可通过 OpenCV 引用计数共享, {@link #from(org.opencv.core.Mat)} 正是基于此).
+ * 因此 {@link #finalize()} 可以在对象不可达时安全删除头部, 避免脚本忘记 release 时原生内存永久泄漏.
+ */
 public class Mat extends org.opencv.core.Mat {
 
     private volatile boolean mReleased;
@@ -166,9 +182,32 @@ public class Mat extends org.opencv.core.Mat {
         }
     }
 
+    /**
+     * Creates a Mat that owns its own native header but shares pixel data with {@code source}
+     * through OpenCV reference counting. Use this instead of {@code new Mat(source.nativeObj)},
+     * which would let two Java objects delete the same header.
+     * <p>
+     * zh-CN: 创建拥有独立原生头部但与 {@code source} 共享像素数据 (引用计数) 的 Mat.
+     * 请使用此方法替代 {@code new Mat(source.nativeObj)}, 后者会让两个 Java 对象删除同一个头部.
+     */
+    @NonNull
+    public static Mat from(@NonNull org.opencv.core.Mat source) {
+        if (source instanceof Mat) {
+            return (Mat) source;
+        }
+        Mat result = new Mat();
+        if (source.nativeObj != 0L) {
+            source.assignTo(result);
+        }
+        return result;
+    }
+
     @Override
     protected void finalize() throws Throwable {
-        /* Empty body. */
+        // Delete the native header (and drop our data reference) when the Java object is unreachable.
+        // The header is private to this instance (see class comment), so this cannot double-free.
+        // zh-CN: Java 对象不可达时删除原生头部 (并释放数据引用). 头部为本实例独占 (见类注释), 不会重复释放.
+        super.finalize();
     }
 
 }

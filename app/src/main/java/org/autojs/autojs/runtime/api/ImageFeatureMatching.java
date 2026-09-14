@@ -237,17 +237,32 @@ public final class ImageFeatureMatching {
             }
         }
 
+        // Release the per-query match lists as soon as they have been consumed.
+        // zh-CN: 匹配列表消费完毕后立即释放.
+        for (MatOfDMatch matOfDMatch : knnMatches) {
+            matOfDMatch.release();
+        }
+
         // Draw matches visualization
         // zh-CN: 绘制匹配图
         Mat matchesImg = null;
         if (debugMatchesImagePath != null && !debugMatchesImagePath.isEmpty()) {
             matchesImg = new Mat();
-            Features2d.drawMatches(
-                    /* img1 = */ ImageUtils.to8UC3(objectDesc.getDescriptors()), objectDesc.getKeyPoint(),
-                    /* img2 = */ ImageUtils.to8UC3(sceneDesc.getDescriptors()), sceneDesc.getKeyPoint(),
-                    new MatOfDMatch(goodMatches.toArray(new DMatch[0])),
-                    matchesImg);
-            Imgcodecs.imwrite(debugMatchesImagePath, matchesImg);
+            Mat objectImg = ImageUtils.to8UC3(objectDesc.getDescriptors());
+            Mat sceneImg = ImageUtils.to8UC3(sceneDesc.getDescriptors());
+            MatOfDMatch goodMatchesMat = new MatOfDMatch(goodMatches.toArray(new DMatch[0]));
+            try {
+                Features2d.drawMatches(
+                        /* img1 = */ objectImg, objectDesc.getKeyPoint(),
+                        /* img2 = */ sceneImg, sceneDesc.getKeyPoint(),
+                        goodMatchesMat,
+                        matchesImg);
+                Imgcodecs.imwrite(debugMatchesImagePath, matchesImg);
+            } finally {
+                objectImg.release();
+                sceneImg.release();
+                goodMatchesMat.release();
+            }
         }
 
         // Extract matched object / scene coordinates
@@ -270,16 +285,24 @@ public final class ImageFeatureMatching {
         if (objPts.size() >= 4) {
             MatOfPoint2f objMat = new MatOfPoint2f();
             MatOfPoint2f sceneMat = new MatOfPoint2f();
-            objMat.fromList(objPts);
-            sceneMat.fromList(scenePts);
+            MatOfPoint2f sceneCorners = new MatOfPoint2f();
+            Mat H = null;
+            try {
+                objMat.fromList(objPts);
+                sceneMat.fromList(scenePts);
 
-            Mat H = Calib3d.findHomography(objMat, sceneMat, Calib3d.RANSAC, 3);
+                H = Calib3d.findHomography(objMat, sceneMat, Calib3d.RANSAC, 3);
 
-            if (!H.empty()) {
-                MatOfPoint2f objCorners = objectDesc.getCorners();
-                MatOfPoint2f sceneCorners = new MatOfPoint2f();
-                Core.perspectiveTransform(objCorners, sceneCorners, H);
-                quad = sortClockwise(sceneCorners.toList());
+                if (!H.empty()) {
+                    MatOfPoint2f objCorners = objectDesc.getCorners();
+                    Core.perspectiveTransform(objCorners, sceneCorners, H);
+                    quad = sortClockwise(sceneCorners.toList());
+                }
+            } finally {
+                objMat.release();
+                sceneMat.release();
+                sceneCorners.release();
+                if (H != null) H.release();
             }
         }
 
@@ -298,12 +321,6 @@ public final class ImageFeatureMatching {
         Stream<Point> sorted = pts.stream()
                 .sorted(Comparator.comparingDouble(a -> Math.atan2(a.y - cy, a.x - cx)));
         return List.of(sorted.toArray(Point[]::new));
-    }
-
-    private static void releaseFeatureMatchingDescriptor(long pointer) {
-        Log.d(TAG, "Descriptor pointer to release: " + pointer);
-        Mat mat = new org.autojs.autojs.core.opencv.Mat(pointer);
-        mat.release();
     }
 
     /**
@@ -356,7 +373,13 @@ public final class ImageFeatureMatching {
         public void release() {
             synchronized (this) {
                 if (mNativePtr != 0L) {
-                    releaseFeatureMatchingDescriptor(mNativePtr);
+                    Log.d(TAG, "Descriptor pointer to release: " + mNativePtr);
+                    // Release through the owning Java objects; wrapping the pointer into a second Mat
+                    // would let two finalizers delete the same native header.
+                    // zh-CN: 通过持有者对象释放; 若将指针再包装成另一个 Mat, 两个 finalizer 会删除同一原生头部.
+                    mDescriptors.release();
+                    mKeyPoint.release();
+                    mCorners.release();
                     mNativePtr = 0L;
                 }
             }

@@ -189,6 +189,9 @@
 * `Nuevo` Comprobacion de la alineacion ELF antes de cargar complementos OpenCV e Image Quantization, con un error claro si el tamano de pagina no es compatible
 * `Nuevo` El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB
 * `Nuevo` Alternativa de captura MCP: image.captureScreen(options) acepta las opciones de recorte, escala, formato y calidad de las capturas de accesibilidad y devuelve una imagen codificada de un solo uso mediante descriptor de archivo. captureScreen() mantiene el identificador de imagen; la autorización MediaProjection ausente o revocada devuelve un error de permisos.
+* `Nuevo` `images.countPointsByColor(image, color, options?)` cuenta los píxeles que coinciden con un color mediante una máscara de OpenCV, e `images.getMeanColor(image, region?)` devuelve el color medio de una imagen o región
+* `Nuevo` `colors.distance(colorA, colorB, algorithm?)` devuelve la distancia de color en la escala de umbral de cada algoritmo de detección, `colors.invert(color)` invierte RGB conservando alpha, `colors.blend(colorA, colorB, ratio?)` mezcla dos colores y `colors.contrast(foreground, background)` calcula la relación de contraste WCAG; los cuatro métodos también están disponibles en las instancias de Color
+* `Nuevo` `images.readPixels` acepta un ImageWrapper además de una ruta de archivo, y la imagen pasada sigue siendo utilizable
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual
 * `Corrección` La configuración de seguridad de red podía bloquear solicitudes HTTP en las versiones de distribución del host y de las aplicaciones empaquetadas; la política de tráfico sin cifrar ahora coincide con las versiones de depuración y mantiene los dominios de recursos de GitHub restringidos a HTTPS
 * `Corrección` Las instalaciones de APK en segundo plano no podían continuar si el sistema bloqueaba la confirmación; ahora se guarda el estado por sesión y se puede continuar desde una notificación o al volver a la aplicación, incluso tras denegar las notificaciones o recrear el proceso
@@ -359,6 +362,13 @@
 * `Corrección` Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17
 * `Corrección` runtime.loadDex en Android 7.0 / 7.1 podía sobrescribir el DEX en caché con la salida optimizada de ART, provocando errores al cargar clases
 * `Corrección` Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento
+* `Corrección` Las matrices de OpenCV detrás de `images.imread`, `images.matToImage` y las imágenes basadas en Mat nunca se liberaban o compartían el encabezado nativo con una fuente que podía ser recolectada, causando fugas de memoria nativa y punteros colgantes
+* `Corrección` Un script al finalizar reciclaba las imágenes de todos los demás scripts en ejecución; ahora las imágenes se registran y reciclan por entorno de ejecución de script
+* `Corrección` `colors.isSimilar` e `images.detectColor` con el algoritmo `hs` coincidían con cualquier color, y `colors.rgb` / `colors.rgba` trataban los componentes fraccionarios o porcentuales como enteros
+* `Corrección` `images.isEqual` devolvía true para imágenes que difieren en un solo canal, `images.mse` se saturaba en `255`, e `images.ncc` / `images.isGrayscale` manejaban mal las entradas en escala de grises o RGBA
+* `Corrección` `images.invert` perdía el canal alpha, `ImageWrapper.saveTo` guardaba las imágenes basadas en Mat con los canales rojo y azul intercambiados, e `images.clip` devolvía silenciosamente resultados erróneos para regiones fuera de la imagen
+* `Corrección` Las imágenes pasadas por ruta a `images.clip`, `images.findCircles` e `images.readPixels` podían reciclarse antes de usarse, e `images.findImage` / `images.matchTemplate` podían lanzar excepciones o devolver coincidencias erróneas con plantillas cerca del borde de la imagen o mayores que la región de búsqueda
+* `Corrección` `images.load` aplica un tiempo de espera de 30 segundos y cierra la conexión, e `images.saveBitmap`, la coincidencia de características y la comparación de histogramas liberan sus flujos y matrices temporales
 * `Mejora` Las apps empaquetadas solicitan almacenamiento según las rutas compartidas del proyecto; la denegación, el regreso de ajustes, la recuperación del acceso de inicio y el arranque comprueban el acceso real
 * `Mejora` media.playMusic utiliza un servicio de música en primer plano Media3 con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
@@ -473,6 +483,9 @@
 * `Mejora` Alineacion de 16 KB para bibliotecas nativas del anfitrion y runtime-kit, con jackpal JNI recompilado, libc++ de NDK r28.2, registros de procedencia y verificacion de compilacion compartida
 * `Mejora` El generador APK informa sobre bibliotecas nativas incompatibles durante la compilacion y en los resultados, registra su alineacion en metadatos locales y mantiene el empaquetado comprimido
 * `Mejora` Los resúmenes de versión del Centro de plugins también normalizan cadenas de fecha y hora ISO 8601 como `2026-09-11T14:30:00+08:00` a `yyyy-MM-dd`, conservando la fecha de calendario del desfase horario de la propia cadena
+* `Mejora` La búsqueda multicolor (`images.findPointByColors`, `images.findPointsByColors`) prefiltra los candidatos con máscaras vectorizadas de OpenCV, siendo decenas de veces más rápida en imágenes densas con resultados idénticos
+* `Mejora` Los detectores de color exponen un método `distance` compartido por `colors.isSimilar`, `images.detectColor` y la búsqueda multicolor; el algoritmo `hs` usa la distancia circular de tono y los nombres de algoritmo desconocidos lanzan un error descriptivo
+* `Mejora` El estado del capturador de pantalla se lee sin bloqueo, e `images.releaseScreenCapturer` ya no bloquea las llamadas de imagen concurrentes durante la liberación
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

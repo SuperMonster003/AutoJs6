@@ -183,7 +183,10 @@
         "Les requêtes MediaInfo prennent en charge streamNumber à partir de 0, countGet et infoKind pour les unités, descriptions et noms lisibles; Rhino et Node conservent TEXT sur le premier flux par défaut et négocient les capacités du plugin",
         "Vérification de l'alignement ELF avant le chargement des plugins OpenCV et Image Quantization, avec une erreur claire si la taille des pages est incompatible",
         "Le Centre de plugins lit l'alignement dans l'index officiel et le manifest installé, et avertit avant d'installer ou d'activer des versions incompatibles sur les appareils de 16 KB",
-        "Repli de capture MCP: image.captureScreen(options) accepte les options de recadrage, taille, format et qualité de la capture d'accessibilité et renvoie une image encodée à usage unique par descripteur de fichier. captureScreen() conserve son handle d'image; une autorisation MediaProjection absente ou révoquée produit une erreur de permission."
+        "Repli de capture MCP: image.captureScreen(options) accepte les options de recadrage, taille, format et qualité de la capture d'accessibilité et renvoie une image encodée à usage unique par descripteur de fichier. captureScreen() conserve son handle d'image; une autorisation MediaProjection absente ou révoquée produit une erreur de permission.",
+        "`images.countPointsByColor(image, color, options?)` compte les pixels correspondant à une couleur via un masque OpenCV, et `images.getMeanColor(image, region?)` renvoie la couleur moyenne d'une image ou d'une région",
+        "`colors.distance(colorA, colorB, algorithm?)` renvoie la distance de couleur sur l'échelle de seuil de chaque algorithme de détection, `colors.invert(color)` inverse le RGB en conservant l'alpha, `colors.blend(colorA, colorB, ratio?)` mélange deux couleurs et `colors.contrast(foreground, background)` calcule le rapport de contraste WCAG; les quatre méthodes sont aussi disponibles sur les instances Color",
+        "`images.readPixels` accepte un ImageWrapper en plus d'un chemin de fichier, et l'image transmise reste utilisable"
       ],
       "fix": [
         "L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours",
@@ -355,7 +358,14 @@
         "Les politiques des plugins OpenCV et ImageQuant rejetaient les bibliothèques natives compilées avec le NDK r28c (28.2.13676358) pour incompatibilité de version du NDK, ce qui bloquait le plugin OpenCV v1.1.2 recompilé ; les compilations r26b et r28c sont désormais acceptées",
         "Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17",
         "runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes",
-        "Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement"
+        "Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement",
+        "Les matrices OpenCV derrière `images.imread`, `images.matToImage` et les images basées sur Mat n'étaient jamais libérées ou partageaient leur en-tête natif avec une source pouvant être récupérée par le ramasse-miettes, provoquant des fuites de mémoire native et des pointeurs pendants",
+        "Un script qui se terminait recyclait les images de tous les autres scripts en cours; les images sont désormais enregistrées et recyclées par environnement d'exécution de script",
+        "`colors.isSimilar` et `images.detectColor` avec l'algorithme `hs` correspondaient à n'importe quelle couleur, et `colors.rgb` / `colors.rgba` traitaient les composantes fractionnaires ou en pourcentage comme des entiers",
+        "`images.isEqual` renvoyait true pour des images différant sur un seul canal, `images.mse` saturait à `255`, et `images.ncc` / `images.isGrayscale` géraient mal les entrées en niveaux de gris ou RGBA",
+        "`images.invert` perdait le canal alpha, `ImageWrapper.saveTo` enregistrait les images basées sur Mat avec les canaux rouge et bleu inversés, et `images.clip` renvoyait silencieusement des résultats erronés pour des régions hors de l'image",
+        "Les images transmises par chemin à `images.clip`, `images.findCircles` et `images.readPixels` pouvaient être recyclées avant utilisation, et `images.findImage` / `images.matchTemplate` pouvaient lever une exception ou renvoyer de mauvaises correspondances pour des modèles proches du bord de l'image ou plus grands que la région de recherche",
+        "`images.load` applique un délai d'attente de 30 secondes et ferme sa connexion, et `images.saveBitmap`, la mise en correspondance de caractéristiques et la comparaison d'histogrammes libèrent leurs flux et matrices temporaires"
       ],
       "improvement": [
         "Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs",
@@ -471,7 +481,10 @@
         "Les noeuds JSON de `accessibility.dump` du Node bridge portent les indicateurs d'etat `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` et `longClickable` en plus des sept champs du descripteur ; l'autorisation de session MCP Server inclut les actions globales `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` pour l'outil `ui_press_key` du plugin, et un appel `keys.*` sans le service d'accessibilite repond desormais avec la categorie `unavailable` comme le module `accessibility` ; un `accessibility.swipe` de longueur nulle (points de depart et d'arrivee identiques) est envoye comme un appui de `durationMs`, dont dependent les formes par coordonnees de `ui_click` / `ui_long_click` de MCP",
         "Alignement 16 KB pour les bibliothèques natives de l'hôte et du runtime-kit, avec jackpal JNI recompilé, libc++ du NDK r28.2, provenance et vérification de compilation partagée",
         "Le constructeur APK signale les bibliothèques natives incompatibles dans la progression et les résultats, enregistre l'alignement dans les métadonnées locales et conserve l'empaquetage compressé",
-        "Les résumés de version du Centre de plugins normalisent aussi les chaînes date-heure ISO 8601 telles que `2026-09-11T14:30:00+08:00` en `yyyy-MM-dd`, en conservant la date calendaire du décalage horaire de la chaîne"
+        "Les résumés de version du Centre de plugins normalisent aussi les chaînes date-heure ISO 8601 telles que `2026-09-11T14:30:00+08:00` en `yyyy-MM-dd`, en conservant la date calendaire du décalage horaire de la chaîne",
+        "La recherche multicolore (`images.findPointByColors`, `images.findPointsByColors`) préfiltre les candidats avec des masques OpenCV vectorisés, s'exécutant des dizaines de fois plus vite sur les images denses avec des résultats identiques",
+        "Les détecteurs de couleur exposent une méthode `distance` partagée par `colors.isSimilar`, `images.detectColor` et la recherche multicolore; l'algorithme `hs` utilise la distance circulaire de teinte et les noms d'algorithme inconnus lèvent une erreur explicite",
+        "L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération"
       ],
       "dependency": [
         "Android AXML modularise",

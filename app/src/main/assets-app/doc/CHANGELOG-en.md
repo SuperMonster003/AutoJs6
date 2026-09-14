@@ -189,6 +189,9 @@
 * `Feature` Checks native ELF alignment before loading OpenCV and Image Quantization plugins, with a clear error for incompatible device page sizes
 * `Feature` Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices
 * `Feature` MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error.
+* `Feature` `images.countPointsByColor(image, color, options?)` counts the pixels matching a color through an OpenCV mask, and `images.getMeanColor(image, region?)` returns the average color of an image or region
+* `Feature` `colors.distance(colorA, colorB, algorithm?)` returns the color distance on the threshold scale of each detection algorithm, `colors.invert(color)` inverts RGB while keeping alpha, `colors.blend(colorA, colorB, ratio?)` mixes two colors and `colors.contrast(foreground, background)` computes the WCAG contrast ratio; all four are also available on Color instances
+* `Feature` `images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
 * `Fix` HTTP requests in host and packaged release apps could be blocked by the network security configuration; cleartext policy now matches debug builds while keeping GitHub resource domains restricted to HTTPS
 * `Fix` Background APK installations could not continue when the system blocked the confirmation activity; session status is now saved, with confirmation available through a notification or on returning to the app, including after notification denial or process recreation
@@ -359,6 +362,13 @@
 * `Fix` The OpenCV and Image Quantization plugin loaders continued after read-only cache protection failed; native files are now verified as read-only before loading for Android 17 compatibility
 * `Fix` runtime.loadDex on Android 7.0 / 7.1 could overwrite the staged DEX with ART's optimized output, causing class loading to fail
 * `Fix` MediaProjection bridge captures retry transient missing frames up to six times, allowing consecutive screenshots after the capture pipeline refreshes without requesting consent again
+* `Fix` OpenCV matrices behind `images.imread`, `images.matToImage` and Mat-backed images were either never released or shared a native header with a source that could be garbage collected, causing native memory leaks and dangling pointers
+* `Fix` A finishing script recycled the images of every other running script; images are now registered and recycled per script runtime
+* `Fix` `colors.isSimilar` and `images.detectColor` with the `hs` algorithm matched any color, and `colors.rgb` / `colors.rgba` treated fractional or percentage components as integers
+* `Fix` `images.isEqual` returned true for images differing in a single channel, `images.mse` saturated at `255`, and `images.ncc` / `images.isGrayscale` mishandled grayscale or RGBA input
+* `Fix` `images.invert` dropped the alpha channel, `ImageWrapper.saveTo` wrote Mat-backed images with swapped red and blue channels, and `images.clip` silently produced wrong results for regions outside the image
+* `Fix` Images passed by path to `images.clip`, `images.findCircles` and `images.readPixels` could be recycled before use, and `images.findImage` / `images.matchTemplate` could throw or return wrong matches for templates near the image border or larger than the search region
+* `Fix` `images.load` applies a 30-second timeout and closes its connection, and `images.saveBitmap`, feature matching and histogram comparison release their temporary streams and matrices
 * `Improvement` Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state
 * `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback
@@ -473,6 +483,9 @@
 * `Improvement` Host and runtime-kit native libraries support 16 KB alignment, with rebuilt jackpal JNI libraries, NDK r28.2 libc++, provenance records and shared build verification
 * `Improvement` APK Builder reports incompatible native libraries in build progress and results, and records alignment in local build-input metadata while preserving compressed packaging
 * `Improvement` Plugin Center version summaries also normalize ISO 8601 date-time strings such as `2026-09-11T14:30:00+08:00` to `yyyy-MM-dd`, keeping the calendar date of the string's own offset
+* `Improvement` Multi-color matching (`images.findPointByColors`, `images.findPointsByColors`) pre-filters candidates with vectorized OpenCV masks, running tens of times faster on dense images with identical results
+* `Improvement` Color detectors expose a `distance` method shared by `colors.isSimilar`, `images.detectColor` and multi-color matching; the `hs` algorithm uses circular hue distance and unknown algorithm names raise a descriptive error
+* `Improvement` Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
