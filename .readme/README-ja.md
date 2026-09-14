@@ -354,6 +354,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` `images.countPointsByColor(image, color, options?)` は OpenCV マスクで指定色に一致するピクセル数を数え, `images.getMeanColor(image, region?)` は画像または領域の平均色を返します
 * `新機能` `colors.distance(colorA, colorB, algorithm?)` は各検出アルゴリズムのしきい値と同じ尺度で色の距離を返し, `colors.invert(color)` は alpha を保持したまま RGB を反転し, `colors.blend(colorA, colorB, ratio?)` は 2 色を混合し, `colors.contrast(foreground, background)` は WCAG コントラスト比を計算します; 4 つのメソッドはいずれも Color インスタンスでも利用できます
 * `新機能` `images.readPixels` はファイルパスに加えて ImageWrapper を受け付け, 渡した画像は引き続き利用できます
+* `新機能` `images.matchTemplate` と `images.findPointByImage` が `scales` オプション (単一の倍率または倍率の配列) を受け付け, 他の解像度で取得したテンプレートを照合できます; 各マッチは `width`, `height`, `scale`, `center`, `rect` を公開し, `MatchingResult` に `size`, `isEmpty()`, `isNotEmpty()`, `filter()` が加わりました
 * `修正` HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用
 * `修正` ホストとパッケージ化アプリのリリース版でネットワークセキュリティ設定により HTTP リクエストが拒否される問題に対応し, 平文通信ポリシーをデバッグ版と統一, GitHub リソースドメインの HTTPS 制限は維持
 * `修正` バックグラウンドでの APK インストールでシステムが確認画面の起動を制限すると続行できない問題; 状態をセッションごとに保存し, 通知またはアプリに戻った際に確認を再開でき, 通知の拒否やプロセスの再生成後も復元可能
@@ -531,6 +532,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` `images.invert` が alpha チャンネルを失い, `ImageWrapper.saveTo` が Mat ベースの画像を赤と青を入れ替えて保存し, `images.clip` が画像外の領域に対して誤った結果を黙って返していました
 * `修正` パスで `images.clip`, `images.findCircles`, `images.readPixels` に渡した画像が使用前に回収されることがあり, `images.findImage` / `images.matchTemplate` がテンプレートが画像の端に近い場合や検索領域より大きい場合に例外を投げたり誤った一致を返したりしていました
 * `修正` `images.load` は 30 秒のタイムアウトを適用して接続を閉じ, `images.saveBitmap`, 特徴量マッチング, ヒストグラム比較は一時的なストリームと行列を解放します
+* `修正` テンプレートマッチングは粗いピラミッド階層でしきい値に達すると, その階層の粗い座標 (数ピクセルずれる可能性) をそのまま返し, 隣接する候補が同じ位置を二重に返すことがあり, 結果は類似度順に並ばず `max` も超過していました
+* `修正` `images.matchTemplate` が画像とテンプレートのチャンネル数が異なると例外を投げ, 単色テンプレートは決して一致せず, `useTransparentMask` は透明ピクセルではなく alpha チャンネルだけをマスクしていました; `MatchingResult.sortBy(compareFn)` は比較関数が整数以外を返すと失敗していました
 * `改善` パッケージアプリはプロジェクトの共有パスへのアクセス要件に応じてストレージ権限を案内し, 拒否, 設定からの復帰, 非表示の起動アイコンの復元, システム起動時に実際のアクセス状態を確認
 * `改善` media.playMusic が Media3 の音楽フォアグラウンドサービスを使用し, オーディオフォーカス, 通知操作, スクリプトの再生所有権と終了時の解放を管理
 * `改善` フォアグラウンドサービスの説明に Android 17 のバックグラウンド音声制限と, アプリ表示中にサービスを再起動して再生を再試行する手順を記載
@@ -648,6 +651,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 多点色検索 (`images.findPointByColors`, `images.findPointsByColors`) はベクトル化した OpenCV マスクで候補を事前に絞り込み, 密な画像で数十倍高速化しつつ同一の結果を返します
 * `改善` 色検出器は `distance` メソッドを公開し, `colors.isSimilar`, `images.detectColor`, 多点色検索で共有されます; `hs` アルゴリズムは円環状の色相距離を使い, 未知のアルゴリズム名は説明的なエラーを投げます
 * `改善` スクリーンキャプチャの状態はロックなしで読み取られ, `images.releaseScreenCapturer` は解放中に並行する画像呼び出しをブロックしなくなりました
+* `改善` テンプレートマッチングのピラミッド階層は面積補間を使い, マスク付き照合は正規化相関係数を維持し, 小さな `max` でも複数の候補を精緻化するため, 最良の一致が粗い階層で失われません
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

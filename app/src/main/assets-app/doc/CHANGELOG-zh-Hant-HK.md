@@ -192,6 +192,7 @@
 * `新增` `images.countPointsByColor(image, color, options?)` 透過 OpenCV 掩碼統計與指定顏色匹配的像素數量, `images.getMeanColor(image, region?)` 返回圖片或區域的平均顏色
 * `新增` `colors.distance(colorA, colorB, algorithm?)` 按各顏色檢測算法的閾值量綱返回顏色距離, `colors.invert(color)` 反轉 RGB 並保留 alpha, `colors.blend(colorA, colorB, ratio?)` 按權重混合兩個顏色, `colors.contrast(foreground, background)` 計算 WCAG 對比度; 以上四個方法同樣可用於 Color 實例
 * `新增` `images.readPixels` 除文件路徑外還接受 ImageWrapper 參數, 且傳入的圖片保持可用
+* `新增` `images.matchTemplate` 和 `images.findPointByImage` 支持 `scales` 選項 (單個比例或比例數組), 用於匹配在其他分辨率下截取的模板; 每個匹配項新增 `width`, `height`, `scale`, `center` 和 `rect` 屬性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 和 `filter()`
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能令後續請求繼續跳過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網絡安全配置意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制
 * `修復` 背景 APK 安裝被系統限制啟動確認頁時無法繼續的問題; 安裝狀態按工作階段儲存, 支援通知及返回應用程式後繼續確認, 通知遭拒或程序重建後仍可恢復待確認事項
@@ -369,6 +370,8 @@
 * `修復` `images.invert` 丟失 alpha 通道, `ImageWrapper.saveTo` 保存基於 Mat 的圖片時紅藍通道顛倒, `images.clip` 對超出圖片範圍的區域靜默返回錯誤結果
 * `修復` 以路徑傳入 `images.clip`, `images.findCircles` 和 `images.readPixels` 的圖片可能在使用前被回收, `images.findImage` / `images.matchTemplate` 在模板靠近圖片邊緣或大於搜索區域時可能拋出異常或返回錯誤結果
 * `修復` `images.load` 採用 30 秒超時並關閉連接, `images.saveBitmap`, 特徵匹配和直方圖比較會釋放臨時流和矩陣
+* `修復` 模板匹配在較粗的金字塔層級提前達到閾值時直接返回該層級的粗略坐標 (可能偏差數個像素), 相鄰候選點可能重複返回同一位置, 且結果未按相似度排序也未受 `max` 限制
+* `修復` `images.matchTemplate` 在圖片與模板通道數不同時拋出異常, 純色模板永遠無法匹配, `useTransparentMask` 僅遮罩了 alpha 通道而非透明像素; `MatchingResult.sortBy(compareFn)` 在比較函數返回非整數時失敗
 * `優化` 封裝應用程式按專案共用路徑需求引導儲存空間授權, 拒絕授權, 設定返回, 隱藏桌面入口恢復及開機啟動均檢查實際存取狀態
 * `優化` media.playMusic 使用 Media3 音樂前景服務, 管理音訊焦點, 通知控制, 指令碼播放擁有權與結束清理
 * `優化` 前台服務説明補充 Android 17 後台音頻限制, 以及在可見介面重啓服務後重試播放的操作指引
@@ -486,6 +489,7 @@
 * `優化` 多點找色 (`images.findPointByColors`, `images.findPointsByColors`) 使用向量化的 OpenCV 掩碼預篩候選點, 在密集圖片上快數十倍且結果完全一致
 * `優化` 顏色檢測器提供 `distance` 方法, 由 `colors.isSimilar`, `images.detectColor` 和多點找色共用; `hs` 算法使用環形色相距離, 未知算法名稱拋出明確的錯誤
 * `優化` 屏幕截圖器狀態讀取不再加鎖, `images.releaseScreenCapturer` 釋放期間不再阻塞並發的圖片調用
+* `優化` 模板匹配的金字塔層級改用區域插值, 遮罩匹配沿用歸一化相關系數, 較小的 `max` 也會精化多個候選點, 避免最佳匹配在粗層級被丟棄
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

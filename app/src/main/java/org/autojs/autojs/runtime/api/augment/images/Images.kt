@@ -1216,7 +1216,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                         val threshold = parseThreshold(opt, 0.9).toFloat()
                         val region = buildRegionInternal(image, opt.prop("region").takeUnless { it.isJsNullish() } ?: listOf(/* x = */ xOrOptions, y, width, height))
                         val level = parseIntNumber(opt.prop("level"), -1)
-                        scriptRuntime.images.findImage(image, template, weakThreshold, threshold, region, level)
+                        val scales = parseScalesInternal(opt, "images.$funcName")
+                        scriptRuntime.images.findImage(image, template, weakThreshold, threshold, region, level, scales)
                     }
                 }
             } finally {
@@ -1265,7 +1266,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     opt.hasProp("transparentMask") -> /* @Compatible with Auto.js Pro. */ coerceBoolean(opt.prop("transparentMask"))
                     else -> false
                 }
-                MatchingResult(scriptRuntime.images.matchTemplate(image, template, weakThreshold, threshold, region, level, max, useTransparentMask))
+                val scales = parseScalesInternal(opt, "images.matchTemplate")
+                MatchingResult(scriptRuntime.images.matchTemplate(image, template, weakThreshold, threshold, region, level, max, useTransparentMask, scales))
             } finally {
                 ApiImages.shoot(imageA, imageB)
             }
@@ -2011,6 +2013,28 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         private fun parseWeakThreshold(options: Any?, def: Double): Double {
             val opt = options as? NativeObject ?: newNativeObject()
             return opt.inquire("weakThreshold", ::coerceNumber, def)
+        }
+
+        /**
+         * Reads the template scale factors from the "scales" (or "scale") option: a number or an array of numbers.
+         * Returns null when the option is absent, meaning the original template size only.
+         * zh-CN: 读取 "scales" (或 "scale") 选项中的模板缩放比例 (数字或数字数组); 选项缺失时返回 null, 表示仅使用原始尺寸.
+         */
+        private fun parseScalesInternal(options: Any?, funcName: String): DoubleArray? {
+            val opt = options as? NativeObject ?: return null
+            val raw = opt.prop("scales").takeUnless { it.isJsNullish() }
+                ?: opt.prop("scale").takeUnless { it.isJsNullish() }
+                ?: return null
+            val items: List<Any?> = when (raw) {
+                is Iterable<*> -> raw.toList()
+                else -> listOf(raw)
+            }
+            require(items.isNotEmpty()) { "Option \"scales\" for $funcName must not be empty" }
+            return items.map { item ->
+                val value = coerceNumber(item)
+                require(value.isFinite() && value > 0) { "Option \"scales\" ${item.jsBrief()} for $funcName must consist of positive finite numbers" }
+                value
+            }.toDoubleArray()
         }
 
         private fun resizeInternal(image: ImageWrapper, mat: AutoJsMat, size: OpencvSize, fx: Double, fy: Double, interpolation: Int) {

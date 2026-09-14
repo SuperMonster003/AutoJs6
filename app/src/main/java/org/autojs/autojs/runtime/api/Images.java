@@ -1141,94 +1141,121 @@ public class Images {
     @Nullable
     @ScriptInterface
     public Point findImage(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel) throws Exception {
+        return findImage(image, template, weakThreshold, strictThreshold, rect, maxLevel, null);
+    }
+
+    /**
+     * Finds the best match of a template.
+     * zh-CN: 查找模板的最佳匹配位置.
+     *
+     * @param scales template scale factors to try in turn; null or empty for the original size only
+     *               (zh-CN: 依次尝试的模板缩放比例; null 或空数组表示仅使用原始尺寸)
+     */
+    @Nullable
+    @ScriptInterface
+    public Point findImage(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, @Nullable double[] scales) throws Exception {
         try {
-            return findImageInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel);
+            List<TemplateMatching.Match> matches = matchTemplateInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel, 1, false, scales, "Images.findImage");
+            return matches.isEmpty() ? null : matches.get(0).point;
         } finally {
             shoot(image, template);
         }
-    }
-
-    private Point findImageInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel) throws Exception {
-        initOpenCvIfNeeded();
-        if (image == null) {
-            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.findImage", "image"));
-        }
-        if (template == null) {
-            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.findImage", "template"));
-        }
-        Mat src = image.getMat();
-        Mat roi = rect != null ? createTemplateRegion(src, template, rect) : null;
-        @Nullable
-        org.opencv.core.Point point;
-        try {
-            point = TemplateMatching.singleTemplateMatching(
-                    roi != null ? roi : src,
-                    template.getMat(),
-                    new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel)
-            );
-        } finally {
-            OpenCVHelper.release(roi);
-        }
-        if (point != null) {
-            if (rect != null) {
-                point.x += rect.x;
-                point.y += rect.y;
-            }
-            point.x = mScreenMetrics.scaleX((int) point.x);
-            point.y = mScreenMetrics.scaleY((int) point.y);
-        }
-        return point;
-    }
-
-    private Mat createTemplateRegion(Mat src, ImageWrapper template, Rect rect) throws Exception {
-        if (template.getWidth() > rect.width) {
-            throw new Exception(mContext.getString(R.string.error_excessive_width_for_template_n_region, template.getWidth(), rect.width));
-        }
-        if (template.getHeight() > rect.height) {
-            throw new Exception(mContext.getString(R.string.error_excessive_height_for_template_n_region, template.getHeight(), rect.height));
-        }
-        return new Mat(src, rect);
     }
 
     public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) throws Exception {
+        return matchTemplate(image, template, weakThreshold, strictThreshold, rect, maxLevel, limit, useTransparentMask, null);
+    }
+
+    /**
+     * Finds up to {@code limit} matches of a template, best first, without overlapping duplicates.
+     * zh-CN: 查找最多 limit 个模板匹配, 按相似度降序且不含重叠的重复项.
+     *
+     * @param scales template scale factors to try in turn; null or empty for the original size only
+     *               (zh-CN: 依次尝试的模板缩放比例; null 或空数组表示仅使用原始尺寸)
+     */
+    public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask, @Nullable double[] scales) throws Exception {
         try {
-            return matchTemplateInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel, limit, useTransparentMask);
+            return matchTemplateInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel, limit, useTransparentMask, scales, "Images.matchTemplate");
         } finally {
             shoot(image, template);
         }
     }
 
-    private List<TemplateMatching.Match> matchTemplateInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) throws Exception {
+    private List<TemplateMatching.Match> matchTemplateInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask, @Nullable double[] scales, String methodName) throws Exception {
         initOpenCvIfNeeded();
         if (image == null) {
-            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.matchTemplate", "image"));
+            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, methodName, "image"));
         }
         if (template == null) {
-            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.matchTemplate", "template"));
+            throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, methodName, "template"));
         }
         Mat src = image.getMat();
-        Mat roi = rect != null ? createTemplateRegion(src, template, rect) : null;
+        Mat roi;
+        if (rect != null) {
+            roi = createTemplateRegion(src, template, rect, scales);
+        } else {
+            ensureTemplateFits(template, src.cols(), src.rows(), scales);
+            roi = null;
+        }
         List<TemplateMatching.Match> result;
         try {
             result = TemplateMatching.fastTemplateMatching(
                     roi != null ? roi : src,
                     template.getMat(),
-                    new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel, useTransparentMask, limit)
+                    new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel, useTransparentMask, limit, scales)
             );
         } finally {
             OpenCVHelper.release(roi);
         }
-
+        List<TemplateMatching.Match> converted = new ArrayList<>(result.size());
         for (TemplateMatching.Match match : result) {
-            Point point = match.point;
-            if (rect != null) {
-                point.x += rect.x;
-                point.y += rect.y;
-            }
-            point.x = mScreenMetrics.scaleX((int) point.x);
-            point.y = mScreenMetrics.scaleY((int) point.y);
+            converted.add(toScreenCoordinates(match, rect));
         }
-        return result;
+        return converted;
+    }
+
+    /**
+     * Moves a match from region coordinates to image coordinates and applies the script screen metrics.
+     * zh-CN: 将匹配从区域坐标转换为图片坐标并应用脚本屏幕度量.
+     */
+    private TemplateMatching.Match toScreenCoordinates(TemplateMatching.Match match, @Nullable Rect rect) {
+        double x = match.point.x + (rect != null ? rect.x : 0);
+        double y = match.point.y + (rect != null ? rect.y : 0);
+        Point point = new Point(mScreenMetrics.scaleX((int) x), mScreenMetrics.scaleY((int) y));
+        return new TemplateMatching.Match(point, match.similarity, mScreenMetrics.scaleX(match.width), mScreenMetrics.scaleY(match.height), match.scale);
+    }
+
+    /**
+     * Cuts the search region out of the image after checking that the (smallest scaled) template fits into it.
+     * zh-CN: 校验 (最小缩放比例下的) 模板能放入搜索区域后, 从图片中截取该区域.
+     */
+    private Mat createTemplateRegion(Mat src, ImageWrapper template, Rect rect, @Nullable double[] scales) throws Exception {
+        ensureTemplateFits(template, rect.width, rect.height, scales);
+        return new Mat(src, rect);
+    }
+
+    /**
+     * Throws a descriptive error when even the smallest scaled template is larger than the search area,
+     * which almost always means swapped arguments.
+     * zh-CN: 即使最小缩放比例下的模板也大于搜索区域时抛出明确的错误 (通常是参数顺序颠倒).
+     */
+    private void ensureTemplateFits(ImageWrapper template, int width, int height, @Nullable double[] scales) throws Exception {
+        double minScale = 1.0;
+        if (scales != null) {
+            for (double scale : scales) {
+                if (scale > 0 && scale < minScale) {
+                    minScale = scale;
+                }
+            }
+        }
+        int templateWidth = (int) Math.max(1, Math.round(template.getWidth() * minScale));
+        int templateHeight = (int) Math.max(1, Math.round(template.getHeight() * minScale));
+        if (templateWidth > width) {
+            throw new Exception(mContext.getString(R.string.error_excessive_width_for_template_n_region, templateWidth, width));
+        }
+        if (templateHeight > height) {
+            throw new Exception(mContext.getString(R.string.error_excessive_height_for_template_n_region, templateHeight, height));
+        }
     }
 
     public Mat newMat() {

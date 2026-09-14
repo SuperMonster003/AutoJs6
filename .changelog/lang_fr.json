@@ -186,7 +186,8 @@
         "Repli de capture MCP: image.captureScreen(options) accepte les options de recadrage, taille, format et qualité de la capture d'accessibilité et renvoie une image encodée à usage unique par descripteur de fichier. captureScreen() conserve son handle d'image; une autorisation MediaProjection absente ou révoquée produit une erreur de permission.",
         "`images.countPointsByColor(image, color, options?)` compte les pixels correspondant à une couleur via un masque OpenCV, et `images.getMeanColor(image, region?)` renvoie la couleur moyenne d'une image ou d'une région",
         "`colors.distance(colorA, colorB, algorithm?)` renvoie la distance de couleur sur l'échelle de seuil de chaque algorithme de détection, `colors.invert(color)` inverse le RGB en conservant l'alpha, `colors.blend(colorA, colorB, ratio?)` mélange deux couleurs et `colors.contrast(foreground, background)` calcule le rapport de contraste WCAG; les quatre méthodes sont aussi disponibles sur les instances Color",
-        "`images.readPixels` accepte un ImageWrapper en plus d'un chemin de fichier, et l'image transmise reste utilisable"
+        "`images.readPixels` accepte un ImageWrapper en plus d'un chemin de fichier, et l'image transmise reste utilisable",
+        "`images.matchTemplate` et `images.findPointByImage` acceptent l'option `scales` (un facteur ou une liste) pour rechercher des modèles capturés à d'autres résolutions; chaque correspondance expose désormais `width`, `height`, `scale`, `center` et `rect`, et `MatchingResult` gagne `size`, `isEmpty()`, `isNotEmpty()` et `filter()`"
       ],
       "fix": [
         "L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours",
@@ -365,7 +366,9 @@
         "`images.isEqual` renvoyait true pour des images différant sur un seul canal, `images.mse` saturait à `255`, et `images.ncc` / `images.isGrayscale` géraient mal les entrées en niveaux de gris ou RGBA",
         "`images.invert` perdait le canal alpha, `ImageWrapper.saveTo` enregistrait les images basées sur Mat avec les canaux rouge et bleu inversés, et `images.clip` renvoyait silencieusement des résultats erronés pour des régions hors de l'image",
         "Les images transmises par chemin à `images.clip`, `images.findCircles` et `images.readPixels` pouvaient être recyclées avant utilisation, et `images.findImage` / `images.matchTemplate` pouvaient lever une exception ou renvoyer de mauvaises correspondances pour des modèles proches du bord de l'image ou plus grands que la région de recherche",
-        "`images.load` applique un délai d'attente de 30 secondes et ferme sa connexion, et `images.saveBitmap`, la mise en correspondance de caractéristiques et la comparaison d'histogrammes libèrent leurs flux et matrices temporaires"
+        "`images.load` applique un délai d'attente de 30 secondes et ferme sa connexion, et `images.saveBitmap`, la mise en correspondance de caractéristiques et la comparaison d'histogrammes libèrent leurs flux et matrices temporaires",
+        "La recherche de modèles renvoyait des coordonnées arrondies à un niveau grossier de la pyramide (jusqu'à plusieurs pixels d'écart) dès qu'une correspondance atteignait le seuil tôt, pouvait renvoyer deux fois la même position pour des candidats voisins, et les résultats n'étaient ni triés par similarité ni limités à `max`",
+        "`images.matchTemplate` levait une exception pour une image et un modèle au nombre de canaux différent, ne trouvait jamais un modèle de couleur unie, et `useTransparentMask` masquait seulement le canal alpha au lieu des pixels transparents; `MatchingResult.sortBy(compareFn)` échouait lorsque le comparateur renvoyait un nombre non entier"
       ],
       "improvement": [
         "Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs",
@@ -484,7 +487,8 @@
         "Les résumés de version du Centre de plugins normalisent aussi les chaînes date-heure ISO 8601 telles que `2026-09-11T14:30:00+08:00` en `yyyy-MM-dd`, en conservant la date calendaire du décalage horaire de la chaîne",
         "La recherche multicolore (`images.findPointByColors`, `images.findPointsByColors`) préfiltre les candidats avec des masques OpenCV vectorisés, s'exécutant des dizaines de fois plus vite sur les images denses avec des résultats identiques",
         "Les détecteurs de couleur exposent une méthode `distance` partagée par `colors.isSimilar`, `images.detectColor` et la recherche multicolore; l'algorithme `hs` utilise la distance circulaire de teinte et les noms d'algorithme inconnus lèvent une erreur explicite",
-        "L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération"
+        "L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération",
+        "Les niveaux de pyramide de la recherche de modèles utilisent l'interpolation par aire, la recherche masquée conserve le coefficient de corrélation normalisé, et les petites valeurs de `max` affinent toujours plusieurs candidats afin de ne pas perdre la meilleure correspondance aux niveaux grossiers"
       ],
       "dependency": [
         "Android AXML modularise",

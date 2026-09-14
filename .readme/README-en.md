@@ -354,6 +354,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` `images.countPointsByColor(image, color, options?)` counts the pixels matching a color through an OpenCV mask, and `images.getMeanColor(image, region?)` returns the average color of an image or region
 * `Feature` `colors.distance(colorA, colorB, algorithm?)` returns the color distance on the threshold scale of each detection algorithm, `colors.invert(color)` inverts RGB while keeping alpha, `colors.blend(colorA, colorB, ratio?)` mixes two colors and `colors.contrast(foreground, background)` computes the WCAG contrast ratio; all four are also available on Color instances
 * `Feature` `images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable
+* `Feature` `images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
 * `Fix` HTTP requests in host and packaged release apps could be blocked by the network security configuration; cleartext policy now matches debug builds while keeping GitHub resource domains restricted to HTTPS
 * `Fix` Background APK installations could not continue when the system blocked the confirmation activity; session status is now saved, with confirmation available through a notification or on returning to the app, including after notification denial or process recreation
@@ -531,6 +532,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` `images.invert` dropped the alpha channel, `ImageWrapper.saveTo` wrote Mat-backed images with swapped red and blue channels, and `images.clip` silently produced wrong results for regions outside the image
 * `Fix` Images passed by path to `images.clip`, `images.findCircles` and `images.readPixels` could be recycled before use, and `images.findImage` / `images.matchTemplate` could throw or return wrong matches for templates near the image border or larger than the search region
 * `Fix` `images.load` applies a 30-second timeout and closes its connection, and `images.saveBitmap`, feature matching and histogram comparison release their temporary streams and matrices
+* `Fix` Template matching returned coordinates rounded to a coarse pyramid level (off by up to several pixels) once a match reached the threshold early, could report the same location twice for neighbouring candidates, and returned results unsorted and beyond `max`
+* `Fix` `images.matchTemplate` threw for an image and template with different channel counts, never matched a solid-color template, and `useTransparentMask` masked only the alpha channel instead of the transparent pixels; `MatchingResult.sortBy(compareFn)` failed when the comparator returned a non-integer number
 * `Improvement` Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state
 * `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback
@@ -648,6 +651,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Multi-color matching (`images.findPointByColors`, `images.findPointsByColors`) pre-filters candidates with vectorized OpenCV masks, running tens of times faster on dense images with identical results
 * `Improvement` Color detectors expose a `distance` method shared by `colors.isSimilar`, `images.detectColor` and multi-color matching; the `hs` algorithm uses circular hue distance and unknown algorithm names raise a descriptive error
 * `Improvement` Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing
+* `Improvement` Pyramid levels of template matching use area interpolation, masked matching keeps the normalized correlation coefficient, and small `max` values still refine several candidates so the best match is not lost at coarse levels
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

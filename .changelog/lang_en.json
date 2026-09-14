@@ -186,7 +186,8 @@
         "MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error.",
         "`images.countPointsByColor(image, color, options?)` counts the pixels matching a color through an OpenCV mask, and `images.getMeanColor(image, region?)` returns the average color of an image or region",
         "`colors.distance(colorA, colorB, algorithm?)` returns the color distance on the threshold scale of each detection algorithm, `colors.invert(color)` inverts RGB while keeping alpha, `colors.blend(colorA, colorB, ratio?)` mixes two colors and `colors.contrast(foreground, background)` computes the WCAG contrast ratio; all four are also available on Color instances",
-        "`images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable"
+        "`images.readPixels` accepts an ImageWrapper in addition to a file path and leaves the passed image usable",
+        "`images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`"
       ],
       "fix": [
         "The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request",
@@ -365,7 +366,9 @@
         "`images.isEqual` returned true for images differing in a single channel, `images.mse` saturated at `255`, and `images.ncc` / `images.isGrayscale` mishandled grayscale or RGBA input",
         "`images.invert` dropped the alpha channel, `ImageWrapper.saveTo` wrote Mat-backed images with swapped red and blue channels, and `images.clip` silently produced wrong results for regions outside the image",
         "Images passed by path to `images.clip`, `images.findCircles` and `images.readPixels` could be recycled before use, and `images.findImage` / `images.matchTemplate` could throw or return wrong matches for templates near the image border or larger than the search region",
-        "`images.load` applies a 30-second timeout and closes its connection, and `images.saveBitmap`, feature matching and histogram comparison release their temporary streams and matrices"
+        "`images.load` applies a 30-second timeout and closes its connection, and `images.saveBitmap`, feature matching and histogram comparison release their temporary streams and matrices",
+        "Template matching returned coordinates rounded to a coarse pyramid level (off by up to several pixels) once a match reached the threshold early, could report the same location twice for neighbouring candidates, and returned results unsorted and beyond `max`",
+        "`images.matchTemplate` threw for an image and template with different channel counts, never matched a solid-color template, and `useTransparentMask` masked only the alpha channel instead of the transparent pixels; `MatchingResult.sortBy(compareFn)` failed when the comparator returned a non-integer number"
       ],
       "improvement": [
         "Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state",
@@ -484,7 +487,8 @@
         "Plugin Center version summaries also normalize ISO 8601 date-time strings such as `2026-09-11T14:30:00+08:00` to `yyyy-MM-dd`, keeping the calendar date of the string's own offset",
         "Multi-color matching (`images.findPointByColors`, `images.findPointsByColors`) pre-filters candidates with vectorized OpenCV masks, running tens of times faster on dense images with identical results",
         "Color detectors expose a `distance` method shared by `colors.isSimilar`, `images.detectColor` and multi-color matching; the `hs` algorithm uses circular hue distance and unknown algorithm names raise a descriptive error",
-        "Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing"
+        "Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing",
+        "Pyramid levels of template matching use area interpolation, masked matching keeps the normalized correlation coefficient, and small `max` values still refine several candidates so the best match is not lost at coarse levels"
       ],
       "dependency": [
         "Modularized Android AXML",
