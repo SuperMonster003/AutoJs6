@@ -916,9 +916,11 @@
             android:name="org.autojs.autojs.core.plugin.center.PluginVariantPriorityActivity"
             android:theme="@style/AppTheme.Settings" />
 
+        <!-- Keep the running script and its view tree when split-screen changes size classes. -->
+        <!-- zh-CN: 分屏改变窗口尺寸类别时, 保留正在运行的脚本及其视图树. -->
         <activity
             android:name="org.autojs.autojs.execution.ScriptExecuteActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout|locale"
             android:theme="@style/ScriptTheme" />
 
         <activity
