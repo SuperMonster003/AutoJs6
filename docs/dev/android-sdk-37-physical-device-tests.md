@@ -2,6 +2,8 @@
 
 日期: 2026-09-13. 源于 [SDK 37 Roadmap](android-sdk-37-roadmap.md) 的 P2、P3、P5、P6, 覆盖宿主、inrt 用户 APK 与全部 42 个官方插件. 共 99 个验收行: 宿主 / 系统 51 行, inrt 6 行, 插件 42 行. 本文汇总待做的实体机工作, 不把模拟器通过项改记为真机通过. 每行有独立 ID, 可导出 CSV 填写状态与证据.
 
+2026-09-14 执行约定: 维护者集中进行实体设备测试并反馈结果. 开测前按实际待测 APK / 插件版本冻结一批清单, 明确设备、步骤、预期与回传材料; 开发会话继续推进源码和独占模拟器验证. 以下 99 行没有因模拟器结果而改为 PASS. API 37 真机、真实 16 KB 内核及物理键盘 / 触摸板的可用性仍待集中测试时确认.
+
 ## 1. 设备与执行顺序
 
 本轮只读清点确认以下 5 台设备在线, 均为 4 KB 内核页. 没有在线 API 37 真机. 原始清点位于 `build/sdk37-physical-20260913/inventory`; `localhost:50781` 离线, 未访问. Xiaomi 的 `am get-config` 当前含 `sw720dp`.
@@ -213,7 +215,7 @@ VERIFIED: Android 17 上后台音频有生命周期限制, target 37 后后台 F
 | [ ] S03 | MediaStore、扫描与回收站 | D33 或 D35 + D37 | images.save 保存已知图、media.scanFile、相册 / 文档选择器, 系统回收站移入 / 恢复 / 删除, 文件管理器版本历史分别测 | 内容与条目同步, 目录查询不越权; App 自有回收站与 MediaStore trash 分开, 未确认的新语义不凭 change 名字定结论 | P2.8 |
 | [ ] S04 | 文件插件热插拔与错误输入 | D33 或 D35 + D37 | Archive / Image Tools / Viewer / File / APK Inspector 用专用样本; 中途撤销 URI、拔出 OTG, 重开文件 | 错误可恢复, 不操作样本外文件; UI、provider、返回描述符各无挂起 | P5.5 |
 | [ ] UI01 | 平板方向 / 分屏 / 窗口调整 | D35 + 大屏 D37 | 在 sw>=600dp 上运行含 setRequestedOrientation 的 UI 脚本, 编辑器 / 控制台 / overlay 旋转、分屏、连续调整尺寸; 手机上另做方向对照 | 大屏 target 37 不依赖方向 / 尺寸豁免; 布局可用、状态不丢失; API 35 行为只与其本机旧 target 基线比较 | P2.12 |
-| [ ] UI02 | IME、Symbols Settings 与配置变化 | D35 + D37, D28 补旧 API | Symbols Settings 编辑符号, 脚本输入框 / EditActivity 弹键盘、Back收起、旋转再点击输入; 夜间 / 色彩 / 外设变化记录重建或 onConfigurationChanged | 焦点、光标、文本和 adjustResize 正常; 旋转不自动恢复 IME 时仍可用户唤起, 不以旧系统效果强套 Android 17 | P1 / P2.12 |
+| [ ] UI02 | IME、Symbols Settings 与配置变化 | D35 + D37, D28 补旧 API | Symbols Settings 编辑符号; 原生 / Ace 的已保存文件、未保存草稿及超过 256 KiB 的无路径文本分别保留光标和非空选区, 旋转并分屏往返; Main 搜索与 Log 输入弹键盘, 收起后再点击输入; 夜间 / 色彩 / 外设变化记录重建或 onConfigurationChanged | 正文及 Log 输入栏不被键盘遮挡, 辅助栏随空间恢复; 文本、草稿保存状态、光标和选区正确, Main 搜索仅在主动退出搜索时清除; 旋转不自动恢复 IME 时仍可用户唤起 | P1 / P2.12 |
 | [ ] UI03 | 物理键盘 / 触摸板 / Back / 边到边 | 有键盘 / 触摸板的 D35 + D37 | 键盘导航、Meta / Back 等系统快捷键、密码可见设置, touchpad捕获, 手势返回取消 / 完成, 三键导航, 刘海 / 系统栏 | 无焦点陷阱或输入吞噬, 文字和按钮不被系统栏遮挡; 系统保留快捷键不误判为应用丢键; 记录具体映射 / OS版本 | P2.12 / P2.15 / P3.3 |
 | [ ] UI04 | WebView、字体与默认 UA | 全部 + D37 | 文档、HTML / Markdown 预览、ui.webview、Ace / LSP; 默认 / 自定义 UA、CJKV与符号字体、文件选择; 记录 WebView版本 | 正确渲染和输入, 默认 UA按实际版本记录; 自定义后缀不被当作恢复完整UA; 同资料回环服务可用, File System Access 未确认能力单列 | P2.11 / P5.4 |
 | [ ] O01 | 测试短信 / OTP / 通知监听 | 有测试 SIM 和发送端的 D37 | 发送自有普通短信与测试 OTP, 记录时间; 用已获权限的脚本读取 content://sms / 广播与 observeNotification, 对照普通文本、验证码及恢复窗口 | 按实际平台过滤 / 延迟记录可见性, 不把过滤当丢包; 不读取真实账号 OTP; 真机没有 emu sms send, 未识别为OTP不能证明无过滤 | P2.10 |
