@@ -1967,6 +1967,11 @@
     <string name="text_terminal_node_plugin_too_old">已安装的 Node.js 运行时插件不含终端启动器, 更新插件后方可在此使用 node 与 npm</string>
     <string name="text_terminal_node_probe">Node.js 启动器检测</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在检测 Node.js 启动器...</string>
+    <string name="text_terminal_notification_channel_description">显示在后台持续运行的终端会话, 并可将其关闭</string>
+    <string name="text_terminal_notification_channel_name">终端会话</string>
+    <string name="text_terminal_notification_close_sessions">关闭会话</string>
+    <string name="text_terminal_notification_title">终端会话运行中</string>
+    <string name="text_terminal_notification_title_multiple">%1$d 个终端会话运行中</string>
     <string name="text_terminal_npm_ignore_scripts">忽略 npm 生命周期脚本</string>
     <string name="text_terminal_npm_init">初始化项目 (npm init)</string>
     <string name="text_terminal_npm_install">安装依赖 (npm install)</string>
@@ -1983,10 +1988,11 @@
     <string name="text_terminal_search_npm">搜索 npm 包</string>
     <string name="text_terminal_select_text">选择文本</string>
     <string name="text_terminal_session_ended">会话已结束</string>
+    <string name="text_terminal_session_kept_running">会话将在后台继续运行, 可通过 \"关闭会话\" 结束</string>
     <string name="text_terminal_share_transcript">分享终端记录</string>
     <string name="text_terminal_show_keyboard">显示键盘</string>
     <string name="text_terminal_tips">终端提示</string>
-    <string name="text_terminal_tips_content">shell 以 AutoJs6 应用用户身份运行, 拥有独立的主目录 (%1$s). 按键栏提供 Esc / Tab / Ctrl / Alt 及方向键, 长按屏幕可选择文本, 菜单可复制或分享终端记录. 安装支持终端的 Node.js 运行时插件后即可使用 node 与 npm.</string>
+    <string name="text_terminal_tips_content">shell 以 AutoJs6 应用用户身份运行, 拥有独立的主目录 (%1$s). 按键栏提供 Esc / Tab / Ctrl / Alt 及方向键, 长按屏幕可选择文本, 菜单可复制或分享终端记录. 安装支持终端的 Node.js 运行时插件后即可使用 node 与 npm. 离开终端后会话及其进程在后台继续运行 (带通知), 菜单中的 \"关闭会话\" 可将其结束.</string>
     <string name="text_text_size">字体大小</string>
     <string name="text_text_size_current_value" formatted="true">字体大小: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">可参考以下解决方案</string>

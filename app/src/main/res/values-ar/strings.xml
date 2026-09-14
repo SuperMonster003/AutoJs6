@@ -1972,6 +1972,11 @@
     <string name="text_terminal_node_plugin_too_old">إضافة Node.js Runtime المثبتة لا تحتوي على مشغل للطرفية, حدثها لاستخدام node و npm هنا</string>
     <string name="text_terminal_node_probe">فحص مشغل Node.js</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">جار فحص مشغل Node.js...</string>
+    <string name="text_terminal_notification_channel_description">يعرض جلسات الطرفية التي تستمر في العمل في الخلفية ويتيح إغلاقها</string>
+    <string name="text_terminal_notification_channel_name">جلسات الطرفية</string>
+    <string name="text_terminal_notification_close_sessions">إغلاق الجلسات</string>
+    <string name="text_terminal_notification_title">جلسة الطرفية قيد التشغيل</string>
+    <string name="text_terminal_notification_title_multiple">%1$d جلسات طرفية قيد التشغيل</string>
     <string name="text_terminal_npm_ignore_scripts">تجاهل نصوص دورة حياة npm</string>
     <string name="text_terminal_npm_init">تهيئة المشروع (npm init)</string>
     <string name="text_terminal_npm_install">تثبيت التبعيات (npm install)</string>
@@ -1988,10 +1993,11 @@
     <string name="text_terminal_search_npm">البحث عن حزم npm</string>
     <string name="text_terminal_select_text">تحديد النص</string>
     <string name="text_terminal_session_ended">انتهت الجلسة</string>
+    <string name="text_terminal_session_kept_running">تستمر الجلسة في العمل في الخلفية; استخدم \"إغلاق الجلسة\" لإنهائها</string>
     <string name="text_terminal_share_transcript">مشاركة النص الكامل</string>
     <string name="text_terminal_show_keyboard">إظهار لوحة المفاتيح</string>
     <string name="text_terminal_tips">تلميحات الطرفية</string>
-    <string name="text_terminal_tips_content">يعمل الـ shell بصفة مستخدم تطبيق AutoJs6 وله دليل رئيسي خاص (%1$s). يوفر شريط المفاتيح Esc / Tab / Ctrl / Alt ومفاتيح المؤشر, والضغط المطول على الشاشة يحدد النص, والقائمة تنسخ النص الكامل أو تشاركه. يصبح node و npm متاحين بعد تثبيت إضافة Node.js Runtime التي تدعم الطرفية.</string>
+    <string name="text_terminal_tips_content">يعمل الـ shell بصفة مستخدم تطبيق AutoJs6 وله دليل رئيسي خاص (%1$s). يوفر شريط المفاتيح Esc / Tab / Ctrl / Alt ومفاتيح المؤشر, والضغط المطول على الشاشة يحدد النص, والقائمة تنسخ النص الكامل أو تشاركه. يصبح node و npm متاحين بعد تثبيت إضافة Node.js Runtime التي تدعم الطرفية. مغادرة الطرفية تبقي الجلسة وعملياتها تعمل في الخلفية (مع إشعار); ويُنهيها \"إغلاق الجلسة\" من القائمة.</string>
     <string name="text_text_size">حجم الخط</string>
     <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>

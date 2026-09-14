@@ -59,14 +59,13 @@ class TerminalActivity : BaseActivity() {
     private var session: TerminalSessionManager.Session? = null
     private var nodeResolution: Resolution? = null
     private var nodeBannerDismissed = false
-    private var closeConfirmed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTerminalBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setToolbarAsBack(R.string.text_terminal)
-        binding.toolbar.setNavigationOnClickListener { requestClose() }
+        binding.toolbar.setNavigationOnClickListener { leave() }
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val bottom = insets.getInsets(WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.navigationBars()).bottom
             view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottom)
@@ -80,10 +79,18 @@ class TerminalActivity : BaseActivity() {
         setUpKeyBar()
         setUpBackHandling()
         setUpNodeBanner()
+        // A recreated activity restores its own session; a fresh launch reattaches the newest live
+        // session (kept by TerminalSessionService) and only starts a shell when there is none.
+        // zh-CN: 重建的 Activity 恢复自己的会话; 新启动时接回最新的存活会话 (由 TerminalSessionService 保持), 没有时才启动新 shell.
         val restored = savedInstanceState?.getString(STATE_SESSION_ID)?.let(TerminalSessionManager::get)
+            ?: TerminalSessionManager.activeSessions.lastOrNull { it.pty.isProcessAlive }
         if (restored != null) {
             attachSession(restored)
-            updateSubtitle(directory)
+            updateSubtitle(restored.initialDirectory)
+            val requested = intent.getStringExtra(EXTRA_DIRECTORY)?.takeIf { it.isNotBlank() }
+            if (savedInstanceState == null && requested != null) {
+                changeDirectory(requested)
+            }
             refreshNodeAvailability()
         } else {
             startSession(directory)
@@ -131,6 +138,11 @@ class TerminalActivity : BaseActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         val requested = intent.getStringExtra(EXTRA_DIRECTORY)?.takeIf { it.isNotBlank() } ?: return
+        changeDirectory(requested)
+    }
+
+    /** Types a `cd` into the running shell (used when the terminal is reopened for a directory). zh-CN: 向运行中的 shell 键入 `cd` (为某目录重新打开终端时使用). */
+    private fun changeDirectory(requested: String) {
         val pty = session?.pty ?: return
         if (!pty.isProcessAlive) return
         pty.clearModifiers()
@@ -154,13 +166,18 @@ class TerminalActivity : BaseActivity() {
         outState.putString(STATE_SESSION_ID, session?.id)
     }
 
+    /**
+     * Leaving the screen never ends the session: it stays in [TerminalSessionManager] under the
+     * foreground service until "Close session" or the shell's own exit; only a dead shell is dropped.
+     * zh-CN: 离开界面不会结束会话: 它由前台服务保持在 [TerminalSessionManager] 中, 直到 "关闭会话" 或 shell 自行退出; 仅移除已死亡的 shell.
+     */
     override fun onDestroy() {
         val current = session
         if (current != null) {
             current.pty.onProcessExited = null
             current.pty.onInputAfterExit = null
             current.pty.onModifiersChanged = null
-            if (isFinishing) {
+            if (isFinishing && !current.pty.isProcessAlive) {
                 TerminalSessionManager.close(current.id)
             }
         }
@@ -228,19 +245,34 @@ class TerminalActivity : BaseActivity() {
     private fun setUpBackHandling() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                requestClose()
+                leave()
             }
         })
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        requestClose()
+        leave()
         return true
     }
 
-    private fun requestClose() {
+    /**
+     * Back / Up: the session keeps running in the background; a toast says so while a child process is busy.
+     * zh-CN: 返回 / 向上: 会话在后台继续运行; 有子进程忙碌时以 toast 说明.
+     */
+    private fun leave() {
         val pty = session?.pty
-        if (pty == null || closeConfirmed || !pty.isProcessAlive || !pty.hasLiveChildren()) {
+        if (pty != null && pty.isProcessAlive && pty.hasLiveChildren()) {
+            ViewUtils.showToast(this, R.string.text_terminal_session_kept_running)
+        }
+        finish()
+    }
+
+    /** Menu "Close session": ends the shell (after confirmation while a child process runs) and leaves. zh-CN: 菜单 "关闭会话": 结束 shell (有子进程运行时先确认) 并离开. */
+    private fun requestCloseSession() {
+        val current = session
+        val pty = current?.pty
+        if (current == null || pty == null || !pty.isProcessAlive || !pty.hasLiveChildren()) {
+            current?.let { TerminalSessionManager.close(it.id) }
             finish()
             return
         }
@@ -252,7 +284,7 @@ class TerminalActivity : BaseActivity() {
             .positiveText(R.string.dialog_button_confirm)
             .positiveColorRes(R.color.dialog_button_warn)
             .onPositive { _, _ ->
-                closeConfirmed = true
+                TerminalSessionManager.close(current.id)
                 finish()
             }
             .widgetThemeColor()
@@ -428,7 +460,7 @@ class TerminalActivity : BaseActivity() {
             R.id.action_show_keyboard -> showSoftKeyboard()
             R.id.action_clear -> clearScreen()
             R.id.action_tips -> showTips(force = true)
-            R.id.action_close_session -> requestClose()
+            R.id.action_close_session -> requestCloseSession()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -550,10 +582,14 @@ class TerminalActivity : BaseActivity() {
 
         @JvmStatic
         @JvmOverloads
+        fun intent(context: Context, directory: String? = null): Intent = Intent(context, TerminalActivity::class.java).apply {
+            directory?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_DIRECTORY, it) }
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun launch(context: Context, directory: String? = null) {
-            Intent(context, TerminalActivity::class.java).apply {
-                directory?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_DIRECTORY, it) }
-            }.startSafely(context)
+            intent(context, directory).startSafely(context)
         }
 
     }

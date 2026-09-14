@@ -86,6 +86,13 @@ Host flow on every session start (`core/terminal`):
    registry (`npm_config_registry`, `COREPACK_NPM_REGISTRY`) and
    `npm_config_ignore_scripts`.
 
+Sessions live in a process-wide registry guarded by a `specialUse` foreground
+service (`TerminalSessionService`): leaving the screen keeps the shell and its
+children (an `npm install`, a running script) alive, the notification shows the
+current directory and offers "Close sessions", and reopening the terminal
+reattaches the newest session. The session ends with the menu's "Close session",
+the notification action, or when the shell itself exits.
+
 Until a plugin with the contract is installed and the check succeeds, the terminal
 is shell-only and shows a banner explaining why. "Developer options > Node.js >
 Node.js launcher check" re-runs the check and prints the raw result.

@@ -1972,6 +1972,11 @@
     <string name="text_terminal_node_plugin_too_old">설치된 Node.js 런타임 플러그인에 터미널 런처가 없습니다. 여기서 node 와 npm 을 사용하려면 플러그인을 업데이트하세요</string>
     <string name="text_terminal_node_probe">Node.js 런처 확인</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Node.js 런처를 확인하는 중...</string>
+    <string name="text_terminal_notification_channel_description">백그라운드에서 계속 실행 중인 터미널 세션을 표시하고 종료할 수 있게 합니다</string>
+    <string name="text_terminal_notification_channel_name">터미널 세션</string>
+    <string name="text_terminal_notification_close_sessions">세션 닫기</string>
+    <string name="text_terminal_notification_title">터미널 세션 실행 중</string>
+    <string name="text_terminal_notification_title_multiple">터미널 세션 %1$d 개 실행 중</string>
     <string name="text_terminal_npm_ignore_scripts">npm 라이프사이클 스크립트 무시</string>
     <string name="text_terminal_npm_init">프로젝트 초기화 (npm init)</string>
     <string name="text_terminal_npm_install">의존성 설치 (npm install)</string>
@@ -1988,10 +1993,11 @@
     <string name="text_terminal_search_npm">npm 패키지 검색</string>
     <string name="text_terminal_select_text">텍스트 선택</string>
     <string name="text_terminal_session_ended">세션이 종료되었습니다</string>
+    <string name="text_terminal_session_kept_running">세션은 백그라운드에서 계속 실행됩니다. 종료하려면 \"세션 닫기\" 를 사용하세요</string>
     <string name="text_terminal_share_transcript">출력 기록 공유</string>
     <string name="text_terminal_show_keyboard">키보드 표시</string>
     <string name="text_terminal_tips">터미널 도움말</string>
-    <string name="text_terminal_tips_content">셸은 AutoJs6 앱 사용자로 실행되며 자체 홈 디렉터리 (%1$s) 를 가집니다. 키 바에서 Esc / Tab / Ctrl / Alt 와 커서 키를 사용할 수 있고, 화면을 길게 누르면 텍스트를 선택할 수 있으며, 메뉴에서 출력 기록을 복사하거나 공유할 수 있습니다. 터미널을 지원하는 Node.js 런타임 플러그인을 설치하면 node 와 npm 을 사용할 수 있습니다.</string>
+    <string name="text_terminal_tips_content">셸은 AutoJs6 앱 사용자로 실행되며 자체 홈 디렉터리 (%1$s) 를 가집니다. 키 바에서 Esc / Tab / Ctrl / Alt 와 커서 키를 사용할 수 있고, 화면을 길게 누르면 텍스트를 선택할 수 있으며, 메뉴에서 출력 기록을 복사하거나 공유할 수 있습니다. 터미널을 지원하는 Node.js 런타임 플러그인을 설치하면 node 와 npm 을 사용할 수 있습니다. 터미널을 떠나도 세션과 그 프로세스는 백그라운드에서 계속 실행됩니다 (알림 표시). 메뉴의 \"세션 닫기\" 로 종료할 수 있습니다.</string>
     <string name="text_text_size">텍스트 크기</string>
     <string name="text_text_size_current_value" formatted="true">텍스트 크기: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>

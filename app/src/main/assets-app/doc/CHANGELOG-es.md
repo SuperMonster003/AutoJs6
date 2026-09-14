@@ -496,6 +496,7 @@
 * `Mejora` El estado del capturador de pantalla se lee sin bloqueo, e `images.releaseScreenCapturer` ya no bloquea las llamadas de imagen concurrentes durante la liberación
 * `Mejora` Los niveles de la pirámide de búsqueda de plantillas usan interpolación por área, la búsqueda con máscara conserva el coeficiente de correlación normalizado, y los valores pequeños de `max` siguen refinando varios candidatos para no perder la mejor coincidencia en los niveles gruesos
 * `Mejora` Ventana de jerarquía de diseño: las filas resumen id / text / desc / clickable y otros indicadores, el nodo seleccionado y todos sus ancestros se resaltan en el árbol y se enmarcan en pantalla, el árbol se desplaza horizontalmente, el elemento de menú "Seleccionar nodo padre" sube la selección nivel a nivel, y un aviso único explica cómo salir con la tecla de bajar volumen
+* `Mejora` Terminal: las sesiones siguen ejecutándose en segundo plano al salir de la pantalla (un servicio en primer plano muestra el directorio actual en su notificación con la acción "Cerrar sesiones"); al volver a abrir la terminal se reconecta a la sesión en ejecución
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

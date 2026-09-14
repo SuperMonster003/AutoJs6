@@ -53,6 +53,13 @@ class TerminalPtySession(
     /** Called on any keyboard input after the child exited. zh-CN: 子进程退出后收到任意键盘输入时回调. */
     var onInputAfterExit: (() -> Unit)? = null
 
+    /**
+     * Registry hook invoked (main thread) after [onProcessExited] so the session can be dropped even
+     * when no activity is attached.
+     * zh-CN: 注册表钩子, 在 [onProcessExited] 之后于主线程调用, 使没有 Activity 依附时会话也能被移除.
+     */
+    internal var onProcessReaped: ((Int) -> Unit)? = null
+
     var onModifiersChanged: ((ctrl: Boolean, alt: Boolean) -> Unit)? = null
 
     init {
@@ -82,6 +89,7 @@ class TerminalPtySession(
                     exitCode = START_FAILURE_CODE
                     appendMessage("\r\n[Failed to start shell: ${e.message}]\r\n")
                     onProcessExited?.invoke(START_FAILURE_CODE)
+                    onProcessReaped?.invoke(START_FAILURE_CODE)
                 }
                 return@thread
             }
@@ -91,6 +99,7 @@ class TerminalPtySession(
                 exitCode = code
                 appendMessage("\r\n[Process completed (code $code)]\r\n")
                 onProcessExited?.invoke(code)
+                onProcessReaped?.invoke(code)
             }
         }
     }

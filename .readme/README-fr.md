@@ -658,6 +658,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` L'état du capteur d'écran est lu sans verrou, et `images.releaseScreenCapturer` ne bloque plus les appels d'image concurrents pendant la libération
 * `Amélioration` Les niveaux de pyramide de la recherche de modèles utilisent l'interpolation par aire, la recherche masquée conserve le coefficient de corrélation normalisé, et les petites valeurs de `max` affinent toujours plusieurs candidats afin de ne pas perdre la meilleure correspondance aux niveaux grossiers
 * `Amélioration` Fenêtre de hiérarchie de mise en page : les lignes résument id / text / desc / clickable et d'autres indicateurs, le nœud sélectionné et tous ses ancêtres sont mis en évidence dans l'arbre et encadrés à l'écran, l'arbre défile horizontalement, l'élément de menu "Sélectionner le nœud parent" remonte la sélection niveau par niveau, et une astuce affichée une seule fois explique la sortie avec la touche volume bas
+* `Amélioration` Terminal : les sessions continuent en arrière-plan après avoir quitté l'écran (un service au premier plan affiche le répertoire courant dans sa notification avec l'action "Fermer les sessions") ; rouvrir le terminal rattache la session en cours
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

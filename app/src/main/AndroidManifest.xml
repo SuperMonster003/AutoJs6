@@ -626,6 +626,16 @@
         </service>
 
         <service
+            android:name="org.autojs.autojs.core.terminal.TerminalSessionService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps user-started terminal sessions and their shell processes (for example npm install) running while the terminal screen is not in front, with a persistent close action" />
+        </service>
+
+        <service
             android:name="org.autojs.autojs.core.media.ScriptMusicService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">

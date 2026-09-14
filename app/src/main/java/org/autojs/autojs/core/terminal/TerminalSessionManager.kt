@@ -5,9 +5,11 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Process-wide registry of terminal sessions so an activity can be recreated (rotation, theme
- * change) or left and re-entered without losing the running shell.
+ * change) or left and re-entered without losing the running shell. While any session exists,
+ * [TerminalSessionService] keeps the process in the foreground.
  *
  * zh-CN: 进程级终端会话注册表, 使 Activity 重建 (旋转, 主题切换) 或离开再进入时不丢失正在运行的 shell.
+ * 只要存在会话, [TerminalSessionService] 就让进程保持前台.
  */
 object TerminalSessionManager {
 
@@ -44,7 +46,9 @@ object TerminalSessionManager {
         val session = Session(nextId.getAndIncrement().toString(), pty, directory, paths)
         synchronized(this) { sessions[session.id] = session }
         pty.setFinishCallback { remove(session.id) }
+        pty.onProcessReaped = { remove(session.id) }
         pty.start()
+        TerminalSessionService.ensureStarted(context)
         notifyChanged()
         return session
     }

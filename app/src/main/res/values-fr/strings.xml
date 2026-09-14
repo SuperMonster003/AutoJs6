@@ -1970,6 +1970,11 @@
     <string name="text_terminal_node_plugin_too_old">Le plugin Node.js Runtime installé n\'a pas de lanceur de terminal, mettez-le à jour pour utiliser node et npm ici</string>
     <string name="text_terminal_node_probe">Vérification du lanceur Node.js</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Vérification du lanceur Node.js...</string>
+    <string name="text_terminal_notification_channel_description">Affiche les sessions de terminal qui continuent en arrière-plan et permet de les fermer</string>
+    <string name="text_terminal_notification_channel_name">Sessions de terminal</string>
+    <string name="text_terminal_notification_close_sessions">Fermer les sessions</string>
+    <string name="text_terminal_notification_title">Session de terminal en cours</string>
+    <string name="text_terminal_notification_title_multiple">%1$d sessions de terminal en cours</string>
     <string name="text_terminal_npm_ignore_scripts">Ignorer les scripts de cycle de vie npm</string>
     <string name="text_terminal_npm_init">Initialiser le projet (npm init)</string>
     <string name="text_terminal_npm_install">Installer les dépendances (npm install)</string>
@@ -1986,10 +1991,11 @@
     <string name="text_terminal_search_npm">Rechercher des paquets npm</string>
     <string name="text_terminal_select_text">Sélectionner du texte</string>
     <string name="text_terminal_session_ended">Session terminée</string>
+    <string name="text_terminal_session_kept_running">La session continue en arrière-plan ; utilisez \"Fermer la session\" pour y mettre fin</string>
     <string name="text_terminal_share_transcript">Partager la transcription</string>
     <string name="text_terminal_show_keyboard">Afficher le clavier</string>
     <string name="text_terminal_tips">Conseils du terminal</string>
-    <string name="text_terminal_tips_content">Le shell s\'exécute en tant qu\'utilisateur de l\'application AutoJs6 avec son propre répertoire personnel (%1$s). La barre de touches fournit Esc / Tab / Ctrl / Alt et les touches de curseur, un appui long sur l\'écran sélectionne du texte, et le menu copie ou partage la transcription. node et npm deviennent disponibles une fois qu\'un plugin Node.js Runtime prenant en charge le terminal est installé.</string>
+    <string name="text_terminal_tips_content">Le shell s\'exécute en tant qu\'utilisateur de l\'application AutoJs6 avec son propre répertoire personnel (%1$s). La barre de touches fournit Esc / Tab / Ctrl / Alt et les touches de curseur, un appui long sur l\'écran sélectionne du texte, et le menu copie ou partage la transcription. node et npm deviennent disponibles une fois qu\'un plugin Node.js Runtime prenant en charge le terminal est installé. Quitter le terminal laisse la session et ses processus tourner en arrière-plan (avec une notification) ; \"Fermer la session\" dans le menu y met fin.</string>
     <string name="text_text_size">Taille du texte</string>
     <string name="text_text_size_current_value" formatted="true">Taille du texte : %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">Les solutions suivantes peuvent être utilisées</string>

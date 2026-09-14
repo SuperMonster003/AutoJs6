@@ -1971,6 +1971,11 @@
     <string name="text_terminal_node_plugin_too_old">インストール済みの Node.js ランタイムプラグインにはターミナルランチャーがありません. ここで node と npm を使うにはプラグインを更新してください</string>
     <string name="text_terminal_node_probe">Node.js ランチャーの確認</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">Node.js ランチャーを確認しています...</string>
+    <string name="text_terminal_notification_channel_description">バックグラウンドで実行中のターミナルセッションを表示し, 終了できるようにします</string>
+    <string name="text_terminal_notification_channel_name">ターミナルセッション</string>
+    <string name="text_terminal_notification_close_sessions">セッションを終了</string>
+    <string name="text_terminal_notification_title">ターミナルセッションを実行中</string>
+    <string name="text_terminal_notification_title_multiple">%1$d 件のターミナルセッションを実行中</string>
     <string name="text_terminal_npm_ignore_scripts">npm ライフサイクルスクリプトを無視</string>
     <string name="text_terminal_npm_init">プロジェクトを初期化 (npm init)</string>
     <string name="text_terminal_npm_install">依存関係をインストール (npm install)</string>
@@ -1987,10 +1992,11 @@
     <string name="text_terminal_search_npm">npm パッケージを検索</string>
     <string name="text_terminal_select_text">テキストを選択</string>
     <string name="text_terminal_session_ended">セッションが終了しました</string>
+    <string name="text_terminal_session_kept_running">セッションはバックグラウンドで実行を続けます. 終了するには \"セッションを閉じる\" を使用してください</string>
     <string name="text_terminal_share_transcript">出力ログを共有</string>
     <string name="text_terminal_show_keyboard">キーボードを表示</string>
     <string name="text_terminal_tips">ターミナルのヒント</string>
-    <string name="text_terminal_tips_content">シェルは AutoJs6 アプリのユーザーとして実行され, 専用のホームディレクトリ (%1$s) を持ちます. キーバーには Esc / Tab / Ctrl / Alt とカーソルキーがあり, 画面を長押しするとテキストを選択でき, メニューから出力ログをコピーまたは共有できます. ターミナル対応の Node.js ランタイムプラグインをインストールすると node と npm が使えるようになります.</string>
+    <string name="text_terminal_tips_content">シェルは AutoJs6 アプリのユーザーとして実行され, 専用のホームディレクトリ (%1$s) を持ちます. キーバーには Esc / Tab / Ctrl / Alt とカーソルキーがあり, 画面を長押しするとテキストを選択でき, メニューから出力ログをコピーまたは共有できます. ターミナル対応の Node.js ランタイムプラグインをインストールすると node と npm が使えるようになります. ターミナルを離れてもセッションとそのプロセスはバックグラウンドで実行を続けます (通知付き). メニューの \"セッションを閉じる\" で終了できます.</string>
     <string name="text_text_size">文字サイズ</string>
     <string name="text_text_size_current_value" formatted="true">テキストサイズ: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">次の解決策を参照できます</string>

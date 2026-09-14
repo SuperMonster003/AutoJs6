@@ -1967,6 +1967,11 @@
     <string name="text_terminal_node_plugin_too_old">已安裝的 Node.js 執行階段外掛程式不含終端機啟動器, 更新外掛程式後方可在此使用 node 與 npm</string>
     <string name="text_terminal_node_probe">Node.js 啟動器檢測</string>
     <string name="text_terminal_node_probe_running" tools:ignore="TypographyEllipsis">正在檢測 Node.js 啟動器...</string>
+    <string name="text_terminal_notification_channel_description">顯示在背景持續執行的終端機工作階段, 並可將其關閉</string>
+    <string name="text_terminal_notification_channel_name">終端機工作階段</string>
+    <string name="text_terminal_notification_close_sessions">關閉工作階段</string>
+    <string name="text_terminal_notification_title">終端機工作階段執行中</string>
+    <string name="text_terminal_notification_title_multiple">%1$d 個終端機工作階段執行中</string>
     <string name="text_terminal_npm_ignore_scripts">忽略 npm 生命週期指令碼</string>
     <string name="text_terminal_npm_init">初始化專案 (npm init)</string>
     <string name="text_terminal_npm_install">安裝相依套件 (npm install)</string>
@@ -1983,10 +1988,11 @@
     <string name="text_terminal_search_npm">搜尋 npm 套件</string>
     <string name="text_terminal_select_text">選取文字</string>
     <string name="text_terminal_session_ended">工作階段已結束</string>
+    <string name="text_terminal_session_kept_running">工作階段將在背景繼續執行, 可透過 \"關閉工作階段\" 結束</string>
     <string name="text_terminal_share_transcript">分享終端機記錄</string>
     <string name="text_terminal_show_keyboard">顯示鍵盤</string>
     <string name="text_terminal_tips">終端機提示</string>
-    <string name="text_terminal_tips_content">shell 以 AutoJs6 應用程式使用者身分執行, 擁有獨立的主目錄 (%1$s). 按鍵列提供 Esc / Tab / Ctrl / Alt 及方向鍵, 長按螢幕可選取文字, 選單可複製或分享終端機記錄. 安裝支援終端機的 Node.js 執行階段外掛程式後即可使用 node 與 npm.</string>
+    <string name="text_terminal_tips_content">shell 以 AutoJs6 應用程式使用者身分執行, 擁有獨立的主目錄 (%1$s). 按鍵列提供 Esc / Tab / Ctrl / Alt 及方向鍵, 長按螢幕可選取文字, 選單可複製或分享終端機記錄. 安裝支援終端機的 Node.js 執行階段外掛程式後即可使用 node 與 npm. 離開終端機後工作階段及其處理程序在背景繼續執行 (帶通知), 選單中的 \"關閉工作階段\" 可將其結束.</string>
     <string name="text_text_size">字型大小</string>
     <string name="text_text_size_current_value" formatted="true">字型大小: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">可參考以下解決方案</string>

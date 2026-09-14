@@ -496,6 +496,7 @@
 * `Improvement` Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing
 * `Improvement` Pyramid levels of template matching use area interpolation, masked matching keeps the normalized correlation coefficient, and small `max` values still refine several candidates so the best match is not lost at coarse levels
 * `Improvement` Layout hierarchy window: rows summarize id / text / desc / clickable and other flags, the selected node and all of its ancestors are highlighted in the tree and outlined on screen, the tree scrolls sideways, a "Select parent node" menu item walks the selection upwards, and a one-time tip explains exiting with the volume down key
+* `Improvement` Terminal: sessions keep running in the background after leaving the screen (a foreground service shows the current directory in its notification with a "Close sessions" action), and reopening the terminal reattaches the running session
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
