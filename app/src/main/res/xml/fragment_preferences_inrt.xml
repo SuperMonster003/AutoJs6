@@ -49,6 +49,11 @@
         app:layout="@layout/preference_category_custom"
         android:title="@string/text_script_running">
 
+        <androidx.preference.Preference
+            app:layout="@layout/preference_custom_inrt"
+            android:key="inrt_run_script"
+            android:title="@string/text_run_script" />
+
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom_inrt"
             android:defaultValue="true"

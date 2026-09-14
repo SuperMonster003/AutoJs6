@@ -7,6 +7,7 @@ import android.view.MenuItem
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
+import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -20,7 +21,8 @@ class LogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setupView()
         if (intent.getBooleanExtra(EXTRA_LAUNCH_SCRIPT, false)) {
-            GlobalProjectLauncher.launch(this)
+            val config = ProjectConfig.fromAssets(this, ProjectConfig.configFileOfDir("project")).launchConfig
+            InrtLaunchGate(this, config, { GlobalProjectLauncher.launch(this) }, {}).begin()
         }
     }
 

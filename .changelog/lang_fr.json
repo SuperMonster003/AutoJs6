@@ -358,6 +358,7 @@
         "Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement"
       ],
       "improvement": [
+        "Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs",
         "media.playMusic utilise un service musical de premier plan Media3 avec gestion du focus audio, commandes de notification, propriété de lecture du script et libération à sa fin",
         "L'aide du service au premier plan explique les restrictions audio en arrière-plan d'Android 17 et comment redémarrer le service depuis l'application visible avant de relancer la lecture",
         "Rendre explicite la délégation de lancement de l'Activity du plugin Sélecteur de couleur, avec des options de l'expéditeur liées à la visibilité de l'hôte sous Android 16 et versions ultérieures",

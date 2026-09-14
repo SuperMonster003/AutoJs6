@@ -259,6 +259,7 @@ public class BuildActivity extends BaseActivity {
     CheckBox mLaunchLogShortcutVisibleView;
     CheckBox mLaunchSettingsShortcutVisibleView;
     CheckBox mLaunchRunOnBootView;
+    CheckBox mLaunchRequiresSharedStorageView;
     EditText mLaunchSlugView;
 
     @Nullable
@@ -425,6 +426,7 @@ public class BuildActivity extends BaseActivity {
         mLaunchLogShortcutVisibleView = binding.checkboxLaunchLogShortcutVisible;
         mLaunchSettingsShortcutVisibleView = binding.checkboxLaunchSettingsShortcutVisible;
         mLaunchRunOnBootView = binding.checkboxLaunchRunOnBoot;
+        mLaunchRequiresSharedStorageView = binding.checkboxLaunchRequiresSharedStorage;
         mLaunchSlugView = binding.launchSlug;
 
         LaunchConfig defaultLaunchConfig = new LaunchConfig();
@@ -434,6 +436,7 @@ public class BuildActivity extends BaseActivity {
         mLaunchLogShortcutVisibleView.setChecked(defaultLaunchConfig.isLogShortcutVisible());
         mLaunchSettingsShortcutVisibleView.setChecked(defaultLaunchConfig.isSettingsShortcutVisible());
         mLaunchRunOnBootView.setChecked(defaultLaunchConfig.isRunOnBoot());
+        mLaunchRequiresSharedStorageView.setChecked(defaultLaunchConfig.getRequiresSharedStorage());
         mLaunchSlugView.setText(defaultLaunchConfig.getSlug());
 
         mFlexboxAbisView = binding.flexboxAbis;
@@ -727,6 +730,7 @@ public class BuildActivity extends BaseActivity {
             state.launchLogShortcutVisible = launchConfig.isLogShortcutVisible();
             state.launchSettingsShortcutVisible = launchConfig.isSettingsShortcutVisible();
             state.launchRunOnBoot = launchConfig.isRunOnBoot();
+            state.launchRequiresSharedStorage = launchConfig.getRequiresSharedStorage();
             state.launchSlug = Objects.requireNonNullElse(launchConfig.getSlug(), "");
         }
         if (!mProjectConfig.getAbis().isEmpty()) {
@@ -752,6 +756,7 @@ public class BuildActivity extends BaseActivity {
         if (policy.fixedLaunchLogShortcutVisible) out.launchLogShortcutVisible = fixedState.launchLogShortcutVisible;
         if (policy.fixedLaunchSettingsShortcutVisible) out.launchSettingsShortcutVisible = fixedState.launchSettingsShortcutVisible;
         if (policy.fixedLaunchRunOnBoot) out.launchRunOnBoot = fixedState.launchRunOnBoot;
+        if (policy.fixedLaunchRequiresSharedStorage) out.launchRequiresSharedStorage = fixedState.launchRequiresSharedStorage;
         if (policy.fixedLaunchSlug) out.launchSlug = fixedState.launchSlug;
         if (policy.fixedAbis && !fixedState.abis.isEmpty()) out.abis = new ArrayList<>(fixedState.abis);
         if (policy.fixedLibs) out.libs = new ArrayList<>(fixedState.libs);
@@ -793,6 +798,7 @@ public class BuildActivity extends BaseActivity {
         mLaunchLogShortcutVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
         mLaunchSettingsShortcutVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
         mLaunchRunOnBootView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchRequiresSharedStorageView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
 
         AdapterView.OnItemSelectedListener stateSpinnerListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1200,6 +1206,7 @@ public class BuildActivity extends BaseActivity {
         addFieldPolicyDivider(container);
 
         CheckBox launchRunOnBoot = createFieldPolicyCheckBox(container, R.string.text_launch_run_on_boot, initialPolicy.fixedLaunchRunOnBoot, true);
+        CheckBox launchRequiresSharedStorage = createFieldPolicyCheckBox(container, R.string.text_launch_requires_shared_storage, initialPolicy.fixedLaunchRequiresSharedStorage, true);
         CheckBox launchLogsVisible = createFieldPolicyCheckBox(container, R.string.text_launch_logs_visible, initialPolicy.fixedLaunchLogsVisible, true);
         CheckBox launchSplashVisible = createFieldPolicyCheckBox(container, R.string.text_launch_splash_visible, initialPolicy.fixedLaunchSplashVisible, true);
         CheckBox launchLauncherVisible = createFieldPolicyCheckBox(container, R.string.text_launch_launcher_visible, initialPolicy.fixedLaunchLauncherVisible, true);
@@ -1231,6 +1238,7 @@ public class BuildActivity extends BaseActivity {
                     selected.fixedVersionName = versionName.isChecked();
                     selected.fixedVersionCode = versionCode.isChecked();
                     selected.fixedLaunchRunOnBoot = launchRunOnBoot.isChecked();
+                    selected.fixedLaunchRequiresSharedStorage = launchRequiresSharedStorage.isChecked();
                     selected.fixedLaunchLogsVisible = launchLogsVisible.isChecked();
                     selected.fixedLaunchSplashVisible = launchSplashVisible.isChecked();
                     selected.fixedLaunchLauncherVisible = launchLauncherVisible.isChecked();
@@ -1541,6 +1549,7 @@ public class BuildActivity extends BaseActivity {
             setCheckedIfChanged(mLaunchLogShortcutVisibleView, state.launchLogShortcutVisible);
             setCheckedIfChanged(mLaunchSettingsShortcutVisibleView, state.launchSettingsShortcutVisible);
             setCheckedIfChanged(mLaunchRunOnBootView, state.launchRunOnBoot);
+            setCheckedIfChanged(mLaunchRequiresSharedStorageView, state.launchRequiresSharedStorage);
             setTextIfChanged(mLaunchSlugView, state.launchSlug);
 
             applyStringSelectionsToFlexbox(mFlexboxAbisView, state.abis);
@@ -1667,6 +1676,7 @@ public class BuildActivity extends BaseActivity {
         state.launchLogShortcutVisible = mLaunchLogShortcutVisibleView.isChecked();
         state.launchSettingsShortcutVisible = mLaunchSettingsShortcutVisibleView.isChecked();
         state.launchRunOnBoot = mLaunchRunOnBootView.isChecked();
+        state.launchRequiresSharedStorage = mLaunchRequiresSharedStorageView.isChecked();
         state.launchSlug = mLaunchSlugView.getText() == null ? "" : mLaunchSlugView.getText().toString();
         state.abis = collectCheckedItems(mFlexboxAbisView);
         state.libs = collectCheckedItems(mFlexboxLibsView);
@@ -2166,6 +2176,7 @@ public class BuildActivity extends BaseActivity {
                 mLaunchLogShortcutVisibleView.setChecked(launchConfig.isLogShortcutVisible());
                 mLaunchSettingsShortcutVisibleView.setChecked(launchConfig.isSettingsShortcutVisible());
                 mLaunchRunOnBootView.setChecked(launchConfig.isRunOnBoot());
+                mLaunchRequiresSharedStorageView.setChecked(launchConfig.getRequiresSharedStorage());
                 mLaunchSlugView.setText(launchConfig.getSlug());
             }
             syncAbisCheckedStates();
@@ -2538,6 +2549,7 @@ public class BuildActivity extends BaseActivity {
         launchConfig.setLogShortcutVisible(state.launchLogShortcutVisible);
         launchConfig.setSettingsShortcutVisible(state.launchSettingsShortcutVisible);
         launchConfig.setRunOnBoot(state.launchRunOnBoot);
+        launchConfig.setRequiresSharedStorage(state.launchRequiresSharedStorage);
         launchConfig.setSlug(state.launchSlug);
 
         ProjectConfig resolved = projectConfig
@@ -3191,6 +3203,7 @@ public class BuildActivity extends BaseActivity {
         boolean fixedLaunchLogShortcutVisible = false;
         boolean fixedLaunchSettingsShortcutVisible = false;
         boolean fixedLaunchRunOnBoot = false;
+        boolean fixedLaunchRequiresSharedStorage = false;
         boolean fixedLaunchSlug = false;
         boolean fixedAbis = false;
         boolean fixedLibs = true;
@@ -3219,6 +3232,7 @@ public class BuildActivity extends BaseActivity {
             policy.fixedLaunchLogShortcutVisible = true;
             policy.fixedLaunchSettingsShortcutVisible = true;
             policy.fixedLaunchRunOnBoot = true;
+            policy.fixedLaunchRequiresSharedStorage = true;
             policy.fixedLaunchSlug = true;
             policy.fixedAbis = true;
             policy.fixedLibs = true;
@@ -3244,6 +3258,7 @@ public class BuildActivity extends BaseActivity {
             copied.fixedLaunchLogShortcutVisible = fixedLaunchLogShortcutVisible;
             copied.fixedLaunchSettingsShortcutVisible = fixedLaunchSettingsShortcutVisible;
             copied.fixedLaunchRunOnBoot = fixedLaunchRunOnBoot;
+            copied.fixedLaunchRequiresSharedStorage = fixedLaunchRequiresSharedStorage;
             copied.fixedLaunchSlug = fixedLaunchSlug;
             copied.fixedAbis = fixedAbis;
             copied.fixedLibs = fixedLibs;
@@ -3270,6 +3285,7 @@ public class BuildActivity extends BaseActivity {
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, fixedLaunchLogShortcutVisible);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, fixedLaunchSettingsShortcutVisible);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, fixedLaunchRunOnBoot);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, fixedLaunchRequiresSharedStorage);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, fixedLaunchSlug);
                 out.put(BuildConfigStore.FIELD_FIXED_ABIS, fixedAbis);
                 out.put(BuildConfigStore.FIELD_FIXED_LIBS, fixedLibs);
@@ -3299,6 +3315,7 @@ public class BuildActivity extends BaseActivity {
             policy.fixedLaunchLogShortcutVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, policy.fixedLaunchLogShortcutVisible);
             policy.fixedLaunchSettingsShortcutVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, policy.fixedLaunchSettingsShortcutVisible);
             policy.fixedLaunchRunOnBoot = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, policy.fixedLaunchRunOnBoot);
+            policy.fixedLaunchRequiresSharedStorage = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, policy.fixedLaunchRequiresSharedStorage);
             policy.fixedLaunchSlug = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, policy.fixedLaunchSlug);
             policy.fixedAbis = json.optBoolean(BuildConfigStore.FIELD_FIXED_ABIS, policy.fixedAbis);
             policy.fixedLibs = json.optBoolean(BuildConfigStore.FIELD_FIXED_LIBS, policy.fixedLibs);
@@ -3322,6 +3339,7 @@ public class BuildActivity extends BaseActivity {
         boolean launchLogShortcutVisible = false;
         boolean launchSettingsShortcutVisible = false;
         boolean launchRunOnBoot = false;
+        boolean launchRequiresSharedStorage = false;
         String launchSlug = "";
         String signatureScheme = "";
         String keyStorePath = "";
@@ -3344,6 +3362,7 @@ public class BuildActivity extends BaseActivity {
             copied.launchLogShortcutVisible = launchLogShortcutVisible;
             copied.launchSettingsShortcutVisible = launchSettingsShortcutVisible;
             copied.launchRunOnBoot = launchRunOnBoot;
+            copied.launchRequiresSharedStorage = launchRequiresSharedStorage;
             copied.launchSlug = launchSlug;
             copied.signatureScheme = signatureScheme;
             copied.keyStorePath = keyStorePath;
@@ -3369,6 +3388,7 @@ public class BuildActivity extends BaseActivity {
                 json.put(BuildConfigStore.STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, launchLogShortcutVisible);
                 json.put(BuildConfigStore.STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, launchSettingsShortcutVisible);
                 json.put(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, launchRunOnBoot);
+                json.put(BuildConfigStore.STATE_LAUNCH_REQUIRES_SHARED_STORAGE, launchRequiresSharedStorage);
                 json.put(BuildConfigStore.STATE_LAUNCH_SLUG, launchSlug);
                 json.put(BuildConfigStore.STATE_SIGNATURE_SCHEME, signatureScheme);
                 json.put(BuildConfigStore.STATE_KEY_STORE_PATH, keyStorePath);
@@ -3396,6 +3416,7 @@ public class BuildActivity extends BaseActivity {
             state.launchLogShortcutVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, false);
             state.launchSettingsShortcutVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false);
             state.launchRunOnBoot = json.optBoolean(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, false);
+            state.launchRequiresSharedStorage = json.optBoolean(BuildConfigStore.STATE_LAUNCH_REQUIRES_SHARED_STORAGE, false);
             state.launchSlug = json.optString(BuildConfigStore.STATE_LAUNCH_SLUG, "");
             state.signatureScheme = json.optString(BuildConfigStore.STATE_SIGNATURE_SCHEME, "");
             state.keyStorePath = json.optString(BuildConfigStore.STATE_KEY_STORE_PATH, "");
@@ -3437,6 +3458,7 @@ public class BuildActivity extends BaseActivity {
                    && launchLogShortcutVisible == that.launchLogShortcutVisible
                    && launchSettingsShortcutVisible == that.launchSettingsShortcutVisible
                    && launchRunOnBoot == that.launchRunOnBoot
+                   && launchRequiresSharedStorage == that.launchRequiresSharedStorage
                    && Objects.equals(launchSlug, that.launchSlug)
                    && Objects.equals(signatureScheme, that.signatureScheme)
                    && Objects.equals(keyStorePath, that.keyStorePath)
@@ -3460,6 +3482,7 @@ public class BuildActivity extends BaseActivity {
                     launchLogShortcutVisible,
                     launchSettingsShortcutVisible,
                     launchRunOnBoot,
+                    launchRequiresSharedStorage,
                     launchSlug,
                     signatureScheme,
                     keyStorePath,

@@ -1333,6 +1333,9 @@
     <string name="text_in_progress">進行中</string>
     <string name="text_info">インフォメーション</string>
     <string name="text_input_bar">入力バー</string>
+    <string name="text_inrt_shared_storage_required">このプロジェクトには共有ファイルへのアクセスが必要です. ストレージへのアクセスを許可してからこの画面に戻ると, スクリプトが起動します. キャンセルすると停止したままになります. すべてのファイルへのアクセスでも, 他のアプリの専用ディレクトリは対象外です.</string>
+    <string name="text_inrt_storage_permission_missing">このパッケージにはプロジェクトが必要とするストレージ権限の宣言がありません. 再ビルド時に必要な権限を含めるよう作者に依頼してください. スクリプトは起動していません.</string>
+    <string name="text_inrt_storage_settings_unavailable">ストレージ権限の設定画面を開けませんでした. Android の設定で許可してから, このアプリを再度開いてください. スクリプトは起動していません.</string>
     <string name="text_insist_on_record">記録</string>
     <string name="text_inspect_layout">レイアウトの検査</string>
     <string name="text_inspect_layout_bounds">レイアウト境界の検査</string>
@@ -1380,6 +1383,8 @@
     <string name="text_launch_launcher_visible">ランチャーにアプリアイコンを表示</string>
     <string name="text_launch_log_shortcut_visible">ランチャーショートカットにログを表示</string>
     <string name="text_launch_logs_visible">起動時にログを表示</string>
+    <string name="text_launch_requires_shared_storage">起動に共有ストレージへのアクセスが必要</string>
+    <string name="text_launch_requires_shared_storage_summary">/sdcard/Download などの共有パスに直接アクセスするスクリプトで有効にします. 同梱リソース, アプリ専用ファイル, システムのファイル選択画面または MediaStore のみを使用する場合は不要です.</string>
     <string name="text_launch_run_on_boot">起動時にスクリプトを実行</string>
     <string name="text_launch_settings_shortcut_visible">ランチャーショートカットに設定を表示</string>
     <string name="text_launch_slug">スプラッシュ標語テキスト</string>

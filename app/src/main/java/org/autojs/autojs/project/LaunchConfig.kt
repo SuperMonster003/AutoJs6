@@ -70,6 +70,9 @@ class LaunchConfig : FuzzyDeserializer.OriginalJsonKeyAware {
     )
     var isRunOnBoot = false
 
+    @SerializedName("requiresSharedStorage")
+    var requiresSharedStorage = false
+
     @SerializedName("slug")
     @field:SerializedNameCompatible(
         With(value = "slugText"),

@@ -681,3 +681,54 @@ history, UI XML, screenshots and installed APK SHA-256. It does not allocate
 memory under pressure; none of these injected exits establishes a memory-limiter
 event. The actual limiter workload still requires `am memory-limiter status` to
 report an enabled mechanism. See the [P2.13 / P2.14 evidence](../../docs/dev/evidence/android-sdk-37-p213-p214-20260914.md).
+
+## Packaged-app storage startup
+
+`build_inrt_storage_fixtures.py` replaces only `assets/project` and selected
+manifest values in an inrt debug template, then signs with a disposable test key.
+The four projects cover private files, shared files, a hidden launcher, and missing
+storage declarations. Runtime DEX and resources come from the supplied template.
+This validates the inrt runtime; it does not exercise the APK Builder plugin,
+encryption, RuntimeKit publication, or a production user APK.
+
+```powershell
+python tools/sdk37/build_inrt_storage_fixtures.py `
+  --template app/build/outputs/apk/inrt/debug/inrt-v6.8.0-universal.apk `
+  --sdk E:/.android/sdk --jdk E:/.java/jdk-21.0.1 `
+  --key build/sdk37-storage/fixture.jks --output build/sdk37-storage/fixtures `
+  --version-code 6000 `
+  --shared-file /sdcard/Download/autojs6-sdk37-storage-example.txt
+
+python tools/sdk37/run_inrt_storage_probe.py `
+  --adb E:/.android/sdk/platform-tools/adb.exe `
+  --serial emulator-5596 --owned-avd AVD_API_37 `
+  --fixtures build/sdk37-storage/fixtures --output build/sdk37-storage/results `
+  --target 29 `
+  --shared-file /sdcard/Download/autojs6-sdk37-storage-example.txt
+```
+
+Use an exclusively owned disposable AVD with English UI and no installed inrt.
+The example serial is not a discovery default. A host with a different signing
+certificate conflicts with the template's shared permission declaration; prepare
+the disposable clone accordingly. The runner installs and updates its fixtures,
+changes their storage grants, creates the named shared test file, and leaves the
+last fixture installed for diagnosis. Discard the clone after testing. Every
+output directory and shared fixture filename must be new, and the shared filename
+must match the one embedded by the fixture builder.
+
+Run separately on API 24 and API 37, with normal target 29 and a target 37 debug
+override template. The actual app target must match `--target`. On API 24,
+`--permanent-denial` additionally clicks the system's "Don't ask again" checkbox,
+verifies the app-settings route, and grants storage for the recovery check.
+Modern settings-return tests kill the background app after granting access and
+verify a single script execution after returning. JSON script receipts establish
+actual private/shared reads and writes; XML and command logs capture the UI and
+system state. `SharedStorageBuildConfigDeviceTest` separately checks project JSON,
+remote serialization, and saved/exported/imported build profiles.
+
+The normal template limits `READ_EXTERNAL_STORAGE` to API 32 and
+`WRITE_EXTERNAL_STORAGE` to API 29. A successful shell `pm grant` alone does not
+establish legacy access on newer systems. The upgrade fixture must record actual
+grants and file I/O before updating. `preserveLegacyExternalStorage`, real boot,
+physical devices, and the complete user-APK migration matrix remain separate
+acceptance items. See the [P2.16 evidence](../../docs/dev/evidence/android-sdk-37-inrt-storage-20260914.md).

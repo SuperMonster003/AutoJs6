@@ -1332,6 +1332,9 @@
     <string name="text_in_progress">В процессе выполнения</string>
     <string name="text_info">Информация</string>
     <string name="text_input_bar">Строка ввода</string>
+    <string name="text_inrt_shared_storage_required">Проекту нужен доступ к общим файлам. Разрешите доступ к хранилищу и вернитесь сюда для запуска скрипта. При отмене скрипт останется остановленным. Доступ ко всем файлам не включает закрытые каталоги других приложений.</string>
+    <string name="text_inrt_storage_permission_missing">В пакете не объявлены разрешения хранилища, необходимые проекту. Попросите автора включить их при повторной сборке. Скрипт не запущен.</string>
+    <string name="text_inrt_storage_settings_unavailable">Не удалось открыть настройки доступа к хранилищу. Разрешите доступ в настройках Android и снова откройте приложение. Скрипт не запущен.</string>
     <string name="text_insist_on_record">Запись</string>
     <string name="text_inspect_layout">Проверить макет</string>
     <string name="text_inspect_layout_bounds">Осмотр границ макета</string>
@@ -1379,6 +1382,8 @@
     <string name="text_launch_launcher_visible">Показывать значок приложения в лаунчере</string>
     <string name="text_launch_log_shortcut_visible">Показывать Журнал в ярлыках запуска</string>
     <string name="text_launch_logs_visible">Показывать логи при запуске</string>
+    <string name="text_launch_requires_shared_storage">Для запуска нужен доступ к общему хранилищу</string>
+    <string name="text_launch_requires_shared_storage_summary">Включите для скриптов с прямым доступом к общим путям, например /sdcard/Download. Для встроенных ресурсов, файлов приложения, системного выбора файлов или MediaStore эта настройка не нужна.</string>
     <string name="text_launch_run_on_boot">Запускать скрипт при загрузке</string>
     <string name="text_launch_settings_shortcut_visible">Показывать Настройки в ярлыках запуска</string>
     <string name="text_launch_slug">Текст слогана заставки</string>

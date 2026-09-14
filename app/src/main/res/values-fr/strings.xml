@@ -1332,6 +1332,9 @@
     <string name="text_in_progress">En cours</string>
     <string name="text_info">Information</string>
     <string name="text_input_bar">Barre de saisie</string>
+    <string name="text_inrt_shared_storage_required">Ce projet doit accéder aux fichiers partagés. Autorisez cet accès, puis revenez ici pour lancer le script. En cas d\'annulation, le script reste arrêté. L\'accès à tous les fichiers ne couvre pas les répertoires privés des autres applications.</string>
+    <string name="text_inrt_storage_permission_missing">Ce paquet ne déclare pas les autorisations de stockage requises par le projet. Demandez à son auteur de les inclure lors de la recompilation. Le script n\'a pas démarré.</string>
+    <string name="text_inrt_storage_settings_unavailable">Impossible d\'ouvrir les paramètres de stockage. Autorisez cet accès dans les paramètres Android, puis rouvrez cette application. Le script n\'a pas démarré.</string>
     <string name="text_insist_on_record">Enregistrer</string>
     <string name="text_inspect_layout">Mise en page de l\'inspection</string>
     <string name="text_inspect_layout_bounds">Inspecter les limites de la mise en page</string>
@@ -1379,6 +1382,8 @@
     <string name="text_launch_launcher_visible">Afficher l\'icone de l\'appli dans le lanceur</string>
     <string name="text_launch_log_shortcut_visible">Afficher Journal dans les raccourcis du lanceur</string>
     <string name="text_launch_logs_visible">Afficher les logs au lancement</string>
+    <string name="text_launch_requires_shared_storage">Le démarrage nécessite un accès au stockage partagé</string>
+    <string name="text_launch_requires_shared_storage_summary">Activez cette option pour les scripts accédant directement à des chemins partagés tels que /sdcard/Download. Désactivez-la pour les ressources intégrées, les fichiers propres à cette application ou les accès via le sélecteur de fichiers du système ou MediaStore.</string>
     <string name="text_launch_run_on_boot">Executer le script au demarrage</string>
     <string name="text_launch_settings_shortcut_visible">Afficher Paramètres dans les raccourcis du lanceur</string>
     <string name="text_launch_slug">Texte du slogan de l\'ecran de demarrage</string>

@@ -16,6 +16,7 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.inrt.LogActivity
 import org.autojs.autojs.inrt.InrtToastVisibilityGuard
 import org.autojs.autojs.inrt.Pref
+import org.autojs.autojs.inrt.InrtStorageAccess
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
@@ -82,6 +83,13 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
     }
 
     private fun runScript(activity: Activity?) {
+        if (mProjectConfig.launchConfig.requiresSharedStorage && !InrtStorageAccess.has(mActivity)) {
+            val message = InrtStorageAccess.explanation(mActivity)
+            Log.w(TAG, message)
+            AutoJs.instance.globalConsole.error(message)
+            Pref.updateLauncherVisibility(mProjectConfig.launchConfig)
+            return
+        }
         if (mScriptExecution != null && mScriptExecution!!.engine != null &&
             !mScriptExecution!!.engine.isDestroyed
         ) {

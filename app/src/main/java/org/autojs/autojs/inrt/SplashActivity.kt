@@ -1,17 +1,14 @@
 package org.autojs.autojs.inrt
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
-import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -31,6 +28,8 @@ import org.autojs.autojs6.databinding.ActivitySplashInrtBinding
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
+    private lateinit var launchGate: InrtLaunchGate
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val projectConfig = ProjectConfig.fromAssets(this, ProjectConfig.configFileOfDir("project"))
         val launchConfig = projectConfig.launchConfig
@@ -40,10 +39,11 @@ class SplashActivity : AppCompatActivity() {
         setTheme(if (shouldShowSplash) R.style.AppTheme_Splash else R.style.AppTheme_SevereTransparent)
 
         super.onCreate(savedInstanceState)
+        launchGate = InrtLaunchGate(this, launchConfig, ::runScript, ::finish)
 
         var timeout = INIT_TIMEOUT
 
-        applyLauncherVisibility(launchConfig.isLauncherVisible)
+        Pref.updateLauncherVisibility(launchConfig)
 
         when {
             !shouldShowSplash -> {
@@ -69,11 +69,11 @@ class SplashActivity : AppCompatActivity() {
                 }
             }
         }
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch {
             if (timeout > 0 && Pref.isFirstUsing) {
                 delay(timeout)
             }
-            checkPermission(WRITE_EXTERNAL_STORAGE)
+            launchGate.begin()
         }
     }
 
@@ -94,38 +94,6 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        runScript()
-    }
-
-    private fun checkPermission(@Suppress("SameParameterValue") vararg permissions: String) {
-        val requestPermissions = getRequestPermissions(permissions)
-        if (requestPermissions.isNotEmpty()) {
-            requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE)
-        } else {
-            runScript()
-        }
-    }
-
-    private fun getRequestPermissions(permissions: Array<out String>) = ArrayList<String>().let { list ->
-        permissions.filterTo(list) { checkSelfPermission(it) == PERMISSION_DENIED }
-        list.toTypedArray()
-    }
-
-    private fun applyLauncherVisibility(visible: Boolean) {
-        val state = if (visible) {
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        } else {
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-        }
-        packageManager.setComponentEnabledSetting(
-            ComponentName(this, SplashActivity::class.java),
-            state,
-            PackageManager.DONT_KILL_APP,
-        )
-    }
-
     private fun finishAfterLaunchFailure() {
         if (isFinishing || isDestroyed) {
             return
@@ -137,12 +105,6 @@ class SplashActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             overridePendingTransition(0, 0)
         }
-    }
-
-    companion object {
-
-        private const val PERMISSION_REQUEST_CODE = 11186
-
     }
 
 }

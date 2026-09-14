@@ -1,0 +1,768 @@
+{
+  "date": "2026-09-14",
+  "sourceBaseCommit": "af962199ebbe99196d89a56039ee51cc86258039",
+  "scope": "P2.16 / Q4(a) storage startup implementation; P3.3 remains open",
+  "normalTargets": {
+    "app": 36,
+    "inrt": 29
+  },
+  "uiRuns": [
+    {
+      "target": 29,
+      "serial": "emulator-5594",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 29,
+            "api": 24,
+            "private": true,
+            "shared": null,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 29,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          },
+          "processKilledWhileAway": false
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "api": 24,
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "rawDirectory": "build/sdk37-inrt-storage-20260914/api24-normal-final"
+    },
+    {
+      "target": 37,
+      "serial": "emulator-5594",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 37,
+            "api": 24,
+            "private": true,
+            "shared": null,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "permanent-denial-opens-app-settings"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 37,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          },
+          "processKilledWhileAway": false
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 24,
+            "private": true,
+            "shared": true,
+            "manager": null,
+            "legacy": null
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "api": 24,
+      "fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "rawDirectory": "build/sdk37-inrt-storage-20260914/api24-target37-verified"
+    },
+    {
+      "target": 29,
+      "serial": "emulator-5596",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "processKilledWhileAway": true
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 29,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "api": 37,
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "rawDirectory": "build/sdk37-inrt-storage-20260914/api37-normal-verified"
+    },
+    {
+      "target": 37,
+      "serial": "emulator-5598",
+      "checks": [
+        {
+          "name": "private-without-storage-grant",
+          "receipt": {
+            "case": "private",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          }
+        },
+        {
+          "name": "cancel-does-not-run"
+        },
+        {
+          "name": "permission-return-without-grant-does-not-run"
+        },
+        {
+          "name": "grant-return-runs-shared-file-read-write",
+          "receipt": {
+            "case": "shared",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          },
+          "processKilledWhileAway": true
+        },
+        {
+          "name": "hidden-launcher-retained-for-recovery"
+        },
+        {
+          "name": "log-entry-checks-grant-and-hides-launcher",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "settings-run-script-entry",
+          "receipt": {
+            "case": "hidden",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": true,
+            "manager": true,
+            "legacy": false
+          }
+        },
+        {
+          "name": "missing-declarations-stop-before-script"
+        }
+      ],
+      "success": true,
+      "api": 37,
+      "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "rawDirectory": "build/sdk37-inrt-storage-20260914/api37-target37"
+    }
+  ],
+  "configurationTests": [
+    {
+      "api": 24,
+      "target": 29,
+      "passed": 3,
+      "statuses": [
+        {
+          "numtests": "3",
+          "test": "existingProjectsDefaultToNoStorageGate",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 1
+        },
+        {
+          "numtests": "3",
+          "test": "existingProjectsDefaultToNoStorageGate",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 0
+        },
+        {
+          "numtests": "3",
+          "test": "projectAndRemoteSerializationPreserveExplicitChoice",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 1
+        },
+        {
+          "numtests": "3",
+          "test": "projectAndRemoteSerializationPreserveExplicitChoice",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 0
+        },
+        {
+          "numtests": "3",
+          "test": "savedBuildProfilePreservesStorageStateAndFieldPolicy",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 1
+        },
+        {
+          "numtests": "3",
+          "test": "savedBuildProfilePreservesStorageStateAndFieldPolicy",
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "status": 0
+        }
+      ],
+      "output": "INSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest:\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=existingProjectsDefaultToNoStorageGate\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=existingProjectsDefaultToNoStorageGate\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=projectAndRemoteSerializationPreserveExplicitChoice\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=projectAndRemoteSerializationPreserveExplicitChoice\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=savedBuildProfilePreservesStorageStateAndFieldPolicy\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: test=savedBuildProfilePreservesStorageStateAndFieldPolicy\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 0.103\n\nOK (3 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    },
+    {
+      "api": 37,
+      "target": 29,
+      "passed": 3,
+      "statuses": [
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "existingProjectsDefaultToNoStorageGate",
+          "status": 1
+        },
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "existingProjectsDefaultToNoStorageGate",
+          "status": 0
+        },
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "projectAndRemoteSerializationPreserveExplicitChoice",
+          "status": 1
+        },
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "projectAndRemoteSerializationPreserveExplicitChoice",
+          "status": 0
+        },
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "savedBuildProfilePreservesStorageStateAndFieldPolicy",
+          "status": 1
+        },
+        {
+          "class": "org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest",
+          "numtests": "3",
+          "test": "savedBuildProfilePreservesStorageStateAndFieldPolicy",
+          "status": 0
+        }
+      ],
+      "output": "INSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\norg.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest:\nINSTRUMENTATION_STATUS: test=existingProjectsDefaultToNoStorageGate\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=1\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=existingProjectsDefaultToNoStorageGate\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=projectAndRemoteSerializationPreserveExplicitChoice\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=2\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=projectAndRemoteSerializationPreserveExplicitChoice\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=\nINSTRUMENTATION_STATUS: test=savedBuildProfilePreservesStorageStateAndFieldPolicy\nINSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS: class=org.autojs.autojs.ui.project.SharedStorageBuildConfigDeviceTest\nINSTRUMENTATION_STATUS: current=3\nINSTRUMENTATION_STATUS: id=AndroidJUnitRunner\nINSTRUMENTATION_STATUS: numtests=3\nINSTRUMENTATION_STATUS: stream=.\nINSTRUMENTATION_STATUS: test=savedBuildProfilePreservesStorageStateAndFieldPolicy\nINSTRUMENTATION_STATUS_CODE: 0\nINSTRUMENTATION_RESULT: stream=\n\nTime: 0.09\n\nOK (3 tests)\n\n\nINSTRUMENTATION_CODE: -1\n"
+    }
+  ],
+  "upgradeAllFiles": {
+    "success": true,
+    "checks": [
+      {
+        "name": "target29-all-files-shared-read-write",
+        "receipt": {
+          "case": "shared",
+          "target": 29,
+          "api": 37,
+          "private": true,
+          "shared": true,
+          "manager": true,
+          "legacy": false
+        },
+        "versionCode": 8001,
+        "file": "legacy-fixture\nshared-write-ok"
+      },
+      {
+        "name": "target37-update-preserves-files-and-all-files-grant",
+        "versionCode": 9001,
+        "receipt": {
+          "case": "shared",
+          "target": 37,
+          "api": 37,
+          "private": true,
+          "shared": true,
+          "manager": true,
+          "legacy": false
+        },
+        "oldPrivateReceiptPreserved": true
+      },
+      {
+        "name": "revocation-after-upgrade-stops-script-without-changing-files"
+      },
+      {
+        "name": "target37-update-resumes-old-shared-file-after-regrant",
+        "receipt": {
+          "case": "shared",
+          "target": 37,
+          "api": 37,
+          "private": true,
+          "shared": true,
+          "manager": true,
+          "legacy": false
+        },
+        "file": "legacy-fixture\nshared-write-ok\nshared-write-ok\nshared-write-ok"
+      }
+    ],
+    "baselinePackages": ""
+  },
+  "boot": {
+    "status": "PARTIAL",
+    "target": 37,
+    "api": 37,
+    "checks": [
+      {
+        "name": "private-script-runs-after-real-boot-without-storage",
+        "receipts": [
+          {
+            "case": "private",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          },
+          {
+            "case": "private",
+            "target": 37,
+            "api": 37,
+            "private": true,
+            "shared": null,
+            "manager": false,
+            "legacy": false
+          }
+        ]
+      }
+    ],
+    "sharedStorageBootStatus": "NOT_COMPLETED: second emulator reboot stalled; adb getprop timed out after 120 seconds"
+  },
+  "fixtures": {
+    "normal-final-fixtures": {
+      "templateSha256": "5afba4776c9005958273d966b46c94b671df1812be37b0c1811c82822f0f48bc",
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 8000,
+          "sha256": "ebbb7ad4684ad98a8037fc24a1794eb641f2b667f97372e9cf1f556466038064",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 8001,
+          "sha256": "2446c9c84aa4bddc5438326b747e9b2f3f2e871204bc9299d8b4be36ea21e619",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 8002,
+          "sha256": "5e08b2f4afef050e4c5a76fcabc9d177bd9fcebe4a9ab2170479a01b20759442",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 8003,
+          "sha256": "b02597e22a58ebc503d98dd281a0063c203c035dc2e4244c91fd754d32423f26",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    },
+    "target37-fixtures": {
+      "templateSha256": "085430764fc4a7da7c46e70c0b7e6c06930797f8926e489896caf6fdb6b7cf2a",
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 7000,
+          "sha256": "a1e9e0f955bd716c18fabd96b60027f343783932c431c639af37302cc6ba3b60",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 7001,
+          "sha256": "096319af7310b232229ff7f00fbb94e9d806b61a48af23fad70813e98c4e37d4",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 7002,
+          "sha256": "1e37ed18f350f12ef0237a7d1bfc6b194cc208c34693dcf01aecd80378c5295f",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 7003,
+          "sha256": "19ceba2aa1a0277d166a1fc56e117df8125b5e967029111826022c85b4cb6a31",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    },
+    "upgrade-fixtures": {
+      "templateSha256": "a1e9e0f955bd716c18fabd96b60027f343783932c431c639af37302cc6ba3b60",
+      "fixtures": [
+        {
+          "case": "private",
+          "versionCode": 9000,
+          "sha256": "11f7588a0badfd2f56d1a828196573c6fe4feabfa8c0bf5ae581d947510aba59",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "shared",
+          "versionCode": 9001,
+          "sha256": "530544e054398decd74eb1d15db65f168bccacdbc42f499748014619cffcbdd1",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "hidden",
+          "versionCode": 9002,
+          "sha256": "c8dbeebb58ac5b4f582c5faf26e22c3d39f03826ffbbcbae9bfa5e171fb2c26e",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        },
+        {
+          "case": "missing",
+          "versionCode": 9003,
+          "sha256": "239ffc8cc1325c5a0b7fbfcabeccf081f4f1180c022796614119b7afb7f186c9",
+          "signer": "V3.0 Signer: certificate DN: CN=SDK37 storage fixture\nV3.0 Signer: certificate SHA-256 digest: b51cdbb230936f6374e8256d0ac90813c8cee4c108d45624b166a6e56b4d38f8\nV3.0 Signer: certificate SHA-1 digest: 5d56b129bdb00830bc0af350dcdfaba5115b4228\nV3.0 Signer: certificate MD5 digest: 954098f85199efb5d4ffe0945f13a82e\n"
+        }
+      ]
+    }
+  },
+  "finalNormalApks": [
+    {
+      "flavor": "app",
+      "variant": "debug",
+      "target": 36,
+      "sha256": "5398b3ffb323adb326aa45d975dab5f343aba3969ecc5f4fecec5ec09fe8dd15",
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "path": "app\\build\\outputs\\apk\\app\\debug\\autojs6-v6.8.0-universal.apk"
+    },
+    {
+      "flavor": "app",
+      "variant": "release",
+      "target": 36,
+      "sha256": "983d3cec7d93cf3eecd8c351b51d0fc429f417832b4c1d5fc2c1075bf9d6d8b8",
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "path": "app\\build\\outputs\\apk\\app\\release\\autojs6-v6.8.0-universal.apk"
+    },
+    {
+      "flavor": "inrt",
+      "variant": "debug",
+      "target": 29,
+      "sha256": "5afba4776c9005958273d966b46c94b671df1812be37b0c1811c82822f0f48bc",
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "path": "app\\build\\outputs\\apk\\inrt\\debug\\inrt-v6.8.0-universal.apk"
+    },
+    {
+      "flavor": "inrt",
+      "variant": "release",
+      "target": 29,
+      "sha256": "4fc4fa49b923cdf518eee86c8315a135680bd9c0acea27fe7ed81ef0999f04da",
+      "signerSha256": "31a681fcfffb3e428420cae280ded89292b12a3b0f59e19b7a73e32a8ae4c213",
+      "path": "app\\build\\outputs\\apk\\inrt\\release\\inrt-v6.8.0-universal.apk"
+    }
+  ],
+  "relatedValidation": {
+    "ace": {
+      "tests": 167,
+      "failures": 0,
+      "errors": 0,
+      "suites": 31
+    },
+    "offline": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "suites": 1
+    },
+    "manualDeclarationsTextEqual": true,
+    "aj6-main-app.d.ts": true,
+    "aj6-resources.d.ts": true,
+    "libraries.d.ts": true
+  },
+  "builds": [
+    {
+      "log": "build/sdk37-inrt-storage-20260914/build-normal-retry.log",
+      "result": "SUCCESS",
+      "elapsed": "1m 17s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/build-target37.log",
+      "result": "SUCCESS",
+      "elapsed": "35s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/build-final-normal.log",
+      "result": "SUCCESS",
+      "elapsed": "3m 36s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/build-config-tests-final.log",
+      "result": "SUCCESS",
+      "elapsed": "11s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/ace-build.log",
+      "result": "SUCCESS",
+      "elapsed": "2m 51s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/docs-sync.log",
+      "result": "SUCCESS",
+      "elapsed": "55s"
+    },
+    {
+      "log": "build/sdk37-inrt-storage-20260914/offline-final-build.log",
+      "result": "SUCCESS",
+      "elapsed": "33s"
+    }
+  ],
+  "totals": {
+    "uiChecks": 33,
+    "configurationJUnit": 6,
+    "upgradeChecks": 4,
+    "actualPrivateBootChecks": 1,
+    "aceJUnit": 167,
+    "offlineDocsJUnit": 2
+  },
+  "limitations": [
+    "Fixtures replace assets/project and versionCode in inrt debug APKs; the missing-permissions fixture also removes storage declarations. They do not exercise the real APK Builder, encrypted projects, published Runtime Kit, or release execution.",
+    "API 37 target 29 to 37 upgrade used an existing MANAGE_EXTERNAL_STORAGE grant. The current template caps READ_EXTERNAL_STORAGE at API 32 and WRITE_EXTERNAL_STORAGE at API 29; pm grant exit 0 did not establish a legacy storage baseline on API 37.",
+    "No preserveLegacyExternalStorage decision is made; historical legacy grants, API 30 and API 33 upgrades, and separate real user APK fresh install/reinstall remain open.",
+    "Private script actual reboot passed once after waiting for PackageManager handlers. A prior abrupt reboot showed stopped=true/notLaunched=true; no cause is proven. The shared-permission reboot group did not complete because emulator ADB timed out.",
+    "InrtLaunchGate source covers Activity recreation; the modern UI groups verified background process death while away in permission Settings. Other OEM recreation and settings fallback paths need physical coverage.",
+    "The pre-existing RemoveWorkManagerInitializer fatal lint finding remains; successful assemble is not a clean lint result.",
+    "Samsung localhost:37478 was offline. No physical device was changed. All 99 physical checklist rows remain open.",
+    "No formal target change, runtime kit publication, release publication, npm publish, push, or CI acceptance in this session.",
+    "Image, capture, OpenCV and ScriptRuntime changes appeared in the shared workspace after this session's build and tests. Those concurrent changes are excluded from the storage commit and this validation scope."
+  ],
+  "earlierAttempts": [
+    {
+      "area": "compile",
+      "result": "FAILED",
+      "reason": "DialogFragment.activity shadowed the non-null gate activity; explicit this@InrtLaunchGate.activity fixed compilation."
+    },
+    {
+      "area": "configuration test",
+      "result": "2 of 3 failed initially",
+      "reason": "Empty JSON was rejected by existing ProjectConfig validation. Valid minimal project fixtures replaced it; production parser was not loosened."
+    },
+    {
+      "area": "UI harness",
+      "result": "partial runs excluded",
+      "reason": "Added ro.kernel.qemu fallback for API 24; used actual Don't ask again UI instead of unsupported pm permission flags; waited for settings UI and package replacement launcher synchronization."
+    },
+    {
+      "area": "API 37 normal final first run",
+      "result": "initial receipt timeout",
+      "reason": "20-second wait expired but the terminal read contained one successful receipt. The harness now waits up to 60 seconds and checks the final polled rows; a complete 8-check rerun passed."
+    },
+    {
+      "area": "debugger",
+      "result": "no tracepoint values",
+      "reason": "Temporary JDWP attachment and non-suspending Pref tracepoint collected no hits. Subsequent launcher system state and real UI behavior were observed; debugger values are not claimed."
+    }
+  ],
+  "ownedEmulators": [
+    {
+      "ChildPids": [
+        28524,
+        20752
+      ],
+      "Fingerprint": "google/sdk_google_phone_x86/generic_x86:7.0/NYC/6696031:userdebug/dev-keys",
+      "Avd": "AVD_API_24",
+      "CommandLine": "\"E:\\.android\\sdk\\emulator\\emulator.exe\" -avd AVD_API_24 -read-only -no-snapshot-save -no-window -no-boot-anim -no-audio -gpu swiftshader_indirect -port 5594",
+      "Owner": {
+        "Id": 44948,
+        "StartTime": "2026-09-14T15:14:35.2906492+08:00",
+        "Path": "E:\\.android\\sdk\\emulator\\emulator.exe"
+      },
+      "Serial": "emulator-5594"
+    },
+    {
+      "ChildPids": [
+        60252,
+        29104
+      ],
+      "Fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+      "Avd": "AVD_API_37",
+      "CommandLine": "\"E:\\.android\\sdk\\emulator\\emulator.exe\" -avd AVD_API_37 -read-only -no-snapshot -no-window -no-boot-anim -no-audio -gpu swiftshader_indirect -port 5596",
+      "Owner": {
+        "Id": 16416,
+        "StartTime": "2026-09-14T15:36:40.5010958+08:00",
+        "Path": "E:\\.android\\sdk\\emulator\\emulator.exe"
+      },
+      "Serial": "emulator-5596"
+    }
+  ],
+  "rawEvidenceDirectory": "build/sdk37-inrt-storage-20260914",
+  "cleanup": {
+    "ownedEmulatorsStopped": true,
+    "sharedAdbServerPid": 31400,
+    "sharedAdbServerPreserved": true,
+    "temporaryDebugForwardRemoved": true,
+    "physicalDevicesChanged": false
+  },
+  "relatedCommits": [
+    {
+      "path": "D:/webstorm-projects/AutoJs6-Documentation",
+      "commit": "f14dde4dcbeef14cba68d67eb15a4fe4ec0ac72c",
+      "subject": "docs(inrt): document shared storage startup permissions",
+      "files": 8
+    },
+    {
+      "path": "D:/idea-projects/AutoJs6-Plugin-Offline-Docs",
+      "commit": "806f85247d75c7cae9333b2ca8512f95c3bc703f",
+      "subject": "docs(inrt): synchronize packaged app storage guidance",
+      "files": 42
+    },
+    {
+      "path": "D:/webstorm-projects/AutoJs6-TypeScript-Declarations",
+      "commit": "0d8d68378a1dbbdbfb05822b315e91b67f46bbc3",
+      "subject": "feat(types): declare packaged app shared storage requirement",
+      "files": 5
+    },
+    {
+      "path": "D:/idea-projects/AutoJs6-Plugin-Ace-Editor",
+      "commit": "4f99d9b1fae14e9afb11977fbf4bdbaf179ddf3a",
+      "subject": "feat(types): synchronize packaged app storage declarations",
+      "files": 39
+    }
+  ],
+  "staticChecks": {
+    "resourceLocales": 11,
+    "newStringKeys": 5,
+    "defaultEnglishSharedEntries": 2044,
+    "changelogLanguagesPerRepo": 10,
+    "declarationsTextEqual": true,
+    "diffCheckRepositories": 5,
+    "physicalRowsOpen": 99
+  }
+}

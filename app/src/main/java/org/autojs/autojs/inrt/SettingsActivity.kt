@@ -1,12 +1,15 @@
 package org.autojs.autojs.inrt
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EdgeEffect
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.runtime.api.Permissions
+import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.theme.preference.Syncable
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
@@ -52,6 +55,14 @@ class SettingsActivity : AppCompatActivity() {
             R.string.key_display_over_other_apps,
             R.string.key_all_files_access,
         ).forEach { findPreference(it)?.sync() }
+        ProjectConfig.fromAssets(this, ProjectConfig.configFileOfDir("project"))?.launchConfig?.let {
+            Pref.updateLauncherVisibility(it)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        findPreference(R.string.key_all_files_access)?.sync()
     }
 
     private fun findPreference(keyRes: Int): Syncable? {
@@ -62,6 +73,10 @@ class SettingsActivity : AppCompatActivity() {
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             addPreferencesFromResource(R.xml.fragment_preferences_inrt)
+            findPreference<Preference>("inrt_run_script")?.setOnPreferenceClickListener {
+                startActivity(Intent(requireContext(), LogActivity::class.java).putExtra(LogActivity.EXTRA_LAUNCH_SCRIPT, true))
+                true
+            }
         }
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -1334,6 +1334,9 @@
     <string name="text_in_progress">في تَقَدم</string>
     <string name="text_info">معلومة</string>
     <string name="text_input_bar">شريط الإدخال</string>
+    <string name="text_inrt_shared_storage_required">يحتاج هذا المشروع إلى الوصول إلى الملفات المشتركة. امنح إذن التخزين ثم عد إلى هذه الصفحة لتشغيل النص. يبقى النص متوقفا عند الإلغاء. لا يشمل الوصول إلى جميع الملفات المجلدات الخاصة بالتطبيقات الأخرى.</string>
+    <string name="text_inrt_storage_permission_missing">لا تعلن هذه الحزمة أذونات التخزين اللازمة للمشروع. اطلب من المطور تضمين الأذونات المطلوبة عند إعادة بناء الحزمة. لم يبدأ النص.</string>
+    <string name="text_inrt_storage_settings_unavailable">تعذر فتح صفحة إعدادات التخزين. امنح الإذن من إعدادات Android ثم افتح هذا التطبيق مجددا. لم يبدأ النص.</string>
     <string name="text_insist_on_record">سجل</string>
     <string name="text_inspect_layout">فحص التصميم</string>
     <string name="text_inspect_layout_bounds">فحص حدود التصميم</string>
@@ -1381,6 +1384,8 @@
     <string name="text_launch_launcher_visible">اظهار ايقونة التطبيق في المشغل</string>
     <string name="text_launch_log_shortcut_visible">إظهار السجل في اختصارات المشغل</string>
     <string name="text_launch_logs_visible">اظهار السجلات عند التشغيل</string>
+    <string name="text_launch_requires_shared_storage">يتطلب بدء التشغيل الوصول إلى التخزين المشترك</string>
+    <string name="text_launch_requires_shared_storage_summary">فعّل هذا الخيار للنصوص التي تصل مباشرة إلى مسارات مشتركة مثل /sdcard/Download. اتركه معطلا للموارد المضمّنة أو ملفات التطبيق الخاصة أو الوصول عبر منتقي ملفات النظام أو MediaStore.</string>
     <string name="text_launch_run_on_boot">تشغيل السكربت عند الاقلاع</string>
     <string name="text_launch_settings_shortcut_visible">إظهار الإعدادات في اختصارات المشغل</string>
     <string name="text_launch_slug">نص شعار شاشة البداية</string>

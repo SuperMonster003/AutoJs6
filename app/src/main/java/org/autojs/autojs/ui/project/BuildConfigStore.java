@@ -49,6 +49,7 @@ public final class BuildConfigStore {
     public static final String STATE_LAUNCH_LOG_SHORTCUT_VISIBLE = "launchLogShortcutVisible";
     public static final String STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE = "launchSettingsShortcutVisible";
     public static final String STATE_LAUNCH_RUN_ON_BOOT = "launchRunOnBoot";
+    public static final String STATE_LAUNCH_REQUIRES_SHARED_STORAGE = "launchRequiresSharedStorage";
     public static final String STATE_LAUNCH_SLUG = "launchSlug";
     public static final String STATE_SIGNATURE_SCHEME = "signatureScheme";
     public static final String STATE_KEY_STORE_PATH = "keyStorePath";
@@ -69,6 +70,7 @@ public final class BuildConfigStore {
     public static final String FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE = "fixedLaunchLogShortcutVisible";
     public static final String FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE = "fixedLaunchSettingsShortcutVisible";
     public static final String FIELD_FIXED_LAUNCH_RUN_ON_BOOT = "fixedLaunchRunOnBoot";
+    public static final String FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE = "fixedLaunchRequiresSharedStorage";
     public static final String FIELD_FIXED_LAUNCH_SLUG = "fixedLaunchSlug";
     public static final String FIELD_FIXED_ABIS = "fixedAbis";
     public static final String FIELD_FIXED_LIBS = "fixedLibs";
@@ -344,6 +346,7 @@ public final class BuildConfigStore {
                || object.has(STATE_LAUNCH_LOG_SHORTCUT_VISIBLE)
                || object.has(STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE)
                || object.has(STATE_LAUNCH_RUN_ON_BOOT)
+               || object.has(STATE_LAUNCH_REQUIRES_SHARED_STORAGE)
                || object.has(STATE_LAUNCH_SLUG)
                || object.has(STATE_SIGNATURE_SCHEME)
                || object.has(STATE_KEY_STORE_PATH)
@@ -369,6 +372,7 @@ public final class BuildConfigStore {
         putSafely(out, STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, src.optBoolean(STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, false));
         putSafely(out, STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, src.optBoolean(STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false));
         putSafely(out, STATE_LAUNCH_RUN_ON_BOOT, src.optBoolean(STATE_LAUNCH_RUN_ON_BOOT, false));
+        putSafely(out, STATE_LAUNCH_REQUIRES_SHARED_STORAGE, src.optBoolean(STATE_LAUNCH_REQUIRES_SHARED_STORAGE, false));
         putSafely(out, STATE_LAUNCH_SLUG, src.optString(STATE_LAUNCH_SLUG, ""));
         putSafely(out, STATE_SIGNATURE_SCHEME, src.optString(STATE_SIGNATURE_SCHEME, ""));
         putSafely(out, STATE_KEY_STORE_PATH, src.optString(STATE_KEY_STORE_PATH, ""));
@@ -396,6 +400,7 @@ public final class BuildConfigStore {
         putSafely(out, FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_RUN_ON_BOOT, false);
+        putSafely(out, FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_SLUG, false);
         putSafely(out, FIELD_FIXED_ABIS, false);
         putSafely(out, FIELD_FIXED_LIBS, true);
@@ -424,6 +429,7 @@ public final class BuildConfigStore {
         putSafely(out, FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_RUN_ON_BOOT, src.optBoolean(FIELD_FIXED_LAUNCH_RUN_ON_BOOT, defaults.optBoolean(FIELD_FIXED_LAUNCH_RUN_ON_BOOT, false)));
+        putSafely(out, FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, src.optBoolean(FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, defaults.optBoolean(FIELD_FIXED_LAUNCH_REQUIRES_SHARED_STORAGE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_SLUG, src.optBoolean(FIELD_FIXED_LAUNCH_SLUG, defaults.optBoolean(FIELD_FIXED_LAUNCH_SLUG, false)));
         putSafely(out, FIELD_FIXED_ABIS, src.optBoolean(FIELD_FIXED_ABIS, defaults.optBoolean(FIELD_FIXED_ABIS, false)));
         putSafely(out, FIELD_FIXED_LIBS, src.optBoolean(FIELD_FIXED_LIBS, defaults.optBoolean(FIELD_FIXED_LIBS, true)));

@@ -1320,6 +1320,9 @@
     <string name="text_in_progress">In progress</string>
     <string name="text_info">Information</string>
     <string name="text_input_bar">Input bar</string>
+    <string name="text_inrt_shared_storage_required">This project needs access to shared files. Grant storage access, then return here to start the script. Cancelling keeps the script stopped. All files access does not include other apps\' private directories.</string>
+    <string name="text_inrt_storage_permission_missing">This package does not declare the storage permissions required by this project. Ask its author to include the required permissions when rebuilding. The script has not started.</string>
+    <string name="text_inrt_storage_settings_unavailable">The storage settings page could not be opened. Grant access from Android settings, then open this app again. The script has not started.</string>
     <string name="text_insist_on_record">Record</string>
     <string name="text_inspect_layout">Inspect layout</string>
     <string name="text_inspect_layout_bounds">Inspect layout bounds</string>
@@ -1367,6 +1370,8 @@
     <string name="text_launch_launcher_visible">Show app icon in launcher</string>
     <string name="text_launch_log_shortcut_visible">Show Log in launcher shortcuts</string>
     <string name="text_launch_logs_visible">Show logs on launch</string>
+    <string name="text_launch_requires_shared_storage">Startup requires shared storage access</string>
+    <string name="text_launch_requires_shared_storage_summary">Enable for scripts that need direct access to shared paths such as /sdcard/Download. Leave off for bundled assets, app-specific files, or access handled through the system file picker or MediaStore.</string>
     <string name="text_launch_run_on_boot">Run script on boot</string>
     <string name="text_launch_settings_shortcut_visible">Show Settings in launcher shortcuts</string>
     <string name="text_launch_slug">Splash slug text</string>

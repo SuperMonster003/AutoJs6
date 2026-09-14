@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.preference.PreferenceManager
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs6.R
 
@@ -65,6 +66,7 @@ object Pref {
         val appliedBuildId = preferences.getString(KEY_APPLIED_BUILD_ID, null)
 
         val shouldApply = force || buildId != appliedBuildId
+        updateLauncherVisibility(launchConfig)
         if (!shouldApply) {
             return
         }
@@ -75,16 +77,17 @@ object Pref {
             .putString(KEY_APPLIED_BUILD_ID, buildId)
             .apply()
 
-        applyLauncherVisibility(launchConfig.isLauncherVisible)
     }
 
-    private fun applyLauncherVisibility(visible: Boolean) {
+    fun updateLauncherVisibility(config: LaunchConfig) {
+        val context = GlobalAppContext.get()
+        // Keep a recovery entry until a project that requires broad file access can run.
+        val visible = config.isLauncherVisible || (config.requiresSharedStorage && !InrtStorageAccess.has(context))
         val state = if (visible) {
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED
         } else {
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         }
-        val context = GlobalAppContext.get()
         context.packageManager.setComponentEnabledSetting(
             ComponentName(context, SplashActivity::class.java),
             state,

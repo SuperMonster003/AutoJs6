@@ -1334,6 +1334,9 @@
     <string name="text_in_progress">진행 중</string>
     <string name="text_info">정보</string>
     <string name="text_input_bar">입력 바</string>
+    <string name="text_inrt_shared_storage_required">이 프로젝트는 공유 파일에 접근해야 합니다. 저장소 접근을 허용한 후 이 화면으로 돌아오면 스크립트가 시작됩니다. 취소하면 스크립트는 중지 상태를 유지합니다. 모든 파일 접근 권한으로도 다른 앱의 비공개 디렉터리에는 접근할 수 없습니다.</string>
+    <string name="text_inrt_storage_permission_missing">이 패키지에 프로젝트가 요구하는 저장소 권한이 선언되지 않았습니다. 작성자에게 다시 빌드할 때 필요한 권한을 포함하도록 요청하세요. 스크립트가 시작되지 않았습니다.</string>
+    <string name="text_inrt_storage_settings_unavailable">저장소 권한 설정 화면을 열 수 없습니다. Android 설정에서 접근을 허용한 후 이 앱을 다시 여세요. 스크립트가 시작되지 않았습니다.</string>
     <string name="text_insist_on_record">기록</string>
     <string name="text_inspect_layout">레이아웃을 검사하십시오</string>
     <string name="text_inspect_layout_bounds">레이아웃 경계를 검사하십시오</string>
@@ -1381,6 +1384,8 @@
     <string name="text_launch_launcher_visible">런처에 앱 아이콘 표시</string>
     <string name="text_launch_log_shortcut_visible">런처 바로 가기에 로그 표시</string>
     <string name="text_launch_logs_visible">실행 시 로그 표시</string>
+    <string name="text_launch_requires_shared_storage">시작 시 공유 저장소 접근 필요</string>
+    <string name="text_launch_requires_shared_storage_summary">/sdcard/Download 같은 공유 경로에 직접 접근하는 스크립트에서 사용하세요. 포함된 리소스, 앱 전용 파일, 시스템 파일 선택기 또는 MediaStore만 사용하면 필요하지 않습니다.</string>
     <string name="text_launch_run_on_boot">부팅 시 스크립트 실행</string>
     <string name="text_launch_settings_shortcut_visible">런처 바로 가기에 설정 표시</string>
     <string name="text_launch_slug">시작 화면 슬로건 텍스트</string>

@@ -521,6 +521,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17
 * `Corrección` runtime.loadDex en Android 7.0 / 7.1 podía sobrescribir el DEX en caché con la salida optimizada de ART, provocando errores al cargar clases
 * `Corrección` Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento
+* `Mejora` Las apps empaquetadas solicitan almacenamiento según las rutas compartidas del proyecto; la denegación, el regreso de ajustes, la recuperación del acceso de inicio y el arranque comprueban el acceso real
 * `Mejora` media.playMusic utiliza un servicio de música en primer plano Media3 con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
 * `Mejora` Explicitar la delegación de inicio de Activity del complemento Selector de color de pantalla, con opciones del emisor vinculadas a la visibilidad del anfitrión en Android 16 y posteriores

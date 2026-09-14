@@ -1329,6 +1329,9 @@
     <string name="text_in_progress">處理中</string>
     <string name="text_info">資訊</string>
     <string name="text_input_bar">輸入框</string>
+    <string name="text_inrt_shared_storage_required">此專案需要存取共用檔案. 請授予儲存空間存取權限, 然後返回此頁面啟動指令碼. 取消後指令碼保持停止. 所有檔案存取權限不包含其他應用程式的私人目錄.</string>
+    <string name="text_inrt_storage_permission_missing">此安裝套件未宣告專案所需的儲存空間權限. 請聯絡作者在重新封裝時包含所需權限. 指令碼尚未啟動.</string>
+    <string name="text_inrt_storage_settings_unavailable">無法開啟儲存空間權限設定頁面. 請在 Android 設定中授權後重新開啟此應用程式. 指令碼尚未啟動.</string>
     <string name="text_insist_on_record">錄製</string>
     <string name="text_inspect_layout">佈局分析</string>
     <string name="text_inspect_layout_bounds">佈局範圍分析</string>
@@ -1376,6 +1379,8 @@
     <string name="text_launch_launcher_visible">在啟動器中顯示應用圖示</string>
     <string name="text_launch_log_shortcut_visible">在啟動器捷徑中顯示日誌</string>
     <string name="text_launch_logs_visible">啟動時顯示日誌</string>
+    <string name="text_launch_requires_shared_storage">啟動需要共用儲存空間存取</string>
+    <string name="text_launch_requires_shared_storage_summary">適用於需要直接存取 /sdcard/Download 等共用路徑的指令碼. 僅使用封裝資源, 應用程式專屬檔案, 系統檔案選擇器或 MediaStore 時無須勾選.</string>
     <string name="text_launch_run_on_boot">開機時執行指令碼</string>
     <string name="text_launch_settings_shortcut_visible">在啟動器捷徑中顯示設定</string>
     <string name="text_launch_slug">啟動頁標語文字</string>

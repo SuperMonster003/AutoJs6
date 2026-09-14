@@ -1329,6 +1329,9 @@
     <string name="text_in_progress">处理中</string>
     <string name="text_info">信息</string>
     <string name="text_input_bar">输入框</string>
+    <string name="text_inrt_shared_storage_required">此项目需要访问共享文件. 请授予存储访问权限, 然后返回此页面启动脚本. 取消后脚本保持停止. 所有文件访问权限不包含其他应用的私有目录.</string>
+    <string name="text_inrt_storage_permission_missing">此安装包未声明项目所需的存储权限. 请联系作者在重新打包时包含所需权限. 脚本尚未启动.</string>
+    <string name="text_inrt_storage_settings_unavailable">无法打开存储权限设置页面. 请在 Android 设置中授权后重新打开此应用. 脚本尚未启动.</string>
     <string name="text_insist_on_record">录制</string>
     <string name="text_inspect_layout">布局分析</string>
     <string name="text_inspect_layout_bounds">布局范围分析</string>
@@ -1376,6 +1379,8 @@
     <string name="text_launch_launcher_visible">在启动器中显示应用图标</string>
     <string name="text_launch_log_shortcut_visible">在启动器快捷方式中显示日志</string>
     <string name="text_launch_logs_visible">启动时显示日志</string>
+    <string name="text_launch_requires_shared_storage">启动需要共享存储访问</string>
+    <string name="text_launch_requires_shared_storage_summary">适用于需要直接访问 /sdcard/Download 等共享路径的脚本. 仅使用打包资源, 应用专属文件, 系统文件选择器或 MediaStore 时无需勾选.</string>
     <string name="text_launch_run_on_boot">开机时运行脚本</string>
     <string name="text_launch_settings_shortcut_visible">在启动器快捷方式中显示设置</string>
     <string name="text_launch_slug">启动页标语文本</string>

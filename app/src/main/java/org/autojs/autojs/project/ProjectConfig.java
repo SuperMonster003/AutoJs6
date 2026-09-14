@@ -357,6 +357,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         Pattern launchConfigSettingsShortcutVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("settingsShortcutVisible"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigAutoRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("autoRunOnBoot"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("runOnBoot"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigRequiresSharedStoragePattern = Pattern.compile(booleanPatternWithKeyCapture("requiresSharedStorage"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigSlugTextPattern = Pattern.compile(stringPatternWithKeyCapture("slugText"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigSlugPattern = Pattern.compile(stringPatternWithKeyCapture("slug"), Pattern.CASE_INSENSITIVE);
 
@@ -401,6 +402,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         setFieldForBooleanIfMatchesWithKey(launchConfigSettingsShortcutVisiblePattern, s, "settingsShortcutVisible", launchConfig::setSettingsShortcutVisible, launchConfig, detectConflicts); /* 优先. */
         setFieldForBooleanIfMatchesWithKey(launchConfigAutoRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts);
         setFieldForBooleanIfMatchesWithKey(launchConfigRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigRequiresSharedStoragePattern, s, "requiresSharedStorage", launchConfig::setRequiresSharedStorage, launchConfig, detectConflicts);
         setFieldIfMatchesWithKey(launchConfigSlugTextPattern, s, "slug", launchConfig::setSlug, launchConfig, detectConflicts);
         setFieldIfMatchesWithKey(launchConfigSlugPattern, s, "slug", launchConfig::setSlug, launchConfig, detectConflicts); /* 优先. */
 

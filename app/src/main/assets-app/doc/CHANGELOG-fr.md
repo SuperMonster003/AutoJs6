@@ -359,6 +359,7 @@
 * `Correction` Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17
 * `Correction` runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes
 * `Correction` Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement
+* `Amélioration` Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs
 * `Amélioration` media.playMusic utilise un service musical de premier plan Media3 avec gestion du focus audio, commandes de notification, propriété de lecture du script et libération à sa fin
 * `Amélioration` L'aide du service au premier plan explique les restrictions audio en arrière-plan d'Android 17 et comment redémarrer le service depuis l'application visible avant de relancer la lecture
 * `Amélioration` Rendre explicite la délégation de lancement de l'Activity du plugin Sélecteur de couleur, avec des options de l'expéditeur liées à la visibilité de l'hôte sous Android 16 et versions ultérieures

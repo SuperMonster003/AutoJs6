@@ -1332,6 +1332,9 @@
     <string name="text_in_progress">En curso</string>
     <string name="text_info">Información</string>
     <string name="text_input_bar">Barra de entrada</string>
+    <string name="text_inrt_shared_storage_required">Este proyecto necesita acceder a archivos compartidos. Concede acceso al almacenamiento y vuelve aquí para iniciar el script. Si cancelas, el script seguirá detenido. El acceso a todos los archivos no incluye los directorios privados de otras apps.</string>
+    <string name="text_inrt_storage_permission_missing">Este paquete no declara los permisos de almacenamiento necesarios para el proyecto. Pide al autor que los incluya al volver a compilarlo. El script no se ha iniciado.</string>
+    <string name="text_inrt_storage_settings_unavailable">No se pudo abrir la página de permisos de almacenamiento. Concede acceso desde los ajustes de Android y vuelve a abrir esta app. El script no se ha iniciado.</string>
     <string name="text_insist_on_record">Registro</string>
     <string name="text_inspect_layout">Inspeccionar el diseño</string>
     <string name="text_inspect_layout_bounds">Inspeccionar los límites del diseño</string>
@@ -1379,6 +1382,8 @@
     <string name="text_launch_launcher_visible">Mostrar icono de la app en el lanzador</string>
     <string name="text_launch_log_shortcut_visible">Mostrar Registro en los accesos directos del iniciador</string>
     <string name="text_launch_logs_visible">Mostrar registros al iniciar</string>
+    <string name="text_launch_requires_shared_storage">El inicio requiere acceso al almacenamiento compartido</string>
+    <string name="text_launch_requires_shared_storage_summary">Activa esta opción para scripts que acceden directamente a rutas compartidas como /sdcard/Download. Déjala desactivada para recursos incluidos, archivos propios de la app o acceso mediante el selector de archivos del sistema o MediaStore.</string>
     <string name="text_launch_run_on_boot">Ejecutar script al iniciar</string>
     <string name="text_launch_settings_shortcut_visible">Mostrar Ajustes en los accesos directos del iniciador</string>
     <string name="text_launch_slug">Texto del lema de inicio</string>

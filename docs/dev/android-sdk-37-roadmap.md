@@ -9,7 +9,7 @@
 
 P2.6 本地验证已落地: [TLS / CT / ECH 实施记录](evidence/android-sdk-37-p26-20260913.md). 修复 `isInsecure` / `insecure` 污染后续请求的共享 TLS 配置; API 37 的 target 36 / 37 与独立兼容开关对照, 加上 API 24 回归, 共 7 组 42 次测试执行通过. 生产 CT / ECH 策略保持默认, 企业代理、实际公网信任链及真实 ECH 协商仍待补证, 不将 P2.6 整体关闭.
 
-2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. Samsung D37 恢复连接后另完成 [真机 62/62](evidence/android-sdk-37-q7-samsung-20260914.md): HTTP 24、TLS 26、DEX 4、Looper / 线程池 8, 含实际 release; target 37 未获 LAN 授权时回环仍通过. O02 / A05 等完整业务与网络拓扑验收继续保留, [Media3 脚本音乐服务](evidence/android-sdk-37-media3-20260914.md) 已接入宿主 / inrt, API 24 / 37 最终自动化 66/66; 后台独立启动与真机听音仍待验. inrt 存储引导和全部插件独立发版继续实施.
+2026-09-14 已确认附录 A 的 Q1=a / Q2=a / Q3=b / Q4=a / Q5=a / Q6=b / Q7=b, 并完成 [Q7 明文配置迁移](evidence/android-sdk-37-q7-20260914.md): 修复 release 普通 HTTP 被 NSC 拒绝的问题, 宿主 / inrt 在 API 24 / 37 上 HTTP 40/40、TLS 回归 40/40. Samsung D37 恢复连接后另完成 [真机 62/62](evidence/android-sdk-37-q7-samsung-20260914.md): HTTP 24、TLS 26、DEX 4、Looper / 线程池 8, 含实际 release; target 37 未获 LAN 授权时回环仍通过. O02 / A05 等完整业务与网络拓扑验收继续保留, [Media3 脚本音乐服务](evidence/android-sdk-37-media3-20260914.md) 已接入宿主 / inrt, API 24 / 37 最终自动化 66/66; 后台独立启动与真机听音仍待验. [inrt 按需存储引导](evidence/android-sdk-37-inrt-storage-20260914.md) 已实现, API 24 / 37 的 target 29 / 37 UI 与真实读写最终 33/33、配置测试 6/6、已有所有文件访问授权的覆盖升级 4 项通过. 完整历史迁移 / 开机 / 用户 APK 矩阵及全部插件独立发版继续实施.
 
 P2.7 本地验证已落地: [Parcel / 插件 IPC 实施记录](evidence/android-sdk-37-p27-20260913.md). 所测 API 37 镜像的 `PARCEL_HARDENING` 长度检查已用设备字节码和正反例核实; 宿主 target 36 强制开启与 target 37 默认状态下, 11 个指定插件的最短链路均通过. 所测生产序列化路径无需修正; 真实 Tasker / 桌面操作、其它 ABI / OEM 及 P5 插件 target 37 发布验证继续开放.
 
@@ -353,7 +353,10 @@ P1 本地验收已记录; 整体关闭仍需远程 CI 证据, 发布工作流随
 ### P2.16 inrt 切换前适配 (D3)
 
 - [ ] 在仍保留 `TARGET_SDK_VERSION_INRT=29` 的代码上, 用 P0.2 的 target 37 debug 覆盖包提前执行 P3.3 清单, 完成 inrt 专属权限 / 存储 / 启动流程的适配; 正常 target 29 包同步回归. P3.3 是最终验收表, 不能等提交 target 37 后才首次排查这些差异. (SOURCE; DEVICE-37)
-- [ ] 无关存储的 assets / 私有目录脚本在拒绝 "所有文件访问" 时仍可启动; 需要共享存储的脚本在缺少授权时得到明确引导. 测试取消授权、返回设置、永久拒绝、无 launcher 入口、开机启动, 不把权限请求回调到达视为授权成功. (DEVICE-37)
+- [x] 增加 `launchConfig.requiresSharedStorage=false` 及打包界面选项, 同步项目 / 远程 JSON、打包配置保存 / 导入 / 导出、固定字段与撤销 / 重做; 文档 / d.ts / Ace / 离线文档已同步. 配置测试 API 24 / 37 共 6/6. [实现与证据](evidence/android-sdk-37-inrt-storage-20260914.md). (SOURCE; DOCS; DEVICE)
+- [x] assets / 私有目录脚本无存储授权启动; 共享路径需求缺少授权时引导, 取消 / 未授权返回不执行, Manifest 缺少声明提示重新打包. API 24 / 37 的正常 target 29 与覆盖 target 37 包最终 33/33, 含永久拒绝、设置中进程退出后恢复、隐藏桌面入口恢复和设置页运行脚本; 授权后检查真实文件读写. (DEVICE; DEVICE-37)
+- [ ] 开机与无界面完整矩阵: 共享执行前检查和恢复入口已实现, API 37 / target 37 的私有脚本真实重启 1 项通过. 共享场景第二次重启因 AVD ADB 超时未完成, 拒绝 / 授权与 OEM 开机仍待验; 不以 UI 回调或源码守卫替代开机结果. (DEVICE-37; PHYSICAL)
+- [ ] 完整旧安装迁移和真实用户 APK 验收: API 37 上同包名 / 签名、递增 versionCode 的 target 29 -> 37 已有所有文件访问授权路径 4 项通过, 原共享 / 私有文件保留, 撤销停止且重新授权恢复. 当前模板权限 maxSdkVersion 不能在 API 37 建立传统 READ / WRITE 基线, 历史 legacy 路径及 `preserveLegacyExternalStorage` 决策仍待 P3.3 矩阵; 提前夹具不替代最终 Runtime Kit / APK Builder. (DEVICE; DEVICE-37)
 
 P2 验收: I1-I15 与 P2.16 每项有结论, 附录 B 对应行回填; target 37 覆盖包在 `AVD_API_37` 通过 P2.1-P2.5 与 inrt 专属用例; 同一代码的正常 debug 包在 API 28 / 33 / 35 真机上跑 a11y 冒烟与 VS Code 连接无退化; changelog 条目齐备. 已知平台限制单独记录, 不计为对应功能通过.
 
@@ -381,18 +384,18 @@ P2 验收: I1-I15 与 P2.16 每项有结论, 附录 B 对应行回填; target 37
 
 | 等级 | 对打包应用的增量 | 验证 |
 | --- | --- | --- |
-| 30 | 分区存储强制: 任意共享路径的直接文件访问需评估所有文件访问权限; 应用专属目录 / MediaStore / SAF 各有规则, `MANAGE_EXTERNAL_STORAGE` 也不等于可访问任意其它应用私有目录. `SplashActivity.kt:76` 仍只申请旧存储权限 | 按脚本实际需要引导 (Q4); 授予 / 拒绝后的共享路径与私有目录脚本各测 |
+| 30 | 分区存储强制: 任意共享路径的直接文件访问需评估所有文件访问权限; 应用专属目录 / MediaStore / SAF 各有规则, `MANAGE_EXTERNAL_STORAGE` 也不等于可访问任意其它应用私有目录. `InrtLaunchGate` 已按 Q4 的显式共享需求检查实际授权 | [提前验证](evidence/android-sdk-37-inrt-storage-20260914.md) 的 API 24 / 37 四组 33/33; 最终用户 APK 与 API 30 / 33 迁移仍待验 |
 | 30 | 包可见性 (`<queries>` 已在共用 manifest, 且声明 `QUERY_ALL_PACKAGES`) | `app.launch` / `app.getAppName` 任意包 |
 | 31 | 组件 `exported` 显式化 (共用 manifest 已满足); `PendingIntent` 可变性 (代码已按 36 处理); 后台启动前台服务限制 (`FGS_BG_START_RESTRICTION_CHANGE_ID`; `BOOT_COMPLETED` 属豁免); 精确闹钟权限 (`SCHEDULE_EXACT_ALARM` + 已声明的 `USE_EXACT_ALARM`); 系统启动画面叠加在自定义 `SplashActivity` 之前; 通知跳板限制 | 开机自启 (`InrtBootCompletedReceiver`), 定时任务, 启动画面观感 |
-| 33 | `POST_NOTIFICATIONS` 运行时权限; 拒绝时前台服务通知在通知栏不可见但服务仍需合法通知及启动条件; 细分媒体权限; 旧 `WRITE_EXTERNAL_STORAGE` 不能代替共享存储授权 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`), 按系统 / target 移除无效存储申请 |
+| 33 | `POST_NOTIFICATIONS` 运行时权限; 拒绝时前台服务通知在通知栏不可见但服务仍需合法通知及启动条件; 细分媒体权限; 旧 `WRITE_EXTERNAL_STORAGE` 不能代替共享存储授权 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`) 待完整用户 APK 验收; 启动旧 WRITE 无条件申请已移除, 按 OS / 真实存储模式引导 |
 | 34 | 前台服务类型必填 (已声明); 运行时注册接收器需导出标志 (共用代码); 隐式 Intent 只匹配已导出组件; `Thread.stop` 不可用; 动态加载 DEX 只读 (`AndroidClassLoader` 已处理); MediaProjection 每次会话授权 + 回调 | `runtime.loadDex`, 截图, `events.broadcast` |
 | 35 | 边到边强制 (UI 模式脚本布局); 前台服务 `dataSync` / `mediaProcessing` 超时 (未用); `BOOT_COMPLETED` 禁止启动部分类型前台服务 (`specialUse` 允许); 悬浮窗不再豁免后台启动前台服务 (`FGS_SAW_RESTRICTIONS`, 仅可见悬浮窗豁免); 最低可安装 targetSdk 24 | UI 模式脚本顶部内容, 开机自启后的前台服务 |
 | 36 | 预测性返回默认开启 (`onBackPressed` 不再回调, 共用 `BackCompat`); 边到边豁免移除; 大屏忽略方向; Intent 重定向保护; `announceForAccessibility` 弃用 | 打包应用的 `LogActivity` / `SettingsActivity` 返回, 平板方向 |
 | 37 | P2 全部条目, 其中本地网络权限与后台音频对打包应用最直接 (脚本自建 HTTP 服务 / TTS) | 复用 P2.1 / P2.2 的用例 |
 
 - [ ] 依上表逐行验证并修正 inrt 专属流程 (`SplashActivity` 权限引导, `fragment_preferences_inrt.xml` 的开关顺序与默认值). (SOURCE; DEVICE-37; DEVICE)
-- [ ] 安装矩阵: 用相同 applicationId / 签名、递增 versionCode 的示例 APK 测 target 29 -> 37 覆盖安装, 并另测 target 37 首次安装 / 卸载重装, 两者不能共享成功结论. API 30 设备或 AVD、API 33 真机与 `AVD_API_37` 分别记录旧文件位置、已有授权、升级后的实际访问及迁移结果. `preserveLegacyExternalStorage` 不能替代新安装的权限引导. ([官方迁移说明](https://developer.android.com/training/data-storage/use-cases); DEVICE; DEVICE-37)
-- [ ] 打包器 UI (`ui/project/BuildActivity`, `ProjectConfigActivity`) 与文档说明打包应用在 Android 11+ 的存储引导. (DOCS)
+- [ ] 安装矩阵: 用相同 applicationId / 签名、递增 versionCode 的示例 APK 测 target 29 -> 37 覆盖安装, 并另测 target 37 首次安装 / 卸载重装, 两者不能共享成功结论. API 30 设备或 AVD、API 33 真机与 `AVD_API_37` 分别记录旧文件位置、已有授权、升级后的实际访问及迁移结果. `preserveLegacyExternalStorage` 不能替代新安装的权限引导. 2026-09-14 已补 API 37 当前模板的所有文件访问授权升级 4 项, 不覆盖传统 legacy 授权或最终用户打包链. ([官方迁移说明](https://developer.android.com/training/data-storage/use-cases); DEVICE; DEVICE-37)
+- [x] 打包器 UI (`ui/project/BuildActivity`, `ProjectConfigActivity`) 与文档说明打包应用在 Android 11+ 的存储引导. `requiresSharedStorage` 同步项目配置与打包保存路径, QA 说明默认值、共享路径范围、取消 / 返回和隐藏入口恢复; d.ts、Ace 与离线文档已生成并验证. [实施记录](evidence/android-sdk-37-inrt-storage-20260914.md). (DOCS)
 
 ### P3.4 打包链路与 Runtime Kit
 
@@ -482,7 +485,7 @@ P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验�
 | Q1 | 本地网络权限的申请时机 (P2.1) | (a) 懒申请: VS Code 连接 / 用户显式开启的服务启动时引导, 脚本层只报错 + 设置页开关; (b) 应用首次启动即申请; (c) 脚本层任何局域网调用都弹窗 | (a), D12. 既有实现 `d9465be13` 获明确确认; 剩余真机拓扑验收见 P2.1 |
 | Q2 | Certificate Transparency 默认策略 (P2.6) | (a) 保持默认; (b) 对已验证且确需豁免的域作局部配置; 证书信任另行处理, 不因用户 CA 未受信任而关闭 CT | (a), D13. 保持默认, 未增加生产例外 |
 | Q3 | 后台音频策略 (P2.2) | (a) 保持常驻服务, 提供可见界面恢复操作与已知限制; (b) 引入 Media3 `MediaSessionService` 承载脚本音频 | (b), D14. 已调整 P2.2 待办; 原 (a) 恢复指引的通过证据不关闭 Media3 迁移 |
-| Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a), D15. 无共享存储需求可跳过, 待实现与升级矩阵验证 |
+| Q4 | inrt 存储引导与旧版升级保护 (P2.16 / P3.3) | (a) 按共享存储需求引导并验证旧安装迁移; (b) 仅设置页开关; `preserveLegacyExternalStorage` 的采用由升级矩阵决定, 不承担新安装兼容保证 | (a), D15. 按需引导已实现, 提前 UI / 读写 33 项及部分升级通过; 完整历史迁移 / 开机 / 用户 APK 矩阵继续 |
 | Q5 | `isAccessibilityTool` (P2.14) | (a) 不声明, 只检测 Advanced Protection 并提示; (b) 声明 | (a), D16. 保持不声明, 实际限制及准确提示仍待验证 / 实现 |
 | Q6 | 插件舰队发布节奏 (P5) | (a) 随各插件下一次发布顺带, 有行为适配的插件 (MCP-Server, Node, Bun, Python, 播放器 x2, Screen-Color-Picker) 单独发版; (b) 全部单独为 SDK 升级发版; (c) 只提交不发布, 由维护者统一发布 | (b), D17. 全部 42 仓单独为 SDK 升级发版, 各自门禁与发布记录仍待完成 |
 | Q7 | `usesCleartextTraffic` 迁移到 NSC 是否随本次 | (a) 否, 记入附录 F; (b) 是 | (b), D18. 迁移、API 24 / 37 AVD 与 Samsung D37 受控验证已完成 (`494a048df`); O02 剩余场景和 P2.6 其他验收继续保留 |
@@ -848,3 +851,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 最终 66/66: API 37 宿主 / inrt 的正常 target 与双 target 37, API 24 的正常双 flavor, 每组 11 项. 初始自然完成测试把 BUFFERING 当成结束, IntelliJ 字段证据确认后修正断言; 不掩盖早期 10/11 或调试附加产生的启动 ANR.
 - 正常 debug / release, 双 target 37 debug, 6 个应用 APK 的 Manifest / 签名检查通过; 最终输出恢复 target 36 / 29. 文档 129 模块和离线插件 debug / release 内容门禁通过, 无 d.ts 签名变更.
 - Samsung 连接已离线, 本轮仅使用两个已关闭的只读 AVD. 真机听音、后台拒绝 / 恢复、TTS、开机 / 定时链、最终打包项目及 P2.16 继续开放. [完整记录](evidence/android-sdk-37-media3-20260914.md).
+
+### 2026-09-14: Q4 按需共享存储启动与 P3.3 文档
+
+- `requiresSharedStorage` 默认 false, 接入打包 UI / 配置持久化 / 远程 JSON. Splash / Log 共享实际权限门控, 设置返回与进程重建不重复执行; 取消、永久拒绝和声明缺失有明确结果, 隐藏项目保留授权恢复入口, 开机执行前检查权限.
+- API 24 / 37 的 target 29 / 37 四组普通 Activity 与实际文件读写共 33/33, 配置 JUnit 6/6. API 37 已有所有文件访问授权的同签名 target 29 -> 37 升级 4 项通过, 私有脚本真实开机 1 项通过. 共享开机后续因 AVD ADB 超时未完成; 传统 legacy 授权、API 30 / 33、实际用户 APK 和 `preserveLegacyExternalStorage` 决策继续保留.
+- 主仓库正常 debug / release 与覆盖 target 37 debug 构建通过, 正式 target 仍为宿主 36 / inrt 29. Documentation 6.8.0 / 68、Offline Docs 6.8.1 / 41、d.ts 4.13.0、Ace 1.4.0 / 93 已同步; Ace 167 项、离线文档 2 项单元测试及两插件 debug / release / native 检查通过. 不把本地提交计为 Q6 插件已发布, 已知 WorkManager Lint Fatal 也未关闭.
+- 只读临时 AVD 已关闭, Samsung 仍离线, 本轮未变更实体机. S01 / I02 / I03 / I05 更新集中测试步骤, 99 行保持未验收. [实现、结果和范围](evidence/android-sdk-37-inrt-storage-20260914.md).

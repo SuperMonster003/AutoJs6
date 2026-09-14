@@ -333,6 +333,22 @@
                         android:textColor="?android:textColorSecondary" />
 
                     <CheckBox
+                        android:id="@+id/checkbox_launch_requires_shared_storage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_requires_shared_storage"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/text_launch_requires_shared_storage_summary"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                    <CheckBox
                         android:id="@+id/checkbox_launch_run_on_boot"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
