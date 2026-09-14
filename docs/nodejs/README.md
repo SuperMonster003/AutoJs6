@@ -102,12 +102,14 @@ Limits: files written by the host cannot be executed on Android (W^X), so
 `node node_modules/<pkg>/<entry>.js` or `npx`. Everything runs under the AutoJs6
 uid with the host's permissions and cannot call the AutoJs6 Java API. Settings >
 Terminal > "Clear terminal data" removes the home, installed packages and caches.
-Runtime plugin 1.5.0 is built without ICU (`--with-intl=none`): `Intl` is absent
+Runtime plugin 1.5.0 was built without ICU (`--with-intl=none`): `Intl` is absent
 and regular expressions with Unicode property escapes (`\p{...}`) do not parse,
 so Yarn 2+ and pnpm (which bundle such expressions) exit without output there,
 while npm and Yarn 1 work; Node's own fatal-error text goes to logcat (tag
-`nodejs`) instead of the terminal. Both are addressed by a runtime rebuild
-tracked in the plugin repository.
+`nodejs`) instead of the terminal. Plugin 1.5.1 rebuilds `libnode.so` with
+`--with-intl=small-icu` (ICU 78, English-only locale data, `NODE_ICU_DATA` for a
+full data file) and writes that text to the real stderr as well, so pnpm 11 and
+Yarn Berry run and uncaught exceptions show up in the terminal.
 
 ## Cross-Repository Guards
 
