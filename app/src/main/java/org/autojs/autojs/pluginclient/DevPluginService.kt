@@ -233,6 +233,11 @@ class DevPluginService(val context: Context) {
 
     private data class RemoteEndpoint(val host: String, val port: Int)
 
+    /** `RouteInfo.hasGateway()` is API 29; older systems fall back to the gateway address itself. */
+    private fun hasGateway(route: android.net.RouteInfo): Boolean =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) route.hasGateway()
+        else route.gateway?.isAnyLocalAddress == false
+
     /** A UI request heuristic, evaluated off the main thread; the OS still authorizes sockets. */
     fun needsLocalNetworkPermission(host: String): Boolean {
         if (LocalNetworkPermission.isGranted(context)) return false
@@ -252,7 +257,7 @@ class DevPluginService(val context: Context) {
                 address.address.size == 4 -> LocalNetworkDiagnostics.couldBeLocalHost(address.hostAddress)
                 address.isLinkLocalAddress || address.isSiteLocalAddress || address.isMulticastAddress -> true
                 (address.address[0].toInt() and 0xfe) == 0xfc -> true
-                else -> routes.any { !it.hasGateway() && it.destination.prefixLength > 0 && it.matches(address) }
+                else -> routes.any { !hasGateway(it) && it.destination.prefixLength > 0 && it.matches(address) }
             }
         }
     }

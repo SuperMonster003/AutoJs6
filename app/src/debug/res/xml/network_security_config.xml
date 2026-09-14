@@ -17,14 +17,14 @@
 
     <!-- Reserved test names only. Never add this CA to base-config or debug-overrides. -->
     <domain-config cleartextTrafficPermitted="false">
-        <domain>trusted.sdk37.test</domain>
-        <domain>mismatch.sdk37.test</domain>
+        <domain includeSubdomains="false">trusted.sdk37.test</domain>
+        <domain includeSubdomains="false">mismatch.sdk37.test</domain>
         <trust-anchors>
             <certificates src="@raw/sdk37_test_ca" />
         </trust-anchors>
     </domain-config>
     <domain-config cleartextTrafficPermitted="false">
-        <domain>ct.sdk37.test</domain>
+        <domain includeSubdomains="false">ct.sdk37.test</domain>
         <trust-anchors>
             <certificates src="@raw/sdk37_test_ca" />
         </trust-anchors>
