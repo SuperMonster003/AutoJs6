@@ -294,7 +294,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:localeConfig="@xml/locales_config"
-        android:usesCleartextTraffic="true"
         tools:ignore="DataExtractionRules"
         tools:targetApi="tiramisu">
 

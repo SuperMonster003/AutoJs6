@@ -187,6 +187,7 @@
       ],
       "fix": [
         "La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual",
+        "La configuración de seguridad de red podía bloquear solicitudes HTTP en las versiones de distribución del host y de las aplicaciones empaquetadas; la política de tráfico sin cifrar ahora coincide con las versiones de depuración y mantiene los dominios de recursos de GitHub restringidos a HTTPS",
         "Las instalaciones de APK en segundo plano no podían continuar si el sistema bloqueaba la confirmación; ahora se guarda el estado por sesión y se puede continuar desde una notificación o al volver a la aplicación, incluso tras denegar las notificaciones o recrear el proceso",
         "Los widgets de scripts podían perder las rutas de sus scripts y las asociaciones de clic al actualizarse por lotes si sus identificadores tenían varios dígitos",
         "La lectura binaria de ejemplos integrados mediante el bridge usa el codificador base64 Okio existente en Android 7.0 / 7.1, evitando un método Java exclusivo de API 26 y permitiendo los recursos MCP de ejemplos",

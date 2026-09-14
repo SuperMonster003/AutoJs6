@@ -190,6 +190,7 @@
 * `Feature` Plugin Center reads native page alignment from the official index and installed manifests, and warns before installing or enabling incompatible versions on 16 KB devices
 * `Feature` MCP screenshot fallback: image.captureScreen(options) accepts the accessibility screenshot crop, scale, format and quality options and returns an encoded one-shot payload for descriptor transport; captureScreen() keeps returning an image handle, and missing or revoked MediaProjection consent returns a permission error.
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
+* `Fix` HTTP requests in host and packaged release apps could be blocked by the network security configuration; cleartext policy now matches debug builds while keeping GitHub resource domains restricted to HTTPS
 * `Fix` Background APK installations could not continue when the system blocked the confirmation activity; session status is now saved, with confirmation available through a notification or on returning to the app, including after notification denial or process recreation
 * `Fix` Script widgets could lose their script paths and click mappings during batch updates when widget IDs contained multiple digits
 * `Fix` Binary reads of built-in samples through the host bridge use the existing Okio base64 encoder on Android 7.0 / 7.1, avoiding an API 26-only Java method and supporting MCP sample resources

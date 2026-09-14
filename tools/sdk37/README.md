@@ -22,7 +22,7 @@ The `instrument` action runs only the named suite against an already installed, 
 py tools/sdk37/physical_device.py instrument --adb $Sdk37Adb --serial $Sdk37Serial --expected-target 37 --suite dex --output build/sdk37-physical/dex
 ```
 
-Suites are `dex` (1 method), `native` (3; compatible OpenCV and Image Quantization plugins required), `install-state` (2; state storage and callback identity only), and `looper-platform` (2). Looper tests require explicit `--clear-interrupt` and `--pool-starts`; use the platform expectation table below. Pass `--package` for a matching inrt test build. The helper never substitutes host tests for a separately generated user APK. The default instrumentation timeout is 300 seconds and accepts 30-900 seconds; an adb timeout may leave device instrumentation running, so inspect it before launching another suite.
+Suites are `cleartext` (4; in-process HTTP fixture), `dex` (1 method), `native` (3; compatible OpenCV and Image Quantization plugins required), `install-state` (2; state storage and callback identity only), and `looper-platform` (2). Looper tests require explicit `--clear-interrupt` and `--pool-starts`; use the platform expectation table below. Pass `--package` for a matching inrt test build. The helper never substitutes host tests for a separately generated user APK. The default instrumentation timeout is 300 seconds and accepts 30-900 seconds; an adb timeout may leave device instrumentation running, so inspect it before launching another suite.
 
 The complete 14-test `run_looper_tests.py`, `run_audio_probe.py`, and local-network permission-dialog suites remain emulator-only because they manipulate services, volume, reboot state or system dialogs. Physical audibility, OEM permission pages, touch / keyboard behavior, actual capture pixels and external hardware need the checklist's manual observations.
 
@@ -31,6 +31,30 @@ Host-only tests for result parsing and LAN peer filtering, with no adb calls:
 ```powershell
 py -m unittest discover -s tools/sdk37 -p test_physical_device.py -v
 ```
+
+## Cleartext policy in the installed APK
+
+`CleartextTrafficDeviceTest` verifies the installed application's NSC with actual OkHttp and Rhino
+requests to an in-process IPv4 loopback server. It uses reserved `.test` hostnames with explicit DNS
+mapping, requires no external fixture or local-network permission, and closes its sockets and worker.
+The four cases cover ordinary endpoint policy, a successful HTTP response, GitHub resource domains
+being rejected before reaching the server, and the same positive / negative paths through `http.get`.
+They work with either the host or inrt instrumentation target. They do not validate real LAN routing,
+WebView, a generated user APK's launcher, certificate trust, CT, or ECH.
+
+After installing matching debug application and instrumentation APKs on the selected test device:
+
+```powershell
+python tools/sdk37/physical_device.py instrument --adb $Sdk37Adb --serial '<selected-serial>' --package org.autojs.autojs6 --suite cleartext --expected-target 36 --output build/sdk37-cleartext/host36
+```
+
+Use `--package org.autojs.autojs6.inrt --expected-target 29` for the normal template, or target 37 for
+the debug override. The helper retains its debuggable-app requirement and does not install APKs or
+change permissions. Test and release APKs with the same signing certificate can also run these four
+methods directly with `am instrument`; the [Q7 evidence](../../docs/dev/evidence/android-sdk-37-q7-20260914.md)
+records the exact signed release APKs, matching test APKs, commands and outcomes. Do not infer release
+behavior from debug results: their NSC resource overlays previously differed. Release target overrides
+remain prohibited by the build guard.
 
 ## Build configuration
 
