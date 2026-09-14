@@ -545,17 +545,41 @@ display, observes Back when the IME is visible, and on tablets enters / leaves
 actual split screen with Settings. The UI-script route also requests landscape:
 the default API 37 image honors this on the phone and ignores it on the tablet
 for both host targets. No compatibility override is changed by this tool.
+Main deliberately collapses its search action on Back; that route uses the IME
+hide API so the subsequent split-screen case still has an active query to restore.
+The rotation lock is reapplied after Main warmup because display settings can
+propagate asynchronously from the preceding case.
 
 Every stage records Activity identity, task, window configuration, multi-window
-state, IME insets, actual input / editor bounds, text, dirty flag and editor
+state, IME insets, actual input / editor bounds, text, dirty state and editor
 selection, with a focused-window dump and screenshot. Editor restoration gets a
 bounded wait before state is judged. The validator rejects missing lifecycle
 evidence, script recreation, changed text / dirty flag / cursor, wrong editor,
-obstructing windows and inputs under an inset-bearing IME. Fullscreen IME
+obstructing windows, inputs under an inset-bearing IME, and a clear FAB obscuring
+the Log page send button. Editor controls must regain their height after the IME
+is hidden. Fullscreen IME
 extraction can report a zero bottom inset; review its screenshot. Passing these
 checks does not establish general layout, font, composing-text or hardware-input
 coverage. Main SearchView handling of Back is also recorded and must be interpreted
 separately from restoration after a configuration change.
+
+Editor receipts distinguish the engine's `changed` flag from the host's
+`draftDirty` (`EditorView.shouldSaveDraft()`). The latter determines whether the
+production draft/save flow retains unsaved work; an Ace engine can report clean
+after text restoration while the host correctly keeps its draft dirty. Legacy
+receipts without the host observation still use the engine flag, and must not be
+interpreted as proof that the host lost its save state.
+
+Use `--editor-range` to select offsets 12..32 and verify both endpoints. Add
+`--editor-state clean` to load a real private file and confirm that recreation
+preserves its selection without marking the file dirty. The clean-file fixture
+also supplies an initial launch position, so restoration must take precedence
+over that old position. `--editor-repeat 8192` generates 409600 characters and
+exercises the production draft file path above its 256 KiB threshold. Large
+documents are checked by their full length and SHA-256; only a short preview is
+written into each receipt. A tablet dirty-document run at this size additionally
+requires an actual file-backed draft save callback. These flags require an editor
+route, and repetition is bounded to 1..8192.
 
 Display size, density and rotation are restored and the host is stopped after
 each run. The tool does not install packages, grant permissions, change roles,

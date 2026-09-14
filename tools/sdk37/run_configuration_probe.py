@@ -29,21 +29,32 @@ def main():
     parser.add_argument("--expected-target", type=int, choices=(36, 37), required=True)
     parser.add_argument("--form", choices=("phone", "tablet"), required=True)
     parser.add_argument("--route", choices=ACTIVITIES, required=True)
+    parser.add_argument("--editor-state", choices=("dirty", "clean"), default="dirty")
+    parser.add_argument("--editor-range", action="store_true", help="Select offsets 12..32 instead of an end-of-file caret")
+    parser.add_argument("--editor-repeat", type=int, default=1, help="Repeat the unique line up to 8192 times; 8192 exercises file-backed draft restoration")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--pause-before-split", type=Path, help="Wait up to 120 seconds for this marker after writing debug-ready.json; debugger diagnostics only")
     args = parser.parse_args()
     if not re.fullmatch(r"emulator-\d+", args.serial):
         parser.error("Requires an explicit emulator serial")
+    if not 1 <= args.editor_repeat <= 8192:
+        parser.error("Editor repetition count must be 1..8192")
+    if not args.route.startswith("edit-") and (args.editor_range or args.editor_state != "dirty" or args.editor_repeat != 1):
+        parser.error("Editor state / range options require an editor route")
     args.output.mkdir(parents=True, exist_ok=False)
     device = Device(args.adb, args.serial)
     case = uuid.uuid4().hex
     seed = "// sdk37-unsaved-" + case
     result = {"caseId": case, "started": utc_now(), "route": args.route, "form": args.form,
-              "target": args.expected_target, "success": False, "stages": {}}
+              "target": args.expected_target, "success": False, "stages": {},
+              "editorState": args.editor_state, "editorRange": args.editor_range, "editorRepeat": args.editor_repeat}
     launched = False
     display_changed = False
     split_task = None
     command_id = 0
+
+    def state_retained(state):
+        return retained(state, args.route, seed, dirty=args.editor_state == "dirty", repeat=args.editor_repeat)
 
     def receipt():
         raw = device.shell("run-as", HOST, "cat", "files/sdk37-config-" + case + ".json")
@@ -127,8 +138,15 @@ def main():
         # Keep the non-UI observer's process foreground while its engine starts.
         result["warmup"] = device.shell("am", "start", "-W", "-n", HOST + "/" + ACTIVITIES["main"])
         checked(result["warmup"])
+        # Size/density and rotation settings propagate asynchronously. Reassert portrait
+        # after warmup so a stale rotation from the previous tablet run cannot seed the case.
+        result["portraitRotation"] = device.shell("wm", "user-rotation", "lock", "0")
+        checked(result["portraitRotation"])
+        time.sleep(0.5)
         script = Path(__file__).with_name("smoke-configuration.js").read_text(encoding="utf-8").replace(
-            "__SDK37_CONFIGURATION_CONFIG__", json.dumps({"caseId": case, "seed": seed, "route": args.route, "activityClass": ACTIVITIES[args.route]}))
+            "__SDK37_CONFIGURATION_CONFIG__", json.dumps({"caseId": case, "seed": seed, "route": args.route,
+                "activityClass": ACTIVITIES[args.route], "editorState": args.editor_state, "editorRange": args.editor_range,
+                "editorRepeat": args.editor_repeat}))
         (args.output / "script.js").write_text(script, encoding="utf-8")
         result["scriptSha256"] = hashlib.sha256(script.encode()).hexdigest()
         result["launch"] = device.shell("am", "start", "-n", HOST + "/org.autojs.autojs.external.open.RunIntentActivity", "-f", "0x10000000", "--es", "script", script, timeout=45)
@@ -140,8 +158,10 @@ def main():
                  "initial portrait configuration")
         if args.route.startswith("edit-"):
             wait_for(lambda r: (r.get("current") or {}).get("editor", {}).get("ready") is True, "editor readiness", 60)
+            if args.editor_state == "clean":
+                wait_for(lambda r: state_retained(r.get("current")), "clean file loaded", 60)
         command("seed")
-        wait_for(lambda r: retained(r.get("current"), args.route, seed), "seeded text")
+        wait_for(lambda r: state_retained(r.get("current")), "seeded text")
         command("ime")
         wait_for(lambda r: (r.get("current") or {}).get("imeVisible") is True, "visible keyboard")
         portrait = capture("portrait")
@@ -159,14 +179,19 @@ def main():
             wait_for(lambda r: (r.get("current") or {}).get("configuration", {}).get("orientation") == 1, "restore portrait")
         checked(device.shell("wm", "user-rotation", "lock", "1"))
         wait_for(lambda r: r.get("current") and r["current"]["configuration"]["orientation"] == 2, "landscape")
-        wait_for(lambda r: retained(r.get("current"), args.route, seed), "state after rotation")
+        wait_for(lambda r: state_retained(r.get("current")), "state after rotation")
         time.sleep(1)
         landscape = capture("landscape")
-        if not retained(landscape, args.route, seed):
+        if not state_retained(landscape):
             raise RuntimeError("Text / unsaved state lost after rotation")
         if landscape["imeVisible"]:
-            checked(device.shell("input", "keyevent", "KEYCODE_BACK"))
-            wait_for(lambda r: r.get("current") and r["current"]["imeVisible"] is False, "back hides keyboard")
+            # Main's search action deliberately collapses on Back. Hide only the IME here
+            # so the following recreation still has an active query to preserve.
+            if args.route == "main":
+                command("hide-ime")
+            else:
+                checked(device.shell("input", "keyevent", "KEYCODE_BACK"))
+            wait_for(lambda r: r.get("current") and r["current"]["imeVisible"] is False, "keyboard hidden")
         time.sleep(1)
         capture("keyboard-hidden")
         if args.form == "tablet":
@@ -185,19 +210,19 @@ def main():
             result["splitStart"] = device.shell("wm", "shell", "splitscreen", "moveToSideStage", str(split_task), "0")
             checked(result["splitStart"])
             wait_for(lambda r: r.get("current") and r["current"].get("multiWindow") is True, "split screen", 30)
-            wait_for(lambda r: retained(r.get("current"), args.route, seed), "state after entering split", 30)
+            wait_for(lambda r: state_retained(r.get("current")), "state after entering split", 30)
             time.sleep(1)
             split = capture("split")
-            if not retained(split, args.route, seed):
+            if not state_retained(split):
                 raise RuntimeError("Text / unsaved state lost in split screen")
             result["splitExit"] = device.shell("wm", "shell", "splitscreen", "exitSplitScreen", str(split_task))
             checked(result["splitExit"])
             split_task = None
             wait_for(lambda r: r.get("current") and r["current"].get("multiWindow") is False, "exit split")
-            wait_for(lambda r: retained(r.get("current"), args.route, seed), "state after leaving split", 30)
+            wait_for(lambda r: state_retained(r.get("current")), "state after leaving split", 30)
             time.sleep(1)
             restored = capture("restored")
-            if not retained(restored, args.route, seed):
+            if not state_retained(restored):
                 raise RuntimeError("Text / unsaved state lost when leaving split")
         command("finish")
         result["receipt"] = receipt()

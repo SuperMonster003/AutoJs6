@@ -1,5 +1,6 @@
 """Validate configuration evidence without mistaking surviving text for full state retention."""
 import re
+import hashlib
 
 
 ACTIVITIES = {
@@ -11,12 +12,17 @@ ACTIVITIES = {
 }
 
 
-def retained(state, route, seed):
+def retained(state, route, seed, dirty=True, repeat=1):
     if not isinstance(state, dict):
         return False
     field = state.get("editor" if route.startswith("edit-") else "input")
+    if route.startswith("edit-") and repeat > 1:
+        expected = ((seed + "\n") * repeat).encode("utf-8")
+        return (isinstance(field, dict) and field.get("textLength") == len(expected)
+                and field.get("textSha256") == hashlib.sha256(expected).hexdigest()
+                and field.get("draftDirty") is dirty)
     return (isinstance(field, dict) and field.get("text") == seed
-            and (not route.startswith("edit-") or field.get("changed") is True))
+            and (not route.startswith("edit-") or field.get("draftDirty", field.get("changed")) is dirty))
 
 
 def validate_result(result):
@@ -55,6 +61,12 @@ def _validate_result(result):
     portrait = stages["portrait"]
     activity = ACTIVITIES[route]
     seed = "// sdk37-unsaved-" + case
+    editor_state = result.get("editorState", "dirty")
+    repeat = result.get("editorRepeat", 1)
+    if type(repeat) is not int or not 1 <= repeat <= 8192:
+        return errors + ["Invalid document repetition count"]
+    if editor_state not in ("dirty", "clean"):
+        return errors + ["Invalid expected editor state"]
     for name, state in stages.items():
         if (state.get("activity") != activity or not state.get("instance")
                 or state.get("taskId") != portrait.get("taskId")):
@@ -62,7 +74,7 @@ def _validate_result(result):
         focus = state.get("focusedWindow", "")
         if activity not in focus or "Application Error" in focus or "Application Not Responding" in focus:
             errors.append(name + ": production window not focused")
-        if not retained(state, route, seed):
+        if not retained(state, route, seed, dirty=editor_state == "dirty", repeat=repeat):
             errors.append(name + ": text / unsaved state lost")
         if state.get("multiWindow") is not (name == "split"):
             errors.append(name + ": multi-window state mismatch")
@@ -86,8 +98,17 @@ def _validate_result(result):
                 errors.append(name + ": requested editor unavailable")
             if not editor.get("selection") or editor.get("selection") != portrait.get("editor", {}).get("selection"):
                 errors.append(name + ": editor selection lost")
+            if result.get("editorRange") is True and (editor.get("selectionStart"), editor.get("selectionEnd")) != (12, 32):
+                errors.append(name + ": editor range lost")
         if route == "main" and state.get("page") != portrait.get("page"):
             errors.append(name + ": selected page lost")
+        if route == "log" and state.get("controls"):
+            controls = state["controls"]
+            if controls.get("fab", {}).get("shown") and controls.get("submit", {}).get("shown"):
+                fab, submit = controls["fab"]["bounds"], controls["submit"]["bounds"]
+                if (max(fab["x"], submit["x"]) < min(fab["x"] + fab["width"], submit["x"] + submit["width"])
+                        and max(fab["y"], submit["y"]) < min(fab["y"] + fab["height"], submit["y"] + submit["height"])):
+                    errors.append(name + ": clear button overlaps console submit")
     initial = portrait.get("configuration", {})
     if (initial.get("orientation") != 1 or not isinstance(initial.get("smallestWidthDp"), int)
             or (initial.get("smallestWidthDp", 0) >= 600) != (form == "tablet")):
@@ -96,6 +117,14 @@ def _validate_result(result):
         errors.append("Rotation did not reach landscape")
     if portrait.get("imeVisible") is not True or stages["keyboard-hidden"].get("imeVisible") is not False:
         errors.append("IME show / hide evidence missing")
+    if route.startswith("edit-") and portrait.get("editor", {}).get("chrome"):
+        initial_chrome = portrait["editor"]["chrome"]
+        restored_chrome = stages["keyboard-hidden"].get("editor", {}).get("chrome", {})
+        for bar in ("editor_status_bar", "input_method_enhance_bar"):
+            initial_height = initial_chrome.get(bar, {}).get("bounds", {}).get("height", 0)
+            restored_height = restored_chrome.get(bar, {}).get("bounds", {}).get("height", 0)
+            if restored_height < initial_height:
+                errors.append("keyboard-hidden: editor chrome not restored: " + bar)
     if form == "tablet":
         full = stages["landscape"].get("configuration", {}).get("widthDp", 0)
         split = stages["split"].get("configuration", {}).get("widthDp", 0)
@@ -108,6 +137,9 @@ def _validate_result(result):
     if not isinstance(events, list) or any(not isinstance(e, dict) or e.get("activity") != activity for e in events):
         return errors + ["Malformed lifecycle events"]
     created = {e.get("instance") for e in events if e.get("event") == "create"}
+    if route.startswith("edit-") and form == "tablet" and repeat == 8192 and editor_state == "dirty":
+        if not any(e.get("event") == "save" and (e.get("extra") or {}).get("draftStorage") == "file" for e in events):
+            errors.append("Missing file-backed draft save evidence")
     if not created or not {s.get("instance") for s in stages.values()} <= created:
         errors.append("Missing Activity creation evidence")
     if route == "script":

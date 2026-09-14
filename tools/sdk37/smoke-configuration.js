@@ -51,12 +51,35 @@ function snapshot() {
     if (config.route.indexOf("edit-") === 0) {
         const view = a.findViewById(R.id.editor_view), engine = view.editor;
         result.editor = { type: String(engine.getEngineType()), ready: engine.isReady(), text: String(engine.getTextSnapshot()),
-            changed: engine.isTextChanged(), selection: String(engine.getSelection()), bounds: bounds(engine.getView()) };
+            changed: engine.isTextChanged(), draftDirty: view.shouldSaveDraft(),
+            selectionStart: engine.getSelection().getStartOffset(), selectionEnd: engine.getSelection().getEndOffset(),
+            selection: String(engine.getSelection()), bounds: bounds(engine.getView()) };
+        result.editor.chrome = {};
+        if (config.editorRepeat > 1) {
+            const text = result.editor.text;
+            const digest = java.security.MessageDigest.getInstance("SHA-256").digest(new java.lang.String(text).getBytes("UTF-8"));
+            let hex = "";
+            for (let i = 0; i < digest.length; i++) hex += ("0" + (digest[i] & 255).toString(16)).slice(-2);
+            result.editor.textLength = text.length;
+            result.editor.textSha256 = hex;
+            result.editor.text = text.slice(0, 100);
+        }
+        ["editor_app_bar", "editor_status_bar", "input_method_enhance_bar"].forEach(name => {
+            const chrome = a.findViewById(R.id[name]);
+            result.editor.chrome[name] = { bounds: bounds(chrome), visibility: chrome.getVisibility() };
+        });
     }
     const field = input(a);
     if (field) result.input = { className: String(field.getClass().getName()), focused: field.hasFocus(), bounds: bounds(field),
-        text: field instanceof android.widget.EditText ? String(field.getText()) : null };
+        text: field instanceof android.widget.EditText ? String(field.getText()).slice(0, 100) : null };
     if (config.route === "main") result.page = a.findViewById(R.id.viewpager).getCurrentItem();
+    if (config.route === "log") {
+        result.controls = {};
+        ["fab", "submit"].forEach(name => {
+            const control = a.findViewById(R.id[name]);
+            result.controls[name] = { bounds: bounds(control), shown: control.isShown() };
+        });
+    }
     return result;
 }
 const lifecycle = new android.app.Application.ActivityLifecycleCallbacks({
@@ -76,7 +99,9 @@ const lifecycle = new android.app.Application.ActivityLifecycleCallbacks({
     },
     onActivityPaused: function(a) { if (watched[id(a)]) event("pause", a); },
     onActivityStopped: function(a) { if (watched[id(a)]) event("stop", a); },
-    onActivitySaveInstanceState: function(a, state) { if (watched[id(a)]) event("save", a); },
+    onActivitySaveInstanceState: function(a, state) {
+        if (watched[id(a)]) event("save", a, { draftStorage: state.containsKey("path") ? "file" : state.containsKey("text") ? "bundle" : "none" });
+    },
     onActivityDestroyed: function(a) {
         if (!watched[id(a)]) return;
         event("destroy", a, { changingConfigurations: a.isChangingConfigurations() });
@@ -94,9 +119,20 @@ function launch() {
             Packages.org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences.set(config.route === "edit-ace" ? types.ACE : types.NATIVE);
         }
         const intent = new android.content.Intent().setClassName(context.getPackageName(), config.activityClass).addFlags(0x10008000);
-        if (config.route.indexOf("edit-") === 0) intent.putExtra("content", "// initial " + config.caseId).putExtra("name", "sdk37-" + config.caseId + ".js").putExtra("saveEnabled", false).putExtra("runEnabled", false);
+        if (config.route.indexOf("edit-") === 0) {
+            if (config.editorState === "clean") {
+                const file = new java.io.File(context.getFilesDir(), "sdk37-clean-" + config.caseId + ".js");
+                files.write(file.getAbsolutePath(), editorDocument());
+                intent.putExtra("path", String(file.getAbsolutePath()));
+                intent.putExtra("initialLine", new java.lang.Integer(0));
+                intent.putExtra("initialColumn", new java.lang.Integer(5));
+            } else intent.putExtra("content", "// initial " + config.caseId).putExtra("name", "sdk37-" + config.caseId + ".js").putExtra("saveEnabled", false).putExtra("runEnabled", false);
+        }
         context.startActivity(intent);
     }
+}
+function editorDocument() {
+    return config.editorRepeat > 1 ? (config.seed + "\n").repeat(config.editorRepeat) : config.seed;
 }
 function execute(command) {
     if (command.action === "launch") launch();
@@ -106,7 +142,9 @@ function execute(command) {
         if (config.route.indexOf("edit-") === 0) {
             const engine = current.findViewById(R.id.editor_view).editor;
             if (!engine.isReady()) throw new Error("Editor is not ready");
-            engine.setText(config.seed); engine.markTextAsChanged(); engine.jumpToEnd(); engine.requestEditorFocus();
+            if (config.editorState !== "clean") { engine.setText(editorDocument()); engine.markTextAsChanged(); }
+            if (config.editorRange) engine.selectRange(12, 32); else engine.jumpToEnd();
+            engine.requestEditorFocus();
         } else {
             if (config.route === "main") {
                 current.findViewById(R.id.viewpager).setCurrentItem(current.getPluginsIndex(), false);
@@ -123,6 +161,9 @@ function execute(command) {
         if (!imeInput) throw new Error("Input missing");
         imeInput.requestFocus();
         current.getSystemService(android.content.Context.INPUT_METHOD_SERVICE).showSoftInput(imeInput, 0);
+    } else if (command.action === "hide-ime") {
+        current.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+            .hideSoftInputFromWindow(current.getWindow().getDecorView().getWindowToken(), 0);
     } else if (command.action === "orientation") current.setRequestedOrientation(command.value);
     else if (command.action === "finish") {
         if (current && !current.isDestroyed()) current.finish();

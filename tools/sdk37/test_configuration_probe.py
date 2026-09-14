@@ -2,6 +2,7 @@
 import copy
 import contextlib
 import io
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -77,6 +78,14 @@ class ConfigurationEvidenceTest(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertTrue(validate_result(result))
 
+    def test_host_draft_state_is_authoritative_when_observed(self):
+        result = fixture("edit-ace")
+        editor = result["stages"]["split"]["editor"]
+        editor.update(changed=False, draftDirty=True)
+        self.assertEqual([], validate_result(result))
+        editor.update(changed=True, draftDirty=False)
+        self.assertIn("split: text / unsaved state lost", validate_result(result))
+
     def test_real_split_resize_and_exit_are_required(self):
         for key, value in (("multiWindow", False), ("configuration", {"widthDp": 1280}), ("focusedWindow", "com.android.settings/.Settings")):
             result = fixture()
@@ -97,6 +106,36 @@ class ConfigurationEvidenceTest(unittest.TestCase):
             result["stages"][stage][key] = value
             self.assertTrue(validate_result(result))
 
+    def test_restoring_a_clean_file_must_not_make_it_dirty(self):
+        result = fixture("edit-native")
+        result["editorState"] = "clean"
+        for state in result["stages"].values():
+            state["editor"].update(changed=False, draftDirty=False)
+        self.assertEqual([], validate_result(result))
+        result["stages"]["restored"]["editor"]["draftDirty"] = True
+        self.assertIn("restored: text / unsaved state lost", validate_result(result))
+
+    def test_a_collapsed_caret_does_not_prove_range_restoration(self):
+        result = fixture("edit-ace")
+        result["editorRange"] = True
+        for state in result["stages"].values():
+            state["editor"].update(selectionStart=12, selectionEnd=32)
+        self.assertEqual([], validate_result(result))
+        result["stages"]["split"]["editor"]["selectionStart"] = 32
+        self.assertIn("split: editor range lost", validate_result(result))
+
+    def test_large_draft_requires_full_content_and_file_restore_evidence(self):
+        result = fixture("edit-ace")
+        result["editorRepeat"] = 8192
+        expected = (("// sdk37-unsaved-" + result["caseId"] + "\n") * 8192).encode()
+        for state in result["stages"].values():
+            state["editor"].update(textLength=len(expected), textSha256=hashlib.sha256(expected).hexdigest(), draftDirty=True)
+        self.assertIn("Missing file-backed draft save evidence", validate_result(result))
+        result["receipt"]["events"].append({"event": "save", "activity": ACTIVITIES["edit-ace"], "instance": "1", "extra": {"draftStorage": "file"}})
+        self.assertEqual([], validate_result(result))
+        result["stages"]["split"]["editor"]["textSha256"] = "0" * 64
+        self.assertIn("split: text / unsaved state lost", validate_result(result))
+
     def test_keyboard_visibility_is_not_input_visibility(self):
         result = fixture("log")
         state = result["stages"]["portrait"]
@@ -104,6 +143,16 @@ class ConfigurationEvidenceTest(unittest.TestCase):
         state["input"]["bounds"] = {"y": 1800, "width": 1000, "height": 60}
         self.assertIn("portrait: input overlaps the IME", validate_result(result))
         state["input"]["bounds"]["y"] = 1400
+        self.assertEqual([], validate_result(result))
+
+    def test_visible_input_does_not_allow_an_obscured_send_button(self):
+        result = fixture("log", "phone")
+        result["stages"]["portrait"]["controls"] = {
+            "fab": {"shown": True, "bounds": {"x": 900, "y": 800, "width": 100, "height": 100}},
+            "submit": {"shown": True, "bounds": {"x": 910, "y": 850, "width": 90, "height": 90}},
+        }
+        self.assertIn("portrait: clear button overlaps console submit", validate_result(result))
+        result["stages"]["portrait"]["controls"]["fab"]["bounds"]["y"] = 750
         self.assertEqual([], validate_result(result))
 
     def test_editor_viewport_is_used_instead_of_its_scrollable_child(self):
@@ -115,6 +164,17 @@ class ConfigurationEvidenceTest(unittest.TestCase):
         self.assertEqual([], validate_result(result))
         state["editor"]["bounds"]["height"] = 0
         self.assertIn("portrait: input viewport is empty", validate_result(result))
+
+    def test_hiding_the_keyboard_must_restore_editor_controls(self):
+        result = fixture("edit-native", "phone")
+        for name in ("portrait", "keyboard-hidden"):
+            result["stages"][name]["editor"]["chrome"] = {
+                "input_method_enhance_bar": {"bounds": {"height": 184}},
+                "editor_status_bar": {"bounds": {"height": 63}},
+            }
+        self.assertEqual([], validate_result(result))
+        result["stages"]["keyboard-hidden"]["editor"]["chrome"]["input_method_enhance_bar"]["bounds"]["height"] = 0
+        self.assertIn("keyboard-hidden: editor chrome not restored: input_method_enhance_bar", validate_result(result))
 
     def test_missing_or_duplicate_commands_and_failed_cleanup(self):
         result = fixture()
