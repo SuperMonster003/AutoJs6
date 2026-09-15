@@ -75,6 +75,7 @@ class BumpTest(unittest.TestCase):
         self.assertEqual(fleet.bump_version_name("1.0.2"), "1.0.3")
         self.assertEqual(fleet.bump_version_name("2.10.9\n"), "2.10.10")
         self.assertEqual(fleet.bump_version_name("0.8.1-m9"), "0.8.2-m9")
+        self.assertEqual(fleet.bump_version_name("0.2.1-provider-dev"), "0.2.2-provider-dev")
         with self.assertRaises(ValueError):
             fleet.bump_version_name("6.8.0 Alpha5")
 
@@ -135,8 +136,28 @@ class BumpTest(unittest.TestCase):
             self.assertEqual((readme / "common.json").read_text(encoding="utf-8"), '{\n  "p_build_params": "36"\n}\n')
             self.assertEqual(fleet.refresh_readme_keys(Path(directory), ["p_build_params"], 36, 37), {})
 
+    def test_flavored_apk_directories_prefer_the_shipped_flavor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory) / "app" / "build" / "outputs" / "apk"
+            for relative in ("nativeTest/debug", "provider/debug", "androidTest/provider/debug", "androidTest/nativeTest/debug"):
+                (base / relative).mkdir(parents=True)
+            self.assertEqual([(f, d.name, t.parent.name) for f, d, t in fleet.debug_apk_dirs(Path(directory))],
+                             [("provider", "debug", "provider"), ("nativeTest", "debug", "nativeTest")])
+            (base / "debug").mkdir()
+            self.assertEqual([f for f, _, _ in fleet.debug_apk_dirs(Path(directory))], [""])
+
     def test_built_in_notes_cover_the_ten_changelog_languages(self):
-        self.assertEqual(sorted(fleet.BUMP_NOTES), sorted(["en", "zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "ja", "ko", "ru", "fr", "es", "ar"]))
+        languages = sorted(["en", "zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "ja", "ko", "ru", "fr", "es", "ar"])
+        self.assertEqual(sorted(fleet.BUMP_NOTES), languages)
+        self.assertEqual(sorted(fleet.BUMP_NOTES_COMPILE_ONLY), languages)
+        self.assertEqual(sorted(fleet.BUMP_NOTES_TARGET_ONLY), languages)
+        self.assertTrue(all("targetSdk" in note for note in fleet.BUMP_NOTES_COMPILE_ONLY.values()))
+        self.assertTrue(all("targetSdk" in note and "compileSdk" in note for note in fleet.BUMP_NOTES_TARGET_ONLY.values()))
+        # Some repositories reject non-ASCII punctuation in packaged text (ApplicationTextPunctuationTest).
+        import unicodedata
+        for notes in (fleet.BUMP_NOTES, fleet.BUMP_NOTES_COMPILE_ONLY, fleet.BUMP_NOTES_TARGET_ONLY):
+            for note in notes.values():
+                self.assertEqual([c for c in note if ord(c) > 127 and unicodedata.category(c).startswith("P")], [], note)
 
 
 if __name__ == "__main__":

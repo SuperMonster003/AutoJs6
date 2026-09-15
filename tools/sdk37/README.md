@@ -74,6 +74,16 @@ repository's own precedent (`v0.8.2` when the previous top entry already dropped
 golden test pinned to another environment; the argument is recorded in the step detail so the
 evidence shows what was left out.
 
+Two-step repositories (D11): `bump <repo> --compile 37` alone uses the built-in compile-only note
+and commits as `chore(sdk): raise compileSdk to 37 (Android 17)`; `bump <repo> --target 37` alone
+(after the exposure rechecks, or for repositories that were already compileSdk 37) uses the
+target-only note and message. With `--compile` alone, `--readme-keys` rewrites the compile level
+instead of the target. `--replace PATH OLD NEW` (or `--replace-json FILE` with `[PATH, OLD, NEW]`
+triples for non-ASCII texts) edits a repository file that mirrors the SDK level, e.g. Python
+Runtime's `locks/python-runtime.lock`, and lets the commit step accept it. Flavored app modules
+(Lua Runtime's `provider` / `nativeTest` / `faultTest`) are installed from
+`apk/<flavor>/debug`, preferring the flavor that is not a test harness.
+
 Self-checks: `py -m unittest discover -s tools/sdk37 -p test_fleet.py`.
 
 ## Physical devices
