@@ -40,4 +40,22 @@ class BunRuntimeContractTest {
         assertTrue(BunRuntimeContract.MAX_WORKSPACE_ENTRIES > 0)
         assertTrue(BunRuntimeContract.MAX_WORKSPACE_BYTES >= BunRuntimeContract.MAX_SOURCE_BYTES)
     }
+
+    @Test
+    fun hostInfoSnapshotKeysAreAdditiveAndBounded() {
+        assertEquals(1, BunRuntimeContract.PROTOCOL_VERSION)
+        assertEquals(1, BunRuntimeContract.HOST_INFO_VERSION)
+        assertEquals("hostInfoVersion", BunRuntimeContract.KEY_HOST_INFO_VERSION)
+        assertEquals("hostInfo", BunRuntimeContract.KEY_HOST_INFO)
+        assertEquals("packageName", BunRuntimeContract.HOST_INFO_KEY_PACKAGE_NAME)
+        assertEquals("versionDate", BunRuntimeContract.HOST_INFO_KEY_VERSION_DATE)
+        assertEquals("languageTag", BunRuntimeContract.HOST_INFO_KEY_LANGUAGE_TAG)
+        assertEquals("hostInfoDelivered", BunRuntimeContract.KEY_HOST_INFO_DELIVERED)
+        assertEquals("AUTOJS6_HOST_INFO_FILE", BunRuntimeContract.HOST_INFO_ENVIRONMENT_VARIABLE)
+        assertEquals("AUTOJS6_", BunRuntimeContract.RESERVED_ENVIRONMENT_PREFIX)
+        assertTrue(BunRuntimeContract.HOST_INFO_ENVIRONMENT_VARIABLE.startsWith(BunRuntimeContract.RESERVED_ENVIRONMENT_PREFIX))
+        assertEquals("org.autojs.plugin.bun.SUPPORTS_HOST_INFO", BunPluginCapabilityKeys.SUPPORTS_HOST_INFO)
+        assertTrue(BunRuntimeContract.MAX_HOST_INFO_VALUE_BYTES in 1..BunRuntimeContract.MAX_HOST_INFO_BYTES)
+        assertTrue(BunRuntimeContract.MAX_HOST_INFO_BYTES <= BunRuntimeContract.MAX_TERMINAL_MESSAGE_BYTES)
+    }
 }

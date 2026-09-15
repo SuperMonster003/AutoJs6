@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 15 日 に更新されました.
+データは 2026 年 9 月 16 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -363,6 +363,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` `images.matchFeatures` の両引数に画像またはパスを直接渡してその場で特徴を検出できます; `ransacThreshold`, `minInliers`, `maxFeatures` オプションが加わり, `ObjectFrame` は `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers` を, `ImageFeatures` は `count` と `method` を公開します
 * `新機能` 公式プラグイン向けアクセシビリティコンパニオンコントラクト: `follow-host` サービスポリシーを公開するコンパニオンは, 設定済みの root, セキュア設定または Shizuku 戦略で AutoJs6 のアクセシビリティサービスと一緒に有効化および無効化され, ホストサービス状態のブロードキャストを受け取ります
 * `新機能` Bun Runtime プラグインのプロジェクト実行: `project.json` または `package.json` を持つディレクトリ配下のスクリプトは上限付きワークスペースアーカイブ (最大 16384 エントリと 64 MiB, 通常ファイルとディレクトリのみ) に梱包され, `SUPPORTS_WORKSPACE_ARCHIVE` を宣言するプラグインへ渡されるため, プロジェクト内の相対インポートが解決される; エントリファイルはエディタの現在のソースを使い, シンボリックリンクや特殊ファイルは実行を中止し, 単独スクリプトや旧版プラグインは単一ソース経路のまま
+* `新機能` Bun Runtime プラグインのホスト情報スナップショット: プラグインが `SUPPORTS_HOST_INFO` を宣言し `host_info` の許可が有効 (既定) なら, `runScript` リクエストに `hostInfoVersion = 1` とホストのパッケージ名, `BuildConfig.VERSION_DATE`, 優先言語タグを含む `hostInfo` Bundle を載せ, Bun スクリプトは環境変数 `AUTOJS6_HOST_INFO_FILE` からプラグインが検証して書き出したホスト/プラグイン/実行のスナップショットを読めます; ホストは自身のバージョンを送らず (プラグインが PackageManager で解決), 許可は実行ごとに取り消せ (`BunHostCapabilityGrants`), この機能を宣言しないプラグインには従来どおりのリクエストが届きます
 * `修正` HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用
 * `修正` ホストとパッケージ化アプリのリリース版でネットワークセキュリティ設定により HTTP リクエストが拒否される問題に対応し, 平文通信ポリシーをデバッグ版と統一, GitHub リソースドメインの HTTPS 制限は維持
 * `修正` バックグラウンドでの APK インストールでシステムが確認画面の起動を制限すると続行できない問題; 状態をセッションごとに保存し, 通知またはアプリに戻った際に確認を再開でき, 通知の拒否やプロセスの再生成後も復元可能
@@ -953,7 +954,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 15 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 16 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

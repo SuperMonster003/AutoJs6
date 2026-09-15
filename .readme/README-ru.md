@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 15 September 2026 года.
+Данные обновлены на 16 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -363,6 +363,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` `images.matchFeatures` принимает изображение или путь в любом из двух аргументов и сразу вычисляет признаки; добавлены опции `ransacThreshold`, `minInliers` и `maxFeatures`, `ObjectFrame` содержит `width`, `height`, `angle`, `bounds`, `points`, `matches` и `inliers`, а `ImageFeatures` содержит `count` и `method`
 * `Новое` Контракт компаньона специальных возможностей для официальных плагинов: компаньоны, публикующие политику службы `follow-host`, включаются и выключаются вместе со службой специальных возможностей AutoJs6 через настроенные стратегии root, защищенных настроек или Shizuku и получают широковещательное сообщение о состоянии службы хоста
 * `Новое` Выполнение проектов плагином Bun Runtime: сценарий внутри каталога с `project.json` или `package.json` упаковывается в ограниченный архив рабочего пространства (не более 16384 записей и 64 МиБ, только обычные файлы и каталоги) для плагина, объявляющего `SUPPORTS_WORKSPACE_ARCHIVE`, поэтому относительные импорты внутри проекта разрешаются; файл точки входа содержит текущий исходный код редактора, символические ссылки и специальные файлы прерывают запуск, а одиночные сценарии и старые плагины сохраняют однофайловый путь
+* `Новое` Снимок сведений о хосте для плагина Bun Runtime: когда плагин объявляет `SUPPORTS_HOST_INFO` и разрешение `host_info` включено (по умолчанию), запросы `runScript` несут `hostInfoVersion = 1` и Bundle `hostInfo` с именем пакета хоста, `BuildConfig.VERSION_DATE` и предпочитаемым языковым тегом, так что Bun-скрипты читают через переменную окружения `AUTOJS6_HOST_INFO_FILE` снимок хоста/плагина/запуска, который плагин проверяет и записывает; хост никогда не отправляет собственную версию (плагин определяет её через PackageManager), разрешение отзывается для каждого запуска (`BunHostCapabilityGrants`), а плагины без этой возможности получают в точности прежний запрос
 * `Исправление` Параметр HTTP isInsecure / insecure мог отключать проверку сертификата и имени узла для последующих запросов; теперь он действует только на текущий запрос
 * `Исправление` Конфигурация сетевой безопасности могла блокировать HTTP-запросы в релизных сборках хоста и упакованных приложений; политика незашифрованного трафика теперь совпадает с отладочными сборками, а домены ресурсов GitHub по-прежнему доступны только по HTTPS
 * `Исправление` Установка APK в фоне не продолжалась, если система блокировала экран подтверждения; состояние теперь сохраняется для каждого сеанса, подтверждение доступно через уведомление или при возврате в приложение, в том числе после запрета уведомлений или пересоздания процесса
@@ -953,7 +954,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 15 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 16 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

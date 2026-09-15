@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 15 September 2026.
+تم تحديث البيانات في 16 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -363,6 +363,7 @@
 * `إضافة جديدة` `images.matchFeatures` يقبل صورة أو مسارًا في أي من وسيطيه ويكتشف المعالم فورًا; خيارات جديدة `ransacThreshold` و `minInliers` و `maxFeatures`, و `ObjectFrame` يوفر `width` و `height` و `angle` و `bounds` و `points` و `matches` و `inliers`, و `ImageFeatures` يوفر `count` و `method`
 * `إضافة جديدة` عقد مرافق إمكانية الوصول للمكونات الإضافية الرسمية: المرافقات التي تنشر سياسة خدمة `follow-host` تفعل وتعطل مع خدمة إمكانية الوصول في AutoJs6 عبر استراتيجيات root أو الإعدادات الآمنة أو Shizuku المضبوطة, وتتلقى بث حالة خدمة المضيف
 * `إضافة جديدة` تنفيذ المشاريع بإضافة Bun Runtime: السكربت الموجود تحت مجلد يحتوي على `project.json` أو `package.json` يُغلَّف في أرشيف مساحة عمل محدود (بحد أقصى 16384 إدخالًا و 64 ميبيبايت, الملفات العادية والمجلدات فقط) لإضافة تعلن `SUPPORTS_WORKSPACE_ARCHIVE`, لذا يتم حل الاستيرادات النسبية داخل المشروع; يحمل ملف نقطة الدخول مصدر المحرر الحالي, وتوقف الروابط الرمزية والملفات الخاصة التشغيل, وتحتفظ السكربتات المنفردة أو الإضافات الأقدم بمسار المصدر الواحد
+* `إضافة جديدة` لقطة معلومات المضيف لـ plugin Bun Runtime: عندما يعلن plugin عن `SUPPORTS_HOST_INFO` ويكون إذن `host_info` مفعلا (افتراضيا), تحمل طلبات `runScript` القيمة `hostInfoVersion = 1` و Bundle باسم `hostInfo` يحوي اسم حزمة المضيف و `BuildConfig.VERSION_DATE` ووسم اللغة المفضلة, فتستطيع Bun scripts قراءة لقطة المضيف و plugin والتشغيل التي يتحقق منها plugin ويكتبها عبر متغير البيئة `AUTOJS6_HOST_INFO_FILE`; لا يرسل المضيف إصداره أبدا (يحله plugin عبر PackageManager), ويمكن إلغاء الإذن لكل تشغيل (`BunHostCapabilityGrants`), وتتلقى plugins التي لا تعلن هذه القدرة الطلب السابق نفسه تماما
 * `تصليح` كان خيار HTTP isInsecure / insecure قد يبقي التحقق من الشهادات وأسماء المضيفين معطلا للطلبات اللاحقة; أصبح يطبق على الطلب الحالي فقط
 * `تصليح` قد تحجب إعدادات أمان الشبكة طلبات HTTP في إصدارات التطبيق المضيف والتطبيقات المجمعة للنشر; أصبحت سياسة الاتصالات غير المشفرة متوافقة مع إصدارات التصحيح مع إبقاء نطاقات موارد GitHub مقيدة باتصالات HTTPS
 * `تصليح` تعذر متابعة تثبيت APK في الخلفية عندما يمنع النظام فتح شاشة التأكيد; يتم الآن حفظ حالة كل جلسة مع إمكانية المتابعة من الإشعار أو عند العودة إلى التطبيق, حتى بعد رفض الإشعارات أو إعادة إنشاء العملية
@@ -953,7 +954,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 15 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 16 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

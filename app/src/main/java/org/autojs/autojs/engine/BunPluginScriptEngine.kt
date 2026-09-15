@@ -7,8 +7,10 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.plugin.bun.BunBinderCallException
 import org.autojs.autojs.core.plugin.bun.BunBinderCallFailure
+import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.core.plugin.bun.BunRuntimeBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimeCleanupBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
@@ -19,6 +21,7 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.TypeScriptStringSource
+import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.bun.runtime.api.BunPluginCapabilityKeys
 import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 import org.autojs.plugin.bun.runtime.api.IBunRuntimeCallback
@@ -131,6 +134,7 @@ class BunPluginScriptEngine(
         timeoutMillis: Long,
     ): Payload {
         val request = buildRequest(source, executionId, timeoutMillis)
+        attachHostInfo(request, selection)
         val fileSource = source as? JavaScriptFileSource
         val projectRoot = fileSource
             ?.takeIf { supportsWorkspaceArchive(selection) }
@@ -164,6 +168,30 @@ class BunPluginScriptEngine(
     private fun supportsWorkspaceArchive(selection: BunRuntimePluginClient.Selection): Boolean =
         selection.discovered.pluginInfo?.capabilities
             ?.getBoolean(BunPluginCapabilityKeys.SUPPORTS_WORKSPACE_ARCHIVE, false) == true
+
+    /**
+     * First capability of the Bun capability bridge (plugin M7): a read-only host info snapshot.
+     * Offered only when the plugin advertises `SUPPORTS_HOST_INFO` and the host grant is on. The
+     * plugin verifies the package name against the Binder caller and resolves the host version from
+     * `PackageManager` itself, so only advisory fields travel in the request; revoking the grant
+     * simply stops offering the keys, and older plugins never see them.
+     */
+    private fun attachHostInfo(request: Bundle, selection: BunRuntimePluginClient.Selection) {
+        if (!supportsHostInfo(selection) || !BunHostCapabilityGrants.isHostInfoGranted(appContext)) return
+        request.putInt(BunRuntimeContract.KEY_HOST_INFO_VERSION, BunRuntimeContract.HOST_INFO_VERSION)
+        request.putBundle(BunRuntimeContract.KEY_HOST_INFO, Bundle().apply {
+            putString(BunRuntimeContract.HOST_INFO_KEY_PACKAGE_NAME, appContext.packageName)
+            putString(BunRuntimeContract.HOST_INFO_KEY_VERSION_DATE, BuildConfig.VERSION_DATE)
+            putString(
+                BunRuntimeContract.HOST_INFO_KEY_LANGUAGE_TAG,
+                Language.getPrefLanguage().getLocalCompatibleLanguageTag(),
+            )
+        })
+    }
+
+    private fun supportsHostInfo(selection: BunRuntimePluginClient.Selection): Boolean =
+        selection.discovered.pluginInfo?.capabilities
+            ?.getBoolean(BunPluginCapabilityKeys.SUPPORTS_HOST_INFO, false) == true
 
     private fun semanticFile(source: JavaScriptFileSource): File =
         source.overriddenFullPath?.takeIf(String::isNotBlank)?.let(::File) ?: source.file

@@ -29,6 +29,22 @@ public final class BunRuntimeContract {
     /** Uncompressed byte limit of one workspace archive; each file still respects MAX_SOURCE_BYTES. */
     public static final long MAX_WORKSPACE_BYTES = 64L * 1024L * 1024L;
 
+    /**
+     * Format version of the optional read-only host info snapshot (M7 capability bridge, first capability).
+     * Absent request key means no snapshot; present means the plugin verifies the host package against the
+     * Binder caller, resolves the host version itself, writes a bounded JSON file into the private run directory
+     * and exposes its path to the script through {@link #HOST_INFO_ENVIRONMENT_VARIABLE}.
+     */
+    public static final int HOST_INFO_VERSION = 1;
+    /** Upper bound of the rendered host info JSON file. */
+    public static final int MAX_HOST_INFO_BYTES = 16 * 1024;
+    /** Upper bound of each advisory host info string value. */
+    public static final int MAX_HOST_INFO_VALUE_BYTES = 256;
+    /** Environment variable that carries the absolute path of the host info JSON file inside the Bun process. */
+    public static final String HOST_INFO_ENVIRONMENT_VARIABLE = "AUTOJS6_HOST_INFO_FILE";
+    /** Environment variable names with this prefix are owned by the plugin; host requests carrying them are invalid. */
+    public static final String RESERVED_ENVIRONMENT_PREFIX = "AUTOJS6_";
+
     public static final String KEY_PROTOCOL_VERSION = "protocolVersion";
     public static final String KEY_EXECUTION_ID = "executionId";
     public static final String KEY_SOURCE_NAME = "sourceName";
@@ -40,6 +56,13 @@ public final class BunRuntimeContract {
     public static final String KEY_WORKSPACE_ENTRY_POINT = "workspaceEntryPoint";
     public static final String KEY_WORKSPACE_MAX_ENTRIES = "workspaceMaxEntries";
     public static final String KEY_WORKSPACE_MAX_BYTES = "workspaceMaxBytes";
+    public static final String KEY_HOST_INFO_VERSION = "hostInfoVersion";
+    public static final String KEY_HOST_INFO = "hostInfo";
+
+    /** Keys inside the {@link #KEY_HOST_INFO} Bundle; the package name is mandatory and verified, the rest is advisory. */
+    public static final String HOST_INFO_KEY_PACKAGE_NAME = "packageName";
+    public static final String HOST_INFO_KEY_VERSION_DATE = "versionDate";
+    public static final String HOST_INFO_KEY_LANGUAGE_TAG = "languageTag";
 
     public static final String KEY_EVENT_TYPE = "eventType";
     public static final String KEY_TEXT = "text";
@@ -60,6 +83,7 @@ public final class BunRuntimeContract {
     public static final String KEY_TIMED_OUT = "timedOut";
     public static final String KEY_WORKSPACE_FILE_COUNT = "workspaceFileCount";
     public static final String KEY_WORKSPACE_BYTES = "workspaceBytes";
+    public static final String KEY_HOST_INFO_DELIVERED = "hostInfoDelivered";
 
     public static final String KEY_RUNTIME_READY = "runtimeReady";
     public static final String KEY_RUNTIME_VERSION = "runtimeVersion";

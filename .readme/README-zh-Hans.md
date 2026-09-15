@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 15 日.
+数据更新于 2026 年 9 月 16 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -339,6 +339,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` `images.matchFeatures` 的两个参数均可直接传入图片或路径并即时检测特征; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 选项, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 属性, `ImageFeatures` 新增 `count` 和 `method` 属性
 * `新增` 官方插件无障碍伴生契约: 发布 `follow-host` 服务策略的伴生插件随 AutoJs6 无障碍服务一同启用和禁用, 使用已配置的 root, 安全设置或 Shizuku 策略, 并接收宿主服务状态广播
 * `新增` Bun Runtime 插件项目执行: 位于含 `project.json` 或 `package.json` 目录下的脚本会打成有界工作区归档 (最多 16384 条目与 64 MiB, 只收普通文件与目录) 交给声明了 `SUPPORTS_WORKSPACE_ARCHIVE` 的插件, 项目内的相对导入可以解析; 入口文件使用编辑器当前源码, 符号链接与特殊文件直接中止运行, 裸脚本或旧版插件保持单源码路径
+* `新增` Bun Runtime 插件宿主信息快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授权开启 (默认) 时, `runScript` 请求携带 `hostInfoVersion = 1` 与 `hostInfo` Bundle (宿主包名, `BuildConfig.VERSION_DATE` 与首选语言标签), Bun 脚本即可通过环境变量 `AUTOJS6_HOST_INFO_FILE` 读取由插件核实并写出的宿主/插件/运行快照; 宿主不发送自身版本 (插件经 PackageManager 解析), 授权可逐次撤销 (`BunHostCapabilityGrants`), 未宣告该能力的插件收到的请求与之前完全相同
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
 * `修复` 宿主与打包应用发行版的 HTTP 请求可能被网络安全配置意外拦截, 明文策略现与调试版保持一致, 并保留 GitHub 资源域的 HTTPS 限制
 * `修复` 后台 APK 安装被系统限制启动确认页时无法继续的问题; 安装状态按会话保存, 支持通知及返回应用后继续确认, 通知被拒绝或进程重建后仍可恢复待确认事项
@@ -932,7 +933,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 15 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 16 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

@@ -201,6 +201,7 @@
 * `新增` `images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時檢測特徵; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 屬性, `ImageFeatures` 新增 `count` 和 `method` 屬性
 * `新增` 官方插件無障礙伴生契約: 發佈 `follow-host` 服務策略的伴生插件隨 AutoJs6 無障礙服務一同啟用及停用, 使用已配置的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播
 * `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區歸檔 (最多 16384 條目及 64 MiB, 只收普通檔案及目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 入口檔案使用編輯器目前原始碼, 符號連結及特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑
+* `新增` Bun Runtime 插件宿主資訊快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授權開啟 (預設) 時, `runScript` 請求攜帶 `hostInfoVersion = 1` 與 `hostInfo` Bundle (宿主套件名稱, `BuildConfig.VERSION_DATE` 與首選語言標籤), Bun 腳本即可透過環境變數 `AUTOJS6_HOST_INFO_FILE` 讀取由插件核實並寫出的宿主/插件/執行快照; 宿主不發送自身版本 (插件經 PackageManager 解析), 授權可逐次撤銷 (`BunHostCapabilityGrants`), 未宣告該能力的插件收到的請求與之前完全相同
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能令後續請求繼續跳過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網絡安全配置意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制
 * `修復` 背景 APK 安裝被系統限制啟動確認頁時無法繼續的問題; 安裝狀態按工作階段儲存, 支援通知及返回應用程式後繼續確認, 通知遭拒或程序重建後仍可恢復待確認事項

@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 15 de September de 2026.
+Datos actualizados el 16 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -363,6 +363,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` `images.matchFeatures` acepta una imagen o una ruta en cualquiera de sus dos argumentos y detecta las características al vuelo; nuevas opciones `ransacThreshold`, `minInliers` y `maxFeatures`, `ObjectFrame` expone `width`, `height`, `angle`, `bounds`, `points`, `matches` e `inliers`, e `ImageFeatures` expone `count` y `method`
 * `Nuevo` Contrato de complemento de accesibilidad para complementos oficiales: los complementos que publican una política de servicio `follow-host` se habilitan y deshabilitan junto con el servicio de accesibilidad de AutoJs6 mediante las estrategias configuradas de root, ajustes seguros o Shizuku, y reciben la difusión de estado del servicio anfitrión
 * `Nuevo` Ejecución de proyectos con el plugin Bun Runtime: un script situado bajo un directorio con `project.json` o `package.json` se empaqueta en un archivo de espacio de trabajo acotado (como máximo 16384 entradas y 64 MiB, solo archivos regulares y directorios) para un plugin que declare `SUPPORTS_WORKSPACE_ARCHIVE`, de modo que las importaciones relativas dentro del proyecto se resuelven; el archivo de entrada lleva la fuente actual del editor, los enlaces simbólicos y archivos especiales abortan la ejecución, y los scripts sueltos o los plugins antiguos conservan la ruta de fuente única
+* `Nuevo` Instantánea de información del host para el plugin Bun Runtime: cuando el plugin declara `SUPPORTS_HOST_INFO` y la autorización `host_info` está activa (por defecto), las solicitudes `runScript` llevan `hostInfoVersion = 1` y un Bundle `hostInfo` con el nombre del paquete del host, `BuildConfig.VERSION_DATE` y la etiqueta de idioma preferida, de modo que los scripts Bun pueden leer mediante la variable de entorno `AUTOJS6_HOST_INFO_FILE` la instantánea de host/plugin/ejecución que el plugin verifica y escribe; el host nunca envía su propia versión (el plugin la resuelve mediante PackageManager), la autorización puede revocarse en cada ejecución (`BunHostCapabilityGrants`) y los plugins sin esta capacidad reciben exactamente la solicitud anterior
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual
 * `Corrección` La configuración de seguridad de red podía bloquear solicitudes HTTP en las versiones de distribución del host y de las aplicaciones empaquetadas; la política de tráfico sin cifrar ahora coincide con las versiones de depuración y mantiene los dominios de recursos de GitHub restringidos a HTTPS
 * `Corrección` Las instalaciones de APK en segundo plano no podían continuar si el sistema bloqueaba la confirmación; ahora se guarda el estado por sesión y se puede continuar desde una notificación o al volver a la aplicación, incluso tras denegar las notificaciones o recrear el proceso
@@ -953,7 +954,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 15 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 16 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
