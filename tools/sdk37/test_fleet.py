@@ -7,8 +7,9 @@ import fleet
 
 
 MANIFEST = """<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="x">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="x">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:node="remove" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <application>
         <service android:name=".Player" android:foregroundServiceType="mediaPlayback" />

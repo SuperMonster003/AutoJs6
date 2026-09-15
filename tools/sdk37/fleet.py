@@ -25,6 +25,7 @@ import xml.etree.ElementTree as ET
 HOST_ROOT = Path(__file__).resolve().parents[2]
 PROJECTS = HOST_ROOT.parent
 PREFIX = "AutoJs6-Plugin-"
+TOOLS_NS = "{http://schemas.android.com/tools}"
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 SDK_LITERAL = re.compile(r"\b(compileSdk|targetSdk|compileSdkVersion|targetSdkVersion)\s*=\s*(\d{2})\b")
 ACCESSOR = re.compile(r"versions\.sdkVersion(?:Compile|Target)|sdkVersion(?:Compile|Target)\b")
@@ -84,6 +85,8 @@ def manifest_exposure(path):
         return {"manifest error"}
     for element in root.iter("uses-permission"):
         name = element.get(ANDROID_NS + "name", "")
+        if element.get(TOOLS_NS + "node") == "remove":
+            continue  # the merger strips it from the final manifest (MLKit-Barcode removes INTERNET this way)
         if name in EXPOSURE_PERMISSIONS:
             facts.add(EXPOSURE_PERMISSIONS[name])
     for service in root.iter("service"):
