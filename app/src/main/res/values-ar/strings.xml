@@ -136,6 +136,7 @@
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_local_network_permission">السماح بالاتصال بالأجهزة والخدمات على الشبكة المحلية, بما فيها VS Code. يمكن للبرامج النصية طلب هذا الإذن صراحة.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
+    <string name="description_mcp_server">اسمح لعملاء الذكاء الاصطناعي المقترنين بأتمتة هذا الجهاز عبر إضافة MCP Server. افتح الإعدادات لاختيار المنفذ والشبكة والرمز ومجموعات الأدوات.</string>
     <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nملاحظة: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
     <string name="description_night_mode_preference_more">لتمكين الوضع الليلي في نظام Android:\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإعدادات -> العرض -> المظهر.\n- Android API المستوى 28 (Android 9) [P]: خيارات المطور -> الوضع الليلي.\n\nيجب استيفاء الشروط التالية لتطبيق الوضع الليلي (المظهر الداكن) على المحتوى المستند إلى الويب باستخدام مكون WebView (مثل صفحة وثائق AutoJs6):\n1.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105\n2. تم تكييف المحتوى المستند إلى الويب في مكون WebView مع المظهر الداكن (عن طريق موارد CSS أو Android XML وما إلى ذلك)</string>
@@ -607,6 +608,17 @@
     <string name="logger_ver_history_raw_thread_success">نجح خيط \"raw\" وجرى حفظ التخزين المؤقت دون اتصال</string>
     <string name="logger_ver_history_start_blob_thread">بدء خيط طلب احتياطي \"blob\"</string>
     <string name="logger_ver_history_start_raw_thread">بدء خيط طلب \"raw\"</string>
+    <string name="mcp_server_state_activation">يلزم التنشيط</string>
+    <string name="mcp_server_state_authorization">يلزم التفويض</string>
+    <string name="mcp_server_state_disabled">الإضافة معطلة</string>
+    <string name="mcp_server_state_failed">فشل البدء. افتح الإعدادات للتحقق من المنفذ.</string>
+    <string name="mcp_server_state_host_unavailable">بانتظار AutoJs6</string>
+    <string name="mcp_server_state_incompatible">إصدار غير متوافق</string>
+    <string name="mcp_server_state_not_installed">الإضافة غير مثبتة</string>
+    <string name="mcp_server_state_running">يعمل</string>
+    <string name="mcp_server_state_starting">جار البدء</string>
+    <string name="mcp_server_state_stopped">متوقف</string>
+    <string name="mcp_server_state_stopping">جار الإيقاف</string>
     <string name="media_info_album_label">الألبوم</string>
     <string name="media_info_aspect_ratio_label">نسبة العرض إلى الارتفاع</string>
     <string name="media_info_audio_format_label">الصوت</string>
@@ -643,6 +655,15 @@
     <string name="prompt_ai_plugin_install_required">ثبّت 3-Stone AI من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_settings_unavailable">لا يوفر 3-Stone AI المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">قد لا يكون الملف الحالي حزمة ملحق صالحة. هل تريد المتابعة بالتثبيت؟\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mcp_server_activate">MCP Server مثبت لكن Android لم ينشطه بعد. نشطه الآن للسماح باتصال AutoJs6.</string>
+    <string name="prompt_mcp_server_application_disabled">عطل Android تطبيق MCP Server. فعله في إعدادات النظام ثم حاول مجددا.</string>
+    <string name="prompt_mcp_server_authorize">تحتاج هذه الإضافة إلى تفويض في مركز الإضافات قبل السماح بوصول MCP إلى الجهاز.</string>
+    <string name="prompt_mcp_server_enable">تفعيل إضافة MCP Server في AutoJs6 وبدء الخادم?</string>
+    <string name="prompt_mcp_server_failed">تعذر الاتصال بالإضافة. تحقق من حالتها في مركز الإضافات وحاول مجددا.</string>
+    <string name="prompt_mcp_server_incompatible">تتطلب هذه الإضافة إصدار AutoJs6 برقم %1$d أو أحدث. ثبت نسخا متوافقة من AutoJs6 وMCP Server.</string>
+    <string name="prompt_mcp_server_install">ثبت MCP Server من مركز الإضافات الرسمي وفعله لاستخدام هذا المفتاح.</string>
+    <string name="prompt_mcp_server_settings_unavailable">هذا الإصدار من MCP Server لا يوفر صفحة الإعدادات. حدث الإضافة في مركز الإضافات.</string>
+    <string name="prompt_mcp_server_trust">لقد فوضت هذه الإضافة يدويا, لكن توقيعها ليس رسميا أو موثوقا. هل تسمح لها بإتاحة قدرات AutoJs6 للعملاء المقترنين?</string>
     <string name="prompt_plugin_abi_mismatch_before_download">لا يوجد تقاطع بين قائمة ABI الخاصة بالمكون الإضافي وقائمة ABI الخاصة بالجهاز الحالي.\n\nABI للمكون الإضافي: %1$s\nABI للجهاز: %2$s\n\nهل تريد متابعة التنزيل رغم ذلك؟</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">لا يوجد تقاطع بين قائمة ABI الخاصة بالمكون الإضافي وقائمة ABI الخاصة بالجهاز الحالي.\n\nABI للمكون الإضافي: %1$s\nABI للجهاز: %2$s\n\nهل تريد متابعة التمكين رغم ذلك؟</string>
     <string name="prompt_plugin_hide_from_center">بعد الإخفاء, لن يظهر هذا المكون الإضافي بعد الآن في قائمة مركز الإضافات. يمكنك إدارة جميع المكونات الإضافية المخفية من \"الإعدادات العامة\" في مركز الإضافات.</string>
@@ -1433,6 +1454,7 @@
     <string name="text_manage_ignored_updates">إدارة التحديثات التي تم تجاهلها</string>
     <string name="text_manage_key_store">إدارة مخزن المفاتيح</string>
     <string name="text_maximize">تكبير</string>
+    <string name="text_mcp_server">خادم MCP</string>
     <string name="text_min_version">الإصدار الأدنى</string>
     <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
     <string name="text_minimize">تصغير</string>

@@ -62,6 +62,11 @@ object McpServerContract {
     /** String: label shown to users in pairing prompts, for example the host app name; optional. */
     const val KEY_SERVER_CONFIG_HOST_LABEL = "serverConfigHostLabel"
 
+    /** Boolean, default false: use the plugin's saved listener settings; requires SETTINGS_VERSION >= 1. */
+    const val KEY_SERVER_CONFIG_USE_SAVED_SETTINGS = "serverConfigUseSavedSettings"
+
+    const val SETTINGS_VERSION = 1
+
     const val BIND_SCOPE_LOOPBACK = "loopback"
     const val BIND_SCOPE_LAN = "lan"
 

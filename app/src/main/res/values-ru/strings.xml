@@ -134,6 +134,7 @@
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="description_local_network_permission">Разрешить соединения с устройствами и службами локальной сети, включая VS Code. Скрипты могут явно запрашивать это разрешение.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
+    <string name="description_mcp_server">Разрешите сопряженным ИИ-клиентам управлять устройством через плагин MCP Server. В настройках можно выбрать порт, сеть, токен и группы инструментов.</string>
     <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nПримечание: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
     <string name="description_night_mode_preference_more">Чтобы включить Ночной режим в системе Android:\n- Android API Level 29 (Android 10) [Q] и выше: Настройки -> Дисплей -> Тема.\n- Android API Уровень 28 (Android 9) [P]: Параметры разработчика -> Ночной режим.\n\nДля применения ночного режима (темной темы) к веб-контенту с помощью компонента WebView (например, страницы документации AutoJs6) должны быть выполнены следующие условия:\n1. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P]: версия >= 105\n2. Веб-содержимое в компоненте WebView адаптировано к теме Dark (с помощью CSS или ресурсов Android XML и т.д.).</string>
@@ -605,6 +606,17 @@
     <string name="logger_ver_history_raw_thread_success">Поток \"raw\" успешен, запись офлайн-кеша</string>
     <string name="logger_ver_history_start_blob_thread">Запуск резервного потока \"blob\"</string>
     <string name="logger_ver_history_start_raw_thread">Запуск потока запроса \"raw\"</string>
+    <string name="mcp_server_state_activation">Требуется активация</string>
+    <string name="mcp_server_state_authorization">Требуется разрешение</string>
+    <string name="mcp_server_state_disabled">Плагин отключен</string>
+    <string name="mcp_server_state_failed">Ошибка запуска. Проверьте порт в настройках.</string>
+    <string name="mcp_server_state_host_unavailable">Ожидание AutoJs6</string>
+    <string name="mcp_server_state_incompatible">Несовместимая версия</string>
+    <string name="mcp_server_state_not_installed">Плагин не установлен</string>
+    <string name="mcp_server_state_running">Работает</string>
+    <string name="mcp_server_state_starting">Запуск</string>
+    <string name="mcp_server_state_stopped">Остановлен</string>
+    <string name="mcp_server_state_stopping">Остановка</string>
     <string name="media_info_album_label">Альбом</string>
     <string name="media_info_aspect_ratio_label">Соотношение сторон</string>
     <string name="media_info_audio_format_label">Аудио</string>
@@ -641,6 +653,15 @@
     <string name="prompt_ai_plugin_install_required">Установите 3-Stone AI из Центра плагинов, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_settings_unavailable">Установленный 3-Stone AI не предоставляет доверенной точки входа в настройки. Обновите или переустановите его из Центра плагинов.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Текущий файл может быть недействительным пакетом плагина. Продолжить установку?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mcp_server_activate">MCP Server установлен, но еще не активирован Android. Активируйте его для подключения AutoJs6.</string>
+    <string name="prompt_mcp_server_application_disabled">Android отключил MCP Server. Включите приложение в системных настройках и повторите попытку.</string>
+    <string name="prompt_mcp_server_authorize">Для доступа MCP к устройству плагину сначала требуется разрешение в Центре плагинов.</string>
+    <string name="prompt_mcp_server_enable">Включить плагин MCP Server в AutoJs6 и запустить сервер?</string>
+    <string name="prompt_mcp_server_failed">Не удалось подключиться к плагину. Проверьте его состояние в Центре плагинов и повторите попытку.</string>
+    <string name="prompt_mcp_server_incompatible">Плагину требуется AutoJs6 сборки %1$d или новее. Установите совместимые версии AutoJs6 и MCP Server.</string>
+    <string name="prompt_mcp_server_install">Установите MCP Server из официального Центра плагинов и включите его для использования переключателя.</string>
+    <string name="prompt_mcp_server_settings_unavailable">Эта версия MCP Server не предоставляет страницу настроек. Обновите плагин в Центре плагинов.</string>
+    <string name="prompt_mcp_server_trust">Плагин разрешен вручную, но его подпись не входит в официальный или доверенный список. Разрешить доступ сопряженных MCP-клиентов к функциям AutoJs6?</string>
     <string name="prompt_plugin_abi_mismatch_before_download">Список ABI плагина не пересекается со списком ABI текущего устройства.\n\nABI плагина: %1$s\nABI устройства: %2$s\n\nВсе равно продолжить загрузку?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">Список ABI плагина не пересекается со списком ABI текущего устройства.\n\nABI плагина: %1$s\nABI устройства: %2$s\n\nВсе равно продолжить включение?</string>
     <string name="prompt_plugin_hide_from_center">После скрытия этот плагин больше не будет отображаться в списке Центра плагинов. Управлять всеми скрытыми плагинами можно в \"Глобальных настройках\" Центра плагинов.</string>
@@ -1431,6 +1452,7 @@
     <string name="text_manage_ignored_updates">Управление игнорируемыми обновлениями</string>
     <string name="text_manage_key_store">Управление хранилищем ключей</string>
     <string name="text_maximize">Развернуть</string>
+    <string name="text_mcp_server">Сервер MCP</string>
     <string name="text_min_version">Минимальная версия</string>
     <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
     <string name="text_minimize">Свернуть</string>

@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sept 15, 2026.
+Data updated on Sep 15, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -172,6 +172,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
+* `Feature` MCP Server drawer switch with installation, activation, enablement, authorization, and compatibility guidance; notification Stop synchronization; saved plugin settings retained on reconnect; permission-checked settings entry from the drawer and Plugin Center. Restores a previously enabled server when AutoJs6 opens, unless the user stopped it while the host was absent; no boot startup.
 * `Feature` MCP workspace capabilities add Android application queries, editor line and column positioning, automatic accessibility activation using configured strategies, bounded Shell output, and read-only descriptors for large JSON results; root execution uses a separate shell.root grant and phone setting
 * `Feature` Independent QuickJS Runtime plugin engine for local single-file JavaScript and ES modules, routed by the "quickjs"/"qjs" directive or `.quickjs.js/.quickjs.mjs` markers without falling back to Rhino, Node.js, or Bun
 * `Feature` `device.pageSize` read-only property returns the running system memory page size in bytes, identifying 4 KB / 16 KB environments
@@ -894,7 +895,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -945,7 +946,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sept 15, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 15, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

@@ -12,6 +12,8 @@ android {
 
     defaultConfig {
         minSdk = versions.sdkVersionMin
+        // Host SDK upgrades must not silently raise the compile SDK of every external plugin.
+        aarMetadata { minCompileSdk = 36 }
         consumerProguardFiles("consumer-rules.pro")
     }
 

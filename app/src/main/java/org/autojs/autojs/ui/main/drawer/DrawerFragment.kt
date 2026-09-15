@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
@@ -22,6 +23,10 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
+import org.autojs.autojs.app.tool.McpServerTool
+import org.autojs.autojs.core.plugin.mcp.McpServerUiPolicy
+import org.autojs.autojs.ui.settings.McpServerSettingsLauncher
+import kotlinx.coroutines.launch
 import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.app.tool.ScreenColorPickerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
@@ -132,6 +137,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mTerminalItem: DrawerMenuShortcutItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
+    private lateinit var mMcpServerItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
     private lateinit var mLocalNetworkPermissionItem: DrawerMenuToggleableItem
     private lateinit var mNotificationAccessItem: DrawerMenuToggleableItem
@@ -408,6 +414,27 @@ open class DrawerFragment : Fragment() {
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
             }
             setOnConnectionDialogDismissed { drawerItem.setCheckedIfNeeded(false) }
+            connectIfNotNormallyClosed()
+        }
+
+        McpServerTool(mActivity).apply {
+            val tool = this
+            mMcpServerItem = DrawerMenuDisposableItem(
+                helper = tool,
+                icon = R.drawable.ic_cast_connected_black_48dp,
+                title = R.string.text_mcp_server,
+                descriptionRes = R.string.description_mcp_server,
+            ) {
+                neutralText(R.string.text_settings)
+            }
+            mMcpServerItem.setOnLaunchManagerListener { d -> d?.dismiss(); McpServerSettingsLauncher.launch(mActivity) }
+            lifecycleScope.launch {
+                state.collect { value ->
+                    mMcpServerItem.subtitle = McpServerTool.subtitle(mContext, value)
+                    mMcpServerItem.setCheckedIfNeeded(McpServerUiPolicy.checked(value.state))
+                    mMcpServerItem.isProgress = McpServerUiPolicy.progress(value.state)
+                }
+            }
             connectIfNotNormallyClosed()
         }
 
@@ -866,6 +893,7 @@ open class DrawerFragment : Fragment() {
         super.onDestroy()
         mClientModeItem.dispose()
         mServerModeItem.dispose()
+        mMcpServerItem.dispose()
 
         dismissA11yServiceManager()
 
@@ -960,6 +988,7 @@ open class DrawerFragment : Fragment() {
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,
+            mMcpServerItem,
             DrawerMenuGroup(R.string.text_permissions),
             mNotificationPostItem,
             mLocalNetworkPermissionItem,
@@ -1015,6 +1044,7 @@ open class DrawerFragment : Fragment() {
         mScreenColorPickerItem,
         mClientModeItem,
         mServerModeItem,
+        mMcpServerItem,
         mNotificationPostItem,
         mLocalNetworkPermissionItem,
         mNotificationAccessItem,

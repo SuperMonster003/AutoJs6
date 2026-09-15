@@ -19,4 +19,7 @@ object McpServerActions {
 
     /** Signature permission every Binder entry point of the plugin requires from its caller. */
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
+
+    /** Parameterless settings entry, exported only behind [PLUGIN_PERMISSION]. */
+    const val OPEN_SETTINGS = "org.autojs.plugin.mcp.server.action.OPEN_SETTINGS"
 }

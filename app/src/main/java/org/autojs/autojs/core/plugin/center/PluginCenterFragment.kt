@@ -221,6 +221,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onSettings(item: PluginCenterItem) {
+                if (item.packageName == org.autojs.plugin.mcp.server.api.McpServerIds.DEFAULT_PACKAGE_NAME) {
+                    org.autojs.autojs.ui.settings.McpServerSettingsLauncher.launch(contextRef)
+                    return
+                }
                 val installedCountForEngine = item.engine
                     ?.takeIf { it.isNotBlank() }
                     ?.let { engineName ->

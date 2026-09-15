@@ -130,6 +130,7 @@
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="description_local_network_permission">Allow connections to devices and services on the local network, including VS Code. Scripts can request this permission explicitly.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
+    <string name="description_mcp_server">Allow paired AI clients to automate this device through the MCP Server plugin. Open Settings to choose the port, network access, token, and tool groups.</string>
     <string name="description_night_mode">Used to control and reflect AutoJs6\'s night mode strategy.\n\nNote: the night mode toggle and the auto night mode toggle are linked and affect each other.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
     <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
@@ -601,6 +602,17 @@
     <string name="logger_ver_history_raw_thread_success">\"Raw\" thread request successful, writing offline cache</string>
     <string name="logger_ver_history_start_blob_thread">Starting \"blob\" fallback request thread</string>
     <string name="logger_ver_history_start_raw_thread">Starting \"raw\" request thread</string>
+    <string name="mcp_server_state_activation">Activation required</string>
+    <string name="mcp_server_state_authorization">Authorization required</string>
+    <string name="mcp_server_state_disabled">Plugin disabled</string>
+    <string name="mcp_server_state_failed">Start failed. Open settings to check the port.</string>
+    <string name="mcp_server_state_host_unavailable">Waiting for AutoJs6</string>
+    <string name="mcp_server_state_incompatible">Incompatible version</string>
+    <string name="mcp_server_state_not_installed">Plugin not installed</string>
+    <string name="mcp_server_state_running">Running</string>
+    <string name="mcp_server_state_starting">Starting</string>
+    <string name="mcp_server_state_stopped">Stopped</string>
+    <string name="mcp_server_state_stopping">Stopping</string>
     <string name="media_info_album_label">Album</string>
     <string name="media_info_aspect_ratio_label">Aspect ratio</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -637,6 +649,15 @@
     <string name="prompt_ai_plugin_install_required">Install 3-Stone AI from Plugin Center before opening AI service settings.</string>
     <string name="prompt_ai_plugin_settings_unavailable">The installed 3-Stone AI has no trusted settings entry. Update or reinstall it from Plugin Center.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">The current file may not be a valid plugin package, do you want to continue with installation?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mcp_server_activate">MCP Server is installed but Android has not activated it yet. Activate it now to allow AutoJs6 to connect.</string>
+    <string name="prompt_mcp_server_application_disabled">Android has disabled MCP Server. Enable the app in its system settings, then try again.</string>
+    <string name="prompt_mcp_server_authorize">This plugin needs authorization in the Plugin Center before it can provide MCP access to this device.</string>
+    <string name="prompt_mcp_server_enable">Enable the MCP Server plugin in AutoJs6 and start the server?</string>
+    <string name="prompt_mcp_server_failed">Cannot connect to the plugin. Check its status in the Plugin Center and try again.</string>
+    <string name="prompt_mcp_server_incompatible">This plugin requires AutoJs6 build %1$d or later. Install compatible versions of AutoJs6 and MCP Server.</string>
+    <string name="prompt_mcp_server_install">Install MCP Server from the official Plugin Center, then enable it to use this switch.</string>
+    <string name="prompt_mcp_server_settings_unavailable">This MCP Server version does not provide the settings page. Update the plugin in the Plugin Center.</string>
+    <string name="prompt_mcp_server_trust">You authorized this plugin manually, but its signer is not in the official or trusted list. Allow it to expose AutoJs6 device capabilities to paired MCP clients?</string>
     <string name="prompt_plugin_abi_mismatch_before_download">The plugin ABI list has no intersection with the current device ABI list.\n\nPlugin ABIs: %1$s\nDevice ABIs: %2$s\n\nContinue downloading anyway?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">The plugin ABI list has no intersection with the current device ABI list.\n\nPlugin ABIs: %1$s\nDevice ABIs: %2$s\n\nContinue enabling anyway?</string>
     <string name="prompt_plugin_hide_from_center">After hiding, this plugin will no longer appear in Plugin Center list. You can manage hidden plugins in Plugin Center global settings.</string>
@@ -1419,6 +1440,7 @@
     <string name="text_manage_ignored_updates">Manage ignored updates</string>
     <string name="text_manage_key_store">Manage Keystore</string>
     <string name="text_maximize">Maximize</string>
+    <string name="text_mcp_server">MCP Server</string>
     <string name="text_min_version">Minimum version</string>
     <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
     <string name="text_minimize">Minimize</string>
