@@ -178,6 +178,9 @@ private class McpServerOwner(context: Context) {
                     wanted = false
                     isNormallyClosed = true
                     closeSessionPreservingState()
+                    // A plugin that died and is no longer available (force-stopped in the system
+                    // settings) shows what the user has to do next, as a fresh install does.
+                    if (status.lastErrorCode == McpServerContract.REASON_PLUGIN_DIED) showInspectedAvailability()
                 }
             }
         }
@@ -209,6 +212,11 @@ private class McpServerOwner(context: Context) {
 
     fun showAvailability(state: McpServerUiState) {
         if (!wanted) mutableState.value = McpServerToolState(state)
+    }
+
+    private suspend fun showInspectedAvailability() {
+        val inspection = withContext(Dispatchers.IO) { runCatching { McpServerPluginInspector.inspect(context) }.getOrNull() } ?: return
+        if (inspection.state != McpServerUiState.AVAILABLE) showAvailability(inspection.state)
     }
 
     fun connect(automatic: Boolean) {
