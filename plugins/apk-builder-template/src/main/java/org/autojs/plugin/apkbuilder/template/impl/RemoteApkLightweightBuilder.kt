@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import java.util.zip.ZipOutputStream
 import org.json.JSONObject
 
 class RemoteApkLightweightBuilder(
@@ -509,48 +508,7 @@ class RemoteApkLightweightBuilder(
     }
 
     private fun packageUnsignedApk(buildDir: File, unsignedApk: File) {
-        FileOutputStream(unsignedApk, false).use { output ->
-            ZipOutputStream(BufferedOutputStream(output, BUFFER_SIZE)).use { zip ->
-                addApkDirectoryToZip(buildDir, buildDir, zip)
-                zip.finish()
-                zip.flush()
-            }
-        }
-    }
-
-    private fun addApkDirectoryToZip(root: File, dir: File, zip: ZipOutputStream) {
-        dir.listFiles()
-            ?.sortedWith(compareBy<File> { !it.isDirectory }.thenBy { it.name })
-            ?.forEach { child ->
-                ensureActive()
-                val relativePath = child.relativeTo(root).path.replace(File.separatorChar, '/')
-                if (shouldSkipUnsignedApkEntry(relativePath, child.isDirectory)) {
-                    return@forEach
-                }
-                if (child.isDirectory) {
-                    zip.putNextEntry(ZipEntry("$relativePath/"))
-                    zip.closeEntry()
-                    addApkDirectoryToZip(root, child, zip)
-                } else {
-                    zip.putNextEntry(ZipEntry(relativePath))
-                    FileInputStream(child).use { input -> input.copyTo(zip, BUFFER_SIZE) }
-                    zip.closeEntry()
-                }
-            }
-    }
-
-    private fun shouldSkipUnsignedApkEntry(path: String, isDirectory: Boolean): Boolean {
-        if (!path.startsWith("META-INF/", ignoreCase = true)) {
-            return false
-        }
-        if (path.startsWith("META-INF/services", ignoreCase = true)) {
-            return false
-        }
-        if (isDirectory) {
-            return path.equals("META-INF", ignoreCase = true)
-                || path.equals("META-INF/", ignoreCase = true)
-        }
-        return true
+        RemoteUnsignedApkWriter.write(buildDir, unsignedApk) { ensureActive() }
     }
 
     private fun signApk(unsignedApk: File, outputApk: File, projectConfig: RemoteProjectConfig) {
