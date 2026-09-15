@@ -78,7 +78,9 @@ Two-step repositories (D11): `bump <repo> --compile 37` alone uses the built-in 
 and commits as `chore(sdk): raise compileSdk to 37 (Android 17)`; `bump <repo> --target 37` alone
 (after the exposure rechecks, or for repositories that were already compileSdk 37) uses the
 target-only note and message. With `--compile` alone, `--readme-keys` rewrites the compile level
-instead of the target. `--replace PATH OLD NEW` (or `--replace-json FILE` with `[PATH, OLD, NEW]`
+instead of the target; pass the keys only in the step that changes the level they spell out (a
+run that rewrites nothing fails as a wrong key, so a `p_build_requirements` "Android SDK 36"
+handled in the compile step must not be repeated in the target step). `--replace PATH OLD NEW` (or `--replace-json FILE` with `[PATH, OLD, NEW]`
 triples for non-ASCII texts) edits a repository file that mirrors the SDK level, e.g. Python
 Runtime's `locks/python-runtime.lock`, and lets the commit step accept it. Flavored app modules
 (Lua Runtime's `provider` / `nativeTest` / `faultTest`) are installed from
