@@ -35,6 +35,19 @@ Emulator-only steps use `--enable-a11y`: the gate removes and re-adds the AutoJs
 
 A PASS means every selected step passed or was skipped with a stated reason; it does not cover real LAN topologies, audibility, OEM launchers or manual UI, which the Roadmap keeps as RC-SMOKE or WATCH items. Host-side self-checks: `py -m unittest discover -s tools/sdk37 -p test_run_gate.py`.
 
+## Plugin fleet (Roadmap P5, D21)
+
+`fleet.py` drives the 42 `AutoJs6-Plugin-*` checkouts that sit next to the host checkout. `scan` and `table` are read-only and regenerate the data of Roadmap appendix E: SDK values from `version.properties`, hardcoded `compileSdk` / `targetSdk` literals in Gradle scripts (which override the properties file), manifest exposure (INTERNET, overlay, MANAGE_EXTERNAL_STORAGE, WRITE_SECURE_SETTINGS, foreground service types, accessibility services, NPU feature), git dirtiness and the last commit. `plan` prints the next D11 step per repository (clean tree first, unify hardcoded values, compileSdk, then targetSdk as a separate step for exposed plugins). `apply` edits `version.properties` of one clean repository and can run its Gradle checks; it never commits.
+
+```powershell
+py tools/sdk37/fleet.py scan --output build/sdk37-fleet/scan.json
+py tools/sdk37/fleet.py table
+py tools/sdk37/fleet.py plan
+py tools/sdk37/fleet.py apply Pinyin --compile 37 --target 37 --gradle assembleDebug testDebugUnitTest
+```
+
+Self-checks: `py -m unittest discover -s tools/sdk37 -p test_fleet.py`.
+
 ## Physical devices
 
 `physical_device.py` uses only the Python standard library. `inventory` queries online devices and records offline entries without querying them. `snapshot` saves read-only package, service, app-op, compat, audio, display and kernel-page information. Unsupported device commands retain their exit codes. Neither action asserts a functional pass. `checklist` exports every case in the physical-device document to a UTF-8 CSV with result and evidence columns, initially `NOT_RUN`. Use a new output directory each time:

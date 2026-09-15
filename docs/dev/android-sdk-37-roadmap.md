@@ -224,7 +224,7 @@ D1-D4 已由维护者于 2026-09-13 确认. 2026-09-14 又明确选择 Q1=a / Q2
 | P2 | 宿主 targetSdk 37 行为变更适配 | P0.2 (覆盖开关), P1 | 宿主 | 代码适配完成 (16 子项 83 项勾选); 剩余条目按 D20 标注为 RC-SMOKE / WATCH / CI, 不再门控 P3 |
 | P3 | 宿主 targetSdk 37 切换 (app + inrt) | P1, 门禁 (D19) | 宿主, APK-Builder-Template (只读验证) | P3.1 完成 (2026-09-14, chore(sdk): raise targetSdk to 37 for app and inrt): 门禁在 AVD_API_37 (16 KB) 与 API 28 / 31 / 33 / 33 / 35 五台真机执行; P3.3 / P3.4 / P3.5 的 inrt 夹具、Runtime Kit 与 CI 待后续 |
 | P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 进行中: P2.1 文档 / 声明 / LSP 已同步, 其余迁移说明与 CI 待完成 |
-| P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案, D21 批处理脚本 | 42 个插件仓库 | 未开始; 按 D21 脚本批量推进 |
+| P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案, D21 批处理脚本 | 42 个插件仓库 | 未开始; D21 工具 `fleet.py` 已落地 (2026-09-15 扫描: 2 仓 compile 37, 0 仓 target 37, 9 仓脏, 2 仓硬编码), NodeJs-Runtime / Accessibility-Compat / Python-Runtime 已重新评估 |
 | P6 | 验收与关闭 | P1-P5 | 全部 | 未开始 |
 
 P2 可按影响矩阵分批推进: P2.6 的局域网 TLS 验证先满足 P2.1 权限前提; P2.16 的 inrt 验证复用 P2.1 / P2.2 等方案. P5 与 P2 / P3 可交错 (插件的 compileSdk 步骤不依赖宿主 targetSdk 切换), 但 P5 中涉及本地网络与动态加载的插件应复用 P2.1 / P2.3 落定的方案.
@@ -483,6 +483,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ### P5.0 每仓通用条目 (复制到附录 E 对应行的证据栏)
 
+0. 工具 (D21): `py tools/sdk37/fleet.py scan|table|plan` 读取 42 仓的 `version.properties`、Gradle 硬编码、manifest 暴露、脏文件与最后提交, `plan` 给出每仓下一步; `apply <repo> --compile 37 --target 37 --gradle assembleDebug testDebugUnitTest` 只改一个干净仓库的属性文件并跑其 Gradle 检查, 不提交. 2026-09-15 扫描: 40 仓 compile 36, Archive-Manager 与 Accessibility-Compat 已 compile 37; 全部 target 36; Python-Runtime 与 R8-Compiler 在 Gradle 脚本硬编码 36; 脏工作区 9 个 (Accessibility-Compat 65 为进行中的功能开发, Lua 30, Paddle v3 40 / v4-v6 各 6, Rapid v3 45 / v6 56, MLKit-OCR 3, Yolo 36). (SOURCE)
 1. 工作区: 若附录 E "脏" 列非 0, 先由维护者提交或搁置既有改动 (D11). (SOURCE)
 2. compileSdk: 核查 `version.properties` 到各构建脚本的实际消费链后设为 37, 包含 app / Android library / lint 配置; R8-Compiler 硬编码例外见 P5.3. 构建 (`assembleDebug` / `assembleRelease`), 单元测试, 既有门禁 (16 KB `verifyNativePageAlignment`, 各仓库自有校验); 修正弃用并核对 APK 元数据. (ANDROID_BUILD; JVM)
 3. 暴露适配: 按附录 E 暴露列处理 (本地网络 -> 复用 P2.1 权限助手模式; 动态加载 -> 只读; 前台服务 / 音频 -> P2.2 结论; 屏幕捕获 -> P2.15 结论; WebView -> P2.11 结论). (SOURCE)
@@ -505,6 +506,8 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 - [ ] 本地网络: 在插件进程内执行脚本时打开局域网 socket (Node `http.createServer`, Bun `Bun.serve`, Python `socket`) 需要各插件自身的 `ACCESS_LOCAL_NETWORK` (权限按 UID, 宿主授权不覆盖插件); 三个带 `INTERNET` 的运行时 (Node, Bun, Python) 声明权限并在宿主转发的错误中提示 "在插件设置中授予". (SOURCE; DEVICE-37)
 - [ ] 内存上限与 MessageQueue: 各运行时若使用 Android Looper, 在 `USE_NEW_MESSAGEQUEUE` 下复测; 大负载脚本观察 `am memory-limiter status`. (DEVICE-37)
 - [ ] R8-Compiler: `app/build.gradle.kts` 与两个 plugin-api 模块硬编码 compileSdk 36, app 的 targetSdk 以及 library lint target 也为 36; 先统一版本来源再执行通用条目. app 的 versionCode / versionName 同样硬编码, 按该仓实际发布约定递增. 另外核查固定 `r8-library/android-36.jar` 及 SHA-256: 插件自身 compileSdk 提升不会更新脚本编译所用的平台库, 必须记录对 API 37 输入 / 符号的支持边界及相关测试. (SOURCE; JVM; ANDROID_BUILD)
+- [ ] NodeJs-Runtime (2026-09-15 复核, 1.5.1 / 171): 除 `.node` / `libnode.so` 的 dlopen 外, 2026-09-14 起提供宿主终端用的多调用启动器 `libnodexe.so` (宿主以自身 uid 从插件 `nativeLibraryDir` 直接 exec, 只读, 不经 Binder) 与 npm / corepack 资产包 (宿主解包到自身存储, 仅 JS, 无 exec); libnode 已改为 small-icu 构建. 宿主侧 `core/terminal/NodeCli*` 有 JVM 测试 (`NodeCliInstallerTest` / `NodeCliMetadataTest` / `NodeCliProbeTest`), 无 device test: 插件 target 37 步骤在 `AVD_API_37` 上补一次终端 `node --version` / `npm --version` 实跑 (宿主已为 target 37), 并确认 W^X 与 Android 17 无新的跨包 exec 限制影响 `nativeLibraryDir` 启动器; `MANAGE_EXTERNAL_STORAGE` 按 P2.8 结论复核. (SOURCE; DEVICE-37)
+- [ ] Python-Runtime: `app/build.gradle.kts` 第 401 / 407 行硬编码 compileSdk / targetSdk 36 (versionCode / versionName 已走 `versions.*`), 先改为 `versions.sdkVersionCompile` / `versions.sdkVersionTarget` 再执行通用条目; 这是 2026-09-15 扫描新发现, 原表未记录. (SOURCE)
 - [ ] Bun-Runtime: 验证当前 1.7.4 平台插件是否正确解析 API 37; 只有阻碍本次构建时才升级到经验证版本, 否则遵循 D7 保持版本并将可选升级留到后续. (SOURCE; ANDROID_BUILD)
 
 ### P5.4 网络, 媒体与屏幕插件 (MCP-Server, Screen-Color-Picker, Three-Ember-Player, Three-Terra-Player, Three-Stone-AI, HTML-Previewer, Markdown-Previewer, Offline-Docs, Ace-Editor)
@@ -518,6 +521,8 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 ### P5.5 其余插件 (MLKit-Barcode, MLKit-OCR, Yolo-NCNN, MediaInfo, OpenCC, ImGui, Archive-Manager, Image-Tools, Image-Viewer, File-Inspector, APK-Inspector, Pinyin, Pinyin4j, Accessibility-Compat)
 
 - [ ] 通用条目; Binder 协议在 `PARCEL_HARDENING` 下复测 (MLKit x2, Yolo, MediaInfo, OpenCC, ImGui); 存储类插件 (Archive-Manager, File-Inspector, Image-*) 按 P2.8 已核实的 MediaStore 卷枚举 / 媒体回收行为及 SAF / OTG 生命周期复测, 分别记录插件自身 target 与 provider 条件; 联系人目录权限开关不套用到存储插件. Archive-Manager 已是 compileSdk 37, 只做 targetSdk 步骤. (DEVICE-37)
+
+- [ ] Accessibility-Compat (2026-09-15 复核, 1.3.0, 另一会话进行中, 工作区 65 个未提交文件, D11 先等其提交): 该仓已不是 "无暴露" 的纯 JVM 插件. `b21e3a7` 起自带真实无障碍服务 (`com.google.android.accessibility.selecttospeak.SelectToSpeakService` 身份壳, `BIND_ACCESSIBILITY_SERVICE`, `packageNames=com.tencent.mm`, `canRetrieveWindowContent`, 未声明 `isAccessibilityTool`), 声明 `WRITE_SECURE_SETTINGS`, 查询 Shizuku / 微信 / 宿主包, 并通过 `HostServiceStateReceiver` 与宿主服务状态同步. compileSdk 已为 37 (仅 target 步骤). target 37 时按 P2.14 / D16 复核: Advanced Protection Mode 下非辅助工具服务的限制对该壳同样生效, 需在插件设置页与宿主 "无障碍兼容" 页给出一致说明; `WRITE_SECURE_SETTINGS` 写 `enabled_accessibility_services` 的路径在 Android 17 上复测 (含被 instrumentation / force-stop 杀死后的重绑, 见 P3.1 记录的 `Crashed services` 现象); 复用 `run_gate.py --enable-a11y` 的重绑逻辑做 AVD 验证. (SOURCE; DEVICE-37)
 
 P5 验收: 附录 E 每行 compile / target 均为 37 且有提交 hash 与验证设备; 官方索引在发布后刷新.
 
@@ -672,7 +677,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 
 ## 附录 E: 插件舰队矩阵
 
-"暴露" 列取自各仓库 manifest 扫描 (2026-09-13): 前台服务类型, 悬浮窗 (`SYSTEM_ALERT_WINDOW`), `INTERNET`, `MANAGE_EXTERNAL_STORAGE`, 以及已知的进程模型; "脏" 为初稿快照中的未提交文件数, 每仓开工时刷新. SDK 数值先来自属性文件, 已核实的构建脚本覆盖值在下表修正, 其余均以实际产物最终确认. 阶段与分组对应 P5.x. "证据" 列按 `C / T / V / D` 分别回填状态、提交 hash 与设备 (见 P5), 不将整个分组一次性勾选.
+数值列与 "脏" 列于 2026-09-15 用 `py tools/sdk37/fleet.py table` 重新扫描 (硬编码字面量覆盖属性文件时标注 "硬编码"); "暴露" 列取自各仓库 manifest 扫描 (2026-09-13, 2026-09-15 复核三行): 前台服务类型, 悬浮窗 (`SYSTEM_ALERT_WINDOW`), `INTERNET`, `MANAGE_EXTERNAL_STORAGE`, 以及已知的进程模型; "脏" 为初稿快照中的未提交文件数, 每仓开工时刷新. SDK 数值先来自属性文件, 已核实的构建脚本覆盖值在下表修正, 其余均以实际产物最终确认. 阶段与分组对应 P5.x. "证据" 列按 `C / T / V / D` 分别回填状态、提交 hash 与设备 (见 P5), 不将整个分组一次性勾选.
 
 | 仓库 | compile / target / min | 平台插件 | 进程模型 | 暴露 | 脏 | 阶段 | 证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -685,9 +690,9 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 | Rapid-OCR-PP-OCRv3 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 45 | P5.2 | |
 | Rapid-OCR-PP-OCRv6 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 56 | P5.2 | |
 | APK-Builder-Template | 36 / 36 / 24 | 1.8.0 | 插件进程 (打包) | 模板 targetSdk 期望, CI 断言 | 0 | P5.2 | |
-| NodeJs-Runtime | 36 / 36 / 24 | 1.8.0 | `:nodejs_runtime` | INTERNET (本地网络), MANAGE_EXTERNAL_STORAGE, 动态加载 (`.node`) | 0 | P5.3 | |
-| Bun-Runtime | 36 / 36 / 33 | 1.7.4 | `:bun_runtime` (exec) | INTERNET (本地网络), 动态加载 | 18 | P5.3 | |
-| Python-Runtime | 36 / 36 / 24 | 1.8.0 | `:python_runtime` | INTERNET (本地网络), 动态加载 (Chaquopy) | 0 | P5.3 | |
+| NodeJs-Runtime | 36 / 36 / 24 | 1.8.0 | `:nodejs_runtime` | INTERNET (本地网络), MANAGE_EXTERNAL_STORAGE, 动态加载 (`.node` 经 dlopen), `libnode.so` dlopen; 2026-09-14 起另有宿主 uid 直接 exec 的终端启动器 `libnodexe.so` (插件 nativeLibraryDir) 与宿主解包的 npm / corepack 资产 (仅 JS) | 0 | P5.3 | |
+| Bun-Runtime | 36 / 36 / 33 | 1.7.4 | `:bun_runtime` (exec) | INTERNET (本地网络), 动态加载 | 0 | P5.3 | |
+| Python-Runtime | 36 / 36 / 24 (硬编码) | 1.8.0 | `:python_runtime` | INTERNET (本地网络), 动态加载 (Chaquopy); `app/build.gradle.kts` 硬编码 compileSdk / targetSdk 36 | 0 | P5.3 | |
 | Lua-Runtime | 36 / 36 / 24 | 1.8.0 | `:lua_runtime` | Binder | 30 | P5.3 | |
 | QuickJS-Runtime | 36 / 36 / 24 | 1.8.0 | `:quickjs_runtime` | Binder | 0 | P5.3 | |
 | TypeScript-Engine | 36 / 36 / 24 | 1.8.0 | `:typescript_*` | Binder | 0 | P5.3 | |
@@ -717,7 +722,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 | APK-Inspector | 36 / 36 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | |
 | Pinyin | 36 / 36 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | |
 | Pinyin4j | 36 / 36 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | |
-| Accessibility-Compat | 36 / 36 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | |
+| Accessibility-Compat | 37 / 36 / 24 | 1.8.0 | 插件进程 | 2026-09-15 起: 无障碍服务 (SelectToSpeak 身份壳, `packageNames=com.tencent.mm`, 未声明 isAccessibilityTool), WRITE_SECURE_SETTINGS, Shizuku 查询, 与宿主服务状态同步的 receiver | 65 | P5.5 (仅 target; 另见 P5.5 专项) | |
 
 ---
 
@@ -927,3 +932,9 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 工具: `tools/sdk37/run_gate.py` (+ `gate-a11y-wrapper.js`, `test_run_gate.py` 12 项主机侧自检). 一条命令完成 badging / 安装 / 无人值守套件 / 模拟器专属步骤 / JVM 汇总, 输出 gate.json / gate.md. 开发中修正: 测试包 badging 无 versionCode, aapt2 的 `minSdkVersion:` 拼写, 裸 inrt 模板无 `assets/project` 时 SplashActivity 必然 NPE (改为 SKIP 并提供 `--inrt-apk`), 连续 instrumentation 在 API 28 上 runner 进程未起即亡 (沉降 + 重试), 被 instrumentation 杀死的无障碍服务停留在系统 "Crashed services" 需切换设置重绑, AutoJs6 `console` 为不可赋值代理 (包装脚本改用函数作用域遮蔽).
 - 切换: `version.properties` 宿主 / inrt 均 37; 构建、单测、lint 与六台设备门禁见 [P3.1 记录](evidence/android-sdk-37-p3-20260914.md). changelog 十种语言 `improvement` 各增一条, README / CHANGELOG 重新生成.
 - 下次起点: P3.3 用 `build_inrt_storage_fixtures.py` 产出 target 37 夹具后跑 `run_gate.py --with-inrt --inrt-apk` 与 `run_inrt_storage_probe.py`; P3.4 Runtime Kit 重新生成; P4 CI 推送验证; P5 按 D21 写批处理脚本.
+
+### 2026-09-15: 舰队重评估与 D21 工具
+
+- 维护者提示 Accessibility-Compat 与 NodeJs-Runtime 期间有变化. 复核结果: Accessibility-Compat 自 `b21e3a7` 起自带 SelectToSpeak 身份壳无障碍服务与 `WRITE_SECURE_SETTINGS`, compileSdk 已 37, 工作区仍有另一会话的 65 个未提交文件; NodeJs-Runtime 新增宿主直接 exec 的终端启动器 `libnodexe.so` 与 npm / corepack 资产, libnode 改 small-icu, SDK 值未变. 两者在附录 E 与 P5.3 / P5.5 已改写.
+- `tools/sdk37/fleet.py` (scan / table / plan / apply, `test_fleet.py` 5 项) 落地 D21; 全量扫描另发现 Python-Runtime 的 Gradle 硬编码 (原表未记录), 附录 E 数值列与脏列已按 2026-09-15 扫描刷新.
+- 下次起点: 按 `fleet.py plan` 的顺序从无暴露且干净的仓库开始 (Pinyin, Pinyin4j, MediaInfo, ImGui, Image-*, File-Inspector, APK-Inspector, OpenCV, Image-Quantization, QuickJS, TypeScript-Engine, Java / Kotlin-Runtime, DEX-Compiler, Offline-Docs, APK-Builder-Template), 每仓 `apply` + Gradle 检查 + 单独提交; 暴露仓库两步走.
