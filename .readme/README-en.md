@@ -673,6 +673,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Layout hierarchy window: rows summarize id / text / desc / clickable and other flags, the selected node and all of its ancestors are highlighted in the tree and outlined on screen, the tree scrolls sideways, a "Select parent node" menu item walks the selection upwards, and a one-time tip explains exiting with the volume down key
 * `Improvement` Terminal: sessions keep running in the background after leaving the screen (a foreground service shows the current directory in its notification with a "Close sessions" action), and reopening the terminal reattaches the running session
 * `Improvement` Feature matching keeps only RANSAC inliers and validates the projected quadrilateral, corrects a matcher incompatible with the descriptor type instead of throwing, accepts `scale` above 1 to enlarge small objects, and ORB detects up to 20000 key points by default so textured scenes no longer starve the object region
+* `Improvement` Node bridge adds the read-only app.listDocs / app.readDoc (enumerate and read the verified offline documentation assets of the installed AutoJs6-Plugin-Offline-Docs, paths confined to the docs root, 1 MiB per read, available: false without an eligible plugin) so that the MCP Server plugin can expose autojs6://docs/ resources
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

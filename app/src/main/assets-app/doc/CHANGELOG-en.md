@@ -511,6 +511,7 @@
 * `Improvement` Layout hierarchy window: rows summarize id / text / desc / clickable and other flags, the selected node and all of its ancestors are highlighted in the tree and outlined on screen, the tree scrolls sideways, a "Select parent node" menu item walks the selection upwards, and a one-time tip explains exiting with the volume down key
 * `Improvement` Terminal: sessions keep running in the background after leaving the screen (a foreground service shows the current directory in its notification with a "Close sessions" action), and reopening the terminal reattaches the running session
 * `Improvement` Feature matching keeps only RANSAC inliers and validates the projected quadrilateral, corrects a matcher incompatible with the descriptor type instead of throwing, accepts `scale` above 1 to enlarge small objects, and ORB detects up to 20000 key points by default so textured scenes no longer starve the object region
+* `Improvement` Node bridge adds the read-only app.listDocs / app.readDoc (enumerate and read the verified offline documentation assets of the installed AutoJs6-Plugin-Offline-Docs, paths confined to the docs root, 1 MiB per read, available: false without an eligible plugin) so that the MCP Server plugin can expose autojs6://docs/ resources
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

@@ -115,7 +115,7 @@ data class McpCapabilityGrant(
             addAll(methodsOf("engines", "execScript", "execScriptFile", "list", "stop", "stopAll"))
             addAll(methodsOf("console", "tail"))
             addAll(methodsOf("files", "list", "stat", "read", "write", "mkdir", "rename", "delete"))
-            addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample"))
+            addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample", "listDocs", "readDoc"))
             addAll(methodsOf("package_manager", "list", "verify", "listApps"))
             addAll(methodsOf("clipboard", "getText", "setText", "hasText"))
             addAll(methodsOf("device", "info", "isScreenOn", "wakeUp", "isIgnoringBatteryOptimizations"))

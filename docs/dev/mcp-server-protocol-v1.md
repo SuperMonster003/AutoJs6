@@ -225,7 +225,7 @@ The default grant (`McpCapabilityGrant.DEFAULT`) allows the roadmap A.6 method
 set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOne, findAll, findByText, click, longClick, setText, scrollForward, scrollBackward, swipe, gesture, back, home, recentApps}`,
 `engines.{execScript, execScriptFile, list, stop, stopAll}`, `console.tail`,
 `files.{list, stat, read, write, mkdir, rename, delete}`,
-`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample}`,
+`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample, listDocs, readDoc}`,
 `package_manager.{list, verify}`, `clipboard.{getText, setText, hasText}`,
 `device.{info, isScreenOn, wakeUp, isIgnoringBatteryOptimizations}`,
 `media_projection.{requestScreenCapture, stop}`, `image.{captureScreen, recycle}`,
@@ -284,6 +284,7 @@ JSON objects carry a `schema` field; the schemas below are frozen at `v1`.
 | `engines.list()` / `engines.stop(id)` | `autojs6-bridge-engines-list-v1` / `-stop-v1` | Host `ScriptEngineService` executions with `state` starting / running / finished; `stopAll({scope: "host"})` returns `autojs6-bridge-engines-stop-all-v1`, `stopAll()` without a scope keeps the plugin-process answer |
 | `device.info()` | `autojs6-bridge-device-info-v1` | Build fields, screen, battery, host version and process, accessibility state, screen state; no hardware identifiers |
 | `app.listSamples(path, options)` / `app.readSample(path, options)` | `autojs6-bridge-app-list-samples-v1` / `-read-sample-v1` | Read-only view of the `sample/` assets, dot entries hidden, `available: false` without samples; token `app.query` |
+| `app.listDocs(path, options)` / `app.readDoc(path, options)` | `autojs6-bridge-app-list-docs-v1` / `-read-doc-v1` | Read-only view of the verified `docs/` assets of the installed Offline Documentation plugin (`OfflineDocsPluginStateMonitor`); directories are derived from the inventory, the root listing carries `status`, `packageName`, `contentVersion`, `fileCount` and `available: false` (with the monitor status and `errorCode`) without an eligible plugin; token `app.query` |
 
 ## Lifecycle And Death Handling
 
@@ -323,13 +324,17 @@ inline. Unclaimed one-shot files are swept from the cache after ten minutes.
 ## R0 Scope And Non-Goals
 
 P3.5 resource consumers use the existing files.read, app.listSamples,
-app.readSample, device.info, and console.tail methods. The plugin owns URI
+app.readSample, device.info, and console.tail methods, plus app.listDocs and
+app.readDoc for the optional documentation resources. The plugin owns URI
 parsing, pairing, group checks, pagination, and prompt text. Sample binary
 encoding uses the existing Okio base64 codec on API 24 and later. Large JSON
-sample results use the P3.4 read-only descriptor path. No AIDL or permission
-grant changes are needed. Text / binary resource data remains bounded to
-1 MiB and carries truncation metadata. Offline-Docs resources remain optional
-and are not exposed by this phase.
+sample results use the P3.4 read-only descriptor path. No AIDL changes are
+needed; the default grant only gains the two read-only docs methods. Text /
+binary resource data remains bounded to 1 MiB and carries truncation metadata.
+Offline-Docs resources stay optional: the host relays the verified assets of
+an installed AutoJs6-Plugin-Offline-Docs and answers available: false
+otherwise, so the plugin lists autojs6://docs/ only while that plugin is
+present.
 
 - The `dual` protocol mode (stateless MCP model of the 2026-07-28 specification)
   is reserved until the Kotlin SDK supports it (roadmap D9); the host rejects it.
