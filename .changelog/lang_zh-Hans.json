@@ -168,7 +168,8 @@
         "布局分析: 节点信息对话框中长按属性可勾选多项, 并合并复制为链式选择器 (id('x').text('y')) 或 pickup() / detect() 可接受的对象选择器; \"保存布局为文件\" 把捕获的节点树写入 <工作目录>/layouts/<时间>.layout.json, 在文件管理器中点击该文件即可离线分析",
         "终端: 应用内 shell (侧拉菜单 \"工具\" 组, 目录菜单 \"在终端中打开\", 项目工具栏), 以 pty 运行 /system/bin/sh, 带 Esc / Tab / Ctrl / Alt 及方向键按键栏, 捏合缩放字号, 复制 / 分享终端记录, npm 辅助菜单, 以及说明 Node.js 运行时插件的 node 为何不可用的横幅",
         "终端: 由 Node.js 运行时插件 (1.5.0+) 提供 node, npm, npx, corepack, yarn 与 pnpm, npm / corepack 资产经 SHA-256 校验并按插件构建安装一次, 每次会话重建命令链接, npm 缓存与全局安装保持在终端前缀目录内, 并新增 \"终端\" 设置组 (npm 镜像源: npmjs.org / npmmirror.com / 自定义 https URL, 忽略生命周期脚本, 清除终端数据)",
-        "`images.matchFeatures` 的两个参数均可直接传入图片或路径并即时检测特征; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 选项, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 属性, `ImageFeatures` 新增 `count` 和 `method` 属性"
+        "`images.matchFeatures` 的两个参数均可直接传入图片或路径并即时检测特征; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 选项, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 属性, `ImageFeatures` 新增 `count` 和 `method` 属性",
+        "官方插件无障碍伴生契约: 发布 `follow-host` 服务策略的伴生插件随 AutoJs6 无障碍服务一同启用和禁用, 使用已配置的 root, 安全设置或 Shizuku 策略, 并接收宿主服务状态广播"
       ],
       "fix": [
         "HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效",

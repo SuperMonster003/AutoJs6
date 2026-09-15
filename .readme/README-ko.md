@@ -360,6 +360,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 터미널: 앱 내 셸 (드로어 "도구" 그룹, 디렉터리 메뉴 "터미널에서 열기", 프로젝트 툴바). pty 에서 /system/bin/sh 를 실행하며, Esc / Tab / Ctrl / Alt 와 커서 키 바, 핀치 줌 글자 크기, 출력 기록 복사 / 공유, npm 보조 메뉴, Node.js 런타임 플러그인의 node 를 사용할 수 없는 이유를 알리는 배너를 제공합니다
 * `추가` 터미널: Node.js 런타임 플러그인 (1.5.0 이상) 의 node, npm, npx, corepack, yarn, pnpm. npm / corepack 자산은 SHA-256 으로 검증하여 플러그인 빌드마다 한 번 설치하고, 명령 링크는 세션마다 재구성하며, npm 캐시와 전역 설치는 터미널 프리픽스 안에 유지. 새 "터미널" 설정 그룹 (npm 레지스트리: npmjs.org / npmmirror.com / 사용자 지정 https URL, 라이프사이클 스크립트 무시, 터미널 데이터 지우기)
 * `추가` `images.matchFeatures`의 두 인수에 이미지나 경로를 직접 전달하면 즉시 특징을 검출합니다; `ransacThreshold`, `minInliers`, `maxFeatures` 옵션이 추가되고 `ObjectFrame`은 `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers`를, `ImageFeatures`는 `count`와 `method`를 제공합니다
+* `추가` 공식 플러그인용 접근성 컴패니언 계약: `follow-host` 서비스 정책을 게시하는 컴패니언은 구성된 root, 보안 설정 또는 Shizuku 전략으로 AutoJs6 접근성 서비스와 함께 활성화 및 비활성화되며 호스트 서비스 상태 브로드캐스트를 받습니다
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
 * `수정` 호스트 및 패키징 앱의 릴리스 빌드에서 네트워크 보안 설정이 HTTP 요청을 차단하던 문제에 대응하여 평문 통신 정책을 디버그 빌드와 통일하고 GitHub 리소스 도메인의 HTTPS 제한은 유지
 * `수정` 시스템이 확인 화면 실행을 차단하면 백그라운드 APK 설치를 계속할 수 없던 문제; 세션별 상태를 저장하고 알림이나 앱 복귀 시 확인을 재개하며, 알림 거부 또는 프로세스 재생성 후에도 대기 중인 확인 복원 가능

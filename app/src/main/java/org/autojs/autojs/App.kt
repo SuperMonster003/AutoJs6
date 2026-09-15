@@ -23,6 +23,7 @@ import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.accessibility.companion.AccessibilityCompanionSync
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
@@ -128,6 +129,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 }
 
                 AutoJs.initInstance(this)
+                AccessibilityCompanionSync.install(this)
                 GlobalKeyObserver.initIfNeeded(applicationContext)
                 setupDrawableImageLoader()
                 TimedTaskScheduler.init(this)

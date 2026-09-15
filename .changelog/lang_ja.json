@@ -192,7 +192,8 @@
         "レイアウト解析: ノード情報ダイアログで属性を長押しすると複数を選択し, 1 つのチェーン形式セレクタ (id('x').text('y')) または pickup() / detect() が受け付けるオブジェクト形式セレクタとしてコピーできます. \"レイアウトをファイルに保存\" はキャプチャしたノードツリーを <作業ディレクトリ>/layouts/<時刻>.layout.json に書き出し, ファイルマネージャーでそのファイルをタップするとオフラインで解析できます",
         "ターミナル: アプリ内シェル (ドロワーの \"ツール\" グループ, ディレクトリメニューの \"ターミナルで開く\", プロジェクトツールバー). pty 上で /system/bin/sh を実行し, Esc / Tab / Ctrl / Alt とカーソルキーのキーバー, ピンチによる文字サイズ変更, 出力ログのコピー / 共有, npm 補助メニュー, Node.js ランタイムプラグインの node が使えない理由を示すバナーを備えます",
         "ターミナル: Node.js ランタイムプラグイン (1.5.0 以降) による node, npm, npx, corepack, yarn, pnpm. npm / corepack アセットは SHA-256 で検証しプラグインビルドごとに一度インストール, コマンドリンクはセッションごとに再構築, npm キャッシュとグローバルインストールはターミナルのプレフィックス内に保持. 新しい \"ターミナル\" 設定グループ (npm レジストリ: npmjs.org / npmmirror.com / カスタム https URL, ライフサイクルスクリプトの無視, ターミナルデータの消去)",
-        "`images.matchFeatures` の両引数に画像またはパスを直接渡してその場で特徴を検出できます; `ransacThreshold`, `minInliers`, `maxFeatures` オプションが加わり, `ObjectFrame` は `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers` を, `ImageFeatures` は `count` と `method` を公開します"
+        "`images.matchFeatures` の両引数に画像またはパスを直接渡してその場で特徴を検出できます; `ransacThreshold`, `minInliers`, `maxFeatures` オプションが加わり, `ObjectFrame` は `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers` を, `ImageFeatures` は `count` と `method` を公開します",
+        "公式プラグイン向けアクセシビリティコンパニオンコントラクト: `follow-host` サービスポリシーを公開するコンパニオンは, 設定済みの root, セキュア設定または Shizuku 戦略で AutoJs6 のアクセシビリティサービスと一緒に有効化および無効化され, ホストサービス状態のブロードキャストを受け取ります"
       ],
       "fix": [
         "HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用",
