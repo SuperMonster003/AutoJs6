@@ -483,7 +483,7 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ### P5.0 每仓通用条目 (复制到附录 E 对应行的证据栏)
 
-0. 工具 (D21): `py tools/sdk37/fleet.py scan|table|plan` 读取 42 仓的 `version.properties`、Gradle 硬编码、manifest 暴露、脏文件与最后提交, `plan` 给出每仓下一步; `apply <repo> --compile 37 --target 37 --gradle assembleDebug testDebugUnitTest` 只改一个干净仓库的属性文件并跑其 Gradle 检查, 不提交. 2026-09-15 扫描: 40 仓 compile 36, Archive-Manager 与 Accessibility-Compat 已 compile 37; 全部 target 36; Python-Runtime 与 R8-Compiler 在 Gradle 脚本硬编码 36; 脏工作区 9 个 (Accessibility-Compat 65 为进行中的功能开发, Lua 30, Paddle v3 40 / v4-v6 各 6, Rapid v3 45 / v6 56, MLKit-OCR 3, Yolo 36). (SOURCE)
+0. 工具 (D21): `py tools/sdk37/fleet.py scan|table|plan` 读取 42 仓的 `version.properties`、Gradle 硬编码、manifest 暴露、脏文件与最后提交, `plan` 给出每仓下一步; `apply <repo> --compile 37 --target 37 --gradle assembleDebug testDebugUnitTest` 只改一个干净仓库的属性文件并跑其 Gradle 检查, 不提交. 2026-09-15 扫描: 40 仓 compile 36, Archive-Manager 与 Accessibility-Compat 已 compile 37; 全部 target 36; Python-Runtime 与 R8-Compiler 在 Gradle 脚本硬编码 36; 脏工作区 9 个 (Accessibility-Compat 65 为进行中的功能开发, Lua 30, Paddle v3 40 / v4-v6 各 6, Rapid v3 45 / v6 56, MLKit-OCR 3, Yolo 36). (SOURCE) 2026-09-15 晚: `bump <repo> --compile 37 --target 37 --serial <AVD> --commit` (`92335f13b`) 一条命令完成第 2 / 4 / 5 步 (属性文件, 补丁版本递增且保留里程碑后缀, `VERSION_BUILD` = 提交数 + 1, 十语 changelog, README 模板 (`common.json` 数字 / 版本, `--readme-keys` 刷新正文里的旧级别), 生成器与仓库检查, Gradle, AVD 安装 + installed targetSdk 核对 + androidTest (`--instrument-arg notClass` 排除与环境绑定的测试并记入证据), 固定 message 提交并核对提交数); 首批 17 仓完成, 见附录 E 证据栏与 `evidence/android-sdk-37-p5-fleet-20260915.md`. (SOURCE; DEVICE-37)
 1. 工作区: 若附录 E "脏" 列非 0, 先由维护者提交或搁置既有改动 (D11). (SOURCE)
 2. compileSdk: 核查 `version.properties` 到各构建脚本的实际消费链后设为 37, 包含 app / Android library / lint 配置; R8-Compiler 硬编码例外见 P5.3. 构建 (`assembleDebug` / `assembleRelease`), 单元测试, 既有门禁 (16 KB `verifyNativePageAlignment`, 各仓库自有校验); 修正弃用并核对 APK 元数据. (ANDROID_BUILD; JVM)
 3. 暴露适配: 按附录 E 暴露列处理 (本地网络 -> 复用 P2.1 权限助手模式; 动态加载 -> 只读; 前台服务 / 音频 -> P2.2 结论; 屏幕捕获 -> P2.15 结论; WebView -> P2.11 结论). (SOURCE)
@@ -493,16 +493,16 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 
 ### P5.1 被宿主进程加载 (OpenCV, Image-Quantization)
 
-- [ ] 两仓通用条目; 运行时 `.so` 的只读处理在宿主侧 (P2.3), 插件侧无运行时暴露; 提交后用宿主 target 37 覆盖包复测加载. (DEVICE-37)
+- [ ] 两仓通用条目; 运行时 `.so` 的只读处理在宿主侧 (P2.3), 插件侧无运行时暴露; 提交后用宿主 target 37 覆盖包复测加载. (DEVICE-37) 进度 (2026-09-15): OpenCV `1101000` v1.1.4 与 Image-Quantization `24d1ea8` v1.0.3 已 37 / 37 并通过各自 AVD instrumentation (Image-Quantization 排除 1 项与环境绑定的金样测试, 证据 3.1); 宿主 target 37 覆盖包的加载复测未做.
 
 ### P5.2 打包进用户 APK (Paddle v3 / v4 / v5 / v6, Rapid v3 / v6, APK-Builder-Template)
 
 - [ ] 6 个 OCR 仓库通用条目; 核对引擎以 `System.loadLibrary` 从 `nativeLibraryDir` 加载 (只读), 无 staging 到可写目录的路径; 在 target 37 的用户 APK 内 (P3.4 示例) 复测识别. (SOURCE; DEVICE-37)
-- [ ] APK-Builder-Template: 通用条目 + 模板 / 夹具中 targetSdk 期望改为读取模板 (P3.4), `configureManifest` 不改写 `uses-sdk` 的约束保持; CI 工作流对模板 APK 的 `aapt2` 检查加 `targetSdkVersion` 断言. (SOURCE; JVM; ANDROID_BUILD)
+- [x] APK-Builder-Template: 通用条目 + 模板 / 夹具中 targetSdk 期望改为读取模板 (P3.4), `configureManifest` 不改写 `uses-sdk` 的约束保持; CI 工作流对模板 APK 的 `aapt2` 检查加 `targetSdkVersion` 断言. (SOURCE; JVM; ANDROID_BUILD) 完成 (2026-09-15): `41f06fd` (v1.0.3 build 44, 并入未发布的 1.0.3), `build-from-runtime-kit.yml` 对 kit 的 `template.apk` 断言 `targetSdkVersion` 等于插件声明的 `TARGET_SDK_VERSION`; 插件测试无 targetSdk 硬编码; 用 5280 universal kit 重建后三个打包示例在 API 37.1 AVD 全部通过 (`evidence/android-sdk-37-p5-apk-builder-examples-20260915.md`).
 
 ### P5.3 独立进程运行时插件 (NodeJs, Bun, Python, Lua, QuickJS, TypeScript-Engine, Java-Runtime, Kotlin-Runtime, DEX-Compiler, R8-Compiler)
 
-- [ ] 通用条目; 逐仓检索 `System.load` / `dlopen` / `DexClassLoader`, 区分 Java 原生库加载, NDK 加载与独立 exec. 核查 Node `.node` / 用户 `.so`, Bun `libbun_exec.so` 及用户库, Python / Chaquopy 扩展模块, Java / Kotlin / DEX / R8 的 DEX 产物. Java `System.load` 按 P2.3 处理, DEX 延续已有只读要求; NDK `dlopen` / exec 是否受其它规则限制须有对应源码或设备证据, 不把 `THROW_ERROR_FOR_WRITABLE_DCL` 的 Java 行为直接推广到全部加载方式. 各插件用 target 37 包复测. (SOURCE; DEVICE-37)
+- [ ] 通用条目; 逐仓检索 `System.load` / `dlopen` / `DexClassLoader`, 区分 Java 原生库加载, NDK 加载与独立 exec. 核查 Node `.node` / 用户 `.so`, Bun `libbun_exec.so` 及用户库, Python / Chaquopy 扩展模块, Java / Kotlin / DEX / R8 的 DEX 产物. Java `System.load` 按 P2.3 处理, DEX 延续已有只读要求; NDK `dlopen` / exec 是否受其它规则限制须有对应源码或设备证据, 不把 `THROW_ERROR_FOR_WRITABLE_DCL` 的 Java 行为直接推广到全部加载方式. 各插件用 target 37 包复测. (SOURCE; DEVICE-37) 进度 (2026-09-15): QuickJS `947e4ab` v1.0.3, TypeScript-Engine `831f64e` v0.6.3, Java-Runtime `9ef0b46` v0.8.2-m9, Kotlin-Runtime `3038600` v0.7.2-m10, DEX-Compiler `8383eeb` v1.1.2 (前置修复 `aed6e7c`: 手写 `platforms/android-<level>` 路径改为 AGP bootClasspath, SDK 的 API 37 目录名为 `android-37.0`) 已 37 / 37 并通过 AVD instrumentation (排除项见证据 3.2 / 3.3); 本条的加载方式检索与 target 37 复测仍开放.
 - [ ] 本地网络: 在插件进程内执行脚本时打开局域网 socket (Node `http.createServer`, Bun `Bun.serve`, Python `socket`) 需要各插件自身的 `ACCESS_LOCAL_NETWORK` (权限按 UID, 宿主授权不覆盖插件); 三个带 `INTERNET` 的运行时 (Node, Bun, Python) 声明权限并在宿主转发的错误中提示 "在插件设置中授予". (SOURCE; DEVICE-37)
 - [ ] 内存上限与 MessageQueue: 各运行时若使用 Android Looper, 在 `USE_NEW_MESSAGEQUEUE` 下复测; 大负载脚本观察 `am memory-limiter status`. (DEVICE-37)
 - [ ] R8-Compiler: `app/build.gradle.kts` 与两个 plugin-api 模块硬编码 compileSdk 36, app 的 targetSdk 以及 library lint target 也为 36; 先统一版本来源再执行通用条目. app 的 versionCode / versionName 同样硬编码, 按该仓实际发布约定递增. 另外核查固定 `r8-library/android-36.jar` 及 SHA-256: 插件自身 compileSdk 提升不会更新脚本编译所用的平台库, 必须记录对 API 37 输入 / 符号的支持边界及相关测试. (SOURCE; JVM; ANDROID_BUILD)
@@ -516,11 +516,11 @@ P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 3
 - [ ] Screen-Color-Picker: `mediaProjection` 前台服务 + 悬浮窗; `CHECK_ADD_MIRROR_DISPLAY_PERMISSION` 下取色通过. (DEVICE-37)
 - [ ] Three-Ember / Three-Terra: `mediaPlayback` 前台服务在后台音频强化 (target 37 需 while-in-use) 下的启动时机; `cmd audio set-enable-hardening throw` 复测播放 / 列表切换 / 锁屏. (DEVICE-37)
 - [ ] Three-Stone-AI: 官方 [Android 17 总览](https://developer.android.com/about/versions/17/summary) 列出 target 37 使用 NPU 需要声明 `android.hardware.npu` (VERIFIED). 若 LiteRT-LM 实际使用 NPU 委托, 添加可选特性声明并测试无 NPU 设备回退; 另测内存上限下的推理. 目标版本主页面未展开该项, 不凭章节缺失忽略总览要求. (SOURCE; DEVICE-37)
-- [ ] HTML / Markdown 预览, Offline-Docs, Ace-Editor: WebView UA 缩减与 File System Access 下渲染正常; 同 profile 的 LSP / 本地文档回环验证与跨 profile 限制分开记录. (DEVICE-37)
+- [ ] HTML / Markdown 预览, Offline-Docs, Ace-Editor: WebView UA 缩减与 File System Access 下渲染正常; 同 profile 的 LSP / 本地文档回环验证与跨 profile 限制分开记录. (DEVICE-37) 进度 (2026-09-15): Offline-Docs `2e253cd` v6.8.2 已 37 / 37 (AVD instrumentation 2 项), WebView 复测未做.
 
 ### P5.5 其余插件 (MLKit-Barcode, MLKit-OCR, Yolo-NCNN, MediaInfo, OpenCC, ImGui, Archive-Manager, Image-Tools, Image-Viewer, File-Inspector, APK-Inspector, Pinyin, Pinyin4j, Accessibility-Compat)
 
-- [ ] 通用条目; Binder 协议在 `PARCEL_HARDENING` 下复测 (MLKit x2, Yolo, MediaInfo, OpenCC, ImGui); 存储类插件 (Archive-Manager, File-Inspector, Image-*) 按 P2.8 已核实的 MediaStore 卷枚举 / 媒体回收行为及 SAF / OTG 生命周期复测, 分别记录插件自身 target 与 provider 条件; 联系人目录权限开关不套用到存储插件. Archive-Manager 已是 compileSdk 37, 只做 targetSdk 步骤. (DEVICE-37)
+- [ ] 通用条目; Binder 协议在 `PARCEL_HARDENING` 下复测 (MLKit x2, Yolo, MediaInfo, OpenCC, ImGui); 存储类插件 (Archive-Manager, File-Inspector, Image-*) 按 P2.8 已核实的 MediaStore 卷枚举 / 媒体回收行为及 SAF / OTG 生命周期复测, 分别记录插件自身 target 与 provider 条件; 联系人目录权限开关不套用到存储插件. Archive-Manager 已是 compileSdk 37, 只做 targetSdk 步骤. (DEVICE-37) 进度 (2026-09-15): MediaInfo `48bb6fb`, ImGui `ee9054d`, Image-Tools `9210c49`, Image-Viewer `eb0fde2`, File-Inspector `7035ef1`, APK-Inspector `59387a6`, Pinyin `2527cd5`, Pinyin4j `28507f5` 已 37 / 37 并通过各自 AVD instrumentation; `PARCEL_HARDENING` 与存储行为复测未做.
 
 - [ ] Accessibility-Compat (2026-09-15 复核, 1.3.0, 另一会话进行中, 工作区 65 个未提交文件, D11 先等其提交): 该仓已不是 "无暴露" 的纯 JVM 插件. `b21e3a7` 起自带真实无障碍服务 (`com.google.android.accessibility.selecttospeak.SelectToSpeakService` 身份壳, `BIND_ACCESSIBILITY_SERVICE`, `packageNames=com.tencent.mm`, `canRetrieveWindowContent`, 未声明 `isAccessibilityTool`), 声明 `WRITE_SECURE_SETTINGS`, 查询 Shizuku / 微信 / 宿主包, 并通过 `HostServiceStateReceiver` 与宿主服务状态同步. compileSdk 已为 37 (仅 target 步骤). target 37 时按 P2.14 / D16 复核: Advanced Protection Mode 下非辅助工具服务的限制对该壳同样生效, 需在插件设置页与宿主 "无障碍兼容" 页给出一致说明; `WRITE_SECURE_SETTINGS` 写 `enabled_accessibility_services` 的路径在 Android 17 上复测 (含被 instrumentation / force-stop 杀死后的重绑, 见 P3.1 记录的 `Crashed services` 现象); 复用 `run_gate.py --enable-a11y` 的重绑逻辑做 AVD 验证. (SOURCE; DEVICE-37)
 
@@ -681,24 +681,24 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 
 | 仓库 | compile / target / min | 平台插件 | 进程模型 | 暴露 | 脏 | 阶段 | 证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| OpenCV | 36 / 36 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | |
-| Image-Quantization | 36 / 36 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | |
+| OpenCV | 37 / 37 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | `1101000` v1.1.4 (build 22), AVD_API_37.1 instrumentation 1 项, 2026-09-15 |
+| Image-Quantization | 37 / 37 / 24 | 1.8.0 | 宿主进程 (staging 加载) | 动态加载 (宿主侧) | 0 | P5.1 | `24d1ea8` v1.0.3 (build 22), AVD_API_37.1 instrumentation 16 项 (排除环境固定金样测试), 2026-09-15 |
 | Paddle-OCR-PP-OCRv3 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 40 | P5.2 | |
 | Paddle-OCR-PP-OCRv4 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
 | Paddle-OCR-PP-OCRv5 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
 | Paddle-OCR-PP-OCRv6 | 36 / 36 / 26 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 6 | P5.2 | |
 | Rapid-OCR-PP-OCRv3 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 45 | P5.2 | |
 | Rapid-OCR-PP-OCRv6 | 36 / 36 / 24 | 1.8.0 | 插件进程 / 用户 APK | Binder, 原生库 | 56 | P5.2 | |
-| APK-Builder-Template | 36 / 36 / 24 | 1.8.0 | 插件进程 (打包) | 模板 targetSdk 期望, CI 断言 | 0 | P5.2 | |
+| APK-Builder-Template | 37 / 37 / 24 | 1.8.0 | 插件进程 (打包) | 模板 targetSdk 期望, CI 断言 | 0 | P5.2 | `41f06fd` v1.0.3 (build 44, 未发布), AVD_API_37.1 三个打包示例 3 / 3 PASS, CI 模板 targetSdkVersion 断言, 2026-09-15 |
 | NodeJs-Runtime | 36 / 36 / 24 | 1.8.0 | `:nodejs_runtime` | INTERNET (本地网络), MANAGE_EXTERNAL_STORAGE, 动态加载 (`.node` 经 dlopen), `libnode.so` dlopen; 2026-09-14 起另有宿主 uid 直接 exec 的终端启动器 `libnodexe.so` (插件 nativeLibraryDir) 与宿主解包的 npm / corepack 资产 (仅 JS) | 0 | P5.3 | |
 | Bun-Runtime | 36 / 36 / 33 | 1.7.4 | `:bun_runtime` (exec) | INTERNET (本地网络), 动态加载 | 0 | P5.3 | |
 | Python-Runtime | 36 / 36 / 24 (硬编码) | 1.8.0 | `:python_runtime` | INTERNET (本地网络), 动态加载 (Chaquopy); `app/build.gradle.kts` 硬编码 compileSdk / targetSdk 36 | 0 | P5.3 | |
 | Lua-Runtime | 36 / 36 / 24 | 1.8.0 | `:lua_runtime` | Binder | 30 | P5.3 | |
-| QuickJS-Runtime | 36 / 36 / 24 | 1.8.0 | `:quickjs_runtime` | Binder | 0 | P5.3 | |
-| TypeScript-Engine | 36 / 36 / 24 | 1.8.0 | `:typescript_*` | Binder | 0 | P5.3 | |
-| Java-Runtime | 36 / 36 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | |
-| Kotlin-Runtime | 36 / 36 / 26 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | |
-| DEX-Compiler | 36 / 36 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX 产物) | 0 | P5.3 | |
+| QuickJS-Runtime | 37 / 37 / 24 | 1.8.0 | `:quickjs_runtime` | Binder | 0 | P5.3 | `947e4ab` v1.0.3 (build 14), AVD_API_37.1 instrumentation 3 项, 2026-09-15 |
+| TypeScript-Engine | 37 / 37 / 24 | 1.8.0 | `:typescript_*` | Binder | 0 | P5.3 | `831f64e` v0.6.3 (build 76), AVD_API_37.1 instrumentation 94 项 (排除环境固定金样测试), 2026-09-15 |
+| Java-Runtime | 37 / 37 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | `9ef0b46` v0.8.2-m9 (build 56), AVD_API_37.1 instrumentation 15 项 (排除 API 34 / 36 专用证据测试), 2026-09-15 |
+| Kotlin-Runtime | 37 / 37 / 26 | 1.8.0 | 插件进程 | 动态加载 (DEX) | 0 | P5.3 | `3038600` v0.7.2-m10 (build 27), AVD_API_37.1 instrumentation 2 项 (排除 API 34 / 36 专用证据测试), 2026-09-15 |
+| DEX-Compiler | 37 / 37 / 24 | 1.8.0 | 插件进程 | 动态加载 (DEX 产物) | 0 | P5.3 | `8383eeb` v1.1.2 (build 44), AVD_API_37.1 instrumentation 2 项, 2026-09-15 |
 | R8-Compiler | 36 / 36 / 24 (硬编码) | 1.8.0 | 插件进程 | 动态加载 (DEX 产物), 固定 android-36.jar | 0 | P5.3 | |
 | MCP-Server | 36 / 36 / 24 | 1.8.0 | 插件进程 | INTERNET (本地网络服务端), `specialUse` 前台服务 | 0 | P5.4 | |
 | Screen-Color-Picker | 36 / 36 / 24 | 1.8.0 | 插件进程 | `mediaProjection` 前台服务, 悬浮窗 | 0 | P5.4 | |
@@ -707,21 +707,21 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 | Three-Stone-AI | 36 / 36 / 24 | 1.8.0 | 插件进程 | INTERNET, NPU 特性声明 (若用), 内存上限 | 0 | P5.4 | |
 | HTML-Previewer | 36 / 36 / 24 | 1.8.0 | 插件进程 | INTERNET, WebView | 0 | P5.4 | |
 | Markdown-Previewer | 36 / 36 / 24 | 1.8.0 | 插件进程 | INTERNET, WebView | 0 | P5.4 | |
-| Offline-Docs | 36 / 36 / 24 | 1.8.0 | 插件进程 | WebView (回环) | 0 | P5.4 | |
+| Offline-Docs | 37 / 37 / 24 | 1.8.0 | 插件进程 | WebView (回环) | 0 | P5.4 | `2e253cd` v6.8.2 (build 42), AVD_API_37.1 instrumentation 2 项, 2026-09-15 |
 | Ace-Editor | 36 / 36 / 24 | 1.8.0 | 插件进程 + LuaLS 独立进程 | INTERNET, WebView, LSP (回环) | 0 | P5.4 | |
 | MLKit-Barcode | 36 / 36 / 24 | 1.8.0 | 插件进程 | Binder, INTERNET | 0 | P5.5 | |
 | MLKit-OCR | 36 / 36 / 24 | 1.8.0 | 插件进程 | Binder | 3 | P5.5 | |
 | Yolo-NCNN | 36 / 36 / 24 | 1.8.0 | `:provider` | Binder | 36 | P5.5 | |
-| MediaInfo | 36 / 36 / 24 | 1.8.0 | 插件进程 | Binder | 0 | P5.5 | |
+| MediaInfo | 37 / 37 / 24 | 1.8.0 | 插件进程 | Binder | 0 | P5.5 | `48bb6fb` v2.1.3 (build 51), AVD_API_37.1 instrumentation 16 项, 2026-09-15 |
 | OpenCC | 36 / 36 / 24 | 1.8.0 | 插件进程 | Binder, INTERNET | 0 | P5.5 | |
-| ImGui | 36 / 36 / 24 | 1.8.0 | 插件进程 (`:privilege_broker`) | Binder | 0 | P5.5 | |
+| ImGui | 37 / 37 / 24 | 1.8.0 | 插件进程 (`:privilege_broker`) | Binder | 0 | P5.5 | `ee9054d` v1.9.3 (build 15), AVD_API_37.1 instrumentation 5 项, 2026-09-15 |
 | Archive-Manager | 37 / 36 / 24 | 1.8.0 | 插件进程 | 存储卷 / MediaStore | 0 | P5.5 (仅 target) | |
-| Image-Tools | 36 / 36 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | |
-| Image-Viewer | 36 / 36 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | |
-| File-Inspector | 36 / 36 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | |
-| APK-Inspector | 36 / 36 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | |
-| Pinyin | 36 / 36 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | |
-| Pinyin4j | 36 / 36 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | |
+| Image-Tools | 37 / 37 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | `9210c49` v1.2.1 (build 14), AVD_API_37.1 instrumentation 2 项, 2026-09-15 |
+| Image-Viewer | 37 / 37 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | `eb0fde2` v1.3.1 (build 13), AVD_API_37.1 instrumentation 48 项, 2026-09-15 |
+| File-Inspector | 37 / 37 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | `7035ef1` v1.1.1 (build 17), AVD_API_37.1 instrumentation 18 项, 2026-09-15 |
+| APK-Inspector | 37 / 37 / 24 | 1.8.0 | 插件进程 | 存储 | 0 | P5.5 | `59387a6` v1.2.1 (build 39), AVD_API_37.1 instrumentation 2 项, 2026-09-15 |
+| Pinyin | 37 / 37 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | `2527cd5` v1.0.3 (build 18), AVD_API_37.1 instrumentation 7 项, 2026-09-15 |
+| Pinyin4j | 37 / 37 / 24 | 1.8.0 | 插件进程 | - | 0 | P5.5 | `28507f5` v1.3.2 (build 25), AVD_API_37.1 instrumentation 2 项, 2026-09-15 |
 | Accessibility-Compat | 37 / 36 / 24 | 1.8.0 | 插件进程 | 2026-09-15 起: 无障碍服务 (SelectToSpeak 身份壳, `packageNames=com.tencent.mm`, 未声明 isAccessibilityTool), WRITE_SECURE_SETTINGS, Shizuku 查询, 与宿主服务状态同步的 receiver | 65 | P5.5 (仅 target; 另见 P5.5 专项) | |
 
 ---
@@ -946,3 +946,10 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 发现 (WATCH): 插件 ADR (2026-09-02) 的正式路径 (`supportsApkBuild`, 不读开发者开关) 宿主与插件均未实现; HEAD 宿主打包页面只走 `RemoteApkBuildClient` (开发者开关 + `supportsRemoteBuild` + 协议 3), 按仓库既定配置 (`enableRemoteBuild=false`) 构建的插件在 HEAD 宿主一律 NOT_AVAILABLE. 维护者同日确认该开关为内部构建移除后的遗留物: 插件 `35846fb` 删除 `enableRemoteBuild` 并固定声明能力, 宿主 `e91d5b46b` 删除开发者开关与运行时门控, 无标志插件 + 新宿主复测 `run_packaged_examples.py` 全部 PASS; 宿主读取 ADR 正式键 (`supportsApkBuild` 等, 需同步 plugin-api) 仍待维护者安排.
 - 未做: 真机 (RC-SMOKE #8 保留; 示例 APK 为 AVD 的 x86_64)、插件发布 / tag、宿主正式路径迁移. AVD 事项: `AVD_API_30` 默认端口 5602 与另一会话撞车, 改 `-port 5610`; 一次 a11y 示例服务 20 s 内未绑定 (刚安装即写设置), runner 改为重写设置最多 3 次.
 - 下次起点: P5 舰队 (`fleet.py plan` 顺序, 每仓一次提交) 与 P4 文档 / CI; P3 只剩 RC-SMOKE #8 与 CI 推送验证.
+### 2026-09-15 晚: P5 舰队第一批 (17 仓) 与 APK Builder 开关清理
+
+- 维护者确认 `enableRemoteBuild` 等为早期 "宿主内部构建 + 远程构建" 双路径的遗留物, 内部构建早已移除: 宿主 `e91d5b46b` 删除开发者开关 / `RemoteApkBuildRuntimeGate` / 相关字符串与偏好 (63 文件), 插件仓库 `35846fb` 删除 `enableRemoteBuild` 构建开关并始终声明能力; 打包示例在无开关宿主 + 无标志插件上 3 / 3 PASS (`d339d5bd3` 记录). 宿主 plugin-api 的 ADR 正式键迁移仍留给维护者 (WATCH).
+- `fleet.py bump` (`92335f13b`, `cd09e6058`) 落地 P5.0 第 0 步的逐仓发布, 17 仓各一次提交 (附录 E 证据栏), 全部在 `AVD_API_37.1_16K` 上安装 + installed targetSdk 核对 + androidTest; 维护者提示的 NodeJs-Runtime (终端 / npm 提交, 干净, 两步走) 与 MCP-Server (P6 进行中, 4 个脏文件) 本批未动, Bun-Runtime 另一会话进行中跳过.
+- 发现 (均与本次升级无关, HEAD 在同一 AVD 复现): Image-Quantization 的 PNG 金样按字节比对而 API 37.1 的 deflate 输出不同 (像素 / 质量一致); TypeScript-Engine 10 项在 API 37.1 上失败 (夹具容量 / 契约 / FD 采样); Java / Kotlin-Runtime 的只读 DEX 证据测试只接受 API 34 / 36. 三者以 `notClass` 排除并写入步骤明细, 留给维护者. DEX-Compiler 手写 `platforms/android-37/android.jar` 路径因 SDK 目录名 `android-37.0` 失效, 先修 (`aed6e7c`) 后升.
+- 未做: 两步走 / 有暴露仓库 (需 `--note-file` 各自说明与 AVD 暴露项复测), 脏工作区仓库 (D11), Python-Runtime / R8-Compiler 硬编码统一, Archive-Manager 的 target 步骤, 各仓发布 / tag, P5.1 / P5.3 / P5.5 的加载 / Binder / 存储复测.
+- 下次起点: (1) 两步走仓库先 compileSdk 37 独立提交 (`bump --compile 37 --note-file ...` 需配合 target 不变的说明; 或先 `apply`), 再按 P5.3 / P5.4 / P5.5 的暴露条目在 AVD 复测后做 targetSdk; (2) 维护者处理脏仓库与 Bun 后补跑; (3) P4 文档 / CI; (4) 17 仓的发布与官方索引刷新由维护者决定.

@@ -1,0 +1,464 @@
+{
+  "started": "2026-09-15T12:23:56.901091+00:00",
+  "serial": "emulator-5600",
+  "device": {
+    "serial": "emulator-5600",
+    "model": "sdk_gphone16k_x86_64",
+    "manufacturer": "Google",
+    "sdk": "37",
+    "release": "17",
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CP31.260623.012/16064790:userdebug/dev-keys",
+    "abiList": "x86_64,arm64-v8a",
+    "buildType": "userdebug",
+    "emulator": true,
+    "getconfPageSize": 16384,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "steps": [
+    {
+      "name": "host",
+      "status": "PASS",
+      "detail": "host targetSdk 37 versionCode 5280; plugin 1.0.3+autojs6-6.8.0 kit autojs6-runtime-v6.8.0+5280-6da20f96975f5b38d4b7c2a8224f9a52f9c9108f-universal for host 5280"
+    },
+    {
+      "name": "produce",
+      "status": "PASS",
+      "detail": "producer instrumentation passed"
+    },
+    {
+      "name": "example a11y",
+      "status": "PASS",
+      "detail": "11 script checks"
+    },
+    {
+      "name": "example ui",
+      "status": "PASS",
+      "detail": "9 script checks"
+    },
+    {
+      "name": "example timer",
+      "status": "PASS",
+      "detail": "9 script checks"
+    }
+  ],
+  "examples": {
+    "a11y": {
+      "apk": {
+        "path": "build\\sdk37-fleet\\examples-plugin37\\sdk37-example-a11y.apk",
+        "size": 38153965,
+        "sha256": "0dc11646d5347bad82666fcbf5eff3e8cb747007b030ec7a1d52ed8c3e9c45ea",
+        "hasProject": true,
+        "package": "org.autojs.autojs6.sdk37.a11y",
+        "versionCode": 1,
+        "versionName": "1.0",
+        "compileSdk": 37,
+        "minSdk": 24,
+        "targetSdk": 37,
+        "debuggable": false,
+        "localNetworkPermission": true,
+        "abis": [
+          "x86_64"
+        ]
+      },
+      "runnerChecks": [
+        [
+          "badging",
+          true,
+          "package org.autojs.autojs6.sdk37.a11y, target 37, LAN permission True"
+        ],
+        [
+          "install",
+          true,
+          "Performing Streamed Install\nSuccess"
+        ],
+        [
+          "a11y-service-enabled-by-runner",
+          true,
+          "bound on attempt 1"
+        ],
+        [
+          "launcher-activity",
+          true,
+          "org.autojs.autojs6.sdk37.a11y/org.autojs.autojs.inrt.SplashActivity"
+        ],
+        [
+          "launch",
+          true,
+          "utojs6.sdk37.a11y/org.autojs.autojs.inrt.SplashActivity }\nStatus: ok\nLaunchState: WARM\nActivity: org.autojs.autojs6.sdk37.a11y/org.autojs.autojs.inrt.LogActivity\nTotalTime: 992\nWaitTime: 1007\nComplete"
+        ]
+      ],
+      "receipt": {
+        "example": "a11y",
+        "package": "org.autojs.autojs6.sdk37.a11y",
+        "api": 37,
+        "target": 37,
+        "checks": [
+          {
+            "name": "a11y-service-bound",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "a11y-own-window-front",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "a11y-root-window",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "a11y-window-event-after-transition",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "target-37",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "visibility-settings-app",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "local-network-declared",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "post-notifications-runtime",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "exact-alarm-capability",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "load-dex",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "broadcast-roundtrip",
+            "passed": true,
+            "detail": ""
+          }
+        ],
+        "ready": true,
+        "done": true,
+        "windowEvents": 7,
+        "postNotifications": {
+          "granted": false,
+          "enabled": false
+        },
+        "canScheduleExactAlarms": true
+      },
+      "crashLines": [],
+      "verdict": {
+        "success": true,
+        "failures": [],
+        "scriptChecks": 11,
+        "expectedChecks": 11
+      }
+    },
+    "ui": {
+      "apk": {
+        "path": "build\\sdk37-fleet\\examples-plugin37\\sdk37-example-ui.apk",
+        "size": 38153962,
+        "sha256": "964ef5b7abf557069b710b42a868f5b4ad6138f3e8bfa4af27c43970e584d919",
+        "hasProject": true,
+        "package": "org.autojs.autojs6.sdk37.ui",
+        "versionCode": 1,
+        "versionName": "1.0",
+        "compileSdk": 37,
+        "minSdk": 24,
+        "targetSdk": 37,
+        "debuggable": false,
+        "localNetworkPermission": true,
+        "abis": [
+          "x86_64"
+        ]
+      },
+      "runnerChecks": [
+        [
+          "badging",
+          true,
+          "package org.autojs.autojs6.sdk37.ui, target 37, LAN permission True"
+        ],
+        [
+          "install",
+          true,
+          "Performing Streamed Install\nSuccess"
+        ],
+        [
+          "launcher-activity",
+          true,
+          "org.autojs.autojs6.sdk37.ui/org.autojs.autojs.inrt.SplashActivity"
+        ],
+        [
+          "launch",
+          true,
+          "utojs6.sdk37.ui/org.autojs.autojs.inrt.SplashActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.autojs.autojs6.sdk37.ui/org.autojs.autojs.inrt.SplashActivity\nTotalTime: 1072\nWaitTime: 1084\nComplete"
+        ],
+        [
+          "ui-predictive-back-finishes-activity",
+          true,
+          "backPressed True, exited True, activity gone True"
+        ]
+      ],
+      "receipt": {
+        "example": "ui",
+        "package": "org.autojs.autojs6.sdk37.ui",
+        "api": 37,
+        "target": 37,
+        "checks": [
+          {
+            "name": "ui-layout-rendered",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "ui-edge-to-edge",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "target-37",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "visibility-settings-app",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "local-network-declared",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "post-notifications-runtime",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "exact-alarm-capability",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "load-dex",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "broadcast-roundtrip",
+            "passed": true,
+            "detail": ""
+          }
+        ],
+        "ready": true,
+        "done": true,
+        "layout": {
+          "contentTop": 0,
+          "contentHeight": 2424,
+          "decorHeight": 2424,
+          "displayHeight": 2424,
+          "statusBarInset": 142,
+          "navigationBarInset": 63
+        },
+        "postNotifications": {
+          "granted": false,
+          "enabled": false
+        },
+        "canScheduleExactAlarms": true,
+        "backPressed": true,
+        "exited": true
+      },
+      "crashLines": [],
+      "verdict": {
+        "success": true,
+        "failures": [],
+        "scriptChecks": 9,
+        "expectedChecks": 9
+      }
+    },
+    "timer": {
+      "apk": {
+        "path": "build\\sdk37-fleet\\examples-plugin37\\sdk37-example-timer.apk",
+        "size": 38154031,
+        "sha256": "ce04ffa4a6eb6f59b95ed97acc9372fa6828b79b2390d889ad3e91e743d7d953",
+        "hasProject": true,
+        "package": "org.autojs.autojs6.sdk37.timer",
+        "versionCode": 1,
+        "versionName": "1.0",
+        "compileSdk": 37,
+        "minSdk": 24,
+        "targetSdk": 37,
+        "debuggable": false,
+        "localNetworkPermission": true,
+        "abis": [
+          "x86_64"
+        ]
+      },
+      "runnerChecks": [
+        [
+          "badging",
+          true,
+          "package org.autojs.autojs6.sdk37.timer, target 37, LAN permission True"
+        ],
+        [
+          "install",
+          true,
+          "Performing Streamed Install\nSuccess"
+        ],
+        [
+          "launcher-activity",
+          true,
+          "org.autojs.autojs6.sdk37.timer/org.autojs.autojs.inrt.SplashActivity"
+        ],
+        [
+          "launch",
+          true,
+          "s6.sdk37.timer/org.autojs.autojs.inrt.SplashActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.autojs.autojs6.sdk37.timer/org.autojs.autojs.inrt.SplashActivity\nTotalTime: 721\nWaitTime: 739\nComplete"
+        ],
+        [
+          "timed-task-fired",
+          true,
+          "{\"fired\": true, \"firedAt\": 1789475111007, \"target\": 37, \"api\": 37}"
+        ]
+      ],
+      "timedReceipt": {
+        "fired": true,
+        "firedAt": 1789475111007,
+        "target": 37,
+        "api": 37
+      },
+      "receipt": {
+        "example": "timer",
+        "package": "org.autojs.autojs6.sdk37.timer",
+        "api": 37,
+        "target": 37,
+        "checks": [
+          {
+            "name": "countdown-task-scheduled",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "tts-done",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "target-37",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "visibility-settings-app",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "local-network-declared",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "post-notifications-runtime",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "exact-alarm-capability",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "load-dex",
+            "passed": true,
+            "detail": ""
+          },
+          {
+            "name": "broadcast-roundtrip",
+            "passed": true,
+            "detail": ""
+          }
+        ],
+        "ready": true,
+        "done": true,
+        "timedTask": {
+          "id": 1,
+          "scheduledAt": 1789475090934,
+          "countdownMillis": 20000
+        },
+        "tts": {
+          "state": "done",
+          "detail": "",
+          "elapsedMillis": 4642
+        },
+        "postNotifications": {
+          "granted": false,
+          "enabled": false
+        },
+        "canScheduleExactAlarms": true
+      },
+      "crashLines": [],
+      "verdict": {
+        "success": true,
+        "failures": [],
+        "scriptChecks": 9,
+        "expectedChecks": 9
+      }
+    }
+  },
+  "pluginVersion": "1.0.3+autojs6-6.8.0",
+  "runtimeKit": {
+    "runtimeKitId": "autojs6-runtime-v6.8.0+5280-6da20f96975f5b38d4b7c2a8224f9a52f9c9108f-universal",
+    "host": {
+      "packageName": "org.autojs.autojs6",
+      "versionName": "6.8.0",
+      "versionCode": 5280,
+      "gitSha": "6da20f96975f5b38d4b7c2a8224f9a52f9c9108f"
+    },
+    "template": {
+      "fileName": "template.apk",
+      "packageName": "org.autojs.autojs6.inrt",
+      "sha256": "0e906eee82f78d76baa1a57345cce701aac174e99cde5cbe36ddab4ce53a574f",
+      "sizeBytes": 39179165,
+      "variant": "inrt-universal",
+      "supportedAbis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64",
+        "x86"
+      ]
+    },
+    "compatibility": {
+      "minHostVersionCode": 5280,
+      "maxHostVersionCode": 5280,
+      "allowPatchVersionMismatch": false
+    },
+    "contract": {
+      "schemaVersion": 1,
+      "apkBuilderProtocolVersion": 2,
+      "remoteBuildProtocolVersion": 3,
+      "runtimeApiLevel": 5280,
+      "runtimeApiHash": "ba7d29250fa5c84eaa1941be33459acfb169d0d012e41e9793ad9c400b9c3ed5",
+      "scriptEngineHash": "7ead016b688488dd1d3c2434f250834b7e4ab054411f68e1c8843e4345e8920c",
+      "resourcesContractHash": "4b5a1143140ed0f09896188170581f0fbe1a68b97455772aa9dda5fec693b1b4",
+      "nativeLibPageAlignment": 16384,
+      "nativeLibManifestHash": "cc7a0fd85e57249d5e94ee5ad3c8829b29b59c42ea0e796f6be78d7db075bf0b"
+    }
+  },
+  "finished": "2026-09-15T12:25:13.503415+00:00",
+  "overall": "PASS"
+}
