@@ -404,6 +404,8 @@ class JavaScriptSourceTest {
             assertTrue(launch.source is TypeScriptFileSource)
             assertEquals(JavaScriptSource.ENGINE, launch.engineName)
             assertEquals(sourceFile.name, (launch.source as TypeScriptFileSource).compilationSourceName)
+            assertEquals(sourceFile.canonicalPath, launch.source.toString())
+            assertEquals(sourceFile.canonicalPath, launch.source.fullPath)
         } finally {
             sourceFile.delete()
         }
@@ -423,6 +425,26 @@ class JavaScriptSourceTest {
             assertTrue(launch.source is TypeScriptFileSource)
             assertEquals(JavaScriptSource.ENGINE, launch.engineName)
             assertEquals(sourceFile.name, (launch.source as TypeScriptFileSource).compilationSourceName)
+            assertEquals(sourceFile.canonicalPath, launch.source.toString())
+            assertEquals(sourceFile.canonicalPath, launch.source.fullPath)
+        } finally {
+            sourceFile.delete()
+        }
+    }
+
+    @Test
+    fun namedTypeScriptFilesPreserveTheirExtensionPrefixAndOriginHints() {
+        val sourceFile = File.createTempFile("autojs6-typescript-name-", ".tsx")
+        try {
+            val source = NodeProjectScriptSourceFactory.create("Component", sourceFile)
+
+            assertEquals("Component.tsx", source.toString())
+            source.prefix = "\$remote/"
+            assertEquals("\$remote/Component.tsx", source.toString())
+            source.originUri = "content://scripts/original.tsx"
+            assertEquals(source.originUri, source.toString())
+            source.overriddenFullPath = File(sourceFile.parentFile, "original.tsx").path
+            assertEquals(source.originPath, source.toString())
         } finally {
             sourceFile.delete()
         }

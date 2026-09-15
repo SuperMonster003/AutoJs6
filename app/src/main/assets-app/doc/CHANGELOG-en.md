@@ -347,6 +347,7 @@
 * `Fix` Explorer Action puzzle icons for ZIP/JAR and other plugin-handled files filled the entire action cell and appeared oversized
 * `Fix` The file manager could not reliably distinguish TypeScript `.ts/.mts` sources and declarations from MPEG-2 TS video with the same suffixes, and did not always treat `.d.ts/.d.mts/.d.cts` as declaration files
 * `Fix` Plugin-backed `.py/.ts/.java/.kt` source files did not consistently use executable-source icons and expose the Run action
+* `Fix` Launching `.ts/.tsx` files through Intent and other entry points could display an incorrect `.js` extension in the host console and lose the original file path
 * `Fix` Minimal script projects without APK packaging metadata fell back to `main.js` instead of launching the `main` entry declared in `project.json`
 * `Fix` Plugin activation entries could be resolved incorrectly for application ID suffix variants, and wake success could be reported before the service was available
 * `Fix` Calling the compat accessors `getChild()` / `getParent()` etc. on a `UiObject` that carried a node allocator recursed endlessly (the allocator called back into the wrapper's own accessors); the allocator now works on the raw node and registers by object identity rather than node equality (two instances of the same view are no longer released as one). It is still not wired into script runtimes: below Android 13 nodes are pooled per process, so a batch release at exit could recycle an instance already reused by another script

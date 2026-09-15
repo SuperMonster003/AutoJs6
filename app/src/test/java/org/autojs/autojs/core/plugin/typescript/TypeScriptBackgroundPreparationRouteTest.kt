@@ -50,6 +50,7 @@ class TypeScriptBackgroundPreparationRouteTest {
         assertEquals(JavaScriptSource.ENGINE_BUN, inMemory.engineName)
         assertEquals(JavaScriptSource.ENGINE_BUN, fileSource.engineName)
         assertTrue(fileSource is TypeScriptFileSource)
+        assertEquals(file.canonicalPath, fileSource.toString())
         assertFalse(TypeScriptExecutionCompiler.requiresPreparation(inMemory))
         assertFalse(TypeScriptExecutionCompiler.requiresPreparation(fileSource))
         assertFalse(TypeScriptExecutionCompiler.requiresPreparation(sequence))
@@ -86,6 +87,8 @@ class TypeScriptBackgroundPreparationRouteTest {
         )
 
         assertTrue(direct.source is TypeScriptFileSource)
+        assertEquals(typeScript.canonicalPath, direct.source.toString())
+        assertEquals(typeScript.canonicalPath, prefixed.source.toString())
         assertTrue(TypeScriptExecutionCompiler.requiresPreparation(direct.source))
         assertTrue(prefixed.source is SequenceScriptSource)
         val sequence = prefixed.source as SequenceScriptSource

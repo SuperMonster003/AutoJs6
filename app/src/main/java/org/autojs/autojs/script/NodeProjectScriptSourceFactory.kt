@@ -59,7 +59,7 @@ object NodeProjectScriptSourceFactory {
 
     private fun createFileSource(file: File, name: String?): JavaScriptFileSource {
         if (JavaScriptSource.isRhinoTypeScriptFileName(file.name)) {
-            return TypeScriptFileSource(file, name ?: file.nameWithoutExtension)
+            return TypeScriptFileSource(file, name)
         }
         return if (name == null) {
             JavaScriptFileSource(file)
