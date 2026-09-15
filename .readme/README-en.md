@@ -495,6 +495,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
 * `Fix` Search fields could keep the default blue cursor instead of the theme-appropriate foreground color, while their hints could remain in the fallback language instead of following the current app language
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
+* `Fix` Home drawer switches could be clipped and bottom action buttons hidden on narrow screens such as 360x640 or after resizing the window
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area

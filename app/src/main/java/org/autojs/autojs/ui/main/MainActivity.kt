@@ -15,6 +15,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.forEach
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
@@ -69,6 +70,7 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
+import kotlin.math.roundToInt
 
 /**
  * Transformed by SuperMonster003 on May 11, 2023.
@@ -165,6 +167,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         ActivityMainBinding.inflate(layoutInflater).also {
             val drawerLayout = it.drawerLayout
             setContentView(it.root)
+            setUpDrawerWidth(it)
             mViewPager = it.viewpager
             mFab = it.fab.apply { excludeFloatingActionButtonFromBottomNavigationBar() }
             mTab = it.tab
@@ -228,6 +231,26 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private fun registerBackPressHandlers(drawerLayout: DrawerLayout) {
         mBackPressedObserver.registerHandler(DrawerAutoClose(drawerLayout, Gravity.START))
         mBackPressedObserver.registerHandler(DoublePressExit(this, R.string.text_press_again_to_exit))
+    }
+
+    private fun setUpDrawerWidth(binding: ActivityMainBinding) {
+        val drawer = binding.fragmentDrawer
+        binding.drawerLayout.addOnLayoutChangeListener { layout, left, _, right, _, _, _, _, _ ->
+            val availableWidth = right - left - layout.paddingLeft - layout.paddingRight
+            if (availableWidth > 0) {
+                val targetWidth = (288f * layout.resources.displayMetrics.density).coerceIn(
+                    availableWidth * 0.4f,
+                    availableWidth * 0.9f,
+                ).roundToInt()
+                // Size the direct drawer child so its content is not clipped by DrawerLayout's
+                // minimum margin for wrap_content drawers. Recalculate when the window resizes.
+                // zh-CN: 设置抽屉直接子视图的宽度, 避免其内容被 DrawerLayout 对 wrap_content 抽屉的
+                // 最小边距裁切, 并在窗口尺寸变化时重新计算.
+                if (drawer.layoutParams.width != targetWidth) {
+                    drawer.updateLayoutParams { width = targetWidth }
+                }
+            }
+        }
     }
 
     private fun setUpToolbar(drawerLayout: DrawerLayout) {

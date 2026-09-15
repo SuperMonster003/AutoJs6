@@ -333,6 +333,7 @@
 * `Correction` La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille
 * `Correction` Les champs de recherche pouvaient conserver le curseur bleu par défaut au lieu de la couleur de premier plan adaptée au thème, et leurs indications pouvaient rester dans la langue de repli au lieu de suivre la langue actuelle de l'application
 * `Correction` La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite
+* `Correction` Les interrupteurs du tiroir d'accueil pouvaient être tronqués et les boutons inférieurs masqués sur les écrans étroits comme 360x640 ou après le redimensionnement de la fenêtre
 * `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_
 * `Correction` La boîte de dialogue "Exécuter le script" du bouton flottant pouvait ne pas être restaurée après sa réduction (tentative de correction) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Correction` L'arrière-plan de l'écran de démarrage ne s'étendait pas dans la zone de découpe du bord court

@@ -88,7 +88,7 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_drawer"
         android:name="org.autojs.autojs.ui.main.drawer.DrawerFragment"
-        android:layout_width="wrap_content"
+        android:layout_width="288dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"

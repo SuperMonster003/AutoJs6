@@ -70,7 +70,6 @@ import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
 import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.util.ActivityLaunchOptions
-import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -88,7 +87,6 @@ import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
 import rikka.shizuku.Shizuku
 import java.lang.ref.WeakReference
 import java.util.Locale
-import kotlin.math.roundToInt
 import org.autojs.autojs.util.App as UtilApp
 
 /**
@@ -748,7 +746,6 @@ open class DrawerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mDrawerMenu = binding.drawerMenu
-        configureDrawerWidth()
         initMenuItems()
         initMenuItemStates()
         setupListeners()
@@ -831,15 +828,6 @@ open class DrawerFragment : Fragment() {
             }
 
         drawerStatsDisposables.add(historyDisposable)
-    }
-
-    private fun configureDrawerWidth() {
-        val screenWidthDp = resources.configuration.screenWidthDp
-        val targetWidthPx = 288f.coerceIn(
-            screenWidthDp * 0.4f,
-            screenWidthDp * 0.9f,
-        ).let { DisplayUtils.dpToPx(it) }.roundToInt()
-        binding.drawerMenuContainer.layoutParams.width = targetWidthPx
     }
 
     private fun setupListeners() {
