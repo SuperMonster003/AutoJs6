@@ -338,6 +338,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 终端: 由 Node.js 运行时插件 (1.5.0+) 提供 node, npm, npx, corepack, yarn 与 pnpm, npm / corepack 资产经 SHA-256 校验并按插件构建安装一次, 每次会话重建命令链接, npm 缓存与全局安装保持在终端前缀目录内, 并新增 "终端" 设置组 (npm 镜像源: npmjs.org / npmmirror.com / 自定义 https URL, 忽略生命周期脚本, 清除终端数据)
 * `新增` `images.matchFeatures` 的两个参数均可直接传入图片或路径并即时检测特征; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 选项, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 属性, `ImageFeatures` 新增 `count` 和 `method` 属性
 * `新增` 官方插件无障碍伴生契约: 发布 `follow-host` 服务策略的伴生插件随 AutoJs6 无障碍服务一同启用和禁用, 使用已配置的 root, 安全设置或 Shizuku 策略, 并接收宿主服务状态广播
+* `新增` Bun Runtime 插件项目执行: 位于含 `project.json` 或 `package.json` 目录下的脚本会打成有界工作区归档 (最多 16384 条目与 64 MiB, 只收普通文件与目录) 交给声明了 `SUPPORTS_WORKSPACE_ARCHIVE` 的插件, 项目内的相对导入可以解析; 入口文件使用编辑器当前源码, 符号链接与特殊文件直接中止运行, 裸脚本或旧版插件保持单源码路径
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
 * `修复` 宿主与打包应用发行版的 HTTP 请求可能被网络安全配置意外拦截, 明文策略现与调试版保持一致, 并保留 GitHub 资源域的 HTTPS 限制
 * `修复` 后台 APK 安装被系统限制启动确认页时无法继续的问题; 安装状态按会话保存, 支持通知及返回应用后继续确认, 通知被拒绝或进程重建后仍可恢复待确认事项

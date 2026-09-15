@@ -19,6 +19,7 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.TypeScriptStringSource
+import org.autojs.plugin.bun.runtime.api.BunPluginCapabilityKeys
 import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 import org.autojs.plugin.bun.runtime.api.IBunRuntimeCallback
 import java.io.ByteArrayOutputStream
@@ -69,13 +70,13 @@ class BunPluginScriptEngine(
         check(activeExecutionId.compareAndSet(null, executionId)) { "Bun engine already has an active execution" }
         val timeoutMillis = executionTimeoutMillis()
         val callback = OutputCallback(executionId, selection.providerUid)
-        var sourceFile: File? = null
+        var payloadFile: File? = null
         try {
-            val snapshot = createSourceSnapshot(scriptSource)
-            sourceFile = snapshot
+            val payload = createPayload(scriptSource, selection, executionId, timeoutMillis)
+            payloadFile = payload.file
             if (stopped.get() || isDestroyed) throw ScriptInterruptedException()
-            ParcelFileDescriptor.open(snapshot, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
-                check(snapshot.delete()) { "Unable to unlink the Bun source snapshot before dispatch" }
+            ParcelFileDescriptor.open(payload.file, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                check(payload.file.delete()) { "Unable to unlink the Bun payload before dispatch" }
                 if (stopped.get() || isDestroyed) throw ScriptInterruptedException()
                 val result = try {
                     runRpc(
@@ -86,7 +87,7 @@ class BunPluginScriptEngine(
                         BunRuntimePluginClient.runScript(
                             context = appContext,
                             selection = selection,
-                            request = buildRequest(scriptSource, executionId, timeoutMillis),
+                            request = payload.request,
                             source = descriptor,
                             callback = callback,
                         )
@@ -109,11 +110,63 @@ class BunPluginScriptEngine(
         } finally {
             callback.close()
             activeExecutionId.compareAndSet(executionId, null)
-            sourceFile?.takeIf(File::exists)?.let { stale ->
-                if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun source snapshot: ${stale.name}")
+            payloadFile?.takeIf(File::exists)?.let { stale ->
+                if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun payload: ${stale.name}")
             }
         }
     }
+
+    /** One dispatchable unit: the file handed to the plugin and the request that describes it. */
+    private class Payload(val file: File, val request: Bundle)
+
+    /**
+     * A script inside a declared project (nearest `project.json` or `package.json`) is sent as a
+     * bounded workspace archive when the plugin advertises the capability; every other source keeps
+     * the single-file snapshot, so older plugins and bare scripts behave exactly as before.
+     */
+    private fun createPayload(
+        source: JavaScriptSource,
+        selection: BunRuntimePluginClient.Selection,
+        executionId: String,
+        timeoutMillis: Long,
+    ): Payload {
+        val request = buildRequest(source, executionId, timeoutMillis)
+        val fileSource = source as? JavaScriptFileSource
+        val projectRoot = fileSource
+            ?.takeIf { supportsWorkspaceArchive(selection) }
+            ?.let { BunPluginWorkspaceArchive.findProjectRoot(semanticFile(it)) }
+        if (fileSource == null || projectRoot == null) {
+            return Payload(createSourceSnapshot(source), request)
+        }
+        val bytes = cleartextSource(source)
+        try {
+            require(bytes.size <= BunRuntimeContract.MAX_SOURCE_BYTES) {
+                "Bun source exceeds ${BunRuntimeContract.MAX_SOURCE_BYTES} bytes"
+            }
+            val directory = sourceSnapshotDirectory()
+            check(directory.isDirectory || directory.mkdirs()) { "Unable to create the Bun snapshot directory" }
+            val archive = BunPluginWorkspaceArchive.create(
+                root = projectRoot,
+                entryFile = semanticFile(fileSource),
+                entryBytes = bytes,
+                directory = directory,
+            )
+            request.putInt(BunRuntimeContract.KEY_WORKSPACE_ARCHIVE_VERSION, BunRuntimeContract.WORKSPACE_ARCHIVE_VERSION)
+            request.putString(BunRuntimeContract.KEY_WORKSPACE_ENTRY_POINT, archive.entryPoint)
+            request.putInt(BunRuntimeContract.KEY_WORKSPACE_MAX_ENTRIES, BunRuntimeContract.MAX_WORKSPACE_ENTRIES)
+            request.putLong(BunRuntimeContract.KEY_WORKSPACE_MAX_BYTES, BunRuntimeContract.MAX_WORKSPACE_BYTES)
+            return Payload(archive.file, request)
+        } finally {
+            bytes.fill(0)
+        }
+    }
+
+    private fun supportsWorkspaceArchive(selection: BunRuntimePluginClient.Selection): Boolean =
+        selection.discovered.pluginInfo?.capabilities
+            ?.getBoolean(BunPluginCapabilityKeys.SUPPORTS_WORKSPACE_ARCHIVE, false) == true
+
+    private fun semanticFile(source: JavaScriptFileSource): File =
+        source.overriddenFullPath?.takeIf(String::isNotBlank)?.let(::File) ?: source.file
 
     override fun forceStop() {
         stopped.set(true)

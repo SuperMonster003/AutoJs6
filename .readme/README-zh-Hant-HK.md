@@ -362,6 +362,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 終端: 由 Node.js 執行階段外掛 (1.5.0+) 提供 node, npm, npx, corepack, yarn 與 pnpm, npm / corepack 資產經 SHA-256 校驗並按外掛構建安裝一次, 每次工作階段重建命令連結, npm 快取與全域安裝保持在終端前綴目錄內, 並新增 "終端" 設定組 (npm 鏡像源: npmjs.org / npmmirror.com / 自訂 https URL, 忽略生命週期指令碼, 清除終端資料)
 * `新增` `images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時檢測特徵; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 屬性, `ImageFeatures` 新增 `count` 和 `method` 屬性
 * `新增` 官方插件無障礙伴生契約: 發佈 `follow-host` 服務策略的伴生插件隨 AutoJs6 無障礙服務一同啟用及停用, 使用已配置的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播
+* `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區歸檔 (最多 16384 條目及 64 MiB, 只收普通檔案及目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 入口檔案使用編輯器目前原始碼, 符號連結及特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能令後續請求繼續跳過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網絡安全配置意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制
 * `修復` 背景 APK 安裝被系統限制啟動確認頁時無法繼續的問題; 安裝狀態按工作階段儲存, 支援通知及返回應用程式後繼續確認, 通知遭拒或程序重建後仍可恢復待確認事項

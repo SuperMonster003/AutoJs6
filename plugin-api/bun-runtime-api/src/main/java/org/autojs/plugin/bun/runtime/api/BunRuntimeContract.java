@@ -23,6 +23,12 @@ public final class BunRuntimeContract {
     public static final int MAX_ENVIRONMENT_COUNT = 256;
     public static final int MAX_ENVIRONMENT_BYTES = 128 * 1024;
 
+    /** Format version of the optional multi-file workspace archive; absent request key means a single source. */
+    public static final int WORKSPACE_ARCHIVE_VERSION = 1;
+    public static final int MAX_WORKSPACE_ENTRIES = 16_384;
+    /** Uncompressed byte limit of one workspace archive; each file still respects MAX_SOURCE_BYTES. */
+    public static final long MAX_WORKSPACE_BYTES = 64L * 1024L * 1024L;
+
     public static final String KEY_PROTOCOL_VERSION = "protocolVersion";
     public static final String KEY_EXECUTION_ID = "executionId";
     public static final String KEY_SOURCE_NAME = "sourceName";
@@ -30,6 +36,10 @@ public final class BunRuntimeContract {
     public static final String KEY_ENVIRONMENT = "environment";
     public static final String KEY_TIMEOUT_MILLIS = "timeoutMillis";
     public static final String KEY_OUTPUT_BYTE_LIMIT = "outputByteLimit";
+    public static final String KEY_WORKSPACE_ARCHIVE_VERSION = "workspaceArchiveVersion";
+    public static final String KEY_WORKSPACE_ENTRY_POINT = "workspaceEntryPoint";
+    public static final String KEY_WORKSPACE_MAX_ENTRIES = "workspaceMaxEntries";
+    public static final String KEY_WORKSPACE_MAX_BYTES = "workspaceMaxBytes";
 
     public static final String KEY_EVENT_TYPE = "eventType";
     public static final String KEY_TEXT = "text";
@@ -48,6 +58,8 @@ public final class BunRuntimeContract {
     public static final String KEY_DURATION_MILLIS = "durationMillis";
     public static final String KEY_CANCELLED = "cancelled";
     public static final String KEY_TIMED_OUT = "timedOut";
+    public static final String KEY_WORKSPACE_FILE_COUNT = "workspaceFileCount";
+    public static final String KEY_WORKSPACE_BYTES = "workspaceBytes";
 
     public static final String KEY_RUNTIME_READY = "runtimeReady";
     public static final String KEY_RUNTIME_VERSION = "runtimeVersion";
