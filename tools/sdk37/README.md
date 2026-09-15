@@ -737,6 +737,15 @@ storage declarations. Runtime DEX and resources come from the supplied template.
 This validates the inrt runtime; it does not exercise the APK Builder plugin,
 encryption, RuntimeKit publication, or a production user APK.
 
+`--key` signs with a disposable test key. `--signing-properties sign.properties`
+signs with the host's own key instead: it reads `storeFile` (resolved beside the
+properties file, then under `app/`), `keyAlias` and the passwords, and hands the
+passwords to apksigner through environment variables so they never appear on a
+command line or in a log. Use it when the fixtures must coexist with an installed
+debug host, because inrt declares the signature-level `org.autojs.permission.PLUGIN`
+permission shared with the host and a fixture with another key fails to install
+next to it. `fixtures.json` records `signingSource` and the signer digest.
+
 ```powershell
 python tools/sdk37/build_inrt_storage_fixtures.py `
   --template app/build/outputs/apk/inrt/debug/inrt-v6.8.0-universal.apk `
@@ -821,3 +830,41 @@ grants and file I/O before updating. `preserveLegacyExternalStorage`, real boot,
 and the complete user-APK migration matrix remain separate acceptance items. See the
 [P2.16 evidence](../../docs/dev/evidence/android-sdk-37-inrt-storage-20260914.md) and
 [Samsung checks](../../docs/dev/evidence/android-sdk-37-inrt-storage-samsung-20260914.md).
+
+## Packaged examples (Roadmap P3.4)
+
+`run_packaged_examples.py` drives the packaging chain end to end: the installed
+debug host (targetSdk 37) with its test APK, the APK Builder Template plugin built
+from the current Runtime Kit, and three example projects kept under
+`app/src/androidTest/assets/sdk37/packaged` (`a11y`: own accessibility service,
+window events; `ui`: UI mode layout, edge to edge, predictive back; `timer`:
+countdown task plus TTS). Every example also runs the shared checks in
+`common.js` (target 37, package visibility, local network declaration,
+`POST_NOTIFICATIONS` runtime state, exact-alarm capability, `runtime.loadDex`,
+broadcast round trip) and writes a JSON receipt to its external files directory.
+
+```powershell
+$env:MSYS_NO_PATHCONV = 1
+python tools/sdk37/run_packaged_examples.py `
+  --adb E:/.android/sdk/platform-tools/adb.exe --serial emulator-5600 `
+  --sdk-root E:/.android/sdk --output build/sdk37-p33/examples-avd371
+```
+
+The runner checks that the plugin's `assets/runtime-kit/runtime-kit.json` names the
+installed host's versionCode, runs the opt-in producer test
+(`Sdk37PackagedExamplesProducerDeviceTest`, `-e autojs.sdk37.produceExamples true`)
+which packages the examples through `RemoteApkBuildClient.buildBlocking` exactly
+as `BuildActivity` does (developer switch on, preferred plugin package), pulls the
+signed APKs, checks their badging, installs each one, launches it and waits for
+the receipt. For `a11y` it enables the example's own accessibility service and
+restores the original service list afterwards; for `ui` it sends BACK and expects
+the script callback plus activity exit; for `timer` it waits for the timed script's
+receipt. `--skip-produce` reuses APKs already in `--output`, `--examples` selects a
+subset, `--keep-installed` leaves the apps for inspection. Output: `examples.json`
+and `examples.md`; exit status 1 when any step fails. Host-side self-checks:
+`python tools/sdk37/test_packaged_examples.py`.
+
+The host at HEAD admits a plugin only when it advertises remote build
+(`supportsRemoteBuild`, protocol 3); build the plugin with
+`-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true` and
+`-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<kit>`.
