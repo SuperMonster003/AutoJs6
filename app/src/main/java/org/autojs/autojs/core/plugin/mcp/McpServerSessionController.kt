@@ -29,7 +29,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * The controller opens the server on a dedicated binding lease, links a death recipient on the
  * session binder, and, when the plugin process dies while the user still wants the server, rebinds
- * on the bounded [McpRebindPolicy] schedule. A user-initiated [close] suppresses rebinding.
+ * on the bounded [McpRebindPolicy] schedule. A user-initiated [close] suppresses rebinding, and so
+ * does a plugin that is no longer available after its death ([pluginAvailable] is false once the
+ * user force-stopped, disabled or uninstalled it): an explicit rebind would start a force-stopped
+ * package again against the user's decision (roadmap P6 lifecycle matrix).
  */
 class McpServerSessionController(
     context: Context,
@@ -38,6 +41,9 @@ class McpServerSessionController(
         McpHostCapabilityBroker(context, sessionId, McpCapabilityGrant.DEFAULT)
     },
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val pluginAvailable: () -> Boolean = {
+        McpServerPluginInspector.inspect(context.applicationContext).state == McpServerUiState.AVAILABLE
+    },
 ) {
 
     interface Listener {
@@ -199,9 +205,30 @@ class McpServerSessionController(
                     publish(McpServerStatus.stopped(McpServerContract.REASON_PLUGIN_DIED))
                     return@withLock
                 }
+                if (!isPluginAvailable()) {
+                    stopForUnavailablePluginLocked()
+                    return@withLock
+                }
                 scheduleRebindLocked(current.config)
             }
         }
+    }
+
+    private fun isPluginAvailable(): Boolean = runCatching { pluginAvailable() }.getOrDefault(true)
+
+    /** The plugin package is stopped, disabled or gone: the session ends instead of being rebound. */
+    private fun stopForUnavailablePluginLocked() {
+        Log.w(TAG, "MCP Server is no longer available after its process died; not rebinding")
+        closedByUser.set(true)
+        rebindAttempt = 0
+        rebindJob?.cancel()
+        rebindJob = null
+        publish(
+            McpServerStatus.stopped(
+                McpServerContract.REASON_PLUGIN_DIED,
+                "MCP Server was stopped outside AutoJs6; turn the switch on to activate it again",
+            ),
+        )
     }
 
     private fun scheduleRebindLocked(config: McpServerConfig) {
@@ -230,6 +257,10 @@ class McpServerSessionController(
             delay(delayMs)
             mutex.withLock {
                 if (closedByUser.get() || active != null) {
+                    return@withLock
+                }
+                if (!isPluginAvailable()) {
+                    stopForUnavailablePluginLocked()
                     return@withLock
                 }
                 val target = desiredConfig ?: config
