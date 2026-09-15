@@ -1311,7 +1311,6 @@ private class ProcessAiPluginAskRunner(
                 } finally {
                     releaseAdmission()
                 }
-                Unit
             }
             if (currentRemote == null && exactBinding == null) {
                 action()

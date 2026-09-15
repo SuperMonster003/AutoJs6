@@ -515,7 +515,7 @@ class TerminalActivity : BaseActivity() {
         val view = binding.terminal
         view.requestFocus()
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-            ?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+            ?.showSoftInput(view, 0)
     }
 
     private fun showTextSizeDialog() {

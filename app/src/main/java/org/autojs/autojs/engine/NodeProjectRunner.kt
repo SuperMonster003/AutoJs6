@@ -534,7 +534,7 @@ object NodeProjectRunner {
 
         val json = JSONObject(packageJson.readText(StandardCharsets.UTF_8))
         auditPackageFeatureFlagMetadata(packageJson, json)
-        val binValue = json.opt("bin")
+        val binValue: Any? = json.opt("bin")
         val target = when (binValue) {
             null, JSONObject.NULL -> throw IllegalArgumentException("Missing package bin in ${packageJson.absolutePath}")
             is String -> binValue
@@ -1091,7 +1091,8 @@ object NodeProjectRunner {
             return false
         }
         val json = runCatching { JSONObject(packageJson.readText(StandardCharsets.UTF_8)) }.getOrNull() ?: return false
-        return when (val binValue = json.opt("bin")) {
+        val binValue: Any? = json.opt("bin")
+        return when (binValue) {
             is JSONObject -> binValue.has(binName)
             is String -> {
                 val packageName = json.optString("name")

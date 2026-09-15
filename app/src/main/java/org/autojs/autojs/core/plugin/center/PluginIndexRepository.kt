@@ -884,7 +884,8 @@ class PluginIndexRepository {
             ?.let { localized -> selectStringFromObject(localized, candidates) }
             ?.let { return it }
 
-        return when (val raw = obj.opt(scalarKey)) {
+        val raw: Any? = obj.opt(scalarKey)
+        return when (raw) {
             is JSONObject -> selectStringFromObject(raw, candidates)
             else -> raw.asJsonStringOrNull()
         }

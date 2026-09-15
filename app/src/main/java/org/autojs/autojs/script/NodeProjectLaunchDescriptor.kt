@@ -171,7 +171,7 @@ object NodeProjectLaunchDescriptor {
         if (!has(key) || isNull(key)) {
             return null
         }
-        val value = opt(key)
+        val value: Any? = opt(key)
         val timeoutMs = when (value) {
             is Number -> value.toLong()
             is String -> value.toLongOrNull()

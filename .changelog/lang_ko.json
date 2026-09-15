@@ -472,6 +472,7 @@
         "프로젝트 문자열 리소스의 다국어 번역 범위/파일 분류/이름순 정렬/ASCII 문장 부호 통일",
         "APK 언어 리소스를 프로젝트에서 지원하는 10개 로캘 구성으로 제한하여 패키지 크기 감소",
         "빌드 시스템에서 Kotlin/KSP/AGP/R8 호환 버전 동적 선택을 지원하고 Gradle 시작 메모리 부담 감소",
+        "Java의 nullable 반환값, 불필요한 표현식 및 Android 지원 중단 API로 인한 Kotlin 컴파일 경고를 제거하고 이전 Kotlin 버전과의 호환성 유지",
         "미출시 공식 AI 플러그인을 3-Stone AI로 확정하고 프로세스 간 계약을 중립적인 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 새 Binder descriptor, AP schema domain 및 이름이 변경된 conformance fixture로 완전히 교체; 식별자 alias를 유지하지 않음",
         "AI Provider V2 페이지형 target discovery를 직접 구현: 각 target은 안정적인 target/provider/model 식별자, locality, 구성 및 가용 상태, capabilities, limits, controls, 허용된 HTTPS origins를 포함; credential byte가 Binder를 통과하지 않는 plugin-managed credential과 REMOTE/HYBRID 실행을 지원하며 교체된 wire alias는 유지하지 않음",
         "파일 관리자 디렉터리 새로 고침이 최소 목록 차이만 적용하여 변경되지 않은 행은 다시 바인딩하지 않고 제자리 새로 고침 시 현재 스크롤 위치를 유지",

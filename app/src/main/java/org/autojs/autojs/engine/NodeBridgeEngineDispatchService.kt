@@ -178,14 +178,16 @@ class NodeBridgeEngineDispatchService : Service() {
     private class WaitOptions(val captureConsole: Boolean, val waitMs: Long)
 
     private fun resolveWaitOptions(options: JSONObject): WaitOptions? {
-        val captureConsole = when (val raw = options.opt("captureConsole")) {
+        val rawCaptureConsole: Any? = options.opt("captureConsole")
+        val captureConsole = when (rawCaptureConsole) {
             null, JSONObject.NULL -> false
-            is Boolean -> raw
+            is Boolean -> rawCaptureConsole
             else -> return null
         }
-        val waitMs = when (val raw = options.opt("waitMs")) {
+        val rawWaitMs: Any? = options.opt("waitMs")
+        val waitMs = when (rawWaitMs) {
             null, JSONObject.NULL -> if (captureConsole) options.optLong("timeoutMs", 0L).coerceIn(0L, MAX_WAIT_MS) else 0L
-            is Number -> raw.toLong().takeIf { it in 0L..MAX_WAIT_MS } ?: return null
+            is Number -> rawWaitMs.toLong().takeIf { it in 0L..MAX_WAIT_MS } ?: return null
             else -> return null
         }
         return WaitOptions(captureConsole, waitMs)

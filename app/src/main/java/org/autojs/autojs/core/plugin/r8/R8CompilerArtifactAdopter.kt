@@ -63,7 +63,7 @@ internal object R8CompilerArtifactFileValidation {
     ) {
         R8CompilerValidation.validateResultAgainst(verified.result, request, capabilities)
         FileInputStream(verified.outputBundleFile).use { input ->
-            R8ArtifactBundleCodec.read(input, verified.result, request, capabilities) { _, _ -> Unit }
+            R8ArtifactBundleCodec.read(input, verified.result, request, capabilities) { _, _ -> }
         }
         val identities = verified.result.artifactIdentities.associateBy(R8ArtifactIdentity::role)
         R8ArtifactRole.values().forEach { role ->

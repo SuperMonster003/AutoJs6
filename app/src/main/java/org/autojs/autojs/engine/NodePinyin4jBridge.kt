@@ -134,7 +134,8 @@ internal object NodePinyin4jBridge {
     private fun JSONObject.optionalScalarString(vararg names: String): String? {
         names.forEach { name ->
             if (!has(name) || isNull(name)) return@forEach
-            return when (val value = opt(name)) {
+            val value: Any? = opt(name)
+            return when (value) {
                 is String -> value
                 is Boolean -> value.toString()
                 is Number -> value.toDouble().also {

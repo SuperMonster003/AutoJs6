@@ -219,7 +219,7 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
     }
 
     private fun isSymbolicLink(file: File): Boolean = if (legacyFileApi) {
-        val entry = File(file.parentFile.canonicalFile, file.name)
+        val entry = file.parentFile?.let { File(it.canonicalFile, file.name) } ?: file
         entry.canonicalFile != entry.absoluteFile
     } else Files.isSymbolicLink(file.toPath())
 

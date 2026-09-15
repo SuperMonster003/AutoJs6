@@ -133,7 +133,6 @@ internal class R8RetraceHostDispatcher(
             } catch (error: VirtualMachineError) {
                 throw error
             } catch (_: Exception) {
-                Unit
             } finally {
                 active.set(false)
             }

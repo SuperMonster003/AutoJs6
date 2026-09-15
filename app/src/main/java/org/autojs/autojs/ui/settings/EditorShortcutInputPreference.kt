@@ -24,7 +24,6 @@ class EditorShortcutInputPreference : MaterialPreference {
         }
         Intent(prefContext, SymbolsSettingsActivity::class.java).startSafely(prefContext, true) {
             ViewUtils.showToast(prefContext, it.message, true)
-            Unit
         }
     }
 }

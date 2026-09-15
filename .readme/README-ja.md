@@ -635,6 +635,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` プロジェクトの文字列リソースについて, 多言語翻訳を網羅しファイル分類/名前順の並べ替え/ASCII 句読記号を統一
 * `改善` APK の言語リソースをプロジェクトが対応する 10 個のロケール設定のみに制限, パッケージサイズを削減
 * `改善` ビルドシステムが Kotlin/KSP/AGP/R8 の互換バージョン動的選択に対応し Gradle 起動時のメモリ負荷を削減
+* `改善` Java の null 許容戻り値, 冗長な式, Android の非推奨 API による Kotlin コンパイル警告を解消し, 旧バージョンの Kotlin との互換性を維持
 * `改善` 未公開の公式 AI プラグインを 3-Stone AI として確定し, プロセス間契約を中立な `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新しい Binder descriptor, AP schema domain, 改名済み conformance fixture で完全に置換; 識別子 alias は保持しない
 * `改善` AI Provider V2 ページ分割ターゲット探索を直接実装: 各ターゲットは安定した target/provider/model 識別子, locality, 設定・可用状態, capabilities, limits, controls, 許可済み HTTPS origins を保持; REMOTE/HYBRID 実行とプラグイン管理認証情報を Binder に認証情報 byte を渡さずにサポートし, 置換済み wire alias は保持しない
 * `改善` ファイルマネージャのディレクトリ更新は最小限のリスト差分を適用し, 変更のない行は再バインドせず, その場での更新時に現在のスクロール位置を維持

@@ -697,6 +697,9 @@ object OcrPluginHost {
         val formatName = extras?.getString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT)?.trim()?.lowercase().orEmpty()
         val quality = extras?.getInt(PaddleOcrOptionExtraKeys.IMAGE_QUALITY, 100) ?: 100
         val resolvedQuality = quality.coerceIn(1, 100)
+        // WEBP is required on Android versions before API 30.
+        // zh-CN: API 30 之前的 Android 版本仍需使用 WEBP.
+        @Suppress("DEPRECATION")
         val resolvedFormat = when (formatName) {
             "png" -> CompressFormat.PNG
             "jpg", "jpeg" -> CompressFormat.JPEG

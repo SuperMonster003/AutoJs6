@@ -117,7 +117,8 @@ class NodeInfoView : RecyclerView {
     }
 
     private fun formatValue(field: Field, nodeInfo: NodeInfo): String = try {
-        when (val value = field.get(nodeInfo)) {
+        val value: Any? = field.get(nodeInfo)
+        when (value) {
             is List<*> -> when (field.name) {
                 "actionNames" -> value.joinToString("\n") { it.toString().replace("^ACTION_".toRegex(), "") }
                 else -> value.joinToString("\n")

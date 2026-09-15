@@ -452,6 +452,7 @@
 * `优化` 项目字符串资源完成多语言翻译同步/文件分类/名称排序及 ASCII 标点规范化
 * `优化` 限制 APK 语言资源仅保留项目支持的 10 种配置, 降低安装包体积
 * `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
+* `优化` 消除 Java 可空返回值, 冗余表达式及 Android 弃用 API 引发的 Kotlin 编译警告, 保持旧版 Kotlin 兼容性
 * `优化` 将未发布的官方 AI 插件定名为 3-Stone AI, 同时以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述符, AP schema 域及重命名的一致性测试夹具完全替换跨进程合约; 不保留身份别名
 * `优化` 直接实现 AI Provider V2 分页目标发现: 每项目标携带稳定的 target/provider/model 身份, locality, 配置与可用状态, capabilities, limits, controls 及允许的 HTTPS origins; 支持 REMOTE/HYBRID 执行和插件自管凭据, 凭据字节不经过 Binder, 且不保留被取代的 wire 别名
 * `优化` 文件管理器目录刷新采用最小差量更新, 未变化的行不再重新绑定, 原地刷新保持当前滚动位置

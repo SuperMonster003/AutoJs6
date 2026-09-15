@@ -472,6 +472,7 @@
         "專案字串資源完成多語言翻譯同步/檔案分類/名稱排序及 ASCII 標點規範化",
         "限制 APK 語言資源僅保留專案支援的 10 種設定, 降低安裝套件體積",
         "建置系統支援動態匹配 Kotlin/KSP/AGP/R8 相容版本並降低 Gradle 啟動記憶體壓力",
+        "消除 Java 可空回傳值, 冗餘運算式及 Android 已棄用 API 引發的 Kotlin 編譯警告, 保持舊版 Kotlin 相容性",
         "將尚未發布的官方 AI 外掛定名為 3-Stone AI, 同時以中性 `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, 新 Binder 描述元, AP schema 域及重新命名的符合性測試夾具完全取代跨處理程序合約; 不保留識別別名",
         "直接實作 AI Provider V2 分頁目標探索: 每個目標帶有穩定 target/provider/model 識別, locality, 設定與可用狀態, capabilities, limits, controls 及允許的 HTTPS origins; 支援 REMOTE/HYBRID 執行與外掛自管憑證, 憑證位元組不經 Binder, 且不保留被取代的 wire 別名",
         "檔案管理器目錄重新整理採用最小差量更新, 未變化的列不再重新繫結, 原地重新整理保持目前捲動位置",

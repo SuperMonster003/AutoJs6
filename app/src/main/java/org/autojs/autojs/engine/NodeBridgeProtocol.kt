@@ -216,7 +216,7 @@ data class NodeBridgeRequest(
             if (!value.has("timeoutMs") || value.isNull("timeoutMs")) {
                 return DEFAULT_TIMEOUT_MS
             }
-            val timeoutValue = value.opt("timeoutMs")
+            val timeoutValue: Any? = value.opt("timeoutMs")
             val timeoutMs = when (timeoutValue) {
                 is Int -> timeoutValue.toLong()
                 is Long -> timeoutValue
@@ -2048,6 +2048,9 @@ class AndroidNodeBridgeCapabilityProvider(
         val file = resolveAndroidFile(args.optString(1))
             ?: throw SecurityException("Image output path must be a non-empty file path without NUL bytes.")
         val options = args.optJSONObject(2) ?: JSONObject()
+        // Preserve legacy WEBP behavior, including lossless output at quality 100 on API 29+.
+        // zh-CN: 保留旧有 WEBP 行为, 包括 API 29+ 在 quality 为 100 时输出无损格式.
+        @Suppress("DEPRECATION")
         val format = when (options.optString("format", "png").lowercase()) {
             "png" -> Bitmap.CompressFormat.PNG
             "jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
@@ -2444,10 +2447,14 @@ class AndroidNodeBridgeCapabilityProvider(
                 "get" -> {
                     val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
                     val parameter = args.optString(2, "")
-                    val options = args.opt(3).takeUnless { it == JSONObject.NULL }
-                    require(options == null || options is JSONObject) { "MediaInfo query options must be an object" }
+                    val rawOptions: Any? = args.opt(3).takeUnless { it == JSONObject.NULL }
+                    val options = when (rawOptions) {
+                        null -> null
+                        is JSONObject -> rawOptions
+                        else -> throw IllegalArgumentException("MediaInfo query options must be an object")
+                    }
                     val query = MediainfoQueryOptions.parse(
-                        (options as? JSONObject)?.opt("streamNumber").takeUnless { it == JSONObject.NULL },
+                        options?.opt("streamNumber").takeUnless { it == JSONObject.NULL },
                         options?.opt("infoKind").takeUnless { it == JSONObject.NULL },
                     )
                     val value = runBlocking { MediainfoPluginHost.get(appContext, file, streamKind, query.streamNumber, parameter, query.infoKind) }
@@ -2528,7 +2535,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun mediainfoSnapshot(requestedPath: String, file: File, options: JSONObject): JSONObject {
         val includeInform = options.optBoolean("includeInform", true)
         val includeSections = options.optBoolean("includeSections", true)
-        val requestedSchema = when (val rawSchema = options.opt("schema")) {
+        val rawSchema: Any? = options.opt("schema")
+        val requestedSchema = when (rawSchema) {
             null, JSONObject.NULL -> null
             is String -> rawSchema
             else -> throw IllegalArgumentException("MediaInfo snapshot schema must be a string")
@@ -4025,7 +4033,7 @@ class AndroidNodeBridgeCapabilityProvider(
         if (payload == null || !payload.has("maxTransactionAgeMs") || payload.isNull("maxTransactionAgeMs")) {
             return 0L
         }
-        val value = payload.opt("maxTransactionAgeMs")
+        val value: Any? = payload.opt("maxTransactionAgeMs")
         return when (value) {
             is Int -> value.toLong()
             is Long -> value
@@ -5352,7 +5360,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 else -> null
             }
         }
-        val value = options.opt("flags")
+        val value: Any? = options.opt("flags")
         return when (value) {
             is JSONArray -> {
                 var flags = 0
@@ -5382,7 +5390,8 @@ class AndroidNodeBridgeCapabilityProvider(
         val keys = extras.keys()
         while (keys.hasNext()) {
             val key = keys.next()
-            when (val value = extras.opt(key)) {
+            val value: Any? = extras.opt(key)
+            when (value) {
                 is Boolean -> intent.putExtra(key, value)
                 is Int -> intent.putExtra(key, value)
                 is Long -> intent.putExtra(key, value)
@@ -6112,7 +6121,7 @@ private data class ControlledWorkTaskDescriptor(
             if (!payload.has(name) || payload.isNull(name)) {
                 return fallback
             }
-            val value = payload.opt(name)
+            val value: Any? = payload.opt(name)
             val parsed = when (value) {
                 is Int -> value.toLong()
                 is Long -> value
@@ -7240,7 +7249,7 @@ private data class ControlledOcrRegion(
             if (!options.has("region") || options.isNull("region")) {
                 return null
             }
-            val value = options.opt("region")
+            val value: Any? = options.opt("region")
             return when (value) {
                 is JSONObject -> ControlledOcrRegion(
                     x = finiteInt(value.opt("x"), "region.x", apiName),
@@ -7418,7 +7427,7 @@ private data class ControlledBarcodeOptions(
             if (!options.has("maxResults") || options.isNull("maxResults")) {
                 return MAX_RESULTS
             }
-            val value = options.opt("maxResults")
+            val value: Any? = options.opt("maxResults")
             val number = when (value) {
                 is Int -> value.toDouble()
                 is Long -> value.toDouble()

@@ -680,7 +680,7 @@ object NodeBridgePermissionManifest {
             metadata.sources += "$sourceName.executionMode"
         }
         if (json.has("network") && !json.isNull("network")) {
-            val network = json.opt("network")
+            val network: Any? = json.opt("network")
             when (network) {
                 is Boolean -> {
                     metadata.networkRequested = metadata.networkRequested || network

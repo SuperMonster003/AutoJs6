@@ -11,9 +11,12 @@ internal object NodeBridgeDeviceActions {
 
     fun listApps(context: Context, options: JSONObject?): JSONObject {
         require(options == null || options.keys().asSequence().all { it == "query" }) { "unknown app list option" }
-        val rawQuery = options?.opt("query")
-        require(rawQuery == null || rawQuery is String) { "query must be a string" }
-        val query = (rawQuery as? String).orEmpty()
+        val rawQuery: Any? = options?.opt("query")
+        val query = when (rawQuery) {
+            null -> ""
+            is String -> rawQuery
+            else -> throw IllegalArgumentException("query must be a string")
+        }
         require(query.toByteArray(Charsets.UTF_8).size <= 512) { "query exceeds 512 bytes" }
         val manager = context.packageManager
         val matches = manager.getInstalledApplications(0).sortedBy { it.packageName }.mapNotNull { app ->

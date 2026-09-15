@@ -473,6 +473,7 @@
 * `Improvement` Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources
 * `Improvement` Limited APK language resources to the 10 locale configurations supported by the project to reduce package size
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
+* `Improvement` Eliminated Kotlin compiler warnings from Java nullable return values, redundant expressions, and Android deprecated APIs while retaining compatibility with older Kotlin versions
 * `Improvement` Finalized the unpublished official AI plugin as 3-Stone AI while replacing its cross-process contract with neutral `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, new Binder descriptors, the AP schema domain, and renamed conformance fixtures; no identity aliases are retained
 * `Improvement` Implemented AI Provider V2 paged target discovery directly: every target carries stable target/provider/model identity, locality, configuration and availability, capabilities, limits, controls, and allowed HTTPS origins; REMOTE/HYBRID execution and plugin-managed credentials are supported without credential bytes crossing Binder, and no superseded wire aliases remain
 * `Improvement` File manager directory refreshes dispatch minimal list diffs, keeping unchanged rows bound and preserving the live scroll position during in-place refreshes

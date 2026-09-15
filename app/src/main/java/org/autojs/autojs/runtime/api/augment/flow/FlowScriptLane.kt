@@ -22,6 +22,9 @@ import org.mozilla.javascript.BaseFunction
  */
 internal class FlowScriptLane(private val scriptRuntime: ScriptRuntime, private val timer: Timer) : FlowLane {
 
+    // Object exposes the JVM monitor's wait/notifyAll methods used below.
+    // zh-CN: Object 提供下方使用的 JVM 监视器 wait/notifyAll 方法.
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val lock = Object()
 
     /** Guarded by [lock]. zh-CN: 受 [lock] 保护. */

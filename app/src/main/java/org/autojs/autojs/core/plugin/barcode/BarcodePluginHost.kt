@@ -393,6 +393,9 @@ object BarcodePluginHost {
     private fun createEncodedPfd(bmp: Bitmap, options: BarcodeOptions): ParcelFileDescriptor {
         val extras = options.extras
         val quality = extras?.getInt("imageQuality", 100)?.coerceIn(1, 100) ?: 100
+        // WEBP is required on Android versions before API 30.
+        // zh-CN: API 30 之前的 Android 版本仍需使用 WEBP.
+        @Suppress("DEPRECATION")
         val format = when (extras?.getString("imageFormat")?.trim()?.lowercase()) {
             "jpg", "jpeg" -> CompressFormat.JPEG
             "webp" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) CompressFormat.WEBP_LOSSY else CompressFormat.WEBP
