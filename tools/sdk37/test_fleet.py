@@ -70,5 +70,74 @@ class PlanTest(unittest.TestCase):
         self.assertIn("app/build.gradle.kts:targetSdk=35", rows[2])
 
 
+class BumpTest(unittest.TestCase):
+    def test_next_patch_version_keeps_milestone_suffixes(self):
+        self.assertEqual(fleet.bump_version_name("1.0.2"), "1.0.3")
+        self.assertEqual(fleet.bump_version_name("2.10.9\n"), "2.10.10")
+        self.assertEqual(fleet.bump_version_name("0.8.1-m9"), "0.8.2-m9")
+        with self.assertRaises(ValueError):
+            fleet.bump_version_name("6.8.0 Alpha5")
+
+    def test_changelog_key_follows_the_repository_precedent(self):
+        self.assertEqual(fleet.changelog_version("0.8.2-m9", "0.8.1-m9", "v0.8.1"), "0.8.2")
+        self.assertEqual(fleet.changelog_version("0.8.2-m9", "0.8.1-m9", "v0.8.1-m9"), "0.8.2-m9")
+        self.assertEqual(fleet.changelog_version("1.0.3", "1.0.2", "v1.0.2"), "1.0.3")
+
+    def test_properties_replaced_in_place_and_missing_keys_rejected(self):
+        text = "#comment\nCOMPILE_SDK_VERSION=36\nTARGET_SDK_VERSION=36\nVERSION_BUILD=17\nVERSION_NAME=1.0.2\n"
+        updated = fleet.set_properties(text, {"COMPILE_SDK_VERSION": 37, "VERSION_BUILD": 18, "VERSION_NAME": "1.0.3"})
+        self.assertEqual(updated, "#comment\nCOMPILE_SDK_VERSION=37\nTARGET_SDK_VERSION=36\nVERSION_BUILD=18\nVERSION_NAME=1.0.3\n")
+        with self.assertRaises(ValueError):
+            fleet.set_properties(text, {"MIN_SDK_VERSION": 24})
+
+    def test_changelog_entry_prepended_with_original_layout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "lang_en.json"
+            path.write_text('{\n  "changelog_label_fix": "Fix",\n  "$data": {\n    "v1.0.2": {\n      "released_date": "2026/09/13",\n      "fix": [\n        "x"\n      ]\n    }\n  }\n}\n', encoding="utf-8")
+            fleet.insert_changelog_entry(path, "1.0.3", "2026/09/15", {"improvement": ["Raise SDK"]})
+            text = path.read_text(encoding="utf-8")
+            self.assertTrue(text.startswith('{\n  "changelog_label_fix": "Fix",\n  "$data": {\n    "v1.0.3": {\n      "released_date": "2026/09/15",\n      "improvement": [\n        "Raise SDK"\n      ]\n    },\n    "v1.0.2": {'))
+            self.assertTrue(text.endswith("}\n"))
+            with self.assertRaises(ValueError):
+                fleet.insert_changelog_entry(path, "1.0.3", "2026/09/15", {"improvement": ["again"]})
+
+    def test_readme_common_numbers_rewritten_without_touching_layout(self):
+        text = '{\n  "android_min_sdk": "24",\n  "android_target_sdk": "36",\n  "min_android_version": "7.0"\n}\n'
+        updated, changed = fleet.update_readme_common(text, 37, 37)
+        self.assertEqual(changed, ["android_target_sdk"])
+        self.assertEqual(updated, '{\n  "android_min_sdk": "24",\n  "android_target_sdk": "37",\n  "min_android_version": "7.0"\n}\n')
+        self.assertEqual(fleet.update_readme_common(updated, 37, 37), (updated, []))
+        versioned = '{\n  "version_name": "0.8.1-m9",\n  "version_build": "52"\n}\n'
+        self.assertEqual(fleet.update_readme_common(versioned, 37, 37, "0.8.2-m9", 56),
+                         ('{\n  "version_name": "0.8.2-m9",\n  "version_build": "56"\n}\n', ["version_name", "version_build"]))
+
+    def test_stale_sdk_mentions_are_listed_per_template_line(self):
+        with tempfile.TemporaryDirectory() as directory:
+            readme = Path(directory) / ".readme"
+            readme.mkdir()
+            (readme / "lang_en.json").write_text('{\n  "a": "targets SDK 36 today",\n  "b": "API 36 / Android 16",\n  "c": "36 items",\n  "d": "minSdk 24, targetSdk 36"\n}\n', encoding="utf-8")
+            hits = fleet.stale_sdk_mentions(Path(directory))
+            self.assertEqual(len(hits), 3)
+            self.assertTrue(hits[0].startswith("lang_en.json:2:"))
+
+    def test_readme_template_numbers_rewritten_only_inside_named_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            readme = Path(directory) / ".readme"
+            readme.mkdir()
+            (readme / "lang_en.json").write_text('{\n  "p_build_params": "min SDK 24, target SDK 36; build 1036 stays",\n  "other": "SDK 36 stays"\n}\n', encoding="utf-8")
+            (readme / "lang_ja.json").write_text('{\n  "p_build_params": "ターゲットSDKは36です"\n}\n', encoding="utf-8")
+            (readme / "common.json").write_text('{\n  "p_build_params": "36"\n}\n', encoding="utf-8")
+            changed = fleet.refresh_readme_keys(Path(directory), ["p_build_params", "missing"], 36, 37)
+            self.assertEqual(changed, {"lang_en.json": 1, "lang_ja.json": 1})
+            self.assertEqual((readme / "lang_en.json").read_text(encoding="utf-8"),
+                             '{\n  "p_build_params": "min SDK 24, target SDK 37; build 1036 stays",\n  "other": "SDK 36 stays"\n}\n')
+            self.assertEqual((readme / "lang_ja.json").read_text(encoding="utf-8"), '{\n  "p_build_params": "ターゲットSDKは37です"\n}\n')
+            self.assertEqual((readme / "common.json").read_text(encoding="utf-8"), '{\n  "p_build_params": "36"\n}\n')
+            self.assertEqual(fleet.refresh_readme_keys(Path(directory), ["p_build_params"], 36, 37), {})
+
+    def test_built_in_notes_cover_the_ten_changelog_languages(self):
+        self.assertEqual(sorted(fleet.BUMP_NOTES), sorted(["en", "zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "ja", "ko", "ru", "fr", "es", "ar"]))
+
+
 if __name__ == "__main__":
     unittest.main()

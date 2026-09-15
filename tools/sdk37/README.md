@@ -44,7 +44,35 @@ py tools/sdk37/fleet.py scan --output build/sdk37-fleet/scan.json
 py tools/sdk37/fleet.py table
 py tools/sdk37/fleet.py plan
 py tools/sdk37/fleet.py apply Pinyin --compile 37 --target 37 --gradle assembleDebug testDebugUnitTest
+py tools/sdk37/fleet.py bump Pinyin --compile 37 --target 37 `
+  --adb E:/.android/sdk/platform-tools/adb.exe --serial emulator-5600 --sdk-root E:/.android/sdk `
+  --log build/sdk37-fleet/bump-log.json --commit
 ```
+
+`bump` is the per-repository release step of Roadmap P5.0 for one clean repository: it sets the SDK
+values, moves `VERSION_NAME` to the next patch version (or `--version-name`), sets `VERSION_BUILD`
+to the commit count plus one, prepends one `improvement` line to all ten `.changelog/lang_*.json`
+files (the built-in wording is for plugins whose behaviour does not depend on the new target; pass
+`--note-file` with a language-to-text JSON object otherwise), runs the repository's markdown
+generator with its `--check` mode and `check_repository.py --pending-commit`, runs the Gradle tasks
+(default `assembleDebug testDebugUnitTest assembleDebugAndroidTest`), and with `--serial` installs
+the debug APK on that device, confirms the installed target and runs the androidTest APK when one was
+built. `--commit` then commits only the expected files with the fixed message
+`chore(sdk): raise compileSdk and targetSdk to 37 (Android 17)` and verifies the build number
+against the new commit count. Any failing step leaves the working tree for inspection and exits 1.
+`--log` appends the per-repository result (steps, versions, commit) to a JSON list.
+
+README templates: the SDK numbers and, where a repository keeps them there, `version_name` /
+`version_build` in `.readme/common.json` are refreshed automatically; `--readme-keys KEY ...`
+rewrites the old target number inside the named `.readme/lang_*.json` values for the few templates
+that spell it out in prose (`p_build_params` in File-Inspector, APK-Inspector, Java-Runtime and
+Kotlin-Runtime, `p_build_intro` in QuickJS-Runtime); template lines that still say `SDK 36`,
+`API 36`, `targetSdk 36` or `Android 16` are printed as warnings. A milestone suffix in
+`VERSION_NAME` (`0.8.1-m9`) is kept (`0.8.2-m9`), never promoted, and the changelog key follows the
+repository's own precedent (`v0.8.2` when the previous top entry already dropped the suffix).
+`--instrument-arg KEY VALUE` passes `-e KEY VALUE` to `am instrument`, e.g. `notClass <test>` for a
+golden test pinned to another environment; the argument is recorded in the step detail so the
+evidence shows what was left out.
 
 Self-checks: `py -m unittest discover -s tools/sdk37 -p test_fleet.py`.
 
