@@ -1,0 +1,1984 @@
+[
+  {
+    "repo": "Lua-Runtime",
+    "versionName": "0.1.2-rc.2",
+    "versionBuild": 77,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme common.json",
+        "ok": true,
+        "detail": "updated android_target_sdk"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "/assets/doc/CHANGELOG-es.md\nGenerated .readme/README-ja.md\nGenerated app/src/main/assets/doc/CHANGELOG-ja.md\nGenerated .readme/README-ko.md\nGenerated app/src/main/assets/doc/CHANGELOG-ko.md\nGenerated .readme/README-ru.md\nGenerated app/src/main/assets/doc/CHANGELOG-ru.md\nGenerated .readme/README-ar.md\nGenerated app/src/main/assets/doc/CHANGELOG-ar.md\nMARKDOWN_OK languages=10 artifacts=25 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=25 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:verifyDebugNativePageAlignment\nNative page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6-Plugin-Lua-Runtime\\app\\build\\reports\\native-alignment\\Debug.json\n\nBUILD SUCCESSFUL in 48s\n203 actionable tasks: 144 executed, 38 from cache, 21 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install",
+        "ok": false,
+        "detail": "no debug APK under app/build/outputs/apk/debug"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "F will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.changelog/lang_zh-Hant-TW.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/common.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'version.properties', CRLF will be replaced by LF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:25:05.022209+00:00",
+    "ok": false
+  },
+  {
+    "repo": "MLKit-OCR",
+    "versionName": "1.0.3",
+    "versionBuild": 15,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "nvironment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 4s"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:25:10.778537+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Yolo-NCNN",
+    "versionName": "0.1.3",
+    "versionBuild": 36,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme common.json",
+        "ok": true,
+        "detail": "updated android_target_sdk, version_name, version_build"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "/assets/doc/CHANGELOG-es.md\nGenerated .readme/README-ja.md\nGenerated app/src/main/assets/doc/CHANGELOG-ja.md\nGenerated .readme/README-ko.md\nGenerated app/src/main/assets/doc/CHANGELOG-ko.md\nGenerated .readme/README-ru.md\nGenerated app/src/main/assets/doc/CHANGELOG-ru.md\nGenerated .readme/README-ar.md\nGenerated app/src/main/assets/doc/CHANGELOG-ar.md\nMARKDOWN_OK languages=10 artifacts=22 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=22 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "n 34s\n93 actionable tasks: 44 executed, 49 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html\nNote: D:\\idea-projects\\AutoJs6-Plugin-Yolo-NCNN\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-yolo-ncnn-v0.1.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.yolo.ncnn badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (5 tests) (io.github.supermonster003.autojs6.plugin.yolo.ncnn.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "working copy of 'app/src/main/assets/doc/CHANGELOG-zh-Hans.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-Hant-HK.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-Hant-TW.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "34 files, build 36"
+      }
+    ],
+    "committed": "d4e9bbb",
+    "finished": "2026-09-15T14:25:49.393145+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv3",
+    "versionName": "1.0.5",
+    "versionBuild": 21,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ronment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 918ms"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:25:52.317900+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv4",
+    "versionName": "1.0.4",
+    "versionBuild": 21,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ronment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 826ms"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:25:54.684166+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv5",
+    "versionName": "1.0.4",
+    "versionBuild": 23,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ronment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 784ms"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:25:57.769377+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv6",
+    "versionName": "1.0.4",
+    "versionBuild": 25,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ronment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 801ms"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:26:00.064886+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Rapid-OCR-PP-OCRv3",
+    "versionName": "1.0.5",
+    "versionBuild": 24,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "nvironment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 1s"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:26:02.650736+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Rapid-OCR-PP-OCRv6",
+    "versionName": "1.0.5",
+    "versionBuild": 26,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ronment or adjust the project requirement; an exact OVERRIDDEN_ANDROID_GRADLE_PLUGIN_VERSION cannot bypass this incompatibility.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 736ms"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:26:04.603919+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Lua-Runtime",
+    "versionName": "0.1.2-rc.2",
+    "versionBuild": 77,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme common.json",
+        "ok": true,
+        "detail": "updated android_target_sdk"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "/assets/doc/CHANGELOG-es.md\nGenerated .readme/README-ja.md\nGenerated app/src/main/assets/doc/CHANGELOG-ja.md\nGenerated .readme/README-ko.md\nGenerated app/src/main/assets/doc/CHANGELOG-ko.md\nGenerated .readme/README-ru.md\nGenerated app/src/main/assets/doc/CHANGELOG-ru.md\nGenerated .readme/README-ar.md\nGenerated app/src/main/assets/doc/CHANGELOG-ar.md\nMARKDOWN_OK languages=10 artifacts=25 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=25 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "le-test:packageDebugAndroidTest UP-TO-DATE\n> Task :host-lifecycle-test:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :host-lifecycle-test:assembleDebugAndroidTest UP-TO-DATE\n\nBUILD SUCCESSFUL in 2s\n203 actionable tasks: 21 executed, 182 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-provider-universal-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.lua.runtime badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (5 tests) (io.github.supermonster003.autojs6.plugin.lua.runtime.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "F will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.changelog/lang_zh-Hant-TW.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/common.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'version.properties', CRLF will be replaced by LF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "37 files, build 77"
+      }
+    ],
+    "committed": "050ca26",
+    "finished": "2026-09-15T14:41:21.662192+00:00",
+    "ok": true
+  },
+  {
+    "repo": "MLKit-OCR",
+    "versionName": "1.0.3",
+    "versionBuild": 16,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "s6-Plugin-MLKit-OCR\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-MLKit-OCR\\app\\src\\androidTest\\java\\org\\autojs\\plugin\\runtime\\PluginBinderContractTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-mlkit-ocr-v1.0.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.mlkitocr badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.mlkitocr.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "37 files, build 16"
+      }
+    ],
+    "committed": "61970ac",
+    "finished": "2026-09-15T14:42:06.330848+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv3",
+    "versionName": "1.0.5",
+    "versionBuild": 22,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "-PP-OCRv3\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv3\\app\\src\\androidTest\\java\\org\\autojs\\plugin\\runtime\\PluginBinderContractTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-paddle-ocr-pp-ocrv3-v1.0.5-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.paddleocr.v3 badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.paddleocr.v3.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 22"
+      }
+    ],
+    "committed": "47d795c",
+    "finished": "2026-09-15T14:43:11.336017+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv4",
+    "versionName": "1.0.4",
+    "versionBuild": 22,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "cuted, 4 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html\nNote: D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv4\\libs\\ppocrv4-plugin-runtime\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-paddle-ocr-pp-ocrv4-v1.0.4-mobile-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.paddleocr.v4.mobile.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 22"
+      }
+    ],
+    "committed": "e679494",
+    "finished": "2026-09-15T14:44:27.201517+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv5",
+    "versionName": "1.0.4",
+    "versionBuild": 24,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "cuted, 4 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html\nNote: D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv5\\libs\\ppocrv5-plugin-runtime\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-paddle-ocr-pp-ocrv5-v1.0.4-arabic-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.paddleocr.v5.arabic badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 24"
+      }
+    ],
+    "committed": "eab79a0",
+    "finished": "2026-09-15T14:46:24.878114+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Paddle-OCR-PP-OCRv6",
+    "versionName": "1.0.4",
+    "versionBuild": 26,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "cuted, 4 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html\nNote: D:\\idea-projects\\AutoJs6-Plugin-Paddle-OCR-PP-OCRv6\\libs\\ppocrv6-plugin-runtime\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-paddle-ocr-pp-ocrv6-v1.0.4-medium-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.paddleocr.v6.medium badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 26"
+      }
+    ],
+    "committed": "160aaa5",
+    "finished": "2026-09-15T14:47:19.961847+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Rapid-OCR-PP-OCRv3",
+    "versionName": "1.0.5",
+    "versionBuild": 25,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_params: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "R-PP-OCRv3\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-Rapid-OCR-PP-OCRv3\\app\\src\\androidTest\\java\\org\\autojs\\plugin\\runtime\\PluginBinderContractTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-rapid-ocr-pp-ocrv3-v1.0.5-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3 badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 25"
+      }
+    ],
+    "committed": "815893d",
+    "finished": "2026-09-15T14:48:41.324454+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Rapid-OCR-PP-OCRv6",
+    "versionName": "1.0.5",
+    "versionBuild": 27,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": "ibopencv_java4.so' to ZIP 'D:\\idea-projects\\AutoJs6-Plugin-Rapid-OCR-PP-OCRv6\\libs\\rapidocr\\build\\outputs\\aar\\rapidocr-debug.aar'.\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 30s"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:49:14.323401+00:00",
+    "ok": false
+  },
+  {
+    "repo": "HTML-Previewer",
+    "versionName": "1.1.1",
+    "versionBuild": 20,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md\nMARKDOWN_OK languages=10 artifacts=25 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=25 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 22s\n87 actionable tasks: 40 executed, 47 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-html-previewer-v1.1.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.htmlpreviewer badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "org.junit.Assert.assertEquals(Assert.java:146)\n\tat io.github.supermonster003.autojs6.plugin.htmlpreviewer.PluginContractInstrumentationTest.manifestRequestsNoAdditionalPermissionForPdfExport(PluginContractInstrumentationTest.kt:157)\n\nFAILURES!!!\nTests run: 42,  Failures: 1\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.htmlpreviewer.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:50:18.459557+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Markdown-Previewer",
+    "versionName": "1.2.1",
+    "versionBuild": 17,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "NGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md\nGenerated 25 documentation artifacts"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Checked 25 documentation artifacts"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "idTest\n> Task :app:mergeProjectDexDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 38s\n85 actionable tasks: 41 executed, 44 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-markdown-previewer-v1.2.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.markdownpreviewer badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (28 tests) (io.github.supermonster003.autojs6.plugin.markdownpreviewer.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 17"
+      }
+    ],
+    "committed": "6b441c4",
+    "finished": "2026-09-15T14:51:19.794582+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Screen-Color-Picker",
+    "versionName": "1.1.1",
+    "versionBuild": 13,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "aw-ko\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ko.md\nGenerated .readme\\README-ru.md\nGenerated app\\src\\main\\res\\raw-ru\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ru.md\nGenerated .readme\\README-ar.md\nGenerated app\\src\\main\\res\\raw-ar\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nMARKDOWN_OK languages=10 artifacts=36 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=36 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 15s\n81 actionable tasks: 34 executed, 47 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.screencolorpicker badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "a:366)\n\tat io.github.supermonster003.autojs6.plugin.screencolorpicker.ScreenColorPickerPluginInstrumentedTest.overlayExplanationSurvivesActivityRecreationAndCancelRestoresInactiveState(ScreenColorPickerPluginInstrumentedTest.kt:306)\n\nFAILURES!!!\nTests run: 10,  Failures: 1\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.screencolorpicker.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "e working copy of 'app/src/main/res/raw-zh-rTW/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw-zh/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:51:58.320377+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Three-Ember-Player",
+    "versionName": "3.1.1",
+    "versionBuild": 25,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Markdown check passed; no files written"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Ember-Player\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": " executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork\n   > Compilation error. See log for more details\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 16s"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:52:16.169215+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Three-Terra-Player",
+    "versionName": "1.6.1",
+    "versionBuild": 36,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "_instruction.md\nGenerated app\\src\\main\\res\\raw-fr\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-es\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ja\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ko\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ru\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ar\\plugin_instruction.md\nMARKDOWN_OK languages=10 artifacts=36 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=36 mode=check"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Terra-Player\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 25s\n87 actionable tasks: 58 executed, 29 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-three-terra-player-v1.6.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.audioplayer badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (48 tests) (io.github.supermonster003.autojs6.plugin.audioplayer.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "e working copy of 'app/src/main/res/raw-zh-rTW/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw-zh/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 36"
+      },
+      {
+        "name": "check_repository",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Terra-Player\",\n  \"errors\": []\n}"
+      }
+    ],
+    "committed": "da4ef76",
+    "finished": "2026-09-15T14:52:49.874523+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Three-Stone-AI",
+    "versionName": "1.1.3",
+    "versionBuild": 189,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ru.json:70: \"p_build_params\": \"Параметры берутся из `version.properties`. Текущий минимальный SDK 24, целевой SDK 36, требуется JDK "
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Markdown check passed; no files written"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Stone-AI\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": false,
+        "detail": " completed, 1 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':app:testDebugUnitTest'.\n> There were failing tests. See the report at: file:///D:/idea-projects/AutoJs6-Plugin-Three-Stone-AI/app/build/reports/tests/testDebugUnitTest/index.html\n\n* Try:\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n\nBUILD FAILED in 29s"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T14:53:22.226432+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Ace-Editor",
+    "versionName": "1.7.1",
+    "versionBuild": 98,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_requirements: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "NGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md\nGenerated 25 documentation artifacts"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Checked 25 documentation artifacts"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "erDebugAndroidTest\n> Task :app:mergeProjectDexDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 43s\n83 actionable tasks: 78 executed, 5 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-ace-editor-v1.7.1-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.ace.editor badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (23 tests) (io.github.supermonster003.autojs6.plugin.ace.editor.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 98"
+      }
+    ],
+    "committed": "62d5d9e",
+    "finished": "2026-09-15T14:54:57.716147+00:00",
+    "ok": true
+  },
+  {
+    "repo": "MLKit-Barcode",
+    "versionName": "1.0.3",
+    "versionBuild": 16,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "n-MLKit-Barcode\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-MLKit-Barcode\\app\\src\\androidTest\\java\\org\\autojs\\plugin\\runtime\\PluginBinderContractTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-mlkit-barcode-v1.0.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.mlkit.barcode badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.mlkit.barcode.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "37 files, build 16"
+      }
+    ],
+    "committed": "10f00bc",
+    "finished": "2026-09-15T14:55:27.395743+00:00",
+    "ok": true
+  },
+  {
+    "repo": "NodeJs-Runtime",
+    "versionName": "1.5.2",
+    "versionBuild": 173,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Checked 25 generated files: no drift."
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": ": Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-NodeJs-Runtime\\app\\src\\test\\java\\io\\github\\supermonster003\\autojs6\\plugin\\nodejs\\NodeRuntimeExecutionGateTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: Some input files use or override a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-nodejs-runtime-v1.5.2-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.nodejs badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (61 tests) (io.github.supermonster003.autojs6.plugin.nodejs.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 173"
+      }
+    ],
+    "committed": "c8da4bf",
+    "finished": "2026-09-15T14:58:28.419762+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Python-Runtime",
+    "versionName": "0.5.3",
+    "versionBuild": 108,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "replace locks/python-runtime.lock",
+        "ok": true,
+        "detail": "'android.compileSdk=36' -> 'android.compileSdk=37'"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "MARKDOWN_OK artifacts=25 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK artifacts=25 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "t incompatible with Gradle 10.\n\nYou can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.\n\nFor more on this, please refer to https://docs.gradle.org/9.5.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.\n\nBUILD SUCCESSFUL in 20s\n94 actionable tasks: 40 executed, 54 up-to-date"
+      },
+      {
+        "name": "device install autojs6-plugin-python-runtime-v0.5.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.python.runtime badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.python.runtime.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "37 files, build 108"
+      }
+    ],
+    "committed": "f20f364",
+    "finished": "2026-09-15T14:58:53.821657+00:00",
+    "ok": true
+  },
+  {
+    "repo": "OpenCC",
+    "versionName": "1.4.1",
+    "versionBuild": 99,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_requirements: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ko.json:145: \"p_instruction_backend\": \"같은 APK를 AutoJs6 없이 오프라인 변환 앱으로 직접 실행할 수도 있습니다. 독립 편집기와 이 플러그인 항목은 공식 OpenCC {{ opencc_version ; lang_ru.json:145: \"p_instruction_backend\": \"Тот же APK можно запускать напрямую как автономное приложение преобразования без AutoJs6. Реда"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "strings.xml\nGenerated app\\src\\main\\res\\values\\strings.xml\nGenerated app\\src\\main\\res\\values-fr\\strings.xml\nGenerated app\\src\\main\\res\\values-es\\strings.xml\nGenerated app\\src\\main\\res\\values-ja\\strings.xml\nGenerated app\\src\\main\\res\\values-ko\\strings.xml\nGenerated app\\src\\main\\res\\values-ru\\strings.xml\nGenerated app\\src\\main\\res\\values-ar\\strings.xml\nMARKDOWN_OK languages=10 artifacts=47 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=47 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "ipDebugAndroidTestDebugSymbols\n> Task :opencc-native:packageDebugAndroidTest\n> Task :opencc-native:createDebugAndroidTestApkListingFileRedirect\n> Task :opencc-native:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 20s\n155 actionable tasks: 85 executed, 70 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-universal-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.opencc badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "eUiTest.assertExplicitClipboardActions(OpenccStandaloneUiTest.kt:161)\n\tat io.github.supermonster003.autojs6.plugin.opencc.OpenccStandaloneUiTest.allStandaloneActionsRemainExplicitCancellableAndRestorable(OpenccStandaloneUiTest.kt:55)\n\nFAILURES!!!\nTests run: 9,  Failures: 5\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.opencc.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "hes it\nwarning: in the working copy of 'app/src/main/res/values-zh-rTW/strings.xml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/values-zh/strings.xml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/values/strings.xml', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T15:05:34.382449+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Three-Stone-AI",
+    "versionName": "1.1.3",
+    "versionBuild": 189,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ru.json:70: \"p_build_params\": \"Параметры берутся из `version.properties`. Текущий минимальный SDK 24, целевой SDK 36, требуется JDK "
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Markdown check passed; no files written"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Stone-AI\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "=========\n\n\n> Task :app:verifyDebugNativePageAlignment\nNative page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6-Plugin-Three-Stone-AI\\app\\build\\reports\\native-alignment\\Debug.json\n\nBUILD SUCCESSFUL in 8s\n80 actionable tasks: 6 executed, 74 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-three-stone-ai-v1.1.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.threestoneai badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "assertTrue(Assert.java:42)\n\tat io.github.supermonster003.autojs6.plugin.threestoneai.LiteRtRealModelInferenceInstrumentationTest.stagedRealModelIsCatalogedInitializedAndGeneratesText(LiteRtRealModelInferenceInstrumentationTest.kt:67)\n\nFAILURES!!!\nTests run: 3,  Failures: 1\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.threestoneai.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T15:05:47.743093+00:00",
+    "ok": false
+  },
+  {
+    "repo": "R8-Compiler",
+    "versionName": "0.2.2-provider-dev",
+    "versionBuild": 19,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "replace .readme/lang_ar.json",
+        "ok": true,
+        "detail": "'argetSdk هو 36' -> 'argetSdk هو 37'"
+      },
+      {
+        "name": "replace .readme/lang_en.json",
+        "ok": true,
+        "detail": "'argetSdk is 36' -> 'argetSdk is 37'"
+      },
+      {
+        "name": "replace .readme/lang_es.json",
+        "ok": true,
+        "detail": "'argetSdk es 36' -> 'argetSdk es 37'"
+      },
+      {
+        "name": "replace .readme/lang_fr.json",
+        "ok": true,
+        "detail": "'targetSdk : 36' -> 'targetSdk : 37'"
+      },
+      {
+        "name": "replace .readme/lang_ja.json",
+        "ok": true,
+        "detail": "'targetSdk は 36' -> 'targetSdk は 37'"
+      },
+      {
+        "name": "replace .readme/lang_ko.json",
+        "ok": true,
+        "detail": "' targetSdk는 36' -> ' targetSdk는 37'"
+      },
+      {
+        "name": "replace .readme/lang_ru.json",
+        "ok": true,
+        "detail": "'argetSdk -- 36' -> 'argetSdk -- 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hans.json",
+        "ok": true,
+        "detail": "'targetSdk 为 36' -> 'targetSdk 为 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hant-HK.json",
+        "ok": true,
+        "detail": "'targetSdk 為 36' -> 'targetSdk 為 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hant-TW.json",
+        "ok": true,
+        "detail": "'targetSdk 為 36' -> 'targetSdk 為 37'"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated documentation is consistent (26 files checked)."
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-R8-Compiler\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "in-api:r8-compiler-api:packageDebugAndroidTest\n> Task :plugin-api:r8-compiler-api:createDebugAndroidTestApkListingFileRedirect\n> Task :plugin-api:r8-compiler-api:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 1m 19s\n207 actionable tasks: 166 executed, 41 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.r8compiler badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "m/lib64, /system_ext/lib64]]\n\tat dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:248)\n\tat java.lang.ClassLoader.loadClass(ClassLoader.java:644)\n\tat java.lang.ClassLoader.loadClass(ClassLoader.java:580)\n\t... 23 more\n\nFAILURES!!!\nTests run: 2,  Failures: 1\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.r8compiler.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/lang_zh-Hant-HK.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/lang_zh-Hant-TW.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'version.properties', CRLF will be replaced by LF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T15:07:11.410553+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Rapid-OCR-PP-OCRv6",
+    "versionName": "1.0.5",
+    "versionBuild": 27,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "R-PP-OCRv6\\app\\src\\main\\java\\org\\autojs\\plugin\\runtime\\InstalledPackageIdentity.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\nNote: D:\\idea-projects\\AutoJs6-Plugin-Rapid-OCR-PP-OCRv6\\app\\src\\androidTest\\java\\org\\autojs\\plugin\\runtime\\PluginBinderContractTest.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+      },
+      {
+        "name": "device install autojs6-plugin-rapid-ocr-pp-ocrv6-v1.0.5-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6 badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (1 test) (io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 27"
+      }
+    ],
+    "committed": "0d535dc",
+    "finished": "2026-09-15T15:08:02.773293+00:00",
+    "ok": true
+  },
+  {
+    "repo": "HTML-Previewer",
+    "versionName": "1.1.1",
+    "versionBuild": 21,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md\nMARKDOWN_OK languages=10 artifacts=25 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=25 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": ".json\n\n> Task :app:mergeProjectDexDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 12s\n87 actionable tasks: 31 executed, 56 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-html-previewer-v1.1.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.htmlpreviewer badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (42 tests) (io.github.supermonster003.autojs6.plugin.htmlpreviewer.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 21"
+      }
+    ],
+    "committed": "3ecc6e2",
+    "finished": "2026-09-15T15:08:56.393689+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Three-Ember-Player",
+    "versionName": "3.1.1",
+    "versionBuild": 26,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Markdown check passed; no files written"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Ember-Player\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 25s\n86 actionable tasks: 27 executed, 59 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-three-ember-player-v3.1.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.videoplayer badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (35 tests) (io.github.supermonster003.autojs6.plugin.videoplayer.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 26"
+      },
+      {
+        "name": "check_repository",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Ember-Player\",\n  \"errors\": []\n}"
+      }
+    ],
+    "committed": "fcfea36",
+    "finished": "2026-09-15T15:09:29.236825+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Screen-Color-Picker",
+    "versionName": "1.1.1",
+    "versionBuild": 13,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "aw-ko\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ko.md\nGenerated .readme\\README-ru.md\nGenerated app\\src\\main\\res\\raw-ru\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ru.md\nGenerated .readme\\README-ar.md\nGenerated app\\src\\main\\res\\raw-ar\\plugin_instruction.md\nGenerated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nMARKDOWN_OK languages=10 artifacts=36 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=36 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 14s\n81 actionable tasks: 26 executed, 55 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.screencolorpicker badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (10 tests) (io.github.supermonster003.autojs6.plugin.screencolorpicker.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "e working copy of 'app/src/main/res/raw-zh-rTW/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw-zh/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 13"
+      }
+    ],
+    "committed": "01e229f",
+    "finished": "2026-09-15T15:09:59.908996+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Three-Stone-AI",
+    "versionName": "1.1.3",
+    "versionBuild": 189,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ru.json:70: \"p_build_params\": \"Параметры берутся из `version.properties`. Текущий минимальный SDK 24, целевой SDK 36, требуется JDK "
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Markdown check passed; no files written"
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Stone-AI\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "gningConfigVersions UP-TO-DATE\n> Task :app:packageDebugAndroidTest UP-TO-DATE\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest UP-TO-DATE\n\nBUILD SUCCESSFUL in 5s\n80 actionable tasks: 2 executed, 78 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-three-stone-ai-v1.1.3-universal.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.threestoneai badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (2 tests) (io.github.supermonster003.autojs6.plugin.threestoneai.test, -e notClass io.github.supermonster003.autojs6.plugin.threestoneai.LiteRtRealModelInferenceInstrumentationTest)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 189"
+      },
+      {
+        "name": "check_repository",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-Three-Stone-AI\",\n  \"errors\": []\n}"
+      }
+    ],
+    "committed": "9666466",
+    "finished": "2026-09-15T15:12:59.890161+00:00",
+    "ok": true
+  },
+  {
+    "repo": "OpenCC",
+    "versionName": "1.4.1",
+    "versionBuild": 100,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_requirements: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ko.json:145: \"p_instruction_backend\": \"같은 APK를 AutoJs6 없이 오프라인 변환 앱으로 직접 실행할 수도 있습니다. 독립 편집기와 이 플러그인 항목은 공식 OpenCC {{ opencc_version ; lang_ru.json:145: \"p_instruction_backend\": \"Тот же APK можно запускать напрямую как автономное приложение преобразования без AutoJs6. Реда"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "strings.xml\nGenerated app\\src\\main\\res\\values\\strings.xml\nGenerated app\\src\\main\\res\\values-fr\\strings.xml\nGenerated app\\src\\main\\res\\values-es\\strings.xml\nGenerated app\\src\\main\\res\\values-ja\\strings.xml\nGenerated app\\src\\main\\res\\values-ko\\strings.xml\nGenerated app\\src\\main\\res\\values-ru\\strings.xml\nGenerated app\\src\\main\\res\\values-ar\\strings.xml\nMARKDOWN_OK languages=10 artifacts=47 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=47 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "Test\n> Task :app:mergeProjectDexDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 10s\n155 actionable tasks: 32 executed, 123 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-universal-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.opencc badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (6 tests) (io.github.supermonster003.autojs6.plugin.opencc.test, -e notClass io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest,io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest,io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "hes it\nwarning: in the working copy of 'app/src/main/res/values-zh-rTW/strings.xml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/values-zh/strings.xml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/values/strings.xml', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 100"
+      }
+    ],
+    "committed": "822afed",
+    "finished": "2026-09-15T15:13:41.089491+00:00",
+    "ok": true
+  },
+  {
+    "repo": "R8-Compiler",
+    "versionName": "0.2.2-provider-dev",
+    "versionBuild": 20,
+    "compileSdk": 37,
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "replace .readme/lang_ar.json",
+        "ok": true,
+        "detail": "'argetSdk هو 36' -> 'argetSdk هو 37'"
+      },
+      {
+        "name": "replace .readme/lang_en.json",
+        "ok": true,
+        "detail": "'argetSdk is 36' -> 'argetSdk is 37'"
+      },
+      {
+        "name": "replace .readme/lang_es.json",
+        "ok": true,
+        "detail": "'argetSdk es 36' -> 'argetSdk es 37'"
+      },
+      {
+        "name": "replace .readme/lang_fr.json",
+        "ok": true,
+        "detail": "'targetSdk : 36' -> 'targetSdk : 37'"
+      },
+      {
+        "name": "replace .readme/lang_ja.json",
+        "ok": true,
+        "detail": "'targetSdk は 36' -> 'targetSdk は 37'"
+      },
+      {
+        "name": "replace .readme/lang_ko.json",
+        "ok": true,
+        "detail": "' targetSdk는 36' -> ' targetSdk는 37'"
+      },
+      {
+        "name": "replace .readme/lang_ru.json",
+        "ok": true,
+        "detail": "'argetSdk -- 36' -> 'argetSdk -- 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hans.json",
+        "ok": true,
+        "detail": "'targetSdk 为 36' -> 'targetSdk 为 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hant-HK.json",
+        "ok": true,
+        "detail": "'targetSdk 為 36' -> 'targetSdk 為 37'"
+      },
+      {
+        "name": "replace .readme/lang_zh-Hant-TW.json",
+        "ok": true,
+        "detail": "'targetSdk 為 36' -> 'targetSdk 為 37'"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated documentation is consistent (26 files checked)."
+      },
+      {
+        "name": "check_repository --pending-commit",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-R8-Compiler\",\n  \"errors\": []\n}"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "gin-api:r8-compiler-api:assembleDebugAndroidTest\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 35s\n207 actionable tasks: 73 executed, 134 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install app-debug.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.r8compiler badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (3 tests) (io.github.supermonster003.autojs6.plugin.r8compiler.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/lang_zh-Hant-HK.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.readme/lang_zh-Hant-TW.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'version.properties', CRLF will be replaced by LF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "47 files, build 20"
+      },
+      {
+        "name": "check_repository",
+        "ok": true,
+        "detail": "{\n  \"repository\": \"AutoJs6-Plugin-R8-Compiler\",\n  \"errors\": []\n}"
+      }
+    ],
+    "committed": "a2f4f75",
+    "finished": "2026-09-15T15:15:12.602642+00:00",
+    "ok": true
+  },
+  {
+    "repo": "Archive-Manager",
+    "versionName": "2.22.3",
+    "versionBuild": 106,
+    "compileSdk": "37",
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "======\n\n\n> Task :app:verifyDebugNativePageAlignment\nNative page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6-Plugin-Archive-Manager\\app\\build\\reports\\native-alignment\\Debug.json\n\nBUILD SUCCESSFUL in 11s\n93 actionable tasks: 23 executed, 70 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-archive-manager-v2.22.3-arm64-v8a.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.archivemanager badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "ert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat org.junit.internal.ComparisonCriteria.arrayEquals(ComparisonCriteria.java:87)\n\t... 38 more\n\nFAILURES!!!\nTests run: 179,  Failures: 2\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.archivemanager.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T15:17:20.555825+00:00",
+    "ok": false
+  },
+  {
+    "repo": "MCP-Server",
+    "versionName": "1.0.1",
+    "versionBuild": 42,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme stale SDK mentions",
+        "ok": true,
+        "detail": "lang_ar.json:82: \"p_build_requirements\": \"يتطلب البناء JDK 21 أو أحدث و Android SDK 36; وتدار إصدارات Gradle والمكونات الإضافية مركزيا عب; lang_en.json:82: \"p_build_requirements\": \"Building requires JDK 21 or later and Android SDK 36; Gradle and plugin versions are managed ce; lang_es.json:82: \"p_build_requirements\": \"La compilación requiere JDK 21 o posterior y Android SDK 36; las versiones de Gr"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "_instruction.md\nGenerated app\\src\\main\\res\\raw-fr\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-es\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ja\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ko\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ru\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ar\\plugin_instruction.md\nMARKDOWN_OK languages=10 artifacts=36 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=36 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 18s\n78 actionable tasks: 26 executed, 52 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-mcp-server-v1.0.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.mcp.server badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": false,
+        "detail": "server.McpServerIdleStopTest.await(McpServerIdleStopTest.kt:112)\n\tat io.github.supermonster003.autojs6.plugin.mcp.server.McpServerIdleStopTest.aListenerWithoutRequestsStopsItselfAfterTheConfiguredMinutes(McpServerIdleStopTest.kt:74)\n\nFAILURES!!!\nTests run: 35,  Failures: 1\n\n\nINSTRUMENTATION_CODE: -1 (io.github.supermonster003.autojs6.plugin.mcp.server.test)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "e working copy of 'app/src/main/res/raw-zh-rTW/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw-zh/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it"
+      }
+    ],
+    "committed": null,
+    "finished": "2026-09-15T15:19:34.186120+00:00",
+    "ok": false
+  },
+  {
+    "repo": "Archive-Manager",
+    "versionName": "2.22.3",
+    "versionBuild": 106,
+    "compileSdk": "37",
+    "targetSdk": 37,
+    "steps": [
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "Generated app\\src\\main\\assets\\doc\\CHANGELOG-ar.md\nGenerated .readme\\README-zh-Hans.md\nGenerated README.md\nGenerated .readme\\README-zh-Hant-HK.md\nGenerated .readme\\README-zh-Hant-TW.md\nGenerated .readme\\README-en.md\nGenerated .readme\\README-fr.md\nGenerated .readme\\README-es.md\nGenerated .readme\\README-ja.md\nGenerated .readme\\README-ko.md\nGenerated .readme\\README-ru.md\nGenerated .readme\\README-ar.md"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "Generated Markdown is current"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "=======\n\n\n> Task :app:verifyDebugNativePageAlignment\nNative page alignment verified (16384 bytes): D:\\idea-projects\\AutoJs6-Plugin-Archive-Manager\\app\\build\\reports\\native-alignment\\Debug.json\n\nBUILD SUCCESSFUL in 7s\n93 actionable tasks: 15 executed, 78 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-archive-manager-v2.22.3.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.archivemanager badging target 37, installed target 37, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (178 tests) (io.github.supermonster003.autojs6.plugin.archivemanager.test, -e notClass io.github.supermonster003.autojs6.plugin.archivemanager.ArchiveIntentPolicyInstrumentationTest#manageArchiveRejectsZipContainerAliases)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": " it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh-rTW.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG-zh.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/assets/doc/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "36 files, build 106"
+      }
+    ],
+    "committed": "4b308f9",
+    "finished": "2026-09-15T15:26:17.644703+00:00",
+    "ok": true
+  },
+  {
+    "repo": "MCP-Server",
+    "versionName": "1.0.1",
+    "versionBuild": 42,
+    "compileSdk": 37,
+    "targetSdk": "36",
+    "steps": [
+      {
+        "name": "readme templates",
+        "ok": true,
+        "detail": "36 -> 37 in p_build_requirements: lang_ar.json x1, lang_en.json x1, lang_es.json x1, lang_fr.json x1, lang_ja.json x1, lang_ko.json x1, lang_ru.json x1, lang_zh-Hans.json x1, lang_zh-Hant-HK.json x1, lang_zh-Hant-TW.json x1"
+      },
+      {
+        "name": "generate_markdown",
+        "ok": true,
+        "detail": "_instruction.md\nGenerated app\\src\\main\\res\\raw-fr\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-es\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ja\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ko\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ru\\plugin_instruction.md\nGenerated app\\src\\main\\res\\raw-ar\\plugin_instruction.md\nMARKDOWN_OK languages=10 artifacts=36 mode=write"
+      },
+      {
+        "name": "generate_markdown --check",
+        "ok": true,
+        "detail": "MARKDOWN_OK languages=10 artifacts=36 mode=check"
+      },
+      {
+        "name": "gradle assembleDebug testDebugUnitTest assembleDebugAndroidTest",
+        "ok": true,
+        "detail": "sk :app:mergeProjectDexDebugAndroidTest UP-TO-DATE\n> Task :app:packageDebugAndroidTest\n> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE\n> Task :app:assembleDebugAndroidTest\n\nBUILD SUCCESSFUL in 10s\n78 actionable tasks: 24 executed, 54 up-to-date\nConsider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html"
+      },
+      {
+        "name": "device install autojs6-plugin-mcp-server-v1.0.1.apk",
+        "ok": true,
+        "detail": "io.github.supermonster003.autojs6.plugin.mcp.server badging target 36, installed target 36, serial emulator-5600"
+      },
+      {
+        "name": "device instrumentation",
+        "ok": true,
+        "detail": "OK (34 tests) (io.github.supermonster003.autojs6.plugin.mcp.server.test, -e notClass io.github.supermonster003.autojs6.plugin.mcp.server.McpServerIdleStopTest#aListenerWithoutRequestsStopsItselfAfterTheConfiguredMinutes)"
+      },
+      {
+        "name": "git diff --check",
+        "ok": true,
+        "detail": "e working copy of 'app/src/main/res/raw-zh-rTW/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw-zh/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'app/src/main/res/raw/plugin_instruction.md', LF will be replaced by CRLF the next time Git touches it"
+      },
+      {
+        "name": "commit",
+        "ok": true,
+        "detail": "46 files, build 42"
+      }
+    ],
+    "committed": "41e53b5",
+    "finished": "2026-09-15T15:27:22.897916+00:00",
+    "ok": true
+  }
+]
