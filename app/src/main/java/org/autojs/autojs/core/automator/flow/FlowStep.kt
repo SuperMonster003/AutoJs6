@@ -235,7 +235,7 @@ data class Stability(
     }
 
     companion object {
-        const val DEFAULT_STABLE_FOR = 500L
+        const val DEFAULT_STABLE_FOR = 0L
     }
 
 }
