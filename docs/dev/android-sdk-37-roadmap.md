@@ -222,7 +222,7 @@ D1-D4 已由维护者于 2026-09-13 确认. 2026-09-14 又明确选择 Q1=a / Q2
 | P0 | 基线与工具 | 无 | 宿主 | 完成 (2026-09-13): 覆盖开关, 分发拒绝, compat 工具, 有效 lint 基线 |
 | P1 | 宿主 compileSdk 37 | P0 | 宿主 | 本地实现 / 构建 / 测试 / 冒烟完成; lint 零增量但有既有错误, 远程 CI 待验证 |
 | P2 | 宿主 targetSdk 37 行为变更适配 | P0.2 (覆盖开关), P1 | 宿主 | 代码适配完成 (16 子项 83 项勾选); 剩余条目按 D20 标注为 RC-SMOKE / WATCH / CI, 不再门控 P3 |
-| P3 | 宿主 targetSdk 37 切换 (app + inrt) | P1, 门禁 (D19) | 宿主, APK-Builder-Template (只读验证) | P3.1 完成 (2026-09-14, chore(sdk): raise targetSdk to 37 for app and inrt): 门禁在 AVD_API_37 (16 KB) 与 API 28 / 31 / 33 / 33 / 35 五台真机执行; P3.3 / P3.4 / P3.5 的 inrt 夹具、Runtime Kit 与 CI 待后续 |
+| P3 | 宿主 targetSdk 37 切换 (app + inrt) | P1, 门禁 (D19) | 宿主, APK-Builder-Template (只读验证) | P3.1 完成 (2026-09-14, chore(sdk): raise targetSdk to 37 for app and inrt): 门禁在 AVD_API_37 (16 KB) 与 API 28 / 31 / 33 / 33 / 35 五台真机执行; P3.3 / P3.4 / P3.5 完成 (2026-09-15): AVD API 30 / 33 / 37.1 自动矩阵、Runtime Kit 5280 与三个打包示例, 插件 `ce6dfd9` 修复 `resources.arsc` 回归; 真机 RC-SMOKE #8 与 CI 推送验证 (P4) 保留 |
 | P4 | 关联项目, 文档与 CI | P1 / P3 各自完成后 | Documentation, TypeScript-Declarations, Ace-Editor (LSP), Offline-Docs, VSCode-Ext (仅文档) | 进行中: P2.1 文档 / 声明 / LSP 已同步, 其余迁移说明与 CI 待完成 |
 | P5 | 官方插件舰队 (42 仓) | P1 (工具链验证), P2.1 / P2.3 的方案, D21 批处理脚本 | 42 个插件仓库 | 未开始; D21 工具 `fleet.py` 已落地 (2026-09-15 扫描: 2 仓 compile 37, 0 仓 target 37, 9 仓脏, 2 仓硬编码), NodeJs-Runtime / Accessibility-Compat / Python-Runtime 已重新评估 |
 | P6 | 验收与关闭 | P1-P5 | 全部 | 未开始 |
@@ -439,28 +439,28 @@ P2 验收: I1-I15 与 P2.16 每项有结论, 附录 B 对应行回填; target 37
 
 | 等级 | 对打包应用的增量 | 验证 |
 | --- | --- | --- |
-| 30 | 分区存储强制: 任意共享路径的直接文件访问需评估所有文件访问权限; 应用专属目录 / MediaStore / SAF 各有规则, `MANAGE_EXTERNAL_STORAGE` 也不等于可访问任意其它应用私有目录. `InrtLaunchGate` 已按 Q4 的显式共享需求检查实际授权 | [提前验证](evidence/android-sdk-37-inrt-storage-20260914.md) 的 API 24 / 37 四组 33/33, Samsung 两组另通过 16/16; 最终用户 APK 与 API 30 / 33 迁移仍待验 |
-| 30 | 包可见性 (`<queries>` 已在共用 manifest, 且声明 `QUERY_ALL_PACKAGES`) | `app.launch` / `app.getAppName` 任意包 |
-| 31 | 组件 `exported` 显式化 (共用 manifest 已满足); `PendingIntent` 可变性 (代码已按 36 处理); 后台启动前台服务限制 (`FGS_BG_START_RESTRICTION_CHANGE_ID`; `BOOT_COMPLETED` 属豁免); 精确闹钟权限 (`SCHEDULE_EXACT_ALARM` + 已声明的 `USE_EXACT_ALARM`); 系统启动画面叠加在自定义 `SplashActivity` 之前; 通知跳板限制 | 开机自启 (`InrtBootCompletedReceiver`), 定时任务, 启动画面观感 |
-| 33 | `POST_NOTIFICATIONS` 运行时权限; 拒绝时前台服务通知在通知栏不可见但服务仍需合法通知及启动条件; 细分媒体权限; 旧 `WRITE_EXTERNAL_STORAGE` 不能代替共享存储授权 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`) 待完整用户 APK 验收; 启动旧 WRITE 无条件申请已移除, 按 OS / 真实存储模式引导 |
-| 34 | 前台服务类型必填 (已声明); 运行时注册接收器需导出标志 (共用代码); 隐式 Intent 只匹配已导出组件; `Thread.stop` 不可用; 动态加载 DEX 只读 (`AndroidClassLoader` 已处理); MediaProjection 每次会话授权 + 回调 | `runtime.loadDex`, 截图, `events.broadcast` |
-| 35 | 边到边强制 (UI 模式脚本布局); 前台服务 `dataSync` / `mediaProcessing` 超时 (未用); `BOOT_COMPLETED` 禁止启动部分类型前台服务 (`specialUse` 允许); 悬浮窗不再豁免后台启动前台服务 (`FGS_SAW_RESTRICTIONS`, 仅可见悬浮窗豁免); 最低可安装 targetSdk 24 | UI 模式脚本顶部内容, 开机自启后的前台服务 |
-| 36 | 预测性返回默认开启 (`onBackPressed` 不再回调, 共用 `BackCompat`); 边到边豁免移除; 大屏忽略方向; Intent 重定向保护; `announceForAccessibility` 弃用 | 打包应用的 `LogActivity` / `SettingsActivity` 返回, 平板方向 |
-| 37 | P2 全部条目, 其中本地网络权限与后台音频对打包应用最直接 (脚本自建 HTTP 服务 / TTS) | 复用 P2.1 / P2.2 的用例 |
+| 30 | 分区存储强制: 任意共享路径的直接文件访问需评估所有文件访问权限; 应用专属目录 / MediaStore / SAF 各有规则, `MANAGE_EXTERNAL_STORAGE` 也不等于可访问任意其它应用私有目录. `InrtLaunchGate` 已按 Q4 的显式共享需求检查实际授权 | [提前验证](evidence/android-sdk-37-inrt-storage-20260914.md) 的 API 24 / 37 四组 33/33, Samsung 两组另通过 16/16; 最终用户 APK 与 API 30 / 33 迁移仍待验 结论 (2026-09-15): AVD API 30 / 33 / 37.1 各 8/8 (目标 37 首次安装) 与 4/4 (29 -> 37 覆盖安装, 所有文件授权与共享文件保留), 见 [P3.3/P3.4 证据](evidence/android-sdk-37-p33-p34-20260915.md) 第 3 节; 真机留 RC-SMOKE #8. |
+| 30 | 包可见性 (`<queries>` 已在共用 manifest, 且声明 `QUERY_ALL_PACKAGES`) | `app.launch` / `app.getAppName` 任意包 结论 (2026-09-15): 三个打包示例的 `visibility-settings-app` (`app.getAppName` 解析系统设置包) 通过 (AVD 37.1). |
+| 31 | 组件 `exported` 显式化 (共用 manifest 已满足); `PendingIntent` 可变性 (代码已按 36 处理); 后台启动前台服务限制 (`FGS_BG_START_RESTRICTION_CHANGE_ID`; `BOOT_COMPLETED` 属豁免); 精确闹钟权限 (`SCHEDULE_EXACT_ALARM` + 已声明的 `USE_EXACT_ALARM`); 系统启动画面叠加在自定义 `SplashActivity` 之前; 通知跳板限制 | 开机自启 (`InrtBootCompletedReceiver`), 定时任务, 启动画面观感 结论 (2026-09-15): 示例 `exact-alarm-capability` (`canScheduleExactAlarms` 为 true) 与 timer 示例的 `countdown-task-scheduled` / 20 s 定时脚本实际触发通过; 开机自启未自动化 (WATCH). |
+| 33 | `POST_NOTIFICATIONS` 运行时权限; 拒绝时前台服务通知在通知栏不可见但服务仍需合法通知及启动条件; 细分媒体权限; 旧 `WRITE_EXTERNAL_STORAGE` 不能代替共享存储授权 | 通知权限开关 (`PostNotificationsPermissionSwitchPreference`) 待完整用户 APK 验收; 启动旧 WRITE 无条件申请已移除, 按 OS / 真实存储模式引导 结论 (2026-09-15): 示例 `post-notifications-runtime` (未授权时 `areNotificationsEnabled` 为 false, 前台服务与脚本照常) 通过. |
+| 34 | 前台服务类型必填 (已声明); 运行时注册接收器需导出标志 (共用代码); 隐式 Intent 只匹配已导出组件; `Thread.stop` 不可用; 动态加载 DEX 只读 (`AndroidClassLoader` 已处理); MediaProjection 每次会话授权 + 回调 | `runtime.loadDex`, 截图, `events.broadcast` 结论 (2026-09-15): 示例 `load-dex` (`runtime.loadDex` 只读 DEX) 与 `broadcast-roundtrip` (运行时注册接收器) 通过; 截图未自动化. |
+| 35 | 边到边强制 (UI 模式脚本布局); 前台服务 `dataSync` / `mediaProcessing` 超时 (未用); `BOOT_COMPLETED` 禁止启动部分类型前台服务 (`specialUse` 允许); 悬浮窗不再豁免后台启动前台服务 (`FGS_SAW_RESTRICTIONS`, 仅可见悬浮窗豁免); 最低可安装 targetSdk 24 | UI 模式脚本顶部内容, 开机自启后的前台服务 结论 (2026-09-15): ui 示例 `ui-edge-to-edge` (内容顶部 0、跨满显示区、状态栏 inset > 0) 通过. |
+| 36 | 预测性返回默认开启 (`onBackPressed` 不再回调, 共用 `BackCompat`); 边到边豁免移除; 大屏忽略方向; Intent 重定向保护; `announceForAccessibility` 弃用 | 打包应用的 `LogActivity` / `SettingsActivity` 返回, 平板方向 结论 (2026-09-15): ui 示例 `ui-predictive-back-finishes-activity` (BACK 到达 `ui.emitter` back_pressed 回调且 activity 退出) 通过; `LogActivity` / `SettingsActivity` 返回与平板方向未自动化 (WATCH). |
+| 37 | P2 全部条目, 其中本地网络权限与后台音频对打包应用最直接 (脚本自建 HTTP 服务 / TTS) | 复用 P2.1 / P2.2 的用例 结论 (2026-09-15): 示例 `local-network-declared` 与 timer 示例 `tts-done` 通过; 真实 LAN 访问留 RC-SMOKE. |
 
-- [ ] 依上表逐行验证并修正 inrt 专属流程 (`SplashActivity` 权限引导, `fragment_preferences_inrt.xml` 的开关顺序与默认值). (SOURCE; DEVICE-37; DEVICE)
-- [ ] 安装矩阵: 用相同 applicationId / 签名、递增 versionCode 的示例 APK 测 target 29 -> 37 覆盖安装, 并另测 target 37 首次安装 / 卸载重装, 两者不能共享成功结论. API 30 设备或 AVD、API 33 真机与 `AVD_API_37` 分别记录旧文件位置、已有授权、升级后的实际访问及迁移结果. `preserveLegacyExternalStorage` 不能替代新安装的权限引导. 2026-09-14 已补 API 37 当前模板的所有文件访问授权升级, AVD / Samsung 分别通过 4 项, 不覆盖传统 legacy 授权或最终用户打包链. ([官方迁移说明](https://developer.android.com/training/data-storage/use-cases); DEVICE; DEVICE-37)
+- [x] 依上表逐行验证并修正 inrt 专属流程 (`SplashActivity` 权限引导, `fragment_preferences_inrt.xml` 的开关顺序与默认值). (SOURCE; DEVICE-37; DEVICE) 2026-09-15: 上表每行已有结论 (AVD 自动矩阵 + 打包示例), inrt 专属流程无需修正; 真机项归 RC-SMOKE #8.
+- [x] 安装矩阵: 用相同 applicationId / 签名、递增 versionCode 的示例 APK 测 target 29 -> 37 覆盖安装, 并另测 target 37 首次安装 / 卸载重装, 两者不能共享成功结论. API 30 设备或 AVD、API 33 真机与 `AVD_API_37` 分别记录旧文件位置、已有授权、升级后的实际访问及迁移结果. `preserveLegacyExternalStorage` 不能替代新安装的权限引导. 2026-09-14 已补 API 37 当前模板的所有文件访问授权升级, AVD / Samsung 分别通过 4 项, 不覆盖传统 legacy 授权或最终用户打包链. ([官方迁移说明](https://developer.android.com/training/data-storage/use-cases); DEVICE; DEVICE-37) 2026-09-15: 目标 37 首次安装 (vc 7000-7003) 与 29 -> 37 覆盖安装 (vc 8000 -> 9000) 分别在 AVD API 30 / 33 / 37.1 通过, 夹具用宿主密钥签名 (`--signing-properties`); API 33 真机留 RC-SMOKE #8.
 - [x] 打包器 UI (`ui/project/BuildActivity`, `ProjectConfigActivity`) 与文档说明打包应用在 Android 11+ 的存储引导. `requiresSharedStorage` 同步项目配置与打包保存路径, QA 说明默认值、共享路径范围、取消 / 返回和隐藏入口恢复; d.ts、Ace 与离线文档已生成并验证. [实施记录](evidence/android-sdk-37-inrt-storage-20260914.md). (DOCS)
 
 ### P3.4 打包链路与 Runtime Kit
 
-- [ ] `generateRuntimeKit` 重新生成; `AutoJs6-Plugin-APK-Builder-Template` 的 JVM 测试与 `build-from-runtime-kit.yml` 夹具中若有 `targetSdkVersion=29` 的硬编码期望, 改为读取模板 (该仓库条目在 P5.2 落地, 本条只做只读核对). (SOURCE; JVM)
-- [ ] 用新 Runtime Kit 打包 3 个示例 (a11y 冒烟, UI 模式, 定时任务 + TTS), `aapt2` 显示 `targetSdkVersion:'37'`, 在 `AVD_API_37` 与 API 33 / 35 真机安装运行. (DEVICE-37; DEVICE)
+- [x] `generateRuntimeKit` 重新生成; `AutoJs6-Plugin-APK-Builder-Template` 的 JVM 测试与 `build-from-runtime-kit.yml` 夹具中若有 `targetSdkVersion=29` 的硬编码期望, 改为读取模板 (该仓库条目在 P5.2 落地, 本条只做只读核对). (SOURCE; JVM) 2026-09-15: Runtime Kit 以 HEAD `6da20f969` 重新生成 (5 个变体, `verify_runtime_kit_set.py` 通过); 插件仓库无 targetSdk 29 硬编码; 插件 `ce6dfd9` (v1.0.3, 配对宿主 5280).
+- [x] 用新 Runtime Kit 打包 3 个示例 (a11y 冒烟, UI 模式, 定时任务 + TTS), `aapt2` 显示 `targetSdkVersion:'37'`, 在 `AVD_API_37` 与 API 33 / 35 真机安装运行. (DEVICE-37; DEVICE) 2026-09-15: `run_packaged_examples.py` 在 `AVD_API_37.1_16K` 打包、安装并运行三个示例 (targetSdkVersion 37), 脚本检查 11 / 9 / 9 全部通过; 过程中发现并修复插件的 `resources.arsc` 压缩回归 (目标 30+ 无法安装); 真机与 arm64 未做, 见 [P3.3/P3.4 证据](evidence/android-sdk-37-p33-p34-20260915.md).
 
 ### P3.5 文档与提交
 
-- [ ] changelog: 按 D9 记录宿主 targetSdk 36 -> 37 与 inrt 29 -> 37 的实际变化, 核对 P2 的 `fix` / `improvement`, README 重新生成; 本文回填. (DOCS)
-- [ ] 提交 `chore(sdk): raise targetSdk to 37 for app and inrt (roadmap P3)`. (DOCS)
+- [x] changelog: 按 D9 记录宿主 targetSdk 36 -> 37 与 inrt 29 -> 37 的实际变化, 核对 P2 的 `fix` / `improvement`, README 重新生成; 本文回填. (DOCS) 已随 P3.1 的 `caea32694` 完成 (2026-09-14); 2026-09-15 本文回填 P3.3 / P3.4.
+- [x] 提交 `chore(sdk): raise targetSdk to 37 for app and inrt (roadmap P3)`. (DOCS) 已提交 `caea32694` (2026-09-14).
 
 P3 验收: P3.2 矩阵通过; P3.3 表每行有结论; 用户 APK 在 API 37 / 35 / 33 上安装运行; CI 绿.
 
@@ -938,3 +938,11 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 维护者提示 Accessibility-Compat 与 NodeJs-Runtime 期间有变化. 复核结果: Accessibility-Compat 自 `b21e3a7` 起自带 SelectToSpeak 身份壳无障碍服务与 `WRITE_SECURE_SETTINGS`, compileSdk 已 37, 工作区仍有另一会话的 65 个未提交文件; NodeJs-Runtime 新增宿主直接 exec 的终端启动器 `libnodexe.so` 与 npm / corepack 资产, libnode 改 small-icu, SDK 值未变. 两者在附录 E 与 P5.3 / P5.5 已改写.
 - `tools/sdk37/fleet.py` (scan / table / plan / apply, `test_fleet.py` 5 项) 落地 D21; 全量扫描另发现 Python-Runtime 的 Gradle 硬编码 (原表未记录), 附录 E 数值列与脏列已按 2026-09-15 扫描刷新.
 - 下次起点: 按 `fleet.py plan` 的顺序从无暴露且干净的仓库开始 (Pinyin, Pinyin4j, MediaInfo, ImGui, Image-*, File-Inspector, APK-Inspector, OpenCV, Image-Quantization, QuickJS, TypeScript-Engine, Java / Kotlin-Runtime, DEX-Compiler, Offline-Docs, APK-Builder-Template), 每仓 `apply` + Gradle 检查 + 单独提交; 暴露仓库两步走.
+
+### 2026-09-15: P3.3 / P3.4 自动矩阵、Runtime Kit 与打包链路
+
+- P3.3: `build_inrt_storage_fixtures.py --signing-properties` 用宿主密钥打出目标 37 / 29 夹具 (inrt 的 signature 级 `org.autojs.permission.PLUGIN` 与宿主共用, 随机密钥的夹具无法与 debug 宿主共存); `run_inrt_storage_probe.py` 在新建的 `AVD_API_30` / `AVD_API_33` 与 `AVD_API_37.1_16K` 各 8/8 (目标 37 首次安装) 与 4/4 (29 -> 37 覆盖安装); HEAD 门禁 `--with-inrt --inrt-apk` 在 37.1 通过 (a11y-smoke 一次 41/42 时序抖动, 复跑 42/42). 证据 [P3.3/P3.4 证据](evidence/android-sdk-37-p33-p34-20260915.md).
+- P3.4: Runtime Kit 以 HEAD 重新生成并通过插件仓库校验; 插件仓库无 targetSdk 29 硬编码. 打包链路发现真实回归: 插件把 `resources.arsc` 压缩写入, 目标 30+ 的用户 APK 在 Android 11+ 无法安装 (inrt 目标 29 时从未暴露); 插件仓库 `ce6dfd9` (v1.0.3, build 42, 配对宿主 5280) 与宿主仓内 `plugins/apk-builder-template` 副本同修 (`RemoteUnsignedApkWriter`, JVM 测试). `tools/sdk37/run_packaged_examples.py` + opt-in `Sdk37PackagedExamplesProducerDeviceTest` 打包 a11y / ui / timer 三个示例并在 37.1 安装运行, 脚本检查 11 / 9 / 9 全部通过 (边到边、预测性返回、定时任务、TTS、loadDex、通知权限、精确闹钟、包可见性、广播).
+- 发现 (WATCH): 插件 ADR (2026-09-02) 的正式路径 (`supportsApkBuild`, 不读开发者开关) 宿主与插件均未实现; HEAD 宿主打包页面只走 `RemoteApkBuildClient` (开发者开关 + `supportsRemoteBuild` + 协议 3), 按仓库既定配置 (`enableRemoteBuild=false`) 构建的插件在 HEAD 宿主一律 NOT_AVAILABLE. 本次插件以 `enableRemoteBuild=true` 构建; 先迁移哪一侧由维护者决定.
+- 未做: 真机 (RC-SMOKE #8 保留; 示例 APK 为 AVD 的 x86_64)、插件发布 / tag、宿主正式路径迁移. AVD 事项: `AVD_API_30` 默认端口 5602 与另一会话撞车, 改 `-port 5610`; 一次 a11y 示例服务 20 s 内未绑定 (刚安装即写设置), runner 改为重写设置最多 3 次.
+- 下次起点: P5 舰队 (`fleet.py plan` 顺序, 每仓一次提交) 与 P4 文档 / CI; P3 只剩 RC-SMOKE #8 与 CI 推送验证.

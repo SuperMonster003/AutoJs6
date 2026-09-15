@@ -1,8 +1,12 @@
 """Create disposable storage-test APKs from an inrt debug APK, without changing runtime code.
 
 Only assets/project and manifest versionCode/storage declarations are changed. The
-fixtures keep the template package name and use a separate test key. Physical
-testing requires --disable-boot and the runner's explicit physical-device mode.
+fixtures keep the template package name and use a separate test key by default.
+The template declares a signature-level permission shared with the host, so a
+fixture that must be installed next to the host (the one-command gate's
+--inrt-apk step) is signed with the host's own key through --signing-properties,
+a Gradle-style sign.properties file. Physical testing requires --disable-boot
+and the runner's explicit physical-device mode.
 This does not test the APK Builder plugin, encryption, RuntimeKit distribution,
 or release signing.
 """
@@ -78,12 +82,37 @@ def manifest(data, version, omit_storage):
     return result
 
 
+def read_signing_properties(path):
+    """Read the four Gradle signing keys; storeFile resolves against the properties file."""
+    values = {}
+    for line in path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line or line.startswith(('#', '!')) or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        values[key.strip()] = value.strip()
+    missing = [k for k in ('storeFile', 'storePassword', 'keyAlias', 'keyPassword') if not values.get(k)]
+    assert not missing, f'{path} lacks {missing}'
+    store = Path(values['storeFile'])
+    if not store.is_absolute():
+        # Same lookup order as the Gradle signing config: beside the properties file, then under app/.
+        candidates = [path.parent / store, path.parent / 'app' / store]
+        store = next((c.resolve() for c in candidates if c.is_file()), candidates[0].resolve())
+    assert store.is_file(), store
+    return {'storeFile': store, 'storePassword': values['storePassword'],
+            'keyAlias': values['keyAlias'], 'keyPassword': values['keyPassword']}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--template', type=Path, required=True)
     parser.add_argument('--sdk', type=Path, required=True)
     parser.add_argument('--jdk', type=Path, required=True)
-    parser.add_argument('--key', type=Path, required=True)
+    signing = parser.add_mutually_exclusive_group(required=True)
+    signing.add_argument('--key', type=Path, help='Disposable test keystore; generated when missing')
+    signing.add_argument('--signing-properties', type=Path,
+                         help='Gradle sign.properties (storeFile, storePassword, keyAlias, keyPassword) of the host build, '
+                              'so the fixtures share the installed host and inrt template certificate')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--version-code', type=int, required=True)
     parser.add_argument('--shared-file', required=True)
@@ -96,14 +125,21 @@ def main():
     bt = args.sdk / 'build-tools/37.0.0'
     exe, bat = ('.exe', '.bat') if os.name == 'nt' else ('', '')
 
-    def run(*command):
-        return subprocess.run([str(v) for v in command], env=env, check=True, capture_output=True, text=True).stdout
+    def run(*command, extra_env=None):
+        return subprocess.run([str(v) for v in command], env=dict(env, **(extra_env or {})),
+                              check=True, capture_output=True, text=True).stdout
 
-    if not args.key.exists():
-        args.key.parent.mkdir(parents=True, exist_ok=True)
-        run(args.jdk / ('bin/keytool' + exe), '-genkeypair', '-keystore', args.key,
-            '-storepass', 'android', '-keypass', 'android', '-alias', 'fixture',
-            '-keyalg', 'RSA', '-validity', '30', '-dname', 'CN=SDK37 storage fixture', '-noprompt')
+    if args.signing_properties:
+        signing = read_signing_properties(args.signing_properties)
+        signing_source = 'signing-properties'
+    else:
+        if not args.key.exists():
+            args.key.parent.mkdir(parents=True, exist_ok=True)
+            run(args.jdk / ('bin/keytool' + exe), '-genkeypair', '-keystore', args.key,
+                '-storepass', 'android', '-keypass', 'android', '-alias', 'fixture',
+                '-keyalg', 'RSA', '-validity', '30', '-dname', 'CN=SDK37 storage fixture', '-noprompt')
+        signing = {'storeFile': args.key, 'storePassword': 'android', 'keyAlias': 'fixture', 'keyPassword': 'android'}
+        signing_source = 'generated-test-key'
     records = []
     for index, case in enumerate(('private', 'shared', 'hidden', 'missing')):
         version = args.version_code + index
@@ -143,8 +179,10 @@ files.append(String(context.getFilesDir().getPath()) + '/storage-result.jsonl', 
             dest.writestr('assets/project/main.js', script, compress_type=zipfile.ZIP_DEFLATED)
         aligned, apk = args.output / (case + '-aligned.apk'), args.output / (case + '.apk')
         run(bt / ('zipalign' + exe), '-f', '-P', '16', '4', unsigned, aligned)
-        run(bt / ('apksigner' + bat), 'sign', '--ks', args.key, '--ks-pass', 'pass:android',
-            '--key-pass', 'pass:android', '--out', apk, aligned)
+        # Passwords travel through the environment so they never appear on a command line.
+        run(bt / ('apksigner' + bat), 'sign', '--ks', signing['storeFile'], '--ks-key-alias', signing['keyAlias'],
+            '--ks-pass', 'env:SDK37_FIXTURE_KS_PASS', '--key-pass', 'env:SDK37_FIXTURE_KEY_PASS', '--out', apk, aligned,
+            extra_env={'SDK37_FIXTURE_KS_PASS': signing['storePassword'], 'SDK37_FIXTURE_KEY_PASS': signing['keyPassword']})
         signer = run(bt / ('apksigner' + bat), 'verify', '--print-certs', apk)
         badging = run(bt / ('aapt2' + exe), 'dump', 'badging', apk)
         assert "package: name='org.autojs.autojs6.inrt'" in badging
@@ -159,7 +197,8 @@ files.append(String(context.getFilesDir().getPath()) + '/storage-result.jsonl', 
         unsigned.unlink()
         aligned.unlink()
     metadata = {'templateSha256': hashlib.sha256(args.template.read_bytes()).hexdigest(),
-                'sharedFile': args.shared_file, 'runOnBoot': not args.disable_boot, 'fixtures': records}
+                'sharedFile': args.shared_file, 'runOnBoot': not args.disable_boot,
+                'signingSource': signing_source, 'fixtures': records}
     (args.output / 'fixtures.json').write_text(json.dumps(metadata, indent=2), encoding='utf-8')
     print(json.dumps(records))
 
