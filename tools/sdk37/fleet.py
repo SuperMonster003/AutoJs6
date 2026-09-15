@@ -218,7 +218,7 @@ BUMP_NOTES = {
     "ar": "رفع compileSdk و targetSdk إلى 37 (Android 17)؛ لا يعتمد سلوك المكون الإضافي على الهدف الجديد",
 }
 # Files a bump may leave modified; anything else means the repository generator did more than expected.
-BUMP_FILE_PREFIXES = ("version.properties", ".changelog/", ".readme/", "README", "app/src/main/assets/doc/")
+BUMP_FILE_PREFIXES = ("version.properties", ".changelog/", ".readme/", "README", "CHANGELOG", "app/src/main/assets/doc/")
 TEST_RUNNER = "androidx.test.runner.AndroidJUnitRunner"
 
 
