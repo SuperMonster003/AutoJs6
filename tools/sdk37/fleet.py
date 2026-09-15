@@ -366,6 +366,19 @@ def debug_apk_dirs(repo):
     return [(f, base / f / "debug", base / "androidTest" / f / "debug") for f in ordered]
 
 
+ABI_SUFFIXES = ("-arm64-v8a", "-armeabi-v7a", "-x86_64", "-x86")
+
+
+def pick_debug_apk(apks):
+    """The universal APK when ABI splits exist: contract tests check the packaged ABI list of the installed package."""
+    apks = sorted(apks)
+    for apk in apks:
+        if "universal" in apk.name:
+            return apk
+    unsplit = [apk for apk in apks if not apk.stem.endswith(ABI_SUFFIXES)]
+    return (unsplit or apks)[0]
+
+
 def device_check(repo, adb, serial, sdk_root, steps, instrument_args=()):
     """Install the debug APK on the AVD, confirm its installed target, and run the androidTest APK if one was built.
 
@@ -386,7 +399,7 @@ def device_check(repo, adb, serial, sdk_root, steps, instrument_args=()):
     if not debug_apks:
         steps.append({"name": "device install", "ok": False, "detail": "no debug APK under app/build/outputs/apk/[<flavor>/]debug"})
         return False
-    apk = next((p for p in debug_apks if "universal" in p.name), debug_apks[0])
+    apk = pick_debug_apk(debug_apks)
     info = describe_apk(aapt2, apk)
     installed = device.call("install", "-r", str(apk), timeout=600)
     dump = device.shell("dumpsys", "package", info["package"])["stdout"]

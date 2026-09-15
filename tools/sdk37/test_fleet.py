@@ -146,6 +146,12 @@ class BumpTest(unittest.TestCase):
             (base / "debug").mkdir()
             self.assertEqual([f for f, _, _ in fleet.debug_apk_dirs(Path(directory))], [""])
 
+    def test_universal_apk_preferred_over_abi_splits(self):
+        names = ["a-v1-arm64-v8a.apk", "a-v1-armeabi-v7a.apk", "a-v1-x86.apk", "a-v1-x86_64.apk", "a-v1.apk"]
+        self.assertEqual(fleet.pick_debug_apk([Path(n) for n in names]).name, "a-v1.apk")
+        self.assertEqual(fleet.pick_debug_apk([Path(n) for n in names[:4] + ["a-v1-universal.apk"]]).name, "a-v1-universal.apk")
+        self.assertEqual(fleet.pick_debug_apk([Path(n) for n in names[:4]]).name, "a-v1-arm64-v8a.apk")
+
     def test_built_in_notes_cover_the_ten_changelog_languages(self):
         languages = sorted(["en", "zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "ja", "ko", "ru", "fr", "es", "ar"])
         self.assertEqual(sorted(fleet.BUMP_NOTES), languages)
