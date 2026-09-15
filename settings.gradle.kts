@@ -134,6 +134,7 @@ private val pluginConformanceTestApps = listOf(
     "ai-provider-conformance",
     "dex-compiler-conformance",
     "lua-runtime-conformance",
+    "mcp-server-conformance",
     "python-runtime-conformance",
     "python-runtime-api-consumer",
     "yolo-provider-conformance",

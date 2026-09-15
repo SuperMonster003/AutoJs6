@@ -73,9 +73,11 @@ jobs:
             :test-apps:ai-provider-conformance:testDebugUnitTest \
             :test-apps:dex-compiler-conformance:testDebugUnitTest \
             :test-apps:lua-runtime-conformance:testDebugUnitTest \
+            :test-apps:mcp-server-conformance:testDebugUnitTest \
             :test-apps:ai-provider-conformance:assembleDebug \
             :test-apps:dex-compiler-conformance:assembleDebug \
             :test-apps:lua-runtime-conformance:assembleDebug \
+            :test-apps:mcp-server-conformance:assembleDebug \
             --no-daemon \
             --build-cache \
             --console=plain \
