@@ -1026,7 +1026,6 @@
     <string name="text_confirm_to_delete">¿Seguro que quieres borrar?</string>
     <string name="text_confirm_to_remove">¿Está seguro de eliminar?</string>
     <string name="text_confirm_to_uninstall">¿Seguro que deseas desinstalar?</string>
-    <string name="text_connect_to_pc">Conectar al PC</string>
     <string name="text_connected">Conectado</string>
     <string name="text_connected_count_with_colon">Conectados: %1$d</string>
     <string name="text_connecting">Conectando</string>
@@ -1783,6 +1782,7 @@
     <string name="text_release_notes">Notas de la versión</string>
     <string name="text_reload_or_convert_to_encoding">Recargar o convertir a %1$s</string>
     <string name="text_remote">remoto</string>
+    <string name="text_remote_connections">Conexiones remotas</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">El archivo remoto se ha guardado correctamente en el almacenamiento local</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">El proyecto remoto se ha guardado correctamente en el almacenamiento local</string>
     <string name="text_remove_all_breakpoints">Eliminar todos los puntos de interrupción</string>

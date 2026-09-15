@@ -1028,7 +1028,6 @@
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
     <string name="text_confirm_to_remove">هل أنت متأكد من إزالته؟</string>
     <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
-    <string name="text_connect_to_pc">الاتصال بالكمبيوتر</string>
     <string name="text_connected">متصل</string>
     <string name="text_connected_count_with_colon">متصل: %1$d</string>
     <string name="text_connecting">جارٍ الاتصال</string>
@@ -1785,6 +1784,7 @@
     <string name="text_release_notes">ملاحظات الإصدار</string>
     <string name="text_reload_or_convert_to_encoding">إعادة التحميل أو التحويل إلى %1$s</string>
     <string name="text_remote">التحكم عن بعد</string>
+    <string name="text_remote_connections">الاتصالات عن بعد</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>

@@ -1019,7 +1019,6 @@
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
     <string name="text_confirm_to_remove">Are you sure to remove?</string>
     <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
-    <string name="text_connect_to_pc">Connect to PC</string>
     <string name="text_connected">Connected</string>
     <string name="text_connected_count_with_colon">Connected: %1$d</string>
     <string name="text_connecting">Connecting</string>
@@ -1771,6 +1770,7 @@
     <string name="text_release_notes">Release notes</string>
     <string name="text_reload_or_convert_to_encoding">Reload or convert to %1$s</string>
     <string name="text_remote">remote</string>
+    <string name="text_remote_connections">Remote connections</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>
     <string name="text_remove_all_breakpoints">Remove all breakpoints</string>

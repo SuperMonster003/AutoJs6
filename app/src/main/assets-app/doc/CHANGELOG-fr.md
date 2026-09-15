@@ -388,6 +388,7 @@
 * `Amélioration` L'aide du service au premier plan explique les restrictions audio en arrière-plan d'Android 17 et comment redémarrer le service depuis l'application visible avant de relancer la lecture
 * `Amélioration` Rendre explicite la délégation de lancement de l'Activity du plugin Sélecteur de couleur, avec des options de l'expéditeur liées à la visibilité de l'hôte sous Android 16 et versions ultérieures
 * `Amélioration` Conseils de reprise des connexions LAN HTTP, WebSocket et du pont réseau contrôlé Node, conservant les erreurs originales et expliquant la reprise après autorisation; conversion des noms de permissions indépendante de la langue du système
+* `Amélioration` Renommer le groupe du tiroir d'accueil "Connexion au PC" en "Connexions à distance" pour regrouper les modes client et serveur ainsi que MCP Server
 * `Amélioration` Passage du compileSdk du projet à 37 (Android 17) et amélioration des builds de débogage et de la vérification lint pour la migration du SDK
 * `Amélioration` Passage du targetSdk de l'application et des applications empaquetées (inrt) à 37 (Android 17); les applications empaquetées passent du targetSdk 29 à 37, la permission réseau local est demandée à la demande sur Android 17 et les applications empaquetées guident l'accès au stockage partagé si nécessaire
 * `Amélioration` Unifier l'inspection des paquets à 262144 entrées et augmenter les budgets des paquets, analyses imbriquées, manifestes et métadonnées pour les grands fichiers APK/AAB/APKS

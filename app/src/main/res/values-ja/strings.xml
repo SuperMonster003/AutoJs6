@@ -1027,7 +1027,6 @@
     <string name="text_confirm_to_delete">本当に削除しますか?</string>
     <string name="text_confirm_to_remove">本当に削除しますか?</string>
     <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
-    <string name="text_connect_to_pc">PC に接続する</string>
     <string name="text_connected">接続済み</string>
     <string name="text_connected_count_with_colon">接続済み: %1$d</string>
     <string name="text_connecting">接続中</string>
@@ -1784,6 +1783,7 @@
     <string name="text_release_notes">リリースノート</string>
     <string name="text_reload_or_convert_to_encoding">再読み込みまたは %1$s に変換</string>
     <string name="text_remote">リモート</string>
+    <string name="text_remote_connections">リモート接続</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモートファイルがローカルストレージに正常に保存されました</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>

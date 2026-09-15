@@ -973,7 +973,7 @@ open class DrawerFragment : Fragment() {
             mPointerLocationItem,
             mScreenColorPickerItem,
             mTerminalItem,
-            DrawerMenuGroup(R.string.text_connect_to_pc),
+            DrawerMenuGroup(R.string.text_remote_connections),
             mClientModeItem,
             mServerModeItem,
             mMcpServerItem,

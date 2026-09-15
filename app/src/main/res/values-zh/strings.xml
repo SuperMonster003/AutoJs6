@@ -1023,7 +1023,6 @@
     <string name="text_confirm_to_delete">是否确定删除</string>
     <string name="text_confirm_to_remove">是否确定移除</string>
     <string name="text_confirm_to_uninstall">是否确定卸载</string>
-    <string name="text_connect_to_pc">连接到计算机</string>
     <string name="text_connected">已连接</string>
     <string name="text_connected_count_with_colon">已连接: %1$d</string>
     <string name="text_connecting">连接中</string>
@@ -1780,6 +1779,7 @@
     <string name="text_release_notes">发行说明</string>
     <string name="text_reload_or_convert_to_encoding">重新加载或转换为 %1$s</string>
     <string name="text_remote">远程</string>
+    <string name="text_remote_connections">远程连接</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">远程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">远程项目已保存至本地</string>
     <string name="text_remove_all_breakpoints">删除所有断点</string>

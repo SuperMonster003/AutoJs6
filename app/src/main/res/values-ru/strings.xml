@@ -1026,7 +1026,6 @@
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
-    <string name="text_connect_to_pc">Подключитесь к ПК</string>
     <string name="text_connected">Подключено</string>
     <string name="text_connected_count_with_colon">Подключено: %1$d</string>
     <string name="text_connecting" tools:ignore="TypographyEllipsis">Подключение...</string>
@@ -1783,6 +1782,7 @@
     <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_reload_or_convert_to_encoding">Перезагрузить или преобразовать в %1$s</string>
     <string name="text_remote">удаленный</string>
+    <string name="text_remote_connections">Удалённые подключения</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
     <string name="text_remove_all_breakpoints">Удалить все точки останова</string>

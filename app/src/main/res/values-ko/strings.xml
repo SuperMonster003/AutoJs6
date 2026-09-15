@@ -1028,7 +1028,6 @@
     <string name="text_confirm_to_delete">삭제 하시겠습니까?</string>
     <string name="text_confirm_to_remove">제거 하시겠습니까?</string>
     <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
-    <string name="text_connect_to_pc">PC 에 연결하십시오</string>
     <string name="text_connected">연결됨</string>
     <string name="text_connected_count_with_colon">연결됨: %1$d</string>
     <string name="text_connecting">연결 중</string>
@@ -1785,6 +1784,7 @@
     <string name="text_release_notes">릴리스 노트</string>
     <string name="text_reload_or_convert_to_encoding">%1$s 인코딩으로 다시 로드 또는 변환</string>
     <string name="text_remote">원격</string>
+    <string name="text_remote_connections">원격 연결</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>
     <string name="text_remove_all_breakpoints">모든 중단 점을 제거하십시오</string>

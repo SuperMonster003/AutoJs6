@@ -1026,7 +1026,6 @@
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer ?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer ?</string>
     <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
-    <string name="text_connect_to_pc">Connexion au PC</string>
     <string name="text_connected">Connecté</string>
     <string name="text_connected_count_with_colon">Connectés : %1$d</string>
     <string name="text_connecting">Connexion en cours</string>
@@ -1783,6 +1782,7 @@
     <string name="text_release_notes">Notes de version</string>
     <string name="text_reload_or_convert_to_encoding">Recharger ou convertir en %1$s</string>
     <string name="text_remote">à distance</string>
+    <string name="text_remote_connections">Connexions à distance</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
     <string name="text_remove_all_breakpoints">Supprimer tous les points d\'arrêt</string>

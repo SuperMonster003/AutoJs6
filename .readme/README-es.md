@@ -550,6 +550,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
 * `Mejora` Explicitar la delegación de inicio de Activity del complemento Selector de color de pantalla, con opciones del emisor vinculadas a la visibilidad del anfitrión en Android 16 y posteriores
 * `Mejora` Indicaciones para recuperar conexiones LAN HTTP, WebSocket y del puente de red controlado de Node, conservando los errores originales y explicando el reintento tras la autorización; conversión de permisos independiente del idioma del sistema
+* `Mejora` Renombrar el grupo del cajón de inicio de "Conectar al PC" a "Conexiones remotas" para incluir los modos cliente y servidor y MCP Server
 * `Mejora` Actualización del compileSdk del proyecto a 37 (Android 17) y mejoras en las compilaciones de depuración y la verificación lint para la migración del SDK
 * `Mejora` Actualización del targetSdk de la aplicación y de las aplicaciones empaquetadas (inrt) a 37 (Android 17); las aplicaciones empaquetadas pasan del targetSdk 29 al 37, el permiso de red local se solicita bajo demanda en Android 17 y las aplicaciones empaquetadas guían el acceso al almacenamiento compartido cuando es necesario
 * `Mejora` Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes
