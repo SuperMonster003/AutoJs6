@@ -8,10 +8,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
@@ -48,8 +46,6 @@ class RemoteApkBuildStabilityBatchDeviceTest {
     @Test
     fun runsRealBinderStabilityAndCancellationBatch() {
         val qualification = requireQualificationEnvironment()
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
-        assertFalse("G2 qualification must start with the host gate disabled", previousGate)
 
         val root = File(context.cacheDir, "$PRIVATE_ROOT_PREFIX-${qualification.tier}").apply {
             deleteRecursively()
@@ -65,7 +61,6 @@ class RemoteApkBuildStabilityBatchDeviceTest {
 
         var primaryFailure: Throwable? = null
         try {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
 
             val warmup = BuildSpec.create(
                 tier = qualification.tier,
@@ -208,8 +203,6 @@ class RemoteApkBuildStabilityBatchDeviceTest {
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = it }
             runCatching { root.deleteRecursively() }
                 .onFailure { error -> cleanupFailure = appendFailure(cleanupFailure, error) }
             context.cacheDir.listFiles()

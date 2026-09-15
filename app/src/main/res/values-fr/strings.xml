@@ -293,8 +293,7 @@
     <string name="error_android_package_file_unavailable">Le fichier du package Android est indisponible</string>
     <string name="error_android_package_installation_failed">Échec de l\'installation du package: %1$s</string>
     <string name="error_android_package_operation_in_progress">Une autre opération de package Android est déjà en cours</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">La construction distante d\'APK est désactivée par le commutateur développeur d\'AutoJs6.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Le plug-in APK Builder installé n\'annonce pas de construction distante expérimentale d\'APK compatible. Installez une version compatible du plug-in qui annonce cette capacité, ou désactivez le commutateur développeur.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Le plug-in APK Builder installé n\'annonce pas de capacité de construction d\'APK compatible. Installez une version du plug-in correspondant à cette version d\'AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Le plugin APK Builder installé prend en charge les versionCode d\'hôte AutoJs6 %1$d-%2$d, mais l\'hôte actuel est %3$d. Installez la version correspondante du plugin.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Le plugin APK Builder installé n\'est pas signé avec un certificat officiel approuvé, la construction est donc bloquée. Package: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée</string>
@@ -689,7 +688,6 @@
     <string name="summary_ace_word_wrap_enabled">Renvoyer les lignes longues dans la zone visible de l\'éditeur</string>
     <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
-    <string name="summary_apk_builder_remote_build_r1">Réservé à l\'activation explicite R1. Un échec distant arrête la construction en cours et préserve toute sortie existante; le repli local automatique n\'est pas encore disponible.</string>
     <string name="summary_clear_media_playback_history">Supprimer toutes les positions de lecture enregistrées par l\'hôte</string>
     <string name="summary_code_editor_settings">Ouvrir la page complète des paramètres de l\'éditeur de code</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx intégré uniquement; AAR reste toujours intégré</string>
@@ -863,7 +861,6 @@
     <string name="text_android_sdk_version">Version du SDK Android</string>
     <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder est indisponible</string>
-    <string name="text_apk_builder_remote_build">Activer la construction distante expérimentale d\'APK</string>
     <string name="text_apk_template_plugin_risk_prompt">Le plugin de modèle APK Builder installé n\'est pas entièrement compatible avec la version actuelle d\'AutoJs6. Continuer peut empêcher l\'application empaquetée de démarrer, lui faire utiliser des API incompatibles ou omettre certains modules.</string>
     <string name="text_apk_template_unavailable">Le modèle APK Builder est indisponible</string>
     <string name="text_apk_template_unavailable_prompt">Aucun modèle APK Builder utilisable n\'a été trouvé. Cette version d\'AutoJs6 n\'inclut pas de fichier template.apk intégré et aucun plugin de modèle APK Builder lisible n\'est disponible. Installez et activez un plugin de modèle compatible, puis réessayez.</string>

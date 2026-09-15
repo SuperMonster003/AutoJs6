@@ -48,19 +48,6 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
-        app:title="@string/text_apk_builder">
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:key="@string/key_apk_builder_remote_build_enabled"
-            app:layout="@layout/preference_custom"
-            app:defaultValue="@bool/pref_apk_builder_remote_build_enabled"
-            app:summary="@string/summary_apk_builder_remote_build_r1"
-            app:title="@string/text_apk_builder_remote_build" />
-
-    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
-
-    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-        app:layout="@layout/preference_category_custom"
         app:title="@string/text_dex_compiler">
 
         <org.autojs.autojs.ui.settings.DexCompilerPreference

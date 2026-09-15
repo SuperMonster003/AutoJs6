@@ -5,20 +5,15 @@ internal object RemoteApkBuildAdmissionPolicy {
 
     enum class Decision {
         ALLOW,
-        RUNTIME_DISABLED,
         CAPABILITY_MISSING,
         PROTOCOL_TOO_OLD,
     }
 
     fun evaluate(
-        runtimeEnabled: Boolean,
         capabilityAdvertised: Boolean,
         advertisedProtocolVersion: Int,
         requiredProtocolVersion: Int,
     ): Decision {
-        if (!runtimeEnabled) {
-            return Decision.RUNTIME_DISABLED
-        }
         if (!capabilityAdvertised) {
             return Decision.CAPABILITY_MISSING
         }

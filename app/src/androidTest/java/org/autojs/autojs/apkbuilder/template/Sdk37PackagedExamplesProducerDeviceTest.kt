@@ -3,10 +3,8 @@ package org.autojs.autojs.apkbuilder.template
 import android.content.res.AssetManager
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.junit.Assert.assertEquals
@@ -35,13 +33,11 @@ class Sdk37PackagedExamplesProducerDeviceTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
         val assets = instrumentation.context.assets
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
         val root = File(context.cacheDir, "sdk37-packaged").apply {
             deleteRecursively()
             mkdirs()
         }
         try {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             for (example in EXAMPLES) {
                 val source = File(root, example.name).apply { mkdirs() }
                 copyAssetDirectory(assets, "$ASSET_ROOT/${example.name}", source)
@@ -77,7 +73,6 @@ class Sdk37PackagedExamplesProducerDeviceTest {
                 assertTrue("${example.name}: empty output", output.length() > 0)
             }
         } finally {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate)
             root.deleteRecursively()
         }
     }

@@ -91,14 +91,14 @@ object ApkBuilderTemplateMetadata {
                 putString(ApkBuilderTemplateCapabilityKeys.RESOURCES_CONTRACT_HASH, contract.optStringOrNull("resourcesContractHash"))
                 putString(ApkBuilderTemplateCapabilityKeys.NATIVE_LIB_MANIFEST_HASH, contract.optStringOrNull("nativeLibManifestHash"))
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_TEMPLATE_APK, true)
-                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, BuildConfig.ENABLE_REMOTE_BUILD)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, true)
                 putInt(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION, remoteBuildProtocolVersion)
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_KEYSTORE_OPERATIONS, true)
                 putInt(
                     ApkBuilderTemplateCapabilityKeys.KEYSTORE_API_VERSION,
                     ApkBuilderTemplateProtocol.KEYSTORE_VERSION,
                 )
-                putString("remoteBuildStatus", if (BuildConfig.ENABLE_REMOTE_BUILD) "enabled" else "disabled")
+                putString("remoteBuildStatus", "enabled")
                 putInt("remoteBuildApiVersion", ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
             },
         )

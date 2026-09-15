@@ -12,13 +12,7 @@ plugins {
 
 val buildTypeRelease = "release"
 val apkFileExtension = "apk"
-val enableRemoteBuildProperty = "autojs.apkBuilder.templatePlugin.enableRemoteBuild"
 val runtimeKitDirProperty = "autojs.apkBuilder.templatePlugin.runtimeKitDir"
-val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
-    .map { value ->
-        value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
-    }
-    .orElse(true)
 
 private fun Any.reflectedNoArgMethod(name: String): Any? =
     javaClass.methods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }?.invoke(this)
@@ -55,7 +49,6 @@ android {
         buildConfigField("String", "HOST_VERSION_NAME", "\"${versions.appVersionName}\"")
         buildConfigField("long", "HOST_VERSION_CODE", "${versions.appVersionCode}L")
         buildConfigField("int", "PROTOCOL_VERSION", "2")
-        buildConfigField("boolean", "ENABLE_REMOTE_BUILD", enableRemoteBuild.get().toString())
         buildConfigField("int", "REMOTE_BUILD_PROTOCOL_VERSION", "2")
         buildConfigField("String", "TEMPLATE_PACKAGE_NAME", "\"org.autojs.autojs6.inrt\"")
     }

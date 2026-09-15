@@ -854,7 +854,7 @@ The runner checks that the plugin's `assets/runtime-kit/runtime-kit.json` names 
 installed host's versionCode, runs the opt-in producer test
 (`Sdk37PackagedExamplesProducerDeviceTest`, `-e autojs.sdk37.produceExamples true`)
 which packages the examples through `RemoteApkBuildClient.buildBlocking` exactly
-as `BuildActivity` does (developer switch on, preferred plugin package), pulls the
+as `BuildActivity` does (preferred plugin package), pulls the
 signed APKs, checks their badging, installs each one, launches it and waits for
 the receipt. For `a11y` it enables the example's own accessibility service and
 restores the original service list afterwards; for `ui` it sends BACK and expects
@@ -864,7 +864,7 @@ subset, `--keep-installed` leaves the apps for inspection. Output: `examples.jso
 and `examples.md`; exit status 1 when any step fails. Host-side self-checks:
 `python tools/sdk37/test_packaged_examples.py`.
 
-The host at HEAD admits a plugin only when it advertises remote build
-(`supportsRemoteBuild`, protocol 3); build the plugin with
-`-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true` and
+The host admits a plugin that declares the build capability (`supportsRemoteBuild`,
+protocol 3), which official plugin builds always do since 1.0.3; there is no host-side
+developer switch any more. Build the plugin with
 `-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<kit>`.

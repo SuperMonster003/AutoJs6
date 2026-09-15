@@ -294,8 +294,7 @@
     <string name="error_android_package_file_unavailable">Android パッケージファイルを利用できません</string>
     <string name="error_android_package_installation_failed">パッケージのインストールに失敗しました: %1$s</string>
     <string name="error_android_package_operation_in_progress">別の Android パッケージ操作がすでに進行中です</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">AutoJs6 の開発者向けスイッチによりリモート APK ビルドは無効です.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">インストール済みの APK Builder プラグインは, 互換性のある実験的リモート APK ビルド機能を宣言していません. この機能を宣言する互換プラグインビルドをインストールするか, 開発者向けスイッチをオフにしてください.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">インストール済みの APK Builder プラグインは, 互換性のある APK ビルド機能を宣言していません. この AutoJs6 バージョンに対応するプラグインビルドをインストールしてください.</string>
     <string name="error_apk_builder_template_host_version_outside_range">インストール済みの APK Builder プラグインが対応する AutoJs6 ホスト versionCode は %1$d-%2$d ですが, 現在のホストは %3$d です. 対応するプラグイン版をインストールしてください.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">インストール済みの APK Builder プラグインは信頼された公式証明書で署名されていないため, ビルドをブロックしました. パッケージ: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
@@ -690,7 +689,6 @@
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
-    <string name="summary_apk_builder_remote_build_r1">R1 の明示的な試用専用です. リモート処理の失敗時は現在のビルドを停止し, 既存の出力を保持します; ローカルへの自動フォールバックはまだ利用できません.</string>
     <string name="summary_clear_media_playback_history">ホストが保存したすべての再生位置を削除します</string>
     <string name="summary_code_editor_settings">コードエディターの全設定ページを開く</string>
     <string name="summary_dex_compiler_experimental_disabled">組み込み D8/dx のみ; AAR は常に組み込み経路</string>
@@ -864,7 +862,6 @@
     <string name="text_android_sdk_version">Android SDK バージョン</string>
     <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder は使用できません</string>
-    <string name="text_apk_builder_remote_build">実験的なリモート APK ビルドを有効化</string>
     <string name="text_apk_template_plugin_risk_prompt">インストールされている APK Builder テンプレートプラグインは, 現在の AutoJs6 バージョンと完全には互換性がありません. 続行すると, パッケージ化したアプリが起動できない, API が一致しない, 一部のモジュールが不足するなどの問題が発生する可能性があります.</string>
     <string name="text_apk_template_unavailable">APK Builder テンプレートを利用できません</string>
     <string name="text_apk_template_unavailable_prompt">使用可能な APK Builder テンプレートが見つかりません. この AutoJs6 ビルドには組み込みの template.apk が含まれておらず, 読み取り可能な APK Builder テンプレートプラグインもありません. バージョンが一致するテンプレートプラグインをインストールして有効にしてから, もう一度試してください.</string>

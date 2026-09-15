@@ -293,8 +293,7 @@
     <string name="error_android_package_file_unavailable">Файл пакета Android недоступен</string>
     <string name="error_android_package_installation_failed">Не удалось установить пакет: %1$s</string>
     <string name="error_android_package_operation_in_progress">Другая операция с пакетом Android уже выполняется</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">Удалённая сборка APK отключена переключателем для разработчиков AutoJs6.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Установленный плагин APK Builder не объявляет совместимую экспериментальную удалённую сборку APK. Установите совместимую сборку плагина с этой возможностью или отключите переключатель для разработчиков.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">Установленный плагин APK Builder не объявляет совместимую возможность сборки APK. Установите сборку плагина, соответствующую этой версии AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Установленный плагин APK Builder поддерживает versionCode хоста AutoJs6 %1$d-%2$d, но текущий хост имеет код %3$d. Установите соответствующую версию плагина.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Установленный плагин APK Builder не подписан доверенным официальным сертификатом, поэтому сборка заблокирована. Пакет: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">Приложение не установлено</string>
@@ -689,7 +688,6 @@
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
-    <string name="summary_apk_builder_remote_build_r1">Только для явного участия в R1. Сбой удалённой сборки останавливает текущую сборку и сохраняет существующий результат; автоматический переход на локальную сборку пока недоступен.</string>
     <string name="summary_clear_media_playback_history">Удалить все позиции воспроизведения, сохранённые хостом</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
     <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
@@ -863,7 +861,6 @@
     <string name="text_android_sdk_version">Версия SDK для Android</string>
     <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder недоступен</string>
-    <string name="text_apk_builder_remote_build">Включить экспериментальную удалённую сборку APK</string>
     <string name="text_apk_template_plugin_risk_prompt">Установленный плагин шаблона APK Builder не полностью совместим с текущей версией AutoJs6. Продолжение может привести к тому, что упакованное приложение не запустится, будет использовать несовместимые API или не будет содержать некоторые модули.</string>
     <string name="text_apk_template_unavailable">Шаблон APK Builder недоступен</string>
     <string name="text_apk_template_unavailable_prompt">Подходящий шаблон APK Builder не найден. Эта сборка AutoJs6 не содержит встроенный template.apk, и доступный для чтения плагин шаблона APK Builder отсутствует. Установите и включите совместимый плагин шаблона, затем повторите попытку.</string>

@@ -295,8 +295,7 @@
     <string name="error_android_package_file_unavailable">ملف حزمة Android غير متاح</string>
     <string name="error_android_package_installation_failed">فشل تثبيت الحزمة: %1$s</string>
     <string name="error_android_package_operation_in_progress">هناك عملية أخرى لحزمة Android قيد التنفيذ بالفعل</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">تم تعطيل إنشاء APK عن بعد بواسطة مفتاح المطور في AutoJs6.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">لا يعلن مكوّن APK Builder الإضافي المثبت عن دعم إنشاء APK تجريبي متوافق عن بعد. ثبّت إصدارًا متوافقًا من المكوّن الإضافي يعلن هذه الإمكانية، أو أوقف مفتاح المطور.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">لا يعلن مكوّن APK Builder الإضافي المثبت عن قدرة متوافقة على إنشاء APK. ثبّت إصدارًا من المكوّن الإضافي يطابق إصدار AutoJs6 هذا.</string>
     <string name="error_apk_builder_template_host_version_outside_range">يدعم ملحق APK Builder المثبت رموز versionCode لمضيف AutoJs6 من %1$d إلى %2$d, لكن المضيف الحالي هو %3$d. ثبّت إصدار الملحق المطابق.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">ملحق APK Builder المثبت غير موقع بشهادة رسمية موثوقة, لذلك تم حظر البناء. الحزمة: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">التطبيق غير مثبت</string>
@@ -691,7 +690,6 @@
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
-    <string name="summary_apk_builder_remote_build_r1">للاشتراك الصريح في R1 فقط. يؤدي فشل البناء عن بعد إلى إيقاف البناء الحالي مع الاحتفاظ بأي مخرجات موجودة; ولا يتوفر بعد رجوع محلي تلقائي.</string>
     <string name="summary_clear_media_playback_history">حذف جميع مواضع تشغيل الوسائط التي حفظها المضيف</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx المدمج فقط; يظل AAR على المسار المدمج دائما</string>
@@ -865,7 +863,6 @@
     <string name="text_android_sdk_version">إصدار Android SDK</string>
     <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder غير متوفر</string>
-    <string name="text_apk_builder_remote_build">تمكين إنشاء APK التجريبي عن بعد</string>
     <string name="text_apk_template_plugin_risk_prompt">المكون الإضافي لقالب APK Builder المثبت غير متوافق تماما مع إصدار AutoJs6 الحالي. قد تؤدي المتابعة إلى فشل تشغيل التطبيق المحزم أو استخدام API غير متطابقة أو فقدان بعض الوحدات.</string>
     <string name="text_apk_template_unavailable">قالب APK Builder غير متاح</string>
     <string name="text_apk_template_unavailable_prompt">لم يعثر على قالب APK Builder صالح للاستخدام. لا يتضمن إصدار AutoJs6 هذا ملف template.apk مضمنا, ولا يتوفر مكون إضافي قابل للقراءة لقالب APK Builder. ثبت مكونا إضافيا مطابقا للقالب ومكنه, ثم حاول مرة أخرى.</string>

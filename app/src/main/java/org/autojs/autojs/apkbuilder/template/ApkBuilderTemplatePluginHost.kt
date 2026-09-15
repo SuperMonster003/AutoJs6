@@ -101,9 +101,6 @@ object ApkBuilderTemplatePluginHost {
         requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
         preferredPackageName: String? = null,
     ): ResolvedRemoteBuilder? {
-        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
-            return null
-        }
         val appContext = context.applicationContext
         val target = remoteBuildCandidates(appContext, requiredProtocolVersion)
             .firstOrNull { preferredPackageName == null || it.serviceInfo.packageName == preferredPackageName }
@@ -120,9 +117,6 @@ object ApkBuilderTemplatePluginHost {
         callback: IApkBuildCallback?,
         preferredPackageName: String? = null,
     ): OpenedBuildSession? {
-        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
-            return null
-        }
         val appContext = context.applicationContext
         val requiredProtocolVersion = request.requiredProtocolVersion.takeIf { it > 0 }
             ?: ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION
@@ -157,11 +151,7 @@ object ApkBuilderTemplatePluginHost {
         preferredPackageName: String? = null,
     ): ApkKeyStoreResult? {
         val appContext = context.applicationContext
-        val target = remoteBuildCandidates(
-            appContext,
-            ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
-            enforceRuntimeGate = false,
-        )
+        val target = remoteBuildCandidates(appContext, ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
             .firstOrNull { candidate ->
                 (preferredPackageName == null || candidate.serviceInfo.packageName == preferredPackageName) &&
                         supportsKeyStoreOperations(candidate.pluginInfo)
@@ -182,18 +172,13 @@ object ApkBuilderTemplatePluginHost {
     private suspend fun remoteBuildCandidates(
         context: Context,
         requiredProtocolVersion: Int,
-        enforceRuntimeGate: Boolean = true,
     ): List<AidlPluginHost.Discovered> {
-        val runtimeEnabled = !enforceRuntimeGate || RemoteApkBuildRuntimeGate.isEnabled()
-        if (!runtimeEnabled) {
-            return emptyList()
-        }
         return discover(context)
             .asSequence()
             .filter { isOfficialTemplatePlugin(context, it) }
             .filter { isDeclaredHostVersionCompatible(it.pluginInfo) }
             .filter { isDeviceAbiCompatible(it.pluginInfo) }
-            .filter { supportsRemoteBuild(it.pluginInfo, requiredProtocolVersion, runtimeEnabled) }
+            .filter { supportsRemoteBuild(it.pluginInfo, requiredProtocolVersion) }
             .sortedWith(
                 compareByDescending<AidlPluginHost.Discovered> { isExactHostVersionMatch(it.pluginInfo) }
                     .thenByDescending { remoteBuildProtocolVersion(it.pluginInfo) }
@@ -205,9 +190,6 @@ object ApkBuilderTemplatePluginHost {
 
     suspend fun unavailableWarnings(context: Context): List<String> {
         val appContext = context.applicationContext
-        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
-            return listOf(appContext.getString(R.string.error_apk_builder_remote_build_disabled_by_runtime_gate))
-        }
         val discovered = discover(appContext)
             .filter { it.serviceInfo.packageName == ApkBuilderTemplatePluginIds.PACKAGE_NAME }
         if (discovered.isEmpty()) {
@@ -321,7 +303,6 @@ object ApkBuilderTemplatePluginHost {
                     !supportsRemoteBuild(
                         pluginInfo = it.pluginInfo,
                         requiredProtocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
-                        runtimeEnabled = true,
                     )
         }
         if (remoteBuildUnavailableItems.isNotEmpty()) {
@@ -405,7 +386,6 @@ object ApkBuilderTemplatePluginHost {
     private fun supportsRemoteBuild(
         pluginInfo: PluginInfo?,
         requiredProtocolVersion: Int,
-        runtimeEnabled: Boolean,
     ): Boolean {
         val capabilities = pluginInfo?.capabilities
         @Suppress("DEPRECATION")
@@ -413,7 +393,6 @@ object ApkBuilderTemplatePluginHost {
             capabilities?.get(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD)
         )
         return RemoteApkBuildAdmissionPolicy.evaluate(
-            runtimeEnabled = runtimeEnabled,
             capabilityAdvertised = capabilityAdvertised,
             advertisedProtocolVersion = remoteBuildProtocolVersion(pluginInfo),
             requiredProtocolVersion = requiredProtocolVersion,

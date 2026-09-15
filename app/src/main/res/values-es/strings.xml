@@ -293,8 +293,7 @@
     <string name="error_android_package_file_unavailable">El archivo del paquete Android no está disponible</string>
     <string name="error_android_package_installation_failed">Error al instalar el paquete: %1$s</string>
     <string name="error_android_package_operation_in_progress">Ya hay otra operación de paquete Android en curso</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">La compilación remota de APK está desactivada mediante el interruptor para desarrolladores de AutoJs6.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">El complemento APK Builder instalado no anuncia una compilación remota experimental de APK compatible. Instala una compilación compatible del complemento que anuncie esta capacidad o desactiva el interruptor para desarrolladores.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">El complemento APK Builder instalado no declara una capacidad de compilación de APK compatible. Instala una compilación del complemento que coincida con esta versión de AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">El complemento APK Builder instalado admite los versionCode de host de AutoJs6 %1$d-%2$d, pero el host actual es %3$d. Instala la versión de complemento correspondiente.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">El complemento APK Builder instalado no está firmado con un certificado oficial de confianza, por lo que se bloqueó la compilación. Paquete: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">La aplicación no está instalada</string>
@@ -689,7 +688,6 @@
     <string name="summary_ace_word_wrap_enabled">Ajustar las líneas largas dentro del área visible del editor</string>
     <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
-    <string name="summary_apk_builder_remote_build_r1">Solo para la participación explícita en R1. Un fallo remoto detiene la compilación actual y conserva cualquier salida existente; la compilación local de reserva automática aún no está disponible.</string>
     <string name="summary_clear_media_playback_history">Eliminar todas las posiciones de reproducción guardadas por el host</string>
     <string name="summary_code_editor_settings">Abrir la página completa de ajustes del editor de código</string>
     <string name="summary_dex_compiler_experimental_disabled">Solo D8/dx integrado; AAR siempre usa la ruta integrada</string>
@@ -863,7 +861,6 @@
     <string name="text_android_sdk_version">Versión del SDK de Android</string>
     <string name="text_apk_builder">APK Builder</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder no está disponible</string>
-    <string name="text_apk_builder_remote_build">Activar la compilación remota experimental de APK</string>
     <string name="text_apk_template_plugin_risk_prompt">El complemento de plantilla APK Builder instalado no es totalmente compatible con la versión actual de AutoJs6. Continuar puede impedir que la aplicación empaquetada se inicie, hacer que use API incompatibles u omitir algunos módulos.</string>
     <string name="text_apk_template_unavailable">La plantilla APK Builder no está disponible</string>
     <string name="text_apk_template_unavailable_prompt">No se encontró una plantilla APK Builder utilizable. Esta compilación de AutoJs6 no incluye template.apk integrada y no hay disponible ningún complemento de plantilla APK Builder legible. Instala y activa un complemento de plantilla compatible e inténtalo de nuevo.</string>

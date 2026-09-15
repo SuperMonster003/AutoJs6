@@ -10,11 +10,9 @@ import androidx.test.runner.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.apkbuilder.ApkBuilder
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.json.JSONObject
@@ -48,8 +46,6 @@ class RemoteApkBuildEquivalenceMatrixDeviceTest {
     fun producesRemoteUpgradeMatrixThroughCompatibilityFacade() {
         requireQualificationEnvironment()
 
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
-        assertFalse("G3 remote matrix must start with the host gate disabled", previousGate)
         val externalFiles = requireNotNull(context.getExternalFilesDir(null))
         val specs = listOf(
             BuildSpec(100, File(externalFiles, "m3-g3-ui-remote-v100.apk")),
@@ -70,7 +66,6 @@ class RemoteApkBuildEquivalenceMatrixDeviceTest {
         var succeeded = false
         var primaryFailure: Throwable? = null
         try {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             RemoteApkBuildDiagnostics.resetForTest()
             val observations = specs.map { spec -> buildOne(root, spec) }
 
@@ -101,8 +96,6 @@ class RemoteApkBuildEquivalenceMatrixDeviceTest {
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = it }
             runCatching { root.deleteRecursively() }
                 .onFailure { error -> cleanupFailure = appendFailure(cleanupFailure, error) }
             if (!succeeded) {
@@ -119,7 +112,6 @@ class RemoteApkBuildEquivalenceMatrixDeviceTest {
             }
         }
         assertFalse("G3 remote matrix private root survived cleanup", root.exists())
-        assertEquals(previousGate, Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false))
     }
 
     @Suppress("DEPRECATION")

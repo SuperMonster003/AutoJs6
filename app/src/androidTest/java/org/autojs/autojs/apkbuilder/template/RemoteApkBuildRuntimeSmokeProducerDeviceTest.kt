@@ -7,10 +7,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
@@ -43,8 +41,6 @@ class RemoteApkBuildRuntimeSmokeProducerDeviceTest {
     fun producesDirectoryAndSingleFileRuntimeSmokeApks() {
         requireQualificationEnvironment()
 
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
-        assertFalse("Runtime-smoke qualification must start with the host gate disabled", previousGate)
         val root = File(context.cacheDir, PRIVATE_PATH_SENTINEL).apply {
             deleteRecursively()
             check(mkdirs())
@@ -92,7 +88,6 @@ class RemoteApkBuildRuntimeSmokeProducerDeviceTest {
                 Charsets.UTF_8,
             )
 
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             RemoteApkBuildDiagnostics.resetForTest()
 
             val observations = specs.mapIndexed { index, spec ->
@@ -149,8 +144,6 @@ class RemoteApkBuildRuntimeSmokeProducerDeviceTest {
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = it }
             runCatching { root.deleteRecursively() }
                 .onFailure { error -> cleanupFailure = appendFailure(cleanupFailure, error) }
             if (!succeeded) {

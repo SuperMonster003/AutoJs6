@@ -9,10 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.junit.Assert.assertArrayEquals
@@ -49,7 +47,6 @@ class RemoteApkBuildBinderDeathDeviceTest {
     fun realPluginDeathIsOneRedactedTerminalAndPreservesExistingOutput() {
         requireQualificationEnvironment()
 
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
         val root = File(context.cacheDir, SENSITIVE_PATH_SENTINEL).apply {
             deleteRecursively()
             check(mkdirs())
@@ -89,7 +86,6 @@ class RemoteApkBuildBinderDeathDeviceTest {
             )
             writeLargeFixture(File(root, "payload.bin"), LARGE_FIXTURE_BYTES)
 
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             RemoteApkBuildDiagnostics.resetForTest()
 
             val outcome = RemoteApkBuildClient.buildBlocking(
@@ -181,8 +177,6 @@ class RemoteApkBuildBinderDeathDeviceTest {
                     }
                 }.onFailure { cleanupFailure = appendFailure(cleanupFailure, it) }
             }
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = appendFailure(cleanupFailure, it) }
             runCatching { root.deleteRecursively() }
                 .onFailure { cleanupFailure = appendFailure(cleanupFailure, it) }
             runCatching { output.delete() }

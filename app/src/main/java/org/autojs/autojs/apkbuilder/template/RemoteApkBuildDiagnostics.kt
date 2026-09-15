@@ -4,7 +4,6 @@ import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicLong
 
 internal enum class RemoteApkBuildDiagnosticPhase {
-    GATE,
     DISCOVERY,
     PREPARE,
     OPEN_SESSION,
@@ -24,7 +23,6 @@ internal enum class RemoteApkBuildDiagnosticStatus {
 
 internal enum class RemoteApkBuildErrorCategory {
     NONE,
-    HOST_SWITCH_DISABLED,
     PROVIDER_NOT_AVAILABLE,
     DISCOVERY_FAILED,
     PREPARATION_FAILED,

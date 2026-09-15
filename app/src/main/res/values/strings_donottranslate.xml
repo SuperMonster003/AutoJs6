@@ -100,7 +100,6 @@
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_ai_settings" translatable="false">key_$_ai_settings</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
-    <string name="key_apk_builder_remote_build_enabled" translatable="false">key_$_apk_builder_remote_build_enabled</string>
     <string name="key_app_language" translatable="false">key_$_app_language</string>
     <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>
     <string name="key_app_language_auto" translatable="false">key_$_app_language_auto</string>

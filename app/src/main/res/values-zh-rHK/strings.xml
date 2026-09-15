@@ -290,8 +290,7 @@
     <string name="error_android_package_file_unavailable">Android 安裝包文件不可用</string>
     <string name="error_android_package_installation_failed">安裝包安裝失敗: %1$s</string>
     <string name="error_android_package_operation_in_progress">已有另一個 Android 安裝包操作正在進行</string>
-    <string name="error_apk_builder_remote_build_disabled_by_runtime_gate">AutoJs6 開發者開關已關閉遠程 APK 建置.</string>
-    <string name="error_apk_builder_remote_build_not_supported_by_plugin">已安裝的 APK Builder 插件未宣告相容的實驗性遠程 APK 建置能力. 請安裝宣告該能力的相容插件建置, 或關閉開發者開關.</string>
+    <string name="error_apk_builder_remote_build_not_supported_by_plugin">已安裝的 APK Builder 插件未宣告相容的 APK 建置能力. 請安裝與當前 AutoJs6 版本匹配的插件建置.</string>
     <string name="error_apk_builder_template_host_version_outside_range">已安裝的 APK 建置器外掛程式支援 AutoJs6 宿主 versionCode %1$d-%2$d, 目前宿主為 %3$d. 請安裝配套的外掛程式版本.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">已安裝的 APK 建置器外掛程式未使用受信任的官方憑證簽署, 已阻止建置. 套件: %1$s. SHA-256: %2$s</string>
     <string name="error_app_not_installed">應用未安裝</string>
@@ -686,7 +685,6 @@
     <string name="summary_ace_word_wrap_enabled">在編輯器可視區域內對長行自動換行</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有文件, 包括外部存儲</string>
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
-    <string name="summary_apk_builder_remote_build_r1">僅供 R1 明確試用. 遠程失敗會終止本次建置並保留已有產物; 目前尚無自動本地後備.</string>
     <string name="summary_clear_media_playback_history">清除宿主儲存的全部媒體播放位置</string>
     <string name="summary_code_editor_settings">打開完整的代碼編輯器設置頁面</string>
     <string name="summary_dex_compiler_experimental_disabled">僅使用內置 D8/dx; AAR 始終使用內置路徑</string>
@@ -860,7 +858,6 @@
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder">APK 建置器</string>
     <string name="text_apk_builder_plugin_unavailable">打包插件不可用</string>
-    <string name="text_apk_builder_remote_build">啓用實驗性遠程 APK 建置</string>
     <string name="text_apk_template_plugin_risk_prompt">檢測到打包應用模板插件與當前 AutoJs6 版本不完全匹配. 繼續使用可能導致打包後的應用啓動失敗, API 不一致或部分模塊不可用.</string>
     <string name="text_apk_template_unavailable">打包應用模板不可用</string>
     <string name="text_apk_template_unavailable_prompt">找不到可用的打包應用模板. 當前 AutoJs6 構建未內置 template.apk, 且沒有可讀取的打包應用模板插件. 請安裝並啓用匹配版本的模板插件後重試.</string>

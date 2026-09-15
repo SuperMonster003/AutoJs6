@@ -7,9 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.apkbuilder.ApkBuildLibrary
 import org.autojs.autojs.core.plugin.nativealign.ElfLoadAlignment
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.ProjectConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.junit.Assert.*
@@ -26,7 +24,6 @@ class NativePageAlignmentApkProducerDeviceTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val source = File(context.cacheDir, "native-page-alignment-project").apply { mkdirs() }
         val output = File(context.getExternalFilesDir(null), "native-page-alignment-smoke.apk")
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
         val rapidVersion = InstrumentationRegistry.getArguments().getString("autojs.nativeAlignment.rapidVersion", "3")
         require(rapidVersion in setOf("3", "6"))
         val paddlePackages = (3..6).map { "io.github.supermonster003.autojs6.plugin.paddleocr.v$it" }
@@ -53,7 +50,6 @@ class NativePageAlignmentApkProducerDeviceTest {
                     (if (includePaddle) listOf(ApkBuildLibrary.PADDLE_OCR) else emptyList())).map { it.label })
                 .setPermissions(emptyList())
             File(source, "project.json").writeText(config.toJson(false))
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             fixturePackages.forEach { name ->
                 PluginEnableStore.setEnabled(context, name,
                     name == paddlePackages.first() || name == "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv$rapidVersion")
@@ -76,7 +72,6 @@ class NativePageAlignmentApkProducerDeviceTest {
                 }
             }
         } finally {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate)
             previousEnabled.forEach { (name, enabled) -> PluginEnableStore.setEnabled(context, name, enabled) }
             source.deleteRecursively()
         }

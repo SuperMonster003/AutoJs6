@@ -17,11 +17,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildCompiler
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.json.JSONObject
@@ -50,8 +48,6 @@ class RemoteG3AdvancedParityProducerDeviceTest {
     fun producesCompiledTsxAndSelfContainedImageQuantApks() {
         requireQualificationEnvironment()
 
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
-        assertFalse("G3 remote advanced producer must start with the host gate disabled", previousGate)
         val outputDirectory = requireNotNull(context.getExternalFilesDir(null))
         val specs = listOf(
             BuildSpec(
@@ -78,7 +74,6 @@ class RemoteG3AdvancedParityProducerDeviceTest {
         var succeeded = false
         var primaryFailure: Throwable? = null
         try {
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             RemoteApkBuildDiagnostics.resetForTest()
             val observations = specs.map { spec -> buildOne(root, spec) }
 
@@ -115,8 +110,6 @@ class RemoteG3AdvancedParityProducerDeviceTest {
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = it }
             runCatching { root.deleteRecursively() }
                 .onFailure { error -> cleanupFailure = appendFailure(cleanupFailure, error) }
             if (!succeeded) {
@@ -131,7 +124,6 @@ class RemoteG3AdvancedParityProducerDeviceTest {
             }
         }
         assertFalse("Remote advanced-parity private root survived cleanup", root.exists())
-        assertEquals(previousGate, Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false))
     }
 
     @Suppress("DEPRECATION")

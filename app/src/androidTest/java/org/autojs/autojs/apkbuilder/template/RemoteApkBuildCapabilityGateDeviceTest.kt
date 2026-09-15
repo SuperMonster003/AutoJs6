@@ -7,7 +7,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -40,7 +39,6 @@ class RemoteApkBuildCapabilityGateDeviceTest {
     fun declaredFalseCapabilityStopsBeforePreparation() {
         requireQualificationEnvironment()
 
-        val previousGate = Pref.getBoolean(R.string.key_apk_builder_remote_build_enabled, false)
         val root = File(context.cacheDir, SENSITIVE_PATH_SENTINEL).apply {
             deleteRecursively()
             check(mkdirs())
@@ -72,7 +70,6 @@ class RemoteApkBuildCapabilityGateDeviceTest {
                 Charsets.UTF_8,
             )
 
-            Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, true)
             RemoteApkBuildDiagnostics.resetForTest()
 
             val discovered = runBlocking(Dispatchers.IO) {
@@ -143,8 +140,6 @@ class RemoteApkBuildCapabilityGateDeviceTest {
             throw error
         } finally {
             var cleanupFailure: Throwable? = null
-            runCatching { Pref.putBooleanSync(R.string.key_apk_builder_remote_build_enabled, previousGate) }
-                .onFailure { cleanupFailure = it }
             runCatching { root.deleteRecursively() }
                 .onFailure { error -> cleanupFailure = appendFailure(cleanupFailure, error) }
             runCatching { output.delete() }

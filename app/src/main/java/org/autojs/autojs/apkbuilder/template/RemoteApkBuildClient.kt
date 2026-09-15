@@ -104,19 +104,6 @@ object RemoteApkBuildClient {
         buildStartedAtElapsedMillis: Long,
         diagnosticTracker: DiagnosticTracker,
     ): BuildOutcome {
-        diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.GATE)
-        if (!RemoteApkBuildRuntimeGate.isEnabled()) {
-            diagnosticTracker.mark(RemoteApkBuildErrorCategory.HOST_SWITCH_DISABLED)
-            return BuildOutcome(
-                status = STATUS_NOT_AVAILABLE,
-                warnings = listOf(
-                    context.applicationContext.getString(
-                        R.string.error_apk_builder_remote_build_disabled_by_runtime_gate,
-                    ),
-                ),
-            )
-        }
-
         val appContext = context.applicationContext
         diagnosticTracker.moveTo(RemoteApkBuildDiagnosticPhase.DISCOVERY)
         val hasRemoteBuildPlugin = runBlocking(Dispatchers.IO) {
@@ -484,7 +471,7 @@ object RemoteApkBuildClient {
     private class DiagnosticTracker(
         private val startedAtElapsedMillis: Long,
     ) {
-        private var phase = RemoteApkBuildDiagnosticPhase.GATE
+        private var phase = RemoteApkBuildDiagnosticPhase.DISCOVERY
         private var errorCategory = RemoteApkBuildErrorCategory.NONE
         private var outputSizeBytes = -1L
         private val recorded = AtomicBoolean(false)
@@ -506,7 +493,6 @@ object RemoteApkBuildClient {
                 return
             }
             errorCategory = when (phase) {
-                RemoteApkBuildDiagnosticPhase.GATE -> RemoteApkBuildErrorCategory.HOST_SWITCH_DISABLED
                 RemoteApkBuildDiagnosticPhase.DISCOVERY -> RemoteApkBuildErrorCategory.DISCOVERY_FAILED
                 RemoteApkBuildDiagnosticPhase.PREPARE -> RemoteApkBuildErrorCategory.PREPARATION_FAILED
                 RemoteApkBuildDiagnosticPhase.OPEN_SESSION -> RemoteApkBuildErrorCategory.SESSION_OPEN_FAILED
