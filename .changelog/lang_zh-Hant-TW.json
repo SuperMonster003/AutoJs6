@@ -191,7 +191,8 @@
         "檔案管理器指令碼選單 \"懸浮執行\" 項, 以半透明懸浮工具列進行指令碼啟停 / 編輯 / 檢視日誌, 跟隨夜間模式與主題色",
         "版面分析: 節點資訊對話方塊中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; \"儲存版面配置為檔案\" 把擷取的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點選該檔案即可離線分析",
         "終端機: 應用內 shell (側拉選單 \"工具\" 組, 目錄選單 \"在終端機中開啟\", 專案工具列), 以 pty 執行 /system/bin/sh, 帶 Esc / Tab / Ctrl / Alt 及方向鍵按鍵列, 捏合縮放字號, 複製 / 分享終端機記錄, npm 輔助選單, 以及說明 Node.js 執行階段外掛程式的 node 為何不可用的橫幅",
-        "終端機: 由 Node.js 執行階段外掛程式 (1.5.0+) 提供 node, npm, npx, corepack, yarn 與 pnpm, npm / corepack 資產經 SHA-256 校驗並按外掛程式建置安裝一次, 每次工作階段重建命令連結, npm 快取與全域安裝保持在終端機前綴目錄內, 並新增 \"終端機\" 設定群組 (npm 鏡像來源: npmjs.org / npmmirror.com / 自訂 https URL, 忽略生命週期指令碼, 清除終端機資料)"
+        "終端機: 由 Node.js 執行階段外掛程式 (1.5.0+) 提供 node, npm, npx, corepack, yarn 與 pnpm, npm / corepack 資產經 SHA-256 校驗並按外掛程式建置安裝一次, 每次工作階段重建命令連結, npm 快取與全域安裝保持在終端機前綴目錄內, 並新增 \"終端機\" 設定群組 (npm 鏡像來源: npmjs.org / npmmirror.com / 自訂 https URL, 忽略生命週期指令碼, 清除終端機資料)",
+        "`images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時偵測特徵; 新增 `ransacThreshold`, `minInliers` 與 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 與 `inliers` 屬性, `ImageFeatures` 新增 `count` 與 `method` 屬性"
       ],
       "fix": [
         "HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效",
@@ -372,7 +373,9 @@
         "以路徑傳入 `images.clip`, `images.findCircles` 與 `images.readPixels` 的圖片可能在使用前被回收, `images.findImage` / `images.matchTemplate` 在範本靠近圖片邊緣或大於搜尋區域時可能擲回例外或傳回錯誤結果",
         "`images.load` 採用 30 秒逾時並關閉連線, `images.saveBitmap`, 特徵比對與直方圖比較會釋放暫存串流與矩陣",
         "範本比對在較粗的金字塔層級提前達到閾值時直接傳回該層級的粗略座標 (可能偏差數個像素), 相鄰候選點可能重複傳回同一位置, 且結果未依相似度排序也未受 `max` 限制",
-        "`images.matchTemplate` 在圖片與範本通道數不同時擲回例外, 純色範本永遠無法比對, `useTransparentMask` 僅遮罩了 alpha 通道而非透明像素; `MatchingResult.sortBy(compareFn)` 在比較函式傳回非整數時失敗"
+        "`images.matchTemplate` 在圖片與範本通道數不同時擲回例外, 純色範本永遠無法比對, `useTransparentMask` 僅遮罩了 alpha 通道而非透明像素; `MatchingResult.sortBy(compareFn)` 在比較函式傳回非整數時失敗",
+        "`images.matchFeatures` 在目標特徵以非 1 的 `scale` 計算時傳回尺寸錯誤的邊框, 對角點重新排序導致旋轉目標的角點與自身角點失去對應, 單應矩陣不可靠時可能傳回變形的邊框, `drawMatches` 圖片由描述子矩陣而非圖片繪製, 且圖片沒有關鍵點時擲回 OpenCV 錯誤",
+        "`images.detectAndComputeFeatures` 洩漏中間矩陣, 且 ORB 因預設 31 像素邊界在小於 63 像素的圖片中偵測不到任何關鍵點, 在較小目標中也僅能偵測到少量關鍵點"
       ],
       "improvement": [
         "封裝應用程式按專案共用路徑需求引導儲存空間授權, 拒絕授權, 設定返回, 隱藏桌面入口恢復及開機啟動均檢查實際存取狀態",
@@ -495,7 +498,8 @@
         "螢幕擷取器狀態讀取不再加鎖, `images.releaseScreenCapturer` 釋放期間不再阻塞並行的圖片呼叫",
         "範本比對的金字塔層級改用區域插值, 遮罩比對沿用正規化相關係數, 較小的 `max` 也會精化多個候選點, 避免最佳比對在粗層級被丟棄",
         "版面層次視窗: 行內摘要顯示 id / text / desc / clickable 等屬性, 選取節點及其全部父層在樹中高亮並在螢幕上勾出邊框, 樹支援橫向捲動, 選單新增 \"選擇父控制項\" 逐級上溯, 首次進入提示可用音量減鍵退出",
-        "終端機: 離開介面後工作階段在背景繼續執行 (前景服務通知顯示目前目錄並提供 \"關閉工作階段\" 操作), 重新開啟終端機時接回執行中的工作階段"
+        "終端機: 離開介面後工作階段在背景繼續執行 (前景服務通知顯示目前目錄並提供 \"關閉工作階段\" 操作), 重新開啟終端機時接回執行中的工作階段",
+        "特徵比對僅保留 RANSAC 內點並驗證投影四邊形, 比對器與描述子類型不相容時自動修正而非擲回例外, `scale` 允許大於 1 以放大小目標, ORB 預設最多偵測 20000 個關鍵點, 避免紋理豐富的場景排擠目標區域的關鍵點"
       ],
       "dependency": [
         "模組化 Android AXML",

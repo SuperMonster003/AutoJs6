@@ -1362,8 +1362,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val opt = fillDetectAndComputeFeaturesOptions(image.height, image.width, options as? NativeObject ?: newNativeObject())
                 val rect = buildRegionInternal(image, opt.region)
                 mat = scriptRuntime.images.newMat(image.mat, rect)
-                val result = scriptRuntime.images.detectAndComputeFeatures(mat, opt.scale, opt.cvtColor, opt.method)
-                ImageFeatures(result, opt.scale, rect)
+                val result = scriptRuntime.images.detectAndComputeFeatures(mat, opt.scale, opt.cvtColor, opt.method, opt.maxFeatures)
+                /* The descriptor reports the scale it actually applied (1 when the option was non-positive). */
+                ImageFeatures(result, result.scale, rect)
             } finally {
                 image.shoot()
                 mat?.release()
@@ -1374,35 +1375,32 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun matchFeatures(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ObjectFrame? = ensureArgumentsLengthInRange(args, 2..3) { argList ->
-            val (sceneFeatures, objectFeatures, options) = argList
+            val (sceneArg, objectArg, options) = argList
             val opt = options as? NativeObject ?: newNativeObject()
-            require(sceneFeatures is ImageFeatures) {
-                "Argument \"sceneFeatures\" ${sceneFeatures.jsBrief()} for images.matchFeatures must be a ImageFeatures"
-            }
-            require(objectFeatures is ImageFeatures) {
-                sceneFeatures.shoot()
-                "Argument \"objectFeatures\" ${objectFeatures.jsBrief()} for images.matchFeatures must be a ImageFeatures"
-            }
+            var sceneFeatures: ImageFeatures? = null
+            var objectFeatures: ImageFeatures? = null
+            var result: ImageFeatureMatching.FeatureMatchingResult? = null
             try {
-                val isObjectOrbAlike = objectFeatures.javaObject.descriptors.type() == CvType.CV_8U
-                val matcherType = opt.inquire("matcher") {
-                    DescriptorMatcher::class.java.getField(coerceString(it)).get(null) as? Int
-                } ?: when (isObjectOrbAlike) {
-                    /* For ORB, BRISK, AKAZE, etc. */
-                    true -> DescriptorMatcher.BRUTEFORCE_HAMMING
-                    /* For SIFT, SURF, etc. */
-                    else -> DescriptorMatcher.FLANNBASED
+                ApiImages.initOpenCvIfNeeded()
+                sceneFeatures = toImageFeaturesInternal(scriptRuntime, sceneArg, opt, "sceneFeatures")
+                objectFeatures = toImageFeaturesInternal(scriptRuntime, objectArg, opt, "objectFeatures")
+                require(!sceneFeatures.isRecycled() && !objectFeatures.isRecycled()) {
+                    "ImageFeatures arguments for images.matchFeatures must not be recycled"
                 }
+                val isBinaryDescriptor = objectFeatures.javaObject.descriptors.depth() == CvType.CV_8U
+                val matcherType = opt.inquire("matcher") { parseMatcherTypeInternal(it) } ?: -1
                 val drawMatches = opt.inquire("drawMatches") { scriptRuntime.files.nonNullPath(coerceString(it)) }
-                val threshold = opt.inquire("threshold", ::coerceFloatNumber, if (isObjectOrbAlike) 0.8f else 0.7f)
+                val threshold = opt.inquire("threshold", ::coerceFloatNumber, if (isBinaryDescriptor) 0.8f else 0.7f)
+                require(threshold > 0f && threshold <= 1f) { "Option \"threshold\" ($threshold) for images.matchFeatures must be in (0, 1]" }
+                val ransacThreshold = opt.inquire("ransacThreshold", ::coerceNumber, ImageFeatureMatching.DEFAULT_RANSAC_REPROJECTION_THRESHOLD)
+                require(ransacThreshold > 0 && ransacThreshold.isFinite()) { "Option \"ransacThreshold\" ($ransacThreshold) for images.matchFeatures must be a positive number" }
+                val minInliers = opt.inquire("minInliers", ::coerceIntNumber, ImageFeatureMatching.MIN_POINTS_FOR_HOMOGRAPHY)
 
-                val result = ImageFeatureMatching.featureMatching(
+                result = ImageFeatureMatching.featureMatching(
                     /* sceneDesc = */ sceneFeatures.javaObject,
                     /* objectDesc = */ objectFeatures.javaObject,
-                    /* matcherType = */ matcherType,
-                    /* debugMatchesImagePath = */ drawMatches,
-                    /* threshold = */ threshold,
-                ) ?: return@ensureArgumentsLengthInRange null
+                    ImageFeatureMatching.MatchingOptions(matcherType, threshold, ransacThreshold, minInliers, !drawMatches.isJsNullish()),
+                )
 
                 if (!drawMatches.isJsNullish()) {
                     val matchesImage = result.matches?.let { matToImage(scriptRuntime, arrayOf(it)) }
@@ -1416,19 +1414,47 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 }
 
                 val region = sceneFeatures.region
-                val scale = sceneFeatures.scale
-                val offsetX = region.x
-                val offsetY = region.y
+                val scale = sceneFeatures.scale.takeIf { it > 0f } ?: 1f
+                fun toSceneCoordinates(p: OpencvPoint) = OpencvPoint(p.x / scale + region.x, p.y / scale + region.y)
 
                 val quad = result.quad ?: return@ensureArgumentsLengthInRange null
                 require(quad.size == 4) { "Quad size of feature matching result must be 4 instead of ${quad.size}" }
-
-                val (tl, tr, br, bl) = quad.map { p ->
-                    OpencvPoint(p.x / scale + offsetX, p.y / scale + offsetY)
-                }
-                ObjectFrame(tl, tr, bl, br)
+                /* Corners keep the order of the object image: TL, TR, BL, BR. */
+                val (tl, tr, bl, br) = quad.map(::toSceneCoordinates)
+                ObjectFrame(tl, tr, bl, br, result.matchCount, result.inlierCount, result.points.map(::toSceneCoordinates))
             } finally {
+                result?.release()
                 ApiImages.shoot(sceneFeatures, objectFeatures)
+            }
+        }
+
+        /**
+         * Accepts ImageFeatures as they are, or detects the features of an ImageWrapper / image path as a one-shot
+         * object, forwarding the detection-related options (method, scale, maxFeatures).
+         * zh-CN: ImageFeatures 原样使用; ImageWrapper 或图片路径则按检测相关选项 (method, scale, maxFeatures) 检测特征并标记为一次性对象.
+         */
+        private fun toImageFeaturesInternal(scriptRuntime: ScriptRuntime, arg: Any?, opt: NativeObject, argName: String): ImageFeatures = when {
+            arg is ImageFeatures -> arg
+            arg is ImageWrapper || arg.isJsString() -> {
+                val detectOptions = newNativeObject()
+                listOf("method", "scale", "grayscale", "maxFeatures").forEach { key ->
+                    if (opt.hasProp(key)) detectOptions.put(key, detectOptions, opt.prop(key))
+                }
+                detectAndComputeFeatures(scriptRuntime, arrayOf(arg, detectOptions)).setOneShot(true)
+            }
+            else -> throw WrappedIllegalArgumentException(
+                "Argument \"$argName\" ${arg.jsBrief()} for images.matchFeatures must be a ImageFeatures, ImageWrapper or image path",
+            )
+        }
+
+        /** Parses a DescriptorMatcher constant name (case-insensitive, "-" as "_") or number. zh-CN: 解析匹配器常量名或数值. */
+        private fun parseMatcherTypeInternal(o: Any?): Int = when {
+            o.isJsNumber() -> coerceIntNumber(o)
+            else -> {
+                val name = coerceString(o).trim().uppercase().replace("-", "_")
+                runCatching { DescriptorMatcher::class.java.getField(name).getInt(null) }.getOrElse {
+                    throw WrappedIllegalArgumentException("Unknown matcher ${o.jsBrief()} for images.matchFeatures; expected a DescriptorMatcher constant name such as \"FLANNBASED\" or \"BRUTEFORCE_HAMMING\"")
+                }
             }
         }
 
@@ -2095,15 +2121,19 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         private fun fillDetectAndComputeFeaturesOptions(rows: Int, cols: Int, options: NativeObject): DetectAndComputeFeaturesOptions {
-            val scale = options.inquire("scale") { coerceFloatNumber(it) } ?: calcScale(rows, cols)
-            val cvtColor = when {
-                options.inquire("grayscale", ::coerceBoolean, false) -> Imgproc.COLOR_RGBA2GRAY
-                else -> -1
-            }
-            val method = getDetectFeatureMethod(options.inquire("method", ::coerceString, "SIFT"))
             val region = buildRegionInternal(options.prop("region"), cols, rows)
+            /* A non-positive or missing scale means automatic; values above 1 enlarge small objects before detection. */
+            val scale = options.inquire("scale") { coerceFloatNumber(it) }?.takeIf { it > 0f } ?: calcScale(region.height, region.width)
+            require(scale.isFinite() && scale <= MAX_FEATURE_DETECTION_SCALE) {
+                "Option \"scale\" ($scale) for images.detectAndComputeFeatures must be a positive number not greater than $MAX_FEATURE_DETECTION_SCALE"
+            }
+            /* Detection always works on grayscale (SIFT and ORB use intensity only); "grayscale" is accepted for compatibility. */
+            val cvtColor = -1
+            val method = getDetectFeatureMethod(options.inquire("method", ::coerceString, "SIFT"))
+            val maxFeatures = options.inquire("maxFeatures", ::coerceIntNumber, 0)
+            require(maxFeatures >= 0) { "Option \"maxFeatures\" ($maxFeatures) for images.detectAndComputeFeatures must not be negative" }
 
-            return DetectAndComputeFeaturesOptions(scale.coerceIn(0f, 1f), cvtColor, method, region)
+            return DetectAndComputeFeaturesOptions(scale, cvtColor, method, region, maxFeatures)
         }
 
         private fun calcScale(rows: Int, cols: Int, targetArea: Int = 1_000_000, maxSide: Int = 1600): Float {
@@ -2163,7 +2193,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             "radius" to radius,
         )
 
-        private class DetectAndComputeFeaturesOptions(val scale: Float, val cvtColor: Int, val method: Int, val region: OpencvRect)
+        private class DetectAndComputeFeaturesOptions(val scale: Float, val cvtColor: Int, val method: Int, val region: OpencvRect, val maxFeatures: Int)
+
+        private const val MAX_FEATURE_DETECTION_SCALE = 8f
 
     }
 

@@ -1273,6 +1273,15 @@ public class Images {
         return ImageFeatureMatching.createFeatureMatchingDescriptor(mat, cvtColor, scale, method);
     }
 
+    /**
+     * @param maxFeatures feature cap, or 0 for the per-method default (unlimited for SIFT, 20000 for ORB)
+     *                    (zh-CN: 特征数上限, 0 表示按方法默认: SIFT 不限, ORB 20000)
+     */
+    @ScriptInterface
+    public FeatureMatchingDescriptor detectAndComputeFeatures(Mat mat, float scale, int cvtColor, int method, int maxFeatures) {
+        return ImageFeatureMatching.createFeatureMatchingDescriptor(mat, new ImageFeatureMatching.DetectionOptions(method, scale, cvtColor, maxFeatures));
+    }
+
     public ScreenCapturer getScreenCapturer() {
         return mScreenCapturer;
     }
