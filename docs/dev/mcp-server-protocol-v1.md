@@ -386,3 +386,31 @@ Host debug and androidTest assemblies passed. Full app lint was canceled after
 about 45 minutes without a result; sampled threads were still in lint detector /
 Kotlin UAST analysis. This is not a successful host lint check. No host runtime
 dependency changed, and the host release assembly was not repeated in P4.
+
+## Conformance Test App
+
+`test-apps/mcp-server-conformance` (registered in `pluginConformanceTestApps`) is a
+test-only fixture of this contract with a distinct package
+(`org.autojs.plugin.mcp.server.fake`), debug-only signing and `android:testOnly`.
+It implements `IMcpServerPlugin` and `IMcpServerSession` without opening a socket,
+and every session reads the broker info and sends one `device.info` request through
+the host broker before it reports `running`. Five components, selected by manifest
+meta-data, cover the normal contract plus the hostile Binder cases: a
+`mcpServerContractVersion` above the supported range, a `statusLastError` far beyond
+its cap together with an inline bridge request above `MAX_BRIDGE_INLINE_JSON_BYTES`,
+duplicated status and event callbacks with one more after `close()`, and a plugin
+process that dies while the host holds the session. The fixture README lists the
+components and the fixture-only status keys.
+
+The host side is `McpServerAndroidConformanceTest` (`app/src/androidTest`, opt-in
+with `-e autojs.mcpServer.conformance.enabled true`). Because `McpServerPluginHost`
+pins the production package, the test binds the fixture components directly and
+verifies `validatePluginInfo`, the `McpServerBundles` caps, and the real
+`McpHostCapabilityBroker` under the default grant: the wrong contract version is
+rejected before any `openServer`, the codec cuts the oversized error to 4 KiB, the
+broker answers `resource-limit` to the oversized request and `process-dead` after
+`destroy`, duplicate callbacks arrive in order and parse, and the session binder's
+death recipient fires. The rebind schedule of `McpServerSessionController` is not
+reachable with a foreign package and stays covered by the lifecycle matrix with the
+production plugin; giving the controller a test seam for the fixture is a separate
+decision.

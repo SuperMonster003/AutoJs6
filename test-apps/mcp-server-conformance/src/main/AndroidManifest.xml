@@ -1,0 +1,119 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:extractNativeLibs="false"
+        android:label="AutoJs6 MCP Server Conformance"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false">
+
+        <!-- Plugin-center discovery, the same shape as the production plugin's INFO service. -->
+        <service
+            android:name=".service.FakeMcpServerInfoService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="requiresHostVersion"
+                android:value="5279" />
+        </service>
+
+        <service
+            android:name=".service.NormalMcpServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.MCP_SERVER" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.mcp.server.fake.SCENARIO"
+                android:value="normal" />
+        </service>
+
+        <service
+            android:name=".service.WrongContractVersionMcpServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.MCP_SERVER" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.mcp.server.fake.SCENARIO"
+                android:value="wrong-contract-version" />
+        </service>
+
+        <service
+            android:name=".service.OversizedBundleMcpServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.MCP_SERVER" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.mcp.server.fake.SCENARIO"
+                android:value="oversized-bundle" />
+        </service>
+
+        <service
+            android:name=".service.DuplicateCallbackMcpServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.MCP_SERVER" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.mcp.server.fake.SCENARIO"
+                android:value="duplicate-callback" />
+        </service>
+
+        <!-- Its own process: the scenario kills the process that owns the session. -->
+        <service
+            android:name=".service.DeathCallbackMcpServerService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":mcp_server_mortal">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.MCP_SERVER" />
+                <category android:name="mcp-server" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.autojs.plugin.mcp.server.fake.SCENARIO"
+                android:value="death-callback" />
+        </service>
+    </application>
+</manifest>
