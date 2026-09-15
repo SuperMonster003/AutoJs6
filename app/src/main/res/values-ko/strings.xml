@@ -730,6 +730,9 @@
     <string name="summary_plugin_instruction_view">이 플러그인의 사용 예시와 설명을 표시합니다</string>
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
+    <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
+    <string name="text_bun_host_info_grant">호스트 정보 스냅샷</string>
+    <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE을 통해 Bun 스크립트에 AutoJs6 버전과 언어의 읽기 전용 스냅샷을 제공합니다; 다음 실행부터 적용</string>
     <string name="summary_plugin_show_official_plugins">공식 저장소의 온라인 설치 가능 플러그인을 표시합니다</string>
     <string name="summary_plugin_show_third_party_plugins">Auto.js-SDK-Plugins-Garage 에 수록된 온라인 설치 가능 플러그인을 표시합니다</string>
     <string name="summary_plugin_variant_priority_manage">같은 플러그인 엔진에 여러 변형이 있을 경우, 변형 우선순위를 조정하여 사용 가능한 플러그인을 순서대로 사용할 수 있습니다</string>

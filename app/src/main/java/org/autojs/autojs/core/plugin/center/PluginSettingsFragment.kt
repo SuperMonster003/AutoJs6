@@ -2,6 +2,8 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -14,6 +16,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs.theme.ThemeColorHelper
@@ -33,6 +36,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogPluginMountInputBinding
+import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 import java.util.Locale
 import kotlin.math.max
 
@@ -64,6 +68,9 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var mountCategory: PreferenceCategory? = null
 
     private var variantPreference: MaterialPreference? = null
+
+    /** Bun capability bridge grants (plugin ROADMAP M7); only shown for the package that hosts the Bun runtime service. */
+    private var bunHostInfoGrantPreference: ThemeColorSwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val args = requireArguments()
@@ -99,6 +106,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             if (variantCategory != null) {
                 preferenceScreen.removePreference(variantCategory)
             }
+        }
+
+        if (source != PluginIndexSource.OFFICIAL || !hostsBunRuntimeService()) {
+            findPreference<PreferenceCategory>(KEY_CATEGORY_BUN_HOST_CAPABILITIES)?.let(preferenceScreen::removePreference)
         }
 
         if (source == PluginIndexSource.THIRD_PARTY) {
@@ -139,6 +150,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         ignoredVersionsPreference = requireNotNull(findPreference(KEY_PLUGIN_IGNORED_VERSIONS))
         instructionPreference = requireNotNull(findPreference(KEY_PLUGIN_INSTRUCTION_VIEW))
         variantPreference = findPreference(KEY_PLUGIN_VARIANT_PRIORITY_MANAGE)
+        bunHostInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_HOST_INFO_GRANT)
 
         launchPagePreference.setOnPreferenceClickListener {
             val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(packageName)
@@ -183,6 +195,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
                     title = title,
                 )
             }
+            true
+        }
+
+        bunHostInfoGrantPreference?.setOnPreferenceChangeListener { _, newValue ->
+            // Revocation is per run: the next runScript request simply carries no snapshot keys.
+            BunHostCapabilityGrants.setHostInfoGranted(requireContext(), newValue as? Boolean ?: true)
             true
         }
 
@@ -235,6 +253,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
 
         val globalAutoCheckEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
         autoCheckPreference.isChecked = PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
+        bunHostInfoGrantPreference?.isChecked = BunHostCapabilityGrants.isHostInfoGranted(requireContext())
         autoCheckPreference.isEnabled = globalAutoCheckEnabled
         autoCheckPreference.setTitleColorVisualEnabledWith { globalAutoCheckEnabled }
         autoCheckPreference.setSummaryColorVisualEnabledWith { globalAutoCheckEnabled }
@@ -306,6 +325,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
 
     private fun refreshVariantSummary() {
         variantPreference?.summary = getString(R.string.summary_plugin_variant_priority_manage)
+    }
+
+    /** True when [packageName] exports the Bun runtime service action, i.e. it is the Bun Runtime plugin. */
+    private fun hostsBunRuntimeService(): Boolean {
+        if (packageName.isBlank()) return false
+        val packageManager = requireContext().packageManager
+        val intent = Intent(BunRuntimeContract.SERVICE_ACTION).setPackage(packageName)
+        val services = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DISABLED_COMPONENTS.toLong()))
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.queryIntentServices(intent, PackageManager.MATCH_DISABLED_COMPONENTS)
+            }
+        }.getOrDefault(emptyList())
+        return services.any { it.serviceInfo?.packageName == packageName }
     }
 
     private fun shouldShowVariantPriority(): Boolean {
@@ -765,6 +800,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         private const val KEY_PLUGIN_MOUNT_OBJECT_NAME = "plugin_mount_object_name"
         private const val KEY_PLUGIN_MOUNT_POINT = "plugin_mount_point"
         private const val KEY_PLUGIN_INSTRUCTION_VIEW = "plugin_instruction_view"
+        private const val KEY_CATEGORY_BUN_HOST_CAPABILITIES = "category_bun_host_capabilities"
+        private const val KEY_PLUGIN_BUN_HOST_INFO_GRANT = "plugin_bun_host_info_grant"
         private const val KEY_PLUGIN_HIDE_CONFIRM_PROMPT = "key_\$_plugin_hide_confirm_prompt"
 
         fun newInstance(args: Bundle) = PluginSettingsFragment().apply { arguments = Bundle(args) }

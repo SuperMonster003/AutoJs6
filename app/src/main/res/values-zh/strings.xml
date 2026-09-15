@@ -724,6 +724,9 @@
     <string name="summary_plugin_instruction_view">查看此插件的使用示例与说明</string>
     <string name="summary_plugin_jump_to_launch_page">打开此插件的启动 Activity</string>
     <string name="summary_plugin_no_launch_page">当前插件没有启动页</string>
+    <string name="text_bun_host_capabilities">Bun 能力桥</string>
+    <string name="text_bun_host_info_grant">宿主信息快照</string>
+    <string name="summary_bun_host_info_grant">通过 AUTOJS6_HOST_INFO_FILE 向 Bun 脚本提供只读的 AutoJs6 版本与语言快照; 下次运行起生效</string>
     <string name="summary_plugin_show_official_plugins">展示官方仓库中的可在线安装插件</string>
     <string name="summary_plugin_show_third_party_plugins">展示 Auto.js-SDK-Plugins-Garage 中收录的可在线安装插件</string>
     <string name="summary_plugin_variant_priority_manage">当同一插件引擎存在多个变体时, 可通过调整变体优先级按顺序使用可用插件</string>

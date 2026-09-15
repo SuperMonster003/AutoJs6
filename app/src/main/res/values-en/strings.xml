@@ -721,6 +721,9 @@
     <string name="summary_plugin_instruction_view">Show usage examples and notes for this plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
+    <string name="text_bun_host_capabilities">Bun capability bridge</string>
+    <string name="text_bun_host_info_grant">Host info snapshot</string>
+    <string name="summary_bun_host_info_grant">Offer Bun scripts a read-only snapshot of the AutoJs6 version and language through AUTOJS6_HOST_INFO_FILE; applies from the next run</string>
     <string name="summary_plugin_show_official_plugins">Display online-installable plugins from the official repositories</string>
     <string name="summary_plugin_show_third_party_plugins">Display online-installable plugins collected in Auto.js-SDK-Plugins-Garage</string>
     <string name="summary_plugin_variant_priority_manage">When multiple variants exist for the same plugin engine, available plugins can be used in order by adjusting variant priority</string>

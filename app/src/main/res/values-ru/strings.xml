@@ -728,6 +728,9 @@
     <string name="summary_plugin_instruction_view">Показать примеры использования и описание этого плагина</string>
     <string name="summary_plugin_jump_to_launch_page">Открыть Activity запуска этого плагина</string>
     <string name="summary_plugin_no_launch_page">У текущего плагина нет страницы запуска</string>
+    <string name="text_bun_host_capabilities">Мост возможностей Bun</string>
+    <string name="text_bun_host_info_grant">Снимок сведений о хосте</string>
+    <string name="summary_bun_host_info_grant">Предоставлять Bun-скриптам снимок версии и языка AutoJs6 только для чтения через AUTOJS6_HOST_INFO_FILE; действует со следующего запуска</string>
     <string name="summary_plugin_show_official_plugins">Показывать онлайн-устанавливаемые плагины из официальных репозиториев</string>
     <string name="summary_plugin_show_third_party_plugins">Показывать онлайн-устанавливаемые плагины, собранные в Auto.js-SDK-Plugins-Garage</string>
     <string name="summary_plugin_variant_priority_manage">Если для одного движка плагина существует несколько вариантов, доступные плагины можно использовать по порядку, настроив приоритет вариантов</string>

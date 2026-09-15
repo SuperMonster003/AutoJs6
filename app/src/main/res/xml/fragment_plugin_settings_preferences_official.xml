@@ -57,6 +57,20 @@
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:key="category_bun_host_capabilities"
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_bun_host_capabilities">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_host_info_grant"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_host_info_grant"
+            app:summary="@string/summary_bun_host_info_grant" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_about">
 

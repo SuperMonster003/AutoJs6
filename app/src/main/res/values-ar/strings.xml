@@ -730,6 +730,9 @@
     <string name="summary_plugin_instruction_view">عرض امثلة الاستخدام والملاحظات الخاصة بهذه الاضافة</string>
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
+    <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
+    <string name="text_bun_host_info_grant">لقطة معلومات المضيف</string>
+    <string name="summary_bun_host_info_grant">تقديم لقطة للقراءة فقط عن إصدار AutoJs6 ولغته إلى Bun scripts عبر AUTOJS6_HOST_INFO_FILE; تسري من التشغيل التالي</string>
     <string name="summary_plugin_show_official_plugins">عرض الاضافات القابلة للتثبيت عبر الانترنت من المستودعات الرسمية</string>
     <string name="summary_plugin_show_third_party_plugins">عرض الاضافات القابلة للتثبيت عبر الانترنت المدرجة في Auto.js-SDK-Plugins-Garage</string>
     <string name="summary_plugin_variant_priority_manage">عند وجود عدة متغيرات لمحرك الاضافة نفسه، يمكن استخدام الاضافات المتاحة بالترتيب عبر ضبط اولوية المتغيرات</string>
