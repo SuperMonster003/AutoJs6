@@ -50,4 +50,30 @@ class TrashExpiryTest {
         assertTrue(past.withinOneDay)
         assertEquals(0L, past.days)
     }
+
+    @Test
+    fun oneDayBoundaryAndSubHourRemainder() {
+        val expiresAt = trashedAt + 10 * TrashExpiry.DAY_MS
+
+        // Exactly one day left is not "within one day"; one millisecond less is.
+        val oneDay = TrashExpiry.remaining(expiresAt, expiresAt - TrashExpiry.DAY_MS)
+        assertEquals(1L, oneDay.days)
+        assertEquals(0L, oneDay.hours)
+        assertFalse(oneDay.withinOneDay)
+        val justUnder = TrashExpiry.remaining(expiresAt, expiresAt - TrashExpiry.DAY_MS + 1)
+        assertEquals(0L, justUnder.days)
+        assertEquals(23L, justUnder.hours)
+        assertTrue(justUnder.withinOneDay)
+
+        // Less than an hour left rounds down to zero hours but is not expired yet.
+        val minutes = TrashExpiry.remaining(expiresAt, expiresAt - 59L * 60L * 1000L)
+        assertEquals(0L, minutes.days)
+        assertEquals(0L, minutes.hours)
+        assertFalse(minutes.expired)
+        assertTrue(minutes.withinOneDay)
+
+        // Large retention periods do not overflow the day arithmetic.
+        val farExpiry = TrashExpiry.expiresAtOrNull(trashedAt, 3650)!!
+        assertEquals(3650L, TrashExpiry.remaining(farExpiry, trashedAt).days)
+    }
 }

@@ -40,8 +40,8 @@ import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.storage.history.HistoryPaths;
 import org.autojs.autojs.storage.history.HistoryPrefs;
 import org.autojs.autojs.storage.history.HistoryRepository;
-import org.autojs.autojs.storage.history.HistoryRetentionPolicy;
 import org.autojs.autojs.storage.history.TrashEntities;
+import org.autojs.autojs.storage.history.TrashQuotaHint;
 import org.autojs.autojs.storage.history.TrashRepository;
 import com.google.android.material.snackbar.Snackbar;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
@@ -1274,7 +1274,7 @@ public class ScriptOperations {
      */
     private void checkTrashQuotaThenRun(@NonNull List<ScriptFile> scriptFiles, @NonNull Runnable proceed, @NonNull Runnable deletePermanently) {
         long limit = HistoryPrefs.INSTANCE.trashMaxTotalBytes();
-        if (HistoryRetentionPolicy.INSTANCE.isUnlimited(limit)) {
+        if (!TrashQuotaHint.INSTANCE.needsMeasurement(limit)) {
             proceed.run();
             return;
         }
@@ -1288,7 +1288,7 @@ public class ScriptOperations {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(total -> {
-                    if (total <= limit) {
+                    if (TrashQuotaHint.INSTANCE.decide(limit, total) == TrashQuotaHint.Decision.PROCEED) {
                         proceed.run();
                         return;
                     }

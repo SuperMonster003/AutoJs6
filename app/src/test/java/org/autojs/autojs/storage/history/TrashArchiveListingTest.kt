@@ -48,6 +48,32 @@ class TrashArchiveListingTest {
     }
 
     @Test
+    fun emptyAndDirectoryOnlyArchives() {
+        val empty = File.createTempFile("trash-listing-empty", ".zip").apply { deleteOnExit() }
+        ZipOutputStream(empty.outputStream()).use { zos ->
+            // A zip needs at least one entry to be well-formed; a directory entry keeps it "empty" of files.
+            zos.putNextEntry(ZipEntry("only/"))
+            zos.closeEntry()
+            zos.putNextEntry(ZipEntry("only/nested/"))
+            zos.closeEntry()
+        }
+        val listing = TrashArchiveListing.read(empty)
+        assertEquals(0, listing.fileCount)
+        assertEquals(2, listing.dirCount)
+        assertEquals(0L, listing.totalBytes)
+        assertFalse(listing.truncated)
+        assertEquals(listOf("only/", "only/nested/"), listing.entries.map { it.relativePath })
+        assertTrue(listing.entries.all { it.isDirectory })
+    }
+
+    @Test
+    fun truncationAtExactEntryCountIsNotTruncated() {
+        val listing = TrashArchiveListing.read(sampleZip(), maxEntries = 3)
+        assertFalse(listing.truncated)
+        assertEquals(3, listing.entries.size)
+    }
+
+    @Test
     fun binarySniff() {
         assertFalse(TrashArchiveListing.looksBinary("console.log('hi');\n".toByteArray()))
         assertFalse(TrashArchiveListing.looksBinary(ByteArray(0)))

@@ -115,11 +115,11 @@
 - [x] P3.4 移入回收站后 Snackbar "撤销": `ScriptOperations.showMovedToTrashWithUndo` 在单个与批量移入成功后显示带 "撤销" 动作的 Snackbar (无宿主 view 时退回普通提示); 撤销在 IO 线程逐条 `findTrashItem` (已不在回收站则跳过), 原路径已被占用则跳过, 否则 `restoreTrashItemToPathWithoutOverwrite` 恢复并刷新父目录; 全部成功提示 "完成", 否则用 P3.1 的汇总文案提示恢复 / 跳过 / 失败数. 顺带修复 `showMessage` 在主线程时先显示再 post 导致提示重复两次. 插件宿主 (`ExplorerActionHostSession`) 的移入路径不在此范围. 证据: 编译 + 全部 history 单测 (60 例), 2026-09-16; 提交 `e7787b563`.
 - [x] P3.5 列表到期倒计时: `TrashViewHolder` 副标题追加 "剩余 N 天 M 小时" (保留天数不限时不显示), `TrashExpiry.Remaining.withinOneDay` 为真时副标题改用 `trash_expiring_soon` 颜色 (含夜间色); 天数与 "现在" 由 `TrashActivity.onItemsLoaded` 写入 adapter, 每次加载刷新. 到期纯函数与单测已在 P3.3 落地. 证据: 编译 + 全部 history 单测 (60 例), 2026-09-16; 提交 `28ca7f4c5`.
 - [x] P3.6 失效条目处理: `TrashRepository.restoreTrashItemToPath` 在 blob 缺失时抛出 `TrashBlobMissingException` (替代 `require`), 新增 `isBlobMissing` / `listTrashItemsWithMissingBlobs`; `TrashFailureText.describe` 把 blob 缺失 / `ZipException` (损坏) 映射为本地化文案, 预览与单个恢复的失败提示均改用它 (批量恢复计入失败数). `TrashActivity.loadAllItemsInBackground` 每次加载检测失效 id, 列表副标题以高亮色标记 "数据缺失" (替代倒计时), 点击失效条目只提供详情 / 移除, 菜单新增 "移除失效条目" (IO 线程重新扫描, 确认后复用批量移除). `HistoryCleanup.runAll` 末尾新增 `reportTrashItemsWithMissingBlobs`: 仅 `Log.w` 数量与样本路径, 不删除. 证据: 编译 + 全部 history 单测 (60 例), 2026-09-16; 提交 `5a38c5fa2`.
-- [x] P3.7 回收站条目关联 history: `TrashRepository.moveToTrashWithProgress` 构造 `TrashItem` 时对文件按规范化路径 `findFileByPath` 写入 `fileId` (目录与未纳管文件为 null, 仅供参考); `restoreTrashItemToPath` 在删除回收站记录后, 若规范化的目标路径与原路径不同则调用 `HistoryRepository.relocate(original, dest)` (文件精确匹配, 目录按前缀, 与目标路径已有条目合并; 不抛异常), 单个 / 批量 / 撤销恢复均经此路径. 未按 fileId 迁移: 历史按路径键控, 同路径新文件会复用同一条目, fileId 无法拆分, 故 fileId 仅记录. 证据: 编译 + 全部 history 单测 (60 例), 2026-09-16; 提交 hash 由 P4.1 提交回填.
+- [x] P3.7 回收站条目关联 history: `TrashRepository.moveToTrashWithProgress` 构造 `TrashItem` 时对文件按规范化路径 `findFileByPath` 写入 `fileId` (目录与未纳管文件为 null, 仅供参考); `restoreTrashItemToPath` 在删除回收站记录后, 若规范化的目标路径与原路径不同则调用 `HistoryRepository.relocate(original, dest)` (文件精确匹配, 目录按前缀, 与目标路径已有条目合并; 不抛异常), 单个 / 批量 / 撤销恢复均经此路径. 未按 fileId 迁移: 历史按路径键控, 同路径新文件会复用同一条目, fileId 无法拆分, 故 fileId 仅记录. 证据: 编译 + 全部 history 单测 (60 例), 2026-09-16; 提交 `18db37408`.
 
 ### P4 质量, 验证与文档
 
-- [ ] P4.1 单测扩展: relocate 路径映射, 配额提示决策, 到期计算, zip 条目列表解析.
+- [x] P4.1 单测扩展: 配额提示决策抽为纯对象 `TrashQuotaHint` (`needsMeasurement` / `decide`, D8 语义: 无上限不统计, 等于上限仍放行), `ScriptOperations.checkTrashQuotaThenRun` 改用它; 新增 `TrashQuotaHintTest` (3 例), `HistoryRelocationTest` 增加回收站恢复到其他目录 / 自动改名 / 同路径映射 (2 例), `TrashExpiryTest` 增加一天边界与不足一小时 / 大保留期 (1 例), `TrashArchiveListingTest` 增加仅目录归档与恰好等于 maxEntries (2 例). 证据: 全部 history 单测 68 例通过, 2026-09-16; 提交 hash 由 P4.2 提交回填.
 - [ ] P4.2 Room `exportSchema = true` 并提交 `app/schemas/` 快照, 2 -> 3 迁移有可回归的 schema 文件 (F18).
 - [ ] P4.3 zip 解压的 canonical path 检查与损坏 zip 的容错 (单个条目失败时记录并继续, 最终提示).
 - [ ] P4.4 两个列表页改用 `ListAdapter` + `DiffUtil`; `VersionHistoryFileViewHolder` 改用布局文件并加文件图标 (F17).
@@ -164,7 +164,7 @@
 | 关注点 | 文件 |
 | --- | --- |
 | 数据模型 | `storage/history/HistoryEntities.kt`, `TrashItemEntity.kt`, `HistoryDao.kt`, `HistoryDatabase.kt` |
-| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `HistorySnapshotLabel.kt` (P2.5), `HistoryExportNaming.kt` (P2.6), `TrashExpiry.kt` (P3.3 / P3.5), `RetentionLimitUnits.kt` (P1.1) |
+| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `HistorySnapshotLabel.kt` (P2.5), `HistoryExportNaming.kt` (P2.6), `TrashExpiry.kt` (P3.3 / P3.5), `TrashQuotaHint.kt` (P4.1), `RetentionLimitUnits.kt` (P1.1) |
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |

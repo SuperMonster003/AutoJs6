@@ -40,4 +40,20 @@ class HistoryRelocationTest {
     fun trailingSlashesAndWhitespaceAreNormalized() {
         assertEquals("$root/new/a.js", HistoryRelocation.mapPath("$root/old/a.js", " $root/old/ ", "$root/new/"))
     }
+
+    @Test
+    fun restoreFromTrashToAnotherDirectory() {
+        // A trashed directory restored under a different parent (P3.7) keeps every nested path.
+        assertEquals("$root/restored/proj/lib/a.js", HistoryRelocation.mapPath("$root/proj/lib/a.js", "$root/proj", "$root/restored/proj"))
+        // Restore with auto-rename: "a.js" becomes "a (1).js".
+        assertEquals("$root/a (1).js", HistoryRelocation.mapPath("$root/a.js", "$root/a.js", "$root/a (1).js"))
+        // Moving a directory into a new location below its own old name still maps by prefix.
+        assertEquals("$root/old/inner/x/y.js", HistoryRelocation.mapPath("$root/old/x/y.js", "$root/old", "$root/old/inner"))
+    }
+
+    @Test
+    fun samePathMapsToItself() {
+        assertEquals("$root/a.js", HistoryRelocation.mapPath("$root/a.js", "$root/a.js/", "$root/a.js"))
+        assertEquals("$root/dir/a.js", HistoryRelocation.mapPath("$root/dir/a.js", "$root/dir", "$root/dir/"))
+    }
 }
