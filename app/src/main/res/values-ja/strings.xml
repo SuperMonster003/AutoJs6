@@ -742,6 +742,7 @@
     <string name="summary_plugin_jump_to_launch_page">このプラグインの起動 Activity を開きます</string>
     <string name="summary_plugin_no_launch_page">現在のプラグインには起動ページがありません</string>
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
+    <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
     <string name="text_bun_host_capabilities">Bun 機能ブリッジ</string>
     <string name="text_bun_host_info_grant">ホスト情報スナップショット</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE を通じて Bun スクリプトに AutoJs6 のバージョンと言語の読み取り専用スナップショットを提供します; 次回の実行から適用</string>
@@ -1519,6 +1520,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">ゴミ箱に移動中...</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_n_days">%d 日</string>
+    <string name="text_n_items">%d 件</string>
+    <string name="text_n_items_conflict">%2$d 件のうち %1$d 件は移動先に既に存在します</string>
     <string name="text_n_unchanged_lines_hidden">変更のない %d 行を非表示中. タップして展開</string>
     <string name="text_n_versions">%d バージョン</string>
     <string name="text_name">名称</string>
@@ -1838,6 +1841,7 @@
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>
     <string name="text_remove_from_trash">ゴミ箱から削除</string>
     <string name="text_remove_from_trash_confirm">この項目をゴミ箱から完全に削除しますか?</string>
+    <string name="text_remove_selected_from_trash_confirm">選択した %d 件の項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_repeat_count_must_be_positive">回数は 0 より大きい必要があります</string>
     <string name="text_repeat_count_times">回</string>
@@ -1865,6 +1869,7 @@
     <string name="text_restart_strategy">再起動戦略</string>
     <string name="text_restore">復元</string>
     <string name="text_restore_and_save">復元して保存</string>
+    <string name="text_restore_selected">選択項目を復元</string>
     <string name="text_restore_to_original_path">元のパスに復元</string>
     <string name="text_restore_to_specified_path">指定したパスに復元</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">復元中...</string>
@@ -1972,6 +1977,7 @@
     <string name="text_signature_configuration">署名設定</string>
     <string name="text_signature_scheme">署名スキーム</string>
     <string name="text_size">サイズ</string>
+    <string name="text_skip_conflicting">競合する項目をスキップ</string>
     <string name="text_snapshot_created">スナップショットを作成しました</string>
     <string name="text_snapshot_label_optional">ラベル (任意)</string>
     <string name="text_snapshot_requires_internal_storage_file">スナップショットは内部ストレージ内のファイルでのみ利用できます</string>

@@ -214,6 +214,7 @@
 * `Feature` Manual snapshots and pinning in version history: the editor menu gains "Create snapshot" (optional label) and snapshots are pinned by default; any revision can be pinned, unpinned or relabelled from the revision list, pinned revisions are exempt from the day / count / per-file size cleanup, and the global size cleanup removes unpinned revisions first
 * `Feature` Version history export: the revision details dialog gains "Export", which writes the revision byte for byte (original encoding and BOM kept) to a chosen directory under a confirmed file name (the original name with the revision time stamp by default); overwriting a tracked file keeps its current content first
 * `Feature` When version history is opened from the editor, the revision details dialog offers "Restore and save": after confirming the overwrite, the revision is loaded into the editor and saved to disk right away (the default "Restore" still only changes the editor content)
+* `Feature` Trash multi-selection: long-press an item to start selecting, with select all / deselect all, batch restore (to each item's original path or one chosen directory; when names clash, choose skip / overwrite / auto-rename for the whole batch, and items sharing a name inside the batch are always auto-renamed; the progress dialog can be aborted and a summary reports restored / skipped / failed counts) and batch removal from the trash
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -410,6 +411,7 @@
 * `Fix` Receiving a project archive from the VSCode extension converted the whole byte array to a string for logging, which could crash with OOM _[`issue #523`](http://issues.autojs6.com/523)_
 * `Fix` A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_
 * `Fix` Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path
+* `Fix` Restoring a single trash item reported "done" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling

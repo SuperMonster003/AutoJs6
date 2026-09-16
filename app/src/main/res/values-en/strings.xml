@@ -734,6 +734,7 @@
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
+    <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
     <string name="text_bun_host_info_grant">Host info snapshot</string>
     <string name="summary_bun_host_info_grant">Offer Bun scripts a read-only snapshot of the AutoJs6 version and language through AUTOJS6_HOST_INFO_FILE; applies from the next run</string>
@@ -1506,6 +1507,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_n_days">%d days</string>
+    <string name="text_n_items">%d items</string>
+    <string name="text_n_items_conflict">%1$d of %2$d items already exist at the destination</string>
     <string name="text_n_unchanged_lines_hidden">%d unchanged lines hidden, tap to expand</string>
     <string name="text_n_versions">%d versions</string>
     <string name="text_name">Name</string>
@@ -1825,6 +1828,7 @@
     <string name="text_remove_all_breakpoints">Remove all breakpoints</string>
     <string name="text_remove_from_trash">Remove from trash</string>
     <string name="text_remove_from_trash_confirm">Remove this item from trash permanently?</string>
+    <string name="text_remove_selected_from_trash_confirm">Remove the %d selected items from trash permanently?</string>
     <string name="text_rename">Rename</string>
     <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>
     <string name="text_repeat_count_times">Times</string>
@@ -1852,6 +1856,7 @@
     <string name="text_restart_strategy">Restart strategy</string>
     <string name="text_restore">Restore</string>
     <string name="text_restore_and_save">Restore and save</string>
+    <string name="text_restore_selected">Restore selected</string>
     <string name="text_restore_to_original_path">Restore to original path</string>
     <string name="text_restore_to_specified_path">Restore to specified path</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>
@@ -1959,6 +1964,7 @@
     <string name="text_signature_configuration">Signature Configuration</string>
     <string name="text_signature_scheme">Signature Scheme</string>
     <string name="text_size">Size</string>
+    <string name="text_skip_conflicting">Skip conflicting</string>
     <string name="text_snapshot_created">Snapshot created</string>
     <string name="text_snapshot_label_optional">Label (optional)</string>
     <string name="text_snapshot_requires_internal_storage_file">Snapshots are only available for files under internal storage</string>

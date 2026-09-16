@@ -11,6 +11,31 @@
         app:showAsAction="always|collapseActionView" />
 
     <item
+        android:id="@+id/action_remove_selected"
+        android:icon="@drawable/ic_delete_black_24dp"
+        android:title="@string/text_remove_from_trash"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_restore_selected"
+        android:title="@string/text_restore_selected"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_select_all"
+        android:title="@string/text_select_all"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_deselect_all"
+        android:title="@string/text_deselect_all"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_sort"
         android:title="@string/text_sort"
         app:showAsAction="never">

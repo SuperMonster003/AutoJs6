@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.storage
 
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.history.TrashEntities
@@ -15,36 +14,37 @@ import java.util.Locale
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
+ * Modified by Claude (Fable 5.1) as of Sep 16, 2026.
  */
 internal class TrashViewHolder(
-    binding: ItemTrashBinding,
+    private val binding: ItemTrashBinding,
     private val onClick: (TrashEntities.TrashItem) -> Unit,
     private val onLongClick: (TrashEntities.TrashItem) -> Unit,
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    private val iconView: ImageView = binding.icon
-    private val titleView: TextView = binding.title
-    private val subtitleView: TextView = binding.subtitle
-
     private var boundItem: TrashEntities.TrashItem? = null
 
-    fun bind(item: TrashEntities.TrashItem) {
+    fun bind(item: TrashEntities.TrashItem, selectionMode: Boolean, selected: Boolean) {
         boundItem = item
 
-        iconView.setImageResource(if (item.isDirectory) R.drawable.ic_simple_folder else R.drawable.ic_simple_file)
-        titleView.text = File(item.originalPath).name
+        binding.icon.setImageResource(if (item.isDirectory) R.drawable.ic_simple_folder else R.drawable.ic_simple_file)
+        binding.title.text = File(item.originalPath).name
 
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val timeText = fmt.format(Date(item.trashedAt))
         val sizeText = PFiles.formatSizeWithUnit(item.sizeBytes)
 
-        subtitleView.text = buildString {
+        binding.subtitle.text = buildString {
             append(timeText)
             append("  |  ")
             append(sizeText)
             append("\n")
             append(item.originalPath.normalizeTrailingSlash(item.isDirectory))
         }
+
+        binding.checkbox.visibility = if (selectionMode) View.VISIBLE else View.GONE
+        binding.checkbox.isChecked = selected
+        binding.root.isActivated = selected
 
         itemView.setOnClickListener {
             boundItem?.let(onClick)

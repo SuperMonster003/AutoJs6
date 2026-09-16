@@ -208,7 +208,8 @@
         "Version history diff view: compare a revision with the current file, or select two revisions and compare them; added and removed lines are colored line by line, unchanged runs are folded and expandable, lines can be searched by text; oversized content shows line and size statistics only",
         "Manual snapshots and pinning in version history: the editor menu gains \"Create snapshot\" (optional label) and snapshots are pinned by default; any revision can be pinned, unpinned or relabelled from the revision list, pinned revisions are exempt from the day / count / per-file size cleanup, and the global size cleanup removes unpinned revisions first",
         "Version history export: the revision details dialog gains \"Export\", which writes the revision byte for byte (original encoding and BOM kept) to a chosen directory under a confirmed file name (the original name with the revision time stamp by default); overwriting a tracked file keeps its current content first",
-        "When version history is opened from the editor, the revision details dialog offers \"Restore and save\": after confirming the overwrite, the revision is loaded into the editor and saved to disk right away (the default \"Restore\" still only changes the editor content)"
+        "When version history is opened from the editor, the revision details dialog offers \"Restore and save\": after confirming the overwrite, the revision is loaded into the editor and saved to disk right away (the default \"Restore\" still only changes the editor content)",
+        "Trash multi-selection: long-press an item to start selecting, with select all / deselect all, batch restore (to each item's original path or one chosen directory; when names clash, choose skip / overwrite / auto-rename for the whole batch, and items sharing a name inside the batch are always auto-renamed; the progress dialog can be aborted and a summary reports restored / skipped / failed counts) and batch removal from the trash"
       ],
       "fix": [
         "The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors",
@@ -406,7 +407,8 @@
         "Files deleted on the PC remained on the device after saving a project from the VSCode extension, and stale files in the cache directory kept reappearing _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
         "Receiving a project archive from the VSCode extension converted the whole byte array to a string for logging, which could crash with OOM _[`issue #523`](http://issues.autojs6.com/523)_",
         "A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_",
-        "Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path"
+        "Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path",
+        "Restoring a single trash item reported \"done\" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown"
       ],
       "improvement": [
         "Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically",

@@ -21,8 +21,9 @@
         app:tint="@color/day_night_alpha_60" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:paddingHorizontal="12dp"
         android:orientation="vertical">
 
@@ -47,4 +48,14 @@
             android:textSize="12sp"
             tools:text="2026-02-06 21:45:55  |  21.93 MiB\n/storage/emulated/0/Scripts/test-116_v1.0.5.apk" />
     </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </LinearLayout>

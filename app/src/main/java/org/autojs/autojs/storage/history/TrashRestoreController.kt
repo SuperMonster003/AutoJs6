@@ -119,6 +119,204 @@ class TrashRestoreController(private val context: Context) {
         }
     }
 
+    /**
+     * Restore several items in one go: destination (original parents or one chosen directory),
+     * then a single conflict policy for the batch (skip / overwrite / auto-rename), then an
+     * abortable progress dialog. Items sharing a name inside the batch are always auto-renamed.
+     *
+     * zh-CN: 批量恢复: 先选目标 (各自原父目录或统一目录), 有冲突时为整批选择一种策略 (跳过 / 覆盖 / 自动改名),
+     * 然后在可中止的进度对话框中执行. 批次内同名条目一律自动改名.
+     */
+    fun startBatchRestoreFlow(items: List<TrashEntities.TrashItem>, onFinished: (() -> Unit)? = null) {
+        if (items.isEmpty()) return
+        if (items.size == 1) {
+            startRestoreFlow(items[0], emptyList(), onFinished)
+            return
+        }
+        val selected = intArrayOf(0)
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_choose_restore_path)
+                .content(context.getString(R.string.text_n_items, items.size))
+                .items(
+                    context.getString(R.string.text_restore_to_original_path),
+                    context.getString(R.string.text_restore_to_specified_path),
+                )
+                .itemsCallbackSingleChoice(0) { _, _, which, _ ->
+                    selected[0] = which
+                    true
+                }
+                .alwaysCallSingleChoiceCallback()
+                .choiceWidgetThemeColor()
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { _, _ ->
+                    when (selected[0]) {
+                        0 -> planBatchThenAskConflicts(items, null, onFinished)
+                        else -> chooseDirectoryThenBatchRestore(items, onFinished)
+                    }
+                }
+                .cancelable(true)
+                .build()
+        }
+    }
+
+    private fun chooseDirectoryThenBatchRestore(items: List<TrashEntities.TrashItem>, onFinished: (() -> Unit)?) {
+        FileChooserDialogBuilder(context)
+            .title(R.string.dialog_button_choose_path)
+            .dir(HistoryPaths.internalStorageRoot)
+            .chooseDir()
+            .singleChoice()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ dir ->
+                planBatchThenAskConflicts(items, dir.path, onFinished)
+            }, { e ->
+                e.printStackTrace()
+                ViewUtils.showToast(context, e.message, true)
+            })
+    }
+
+    private fun planBatch(
+        items: List<TrashEntities.TrashItem>,
+        targetDir: String?,
+        policy: TrashBatchPlanner.ConflictPolicy,
+    ): List<TrashBatchPlanner.Step> = TrashBatchPlanner.plan(
+        entries = items.map { TrashBatchPlanner.Entry(it.trashId, it.originalPath, it.isDirectory) },
+        targetDir = targetDir,
+        policy = policy,
+        exists = { File(it).exists() },
+        siblingNames = { dir -> File(dir).list()?.toList() ?: emptyList() },
+    )
+
+    private fun planBatchThenAskConflicts(items: List<TrashEntities.TrashItem>, targetDir: String?, onFinished: (() -> Unit)?) {
+        Schedulers.io().scheduleDirect {
+            val conflicts = runCatching {
+                planBatch(items, targetDir, TrashBatchPlanner.ConflictPolicy.SKIP).count { it.conflict }
+            }.getOrElse {
+                it.printStackTrace()
+                0
+            }
+            AndroidSchedulers.mainThread().scheduleDirect {
+                if (conflicts == 0) {
+                    executeBatchRestore(items, targetDir, TrashBatchPlanner.ConflictPolicy.SKIP, onFinished)
+                    return@scheduleDirect
+                }
+                DialogUtils.buildAndShowAdaptive {
+                    MaterialDialog.Builder(context)
+                        .title(R.string.text_prompt)
+                        .content(context.getString(R.string.text_n_items_conflict, conflicts, items.size))
+                        .options(listOf(MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_cancel)) { d -> d.dismiss() }))
+                        .negativeText(R.string.text_skip_conflicting)
+                        .negativeColorRes(R.color.dialog_button_default)
+                        .onNegative { _, _ -> executeBatchRestore(items, targetDir, TrashBatchPlanner.ConflictPolicy.SKIP, onFinished) }
+                        .neutralText(R.string.text_overwrite)
+                        .neutralColorRes(R.color.dialog_button_caution)
+                        .onNeutral { _, _ -> executeBatchRestore(items, targetDir, TrashBatchPlanner.ConflictPolicy.OVERWRITE, onFinished) }
+                        .positiveText(R.string.text_auto_rename)
+                        .positiveColorRes(R.color.dialog_button_attraction)
+                        .onPositive { _, _ -> executeBatchRestore(items, targetDir, TrashBatchPlanner.ConflictPolicy.AUTO_RENAME, onFinished) }
+                        .cancelable(true)
+                        .build()
+                }
+            }
+        }
+    }
+
+    private fun executeBatchRestore(
+        items: List<TrashEntities.TrashItem>,
+        targetDir: String?,
+        policy: TrashBatchPlanner.ConflictPolicy,
+        onFinished: (() -> Unit)?,
+    ) {
+        val appCtx = context.applicationContext
+        Schedulers.io().scheduleDirect {
+            var restored = 0
+            var skipped = 0
+            var failed = 0
+            val aborted = runCatching {
+                val steps = planBatch(items, targetDir, policy)
+                skipped = steps.count { it.skipped }
+                val work = steps.filter { !it.skipped }
+                val byId = items.associateBy { it.trashId }
+                withBatchProgressDialog(work.size) { operationController, session ->
+                    val repository = TrashRepository(appCtx)
+                    work.forEachIndexed { index, step ->
+                        operationController.throwIfCancelled()
+                        val item = byId.getValue(step.entry.id)
+                        val dest = File(step.dest)
+                        val destExistedBefore = dest.exists()
+                        session.setContentThrottled(mutableListOf("${index + 1} / ${work.size}", dest.name))
+                        session.setProgressThrottled(index.toLong(), work.size.toLong())
+                        try {
+                            if (destExistedBefore && !item.isDirectory && dest.isFile) {
+                                HistoryRepository(appCtx).recordSnapshotBeforeOverwrite(
+                                    path = dest.path,
+                                    op = HistoryRepository.OP_RESTORE_PRE,
+                                    newContentSha256 = item.sha256,
+                                )
+                            }
+                            repository.restoreTrashItemToPath(item, dest, operationController)
+                            notifyExplorerParentDirChanged(dest)
+                            restored++
+                        } catch (e: OperationAbortedException) {
+                            if (!destExistedBefore && dest.exists()) dest.deleteRecursively()
+                            throw e
+                        } catch (e: Throwable) {
+                            e.printStackTrace()
+                            failed++
+                        }
+                    }
+                    session.setProgressThrottled(work.size.toLong(), work.size.toLong())
+                }
+                false
+            }.getOrElse { e ->
+                if (e is OperationAbortedException) {
+                    true
+                } else {
+                    e.printStackTrace()
+                    failed++
+                    false
+                }
+            }
+            AndroidSchedulers.mainThread().scheduleDirect {
+                if (aborted) {
+                    ViewUtils.showToast(context, context.getString(R.string.text_operation_aborted), false)
+                }
+                ViewUtils.showToast(context, context.getString(R.string.text_batch_restore_summary, restored, skipped, failed), true)
+                onFinished?.invoke()
+            }
+        }
+    }
+
+    /**
+     * Determinate, abortable progress dialog for a batch; failures inside [operation] propagate.
+     * zh-CN: 批量操作用的可中止确定进度对话框; [operation] 内的失败会向外抛出.
+     */
+    @Throws(OperationAbortedException::class)
+    private fun withBatchProgressDialog(total: Int, operation: (OperationController, ProgressDialogSession) -> Unit) {
+        val controller = OperationController()
+        val session = ProgressDialogSession(controller)
+        try {
+            val builder = MaterialDialog.Builder(context)
+                .title(R.string.text_restore)
+                .content(R.string.text_restoring)
+                .negativeText(R.string.dialog_button_abort)
+                .negativeColorRes(R.color.dialog_button_caution)
+                .onNegative { _, _ -> controller.cancel() }
+                .progress(false, total.coerceAtLeast(1))
+                .cancelable(false)
+                .canceledOnTouchOutside(false)
+            session.scheduleShow(builder)
+            controller.throwIfCancelled()
+            operation(controller, session)
+        } finally {
+            session.dismissSafely()
+        }
+    }
+
     private fun restoreToOriginalPathWithConflictHandling(item: TrashEntities.TrashItem, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
         val dest = File(item.originalPath)
         val parent = dest.parentFile ?: run {
@@ -257,7 +455,10 @@ class TrashRestoreController(private val context: Context) {
         } catch (e: OperationAbortedException) {
             throw e
         } catch (e: Throwable) {
+            // Propagate so the caller reports the failure instead of a misleading "done".
+            // zh-CN: 向外抛出, 让调用方报告失败而不是误报 "完成".
             e.printStackTrace()
+            throw e
         } finally {
             session.dismissSafely()
         }

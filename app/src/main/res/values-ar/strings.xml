@@ -743,6 +743,7 @@
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
+    <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
     <string name="text_bun_host_info_grant">لقطة معلومات المضيف</string>
     <string name="summary_bun_host_info_grant">تقديم لقطة للقراءة فقط عن إصدار AutoJs6 ولغته إلى Bun scripts عبر AUTOJS6_HOST_INFO_FILE; تسري من التشغيل التالي</string>
@@ -1520,6 +1521,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">جارٍ النقل الى سلة المحذوفات...</string>
     <string name="text_multiple_options">خيارات متعددة</string>
     <string name="text_n_days">%d يوم</string>
+    <string name="text_n_items">%d عنصر</string>
+    <string name="text_n_items_conflict">%1$d من اصل %2$d عنصر موجودة بالفعل في الوجهة</string>
     <string name="text_n_unchanged_lines_hidden">تم اخفاء %d سطر دون تغيير, انقر للتوسيع</string>
     <string name="text_n_versions">%d اصدار</string>
     <string name="text_name">اسم</string>
@@ -1839,6 +1842,7 @@
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>
     <string name="text_remove_from_trash">ازالة من سلة المحذوفات</string>
     <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
+    <string name="text_remove_selected_from_trash_confirm">ازالة %d من العناصر المحددة من سلة المحذوفات نهائيا؟</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_repeat_count_must_be_positive">يجب أن يكون عدد المرات أكبر من 0</string>
     <string name="text_repeat_count_times">مرات</string>
@@ -1866,6 +1870,7 @@
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
     <string name="text_restore">استعادة</string>
     <string name="text_restore_and_save">استعادة وحفظ</string>
+    <string name="text_restore_selected">استعادة المحدد</string>
     <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
     <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">جارٍ الاستعادة...</string>
@@ -1973,6 +1978,7 @@
     <string name="text_signature_configuration">تكوين التوقيع</string>
     <string name="text_signature_scheme">خطة التوقيع</string>
     <string name="text_size">مقاس</string>
+    <string name="text_skip_conflicting">تخطي المتعارضة</string>
     <string name="text_snapshot_created">تم انشاء اللقطة</string>
     <string name="text_snapshot_label_optional">التسمية (اختياري)</string>
     <string name="text_snapshot_requires_internal_storage_file">اللقطات متاحة فقط للملفات الموجودة في وحدة التخزين الداخلية</string>

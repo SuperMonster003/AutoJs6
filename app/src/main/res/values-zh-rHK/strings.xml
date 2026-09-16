@@ -738,6 +738,7 @@
     <string name="summary_plugin_jump_to_launch_page">打開此插件的啓動 Activity</string>
     <string name="summary_plugin_no_launch_page">當前插件沒有啓動頁</string>
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
+    <string name="text_batch_restore_summary">已還原 %1$d, 略過 %2$d, 失敗 %3$d</string>
     <string name="text_bun_host_capabilities">Bun 能力橋</string>
     <string name="text_bun_host_info_grant">宿主資訊快照</string>
     <string name="summary_bun_host_info_grant">透過 AUTOJS6_HOST_INFO_FILE 向 Bun 腳本提供唯讀的 AutoJs6 版本與語言快照; 下次執行起生效</string>
@@ -1515,6 +1516,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">正在移入回收站...</string>
     <string name="text_multiple_options">多個可選項</string>
     <string name="text_n_days">%d 天</string>
+    <string name="text_n_items">%d 個項目</string>
+    <string name="text_n_items_conflict">%2$d 個項目中有 %1$d 個在目標位置已存在</string>
     <string name="text_n_unchanged_lines_hidden">已隱藏 %d 行未變更內容, 點擊展開</string>
     <string name="text_n_versions">%d 個版本</string>
     <string name="text_name">名稱</string>
@@ -1834,6 +1837,7 @@
     <string name="text_remove_all_breakpoints">刪除所有斷點</string>
     <string name="text_remove_from_trash">從回收站移除</string>
     <string name="text_remove_from_trash_confirm">是否永久刪除此項目</string>
+    <string name="text_remove_selected_from_trash_confirm">從回收站永久移除選取的 %d 個項目?</string>
     <string name="text_rename">重命名</string>
     <string name="text_repeat_count_must_be_positive">次數必須大於 0</string>
     <string name="text_repeat_count_times">次數</string>
@@ -1861,6 +1865,7 @@
     <string name="text_restart_strategy">重啓策略</string>
     <string name="text_restore">恢復</string>
     <string name="text_restore_and_save">還原並儲存</string>
+    <string name="text_restore_selected">還原選取項目</string>
     <string name="text_restore_to_original_path">恢復到原始路徑</string>
     <string name="text_restore_to_specified_path">恢復到指定路徑</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">正在恢復...</string>
@@ -1968,6 +1973,7 @@
     <string name="text_signature_configuration">簽名配置</string>
     <string name="text_signature_scheme">簽名方案</string>
     <string name="text_size">大小</string>
+    <string name="text_skip_conflicting">略過衝突項目</string>
     <string name="text_snapshot_created">快照已建立</string>
     <string name="text_snapshot_label_optional">標籤 (可選)</string>
     <string name="text_snapshot_requires_internal_storage_file">僅內部儲存空間中的文件支援建立快照</string>

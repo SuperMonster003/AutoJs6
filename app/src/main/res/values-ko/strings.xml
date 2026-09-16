@@ -743,6 +743,7 @@
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
+    <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
     <string name="text_bun_host_info_grant">호스트 정보 스냅샷</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE을 통해 Bun 스크립트에 AutoJs6 버전과 언어의 읽기 전용 스냅샷을 제공합니다; 다음 실행부터 적용</string>
@@ -1520,6 +1521,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_n_days">%d일</string>
+    <string name="text_n_items">%d개 항목</string>
+    <string name="text_n_items_conflict">%2$d개 항목 중 %1$d개가 대상 위치에 이미 있습니다</string>
     <string name="text_n_unchanged_lines_hidden">변경되지 않은 %d줄 숨김, 탭하여 펼치기</string>
     <string name="text_n_versions">%d개 버전</string>
     <string name="text_name">이름</string>
@@ -1839,6 +1842,7 @@
     <string name="text_remove_all_breakpoints">모든 중단 점을 제거하십시오</string>
     <string name="text_remove_from_trash">휴지통에서 제거</string>
     <string name="text_remove_from_trash_confirm">이 항목을 휴지통에서 영구 삭제할까요?</string>
+    <string name="text_remove_selected_from_trash_confirm">선택한 %d개 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_rename">이름 바꾸기</string>
     <string name="text_repeat_count_must_be_positive">횟수는 0보다 커야 합니다</string>
     <string name="text_repeat_count_times">회</string>
@@ -1866,6 +1870,7 @@
     <string name="text_restart_strategy">재시작 전략</string>
     <string name="text_restore">복원</string>
     <string name="text_restore_and_save">복원 후 저장</string>
+    <string name="text_restore_selected">선택 항목 복원</string>
     <string name="text_restore_to_original_path">원래 경로로 복원</string>
     <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">복원 중...</string>
@@ -1973,6 +1978,7 @@
     <string name="text_signature_configuration">서명 설정</string>
     <string name="text_signature_scheme">서명 스킴</string>
     <string name="text_size">크기</string>
+    <string name="text_skip_conflicting">충돌 항목 건너뛰기</string>
     <string name="text_snapshot_created">스냅샷을 만들었습니다</string>
     <string name="text_snapshot_label_optional">레이블 (선택 사항)</string>
     <string name="text_snapshot_requires_internal_storage_file">스냅샷은 내부 저장소의 파일에서만 사용할 수 있습니다</string>

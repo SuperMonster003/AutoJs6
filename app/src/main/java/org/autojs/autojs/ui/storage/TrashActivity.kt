@@ -2,7 +2,10 @@ package org.autojs.autojs.ui.storage
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
@@ -34,19 +37,35 @@ import java.util.Locale
  */
 class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEntities.TrashItem>() {
 
-    private val adapter = TrashAdapter(
+    private val adapter: TrashAdapter = TrashAdapter(
         onClick = { item ->
-            val optionMenuItemRemove = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_remove_from_trash)) { d ->
-                confirmAndRemoveFromTrash(item, d)
-            }
-            TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemRemove)) {
-                load()
+            if (adapter.selectionMode) {
+                adapter.toggle(item)
+            } else {
+                val optionMenuItemRemove = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_remove_from_trash)) { d ->
+                    confirmAndRemoveFromTrash(item, d)
+                }
+                TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemRemove)) {
+                    load()
+                }
             }
         },
         onLongClick = { item ->
-            confirmAndRemoveFromTrash(item)
+            if (adapter.selectionMode) adapter.toggle(item) else adapter.enterSelection(item)
         },
+        onSelectionChanged = { count, selectionMode -> onSelectionChanged(count, selectionMode) },
     )
+
+    private val backCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            adapter.clearSelection()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this, backCallback)
+    }
 
     /**
      * Disposables for header observing.
@@ -167,11 +186,47 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
     ) {
         // Header subtitle is driven by Room observe + Pref observe.
         // zh-CN: header subtitle 由 Room 监听 + Pref 监听驱动.
+        if (adapter.selectionMode) return
         observedSubtitle?.let { toolbar.subtitle = it }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val selecting = adapter.selectionMode
+        menu.findItem(R.id.action_remove_selected)?.isVisible = selecting
+        menu.findItem(R.id.action_restore_selected)?.isVisible = selecting
+        menu.findItem(R.id.action_select_all)?.isVisible = selecting
+        menu.findItem(R.id.action_deselect_all)?.isVisible = selecting
+        menu.findItem(R.id.action_search)?.isVisible = !selecting
+        menu.findItem(R.id.action_sort)?.isVisible = !selecting
+        menu.findItem(R.id.action_clear_trash)?.isVisible = !selecting
+        menu.findItem(R.id.action_clean_up_now)?.isVisible = !selecting
+        menu.findItem(R.id.action_trash_and_version_history_settings)?.isVisible = !selecting
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun onSelectionChanged(count: Int, selectionMode: Boolean) {
+        backCallback.isEnabled = selectionMode
+        if (selectionMode) {
+            toolbar.title = getString(R.string.text_selected_items, count)
+            toolbar.subtitle = null
+        } else {
+            toolbar.title = getToolbarTitleText()
+            observedSubtitle?.let { toolbar.subtitle = it }
+        }
+        invalidateOptionsMenu()
     }
 
     override fun onExtraMenuItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_select_all -> true.also { adapter.selectAll() }
+            R.id.action_deselect_all -> true.also { adapter.clearSelection() }
+            R.id.action_restore_selected -> true.also {
+                TrashRestoreController(this).startBatchRestoreFlow(adapter.selectedItems()) {
+                    adapter.clearSelection()
+                    load()
+                }
+            }
+            R.id.action_remove_selected -> true.also { confirmAndRemoveSelectedFromTrash(adapter.selectedItems()) }
             R.id.action_clear_trash -> true.also { confirmAndClearTrash() }
             R.id.action_clean_up_now -> true.also { HistoryCleanupUi.runNow(this) { load() } }
             R.id.action_trash_and_version_history_settings -> true.also { TrashAndVersionHistorySettingsActivity.launch(this) }
@@ -210,6 +265,44 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
                 AndroidSchedulers.mainThread().scheduleDirect {
                     ViewUtils.showToast(this, it.message, true)
                 }
+            }
+        }
+    }
+
+    private fun confirmAndRemoveSelectedFromTrash(items: List<TrashEntities.TrashItem>) {
+        if (items.isEmpty()) return
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(getString(R.string.text_remove_selected_from_trash_confirm, items.size))
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive { _, _ -> removeSelectedFromTrash(items) }
+                .cancelable(true)
+                .build()
+        }
+    }
+
+    private fun removeSelectedFromTrash(items: List<TrashEntities.TrashItem>) {
+        Schedulers.io().scheduleDirect {
+            val repository = TrashRepository(applicationContext)
+            var failed = 0
+            items.forEach { item ->
+                runCatching { repository.deleteTrashItem(item) }.onFailure {
+                    it.printStackTrace()
+                    failed++
+                }
+            }
+            AndroidSchedulers.mainThread().scheduleDirect {
+                if (failed == 0) {
+                    ViewUtils.showToast(this, getString(R.string.text_already_deleted))
+                } else {
+                    ViewUtils.showToast(this, "${getString(R.string.text_failed)}: $failed", true)
+                }
+                adapter.clearSelection()
+                load()
             }
         }
     }

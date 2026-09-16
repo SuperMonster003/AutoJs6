@@ -741,6 +741,7 @@
     <string name="summary_plugin_jump_to_launch_page">Abrir la Activity de inicio de este plugin</string>
     <string name="summary_plugin_no_launch_page">El plugin actual no tiene página de inicio</string>
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
+    <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
     <string name="text_bun_host_capabilities">Puente de capacidades de Bun</string>
     <string name="text_bun_host_info_grant">Instantánea de información del host</string>
     <string name="summary_bun_host_info_grant">Ofrecer a los scripts Bun una instantánea de solo lectura de la versión y el idioma de AutoJs6 mediante AUTOJS6_HOST_INFO_FILE; se aplica a partir de la próxima ejecución</string>
@@ -1518,6 +1519,8 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moviendo a la papelera...</string>
     <string name="text_multiple_options">Opciones múltiples</string>
     <string name="text_n_days">%d días</string>
+    <string name="text_n_items">%d elementos</string>
+    <string name="text_n_items_conflict">%1$d de %2$d elementos ya existen en el destino</string>
     <string name="text_n_unchanged_lines_hidden">%d líneas sin cambios ocultas, toca para expandir</string>
     <string name="text_n_versions">%d versiones</string>
     <string name="text_name">Nombre</string>
@@ -1837,6 +1840,7 @@
     <string name="text_remove_all_breakpoints">Eliminar todos los puntos de interrupción</string>
     <string name="text_remove_from_trash">Quitar de la papelera</string>
     <string name="text_remove_from_trash_confirm">¿Eliminar este elemento de la papelera de forma permanente?</string>
+    <string name="text_remove_selected_from_trash_confirm">¿Eliminar permanentemente de la papelera los %d elementos seleccionados?</string>
     <string name="text_rename">Cambiar el nombre de</string>
     <string name="text_repeat_count_must_be_positive">La cantidad de veces debe ser mayor que 0</string>
     <string name="text_repeat_count_times">Veces</string>
@@ -1864,6 +1868,7 @@
     <string name="text_restart_strategy">Estrategia de reinicio</string>
     <string name="text_restore">Restaurar</string>
     <string name="text_restore_and_save">Restaurar y guardar</string>
+    <string name="text_restore_selected">Restaurar seleccionados</string>
     <string name="text_restore_to_original_path">Restaurar a la ruta original</string>
     <string name="text_restore_to_specified_path">Restaurar a una ruta especifica</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restaurando...</string>
@@ -1971,6 +1976,7 @@
     <string name="text_signature_configuration">Configuración de firma</string>
     <string name="text_signature_scheme">Esquema de firma</string>
     <string name="text_size">Tamaño</string>
+    <string name="text_skip_conflicting">Omitir conflictivos</string>
     <string name="text_snapshot_created">Instantánea creada</string>
     <string name="text_snapshot_label_optional">Etiqueta (opcional)</string>
     <string name="text_snapshot_requires_internal_storage_file">Las instantáneas solo están disponibles para archivos del almacenamiento interno</string>
