@@ -6,16 +6,9 @@ import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
-import org.autojs.autojs.model.explorer.Explorers
-import org.autojs.autojs.ui.common.NotAskAgainDialog
-import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.StringUtils.key
-import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.accessibility.NodeInfo
@@ -25,13 +18,17 @@ import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataS
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoOrderDataItem
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoRootNodeDataItem
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.parseWindowType
+import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ContextUtils.withHostConfiguration
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import kotlin.concurrent.thread
 import kotlin.reflect.KFunction0
@@ -116,24 +113,24 @@ abstract class LayoutFloatyWindow(
 
     protected fun getLayoutSelectedNode() = mLayoutSelectedNode
 
-    /**
-     * Shows the "press volume down to exit" tip once per process, unless the user has ticked
-     * "do not show again". Shown after attaching so the dialog can sit above the inspector window.
-     * zh-CN: 每个进程仅提示一次 "按音量减键可退出", 用户勾选 "不再提示" 后不再显示; 附加到窗口之后再弹出, 以便对话框位于分析窗口之上.
-     */
-    override fun onAttachToWindow(view: View?, manager: WindowManager?) {
-        super.onAttachToWindow(view, manager)
-        if (sExitTipsShownInProcess) return
-        sExitTipsShownInProcess = true
-        NotAskAgainDialog.Builder(mServiceContext, key(R.string.key_dialog_layout_inspector_exit_tips))
-            .title(R.string.text_prompt)
-            .content(R.string.text_volume_down_to_exit_layout_inspector)
-            .positiveText(R.string.dialog_button_confirm)
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .build()
-            ?.also { it.window?.setType(FloatyWindowManger.getWindowType()) }
-            ?.show()
-    }
+    // /**
+    //  * Shows the "press volume down to exit" tip once per process, unless the user has ticked
+    //  * "do not show again". Shown after attaching so the dialog can sit above the inspector window.
+    //  * zh-CN: 每个进程仅提示一次 "按音量减键可退出", 用户勾选 "不再提示" 后不再显示; 附加到窗口之后再弹出, 以便对话框位于分析窗口之上.
+    //  */
+    // override fun onAttachToWindow(view: View?, manager: WindowManager?) {
+    //     super.onAttachToWindow(view, manager)
+    //     if (sExitTipsShownInProcess) return
+    //     sExitTipsShownInProcess = true
+    //     NotAskAgainDialog.Builder(mServiceContext, key(R.string.key_dialog_layout_inspector_exit_tips))
+    //         .title(R.string.text_prompt)
+    //         .content(R.string.text_volume_down_to_exit_layout_inspector)
+    //         .positiveText(R.string.dialog_button_confirm)
+    //         .positiveColorRes(R.color.dialog_button_attraction)
+    //         .build()
+    //         ?.also { it.window?.setType(FloatyWindowManger.getWindowType()) }
+    //         ?.show()
+    // }
 
     /**
      * Whether a pop menu action applies to the current selection; unavailable actions are left out
@@ -287,7 +284,7 @@ abstract class LayoutFloatyWindow(
         @JvmStatic
         protected val SPLIT_LINE: Nothing? = null
 
-        private var sExitTipsShownInProcess = false
+        // private var sExitTipsShownInProcess = false
 
         private var sMultiSelectHintShown = false
 
