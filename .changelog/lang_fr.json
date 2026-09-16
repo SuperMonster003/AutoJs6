@@ -413,7 +413,8 @@
         "Une seule connexion semi-morte de l'extension VSCode bloquait le thread d'écriture des journaux, de sorte que les nouvelles connexions ne recevaient aucun journal _[`issue #385`](http://issues.autojs6.com/385)_",
         "L'historique des versions restait à l'ancien chemin après le renommage ou le déplacement d'un fichier ou d'un dossier dans l'explorateur; il suit désormais le nouveau chemin (les dossiers réécrivent tous les chemins suivis qu'ils contiennent), et lorsqu'un déplacement écrase un fichier suivi, les deux historiques sont fusionnés dans le chemin de destination",
         "La restauration d'un seul élément de la corbeille affichait \"terminé\" même en cas d'échec, car la boîte de progression avalait l'exception; l'erreur réelle est désormais affichée",
-        "Les messages d'opération de l'explorateur affichés depuis le thread principal (comme \"Déplacé vers la corbeille\") apparaissaient deux fois"
+        "Les messages d'opération de l'explorateur affichés depuis le thread principal (comme \"Déplacé vers la corbeille\") apparaissaient deux fois",
+        "Lors de la restauration d'un dossier depuis la corbeille, les noms des entrées de l'archive sont validés par rapport au chemin canonique de la destination, de sorte que les entrées contenant \"..\" ou des chemins absolus ne peuvent plus être écrites hors de la destination (ces entrées sont ignorées et journalisées)"
       ],
       "improvement": [
         "Les erreurs Flow conservent les méthodes, fichiers de script et numéros de ligne des tâches asynchrones dans flowStack et stack, affichés automatiquement par console.error",
@@ -556,7 +557,8 @@
         "L'explorateur enregistre le contenu actuel d'un fichier comme révision OVERWRITE_PRE avant qu'une copie ou un déplacement ne le remplace; lorsqu'un dossier est écrasé, les fichiers suivis qu'il contient reçoivent des instantanés",
         "Chaque élément de la liste de la corbeille affiche un compte à rebours avant expiration (dérivé des jours de conservation de la corbeille, masqué si illimité), et les éléments expirant sous 24 heures sont mis en évidence",
         "Lorsqu'un élément de la corbeille ne peut être ni prévisualisé ni restauré parce que son fichier de données est manquant ou endommagé, un message localisé est affiché à la place du texte brut de l'exception",
-        "Lorsqu'un élément de la corbeille est restauré à un emplacement différent de son chemin d'origine, l'historique des versions du fichier (ou de tous les fichiers du dossier) le suit vers le nouveau chemin ; le déplacement d'un fichier vers la corbeille enregistre l'entrée d'historique des versions à laquelle il était lié à ce moment"
+        "Lorsqu'un élément de la corbeille est restauré à un emplacement différent de son chemin d'origine, l'historique des versions du fichier (ou de tous les fichiers du dossier) le suit vers le nouveau chemin ; le déplacement d'un fichier vers la corbeille enregistre l'entrée d'historique des versions à laquelle il était lié à ce moment",
+        "Une archive de dossier endommagée dans la corbeille n'interrompt plus toute la restauration : les entrées lisibles sont restaurées normalement, les entrées endommagées sont enregistrées et ignorées (les fichiers à moitié écrits sont supprimés), le nombre d'entrées restaurées / en échec est indiqué à la fin et l'élément reste dans la corbeille"
       ],
       "dependency": [
         "Android AXML modularise",

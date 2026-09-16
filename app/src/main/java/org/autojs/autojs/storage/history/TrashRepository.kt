@@ -1,6 +1,7 @@
 package org.autojs.autojs.storage.history
 
 import android.content.Context
+import android.util.Log
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.util.DialogUtils
 import java.io.BufferedInputStream
@@ -17,7 +18,6 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 class TrashMoveRecoveryRequiredException(
@@ -307,6 +307,10 @@ class TrashRepository(private val context: Context) {
 
     fun newTrashId(): String = blobs.newTrashId()
 
+    companion object {
+        private const val TAG = "TrashRepository"
+    }
+
     fun findTrashItem(trashId: String): TrashEntities.TrashItem? = dao.getTrashItem(trashId)
 
     fun blobFileOf(item: TrashEntities.TrashItem): File = File(context.filesDir, item.blobRelPath)
@@ -422,25 +426,16 @@ class TrashRepository(private val context: Context) {
 
         if (item.isDirectory) {
             dest.mkdirs()
-            ZipInputStream(FileInputStream(blobFile)).use { zis ->
-                while (true) {
-                    operationController.throwIfCancelled()
-
-                    val entry = zis.nextEntry ?: break
-                    val outFile = File(dest, entry.name)
-
-                    if (entry.isDirectory) {
-                        outFile.mkdirs()
-                        zis.closeEntry()
-                        continue
-                    }
-
-                    outFile.parentFile?.mkdirs()
-                    outFile.outputStream().use { os ->
-                        copyToCancellable(zis, os)
-                    }
-                    zis.closeEntry()
-                }
+            val report = TrashArchiveExtractor.extract(blobFile, dest) { operationController.throwIfCancelled() }
+            if (report.skippedUnsafe.isNotEmpty()) {
+                Log.w(TAG, "Skipped ${report.skippedUnsafe.size} unsafe archive entries while restoring ${item.originalPath}: ${report.skippedUnsafe.take(5)}")
+            }
+            if (report.hasFailures) {
+                // Keep the trash record and blob: the item is visibly still there and the caller reports
+                // how much was salvaged, instead of silently dropping data that could not be read.
+                // zh-CN: 保留回收站记录与 blob: 条目仍可见, 由调用方报告挽回了多少, 而不是悄悄丢弃读不出的数据.
+                Log.w(TAG, "Archive of ${item.originalPath} restored partially: ${report.failed.size} entries failed")
+                throw TrashArchiveExtractor.PartialFailure(report)
             }
         } else {
             // Write into a hidden sibling first and rename over the destination, so an abort or a

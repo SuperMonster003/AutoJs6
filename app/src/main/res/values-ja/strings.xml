@@ -2133,6 +2133,7 @@
     <string name="text_trash_max_days">ゴミ箱の保持日数</string>
     <string name="text_trash_max_total_bytes">ゴミ箱のサイズ上限</string>
     <string name="text_trash_quota_exceeded_prompt">移動する項目のサイズ (%1$s) がゴミ箱のサイズ上限 (%2$s) を超えています. 続行すると空きを作るためにゴミ箱内の古い項目が削除され, これらの項目は新しい項目が入ると最初に削除されます.</string>
+    <string name="text_trash_restore_partial">%1$d 件のアーカイブ項目を復元しました. %2$d 件はアーカイブの破損により読み取れませんでした. この項目はゴミ箱に残ります</string>
     <string name="text_tutorial">チュートリアル</string>
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>

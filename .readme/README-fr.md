@@ -579,6 +579,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` L'historique des versions restait à l'ancien chemin après le renommage ou le déplacement d'un fichier ou d'un dossier dans l'explorateur; il suit désormais le nouveau chemin (les dossiers réécrivent tous les chemins suivis qu'ils contiennent), et lorsqu'un déplacement écrase un fichier suivi, les deux historiques sont fusionnés dans le chemin de destination
 * `Correction` La restauration d'un seul élément de la corbeille affichait "terminé" même en cas d'échec, car la boîte de progression avalait l'exception; l'erreur réelle est désormais affichée
 * `Correction` Les messages d'opération de l'explorateur affichés depuis le thread principal (comme "Déplacé vers la corbeille") apparaissaient deux fois
+* `Correction` Lors de la restauration d'un dossier depuis la corbeille, les noms des entrées de l'archive sont validés par rapport au chemin canonique de la destination, de sorte que les entrées contenant ".." ou des chemins absolus ne peuvent plus être écrites hors de la destination (ces entrées sont ignorées et journalisées)
 * `Amélioration` Les erreurs Flow conservent les méthodes, fichiers de script et numéros de ligne des tâches asynchrones dans flowStack et stack, affichés automatiquement par console.error
 * `Amélioration` Le paramètre maxAttempts de Flow repeatUntil vaut 0 par défaut pour des tentatives illimitées dans le délai total
 * `Amélioration` Comparaison des collections ordonnées de noeuds et des projections snapshot immuables, avec gestion des délais et de l'annulation des sous-flux
@@ -720,6 +721,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Chaque élément de la liste de la corbeille affiche un compte à rebours avant expiration (dérivé des jours de conservation de la corbeille, masqué si illimité), et les éléments expirant sous 24 heures sont mis en évidence
 * `Amélioration` Lorsqu'un élément de la corbeille ne peut être ni prévisualisé ni restauré parce que son fichier de données est manquant ou endommagé, un message localisé est affiché à la place du texte brut de l'exception
 * `Amélioration` Lorsqu'un élément de la corbeille est restauré à un emplacement différent de son chemin d'origine, l'historique des versions du fichier (ou de tous les fichiers du dossier) le suit vers le nouveau chemin ; le déplacement d'un fichier vers la corbeille enregistre l'entrée d'historique des versions à laquelle il était lié à ce moment
+* `Amélioration` Une archive de dossier endommagée dans la corbeille n'interrompt plus toute la restauration : les entrées lisibles sont restaurées normalement, les entrées endommagées sont enregistrées et ignorées (les fichiers à moitié écrits sont supprimés), le nombre d'entrées restaurées / en échec est indiqué à la fin et l'élément reste dans la corbeille
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

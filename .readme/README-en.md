@@ -579,6 +579,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path
 * `Fix` Restoring a single trash item reported "done" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown
 * `Fix` Explorer operation messages shown from the main thread (such as "Moved to trash") appeared twice
+* `Fix` When restoring a directory from the trash, archive entry names are validated against the destination's canonical path, so entries containing ".." or absolute paths can no longer be written outside the destination (such entries are skipped and logged)
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -720,6 +721,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted
 * `Improvement` When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text
 * `Improvement` When a trash item is restored to a location other than its original path, the version history of the file (or of every file under the directory) follows it to the new path; moving a file to the trash records the version history entry it was linked to at that time
+* `Improvement` A damaged directory archive in the trash no longer aborts the whole restore: readable entries are restored as usual, damaged ones are recorded and skipped (half-written files are removed), the restored / failed counts are reported at the end, and the item stays in the trash
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

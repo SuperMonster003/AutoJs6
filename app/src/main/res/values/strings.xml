@@ -2128,6 +2128,7 @@
     <string name="text_trash_max_days">Trash retention days</string>
     <string name="text_trash_max_total_bytes">Max trash size</string>
     <string name="text_trash_quota_exceeded_prompt">The items to move (%1$s) exceed the trash size limit (%2$s). If you continue, older trash items will be removed to make room, and these items will be removed first once newer items arrive.</string>
+    <string name="text_trash_restore_partial">Restored %1$d archive entries; %2$d could not be read because the archive is damaged. The item stays in the trash</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>

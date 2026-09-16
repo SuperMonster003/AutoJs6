@@ -2134,6 +2134,7 @@
     <string name="text_trash_max_days">ايام الاحتفاظ في سلة المحذوفات</string>
     <string name="text_trash_max_total_bytes">الحد الاقصى لحجم سلة المحذوفات</string>
     <string name="text_trash_quota_exceeded_prompt">حجم العناصر المراد نقلها (%1$s) يتجاوز حد حجم سلة المحذوفات (%2$s). اذا تابعت, ستتم ازالة العناصر الاقدم من سلة المحذوفات لتوفير مساحة, وستتم ازالة هذه العناصر اولا عند وصول عناصر احدث.</string>
+    <string name="text_trash_restore_partial">تمت استعادة %1$d من عناصر الارشيف; تعذرت قراءة %2$d بسبب تلف الارشيف. يبقى العنصر في سلة المحذوفات</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>

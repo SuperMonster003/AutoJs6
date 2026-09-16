@@ -14,6 +14,11 @@ object TrashFailureText {
 
     fun describe(context: Context, e: Throwable): String = when (e) {
         is TrashBlobMissingException -> context.getString(R.string.error_trash_data_missing)
+        is TrashArchiveExtractor.PartialFailure -> context.getString(
+            R.string.text_trash_restore_partial,
+            e.report.restoredEntries,
+            e.report.failed.size,
+        )
         is ZipException -> context.getString(R.string.error_trash_data_damaged)
         else -> e.message?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName
     }

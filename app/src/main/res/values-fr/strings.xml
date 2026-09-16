@@ -2132,6 +2132,7 @@
     <string name="text_trash_max_days">Jours de conservation de la corbeille</string>
     <string name="text_trash_max_total_bytes">Taille maximale de la corbeille</string>
     <string name="text_trash_quota_exceeded_prompt">La taille des éléments à déplacer (%1$s) dépasse la limite de taille de la corbeille (%2$s). Si vous continuez, les éléments plus anciens de la corbeille seront supprimés pour faire de la place, et ces éléments seront supprimés en premier dès l\'arrivée d\'éléments plus récents.</string>
+    <string name="text_trash_restore_partial">%1$d entrées de l\'archive restaurées ; %2$d n\'ont pas pu être lues car l\'archive est endommagée. L\'élément reste dans la corbeille</string>
     <string name="text_tutorial">Tutoriel</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>

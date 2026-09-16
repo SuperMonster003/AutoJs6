@@ -579,6 +579,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El historial de versiones permanecía en la ruta antigua tras renombrar o mover un archivo o directorio en el explorador; ahora sigue la nueva ruta (los directorios reescriben todas las rutas rastreadas que contienen), y cuando un movimiento sobrescribe un archivo rastreado ambos historiales se fusionan en la ruta de destino
 * `Corrección` Restaurar un único elemento de la papelera indicaba "hecho" incluso cuando la restauración había fallado porque el diálogo de progreso se tragaba la excepción; ahora se muestra el error real
 * `Corrección` Los mensajes de operación del explorador mostrados desde el hilo principal (como "Movido a la papelera") aparecían dos veces
+* `Corrección` Al restaurar un directorio desde la papelera, los nombres de las entradas del archivo se validan contra la ruta canónica del destino, por lo que las entradas con ".." o rutas absolutas ya no pueden escribirse fuera del destino (dichas entradas se omiten y se registran)
 * `Mejora` Los errores Flow conservan métodos, archivos de script y números de línea de tareas asíncronas en flowStack y stack, y console.error muestra la pila automáticamente
 * `Mejora` maxAttempts de Flow repeatUntil usa 0 de forma predeterminada para intentos ilimitados dentro del tiempo total
 * `Mejora` Comparación de colecciones ordenadas de nodos y proyecciones snapshot inmutables, con plazos y cancelación de subflujos
@@ -720,6 +721,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
 * `Mejora` Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción
 * `Mejora` Cuando un elemento de la papelera se restaura en una ubicación distinta de su ruta original, el historial de versiones del archivo (o de todos los archivos del directorio) lo sigue a la nueva ruta; al mover un archivo a la papelera se registra la entrada del historial de versiones a la que estaba vinculado en ese momento
+* `Mejora` Un archivo de directorio dañado en la papelera ya no aborta toda la restauración: las entradas legibles se restauran con normalidad, las dañadas se registran y se omiten (los archivos a medio escribir se eliminan), al final se informa el número de entradas restauradas / fallidas y el elemento permanece en la papelera
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

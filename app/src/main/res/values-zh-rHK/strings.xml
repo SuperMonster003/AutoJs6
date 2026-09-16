@@ -2129,6 +2129,7 @@
     <string name="text_trash_max_days">回收站保留天數</string>
     <string name="text_trash_max_total_bytes">回收站容量上限</string>
     <string name="text_trash_quota_exceeded_prompt">待移入條目的大小 (%1$s) 超過回收站容量上限 (%2$s). 繼續移入將清理回收站中更早的條目以騰出空間, 且這些條目會在更新的條目移入後被優先清理.</string>
+    <string name="text_trash_restore_partial">已還原 %1$d 個封存項目, %2$d 個因封存損壞無法讀取, 該項目仍保留在回收站</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">類型</string>
     <string name="text_type_file">文件</string>

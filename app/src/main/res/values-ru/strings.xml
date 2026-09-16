@@ -2132,6 +2132,7 @@
     <string name="text_trash_max_days">Срок хранения в корзине (дней)</string>
     <string name="text_trash_max_total_bytes">Максимальный размер корзины</string>
     <string name="text_trash_quota_exceeded_prompt">Размер перемещаемых элементов (%1$s) превышает ограничение размера корзины (%2$s). Если продолжить, более старые элементы корзины будут удалены, чтобы освободить место, а эти элементы будут удалены первыми при поступлении новых.</string>
+    <string name="text_trash_restore_partial">Восстановлено записей архива: %1$d; не удалось прочитать %2$d из-за повреждения архива. Элемент остается в корзине</string>
     <string name="text_tutorial">Учебник</string>
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>

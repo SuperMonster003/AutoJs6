@@ -2134,6 +2134,7 @@
     <string name="text_trash_max_days">휴지통 보관 일수</string>
     <string name="text_trash_max_total_bytes">휴지통 용량 상한</string>
     <string name="text_trash_quota_exceeded_prompt">이동할 항목의 크기(%1$s)가 휴지통 용량 상한(%2$s)을 초과합니다. 계속하면 공간을 확보하기 위해 휴지통의 오래된 항목이 제거되며, 이 항목들은 새 항목이 들어오면 먼저 제거됩니다.</string>
+    <string name="text_trash_restore_partial">아카이브 항목 %1$d개를 복원했습니다. %2$d개는 아카이브 손상으로 읽을 수 없었습니다. 이 항목은 휴지통에 남아 있습니다</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>

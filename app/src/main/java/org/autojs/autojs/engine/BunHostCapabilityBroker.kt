@@ -148,7 +148,8 @@ internal class BunHostCapabilityBroker(
         if (text.any { it != '\n' && it.isISOControl() }) {
             return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast text contains control characters")
         }
-        val duration = when (request.opt(TOAST_DURATION_KEY)) {
+        val durationValue: Any? = request.opt(TOAST_DURATION_KEY)
+        val duration = when (durationValue) {
             null, TOAST_DURATION_SHORT -> Toast.LENGTH_SHORT
             TOAST_DURATION_LONG -> Toast.LENGTH_LONG
             else -> return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast duration must be \"short\" or \"long\"")
