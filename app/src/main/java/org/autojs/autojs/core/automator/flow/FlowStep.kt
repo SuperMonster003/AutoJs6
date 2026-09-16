@@ -197,7 +197,8 @@ sealed class FlowStep {
         val action: Any?,
         val cond: Any?,
         val timeout: Long,
-        val maxAttempts: Int = 10,
+        /** Zero leaves the action count unlimited; timeout still applies. zh-CN: 0 不限制动作次数, 仍受总超时约束. */
+        val maxAttempts: Int = 0,
         val interval: Long = 200,
         val retryOn: Any? = null,
     ) : FlowStep() {

@@ -27,6 +27,7 @@ import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
+import org.autojs.autojs.runtime.api.augment.flow.FlowJsErrors
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -289,7 +290,7 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun error(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
-            return scriptRuntime.console.error(Util.formatRhino(*args))
+            return scriptRuntime.console.error(FlowJsErrors.formatConsole(args))
         }
 
         @JvmStatic

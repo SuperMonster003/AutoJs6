@@ -59,6 +59,35 @@ class SmartClickTest {
     }
 
     @Test
+    fun boundsOnlyBypassesSuccessfulNodeAndAncestorActions() {
+        val options = Options(boundsOnly = true, offsetX = -10, offsetY = 5)
+        val button = click("button", options)
+        val label = click("label", options)
+        assertEquals(Method.GESTURE, button.method)
+        assertSame(node("button"), button.target)
+        assertEquals(Method.GESTURE, label.method)
+        assertSame(node("label"), label.target)
+        assertEquals(listOf("tap(90, 355)", "tap(190, 105)"), actions.calls)
+    }
+
+    @Test
+    fun boundsOnlyStillVerifiesAndReportsGestureFailuresWithoutNodeFallback() {
+        val options = Options(boundsOnly = true, verify = { "confirmed" })
+        val result = kit.smartClick.click(node("button"), options, SmartClick.STEP_BOUNDS)
+        assertEquals("confirmed", result.verified)
+        actions.tapResult = { _, _ -> false }
+        val failed = error { kit.smartClick.click(node("button"), options, SmartClick.STEP_BOUNDS) }
+        assertEquals(SmartClick.STEP_BOUNDS, failed.step)
+        assertEquals(SmartClick.REASON_GESTURE, failed.reason)
+        assertEquals(listOf("tap(100, 350)", "tap(100, 350)"), actions.calls)
+        actions.tapResult = { _, _ -> true }
+        val unverified = error {
+            kit.smartClick.click(node("button"), options.copy(verify = { false }, verifyTimeout = 0), SmartClick.STEP_BOUNDS)
+        }
+        assertEquals(SmartClick.REASON_VERIFY, unverified.reason)
+    }
+
+    @Test
     fun nonClickableNodeClimbsToTheNearestClickableAncestor() {
         val outcome = click("label")
         assertEquals(Method.ANCESTOR, outcome.method)

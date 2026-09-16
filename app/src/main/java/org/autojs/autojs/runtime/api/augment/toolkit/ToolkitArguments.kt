@@ -174,7 +174,7 @@ internal class ToolkitArguments(
         } ?: ListCollector.Options.DEFAULT_RESULT_TYPE
 
         /** The `offset` of a smart click: one number for both axes or `[dx, dy]`. zh-CN: 智能点击的 `offset`: 一个数字 (两轴同值) 或 `[dx, dy]`. */
-        fun offset(): Pair<Int, Int> = raw("offset")?.let { pair(it, "offset", name) { v -> integer(v, "offset", name) } } ?: (0 to 0)
+        fun offset(): Pair<Int, Int> = raw("offset")?.let { pair(it, "offset", name) { v -> signedInteger(v, "offset", name) } } ?: (0 to 0)
 
     }
 
@@ -303,6 +303,9 @@ internal class ToolkitArguments(
         /** The flat smart click keys. zh-CN: 扁平的智能点击键. */
         val CLICK_KEYS = COMMON_KEYS + setOf("climb", "maxClimb", "gestureFallback", "verify", "verifyTimeout", "verifyInterval", "offset")
 
+        /** Direct coordinate clicks have no node/ancestor fallback policy. zh-CN: 直接坐标点击不接受节点或祖先回退策略. */
+        val CLICK_BOUNDS_KEYS = CLICK_KEYS - setOf("climb", "maxClimb", "gestureFallback")
+
         val FIND_KEYS = COMMON_KEYS
 
         val SCROLL_KEYS = COMMON_KEYS + setOf("container", "direction", "maxSteps", "method", "stopAtEnd", "settle", "gestureDuration")
@@ -356,6 +359,14 @@ internal class ToolkitArguments(
             val n = number(value, what, name)
             require(n.isFinite() && n >= 0 && n == Math.floor(n)) { "Value ${value.jsBrief()} of \"$what\" must be a non-negative integer for $name" }
             require(n <= Int.MAX_VALUE) { "Value ${value.jsBrief()} of \"$what\" is too large for $name" }
+            return n.toInt()
+        }
+
+        private fun signedInteger(value: Any?, what: String, name: String): Int {
+            val n = number(value, what, name)
+            require(n.isFinite() && n >= Int.MIN_VALUE && n <= Int.MAX_VALUE && n == Math.floor(n)) {
+                "Value ${value.jsBrief()} of \"$what\" must be a signed 32-bit integer for $name"
+            }
             return n.toInt()
         }
 

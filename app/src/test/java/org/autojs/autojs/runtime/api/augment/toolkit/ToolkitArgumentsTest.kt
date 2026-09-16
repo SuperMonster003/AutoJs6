@@ -208,6 +208,22 @@ class ToolkitArgumentsTest {
     }
 
     @Test
+    fun boundsClickOptionsSupportSignedOffsetsAndRejectNodePolicies() {
+        val options = arguments.smartClick(reader(obj("{ offset: [-12, 7], verify: 'done' }"), ToolkitArguments.CLICK_BOUNDS_KEYS))
+        assertEquals(-12, options.offsetX)
+        assertEquals(7, options.offsetY)
+        assertEquals("done", options.verify)
+        assertEquals(-3 to -3, reader(obj("{ offset: -3 }")).offset())
+        for (invalid in listOf("{ climb: false }", "{ maxClimb: 0 }", "{ gestureFallback: true }")) {
+            assertThrows(IllegalArgumentException::class.java) { reader(obj(invalid), ToolkitArguments.CLICK_BOUNDS_KEYS) }
+        }
+        for (invalid in listOf("{ offset: 1.5 }", "{ offset: Infinity }", "{ offset: -2147483649 }")) {
+            assertThrows(IllegalArgumentException::class.java) { arguments.smartClick(reader(obj(invalid), ToolkitArguments.CLICK_BOUNDS_KEYS)) }
+        }
+        assertThrows(IllegalArgumentException::class.java) { reader(obj("{ humanize: { offset: -1 } }")).humanize() }
+    }
+
+    @Test
     fun nestedClickOptionsInheritTheOuterHumanizeUnlessTheyHaveTheirOwn() {
         val outer = reader(obj("{ humanize: { delay: 7 }, click: { climb: false } }"), ToolkitArguments.TOGGLE_KEYS)
         val nested = arguments.nestedClick(outer)

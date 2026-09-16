@@ -20,6 +20,7 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.EvaluatorException
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
@@ -40,6 +41,8 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * Created by SuperMonster003 on Sep 6, 2026.
  */
 internal class RuntimeFlowBindings(private val scriptRuntime: ScriptRuntime, private val executor: FlowExecutor) : FlowBindings {
+
+    override fun captureSourceStack(): List<StackTraceElement> = captureScriptStack()
 
     override fun probe(cond: Any?, scope: FlowScope): Any? = when (cond) {
         is FlowCondition.Selector -> {
@@ -183,6 +186,15 @@ internal class RuntimeFlowBindings(private val scriptRuntime: ScriptRuntime, pri
             "press" -> automator.press(x, y, FlowActions.int(args, 0, "duration"))
             else -> null
         }
+    }
+
+    companion object {
+        fun captureScriptStack(): List<StackTraceElement> = runCatching {
+            if (Context.getCurrentContext() == null) emptyList()
+            else EvaluatorException("Flow task creation").scriptStack.take(16).map {
+                StackTraceElement("", it.functionName?.takeIf(String::isNotEmpty) ?: "<script>", it.fileName, it.lineNumber)
+            }
+        }.getOrDefault(emptyList())
     }
 
 }

@@ -86,9 +86,15 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
 
     fun smartClick(args: Array<out Any?>): Any? = sync(SmartClick.STEP, args)
 
+    fun smartClickBounds(args: Array<out Any?>): Any? = sync(SmartClick.STEP_BOUNDS, args)
+
     fun clickIfExists(args: Array<out Any?>): Any? = sync(Toolkit.STEP_CLICK_IF_EXISTS, args)
 
+    fun clickBoundsIfExists(args: Array<out Any?>): Any? = sync(Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS, args)
+
     fun clickAny(args: Array<out Any?>): Any? = sync(Toolkit.STEP_CLICK_ANY, args)
+
+    fun clickBoundsAny(args: Array<out Any?>): Any? = sync(Toolkit.STEP_CLICK_BOUNDS_ANY, args)
 
     fun findAny(args: Array<out Any?>): Any? = sync(STEP_FIND_ANY, args)
 
@@ -133,9 +139,9 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
     }
 
     private fun prepare(mode: Mode, name: String, args: Array<out Any?>): Prepared = when (name) {
-        SmartClick.STEP -> smartClick(mode, args)
-        Toolkit.STEP_CLICK_IF_EXISTS -> clickIfExists(mode, args)
-        Toolkit.STEP_CLICK_ANY -> clickAny(mode, args)
+        SmartClick.STEP, SmartClick.STEP_BOUNDS -> smartClick(mode, args, name)
+        Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS -> clickIfExists(mode, args, name)
+        Toolkit.STEP_CLICK_ANY, Toolkit.STEP_CLICK_BOUNDS_ANY -> clickAny(mode, args, name)
         STEP_FIND_ANY -> findAny(mode, args)
         ScrollSearch.STEP -> scrollUntil(mode, args)
         TextEntry.STEP -> typeInto(mode, args)
@@ -152,44 +158,47 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
     // The tools. zh-CN: 各工具.
 
     /** `smartClick(target, options?)` / `.smartClick(options?)`: `{ ok, method, target, verified }`. */
-    private fun smartClick(mode: Mode, args: Array<out Any?>): Prepared {
-        val call = split(mode, SmartClick.STEP, args, positional = if (mode == Mode.CHAINED) 0 else 1)
-        val r = arguments.reader(call, ToolkitArguments.CLICK_KEYS)
+    private fun smartClick(mode: Mode, args: Array<out Any?>, name: String): Prepared {
+        val boundsOnly = name == SmartClick.STEP_BOUNDS
+        val call = split(mode, name, args, positional = if (mode == Mode.CHAINED) 0 else 1)
+        val r = arguments.reader(call, if (boundsOnly) ToolkitArguments.CLICK_BOUNDS_KEYS else ToolkitArguments.CLICK_KEYS)
         val target = if (mode == Mode.CHAINED) null else call.require(0, "target")
-        val options = arguments.smartClick(r)
+        val options = arguments.smartClick(r).copy(boundsOnly = boundsOnly)
         val locate = r.locate(defaultTimeout(mode))
         val root = r.root()
         return Prepared(detail(target), call.onOk, call.onErr) { value, scope ->
-            val t = if (mode == Mode.CHAINED) targetOf(value, SmartClick.STEP) else target
+            val t = if (mode == Mode.CHAINED) targetOf(value, name) else target
             val effectiveRoot = root ?: rootOf(scope)
-            val node = kit.locate(t, effectiveRoot, SmartClick.STEP, locate)
-            results.smartClick(kit.smartClick.click(node, options, SmartClick.STEP, effectiveRoot, describe(t)))
+            val node = kit.locate(t, effectiveRoot, name, locate)
+            results.smartClick(kit.smartClick.click(node, options, name, effectiveRoot, describe(t)))
         }
     }
 
     /** `clickIfExists(target, options? | timeout?)`: whether it was clicked. */
-    private fun clickIfExists(mode: Mode, args: Array<out Any?>): Prepared {
-        val call = split(mode, Toolkit.STEP_CLICK_IF_EXISTS, args, positional = 1)
-        val r = arguments.reader(call, ToolkitArguments.CLICK_KEYS, shorthandKey = "timeout")
+    private fun clickIfExists(mode: Mode, args: Array<out Any?>, name: String): Prepared {
+        val boundsOnly = name == Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS
+        val call = split(mode, name, args, positional = 1)
+        val r = arguments.reader(call, if (boundsOnly) ToolkitArguments.CLICK_BOUNDS_KEYS else ToolkitArguments.CLICK_KEYS, shorthandKey = "timeout")
         val target = call.require(0, "target")
-        val options = arguments.smartClick(r)
+        val options = arguments.smartClick(r).copy(boundsOnly = boundsOnly)
         val locate = r.locate(defaultTimeout(mode))
         val root = r.root()
         return Prepared(detail(target), call.onOk, call.onErr) { _, scope ->
-            kit.clickIfExists(target, root ?: rootOf(scope), locate, options, Toolkit.STEP_CLICK_IF_EXISTS) != null
+            kit.clickIfExists(target, root ?: rootOf(scope), locate, options, name) != null
         }
     }
 
     /** `clickAny(targets, options? | timeout?)`: `{ index, target, node, method, verified }` or `null`. */
-    private fun clickAny(mode: Mode, args: Array<out Any?>): Prepared {
-        val call = split(mode, Toolkit.STEP_CLICK_ANY, args, positional = 1)
-        val r = arguments.reader(call, ToolkitArguments.CLICK_KEYS, shorthandKey = "timeout")
+    private fun clickAny(mode: Mode, args: Array<out Any?>, name: String): Prepared {
+        val boundsOnly = name == Toolkit.STEP_CLICK_BOUNDS_ANY
+        val call = split(mode, name, args, positional = 1)
+        val r = arguments.reader(call, if (boundsOnly) ToolkitArguments.CLICK_BOUNDS_KEYS else ToolkitArguments.CLICK_KEYS, shorthandKey = "timeout")
         val targets = arguments.targets(call.require(0, "targets"), call.name)
-        val options = arguments.smartClick(r)
+        val options = arguments.smartClick(r).copy(boundsOnly = boundsOnly)
         val locate = r.locate(defaultTimeout(mode))
         val root = r.root()
         return Prepared(detail(targets), call.onOk, call.onErr) { _, scope ->
-            kit.clickAny(targets, root ?: rootOf(scope), locate, options, Toolkit.STEP_CLICK_ANY)?.let { results.clicked(it) }
+            kit.clickAny(targets, root ?: rootOf(scope), locate, options, name)?.let { results.clicked(it) }
         }
     }
 
@@ -472,7 +481,7 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
         const val REASON_NO_TARGET = "noTarget"
 
         /** The chain methods of `Flow.prototype` (roadmap Appendix B). zh-CN: `Flow.prototype` 的链式方法 (Roadmap 附录 B). */
-        val CHAIN_STEPS = listOf(SmartClick.STEP, Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_ANY, STEP_FIND_ANY, ScrollSearch.STEP, TextEntry.STEP, PopupDismisser.STEP, ListCollector.STEP, AppLauncher.STEP_LAUNCH, AppLauncher.STEP_BACK, AppLauncher.STEP_BACK_TO_APP, Toggle.STEP)
+        val CHAIN_STEPS = listOf(SmartClick.STEP, SmartClick.STEP_BOUNDS, Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS, Toolkit.STEP_CLICK_ANY, Toolkit.STEP_CLICK_BOUNDS_ANY, STEP_FIND_ANY, ScrollSearch.STEP, TextEntry.STEP, PopupDismisser.STEP, ListCollector.STEP, AppLauncher.STEP_LAUNCH, AppLauncher.STEP_BACK, AppLauncher.STEP_BACK_TO_APP, Toggle.STEP)
 
         /** The synchronous functions on `automator` and the global scope (D10). zh-CN: `automator` 与全局上的同步函数 (D10). */
         val SYNC_NAMES = (CHAIN_STEPS + listOf(Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_ANY, STEP_FIND_ANY, STEP_RETRY)).toSet()

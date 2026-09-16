@@ -15,6 +15,9 @@ package org.autojs.autojs.core.automator.flow
  */
 interface FlowBindings {
 
+    /** Capture script frames at step creation, before it moves to a worker. zh-CN: 在步骤移交工作线程前捕获创建处的脚本栈. */
+    fun captureSourceStack(): List<StackTraceElement> = emptyList()
+
     /**
      * One attempt at [cond] under [scope]: the picked-up value, or `null` when the condition is
      * not satisfied yet (not found; a function condition returned a value the `wait` truthiness

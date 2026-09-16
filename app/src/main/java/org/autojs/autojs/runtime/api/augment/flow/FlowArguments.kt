@@ -189,7 +189,7 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         val timeout = options?.number("timeout", name)?.let { nonNegativeMillis(it, "timeout", name) } ?: defaults.timeout
         require(timeout < Long.MAX_VALUE) { "Option \"timeout\" must be finite for $name" }
         val interval = options?.number("interval", name)?.let { nonNegativeMillis(it, "interval", name) } ?: defaults.interval
-        val attempts = options?.number("maxAttempts", name) ?: 10.0
+        val attempts = options?.number("maxAttempts", name) ?: 0.0
         require(attempts.isFinite() && attempts >= 0 && attempts <= Int.MAX_VALUE && attempts == kotlin.math.floor(attempts)) { "Option \"maxAttempts\" must be a non-negative integer for $name" }
         val retryOn = options?.prop("retryOn").takeUnless { it.isJsNullish() }
         require(retryOn == null || retryOn is Callable) { "Option \"retryOn\" must be a function for $name" }

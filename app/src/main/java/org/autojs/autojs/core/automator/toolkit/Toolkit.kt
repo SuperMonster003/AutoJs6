@@ -246,7 +246,11 @@ class Toolkit<N : UiNode<N>>(
 
         const val STEP_CLICK_ANY = "clickAny"
 
+        const val STEP_CLICK_BOUNDS_ANY = "clickBoundsAny"
+
         const val STEP_CLICK_IF_EXISTS = "clickIfExists"
+
+        const val STEP_CLICK_BOUNDS_IF_EXISTS = "clickBoundsIfExists"
 
         /** A given container is not there. zh-CN: 指定的容器不存在. */
         const val REASON_CONTAINER = "container"

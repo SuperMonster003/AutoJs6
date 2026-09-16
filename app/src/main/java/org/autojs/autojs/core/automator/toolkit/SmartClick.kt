@@ -32,6 +32,8 @@ class SmartClick<N : UiNode<N>> internal constructor(private val kit: Toolkit<N>
         val offsetX: Int = 0,
         val offsetY: Int = 0,
         val humanize: Humanize = Humanize.NONE,
+        /** Always tap this node's bounds, without trying node or ancestor actions. zh-CN: 始终点按本节点边界, 不尝试节点或祖先动作. */
+        val boundsOnly: Boolean = false,
     ) {
 
         init {
@@ -80,6 +82,7 @@ class SmartClick<N : UiNode<N>> internal constructor(private val kit: Toolkit<N>
      */
     fun click(node: N, options: Options = Options(), step: String = STEP, root: N? = null, selector: String? = null): Outcome<N> {
         kit.pause(options.humanize)
+        if (options.boundsOnly) return tap(node, options, step, root, selector)
         var refused = false
         if (node.clickable()) {
             if (kit.actions.click(node)) return verify(Outcome(Method.NODE, node), options, step, root, selector)
@@ -92,15 +95,19 @@ class SmartClick<N : UiNode<N>> internal constructor(private val kit: Toolkit<N>
             }
         }
         if (options.gestureFallback) {
-            val x = node.centerX() + options.offsetX + options.humanize.offsetX(kit.random)
-            val y = node.centerY() + options.offsetY + options.humanize.offsetY(kit.random)
-            if (kit.actions.tap(x, y)) return verify(Outcome(Method.GESTURE, node), options, step, root, selector)
-            throw FlowError.ActionFailed(step, selector, reason = REASON_GESTURE)
+            return tap(node, options, step, root, selector)
         }
         throw when {
             refused -> FlowError.ActionFailed(step, selector, reason = REASON_CLICK)
             else -> FlowError.InvalidTarget(step, selector, REASON_NOT_CLICKABLE)
         }
+    }
+
+    private fun tap(node: N, options: Options, step: String, root: N?, selector: String?): Outcome<N> {
+        val x = node.centerX() + options.offsetX + options.humanize.offsetX(kit.random)
+        val y = node.centerY() + options.offsetY + options.humanize.offsetY(kit.random)
+        if (kit.actions.tap(x, y)) return verify(Outcome(Method.GESTURE, node), options, step, root, selector)
+        throw FlowError.ActionFailed(step, selector, reason = REASON_GESTURE)
     }
 
     private fun verify(outcome: Outcome<N>, options: Options, step: String, root: N?, selector: String?): Outcome<N> {
@@ -113,6 +120,8 @@ class SmartClick<N : UiNode<N>> internal constructor(private val kit: Toolkit<N>
     companion object {
 
         const val STEP = "smartClick"
+
+        const val STEP_BOUNDS = "smartClickBounds"
 
         const val REASON_CLICK = "click"
 

@@ -35,6 +35,7 @@ class FlowNode internal constructor(
     internal var stateInternal: State = State.Pending
     internal var contextInternal: FlowContext? = null
     internal var initialContext: FlowContext = FlowContext.INITIAL
+    internal var sourceStack: List<StackTraceElement> = emptyList()
     internal val children = ArrayList<FlowNode>()
     internal val callbacks = ArrayList<(State) -> Unit>()
     internal val owned = ArrayList<FlowNode>()

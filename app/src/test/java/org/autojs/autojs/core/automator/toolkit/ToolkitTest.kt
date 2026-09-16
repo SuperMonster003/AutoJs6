@@ -109,6 +109,25 @@ class ToolkitTest {
     }
 
     @Test
+    fun boundsVariantsKeepOptionalAndCandidateSemanticsAndFailureNames() {
+        val options = SmartClick.Options(boundsOnly = true)
+        assertNull(kit.clickIfExists("a", options = options, step = Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS))
+        assertNull(kit.clickAny(listOf("a", "c"), options = options, step = Toolkit.STEP_CLICK_BOUNDS_ANY))
+        assertTrue(actions.calls.isEmpty())
+        b.show("c", c)
+        val found = kit.clickAny(listOf("a", "c"), options = options, step = Toolkit.STEP_CLICK_BOUNDS_ANY)!!
+        assertEquals(1, found.found.index)
+        assertSame(c, found.found.node)
+        assertEquals(SmartClick.Method.GESTURE, found.outcome.method)
+        actions.tapResult = { _, _ -> false }
+        val failed = error { kit.clickIfExists("c", options = options, step = Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS) }
+        assertEquals(Toolkit.STEP_CLICK_BOUNDS_IF_EXISTS, failed.step)
+        assertEquals("text(\"c\")", failed.selector)
+        assertEquals(SmartClick.REASON_GESTURE, failed.reason)
+        assertTrue(actions.calls.all { it.startsWith("tap(") })
+    }
+
+    @Test
     fun clickIfExistsWaitsPerPlan() {
         rig.appearing("a", a, from = 2)
         assertSame(a, kit.clickIfExists("a", locate = Locate(timeout = 500))!!.target)

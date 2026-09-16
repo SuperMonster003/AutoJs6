@@ -69,6 +69,7 @@ class FlowScheduler(
     /** Starts [step] after [parent] (or as the root of a new chain) and returns its node. zh-CN: 在 [parent] 之后 (或作为新链的根) 启动 [step] 并返回其节点. */
     fun start(step: FlowStep, parent: FlowNode? = null): FlowNode {
         val node = FlowNode(step, parent, this)
+        node.sourceStack = bindings.captureSourceStack()
         val creation = creationContext.get()
         if (parent == null && creation != null) node.initialContext = creation.context
         val launchNow = synchronized(lock) {
@@ -521,7 +522,7 @@ class FlowScheduler(
                 if (step.timeout != 0L) checkDeadline()
                 if (found != null) return Outcome(State.Fulfilled(found), ctx)
                 checkDeadline()
-                if (attempts >= step.maxAttempts) {
+                if (step.maxAttempts > 0 && attempts >= step.maxAttempts) {
                     throw FlowError.Timeout(step.name, selector, clock() - start, attempts, "attempts")
                 }
                 if (attempts > 0 && step.interval > 0) {
@@ -698,6 +699,7 @@ class FlowScheduler(
         val children: List<FlowNode>
         synchronized(lock) {
             if (node.stateInternal !is State.Pending) return
+            (outcome.state as? State.Rejected)?.error?.let { FlowTaskStack.record(node, it) }
             node.stateInternal = outcome.state
             node.contextInternal = outcome.context
             pending.remove(node)

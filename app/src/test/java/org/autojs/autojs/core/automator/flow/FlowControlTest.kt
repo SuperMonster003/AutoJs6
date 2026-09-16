@@ -82,6 +82,34 @@ class FlowControlTest {
     }
 
     @Test
+    fun defaultAndZeroAttemptLimitsAllowMoreThanTenActions() {
+        for (explicitZero in listOf(false, true)) {
+            val rig = FlowRig()
+            var calls = 0
+            val action = fn { calls++; null }
+            val cond = { if (calls == 12) "ready" else null }
+            val step = if (explicitZero) FlowStep.RepeatUntil(action, cond, 1000, maxAttempts = 0, interval = 1)
+            else FlowStep.RepeatUntil(action, cond, 1000, interval = 1)
+            val flow = rig.scheduler.start(step)
+            rig.drain()
+            assertEquals(12, calls)
+            assertEquals("ready", flow.value)
+        }
+    }
+
+    @Test
+    fun unlimitedAttemptsStillStopAtTheTotalTimeout() {
+        val rig = FlowRig()
+        var calls = 0
+        val flow = rig.scheduler.start(FlowStep.RepeatUntil(fn { calls++; null }, rig.never, 25, maxAttempts = 0, interval = 1))
+        rig.drain()
+        assertTrue(calls > 10)
+        assertEquals(25L, rig.clock.now)
+        assertEquals("timeout", (flow.error as FlowError).reason)
+        assertEquals(0, rig.scheduler.pendingCount)
+    }
+
+    @Test
     fun errorsOnlyRetryWhenExplicitlyAcceptedAndCancellationNeverRetries() {
         val rig = FlowRig()
         val error = IllegalStateException("transient")

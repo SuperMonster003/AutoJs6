@@ -54,9 +54,12 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::waitForActivity.name,
         ::waitForPackage.name,
         ::waitThenClick.name to listOf("waitThenClick", "clickWait"),
+        ::waitThenClickBounds.name to listOf("waitThenClickBounds", "clickBoundsWait"),
         ::waitThenLongClick.name,
         ::waitForStableThenClick.name to listOf("waitForStableThenClick", "clickWhenStable"),
+        ::waitForStableThenClickBounds.name to listOf("waitForStableThenClickBounds", "clickBoundsWhenStable"),
         ::clickWhenStableAfter.name,
+        ::clickBoundsWhenStableAfter.name,
         ::sleep.name to listOf("sleep", "delay"),
         Companion::run.name,
         ::of.name,
@@ -69,8 +72,11 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         // Toolkit roots (roadmap P4.2); the synchronous forms are the globals of Automator (D10).
         // zh-CN: 工具起点 (Roadmap P4.2); 同步形式为 Automator 的全局函数 (D10).
         ::smartClick.name,
+        ::smartClickBounds.name,
         ::clickIfExists.name,
+        ::clickBoundsIfExists.name,
         ::clickAny.name,
+        ::clickBoundsAny.name,
         ::findAny.name,
         ::waitForIdle.name,
         ::waitForEvent.name,
@@ -89,11 +95,14 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
     override val globalAssignmentFunctions = listOf(
         ::waitAsync.name,
         ::waitThenClick.name to listOf("waitThenClick", "clickWait"),
+        ::waitThenClickBounds.name to listOf("waitThenClickBounds", "clickBoundsWait"),
         ::waitForStable.name,
         ::waitForStableThenClick.name to listOf("waitForStableThenClick", "clickWhenStable"),
+        ::waitForStableThenClickBounds.name to listOf("waitForStableThenClickBounds", "clickBoundsWhenStable"),
         ::waitForVisible.name,
         ::waitForHidden.name to listOf("waitForHidden", "waitForGone"),
         ::clickWhenStableAfter.name,
+        ::clickBoundsWhenStableAfter.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -168,6 +177,10 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun waitThenClickBounds(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).waitThen(null, WaitKind.WAIT, "waitThenClickBounds", args, "clickBounds", after = false)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun waitThenLongClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).waitThen(null, WaitKind.WAIT, "flow.waitThenLongClick", args, "longClick", after = false)
 
         @JvmStatic
@@ -176,7 +189,15 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun waitForStableThenClickBounds(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).waitThen(null, WaitKind.STABLE, "waitForStableThenClickBounds", args, "clickBounds", after = false)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun clickWhenStableAfter(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).waitThen(null, WaitKind.STABLE, "clickWhenStableAfter", args, "click", after = true)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickBoundsWhenStableAfter(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).waitThen(null, WaitKind.STABLE, "clickBoundsWhenStableAfter", args, "clickBounds", after = true)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -250,11 +271,23 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun smartClickBounds(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "smartClickBounds", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun clickIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickIfExists", args)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun clickBoundsIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickBoundsIfExists", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun clickAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickAny", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickBoundsAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).tool(null, "clickBoundsAny", args)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

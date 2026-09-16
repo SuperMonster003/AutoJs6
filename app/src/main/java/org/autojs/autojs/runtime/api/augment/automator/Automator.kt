@@ -85,12 +85,15 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         // The toolkit (roadmap P4.2, D10): on the module and global alike; the Flow forms live in `flow`.
         // zh-CN: 工具集 (Roadmap P4.2, D10): 模块与全局同时挂载; Flow 形式在 `flow` 中.
         ::smartClick.name to AS_GLOBAL,
+        ::smartClickBounds.name to AS_GLOBAL,
         ::waitForIdle.name to AS_GLOBAL,
         ::waitForEvent.name to AS_GLOBAL,
         ::waitForToast.name to AS_GLOBAL,
         ::waitForNotification.name to AS_GLOBAL,
         ::clickIfExists.name to AS_GLOBAL,
+        ::clickBoundsIfExists.name to AS_GLOBAL,
         ::clickAny.name to AS_GLOBAL,
+        ::clickBoundsAny.name to AS_GLOBAL,
         ::findAny.name to AS_GLOBAL,
         ::scrollUntil.name to AS_GLOBAL,
         ::typeInto.name to AS_GLOBAL,
@@ -144,15 +147,28 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun smartClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).smartClick(args)
 
+        /** Direct bounds tap with optional verification. zh-CN: 直接点按节点中心, 可选点击后校验. */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun smartClickBounds(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).smartClickBounds(args)
+
         /** `clickIfExists(target, options? | timeout?)`: whether it was there and got clicked. zh-CN: `clickIfExists(target, options? | timeout?)`: 目标是否存在并被点击. */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun clickIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickIfExists(args)
 
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickBoundsIfExists(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickBoundsIfExists(args)
+
         /** `clickAny(targets, options? | timeout?)`: the first present, clicked; `{ index, target, node, method }` or `null`. zh-CN: `clickAny(targets, options? | timeout?)`: 点击首个存在的; `{ index, target, node, method }` 或 `null`. */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun clickAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickAny(args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clickBoundsAny(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = toolkit(scriptRuntime).clickBoundsAny(args)
 
         /** `findAny(targets, options? | timeout?)`: `{ index, target, node }` of the first present, or `null`. zh-CN: `findAny(targets, options? | timeout?)`: 首个存在的 `{ index, target, node }`, 或 `null`. */
         @JvmStatic

@@ -10,6 +10,7 @@ import org.autojs.autojs.core.automator.flow.FlowListeners
 import org.autojs.autojs.core.automator.flow.FlowNode
 import org.autojs.autojs.core.automator.flow.FlowScheduler
 import org.autojs.autojs.core.automator.flow.FlowScope
+import org.autojs.autojs.core.automator.flow.FlowTaskStack
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
@@ -155,7 +156,8 @@ internal class FlowExecutor(val scriptRuntime: ScriptRuntime) : Closeable {
             is JavaScriptException -> Context.toString(error.value)
             else -> error.message ?: error.toString()
         }
-        scriptRuntime.console.warn("Possible unhandled Flow rejection in step \"${node.step.name}\": $message")
+        val taskStack = FlowTaskStack.format(error)?.let { "\n$it" }.orEmpty()
+        scriptRuntime.console.warn("Possible unhandled Flow rejection in step \"${node.step.name}\": $message$taskStack")
     }
 
     /** The JavaScript value of [value] on the calling script thread (errors per [FlowJsErrors]). zh-CN: [value] 在调用方脚本线程上的 JavaScript 值 (错误按 [FlowJsErrors]). */

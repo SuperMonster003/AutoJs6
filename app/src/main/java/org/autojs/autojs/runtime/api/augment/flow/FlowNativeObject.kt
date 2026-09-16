@@ -390,12 +390,16 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
         method("waitForPackage") { self, args -> api.wait(self, WaitKind.PACKAGE, "waitForPackage", args) }
 
         method("waitThenClick", "clickWait") { self, args -> api.waitThen(self, WaitKind.WAIT, "waitThenClick", args, "click", after = false) }
+        method("waitThenClickBounds", "clickBoundsWait") { self, args -> api.waitThen(self, WaitKind.WAIT, "waitThenClickBounds", args, "clickBounds", after = false) }
         method("waitThenLongClick") { self, args -> api.waitThen(self, WaitKind.WAIT, "waitThenLongClick", args, "longClick", after = false) }
         method("waitForStableThenClick", "clickWhenStable") { self, args -> api.waitThen(self, WaitKind.STABLE, "clickWhenStable", args, "click", after = false) }
+        method("waitForStableThenClickBounds", "clickBoundsWhenStable") { self, args -> api.waitThen(self, WaitKind.STABLE, "waitForStableThenClickBounds", args, "clickBounds", after = false) }
         method("clickWhenStableAfter") { self, args -> api.waitThen(self, WaitKind.STABLE, "clickWhenStableAfter", args, "click", after = true) }
+        method("clickBoundsWhenStableAfter") { self, args -> api.waitThen(self, WaitKind.STABLE, "clickBoundsWhenStableAfter", args, "clickBounds", after = true) }
 
         FlowActions.NODE_ACTIONS.keys.forEach { name -> method(name) { self, args -> api.action(self, name, args) } }
         method("clickAfter") { self, args -> api.actionAfter(self, "clickAfter", "click", args) }
+        method("clickBoundsAfter") { self, args -> api.actionAfter(self, "clickBoundsAfter", "clickBounds", args) }
         method("longClickAfter") { self, args -> api.actionAfter(self, "longClickAfter", "longClick", args) }
         FlowActions.GLOBAL_ACTIONS.keys.forEach { name -> method(name) { self, args -> api.globalAction(self, name, args) } }
 

@@ -70,6 +70,8 @@ class FlowArgumentsTest {
         val repeat = arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ timeout: 500, maxAttempts: 3, interval: 20 })")))
         assertEquals(500L, repeat.timeout)
         assertEquals(3, repeat.maxAttempts)
+        assertEquals(0, arguments.repeatUntil("repeatUntil", arrayOf(handler, "done")).maxAttempts)
+        assertEquals(0, arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ maxAttempts: 0 })"))).maxAttempts)
         assertEquals(20L, repeat.interval)
         assertThrows(IllegalArgumentException::class.java) { arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ maxAttempts: 1.5 })"))) }
         assertThrows(IllegalArgumentException::class.java) { arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ timeout: Infinity })"))) }
