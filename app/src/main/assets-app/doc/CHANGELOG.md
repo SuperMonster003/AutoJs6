@@ -178,6 +178,7 @@
 * `新增` 官方插件无障碍伴生契约: 发布 `follow-host` 服务策略的伴生插件随 AutoJs6 无障碍服务一同启用和禁用, 使用已配置的 root, 安全设置或 Shizuku 策略, 并接收宿主服务状态广播
 * `新增` Bun Runtime 插件项目执行: 位于含 `project.json` 或 `package.json` 目录下的脚本会打成有界工作区归档 (最多 16384 条目与 64 MiB, 只收普通文件与目录) 交给声明了 `SUPPORTS_WORKSPACE_ARCHIVE` 的插件, 项目内的相对导入可以解析; 入口文件使用编辑器当前源码, 符号链接与特殊文件直接中止运行, 裸脚本或旧版插件保持单源码路径
 * `新增` Bun Runtime 插件宿主信息快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授权开启 (默认) 时, `runScript` 请求携带 `hostInfoVersion = 1` 与 `hostInfo` Bundle (宿主包名, `BuildConfig.VERSION_DATE` 与首选语言标签), Bun 脚本即可通过环境变量 `AUTOJS6_HOST_INFO_FILE` 读取由插件核实并写出的宿主/插件/运行快照; 宿主不发送自身版本 (插件经 PackageManager 解析), 授权可逐次撤销 (`BunHostCapabilityGrants`), 未宣告该能力的插件收到的请求与之前完全相同
+* `新增` Bun Runtime 插件动态调用能力桥与首批两项能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一项授权开启 (默认) 时, `runScript` 请求携带 `hostCapabilityBridgeVersion = 1`, 绑定插件 UID 与本次执行的 `IBunHostCapabilityBroker` binder 以及已授权的能力 ID; Bun 脚本经插件的 unix socket 调用 `GET /v1/info` 与 `POST /v1/<能力>`, 宿主原样转发 JSON (请求 64 KiB, 结果 256 KiB, 每次运行 1024 次, 4 路并发, 单次 10 s) 并经 `IBunHostCapabilityCallback` 应答. `ui.toast` 每次运行最多在主线程显示四条 toast, `device.info` 只返回 `android.os.Build` 字段; 两枚开关位于插件中心的插件设置页, 未宣告该能力的插件收到的请求与之前完全相同
 * `修复` 主页正确回传插件授权结果, 授权成功后可继续完成本次插件启用
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
 * `修复` 宿主与打包应用发行版的 HTTP 请求可能被网络安全配置意外拦截, 明文策略现与调试版保持一致, 并保留 GitHub 资源域的 HTTPS 限制

@@ -364,6 +364,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 官方外掛無障礙伴生契約: 發布 `follow-host` 服務策略的伴生外掛隨 AutoJs6 無障礙服務一同啟用與停用, 使用已設定的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播
 * `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區封存 (最多 16384 項目與 64 MiB, 只收一般檔案與目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 進入點檔案使用編輯器目前原始碼, 符號連結與特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑
 * `新增` Bun Runtime 插件宿主資訊快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授權開啟 (預設) 時, `runScript` 請求攜帶 `hostInfoVersion = 1` 與 `hostInfo` Bundle (宿主套件名稱, `BuildConfig.VERSION_DATE` 與偏好語言標籤), Bun 腳本即可透過環境變數 `AUTOJS6_HOST_INFO_FILE` 讀取由插件核實並寫出的宿主/插件/執行快照; 宿主不發送自身版本 (插件經 PackageManager 解析), 授權可逐次撤銷 (`BunHostCapabilityGrants`), 未宣告該能力的插件收到的請求與之前完全相同
+* `新增` Bun Runtime 插件動態呼叫能力橋與首批兩項能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一項授權開啟 (預設) 時, `runScript` 請求攜帶 `hostCapabilityBridgeVersion = 1`, 綁定插件 UID 與本次執行的 `IBunHostCapabilityBroker` binder 以及已授權的能力 ID; Bun 指令碼經插件的 unix socket 呼叫 `GET /v1/info` 與 `POST /v1/<能力>`, 宿主原樣轉發 JSON (請求 64 KiB, 結果 256 KiB, 每次執行 1024 次, 4 路並行, 單次 10 s) 並經 `IBunHostCapabilityCallback` 回應. `ui.toast` 每次執行最多在主執行緒顯示四則 toast, `device.info` 只回傳 `android.os.Build` 欄位; 兩個開關位於插件中心的插件設定頁, 未宣告該能力的插件收到的請求與之前完全相同
 * `修復` 主頁正確回傳外掛授權結果, 授權成功後可繼續完成本次外掛啟用
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效
 * `修復` 宿主與打包應用發行版的 HTTP 請求可能被網路安全設定意外攔截, 明文策略現與偵錯版保持一致, 並保留 GitHub 資源網域的 HTTPS 限制

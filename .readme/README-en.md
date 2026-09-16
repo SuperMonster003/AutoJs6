@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sept 16, 2026.
+Data updated on Sep 16, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -364,6 +364,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Accessibility companion contract for official plugins: companions that publish a `follow-host` service policy are enabled and disabled together with the AutoJs6 accessibility service using the configured root, secure settings or Shizuku strategies, and receive the host service state broadcast
 * `Feature` Bun Runtime plugin project execution: a script below a directory carrying `project.json` or `package.json` is packed into a bounded workspace archive (at most 16384 entries and 64 MiB, regular files and directories only) for a plugin that declares `SUPPORTS_WORKSPACE_ARCHIVE`, so relative imports inside the project resolve; the entry file carries the current editor source, symbolic links and special files abort the run, and bare scripts or older plugins keep the single-source path
 * `Feature` Bun Runtime plugin host info snapshot: when the plugin declares `SUPPORTS_HOST_INFO` and the `host_info` grant is on (default), `runScript` requests carry `hostInfoVersion = 1` and a `hostInfo` Bundle with the host package name, `BuildConfig.VERSION_DATE` and the preferred language tag, so Bun scripts can read the host/plugin/execution snapshot the plugin verifies and writes through the `AUTOJS6_HOST_INFO_FILE` environment variable; the host never sends its own version (the plugin resolves it through PackageManager), the grant is revocable per run (`BunHostCapabilityGrants`), and plugins without the capability receive exactly the previous request
+* `Feature` Bun Runtime plugin capability bridge for dynamic calls with the first two capabilities `ui.toast` and `device.info`: when the plugin declares `SUPPORTS_HOST_CAPABILITY_BRIDGE` and at least one of the `ui_toast` / `device_info` grants is on (default), `runScript` requests carry `hostCapabilityBridgeVersion = 1`, a per-run `IBunHostCapabilityBroker` binder pinned to the plugin UID and execution ID, and the granted capability IDs; Bun scripts call `GET /v1/info` and `POST /v1/<capability>` over the plugin's unix socket, the host relays JSON uninterpreted (64 KiB requests, 256 KiB results, 1024 calls per run, 4 in flight, 10 s each) and answers through `IBunHostCapabilityCallback`. `ui.toast` shows at most four toasts per run from the main thread, `device.info` returns only `android.os.Build` facts; both switches live in the plugin's page of the Plugin Center, and plugins without the capability receive exactly the previous request
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
 * `Fix` HTTP requests in host and packaged release apps could be blocked by the network security configuration; cleartext policy now matches debug builds while keeping GitHub resource domains restricted to HTTPS
@@ -907,7 +908,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -958,7 +959,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sept 16, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 16, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

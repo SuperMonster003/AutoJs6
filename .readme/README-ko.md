@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026/09/16.
+데이터 갱신일: 2026 년 9 월 16 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -136,7 +136,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -364,6 +364,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 공식 플러그인용 접근성 컴패니언 계약: `follow-host` 서비스 정책을 게시하는 컴패니언은 구성된 root, 보안 설정 또는 Shizuku 전략으로 AutoJs6 접근성 서비스와 함께 활성화 및 비활성화되며 호스트 서비스 상태 브로드캐스트를 받습니다
 * `추가` Bun Runtime 플러그인 프로젝트 실행: `project.json` 또는 `package.json`이 있는 디렉터리 아래의 스크립트는 크기가 제한된 워크스페이스 아카이브 (최대 16384 항목과 64 MiB, 일반 파일과 디렉터리만)로 묶여 `SUPPORTS_WORKSPACE_ARCHIVE`를 선언한 플러그인에 전달되므로 프로젝트 내부의 상대 경로 가져오기가 해석됨; 진입점 파일은 편집기의 현재 소스를 사용하고, 심볼릭 링크와 특수 파일은 실행을 중단하며, 단독 스크립트나 이전 플러그인은 단일 소스 경로를 유지
 * `추가` Bun Runtime 플러그인 호스트 정보 스냅샷: 플러그인이 `SUPPORTS_HOST_INFO`를 선언하고 `host_info` 권한이 켜져 있으면 (기본값), `runScript` 요청에 `hostInfoVersion = 1`과 호스트 패키지 이름, `BuildConfig.VERSION_DATE`, 선호 언어 태그를 담은 `hostInfo` Bundle을 실어 보내므로 Bun 스크립트는 환경 변수 `AUTOJS6_HOST_INFO_FILE`을 통해 플러그인이 검증하고 기록한 호스트/플러그인/실행 스냅샷을 읽을 수 있습니다; 호스트는 자신의 버전을 보내지 않고 (플러그인이 PackageManager로 확인), 권한은 실행마다 철회할 수 있으며 (`BunHostCapabilityGrants`), 이 기능을 선언하지 않은 플러그인은 이전과 똑같은 요청을 받습니다
+* `추가` Bun Runtime 플러그인 동적 호출 기능 브리지와 첫 두 기능 `ui.toast` / `device.info`: 플러그인이 `SUPPORTS_HOST_CAPABILITY_BRIDGE`를 선언하고 `ui_toast` / `device_info` 권한 중 하나 이상이 켜져 있으면 (기본값), `runScript` 요청에 `hostCapabilityBridgeVersion = 1`, 플러그인 UID와 이번 실행에 고정된 `IBunHostCapabilityBroker` binder, 허용된 기능 ID를 실어 보냅니다; Bun 스크립트는 플러그인의 unix socket으로 `GET /v1/info`와 `POST /v1/<기능>`을 호출하고, 호스트는 JSON을 해석하지 않고 중계하며 (요청 64 KiB, 결과 256 KiB, 실행당 1024회, 동시 4건, 각 10 s) `IBunHostCapabilityCallback`으로 응답합니다. `ui.toast`는 실행당 최대 4개의 toast를 메인 스레드에서 표시하고, `device.info`는 `android.os.Build` 항목만 반환합니다; 두 스위치는 플러그인 센터의 플러그인 설정 페이지에 있으며, 이 기능을 선언하지 않은 플러그인은 이전과 똑같은 요청을 받습니다
 * `수정` 메인 화면에서 플러그인 권한 결과가 올바르게 전달되어 허용 후 대기 중인 활성화 작업을 완료할 수 있음
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
 * `수정` 호스트 및 패키징 앱의 릴리스 빌드에서 네트워크 보안 설정이 HTTP 요청을 차단하던 문제에 대응하여 평문 통신 정책을 디버그 빌드와 통일하고 GitHub 리소스 도메인의 HTTPS 제한은 유지
@@ -907,7 +908,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -958,7 +959,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026/09/16 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 16 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1124,7 +1125,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026/03/18.
+데이터 갱신일: 2026 년 3 월 18 일.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 
