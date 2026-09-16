@@ -1864,6 +1864,7 @@
     <string name="text_restart">再起動</string>
     <string name="text_restart_strategy">再起動戦略</string>
     <string name="text_restore">復元</string>
+    <string name="text_restore_and_save">復元して保存</string>
     <string name="text_restore_to_original_path">元のパスに復元</string>
     <string name="text_restore_to_specified_path">指定したパスに復元</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">復元中...</string>

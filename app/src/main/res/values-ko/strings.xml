@@ -1865,6 +1865,7 @@
     <string name="text_restart">재시작</string>
     <string name="text_restart_strategy">재시작 전략</string>
     <string name="text_restore">복원</string>
+    <string name="text_restore_and_save">복원 후 저장</string>
     <string name="text_restore_to_original_path">원래 경로로 복원</string>
     <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">복원 중...</string>

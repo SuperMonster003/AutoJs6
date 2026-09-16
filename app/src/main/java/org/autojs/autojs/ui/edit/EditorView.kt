@@ -334,6 +334,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             syncPrimaryMenuState()
             showSnack(this@EditorView, R.string.text_done)
         },
+        onSaveRequested = { saveFile() },
     )
 
     // Whether we have had any direct edits since last save/baseline.

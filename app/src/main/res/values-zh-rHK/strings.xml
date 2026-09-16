@@ -1860,6 +1860,7 @@
     <string name="text_restart">重啓</string>
     <string name="text_restart_strategy">重啓策略</string>
     <string name="text_restore">恢復</string>
+    <string name="text_restore_and_save">還原並儲存</string>
     <string name="text_restore_to_original_path">恢復到原始路徑</string>
     <string name="text_restore_to_specified_path">恢復到指定路徑</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">正在恢復...</string>

@@ -213,6 +213,12 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
                 DiffActivity.launch(this, canonicalPath, displayPath, leftRevId = rev.revId, rightRevId = null)
             }
         }
+        if (mode == VersionHistoryController.Mode.RESTORE_TO_EDITOR) {
+            options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_restore_and_save)) { dialog ->
+                dialog.dismiss()
+                restoreToEditorAndSave(row)
+            }
+        }
         options += MaterialDialog.OptionMenuItemSpec(getString(if (rev.pinned) R.string.text_unpin else R.string.text_pin)) { dialog ->
             dialog.dismiss()
             controller.setPinned(rev, !rev.pinned) { load() }
@@ -293,6 +299,15 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
         if (rows.size != 2) return
         val sorted = rows.sortedBy { it.rev.createdAt }
         DiffActivity.launch(this, canonicalPath, displayPath, leftRevId = sorted[0].rev.revId, rightRevId = sorted[1].rev.revId)
+    }
+
+    private fun restoreToEditorAndSave(row: RevisionRow) {
+        val callbacks = VersionHistoryEditorBridge.get(callbackToken)
+        if (callbacks == null) {
+            ViewUtils.showToast(this, R.string.text_editor_is_no_longer_available)
+            return
+        }
+        controller.confirmAndRestoreToEditorAndSave(row.rev, callbacks, displayPath) { finish() }
     }
 
     private fun confirmAndDelete(rows: List<RevisionRow>) {

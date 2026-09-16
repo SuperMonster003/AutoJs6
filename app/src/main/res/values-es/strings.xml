@@ -1863,6 +1863,7 @@
     <string name="text_restart">Reiniciar</string>
     <string name="text_restart_strategy">Estrategia de reinicio</string>
     <string name="text_restore">Restaurar</string>
+    <string name="text_restore_and_save">Restaurar y guardar</string>
     <string name="text_restore_to_original_path">Restaurar a la ruta original</string>
     <string name="text_restore_to_specified_path">Restaurar a una ruta especifica</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restaurando...</string>

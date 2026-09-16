@@ -167,7 +167,22 @@ class VersionHistoryController(private val context: Context) {
         onDone: (() -> Unit)? = null,
     ) {
         showRestoreConfirmDialogForEditor {
-            restoreToEditor(rev, callbacks, onDone)
+            restoreToEditor(rev, callbacks, andSave = false, onDone = onDone)
+        }
+    }
+
+    /**
+     * Confirm (the file will be overwritten) and push the revision text into the editor, then save.
+     * zh-CN: 确认 (文件将被覆盖) 后把 revision 文本放入编辑器并保存.
+     */
+    fun confirmAndRestoreToEditorAndSave(
+        rev: HistoryEntities.Revision,
+        callbacks: VersionHistoryEditorBridge.Callbacks,
+        displayPath: String,
+        onDone: (() -> Unit)? = null,
+    ) {
+        showRestoreConfirmDialogForDisk(displayPath) {
+            restoreToEditor(rev, callbacks, andSave = true, onDone = onDone)
         }
     }
 
@@ -323,6 +338,7 @@ class VersionHistoryController(private val context: Context) {
     private fun restoreToEditor(
         rev: HistoryEntities.Revision,
         callbacks: VersionHistoryEditorBridge.Callbacks,
+        andSave: Boolean,
         onDone: (() -> Unit)?,
     ) {
         val appCtx = context.applicationContext
@@ -331,7 +347,7 @@ class VersionHistoryController(private val context: Context) {
                 val bytes = HistoryRepository(appCtx).readRevisionBytes(rev)
                 val restored = decodeRevisionBytes(bytes, rev.encoding, rev.hadBom)
                 AndroidSchedulers.mainThread().scheduleDirect {
-                    callbacks.onRestoreToEditor(restored)
+                    if (andSave) callbacks.onRestoreToEditorAndSave(restored) else callbacks.onRestoreToEditor(restored)
                     callbacks.onRestoredUi()
                     onDone?.invoke()
                 }

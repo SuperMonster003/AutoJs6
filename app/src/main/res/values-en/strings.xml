@@ -1851,6 +1851,7 @@
     <string name="text_restart">Restart</string>
     <string name="text_restart_strategy">Restart strategy</string>
     <string name="text_restore">Restore</string>
+    <string name="text_restore_and_save">Restore and save</string>
     <string name="text_restore_to_original_path">Restore to original path</string>
     <string name="text_restore_to_specified_path">Restore to specified path</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>

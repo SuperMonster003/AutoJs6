@@ -1865,6 +1865,7 @@
     <string name="text_restart">إعادة بدء</string>
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
     <string name="text_restore">استعادة</string>
+    <string name="text_restore_and_save">استعادة وحفظ</string>
     <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
     <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">جارٍ الاستعادة...</string>

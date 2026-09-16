@@ -1863,6 +1863,7 @@
     <string name="text_restart">Перезапустить</string>
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
     <string name="text_restore">Восстановить</string>
+    <string name="text_restore_and_save">Восстановить и сохранить</string>
     <string name="text_restore_to_original_path">Восстановить в исходный путь</string>
     <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Восстановление...</string>

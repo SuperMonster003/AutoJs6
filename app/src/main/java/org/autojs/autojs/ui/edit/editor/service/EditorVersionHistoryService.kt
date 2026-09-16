@@ -26,6 +26,7 @@ class EditorVersionHistoryService(
     private val currentEditor: () -> ScriptEditorEngine,
     private val onRestoredToEditor: () -> Unit,
     private val onRestoredUi: () -> Unit,
+    private val onSaveRequested: () -> Unit,
 ) {
 
     // Held strongly here: the bridge only keeps a weak reference, so the callbacks live as long as this service.
@@ -36,6 +37,11 @@ class EditorVersionHistoryService(
             onRestoredToEditor()
         },
         onRestoredUi = onRestoredUi,
+        onRestoreToEditorAndSave = { restoredText ->
+            currentEditor().text = restoredText
+            onRestoredToEditor()
+            onSaveRequested()
+        },
     )
 
     fun recordSavePreIfNeeded(

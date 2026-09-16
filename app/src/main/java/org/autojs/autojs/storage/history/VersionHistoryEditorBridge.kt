@@ -20,6 +20,9 @@ object VersionHistoryEditorBridge {
         val onRestoreToEditor: (restoredText: String) -> Unit,
         /** Runs after the text was applied so the editor can refresh its UI state. */
         val onRestoredUi: () -> Unit,
+
+        /** Like [onRestoreToEditor], then save the file to disk (P2.7). */
+        val onRestoreToEditorAndSave: (restoredText: String) -> Unit,
     )
 
     private val registry = HashMap<String, WeakReference<Callbacks>>()
