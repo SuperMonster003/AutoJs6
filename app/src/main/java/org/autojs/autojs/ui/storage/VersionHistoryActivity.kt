@@ -10,6 +10,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
@@ -59,18 +60,19 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
      */
     private val sizeLoading: AtomicBoolean = AtomicBoolean(false)
 
+    /**
+     * File-type icon per fileId, resolved off the main thread while loading (extension matching).
+     * zh-CN: 每个 fileId 的文件类型图标, 加载时在非主线程解析 (扩展名匹配).
+     */
+    @Volatile
+    private var iconCache: Map<String, FileUtils.TYPE.Icon> = emptyMap()
+
     private val adapter = VersionHistoryFileAdapter(
         onClick = { entry ->
             VersionHistoryController(this).showForFilePath(entry.canonicalPath, entry.displayPath)
         },
         onLongClick = { entry ->
             confirmAndClearHistoryForEntry(entry)
-        },
-        getSizeBytesOrNull = { fileId ->
-            sizeCache[fileId]
-        },
-        getRevisionCountOrNull = { fileId ->
-            countCache[fileId]
         },
     )
 
@@ -155,7 +157,15 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
     }
 
     override fun submitToAdapter(items: List<HistoryEntities.FileEntry>) {
-        adapter.submit(items)
+        val icons = iconCache
+        adapter.submit(items.map { entry ->
+            VersionHistoryFileRow(
+                entry = entry,
+                sizeBytes = sizeCache[entry.fileId],
+                revisionCount = countCache[entry.fileId],
+                icon = icons[entry.fileId] ?: iconOf(entry),
+            )
+        })
     }
 
     override fun loadAllItemsInBackground(): List<HistoryEntities.FileEntry> {
@@ -163,7 +173,13 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
 
         // Default sorting: latest seen first.
         // zh-CN: 默认排序: 最近访问优先.
-        return dao.listAllFiles().sortedByDescending { it.lastSeenAt }
+        val entries = dao.listAllFiles().sortedByDescending { it.lastSeenAt }
+        iconCache = entries.associate { it.fileId to iconOf(it) }
+        return entries
+    }
+
+    private fun iconOf(entry: HistoryEntities.FileEntry): FileUtils.TYPE.Icon {
+        return FileUtils.TYPE.determineBy(File(entry.canonicalPath)).icon
     }
 
     override fun onItemsLoaded(items: List<HistoryEntities.FileEntry>) {
@@ -174,10 +190,8 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
         sizeReady.set(false)
         sizeLoading.set(false)
 
-        // Refresh per-row display immediately (show "Calculating...").
-        // zh-CN: 立即刷新每行显示 (展示 "Calculating...").
-        adapter.notifyDataSetChanged()
-
+        // Rows are rebuilt by the applyFilterAndSort() that follows this hook (stats show as pending).
+        // zh-CN: 此钩子之后的 applyFilterAndSort() 会重建各行 (统计显示为待计算).
         ensureStatsLoadedAsync(forceRecompute = true)
     }
 
@@ -244,19 +258,10 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
                     sizeReady.set(true)
                     sizeLoading.set(false)
 
-                    // Refresh per-row display.
-                    // zh-CN: 刷新每行显示.
-                    adapter.notifyDataSetChanged()
-
-                    // If current mode is size sort, now apply strict sorting.
-                    // zh-CN: 若当前为按大小排序, 则此时才允许应用严格排序.
-                    val needSize = internalSortMode == CommonSortMode.SIZE_DESC || internalSortMode == CommonSortMode.SIZE_ASC
-                    if (needSize) {
-                        applyFilterAndSort()
-                    } else {
-                        swipeRefreshLayout.isRefreshing = false
-                        updateStats(allItems = allItems, shownItems = emptyList())
-                    }
+                    // Rebuild the rows with the stats (DiffUtil rebinds only changed rows); for a size
+                    // sort this is also the moment strict sorting becomes possible.
+                    // zh-CN: 带统计重建各行 (DiffUtil 仅重绑变化的行); 按大小排序时也正是此刻才能严格排序.
+                    applyFilterAndSort()
                 }
             }.onFailure { t ->
                 t.printStackTrace()

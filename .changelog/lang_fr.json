@@ -558,7 +558,8 @@
         "Chaque élément de la liste de la corbeille affiche un compte à rebours avant expiration (dérivé des jours de conservation de la corbeille, masqué si illimité), et les éléments expirant sous 24 heures sont mis en évidence",
         "Lorsqu'un élément de la corbeille ne peut être ni prévisualisé ni restauré parce que son fichier de données est manquant ou endommagé, un message localisé est affiché à la place du texte brut de l'exception",
         "Lorsqu'un élément de la corbeille est restauré à un emplacement différent de son chemin d'origine, l'historique des versions du fichier (ou de tous les fichiers du dossier) le suit vers le nouveau chemin ; le déplacement d'un fichier vers la corbeille enregistre l'entrée d'historique des versions à laquelle il était lié à ce moment",
-        "Une archive de dossier endommagée dans la corbeille n'interrompt plus toute la restauration : les entrées lisibles sont restaurées normalement, les entrées endommagées sont enregistrées et ignorées (les fichiers à moitié écrits sont supprimés), le nombre d'entrées restaurées / en échec est indiqué à la fin et l'élément reste dans la corbeille"
+        "Une archive de dossier endommagée dans la corbeille n'interrompt plus toute la restauration : les entrées lisibles sont restaurées normalement, les entrées endommagées sont enregistrées et ignorées (les fichiers à moitié écrits sont supprimés), le nombre d'entrées restaurées / en échec est indiqué à la fin et l'élément reste dans la corbeille",
+        "La liste des fichiers de l'historique des versions affiche les mêmes icônes de type de fichier que l'explorateur ; les listes de l'historique des versions et de la corbeille se rafraîchissent désormais de manière incrémentale par différence, si bien que les changements de statistiques / compte à rebours / sélection ne redessinent plus toute la liste"
       ],
       "dependency": [
         "Android AXML modularise",

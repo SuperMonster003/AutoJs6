@@ -2,13 +2,26 @@ package org.autojs.autojs.ui.storage
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import org.autojs.autojs.storage.history.TrashEntities
+import org.autojs.autojs.storage.history.TrashExpiry
 import org.autojs.autojs6.databinding.ItemTrashBinding
 
 /**
- * Trash list with an optional multi-selection mode (entered by long press, left when empty).
- * zh-CN: 带可选多选模式的回收站列表 (长按进入, 选空后退出).
+ * Display row: the item plus its derived state, so [DiffUtil] notices countdown / broken-state changes.
+ * zh-CN: 显示行: 条目加上派生状态, 使 [DiffUtil] 能感知倒计时 / 失效状态的变化.
+ */
+internal data class TrashRow(
+    val item: TrashEntities.TrashItem,
+    val missing: Boolean,
+    val remaining: TrashExpiry.Remaining?,
+)
+
+/**
+ * Trash list backed by [ListAdapter] with an optional multi-selection mode (entered by long press,
+ * left when empty). Selection lives in the adapter and is refreshed with targeted notifications.
+ * zh-CN: 基于 [ListAdapter] 的回收站列表, 带可选多选模式 (长按进入, 选空后退出). 选择状态保存在 adapter 内, 以定向通知刷新.
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
  * Modified by Claude (Fable 5.1) as of Sep 16, 2026.
@@ -17,61 +30,66 @@ internal class TrashAdapter(
     private val onClick: (TrashEntities.TrashItem) -> Unit,
     private val onLongClick: (TrashEntities.TrashItem) -> Unit,
     private val onSelectionChanged: (selectedCount: Int, selectionMode: Boolean) -> Unit,
-) : RecyclerView.Adapter<TrashViewHolder>() {
+) : ListAdapter<TrashRow, TrashViewHolder>(DIFF) {
 
-    private var items: List<TrashEntities.TrashItem> = emptyList()
     private val selectedIds = LinkedHashSet<String>()
 
     var selectionMode: Boolean = false
         private set
 
-    // Expiry inputs for the countdown column; set by the page before submitting items.
-    // zh-CN: 到期倒计时所需输入; 由页面在提交数据前设置.
-    var expiryMaxDays: Int = 0
-    var now: Long = System.currentTimeMillis()
-
-    // Ids of items whose blob is missing ("broken"); computed by the page while loading.
-    // zh-CN: blob 缺失 ("失效") 条目的 id; 由页面在加载时计算.
-    var missingBlobIds: Set<String> = emptySet()
-
     val selectedCount: Int get() = selectedIds.size
 
-    fun submit(newItems: List<TrashEntities.TrashItem>) {
-        items = newItems
-        val known = newItems.mapTo(HashSet()) { it.trashId }
+    fun submit(rows: List<TrashRow>) {
+        val known = rows.mapTo(HashSet()) { it.item.trashId }
+        val wasSelecting = selectionMode
         selectedIds.retainAll(known)
         if (selectedIds.isEmpty()) selectionMode = false
-        notifyDataSetChanged()
+        val modeChanged = wasSelecting != selectionMode
+        submitList(rows) {
+            // Rows unchanged by the diff still need the checkbox column toggled.
+            // zh-CN: diff 认为未变化的行仍需切换复选框列.
+            if (modeChanged) notifyItemRangeChanged(0, itemCount)
+        }
         onSelectionChanged(selectedIds.size, selectionMode)
     }
 
-    fun selectedItems(): List<TrashEntities.TrashItem> = items.filter { it.trashId in selectedIds }
+    fun selectedItems(): List<TrashEntities.TrashItem> = currentList.filter { it.item.trashId in selectedIds }.map { it.item }
 
     fun enterSelection(item: TrashEntities.TrashItem) {
+        val wasSelecting = selectionMode
         selectionMode = true
-        toggle(item)
+        applyToggle(item, wasSelecting)
     }
 
     fun toggle(item: TrashEntities.TrashItem) {
+        applyToggle(item, selectionMode)
+    }
+
+    private fun applyToggle(item: TrashEntities.TrashItem, wasSelecting: Boolean) {
         val id = item.trashId
         if (!selectedIds.add(id)) selectedIds.remove(id)
         if (selectedIds.isEmpty()) selectionMode = false
-        notifyDataSetChanged()
+        if (wasSelecting != selectionMode) {
+            notifyItemRangeChanged(0, itemCount)
+        } else {
+            val index = currentList.indexOfFirst { it.item.trashId == id }
+            if (index >= 0) notifyItemChanged(index)
+        }
         onSelectionChanged(selectedIds.size, selectionMode)
     }
 
     fun selectAll() {
-        if (items.isEmpty()) return
+        if (currentList.isEmpty()) return
         selectionMode = true
-        items.forEach { selectedIds.add(it.trashId) }
-        notifyDataSetChanged()
+        currentList.forEach { selectedIds.add(it.item.trashId) }
+        notifyItemRangeChanged(0, itemCount)
         onSelectionChanged(selectedIds.size, selectionMode)
     }
 
     fun clearSelection() {
         selectedIds.clear()
         selectionMode = false
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
         onSelectionChanged(0, false)
     }
 
@@ -81,9 +99,21 @@ internal class TrashAdapter(
     }
 
     override fun onBindViewHolder(holder: TrashViewHolder, position: Int) {
-        val item = items[position]
-        holder.bind(item, selectionMode, item.trashId in selectedIds, expiryMaxDays, now, item.trashId in missingBlobIds)
+        val row = getItem(position)
+        holder.bind(row, selectionMode, row.item.trashId in selectedIds)
     }
 
-    override fun getItemCount(): Int = items.size
+    companion object {
+
+        private val DIFF = object : DiffUtil.ItemCallback<TrashRow>() {
+
+            override fun areItemsTheSame(oldItem: TrashRow, newItem: TrashRow): Boolean {
+                return oldItem.item.trashId == newItem.item.trashId
+            }
+
+            override fun areContentsTheSame(oldItem: TrashRow, newItem: TrashRow): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
 }

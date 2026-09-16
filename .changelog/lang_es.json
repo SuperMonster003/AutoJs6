@@ -558,7 +558,8 @@
         "Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan",
         "Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción",
         "Cuando un elemento de la papelera se restaura en una ubicación distinta de su ruta original, el historial de versiones del archivo (o de todos los archivos del directorio) lo sigue a la nueva ruta; al mover un archivo a la papelera se registra la entrada del historial de versiones a la que estaba vinculado en ese momento",
-        "Un archivo de directorio dañado en la papelera ya no aborta toda la restauración: las entradas legibles se restauran con normalidad, las dañadas se registran y se omiten (los archivos a medio escribir se eliminan), al final se informa el número de entradas restauradas / fallidas y el elemento permanece en la papelera"
+        "Un archivo de directorio dañado en la papelera ya no aborta toda la restauración: las entradas legibles se restauran con normalidad, las dañadas se registran y se omiten (los archivos a medio escribir se eliminan), al final se informa el número de entradas restauradas / fallidas y el elemento permanece en la papelera",
+        "La lista de archivos del historial de versiones muestra los mismos iconos de tipo de archivo que el explorador; las listas del historial de versiones y de la papelera ahora se actualizan de forma incremental por diferencias, por lo que los cambios de estadísticas / cuenta atrás / selección ya no redibujan toda la lista"
       ],
       "dependency": [
         "Android AXML modularizado",

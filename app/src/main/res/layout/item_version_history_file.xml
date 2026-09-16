@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="9dp"
+    android:background="?selectableItemBackground"
+    android:orientation="horizontal">
+
+    <org.autojs.autojs.ui.widget.FirstCharView
+        android:id="@+id/first_char"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="start|center_vertical"
+        android:background="@drawable/ring"
+        android:gravity="center"
+        tools:includeFontPadding="false"
+        tools:textSize="23sp"
+        tools:textColor="@color/day_night"
+        tools:text="J" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingHorizontal="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:textColor="@color/day_night"
+            android:textSize="16sp"
+            tools:text="main.js" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.75"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="@color/day_night_alpha_70"
+            android:textSize="12sp"
+            tools:text="2026-02-06 21:45:55  |  &lt; 3 &gt;  |  21.93 KiB\n/storage/emulated/0/Scripts/main.js" />
+    </LinearLayout>
+</LinearLayout>

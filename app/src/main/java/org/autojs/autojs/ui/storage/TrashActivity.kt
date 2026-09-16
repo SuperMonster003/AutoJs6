@@ -18,6 +18,7 @@ import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.TrashEntities
+import org.autojs.autojs.storage.history.TrashExpiry
 import org.autojs.autojs.storage.history.TrashPreviewController
 import org.autojs.autojs.storage.history.TrashRepository
 import org.autojs.autojs.storage.history.TrashRestoreController
@@ -162,7 +163,18 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
     }
 
     override fun submitToAdapter(items: List<TrashEntities.TrashItem>) {
-        adapter.submit(items)
+        // Derived state travels with the row so DiffUtil sees countdown / broken-state changes.
+        // zh-CN: 派生状态随行一起提交, 使 DiffUtil 能感知倒计时 / 失效状态的变化.
+        val maxDays = HistoryPrefs.trashMaxDays()
+        val now = System.currentTimeMillis()
+        val missing = missingBlobIds
+        adapter.submit(items.map { item ->
+            TrashRow(
+                item = item,
+                missing = item.trashId in missing,
+                remaining = TrashExpiry.expiresAtOrNull(item.trashedAt, maxDays)?.let { TrashExpiry.remaining(it, now) },
+            )
+        })
     }
 
     override fun loadAllItemsInBackground(): List<TrashEntities.TrashItem> {
@@ -173,12 +185,6 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
         // zh-CN: 每次加载都检测失效条目 (blob 缺失), 仅标记, 不在此删除.
         missingBlobIds = items.filter { repository.isBlobMissing(it) }.mapTo(HashSet()) { it.trashId }
         return items
-    }
-
-    override fun onItemsLoaded(items: List<TrashEntities.TrashItem>) {
-        adapter.expiryMaxDays = HistoryPrefs.trashMaxDays()
-        adapter.now = System.currentTimeMillis()
-        adapter.missingBlobIds = missingBlobIds
     }
 
     override fun matchesQuery(item: TrashEntities.TrashItem, qLower: String): Boolean {
