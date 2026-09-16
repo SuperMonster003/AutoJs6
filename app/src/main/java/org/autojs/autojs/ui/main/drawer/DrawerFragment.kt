@@ -47,6 +47,7 @@ import org.autojs.autojs.permission.VivoBackgroundPopupPermission
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
 import org.autojs.autojs.permission.WriteSystemSettingsPermission
 import org.autojs.autojs.permission.XiaomiBackgroundPopupPermission
+import org.autojs.autojs.pluginclient.DevPluginClientReconnector
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
@@ -61,6 +62,8 @@ import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.accessibility.A11yServiceManagerDialog
+import org.autojs.autojs.ui.devplugin.ClientModeManagerDialog
+import org.autojs.autojs.ui.devplugin.ServerModeManagerDialog
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
@@ -166,6 +169,11 @@ open class DrawerFragment : Fragment() {
     // listener stop with the dismiss) without keeping a finished dialog alive.
     // zh-CN: 弱引用持有, 以便随 Activity 一起关闭 (其 1 s 刷新定时器与注册表监听者随 dismiss 停止), 且不延长已关闭对话框的生命周期.
     private var mA11yServiceManagerDialog: WeakReference<MaterialDialog>? = null
+
+    // The VSCode connection managers (client / server mode), held the same way.
+    // zh-CN: VSCode 连接管理器 (客户端 / 服务端模式), 以同样方式持有.
+    private var mClientModeManagerDialog: WeakReference<MaterialDialog>? = null
+    private var mServerModeManagerDialog: WeakReference<MaterialDialog>? = null
 
     private val screenColorPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -332,24 +340,33 @@ open class DrawerFragment : Fragment() {
                 (helper as? JsonSocketClientTool)?.showConnectingStatusDialogIfConnecting() == true
             }.also { mClientModeItem = it }
 
+            drawerItem.setOnLaunchManagerListener { d ->
+                // The description dialog is closed first, the manager takes its place.
+                // zh-CN: 先关闭说明对话框, 由管理器取而代之.
+                d?.dismiss()
+                showClientModeManager(this@apply)
+            }
+
             val disposable = Observable
                 .combineLatest(
                     JsonSocketClient.cxnState,
                     devPluginService.clientConnectionIpAddress,
-                ) { state: DevPluginService.State, ip: String ->
-                    Pair(state, ip)
+                    devPluginService.clientReconnector.status,
+                ) { state: DevPluginService.State, ip: String, reconnect: DevPluginClientReconnector.Status ->
+                    Triple(state, ip, reconnect)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { (state, ip) ->
+                .subscribe { (state, ip, reconnect) ->
+                    // While a reconnect session waits for its next attempt the entry stays busy and says so.
+                    // zh-CN: 重连会话等待下一次尝试期间, 条目保持忙碌并予以说明.
+                    val isReconnecting = state.isDisconnected() && reconnect.isActive
                     drawerItem.subtitle = when {
-                        state.isDisconnected() -> null
+                        isReconnecting -> "${reconnect.host ?: ip}  [ ${mContext.getString(R.string.text_reconnecting_with_attempts, reconnect.attempts)} ]"
+                        state.isDisconnected() || state.exception != null -> null
                         else -> ip
                     }
                     drawerItem.setCheckedIfNeeded(state.isConnected())
-                    drawerItem.isProgress = state.isConnecting()
-                    state.exception?.let {
-                        drawerItem.subtitle = null
-                    }
+                    drawerItem.isProgress = state.isConnecting() || isReconnecting
                 }
             setStateDisposable(disposable)
 
@@ -374,11 +391,8 @@ open class DrawerFragment : Fragment() {
                 descriptionRes = R.string.description_server_mode,
             ).also { item ->
                 item.setOnLaunchManagerListener { d ->
-                    if (d != null) {
-                        ViewUtils.showSnack(d.view, R.string.text_under_development, 1_200)
-                    } else {
-                        ViewUtils.showToast(mContext, R.string.text_under_development)
-                    }
+                    d?.dismiss()
+                    showServerModeManager(this@apply)
                 }
                 mServerModeItem = item
             }
@@ -884,6 +898,7 @@ open class DrawerFragment : Fragment() {
         mMcpServerItem.dispose()
 
         dismissA11yServiceManager()
+        dismissConnectionManagers()
 
         // mActivity.unregisterReceiver(mReceiver)
 
@@ -961,6 +976,24 @@ open class DrawerFragment : Fragment() {
             if (dialog.isShowing) runCatching { dialog.dismiss() }
         }
         mA11yServiceManagerDialog = null
+    }
+
+    private fun showClientModeManager(tool: JsonSocketClientTool) {
+        dismissConnectionManagers()
+        mClientModeManagerDialog = WeakReference(ClientModeManagerDialog.show(mContext, tool))
+    }
+
+    private fun showServerModeManager(tool: JsonSocketServerTool) {
+        dismissConnectionManagers()
+        mServerModeManagerDialog = WeakReference(ServerModeManagerDialog.show(mContext, tool))
+    }
+
+    private fun dismissConnectionManagers() {
+        listOf(mClientModeManagerDialog, mServerModeManagerDialog).forEach { ref ->
+            ref?.get()?.let { dialog -> if (dialog.isShowing) runCatching { dialog.dismiss() } }
+        }
+        mClientModeManagerDialog = null
+        mServerModeManagerDialog = null
     }
 
     private fun initMenuItems() {

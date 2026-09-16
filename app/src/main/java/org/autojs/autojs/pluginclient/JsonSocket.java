@@ -89,6 +89,14 @@ abstract public class JsonSocket extends Socket {
     public static final String TYPE_PONG = DevPluginService.TYPE_PONG;
     public static final String TYPE_REQUEST = DevPluginService.TYPE_REQUEST;
     public static final String TYPE_RESPONSE = DevPluginService.TYPE_RESPONSE;
+    public static final String TYPE_BYE = DevPluginService.TYPE_BYE;
+
+    /** `bye` reason: the person explicitly disconnected; the peer must not reconnect automatically. zh-CN: 用户显式断开, 对端不得自动重连. */
+    public static final String BYE_REASON_USER = "user";
+    /** `bye` reason: the app or extension is shutting down; reconnecting later is fine. zh-CN: 应用或插件正在退出, 稍后可重连. */
+    public static final String BYE_REASON_SHUTDOWN = "shutdown";
+    public static final String BYE_REASON_RESTART = "restart";
+    public static final String BYE_REASON_REPLACED = "replaced";
 
     protected static final HashMap<String, Bytes> sBytes = new HashMap<>();
     protected static final HashMap<String, JsonObject> sRequiredBytesCommands = new HashMap<>();
@@ -120,6 +128,19 @@ abstract public class JsonSocket extends Socket {
     private volatile int mPeerProtocolVersion = 1;
     private volatile long mLastInboundAt = System.currentTimeMillis();
     private volatile boolean mHeartbeatStarted = false;
+
+    // Peer metadata from its hello (extension 1.1.0+ sends name/platform) and the reason of its `bye`, if any.
+    // zh-CN: 对端 hello 中的元数据 (插件 1.1.0+ 携带 name/platform) 及其 `bye` 原因 (如有).
+    @Nullable
+    private volatile String mPeerName;
+    @Nullable
+    private volatile String mPeerExtensionVersion;
+    @Nullable
+    private volatile String mPeerPlatform;
+    @Nullable
+    private volatile String mPeerByeReason;
+    private volatile long mPeerHelloAt = 0L;
+    private volatile boolean mByeSent = false;
 
     private final Runnable mHeartbeatRunnable = new Runnable() {
         @Override
@@ -180,6 +201,51 @@ abstract public class JsonSocket extends Socket {
 
     public boolean isPeerProtocolV2() {
         return mPeerProtocolVersion >= 2;
+    }
+
+    @Nullable
+    public String getPeerName() {
+        return mPeerName;
+    }
+
+    @Nullable
+    public String getPeerExtensionVersion() {
+        return mPeerExtensionVersion;
+    }
+
+    @Nullable
+    public String getPeerPlatform() {
+        return mPeerPlatform;
+    }
+
+    /** Reason of the peer's `bye`, or null when the peer never said goodbye. zh-CN: 对端 `bye` 的原因, 未收到则为 null. */
+    @Nullable
+    public String getPeerByeReason() {
+        return mPeerByeReason;
+    }
+
+    /** Whether the peer explicitly asked us not to reconnect. zh-CN: 对端是否明确要求不要重连. */
+    public boolean isClosedByPeerUser() {
+        return BYE_REASON_USER.equals(mPeerByeReason);
+    }
+
+    /** Time the peer's hello was processed (0 before the handshake). zh-CN: 处理对端 hello 的时间 (握手前为 0). */
+    public long getPeerHelloAt() {
+        return mPeerHelloAt;
+    }
+
+    public long getLastInboundAt() {
+        return mLastInboundAt;
+    }
+
+    /** `host:port` of the peer, or null when there is no socket. zh-CN: 对端地址, 无 socket 时为 null. */
+    @Nullable
+    public String getRemoteAddressText() {
+        Socket socket = getSocket();
+        if (socket == null || socket.getInetAddress() == null) {
+            return null;
+        }
+        return socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
     }
 
     public abstract void switchOff() throws IOException;
@@ -273,7 +339,8 @@ abstract public class JsonSocket extends Socket {
     protected void onPeerHello(@NonNull JsonObject message) {
         JsonElement data = message.get("data");
         if (data != null && data.isJsonObject()) {
-            JsonElement version = data.getAsJsonObject().get("protocolVersion");
+            JsonObject obj = data.getAsJsonObject();
+            JsonElement version = obj.get("protocolVersion");
             if (version != null && version.isJsonPrimitive()) {
                 try {
                     mPeerProtocolVersion = version.getAsInt();
@@ -281,10 +348,80 @@ abstract public class JsonSocket extends Socket {
                     mPeerProtocolVersion = 1;
                 }
             }
+            mPeerName = optString(obj, "name");
+            mPeerExtensionVersion = optString(obj, "extensionVersion");
+            mPeerPlatform = optString(obj, "platform");
         }
-        Log.i(TAG, "peer protocol version: " + mPeerProtocolVersion);
+        mPeerHelloAt = System.currentTimeMillis();
+        Log.i(TAG, "peer protocol version: " + mPeerProtocolVersion + ", name: " + mPeerName + ", extension: " + mPeerExtensionVersion);
         if (isPeerProtocolV2()) {
             startHeartbeat();
+        }
+    }
+
+    @Nullable
+    private static String optString(@NonNull JsonObject obj, @NonNull String key) {
+        JsonElement element = obj.get(key);
+        if (element == null || !element.isJsonPrimitive()) {
+            return null;
+        }
+        try {
+            String value = element.getAsString();
+            return value == null || value.isEmpty() ? null : value;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Called (on the main thread) when the peer announced an intentional close with `bye`; the socket usually
+     * reaches end-of-stream right after. Subclasses decide whether the close is "normal" or worth reconnecting.
+     * zh-CN: 对端以 `bye` 宣告主动关闭时 (主线程) 调用, 随后通常读到流结束. 由子类决定视为正常关闭还是需要重连.
+     */
+    protected void onPeerBye(@NonNull String reason) {
+        Log.i(TAG, "peer said bye: " + reason);
+    }
+
+    /**
+     * Announce an intentional close to a v2 peer, then run `onDone` on the main thread once the frame has been
+     * handed to the socket (or immediately when nothing can be sent). Callers close the socket in `onDone`.
+     * zh-CN: 向 v2 对端宣告主动关闭, 帧写出后 (或无法发送时立即) 在主线程执行 `onDone`. 调用方在 `onDone` 中关闭 socket.
+     */
+    @AnyThread
+    public void sayBye(@NonNull String reason, @Nullable Runnable onDone) {
+        Runnable done = () -> {
+            if (onDone != null) {
+                mHandler.post(onDone);
+            }
+        };
+        // Check the raw socket rather than isSocketReady(): the client marks itself "switched off" before
+        // announcing the close, which makes isSocketReady() false while the socket can still write.
+        // zh-CN: 检查底层 socket 而非 isSocketReady(): 客户端在宣告关闭前已标记为 "switched off",
+        // 此时 isSocketReady() 为 false, 但 socket 仍可写出.
+        Socket socket = getSocket();
+        boolean canWrite = socket != null && socket.isConnected() && !socket.isClosed() && !socket.isOutputShutdown();
+        if (mByeSent || !isPeerProtocolV2() || !canWrite) {
+            done.run();
+            return;
+        }
+        mByeSent = true;
+        JsonObject data = new JsonObject();
+        data.addProperty("reason", reason);
+        JsonObject json = new JsonObject();
+        json.addProperty("type", TYPE_BYE);
+        json.add("data", data);
+        byte[] payload = getJsonBytes(json.toString());
+        try {
+            mWriteExecutor.execute(() -> {
+                try {
+                    writeFrame(getSocket(), payload, Type.JSON);
+                } catch (IOException e) {
+                    Log.w(TAG, "failed to send bye: " + e.getMessage());
+                }
+                done.run();
+            });
+        } catch (RejectedExecutionException e) {
+            done.run();
         }
     }
 
@@ -322,6 +459,13 @@ abstract public class JsonSocket extends Socket {
                 return true;
             case TYPE_RESPONSE:
                 return true;
+            case TYPE_BYE: {
+                JsonElement data = message.get("data");
+                String reason = data != null && data.isJsonObject() ? optString(data.getAsJsonObject(), "reason") : null;
+                mPeerByeReason = reason == null ? "unknown" : reason;
+                onPeerBye(mPeerByeReason);
+                return true;
+            }
             default:
                 return false;
         }
@@ -527,13 +671,19 @@ abstract public class JsonSocket extends Socket {
                     return;
                 }
 
+                // End-of-stream after the peer's `bye` is the announced close, not an error.
+                // zh-CN: 对端发送 `bye` 后读到流结束属于已宣告的关闭, 并非错误.
+                if (mPeerByeReason != null || mByeSent) {
+                    return;
+                }
+
                 // Treat "Stream ended unexpectedly" as error unless user requested normal close.
                 // zh-CN: 除非用户主动正常关闭, 否则将 "Stream ended unexpectedly" 视为错误.
                 if (message != null && message.toLowerCase().contains("stream ended unexpectedly")) {
                     boolean isNormallyClosed = false;
                     try {
                         if (jsonSocket instanceof JsonSocketClient) {
-                            isNormallyClosed = JsonSocketClient.Companion.isClientSocketNormallyClosed();
+                            isNormallyClosed = ((JsonSocketClient) jsonSocket).isSwitchedOff();
                         }
                     } catch (Throwable ignored) {
                         /* Ignored. */
@@ -546,11 +696,20 @@ abstract public class JsonSocket extends Socket {
                 mHandler.post(() -> onSocketError(e));
             } finally {
                 if (jsonSocket instanceof JsonSocketClient) {
-                    try {
-                        jsonSocket.switchOff();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    // Release the socket without touching the "normally closed" flag: only an explicit user action
+                    // may set it, otherwise a crashed extension would disable auto reconnect (roadmap 3.9).
+                    // Posted behind the error above so that the error state is published first; a synchronous close
+                    // here would publish a clean DISCONNECTED and the reconnector would stay idle.
+                    // zh-CN: 仅释放 socket, 不改动 "正常关闭" 标记: 该标记只能由用户显式操作设置,
+                    // 否则插件崩溃会导致自动重连被禁用 (roadmap 3.9).
+                    // 排在上面的错误之后投递, 使错误状态先发布; 若在此同步关闭, 会先发布 "正常断开", 重连器便不会工作.
+                    mHandler.post(() -> {
+                        try {
+                            jsonSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
         });

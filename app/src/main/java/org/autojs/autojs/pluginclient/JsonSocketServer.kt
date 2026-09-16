@@ -84,8 +84,9 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
                 TYPE_HELLO -> {
                     onPeerHello(obj)
                     setStateConnected()
+                    service.onServerClientHello(this)
                 }
-                TYPE_PING, TYPE_PONG, TYPE_REQUEST, TYPE_RESPONSE -> handleProtocolMessage(type, obj)
+                TYPE_PING, TYPE_PONG, TYPE_REQUEST, TYPE_RESPONSE, TYPE_BYE -> handleProtocolMessage(type, obj)
                 TYPE_BYTES_COMMAND -> {
                     val md5 = obj["md5"].asString
                     val bytes = sBytes.remove(md5)
@@ -111,6 +112,22 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
         } else {
             sBytes[bytes.md5] = bytes
         }
+    }
+
+    /**
+     * The extension announced its close (user disconnect, VSCode shutdown, replaced connection): release this
+     * client socket quietly, the listening socket stays up. Whether VSCode reconnects later is its decision.
+     * zh-CN: 插件宣告关闭 (用户断开, VSCode 退出, 连接被替换): 静默释放该客户端 socket, 监听 socket 保持. 之后是否重连由 VSCode 决定.
+     */
+    @MainThread
+    override fun onPeerBye(reason: String) {
+        super.onPeerBye(reason)
+        try {
+            close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        service.onServerClientDisconnected(this)
     }
 
     @MainThread

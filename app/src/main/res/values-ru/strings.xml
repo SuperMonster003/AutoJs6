@@ -441,6 +441,7 @@
     <string name="error_no_permission_to_access_shizuku">Нет разрешения на доступ к Shizuku</string>
     <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
     <string name="error_no_read_phone_state_permission">Нет разрешения \"читать состояние телефона\"</string>
+    <string name="error_no_saved_server_address">Адрес сервера не сохранён</string>
     <string name="error_no_screen_capture_permission">Нет разрешения на захват экрана</string>
     <string name="error_no_storage_rw_permission">Нет разрешения \"хранение r/w\"</string>
     <string name="error_no_such_selector_method" formatted="false">Нет такого метода селектора %s(%s: %s)</string>
@@ -701,6 +702,7 @@
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
+    <string name="summary_auto_reconnect">Автоматически переподключаться после неожиданного разрыва. Явное отключение с любой стороны соблюдается</string>
     <string name="summary_clear_media_playback_history">Удалить все позиции воспроизведения, сохранённые хостом</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
     <string name="summary_delete_permanently_also_clear_history">Удаляет историю версий файла или каталога при его окончательном удалении</string>
@@ -732,6 +734,7 @@
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
+    <string name="summary_notify_client_connection_changes">Показывать уведомление при подключении и отключении VSCode</string>
     <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления - проверить немедленно)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">Глобальная опция \"Автоматически проверять обновления плагинов\" отключена, этот параметр недоступен</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">Автоматически проверять обновления и показывать подсказки об обновлении в элементах плагинов</string>
@@ -742,8 +745,12 @@
     <string name="summary_plugin_instruction_view">Показать примеры использования и описание этого плагина</string>
     <string name="summary_plugin_jump_to_launch_page">Открыть Activity запуска этого плагина</string>
     <string name="summary_plugin_no_launch_page">У текущего плагина нет страницы запуска</string>
+    <string name="summary_reconnect_on_network_change">Во время переподключения повторять попытку сразу, как только сеть станет доступна</string>
+    <string name="summary_restore_connection_on_launch">При запуске приложения подключаться к последнему серверу, если подключение не было разорвано явно</string>
+    <string name="summary_restore_server_on_launch">При запуске приложения снова начинать прослушивание, если сервер не был остановлен явно</string>
     <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
     <string name="text_and_n_more">... и еще %d</string>
+    <string name="text_auto_reconnect">Автоматическое переподключение</string>
     <string name="text_batch_restore_summary">Восстановлено: %1$d, пропущено: %2$d, ошибок: %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Двоичное содержимое нельзя просмотреть</string>
     <string name="text_bun_host_capabilities">Мост возможностей Bun</string>
@@ -1025,6 +1032,8 @@
     <string name="text_click_other_areas_to_exit_selection">Нажмите в другом месте, чтобы выйти из выбора</string>
     <string name="text_click_too_frequently">Частые операции</string>
     <string name="text_client_mode">Режим клиента</string>
+    <string name="text_client_mode_manager">Менеджер режима клиента</string>
+    <string name="text_client_n">Клиент %d</string>
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
     <string name="text_close">Закрыть</string>
     <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
@@ -1053,12 +1062,16 @@
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
+    <string name="text_connect">Подключить</string>
     <string name="text_connected">Подключено</string>
+    <string name="text_connected_clients">Подключённые клиенты</string>
     <string name="text_connected_count_with_colon">Подключено: %1$d</string>
     <string name="text_connecting" tools:ignore="TypographyEllipsis">Подключение...</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Подключение к \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
+    <string name="text_connection_duration">Длительность подключения</string>
     <string name="text_connection_failed">Не удалось подключиться</string>
+    <string name="text_connection_status">Состояние подключения</string>
     <string name="text_console">Консоль</string>
     <string name="text_console_input_hint">Введите строку и нажмите Enter</string>
     <string name="text_console_resize_mode_hint">Перетащите для изменения размера, коснитесь для завершения</string>
@@ -1069,6 +1082,7 @@
     <string name="text_control">Управление</string>
     <string name="text_copy">Скопировать</string>
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
+    <string name="text_copy_address">Копировать адрес</string>
     <string name="text_copy_all">Скопировать все</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_chained_selector">Копировать цепочечный селектор</string>
@@ -1166,6 +1180,9 @@
     <string name="text_directly_download">Загрузить сейчас</string>
     <string name="text_directory">Каталог</string>
     <string name="text_disabled">Отключено</string>
+    <string name="text_disconnect">Отключить</string>
+    <string name="text_disconnect_all_clients">Отключить всех клиентов</string>
+    <string name="text_disconnected">Отключено</string>
     <string name="text_display_over_other_app">Отображать поверх других приложений</string>
     <string name="text_display_over_other_app_is_recommended">Разрешение \"Отображать поверх других приложений\" рекомендуется для правильного отображения всех виджетов.</string>
     <string name="text_disposable_task">Одноразовая задача</string>
@@ -1223,6 +1240,7 @@
     <string name="text_editor_theme">Тема редактора</string>
     <string name="text_editor_theme_mode">Режим темы редактора</string>
     <string name="text_editor_word_wrap_indent_style">Отступ переноса</string>
+    <string name="text_elapsed_ago">%s назад</string>
     <string name="text_email">Электронная почта</string>
     <string name="text_email_cannot_be_empty">Электронная почта не может быть пустой</string>
     <string name="text_email_format_error">Неверный формат электронной почты</string>
@@ -1267,6 +1285,7 @@
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
+    <string name="text_extension_version">Версия расширения</string>
     <string name="text_external_storage">Внешнее хранилище</string>
     <string name="text_extract">Извлечь</string>
     <string name="text_extract_archive_current_folder">Извлечь текущую папку</string>
@@ -1451,6 +1470,8 @@
     <string name="text_label">Метка</string>
     <string name="text_label_name">Метка</string>
     <string name="text_label_state">Состояние</string>
+    <string name="text_last_activity">Последняя активность</string>
+    <string name="text_last_error">Последняя ошибка</string>
     <string name="text_last_event">Последнее событие</string>
     <string name="text_last_updates_checked_time">Последняя проверка: %s</string>
     <string name="text_latest_activity">Последняя активность</string>
@@ -1475,6 +1496,8 @@
     <string name="text_licenses">Лицензии на открытые источники</string>
     <string name="text_lines_and_size">Строк: %1$d, %2$s</string>
     <string name="text_listeners">Слушатели</string>
+    <string name="text_listening">Прослушивание</string>
+    <string name="text_listening_address">Адрес прослушивания</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
     <string name="text_loading_completed">Загрузка завершена</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
@@ -1544,6 +1567,7 @@
     <string name="text_new_project">Новый проект</string>
     <string name="text_new_version_found">Найдена новая версия</string>
     <string name="text_new_watching_variables">Новые наблюдающие переменные</string>
+    <string name="text_next_retry">Следующая попытка</string>
     <string name="text_next_run_time">Следующий запуск</string>
     <string name="text_night_mode">Ночной режим</string>
     <string name="text_no_auto_mount_plugins">Нет плагинов с авто-монтированием</string>
@@ -1589,6 +1613,7 @@
     <string name="text_notification">Уведомление</string>
     <string name="text_notification_access_permission">Доступ к уведомлениям</string>
     <string name="text_notification_service_disabled">Служба уведомлений не работает</string>
+    <string name="text_notify_client_connection_changes">Уведомлять об изменениях клиентов</string>
     <string name="text_null">Null</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">Количество записей журнала %d превышает лимит для отправки</string>
     <string name="text_number_format_error">Неверный формат номера</string>
@@ -1812,6 +1837,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protocol_version">Версия протокола</string>
     <string name="text_pruning">Обрезка</string>
     <string name="text_pruning_native_libraries">Удаление ненужных нативных библиотек</string>
     <string name="text_querying_plugin_info">Запрос сведений о плагине</string>
@@ -1825,6 +1851,10 @@
     <string name="text_reading_android_package">Чтение пакета Android</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
+    <string name="text_reconnect_attempts">Попытки переподключения</string>
+    <string name="text_reconnect_now">Переподключить сейчас</string>
+    <string name="text_reconnect_on_network_change">Повторять при смене сети</string>
+    <string name="text_reconnecting_with_attempts">Переподключение (попыток: %d)</string>
     <string name="text_record_finished">Запись завершена</string>
     <string name="text_record_media_playback_progress">Записывать прогресс воспроизведения медиа</string>
     <string name="text_record_prompt">Запрос записи</string>
@@ -1880,7 +1910,9 @@
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
     <string name="text_restore">Восстановить</string>
     <string name="text_restore_and_save">Восстановить и сохранить</string>
+    <string name="text_restore_connection_on_launch">Восстанавливать подключение при запуске</string>
     <string name="text_restore_selected">Восстановить выбранные</string>
+    <string name="text_restore_server_on_launch">Запускать сервер при запуске</string>
     <string name="text_restore_to_original_path">Восстановить в исходный путь</string>
     <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Восстановление...</string>
@@ -1962,7 +1994,9 @@
     <string name="text_self_check">Самопроверка</string>
     <string name="text_send">Отправить</string>
     <string name="text_send_shortcut">Создать ярлык</string>
+    <string name="text_server_address">Адрес сервера</string>
     <string name="text_server_mode">Режим сервера</string>
+    <string name="text_server_mode_manager">Менеджер режима сервера</string>
     <string name="text_service">Сервис</string>
     <string name="text_service_management">Управление службами</string>
     <string name="text_service_status">Состояние службы</string>
@@ -2027,7 +2061,9 @@
     <string name="text_start_running">Выполнение</string>
     <string name="text_state_or_province">Штат или провинция</string>
     <string name="text_stop">Остановить</string>
+    <string name="text_stop_reconnecting">Прекратить переподключение</string>
     <string name="text_stop_simplified">Стоп</string>
+    <string name="text_stopped">Остановлено</string>
     <string name="text_street">Улица</string>
     <string name="text_successfully_created_key_store">Ключ подписи успешно создан</string>
     <string name="text_supported_abis_short">ABIs</string>
@@ -2123,6 +2159,7 @@
     <string name="text_title_bar_opacity">Непрозрачность заголовка</string>
     <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_toggle_all">Переключить все</string>
+    <string name="text_toggle_flashlight">Переключить фонарик</string>
     <string name="text_tools">Инструменты</string>
     <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
@@ -2213,6 +2250,9 @@
     <string name="text_vivo_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="text_volume_down_to_exit_layout_inspector">Нажмите клавишу уменьшения громкости, чтобы выйти из анализа компоновки</string>
     <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
+    <string name="text_vscode_connected_format">VSCode подключён: %s</string>
+    <string name="text_vscode_disconnected_format">VSCode отключён: %s</string>
+    <string name="text_vscode_host">Хост VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>

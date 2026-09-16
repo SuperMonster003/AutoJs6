@@ -441,6 +441,7 @@
     <string name="error_no_permission_to_access_shizuku">Pas de permission pour accéder à Shizuku</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
     <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
+    <string name="error_no_saved_server_address">Aucune adresse de serveur n\'a été enregistrée</string>
     <string name="error_no_screen_capture_permission">Aucune autorisation de capture d\'écran</string>
     <string name="error_no_storage_rw_permission">Aucune autorisation \"storage r/w\"</string>
     <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s : %s)</string>
@@ -701,6 +702,7 @@
     <string name="summary_ace_word_wrap_enabled">Renvoyer les lignes longues dans la zone visible de l\'éditeur</string>
     <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
+    <string name="summary_auto_reconnect">Se reconnecter automatiquement après une déconnexion inattendue. Une déconnexion explicite de l\'un ou l\'autre côté est respectée</string>
     <string name="summary_clear_media_playback_history">Supprimer toutes les positions de lecture enregistrées par l\'hôte</string>
     <string name="summary_code_editor_settings">Ouvrir la page complète des paramètres de l\'éditeur de code</string>
     <string name="summary_delete_permanently_also_clear_history">Supprime l\'historique des versions d\'un fichier ou d\'un dossier supprimé définitivement</string>
@@ -732,6 +734,7 @@
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan.</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale.</string>
+    <string name="summary_notify_client_connection_changes">Afficher un toast lorsque VSCode se connecte ou se déconnecte</string>
     <string name="summary_plugin_auto_check_updates">Verifier automatiquement les mises a jour des plugins toutes les 1 heure (tirer pour actualiser verifie immediatement)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">L\'option globale \"Verifier automatiquement les mises a jour des plugins\" est desactivee. Cette option n\'est pas disponible</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">Verifier automatiquement les mises a jour et afficher des indications de mise a jour dans les entrees de plugins</string>
@@ -742,8 +745,12 @@
     <string name="summary_plugin_instruction_view">Afficher des exemples d\'utilisation et des notes pour ce plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Ouvrir l\'Activity de lancement de ce plugin</string>
     <string name="summary_plugin_no_launch_page">Le plugin actuel n\'a pas de page de lancement</string>
+    <string name="summary_reconnect_on_network_change">Pendant la reconnexion, réessayer immédiatement dès qu\'un réseau devient disponible</string>
+    <string name="summary_restore_connection_on_launch">Au démarrage de l\'application, se reconnecter au dernier serveur, sauf si la connexion a été fermée explicitement</string>
+    <string name="summary_restore_server_on_launch">Au démarrage de l\'application, se remettre en écoute, sauf si le serveur a été arrêté explicitement</string>
     <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
     <string name="text_and_n_more">... et %d de plus</string>
+    <string name="text_auto_reconnect">Reconnexion automatique</string>
     <string name="text_batch_restore_summary">Restaurés %1$d, ignorés %2$d, échoués %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Le contenu binaire ne peut pas être prévisualisé</string>
     <string name="text_bun_host_capabilities">Pont de capacités Bun</string>
@@ -1025,6 +1032,8 @@
     <string name="text_click_other_areas_to_exit_selection">Appuyez ailleurs pour quitter la selection</string>
     <string name="text_click_too_frequently">Une opération fréquente</string>
     <string name="text_client_mode">Mode client</string>
+    <string name="text_client_mode_manager">Gestionnaire du mode client</string>
+    <string name="text_client_n">Client %d</string>
     <string name="text_clone_color_library">Cloner une bibliothèque de couleurs</string>
     <string name="text_close">Fermeture</string>
     <string name="text_close_floating_button">Fermer le bouton flottant</string>
@@ -1053,12 +1062,16 @@
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer ?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer ?</string>
     <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
+    <string name="text_connect">Connecter</string>
     <string name="text_connected">Connecté</string>
+    <string name="text_connected_clients">Clients connectés</string>
     <string name="text_connected_count_with_colon">Connectés : %1$d</string>
     <string name="text_connecting">Connexion en cours</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Connexion à \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
+    <string name="text_connection_duration">Durée de connexion</string>
     <string name="text_connection_failed">Échec de la connexion</string>
+    <string name="text_connection_status">État de la connexion</string>
     <string name="text_console">Console</string>
     <string name="text_console_input_hint">Saisissez une ligne et appuyez sur Entrée</string>
     <string name="text_console_resize_mode_hint">Faites glisser pour redimensionner, touchez pour terminer</string>
@@ -1069,6 +1082,7 @@
     <string name="text_control">Contrôle</string>
     <string name="text_copy">Copie</string>
     <string name="text_copy_ace_diagnostics">Copier les diagnostics Ace</string>
+    <string name="text_copy_address">Copier l\'adresse</string>
     <string name="text_copy_all">Copier tout</string>
     <string name="text_copy_all_files_to_new_directory">Copier tous les fichiers dans un nouveau répertoire</string>
     <string name="text_copy_chained_selector">Copier le sélecteur chaîné</string>
@@ -1166,6 +1180,9 @@
     <string name="text_directly_download">Téléchargement immédiat</string>
     <string name="text_directory">Repertoire</string>
     <string name="text_disabled">Désactivé</string>
+    <string name="text_disconnect">Déconnecter</string>
+    <string name="text_disconnect_all_clients">Déconnecter tous les clients</string>
+    <string name="text_disconnected">Déconnecté</string>
     <string name="text_display_over_other_app">Affichage sur les autres apps</string>
     <string name="text_display_over_other_app_is_recommended">La permission \"Affichage sur les autres apps\" est recommandée pour que tous les widgets s\'affichent correctement.</string>
     <string name="text_disposable_task">Tâche à supprimer</string>
@@ -1223,6 +1240,7 @@
     <string name="text_editor_theme">Thème de l\'éditeur</string>
     <string name="text_editor_theme_mode">Mode de thème de l\'éditeur</string>
     <string name="text_editor_word_wrap_indent_style">Indentation du retour à la ligne</string>
+    <string name="text_elapsed_ago">il y a %s</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">L\'e-mail ne peut être vide</string>
     <string name="text_email_format_error">Format d\'e-mail invalide</string>
@@ -1267,6 +1285,7 @@
     <string name="text_exported">Exporté</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
+    <string name="text_extension_version">Version de l\'extension</string>
     <string name="text_external_storage">Stockage externe</string>
     <string name="text_extract">Extraire</string>
     <string name="text_extract_archive_current_folder">Extraire le dossier actuel</string>
@@ -1451,6 +1470,8 @@
     <string name="text_label">Libellé</string>
     <string name="text_label_name">Étiquette</string>
     <string name="text_label_state">État</string>
+    <string name="text_last_activity">Dernière activité</string>
+    <string name="text_last_error">Dernière erreur</string>
     <string name="text_last_event">Dernier événement</string>
     <string name="text_last_updates_checked_time">Dernière vérification : %s</string>
     <string name="text_latest_activity">Dernière activité</string>
@@ -1475,6 +1496,8 @@
     <string name="text_licenses">Licences Open Sources</string>
     <string name="text_lines_and_size">%1$d lignes, %2$s</string>
     <string name="text_listeners">Écouteurs</string>
+    <string name="text_listening">En écoute</string>
+    <string name="text_listening_address">Adresse d\'écoute</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
     <string name="text_loading_completed">Chargement termine</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
@@ -1544,6 +1567,7 @@
     <string name="text_new_project">Nouveau projet</string>
     <string name="text_new_version_found">Nouvelle version trouvée</string>
     <string name="text_new_watching_variables">Nouvelles variables de surveillance</string>
+    <string name="text_next_retry">Prochaine tentative</string>
     <string name="text_next_run_time">Prochaine exécution</string>
     <string name="text_night_mode">Mode nuit</string>
     <string name="text_no_auto_mount_plugins">Aucun plugin avec montage automatique</string>
@@ -1589,6 +1613,7 @@
     <string name="text_notification">Notification</string>
     <string name="text_notification_access_permission">Accès à la notification</string>
     <string name="text_notification_service_disabled">Le service de notification ne fonctionne pas</string>
+    <string name="text_notify_client_connection_changes">Notifier les changements de clients</string>
     <string name="text_null">Null</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">Le nombre d\'entrées de journal %d dépasse la limite d\'envoi</string>
     <string name="text_number_format_error">Format de numéro invalide</string>
@@ -1812,6 +1837,7 @@
     <string name="text_property_colon_value">%1$s : %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s : %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s : %2$d%3$s</string>
+    <string name="text_protocol_version">Version du protocole</string>
     <string name="text_pruning">Elagage</string>
     <string name="text_pruning_native_libraries">Suppression des bibliothèques natives inutiles</string>
     <string name="text_querying_plugin_info">Interrogation des informations du plugin</string>
@@ -1825,6 +1851,10 @@
     <string name="text_reading_android_package">Lecture du package Android</string>
     <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
     <string name="text_recommended">Recommandé</string>
+    <string name="text_reconnect_attempts">Tentatives de reconnexion</string>
+    <string name="text_reconnect_now">Reconnecter maintenant</string>
+    <string name="text_reconnect_on_network_change">Réessayer lors d\'un changement de réseau</string>
+    <string name="text_reconnecting_with_attempts">Reconnexion (%d tentatives)</string>
     <string name="text_record_finished">Enregistrement terminé</string>
     <string name="text_record_media_playback_progress">Enregistrer la progression de lecture multimédia</string>
     <string name="text_record_prompt">Demande d\'enregistrement</string>
@@ -1880,7 +1910,9 @@
     <string name="text_restart_strategy">Stratégie de redémarrage</string>
     <string name="text_restore">Restaurer</string>
     <string name="text_restore_and_save">Restaurer et enregistrer</string>
+    <string name="text_restore_connection_on_launch">Restaurer la connexion au lancement</string>
     <string name="text_restore_selected">Restaurer la sélection</string>
+    <string name="text_restore_server_on_launch">Démarrer le serveur au lancement</string>
     <string name="text_restore_to_original_path">Restaurer vers le chemin d\'origine</string>
     <string name="text_restore_to_specified_path">Restaurer vers un chemin specifique</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restauration...</string>
@@ -1962,7 +1994,9 @@
     <string name="text_self_check">Autovérification</string>
     <string name="text_send">Envoyer</string>
     <string name="text_send_shortcut">Créer un raccourci</string>
+    <string name="text_server_address">Adresse du serveur</string>
     <string name="text_server_mode">Mode serveur</string>
+    <string name="text_server_mode_manager">Gestionnaire du mode serveur</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Gestion des services</string>
     <string name="text_service_status">État du service</string>
@@ -2027,7 +2061,9 @@
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_state_or_province">État ou province</string>
     <string name="text_stop">Stop</string>
+    <string name="text_stop_reconnecting">Arrêter la reconnexion</string>
     <string name="text_stop_simplified">Arreter</string>
+    <string name="text_stopped">Arrêté</string>
     <string name="text_street">Rue</string>
     <string name="text_successfully_created_key_store">Clé de signature créée avec succès</string>
     <string name="text_supported_abis_short">ABIs</string>
@@ -2123,6 +2159,7 @@
     <string name="text_title_bar_opacity">Opacité de la barre de titre</string>
     <string name="text_to_be_chosen">A choisir</string>
     <string name="text_toggle_all">Basculer tout</string>
+    <string name="text_toggle_flashlight">Activer ou désactiver la lampe</string>
     <string name="text_tools">Outils</string>
     <string name="text_total_size_colon_value">Taille: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>
@@ -2213,6 +2250,9 @@
     <string name="text_vivo_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="text_volume_down_to_exit_layout_inspector">Appuyez sur la touche volume bas pour quitter l\'inspecteur de mise en page</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
+    <string name="text_vscode_connected_format">VSCode connecté: %s</string>
+    <string name="text_vscode_disconnected_format">VSCode déconnecté: %s</string>
+    <string name="text_vscode_host">Hôte VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>

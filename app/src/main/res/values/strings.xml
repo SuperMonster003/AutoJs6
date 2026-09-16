@@ -436,6 +436,7 @@
     <string name="error_no_permission_to_access_shizuku">No permission to access Shizuku</string>
     <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
     <string name="error_no_read_phone_state_permission">No \"read phone state\" permission</string>
+    <string name="error_no_saved_server_address">No server address has been saved</string>
     <string name="error_no_screen_capture_permission">No screen capture permission</string>
     <string name="error_no_storage_rw_permission">No \"storage r/w\" permission</string>
     <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s: %s)</string>
@@ -696,6 +697,7 @@
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_auto_reconnect">Reconnect automatically after an unexpected disconnect. An explicit disconnect on either side is respected</string>
     <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_delete_permanently_also_clear_history">Removes the version history of a file or directory that is deleted permanently</string>
@@ -727,6 +729,7 @@
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
+    <string name="summary_notify_client_connection_changes">Show a toast when VSCode connects or disconnects</string>
     <string name="summary_plugin_auto_check_updates">Automatically check plugin updates every 1 hour (pull-to-refresh checks immediately)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">Global \"Auto check plugin updates\" is disabled, this option is unavailable</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">Auto check for updates and show update hints on plugin entries</string>
@@ -737,8 +740,12 @@
     <string name="summary_plugin_instruction_view">Show usage examples and notes for this plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
+    <string name="summary_reconnect_on_network_change">While reconnecting, retry immediately when a network becomes available</string>
+    <string name="summary_restore_connection_on_launch">Reconnect to the last server when the app starts, unless the connection was disconnected explicitly</string>
+    <string name="summary_restore_server_on_launch">Listen again when the app starts, unless the server was stopped explicitly</string>
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
     <string name="text_and_n_more">... and %d more</string>
+    <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Binary content cannot be previewed</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
@@ -1021,6 +1028,8 @@
     <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
+    <string name="text_client_mode_manager">Client mode manager</string>
+    <string name="text_client_n">Client %d</string>
     <string name="text_clone_color_library">Clone a color library</string>
     <string name="text_close">Close</string>
     <string name="text_close_floating_button">Close floating button</string>
@@ -1049,12 +1058,16 @@
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
     <string name="text_confirm_to_remove">Are you sure to remove?</string>
     <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
+    <string name="text_connect">Connect</string>
     <string name="text_connected">Connected</string>
+    <string name="text_connected_clients">Connected clients</string>
     <string name="text_connected_count_with_colon">Connected: %1$d</string>
     <string name="text_connecting">Connecting</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Connecting to \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">Connection cannot be established</string>
+    <string name="text_connection_duration">Connected for</string>
     <string name="text_connection_failed">Connection failed</string>
+    <string name="text_connection_status">Connection status</string>
     <string name="text_console">Console</string>
     <string name="text_console_input_hint">Type a line and press Enter</string>
     <string name="text_console_resize_mode_hint">Drag to resize, tap to finish</string>
@@ -1065,6 +1078,7 @@
     <string name="text_control">Control</string>
     <string name="text_copy">Copy</string>
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
+    <string name="text_copy_address">Copy address</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_chained_selector">Copy chained selector</string>
@@ -1162,6 +1176,9 @@
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_disabled">Disabled</string>
+    <string name="text_disconnect">Disconnect</string>
+    <string name="text_disconnect_all_clients">Disconnect all clients</string>
+    <string name="text_disconnected">Disconnected</string>
     <string name="text_display_over_other_app">Display over other apps</string>
     <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
     <string name="text_disposable_task">Disposable task</string>
@@ -1219,6 +1236,7 @@
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_editor_theme_mode">Editor theme mode</string>
     <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
+    <string name="text_elapsed_ago">%s ago</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
@@ -1263,6 +1281,7 @@
     <string name="text_exported">Exported</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
     <string name="text_extensibility">Extensibility</string>
+    <string name="text_extension_version">Extension version</string>
     <string name="text_external_storage">External storage</string>
     <string name="text_extract">Extract</string>
     <string name="text_extract_archive_current_folder">Extract current folder</string>
@@ -1447,6 +1466,8 @@
     <string name="text_label">Label</string>
     <string name="text_label_name">Label</string>
     <string name="text_label_state">State</string>
+    <string name="text_last_activity">Last activity</string>
+    <string name="text_last_error">Last error</string>
     <string name="text_last_event">Last event</string>
     <string name="text_last_updates_checked_time">Last checked: %s</string>
     <string name="text_latest_activity">Latest activity</string>
@@ -1471,6 +1492,8 @@
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_lines_and_size">%1$d lines, %2$s</string>
     <string name="text_listeners">Listeners</string>
+    <string name="text_listening">Listening</string>
+    <string name="text_listening_address">Listening address</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_completed">Loading completed</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
@@ -1540,6 +1563,7 @@
     <string name="text_new_project">New project</string>
     <string name="text_new_version_found">New version found</string>
     <string name="text_new_watching_variables">New watching variables</string>
+    <string name="text_next_retry">Next retry</string>
     <string name="text_next_run_time">Next run</string>
     <string name="text_night_mode">Night mode</string>
     <string name="text_no_auto_mount_plugins">No plugins with auto-mount enabled</string>
@@ -1585,6 +1609,7 @@
     <string name="text_notification">Notification</string>
     <string name="text_notification_access_permission">Notification access</string>
     <string name="text_notification_service_disabled">Notification service is not working</string>
+    <string name="text_notify_client_connection_changes">Notify on client changes</string>
     <string name="text_null">Null</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">Number of log entries %d exceeds the limit for sending</string>
     <string name="text_number_format_error">Invalid number format</string>
@@ -1808,6 +1833,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protocol_version">Protocol version</string>
     <string name="text_pruning">Pruning</string>
     <string name="text_pruning_native_libraries">Pruning native libraries</string>
     <string name="text_querying_plugin_info">Querying plugin info</string>
@@ -1821,6 +1847,10 @@
     <string name="text_reading_android_package">Reading Android package</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>
     <string name="text_recommended">Recommended</string>
+    <string name="text_reconnect_attempts">Reconnect attempts</string>
+    <string name="text_reconnect_now">Reconnect now</string>
+    <string name="text_reconnect_on_network_change">Retry on network change</string>
+    <string name="text_reconnecting_with_attempts">Reconnecting (%d attempts)</string>
     <string name="text_record_finished">Recording finished</string>
     <string name="text_record_media_playback_progress">Record media playback progress</string>
     <string name="text_record_prompt">Recording prompt</string>
@@ -1876,7 +1906,9 @@
     <string name="text_restart_strategy">Restart strategy</string>
     <string name="text_restore">Restore</string>
     <string name="text_restore_and_save">Restore and save</string>
+    <string name="text_restore_connection_on_launch">Restore connection on launch</string>
     <string name="text_restore_selected">Restore selected</string>
+    <string name="text_restore_server_on_launch">Start server on launch</string>
     <string name="text_restore_to_original_path">Restore to original path</string>
     <string name="text_restore_to_specified_path">Restore to specified path</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>
@@ -1958,7 +1990,9 @@
     <string name="text_self_check">Self-check</string>
     <string name="text_send">Send</string>
     <string name="text_send_shortcut">Create shortcut</string>
+    <string name="text_server_address">Server address</string>
     <string name="text_server_mode">Server mode</string>
+    <string name="text_server_mode_manager">Server mode manager</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Service management</string>
     <string name="text_service_status">Service status</string>
@@ -2023,7 +2057,9 @@
     <string name="text_start_running">Running</string>
     <string name="text_state_or_province">State or Province</string>
     <string name="text_stop">Stop</string>
+    <string name="text_stop_reconnecting">Stop reconnecting</string>
     <string name="text_stop_simplified">Stop</string>
+    <string name="text_stopped">Stopped</string>
     <string name="text_street">Street</string>
     <string name="text_successfully_created_key_store">Successfully created signature key</string>
     <string name="text_supported_abis_short">ABIs</string>
@@ -2119,6 +2155,7 @@
     <string name="text_title_bar_opacity">Title bar opacity</string>
     <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_toggle_all">Toggle all</string>
+    <string name="text_toggle_flashlight">Toggle flashlight</string>
     <string name="text_tools">Tools</string>
     <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
@@ -2209,6 +2246,9 @@
     <string name="text_vivo_background_popup_permission">Background pop-ups</string>
     <string name="text_volume_down_to_exit_layout_inspector">Press the volume down key to exit the layout inspector</string>
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
+    <string name="text_vscode_connected_format">VSCode connected: %s</string>
+    <string name="text_vscode_disconnected_format">VSCode disconnected: %s</string>
+    <string name="text_vscode_host">VSCode host</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>

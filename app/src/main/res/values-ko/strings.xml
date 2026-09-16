@@ -443,6 +443,7 @@
     <string name="error_no_permission_to_access_shizuku">Shizuku 에 액세스할 수 있는 권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
     <string name="error_no_read_phone_state_permission">\"전화 상태 읽기\"권한이 없습니다</string>
+    <string name="error_no_saved_server_address">저장된 서버 주소가 없습니다</string>
     <string name="error_no_screen_capture_permission">화면 캡처 허가가 없습니다</string>
     <string name="error_no_storage_rw_permission">\"스토리지 R/W\" 권한이 없습니다</string>
     <string name="error_no_such_selector_method" formatted="false">그러한 선택기 방법 %s(%s: %s)</string>
@@ -703,6 +704,7 @@
     <string name="summary_ace_word_wrap_enabled">편집기 뷰포트 안에서 긴 줄 바꿈</string>
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
+    <string name="summary_auto_reconnect">예기치 않은 연결 끊김 후 자동으로 재연결합니다. 어느 한쪽이 명시적으로 연결을 해제한 경우에는 재연결하지 않습니다</string>
     <string name="summary_clear_media_playback_history">호스트가 저장한 모든 미디어 재생 위치 삭제</string>
     <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
     <string name="summary_delete_permanently_also_clear_history">영구 삭제한 파일이나 디렉터리의 버전 기록도 함께 제거합니다</string>
@@ -734,6 +736,7 @@
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>
+    <string name="summary_notify_client_connection_changes">VSCode가 연결되거나 연결이 끊길 때 토스트를 표시합니다</string>
     <string name="summary_plugin_auto_check_updates">1시간마다 플러그인 업데이트를 자동으로 확인합니다 (당겨서 새로고침하면 즉시 확인)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">전역 \"플러그인 업데이트 자동 확인\" 이 비활성화되어 있어 이 옵션을 사용할 수 없습니다</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">업데이트를 자동 확인하고 플러그인 항목에 업데이트 안내를 표시합니다</string>
@@ -744,8 +747,12 @@
     <string name="summary_plugin_instruction_view">이 플러그인의 사용 예시와 설명을 표시합니다</string>
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
+    <string name="summary_reconnect_on_network_change">재연결 중 네트워크를 사용할 수 있게 되면 즉시 재시도합니다</string>
+    <string name="summary_restore_connection_on_launch">앱 시작 시 마지막 서버에 다시 연결합니다 (명시적으로 연결을 해제한 경우 제외)</string>
+    <string name="summary_restore_server_on_launch">앱 시작 시 다시 수신 대기합니다 (명시적으로 중지한 경우 제외)</string>
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
     <string name="text_and_n_more">... 외 %d개</string>
+    <string name="text_auto_reconnect">자동 재연결</string>
     <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
     <string name="text_binary_content_cannot_be_previewed">바이너리 내용은 미리 볼 수 없습니다</string>
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
@@ -1027,6 +1034,8 @@
     <string name="text_click_other_areas_to_exit_selection">다른 곳을 눌러 선택을 종료</string>
     <string name="text_click_too_frequently">빈번한 작동</string>
     <string name="text_client_mode">클라이언트 모드</string>
+    <string name="text_client_mode_manager">클라이언트 모드 관리자</string>
+    <string name="text_client_n">클라이언트 %d</string>
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
     <string name="text_close">닫다</string>
     <string name="text_close_floating_button">플로팅 버튼 닫기</string>
@@ -1055,12 +1064,16 @@
     <string name="text_confirm_to_delete">삭제 하시겠습니까?</string>
     <string name="text_confirm_to_remove">제거 하시겠습니까?</string>
     <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
+    <string name="text_connect">연결</string>
     <string name="text_connected">연결됨</string>
+    <string name="text_connected_clients">연결된 클라이언트</string>
     <string name="text_connected_count_with_colon">연결됨: %1$d</string>
     <string name="text_connecting">연결 중</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">\"%1$s\"에 연결하는 중...</string>
     <string name="text_connection_cannot_be_established">연결을 설정할 수 없습니다</string>
+    <string name="text_connection_duration">연결 시간</string>
     <string name="text_connection_failed">연결 실패</string>
+    <string name="text_connection_status">연결 상태</string>
     <string name="text_console">콘솔</string>
     <string name="text_console_input_hint">입력 후 Enter를 누르세요</string>
     <string name="text_console_resize_mode_hint">드래그하여 크기 조정, 탭하여 완료</string>
@@ -1071,6 +1084,7 @@
     <string name="text_control">제어</string>
     <string name="text_copy">복사</string>
     <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
+    <string name="text_copy_address">주소 복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_chained_selector">체인 선택자 복사</string>
@@ -1168,6 +1182,9 @@
     <string name="text_directly_download">지금 다운로드하십시오</string>
     <string name="text_directory">디렉터리</string>
     <string name="text_disabled">비활성화됨</string>
+    <string name="text_disconnect">연결 해제</string>
+    <string name="text_disconnect_all_clients">모든 클라이언트 연결 해제</string>
+    <string name="text_disconnected">연결 끊김</string>
     <string name="text_display_over_other_app">다른 앱에 표시됩니다</string>
     <string name="text_display_over_other_app_is_recommended">\"다른 앱 위의 디스플레이\"권한은 모든 위젯을 올바르게 표시하는 것이 좋습니다.</string>
     <string name="text_disposable_task">일회용 작업</string>
@@ -1225,6 +1242,7 @@
     <string name="text_editor_theme">편집기 테마</string>
     <string name="text_editor_theme_mode">편집기 테마 모드</string>
     <string name="text_editor_word_wrap_indent_style">줄 바꿈 들여쓰기</string>
+    <string name="text_elapsed_ago">%s 전</string>
     <string name="text_email">이메일</string>
     <string name="text_email_cannot_be_empty">이메일이 비어질 수 없다</string>
     <string name="text_email_format_error">잘못된 이메일 형식</string>
@@ -1269,6 +1287,7 @@
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
+    <string name="text_extension_version">확장 프로그램 버전</string>
     <string name="text_external_storage">외부 저장소</string>
     <string name="text_extract">압축 풀기</string>
     <string name="text_extract_archive_current_folder">현재 폴더 압축 풀기</string>
@@ -1453,6 +1472,8 @@
     <string name="text_label">레이블</string>
     <string name="text_label_name">이름</string>
     <string name="text_label_state">상태</string>
+    <string name="text_last_activity">최근 활동</string>
+    <string name="text_last_error">최근 오류</string>
     <string name="text_last_event">최근 이벤트</string>
     <string name="text_last_updates_checked_time">마지막으로 확인 된: %s</string>
     <string name="text_latest_activity">최신 활동</string>
@@ -1477,6 +1498,8 @@
     <string name="text_licenses">오픈 소스 라이센스</string>
     <string name="text_lines_and_size">%1$d줄, %2$s</string>
     <string name="text_listeners">리스너</string>
+    <string name="text_listening">수신 대기 중</string>
+    <string name="text_listening_address">수신 주소</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
     <string name="text_loading_completed">로딩 완료</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
@@ -1546,6 +1569,7 @@
     <string name="text_new_project">새로운 과제</string>
     <string name="text_new_version_found">새 버전이 발견되었습니다</string>
     <string name="text_new_watching_variables">새로운 시청 변수</string>
+    <string name="text_next_retry">다음 재시도</string>
     <string name="text_next_run_time">다음 달리기</string>
     <string name="text_night_mode">야간 모드</string>
     <string name="text_no_auto_mount_plugins">자동 마운트된 플러그인이 없습니다</string>
@@ -1591,6 +1615,7 @@
     <string name="text_notification">공고</string>
     <string name="text_notification_access_permission">알림 액세스</string>
     <string name="text_notification_service_disabled">알림 서비스가 작동하지 않습니다</string>
+    <string name="text_notify_client_connection_changes">클라이언트 변경 알림</string>
     <string name="text_null">없는</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d 개가 전송 제한을 초과했습니다</string>
     <string name="text_number_format_error">잘못된 번호 형식</string>
@@ -1814,6 +1839,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protocol_version">프로토콜 버전</string>
     <string name="text_pruning">가지치기 중</string>
     <string name="text_pruning_native_libraries">네이티브 라이브러리 정리 중</string>
     <string name="text_querying_plugin_info">플러그인 정보 조회 중</string>
@@ -1827,6 +1853,10 @@
     <string name="text_reading_android_package">Android 패키지 읽는 중</string>
     <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
     <string name="text_recommended">권장</string>
+    <string name="text_reconnect_attempts">재연결 시도 횟수</string>
+    <string name="text_reconnect_now">지금 재연결</string>
+    <string name="text_reconnect_on_network_change">네트워크 변경 시 재시도</string>
+    <string name="text_reconnecting_with_attempts">재연결 중 (%d회 시도)</string>
     <string name="text_record_finished">녹음 완료</string>
     <string name="text_record_media_playback_progress">미디어 재생 진행률 기록</string>
     <string name="text_record_prompt">녹음 프롬프트</string>
@@ -1882,7 +1912,9 @@
     <string name="text_restart_strategy">재시작 전략</string>
     <string name="text_restore">복원</string>
     <string name="text_restore_and_save">복원 후 저장</string>
+    <string name="text_restore_connection_on_launch">시작 시 연결 복원</string>
     <string name="text_restore_selected">선택 항목 복원</string>
+    <string name="text_restore_server_on_launch">시작 시 서버 시작</string>
     <string name="text_restore_to_original_path">원래 경로로 복원</string>
     <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">복원 중...</string>
@@ -1964,7 +1996,9 @@
     <string name="text_self_check">자체 점검</string>
     <string name="text_send">보내다</string>
     <string name="text_send_shortcut">바로 가기를 만듭니다</string>
+    <string name="text_server_address">서버 주소</string>
     <string name="text_server_mode">서버 모드</string>
+    <string name="text_server_mode_manager">서버 모드 관리자</string>
     <string name="text_service">서비스</string>
     <string name="text_service_management">서비스 관리</string>
     <string name="text_service_status">서비스 상태</string>
@@ -2029,7 +2063,9 @@
     <string name="text_start_running">달리기</string>
     <string name="text_state_or_province">주 또는 도</string>
     <string name="text_stop">중지</string>
+    <string name="text_stop_reconnecting">재연결 중지</string>
     <string name="text_stop_simplified">중지</string>
+    <string name="text_stopped">중지됨</string>
     <string name="text_street">거리</string>
     <string name="text_successfully_created_key_store">서명 키가 성공적으로 생성되었습니다</string>
     <string name="text_supported_abis_short">ABI</string>
@@ -2125,6 +2161,7 @@
     <string name="text_title_bar_opacity">제목 표시줄 불투명도</string>
     <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_toggle_all">전체 전환</string>
+    <string name="text_toggle_flashlight">손전등 전환</string>
     <string name="text_tools">도구</string>
     <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
@@ -2215,6 +2252,9 @@
     <string name="text_vivo_background_popup_permission">백그라운드 팝업</string>
     <string name="text_volume_down_to_exit_layout_inspector">볼륨 낮추기 키를 눌러 레이아웃 분석을 종료할 수 있습니다</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 확장 버전이 요구 사항을 충족하지 않습니다</string>
+    <string name="text_vscode_connected_format">VSCode 연결됨: %s</string>
+    <string name="text_vscode_disconnected_format">VSCode 연결 끊김: %s</string>
+    <string name="text_vscode_host">VSCode 호스트</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">모든 데이터 처리가 완료될 때까지 대기 중입니다...</string>
     <string name="text_weekly_task">주간 과제</string>
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>

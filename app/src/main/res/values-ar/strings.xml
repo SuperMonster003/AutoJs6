@@ -443,6 +443,7 @@
     <string name="error_no_permission_to_access_shizuku">لا يوجد إذن للوصول إلى Shizuku</string>
     <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
     <string name="error_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
+    <string name="error_no_saved_server_address">لم يتم حفظ عنوان الخادم</string>
     <string name="error_no_screen_capture_permission">لا يوجد إذن التقاط الشاشة</string>
     <string name="error_no_storage_rw_permission">لا يوجد إذن \"تخزين R/W\"</string>
     <string name="error_no_such_selector_method" formatted="false">لا توجد طريقة محددة %s (%s: %s)</string>
@@ -703,6 +704,7 @@
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
+    <string name="summary_auto_reconnect">إعادة الاتصال تلقائيا بعد انقطاع غير متوقع. يتم احترام قطع الاتصال الصريح من أي طرف</string>
     <string name="summary_clear_media_playback_history">حذف جميع مواضع تشغيل الوسائط التي حفظها المضيف</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
     <string name="summary_delete_permanently_also_clear_history">يزيل سجل الاصدارات للملف او المجلد الذي يتم حذفه نهائيا</string>
@@ -734,6 +736,7 @@
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
+    <string name="summary_notify_client_connection_changes">إظهار تنبيه عند اتصال VSCode أو انقطاعه</string>
     <string name="summary_plugin_auto_check_updates">التحقق تلقائيا من تحديثات الاضافات كل 1 ساعة (السحب للتحديث يتحقق فورا)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">تم تعطيل خيار \"التحقق التلقائي من تحديثات الاضافات\" على المستوى العام، وهذا الخيار غير متاح</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">التحقق تلقائيا من التحديثات واظهار تلميحات التحديث في عناصر الاضافات</string>
@@ -744,8 +747,12 @@
     <string name="summary_plugin_instruction_view">عرض امثلة الاستخدام والملاحظات الخاصة بهذه الاضافة</string>
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
+    <string name="summary_reconnect_on_network_change">أثناء إعادة الاتصال, إعادة المحاولة فورا عند توفر شبكة</string>
+    <string name="summary_restore_connection_on_launch">عند بدء التطبيق, إعادة الاتصال بآخر خادم ما لم يتم قطع الاتصال صراحة</string>
+    <string name="summary_restore_server_on_launch">عند بدء التطبيق, الاستماع مجددا ما لم يتم إيقاف الخادم صراحة</string>
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
     <string name="text_and_n_more">... و %d اخرى</string>
+    <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">لا يمكن معاينة المحتوى الثنائي</string>
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
@@ -1027,6 +1034,8 @@
     <string name="text_click_other_areas_to_exit_selection">اضغط في مكان اخر للخروج من التحديد</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
+    <string name="text_client_mode_manager">مدير وضع العميل</string>
+    <string name="text_client_n">العميل %d</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
     <string name="text_close">قريب</string>
     <string name="text_close_floating_button">إغلاق الزر العائم</string>
@@ -1055,12 +1064,16 @@
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
     <string name="text_confirm_to_remove">هل أنت متأكد من إزالته؟</string>
     <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
+    <string name="text_connect">اتصال</string>
     <string name="text_connected">متصل</string>
+    <string name="text_connected_clients">العملاء المتصلون</string>
     <string name="text_connected_count_with_colon">متصل: %1$d</string>
     <string name="text_connecting">جارٍ الاتصال</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">جارٍ الاتصال بـ \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
+    <string name="text_connection_duration">مدة الاتصال</string>
     <string name="text_connection_failed">فشل الاتصال</string>
+    <string name="text_connection_status">حالة الاتصال</string>
     <string name="text_console">وحدة التحكم</string>
     <string name="text_console_input_hint">اكتب سطرا واضغط Enter</string>
     <string name="text_console_resize_mode_hint">اسحب لتغيير الحجم, وانقر للإنهاء</string>
@@ -1071,6 +1084,7 @@
     <string name="text_control">التحكم</string>
     <string name="text_copy">ينسخ</string>
     <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
+    <string name="text_copy_address">نسخ العنوان</string>
     <string name="text_copy_all">نسخ جميع</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_chained_selector">نسخ المحدد المتسلسل</string>
@@ -1168,6 +1182,9 @@
     <string name="text_directly_download">التحميل الان</string>
     <string name="text_directory">دليل</string>
     <string name="text_disabled">معطّل</string>
+    <string name="text_disconnect">قطع الاتصال</string>
+    <string name="text_disconnect_all_clients">قطع اتصال جميع العملاء</string>
+    <string name="text_disconnected">غير متصل</string>
     <string name="text_display_over_other_app">عرض على تطبيقات أخرى</string>
     <string name="text_display_over_other_app_is_recommended">يوصى بإذن \"العرض عبر التطبيقات الأخرى\" لعرض جميع عناصر واجهة المستخدم بشكل صحيح</string>
     <string name="text_disposable_task">مهمة يمكن التخلص منها</string>
@@ -1225,6 +1242,7 @@
     <string name="text_editor_theme">موضوع المحرر</string>
     <string name="text_editor_theme_mode">وضع سمة المحرر</string>
     <string name="text_editor_word_wrap_indent_style">المسافة البادئة للالتفاف</string>
+    <string name="text_elapsed_ago">منذ %s</string>
     <string name="text_email">البريد الإلكتروني</string>
     <string name="text_email_cannot_be_empty">البريد الإلكتروني لا يمكن أن يكون فارغًا</string>
     <string name="text_email_format_error">تنسيق البريد الإلكتروني غير صالح</string>
@@ -1269,6 +1287,7 @@
     <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
+    <string name="text_extension_version">إصدار الإضافة</string>
     <string name="text_external_storage">التخزين الخارجي</string>
     <string name="text_extract">استخراج</string>
     <string name="text_extract_archive_current_folder">استخراج المجلد الحالي</string>
@@ -1453,6 +1472,8 @@
     <string name="text_label">التسمية</string>
     <string name="text_label_name">ملصق</string>
     <string name="text_label_state">الحالة</string>
+    <string name="text_last_activity">آخر نشاط</string>
+    <string name="text_last_error">آخر خطأ</string>
     <string name="text_last_event">آخر حدث</string>
     <string name="text_last_updates_checked_time">آخر فحص: %s</string>
     <string name="text_latest_activity">النشاط الاخير</string>
@@ -1477,6 +1498,8 @@
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
     <string name="text_lines_and_size">%1$d سطر, %2$s</string>
     <string name="text_listeners">المستمعون</string>
+    <string name="text_listening">قيد الاستماع</string>
+    <string name="text_listening_address">عنوان الاستماع</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">جارٍ تجربة حل بديل...</string>
     <string name="text_loading_completed">اكتمل التحميل</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">جار التحميل...</string>
@@ -1546,6 +1569,7 @@
     <string name="text_new_project">مشروع جديد</string>
     <string name="text_new_version_found">تم العثور على نسخة جديدة</string>
     <string name="text_new_watching_variables">متغيرات مشاهدة جديدة</string>
+    <string name="text_next_retry">المحاولة التالية</string>
     <string name="text_next_run_time">الجولة التالية</string>
     <string name="text_night_mode">وضع الليل</string>
     <string name="text_no_auto_mount_plugins">لا توجد مكونات إضافية مع تمكين التحميل التلقائي</string>
@@ -1591,6 +1615,7 @@
     <string name="text_notification">تنبيه</string>
     <string name="text_notification_access_permission">الوصول إلى الإخطار</string>
     <string name="text_notification_service_disabled">خدمة الإخطار لا تعمل</string>
+    <string name="text_notify_client_connection_changes">الإشعار بتغيرات العملاء</string>
     <string name="text_null">لا شيء</string>
     <string name="text_num_of_log_entries_exceeds_limit_for_sending">عدد إدخالات السجل %d يتجاوز حد الإرسال</string>
     <string name="text_number_format_error">تنسيق رقم غير صالح</string>
@@ -1814,6 +1839,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protocol_version">إصدار البروتوكول</string>
     <string name="text_pruning">جارٍ التقليم</string>
     <string name="text_pruning_native_libraries">جار استبعاد المكتبات الأصلية</string>
     <string name="text_querying_plugin_info">جار الاستعلام عن معلومات المكون الإضافي</string>
@@ -1827,6 +1853,10 @@
     <string name="text_reading_android_package">جارٍ قراءة حزمة Android</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
+    <string name="text_reconnect_attempts">محاولات إعادة الاتصال</string>
+    <string name="text_reconnect_now">إعادة الاتصال الآن</string>
+    <string name="text_reconnect_on_network_change">إعادة المحاولة عند تغير الشبكة</string>
+    <string name="text_reconnecting_with_attempts">إعادة الاتصال (%d محاولات)</string>
     <string name="text_record_finished">انتهى التسجيل</string>
     <string name="text_record_media_playback_progress">تسجيل تقدم تشغيل الوسائط</string>
     <string name="text_record_prompt">موجه التسجيل</string>
@@ -1882,7 +1912,9 @@
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
     <string name="text_restore">استعادة</string>
     <string name="text_restore_and_save">استعادة وحفظ</string>
+    <string name="text_restore_connection_on_launch">استعادة الاتصال عند التشغيل</string>
     <string name="text_restore_selected">استعادة المحدد</string>
+    <string name="text_restore_server_on_launch">بدء الخادم عند التشغيل</string>
     <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
     <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
     <string name="text_restoring" tools:ignore="TypographyEllipsis">جارٍ الاستعادة...</string>
@@ -1964,7 +1996,9 @@
     <string name="text_self_check">فحص ذاتي</string>
     <string name="text_send">إرسال</string>
     <string name="text_send_shortcut">انشاء اختصار</string>
+    <string name="text_server_address">عنوان الخادم</string>
     <string name="text_server_mode">وضع الخادم</string>
+    <string name="text_server_mode_manager">مدير وضع الخادم</string>
     <string name="text_service">خدمة</string>
     <string name="text_service_management">إدارة الخدمات</string>
     <string name="text_service_status">حالة الخدمة</string>
@@ -2029,7 +2063,9 @@
     <string name="text_start_running">ادارة</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>
     <string name="text_stop">قف</string>
+    <string name="text_stop_reconnecting">إيقاف إعادة الاتصال</string>
     <string name="text_stop_simplified">ايقاف</string>
+    <string name="text_stopped">متوقف</string>
     <string name="text_street">الشارع</string>
     <string name="text_successfully_created_key_store">تم إنشاء مفتاح التوقيع بنجاح</string>
     <string name="text_supported_abis_short">قيم ABIs</string>
@@ -2125,6 +2161,7 @@
     <string name="text_title_bar_opacity">عتامة شريط العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
+    <string name="text_toggle_flashlight">تبديل المصباح</string>
     <string name="text_tools">أدوات</string>
     <string name="text_total_size_colon_value">الحجم: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
@@ -2215,6 +2252,9 @@
     <string name="text_vivo_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_volume_down_to_exit_layout_inspector">اضغط على مفتاح خفض الصوت للخروج من محلل التخطيط</string>
     <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
+    <string name="text_vscode_connected_format">تم اتصال VSCode: %s</string>
+    <string name="text_vscode_disconnected_format">انقطع اتصال VSCode: %s</string>
+    <string name="text_vscode_host">مضيف VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">بانتظار اكتمال معالجة جميع البيانات...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>

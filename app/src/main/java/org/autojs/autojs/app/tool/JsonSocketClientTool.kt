@@ -19,6 +19,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.permission.LocalNetworkPermission
+import org.autojs.autojs.pluginclient.DevPluginPrefs
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
@@ -82,13 +83,15 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     override fun connectIfNotNormallyClosed() {
-        if (!isNormallyClosed) {
-            inputRemoteHost(isAutoConnect = true)
+        // Launch restore goes through the reconnector so that a PC that is not ready yet gets retried.
+        // zh-CN: 启动时恢复经由重连器进行, 使尚未就绪的 PC 也能得到重试.
+        if (!isNormallyClosed && DevPluginPrefs.isClientRestoreOnLaunchEnabled) {
+            devPlugin.clientReconnector.restoreOnLaunch()
         }
     }
 
     override fun disconnect() {
-        devPlugin.jsonSocketClient?.switchOff()
+        devPlugin.disconnectJsonSocketClient()
         isNormallyClosed = true
         dismissConnectionDialogSilently()
         dismissConnectingStatusDialogSilently()

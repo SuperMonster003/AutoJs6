@@ -52,10 +52,15 @@ public class DevPluginResponseHandler implements Handler {
     private final HashMap<String, ScriptExecution> mScriptExecutions = new HashMap<>();
     private final File mCacheDir;
 
+    // Single remote scripts that need a real file (Python, .auto, Java / Kotlin) are written here.
+    // zh-CN: 需要真实文件的单个远程脚本 (Python, .auto, Java / Kotlin) 写入此处.
+    private final File mRemoteScriptDir;
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public DevPluginResponseHandler(Context context, File cacheDir) {
         mContext = context;
         mCacheDir = cacheDir;
+        mRemoteScriptDir = new File(cacheDir.getParentFile(), "remote_script");
         if (cacheDir.exists()) {
             if (cacheDir.isDirectory()) {
                 PFiles.deleteFilesOfDir(cacheDir);
@@ -138,17 +143,13 @@ public class DevPluginResponseHandler implements Handler {
     }
 
     private void runScript(Context mContext, String viewId, String name, String script) {
-        if (TextUtils.isEmpty(name)) {
-            name = "[" + viewId + "]";
-        } else {
-            name = PFiles.getNameWithoutExtension(name);
+        // Route by file name (TypeScript, Lua, Node.js / Bun / QuickJS markers, file-only languages) instead of
+        // treating every remote script as Rhino JavaScript.
+        // zh-CN: 按文件名路由 (TypeScript, Lua, Node.js / Bun / QuickJS 标记, 仅支持文件的语言), 而非一律按 Rhino JavaScript 处理.
+        ScriptExecution execution = RemoteScriptRunner.run(mContext, mRemoteScriptDir, viewId, name, script);
+        if (execution != null) {
+            mScriptExecutions.put(viewId, execution);
         }
-        StringScriptSource scriptSource = new StringScriptSource(name, script);
-
-        // scriptSource.setPrefix(mContext.getString(R.string.text_remote) + "$");
-        scriptSource.setPrefix("$remote/");
-
-        mScriptExecutions.put(viewId, Scripts.run(mContext, scriptSource));
     }
 
     private void launchProject(String dir) {

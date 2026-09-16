@@ -381,6 +381,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Trash item details: the item dialog gains "Details", showing name, type, original path, time moved to trash, size, SHA-256 and the expected expiry (with days and hours left) as selectable text that can be copied to the clipboard in one tap
 * `Feature` After the explorer moves a file or directory to the trash, the snackbar offers "Undo", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary
 * `Feature` The trash detects broken items whose data file is missing: the list marks them as "Data missing" in a highlight color, tapping offers only details and removal, and a new "Remove broken items" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically
+* `Feature` VSCode extension connection: both client mode and server mode gain a "Manager" dialog (opened by the "Manager" button of the drawer entry or by long-pressing it) showing live status (connection state, server or listening address, peer host, extension and protocol versions, connection duration, last activity, reconnect session, last error; each row copyable), actions (connect, disconnect, reconnect now, stop reconnecting, start, stop, restart, disconnect all clients, copy address) and switches (auto reconnect, retry on network change, restore connection or start server on launch, notify on client changes)
+* `Feature` VSCode extension connection: client mode reconnects automatically after an unexpected disconnect (extension crash, VSCode restart, network hiccup) with exponential backoff, immediate retry once a network is available and restore on app launch; both sides announce intentional closes with a bye message, so an explicit disconnect on either side is never followed by an automatic reconnect
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -580,6 +582,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Restoring a single trash item reported "done" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown
 * `Fix` Explorer operation messages shown from the main thread (such as "Moved to trash") appeared twice
 * `Fix` When restoring a directory from the trash, archive entry names are validated against the destination's canonical path, so entries containing ".." or absolute paths can no longer be written outside the destination (such entries are skipped and logged)
+* `Fix` Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name
+* `Fix` Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -722,6 +726,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text
 * `Improvement` When a trash item is restored to a location other than its original path, the version history of the file (or of every file under the directory) follows it to the new path; moving a file to the trash records the version history entry it was linked to at that time
 * `Improvement` A damaged directory archive in the trash no longer aborts the whole restore: readable entries are restored as usual, damaged ones are recorded and skipped (half-written files are removed), the restored / failed counts are reported at the end, and the item stays in the trash
+* `Improvement` The version history file list shows the same file-type icons as the explorer; the version history and trash lists now refresh incrementally by diff, so stat / countdown / selection changes no longer redraw the whole list
+* `Improvement` Scan QR code to connect: the camera uses continuous focus with metering, a flashlight toggle was added and decoding uses TRY_HARDER, which makes aiming at an on-screen code much easier
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

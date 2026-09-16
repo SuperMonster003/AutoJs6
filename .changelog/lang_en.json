@@ -213,7 +213,9 @@
         "Trash content preview: the item dialog gains \"Preview\", which opens text files in the read-only editor, lists the files inside a trashed directory (relative path, size, file and folder counts) and reports binary content instead of opening it",
         "Trash item details: the item dialog gains \"Details\", showing name, type, original path, time moved to trash, size, SHA-256 and the expected expiry (with days and hours left) as selectable text that can be copied to the clipboard in one tap",
         "After the explorer moves a file or directory to the trash, the snackbar offers \"Undo\", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary",
-        "The trash detects broken items whose data file is missing: the list marks them as \"Data missing\" in a highlight color, tapping offers only details and removal, and a new \"Remove broken items\" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically"
+        "The trash detects broken items whose data file is missing: the list marks them as \"Data missing\" in a highlight color, tapping offers only details and removal, and a new \"Remove broken items\" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically",
+        "VSCode extension connection: both client mode and server mode gain a \"Manager\" dialog (opened by the \"Manager\" button of the drawer entry or by long-pressing it) showing live status (connection state, server or listening address, peer host, extension and protocol versions, connection duration, last activity, reconnect session, last error; each row copyable), actions (connect, disconnect, reconnect now, stop reconnecting, start, stop, restart, disconnect all clients, copy address) and switches (auto reconnect, retry on network change, restore connection or start server on launch, notify on client changes)",
+        "VSCode extension connection: client mode reconnects automatically after an unexpected disconnect (extension crash, VSCode restart, network hiccup) with exponential backoff, immediate retry once a network is available and restore on app launch; both sides announce intentional closes with a bye message, so an explicit disconnect on either side is never followed by an automatic reconnect"
       ],
       "fix": [
         "The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors",
@@ -414,7 +416,9 @@
         "Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path",
         "Restoring a single trash item reported \"done\" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown",
         "Explorer operation messages shown from the main thread (such as \"Moved to trash\") appeared twice",
-        "When restoring a directory from the trash, archive entry names are validated against the destination's canonical path, so entries containing \"..\" or absolute paths can no longer be written outside the destination (such entries are skipped and logged)"
+        "When restoring a directory from the trash, archive entry names are validated against the destination's canonical path, so entries containing \"..\" or absolute paths can no longer be written outside the destination (such entries are skipped and logged)",
+        "Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name",
+        "Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast"
       ],
       "improvement": [
         "Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically",
@@ -559,7 +563,8 @@
         "When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text",
         "When a trash item is restored to a location other than its original path, the version history of the file (or of every file under the directory) follows it to the new path; moving a file to the trash records the version history entry it was linked to at that time",
         "A damaged directory archive in the trash no longer aborts the whole restore: readable entries are restored as usual, damaged ones are recorded and skipped (half-written files are removed), the restored / failed counts are reported at the end, and the item stays in the trash",
-        "The version history file list shows the same file-type icons as the explorer; the version history and trash lists now refresh incrementally by diff, so stat / countdown / selection changes no longer redraw the whole list"
+        "The version history file list shows the same file-type icons as the explorer; the version history and trash lists now refresh incrementally by diff, so stat / countdown / selection changes no longer redraw the whole list",
+        "Scan QR code to connect: the camera uses continuous focus with metering, a flashlight toggle was added and decoding uses TRY_HARDER, which makes aiming at an on-screen code much easier"
       ],
       "dependency": [
         "Modularized Android AXML",

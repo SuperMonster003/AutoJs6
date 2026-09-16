@@ -16,6 +16,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs.pluginclient.JsonSocket.HANDSHAKE_TIMEOUT
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ThreadUtils
+import org.autojs.autojs.util.ViewUtils
 import java.io.File
 import java.io.IOException
 import java.net.ServerSocket
@@ -58,6 +59,10 @@ class DevPluginService(val context: Context) {
     // zh-CN: 处理协议 v2 请求 (远程文件管理等).
     val requestHandler = DevPluginRequestHandler(context)
 
+    // Restores the client mode connection after unexpected disconnects (roadmap 3.9).
+    // zh-CN: 意外断开后恢复客户端模式连接 (roadmap 3.9).
+    val clientReconnector = DevPluginClientReconnector(this)
+
     // Publish current server-side connection count.
     // zh-CN: 发布当前服务端连接数量.
     val serverConnectionCount = BehaviorSubject.createDefault(0)
@@ -99,11 +104,23 @@ class DevPluginService(val context: Context) {
     // zh-CN: 跟踪所有服务端已建立的客户端连接.
     private val mServerConnections = ConcurrentHashMap.newKeySet<JsonSocketServer>()
 
+    /** Snapshot of the server-side client connections. zh-CN: 服务端客户端连接快照. */
+    val serverConnections: List<JsonSocketServer>
+        get() = mServerConnections.toList()
+
+    /** Epoch millis when the listening socket was opened, 0 while stopped. zh-CN: 监听 socket 打开的时间戳, 停止时为 0. */
+    @Volatile
+    var serverStartedAt = 0L
+        private set
+
     // Prevent duplicate server startup.
     // zh-CN: 防止服务端重复启动.
     private val mEnableLocalServerStarted = AtomicBoolean(false)
 
     fun disconnectJsonSocketClient() {
+        // Explicit user action: silence the reconnector before the state change reaches it.
+        // zh-CN: 用户显式操作: 在状态变化到达重连器之前先使其静默.
+        clientReconnector.onUserDisconnect()
         try {
             jsonSocketClient?.switchOff()
         } catch (e: IOException) {
@@ -113,21 +130,34 @@ class DevPluginService(val context: Context) {
 
     fun disconnectJsonSocketServer() {
         try {
-            // Close all active client connections first.
-            // zh-CN: 先关闭所有已连接客户端.
-            mServerConnections.toList().forEach { runCatching { it.close() } }
-            mServerConnections.clear()
-            serverConnectionCount.onNext(0)
+            // Tell every client that the person stopped the server (so VSCode does not reconnect), then close.
+            // zh-CN: 告知所有客户端用户已停止服务端 (VSCode 因此不会重连), 然后关闭.
+            disconnectServerClients()
 
             // Then close listening socket.
             // zh-CN: 然后关闭监听 socket.
             jsonSocketServer?.switchOff()
+            serverStartedAt = 0L
 
             // Publish disconnected state for UI.
             // zh-CN: 发布断开状态用于 UI 刷新.
             JsonSocketServer.cxnState.onNext(State(State.DISCONNECTED))
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * Close every server-side client connection while the listening socket stays up. A v2 peer receives
+     * `bye(reason)` first; the default `user` reason tells VSCode not to reconnect automatically.
+     * zh-CN: 关闭所有服务端客户端连接, 监听 socket 保持. v2 对端先收到 `bye(reason)`; 默认的 `user` 表示 VSCode 不应自动重连.
+     */
+    fun disconnectServerClients(reason: String = JsonSocket.BYE_REASON_USER) {
+        val connections = mServerConnections.toList()
+        mServerConnections.clear()
+        serverConnectionCount.onNext(0)
+        connections.forEach { conn ->
+            conn.sayBye(reason) { runCatching { conn.close() }.onFailure { it.printStackTrace() } }
         }
     }
 
@@ -173,21 +203,16 @@ class DevPluginService(val context: Context) {
                         } else {
                             if (client.isExtensionVersionCheckFailed || client.hasErrorMessageOnHello) {
                                 JsonSocketClient.addIntoHistory(ip)
-                                client.switchOff()
+                                runCatching { client.close() }
                                 return@doOnNext
                             }
-                            if (!ignoreExceptions) {
-                                client.onHandshakeTimeout()
-                            } else {
-                                client.switchOff()
-                            }
+                            // Publish the timeout as an error in both cases (the reconnector relies on it);
+                            // `ignoreExceptions` only silences the script-facing exception popup.
+                            // zh-CN: 两种情况都将超时作为错误发布 (重连器依赖它); `ignoreExceptions` 仅抑制面向脚本的异常弹窗.
+                            ThreadUtils.runOnMain { runCatching { client.onHandshakeTimeout() } }
                         }
                     } catch (e: IOException) {
-                        if (!ignoreExceptions) {
-                            client.onSocketError(e)
-                        } else {
-                            client.switchOff()
-                        }
+                        ThreadUtils.runOnMain { runCatching { client.onSocketError(e) } }
                     }
                 }
         } catch (e: Exception) {
@@ -289,6 +314,7 @@ class DevPluginService(val context: Context) {
                     // zh-CN: 监听已启动.
                     this.jsonSocketServer = it
                     it.setStateConnected()
+                    serverStartedAt = System.currentTimeMillis()
                     emitter.onNext(it)
                 }
 
@@ -329,6 +355,7 @@ class DevPluginService(val context: Context) {
                     // Allow restarting after loop exits.
                     // zh-CN: 循环退出后允许再次启动.
                     mEnableLocalServerStarted.set(false)
+                    serverStartedAt = 0L
                 }
             }
             // Run blocking accept loop on IO scheduler to avoid ANR.
@@ -339,8 +366,22 @@ class DevPluginService(val context: Context) {
     internal fun onServerClientDisconnected(conn: JsonSocketServer) {
         // Remove disconnected connection and update count.
         // zh-CN: 移除已断开连接并更新计数.
-        mServerConnections.remove(conn)
+        val removed = mServerConnections.remove(conn)
         serverConnectionCount.onNext(mServerConnections.size)
+        if (removed && conn.peerHelloAt > 0L && DevPluginPrefs.isServerNotifyConnectionChangesEnabled) {
+            ViewUtils.showToast(context, context.getString(R.string.text_vscode_disconnected_format, describeClient(conn)))
+        }
+    }
+
+    /** A VSCode client completed the handshake on the local server. zh-CN: 一个 VSCode 客户端已在本地服务端完成握手. */
+    internal fun onServerClientHello(conn: JsonSocketServer) {
+        if (DevPluginPrefs.isServerNotifyConnectionChangesEnabled) {
+            ViewUtils.showToast(context, context.getString(R.string.text_vscode_connected_format, describeClient(conn)))
+        }
+    }
+
+    private fun describeClient(conn: JsonSocketServer): String {
+        return conn.peerName ?: conn.remoteAddressText ?: context.getString(R.string.text_unknown)
     }
 
     @AnyThread
@@ -361,6 +402,7 @@ class DevPluginService(val context: Context) {
         const val TYPE_PONG = "pong"
         const val TYPE_REQUEST = "request"
         const val TYPE_RESPONSE = "response"
+        const val TYPE_BYE = "bye"
 
         /**
          * Convert the text of a connection QR code into a `host[:port]` string accepted by the address dialog.

@@ -29,4 +29,9 @@
     <bool name="pref_plugin_center_auto_check_updates">true</bool>
     <bool name="pref_use_volume_control_record">true</bool>
     <bool name="pref_use_volume_control_running">true</bool>
+    <bool name="pref_client_mode_auto_reconnect">true</bool>
+    <bool name="pref_client_mode_reconnect_on_network_change">true</bool>
+    <bool name="pref_client_mode_restore_on_launch">true</bool>
+    <bool name="pref_server_mode_notify_connection_changes">true</bool>
+    <bool name="pref_server_mode_restore_on_launch">true</bool>
 </resources>
