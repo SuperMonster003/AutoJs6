@@ -218,7 +218,7 @@
         "Connexion de l'extension VSCode : le mode client se reconnecte automatiquement après une déconnexion inattendue (plantage de l'extension, redémarrage de VSCode, incident réseau) avec un délai exponentiel, un nouvel essai immédiat dès qu'un réseau est disponible et une restauration au lancement de l'application ; les deux côtés annoncent les fermetures volontaires par un message bye, si bien qu'une déconnexion explicite de l'un ou l'autre n'est jamais suivie d'une reconnexion automatique",
         "Connexion de l'extension VSCode : confirmation d'appairage - un appareil inconnu se connectant en mode client doit d'abord être autorisé dans VSCode (mémorisation possible), tandis que les appareils ayant scanné le QR code sont approuvés automatiquement ; extension 1.1.0+ requise",
         "Mode serveur : découverte sur le réseau local (mDNS) - une fois activée, l'extension VSCode (1.1.0+) liste cet appareil dans son sélecteur de connexion LAN sans saisie d'adresse",
-        "Fichiers distants VSCode : transfert par morceaux - les gros fichiers sont lus et écrits par morceaux de 1 MiB avec progression affichée dans VSCode ; extension 1.1.0+ requise"
+        "Fichiers distants VSCode : transfert par morceaux - les gros fichiers sont lus et écrits par morceaux de 1 MiB avec progression affichée dans VSCode ; extension 1.1.0+ requise; fs.list peut renvoyer le md5 des fichiers à la demande pour que l'extension compare les fichiers lors de la récupération des modifications du projet depuis l'appareil"
       ],
       "fix": [
         "L'exemple Flow de réservation retourne false au lieu de null si une ligne de médecin ne peut pas être analysée, évitant les erreurs de conversion booléenne",

@@ -18,6 +18,7 @@ import org.autojs.autojs6.R
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
+import java.security.MessageDigest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -64,7 +65,7 @@ class DevPluginRequestHandler(private val context: Context) {
     private fun dispatch(method: String, params: JsonObject): JsonElement = when (method) {
         "sys.info" -> sysInfo()
         "fs.roots" -> roots()
-        "fs.list" -> list(requireFile(params, "path"))
+        "fs.list" -> list(requireFile(params, "path"), params.optBoolean("hash", false))
         "fs.stat" -> stat(requireFile(params, "path"))
         "fs.read" -> read(requireFile(params, "path"), params.optString("encoding") ?: "utf8", params.optLong("offset"), params.optLong("length"))
         "fs.write" -> write(
@@ -111,7 +112,12 @@ class DevPluginRequestHandler(private val context: Context) {
         })
     }
 
-    private fun list(dir: File): JsonElement {
+    /**
+     * List a directory; with `hash` every regular file up to `MAX_HASH_SIZE` also carries its `md5` so the extension can
+     * compare device files with local ones without downloading them (pull project changes).
+     * zh-CN: 列出目录; `hash` 为 true 时不超过 `MAX_HASH_SIZE` 的普通文件附带 `md5`, 使插件无需下载即可比较设备文件与本地文件 (拉取项目变更).
+     */
+    private fun list(dir: File, hash: Boolean = false): JsonElement {
         if (!dir.exists()) throw IOException("Not found: ${dir.path}")
         if (!dir.isDirectory) throw IOException("Not a directory: ${dir.path}")
         val children = dir.listFiles() ?: throw IOException("Access denied: ${dir.path}")
@@ -120,7 +126,7 @@ class DevPluginRequestHandler(private val context: Context) {
             add("entries", JsonArray().apply {
                 children
                     .sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
-                    .forEach { add(entryOf(it)) }
+                    .forEach { add(entryOf(it, hash)) }
             })
         }
     }
@@ -263,13 +269,29 @@ class DevPluginRequestHandler(private val context: Context) {
 
     /* Helpers. zh-CN: 辅助方法. */
 
-    private fun entryOf(file: File) = JsonObject().apply {
+    private fun entryOf(file: File, hash: Boolean = false) = JsonObject().apply {
         addProperty("name", file.name)
         addProperty("path", file.path)
         addProperty("type", if (file.isDirectory) "directory" else "file")
         addProperty("size", if (file.isDirectory) 0 else file.length())
         addProperty("mtime", file.lastModified())
+        if (hash && file.isFile && file.length() <= MAX_HASH_SIZE) {
+            md5Of(file)?.let { addProperty("md5", it) }
+        }
     }
+
+    private fun md5Of(file: File): String? = runCatching {
+        val digest = MessageDigest.getInstance("MD5")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val n = input.read(buffer)
+                if (n < 0) break
+                digest.update(buffer, 0, n)
+            }
+        }
+        digest.digest().joinToString("") { "%02x".format(it) }
+    }.getOrNull()
 
     /**
      * Resolve a path parameter and make sure it stays inside the external storage directory.
@@ -301,6 +323,7 @@ class DevPluginRequestHandler(private val context: Context) {
     companion object {
         private const val TAG = "DevPluginRequestHandler"
         private const val MAX_READ_SIZE = 32L * 1024 * 1024
+        private const val MAX_HASH_SIZE = 16L * 1024 * 1024
     }
 
 }

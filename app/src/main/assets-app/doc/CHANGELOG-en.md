@@ -223,7 +223,7 @@
 * `Feature` VSCode extension connection: client mode reconnects automatically after an unexpected disconnect (extension crash, VSCode restart, network hiccup) with exponential backoff, immediate retry once a network is available and restore on app launch; both sides announce intentional closes with a bye message, so an explicit disconnect on either side is never followed by an automatic reconnect
 * `Feature` VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+
 * `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
-* `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+
+* `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
