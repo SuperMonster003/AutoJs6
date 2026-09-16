@@ -58,4 +58,40 @@ class BunRuntimeContractTest {
         assertTrue(BunRuntimeContract.MAX_HOST_INFO_VALUE_BYTES in 1..BunRuntimeContract.MAX_HOST_INFO_BYTES)
         assertTrue(BunRuntimeContract.MAX_HOST_INFO_BYTES <= BunRuntimeContract.MAX_TERMINAL_MESSAGE_BYTES)
     }
+
+    @Test
+    fun hostCapabilityBridgeKeysAreAdditiveAndBounded() {
+        assertEquals(1, BunRuntimeContract.PROTOCOL_VERSION)
+        assertEquals(1, BunRuntimeContract.HOST_CAPABILITY_BRIDGE_VERSION)
+        assertEquals("hostCapabilityBridgeVersion", BunRuntimeContract.KEY_HOST_CAPABILITY_BRIDGE_VERSION)
+        assertEquals("hostCapabilityBroker", BunRuntimeContract.KEY_HOST_CAPABILITY_BROKER)
+        assertEquals("hostCapabilities", BunRuntimeContract.KEY_HOST_CAPABILITIES)
+        assertEquals("hostCallId", BunRuntimeContract.KEY_HOST_CALL_ID)
+        assertEquals("hostCapability", BunRuntimeContract.KEY_HOST_CAPABILITY)
+        assertEquals("hostCallRequestJson", BunRuntimeContract.KEY_HOST_CALL_REQUEST_JSON)
+        assertEquals("hostCallResultJson", BunRuntimeContract.KEY_HOST_CALL_RESULT_JSON)
+        assertEquals("hostBridgeDelivered", BunRuntimeContract.KEY_HOST_BRIDGE_DELIVERED)
+        assertEquals("hostCalls", BunRuntimeContract.KEY_HOST_CALLS)
+        assertEquals("ui.toast", BunRuntimeContract.HOST_CAPABILITY_UI_TOAST)
+        assertEquals("device.info", BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO)
+        assertEquals("AUTOJS6_HOST_BRIDGE_SOCKET", BunRuntimeContract.HOST_BRIDGE_ENVIRONMENT_VARIABLE)
+        assertTrue(BunRuntimeContract.HOST_BRIDGE_ENVIRONMENT_VARIABLE.startsWith(BunRuntimeContract.RESERVED_ENVIRONMENT_PREFIX))
+        assertEquals("org.autojs.plugin.bun.SUPPORTS_HOST_CAPABILITY_BRIDGE", BunPluginCapabilityKeys.SUPPORTS_HOST_CAPABILITY_BRIDGE)
+        assertEquals("org.autojs.plugin.bun.runtime.api.IBunHostCapabilityBroker", IBunHostCapabilityBroker.DESCRIPTOR)
+        assertEquals("org.autojs.plugin.bun.runtime.api.IBunHostCapabilityCallback", IBunHostCapabilityCallback.DESCRIPTOR)
+        assertTrue(BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT in 1..1024)
+        assertTrue(BunRuntimeContract.MAX_HOST_CAPABILITY_ID_BYTES in 1..256)
+        assertTrue(BunRuntimeContract.MAX_HOST_CALL_REQUEST_BYTES in 1..BunRuntimeContract.MAX_HOST_CALL_RESULT_BYTES)
+        assertTrue(BunRuntimeContract.MAX_HOST_CALL_RESULT_BYTES < 1024 * 1024)
+        assertTrue(BunRuntimeContract.MAX_CONCURRENT_HOST_CALLS in 1..BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION)
+        assertTrue(BunRuntimeContract.HOST_CALL_TIMEOUT_MILLIS in 1..BunRuntimeContract.DEFAULT_TIMEOUT_MILLIS)
+        val codes = listOf(
+            BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, BunRuntimeContract.HOST_CALL_ERROR_NOT_GRANTED,
+            BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, BunRuntimeContract.HOST_CALL_ERROR_PAYLOAD_TOO_LARGE,
+            BunRuntimeContract.HOST_CALL_ERROR_TOO_MANY_REQUESTS, BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED,
+            BunRuntimeContract.HOST_CALL_ERROR_TIMEOUT, BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE,
+            BunRuntimeContract.HOST_CALL_ERROR_INTERNAL,
+        )
+        assertEquals(codes.size, codes.toSet().size)
+    }
 }

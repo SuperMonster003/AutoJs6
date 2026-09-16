@@ -11,6 +11,7 @@ public final class BunPluginCapabilityKeys {
     public static final String SUPPORTS_STREAMING_OUTPUT = "org.autojs.plugin.bun.SUPPORTS_STREAMING_OUTPUT";
     public static final String SUPPORTS_WORKSPACE_ARCHIVE = "org.autojs.plugin.bun.SUPPORTS_WORKSPACE_ARCHIVE";
     public static final String SUPPORTS_HOST_INFO = "org.autojs.plugin.bun.SUPPORTS_HOST_INFO";
+    public static final String SUPPORTS_HOST_CAPABILITY_BRIDGE = "org.autojs.plugin.bun.SUPPORTS_HOST_CAPABILITY_BRIDGE";
 
     private BunPluginCapabilityKeys() {
     }

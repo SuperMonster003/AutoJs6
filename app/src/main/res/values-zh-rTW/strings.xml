@@ -728,6 +728,10 @@
     <string name="text_bun_host_capabilities">Bun 能力橋</string>
     <string name="text_bun_host_info_grant">宿主資訊快照</string>
     <string name="summary_bun_host_info_grant">透過 AUTOJS6_HOST_INFO_FILE 向 Bun 指令碼提供唯讀的 AutoJs6 版本與語言快照; 下次執行起生效</string>
+    <string name="text_bun_ui_toast_grant">Toast 訊息</string>
+    <string name="summary_bun_ui_toast_grant">允許 Bun 指令碼透過能力橋彈出簡短的 Toast 訊息 (ui.toast, 每次執行至多 4 則); 下次執行起生效</string>
+    <string name="text_bun_device_info_grant">裝置資訊</string>
+    <string name="summary_bun_device_info_grant">允許 Bun 指令碼透過能力橋讀取裝置品牌, 型號與 Android 版本 (device.info, 不含識別碼); 下次執行起生效</string>
     <string name="summary_plugin_show_official_plugins">展示官方倉庫中的可線上安裝外掛</string>
     <string name="summary_plugin_show_third_party_plugins">展示 Auto.js-SDK-Plugins-Garage 中收錄的可線上安裝外掛</string>
     <string name="summary_plugin_variant_priority_manage">當同一外掛引擎存在多個變體時, 可透過調整變體優先順序按順序使用可用外掛</string>

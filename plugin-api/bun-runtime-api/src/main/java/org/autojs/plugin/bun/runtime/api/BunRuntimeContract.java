@@ -45,6 +45,30 @@ public final class BunRuntimeContract {
     /** Environment variable names with this prefix are owned by the plugin; host requests carrying them are invalid. */
     public static final String RESERVED_ENVIRONMENT_PREFIX = "AUTOJS6_";
 
+    /**
+     * Version of the optional runtime capability bridge (M7 capability bridge, dynamic calls). Absent request
+     * key means no bridge; present means the host hands over an {@code IBunHostCapabilityBroker} Binder and the
+     * granted capability IDs, and the plugin serves them to the script over a private unix socket (HTTP/1.1)
+     * whose path is exposed through {@link #HOST_BRIDGE_ENVIRONMENT_VARIABLE}.
+     */
+    public static final int HOST_CAPABILITY_BRIDGE_VERSION = 1;
+    /** Environment variable that carries the absolute path of the bridge unix socket inside the Bun process. */
+    public static final String HOST_BRIDGE_ENVIRONMENT_VARIABLE = "AUTOJS6_HOST_BRIDGE_SOCKET";
+    /** Upper bound of granted capability IDs in one request. */
+    public static final int MAX_HOST_CAPABILITY_COUNT = 64;
+    /** Upper bound of one capability ID; IDs match {@code [a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+} (at least one dot, so no ID collides with the bridge info path). */
+    public static final int MAX_HOST_CAPABILITY_ID_BYTES = 64;
+    /** Upper bound of one call request JSON document (HTTP body and broker request alike). */
+    public static final int MAX_HOST_CALL_REQUEST_BYTES = 64 * 1024;
+    /** Upper bound of one call result JSON document. */
+    public static final int MAX_HOST_CALL_RESULT_BYTES = 256 * 1024;
+    /** Upper bound of calls (including failed ones) relayed during one execution. */
+    public static final int MAX_HOST_CALLS_PER_EXECUTION = 1024;
+    /** Upper bound of calls in flight at the same time; further calls fail fast. */
+    public static final int MAX_CONCURRENT_HOST_CALLS = 4;
+    /** Time the plugin waits for the broker callback of one call. */
+    public static final long HOST_CALL_TIMEOUT_MILLIS = 10_000L;
+
     public static final String KEY_PROTOCOL_VERSION = "protocolVersion";
     public static final String KEY_EXECUTION_ID = "executionId";
     public static final String KEY_SOURCE_NAME = "sourceName";
@@ -58,11 +82,26 @@ public final class BunRuntimeContract {
     public static final String KEY_WORKSPACE_MAX_BYTES = "workspaceMaxBytes";
     public static final String KEY_HOST_INFO_VERSION = "hostInfoVersion";
     public static final String KEY_HOST_INFO = "hostInfo";
+    public static final String KEY_HOST_CAPABILITY_BRIDGE_VERSION = "hostCapabilityBridgeVersion";
+    /** IBinder request value implementing {@code IBunHostCapabilityBroker}; scoped to this execution. */
+    public static final String KEY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker";
+    /** String list request value: the capability IDs granted for this execution (1..MAX_HOST_CAPABILITY_COUNT). */
+    public static final String KEY_HOST_CAPABILITIES = "hostCapabilities";
 
     /** Keys inside the {@link #KEY_HOST_INFO} Bundle; the package name is mandatory and verified, the rest is advisory. */
     public static final String HOST_INFO_KEY_PACKAGE_NAME = "packageName";
     public static final String HOST_INFO_KEY_VERSION_DATE = "versionDate";
     public static final String HOST_INFO_KEY_LANGUAGE_TAG = "languageTag";
+
+    /** Keys of the broker call request and result Bundles; results also carry executionId, succeeded, errorCode and errorMessage. */
+    public static final String KEY_HOST_CALL_ID = "hostCallId";
+    public static final String KEY_HOST_CAPABILITY = "hostCapability";
+    public static final String KEY_HOST_CALL_REQUEST_JSON = "hostCallRequestJson";
+    public static final String KEY_HOST_CALL_RESULT_JSON = "hostCallResultJson";
+
+    /** Capability IDs of the first dynamic host capabilities. */
+    public static final String HOST_CAPABILITY_UI_TOAST = "ui.toast";
+    public static final String HOST_CAPABILITY_DEVICE_INFO = "device.info";
 
     public static final String KEY_EVENT_TYPE = "eventType";
     public static final String KEY_TEXT = "text";
@@ -84,6 +123,8 @@ public final class BunRuntimeContract {
     public static final String KEY_WORKSPACE_FILE_COUNT = "workspaceFileCount";
     public static final String KEY_WORKSPACE_BYTES = "workspaceBytes";
     public static final String KEY_HOST_INFO_DELIVERED = "hostInfoDelivered";
+    public static final String KEY_HOST_BRIDGE_DELIVERED = "hostBridgeDelivered";
+    public static final String KEY_HOST_CALLS = "hostCalls";
 
     public static final String KEY_RUNTIME_READY = "runtimeReady";
     public static final String KEY_RUNTIME_VERSION = "runtimeVersion";
@@ -105,6 +146,17 @@ public final class BunRuntimeContract {
     public static final String ERROR_OUTPUT_LIMIT = "OUTPUT_LIMIT";
     public static final String ERROR_NON_ZERO_EXIT = "NON_ZERO_EXIT";
     public static final String ERROR_INTERNAL = "INTERNAL";
+
+    /** Bridge-level call error codes shared by the HTTP reply and the broker result; not runScript error codes. */
+    public static final String HOST_CALL_ERROR_INVALID_REQUEST = "INVALID_REQUEST";
+    public static final String HOST_CALL_ERROR_NOT_GRANTED = "NOT_GRANTED";
+    public static final String HOST_CALL_ERROR_UNKNOWN_CAPABILITY = "UNKNOWN_CAPABILITY";
+    public static final String HOST_CALL_ERROR_PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE";
+    public static final String HOST_CALL_ERROR_TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS";
+    public static final String HOST_CALL_ERROR_QUOTA_EXCEEDED = "QUOTA_EXCEEDED";
+    public static final String HOST_CALL_ERROR_TIMEOUT = "TIMEOUT";
+    public static final String HOST_CALL_ERROR_HOST_UNAVAILABLE = "HOST_UNAVAILABLE";
+    public static final String HOST_CALL_ERROR_INTERNAL = "INTERNAL";
 
     private BunRuntimeContract() {
     }

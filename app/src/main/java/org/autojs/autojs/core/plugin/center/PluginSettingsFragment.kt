@@ -151,6 +151,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         instructionPreference = requireNotNull(findPreference(KEY_PLUGIN_INSTRUCTION_VIEW))
         variantPreference = findPreference(KEY_PLUGIN_VARIANT_PRIORITY_MANAGE)
         bunHostInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_HOST_INFO_GRANT)
+        bunUiToastGrantPreference = findPreference(KEY_PLUGIN_BUN_UI_TOAST_GRANT)
+        bunDeviceInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_DEVICE_INFO_GRANT)
 
         launchPagePreference.setOnPreferenceClickListener {
             val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(packageName)
@@ -204,6 +206,17 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        bunUiToastGrantPreference?.setOnPreferenceChangeListener { _, newValue ->
+            // Dynamic capabilities are revoked the same way: the next request just omits the ID from the grant list.
+            BunHostCapabilityGrants.setUiToastGranted(requireContext(), newValue as? Boolean ?: true)
+            true
+        }
+
+        bunDeviceInfoGrantPreference?.setOnPreferenceChangeListener { _, newValue ->
+            BunHostCapabilityGrants.setDeviceInfoGranted(requireContext(), newValue as? Boolean ?: true)
+            true
+        }
+
         instructionPreference.setOnPreferenceClickListener {
             PluginInstructionActivity.launch(
                 context = requireContext(),
@@ -254,6 +267,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         val globalAutoCheckEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
         autoCheckPreference.isChecked = PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
         bunHostInfoGrantPreference?.isChecked = BunHostCapabilityGrants.isHostInfoGranted(requireContext())
+        bunUiToastGrantPreference?.isChecked = BunHostCapabilityGrants.isUiToastGranted(requireContext())
+        bunDeviceInfoGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceInfoGranted(requireContext())
         autoCheckPreference.isEnabled = globalAutoCheckEnabled
         autoCheckPreference.setTitleColorVisualEnabledWith { globalAutoCheckEnabled }
         autoCheckPreference.setSummaryColorVisualEnabledWith { globalAutoCheckEnabled }
@@ -802,6 +817,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         private const val KEY_PLUGIN_INSTRUCTION_VIEW = "plugin_instruction_view"
         private const val KEY_CATEGORY_BUN_HOST_CAPABILITIES = "category_bun_host_capabilities"
         private const val KEY_PLUGIN_BUN_HOST_INFO_GRANT = "plugin_bun_host_info_grant"
+        private const val KEY_PLUGIN_BUN_UI_TOAST_GRANT = "plugin_bun_ui_toast_grant"
+        private const val KEY_PLUGIN_BUN_DEVICE_INFO_GRANT = "plugin_bun_device_info_grant"
         private const val KEY_PLUGIN_HIDE_CONFIRM_PROMPT = "key_\$_plugin_hide_confirm_prompt"
 
         fun newInstance(args: Bundle) = PluginSettingsFragment().apply { arguments = Bundle(args) }

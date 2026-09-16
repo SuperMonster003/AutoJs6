@@ -74,8 +74,10 @@ class BunPluginScriptEngine(
         val timeoutMillis = executionTimeoutMillis()
         val callback = OutputCallback(executionId, selection.providerUid)
         var payloadFile: File? = null
+        val broker = createCapabilityBroker(selection, executionId)
         try {
             val payload = createPayload(scriptSource, selection, executionId, timeoutMillis)
+            broker?.attachTo(payload.request)
             payloadFile = payload.file
             if (stopped.get() || isDestroyed) throw ScriptInterruptedException()
             ParcelFileDescriptor.open(payload.file, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
@@ -111,6 +113,7 @@ class BunPluginScriptEngine(
                 return result.getInt(BunRuntimeContract.KEY_EXIT_CODE, 0)
             }
         } finally {
+            broker?.close()
             callback.close()
             activeExecutionId.compareAndSet(executionId, null)
             payloadFile?.takeIf(File::exists)?.let { stale ->
@@ -192,6 +195,26 @@ class BunPluginScriptEngine(
     private fun supportsHostInfo(selection: BunRuntimePluginClient.Selection): Boolean =
         selection.discovered.pluginInfo?.capabilities
             ?.getBoolean(BunPluginCapabilityKeys.SUPPORTS_HOST_INFO, false) == true
+
+    /**
+     * Dynamic calls of the Bun capability bridge (plugin M7, second part): a broker Binder scoped to this
+     * execution plus the granted capability IDs travel in the request, and the plugin serves them to the script
+     * over a private socket. Offered only when the plugin advertises `SUPPORTS_HOST_CAPABILITY_BRIDGE` and at
+     * least one dynamic capability is granted; revoking every grant means no broker, no socket and no variable.
+     */
+    private fun createCapabilityBroker(
+        selection: BunRuntimePluginClient.Selection,
+        executionId: String,
+    ): BunHostCapabilityBroker? {
+        if (!supportsCapabilityBridge(selection)) return null
+        val granted = BunHostCapabilityGrants.grantedBridgeCapabilities(appContext)
+        if (granted.isEmpty()) return null
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted)
+    }
+
+    private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =
+        selection.discovered.pluginInfo?.capabilities
+            ?.getBoolean(BunPluginCapabilityKeys.SUPPORTS_HOST_CAPABILITY_BRIDGE, false) == true
 
     private fun semanticFile(source: JavaScriptFileSource): File =
         source.overriddenFullPath?.takeIf(String::isNotBlank)?.let(::File) ?: source.file
