@@ -37,6 +37,7 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
+import org.autojs.autojs.storage.history.HistoryPaths;
 import org.autojs.autojs.storage.history.HistoryPrefs;
 import org.autojs.autojs.storage.history.HistoryRepository;
 import org.autojs.autojs.storage.history.TrashRepository;
@@ -92,7 +93,6 @@ public class ScriptOperations {
     // zh-CN: 复制过程的临时输出文件后缀.
     private static final String PARTIAL_COPY_SUFFIX = ".partial";
 
-    private static final String INTERNAL_STORAGE_ROOT = "/storage/emulated/0";
 
     private final ExplorerPage mExplorerPage;
     private final Context mContext;
@@ -1487,7 +1487,7 @@ public class ScriptOperations {
             return;
         }
         String scriptFilePath = scriptFile.getPath();
-        if (!scriptFilePath.startsWith(INTERNAL_STORAGE_ROOT)) {
+        if (!HistoryPaths.isUnderInternalStorage(scriptFilePath)) {
             return;
         }
         Schedulers.io().scheduleDirect(() -> {
@@ -1615,10 +1615,7 @@ public class ScriptOperations {
     }
 
     private boolean isInternalStorageRoot(String absPath) {
-        if (absPath == null) return false;
-        String p = absPath;
-        while (p.length() > 1 && p.endsWith("/")) p = p.substring(0, p.length() - 1);
-        return INTERNAL_STORAGE_ROOT.equals(p);
+        return HistoryPaths.isInternalStorageRoot(absPath);
     }
 
     private List<DeleteTarget> buildDeleteTargets(@NonNull List<ScriptFile> scriptFiles) {

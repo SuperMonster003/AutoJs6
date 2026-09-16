@@ -1,6 +1,7 @@
 package org.autojs.autojs.storage.history
 
 import android.content.Context
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDetector
 import java.io.File
 import java.security.MessageDigest
 import java.util.Locale
@@ -8,6 +9,7 @@ import java.util.Locale
 /**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 3, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 6, 2026.
+ * Modified by Claude (Fable 5.1) as of Sep 16, 2026.
  */
 class HistoryRepository(private val context: Context) {
 
@@ -29,8 +31,11 @@ class HistoryRepository(private val context: Context) {
      *
      * Rules:
      * - Only tracks files under internal storage root.
-     * - Uses logicalPath first; fallback by latestFingerprint matching.
-     * - Applies per-file retention after inserting.
+     * - Uses logicalPath first; fallback by latestFingerprint matching when the old path is gone.
+     * - The fingerprint of [newBytes] (the content about to be written) becomes the entry's
+     *   latestFingerprint, so a later save of the renamed file can be re-attached.
+     * - A snapshot identical to the newest stored revision is skipped.
+     * - Applies per-file and global retention after inserting.
      *
      * zh-CN:
      *
@@ -38,44 +43,112 @@ class HistoryRepository(private val context: Context) {
      *
      * 规则:
      * - 仅纳管内部存储根目录下的文件.
-     * - 优先按 logicalPath 匹配; 找不到时用 latestFingerprint 回退匹配.
-     * - 插入后执行单文件保留策略清理.
+     * - 优先按 logicalPath 匹配; 找不到且旧路径已不存在时用 latestFingerprint 回退匹配.
+     * - [newBytes] (即将写入的内容) 的指纹作为 entry 的 latestFingerprint, 使重命名后的下次保存可以重新绑定.
+     * - 与最新 revision 内容相同的快照跳过.
+     * - 插入后执行单文件与全局保留策略清理.
+     *
+     * @return the inserted revision, or null when skipped as a duplicate.
      */
+    @JvmOverloads
     fun recordSavePre(
         logicalPath: String,
         oldBytes: ByteArray,
         encodingName: String,
         hadBom: Boolean,
-    ) {
+        newBytes: ByteArray? = null,
+    ): HistoryEntities.Revision? = recordSnapshot(
+        logicalPath = HistoryPaths.normalizePath(logicalPath),
+        bytes = oldBytes,
+        encodingName = encodingName,
+        hadBom = hadBom,
+        op = OP_SAVE_PRE,
+        newContentSha256 = newBytes?.let { sha256Hex(it) },
+    )
+
+    /**
+     * Snapshot the current on-disk content of [path] right before the app overwrites it
+     * (restore from history, restore from trash, copy / move with overwrite).
+     *
+     * Skipped (returns null) when the target is not a regular file under internal storage,
+     * exceeds the tracked file size limit, or duplicates the newest revision. Never throws.
+     *
+     * zh-CN: 在应用覆盖写入 [path] 之前为其当前磁盘内容留一份快照 (历史恢复 / 回收站恢复 / 覆盖式复制移动).
+     * 目标不是内部存储下的普通文件, 超过纳管大小上限, 或与最新 revision 重复时跳过 (返回 null); 不抛异常.
+     *
+     * @param newContentSha256 fingerprint of the content that will replace the file, if known.
+     */
+    @JvmOverloads
+    fun recordSnapshotBeforeOverwrite(
+        path: String,
+        op: String,
+        newContentSha256: String? = null,
+    ): HistoryEntities.Revision? = runCatching {
+        val logicalPath = HistoryPaths.normalizePath(path)
+        if (!HistoryPaths.isUnderInternalStorage(logicalPath)) return@runCatching null
+
+        val file = File(logicalPath)
+        if (!file.isFile) return@runCatching null
+
+        val limit = HistoryPrefs.maxFileSizeToTrackBytes()
+        if (!HistoryRetentionPolicy.isUnlimited(limit) && file.length() > limit) return@runCatching null
+
+        val bytes = file.readBytes()
+        val detection = EditorEncodingDetector.detect(bytes)
+        recordSnapshot(
+            logicalPath = logicalPath,
+            bytes = bytes,
+            encodingName = detection.charset.name(),
+            hadBom = detection.hadBom,
+            op = op,
+            newContentSha256 = newContentSha256,
+        )
+    }.onFailure { it.printStackTrace() }.getOrNull()
+
+    private fun recordSnapshot(
+        logicalPath: String,
+        bytes: ByteArray,
+        encodingName: String,
+        hadBom: Boolean,
+        op: String,
+        newContentSha256: String?,
+    ): HistoryEntities.Revision? {
         val now = System.currentTimeMillis()
 
-        val oldSha = sha256Hex(oldBytes)
+        val sha = sha256Hex(bytes)
         val fileEntry = getOrCreateFileEntry(
             logicalPath = logicalPath,
-            latestFingerprint = oldSha,
+            lookupFingerprint = sha,
+            latestFingerprint = newContentSha256 ?: sha,
             now = now,
         )
 
-        val revId = blobs.newRevId()
-        val blobRel = blobs.writeRevisionBlob(fileEntry.fileId, revId, oldBytes)
+        val latest = dao.findLatestRevision(fileEntry.fileId)
+        if (HistoryFingerprintPolicy.isDuplicateSnapshot(latest?.sha256, latest?.sizeBytes, sha, bytes.size.toLong())) {
+            return null
+        }
 
-        dao.insertRevision(
-            HistoryEntities.Revision(
-                revId = revId,
-                fileId = fileEntry.fileId,
-                op = "SAVE_PRE",
-                createdAt = now,
-                logicalPathAtThatTime = logicalPath,
-                encoding = encodingName,
-                hadBom = hadBom,
-                sizeBytes = oldBytes.size.toLong(),
-                sha256 = oldSha,
-                blobRelPath = blobRel,
-            )
+        val revId = blobs.newRevId()
+        val blobRel = blobs.writeRevisionBlob(fileEntry.fileId, revId, bytes)
+
+        val revision = HistoryEntities.Revision(
+            revId = revId,
+            fileId = fileEntry.fileId,
+            op = op,
+            createdAt = now,
+            logicalPathAtThatTime = logicalPath,
+            encoding = encodingName,
+            hadBom = hadBom,
+            sizeBytes = bytes.size.toLong(),
+            sha256 = sha,
+            blobRelPath = blobRel,
         )
+        dao.insertRevision(revision)
 
         cleanupPerFile(fileEntry.fileId, now)
         cleanupGlobal()
+
+        return revision
     }
 
     /**
@@ -94,7 +167,7 @@ class HistoryRepository(private val context: Context) {
      * - 若目标是目录: 按路径前缀清理该目录下所有已纳管条目.
      */
     fun clearHistoryForPath(path: String) {
-        val normalized = path.trimEnd('/')
+        val normalized = HistoryPaths.normalizePath(path)
 
         val target = File(normalized)
         val fileIds = if (target.isDirectory) {
@@ -112,79 +185,84 @@ class HistoryRepository(private val context: Context) {
         dao.deleteFileEntriesByIds(fileIds)
     }
 
-    private fun getOrCreateFileEntry(logicalPath: String, latestFingerprint: String, now: Long): HistoryEntities.FileEntry {
+    /**
+     * Find or create the file entry for a logical path.
+     *
+     * [lookupFingerprint] is the fingerprint of the content currently on disk (used to find an
+     * entry whose file was renamed or moved); [latestFingerprint] is what the entry will carry
+     * afterwards (the content that will be on disk once the pending write completes).
+     *
+     * zh-CN: 查找或创建 logical path 对应的 file entry.
+     * [lookupFingerprint] 是当前磁盘内容的指纹 (用于找到被重命名 / 移动的文件的条目);
+     * [latestFingerprint] 是本次写入完成后磁盘内容的指纹, 写入条目供下次匹配.
+     */
+    private fun getOrCreateFileEntry(
+        logicalPath: String,
+        lookupFingerprint: String,
+        latestFingerprint: String,
+        now: Long,
+    ): HistoryEntities.FileEntry {
         val byPath = dao.findFileByPath(logicalPath)
-        if (byPath != null) {
-            val updated = byPath.copy(
-                lastSeenAt = now,
-                latestFingerprint = latestFingerprint,
-            )
-            dao.upsertFile(updated)
-            return updated
-        }
+        val byFingerprint = if (byPath == null) dao.findFileByLatestFingerprint(lookupFingerprint) else null
 
-        val byFingerprint = dao.findFileByLatestFingerprint(latestFingerprint)
-        if (byFingerprint != null) {
-            // Re-attach to new path.
-            // zh-CN: 重新绑定到新路径.
-            val updated = byFingerprint.copy(
-                logicalPath = logicalPath,
-                lastSeenAt = now,
-                latestFingerprint = latestFingerprint,
-            )
-            dao.upsertFile(updated)
-            return updated
-        }
-
-        val created = HistoryEntities.FileEntry(
-            fileId = blobs.newFileId(),
-            logicalPath = logicalPath,
-            createdAt = now,
-            lastSeenAt = now,
-            latestFingerprint = latestFingerprint,
+        val decision = HistoryFingerprintPolicy.decideAttach(
+            hasEntryByPath = byPath != null,
+            hasEntryByFingerprint = byFingerprint != null,
+            fingerprintEntryPathStillExists = byFingerprint?.let { File(it.logicalPath).exists() } ?: false,
         )
-        dao.upsertFile(created)
-        return created
-    }
 
-    private fun cleanupPerFile(fileId: String, now: Long) {
-        val revisions = dao.listRevisionsAsc(fileId).toMutableList()
-        if (revisions.isEmpty()) return
-
-        // Read policy from preferences.
-        // zh-CN: 从偏好设置读取策略参数.
-        val maxDaysMs = HistoryPrefs.historyMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
-        val maxVersions = HistoryPrefs.historyMaxVersions().coerceAtLeast(0)
-        val maxTotalBytesPerFile = HistoryPrefs.historyMaxTotalBytesPerFile().coerceAtLeast(0L)
-
-        // 1) Remove expired by days.
-        // zh-CN: 1) 按天数删除过期版本.
-        val expiredBefore = now - maxDaysMs
-        val expired = revisions.filter { it.createdAt < expiredBefore }
-        if (expired.isNotEmpty()) {
-            deleteRevisionsAndBlobs(expired)
-            revisions.removeAll(expired.toSet())
-        }
-
-        // 2) Enforce max count (remove oldest).
-        // zh-CN: 2) 约束最大版本数 (删除最旧).
-        if (revisions.size > maxVersions) {
-            val toRemove = revisions.take(revisions.size - maxVersions)
-            deleteRevisionsAndBlobs(toRemove)
-            revisions.removeAll(toRemove.toSet())
-        }
-
-        // 3) Enforce max total bytes per file (remove oldest).
-        // zh-CN: 3) 约束单文件历史总容量 (删除最旧).
-        var totalBytes = (dao.sumBytesByFileId(fileId) ?: 0L).coerceAtLeast(0L)
-        if (totalBytes > maxTotalBytesPerFile) {
-            for (rev in revisions.toList()) {
-                if (totalBytes <= maxTotalBytesPerFile) break
-                deleteRevisionsAndBlobs(listOf(rev))
-                totalBytes -= rev.sizeBytes.coerceAtLeast(0L)
-                revisions.remove(rev)
+        return when (decision) {
+            HistoryFingerprintPolicy.Attach.EXISTING_BY_PATH -> {
+                val updated = requireNotNull(byPath).copy(
+                    lastSeenAt = now,
+                    latestFingerprint = latestFingerprint,
+                )
+                dao.upsertFile(updated)
+                updated
+            }
+            HistoryFingerprintPolicy.Attach.REATTACH_BY_FINGERPRINT -> {
+                // Re-attach to new path (rename / move happened outside our hooks).
+                // zh-CN: 重新绑定到新路径 (重命名 / 移动发生在钩子之外).
+                val updated = requireNotNull(byFingerprint).copy(
+                    logicalPath = logicalPath,
+                    lastSeenAt = now,
+                    latestFingerprint = latestFingerprint,
+                )
+                dao.upsertFile(updated)
+                updated
+            }
+            HistoryFingerprintPolicy.Attach.CREATE_NEW -> {
+                val created = HistoryEntities.FileEntry(
+                    fileId = blobs.newFileId(),
+                    logicalPath = logicalPath,
+                    createdAt = now,
+                    lastSeenAt = now,
+                    latestFingerprint = latestFingerprint,
+                )
+                dao.upsertFile(created)
+                created
             }
         }
+    }
+
+    /**
+     * Enforce per-file retention (days, count, bytes); zero or negative limits mean unlimited.
+     * zh-CN: 执行单文件保留策略 (天数 / 条数 / 容量); 上限为 0 或负数表示不限.
+     */
+    private fun cleanupPerFile(fileId: String, now: Long) {
+        val revisions = dao.listRevisionsAsc(fileId)
+        if (revisions.isEmpty()) return
+
+        val toDelete = HistoryRetentionPolicy.selectToDelete(
+            itemsOldestFirst = revisions,
+            now = now,
+            maxDays = HistoryPrefs.historyMaxDays(),
+            maxCount = HistoryPrefs.historyMaxVersions(),
+            maxBytes = HistoryPrefs.historyMaxTotalBytesPerFile(),
+            createdAt = { it.createdAt },
+            sizeOf = { it.sizeBytes },
+        )
+        deleteRevisionsAndBlobs(toDelete)
     }
 
     /**
@@ -232,8 +310,8 @@ class HistoryRepository(private val context: Context) {
      * zh-CN: 约束全局历史总容量上限 (优先删除最旧 revision).
      */
     private fun cleanupGlobal() {
-        val maxTotalBytes = HistoryPrefs.historyMaxTotalBytes().coerceAtLeast(0L)
-        if (maxTotalBytes <= 0L) return
+        val maxTotalBytes = HistoryPrefs.historyMaxTotalBytes()
+        if (HistoryRetentionPolicy.isUnlimited(maxTotalBytes)) return
 
         var totalBytes = (dao.sumAllRevisionBytes() ?: 0L).coerceAtLeast(0L)
         if (totalBytes <= maxTotalBytes) return
@@ -246,22 +324,22 @@ class HistoryRepository(private val context: Context) {
             val oldest = dao.listOldestRevisions(batchSize)
             if (oldest.isEmpty()) break
 
-            // Remove until under limit or batch exhausted.
-            // zh-CN: 删除直到满足上限或本批用尽.
-            val toRemove = ArrayList<HistoryEntities.Revision>(oldest.size)
-            var bytesToFree = 0L
-
-            for (rev in oldest) {
-                if (totalBytes - bytesToFree <= maxTotalBytes) break
-                toRemove.add(rev)
-                bytesToFree += rev.sizeBytes.coerceAtLeast(0L)
-            }
-
+            val toRemove = HistoryRetentionPolicy.selectOverBytes(oldest, maxTotalBytes, totalBytes) { it.sizeBytes }
             if (toRemove.isEmpty()) break
 
             deleteRevisionsAndBlobs(toRemove)
-
-            totalBytes = (totalBytes - bytesToFree).coerceAtLeast(0L)
+            totalBytes = (totalBytes - toRemove.sumOf { it.sizeBytes.coerceAtLeast(0L) }).coerceAtLeast(0L)
         }
+    }
+
+    companion object {
+        /** Content captured right before an editor save overwrote it. */
+        const val OP_SAVE_PRE: String = "SAVE_PRE"
+
+        /** Content captured right before a restore (history or trash) overwrote it. */
+        const val OP_RESTORE_PRE: String = "RESTORE_PRE"
+
+        /** Content captured right before an explorer copy / move overwrote it. */
+        const val OP_OVERWRITE_PRE: String = "OVERWRITE_PRE"
     }
 }

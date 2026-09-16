@@ -16,6 +16,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.file.StableDraftFileHelper
+import org.autojs.autojs.storage.history.HistoryPaths
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCodec
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingProbe
@@ -541,7 +542,7 @@ class EditorFileService(
         runCatching {
             saveAsChooserDisposable = FileChooserDialogBuilder(context)
                 .title(R.string.text_save_to)
-                .dir(INTERNAL_STORAGE_ROOT)
+                .dir(HistoryPaths.internalStorageRoot)
                 .chooseDir()
                 .singleChoice()
                 .subscribeOn(Schedulers.io())
@@ -980,7 +981,6 @@ class EditorFileService(
     companion object {
         val DEFAULT_CHARSET_TO_WRITE_FILE: Charset = StandardCharsets.UTF_8
 
-        private const val INTERNAL_STORAGE_ROOT = "/storage/emulated/0"
         private const val ENCODING_PROBE_LIMIT_BYTES = 256 * 1024
         private const val MAX_SAVE_AS_NAME_ATTEMPTS = 10_000
         private const val MAX_SAVE_AS_FILENAME_UTF8_BYTES = 240

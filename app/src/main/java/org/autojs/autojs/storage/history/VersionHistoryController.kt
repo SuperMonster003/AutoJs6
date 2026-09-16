@@ -37,6 +37,7 @@ import java.util.Locale
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
  * Modified by SuperMonster003 as of Feb 6, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
+ * Modified by Claude (Fable 5.1) as of Sep 16, 2026.
  */
 class VersionHistoryController(private val context: Context) {
 
@@ -58,7 +59,6 @@ class VersionHistoryController(private val context: Context) {
             canonicalPath = logicalPath,
             displayPath = runCatching { Uri.decode(logicalPath) }.getOrElse { logicalPath },
             mode = Mode.RESTORE_TO_EDITOR,
-            showPreview = false,
             onRestoreToEditor = onRestoreToEditor,
             onRestoredUi = onRestoredUi,
         )
@@ -69,8 +69,8 @@ class VersionHistoryController(private val context: Context) {
      * zh-CN: 为资源管理器显示版本历史 (恢复并写回磁盘, 覆盖文件内容).
      */
     fun showForFilePath(path: String, displayPath: String) {
-        val normalized = path.trimEnd('/')
-        if (!normalized.startsWith(INTERNAL_STORAGE_ROOT)) {
+        val normalized = HistoryPaths.normalizePath(path)
+        if (!HistoryPaths.isUnderInternalStorage(normalized)) {
             showNoHistoryDialog()
             return
         }
@@ -78,7 +78,6 @@ class VersionHistoryController(private val context: Context) {
             canonicalPath = normalized,
             displayPath = displayPath,
             mode = Mode.RESTORE_TO_DISK,
-            showPreview = true,
             onRestoreToEditor = null,
             onRestoredUi = null,
         )
@@ -100,7 +99,6 @@ class VersionHistoryController(private val context: Context) {
         canonicalPath: String,
         displayPath: String,
         mode: Mode,
-        showPreview: Boolean = false,
         onRestoreToEditor: ((String) -> Unit)?,
         onRestoredUi: (() -> Unit)?,
     ) {
@@ -113,9 +111,9 @@ class VersionHistoryController(private val context: Context) {
                 val fileId = fileEntry?.fileId
 
                 val revs = if (fileId != null) {
-                    // Show latest first for selection.
-                    // zh-CN: 列表按最新优先展示供选择.
-                    dao.listRevisionsAsc(fileId).asReversed().take(HISTORY_DIALOG_MAX_ITEMS)
+                    // Show latest first for selection; every retained revision is reachable.
+                    // zh-CN: 列表按最新优先展示供选择; 所有已保留的 revision 都可达.
+                    dao.listRevisionsAsc(fileId).asReversed()
                 } else {
                     emptyList()
                 }
@@ -161,14 +159,11 @@ class VersionHistoryController(private val context: Context) {
                             }
                             .alwaysCallSingleChoiceCallback()
                             .choiceWidgetThemeColor()
-                            .apply {
-                                if (!showPreview) return@apply
-                                neutralText(R.string.dialog_button_preview)
-                                neutralColorRes(R.color.dialog_button_hint)
-                                onNeutral { _, _ ->
-                                    val chosen = revs.getOrNull(selectedIndex[0]) ?: return@onNeutral
-                                    previewInReadOnlyEditor(chosen, displayPath)
-                                }
+                            .neutralText(R.string.dialog_button_preview)
+                            .neutralColorRes(R.color.dialog_button_hint)
+                            .onNeutral { _, _ ->
+                                val chosen = revs.getOrNull(selectedIndex[0]) ?: return@onNeutral
+                                previewInReadOnlyEditor(chosen, displayPath)
                             }
                             .negativeText(R.string.dialog_button_cancel)
                             .negativeColorRes(R.color.dialog_button_default)
@@ -292,7 +287,21 @@ class VersionHistoryController(private val context: Context) {
         val appCtx = context.applicationContext
         Schedulers.io().scheduleDirect {
             runCatching {
-                val bytes = HistoryRepository(appCtx).readRevisionBytes(rev)
+                val repository = HistoryRepository(appCtx)
+
+                // Read the revision first: the snapshot below runs retention cleanup, which could
+                // otherwise evict the very revision being restored.
+                // zh-CN: 先读取 revision: 下面的快照会触发保留策略清理, 可能淘汰正要恢复的这条 revision.
+                val bytes = repository.readRevisionBytes(rev)
+
+                // Keep the current on-disk content as a revision before overwriting it.
+                // zh-CN: 覆盖前把当前磁盘内容记为一条 revision.
+                repository.recordSnapshotBeforeOverwrite(
+                    path = targetPath,
+                    op = HistoryRepository.OP_RESTORE_PRE,
+                    newContentSha256 = rev.sha256,
+                )
+
                 writeBytesTransactional(File(targetPath), bytes)
 
                 // Notify Explorer to refresh the parent directory after restoring to disk.
@@ -451,7 +460,6 @@ class VersionHistoryController(private val context: Context) {
                         canonicalPath = canonicalPath,
                         displayPath = displayPath,
                         mode = mode,
-                        showPreview = true,
                         onRestoreToEditor = onRestoreToEditor,
                         onRestoredUi = onRestoredUi,
                     )
@@ -472,8 +480,6 @@ class VersionHistoryController(private val context: Context) {
 
     companion object {
         private val DEFAULT_CHARSET: Charset = StandardCharsets.UTF_8
-        private const val HISTORY_DIALOG_MAX_ITEMS: Int = 20
-        private const val INTERNAL_STORAGE_ROOT: String = "/storage/emulated/0"
 
         // Keep Intent extras payload under a conservative threshold.
         // zh-CN: 将 Intent extras 的载荷控制在一个保守阈值以内.

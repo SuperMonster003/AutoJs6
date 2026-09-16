@@ -6,6 +6,7 @@ import org.autojs.autojs.util.DialogUtils
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -367,10 +368,39 @@ class TrashRepository(private val context: Context) {
                 }
             }
         } else {
-            dest.parentFile?.mkdirs()
-            blobFile.inputStream().use { input ->
-                dest.outputStream().use { output ->
-                    copyToCancellable(input, output)
+            // Write into a hidden sibling first and rename over the destination, so an abort or a
+            // crash in the middle never leaves a half-written file where the original used to be.
+            // zh-CN: 先写入同目录的隐藏临时文件再 rename 覆盖目标, 中止或崩溃时不会在原文件位置留下半成品.
+            val parent = dest.absoluteFile.parentFile
+            parent?.mkdirs()
+            val tmp = File(parent, ".${dest.name}.restore.${UUID.randomUUID().toString().take(8)}.tmp")
+            var committed = false
+            try {
+                blobFile.inputStream().use { input ->
+                    FileOutputStream(tmp).use { output ->
+                        copyToCancellable(input, output)
+                        output.fd.sync()
+                    }
+                }
+                operationController.throwIfCancelled()
+
+                // rename(2) replaces an existing regular file atomically; fall back to delete + rename.
+                // zh-CN: rename(2) 会原子替换已有的普通文件; 失败时回退为先删除再 rename.
+                if (!tmp.renameTo(dest)) {
+                    if (dest.exists() && !dest.delete()) {
+                        throw IOException("Failed to replace restore destination: $dest")
+                    }
+                    if (!tmp.renameTo(dest)) {
+                        throw IOException("Failed to commit restored file: $dest")
+                    }
+                }
+                committed = true
+            } finally {
+                if (!committed) {
+                    runCatching {
+                        // noinspection ResultOfMethodCallIgnored
+                        tmp.delete()
+                    }
                 }
             }
         }

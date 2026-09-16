@@ -5,6 +5,7 @@ import android.net.Uri
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
+import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.storage.history.HistoryUriUtils
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
@@ -36,6 +37,7 @@ class EditorVersionHistoryService(
                 oldBytes = oldBytes,
                 encodingName = encodingName,
                 hadBom = hadBom,
+                newBytes = newBytes,
             )
         }
     }
@@ -64,10 +66,9 @@ class EditorVersionHistoryService(
     }
 
     private fun shouldTrackHistory(oldBytes: ByteArray, newBytes: ByteArray): Boolean {
-        val oldSize = oldBytes.size
-        val newSize = newBytes.size
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes().coerceAtLeast(0L)
+        val limit = HistoryPrefs.maxFileSizeToTrackBytes()
+        if (HistoryRetentionPolicy.isUnlimited(limit)) return true
 
-        return oldSize.toLong() <= limit && newSize.toLong() <= limit
+        return oldBytes.size.toLong() <= limit && newBytes.size.toLong() <= limit
     }
 }

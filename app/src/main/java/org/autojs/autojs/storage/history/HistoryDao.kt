@@ -28,6 +28,9 @@ interface HistoryDao {
     @Query("SELECT * FROM revision WHERE fileId = :fileId ORDER BY createdAt ASC")
     fun listRevisionsAsc(fileId: String): List<HistoryEntities.Revision>
 
+    @Query("SELECT * FROM revision WHERE fileId = :fileId ORDER BY createdAt DESC LIMIT 1")
+    fun findLatestRevision(fileId: String): HistoryEntities.Revision?
+
     @Query("DELETE FROM revision WHERE revId IN (:revIds)")
     fun deleteRevisionsByIds(revIds: List<String>)
 

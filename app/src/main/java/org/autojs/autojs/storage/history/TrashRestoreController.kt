@@ -21,7 +21,6 @@ import org.autojs.autojs.util.DialogUtils.setActionButtonText
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
-import java.util.regex.Pattern
 
 /**
  * Restore flow controller for trash items.
@@ -29,6 +28,7 @@ import java.util.regex.Pattern
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
  * Modified by SuperMonster003 as of Feb 7, 2026.
+ * Modified by Claude (Fable 5.1) as of Sep 16, 2026.
  */
 @SuppressLint("CheckResult")
 class TrashRestoreController(private val context: Context) {
@@ -132,7 +132,7 @@ class TrashRestoreController(private val context: Context) {
     private fun chooseDirectoryThenRestore(item: TrashEntities.TrashItem, fileName: String, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
         FileChooserDialogBuilder(context)
             .title(R.string.dialog_button_choose_path)
-            .dir(INTERNAL_STORAGE_ROOT)
+            .dir(HistoryPaths.internalStorageRoot)
             .chooseDir()
             .singleChoice()
             .subscribeOn(Schedulers.io())
@@ -164,7 +164,8 @@ class TrashRestoreController(private val context: Context) {
                 .neutralText(R.string.text_auto_rename)
                 .neutralColorRes(R.color.dialog_button_hint)
                 .onNeutral { _, _ ->
-                    val newName = generateNextIndexedName(destDir, fileName)
+                    val siblings = destDir.list()?.toList() ?: emptyList()
+                    val newName = TrashRestoreNaming.nextIndexedName(siblings, fileName, item.isDirectory)
                     restoreNow(item, File(destDir, newName), onRestore, onFinished)
                 }
                 .positiveText(R.string.text_overwrite)
@@ -186,7 +187,19 @@ class TrashRestoreController(private val context: Context) {
                 }
 
                 withControllableProgressDialog { operationController ->
-                    TrashRepository(context.applicationContext).restoreTrashItemToPath(item, dest, operationController)
+                    val appCtx = context.applicationContext
+
+                    // Overwriting an existing file: keep its current content as a history revision first.
+                    // zh-CN: 覆盖已有文件前, 先把其当前内容记为一条历史 revision.
+                    if (destExistsBeforeRestore && !item.isDirectory && dest.isFile) {
+                        HistoryRepository(appCtx).recordSnapshotBeforeOverwrite(
+                            path = dest.path,
+                            op = HistoryRepository.OP_RESTORE_PRE,
+                            newContentSha256 = item.sha256,
+                        )
+                    }
+
+                    TrashRepository(appCtx).restoreTrashItemToPath(item, dest, operationController)
 
                     // Notify Explorer to refresh the parent directory after restore.
                     // zh-CN: 恢复成功后通知 Explorer 刷新目标父目录.
@@ -258,46 +271,4 @@ class TrashRestoreController(private val context: Context) {
         }
     }
 
-    /**
-     * Generate next indexed name by scanning existing "-n" siblings and taking the first missing n from 1.
-     * zh-CN: 通过扫描同级目录中已有的 "-n" 名称, 从 1 开始取第一个缺失的 n 作为新后缀.
-     */
-    private fun generateNextIndexedName(parentDir: File, originalName: String): String {
-        val isDirectory = !originalName.contains('.')
-        val base: String
-        val extWithDot: String
-
-        if (isDirectory) {
-            base = originalName
-            extWithDot = ""
-        } else {
-            val dot = originalName.lastIndexOf('.')
-            base = if (dot > 0) originalName.substring(0, dot) else originalName
-            extWithDot = if (dot > 0) originalName.substring(dot) else ""
-        }
-
-        val files = parentDir.listFiles()?.map { it.name } ?: emptyList()
-
-        val existingIndexes = HashSet<Int>()
-        val pattern = if (isDirectory) {
-            Regex("^" + Pattern.quote(base) + "-(\\d+)$")
-        } else {
-            Regex("^" + Pattern.quote(base) + "-(\\d+)" + Pattern.quote(extWithDot) + "$")
-        }
-
-        for (name in files) {
-            val m = pattern.matchEntire(name) ?: continue
-            val idx = m.groups[1]?.value?.toIntOrNull() ?: continue
-            existingIndexes.add(idx)
-        }
-
-        var n = 1
-        while (existingIndexes.contains(n)) n++
-
-        return if (isDirectory) "$base-$n" else "$base-$n$extWithDot"
-    }
-
-    companion object {
-        private const val INTERNAL_STORAGE_ROOT: String = "/storage/emulated/0"
-    }
 }

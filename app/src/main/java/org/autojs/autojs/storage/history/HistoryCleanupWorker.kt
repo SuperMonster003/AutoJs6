@@ -38,11 +38,10 @@ class HistoryCleanupWorker(
         val dao = db.historyDao()
         val blobs = HistoryBlobStore(applicationContext)
 
-        // Remove expired revisions by days.
-        // zh-CN: 按天数删除过期 revision.
+        // Remove expired revisions by days (zero or negative days means unlimited).
+        // zh-CN: 按天数删除过期 revision (天数为 0 或负数表示不限).
         val now = System.currentTimeMillis()
-        val maxDaysMs = HistoryPrefs.historyMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
-        val expiredBefore = now - maxDaysMs
+        val expiredBefore = HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryPrefs.historyMaxDays()) ?: return
 
         val expired = dao.listExpiredRevisions(expiredBefore)
         if (expired.isEmpty()) return
@@ -56,11 +55,10 @@ class HistoryCleanupWorker(
         val dao = db.historyDao()
         val trashBlobs = TrashBlobStore(applicationContext)
 
-        // Remove expired trash items by days.
-        // zh-CN: 按天数删除过期回收站条目.
+        // Remove expired trash items by days (zero or negative days means unlimited).
+        // zh-CN: 按天数删除过期回收站条目 (天数为 0 或负数表示不限).
         val now = System.currentTimeMillis()
-        val maxDaysMs = HistoryPrefs.trashMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
-        val expiredBefore = now - maxDaysMs
+        val expiredBefore = HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryPrefs.trashMaxDays()) ?: return
 
         val expired = dao.listExpiredTrashItems(expiredBefore)
         if (expired.isEmpty()) return
@@ -74,27 +72,21 @@ class HistoryCleanupWorker(
      * zh-CN: 通过优先删除最旧条目来约束回收站总容量上限.
      */
     private fun cleanupTrashTotalBytesLimit() {
-        val limit = HistoryPrefs.trashMaxTotalBytes().coerceAtLeast(0L)
-        if (limit <= 0L) return
+        val limit = HistoryPrefs.trashMaxTotalBytes()
+        if (HistoryRetentionPolicy.isUnlimited(limit)) return
 
         val db = HistoryDatabase.getInstance(applicationContext)
         val dao = db.historyDao()
         val trashBlobs = TrashBlobStore(applicationContext)
 
-        val items = dao.listTrashItemsDesc()
-        if (items.isEmpty()) return
-
-        var total = items.sumOf { it.sizeBytes.coerceAtLeast(0L) }
-        if (total <= limit) return
-
         // Delete from oldest to newest until within limit.
         // zh-CN: 从最旧到最新删除, 直到满足上限.
-        for (item in items.asReversed()) {
-            if (total <= limit) break
-            dao.deleteTrashItemsByIds(listOf(item.trashId))
-            trashBlobs.deleteBlobByRelPath(item.blobRelPath)
-            total -= item.sizeBytes.coerceAtLeast(0L)
-        }
+        val oldestFirst = dao.listTrashItemsDesc().asReversed()
+        val toRemove = HistoryRetentionPolicy.selectOverBytes(oldestFirst, limit) { it.sizeBytes }
+        if (toRemove.isEmpty()) return
+
+        dao.deleteTrashItemsByIds(toRemove.map { it.trashId })
+        toRemove.forEach { trashBlobs.deleteBlobByRelPath(it.blobRelPath) }
     }
 
     private fun cleanupOrphanHistoryBlobs() {
@@ -108,11 +100,20 @@ class HistoryCleanupWorker(
         val root = File(applicationContext.filesDir, "history/blob")
         if (!root.exists() || !root.isDirectory) return
 
+        val now = System.currentTimeMillis()
+
         // Delete blobs that are not referenced by DB.
         // zh-CN: 删除 DB 未引用的 blob.
         root.walkTopDown()
             .filter { it.isFile }
             .forEach { f ->
+                // Protect very new files: the blob is written before the revision row is inserted.
+                // zh-CN: 保护非常新的文件: blob 先于 revision 记录写入, 避免误删刚创建的 blob.
+                val ageMs = now - f.lastModified()
+                if (ageMs >= 0L && ageMs < ORPHAN_BLOB_MIN_AGE_MS) {
+                    return@forEach
+                }
+
                 val rel = f.relativeTo(applicationContext.filesDir).invariantSeparatorsPath
                 if (!referenced.contains(rel)) {
                     // noinspection ResultOfMethodCallIgnored
@@ -154,7 +155,7 @@ class HistoryCleanupWorker(
                 // Protect very new files to avoid deleting blobs created while DB write is pending.
                 // zh-CN: 保护非常新的文件, 避免在 DB 写入尚未完成时误删刚创建的 blob.
                 val ageMs = now - f.lastModified()
-                if (ageMs >= 0L && ageMs < ORPHAN_TRASH_BLOB_MIN_AGE_MS) {
+                if (ageMs >= 0L && ageMs < ORPHAN_BLOB_MIN_AGE_MS) {
                     return@forEach
                 }
 
@@ -226,8 +227,8 @@ class HistoryCleanupWorker(
     }
 
     companion object {
-        // Minimum age for orphan final trash blobs before deletion to avoid races.
-        // zh-CN: orphan 正式回收站 blob 的最小删除年龄, 用于避免并发时序竞争.
-        private const val ORPHAN_TRASH_BLOB_MIN_AGE_MS: Long = 30L * 60L * 1000L
+        // Minimum age for orphan history / trash blobs before deletion to avoid races with pending DB writes.
+        // zh-CN: orphan 历史 / 回收站 blob 的最小删除年龄, 用于避免与尚未提交的 DB 写入发生时序竞争.
+        private const val ORPHAN_BLOB_MIN_AGE_MS: Long = 30L * 60L * 1000L
     }
 }
