@@ -9,6 +9,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">Android 17 고급 보호는 이 호환 서비스를 포함해 접근성 도구가 아닌 접근성 서비스를 제한할 수 있습니다. 전역 모드만으로 이 서비스가 차단되었는지 판단할 수 없습니다. 실제 서비스 상태와 Android 접근성 설정을 확인하세요. 보안 설정 권한을 부여해도 시스템 제한을 우회하지 않습니다.</string>
+    <string name="a11y_advanced_protection_off">꺼짐</string>
+    <string name="a11y_advanced_protection_on">켜짐</string>
+    <string name="a11y_advanced_protection_title">고급 보호</string>
+    <string name="a11y_advanced_protection_unknown">확인 불가</string>
     <string name="apk_builder_build">건물</string>
     <string name="apk_builder_clean">청소</string>
     <string name="apk_builder_package">포장</string>

@@ -1,0 +1,50 @@
+MEDIA SESSION SERVICE (dumpsys media_session)
+
+6 sessions listeners.
+Global priority session is com.android.server.telecom/HeadsetMediaButton/1 (userId=0)
+  HeadsetMediaButton com.android.server.telecom/HeadsetMediaButton/1 (userId=0)
+    ownerPid=712, ownerUid=1000, userId=0
+    package=com.android.server.telecom
+    launchIntent=null
+    mediaButtonReceiver=null
+    active=false
+    flags=65537
+    rating type=0
+    controllers: 0
+    state=null
+    audioAttrs=AudioAttributes: usage=USAGE_VOICE_COMMUNICATION content=CONTENT_TYPE_SPEECH flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null
+    volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0
+    metadata: null
+    queueTitle=null, size=0
+User Records:
+Record for full_user=0
+  Volume key long-press listener: null
+  Volume key long-press listener package:
+  Media key listener: null
+  Media key listener package:
+  OnMediaKeyEventDispatchedListener: added 0 listener(s)
+  OnMediaKeyEventSessionChangedListener: added 1 listener(s)
+    from com.google.android.bluetooth
+  Last MediaButtonReceiver: null
+  Media button session is io.github.supermonster003.autojs6.plugin.audioplayer/androidx.media3.session.id./17 (userId=0)
+  Sessions Stack - have 1 sessions:
+    androidx.media3.session.id. io.github.supermonster003.autojs6.plugin.audioplayer/androidx.media3.session.id./17 (userId=0)
+      ownerPid=14483, ownerUid=10260, userId=0
+      package=io.github.supermonster003.autojs6.plugin.audioplayer
+      launchIntent=PendingIntent{e7c5b2e: PendingIntentRecord{5b56f0c io.github.supermonster003.autojs6.plugin.audioplayer startActivity (allowlist: d3bb59f:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}
+      mediaButtonReceiver=null
+      active=true
+      flags=7
+      rating type=0
+      controllers: 9
+      state=PlaybackState {state=PLAYING(3), position=28009, buffered position=120000, speed=1.0, updated=4643293, actions=7339979, custom actions=[Action:mName='Previous track, mIcon=2131230948, mExtras=Bundle[mParcelledData.dataSize=140], Action:mName='Next track, mIcon=2131230932, mExtras=Bundle[mParcelledData.dataSize=140], Action:mName='Enable shuffle, mIcon=2131230960, mExtras=Bundle[mParcelledData.dataSize=140], Action:mName='Exit player, mIcon=2131230866, mExtras=Bundle[EMPTY_PARCEL]], active item id=0, error=null}
+      audioAttrs=AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null
+      volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0
+      metadata: size=9, description=fixture.m4a, null, null
+      queueTitle=null, size=1
+Audio playback (lastly played comes first)
+  uid=10260 packages=io.github.supermonster003.autojs6.plugin.audioplayer
+Media session config:
+  media_session_calback_fgs_allowlist_duration_ms: [cur: 10000, def: 10000]
+  media_session_callback_fgs_while_in_use_temp_allow_duration_ms: [cur: 10000, def: 10000]
+  media_session_temp_user_engaged_duration_ms: [cur: 600000, def: 600000]

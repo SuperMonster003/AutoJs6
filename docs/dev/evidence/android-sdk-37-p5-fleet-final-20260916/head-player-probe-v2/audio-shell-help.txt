@@ -1,0 +1,70 @@
+Audio manager commands:
+  help
+    Print this help text.
+
+  set-surround-format-enabled SURROUND_FORMAT IS_ENABLED
+    Enables/disabled the SURROUND_FORMAT based on IS_ENABLED
+  get-is-surround-format-enabled SURROUND_FORMAT
+    Returns if the SURROUND_FORMAT is enabled
+  set-encoded-surround-mode SURROUND_SOUND_MODE
+    Sets the encoded surround sound mode to SURROUND_SOUND_MODE
+  get-encoded-surround-mode
+    Returns the encoded surround sound mode
+  set-sound-dose-value
+    Sets the current sound dose value
+  get-sound-dose-value
+    Returns the current sound dose value
+  reset-sound-dose-timeout
+    Resets the sound dose timeout used for momentary exposure
+  set-ringer-mode NORMAL|SILENT|VIBRATE
+    Sets the Ringer mode to one of NORMAL|SILENT|VIBRATE
+  set-volume STREAM_TYPE VOLUME_INDEX
+    Sets the volume for STREAM_TYPE to VOLUME_INDEX
+  get-min-volume STREAM_TYPE
+    Gets the min volume for STREAM_TYPE
+  get-max-volume STREAM_TYPE
+    Gets the max volume for STREAM_TYPE
+  get-stream-volume STREAM_TYPE
+    Gets the volume for STREAM_TYPE
+  set-device-volume STREAM_TYPE VOLUME_INDEX NATIVE_DEVICE_TYPE
+    Sets for NATIVE_DEVICE_TYPE the STREAM_TYPE volume to VOLUME_INDEX
+  is-stream-mute STREAM_TYPE
+    Returns whether the STREAM_TYPE is muted.
+  is-volume-fixed
+    Returns whether the volume is fixed for the device
+  adj-mute STREAM_TYPE
+    mutes the STREAM_TYPE
+  adj-unmute STREAM_TYPE
+    unmutes the STREAM_TYPE
+  adj-volume STREAM_TYPE <RAISE|LOWER|MUTE|UNMUTE>
+    Adjusts the STREAM_TYPE volume given the specified direction
+  set-group-volume GROUP_ID VOLUME_INDEX
+    Sets the volume for GROUP_ID to VOLUME_INDEX
+  adj-group-volume GROUP_ID <RAISE|LOWER|MUTE|UNMUTE>
+    Adjusts the group volume for GROUP_ID given the specified direction
+  set-hardening <1|enable|0|disable|throw>
+    Enables (1), disables (0) or throws on audio hardening enforcement
+  clear-hardening
+    Clears the hardening override, returning to default behavior
+  set-preferred-output-device AUDIO_DEVICE_TYPE [ADDRESS]
+    Sets the output audio device to AUDIO_DEVICE_TYPE (e.g. AUTO, HDMI, BLUETOOTH_A2DP, BUILTIN_SPEAKER) for media strategy. AUTO means that the preferred device will be removed and the system will select the default device. Optionally, the ADDRESS can be provided to select a specific device. 'get-supported-output-devices' and 'get-connected-output-devices' commands to see available output devices
+  get-supported-output-devices
+    Returns a list of supported audio output devices using AudioManager.getSupportedDeviceTypes(AudioManager.GET_DEVICES_OUTPUTS)
+  get-current-output-device
+    Returns the current output audio device for the media strategy if preferred device is not set then returns first device in the connected list of devices with media strategy using AudioManager.getDevicesForAttributes(<AudioAttributes.USAGE_MEDIA>)
+ get-connected-output-devices
+    Returns a list of all connected output devices using AudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+  get-preferred-output-device
+    Returns the preferred output audio device for the media strategy
+  set-preferred-input-device AUDIO_SOURCE AUDIO_DEVICE_TYPE [ADDRESS]
+    Sets the input audio device of AUDIO_SOURCE (e.g. MIC, VOICE_RECOGNITION) to AUDIO_DEVICE_TYPE  Optionally, the ADDRESS can be provided to select a specific device. 'get-supported-input-devices' and 'get-connected-input-devices' commands to see available input devices
+  get-supported-input-devices
+    Returns a list of supported audio input devices using AudioManager.getSupportedDeviceTypes(AudioManager.GET_DEVICES_INPUTS)
+  get-current-input-device
+    Returns the current input audio device for the MIC audio source. if preferred device is not set then returns first device in the connected list of devices with MIC audio source using AudioManager.getDevicesForAttributes(<AudioSource.MIC>)
+ get-connected-input-devices
+    Returns a list of all connected input devices using AudioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
+  get-preferred-input-device AUDIO_SOURCE
+    Returns the preferred input audio device for AUDIO_SOURCE
+  hfp-audio-disconnect REASON [ADDRESS]
+    Disconnects HFP audio for device with ADDRESS for REASON. If ADDRESS is not provided, the active device will be used.

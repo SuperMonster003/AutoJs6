@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 16, 2026.
+Data updated on Sept 16, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/15
+###### 2026/09/16
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -548,6 +548,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` `images.matchFeatures` returned a wrongly sized frame when the object features were computed with a `scale` other than 1, re-sorted the corners so a rotated object lost the correspondence to its own corners, could return a distorted frame from an unreliable homography, drew the `drawMatches` image from the descriptor matrices instead of the images, and threw an OpenCV error for images without key points
 * `Fix` `images.detectAndComputeFeatures` leaked its intermediate matrices, and ORB found no key points at all in images smaller than 63 px and only a few in small objects because of the default 31 px border
 * `Fix` The MCP Server session controller rebound the plugin about one second after the user force-stopped it in the system settings, which started it again against that decision; a plugin that is no longer available after its process died (stopped, disabled or uninstalled) is not rebound any more, the drawer switch closes and its subtitle shows the activation guide the way a fresh install does
+* `Improvement` Explain Advanced Protection in the host and companion, showing the global mode separately from actual service availability and secure settings control
 * `Improvement` Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state
 * `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback
@@ -904,7 +905,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -955,7 +956,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 16, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 16, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

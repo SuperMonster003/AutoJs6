@@ -17,6 +17,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
+import org.autojs.autojs.core.accessibility.AdvancedProtectionNotice
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs.theme.ThemeColorHelper
@@ -71,6 +72,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
 
     /** Bun capability bridge grants (plugin ROADMAP M7); only shown for the package that hosts the Bun runtime service. */
     private var bunHostInfoGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunUiToastGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDeviceInfoGrantPreference: ThemeColorSwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val args = requireArguments()
@@ -101,6 +104,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         }
         setPreferencesFromResource(resId, rootKey)
 
+        if (packageName == "io.github.supermonster003.autojs6.plugin.accessibilitycompat") {
+            preferenceScreen.addPreference(MaterialPreference(requireContext()).apply {
+                key = "accessibility_advanced_protection"
+                setTitle(R.string.a11y_advanced_protection_title)
+                summary = AdvancedProtectionNotice.summary(requireContext())
+                setOnPreferenceClickListener {
+                    MaterialDialog.Builder(requireContext())
+                        .title(R.string.a11y_advanced_protection_title)
+                        .content(AdvancedProtectionNotice.summary(requireContext()))
+                        .positiveText(android.R.string.ok)
+                        .showAdaptive()
+                    true
+                }
+            })
+        }
+
         if (source == PluginIndexSource.OFFICIAL && !shouldShowVariantPriority()) {
             val variantCategory = findPreference<PreferenceCategory>(KEY_CATEGORY_VARIANT_PRIORITY)
             if (variantCategory != null) {
@@ -129,6 +148,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         refreshAllSummaries()
+        findPreference<MaterialPreference>("accessibility_advanced_protection")?.summary =
+            AdvancedProtectionNotice.summary(requireContext())
     }
 
     fun requestClose(onAllowed: () -> Unit) {

@@ -7,6 +7,11 @@
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">La protección avanzada de Android 17 puede restringir los servicios que no son herramientas de accesibilidad, incluido este servicio de compatibilidad. El modo global por sí solo no indica si el servicio está bloqueado. Comprueba su estado real y los ajustes de accesibilidad de Android. El permiso de ajustes seguros no elude las restricciones del sistema.</string>
+    <string name="a11y_advanced_protection_off">Desactivada</string>
+    <string name="a11y_advanced_protection_on">Activada</string>
+    <string name="a11y_advanced_protection_title">Protección avanzada</string>
+    <string name="a11y_advanced_protection_unknown">No disponible</string>
     <string name="apk_builder_build">Construir</string>
     <string name="apk_builder_clean">Limpieza</string>
     <string name="apk_builder_package">Empaquetando</string>

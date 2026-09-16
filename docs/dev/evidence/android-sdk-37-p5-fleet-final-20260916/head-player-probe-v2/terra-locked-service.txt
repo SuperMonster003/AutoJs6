@@ -1,0 +1,41 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{da55695 u0 io.github.supermonster003.autojs6.plugin.audioplayer/io.github.supermonster003.autojs6.plugin.threeterraplayer.AudioPlaybackService c:io.github.supermonster003.autojs6.plugin.audioplayer}
+    intent={act=io.github.supermonster003.autojs6.plugin.threeterraplayer.action.START_PLAYBACK dat=content://org.autojs.sdk37.fleetfixture.files/fixture.m4a typ=audio/mp4 cmp=io.github.supermonster003.autojs6.plugin.audioplayer/io.github.supermonster003.autojs6.plugin.threeterraplayer.AudioPlaybackService}
+    packageName=io.github.supermonster003.autojs6.plugin.audioplayer
+    processName=io.github.supermonster003.autojs6.plugin.audioplayer
+    targetSdkVersion=37
+    baseDir=/data/app/~~USEkmjEFpkk_ihojxBroYQ==/io.github.supermonster003.autojs6.plugin.audioplayer-4va5n6-R1_5387Hc89oDwQ==/base.apk
+    dataDir=/data/user/0/io.github.supermonster003.autojs6.plugin.audioplayer
+    app=ProcessRecord{98351c7 14483:io.github.supermonster003.autojs6.plugin.audioplayer/u0a260}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=PROC_STATE_TOP
+    mAllowWiu_inBindService=PROC_STATE_TOP
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=PROC_STATE_TOP
+    getFgsAllowWiu_new=PROC_STATE_TOP
+    getFgsAllowWiu_forStart=PROC_STATE_TOP
+    getFgsAllowWiu_forCapabilities=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=io.github.supermonster003.autojs6.plugin.audioplayer
+    recentCallingUid=10260
+    mAllowStart_noBinding=PROC_STATE_TOP
+    mAllowStart_inBindService=PROC_STATE_TOP
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=PROC_STATE_TOP
+    getFgsAllowStart_new=PROC_STATE_TOP
+    getFgsAllowStart=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: io.github.supermonster003.autojs6.plugin.audioplayer; callingUid: 10260; uidState: TOP ; uidBFSL: [BFSL]; BFGS denied: false; intent: Intent { act=androidx.media3.session.MediaSessionService xflg=0x4 cmp=io.github.supermonster003.autojs6.plugin.audioplayer/io.github.supermonster003.autojs6.plugin.threeterraplayer.AudioPlaybackService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null; isBindService:true]
+    isForeground=true foregroundId=1001 types=0x00000002 foregroundNoti=Notification(channel=default_channel_id shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|NO_CLEAR|FOREGROUND_SERVICE color=0x00000000 category=transport groupKey=media3_group_key actions=4 vis=PUBLIC template=android.app.Notification$MediaStyle)
+    createTime=-31s827ms startingBgTimeout=--
+    lastActivity=-6s469ms restartTime=-31s826ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=false callStart=true lastStartId=5
+ startCommandResult=1
+    Bindings:
+    * IntentBindRecord{2d3285c}:
+      intent={act=androidx.media3.session.MediaSessionService xflg=0x4 cmp=io.github.supermonster003.autojs6.plugin.audioplayer/io.github.supermonster003.autojs6.plugin.threeterraplayer.AudioPlaybackService}
+      binder=android.os.BinderProxy@d5c6765
+      requested=true received=true hasBound=false doRebind=false

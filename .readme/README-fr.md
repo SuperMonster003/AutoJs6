@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/15
+###### 2026/09/16
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -548,6 +548,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` `images.matchFeatures` renvoyait un cadre de taille erronée lorsque les caractéristiques de l'objet étaient calculées avec un `scale` différent de 1, retriait les coins de sorte qu'un objet pivoté perdait la correspondance avec ses propres coins, pouvait renvoyer un cadre déformé issu d'une homographie peu fiable, dessinait l'image `drawMatches` à partir des matrices de descripteurs au lieu des images, et levait une erreur OpenCV pour des images sans points clés
 * `Correction` `images.detectAndComputeFeatures` ne libérait pas ses matrices intermédiaires, et ORB ne trouvait aucun point clé dans les images de moins de 63 px et seulement quelques-uns dans les petits objets à cause de la bordure par défaut de 31 px
 * `Correction` Le contrôleur de session MCP Server reliait le plugin environ une seconde après que l'utilisateur l'ait arrêté de force dans les paramètres système, ce qui le redémarrait contre cette décision; un plugin qui n'est plus disponible après la mort de son processus (arrêté, désactivé ou désinstallé) n'est plus relié, l'interrupteur du tiroir se ferme et son sous-titre affiche le guide d'activation comme pour une nouvelle installation
+* `Amélioration` Explications de la protection avancée dans l'hôte et le compagnon, distinguant le mode global de la disponibilité réelle du service et du contrôle des paramètres sécurisés
 * `Amélioration` Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs
 * `Amélioration` media.playMusic utilise un service musical de premier plan Media3 avec gestion du focus audio, commandes de notification, propriété de lecture du script et libération à sa fin
 * `Amélioration` L'aide du service au premier plan explique les restrictions audio en arrière-plan d'Android 17 et comment redémarrer le service depuis l'application visible avant de relancer la lecture

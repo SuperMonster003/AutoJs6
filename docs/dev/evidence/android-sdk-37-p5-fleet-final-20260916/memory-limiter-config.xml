@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dedicated 6 GiB SDK 37 emulator test profile; all values below are in MiB. -->
+<MemoryLimiterConfig>
+  <version>1</version>
+  <configList>
+    <limitSet>
+      <minimumRequiredMemTotal>4800</minimumRequiredMemTotal>
+      <maximumAllowedMemTotal>6800</maximumAllowedMemTotal>
+      <memVisible>4096</memVisible>
+      <memNotVisible>2048</memNotVisible>
+      <swapVisible>2048</swapVisible>
+      <swapNotVisible>2048</swapNotVisible>
+    </limitSet>
+  </configList>
+</MemoryLimiterConfig>

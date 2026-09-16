@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/15",
+      "released_date": "2026/09/16",
       "feature": [
         "Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk",
         "Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports",
@@ -385,6 +385,7 @@
         "The MCP Server session controller rebound the plugin about one second after the user force-stopped it in the system settings, which started it again against that decision; a plugin that is no longer available after its process died (stopped, disabled or uninstalled) is not rebound any more, the drawer switch closes and its subtitle shows the activation guide the way a fresh install does"
       ],
       "improvement": [
+        "Explain Advanced Protection in the host and companion, showing the global mode separately from actual service availability and secure settings control",
         "Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state",
         "media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits",
         "Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback",

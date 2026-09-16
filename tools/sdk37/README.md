@@ -908,3 +908,94 @@ The host admits a plugin that declares the build capability (`supportsRemoteBuil
 protocol 3), which official plugin builds always do since 1.0.3; there is no host-side
 developer switch any more. Build the plugin with
 `-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<kit>`.
+
+## Fleet color and background playback (P5 final nine repositories)
+
+`build_fleet_fixture.py` builds a small target-37 test APK without Gradle. It shows
+the known color `#123456`, reads the clipboard only from its visible activity, and
+provides generated 120-second MP4 / M4A files (solid color and a 440 Hz sine wave).
+Its provider is read-only and non-exported; ACTION_VIEW explicitly grants the
+selected content URI to the allowlisted Ember / Terra package. It has no network
+permission. A disposable signing key is generated in the new output directory.
+
+```powershell
+python tools/sdk37/build_fleet_fixture.py `
+  --sdk E:/.android/sdk --jdk E:/.java/jdk-21.0.12.1 `
+  --ffmpeg 'D:/Program Files/MeGUI_2418_x86/tools/ffmpeg/ffmpeg.exe' `
+  --output build/verification/sdk37-player-fixture
+
+python tools/sdk37/probe_background_players.py `
+  --adb E:/.android/sdk/platform-tools/adb.exe `
+  --serial emulator-5568 --expected-avd AVD_API_37.1_16K `
+  --fixture build/verification/sdk37-player-fixture/fleet-fixture.apk `
+  --output build/verification/sdk37-player-results --reset-test-data
+```
+
+Use an exclusively owned disposable English-language API 37 AVD. The serial and
+exact AVD name are required, physical devices are refused, and output directories
+must be new. `--projects` defaults to the parent of this host repository;
+`--player ember` or `--player terra` limits the selected plugins. The probe installs
+the current debug APKs and clears **only the selected player test installations**.
+For Ember it enables the existing background-audio preference and disables PiP on
+that test installation, so Home really enters the background-audio path.
+
+The runner checks the device audio command table, enables throw hardening, and
+requires `dumpsys audio` to report `mHardeningOverride=3`. The tested API 37 image
+uses `cmd audio set-hardening throw`; the older `set-enable-hardening` spelling can
+return without changing the override. Even `cmd audio` help can have a nonzero exit
+code, so only help tolerates that result. Actual configuration commands and the
+observed override must pass.
+
+Verification covers advancing playback in the background, pause / resume, locked
+playback and controls, foreground-service state, and explicit exit. Terra's
+notification **Exit player** releases the service; its MEDIA_STOP intentionally
+keeps a restorable session. The runner records APK hashes, fingerprints, page size,
+media sessions, services and screenshots. Headless playback does not establish
+physical audibility. A finally block stops selected players, clears the temporary
+audio override, wakes the display and collapses notifications. Discard the AVD to
+remove the fixture, selected apps' test data and Ember's test preference / PiP change.
+
+For the Screen-Color-Picker probe, launch this fixture, use the plugin's actual
+system MediaProjection consent flow, and compare copied HEX / RGB against `#123456`
+and `R18,G52,B86`. Read the clipboard through the fixture's visible activity and
+verify projection / service shutdown after stopping. The recorded run and its
+screenshots are in the [final fleet evidence](../../docs/dev/evidence/android-sdk-37-p5-fleet-final-20260916.md).
+
+`fixtures/fleet/node-host-cli.js` runs inside an installed AutoJs6 host through
+`RunIntentActivity`, using the installed Node plugin's read-only native launcher
+under the host UID. It extracts only the pinned Node 24.21.0 JS CLI archive to a
+new private cache directory and verifies Node, npm, npx and Corepack without package
+downloads. It writes `cache/sdk37-node-host-cli-result.json` in the host sandbox.
+This checks real cross-package exec, not terminal UI interaction. Install matching
+current debug host and plugin APKs on an owned disposable AVD before running:
+
+```powershell
+adb -s emulator-5564 push tools/sdk37/fixtures/fleet/node-host-cli.js /sdcard/sdk37-node-host-cli.js
+adb -s emulator-5564 shell am start -W `
+  -n org.autojs.autojs6/org.autojs.autojs.external.open.RunIntentActivity `
+  -d file:///sdcard/sdk37-node-host-cli.js
+adb -s emulator-5564 shell run-as org.autojs.autojs6 cat cache/sdk37-node-host-cli-result.json
+```
+
+The test host needs access to that explicitly supplied script path. Do not run this
+fixture on a personal installation: it leaves private cache files for inspection.
+
+## Historical SDK 37 build cleanup
+
+`remove_historical_builds.ps1` reviews only immediate `build/sdk37-*` directories.
+Its default is read-only. Before any deletion it resolves the repository / build
+boundary, rejects reparse points including descendants, and refuses tracked files.
+It performs file operations entirely in PowerShell with literal paths.
+
+```powershell
+# Read-only inventory.
+./tools/sdk37/remove_historical_builds.ps1
+# After stopping work that uses these historical output directories:
+./tools/sdk37/remove_historical_builds.ps1 -Apply
+```
+
+Current final-fleet data under `build/verification` is outside this glob. The
+2026-09-16 inventory found 29 directories totaling 9.563 GiB. Automatic approval
+review rejected the agent's actual deletion attempts without providing a specific
+reason; no historical directory was deleted in that run. The script's read-only
+mode was verified, and the exact inventory is retained with the evidence.

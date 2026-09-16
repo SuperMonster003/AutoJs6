@@ -1,0 +1,331 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+Type-safe project accessors is an incubating feature.
+
+> Configure project :build-logic
+JDK versions: min [17] / select [21] / current [21] / max [25]
+JVM target: min [17] / select [21] / max [25]
+
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+
+> Configure project :app
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+Add android.sync.suppressAgpWarnings=UNSUPPORTED_PROJECT_OPTION_USE to the gradle.properties file to suppress this warning.
+=====================================================================================
+Version information for IDE platform and Gradle plugins
+-------------------------------------------------------------------------------------
+Platform: Temurin | 21.0.12.1+1
+Classpath: "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20" [nearest-lower-matched]
+Classpath: "com.android.tools.build:gradle:9.3.2" [auto-specified]
+Classpath: "com.android.tools:r8:8.13.19" [agp-bundled]
+Plugin: "com.google.devtools.ksp:2.3.12" [auto-specified]
+-------------------------------------------------------------------------------------
+Gradle version: 9.5.0
+=====================================================================================
+
+Found assemble task, skip version update.
+
+> Task :app:verifyNodeCliArchive
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :nodejs-api:preBuild UP-TO-DATE
+> Task :nodejs-api:preDebugBuild UP-TO-DATE
+> Task :nodejs-api:compileDebugAidl UP-TO-DATE
+> Task :app:compileDebugAidl NO-SOURCE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :nodejs-api:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :nodejs-api:generateDebugResources UP-TO-DATE
+> Task :nodejs-api:packageDebugResources UP-TO-DATE
+> Task :nodejs-api:parseDebugLocalResources UP-TO-DATE
+> Task :nodejs-api:generateDebugRFile UP-TO-DATE
+> Task :nodejs-api:compileDebugKotlin UP-TO-DATE
+> Task :nodejs-api:javaPreCompileDebug UP-TO-DATE
+> Task :nodejs-api:compileDebugJavaWithJavac UP-TO-DATE
+> Task :nodejs-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugKotlin NO-SOURCE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac
+Note: D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\src\main\java\io\github\supermonster003\autojs6\plugin\nodejs\LocalNetworkSettingsActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :nodejs-api:generateDebugAssets UP-TO-DATE
+> Task :nodejs-api:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :nodejs-api:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :nodejs-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :nodejs-api:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksDebug UP-TO-DATE
+> Task :nodejs-api:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :nodejs-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :nodejs-api:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:buildCMakeDebug[armeabi-v7a]
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:buildCMakeDebug[x86_64]
+> Task :nodejs-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :nodejs-api:mergeDebugNativeLibs NO-SOURCE
+> Task :nodejs-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:externalNativeBuildDebug
+> Task :app:collectDebugNodeCliLauncher
+> Task :app:mergeDebugJniLibFolders
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:preDebugUnitTestBuild
+> Task :app:compileDebugUnitTestKotlin NO-SOURCE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac UP-TO-DATE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :nodejs-api:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:mergeDebugNativeLibs
+> Task :app:testDebugUnitTest
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:compileDebugAndroidTestAidl NO-SOURCE
+> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:packageDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:compileDebugAndroidTestKotlin NO-SOURCE
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:stripDebugDebugSymbols
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+
+> Task :app:assembleDebug
+
+=================================================================
+Version information for autojs6-plugin-nodejs-runtime app library
+-----------------------------------------------------------------
+Version name: 1.5.3
+Version code: 174
+SDK versions: min [24] / target [37] / compile [37]
+JDK versions: min [17] / select [21] / current [21] / max [25]
+Java version: 21
+=================================================================
+
+
+> Task :app:verifyDebugNativePageAlignment
+Native page alignment verified (16384 bytes): D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\build\reports\native-alignment\Debug.json
+
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:packageDebugAndroidTest UP-TO-DATE
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebugAndroidTest UP-TO-DATE
+> Task :nodejs-api:checkDebugAarMetadata UP-TO-DATE
+> Task :nodejs-api:extractDebugAnnotations UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :nodejs-api:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :nodejs-api:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :nodejs-api:prepareDebugArtProfile UP-TO-DATE
+> Task :nodejs-api:prepareLintJarForPublish UP-TO-DATE
+> Task :nodejs-api:mergeDebugJavaResource UP-TO-DATE
+> Task :nodejs-api:syncDebugLibJars UP-TO-DATE
+> Task :nodejs-api:bundleDebugLocalLintAar UP-TO-DATE
+> Task :nodejs-api:createFullJarDebug UP-TO-DATE
+> Task :nodejs-api:writeDebugLintModelMetadata UP-TO-DATE
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :nodejs-api:extractProguardFiles UP-TO-DATE
+> Task :nodejs-api:generateDebugLintModel UP-TO-DATE
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :nodejs-api:lintAnalyzeDebug UP-TO-DATE
+> Task :app:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :nodejs-api:preDebugAndroidTestBuild UP-TO-DATE
+> Task :nodejs-api:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :nodejs-api:preDebugUnitTestBuild UP-TO-DATE
+> Task :nodejs-api:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :nodejs-api:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :nodejs-api:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :app:preReleaseBuild
+> Task :app:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :app:buildCMakeRelWithDebInfo[arm64-v8a]
+> Task :app:configureCMakeRelWithDebInfo[armeabi-v7a]
+> Task :app:buildCMakeRelWithDebInfo[armeabi-v7a]
+> Task :app:configureCMakeRelWithDebInfo[x86_64]
+> Task :app:buildCMakeRelWithDebInfo[x86_64]
+> Task :nodejs-api:preReleaseBuild UP-TO-DATE
+> Task :nodejs-api:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :nodejs-api:mergeReleaseNativeLibs NO-SOURCE
+> Task :nodejs-api:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:externalNativeBuildRelease
+> Task :app:collectReleaseNodeCliLauncher UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs UP-TO-DATE
+> Task :app:stripReleaseDebugSymbols UP-TO-DATE
+> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata UP-TO-DATE
+> Task :nodejs-api:compileReleaseAidl UP-TO-DATE
+> Task :nodejs-api:generateReleaseResources UP-TO-DATE
+> Task :nodejs-api:packageReleaseResources UP-TO-DATE
+> Task :nodejs-api:processReleaseNavigationResources UP-TO-DATE
+> Task :nodejs-api:parseReleaseLocalResources UP-TO-DATE
+> Task :nodejs-api:generateReleaseRFile UP-TO-DATE
+> Task :nodejs-api:compileReleaseKotlin UP-TO-DATE
+> Task :nodejs-api:javaPreCompileRelease UP-TO-DATE
+> Task :nodejs-api:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :nodejs-api:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :nodejs-api:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:compileReleaseAidl NO-SOURCE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:generateReleaseRFile UP-TO-DATE
+> Task :nodejs-api:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:compileReleaseKotlin NO-SOURCE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+
+> Task :app:compileReleaseJavaWithJavac
+Note: D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\src\main\java\io\github\supermonster003\autojs6\plugin\nodejs\LocalNetworkSettingsActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :nodejs-api:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :nodejs-api:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksRelease UP-TO-DATE
+> Task :nodejs-api:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :nodejs-api:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :nodejs-api:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :nodejs-api:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :app:expandReleaseArtProfileWildcards
+> Task :app:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :nodejs-api:processReleaseJavaRes UP-TO-DATE
+> Task :app:mergeReleaseJavaResource UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:lintAnalyzeDebugUnitTest
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///D:/idea-projects/AutoJs6-Plugin-NodeJs-Runtime/app/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///D:/idea-projects/AutoJs6-Plugin-NodeJs-Runtime/app/build/reports/lint-results-debug.sarif
+
+> Task :app:lintDebug
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :nodejs-api:generateReleaseAssets UP-TO-DATE
+> Task :nodejs-api:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :nodejs-api:createFullJarRelease UP-TO-DATE
+> Task :nodejs-api:generateReleaseLintModel UP-TO-DATE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :nodejs-api:checkReleaseAarMetadata UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :nodejs-api:extractReleaseAnnotations UP-TO-DATE
+> Task :nodejs-api:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :nodejs-api:mergeReleaseJavaResource UP-TO-DATE
+> Task :nodejs-api:syncReleaseLibJars UP-TO-DATE
+> Task :nodejs-api:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :nodejs-api:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :nodejs-api:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :app:lintVitalAnalyzeRelease
+> Task :nodejs-api:generateReleaseLintVitalModel UP-TO-DATE
+> Task :app:lintVitalReportRelease UP-TO-DATE
+> Task :app:lintVitalRelease
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningRelease UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:minifyReleaseWithR8
+> Task :app:compileReleaseArtProfile
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleRelease
+
+> Task :app:verifyReleaseNativePageAlignment
+Native page alignment verified (16384 bytes): D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\build\reports\native-alignment\Release.json
+
+> Task :app:appendDigestToReleasedFiles
+Destination: D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\releases\1.5.3
+autojs6-plugin-nodejs-runtime-v1.5.3-arm64-v8a-f471de23.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-armeabi-v7a-d0de9ceb.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-universal-4ca95214.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-x86_64-811d101b.apk
+
+[Incubating] Problems report is available at: file:///D:/idea-projects/AutoJs6-Plugin-NodeJs-Runtime/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 3m 4s
+226 actionable tasks: 46 executed, 180 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

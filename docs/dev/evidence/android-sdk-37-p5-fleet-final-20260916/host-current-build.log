@@ -1,0 +1,985 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+Type-safe project accessors is an incubating feature.
+
+> Configure project :build-logic
+JDK versions: min [17] / select [21] / current [21] / max [26]
+JVM target: min [17] / select [21] / max [26]
+
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+====================================================================================
+Version information for IDE platform and Gradle plugins
+------------------------------------------------------------------------------------
+Platform: Temurin | 21.0.12.1+1
+Classpath: "org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0" [nearest-lower-matched]
+Classpath: "com.android.tools.build:gradle:9.4.0" [auto-specified]
+Classpath: "com.android.tools:r8:9.1.29" [agp-bundled]
+Plugin: "com.google.devtools.ksp:2.3.12" [auto-specified]
+------------------------------------------------------------------------------------
+Gradle version: 9.7.1
+====================================================================================
+
+> Task :build-logic:ksp-version-codes-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preAppDebugBuild UP-TO-DATE
+> Task :app:mergeAppDebugNativeDebugMetadata NO-SOURCE
+> Task :build-logic:ksp-version-codes-processor:compileKotlin UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:compileJava NO-SOURCE
+> Task :build-logic:ksp-version-codes-processor:pluginDescriptors UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:processResources UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:classes UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:jar UP-TO-DATE
+> Task :plugin-api:ai-provider-api:preBuild UP-TO-DATE
+> Task :plugin-api:ai-provider-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:ai-provider-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:apk-builder-template:preBuild UP-TO-DATE
+> Task :plugin-api:apk-builder-template:preDebugBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:preBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:apk-builder-template:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:preBuild UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:preBuild UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:explorer-action-api:preBuild UP-TO-DATE
+> Task :plugin-api:explorer-action-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:jvm-source-api:preBuild UP-TO-DATE
+> Task :plugin-api:explorer-action-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:jvm-source-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:preBuild UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:mcp-server-api:preBuild UP-TO-DATE
+> Task :plugin-api:mcp-server-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:jvm-source-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:mediainfo-api:preBuild UP-TO-DATE
+> Task :plugin-api:mediainfo-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:mediainfo-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:mcp-server-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:preBuild UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:nodejs-api:preBuild UP-TO-DATE
+> Task :plugin-api:nodejs-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:nodejs-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:preBuild UP-TO-DATE
+> Task :plugin-api:opencc-api:preBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:opencc-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:opencc-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:preBuild UP-TO-DATE
+> Task :plugin-api:pinyin-api:preBuild UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:pinyin-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:pinyin-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:preBuild UP-TO-DATE
+> Task :plugin-api:python-runtime-api:preBuild UP-TO-DATE
+> Task :plugin-api:python-runtime-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:preBuild UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:python-runtime-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:typescript-api:preBuild UP-TO-DATE
+> Task :plugin-api:typescript-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:yolo-api:preBuild UP-TO-DATE
+> Task :plugin-api:yolo-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:typescript-api:compileDebugAidl UP-TO-DATE
+> Task :plugin-api:yolo-api:compileDebugAidl UP-TO-DATE
+> Task :modules:apk-signer:preBuild UP-TO-DATE
+> Task :modules:apk-signer:preDebugBuild UP-TO-DATE
+> Task :modules:apk-signer:generateDebugResources UP-TO-DATE
+> Task :modules:apk-signer:packageDebugResources UP-TO-DATE
+> Task :modules:color-picker:preBuild UP-TO-DATE
+> Task :modules:color-picker:preDebugBuild UP-TO-DATE
+> Task :modules:color-picker:generateDebugResources UP-TO-DATE
+> Task :modules:color-picker:packageDebugResources UP-TO-DATE
+> Task :modules:expandable-layout:preBuild UP-TO-DATE
+> Task :modules:expandable-layout:preDebugBuild UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugResources UP-TO-DATE
+> Task :modules:expandable-layout:packageDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:preBuild UP-TO-DATE
+> Task :modules:expandable-recyclerview:preDebugBuild UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:packageDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:preBuild UP-TO-DATE
+> Task :modules:material-date-time-picker:preDebugBuild UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:packageDebugResources UP-TO-DATE
+> Task :modules:material-dialogs:preBuild UP-TO-DATE
+> Task :modules:material-dialogs:preDebugBuild UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugResources UP-TO-DATE
+> Task :modules:material-dialogs:packageDebugResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:preBuild UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:preDebugBuild UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:generateDebugResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:packageDebugResources UP-TO-DATE
+> Task :plugin-api:ai-common-api:preBuild UP-TO-DATE
+> Task :plugin-api:ai-common-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:ai-common-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:ai-common-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:ai-provider-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:ai-provider-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:apk-builder-template:generateDebugResources UP-TO-DATE
+> Task :plugin-api:apk-builder-template:packageDebugResources UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:editor-api:preBuild UP-TO-DATE
+> Task :plugin-api:editor-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:editor-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:editor-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:explorer-action-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:explorer-action-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:imagequant-api:preBuild UP-TO-DATE
+> Task :plugin-api:imagequant-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:imagequant-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:imagequant-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:jvm-source-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:jvm-source-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:mcp-server-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:mcp-server-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:mediainfo-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:mediainfo-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:nodejs-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:nodejs-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:offline-docs-api:preBuild UP-TO-DATE
+> Task :plugin-api:offline-docs-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:offline-docs-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:offline-docs-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:opencc-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:opencc-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:opencv-api:preBuild UP-TO-DATE
+> Task :plugin-api:opencv-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:opencv-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:opencv-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:preBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:preDebugBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:packageDebugResources UP-TO-DATE
+> Task :plugin-api:pinyin-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:pinyin-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:preBuild UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:preDebugBuild UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:python-runtime-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:python-runtime-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:preBuild UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:preDebugBuild UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:generateDebugResources UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:packageDebugResources UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:typescript-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:typescript-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:yolo-api:generateDebugResources UP-TO-DATE
+> Task :plugin-api:yolo-api:packageDebugResources UP-TO-DATE
+> Task :modules:apk-signer:processDebugNavigationResources UP-TO-DATE
+> Task :modules:color-picker:processDebugNavigationResources UP-TO-DATE
+> Task :modules:expandable-layout:processDebugNavigationResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:processDebugNavigationResources UP-TO-DATE
+> Task :modules:material-date-time-picker:processDebugNavigationResources UP-TO-DATE
+> Task :modules:material-dialogs:processDebugNavigationResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:ai-common-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:ai-provider-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:apk-builder-template:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:editor-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:explorer-action-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:imagequant-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:jvm-source-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:mcp-server-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:mediainfo-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:nodejs-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:offline-docs-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:opencc-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:opencv-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:pinyin-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:python-runtime-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:typescript-api:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:yolo-api:processDebugNavigationResources UP-TO-DATE
+> Task :modules:apk-signer:parseDebugLocalResources UP-TO-DATE
+> Task :modules:apk-signer:generateDebugRFile UP-TO-DATE
+> Task :modules:color-picker:parseDebugLocalResources UP-TO-DATE
+> Task :modules:color-picker:generateDebugRFile UP-TO-DATE
+> Task :modules:expandable-layout:parseDebugLocalResources UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugRFile UP-TO-DATE
+> Task :modules:expandable-recyclerview:parseDebugLocalResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugRFile UP-TO-DATE
+> Task :modules:material-date-time-picker:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugRFile UP-TO-DATE
+> Task :modules:material-dialogs:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugRFile UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:parseDebugLocalResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:ai-common-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:ai-common-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:ai-provider-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:ai-provider-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:apk-builder-template:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:apk-builder-template:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:common-plugin-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:editor-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:editor-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:explorer-action-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:explorer-action-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:imagequant-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:imagequant-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:jvm-source-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:jvm-source-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:mcp-server-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:mcp-server-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:mediainfo-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:mediainfo-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:nodejs-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:nodejs-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:offline-docs-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:offline-docs-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:opencc-api:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileAppDebugAidl UP-TO-DATE
+> Task :plugin-api:opencc-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:opencv-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:opencv-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:pinyin-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:pinyin-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:python-runtime-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:python-runtime-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:typescript-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:typescript-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:yolo-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:yolo-api:generateDebugRFile UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsAppDebug UP-TO-DATE
+> Task :app:generateAppDebugResValues UP-TO-DATE
+> Task :app:generateAppDebugResources UP-TO-DATE
+> Task :app:mergeAppDebugResources UP-TO-DATE
+> Task :modules:apk-signer:compileDebugKotlin UP-TO-DATE
+> Task :modules:apk-signer:javaPreCompileDebug UP-TO-DATE
+> Task :app:packageAppDebugResources UP-TO-DATE
+> Task :app:processAppDebugNavigationResources UP-TO-DATE
+> Task :app:parseAppDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesAppDebug UP-TO-DATE
+> Task :app:generateAppDebugBuildConfig UP-TO-DATE
+> Task :app:generateAppDebugRFile UP-TO-DATE
+> Task :modules:color-picker:compileDebugKotlin UP-TO-DATE
+> Task :modules:color-picker:javaPreCompileDebug UP-TO-DATE
+
+> Task :modules:color-picker:compileDebugJavaWithJavac
+
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+> Task :modules:color-picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:expandable-layout:compileDebugKotlin NO-SOURCE
+> Task :modules:expandable-layout:javaPreCompileDebug UP-TO-DATE
+
+> Task :modules:expandable-layout:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :modules:expandable-layout:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:compileDebugKotlin NO-SOURCE
+> Task :modules:expandable-recyclerview:javaPreCompileDebug UP-TO-DATE
+
+> Task :modules:expandable-recyclerview:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :modules:expandable-recyclerview:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:compileDebugKotlin NO-SOURCE
+> Task :modules:material-date-time-picker:javaPreCompileDebug UP-TO-DATE
+> Task :modules:apk-signer:compileDebugJavaWithJavac
+> Task :modules:apk-signer:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :modules:material-date-time-picker:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :modules:material-date-time-picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugKotlin NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:javaPreCompileDebug UP-TO-DATE
+> Task :modules:material-dialogs:compileDebugKotlin NO-SOURCE
+> Task :modules:material-dialogs:javaPreCompileDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugJavaWithJavac
+> Task :modules:recyclerview-flexibledivider:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:protocol-wire-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:ai-common-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:ai-common-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:ai-common-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:ai-common-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:ai-provider-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:ai-provider-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:ai-provider-api:compileDebugJavaWithJavac
+> Task :plugin-api:ai-provider-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:common-plugin-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugJavaWithJavac
+> Task :plugin-api:common-plugin-api:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :modules:material-dialogs:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :plugin-api:apk-builder-template:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:apk-builder-template:javaPreCompileDebug UP-TO-DATE
+> Task :modules:material-dialogs:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:compileDebugKotlin NO-SOURCE
+> Task :plugin-api:bun-runtime-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:apk-builder-template:compileDebugJavaWithJavac
+> Task :plugin-api:apk-builder-template:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:compileDebugJavaWithJavac
+> Task :plugin-api:bun-runtime-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:editor-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:editor-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:editor-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:editor-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:explorer-action-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:explorer-action-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:compileDebugJavaWithJavac
+> Task :plugin-api:dex-compiler-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:imagequant-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:imagequant-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:imagequant-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:imagequant-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:jvm-source-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:jvm-source-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:explorer-action-api:compileDebugJavaWithJavac
+> Task :plugin-api:explorer-action-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:jvm-source-api:compileDebugJavaWithJavac
+> Task :plugin-api:jvm-source-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:mcp-server-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:mcp-server-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:compileDebugJavaWithJavac
+> Task :plugin-api:lua-runtime-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:mediainfo-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:mediainfo-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:mcp-server-api:compileDebugJavaWithJavac
+> Task :plugin-api:mcp-server-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:mediainfo-api:compileDebugJavaWithJavac
+> Task :plugin-api:mediainfo-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:nodejs-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:nodejs-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:compileDebugJavaWithJavac
+> Task :plugin-api:mlkit-barcode-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:nodejs-api:compileDebugJavaWithJavac
+> Task :plugin-api:nodejs-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:offline-docs-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:offline-docs-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:offline-docs-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:offline-docs-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:opencc-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:opencc-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:opencv-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:opencv-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:opencv-api:compileDebugJavaWithJavac NO-SOURCE
+> Task :plugin-api:opencv-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:opencc-api:compileDebugJavaWithJavac
+> Task :plugin-api:opencc-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:pinyin-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:pinyin-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugJavaWithJavac
+> Task :plugin-api:paddle-ocr-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:pinyin-api:compileDebugJavaWithJavac
+> Task :plugin-api:pinyin-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:compileDebugJavaWithJavac
+> Task :plugin-api:pinyin4j-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:python-runtime-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:python-runtime-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:compileDebugJavaWithJavac
+> Task :plugin-api:paddle-ocr-engine:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:python-runtime-api:compileDebugJavaWithJavac
+> Task :plugin-api:python-runtime-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:compileDebugKotlin NO-SOURCE
+> Task :plugin-api:quickjs-runtime-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:compileDebugJavaWithJavac
+> Task :plugin-api:rapid-ocr-engine:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:compileDebugJavaWithJavac
+> Task :plugin-api:quickjs-runtime-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:compileDebugKotlin NO-SOURCE
+> Task :plugin-api:screen-color-picker-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:typescript-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:typescript-api:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:compileDebugJavaWithJavac
+> Task :plugin-api:screen-color-picker-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:typescript-api:compileDebugJavaWithJavac
+> Task :plugin-api:typescript-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:javaPreCompileAppDebug UP-TO-DATE
+> Task :plugin-api:yolo-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:yolo-api:javaPreCompileDebug UP-TO-DATE
+> Task :app:generateAppDebugAssets UP-TO-DATE
+> Task :modules:apk-signer:generateDebugAssets UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugAssets UP-TO-DATE
+> Task :modules:color-picker:generateDebugAssets UP-TO-DATE
+> Task :modules:color-picker:mergeDebugAssets UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugAssets UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugAssets UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugAssets UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugAssets UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugAssets UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugAssets UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugAssets UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugAssets UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:generateDebugAssets UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:ai-common-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:ai-common-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:ai-provider-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:ai-provider-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:apk-builder-template:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:apk-builder-template:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:editor-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:editor-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:explorer-action-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:explorer-action-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:imagequant-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:imagequant-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:jvm-source-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:jvm-source-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:mcp-server-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:mcp-server-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:mediainfo-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:mediainfo-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:nodejs-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:nodejs-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:offline-docs-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:offline-docs-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:opencc-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:opencc-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:opencv-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:opencv-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:pinyin-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:pinyin-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:python-runtime-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:python-runtime-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:typescript-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:typescript-api:mergeDebugAssets UP-TO-DATE
+> Task :app:generateAppDebugGlobalSynthetics UP-TO-DATE
+> Task :app:l8DexDesugarLibAppDebug UP-TO-DATE
+> Task :modules:apk-signer:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:yolo-api:compileDebugJavaWithJavac
+> Task :plugin-api:yolo-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:color-picker:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:yolo-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:yolo-api:mergeDebugAssets UP-TO-DATE
+> Task :modules:expandable-layout:processDebugJavaRes NO-SOURCE
+> Task :modules:expandable-recyclerview:processDebugJavaRes NO-SOURCE
+> Task :modules:material-date-time-picker:processDebugJavaRes NO-SOURCE
+> Task :modules:material-dialogs:processDebugJavaRes NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:processDebugJavaRes NO-SOURCE
+> Task :plugin-api:ai-common-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:ai-provider-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:apk-builder-template:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:processDebugJavaRes NO-SOURCE
+> Task :plugin-api:common-plugin-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:editor-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:explorer-action-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:imagequant-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:jvm-source-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:mcp-server-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:mediainfo-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:nodejs-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:offline-docs-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:opencc-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:opencv-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:pinyin-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:python-runtime-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:processDebugJavaRes NO-SOURCE
+> Task :plugin-api:rapid-ocr-engine:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:processDebugJavaRes NO-SOURCE
+> Task :plugin-api:typescript-api:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:yolo-api:processDebugJavaRes UP-TO-DATE
+> Task :modules:apk-signer:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:material-dialogs:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:color-picker:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:ai-provider-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:ai-common-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:editor-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:explorer-action-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:typescript-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:apk-builder-template:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:opencc-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:pinyin-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:mediainfo-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:imagequant-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:offline-docs-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:opencv-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:mcp-server-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:jvm-source-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:python-runtime-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:yolo-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:nodejs-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:expandable-layout:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:kspAppDebugKotlin UP-TO-DATE
+> Task :modules:apk-signer:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:color-picker:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-layout:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-recyclerview:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-date-time-picker:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-dialogs:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:ai-common-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:ai-provider-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:apk-builder-template:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:common-plugin-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:editor-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:explorer-action-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:imagequant-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:jvm-source-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:mcp-server-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:mediainfo-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:nodejs-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:offline-docs-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:opencc-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:opencv-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:pinyin-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:python-runtime-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:typescript-api:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:yolo-api:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:apk-signer:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:apk-signer:processDebugManifest UP-TO-DATE
+> Task :modules:color-picker:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:color-picker:processDebugManifest UP-TO-DATE
+> Task :modules:expandable-layout:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:expandable-layout:processDebugManifest UP-TO-DATE
+> Task :modules:expandable-recyclerview:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:processDebugManifest UP-TO-DATE
+> Task :modules:material-date-time-picker:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:processDebugManifest UP-TO-DATE
+> Task :modules:material-dialogs:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:material-dialogs:processDebugManifest UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:processDebugManifest UP-TO-DATE
+> Task :plugin-api:ai-common-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:ai-common-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:ai-provider-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:ai-provider-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:apk-builder-template:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:apk-builder-template:processDebugManifest UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:common-plugin-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:editor-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:editor-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:explorer-action-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:explorer-action-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:imagequant-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:imagequant-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:jvm-source-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:jvm-source-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:mcp-server-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:mcp-server-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:mediainfo-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:mediainfo-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:nodejs-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:nodejs-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:offline-docs-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:offline-docs-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:opencc-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:opencc-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:opencv-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:opencv-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugManifest UP-TO-DATE
+> Task :plugin-api:pinyin-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:pinyin-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:python-runtime-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:python-runtime-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:processDebugManifest UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:typescript-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:typescript-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:yolo-api:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:yolo-api:processDebugManifest UP-TO-DATE
+> Task :modules:apk-signer:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:apk-signer:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:color-picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:color-picker:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:expandable-layout:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:expandable-layout:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:expandable-recyclerview:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:material-date-time-picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-date-time-picker:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:material-dialogs:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-dialogs:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:ai-common-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:ai-common-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:ai-provider-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:ai-provider-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:apk-builder-template:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:apk-builder-template:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:editor-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:editor-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:explorer-action-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:explorer-action-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:imagequant-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:imagequant-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:jvm-source-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:jvm-source-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:mcp-server-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:mcp-server-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:mediainfo-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:mediainfo-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:nodejs-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:nodejs-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:offline-docs-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:offline-docs-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:opencc-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:opencc-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:opencv-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:opencv-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:pinyin-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:pinyin-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:python-runtime-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:python-runtime-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:typescript-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:typescript-api:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:yolo-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:yolo-api:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:apk-signer:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:color-picker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:color-picker:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:color-picker:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:expandable-layout:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:expandable-recyclerview:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:material-date-time-picker:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:material-dialogs:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:ai-common-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:ai-common-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:ai-common-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:ai-provider-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:ai-provider-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:ai-provider-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:apk-builder-template:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:apk-builder-template:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:apk-builder-template:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:bun-runtime-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:bun-runtime-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:common-plugin-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:dex-compiler-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:dex-compiler-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:editor-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:editor-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:editor-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:explorer-action-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:explorer-action-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:explorer-action-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:imagequant-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:imagequant-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:imagequant-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:jvm-source-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:jvm-source-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:jvm-source-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:lua-runtime-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:lua-runtime-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:mcp-server-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:mcp-server-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:mcp-server-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:mediainfo-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:mediainfo-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:mediainfo-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:mlkit-barcode-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:mlkit-barcode-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:nodejs-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:nodejs-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:nodejs-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:offline-docs-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:offline-docs-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:offline-docs-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:opencc-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:opencc-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:opencc-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:opencv-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:opencv-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:opencv-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:paddle-ocr-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:paddle-ocr-engine:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:pinyin-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:pinyin-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:pinyin-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:pinyin4j-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:pinyin4j-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:protocol-wire-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:protocol-wire-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:python-runtime-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:python-runtime-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:python-runtime-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:quickjs-runtime-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:quickjs-runtime-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:rapid-ocr-engine:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:rapid-ocr-engine:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:screen-color-picker-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:screen-color-picker-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:typescript-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:typescript-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:typescript-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:yolo-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:yolo-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:yolo-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:compileAppDebugKotlin UP-TO-DATE
+
+> Task :app:compileAppDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :app:mergeAppDebugAssets UP-TO-DATE
+> Task :app:compressAppDebugAssets UP-TO-DATE
+> Task :app:processAppDebugJavaRes UP-TO-DATE
+> Task :app:mergeAppDebugJavaResource UP-TO-DATE
+> Task :app:checkAppDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarAppDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexAppDebug UP-TO-DATE
+> Task :app:mergeLibDexAppDebug UP-TO-DATE
+> Task :app:checkAppDebugAarMetadata UP-TO-DATE
+> Task :app:mapAppDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileAppDebugNavigationResources UP-TO-DATE
+> Task :app:createAppDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksAppDebug UP-TO-DATE
+> Task :app:processAppDebugMainManifest UP-TO-DATE
+> Task :app:processAppDebugManifest UP-TO-DATE
+> Task :app:processAppDebugManifestForPackage UP-TO-DATE
+> Task :app:processAppDebugResources UP-TO-DATE
+> Task :app:dexBuilderAppDebug UP-TO-DATE
+> Task :app:mergeProjectDexAppDebug UP-TO-DATE
+> Task :app:mergeAppDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeAppDebugNativeLibs UP-TO-DATE
+> Task :app:stripAppDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningAppDebug UP-TO-DATE
+> Task :app:writeAppDebugAppMetadata UP-TO-DATE
+> Task :app:writeAppDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageAppDebug UP-TO-DATE
+> Task :app:createAppDebugApkListingFileRedirect UP-TO-DATE
+
+> Task :app:assembleAppDebug
+
+==============================================================
+Version information for AutoJs6 app library
+--------------------------------------------------------------
+Version name: 6.8.0
+Version code: 5280
+SDK versions: min [24] / target [37] / compile [37]
+JDK versions: min [17] / select [21] / current [21] / max [26]
+Java version: 21
+==============================================================
+
+
+> Task :app:verifyAppDebugNativePageAlignment
+Native page alignment verified (16384 bytes): D:\idea-projects\AutoJs6\app\build\reports\native-alignment\AppDebug.json
+
+[Incubating] Problems report is available at: file:///D:/idea-projects/AutoJs6/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 5s
+737 actionable tasks: 33 executed, 704 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.7.1/userguide/configuration_cache_enabling.html

@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "hostUid": 10239,
+  "hostPackage": "org.autojs.autojs6",
+  "pluginUid": 10240,
+  "executable": "/data/app/~~cWxhn4AjcQbi9_lY35d7IQ==/io.github.supermonster003.autojs6.plugin.nodejs-OS22V-FBsKBy-WJ_9hns4A==/lib/x86_64/libnodexe.so",
+  "archiveEntries": 1699,
+  "node": "10239|v24.21.0|true",
+  "npm": "11.19.0",
+  "npx": "11.19.0",
+  "corepack": "0.36.0"
+}

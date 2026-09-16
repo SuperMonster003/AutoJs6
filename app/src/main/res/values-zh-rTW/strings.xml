@@ -4,6 +4,11 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">Android 17 進階保護可能限制非輔助工具的無障礙服務, 包括此相容服務. 僅憑全域模式無法判斷此服務是否遭到封鎖. 請檢查實際服務狀態及 Android 無障礙設定. 授予安全設定權限不會繞過系統限制.</string>
+    <string name="a11y_advanced_protection_off">已關閉</string>
+    <string name="a11y_advanced_protection_on">已開啟</string>
+    <string name="a11y_advanced_protection_title">進階保護</string>
+    <string name="a11y_advanced_protection_unknown">無法讀取</string>
     <string name="apk_builder_build">構建中</string>
     <string name="apk_builder_clean">清理臨時檔案</string>
     <string name="apk_builder_package">打包中</string>

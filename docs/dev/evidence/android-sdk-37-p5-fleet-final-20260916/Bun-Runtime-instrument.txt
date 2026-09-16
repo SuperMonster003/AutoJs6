@@ -1,0 +1,401 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest:
+INSTRUMENTATION_STATUS: test=sigtermIgnoringCancellationAfterReadinessReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_LIFECYCLE error=CANCELLED childPid=7918 reaped=true exitCode=137 durationMillis=335 workspaceRemoved=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_LIFECYCLE error=CANCELLED childPid=7929 reaped=true exitCode=137 durationMillis=309 workspaceRemoved=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_LIFECYCLE error=CANCELLED childPid=7939 reaped=true exitCode=137 durationMillis=413 workspaceRemoved=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=sigtermIgnoringCancellationAfterReadinessReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=localNetworkUsesThePluginGrant
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=localNetworkUsesThePluginGrant
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=discoveryMetadataPrewarmJavaScriptAndTypeScriptRoundTrip
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=discoveryMetadataPrewarmJavaScriptAndTypeScriptRoundTrip
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=installedNativeRuntimeMatchesTheLockedPayload
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=installedNativeRuntimeMatchesTheLockedPayload
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=sigtermIgnoringTimeoutReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_LIFECYCLE error=TIMEOUT childPid=8029 reaped=true exitCode=137 durationMillis=3305 workspaceRemoved=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=sigtermIgnoringTimeoutReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=sigtermIgnoringOutputLimitReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_LIFECYCLE error=OUTPUT_LIMIT childPid=8059 reaped=true exitCode=137 durationMillis=811 workspaceRemoved=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=sigtermIgnoringOutputLimitReapsTheChild
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=hostInfoSnapshotIsDeliveredOnlyWhenOffered
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=hostInfoSnapshotIsDeliveredOnlyWhenOffered
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=workspaceArchiveProjectRoundTrip
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=workspaceArchiveProjectRoundTrip
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=hostCapabilityBridgeRoundTrip
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=hostCapabilityBridgeRoundTrip
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=checkedInSamplesExecuteWithinPublishedBoundaries
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=checkedInSamplesExecuteWithinPublishedBoundaries
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=manifestPublishesWakeInfoAndRuntimeContracts
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=manifestPublishesWakeInfoAndRuntimeContracts
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=hostGlobalsAreAbsentAndFailLoudly
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=hostGlobalsAreAbsentAndFailLoudly
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=timeoutCancellationAndInvalidRequestAreBounded
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeInstrumentedTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=timeoutCancellationAndInvalidRequestAreBounded
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=14
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest:
+INSTRUMENTATION_STATUS: test=tenLocalesRenderResourcesHelpAndBoundedDiagnostics
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=en keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=ar keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=es keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=fr keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=ja keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=ko keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=ru keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=zh-CN keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=zh-HK keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES resources locale=zh-TW keys=17 help=5 errorCodes=10 diagnosticBound=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=14
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=tenLocalesRenderResourcesHelpAndBoundedDiagnostics
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=15
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=binderErrorsFollowAppLocaleAndMatchFinishedEvents
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=en errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=ar errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=es errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=fr errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=ja errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=ko errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=ru errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=zh-CN errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=zh-HK errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES binder locale=zh-TW errors=6 finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES localeRestored=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=15
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=binderErrorsFollowAppLocaleAndMatchFinishedEvents
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=16
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=16
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stack=org.junit.AssumptionViolatedException: got: <false>, expected: is <true>
+	at org.junit.Assume.assumeThat(Assume.java:106)
+	at org.junit.Assume.assumeTrue(Assume.java:50)
+	at io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest.cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun$lambda$0(BunRuntimeMessagesInstrumentedTest.kt:118)
+	at io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest$$ExternalSyntheticLambda2.invoke(D8$$SyntheticClass:0)
+	at io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest.withRuntime(BunRuntimeMessagesInstrumentedTest.kt:230)
+	at io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest.cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun(BunRuntimeMessagesInstrumentedTest.kt:115)
+
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun
+INSTRUMENTATION_STATUS_CODE: -4
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=17
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest:
+INSTRUMENTATION_STATUS: test=transientFailureRetriesOnceForConcurrentCallersAfterCooldown
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_PROBE retry callers=8 commands=4 cooldownMillis=30000 recovered=true injectedStartFailure=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=17
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=transientFailureRetriesOnceForConcurrentCallersAfterCooldown
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=18
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=permanentIdentityFailureRequiresANewCacheAndDoesNotRetry
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_PROBE permanent commands=1 elapsedMillis=3000000 cached=true newCacheReady=true injectedVersionMismatch=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=18
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=permanentIdentityFailureRequiresANewCacheAndDoesNotRetry
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=19
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=realCommandsBoundOutputTimeoutAndExitDiagnostics
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_PROBE commands nonzero=159 syntheticExit=true outputStreams=2 capBytes=4096 timeoutExit=137 reaped=true readers=0 recovery=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeProbeInstrumentedTest
+INSTRUMENTATION_STATUS: current=19
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=19
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realCommandsBoundOutputTimeoutAndExitDiagnostics
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 38.618
+
+OK (19 tests)
+
+
+INSTRUMENTATION_CODE: -1

@@ -8,6 +8,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">Android 17 の高度な保護は, この互換サービスを含む支援ツール以外のユーザー補助サービスを制限する場合があります. 全体のモードだけではサービスがブロックされたか判断できません. 実際のサービス状態と Android のユーザー補助設定を確認してください. 安全な設定へのアクセス権限はシステム制限を回避しません.</string>
+    <string name="a11y_advanced_protection_off">無効</string>
+    <string name="a11y_advanced_protection_on">有効</string>
+    <string name="a11y_advanced_protection_title">高度な保護</string>
+    <string name="a11y_advanced_protection_unknown">取得不可</string>
     <string name="apk_builder_build">建築</string>
     <string name="apk_builder_clean">洗浄</string>
     <string name="apk_builder_package">パッケージング</string>

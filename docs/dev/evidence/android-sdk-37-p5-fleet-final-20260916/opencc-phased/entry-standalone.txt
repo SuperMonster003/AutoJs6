@@ -1,0 +1,23 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest:
+INSTRUMENTATION_STATUS: test=firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 4.283
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

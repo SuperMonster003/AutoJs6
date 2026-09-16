@@ -1,0 +1,16 @@
+[
+  {
+    "serial": "emulator-5568",
+    "avd": "AVD_API_37.1_16K",
+    "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CP31.260623.012/16064790:userdebug/dev-keys",
+    "audioOverrideBeforeShutdown": 0,
+    "shutdownReply": "OK: killing emulator, bye bye\r\r\nOK"
+  },
+  {
+    "serial": "emulator-5564",
+    "avd": "codex-sdk37-fleet-4k-20260916",
+    "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+    "audioOverrideBeforeShutdown": null,
+    "shutdownReply": "OK: killing emulator, bye bye\r\r\nOK"
+  }
+]

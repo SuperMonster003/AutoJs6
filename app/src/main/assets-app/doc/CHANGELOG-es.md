@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/15
+###### 2026/09/16
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -386,6 +386,7 @@
 * `Corrección` `images.matchFeatures` devolvía un marco de tamaño incorrecto cuando las características del objeto se calculaban con un `scale` distinto de 1, reordenaba las esquinas de modo que un objeto rotado perdía la correspondencia con sus propias esquinas, podía devolver un marco distorsionado a partir de una homografía poco fiable, dibujaba la imagen de `drawMatches` a partir de las matrices de descriptores en lugar de las imágenes, y lanzaba un error de OpenCV con imágenes sin puntos clave
 * `Corrección` `images.detectAndComputeFeatures` no liberaba sus matrices intermedias, y ORB no encontraba ningún punto clave en imágenes menores de 63 px y solo unos pocos en objetos pequeños a causa del borde predeterminado de 31 px
 * `Corrección` El controlador de sesión de MCP Server volvía a vincular el plugin alrededor de un segundo después de que el usuario lo detuviera forzosamente en los ajustes del sistema, lo que lo iniciaba de nuevo en contra de esa decisión; un plugin que ya no está disponible tras la muerte de su proceso (detenido, deshabilitado o desinstalado) ya no se vuelve a vincular, el interruptor del panel lateral se cierra y su subtítulo muestra la guía de activación como en una instalación nueva
+* `Mejora` Explicación de la protección avanzada en el anfitrión y el complemento, diferenciando el modo global de la disponibilidad real del servicio y el control de ajustes seguros
 * `Mejora` Las apps empaquetadas solicitan almacenamiento según las rutas compartidas del proyecto; la denegación, el regreso de ajustes, la recuperación del acceso de inicio y el arranque comprueban el acceso real
 * `Mejora` media.playMusic utiliza un servicio de música en primer plano Media3 con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción

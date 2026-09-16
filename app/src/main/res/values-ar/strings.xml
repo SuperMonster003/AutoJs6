@@ -9,6 +9,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">قد تقيد الحماية المتقدمة في Android 17 خدمات تسهيل الاستخدام التي ليست أدوات مساعدة, بما فيها خدمة التوافق هذه. الوضع العام وحده لا يثبت حظر الخدمة. تحقق من حالة الخدمة الفعلية وإعدادات تسهيل الاستخدام في Android. منح إذن الإعدادات الآمنة لا يتجاوز قيود النظام.</string>
+    <string name="a11y_advanced_protection_off">معطلة</string>
+    <string name="a11y_advanced_protection_on">مفعلة</string>
+    <string name="a11y_advanced_protection_title">الحماية المتقدمة</string>
+    <string name="a11y_advanced_protection_unknown">غير متاح</string>
     <string name="apk_builder_build">مبنى</string>
     <string name="apk_builder_clean">تنظيف</string>
     <string name="apk_builder_package">التغليف </string>

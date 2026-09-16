@@ -1,0 +1,10 @@
+{
+  "package": "io.github.supermonster003.autojs6.plugin.mcp.server",
+  "serial": "emulator-5568",
+  "targetSdk": 37,
+  "systemDialogDenied": true,
+  "systemDialogGranted": true,
+  "lanRequiresAnotherExplicitToggle": true,
+  "deniedGrantRevokedRestoredRuntimeChecks": true,
+  "loopbackAvailableInAllFourStates": true
+}

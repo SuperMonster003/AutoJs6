@@ -1,0 +1,10 @@
+{
+  "serial": "emulator-5568",
+  "targetSdk": 37,
+  "fixtureColor": "#123456",
+  "copiedHex": "#123456",
+  "copiedRgb": "R18,G52,B86",
+  "systemConsentCancelled": true,
+  "systemEntireScreenConsentGranted": true,
+  "projectionAndForegroundServiceReleased": true
+}

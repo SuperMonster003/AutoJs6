@@ -1,0 +1,165 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+Type-safe project accessors is an incubating feature.
+
+> Configure project :build-logic
+JDK versions: min [17] / select [21] / current [21] / max [25]
+JVM target: min [17] / select [21] / max [25]
+
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+
+> Configure project :app
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+Add android.sync.suppressAgpWarnings=UNSUPPORTED_PROJECT_OPTION_USE to the gradle.properties file to suppress this warning.
+=====================================================================================
+Version information for IDE platform and Gradle plugins
+-------------------------------------------------------------------------------------
+Platform: Temurin | 21.0.12.1+1
+Classpath: "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20" [nearest-lower-matched]
+Classpath: "com.android.tools.build:gradle:9.3.2" [auto-specified]
+Classpath: "com.android.tools:r8:8.13.19" [agp-bundled]
+Plugin: "com.google.devtools.ksp:2.3.12" [auto-specified]
+-------------------------------------------------------------------------------------
+Gradle version: 9.5.0
+=====================================================================================
+
+Found assemble task, skip version update.
+
+> Task :app:verifyNodeCliArchive
+> Task :app:preBuild
+> Task :app:preReleaseBuild
+> Task :app:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :app:buildCMakeRelWithDebInfo[arm64-v8a]
+> Task :app:configureCMakeRelWithDebInfo[armeabi-v7a]
+> Task :app:buildCMakeRelWithDebInfo[armeabi-v7a]
+> Task :app:configureCMakeRelWithDebInfo[x86_64]
+> Task :app:buildCMakeRelWithDebInfo[x86_64]
+> Task :nodejs-api:preBuild UP-TO-DATE
+> Task :nodejs-api:preReleaseBuild UP-TO-DATE
+> Task :nodejs-api:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :nodejs-api:mergeReleaseNativeLibs NO-SOURCE
+> Task :nodejs-api:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:externalNativeBuildRelease
+> Task :app:collectReleaseNodeCliLauncher UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs UP-TO-DATE
+> Task :app:stripReleaseDebugSymbols UP-TO-DATE
+> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata UP-TO-DATE
+> Task :nodejs-api:compileReleaseAidl UP-TO-DATE
+> Task :nodejs-api:generateReleaseResources UP-TO-DATE
+> Task :nodejs-api:packageReleaseResources UP-TO-DATE
+> Task :nodejs-api:processReleaseNavigationResources UP-TO-DATE
+> Task :nodejs-api:parseReleaseLocalResources UP-TO-DATE
+> Task :nodejs-api:generateReleaseRFile UP-TO-DATE
+> Task :nodejs-api:compileReleaseKotlin UP-TO-DATE
+> Task :nodejs-api:javaPreCompileRelease UP-TO-DATE
+> Task :nodejs-api:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :nodejs-api:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :nodejs-api:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:compileReleaseAidl NO-SOURCE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:generateReleaseRFile UP-TO-DATE
+> Task :nodejs-api:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:compileReleaseKotlin NO-SOURCE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :nodejs-api:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :nodejs-api:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksRelease UP-TO-DATE
+> Task :nodejs-api:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :nodejs-api:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :nodejs-api:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :nodejs-api:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :app:expandReleaseArtProfileWildcards UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :nodejs-api:processReleaseJavaRes UP-TO-DATE
+> Task :app:mergeReleaseJavaResource UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:minifyReleaseWithR8 UP-TO-DATE
+> Task :app:compileReleaseArtProfile UP-TO-DATE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :nodejs-api:generateReleaseAssets UP-TO-DATE
+> Task :nodejs-api:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo
+> Task :nodejs-api:createFullJarRelease UP-TO-DATE
+> Task :nodejs-api:extractProguardFiles UP-TO-DATE
+> Task :nodejs-api:generateReleaseLintModel UP-TO-DATE
+> Task :nodejs-api:prepareLintJarForPublish UP-TO-DATE
+> Task :app:generateReleaseLintVitalReportModel UP-TO-DATE
+> Task :nodejs-api:checkReleaseAarMetadata UP-TO-DATE
+> Task :nodejs-api:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :nodejs-api:extractReleaseAnnotations UP-TO-DATE
+> Task :nodejs-api:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :nodejs-api:mergeReleaseJavaResource UP-TO-DATE
+> Task :nodejs-api:syncReleaseLibJars UP-TO-DATE
+> Task :nodejs-api:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :nodejs-api:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :nodejs-api:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :app:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :nodejs-api:generateReleaseLintVitalModel UP-TO-DATE
+> Task :app:lintVitalReportRelease UP-TO-DATE
+> Task :app:lintVitalRelease
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningRelease UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect UP-TO-DATE
+
+> Task :app:assembleRelease
+
+=================================================================
+Version information for autojs6-plugin-nodejs-runtime app library
+-----------------------------------------------------------------
+Version name: 1.5.3
+Version code: 174
+SDK versions: min [24] / target [37] / compile [37]
+JDK versions: min [17] / select [21] / current [21] / max [25]
+Java version: 21
+=================================================================
+
+
+> Task :app:verifyReleaseNativePageAlignment
+Native page alignment verified (16384 bytes): D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\build\reports\native-alignment\Release.json
+
+> Task :app:appendDigestToReleasedFiles
+Destination: D:\idea-projects\AutoJs6-Plugin-NodeJs-Runtime\app\releases\1.5.3
+autojs6-plugin-nodejs-runtime-v1.5.3-arm64-v8a-06210053.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-armeabi-v7a-671523c0.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-universal-cfa35b31.apk
+autojs6-plugin-nodejs-runtime-v1.5.3-x86_64-b8973291.apk
+
+BUILD SUCCESSFUL in 42s
+100 actionable tasks: 14 executed, 86 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

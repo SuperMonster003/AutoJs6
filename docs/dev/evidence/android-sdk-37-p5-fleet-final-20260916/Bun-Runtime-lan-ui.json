@@ -1,0 +1,10 @@
+{
+  "package": "io.github.supermonster003.autojs6.plugin.bun.runtime",
+  "serial": "emulator-5564",
+  "targetSdk": 37,
+  "fixture": "10.0.2.2 TCP, one known byte",
+  "denialViaSystemDialog": true,
+  "grantViaSystemDialog": true,
+  "revokedFailureHint": true,
+  "restored": true
+}

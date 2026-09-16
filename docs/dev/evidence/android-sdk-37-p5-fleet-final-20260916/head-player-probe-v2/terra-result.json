@@ -1,0 +1,31 @@
+{
+  "package": "io.github.supermonster003.autojs6.plugin.audioplayer",
+  "serial": "emulator-5568",
+  "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CP31.260623.012/16064790:userdebug/dev-keys",
+  "pageSize": 16384,
+  "targetSdk": 37,
+  "apkSha256": "f1269d53d3b2dfffc73d3bb68811f2c9e848f4d3da5ef1561356faf0f6b853f4",
+  "hardeningOverride": 3,
+  "background": {
+    "state": 3,
+    "position": 15916,
+    "foreground": true
+  },
+  "paused": {
+    "state": 2,
+    "position": 21955,
+    "foreground": true
+  },
+  "locked": {
+    "state": 3,
+    "position": 28009,
+    "foreground": true
+  },
+  "lockedPaused": {
+    "state": 2,
+    "position": 28656,
+    "foreground": true
+  },
+  "stopReleasedForegroundService": true,
+  "physicalAudibilityTested": false
+}

@@ -1,0 +1,26 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest:
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=OPENCC_BENCHMARK_JSON={"schema_version":1,"engine":"official","phase":"first-load","pid":10243,"sdk_int":37,"android_release":"17","model":"sdk_gphone64_x86_64","fingerprint":"google\/sdk_gphone64_x86_64\/emu64xa:17\/CE2A.260420.019\/15611780:userdebug\/dev-keys","process_is_64_bit":true,"supported_abis":["x86_64","arm64-v8a"],"page_size_bytes":4096,"input_utf16_units":1376,"input_code_points":1312,"first_load_ns":223127032,"resource_bytes":1237703,"output_utf16_units":1376,"memory_before":{"total_pss_kb":47634,"total_private_dirty_kb":42948,"native_heap_bytes":5690944,"java_heap_bytes":2127584},"memory_after":{"total_pss_kb":77280,"total_private_dirty_kb":69860,"native_heap_bytes":31665232,"java_heap_bytes":2242320},"pss_delta_kb":29646}
+
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.372
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

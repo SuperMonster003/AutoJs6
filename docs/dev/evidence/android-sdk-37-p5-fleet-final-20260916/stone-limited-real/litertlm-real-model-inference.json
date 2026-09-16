@@ -1,0 +1,18 @@
+{
+  "pageSize": 16384,
+  "device": "Google sdk_gphone16k_x86_64 / API 37 / x86_64,arm64-v8a",
+  "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys",
+  "modelSha256": "faa60663b333290c1496c499828b21d3e3254a788cacd8cce917ce0f761a2dc9",
+  "modelSizeBytes": 1597931520,
+  "digestMillis": 1927,
+  "recommendedModelId": "qwen2-5-1-5b-instruct",
+  "healthCheckMillis": 5405,
+  "engineInitializeMillis": 1220,
+  "generationMillis": 4203,
+  "prompt": "Reply with one short English sentence that greets a tester.",
+  "generatedText": "Hello tester! How's everything going?",
+  "streamedDeltas": 8,
+  "maxOutputTokens": 48,
+  "backend": "CPU",
+  "ok": true
+}

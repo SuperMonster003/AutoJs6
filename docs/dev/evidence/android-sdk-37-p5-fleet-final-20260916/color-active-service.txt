@@ -1,0 +1,36 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{c0de5c8 u0 io.github.supermonster003.autojs6.plugin.screencolorpicker/.ProjectionForegroundService c:io.github.supermonster003.autojs6.plugin.screencolorpicker}
+    intent={act=io.github.supermonster003.autojs6.plugin.screencolorpicker.action.START cmp=io.github.supermonster003.autojs6.plugin.screencolorpicker/.ProjectionForegroundService}
+    packageName=io.github.supermonster003.autojs6.plugin.screencolorpicker
+    processName=io.github.supermonster003.autojs6.plugin.screencolorpicker
+    targetSdkVersion=37
+    baseDir=/data/app/~~bYD8p8T-Bcdv7iGfqE2q1w==/io.github.supermonster003.autojs6.plugin.screencolorpicker-tJy9sg_p5_vKUgllvHCiwg==/base.apk
+    dataDir=/data/user/0/io.github.supermonster003.autojs6.plugin.screencolorpicker
+    app=ProcessRecord{a9a860e 6316:io.github.supermonster003.autojs6.plugin.screencolorpicker/u0a239}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=PROC_STATE_TOP
+    mAllowWiu_inBindService=DENIED
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=PROC_STATE_TOP
+    getFgsAllowWiu_new=PROC_STATE_TOP
+    getFgsAllowWiu_forStart=PROC_STATE_TOP
+    getFgsAllowWiu_forCapabilities=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=io.github.supermonster003.autojs6.plugin.screencolorpicker
+    recentCallingUid=10239
+    mAllowStart_noBinding=PROC_STATE_TOP
+    mAllowStart_inBindService=DENIED
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=PROC_STATE_TOP
+    getFgsAllowStart_new=PROC_STATE_TOP
+    getFgsAllowStart=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: io.github.supermonster003.autojs6.plugin.screencolorpicker; callingUid: 10239; uidState: TOP ; uidBFSL: [BFSL]; BFGS denied: false; intent: Intent { act=io.github.supermonster003.autojs6.plugin.screencolorpicker.action.START xflg=0x4 cmp=io.github.supermonster003.autojs6.plugin.screencolorpicker/.ProjectionForegroundService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null; isBindService:false]
+    isForeground=true foregroundId=5456720 types=0x00000020 foregroundNoti=Notification(channel=screen_color_picker shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|ONLY_ALERT_ONCE|NO_CLEAR|FOREGROUND_SERVICE color=0x00000000 category=service actions=1 vis=PRIVATE template=null)
+    createTime=-3s516ms startingBgTimeout=--
+    lastActivity=-3s514ms restartTime=-3s514ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=true callStart=true lastStartId=1
+ startCommandResult=2

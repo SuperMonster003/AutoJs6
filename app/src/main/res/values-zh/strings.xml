@@ -3,6 +3,11 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">Android 17 高级保护可能限制非辅助工具的无障碍服务, 包括此兼容服务. 仅凭全局模式不能判断此服务是否被阻止. 请检查实际服务状态和 Android 无障碍设置. 授予安全设置权限不会绕过系统限制.</string>
+    <string name="a11y_advanced_protection_off">已关闭</string>
+    <string name="a11y_advanced_protection_on">已开启</string>
+    <string name="a11y_advanced_protection_title">高级保护</string>
+    <string name="a11y_advanced_protection_unknown">无法读取</string>
     <string name="apk_builder_build">构建中</string>
     <string name="apk_builder_clean">清理临时文件</string>
     <string name="apk_builder_package">打包中</string>

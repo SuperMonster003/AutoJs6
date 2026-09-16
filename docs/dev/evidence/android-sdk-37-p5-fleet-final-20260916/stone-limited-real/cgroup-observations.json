@@ -1,0 +1,71 @@
+[
+  {
+    "time": 1789527179.3844113,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "max",
+    "memory.swap.max": "max",
+    "memory.current": "64102400",
+    "memory.peak": "65077248",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+  },
+  {
+    "time": 1789527181.5849845,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "2147483648",
+    "memory.swap.max": "2147483648",
+    "memory.current": "69537792",
+    "memory.peak": "159301632",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+  },
+  {
+    "time": 1789527184.5088348,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "2147483648",
+    "memory.swap.max": "2147483648",
+    "memory.current": "1224187904",
+    "memory.peak": "1483309056",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+  },
+  {
+    "time": 1789527187.7173214,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "2252341248",
+    "memory.swap.max": "2147483648",
+    "memory.current": "2027278336",
+    "memory.peak": "2230661120",
+    "memory.events": "low 0\nhigh 2\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+  },
+  {
+    "time": 1789527190.1879604,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "2252341248",
+    "memory.swap.max": "2147483648",
+    "memory.current": "2022576128",
+    "memory.peak": "2230661120",
+    "memory.events": "low 0\nhigh 2\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+  },
+  {
+    "time": 1789527192.8561282,
+    "uid": 10231,
+    "pid": 6840,
+    "name": "io.github.supermonster003.autojs6.plugin.threestoneai",
+    "cgroup": "/apps/uid_10231/pid_6840",
+    "memory.high": "2252341248",
+    "memory.swap.max": "2147483648"
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "package": "io.github.supermonster003.autojs6.plugin.videoplayer",
+  "serial": "emulator-5568",
+  "fingerprint": "google/sdk_gphone16k_x86_64/emu64xa16k:17/CP31.260623.012/16064790:userdebug/dev-keys",
+  "pageSize": 16384,
+  "targetSdk": 37,
+  "apkSha256": "a347ccb978af94fd94ba4152c1ecf95766c51ef3011a2d8f4065770a9c29ff90",
+  "hardeningOverride": 3,
+  "background": {
+    "state": 3,
+    "position": 11734,
+    "foreground": true
+  },
+  "paused": {
+    "state": 2,
+    "position": 18060,
+    "foreground": true
+  },
+  "locked": {
+    "state": 3,
+    "position": 24167,
+    "foreground": true
+  },
+  "lockedPaused": {
+    "state": 2,
+    "position": 24913,
+    "foreground": true
+  },
+  "stopReleasedForegroundService": true,
+  "physicalAudibilityTested": false
+}

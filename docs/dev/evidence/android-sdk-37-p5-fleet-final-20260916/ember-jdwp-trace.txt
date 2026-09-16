@@ -1,0 +1,72 @@
+ATTACHED
+1789525034925 io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:356
+  foregroundStarted=false
+  serviceState=instance of io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundServiceState(id=92)
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:356
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:166
+  android.app.ActivityThread:5829
+  android.app.ActivityThread.-$$Nest$mhandleServiceArgs(android.app.ActivityThread, android.app.ActivityThread$ServiceArgsData)+0
+  android.app.ActivityThread$H:2870
+  android.os.Handler:142
+  android.os.Handler:126
+  android.os.Looper:295
+  android.os.Looper:398
+1789525035210 android.app.Service:861
+  foregroundStarted=false
+  serviceState=instance of io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundServiceState(id=92)
+  android.app.Service:861
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:366
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:166
+  android.app.ActivityThread:5829
+  android.app.ActivityThread.-$$Nest$mhandleServiceArgs(android.app.ActivityThread, android.app.ActivityThread$ServiceArgsData)+0
+  android.app.ActivityThread$H:2870
+  android.os.Handler:142
+  android.os.Handler:126
+  android.os.Looper:295
+1789525037180 io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:245
+  foregroundStarted=true
+  serviceState=instance of io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundServiceState(id=92)
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:245
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:231
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackCoordinator:92
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.VideoPlayerActivity:1176
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.VideoPlayerActivity:527
+  android.app.Activity:9580
+  android.app.Instrumentation:1797
+  android.app.ActivityThread:6201
+  android.app.ActivityThread:6182
+1789525038724 io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:181
+  foregroundStarted=true
+  serviceState=instance of io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundServiceState(id=92)
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:181
+  androidx.media3.session.MediaSessionService:872
+  androidx.media3.session.MediaNotificationManager$MediaControllerListener:468
+  androidx.media3.session.MediaNotificationManager:141
+  androidx.media3.session.MediaNotificationManager$$ExternalSyntheticLambda7:0
+  androidx.media3.common.util.Util:837
+  androidx.media3.session.MediaNotificationManager:103
+  androidx.media3.session.MediaNotificationManager$$ExternalSyntheticLambda2:0
+  com.google.common.util.concurrent.AbstractFuture:1300
+1789525038966 android.app.NotificationManager:1021
+  android.app.NotificationManager:1021
+  androidx.core.app.NotificationManagerCompat:248
+  androidx.core.app.NotificationManagerCompat:238
+  androidx.media3.ui.PlayerNotificationManager:1224
+  androidx.media3.ui.PlayerNotificationManager:832
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.PlayerSystemIntegration:43
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.VideoPlayerActivity:1181
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.VideoPlayerActivity:527
+  android.app.Activity:9580
+1789525052388 io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:181
+  foregroundStarted=true
+  serviceState=instance of io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundServiceState(id=112)
+  io.github.supermonster003.autojs6.plugin.threeemberplayer.BackgroundPlaybackService:181
+  androidx.media3.session.MediaSessionService:872
+  androidx.media3.session.MediaNotificationManager$MediaControllerListener:517
+Ignoring cmd 399/199/1 from the VM
+  androidx.media3.session.MediaControllerImplBase:185
+  androidx.media3.session.MediaControllerImplBase$$ExternalSyntheticLambda86:0
+  androidx.media3.common.util.ListenerSet$ListenerHolder:477
+  androidx.media3.common.util.ListenerSet:421
+  androidx.media3.common.util.ListenerSet.$r8$lambda$rFcF5Pkb99AL585p5-2u78YfNkY(androidx.media3.common.util.ListenerSet, android.os.Message)+0
+  androidx.media3.common.util.ListenerSet$$ExternalSyntheticLambda0:0

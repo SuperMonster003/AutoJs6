@@ -1,0 +1,356 @@
+{
+  "date": "2026-09-16",
+  "fleet": {
+    "repositories": 42,
+    "compile37": 42,
+    "target37": 42,
+    "clean": 42,
+    "scan": "fleet-final-scan.json"
+  },
+  "repositories": [
+    {
+      "name": "NodeJs-Runtime",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.5.3",
+      "versionBuild": "174",
+      "head": "861e084c3aba178e94d6349804a1ab3fe4d486ab",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-nodejs-runtime-v1.5.3-universal.apk",
+      "debugApkSha256": "a053fb1f3ff6aaf15155e05bd63b89ec052bf3ab962fd61c5a86aedd37a17cbd",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-nodejs-runtime-v1.5.3-universal.apk",
+      "releaseApkSha256": "78da6daf7b507c8d1c9491bfe82ff0ae1790d48a9b024c4361f4bd08c467fc40",
+      "buildLog": "NodeJs-Runtime-build.log",
+      "releaseLog": "NodeJs-Runtime-head-release.log",
+      "fullSuite": {
+        "log": "NodeJs-Runtime-instrument.txt",
+        "runnerCount": 62,
+        "passed": 62,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 62
+    },
+    {
+      "name": "Bun-Runtime",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 33,
+      "versionName": "0.2.4",
+      "versionBuild": "111",
+      "head": "4a7d654c3260df59f296a39271f38ee9592efc58",
+      "workspaceClean": true,
+      "serial": "emulator-5564",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\app-universal-debug.apk",
+      "debugApkSha256": "bcdd36420477c08f4702fd8f0917ad967dc87089a39b62cb7d3ac41645047d94",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\app-universal-release.apk",
+      "releaseApkSha256": "4bc922a99c2a9951107a71cb173e47ddb2ed0caf348ee426df5c3a9da20c1173",
+      "buildLog": "Bun-Runtime-build.log",
+      "releaseLog": "Bun-Runtime-build.log",
+      "fullSuite": {
+        "log": "Bun-Runtime-instrument.txt",
+        "runnerCount": 19,
+        "passed": 18,
+        "conditionalSkips": [
+          "io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest#cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun"
+        ],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [
+        {
+          "log": "Bun-Runtime-page16k-refusal.txt",
+          "runnerCount": 1,
+          "passed": 1,
+          "conditionalSkips": [],
+          "excludedClassesOrMethods": []
+        }
+      ],
+      "coveredDistinctTests": 19
+    },
+    {
+      "name": "Python-Runtime",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "0.5.4",
+      "versionBuild": "109",
+      "head": "808e716394f545e35e33aaf08dd0d62829390821",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-python-runtime-v0.5.4-universal.apk",
+      "debugApkSha256": "bc378a3c857b3d23621494a306b248e5578d57eb4e82384fe7e4e4b6c860f218",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-python-runtime-v0.5.4-universal.apk",
+      "releaseApkSha256": "572c303d3462fa1fa3bed2b0a75ae754332242c0928c3024d4a944ec15b2dc4d",
+      "buildLog": "Python-Runtime-head-build.log",
+      "releaseLog": "Python-Runtime-head-build.log",
+      "fullSuite": {
+        "log": "Python-Runtime-instrument.txt",
+        "runnerCount": 2,
+        "passed": 2,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 2
+    },
+    {
+      "name": "MCP-Server",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.0.2",
+      "versionBuild": "60",
+      "head": "d4c37966b149f584f5a61f840b20ef2b270f5ee5",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-mcp-server-v1.0.2.apk",
+      "debugApkSha256": "5be662a94697ccb385e7165e61588d85cd29df51006f27dfb392eda08f38acf5",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-mcp-server-v1.0.2.apk",
+      "releaseApkSha256": "f275e024215371b24b8a076944fb4f7eb483fc286ff2a8400b9a7272d0ece928",
+      "buildLog": "MCP-Server-build.log",
+      "releaseLog": "MCP-Server-build.log",
+      "fullSuite": {
+        "log": "MCP-Server-instrument.txt",
+        "runnerCount": 36,
+        "passed": 35,
+        "conditionalSkips": [
+          "io.github.supermonster003.autojs6.plugin.mcp.server.McpServerLifecycleTest#killListenerProcess"
+        ],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [
+        {
+          "log": "MCP-Server-kill-listener-staged.txt",
+          "runnerCount": 1,
+          "passed": 1,
+          "conditionalSkips": [],
+          "excludedClassesOrMethods": []
+        }
+      ],
+      "coveredDistinctTests": 36
+    },
+    {
+      "name": "Screen-Color-Picker",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.1.3",
+      "versionBuild": "15",
+      "head": "c2625fe7e0d266d04b216e9ce3622f0737fa8a7f",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\app-debug.apk",
+      "debugApkSha256": "740468044cb6e74012118f33e80952814a9db9f27873ab13e3b764b8818c80e7",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\app-release.apk",
+      "releaseApkSha256": "fbc403662943df0e23c285baae2f77083f9d2cd39845767dd8a0aedebe6bc480",
+      "buildLog": "Screen-Color-Picker-build.log",
+      "releaseLog": "Screen-Color-Picker-head-release.log",
+      "fullSuite": {
+        "log": "Screen-Color-Picker-instrument.txt",
+        "runnerCount": 10,
+        "passed": 10,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 10
+    },
+    {
+      "name": "Three-Ember-Player",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "3.1.2",
+      "versionBuild": "27",
+      "head": "5cabf8bbb790829dcfe814699fad2bffcacebae3",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-three-ember-player-v3.1.2.apk",
+      "debugApkSha256": "a347ccb978af94fd94ba4152c1ecf95766c51ef3011a2d8f4065770a9c29ff90",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-three-ember-player-v3.1.2.apk",
+      "releaseApkSha256": "86592fb8412b3d65a9e4f84ae062f0d3ca8de1955f04bc8e698363c91f219702",
+      "buildLog": "Three-Ember-Player-build.log",
+      "releaseLog": "Three-Ember-Player-head-release.log",
+      "fullSuite": {
+        "log": "Three-Ember-Player-instrument.txt",
+        "runnerCount": 35,
+        "passed": 35,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 35
+    },
+    {
+      "name": "Three-Terra-Player",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.6.2",
+      "versionBuild": "37",
+      "head": "cf1ed3d6489b9d38692fd6026b1a6f207f2f8093",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-three-terra-player-v1.6.2.apk",
+      "debugApkSha256": "f1269d53d3b2dfffc73d3bb68811f2c9e848f4d3da5ef1561356faf0f6b853f4",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-three-terra-player-v1.6.2.apk",
+      "releaseApkSha256": "04711968b9816df0c9e14ee335bc555b88f6f67e1960be48b943a7f4074954a8",
+      "buildLog": "Three-Terra-Player-build.log",
+      "releaseLog": "Three-Terra-Player-head-release.log",
+      "fullSuite": {
+        "log": "Three-Terra-Player-instrument.txt",
+        "runnerCount": 48,
+        "passed": 48,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 48
+    },
+    {
+      "name": "Three-Stone-AI",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.1.4",
+      "versionBuild": "191",
+      "head": "48a1b59d78056e7eaa3d3b8a2a333a3e2232365a",
+      "workspaceClean": true,
+      "serial": "emulator-5566",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\autojs6-plugin-three-stone-ai-v1.1.4-x86_64.apk",
+      "debugApkSha256": "023a2436fb598b23e16e76c6f672a8dfd5ee9129a7b2db96294e57817480b883",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\autojs6-plugin-three-stone-ai-v1.1.4-universal.apk",
+      "releaseApkSha256": "037bf22552334733766d6daf0424916f22e4c0c32f1e8c599ce7c3273c05eacd",
+      "buildLog": "Three-Stone-AI-build.log",
+      "releaseLog": "Three-Stone-AI-head-release.log",
+      "fullSuite": {
+        "log": "Three-Stone-AI-head-full-instrument.txt",
+        "runnerCount": 3,
+        "passed": 3,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 3
+    },
+    {
+      "name": "Accessibility-Compat",
+      "compileSdk": 37,
+      "targetSdk": 37,
+      "minSdk": 24,
+      "versionName": "1.3.1",
+      "versionBuild": "18",
+      "head": "d822ccd7c1f9d7d0ca0cb6c72397f40de0138781",
+      "workspaceClean": true,
+      "serial": "emulator-5568",
+      "debugApk": "app\\build\\outputs\\apk\\debug\\app-debug.apk",
+      "debugApkSha256": "82a40baa9cb8090a9cb50297449bcf3cb8584c18d2ee5e55d87bb29551fdda7c",
+      "releaseApk": "app\\build\\outputs\\apk\\release\\app-release.apk",
+      "releaseApkSha256": "39dcb06a1392df55c0418c76f685f02450f659f1aea9613ad617c59442fa4ade",
+      "buildLog": "Accessibility-Compat-build.log",
+      "releaseLog": "Accessibility-Compat-head-release.log",
+      "fullSuite": {
+        "log": "Accessibility-Compat-instrument.txt",
+        "runnerCount": 12,
+        "passed": 12,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      "supplements": [],
+      "coveredDistinctTests": 12
+    }
+  ],
+  "tests": {
+    "runnerCount": 227,
+    "passedInFullSuites": 225,
+    "conditionalCasesPassedSeparately": 2,
+    "coveredDistinctTests": 227,
+    "classesOrMethodsExcludedFromFullSuites": []
+  },
+  "opencc": {
+    "head": "5c040622e454cb840eb52ae487de87cab2a39817",
+    "serial": "emulator-5564",
+    "fullSuite": {
+      "log": "OpenCC-instrument.txt",
+      "runnerCount": 9,
+      "passed": 5,
+      "conditionalSkips": [
+        "io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest#capturePopulatedStandaloneScreen",
+        "io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest#firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource",
+        "io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest#measureSelectedEngineAndPhase",
+        "io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest#verifiedArchiveIsReusedAcrossARealProcessRestart"
+      ],
+      "excludedClassesOrMethods": []
+    },
+    "supplements": [
+      {
+        "log": "opencc-phased/entry-standalone.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "opencc-phased/entry-binder.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "opencc-phased/restart-prepare.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "opencc-phased/restart-verify.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "opencc-phased/screenshot.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "OpenCC-benchmark-first-load.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      },
+      {
+        "log": "OpenCC-benchmark-steady-state.txt",
+        "runnerCount": 1,
+        "passed": 1,
+        "conditionalSkips": [],
+        "excludedClassesOrMethods": []
+      }
+    ],
+    "coveredDistinctTests": 9,
+    "successfulInvocations": 12
+  },
+  "cleanup": {
+    "directoryCount": 29,
+    "bytes": 10268480729,
+    "removedDirectories": 0,
+    "status": "blocked_by_automatic_approval_review",
+    "reasonProvided": false,
+    "retainedCurrentEvidence": "build/verification/sdk37-fleet-final-20260916"
+  },
+  "limits": [
+    "No physical audibility claim from headless AVD playback.",
+    "MemoryLimiter test uses a dedicated 6 GiB AVD vendor configuration; soft memory.high with adaptive increase, no kill.",
+    "Advanced Protection enabled did not block this service on the tested image.",
+    "Per-device and per-client release matrices are not replaced by these target SDK checks."
+  ]
+}

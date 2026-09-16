@@ -1,0 +1,62 @@
+[
+  {
+    "protection": false,
+    "secureSettingsTest": true,
+    "forceStopRebinds": 2,
+    "notice": "Off\n\nAndroid 17 Advanced Protection can restrict accessibility services that are not accessibility tools, including this compatibility service. The global mode alone does not establish whether this service is blocked. Check the actual service state and Android accessibility settings. Granting secure settings access does not bypass system restrictions.",
+    "homeStates": [
+      [
+        "AutoJs6 Accessibility Compat",
+        "An optional experimental companion that may help AutoJs6 retrieve accessibility nodes from supported apps.",
+        "Compatibility service",
+        "Enabled",
+        "Enabled. AutoJs6 service: Not installed",
+        "Currently supported apps",
+        "com.tencent.mm",
+        "Not installed",
+        "Version: 1.3.1"
+      ],
+      [
+        "AutoJs6 Accessibility Compat",
+        "An optional experimental companion that may help AutoJs6 retrieve accessibility nodes from supported apps.",
+        "Compatibility service",
+        "Enabled",
+        "Enabled. AutoJs6 service: Not installed",
+        "Currently supported apps",
+        "com.tencent.mm",
+        "Not installed",
+        "Version: 1.3.1"
+      ]
+    ]
+  },
+  {
+    "protection": true,
+    "secureSettingsTest": true,
+    "forceStopRebinds": 2,
+    "notice": "On\n\nAndroid 17 Advanced Protection can restrict accessibility services that are not accessibility tools, including this compatibility service. The global mode alone does not establish whether this service is blocked. Check the actual service state and Android accessibility settings. Granting secure settings access does not bypass system restrictions.",
+    "homeStates": [
+      [
+        "AutoJs6 Accessibility Compat",
+        "An optional experimental companion that may help AutoJs6 retrieve accessibility nodes from supported apps.",
+        "Compatibility service",
+        "Enabled",
+        "Enabled. AutoJs6 service: Not installed",
+        "Currently supported apps",
+        "com.tencent.mm",
+        "Not installed",
+        "Version: 1.3.1"
+      ],
+      [
+        "AutoJs6 Accessibility Compat",
+        "An optional experimental companion that may help AutoJs6 retrieve accessibility nodes from supported apps.",
+        "Compatibility service",
+        "Enabled",
+        "Enabled. AutoJs6 service: Not installed",
+        "Currently supported apps",
+        "com.tencent.mm",
+        "Not installed",
+        "Version: 1.3.1"
+      ]
+    ]
+  }
+]

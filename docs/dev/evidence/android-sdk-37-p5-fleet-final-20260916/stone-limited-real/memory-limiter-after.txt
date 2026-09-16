@@ -1,0 +1,5 @@
+Memory limiter
+  enabled                  limits=true              monitoring=true          killing=true             ignored=none
+  visibleMem=4096MB        visibleSwap=2048MB       notVisibleMem=2048MB     notVisibleSwap=2048MB
+  started=47               watched=47               watch-failed=0           events=1                 false-events=0
+  processes=47             process-hwm=47           red-poll=2               red-process=0

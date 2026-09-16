@@ -1,0 +1,50 @@
+MEDIA SESSION SERVICE (dumpsys media_session)
+
+6 sessions listeners.
+Global priority session is com.android.server.telecom/HeadsetMediaButton/1 (userId=0)
+  HeadsetMediaButton com.android.server.telecom/HeadsetMediaButton/1 (userId=0)
+    ownerPid=712, ownerUid=1000, userId=0
+    package=com.android.server.telecom
+    launchIntent=null
+    mediaButtonReceiver=null
+    active=false
+    flags=65537
+    rating type=0
+    controllers: 0
+    state=null
+    audioAttrs=AudioAttributes: usage=USAGE_VOICE_COMMUNICATION content=CONTENT_TYPE_SPEECH flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null
+    volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0
+    metadata: null
+    queueTitle=null, size=0
+User Records:
+Record for full_user=0
+  Volume key long-press listener: null
+  Volume key long-press listener package:
+  Media key listener: null
+  Media key listener package:
+  OnMediaKeyEventDispatchedListener: added 0 listener(s)
+  OnMediaKeyEventSessionChangedListener: added 1 listener(s)
+    from com.google.android.bluetooth
+  Last MediaButtonReceiver: null
+  Media button session is io.github.supermonster003.autojs6.plugin.videoplayer/androidx.media3.session.id.background-audio-86e6875f-d3c5-4957-ba72-42702de8e409/16 (userId=0)
+  Sessions Stack - have 1 sessions:
+    androidx.media3.session.id.background-audio-86e6875f-d3c5-4957-ba72-42702de8e409 io.github.supermonster003.autojs6.plugin.videoplayer/androidx.media3.session.id.background-audio-86e6875f-d3c5-4957-ba72-42702de8e409/16 (userId=0)
+      ownerPid=14119, ownerUid=10258, userId=0
+      package=io.github.supermonster003.autojs6.plugin.videoplayer
+      launchIntent=PendingIntent{30a8170: PendingIntentRecord{45187f0 io.github.supermonster003.autojs6.plugin.videoplayer startActivity (allowlist: d3bb59f:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}
+      mediaButtonReceiver=null
+      active=true
+      flags=7
+      rating type=0
+      controllers: 9
+      state=PlaybackState {state=PLAYING(3), position=11734, buffered position=51153, speed=1.0, updated=4585887, actions=7339995, custom actions=[], active item id=0, error=null}
+      audioAttrs=AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MOVIE flags=0x800(FLAG_MUTE_HAPTIC)  tags= bundle=null
+      volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0
+      metadata: size=5, description=fixture.mp4, null, null
+      queueTitle=null, size=1
+Audio playback (lastly played comes first)
+  uid=10258 packages=io.github.supermonster003.autojs6.plugin.videoplayer
+Media session config:
+  media_session_calback_fgs_allowlist_duration_ms: [cur: 10000, def: 10000]
+  media_session_callback_fgs_while_in_use_temp_allow_duration_ms: [cur: 10000, def: 10000]
+  media_session_temp_user_engaged_duration_ms: [cur: 600000, def: 600000]

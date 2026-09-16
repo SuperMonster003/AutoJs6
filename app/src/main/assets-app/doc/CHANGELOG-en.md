@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/15
+###### 2026/09/16
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -386,6 +386,7 @@
 * `Fix` `images.matchFeatures` returned a wrongly sized frame when the object features were computed with a `scale` other than 1, re-sorted the corners so a rotated object lost the correspondence to its own corners, could return a distorted frame from an unreliable homography, drew the `drawMatches` image from the descriptor matrices instead of the images, and threw an OpenCV error for images without key points
 * `Fix` `images.detectAndComputeFeatures` leaked its intermediate matrices, and ORB found no key points at all in images smaller than 63 px and only a few in small objects because of the default 31 px border
 * `Fix` The MCP Server session controller rebound the plugin about one second after the user force-stopped it in the system settings, which started it again against that decision; a plugin that is no longer available after its process died (stopped, disabled or uninstalled) is not rebound any more, the drawer switch closes and its subtitle shows the activation guide the way a fresh install does
+* `Improvement` Explain Advanced Protection in the host and companion, showing the global mode separately from actual service availability and secure settings control
 * `Improvement` Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state
 * `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback

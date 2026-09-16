@@ -1,0 +1,22 @@
+[
+  {
+    "phase": "entry-standalone",
+    "passed": true
+  },
+  {
+    "phase": "entry-binder",
+    "passed": true
+  },
+  {
+    "phase": "restart-prepare",
+    "passed": true
+  },
+  {
+    "phase": "restart-verify",
+    "passed": true
+  },
+  {
+    "phase": "screenshot",
+    "passed": true
+  }
+]

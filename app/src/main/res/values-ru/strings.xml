@@ -7,6 +7,11 @@
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="a11y_advanced_protection_explanation">Расширенная защита Android 17 может ограничивать службы, не являющиеся средствами специальных возможностей, включая эту службу совместимости. Глобальный режим сам по себе не означает блокировку службы. Проверьте фактическое состояние службы и настройки специальных возможностей Android. Разрешение изменения защищенных настроек не обходит системные ограничения.</string>
+    <string name="a11y_advanced_protection_off">Выключена</string>
+    <string name="a11y_advanced_protection_on">Включена</string>
+    <string name="a11y_advanced_protection_title">Расширенная защита</string>
+    <string name="a11y_advanced_protection_unknown">Недоступно</string>
     <string name="apk_builder_build">Строительство</string>
     <string name="apk_builder_clean">Очистка</string>
     <string name="apk_builder_package">Упаковка</string>

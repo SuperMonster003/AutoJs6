@@ -1,0 +1,52 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.LiteRtRealModelInferenceInstrumentationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.threestoneai.LiteRtRealModelInferenceInstrumentationTest:
+INSTRUMENTATION_STATUS: test=stagedRealModelIsCatalogedInitializedAndGeneratesText
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.LiteRtRealModelInferenceInstrumentationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=stagedRealModelIsCatalogedInitializedAndGeneratesText
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.PluginDiscoveryAndroidTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.threestoneai.PluginDiscoveryAndroidTest:
+INSTRUMENTATION_STATUS: test=wakeIsDiscoverableAndPermissionProtected
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.PluginDiscoveryAndroidTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=wakeIsDiscoverableAndPermissionProtected
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.PluginDiscoveryAndroidTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=infoDiscoveryBindingAndInstalledMetadataAgree
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.threestoneai.PluginDiscoveryAndroidTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=infoDiscoveryBindingAndInstalledMetadataAgree
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 23.506
+
+OK (3 tests)
+
+
+INSTRUMENTATION_CODE: -1

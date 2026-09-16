@@ -1,0 +1,67 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest:
+INSTRUMENTATION_STATUS: test=cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=en pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=ar pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=es pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=fr pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=ja pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=ko pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=ru pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=zh-CN pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=zh-HK pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES page-refusal locale=zh-TW pages=16384 prewarmInfoRun=true finishedMatches=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+BUN_MESSAGES localeRestored=true
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.bun.runtime.BunRuntimeMessagesInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=cachedPageSizeRefusalFollowsLocaleInPrewarmInfoAndRun
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 1.161
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

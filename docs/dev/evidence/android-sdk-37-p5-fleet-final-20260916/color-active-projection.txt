@@ -1,0 +1,17 @@
+MEDIA PROJECTION MANAGER (dumpsys media_projection)
+Media Projection:
+Projection:
+    packageName: io.github.supermonster003.autojs6.plugin.screencolorpicker
+    uid: 10239
+    userHandle: UserHandle{0}
+    type: TYPE_SCREEN_CAPTURE
+    started: 743839
+    privileged: false
+    granted SAW: false
+    granted SAO: false
+    mIsRecordingOverlay: false
+    mRecordingOverlayStopAtLayer: null
+    displayId of the mirror display: 2
+    displayId of the display to mirror: 0
+    taskId to mirror: -1
+    mSession: ContentRecordingSession { taskId = -1, recordingOwnerUid = 0, virtualDisplayId = 2, contentToRecord = RECORD_CONTENT_DISPLAY, displayToRecord = 0, tokenToRecord = null, recordingOverlayToken = null, waitingForConsent = false, targetUid = -1 }

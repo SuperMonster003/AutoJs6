@@ -1,0 +1,26 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest:
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: stream=OPENCC_BENCHMARK_JSON={"schema_version":1,"engine":"official","phase":"steady-state","pid":10278,"sdk_int":37,"android_release":"17","model":"sdk_gphone64_x86_64","fingerprint":"google\/sdk_gphone64_x86_64\/emu64xa:17\/CE2A.260420.019\/15611780:userdebug\/dev-keys","process_is_64_bit":true,"supported_abis":["x86_64","arm64-v8a"],"page_size_bytes":4096,"input_utf16_units":1376,"input_code_points":1312,"cold_conversion_ns":228200932,"warmup_iterations":20,"warm_iterations":200,"warm_min_ns":358776,"warm_median_ns":407546,"warm_p95_ns":625070,"warm_max_ns":1407057,"warm_total_ns":90049566,"batch_size":1024,"batch_input_utf16_units":27562,"batch_output_utf16_units":27562,"batch_total_ns":27374521,"memory_before":{"total_pss_kb":47286,"total_private_dirty_kb":42804,"native_heap_bytes":5700736,"java_heap_bytes":2115296},"memory_after_cold":{"total_pss_kb":77021,"total_private_dirty_kb":69704,"native_heap_bytes":31660144,"java_heap_bytes":2184976},"memory_before_workload":{"total_pss_kb":77060,"total_private_dirty_kb":69516,"native_heap_bytes":31660736,"java_heap_bytes":2205456},"memory_after_workload":{"total_pss_kb":77300,"total_private_dirty_kb":69752,"native_heap_bytes":31661312,"java_heap_bytes":2209552},"memory_peak":{"total_pss_kb":77888,"total_private_dirty_kb":70340,"native_heap_bytes":31702960,"java_heap_bytes":2762608},"peak_pss_delta_kb":30602}
+
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.749
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

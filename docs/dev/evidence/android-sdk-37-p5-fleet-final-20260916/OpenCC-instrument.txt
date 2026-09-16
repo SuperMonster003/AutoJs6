@@ -1,0 +1,163 @@
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccAccessibilityLayoutTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccAccessibilityLayoutTest:
+INSTRUMENTATION_STATUS: test=standaloneUiHasStableSemanticsKeyboardFlowAndResponsiveLayouts
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccAccessibilityLayoutTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=standaloneUiHasStableSemanticsKeyboardFlowAndResponsiveLayouts
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest:
+INSTRUMENTATION_STATUS: test=capturePopulatedStandaloneScreen
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stack=org.junit.AssumptionViolatedException: Run scripts/ci/run_phased_device_tests.py or pass -e opencc_screenshot_file
+	at org.junit.Assume.assumeTrue(Assume.java:68)
+	at io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest.capturePopulatedStandaloneScreen(OpenccDocumentationScreenshotTest.kt:36)
+
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccDocumentationScreenshotTest:
+INSTRUMENTATION_STATUS: test=capturePopulatedStandaloneScreen
+INSTRUMENTATION_STATUS_CODE: -4
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryLifecycleTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryLifecycleTest:
+INSTRUMENTATION_STATUS: test=uiAndBinderStayIsolatedAcrossConcurrencyBackgroundAndComponentRestart
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryLifecycleTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=uiAndBinderStayIsolatedAcrossConcurrencyBackgroundAndComponentRestart
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryTest:
+INSTRUMENTATION_STATUS: test=launcherAndBinderUseTheSameOfficialBackend
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccDualEntryTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=launcherAndBinderUseTheSameOfficialBackend
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest:
+INSTRUMENTATION_STATUS: test=firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stack=org.junit.AssumptionViolatedException: Run scripts/ci/run_phased_device_tests.py or pass -e opencc_entry_resource_phase
+	at org.junit.Assume.assumeTrue(Assume.java:68)
+	at io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest.firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource(OpenccEntryResourceTest.kt:50)
+
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccEntryResourceTest:
+INSTRUMENTATION_STATUS: test=firstEntryConversionUsesOnlyTheVerifiedEmbeddedResource
+INSTRUMENTATION_STATUS_CODE: -4
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest:
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stack=org.junit.AssumptionViolatedException: Pass -e opencc_benchmark_engine official and -e opencc_benchmark_phase {first-load|steady-state}
+	at org.junit.Assume.assumeTrue(Assume.java:68)
+	at io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest.measureSelectedEngineAndPhase(OpenccPerformanceBenchmarkTest.kt:48)
+
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccPerformanceBenchmarkTest:
+INSTRUMENTATION_STATUS: test=measureSelectedEngineAndPhase
+INSTRUMENTATION_STATUS_CODE: -4
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPluginServiceTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccPluginServiceTest:
+INSTRUMENTATION_STATUS: test=discoveryBindingMetadataAndAllConversionTypesRoundTrip
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccPluginServiceTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=discoveryBindingMetadataAndAllConversionTypesRoundTrip
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest:
+INSTRUMENTATION_STATUS: test=verifiedArchiveIsReusedAcrossARealProcessRestart
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stack=org.junit.AssumptionViolatedException: Run scripts/ci/run_phased_device_tests.py or pass -e opencc_resource_restart_phase
+	at org.junit.Assume.assumeTrue(Assume.java:68)
+	at io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest.verifiedArchiveIsReusedAcrossARealProcessRestart(OpenccResourceRestartTest.kt:37)
+
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccResourceRestartTest:
+INSTRUMENTATION_STATUS: test=verifiedArchiveIsReusedAcrossARealProcessRestart
+INSTRUMENTATION_STATUS_CODE: -4
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccStandaloneUiTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+io.github.supermonster003.autojs6.plugin.opencc.OpenccStandaloneUiTest:
+INSTRUMENTATION_STATUS: test=allStandaloneActionsRemainExplicitCancellableAndRestorable
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.github.supermonster003.autojs6.plugin.opencc.OpenccStandaloneUiTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=allStandaloneActionsRemainExplicitCancellableAndRestorable
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 22.157
+
+OK (9 tests)
+
+
+INSTRUMENTATION_CODE: -1
