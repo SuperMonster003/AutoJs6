@@ -652,6 +652,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 布局层次窗口: 行内摘要显示 id / text / desc / clickable 等属性, 选中节点及其全部父级在树中高亮并在屏幕上勾出边框, 树支持横向滚动, 菜单新增 "选择父控件" 逐级上溯, 首次进入提示可用音量减键退出
 * `优化` 终端: 离开界面后会话在后台继续运行 (前台服务通知显示当前目录并提供 "关闭会话" 操作), 重新打开终端时接回运行中的会话
 * `优化` 特征匹配仅保留 RANSAC 内点并校验投影四边形, 匹配器与描述子类型不兼容时自动修正而非抛出异常, `scale` 允许大于 1 以放大小目标, ORB 默认检测最多 20000 个关键点, 避免纹理丰富的场景挤占目标区域的关键点
+* `优化` Node bridge 新增只读的 app.listDocs / app.readDoc (枚举与读取已安装 AutoJs6-Plugin-Offline-Docs 经校验的离线文档资产, 路径限制在文档根内, 单次读取上限 1 MiB, 无可用插件时返回 available: false), 供 MCP Server 插件提供 autojs6://docs/ 资源
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

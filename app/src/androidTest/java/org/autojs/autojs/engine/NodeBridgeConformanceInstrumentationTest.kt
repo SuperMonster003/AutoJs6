@@ -1274,7 +1274,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.EVENTS to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
             NodeBridgeModules.KEYS to setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog"),
             NodeBridgeModules.TOAST to setOf("showToast", "toast"),
-            NodeBridgeModules.APP to setOf("listSamples", "readSample", 
+            NodeBridgeModules.APP to setOf("listSamples", "readSample", "listDocs", "readDoc",
                 "launchPackage",
                 "launchApp",
                 "openAppSetting",

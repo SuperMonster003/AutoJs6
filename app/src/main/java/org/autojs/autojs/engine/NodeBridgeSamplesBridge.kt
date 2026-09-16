@@ -1,27 +1,42 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.content.res.AssetManager
+import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
+import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginStateMonitor
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.InputStream
+import java.util.Locale
 
 /**
  * The JSON layer of `app.listSamples(path?, options?)` / `app.readSample(path, options?)` over
- * [NodeBridgeSampleCatalog] backed by the application's asset manager (MCP roadmap P1.3, D20).
- * Read-only; the `inrt` flavor ships no samples, so the root listing reports `available: false`.
+ * [NodeBridgeSampleCatalog] backed by the application's asset manager (MCP roadmap P1.3, D20),
+ * and of `app.listDocs(path?, options?)` / `app.readDoc(path, options?)` over
+ * [NodeBridgeDocsCatalog] backed by the verified assets of the installed Offline Documentation
+ * plugin (MCP roadmap P3.5, D20). Read-only; the `inrt` flavor ships no samples and a host
+ * without an eligible documentation plugin has no docs, so the root listings report
+ * `available: false`.
  *
  * zh-CN: `app.listSamples(path?, options?)` / `app.readSample(path, options?)` 的 JSON 层, 基于以应用 asset manager 为后端的
- * [NodeBridgeSampleCatalog] (MCP 路线图 P1.3, D20). 只读; `inrt` 风味不含示例, 根列表报告 `available: false`.
+ * [NodeBridgeSampleCatalog] (MCP 路线图 P1.3, D20); 以及 `app.listDocs(path?, options?)` / `app.readDoc(path, options?)` 的 JSON 层,
+ * 基于以已安装离线文档插件的已校验资产为后端的 [NodeBridgeDocsCatalog] (MCP 路线图 P3.5, D20). 只读; `inrt` 风味不含示例,
+ * 无可用文档插件的宿主没有文档, 根列表均报告 `available: false`.
  *
  * Created by SuperMonster003 on Sep 8, 2026.
  */
 internal class NodeBridgeSamplesBridge(context: Context) {
 
-    private val assets = context.applicationContext.assets
+    private val appContext = context.applicationContext
+
+    private val assets = appContext.assets
 
     private val catalog = NodeBridgeSampleCatalog(
         lister = { path -> runCatching { assets.list(path) }.getOrNull() },
         opener = { path -> runCatching { assets.open(path) }.getOrNull() },
     )
+
+    private val docsCatalog = NodeBridgeDocsCatalog(source = ::docsSource)
 
     fun dispatch(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = runCatching { JSONArray(request.argsJson) }.getOrDefault(JSONArray())
@@ -29,6 +44,8 @@ internal class NodeBridgeSamplesBridge(context: Context) {
             when (request.method) {
                 "listSamples" -> listSamples(request, args)
                 "readSample" -> readSample(request, args)
+                "listDocs" -> listDocs(request, args)
+                "readDoc" -> readDoc(request, args)
                 else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
             }
         } catch (error: NodeBridgeFileScopeException) {
@@ -57,12 +74,7 @@ internal class NodeBridgeSamplesBridge(context: Context) {
         )
         val entries = JSONArray()
         result.entries.forEach { entry ->
-            entries.put(
-                JSONObject()
-                    .put("path", entry.path)
-                    .put("name", entry.name)
-                    .put("type", if (entry.isDirectory) TYPE_DIRECTORY else TYPE_FILE),
-            )
+            entries.put(entryJson(entry.path, entry.name, entry.isDirectory))
         }
         return success(
             request,
@@ -96,6 +108,116 @@ internal class NodeBridgeSamplesBridge(context: Context) {
                 .put("truncated", result.truncated)
                 .put("content", result.content),
         )
+    }
+
+    private fun listDocs(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val path = pathArg(args, 0, NodeBridgeDocsCatalog.ROOT_PATH)
+        val options = optionsArg(request, args, 1, LIST_KEYS)
+        val recursive = booleanOf(options, "recursive", false)
+        val result = docsCatalog.list(
+            path = path,
+            recursive = recursive,
+            maxEntries = intOf(options, "maxEntries", NodeBridgeDocsCatalog.MAX_LIST_ENTRIES),
+        )
+        val entries = JSONArray()
+        result.entries.forEach { entry ->
+            entries.put(entryJson(entry.path, entry.name, entry.isDirectory))
+        }
+        val json = JSONObject()
+            .put("schema", SCHEMA_LIST_DOCS)
+            .put("root", NodeBridgeDocsCatalog.ASSET_ROOT)
+            .put("path", result.path)
+            .put("recursive", recursive)
+            .put("available", result.available)
+        val source = result.source
+        if (source != null) {
+            json.put("status", STATUS_AVAILABLE)
+                .put("packageName", source.packageName)
+                .put("contentVersion", source.contentVersion)
+                .put("contractVersion", source.contractVersion)
+                .put("entryPoint", source.entryPoint)
+                .put("fileCount", source.fileCount)
+                .put("totalBytes", source.totalBytes)
+        } else {
+            val state = OfflineDocsPluginStateMonitor.current(appContext)
+            json.put("status", state.status.name.lowercase(Locale.ROOT))
+            state.errorCode?.let { json.put("errorCode", it.name.lowercase(Locale.ROOT)) }
+        }
+        return success(
+            request,
+            json.put("count", result.entries.size)
+                .put("truncated", result.truncated)
+                .put("entries", entries),
+        )
+    }
+
+    private fun readDoc(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val options = optionsArg(request, args, 1, READ_KEYS)
+        val result = docsCatalog.read(
+            path = pathArg(args, 0),
+            encoding = options.optString("encoding", NodeBridgeFileScope.ENCODING_UTF8),
+            maxBytes = intOf(options, "maxBytes", NodeBridgeDocsCatalog.MAX_READ_BYTES),
+        )
+        return success(
+            request,
+            JSONObject()
+                .put("schema", SCHEMA_READ_DOC)
+                .put("root", NodeBridgeDocsCatalog.ASSET_ROOT)
+                .put("path", result.path)
+                .put("encoding", result.encoding)
+                .put("bytes", result.bytes)
+                .put("truncated", result.truncated)
+                .put("content", result.content),
+        )
+    }
+
+    /**
+     * The plugin the host trusts right now, as seen by the same monitor the documentation UI uses.
+     * While the monitor's first inspection is still running, the plugin is loaded (and verified)
+     * synchronously on the bridge thread instead of answering `available: false` too early.
+     */
+    private fun docsSource(): NodeBridgeDocsCatalog.Source? {
+        val plugin = OfflineDocsPluginStateMonitor.loadedPlugin(appContext)
+            ?: OfflineDocsPluginStateMonitor.current(appContext)
+                .takeIf { it.status == OfflineDocsPluginStateMonitor.Status.LOADING }
+                ?.let { runCatching { OfflineDocsPluginHost.load(appContext) }.getOrNull() }
+            ?: return null
+        return DocsSource(plugin)
+    }
+
+    private class DocsSource(private val plugin: OfflineDocsPluginHost.LoadedPlugin) : NodeBridgeDocsCatalog.Source {
+
+        override val packageName: String
+            get() = plugin.candidate.serviceInfo.packageName
+
+        override val contentVersion: String
+            get() = plugin.candidate.contentVersion
+
+        override val contractVersion: Int
+            get() = plugin.candidate.contractVersion
+
+        override val entryPoint: String
+            get() = plugin.candidate.entryPoint
+
+        override val fileCount: Long
+            get() = plugin.candidate.fileCount
+
+        override val totalBytes: Long
+            get() = plugin.candidate.totalBytes
+
+        override val assetPaths: Set<String>
+            get() = plugin.verifiedAssetPaths
+
+        override fun open(relativePath: String): InputStream? = runCatching {
+            plugin.assetManager.open("${plugin.candidate.assetRoot}/$relativePath", AssetManager.ACCESS_STREAMING)
+        }.getOrNull()
+    }
+
+    private fun entryJson(path: String, name: String, isDirectory: Boolean): JSONObject {
+        return JSONObject()
+            .put("path", path)
+            .put("name", name)
+            .put("type", if (isDirectory) TYPE_DIRECTORY else TYPE_FILE)
     }
 
     private fun pathArg(args: JSONArray, index: Int, default: String? = null): String {
@@ -159,8 +281,13 @@ internal class NodeBridgeSamplesBridge(context: Context) {
     companion object {
         const val SCHEMA_LIST = "autojs6-bridge-app-list-samples-v1"
         const val SCHEMA_READ = "autojs6-bridge-app-read-sample-v1"
+        const val SCHEMA_LIST_DOCS = "autojs6-bridge-app-list-docs-v1"
+        const val SCHEMA_READ_DOC = "autojs6-bridge-app-read-doc-v1"
         const val TYPE_FILE = "file"
         const val TYPE_DIRECTORY = "directory"
+        const val STATUS_AVAILABLE = "available"
+        val DOCS_METHODS = setOf("listDocs", "readDoc")
+        val METHODS = setOf("listSamples", "readSample") + DOCS_METHODS
         private val LIST_KEYS = setOf("recursive", "maxEntries")
         private val READ_KEYS = setOf("encoding", "maxBytes")
     }

@@ -657,6 +657,8 @@ object NodeBridgeModules {
         "currentWindow",
         "listSamples",
         "readSample",
+        "listDocs",
+        "readDoc",
         "startService",
         "sendBroadcast",
         "getInstalledApps",
@@ -4728,8 +4730,8 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchApp(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (request.method == "listSamples" || request.method == "readSample") {
-            // Asset reads stay off the main thread (MCP roadmap P1.3, D20).
+        if (request.method in NodeBridgeSamplesBridge.METHODS) {
+            // Sample and offline documentation asset reads stay off the main thread (MCP roadmap P1.3 / P3.5, D20).
             callback(samplesBridge.dispatch(request))
             return
         }

@@ -90,19 +90,6 @@ class NodeBridgeSampleCatalog(
 
     private fun isFile(assetPath: String): Boolean = runCatching { opener(assetPath)?.use { true } }.getOrNull() ?: false
 
-    private fun readHead(stream: InputStream, limit: Int): Pair<ByteArray, Boolean> {
-        val buffer = ByteArray(limit)
-        var offset = 0
-        while (offset < limit) {
-            val read = stream.read(buffer, offset, limit - offset)
-            if (read < 0) break
-            offset += read
-        }
-        val bytes = if (offset == limit) buffer else buffer.copyOf(offset)
-        val truncated = offset == limit && stream.read() != -1
-        return bytes to truncated
-    }
-
     companion object {
 
         const val ASSET_ROOT = "sample"
@@ -113,5 +100,19 @@ class NodeBridgeSampleCatalog(
         fun assetPathOf(relative: String): String = if (relative == ROOT_PATH) ASSET_ROOT else "$ASSET_ROOT/$relative"
 
         private fun join(relative: String, name: String): String = if (relative == ROOT_PATH) name else "$relative/$name"
+
+        /** Reads at most [limit] bytes and reports whether the stream had more; shared with [NodeBridgeDocsCatalog]. */
+        internal fun readHead(stream: InputStream, limit: Int): Pair<ByteArray, Boolean> {
+            val buffer = ByteArray(limit)
+            var offset = 0
+            while (offset < limit) {
+                val read = stream.read(buffer, offset, limit - offset)
+                if (read < 0) break
+                offset += read
+            }
+            val bytes = if (offset == limit) buffer else buffer.copyOf(offset)
+            val truncated = offset == limit && stream.read() != -1
+            return bytes to truncated
+        }
     }
 }
