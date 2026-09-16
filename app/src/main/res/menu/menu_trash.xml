@@ -64,6 +64,11 @@
     </item>
 
     <item
+        android:id="@+id/action_remove_broken_items"
+        android:title="@string/text_remove_broken_items"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_clear_trash"
         android:title="@string/text_clear_trash"
         app:showAsAction="never" />

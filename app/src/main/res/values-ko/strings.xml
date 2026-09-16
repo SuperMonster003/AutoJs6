@@ -490,6 +490,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">필수 속성 \"%1$s\" 에 대한 변환기는 null 값을 반환할 수 없습니다</string>
     <string name="error_thread_is_not_alive">스레드는 살아 있지 않습니다</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
+    <string name="error_trash_data_damaged">이 휴지통 항목의 데이터 파일이 손상되어 미리 보거나 복원할 수 없습니다</string>
+    <string name="error_trash_data_missing">이 휴지통 항목의 데이터 파일이 없어 미리 보거나 복원할 수 없습니다. 항목 제거를 고려하세요</string>
     <string name="error_typescript_compilation_failed">TypeScript 컴파일에 실패했습니다</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript 컴파일러 플러그인을 사용할 수 없습니다. 플러그인 센터에서 설치하거나 활성화한 후 다시 시도하세요.</string>
     <string name="error_typescript_project_rename_failed">프로젝트 이름 바꾸기에 실패했습니다. 부분 변경은 유지되지 않았습니다.</string>
@@ -1548,6 +1550,7 @@
     <string name="text_night_mode">야간 모드</string>
     <string name="text_no_auto_mount_plugins">자동 마운트된 플러그인이 없습니다</string>
     <string name="text_no_available_plugins_found_hint">사용 가능한 플러그인을 찾지 못했습니다</string>
+    <string name="text_no_broken_items">손상된 항목 없음</string>
     <string name="text_no_browser">브라우저가 설치되지 않았습니다</string>
     <string name="text_no_content">내용 없음</string>
     <string name="text_no_content_description">콘텐츠 설명 없음</string>
@@ -1847,6 +1850,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>
     <string name="text_remove_all_breakpoints">모든 중단 점을 제거하십시오</string>
+    <string name="text_remove_broken_items">손상된 항목 제거</string>
+    <string name="text_remove_broken_items_confirm">데이터가 없는 손상된 항목 %1$d개를 제거할까요? 이 항목들은 복원할 수 없습니다.</string>
     <string name="text_remove_from_trash">휴지통에서 제거</string>
     <string name="text_remove_from_trash_confirm">이 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_remove_selected_from_trash_confirm">선택한 %d개 항목을 휴지통에서 영구 삭제할까요?</string>
@@ -2125,6 +2130,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
     <string name="text_trash">휴지통</string>
     <string name="text_trash_and_version_history">휴지통 및 버전 기록</string>
+    <string name="text_trash_data_missing">데이터 없음</string>
     <string name="text_trash_max_days">휴지통 보관 일수</string>
     <string name="text_trash_max_total_bytes">휴지통 용량 상한</string>
     <string name="text_trash_quota_exceeded_prompt">이동할 항목의 크기(%1$s)가 휴지통 용량 상한(%2$s)을 초과합니다. 계속하면 공간을 확보하기 위해 휴지통의 오래된 항목이 제거되며, 이 항목들은 새 항목이 들어오면 먼저 제거됩니다.</string>

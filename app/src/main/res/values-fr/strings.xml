@@ -488,6 +488,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Le transformateur pour la propriété requise \"%1$s\" ne peut pas retourner une valeur nulle</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
     <string name="error_timeout_while_querying_plugin_info">Délai d\'attente dépassé lors de la requête des informations du plugin %1$s.</string>
+    <string name="error_trash_data_damaged">Le fichier de données de cet élément de la corbeille est endommagé et ne peut être ni prévisualisé ni restauré</string>
+    <string name="error_trash_data_missing">Le fichier de données de cet élément de la corbeille est manquant, il ne peut donc être ni prévisualisé ni restauré. Envisagez de supprimer l\'élément</string>
     <string name="error_typescript_compilation_failed">La compilation TypeScript a échoué</string>
     <string name="error_typescript_compiler_plugin_unavailable">Le plugin compilateur TypeScript n\'est pas disponible. Installez-le ou activez-le dans le Centre des plugins, puis réessayez.</string>
     <string name="error_typescript_project_rename_failed">Échec du renommage du projet. Aucune modification partielle n\'a été conservée.</string>
@@ -1546,6 +1548,7 @@
     <string name="text_night_mode">Mode nuit</string>
     <string name="text_no_auto_mount_plugins">Aucun plugin avec montage automatique</string>
     <string name="text_no_available_plugins_found_hint">Aucun plugin disponible trouve</string>
+    <string name="text_no_broken_items">Aucun élément défectueux</string>
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
     <string name="text_no_content">Pas de contenu</string>
     <string name="text_no_content_description">Aucune description de contenu</string>
@@ -1845,6 +1848,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
     <string name="text_remove_all_breakpoints">Supprimer tous les points d\'arrêt</string>
+    <string name="text_remove_broken_items">Supprimer les éléments défectueux</string>
+    <string name="text_remove_broken_items_confirm">Supprimer %1$d élément(s) défectueux dont les données sont manquantes ? Ils ne peuvent pas être restaurés.</string>
     <string name="text_remove_from_trash">Retirer de la corbeille</string>
     <string name="text_remove_from_trash_confirm">Supprimer definitivement cet element de la corbeille?</string>
     <string name="text_remove_selected_from_trash_confirm">Supprimer définitivement de la corbeille les %d éléments sélectionnés ?</string>
@@ -2123,6 +2128,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>
     <string name="text_trash">Corbeille</string>
     <string name="text_trash_and_version_history">Corbeille et historique des versions</string>
+    <string name="text_trash_data_missing">Données manquantes</string>
     <string name="text_trash_max_days">Jours de conservation de la corbeille</string>
     <string name="text_trash_max_total_bytes">Taille maximale de la corbeille</string>
     <string name="text_trash_quota_exceeded_prompt">La taille des éléments à déplacer (%1$s) dépasse la limite de taille de la corbeille (%2$s). Si vous continuez, les éléments plus anciens de la corbeille seront supprimés pour faire de la place, et ces éléments seront supprimés en premier dès l\'arrivée d\'éléments plus récents.</string>

@@ -490,6 +490,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">لا يمكن لمحول الخاصية المطلوبة \"%1$s\" إرجاع قيمة فارغة</string>
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
     <string name="error_timeout_while_querying_plugin_info">انتهت مهلة الاستعلام عن معلومات المكوّن الإضافي %1$s.</string>
+    <string name="error_trash_data_damaged">ملف البيانات لعنصر سلة المحذوفات هذا تالف ولا يمكن معاينته او استعادته</string>
+    <string name="error_trash_data_missing">ملف البيانات لعنصر سلة المحذوفات هذا مفقود, لذا لا يمكن معاينته او استعادته. يُنصح بازالة العنصر</string>
     <string name="error_typescript_compilation_failed">فشل ترجمة TypeScript</string>
     <string name="error_typescript_compiler_plugin_unavailable">ملحق مترجم TypeScript غير متاح. ثبته أو مكّنه في مركز الملحقات ثم أعد المحاولة.</string>
     <string name="error_typescript_project_rename_failed">فشلت إعادة التسمية في المشروع. لم يتم الاحتفاظ بأي تغييرات جزئية.</string>
@@ -1548,6 +1550,7 @@
     <string name="text_night_mode">وضع الليل</string>
     <string name="text_no_auto_mount_plugins">لا توجد مكونات إضافية مع تمكين التحميل التلقائي</string>
     <string name="text_no_available_plugins_found_hint">لم يتم العثور على اضافات متاحة</string>
+    <string name="text_no_broken_items">لا توجد عناصر تالفة</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
@@ -1847,6 +1850,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>
+    <string name="text_remove_broken_items">ازالة العناصر التالفة</string>
+    <string name="text_remove_broken_items_confirm">هل تريد ازالة %1$d من العناصر التالفة التي فُقدت بياناتها؟ لا يمكن استعادتها.</string>
     <string name="text_remove_from_trash">ازالة من سلة المحذوفات</string>
     <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
     <string name="text_remove_selected_from_trash_confirm">ازالة %d من العناصر المحددة من سلة المحذوفات نهائيا؟</string>
@@ -2125,6 +2130,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
     <string name="text_trash">سلة المحذوفات</string>
     <string name="text_trash_and_version_history">سلة المحذوفات وسجل الاصدارات</string>
+    <string name="text_trash_data_missing">البيانات مفقودة</string>
     <string name="text_trash_max_days">ايام الاحتفاظ في سلة المحذوفات</string>
     <string name="text_trash_max_total_bytes">الحد الاقصى لحجم سلة المحذوفات</string>
     <string name="text_trash_quota_exceeded_prompt">حجم العناصر المراد نقلها (%1$s) يتجاوز حد حجم سلة المحذوفات (%2$s). اذا تابعت, ستتم ازالة العناصر الاقدم من سلة المحذوفات لتوفير مساحة, وستتم ازالة هذه العناصر اولا عند وصول عناصر احدث.</string>

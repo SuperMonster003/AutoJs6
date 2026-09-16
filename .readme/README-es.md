@@ -380,6 +380,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Vista previa del contenido de la papelera: el diálogo del elemento incorpora "Vista previa", que abre los archivos de texto en el editor de solo lectura, lista los archivos dentro de un directorio de la papelera (ruta relativa, tamaño, número de archivos y carpetas) e informa del contenido binario en lugar de abrirlo
 * `Nuevo` Detalles del elemento de la papelera: el diálogo del elemento incorpora "Detalles", que muestra nombre, tipo, ruta original, hora de envío a la papelera, tamaño, SHA-256 y la caducidad prevista (con días y horas restantes) como texto seleccionable que se puede copiar al portapapeles con un toque
 * `Nuevo` Tras mover un archivo o directorio a la papelera desde el explorador, la barra de aviso ofrece "Deshacer", que restaura cada elemento a su ruta original solo mientras esa ruta siga libre (sin sobrescribir nunca); los elementos que ya no están en la papelera o cuya ruta está ocupada se indican como omitidos en el resumen
+* `Nuevo` La papelera detecta elementos dañados cuyo archivo de datos falta: la lista los marca como "Datos ausentes" con un color destacado, al tocarlos solo se ofrecen detalles y eliminación, y una nueva acción de menú "Eliminar elementos dañados" los limpia de una vez; la limpieza periódica solo registra su número y nunca los elimina automáticamente
 * `Corrección` El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana
 * `Corrección` Los resultados de autorización del plugin se transmiten correctamente desde la pantalla principal para completar la activación pendiente tras conceder el permiso
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual
@@ -717,6 +718,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Los archivos guardados desde la extensión de VSCode pueden conservar su estructura de directorios relativa dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Mejora` El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas
 * `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
+* `Mejora` Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

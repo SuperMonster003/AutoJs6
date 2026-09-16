@@ -27,7 +27,7 @@ internal class TrashViewHolder(
 
     private var boundItem: TrashEntities.TrashItem? = null
 
-    fun bind(item: TrashEntities.TrashItem, selectionMode: Boolean, selected: Boolean, expiryMaxDays: Int, now: Long) {
+    fun bind(item: TrashEntities.TrashItem, selectionMode: Boolean, selected: Boolean, expiryMaxDays: Int, now: Long, missing: Boolean) {
         boundItem = item
         val context = binding.root.context
 
@@ -43,16 +43,19 @@ internal class TrashViewHolder(
             append(timeText)
             append("  |  ")
             append(sizeText)
-            if (remaining != null) {
+            if (missing) {
+                append("  |  ")
+                append(context.getString(R.string.text_trash_data_missing))
+            } else if (remaining != null) {
                 append("  |  ")
                 append(TrashPreviewController.formatRemaining(context, remaining))
             }
             append('\n')
             append(item.originalPath.normalizeTrailingSlash(item.isDirectory))
         }
-        // Items expiring within a day are highlighted.
-        // zh-CN: 一天内到期的条目高亮.
-        val subtitleColor = if (remaining?.withinOneDay == true) R.color.trash_expiring_soon else R.color.day_night_alpha_70
+        // Broken items and items expiring within a day are highlighted.
+        // zh-CN: 失效条目与一天内到期的条目高亮.
+        val subtitleColor = if (missing || remaining?.withinOneDay == true) R.color.trash_expiring_soon else R.color.day_night_alpha_70
         binding.subtitle.setTextColor(ContextCompat.getColor(context, subtitleColor))
 
         binding.checkbox.visibility = if (selectionMode) View.VISIBLE else View.GONE

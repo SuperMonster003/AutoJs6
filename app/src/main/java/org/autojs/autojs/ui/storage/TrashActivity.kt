@@ -38,10 +38,15 @@ import java.util.Locale
  */
 class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEntities.TrashItem>() {
 
+    @Volatile
+    private var missingBlobIds: Set<String> = emptySet()
+
     private val adapter: TrashAdapter = TrashAdapter(
         onClick = { item ->
             if (adapter.selectionMode) {
                 adapter.toggle(item)
+            } else if (item.trashId in missingBlobIds) {
+                showBrokenItemDialog(item)
             } else {
                 val optionMenuItemPreview = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_preview)) { d ->
                     d.dismiss()
@@ -162,12 +167,18 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
 
     override fun loadAllItemsInBackground(): List<TrashEntities.TrashItem> {
         val dao = HistoryDatabase.getInstance(applicationContext).historyDao()
-        return dao.listTrashItemsDesc()
+        val repository = TrashRepository(applicationContext)
+        val items = dao.listTrashItemsDesc()
+        // Broken items (blob missing) are detected on every load and only marked, never removed here.
+        // zh-CN: 每次加载都检测失效条目 (blob 缺失), 仅标记, 不在此删除.
+        missingBlobIds = items.filter { repository.isBlobMissing(it) }.mapTo(HashSet()) { it.trashId }
+        return items
     }
 
     override fun onItemsLoaded(items: List<TrashEntities.TrashItem>) {
         adapter.expiryMaxDays = HistoryPrefs.trashMaxDays()
         adapter.now = System.currentTimeMillis()
+        adapter.missingBlobIds = missingBlobIds
     }
 
     override fun matchesQuery(item: TrashEntities.TrashItem, qLower: String): Boolean {
@@ -213,6 +224,7 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
         menu.findItem(R.id.action_search)?.isVisible = !selecting
         menu.findItem(R.id.action_sort)?.isVisible = !selecting
         menu.findItem(R.id.action_clear_trash)?.isVisible = !selecting
+        menu.findItem(R.id.action_remove_broken_items)?.isVisible = !selecting
         menu.findItem(R.id.action_clean_up_now)?.isVisible = !selecting
         menu.findItem(R.id.action_trash_and_version_history_settings)?.isVisible = !selecting
         return super.onPrepareOptionsMenu(menu)
@@ -241,6 +253,7 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
                 }
             }
             R.id.action_remove_selected -> true.also { confirmAndRemoveSelectedFromTrash(adapter.selectedItems()) }
+            R.id.action_remove_broken_items -> true.also { confirmAndRemoveBrokenItems() }
             R.id.action_clear_trash -> true.also { confirmAndClearTrash() }
             R.id.action_clean_up_now -> true.also { HistoryCleanupUi.runNow(this) { load() } }
             R.id.action_trash_and_version_history_settings -> true.also { TrashAndVersionHistorySettingsActivity.launch(this) }
@@ -317,6 +330,59 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
                 }
                 adapter.clearSelection()
                 load()
+            }
+        }
+    }
+
+    /**
+     * A broken item cannot be previewed or restored; only details and removal are offered.
+     * zh-CN: 失效条目不能预览或恢复; 仅提供详情与移除.
+     */
+    private fun showBrokenItemDialog(item: TrashEntities.TrashItem) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(this)
+                .title(File(item.originalPath).name)
+                .content(R.string.error_trash_data_missing)
+                .neutralText(R.string.text_details)
+                .neutralColorRes(R.color.dialog_button_default)
+                .onNeutral { d, _ ->
+                    d.dismiss()
+                    TrashPreviewController(this).showDetails(item)
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.text_remove_from_trash)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive { d, _ -> confirmAndRemoveFromTrash(item, d) }
+                .autoDismiss(false)
+                .cancelable(true)
+                .build()
+        }
+    }
+
+    private fun confirmAndRemoveBrokenItems() {
+        Schedulers.io().scheduleDirect {
+            val broken = runCatching { TrashRepository(applicationContext).listTrashItemsWithMissingBlobs() }
+                .onFailure { it.printStackTrace() }
+                .getOrDefault(emptyList())
+            AndroidSchedulers.mainThread().scheduleDirect {
+                if (isFinishing || isDestroyed) return@scheduleDirect
+                if (broken.isEmpty()) {
+                    ViewUtils.showToast(this, R.string.text_no_broken_items)
+                    return@scheduleDirect
+                }
+                DialogUtils.buildAndShowAdaptive {
+                    MaterialDialog.Builder(this)
+                        .title(R.string.text_prompt)
+                        .content(getString(R.string.text_remove_broken_items_confirm, broken.size))
+                        .negativeText(R.string.dialog_button_cancel)
+                        .negativeColorRes(R.color.dialog_button_default)
+                        .positiveText(R.string.dialog_button_confirm)
+                        .positiveColorRes(R.color.dialog_button_caution)
+                        .onPositive { _, _ -> removeSelectedFromTrash(broken) }
+                        .cancelable(true)
+                        .build()
+                }
             }
         }
     }

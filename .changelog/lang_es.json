@@ -212,7 +212,8 @@
         "Selección múltiple en la papelera: mantén pulsado un elemento para empezar a seleccionar, con seleccionar todo / deseleccionar todo, restauración por lotes (a la ruta original de cada elemento o a un directorio elegido; si hay nombres en conflicto se elige omitir / sobrescribir / renombrar automáticamente para todo el lote, y los elementos con el mismo nombre dentro del lote siempre se renombran; el diálogo de progreso puede abortarse y al final se muestra un resumen de restaurados / omitidos / fallidos) y eliminación por lotes de la papelera",
         "Vista previa del contenido de la papelera: el diálogo del elemento incorpora \"Vista previa\", que abre los archivos de texto en el editor de solo lectura, lista los archivos dentro de un directorio de la papelera (ruta relativa, tamaño, número de archivos y carpetas) e informa del contenido binario en lugar de abrirlo",
         "Detalles del elemento de la papelera: el diálogo del elemento incorpora \"Detalles\", que muestra nombre, tipo, ruta original, hora de envío a la papelera, tamaño, SHA-256 y la caducidad prevista (con días y horas restantes) como texto seleccionable que se puede copiar al portapapeles con un toque",
-        "Tras mover un archivo o directorio a la papelera desde el explorador, la barra de aviso ofrece \"Deshacer\", que restaura cada elemento a su ruta original solo mientras esa ruta siga libre (sin sobrescribir nunca); los elementos que ya no están en la papelera o cuya ruta está ocupada se indican como omitidos en el resumen"
+        "Tras mover un archivo o directorio a la papelera desde el explorador, la barra de aviso ofrece \"Deshacer\", que restaura cada elemento a su ruta original solo mientras esa ruta siga libre (sin sobrescribir nunca); los elementos que ya no están en la papelera o cuya ruta está ocupada se indican como omitidos en el resumen",
+        "La papelera detecta elementos dañados cuyo archivo de datos falta: la lista los marca como \"Datos ausentes\" con un color destacado, al tocarlos solo se ofrecen detalles y eliminación, y una nueva acción de menú \"Eliminar elementos dañados\" los limpia de una vez; la limpieza periódica solo registra su número y nunca los elimina automáticamente"
       ],
       "fix": [
         "El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana",
@@ -553,7 +554,8 @@
         "Las conexiones de la extensión de VSCode incorporan un latido a nivel de aplicación (ping/pong) y un límite de longitud de trama, liberando conexiones muertas con rapidez y evitando asignaciones enormes en caso de desincronización _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
         "Los archivos guardados desde la extensión de VSCode pueden conservar su estructura de directorios relativa dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
         "El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas",
-        "Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan"
+        "Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan",
+        "Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción"
       ],
       "dependency": [
         "Android AXML modularizado",

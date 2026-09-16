@@ -26,6 +26,14 @@ class TrashMoveRecoveryRequiredException(
 ) : IOException("Source removal requires recovery from Trash: ${trashItem.originalPath}", cause)
 
 /**
+ * The recovery blob of a trash item is gone from disk while its DB row still exists ("broken item").
+ * zh-CN: 回收站条目的 blob 已不在磁盘上而 DB 记录仍在 ("失效条目").
+ */
+class TrashBlobMissingException(
+    val trashItem: TrashEntities.TrashItem,
+) : IOException("Trash blob not exists: ${trashItem.blobRelPath}")
+
+/**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
  * Modified by SuperMonster003 as of Feb 7, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
@@ -297,6 +305,20 @@ class TrashRepository(private val context: Context) {
 
     fun findTrashItem(trashId: String): TrashEntities.TrashItem? = dao.getTrashItem(trashId)
 
+    fun blobFileOf(item: TrashEntities.TrashItem): File = File(context.filesDir, item.blobRelPath)
+
+    /**
+     * True when the item's recovery blob is missing on disk (the item can neither be previewed nor restored).
+     * zh-CN: 条目的 blob 在磁盘上缺失时为真 (该条目既不能预览也不能恢复).
+     */
+    fun isBlobMissing(item: TrashEntities.TrashItem): Boolean = !blobFileOf(item).isFile
+
+    /**
+     * Items whose blob is missing, newest first. Detection only: nothing is deleted here.
+     * zh-CN: blob 缺失的条目 (新的在前). 仅检测, 不删除.
+     */
+    fun listTrashItemsWithMissingBlobs(): List<TrashEntities.TrashItem> = dao.listTrashItemsDesc().filter { isBlobMissing(it) }
+
     /**
      * Apply the trash retention policy: expire items by days, then enforce the total byte limit
      * while keeping the newest item (zero or negative limits mean unlimited).
@@ -378,8 +400,8 @@ class TrashRepository(private val context: Context) {
     fun restoreTrashItemToPath(item: TrashEntities.TrashItem, dest: File, operationController: DialogUtils.OperationController) {
         operationController.throwIfCancelled()
 
-        val blobFile = File(context.filesDir, item.blobRelPath)
-        require(blobFile.exists()) { "Trash blob not exists: ${item.blobRelPath}" }
+        val blobFile = blobFileOf(item)
+        if (!blobFile.isFile) throw TrashBlobMissingException(item)
 
         // Copy stream with cancellation checkpoints.
         // zh-CN: 带取消检查点的流拷贝, 以便在大文件恢复过程中及时响应终止操作.

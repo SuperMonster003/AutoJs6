@@ -13,7 +13,6 @@ import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
-import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,7 +72,7 @@ class TrashPreviewController(private val context: Context) {
         Schedulers.io().scheduleDirect {
             runCatching {
                 val blob = File(appCtx.filesDir, item.blobRelPath)
-                if (!blob.isFile) throw FileNotFoundException(item.blobRelPath)
+                if (!blob.isFile) throw TrashBlobMissingException(item)
                 if (item.isDirectory) {
                     val listing = TrashArchiveListing.read(blob)
                     AndroidSchedulers.mainThread().scheduleDirect { showArchiveListing(item, listing) }
@@ -98,7 +97,7 @@ class TrashPreviewController(private val context: Context) {
             }.onFailure {
                 it.printStackTrace()
                 AndroidSchedulers.mainThread().scheduleDirect {
-                    ViewUtils.showToast(context, it.message, true)
+                    ViewUtils.showToast(context, TrashFailureText.describe(context, it), true)
                 }
             }
         }

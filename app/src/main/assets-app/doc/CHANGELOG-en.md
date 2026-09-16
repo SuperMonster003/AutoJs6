@@ -218,6 +218,7 @@
 * `Feature` Trash content preview: the item dialog gains "Preview", which opens text files in the read-only editor, lists the files inside a trashed directory (relative path, size, file and folder counts) and reports binary content instead of opening it
 * `Feature` Trash item details: the item dialog gains "Details", showing name, type, original path, time moved to trash, size, SHA-256 and the expected expiry (with days and hours left) as selectable text that can be copied to the clipboard in one tap
 * `Feature` After the explorer moves a file or directory to the trash, the snackbar offers "Undo", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary
+* `Feature` The trash detects broken items whose data file is missing: the list marks them as "Data missing" in a highlight color, tapping offers only details and removal, and a new "Remove broken items" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -555,6 +556,7 @@
 * `Improvement` Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Improvement` The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots
 * `Improvement` Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted
+* `Improvement` When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

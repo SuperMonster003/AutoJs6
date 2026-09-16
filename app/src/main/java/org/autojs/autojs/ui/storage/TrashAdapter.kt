@@ -30,6 +30,10 @@ internal class TrashAdapter(
     var expiryMaxDays: Int = 0
     var now: Long = System.currentTimeMillis()
 
+    // Ids of items whose blob is missing ("broken"); computed by the page while loading.
+    // zh-CN: blob 缺失 ("失效") 条目的 id; 由页面在加载时计算.
+    var missingBlobIds: Set<String> = emptySet()
+
     val selectedCount: Int get() = selectedIds.size
 
     fun submit(newItems: List<TrashEntities.TrashItem>) {
@@ -78,7 +82,7 @@ internal class TrashAdapter(
 
     override fun onBindViewHolder(holder: TrashViewHolder, position: Int) {
         val item = items[position]
-        holder.bind(item, selectionMode, item.trashId in selectedIds, expiryMaxDays, now)
+        holder.bind(item, selectionMode, item.trashId in selectedIds, expiryMaxDays, now, item.trashId in missingBlobIds)
     }
 
     override fun getItemCount(): Int = items.size

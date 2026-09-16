@@ -1,6 +1,7 @@
 package org.autojs.autojs.storage.history
 
 import android.content.Context
+import android.util.Log
 import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.history.TrashBlobStore.Companion.TRASH_BLOB_DIR_REL
 import java.io.File
@@ -19,6 +20,8 @@ import java.io.File
  */
 object HistoryCleanup {
 
+    private const val TAG = "HistoryCleanup"
+
     // Minimum age for orphan history / trash blobs before deletion to avoid races with pending DB writes.
     // zh-CN: orphan 历史 / 回收站 blob 的最小删除年龄, 用于避免与尚未提交的 DB 写入发生时序竞争.
     private const val ORPHAN_BLOB_MIN_AGE_MS: Long = 30L * 60L * 1000L
@@ -33,6 +36,19 @@ object HistoryCleanup {
         cleanupOrphanHistoryBlobs(appContext)
         cleanupOrphanTrashBlobs(appContext)
         cleanupEmergencyDrafts(appContext)
+        reportTrashItemsWithMissingBlobs(appContext)
+    }
+
+    /**
+     * Report trash items whose blob is gone (DB row kept). They are never removed automatically:
+     * the trash page marks them and offers "Remove broken items".
+     * zh-CN: 报告 blob 已丢失的回收站条目 (DB 记录保留). 不会自动删除: 回收站页面会标记它们并提供 "移除失效条目".
+     */
+    private fun reportTrashItemsWithMissingBlobs(appContext: Context) {
+        val missing = TrashRepository(appContext).listTrashItemsWithMissingBlobs()
+        if (missing.isEmpty()) return
+        val sample = missing.take(5).joinToString { it.originalPath }
+        Log.w(TAG, "Trash has ${missing.size} item(s) with a missing blob (kept for manual removal): $sample")
     }
 
     /**

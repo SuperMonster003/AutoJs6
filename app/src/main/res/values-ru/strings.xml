@@ -488,6 +488,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Преобразователь для требуемого свойства \"%1$s\" не может возвращать пустое значение</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
+    <string name="error_trash_data_damaged">Файл данных этого элемента корзины поврежден, его нельзя просмотреть или восстановить</string>
+    <string name="error_trash_data_missing">Файл данных этого элемента корзины отсутствует, поэтому его нельзя просмотреть или восстановить. Рекомендуется удалить элемент</string>
     <string name="error_typescript_compilation_failed">Не удалось скомпилировать TypeScript</string>
     <string name="error_typescript_compiler_plugin_unavailable">Плагин компилятора TypeScript недоступен. Установите или включите его в Центре плагинов и повторите попытку.</string>
     <string name="error_typescript_project_rename_failed">Не удалось переименовать символ в проекте. Частичные изменения не сохранены.</string>
@@ -1546,6 +1548,7 @@
     <string name="text_night_mode">Ночной режим</string>
     <string name="text_no_auto_mount_plugins">Нет плагинов с авто-монтированием</string>
     <string name="text_no_available_plugins_found_hint">Доступные плагины не найдены</string>
+    <string name="text_no_broken_items">Поврежденных элементов нет</string>
     <string name="text_no_browser">Не установлен браузер</string>
     <string name="text_no_content">Нет содержимого</string>
     <string name="text_no_content_description">Нет описания содержимого</string>
@@ -1845,6 +1848,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
     <string name="text_remove_all_breakpoints">Удалить все точки останова</string>
+    <string name="text_remove_broken_items">Удалить поврежденные элементы</string>
+    <string name="text_remove_broken_items_confirm">Удалить поврежденные элементы (%1$d) с отсутствующими данными? Их нельзя восстановить.</string>
     <string name="text_remove_from_trash">Убрать из корзины</string>
     <string name="text_remove_from_trash_confirm">Удалить этот элемент из корзины навсегда?</string>
     <string name="text_remove_selected_from_trash_confirm">Удалить %d выбранных элементов из корзины навсегда?</string>
@@ -2123,6 +2128,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
     <string name="text_trash">Корзина</string>
     <string name="text_trash_and_version_history">Корзина и история версий</string>
+    <string name="text_trash_data_missing">Данные отсутствуют</string>
     <string name="text_trash_max_days">Срок хранения в корзине (дней)</string>
     <string name="text_trash_max_total_bytes">Максимальный размер корзины</string>
     <string name="text_trash_quota_exceeded_prompt">Размер перемещаемых элементов (%1$s) превышает ограничение размера корзины (%2$s). Если продолжить, более старые элементы корзины будут удалены, чтобы освободить место, а эти элементы будут удалены первыми при поступлении новых.</string>

@@ -489,6 +489,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
+    <string name="error_trash_data_damaged">このゴミ箱項目のデータファイルが破損しているため, プレビューや復元ができません</string>
+    <string name="error_trash_data_missing">このゴミ箱項目のデータファイルが見つからないため, プレビューや復元ができません. 項目の削除を検討してください</string>
     <string name="error_typescript_compilation_failed">TypeScript のコンパイルに失敗しました</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript コンパイラプラグインを利用できません. プラグインセンターでインストールまたは有効化してから再試行してください.</string>
     <string name="error_typescript_project_rename_failed">プロジェクトの名前変更に失敗しました. 部分的な変更は保持されていません.</string>
@@ -1547,6 +1549,7 @@
     <string name="text_night_mode">夜間モード</string>
     <string name="text_no_auto_mount_plugins">自動マウントされたプラグインはありません</string>
     <string name="text_no_available_plugins_found_hint">利用可能なプラグインが見つかりません</string>
+    <string name="text_no_broken_items">無効な項目はありません</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
@@ -1846,6 +1849,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">リモートファイルがローカルストレージに正常に保存されました</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>
+    <string name="text_remove_broken_items">無効な項目を削除</string>
+    <string name="text_remove_broken_items_confirm">データが欠落している %1$d 件の無効な項目を削除しますか? これらは復元できません.</string>
     <string name="text_remove_from_trash">ゴミ箱から削除</string>
     <string name="text_remove_from_trash_confirm">この項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_remove_selected_from_trash_confirm">選択した %d 件の項目をゴミ箱から完全に削除しますか?</string>
@@ -2124,6 +2129,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
     <string name="text_trash">ゴミ箱</string>
     <string name="text_trash_and_version_history">ゴミ箱とバージョン履歴</string>
+    <string name="text_trash_data_missing">データ欠落</string>
     <string name="text_trash_max_days">ゴミ箱の保持日数</string>
     <string name="text_trash_max_total_bytes">ゴミ箱のサイズ上限</string>
     <string name="text_trash_quota_exceeded_prompt">移動する項目のサイズ (%1$s) がゴミ箱のサイズ上限 (%2$s) を超えています. 続行すると空きを作るためにゴミ箱内の古い項目が削除され, これらの項目は新しい項目が入ると最初に削除されます.</string>

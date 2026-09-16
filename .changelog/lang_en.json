@@ -212,7 +212,8 @@
         "Trash multi-selection: long-press an item to start selecting, with select all / deselect all, batch restore (to each item's original path or one chosen directory; when names clash, choose skip / overwrite / auto-rename for the whole batch, and items sharing a name inside the batch are always auto-renamed; the progress dialog can be aborted and a summary reports restored / skipped / failed counts) and batch removal from the trash",
         "Trash content preview: the item dialog gains \"Preview\", which opens text files in the read-only editor, lists the files inside a trashed directory (relative path, size, file and folder counts) and reports binary content instead of opening it",
         "Trash item details: the item dialog gains \"Details\", showing name, type, original path, time moved to trash, size, SHA-256 and the expected expiry (with days and hours left) as selectable text that can be copied to the clipboard in one tap",
-        "After the explorer moves a file or directory to the trash, the snackbar offers \"Undo\", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary"
+        "After the explorer moves a file or directory to the trash, the snackbar offers \"Undo\", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary",
+        "The trash detects broken items whose data file is missing: the list marks them as \"Data missing\" in a highlight color, tapping offers only details and removal, and a new \"Remove broken items\" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically"
       ],
       "fix": [
         "The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors",
@@ -553,7 +554,8 @@
         "VSCode extension connections gain an application-level heartbeat (ping/pong) and a frame length limit, releasing dead connections promptly and avoiding huge allocations on desync _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
         "Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
         "The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots",
-        "Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted"
+        "Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted",
+        "When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text"
       ],
       "dependency": [
         "Modularized Android AXML",

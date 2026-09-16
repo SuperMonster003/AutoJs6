@@ -485,6 +485,8 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需屬性 \"%1$s\" 的轉換器不能返回空值</string>
     <string name="error_thread_is_not_alive">線程處於非活動狀態</string>
     <string name="error_timeout_while_querying_plugin_info">查詢 %1$s 插件信息超時.</string>
+    <string name="error_trash_data_damaged">該回收站項目的資料文件已損壞, 無法預覽或還原</string>
+    <string name="error_trash_data_missing">該回收站項目的資料文件缺失, 無法預覽或還原, 建議移除該項目</string>
     <string name="error_typescript_compilation_failed">TypeScript 編譯失敗</string>
     <string name="error_typescript_compiler_plugin_unavailable">TypeScript 編譯插件不可用. 請在插件中心安裝或啓用後重試.</string>
     <string name="error_typescript_project_rename_failed">項目重命名失敗. 未保留局部變更.</string>
@@ -1543,6 +1545,7 @@
     <string name="text_night_mode">夜間模式</string>
     <string name="text_no_auto_mount_plugins">暫無自動掛載插件</string>
     <string name="text_no_available_plugins_found_hint">未發現可用插件</string>
+    <string name="text_no_broken_items">沒有失效項目</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
     <string name="text_no_content">無內容</string>
     <string name="text_no_content_description">無內容描述</string>
@@ -1842,6 +1845,8 @@
     <string name="text_remote_file_saved_to_local_storage_successfully">遠程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
     <string name="text_remove_all_breakpoints">刪除所有斷點</string>
+    <string name="text_remove_broken_items">移除失效項目</string>
+    <string name="text_remove_broken_items_confirm">移除 %1$d 個資料缺失的失效項目? 這些項目無法還原.</string>
     <string name="text_remove_from_trash">從回收站移除</string>
     <string name="text_remove_from_trash_confirm">是否永久刪除此項目</string>
     <string name="text_remove_selected_from_trash_confirm">從回收站永久移除選取的 %d 個項目?</string>
@@ -2120,6 +2125,7 @@
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啓動器圖標可能被系統自動添加遮罩或背景, 因此不同設備的實際效果與預期可能不完全一致</string>
     <string name="text_trash">回收站</string>
     <string name="text_trash_and_version_history">回收站與版本歷史</string>
+    <string name="text_trash_data_missing">資料缺失</string>
     <string name="text_trash_max_days">回收站保留天數</string>
     <string name="text_trash_max_total_bytes">回收站容量上限</string>
     <string name="text_trash_quota_exceeded_prompt">待移入條目的大小 (%1$s) 超過回收站容量上限 (%2$s). 繼續移入將清理回收站中更早的條目以騰出空間, 且這些條目會在更新的條目移入後被優先清理.</string>

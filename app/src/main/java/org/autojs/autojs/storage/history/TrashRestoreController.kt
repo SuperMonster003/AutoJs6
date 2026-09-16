@@ -421,7 +421,7 @@ class TrashRestoreController(private val context: Context) {
                     else -> {
                         e.printStackTrace()
                         AndroidSchedulers.mainThread().scheduleDirect {
-                            ViewUtils.showToast(context, e.message, true)
+                            ViewUtils.showToast(context, TrashFailureText.describe(context, e), true)
                         }
                     }
                 }
