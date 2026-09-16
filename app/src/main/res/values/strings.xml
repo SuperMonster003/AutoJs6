@@ -644,6 +644,9 @@
     <string name="plugin_item_info_package_size">Package size</string>
     <string name="plugin_item_info_supported_abis">Supported ABIs</string>
     <string name="plugin_item_info_updatable_version">Updatable ver.</string>
+    <string name="plugin_local_network_denied">Not allowed. Tap to authorize this plugin.</string>
+    <string name="plugin_local_network_enable_explanation">To enable %1$s on Android 17 or later, allow Nearby devices for this plugin. The switch stays off without permission. Automatic startup does not request permission.</string>
+    <string name="plugin_local_network_granted">Allowed. Tap to manage permission for this plugin.</string>
     <string name="prompt_ace_editor_plugin_required">Install or enable the Ace editor plugin in Plugin Center to use the Ace engine.</string>
     <string name="prompt_add_ignored_app_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by app settings.</string>
     <string name="prompt_add_ignored_plugin_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by plugin settings.</string>

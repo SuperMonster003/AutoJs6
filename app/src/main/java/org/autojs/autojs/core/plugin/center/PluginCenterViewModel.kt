@@ -336,15 +336,16 @@ class PluginCenterViewModel : ViewModel() {
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean, error: PluginError? = null) {
         enableStore.setEnabled(context, packageName, enabled)
+        val allowed = enabled && enableStore.isEnabled(context, packageName)
         _items.value = _items.value.map {
             if (it.packageName == packageName) {
                 val nextEnabledState = when {
                     error != null && error.code != PluginErrorCode.NOT_AUTHORIZED -> PluginEnabledState.ERROR(error)
-                    !enabled -> PluginEnabledState.DISABLED
+                    !allowed -> PluginEnabledState.DISABLED
                     else -> PluginEnabledState.READY
                 }
                 it.copy(
-                    isEnabled = enabled,
+                    isEnabled = allowed,
                     enabledState = nextEnabledState,
                     lastError = error,
                 )

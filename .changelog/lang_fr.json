@@ -199,6 +199,7 @@
         "Instantané des informations de l'hôte pour le plugin Bun Runtime: quand le plugin déclare `SUPPORTS_HOST_INFO` et que l'autorisation `host_info` est active (par défaut), les requêtes `runScript` portent `hostInfoVersion = 1` et un Bundle `hostInfo` avec le nom du paquet hôte, `BuildConfig.VERSION_DATE` et la balise de langue préférée, de sorte que les scripts Bun lisent via la variable d'environnement `AUTOJS6_HOST_INFO_FILE` l'instantané hôte/plugin/exécution vérifié et écrit par le plugin; l'hôte n'envoie jamais sa propre version (le plugin la résout via PackageManager), l'autorisation est révocable à chaque exécution (`BunHostCapabilityGrants`) et les plugins sans cette capacité reçoivent exactement la requête précédente"
       ],
       "fix": [
+        "Les résultats des autorisations du plugin sont correctement transmis depuis l'écran principal, ce qui permet de terminer l'activation en attente après accord",
         "L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours",
         "La configuration de sécurité réseau pouvait bloquer les requêtes HTTP dans les versions de distribution de l'hôte et des applications empaquetées; la politique du trafic en clair correspond désormais aux versions de débogage tout en limitant les domaines de ressources GitHub à HTTPS",
         "Les installations APK en arrière-plan ne pouvaient pas continuer lorsque le système bloquait la page de confirmation; l'état est désormais enregistré par session, avec reprise depuis une notification ou au retour dans l'application, même après un refus des notifications ou une recréation du processus",
@@ -385,6 +386,7 @@
         "Le contrôleur de session MCP Server reliait le plugin environ une seconde après que l'utilisateur l'ait arrêté de force dans les paramètres système, ce qui le redémarrait contre cette décision; un plugin qui n'est plus disponible après la mort de son processus (arrêté, désactivé ou désinstallé) n'est plus relié, l'interrupteur du tiroir se ferme et son sous-titre affiche le guide d'activation comme pour une nouvelle installation"
       ],
       "improvement": [
+        "Autorisation du réseau local sous Android 17 intégrée au parcours activation et aux paramètres du plugin, sans page du lanceur; sans autorisation, le plugin reste désactivé et le démarrage automatique est silencieux",
         "Explications de la protection avancée dans l'hôte et le compagnon, distinguant le mode global de la disponibilité réelle du service et du contrôle des paramètres sécurisés",
         "Les applications empaquetées demandent un accès au stockage selon les besoins du projet; refus, retour des paramètres, restauration du lanceur et démarrage du système vérifient les droits effectifs",
         "media.playMusic utilise un service musical de premier plan Media3 avec gestion du focus audio, commandes de notification, propriété de lecture du script et libération à sa fin",

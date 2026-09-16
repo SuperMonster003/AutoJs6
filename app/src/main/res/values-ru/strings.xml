@@ -649,6 +649,9 @@
     <string name="plugin_item_info_package_size">Размер пакета</string>
     <string name="plugin_item_info_supported_abis">Поддерживаемые ABI</string>
     <string name="plugin_item_info_updatable_version">Обновл. вер.</string>
+    <string name="plugin_local_network_denied">Не разрешено. Нажмите, чтобы выдать разрешение плагину.</string>
+    <string name="plugin_local_network_enable_explanation">Чтобы включить %1$s на Android 17 и новее, разрешите этому плагину доступ к устройствам поблизости. Без разрешения переключатель остается выключенным. Автозапуск не запрашивает разрешение.</string>
+    <string name="plugin_local_network_granted">Разрешено. Нажмите, чтобы управлять разрешением плагина.</string>
     <string name="prompt_ace_editor_plugin_required">Установите или включите плагин редактора Ace в Центре плагинов, чтобы использовать движок Ace.</string>
     <string name="prompt_add_ignored_app_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
     <string name="prompt_add_ignored_plugin_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках плагина.</string>

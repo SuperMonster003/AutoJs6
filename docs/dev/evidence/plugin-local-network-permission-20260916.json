@@ -1,0 +1,132 @@
+{
+  "date": "2026-09-16",
+  "scope": "Android 17 plugin local network permission entry points",
+  "host": {
+    "versionName": "6.8.0",
+    "versionCode": 5280,
+    "selectedJvmTests": 85
+  },
+  "artifacts": [
+    {
+      "repository": "NodeJs-Runtime",
+      "versionName": "1.5.3",
+      "versionCode": 175,
+      "commit": "5447fc66099066100e217d65da9724db205b6c6d",
+      "file": "app/releases/1.5.3/autojs6-plugin-nodejs-runtime-v1.5.3-universal-84066bf2.apk",
+      "bytes": 88064117,
+      "sha256": "561519d3e62240997c8cfae7699c6637197bb468360a345516504233561c901e",
+      "crc32": "84066bf2",
+      "signatureVerified": true
+    },
+    {
+      "repository": "NodeJs-Runtime",
+      "versionName": "1.5.3",
+      "versionCode": 175,
+      "commit": "5447fc66099066100e217d65da9724db205b6c6d",
+      "file": "app/releases/1.5.3/autojs6-plugin-nodejs-runtime-v1.5.3-armeabi-v7a-17c2cfe5.apk",
+      "bytes": 30333129,
+      "sha256": "9bced338c3e27d8bd2db2ed670252b8ffaccca5ca3dfa0dd64ea3b3110cb1cc1",
+      "crc32": "17c2cfe5",
+      "signatureVerified": true
+    },
+    {
+      "repository": "NodeJs-Runtime",
+      "versionName": "1.5.3",
+      "versionCode": 175,
+      "commit": "5447fc66099066100e217d65da9724db205b6c6d",
+      "file": "app/releases/1.5.3/autojs6-plugin-nodejs-runtime-v1.5.3-x86_64-893dc5e8.apk",
+      "bytes": 32981281,
+      "sha256": "c5142ca55cfa6f02eeccf3eafbc43dd0fa86cfbd3c23cf1586f0e69123b3de49",
+      "crc32": "893dc5e8",
+      "signatureVerified": true
+    },
+    {
+      "repository": "NodeJs-Runtime",
+      "versionName": "1.5.3",
+      "versionCode": 175,
+      "commit": "5447fc66099066100e217d65da9724db205b6c6d",
+      "file": "app/releases/1.5.3/autojs6-plugin-nodejs-runtime-v1.5.3-arm64-v8a-6adc6ad4.apk",
+      "bytes": 31343845,
+      "sha256": "13db774e7044146c7d9ee1ed1f96a771289d40317b98886d0e9eb55dbce2dbba",
+      "crc32": "6adc6ad4",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Bun-Runtime",
+      "versionName": "0.2.4",
+      "versionCode": 112,
+      "commit": "5b5bbd130a89f6202d364d20fbfe14592476f20a",
+      "file": "app/releases/autojs6-plugin-bun-runtime-v0.2.4-universal-f5c371a4.apk",
+      "bytes": 72227908,
+      "sha256": "ad7f71908173379e48f80774b90e733bcc59b8e445facf1a04f54100f2043b8d",
+      "crc32": "f5c371a4",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Bun-Runtime",
+      "versionName": "0.2.4",
+      "versionCode": 112,
+      "commit": "5b5bbd130a89f6202d364d20fbfe14592476f20a",
+      "file": "app/releases/autojs6-plugin-bun-runtime-v0.2.4-x86_64-3b5ae019.apk",
+      "bytes": 37040530,
+      "sha256": "74e550e1685ab1e3ed3cd71168ddea88b4e55e42f528fe6c5bbae92d0254c287",
+      "crc32": "3b5ae019",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Bun-Runtime",
+      "versionName": "0.2.4",
+      "versionCode": 112,
+      "commit": "5b5bbd130a89f6202d364d20fbfe14592476f20a",
+      "file": "app/releases/autojs6-plugin-bun-runtime-v0.2.4-arm64-v8a-23010ac7.apk",
+      "bytes": 35647992,
+      "sha256": "ca4928865a0c75f36536ec48406ec42005d140d4cf9c3673c78515328246223a",
+      "crc32": "23010ac7",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Python-Runtime",
+      "versionName": "0.5.4",
+      "versionCode": 110,
+      "commit": "cdb887e8cc13f1466be4a13ad231eea67029a3b4",
+      "file": "app/releases/0.5.4/autojs6-plugin-python-runtime-v0.5.4-universal-44D840C0.apk",
+      "bytes": 33683143,
+      "sha256": "0ed5dfa158009ddac2ff235b6362b7be1deeccc1b5e155c1216e6ef313018741",
+      "crc32": "44d840c0",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Python-Runtime",
+      "versionName": "0.5.4",
+      "versionCode": 110,
+      "commit": "cdb887e8cc13f1466be4a13ad231eea67029a3b4",
+      "file": "app/releases/0.5.4/autojs6-plugin-python-runtime-v0.5.4-x86_64-CD2BD25E.apk",
+      "bytes": 22787152,
+      "sha256": "30a4a48fca36377a2b0f67b59e01c57338437a1054145679c270d3a7f68a23c5",
+      "crc32": "cd2bd25e",
+      "signatureVerified": true
+    },
+    {
+      "repository": "Python-Runtime",
+      "versionName": "0.5.4",
+      "versionCode": 110,
+      "commit": "cdb887e8cc13f1466be4a13ad231eea67029a3b4",
+      "file": "app/releases/0.5.4/autojs6-plugin-python-runtime-v0.5.4-arm64-v8a-416F3CC3.apk",
+      "bytes": 22770792,
+      "sha256": "1ce1a01ed2d41ccb7621170095f1cbf7b6af13bfc167707a04da002f1097bd13",
+      "crc32": "416f3cc3",
+      "signatureVerified": true
+    },
+    {
+      "repository": "MCP-Server",
+      "versionName": "1.0.2",
+      "versionCode": 62,
+      "commit": "075cbcc7fa4fed13c5d006791d54c7c3c681eae2",
+      "file": "releases/autojs6-plugin-mcp-server-v1.0.2-1540f879.apk",
+      "bytes": 1387862,
+      "sha256": "5f39b9210ad490670e31cf27fb7ace5c93f27481da008aa2971454053112789c",
+      "crc32": "1540f879",
+      "signatureVerified": true
+    }
+  ]
+}

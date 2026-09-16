@@ -651,6 +651,9 @@
     <string name="plugin_item_info_package_size">حجم الحزمة</string>
     <string name="plugin_item_info_supported_abis">وحدات ABI المدعومة</string>
     <string name="plugin_item_info_updatable_version">إصدار متاح</string>
+    <string name="plugin_local_network_denied">غير مسموح. انقر لمنح الإذن لهذا الملحق.</string>
+    <string name="plugin_local_network_enable_explanation">لتفعيل %1$s على Android 17 أو أحدث, اسمح بالأجهزة القريبة لهذا الملحق. يبقى المفتاح مغلقا دون الإذن. لا يطلب التشغيل التلقائي الإذن.</string>
+    <string name="plugin_local_network_granted">مسموح. انقر لإدارة إذن هذا الملحق.</string>
     <string name="prompt_ace_editor_plugin_required">ثبّت اضافة محرر Ace أو فعّلها في مركز الاضافات لاستخدام محرك Ace.</string>
     <string name="prompt_add_ignored_app_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
     <string name="prompt_add_ignored_plugin_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات الإضافة.</string>

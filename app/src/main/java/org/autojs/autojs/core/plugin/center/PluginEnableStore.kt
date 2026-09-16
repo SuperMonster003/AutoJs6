@@ -9,14 +9,20 @@ object PluginEnableStore {
 
     fun isEnabled(context: Context, packageName: String, defaultEnabled: Boolean = true): Boolean {
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
-        return sp.getBoolean(key(packageName), defaultEnabled)
+        val enabled = sp.getBoolean(key(packageName), defaultEnabled)
+        if (enabled && !PluginLocalNetworkPermission.isGranted(context, packageName)) {
+            setEnabled(context, packageName, false)
+            return false
+        }
+        return enabled
     }
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
         val key = key(packageName)
-        if (sp.contains(key) && sp.getBoolean(key, true) == enabled) return
-        sp.edit { putBoolean(key, enabled) }
+        val allowed = enabled && PluginLocalNetworkPermission.isGranted(context, packageName)
+        if (sp.contains(key) && sp.getBoolean(key, true) == allowed) return
+        sp.edit { putBoolean(key, allowed) }
         PluginStateChangeRegistry.notifyChanged(packageName)
     }
 

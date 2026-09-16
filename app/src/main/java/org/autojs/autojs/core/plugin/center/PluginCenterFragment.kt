@@ -187,10 +187,21 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 }
 
                 ensureAuthorized(item) { authorizedItem ->
-                    PluginAbiCompatibilityPrompt.runBeforeEnable(contextRef, authorizedItem) {
-                        when (authorizedItem.mechanism) {
-                            PluginMechanism.SDK -> enableLegacyPlugin(authorizedItem)
-                            PluginMechanism.AIDL -> enableAidlPlugin(authorizedItem)
+                    if (!PluginLocalNetworkPermission.isGranted(contextRef, authorizedItem.packageName)) {
+                        vm.setEnabled(contextRef, authorizedItem.packageName, false)
+                        authorizedItem.isEnabled = false
+                        authorizedItem.enabledState = PluginEnabledState.DISABLED
+                        authorizedItem.lastError = null
+                        adapter.notifyDataSetChanged()
+                    }
+                    PluginLocalNetworkPermission.runBeforeEnable(contextRef, authorizedItem.packageName, authorizedItem.title) {
+                        if (isAdded && _binding != null) {
+                            PluginAbiCompatibilityPrompt.runBeforeEnable(contextRef, authorizedItem) {
+                                when (authorizedItem.mechanism) {
+                                    PluginMechanism.SDK -> enableLegacyPlugin(authorizedItem)
+                                    PluginMechanism.AIDL -> enableAidlPlugin(authorizedItem)
+                                }
+                            }
                         }
                     }
                 }
@@ -737,6 +748,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun enableAidlPlugin(item: PluginCenterItem) {
+        if (!PluginLocalNetworkPermission.isGranted(contextRef, item.packageName)) return
         val hostVersionError = buildHostVersionErrorIfNeeded(item)
         if (hostVersionError != null) {
             rejectEnableWithError(item, hostVersionError)
@@ -782,6 +794,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 return@launch
             }
 
+            if (!PluginLocalNetworkPermission.isGranted(contextRef, item.packageName)) return@launch
             vm.setEnabled(contextRef, item.packageName, true)
             item.isEnabled = true
             item.enabledState = PluginEnabledState.READY
@@ -911,11 +924,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             var lastError: Throwable? = null
             for (delayMs in delays) {
                 delay(delayMs)
+                if (!PluginLocalNetworkPermission.isGranted(contextRef, item.packageName)) return@launch
                 val error = runCatching {
                     probeAidlPlugin(item)
                 }.exceptionOrNull()
                 if (error == null) {
                     if (isAdded && _binding != null) {
+                        if (!PluginLocalNetworkPermission.isGranted(contextRef, item.packageName)) return@launch
                         vm.setEnabled(contextRef, item.packageName, true)
                         item.isEnabled = true
                         item.enabledState = PluginEnabledState.READY

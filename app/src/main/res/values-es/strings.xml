@@ -649,6 +649,9 @@
     <string name="plugin_item_info_package_size">Tamaño paquete</string>
     <string name="plugin_item_info_supported_abis">ABI compatibles</string>
     <string name="plugin_item_info_updatable_version">Vers. actualiz.</string>
+    <string name="plugin_local_network_denied">No permitido. Toque para autorizar este plugin.</string>
+    <string name="plugin_local_network_enable_explanation">Para activar %1$s en Android 17 o posterior, permita Dispositivos cercanos para este plugin. Sin permiso, el interruptor permanece apagado. El inicio automático no solicita permisos.</string>
+    <string name="plugin_local_network_granted">Permitido. Toque para gestionar el permiso de este plugin.</string>
     <string name="prompt_ace_editor_plugin_required">Instala o activa el plugin del editor Ace en el Centro de plugins para usar el motor Ace.</string>
     <string name="prompt_add_ignored_app_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes de la aplicación.</string>
     <string name="prompt_add_ignored_plugin_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes del plugin.</string>

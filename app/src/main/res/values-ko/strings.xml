@@ -651,6 +651,9 @@
     <string name="plugin_item_info_package_size">패키지 크기</string>
     <string name="plugin_item_info_supported_abis">지원 ABI</string>
     <string name="plugin_item_info_updatable_version">업데이트 가능</string>
+    <string name="plugin_local_network_denied">허용되지 않음. 눌러서 이 플러그인에 권한을 부여하세요.</string>
+    <string name="plugin_local_network_enable_explanation">Android 17 이상에서 %1$s을(를) 사용하려면 이 플러그인에 주변 기기 권한을 허용하세요. 권한이 없으면 스위치가 꺼진 상태로 유지되며 자동 시작은 권한을 요청하지 않습니다.</string>
+    <string name="plugin_local_network_granted">허용됨. 눌러서 이 플러그인의 권한을 관리하세요.</string>
     <string name="prompt_ace_editor_plugin_required">Ace 편집기 엔진을 사용하려면 플러그인 센터에서 Ace 편집기 플러그인을 설치하거나 활성화하세요.</string>
     <string name="prompt_add_ignored_app_version">현재 업데이트 버전을 무시해야합니까?\n앱 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>
     <string name="prompt_add_ignored_plugin_version">현재 업데이트 버전을 무시해야합니까?\n플러그인 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>

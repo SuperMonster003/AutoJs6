@@ -104,6 +104,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         }
         setPreferencesFromResource(resId, rootKey)
 
+        if (PluginLocalNetworkPermission.isRequired(packageName)) {
+            val launchCategory = findPreference<MaterialPreference>(KEY_PLUGIN_LAUNCH_PAGE)?.parent ?: preferenceScreen
+            launchCategory.addPreference(MaterialPreference(requireContext()).apply {
+                key = "plugin_local_network_permission"
+                layoutResource = R.layout.preference_custom
+                setTitle(R.string.text_local_network_permission)
+                summary = PluginLocalNetworkPermission.summary(requireContext(), packageName)
+                setOnPreferenceClickListener {
+                    PluginLocalNetworkPermission.manage(requireContext(), packageName) {
+                        if (isAdded) refreshLocalNetworkPermission()
+                    }
+                    true
+                }
+            })
+        }
+
         if (packageName == "io.github.supermonster003.autojs6.plugin.accessibilitycompat") {
             preferenceScreen.addPreference(MaterialPreference(requireContext()).apply {
                 key = "accessibility_advanced_protection"
@@ -150,6 +166,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         refreshAllSummaries()
         findPreference<MaterialPreference>("accessibility_advanced_protection")?.summary =
             AdvancedProtectionNotice.summary(requireContext())
+        refreshLocalNetworkPermission()
+    }
+
+    private fun refreshLocalNetworkPermission() {
+        findPreference<MaterialPreference>("plugin_local_network_permission")?.summary =
+            PluginLocalNetworkPermission.summary(requireContext(), packageName)
     }
 
     fun requestClose(onAllowed: () -> Unit) {

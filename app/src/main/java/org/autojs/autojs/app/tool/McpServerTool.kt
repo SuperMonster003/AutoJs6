@@ -101,8 +101,10 @@ class McpServerTool(override val context: Context) : SocketItemHelper {
                         }
                     }
                     McpServerUiState.PLUGIN_DISABLED -> {
-                        PluginEnableStore.setEnabled(context, McpServerIds.DEFAULT_PACKAGE_NAME, true)
-                        requestConnect(false)
+                        PluginLocalNetworkPermission.runBeforeEnable(context, McpServerIds.DEFAULT_PACKAGE_NAME, "MCP Server") {
+                            PluginEnableStore.setEnabled(context, McpServerIds.DEFAULT_PACKAGE_NAME, true)
+                            requestConnect(false)
+                        }
                     }
                     McpServerUiState.TRUST_CONFIRMATION_REQUIRED -> {
                         // Confirmation is pinned to all current signing fingerprints, never just the package name.
