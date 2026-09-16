@@ -2,6 +2,7 @@ package org.autojs.autojs.core.automator.flow
 
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.UiObjectSummary
+import java.util.IdentityHashMap
 
 /**
  * The "unchanged for N milliseconds" detector of the stability waits (roadmap Appendix A.5): fed
@@ -92,7 +93,32 @@ class Stabilizer(
                 StabilityCompare.Content -> sample.text() to sample.desc()
                 is StabilityCompare.Custom -> sample
             }
+            is Iterable<*> -> sample.map { it?.let { value -> keyOf(compare, value) } }
+            is Array<*> -> sample.map { it?.let { value -> keyOf(compare, value) } }
             else -> sample
+        }
+
+        /** Immutable structural copy; active-path tracking accepts shared references but rejects cycles.
+         * zh-CN: 按结构复制值; 仅跟踪当前路径, 允许共享引用并拒绝循环引用. */
+        fun snapshot(value: Any?): Any? {
+            val visiting = IdentityHashMap<Any, Boolean>()
+            fun copy(v: Any?): Any? {
+                if (v == null || v is Boolean || v is Number || v is Char) return v
+                if (v is CharSequence) return v.toString()
+                if (v is UiNode<*>) return UiObjectSummary.fingerprint(v)
+                require(visiting.put(v, true) == null) { "A stability snapshot cannot contain cycles" }
+                return try {
+                    when (v) {
+                        is Map<*, *> -> v.entries.associate { copy(it.key) to copy(it.value) }
+                        is Iterable<*> -> v.map { copy(it) }
+                        is Array<*> -> v.map { copy(it) }
+                        else -> throw IllegalArgumentException("Unsupported stability snapshot value: ${v.javaClass.name}")
+                    }
+                } finally {
+                    visiting.remove(v)
+                }
+            }
+            return copy(value)
         }
 
         /** Whether a node counts as visible for `waitForVisible` / `waitForHidden`: visible to the user with non-empty bounds. zh-CN: 节点在 `waitForVisible` / `waitForHidden` 中是否算可见: 对用户可见且边界非空. */

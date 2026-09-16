@@ -116,10 +116,14 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         val interval = numbers.getOrNull(1) ?: options?.number("interval", name)
         val times = options?.number("times", name)
         val policy = policy(name, timeout, interval, times)
+        val snapshot = options?.prop("snapshot").takeUnless { it.isJsNullish() }
+        require(snapshot == null || snapshot is Callable) { "Option \"snapshot\" must be a function for $name" }
+        require(snapshot == null || options?.prop("compare").isJsNullish()) { "Options \"snapshot\" and \"compare\" are mutually exclusive for $name" }
         val stability = Stability(
             stableFor = options?.number("stableFor", name)?.let { nonNegativeMillis(it, "stableFor", name) } ?: defaults.stableFor,
             compare = options?.prop("compare").takeUnless { it.isJsNullish() }?.let { compare(it, name) } ?: StabilityCompare.Fingerprint,
             missing = options?.prop("missing").takeUnless { it.isJsNullish() }?.let { missing(it, name) } ?: MissingPolicy.RESET,
+            snapshot = snapshot,
         )
         val strict = options?.prop("strict").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) } ?: defaults.strictActions
         val recoverService = options?.prop("recoverService").takeUnless { it.isJsNullish() }?.let { Context.toBoolean(it) } ?: defaults.recoverService
@@ -168,6 +172,36 @@ internal class FlowArguments(private val defaults: FlowDefaults, private val con
         val delay = args.getOrNull(1).takeUnless { it.isJsNullish() }?.let { nonNegativeMillis(number(it, "delay", name), "delay", name) } ?: 0L
         require(times <= Int.MAX_VALUE) { "Argument \"times\" ($times) is too large for $name" }
         return FlowStep.Retry(times.toInt(), delay)
+    }
+
+    fun whenPresent(name: String, args: Array<out Any?>): FlowStep.WhenPresent {
+        require(args.size in 2..3) { "$name expects (cond, handler, options?)" }
+        require(args[1] is Callable) { "Argument \"handler\" must be a function for $name" }
+        val options = controlOptions(name, args.getOrNull(2), setOf("timeout", "interval", "times", "root", "compass", "resultType", "recoverService"))
+        val spec = wait(name, arrayOf(args[0], options))
+        return FlowStep.WhenPresent(FlowStep.Wait(spec.cond, spec.policy, recoverService = spec.recoverService), args[1])
+    }
+
+    fun repeatUntil(name: String, args: Array<out Any?>): FlowStep.RepeatUntil {
+        require(args.size in 2..3) { "$name expects (action, cond, options?)" }
+        require(args[0] is Callable) { "Argument \"action\" must be a function for $name" }
+        val options = controlOptions(name, args.getOrNull(2), setOf("timeout", "interval", "maxAttempts", "retryOn", "root", "compass", "resultType"))
+        val timeout = options?.number("timeout", name)?.let { nonNegativeMillis(it, "timeout", name) } ?: defaults.timeout
+        require(timeout < Long.MAX_VALUE) { "Option \"timeout\" must be finite for $name" }
+        val interval = options?.number("interval", name)?.let { nonNegativeMillis(it, "interval", name) } ?: defaults.interval
+        val attempts = options?.number("maxAttempts", name) ?: 10.0
+        require(attempts.isFinite() && attempts >= 0 && attempts <= Int.MAX_VALUE && attempts == kotlin.math.floor(attempts)) { "Option \"maxAttempts\" must be a non-negative integer for $name" }
+        val retryOn = options?.prop("retryOn").takeUnless { it.isJsNullish() }
+        require(retryOn == null || retryOn is Callable) { "Option \"retryOn\" must be a function for $name" }
+        val scope = options?.let { scope(it, name) } ?: FlowScope.NONE
+        return FlowStep.RepeatUntil(args[0], conditions.of(args[1], name, scope), timeout, attempts.toInt(), interval, retryOn)
+    }
+
+    private fun controlOptions(name: String, value: Any?, keys: Set<String>): ScriptableObject? {
+        if (value.isJsNullish()) return null
+        require(value is ScriptableObject && !value.isJsArray() && value !is Callable) { "Argument \"options\" must be an object for $name" }
+        value.ids.forEach { key -> require(key.toString() in keys) { "Unknown option \"$key\" for $name; expected one of ${keys.joinToString(", ")}" } }
+        return value
     }
 
     /**

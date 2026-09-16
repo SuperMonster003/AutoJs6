@@ -8,6 +8,8 @@ import org.autojs.autojs.core.automator.flow.FlowBindings
 import org.autojs.autojs.core.automator.flow.FlowError
 import org.autojs.autojs.core.automator.flow.FlowNode
 import org.autojs.autojs.core.automator.flow.FlowScope
+import org.autojs.autojs.core.automator.flow.StabilityCompare
+import org.autojs.autojs.core.automator.flow.Stabilizer
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.automator.Automator
@@ -83,11 +85,16 @@ internal class RuntimeFlowBindings(private val scriptRuntime: ScriptRuntime, pri
     }
 
     override fun adopt(value: Any?): FlowNode? = when {
-        value is FlowNativeObject -> value.node
+        value is FlowNativeObject -> value.node.also { value.observed = true }
         value is FlowNode -> value
         executor.isThenable(value) -> executor.adoptThenable(value as org.mozilla.javascript.Scriptable)
         else -> null
     }
+
+    override fun snapshot(value: Any?): Any? = FlowSnapshot.capture(value)
+
+    override fun stabilityKey(compare: StabilityCompare, value: Any): Any? =
+        Stabilizer.keyOf(compare, if (value is UiObjectCollection) value.nodes else value)
 
     /** Roadmap P5.5 (`recoverService`): the quiet wait of the service controller, never the settings page. zh-CN: Roadmap P5.5 (`recoverService`): 服务控制器的安静等待, 从不打开设置页. */
     override fun awaitService(timeoutMillis: Long): Boolean = scriptRuntime.accessibilityBridge.awaitServiceAvailable(timeoutMillis)

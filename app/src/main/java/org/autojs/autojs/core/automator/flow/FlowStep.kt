@@ -183,6 +183,33 @@ sealed class FlowStep {
         override val name get() = "retry"
     }
 
+    /** Detect an optional target, await its handler, and preserve the input value. Only absence is skipped.
+     * zh-CN: 检测可选目标, 等待处理函数完成并透传输入值; 仅跳过目标缺席. */
+    data class WhenPresent(val wait: Wait, val handler: Any?) : FlowStep() {
+        override val name get() = "whenPresent"
+    }
+
+    /** Check before the first action and after each completed action. Callbacks run on a worker,
+     * like `run`, and may return a fresh Flow or Promise. Errors propagate unless retryOn accepts them.
+     * zh-CN: 首次动作前及每次动作完成后检查条件. 回调同 run 在工作线程运行, 可返回新的 Flow 或 Promise.
+     * 异常默认传播, 仅在 retryOn 接受时重试. */
+    data class RepeatUntil(
+        val action: Any?,
+        val cond: Any?,
+        val timeout: Long,
+        val maxAttempts: Int = 10,
+        val interval: Long = 200,
+        val retryOn: Any? = null,
+    ) : FlowStep() {
+        init {
+            require(timeout >= 0 && timeout < Long.MAX_VALUE) { "timeout must be finite and non-negative" }
+            require(maxAttempts >= 0) { "maxAttempts must be non-negative" }
+            require(interval >= 0) { "interval must be non-negative" }
+        }
+
+        override val name get() = "repeatUntil"
+    }
+
 }
 
 enum class CallbackKind(val stepName: String) {
@@ -228,6 +255,9 @@ data class Stability(
     val stableFor: Long = DEFAULT_STABLE_FOR,
     val compare: StabilityCompare = StabilityCompare.Fingerprint,
     val missing: MissingPolicy = MissingPolicy.RESET,
+    /** A projection captured by value at each sample, mutually exclusive with a custom compare.
+     * zh-CN: 每次采样时按值保存的投影, 与自定义 compare 互斥. */
+    val snapshot: Any? = null,
 ) {
 
     init {
@@ -235,7 +265,7 @@ data class Stability(
     }
 
     companion object {
-        const val DEFAULT_STABLE_FOR = 0L
+        const val DEFAULT_STABLE_FOR = 100L
     }
 
 }

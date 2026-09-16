@@ -69,6 +69,8 @@ class FlowScheduler(
     /** Starts [step] after [parent] (or as the root of a new chain) and returns its node. zh-CN: 在 [parent] 之后 (或作为新链的根) 启动 [step] 并返回其节点. */
     fun start(step: FlowStep, parent: FlowNode? = null): FlowNode {
         val node = FlowNode(step, parent, this)
+        val creation = creationContext.get()
+        if (parent == null && creation != null) node.initialContext = creation.context
         val launchNow = synchronized(lock) {
             node.worker = parent?.worker ?: workerFactory?.invoke() ?: worker
             pending += node
@@ -80,6 +82,7 @@ class FlowScheduler(
                 }
             }
         }
+        creation?.owner?.own(node)
         if (launchNow) launch(node)
         return node
     }
@@ -128,7 +131,7 @@ class FlowScheduler(
 
     internal fun hasChildren(node: FlowNode): Boolean = synchronized(lock) { node.children.isNotEmpty() }
 
-    private fun inheritedContext(node: FlowNode): FlowContext = node.parent?.let { it.contextInternal ?: inheritedContext(it) } ?: FlowContext.INITIAL
+    private fun inheritedContext(node: FlowNode): FlowContext = node.parent?.let { it.contextInternal ?: inheritedContext(it) } ?: node.initialContext
 
     internal fun onSettled(node: FlowNode, callback: (State) -> Unit) {
         val settled = synchronized(lock) {
@@ -191,7 +194,7 @@ class FlowScheduler(
 
     private fun inputOf(node: FlowNode): Pair<State, FlowContext> = synchronized(lock) {
         when (val parent = node.parent) {
-            null -> State.Fulfilled(null) to FlowContext.INITIAL
+            null -> State.Fulfilled(null) to node.initialContext
             else -> parent.stateInternal to (parent.contextInternal ?: inheritedContext(parent))
         }
     }
@@ -283,6 +286,8 @@ class FlowScheduler(
             is FlowStep.Callback -> runCallback(node, step, input, ctx, done)
             is FlowStep.Combinator -> if (input is State.Fulfilled) runCombinator(node, step, ctx, done) else done(passThrough)
             is FlowStep.Retry -> runRetry(node, step, input, ctx, done)
+            is FlowStep.WhenPresent -> done(if (input is State.Fulfilled) runWhenPresent(node, step, input, ctx) else passThrough)
+            is FlowStep.RepeatUntil -> done(if (input is State.Fulfilled) runRepeatUntil(node, step, ctx) else passThrough)
         }
     }
 
@@ -311,7 +316,7 @@ class FlowScheduler(
         val elapsed = clock() - start
         if (found == null) {
             outage?.let { return Outcome(State.Rejected(FlowError.A11yUnavailable(step.name, selector, it.cause, elapsed, attempts)), ctx) }
-            val reason = if (clipped && policy.timeout != PollPolicy.UNBOUNDED && elapsed > policy.timeout) "chain" else null
+            val reason = if (clipped && policy.timeout != PollPolicy.UNBOUNDED && elapsed >= policy.timeout) "chain" else null
             return Outcome(State.Rejected(FlowError.Timeout(step.name, selector, elapsed, attempts, reason)), ctx)
         }
         val value = if (step.negate) true else found
@@ -451,8 +456,134 @@ class FlowScheduler(
     private fun argumentsFor(node: FlowNode, value: Any?): List<Any?> = if (node.parent == null) emptyList() else listOf(value)
 
     private fun adopt(node: FlowNode, adopted: FlowNode, onSettled: (State) -> Unit) {
-        synchronized(lock) { node.owned += adopted }
+        own(node, adopted)
         adopted.onSettled(onSettled)
+    }
+
+    /** Register before starting a newly created subflow, including cancellation during its factory.
+     * zh-CN: 新子流程启动前登记所有权, 包括在工厂函数执行期间到达的取消. */
+    internal fun own(node: FlowNode, child: FlowNode) {
+        val stop = synchronized(lock) {
+            if (node.cancelRequested || node.stateInternal !is State.Pending) true
+            else {
+                node.owned += child
+                false
+            }
+        }
+        if (stop) child.cancel()
+        else child.onSettled { synchronized(lock) { node.owned.remove(child) } }
+    }
+
+    private fun cancelOwned(node: FlowNode) {
+        val owned = synchronized(lock) { node.owned.toList() }
+        owned.forEach { it.cancel() }
+    }
+
+    private fun runWhenPresent(node: FlowNode, step: FlowStep.WhenPresent, input: State, ctx: FlowContext): Outcome {
+        val detected = runWait(node, step.wait, ctx).state
+        if (detected is State.Rejected) {
+            val error = detected.error
+            if (error is FlowError.Timeout && error.reason != "chain" && ctx.remainingUntilDeadline(clock()) > 0) {
+                return Outcome(input, ctx)
+            }
+            return Outcome(detected, ctx)
+        }
+        try {
+            invokeControl(node, step.handler, listOf((detected as State.Fulfilled).value), ctx, bindings.describe(step.wait.cond), 1)
+            return Outcome(input, ctx)
+        } finally {
+            cancelOwned(node)
+        }
+    }
+
+    private fun runRepeatUntil(node: FlowNode, step: FlowStep.RepeatUntil, ctx: FlowContext): Outcome {
+        val start = clock()
+        val localDeadline = if (Long.MAX_VALUE - start < step.timeout) Long.MAX_VALUE else start + step.timeout
+        val effective = ctx.copy(deadline = minOf(ctx.deadline, localDeadline))
+        val selector = bindings.describe(step.cond)
+        var attempts = 0L
+        fun checkDeadline() {
+            ensureNotCancelled(node, step.name, selector, clock() - start, attempts)
+            if (effective.remainingUntilDeadline(clock()) <= 0) {
+                throw FlowError.Timeout(step.name, selector, clock() - start, attempts, if (ctx.deadline <= localDeadline) "chain" else "timeout")
+            }
+        }
+        fun probe(): Any? {
+            ensureNotCancelled(node, step.name, selector, clock() - start, attempts)
+            return bindings.probe(step.cond, effective.scope)
+        }
+        try {
+            while (true) {
+                // timeout=0 still probes once, but never executes the action.
+                // zh-CN: timeout=0 仍检测一次, 但不执行动作.
+                if (step.timeout != 0L || attempts != 0L) checkDeadline()
+                val found = probe()
+                if (step.timeout != 0L) checkDeadline()
+                if (found != null) return Outcome(State.Fulfilled(found), ctx)
+                checkDeadline()
+                if (attempts >= step.maxAttempts) {
+                    throw FlowError.Timeout(step.name, selector, clock() - start, attempts, "attempts")
+                }
+                if (attempts > 0 && step.interval > 0) {
+                    sleep(minOf(step.interval, effective.remainingUntilDeadline(clock()).coerceAtLeast(0)))
+                    checkDeadline()
+                    val afterDelay = probe()
+                    checkDeadline()
+                    if (afterDelay != null) return Outcome(State.Fulfilled(afterDelay), ctx)
+                }
+                attempts += 1
+                try {
+                    invokeControl(node, step.action, listOf(attempts), effective, selector, attempts)
+                } catch (e: Exception) {
+                    checkDeadline()
+                    if (e is FlowError.Cancelled || e is InterruptedException || step.retryOn == null) throw e
+                    val retry = bindings.invoke(step.retryOn, listOf(e, attempts))
+                    require(retry is Boolean) { "retryOn must return a boolean for repeatUntil" }
+                    if (!retry) throw e
+                } finally {
+                    cancelOwned(node)
+                }
+            }
+        } finally {
+            cancelOwned(node)
+        }
+    }
+
+    /** Control callbacks construct work on the worker, like run. Awaiting a returned flow yields
+     * its independent lane; no blocking sync() is used on the script thread.
+     * zh-CN: 控制回调同 run 在工作线程构造任务; 返回的 Flow 使用独立 lane, 不在脚本线程调用阻塞式 sync(). */
+    private fun invokeControl(node: FlowNode, fn: Any?, args: List<Any?>, ctx: FlowContext, selector: String?, attempts: Long): Any? {
+        fun checkpoint() {
+            ensureNotCancelled(node, node.step.name, selector, elapsedOf(node), attempts)
+            if (ctx.remainingUntilDeadline(clock()) <= 0) throw FlowError.Timeout(node.step.name, selector, elapsedOf(node), attempts, "chain")
+        }
+        checkpoint()
+        val previous = creationContext.get()
+        val result = try {
+            creationContext.set(CreationContext(node, ctx))
+            bindings.invoke(fn, args)
+        } finally {
+            if (previous == null) creationContext.remove() else creationContext.set(previous)
+        }
+        val adopted = bindings.adopt(result)
+        if (adopted == null) {
+            checkpoint()
+            return result
+        }
+        own(node, adopted)
+        try {
+            while (true) {
+                checkpoint()
+                when (val state = adopted.state) {
+                    is State.Fulfilled -> return state.value
+                    is State.Rejected -> throw state.error
+                    is State.Pending -> sleep(minOf(50L, ctx.remainingUntilDeadline(clock())))
+                }
+            }
+        } finally {
+            if (!adopted.isSettled) adopted.cancel()
+            synchronized(lock) { node.owned.remove(adopted) }
+        }
     }
 
     private fun runCombinator(node: FlowNode, step: FlowStep.Combinator, ctx: FlowContext, done: (Outcome) -> Unit) {
@@ -556,7 +687,7 @@ class FlowScheduler(
     }
 
     private fun isRerunnable(step: FlowStep): Boolean = when (step) {
-        is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool, is FlowStep.Sleep, is FlowStep.Callback, is FlowStep.Combinator -> true
+        is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool, is FlowStep.Sleep, is FlowStep.Callback, is FlowStep.Combinator, is FlowStep.WhenPresent, is FlowStep.RepeatUntil -> true
         is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Retry -> false
     }
 
@@ -633,7 +764,7 @@ class FlowScheduler(
         val fulfilled = input is State.Fulfilled
         return when (step) {
             is FlowStep.Value, is FlowStep.Adopted, is FlowStep.Scope, is FlowStep.Timeout, is FlowStep.Combinator, is FlowStep.Retry -> null
-            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool -> if (fulfilled) node.worker else null
+            is FlowStep.Wait, is FlowStep.WaitStable, is FlowStep.Sleep, is FlowStep.Action, is FlowStep.GlobalAction, is FlowStep.Tool, is FlowStep.WhenPresent, is FlowStep.RepeatUntil -> if (fulfilled) node.worker else null
             is FlowStep.Callback -> {
                 val runs = when (step.kind) {
                     CallbackKind.FINALLY -> step.onOk != null
@@ -655,12 +786,19 @@ class FlowScheduler(
      * modes reduce each sample to a key when it is observed.
      * zh-CN: 自定义比较器经 bindings 直接收到样本; 内置模式在观察到样本时把它归约为键.
      */
-    private fun stabilizerFor(stability: Stability): Stabilizer = when (val compare = stability.compare) {
-        is StabilityCompare.Custom -> Stabilizer(stability, { it }) { previous, next -> bindings.isTruthy(bindings.invoke(compare.fn, listOf(previous, next))) }
-        else -> Stabilizer(stability, { Stabilizer.keyOf(compare, it) })
+    private fun stabilizerFor(stability: Stability): Stabilizer {
+        stability.snapshot?.let { fn -> return Stabilizer(stability, { bindings.snapshot(bindings.invoke(fn, listOf(it))) }) }
+        return when (val compare = stability.compare) {
+            is StabilityCompare.Custom -> Stabilizer(stability, { it }) { previous, next -> bindings.isTruthy(bindings.invoke(compare.fn, listOf(previous, next))) }
+            else -> Stabilizer(stability, { bindings.stabilityKey(compare, it) })
+        }
     }
 
     private companion object {
+
+        class CreationContext(val owner: FlowNode, val context: FlowContext)
+
+        val creationContext = ThreadLocal<CreationContext>()
 
         /** The value a negated wait yields when the probe finds nothing. zh-CN: 取反等待在探测无所得时产生的值. */
         val SATISFIED = Any()

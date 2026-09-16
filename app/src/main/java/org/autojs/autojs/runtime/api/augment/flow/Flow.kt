@@ -46,6 +46,8 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::wait.name to listOf("wait", "waitAsync"),
         ::waitUntil.name,
         ::waitWhile.name,
+        ::whenPresent.name,
+        ::repeatUntil.name,
         ::waitForStable.name,
         ::waitForVisible.name,
         ::waitForHidden.name to listOf("waitForHidden", "waitForGone"),
@@ -131,6 +133,14 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun waitWhile(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).wait(null, WaitKind.WHILE, "flow.waitWhile", args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun whenPresent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).whenPresent(null, args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun repeatUntil(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = api(scriptRuntime).repeatUntil(null, args)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

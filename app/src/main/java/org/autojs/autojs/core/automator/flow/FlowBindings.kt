@@ -51,6 +51,13 @@ interface FlowBindings {
      */
     fun adopt(value: Any?): FlowNode? = value as? FlowNode
 
+    /** Freeze a stability projection before another sample can mutate it.
+     * zh-CN: 在下一次采样可能修改投影之前保存其值. */
+    fun snapshot(value: Any?): Any? = Stabilizer.snapshot(value)
+
+    /** Key of a single node or ordered collection. zh-CN: 单节点或有序集合的比较键. */
+    fun stabilityKey(compare: StabilityCompare, value: Any): Any? = Stabilizer.keyOf(compare, value)
+
     /**
      * Waits at most [timeoutMillis] for the accessibility service to be available again after a
      * probe failed with `A11Y_UNAVAILABLE` (roadmap P5.5, `recoverService`); returns whether it

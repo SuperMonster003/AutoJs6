@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 16 일.
+데이터 갱신일: 2026/09/16.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -136,7 +136,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -326,6 +326,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` `auto.setFlags()` 에 플래그 `appWindowsFallback` 추가: 시스템이 아직 활성 창의 루트를 제공하지 않는 동안 (접근성 서비스가 바인딩된 직후; Android 8.0 에서는 다음 창 변화까지 지속될 수 있음), 선택기와 `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` 가 창 목록의 애플리케이션 창 (포커스된 창 우선) 루트로 대체함. 기본값은 꺼짐
 * `추가` `UiObject` 에 `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` 메서드 추가 (`clickable()` 등 불리언 속성 메서드와 같은 형식이며 기존 compat 접근자 `isContentInvalid` 등에 대응)
 * `추가` 위젯 컬렉션 (`find()` / `untilFind()` / `children()` / `siblings()` 등이 반환하는 배열) 에 새 메서드 추가: `at(i)` (음수는 끝에서부터, 범위 밖은 null), `first()` / `last()` (비어 있으면 null), `nonNull()` (null 항목 제거), `slice(start?, end?)` (`Array.prototype.slice` 와 같은 인덱스 규칙, 결과도 컬렉션 메서드를 가짐), 그리고 노드별 결과를 반환하는 `performActionEach(action, ...args)` / `clickEach()` / `longClickEach()` / `scrollForwardEach()` / `scrollBackwardEach()` / `setTextEach(text)` (boolean 배열, 모든 노드를 시도; 기존 `performAction` / `click()` 등의 논리곱 의미는 변함없음); `filter` / `map` / `forEach` / `some` / `every` / `indexOf` / `for...of` 는 배열 자체의 연산으로 이전처럼 사용 가능
+* `추가` Flow 인스턴스의 clickIfExists / clickAny / findAny 체인 단계, whenPresent 선택적 분기 및 repeatUntil 제한된 비동기 루프
 * `추가` 비동기 체인형 대기 API 추가: `waitAsync(cond, timeout?, interval?)` (별칭 `wait.async` / `auto.wait` / `flow.wait`) 는 스크립트를 차단하지 않고 `Flow` 객체를 반환함. 조건은 선택자 (문자열 / 정규식 / `UiSelector` / 객체 / 배열), 함수, `UiObject`, `Flow`, `Promise` 중 하나; 체인에는 노드 동작 (`click` / `longClick` / `setText` / `scrollForward` 등), 전역 동작 (`back` / `home` / `swipe` 등), `sleep` / `timeout` / `retry` / `scope`, 콜백 `then` / `catch` (`else`) / `finally` / `map` / `filter` / `peek` / `run` 을 이어 붙일 수 있고, 결과는 `sync()` / `await()` / `toPromise()` 로 얻으며 `cancel()` 로 취소함; 전역 진입 함수 `waitThenClick` (`clickWait`), `waitForStable`, `waitForStableThenClick` (`clickWhenStable`), `clickWhenStableAfter`, `waitForVisible`, `waitForHidden` (`waitForGone`) 외에 네임스페이스 `flow` (`$flow`) 에 `waitUntil` / `waitWhile` / `waitForActivity` / `waitForPackage` / `waitThenLongClick` / `sleep` (`delay`) / `run` / `of` / `all` / `race` / `any` / `cancelAll` / `Flow` / `pending` 제공; 차단 단계는 스크립트 전용 작업 스레드 풀 (`flow-<id>-<n>` 스레드, 체인마다 직렬 레인 하나, 독립된 체인은 동시에 실행) 에서 실행되고 콜백은 체인을 만든 스크립트 스레드로 되돌아감 (UI 모드에서도 사용 가능하나 `sync()` 는 UI 스레드에서 금지), 스크립트 종료 시 대기 중인 체인은 모두 취소되고 스레드 풀은 정지함; 실패는 `FlowError` (`code` / `step` / `selector` / `elapsed` / `attempts` / `reason` 을 가진 `Error`) 로 거부되며 코드는 `TIMEOUT` / `ACTION_FAILED` / `CANCELLED` / `A11Y_UNAVAILABLE` / `INVALID_TARGET`; `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` 로 스크립트별 기본값을 설정하고 (인수가 없으면 읽기), `flow.trace(true)` 로 각 단계의 시작 / 종료 / 소요 시간 / 결과 요약을 콘솔에 출력함; 편의 단계 `clickAfter(min, max?)` / `longClickAfter` / `clickWhenStableAfter` 와 `sleep(min, max?)` 는 전역 `sleep` 처럼 `"±delta"` 문자열을 받음; 동기 `wait()` 는 변경 없음
 * `추가` 고수준 자동화 도구를 `automator` 모듈과 전역 양쪽에 추가: `smartClick(target, options?)` (대상이 클릭 불가면 클릭 가능한 조상으로 올라가고, 그것도 없으면 탭 제스처로 대체하며, 클릭 후 조건 검증 가능), `clickIfExists` / `clickAny` / `findAny`, `scrollUntil(target, options?)` (대상이 나타날 때까지 컨테이너를 스크롤, 접근성 동작 또는 제스처 방식, 내용이 연속으로 변하지 않으면 끝으로 간주), `typeInto(target, text, options?)` (선택자 / 인덱스 / 포커스된 입력란; 대체 또는 추가; 다시 읽어 검증하고 제출), `dismissPopups(targets, options?)` (팝업을 하나 / 전부 닫고, `watch: true` 면 창 변경 이벤트로 구동되는 백그라운드 감시 핸들을 반환), `collectList(container, item, options?)` (스크롤하며 항목을 수집하고 내용으로 중복 제거), `launchAndWait` / `backUntil` / `backToApp`, `toggle(target, checked)` (상태가 다를 때만 클릭한 뒤 검증) 및 `retry(fn, options?)`; Flow 에 대응 단계 `.smartClick()` / `.scrollUntil()` / `.typeInto()` / `.dismissPopups()` / `.collectList()` / `.launchAndWait()` / `.backUntil()` / `.backToApp()` / `.toggle()` 와 `flow.*` 시작점을 추가; 모든 실패는 `FlowError` (`code` / `step` / `selector` / `reason`); `flow.defaults({ humanize: { offset, delay } })` 로 Flow 동작 단계와 각 도구에 사람처럼 보이는 무작위 탭 오프셋과 동작 전 대기를 부여함
 * `추가` 접근성 진단: `auto.explain(selector, root?)` 는 선택자를 필터 단위로 집계 (각 필터 단독 일치 수와 앞선 필터를 겹친 뒤의 잔여 수, 결과를 비우는 필터, 그 앞의 모든 단계를 통과한 "아깝게 놓친" 노드) 하며 결과의 `toString()` 이 텍스트 보고서; `auto.dump(options?)` 는 각 창 루트 (또는 `root`) 의 읽기 쉬운 스냅샷 (들여쓰기 텍스트 / JSON / uiautomator 스타일 XML, `maxDepth` / `properties` / `visibleOnly` / `maxNodes` 지정 가능) 을 출력; `UiObject.toJSON()` (`JSON.stringify(node)` 사용 가능) 과 `UiObject.dumpSubtree(options?)`; `auto.stats` 는 스크립트별 검색 / 폴링 조회 / 가장 느린 선택자 / Flow 단계 소요 시간 통계 (`reset()` 으로 초기화, `toString()` 이 텍스트 보고서); 레이아웃 분석기의 코드 생성에 "코드 스타일" 옵션을 추가하여 Flow 스타일 조각 (`waitThenClick(selector).sync()` 등) 을 출력 가능
@@ -550,6 +551,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` `images.matchFeatures`가 객체 특징을 1이 아닌 `scale`로 계산하면 크기가 잘못된 프레임을 반환하고, 모서리를 재정렬하여 회전된 객체의 모서리가 자신의 모서리와의 대응을 잃었으며, 호모그래피가 불안정할 때 왜곡된 프레임을 반환할 수 있었고, `drawMatches` 이미지를 이미지 대신 기술자 행렬로 그렸으며, 키포인트가 없는 이미지에서 OpenCV 오류를 던졌습니다
 * `수정` `images.detectAndComputeFeatures`가 중간 행렬을 누수했고, ORB는 기본 31 px 경계 때문에 63 px보다 작은 이미지에서 키포인트를 전혀 검출하지 못하고 작은 객체에서도 소수만 검출했습니다
 * `수정` MCP Server 세션 컨트롤러가 사용자가 시스템 설정에서 플러그인을 강제 종료한 뒤 약 1 초 만에 다시 바인딩하여 플러그인을 다시 시작해 사용자의 결정에 어긋났습니다. 이제 프로세스가 종료된 뒤 더 이상 사용할 수 없는 플러그인 (중지, 비활성화 또는 제거됨) 은 다시 바인딩하지 않으며, 드로어 스위치가 꺼지고 부제목에 새로 설치했을 때와 같은 활성화 안내가 표시됩니다
+* `개선` 안정화 대기에서 순서가 있는 노드 모음과 snapshot 데이터 투영을 비교하고 하위 흐름의 기한, 취소 및 오류 전파 개선
 * `개선` Android 17 로컬 네트워크 권한 요청을 플러그인 센터의 활성화 흐름과 설정으로 통합하고 런처 권한 페이지 제거; 권한이 없으면 비활성 상태를 유지하고 자동 시작을 조용히 건너뜀
 * `개선` 호스트와 호환 플러그인에 고급 보호 설명을 표시하고 전역 모드, 실제 서비스 가용성 및 보안 설정 제어를 구분
 * `개선` 패키징된 앱은 프로젝트의 공유 경로 요구에 따라 저장소 권한을 안내하며 거부, 설정 복귀, 숨겨진 실행 아이콘 복원 및 부팅 시 실제 접근 상태를 확인
@@ -908,7 +910,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -959,7 +961,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 16 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026/09/16 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1125,7 +1127,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026 년 3 월 18 일.
+데이터 갱신일: 2026/03/18.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 

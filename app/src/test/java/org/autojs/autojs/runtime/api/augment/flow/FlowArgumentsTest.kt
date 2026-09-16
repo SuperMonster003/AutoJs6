@@ -63,6 +63,23 @@ class FlowArgumentsTest {
     private fun fn(): Callable = js("(function () {})") as Callable
 
     @Test
+    fun controlArgumentsAndSnapshotHaveExplicitContracts() {
+        val handler = fn()
+        assertSame(handler, arguments.whenPresent("whenPresent", arrayOf("dialog", handler)).handler)
+        assertThrows(IllegalArgumentException::class.java) { arguments.whenPresent("whenPresent", arrayOf("dialog", handler, js("({ timeuot: 10 })"))) }
+        val repeat = arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ timeout: 500, maxAttempts: 3, interval: 20 })")))
+        assertEquals(500L, repeat.timeout)
+        assertEquals(3, repeat.maxAttempts)
+        assertEquals(20L, repeat.interval)
+        assertThrows(IllegalArgumentException::class.java) { arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ maxAttempts: 1.5 })"))) }
+        assertThrows(IllegalArgumentException::class.java) { arguments.repeatUntil("repeatUntil", arrayOf(handler, "done", js("({ timeout: Infinity })"))) }
+        val snapshot = arguments.wait("waitForStable", arrayOf("row", js("({ snapshot: function (x) { return x; } })"))).stability.snapshot
+        assertTrue(snapshot is Callable)
+        assertThrows(IllegalArgumentException::class.java) { arguments.wait("waitForStable", arrayOf("row", js("({ snapshot: 1 })"))) }
+        assertThrows(IllegalArgumentException::class.java) { arguments.wait("waitForStable", arrayOf("row", js("({ snapshot: function () {}, compare: 'content' })"))) }
+    }
+
+    @Test
     fun recoverServiceComesFromTheOptionOrTheDefaults() {
         assertFalse(arguments.wait("t", arrayOf<Any?>("text")).recoverService)
         assertTrue(arguments.wait("t", arrayOf<Any?>("text", js("({ recoverService: true })"))).recoverService)

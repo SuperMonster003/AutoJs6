@@ -34,6 +34,7 @@ class FlowNode internal constructor(
     // The fields below are guarded by the scheduler's lock. zh-CN: 以下字段由调度器的锁保护.
     internal var stateInternal: State = State.Pending
     internal var contextInternal: FlowContext? = null
+    internal var initialContext: FlowContext = FlowContext.INITIAL
     internal val children = ArrayList<FlowNode>()
     internal val callbacks = ArrayList<(State) -> Unit>()
     internal val owned = ArrayList<FlowNode>()
@@ -62,6 +63,8 @@ class FlowNode internal constructor(
 
     /** The error once rejected, `null` otherwise. zh-CN: 拒绝后的错误, 其它情况为 `null`. */
     val error: Throwable? get() = (state as? State.Rejected)?.error
+
+    internal fun own(child: FlowNode) = scheduler.own(this, child)
 
     /** The context the children of this node run in; the parent's (or the initial one) until settled. zh-CN: 本节点的子节点运行于其中的上下文; 结算前为父节点的 (或初始的). */
     val context: FlowContext get() = scheduler.contextOf(this)

@@ -131,6 +131,10 @@ internal class FlowApi(val executor: FlowExecutor) {
         return withCallbacks(start(stepOf(kind, spec), parent), spec.onOk, spec.onErr)
     }
 
+    fun whenPresent(parent: FlowNativeObject?, args: Array<out Any?>): FlowNativeObject = start(arguments.whenPresent("whenPresent", args), parent)
+
+    fun repeatUntil(parent: FlowNativeObject?, args: Array<out Any?>): FlowNativeObject = start(arguments.repeatUntil("repeatUntil", args), parent)
+
     /** A wait followed by [action] (`waitThenClick`, `clickWhenStable`, ...), with a sleep between when [after]. zh-CN: 等待后接 [action] (`waitThenClick`, `clickWhenStable`, ...), [after] 时中间加休眠. */
     fun waitThen(parent: FlowNativeObject?, kind: WaitKind, name: String, args: Array<out Any?>, action: String, after: Boolean): FlowNativeObject {
         val spec = specOf(kind, name, args, withDelay = after)
@@ -401,6 +405,8 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
         method("sleep", "delay") { self, args -> api.sleep(self, "sleep", args) }
         method("timeout") { self, args -> api.timeout(self, args) }
         method("retry") { self, args -> api.retry(self, args) }
+        method("whenPresent") { self, args -> api.whenPresent(self, args) }
+        method("repeatUntil") { self, args -> api.repeatUntil(self, args) }
         method("scope") { self, args -> api.scope(self, args) }
 
         method("then") { self, args -> api.callback(self, CallbackKind.THEN, "then", args) }

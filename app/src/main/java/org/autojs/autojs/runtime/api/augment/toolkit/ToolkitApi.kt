@@ -472,7 +472,7 @@ internal class ToolkitApi(private val owner: RuntimeToolkit) {
         const val REASON_NO_TARGET = "noTarget"
 
         /** The chain methods of `Flow.prototype` (roadmap Appendix B). zh-CN: `Flow.prototype` 的链式方法 (Roadmap 附录 B). */
-        val CHAIN_STEPS = listOf(SmartClick.STEP, ScrollSearch.STEP, TextEntry.STEP, PopupDismisser.STEP, ListCollector.STEP, AppLauncher.STEP_LAUNCH, AppLauncher.STEP_BACK, AppLauncher.STEP_BACK_TO_APP, Toggle.STEP)
+        val CHAIN_STEPS = listOf(SmartClick.STEP, Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_ANY, STEP_FIND_ANY, ScrollSearch.STEP, TextEntry.STEP, PopupDismisser.STEP, ListCollector.STEP, AppLauncher.STEP_LAUNCH, AppLauncher.STEP_BACK, AppLauncher.STEP_BACK_TO_APP, Toggle.STEP)
 
         /** The synchronous functions on `automator` and the global scope (D10). zh-CN: `automator` 与全局上的同步函数 (D10). */
         val SYNC_NAMES = (CHAIN_STEPS + listOf(Toolkit.STEP_CLICK_IF_EXISTS, Toolkit.STEP_CLICK_ANY, STEP_FIND_ANY, STEP_RETRY)).toSet()
