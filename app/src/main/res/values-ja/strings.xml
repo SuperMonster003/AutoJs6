@@ -742,7 +742,9 @@
     <string name="summary_plugin_jump_to_launch_page">このプラグインの起動 Activity を開きます</string>
     <string name="summary_plugin_no_launch_page">現在のプラグインには起動ページがありません</string>
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
+    <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
+    <string name="text_binary_content_cannot_be_previewed">バイナリの内容はプレビューできません</string>
     <string name="text_bun_host_capabilities">Bun 機能ブリッジ</string>
     <string name="text_bun_host_info_grant">ホスト情報スナップショット</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE を通じて Bun スクリプトに AutoJs6 のバージョンと言語の読み取り専用スナップショットを提供します; 次回の実行から適用</string>
@@ -1520,6 +1522,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">ゴミ箱に移動中...</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_n_days">%d 日</string>
+    <string name="text_n_files_n_folders">ファイル %1$d 件, フォルダー %2$d 件</string>
     <string name="text_n_items">%d 件</string>
     <string name="text_n_items_conflict">%2$d 件のうち %1$d 件は移動先に既に存在します</string>
     <string name="text_n_unchanged_lines_hidden">変更のない %d 行を非表示中. タップして展開</string>

@@ -734,7 +734,9 @@
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
+    <string name="text_and_n_more">... and %d more</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
+    <string name="text_binary_content_cannot_be_previewed">Binary content cannot be previewed</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
     <string name="text_bun_host_info_grant">Host info snapshot</string>
     <string name="summary_bun_host_info_grant">Offer Bun scripts a read-only snapshot of the AutoJs6 version and language through AUTOJS6_HOST_INFO_FILE; applies from the next run</string>
@@ -1507,6 +1509,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_n_days">%d days</string>
+    <string name="text_n_files_n_folders">%1$d files, %2$d folders</string>
     <string name="text_n_items">%d items</string>
     <string name="text_n_items_conflict">%1$d of %2$d items already exist at the destination</string>
     <string name="text_n_unchanged_lines_hidden">%d unchanged lines hidden, tap to expand</string>

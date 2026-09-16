@@ -109,8 +109,8 @@
 
 ### P3 回收站精进 (F14, F15)
 
-- [x] P3.1 多选模式: `TrashAdapter` 长按进入多选 (与 P2.3 的 revision 列表同一套模式: 全选 / 取消全选 / 返回键退出, 工具栏显示已选数量); 菜单 "恢复选中项" 走 `TrashRestoreController.startBatchRestoreFlow`: 选目标 (各自原父目录 / 统一目录), 在 IO 线程用纯函数 `TrashBatchPlanner.plan` 预判冲突, 有冲突时整批三选一 (跳过 / 覆盖 / 自动改名; 批次内同名条目即使选 "覆盖" 也自动改名, 避免覆盖刚恢复的文件), 执行时使用可中止的确定进度对话框 (逐项更新 "i / n" 与文件名, 覆盖文件前记 `RESTORE_PRE`, 中止时清理未完成的目录), 结束 toast 汇总恢复 / 跳过 / 失败; 菜单 "从回收站移除" 批量删除 (确认后逐项 `deleteTrashItem`). 顺带修复: `withControllableProgressDialog` 吞掉非中止异常导致单个恢复失败仍提示 "完成", 现在向外抛出. 证据: `TrashBatchPlannerTest` (JVM, 6 例) + 编译 + 全部 history 单测 (54 例), 2026-09-16; 提交 hash 由 P3.2 提交回填.
-- [ ] P3.2 内容预览: 文本文件以只读编辑器打开 (复用 `PREVIEW_INTENT_MAX_BYTES` 与临时文件策略), 目录显示 zip 条目列表 (相对路径 / 大小 / 数量).
+- [x] P3.1 多选模式: `TrashAdapter` 长按进入多选 (与 P2.3 的 revision 列表同一套模式: 全选 / 取消全选 / 返回键退出, 工具栏显示已选数量); 菜单 "恢复选中项" 走 `TrashRestoreController.startBatchRestoreFlow`: 选目标 (各自原父目录 / 统一目录), 在 IO 线程用纯函数 `TrashBatchPlanner.plan` 预判冲突, 有冲突时整批三选一 (跳过 / 覆盖 / 自动改名; 批次内同名条目即使选 "覆盖" 也自动改名, 避免覆盖刚恢复的文件), 执行时使用可中止的确定进度对话框 (逐项更新 "i / n" 与文件名, 覆盖文件前记 `RESTORE_PRE`, 中止时清理未完成的目录), 结束 toast 汇总恢复 / 跳过 / 失败; 菜单 "从回收站移除" 批量删除 (确认后逐项 `deleteTrashItem`). 顺带修复: `withControllableProgressDialog` 吞掉非中止异常导致单个恢复失败仍提示 "完成", 现在向外抛出. 证据: `TrashBatchPlannerTest` (JVM, 6 例) + 编译 + 全部 history 单测 (54 例), 2026-09-16; 提交 `e4eda89cf`.
+- [x] P3.2 内容预览 (`TrashPreviewController`): 条目对话框 "预览" 选项. 文件: 先嗅探前 8 KiB, 含 NUL 视为二进制并提示 (`text_binary_content_cannot_be_previewed`); 文本则复制 blob 到 `TmpScriptFiles` 临时文件 (沿用原扩展名以便高亮) 后 `EditActivity.viewPath` 只读打开 (不再区分大小走 Intent extras, 一律临时文件). 目录: `TrashArchiveListing.read` 仅读 zip 中央目录 (不解压即得大小), 对话框显示 "N 个文件, M 个文件夹 | 总大小" 与最多 500 条 "相对路径 (大小)", 超出显示 "及其他 N 项", 文本可选中. 证据: `TrashArchiveListingTest` (JVM, 3 例, 用临时 zip) + 编译 + 全部 history 单测 (57 例), 2026-09-16; 提交 hash 由 P3.3 提交回填.
 - [ ] P3.3 条目详情对话框: 原路径 / 移入时间 / 大小 / sha256 / 预计到期时间, 逐行可复制.
 - [ ] P3.4 移入回收站后 Snackbar "撤销" (仅在原路径仍空闲时可用, 复用 `restoreTrashItemToPathWithoutOverwrite`).
 - [ ] P3.5 列表显示到期倒计时 (基于回收站保留天数), 24 小时内到期的条目高亮; 到期计算抽为纯函数并单测.
@@ -168,7 +168,7 @@
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
-| 交互 | `storage/history/VersionHistoryController.kt`, `VersionHistoryEditorBridge.kt` (P2.3), `HistoryTextCodec.kt` (P2.4), `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5), `TrashBatchPlanner.kt` (P3.1, 纯函数) |
+| 交互 | `storage/history/VersionHistoryController.kt`, `VersionHistoryEditorBridge.kt` (P2.3), `HistoryTextCodec.kt` (P2.4), `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5), `TrashBatchPlanner.kt` (P3.1, 纯函数), `TrashPreviewController.kt` / `TrashArchiveListing.kt` (P3.2) |
 | 差异 | `storage/history/LineDiff.kt` (P2.4, 纯函数), `ui/storage/DiffActivity.kt` / `DiffLineAdapter.kt` (P2.4) |
 | 页面 | `ui/storage/TrashActivity.kt`, `VersionHistoryActivity.kt`, `RevisionListActivity.kt` / `RevisionAdapter.kt` / `RevisionViewHolder.kt` (P2.3), `BaseSearchSortListActivity.kt` |
 | 设置 | `ui/settings/TrashAndVersionHistorySettingsActivity.kt` / `...Fragment.kt` / `...Preference.kt`, `RetentionLimitSettings.kt`, `RetentionLimitPreference.kt`, `RetentionLimitDialogBuilder.kt`, `res/xml/fragment_trash_and_version_history_settings.xml`, `res/xml/fragment_preferences.xml` (分类) |

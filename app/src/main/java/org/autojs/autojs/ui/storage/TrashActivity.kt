@@ -18,6 +18,7 @@ import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.TrashEntities
+import org.autojs.autojs.storage.history.TrashPreviewController
 import org.autojs.autojs.storage.history.TrashRepository
 import org.autojs.autojs.storage.history.TrashRestoreController
 import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
@@ -42,10 +43,14 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
             if (adapter.selectionMode) {
                 adapter.toggle(item)
             } else {
+                val optionMenuItemPreview = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_preview)) { d ->
+                    d.dismiss()
+                    TrashPreviewController(this).preview(item)
+                }
                 val optionMenuItemRemove = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_remove_from_trash)) { d ->
                     confirmAndRemoveFromTrash(item, d)
                 }
-                TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemRemove)) {
+                TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemPreview, optionMenuItemRemove)) {
                     load()
                 }
             }

@@ -743,7 +743,9 @@
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
+    <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
+    <string name="text_binary_content_cannot_be_previewed">바이너리 내용은 미리 볼 수 없습니다</string>
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
     <string name="text_bun_host_info_grant">호스트 정보 스냅샷</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE을 통해 Bun 스크립트에 AutoJs6 버전과 언어의 읽기 전용 스냅샷을 제공합니다; 다음 실행부터 적용</string>
@@ -1521,6 +1523,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_n_days">%d일</string>
+    <string name="text_n_files_n_folders">파일 %1$d개, 폴더 %2$d개</string>
     <string name="text_n_items">%d개 항목</string>
     <string name="text_n_items_conflict">%2$d개 항목 중 %1$d개가 대상 위치에 이미 있습니다</string>
     <string name="text_n_unchanged_lines_hidden">변경되지 않은 %d줄 숨김, 탭하여 펼치기</string>
