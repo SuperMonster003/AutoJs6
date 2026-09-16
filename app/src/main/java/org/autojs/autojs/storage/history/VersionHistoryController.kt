@@ -1,8 +1,10 @@
 package org.autojs.autojs.storage.history
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.text.InputType
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -12,6 +14,7 @@ import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.storage.RevisionListActivity
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -199,6 +202,100 @@ class VersionHistoryController(private val context: Context) {
                 }
             }
             AndroidSchedulers.mainThread().scheduleDirect { onDone?.invoke() }
+        }
+    }
+
+    /**
+     * Export the raw bytes of a revision (original encoding and BOM preserved): pick a directory,
+     * confirm a file name (suggested: original name with the revision time stamp), then write.
+     * Overwriting a tracked file keeps its current content as an OVERWRITE_PRE revision (D4).
+     *
+     * zh-CN: 导出 revision 的原始字节 (保留原编码与 BOM): 选目录, 确认文件名 (建议名为原文件名加 revision 时间戳),
+     * 然后写入. 覆盖已纳管文件时先把其当前内容记为 OVERWRITE_PRE revision (D4).
+     */
+    @SuppressLint("CheckResult")
+    fun exportRevision(rev: HistoryEntities.Revision, displayPath: String) {
+        val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date(rev.createdAt))
+        val suggested = HistoryExportNaming.suggestName(File(displayPath).name, stamp)
+        FileChooserDialogBuilder(context)
+            .title(R.string.text_save_to)
+            .dir(HistoryPaths.internalStorageRoot)
+            .chooseDir()
+            .singleChoice()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ dir ->
+                promptExportFileName(rev, File(dir.path), suggested)
+            }, { e ->
+                e.printStackTrace()
+                ViewUtils.showToast(context, e.message, true)
+            })
+    }
+
+    private fun promptExportFileName(rev: HistoryEntities.Revision, dir: File, suggested: String) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_export)
+                .content(context.getString(R.string.text_path_colon_value, dir.absolutePath))
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(context.getString(R.string.text_file_name), suggested, false) { _, input ->
+                    val name = input.toString().trim()
+                    if (!HistoryExportNaming.isValidFileName(name)) {
+                        ViewUtils.showToast(context, context.getString(R.string.error_invalid_path, name), true)
+                        return@input
+                    }
+                    val dest = File(dir, name)
+                    if (dest.exists()) confirmOverwriteThenExport(rev, dest) else writeExport(rev, dest)
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .apply { widgetThemeColor() }
+                .build()
+        }
+    }
+
+    private fun confirmOverwriteThenExport(rev: HistoryEntities.Revision, dest: File) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_file_exists)
+                .content(context.getString(R.string.text_path_colon_value, dest.absolutePath))
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.text_overwrite)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive { _, _ -> writeExport(rev, dest) }
+                .cancelable(true)
+                .build()
+        }
+    }
+
+    private fun writeExport(rev: HistoryEntities.Revision, dest: File) {
+        val appCtx = context.applicationContext
+        Schedulers.io().scheduleDirect {
+            runCatching {
+                if (dest.isDirectory) throw IOException("Destination is a directory: ${dest.absolutePath}")
+                val repository = HistoryRepository(appCtx)
+                val bytes = repository.readRevisionBytes(rev)
+                if (dest.isFile && HistoryPaths.isUnderInternalStorage(HistoryPaths.normalizePath(dest.path))) {
+                    repository.recordSnapshotBeforeOverwrite(
+                        path = dest.path,
+                        op = HistoryRepository.OP_OVERWRITE_PRE,
+                        newContentSha256 = rev.sha256,
+                    )
+                }
+                writeBytesTransactional(dest, bytes)
+                notifyExplorerParentDirChanged(dest.path)
+                AndroidSchedulers.mainThread().scheduleDirect {
+                    ViewUtils.showToast(context, "${context.getString(R.string.text_exported)}: ${dest.absolutePath}", true)
+                }
+            }.onFailure {
+                it.printStackTrace()
+                AndroidSchedulers.mainThread().scheduleDirect {
+                    ViewUtils.showToast(context, it.message, true)
+                }
+            }
         }
     }
 

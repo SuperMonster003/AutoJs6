@@ -221,6 +221,10 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
             dialog.dismiss()
             showEditLabelDialog(row)
         }
+        options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_export)) { dialog ->
+            dialog.dismiss()
+            controller.exportRevision(rev, displayPath)
+        }
         options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_delete)) { dialog ->
             dialog.dismiss()
             confirmAndDelete(listOf(row))
