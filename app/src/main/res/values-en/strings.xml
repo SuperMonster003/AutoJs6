@@ -738,6 +738,7 @@
     <string name="summary_plugin_instruction_view">Show usage examples and notes for this plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
+    <string name="summary_reconnect_client">Reconnect drops this connection and lets VSCode re-establish it automatically (extension 1.1.0+); Disconnect closes it without automatic reconnection</string>
     <string name="summary_reconnect_on_network_change">While reconnecting, retry immediately when a network becomes available</string>
     <string name="summary_restore_connection_on_launch">Reconnect to the last server when the app starts, unless the connection was disconnected explicitly</string>
     <string name="summary_restore_server_on_launch">Listen again when the app starts, unless the server was stopped explicitly</string>
@@ -1027,6 +1028,7 @@
     <string name="text_client_mode">Client mode</string>
     <string name="text_client_mode_manager">Client mode manager</string>
     <string name="text_client_n">Client %d</string>
+    <string name="text_clients">Clients</string>
     <string name="text_clone_color_library">Clone a color library</string>
     <string name="text_close">Close</string>
     <string name="text_close_floating_button">Close floating button</string>
@@ -1057,6 +1059,7 @@
     <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
     <string name="text_connect">Connect</string>
     <string name="text_connected">Connected</string>
+    <string name="text_connected_at">Connected at</string>
     <string name="text_connected_clients">Connected clients</string>
     <string name="text_connected_count_with_colon">Connected: %1$d</string>
     <string name="text_connecting">Connecting</string>
@@ -1562,6 +1565,7 @@
     <string name="text_no_available_plugins_found_hint">No available plugins found</string>
     <string name="text_no_broken_items">No broken items</string>
     <string name="text_no_browser">No browser installed</string>
+    <string name="text_no_clients_connected">No VSCode client is connected</string>
     <string name="text_no_content">No content</string>
     <string name="text_no_content_description">No content description</string>
     <string name="text_no_data">No data</string>
@@ -1737,6 +1741,7 @@
     <string name="text_pinch_to_zoom">Pinch to zoom</string>
     <string name="text_pinned">Pinned</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">Pinned, exempt from per-file cleanup</string>
+    <string name="text_platform">Platform</string>
     <string name="text_play">Play</string>
     <string name="text_please_choose">Please choose</string>
     <string name="text_please_choose_a_script">Choose a script</string>
@@ -1839,6 +1844,7 @@
     <string name="text_reading_android_package">Reading Android package</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>
     <string name="text_recommended">Recommended</string>
+    <string name="text_reconnect">Reconnect</string>
     <string name="text_reconnect_attempts">Reconnect attempts</string>
     <string name="text_reconnect_now">Reconnect now</string>
     <string name="text_reconnect_on_network_change">Retry on network change</string>
@@ -1862,6 +1868,7 @@
     <string name="text_release_notes">Release notes</string>
     <string name="text_reload_or_convert_to_encoding">Reload or convert to %1$s</string>
     <string name="text_remote">remote</string>
+    <string name="text_remote_address">Remote address</string>
     <string name="text_remote_connections">Remote connections</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>

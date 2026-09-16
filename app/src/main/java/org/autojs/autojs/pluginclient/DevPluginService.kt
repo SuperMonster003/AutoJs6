@@ -153,12 +153,18 @@ class DevPluginService(val context: Context) {
      * zh-CN: 关闭所有服务端客户端连接, 监听 socket 保持. v2 对端先收到 `bye(reason)`; 默认的 `user` 表示 VSCode 不应自动重连.
      */
     fun disconnectServerClients(reason: String = JsonSocket.BYE_REASON_USER) {
-        val connections = mServerConnections.toList()
-        mServerConnections.clear()
-        serverConnectionCount.onNext(0)
-        connections.forEach { conn ->
-            conn.sayBye(reason) { runCatching { conn.close() }.onFailure { it.printStackTrace() } }
-        }
+        mServerConnections.toList().forEach { disconnectServerClient(it, reason) }
+    }
+
+    /**
+     * Close one server-side client connection. `bye(user)` tells VSCode not to reconnect, `bye(restart)` asks
+     * it to re-establish the connection right away (server manager "reconnect").
+     * zh-CN: 关闭一个服务端客户端连接. `bye(user)` 告知 VSCode 不要重连, `bye(restart)` 要求其立即重新建立连接 (服务端管理器 "重新连接").
+     */
+    fun disconnectServerClient(conn: JsonSocketServer, reason: String = JsonSocket.BYE_REASON_USER) {
+        if (!mServerConnections.remove(conn)) return
+        serverConnectionCount.onNext(mServerConnections.size)
+        conn.sayBye(reason) { runCatching { conn.close() }.onFailure { it.printStackTrace() } }
     }
 
     @AnyThread

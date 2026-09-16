@@ -745,6 +745,7 @@
     <string name="summary_plugin_instruction_view">Показать примеры использования и описание этого плагина</string>
     <string name="summary_plugin_jump_to_launch_page">Открыть Activity запуска этого плагина</string>
     <string name="summary_plugin_no_launch_page">У текущего плагина нет страницы запуска</string>
+    <string name="summary_reconnect_client">\"Переподключить\" разрывает это соединение и позволяет VSCode восстановить его автоматически (расширение 1.1.0+); \"Отключить\" закрывает его без автоматического переподключения</string>
     <string name="summary_reconnect_on_network_change">Во время переподключения повторять попытку сразу, как только сеть станет доступна</string>
     <string name="summary_restore_connection_on_launch">При запуске приложения подключаться к последнему серверу, если подключение не было разорвано явно</string>
     <string name="summary_restore_server_on_launch">При запуске приложения снова начинать прослушивание, если сервер не был остановлен явно</string>
@@ -1034,6 +1035,7 @@
     <string name="text_client_mode">Режим клиента</string>
     <string name="text_client_mode_manager">Менеджер режима клиента</string>
     <string name="text_client_n">Клиент %d</string>
+    <string name="text_clients">Клиенты</string>
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
     <string name="text_close">Закрыть</string>
     <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
@@ -1064,6 +1066,7 @@
     <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
     <string name="text_connect">Подключить</string>
     <string name="text_connected">Подключено</string>
+    <string name="text_connected_at">Время подключения</string>
     <string name="text_connected_clients">Подключённые клиенты</string>
     <string name="text_connected_count_with_colon">Подключено: %1$d</string>
     <string name="text_connecting" tools:ignore="TypographyEllipsis">Подключение...</string>
@@ -1574,6 +1577,7 @@
     <string name="text_no_available_plugins_found_hint">Доступные плагины не найдены</string>
     <string name="text_no_broken_items">Поврежденных элементов нет</string>
     <string name="text_no_browser">Не установлен браузер</string>
+    <string name="text_no_clients_connected">Нет подключенных клиентов VSCode</string>
     <string name="text_no_content">Нет содержимого</string>
     <string name="text_no_content_description">Нет описания содержимого</string>
     <string name="text_no_data">Нет данных</string>
@@ -1749,6 +1753,7 @@
     <string name="text_pinch_to_zoom">Уменьшение масштаба</string>
     <string name="text_pinned">Закреплено</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">Закреплено, не подлежит очистке на уровне файла</string>
+    <string name="text_platform">Платформа</string>
     <string name="text_play">Воспроизвести</string>
     <string name="text_please_choose">Пожалуйста, выберите</string>
     <string name="text_please_choose_a_script">Выберите сценарий</string>
@@ -1851,6 +1856,7 @@
     <string name="text_reading_android_package">Чтение пакета Android</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
+    <string name="text_reconnect">Переподключить</string>
     <string name="text_reconnect_attempts">Попытки переподключения</string>
     <string name="text_reconnect_now">Переподключить сейчас</string>
     <string name="text_reconnect_on_network_change">Повторять при смене сети</string>
@@ -1874,6 +1880,7 @@
     <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_reload_or_convert_to_encoding">Перезагрузить или преобразовать в %1$s</string>
     <string name="text_remote">удаленный</string>
+    <string name="text_remote_address">Удаленный адрес</string>
     <string name="text_remote_connections">Удалённые подключения</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>

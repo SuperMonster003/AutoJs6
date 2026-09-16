@@ -46,6 +46,14 @@ abstract class ConnectionManagerDialog protected constructor(
         val onClick: () -> Unit,
     )
 
+    /** One connected client in the clients section. zh-CN: 客户端区中的一个已连接客户端. */
+    protected class ClientRow(
+        @DrawableRes val iconRes: Int,
+        val title: String,
+        val subtitle: String,
+        val onClick: () -> Unit,
+    )
+
     protected val inflater: LayoutInflater = LayoutInflater.from(context)
     protected val binding = DialogConnectionManagerBinding.inflate(inflater)
     protected val handler = Handler(Looper.getMainLooper())
@@ -54,6 +62,8 @@ abstract class ConnectionManagerDialog protected constructor(
     private val statusRows = ArrayList<A11yServiceManagerEntryItemBinding>()
     private var statusEntries: List<Pair<String, String>> = emptyList()
     private val actionRows = LinkedHashMap<Action, OperationDialogItemBinding>()
+    private val clientRows = ArrayList<OperationDialogItemBinding>()
+    private var clientEntries: List<ClientRow> = emptyList()
 
     val dialog: MaterialDialog
 
@@ -67,7 +77,7 @@ abstract class ConnectionManagerDialog protected constructor(
 
     init {
         val sectionTitleColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 3.2)
-        listOf(binding.statusTitle, binding.controlTitle, binding.settingsTitle).forEach { it.setTextColor(sectionTitleColor) }
+        listOf(binding.statusTitle, binding.clientsTitle, binding.controlTitle, binding.settingsTitle).forEach { it.setTextColor(sectionTitleColor) }
         binding.statusRefresh.imageTintList = ColorStateList.valueOf(sectionTitleColor)
         binding.statusRefresh.setOnClickListener { refresh() }
 
@@ -136,6 +146,54 @@ abstract class ConnectionManagerDialog protected constructor(
             root.setOnClickListener {
                 val entry = statusEntries.getOrNull(index) ?: return@setOnClickListener
                 copyText("${entry.first}: ${entry.second}")
+            }
+        }
+    }
+
+    /** Show or hide the clients section (server mode only). zh-CN: 显示或隐藏客户端区 (仅服务端模式). */
+    protected fun setClientsSectionVisible(visible: Boolean) {
+        val visibility = if (visible) View.VISIBLE else View.GONE
+        binding.clientsTitle.visibility = visibility
+        binding.clientsContainer.visibility = visibility
+    }
+
+    /**
+     * Replace the client rows; views are reused like the status rows. An empty list shows a single
+     * placeholder row.
+     * zh-CN: 替换客户端行; 与状态行一样复用视图. 空列表显示一行占位说明.
+     */
+    protected fun setClients(entries: List<ClientRow>) {
+        clientEntries = entries
+        val rows = if (entries.isEmpty()) {
+            listOf(ClientRow(R.drawable.ic_laptop_black_48dp, getString(R.string.text_no_clients_connected), "") {})
+        } else entries
+        while (clientRows.size < rows.size) clientRows += createClientRow(clientRows.size)
+        clientRows.forEachIndexed { index, row ->
+            val entry = rows.getOrNull(index)
+            if (entry == null) {
+                row.root.visibility = View.GONE
+            } else {
+                row.root.visibility = View.VISIBLE
+                row.root.isClickable = entries.isNotEmpty()
+                row.root.alpha = if (entries.isEmpty()) 0.6f else 1f
+                row.icon.setImageResource(entry.iconRes)
+                if (row.title.text != entry.title) row.title.text = entry.title
+                if (row.subtitle.text != entry.subtitle) row.subtitle.text = entry.subtitle
+                row.subtitle.visibility = if (entry.subtitle.isEmpty()) View.GONE else View.VISIBLE
+            }
+        }
+    }
+
+    private fun createClientRow(index: Int): OperationDialogItemBinding {
+        return OperationDialogItemBinding.inflate(inflater, binding.clientsContainer, true).apply {
+            val verticalPadding = DisplayUtils.dpToPx(10f).roundToInt()
+            root.setPadding(root.paddingLeft, verticalPadding, root.paddingRight, verticalPadding)
+            icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
+            root.setOnClickListener {
+                val entry = clientEntries.getOrNull(index) ?: return@setOnClickListener
+                runCatching { entry.onClick() }.onFailure { e ->
+                    snack(e.message ?: getString(R.string.error_an_error_occurred))
+                }
             }
         }
     }

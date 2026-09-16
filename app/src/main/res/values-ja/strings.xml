@@ -746,6 +746,7 @@
     <string name="summary_plugin_instruction_view">このプラグインの使用例と説明を表示します</string>
     <string name="summary_plugin_jump_to_launch_page">このプラグインの起動 Activity を開きます</string>
     <string name="summary_plugin_no_launch_page">現在のプラグインには起動ページがありません</string>
+    <string name="summary_reconnect_client">\"再接続\" はこの接続を切断し, VSCode に自動的に再確立させます (拡張機能 1.1.0+); \"切断\" は自動再接続なしで接続を閉じます</string>
     <string name="summary_reconnect_on_network_change">再接続中にネットワークが利用可能になったら直ちに再試行します</string>
     <string name="summary_restore_connection_on_launch">アプリ起動時に前回のサーバーへ再接続します (明示的に切断した場合を除く)</string>
     <string name="summary_restore_server_on_launch">アプリ起動時に再び待機します (明示的に停止した場合を除く)</string>
@@ -1035,6 +1036,7 @@
     <string name="text_client_mode">クライアントモード</string>
     <string name="text_client_mode_manager">クライアントモードマネージャー</string>
     <string name="text_client_n">クライアント %d</string>
+    <string name="text_clients">クライアント</string>
     <string name="text_clone_color_library">カラーライブラリを複製</string>
     <string name="text_close">閉じる</string>
     <string name="text_close_floating_button">フローティングボタンを閉じる</string>
@@ -1065,6 +1067,7 @@
     <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
     <string name="text_connect">接続</string>
     <string name="text_connected">接続済み</string>
+    <string name="text_connected_at">接続時刻</string>
     <string name="text_connected_clients">接続中のクライアント</string>
     <string name="text_connected_count_with_colon">接続済み: %1$d</string>
     <string name="text_connecting">接続中</string>
@@ -1575,6 +1578,7 @@
     <string name="text_no_available_plugins_found_hint">利用可能なプラグインが見つかりません</string>
     <string name="text_no_broken_items">無効な項目はありません</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
+    <string name="text_no_clients_connected">接続中の VSCode クライアントはありません</string>
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
     <string name="text_no_data">データなし</string>
@@ -1750,6 +1754,7 @@
     <string name="text_pinch_to_zoom">ピンチ操作</string>
     <string name="text_pinned">固定済み</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">固定済み, ファイル単位のクリーンアップの対象外</string>
+    <string name="text_platform">プラットフォーム</string>
     <string name="text_play">再生</string>
     <string name="text_please_choose">選択してください</string>
     <string name="text_please_choose_a_script">スクリプトを選択してください</string>
@@ -1852,6 +1857,7 @@
     <string name="text_reading_android_package">Android パッケージを読み込み中</string>
     <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
     <string name="text_recommended">推奨</string>
+    <string name="text_reconnect">再接続</string>
     <string name="text_reconnect_attempts">再接続の試行回数</string>
     <string name="text_reconnect_now">今すぐ再接続</string>
     <string name="text_reconnect_on_network_change">ネットワーク変更時に再試行</string>
@@ -1875,6 +1881,7 @@
     <string name="text_release_notes">リリースノート</string>
     <string name="text_reload_or_convert_to_encoding">再読み込みまたは %1$s に変換</string>
     <string name="text_remote">リモート</string>
+    <string name="text_remote_address">リモートアドレス</string>
     <string name="text_remote_connections">リモート接続</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモートファイルがローカルストレージに正常に保存されました</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>

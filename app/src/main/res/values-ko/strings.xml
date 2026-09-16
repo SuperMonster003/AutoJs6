@@ -747,6 +747,7 @@
     <string name="summary_plugin_instruction_view">이 플러그인의 사용 예시와 설명을 표시합니다</string>
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
+    <string name="summary_reconnect_client">\"다시 연결\"은 이 연결을 끊고 VSCode가 자동으로 다시 연결하도록 합니다 (확장 1.1.0+); \"연결 끊기\"는 자동 재연결 없이 연결을 닫습니다</string>
     <string name="summary_reconnect_on_network_change">재연결 중 네트워크를 사용할 수 있게 되면 즉시 재시도합니다</string>
     <string name="summary_restore_connection_on_launch">앱 시작 시 마지막 서버에 다시 연결합니다 (명시적으로 연결을 해제한 경우 제외)</string>
     <string name="summary_restore_server_on_launch">앱 시작 시 다시 수신 대기합니다 (명시적으로 중지한 경우 제외)</string>
@@ -1036,6 +1037,7 @@
     <string name="text_client_mode">클라이언트 모드</string>
     <string name="text_client_mode_manager">클라이언트 모드 관리자</string>
     <string name="text_client_n">클라이언트 %d</string>
+    <string name="text_clients">클라이언트</string>
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
     <string name="text_close">닫다</string>
     <string name="text_close_floating_button">플로팅 버튼 닫기</string>
@@ -1066,6 +1068,7 @@
     <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
     <string name="text_connect">연결</string>
     <string name="text_connected">연결됨</string>
+    <string name="text_connected_at">연결 시각</string>
     <string name="text_connected_clients">연결된 클라이언트</string>
     <string name="text_connected_count_with_colon">연결됨: %1$d</string>
     <string name="text_connecting">연결 중</string>
@@ -1576,6 +1579,7 @@
     <string name="text_no_available_plugins_found_hint">사용 가능한 플러그인을 찾지 못했습니다</string>
     <string name="text_no_broken_items">손상된 항목 없음</string>
     <string name="text_no_browser">브라우저가 설치되지 않았습니다</string>
+    <string name="text_no_clients_connected">연결된 VSCode 클라이언트가 없습니다</string>
     <string name="text_no_content">내용 없음</string>
     <string name="text_no_content_description">콘텐츠 설명 없음</string>
     <string name="text_no_data">데이터 없음</string>
@@ -1751,6 +1755,7 @@
     <string name="text_pinch_to_zoom">확대하려면 핀치</string>
     <string name="text_pinned">고정됨</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">고정됨, 파일별 정리에서 제외</string>
+    <string name="text_platform">플랫폼</string>
     <string name="text_play">재생</string>
     <string name="text_please_choose">선택하십시오</string>
     <string name="text_please_choose_a_script">스크립트를 선택하십시오</string>
@@ -1853,6 +1858,7 @@
     <string name="text_reading_android_package">Android 패키지 읽는 중</string>
     <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
     <string name="text_recommended">권장</string>
+    <string name="text_reconnect">다시 연결</string>
     <string name="text_reconnect_attempts">재연결 시도 횟수</string>
     <string name="text_reconnect_now">지금 재연결</string>
     <string name="text_reconnect_on_network_change">네트워크 변경 시 재시도</string>
@@ -1876,6 +1882,7 @@
     <string name="text_release_notes">릴리스 노트</string>
     <string name="text_reload_or_convert_to_encoding">%1$s 인코딩으로 다시 로드 또는 변환</string>
     <string name="text_remote">원격</string>
+    <string name="text_remote_address">원격 주소</string>
     <string name="text_remote_connections">원격 연결</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>

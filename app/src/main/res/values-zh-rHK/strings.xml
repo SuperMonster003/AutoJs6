@@ -742,6 +742,7 @@
     <string name="summary_plugin_instruction_view">查看此插件的使用示例與説明</string>
     <string name="summary_plugin_jump_to_launch_page">打開此插件的啓動 Activity</string>
     <string name="summary_plugin_no_launch_page">當前插件沒有啓動頁</string>
+    <string name="summary_reconnect_client">\"重新連接\" 斷開此連接並由 VSCode 自動重新建立 (需插件 1.1.0+); \"斷開連接\" 關閉連接且不再自動重連</string>
     <string name="summary_reconnect_on_network_change">重連期間, 網路恢復可用時立即重試</string>
     <string name="summary_restore_connection_on_launch">應用程式啟動時重新連線上次的伺服端 (顯式斷開連線後除外)</string>
     <string name="summary_restore_server_on_launch">應用程式啟動時重新開始監聽 (顯式停止後除外)</string>
@@ -1031,6 +1032,7 @@
     <string name="text_client_mode">客户端模式</string>
     <string name="text_client_mode_manager">客戶端模式管理器</string>
     <string name="text_client_n">客戶端 %d</string>
+    <string name="text_clients">客戶端</string>
     <string name="text_clone_color_library">克隆顏色庫</string>
     <string name="text_close">關閉</string>
     <string name="text_close_floating_button">關閉浮動按鈕</string>
@@ -1061,6 +1063,7 @@
     <string name="text_confirm_to_uninstall">是否確定卸載</string>
     <string name="text_connect">連線</string>
     <string name="text_connected">已連接</string>
+    <string name="text_connected_at">連接時間</string>
     <string name="text_connected_clients">已連線客戶端</string>
     <string name="text_connected_count_with_colon">已連接: %1$d</string>
     <string name="text_connecting">連接中</string>
@@ -1571,6 +1574,7 @@
     <string name="text_no_available_plugins_found_hint">未發現可用插件</string>
     <string name="text_no_broken_items">沒有失效項目</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
+    <string name="text_no_clients_connected">暫無已連接的 VSCode 客戶端</string>
     <string name="text_no_content">無內容</string>
     <string name="text_no_content_description">無內容描述</string>
     <string name="text_no_data">無數據</string>
@@ -1746,6 +1750,7 @@
     <string name="text_pinch_to_zoom">手勢縮放</string>
     <string name="text_pinned">已固定</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">已固定, 不參與單文件清理</string>
+    <string name="text_platform">平台</string>
     <string name="text_play">播放</string>
     <string name="text_please_choose">請選擇</string>
     <string name="text_please_choose_a_script">請選擇腳本</string>
@@ -1848,6 +1853,7 @@
     <string name="text_reading_android_package">正在讀取 Android 安裝包</string>
     <string name="text_reading_splash_resources">正在讀取啓動頁資源</string>
     <string name="text_recommended">推薦</string>
+    <string name="text_reconnect">重新連接</string>
     <string name="text_reconnect_attempts">重連次數</string>
     <string name="text_reconnect_now">立即重連</string>
     <string name="text_reconnect_on_network_change">網路變化時重試</string>
@@ -1871,6 +1877,7 @@
     <string name="text_release_notes">發行説明</string>
     <string name="text_reload_or_convert_to_encoding">重新加載或轉換為 %1$s</string>
     <string name="text_remote">遠程</string>
+    <string name="text_remote_address">遠端地址</string>
     <string name="text_remote_connections">遠程連接</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">遠程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">遠程項目已保存至本地</string>

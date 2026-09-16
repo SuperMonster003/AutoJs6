@@ -745,6 +745,7 @@
     <string name="summary_plugin_instruction_view">Afficher des exemples d\'utilisation et des notes pour ce plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Ouvrir l\'Activity de lancement de ce plugin</string>
     <string name="summary_plugin_no_launch_page">Le plugin actuel n\'a pas de page de lancement</string>
+    <string name="summary_reconnect_client">\"Reconnecter\" coupe cette connexion et laisse VSCode la rétablir automatiquement (extension 1.1.0+); \"Déconnecter\" la ferme sans reconnexion automatique</string>
     <string name="summary_reconnect_on_network_change">Pendant la reconnexion, réessayer immédiatement dès qu\'un réseau devient disponible</string>
     <string name="summary_restore_connection_on_launch">Au démarrage de l\'application, se reconnecter au dernier serveur, sauf si la connexion a été fermée explicitement</string>
     <string name="summary_restore_server_on_launch">Au démarrage de l\'application, se remettre en écoute, sauf si le serveur a été arrêté explicitement</string>
@@ -1034,6 +1035,7 @@
     <string name="text_client_mode">Mode client</string>
     <string name="text_client_mode_manager">Gestionnaire du mode client</string>
     <string name="text_client_n">Client %d</string>
+    <string name="text_clients">Clients</string>
     <string name="text_clone_color_library">Cloner une bibliothèque de couleurs</string>
     <string name="text_close">Fermeture</string>
     <string name="text_close_floating_button">Fermer le bouton flottant</string>
@@ -1064,6 +1066,7 @@
     <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
     <string name="text_connect">Connecter</string>
     <string name="text_connected">Connecté</string>
+    <string name="text_connected_at">Connecté à</string>
     <string name="text_connected_clients">Clients connectés</string>
     <string name="text_connected_count_with_colon">Connectés : %1$d</string>
     <string name="text_connecting">Connexion en cours</string>
@@ -1574,6 +1577,7 @@
     <string name="text_no_available_plugins_found_hint">Aucun plugin disponible trouve</string>
     <string name="text_no_broken_items">Aucun élément défectueux</string>
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
+    <string name="text_no_clients_connected">Aucun client VSCode connecté</string>
     <string name="text_no_content">Pas de contenu</string>
     <string name="text_no_content_description">Aucune description de contenu</string>
     <string name="text_no_data">Aucune donnee</string>
@@ -1749,6 +1753,7 @@
     <string name="text_pinch_to_zoom">Pincez pour zoomer</string>
     <string name="text_pinned">Épinglée</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">Épinglée, exclue du nettoyage par fichier</string>
+    <string name="text_platform">Plateforme</string>
     <string name="text_play">Jouer</string>
     <string name="text_please_choose">Veuillez choisir</string>
     <string name="text_please_choose_a_script">Choisissez un script</string>
@@ -1851,6 +1856,7 @@
     <string name="text_reading_android_package">Lecture du package Android</string>
     <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
     <string name="text_recommended">Recommandé</string>
+    <string name="text_reconnect">Reconnecter</string>
     <string name="text_reconnect_attempts">Tentatives de reconnexion</string>
     <string name="text_reconnect_now">Reconnecter maintenant</string>
     <string name="text_reconnect_on_network_change">Réessayer lors d\'un changement de réseau</string>
@@ -1874,6 +1880,7 @@
     <string name="text_release_notes">Notes de version</string>
     <string name="text_reload_or_convert_to_encoding">Recharger ou convertir en %1$s</string>
     <string name="text_remote">à distance</string>
+    <string name="text_remote_address">Adresse distante</string>
     <string name="text_remote_connections">Connexions à distance</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>

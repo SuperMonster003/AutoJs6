@@ -47,6 +47,29 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
+        <!-- Clients section (server mode only): one row per connected VSCode, tap for details and actions. -->
+        <!-- zh-CN: 客户端区 (仅服务端模式): 每个已连接的 VSCode 一行, 点击查看详情与操作. -->
+        <TextView
+            android:id="@+id/clients_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:minHeight="36dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/text_clients"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/clients_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/control_title"
             android:layout_width="match_parent"

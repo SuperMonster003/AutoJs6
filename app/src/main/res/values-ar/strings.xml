@@ -747,6 +747,7 @@
     <string name="summary_plugin_instruction_view">عرض امثلة الاستخدام والملاحظات الخاصة بهذه الاضافة</string>
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
+    <string name="summary_reconnect_client">\"إعادة الاتصال\" تقطع هذا الاتصال وتترك VSCode يعيد إنشاءه تلقائيًا (الإضافة 1.1.0+); \"قطع الاتصال\" يغلقه دون إعادة اتصال تلقائية</string>
     <string name="summary_reconnect_on_network_change">أثناء إعادة الاتصال, إعادة المحاولة فورا عند توفر شبكة</string>
     <string name="summary_restore_connection_on_launch">عند بدء التطبيق, إعادة الاتصال بآخر خادم ما لم يتم قطع الاتصال صراحة</string>
     <string name="summary_restore_server_on_launch">عند بدء التطبيق, الاستماع مجددا ما لم يتم إيقاف الخادم صراحة</string>
@@ -1036,6 +1037,7 @@
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_client_mode_manager">مدير وضع العميل</string>
     <string name="text_client_n">العميل %d</string>
+    <string name="text_clients">العملاء</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
     <string name="text_close">قريب</string>
     <string name="text_close_floating_button">إغلاق الزر العائم</string>
@@ -1066,6 +1068,7 @@
     <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
     <string name="text_connect">اتصال</string>
     <string name="text_connected">متصل</string>
+    <string name="text_connected_at">وقت الاتصال</string>
     <string name="text_connected_clients">العملاء المتصلون</string>
     <string name="text_connected_count_with_colon">متصل: %1$d</string>
     <string name="text_connecting">جارٍ الاتصال</string>
@@ -1576,6 +1579,7 @@
     <string name="text_no_available_plugins_found_hint">لم يتم العثور على اضافات متاحة</string>
     <string name="text_no_broken_items">لا توجد عناصر تالفة</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
+    <string name="text_no_clients_connected">لا يوجد عميل VSCode متصل</string>
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
     <string name="text_no_data">لا توجد بيانات</string>
@@ -1751,6 +1755,7 @@
     <string name="text_pinch_to_zoom">قرصة للتكبير</string>
     <string name="text_pinned">مثبت</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">مثبت, مستثنى من التنظيف على مستوى الملف</string>
+    <string name="text_platform">المنصة</string>
     <string name="text_play">تشغيل</string>
     <string name="text_please_choose">اختر من فضلك</string>
     <string name="text_please_choose_a_script">اختر نصًا</string>
@@ -1853,6 +1858,7 @@
     <string name="text_reading_android_package">جارٍ قراءة حزمة Android</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
+    <string name="text_reconnect">إعادة الاتصال</string>
     <string name="text_reconnect_attempts">محاولات إعادة الاتصال</string>
     <string name="text_reconnect_now">إعادة الاتصال الآن</string>
     <string name="text_reconnect_on_network_change">إعادة المحاولة عند تغير الشبكة</string>
@@ -1876,6 +1882,7 @@
     <string name="text_release_notes">ملاحظات الإصدار</string>
     <string name="text_reload_or_convert_to_encoding">إعادة التحميل أو التحويل إلى %1$s</string>
     <string name="text_remote">التحكم عن بعد</string>
+    <string name="text_remote_address">العنوان البعيد</string>
     <string name="text_remote_connections">الاتصالات عن بعد</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
