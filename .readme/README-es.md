@@ -714,6 +714,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Las conexiones de la extensión de VSCode incorporan un latido a nivel de aplicación (ping/pong) y un límite de longitud de trama, liberando conexiones muertas con rapidez y evitando asignaciones enormes en caso de desincronización _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `Mejora` Los archivos guardados desde la extensión de VSCode pueden conservar su estructura de directorios relativa dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Mejora` El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas
+* `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

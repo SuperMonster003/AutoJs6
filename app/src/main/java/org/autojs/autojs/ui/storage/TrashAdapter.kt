@@ -25,6 +25,11 @@ internal class TrashAdapter(
     var selectionMode: Boolean = false
         private set
 
+    // Expiry inputs for the countdown column; set by the page before submitting items.
+    // zh-CN: 到期倒计时所需输入; 由页面在提交数据前设置.
+    var expiryMaxDays: Int = 0
+    var now: Long = System.currentTimeMillis()
+
     val selectedCount: Int get() = selectedIds.size
 
     fun submit(newItems: List<TrashEntities.TrashItem>) {
@@ -73,7 +78,7 @@ internal class TrashAdapter(
 
     override fun onBindViewHolder(holder: TrashViewHolder, position: Int) {
         val item = items[position]
-        holder.bind(item, selectionMode, item.trashId in selectedIds)
+        holder.bind(item, selectionMode, item.trashId in selectedIds, expiryMaxDays, now)
     }
 
     override fun getItemCount(): Int = items.size

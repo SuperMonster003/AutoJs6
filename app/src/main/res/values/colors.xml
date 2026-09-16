@@ -203,4 +203,5 @@
     <color name="floating_controller_stroke">#1F000000</color>
     <color name="diff_line_inserted_bg">#DDF4DD</color>
     <color name="diff_line_deleted_bg">#F9DEDE</color>
+    <color name="trash_expiring_soon">#D84315</color>
 </resources>

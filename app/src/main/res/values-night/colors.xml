@@ -101,5 +101,6 @@
     <color name="floating_controller_stroke">#1FFFFFFF</color>
     <color name="diff_line_inserted_bg">#1D3A24</color>
     <color name="diff_line_deleted_bg">#4A2222</color>
+    <color name="trash_expiring_soon">#FF8A65</color>
 
 </resources>

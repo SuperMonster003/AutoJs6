@@ -714,6 +714,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` VSCode extension connections gain an application-level heartbeat (ping/pong) and a frame length limit, releasing dead connections promptly and avoiding huge allocations on desync _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `Improvement` Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Improvement` The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots
+* `Improvement` Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

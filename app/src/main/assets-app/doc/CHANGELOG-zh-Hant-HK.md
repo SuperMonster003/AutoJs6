@@ -552,6 +552,7 @@
 * `優化` VSCode 插件連線增加應用層心跳 (ping/pong) 與幀長度上限校驗, 及時釋放失效連線並避免失步時的超大記憶體分配 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `優化` VSCode 插件儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `優化` 文件管理器以複製或移動覆蓋已有文件前, 先把目標文件的目前內容記錄為一條 OVERWRITE_PRE 版本; 覆蓋目錄時為其中已納管的文件留快照
+* `優化` 回收站列表每個項目顯示到期倒數 (基於回收站保留天數, 不限制時不顯示), 24 小時內到期的項目以醒目顏色高亮
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

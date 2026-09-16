@@ -552,6 +552,7 @@
 * `개선` VSCode 확장 연결에 애플리케이션 수준 하트비트 (ping/pong) 와 프레임 길이 제한을 추가하여 끊긴 연결을 즉시 해제하고 동기화 오류 시 대용량 메모리 할당을 방지 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `개선` VSCode 확장에서 저장한 파일이 작업 디렉터리 내에서 상대 디렉터리 구조를 유지 가능 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `개선` 탐색기는 복사 또는 이동으로 파일을 교체하기 전에 현재 내용을 OVERWRITE_PRE 리비전으로 기록합니다; 디렉터리를 덮어쓸 때는 그 안의 추적 중인 파일에 대해 스냅샷을 남깁니다
+* `개선` 휴지통 목록의 각 항목에 만료까지 남은 시간(휴지통 보관 일수 기준, 무제한이면 표시하지 않음)을 표시하고 24시간 안에 만료되는 항목을 강조합니다
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

@@ -552,6 +552,7 @@
 * `最佳化` VSCode 擴充功能連線增加應用層心跳 (ping/pong) 與幀長度上限校驗, 及時釋放失效連線並避免失步時的超大記憶體配置 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `最佳化` VSCode 擴充功能儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `最佳化` 檔案管理器以複製或移動覆蓋已有檔案前, 先把目標檔案的目前內容記錄為一條 OVERWRITE_PRE 版本; 覆蓋目錄時為其中已納管的檔案留快照
+* `最佳化` 回收站列表每個項目顯示到期倒數 (基於回收站保留天數, 不限制時不顯示), 24 小時內到期的項目以醒目顏色高亮
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

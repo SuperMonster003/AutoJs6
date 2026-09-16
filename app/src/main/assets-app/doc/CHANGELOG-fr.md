@@ -552,6 +552,7 @@
 * `Amélioration` Les connexions de l'extension VSCode disposent d'un battement de coeur applicatif (ping/pong) et d'une limite de longueur de trame, libérant rapidement les connexions mortes et évitant les allocations énormes en cas de désynchronisation _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `Amélioration` Les fichiers enregistrés depuis l'extension VSCode peuvent conserver leur structure de répertoires relative dans le répertoire de travail _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Amélioration` L'explorateur enregistre le contenu actuel d'un fichier comme révision OVERWRITE_PRE avant qu'une copie ou un déplacement ne le remplace; lorsqu'un dossier est écrasé, les fichiers suivis qu'il contient reçoivent des instantanés
+* `Amélioration` Chaque élément de la liste de la corbeille affiche un compte à rebours avant expiration (dérivé des jours de conservation de la corbeille, masqué si illimité), et les éléments expirant sous 24 heures sont mis en évidence
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

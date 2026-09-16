@@ -165,6 +165,11 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
         return dao.listTrashItemsDesc()
     }
 
+    override fun onItemsLoaded(items: List<TrashEntities.TrashItem>) {
+        adapter.expiryMaxDays = HistoryPrefs.trashMaxDays()
+        adapter.now = System.currentTimeMillis()
+    }
+
     override fun matchesQuery(item: TrashEntities.TrashItem, qLower: String): Boolean {
         val path = item.originalPath
         val name = File(path).name

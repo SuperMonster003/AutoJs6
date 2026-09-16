@@ -714,6 +714,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` VSCode 拡張機能の接続にアプリケーション層ハートビート (ping/pong) とフレーム長上限を追加し, 無効な接続を速やかに解放して同期ずれ時の巨大なメモリ割り当てを回避 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `改善` VSCode 拡張機能から保存するファイルは作業ディレクトリ内で相対ディレクトリ構造を保持可能 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `改善` エクスプローラーはコピーまたは移動でファイルを置き換える前に, その現在の内容を OVERWRITE_PRE リビジョンとして記録します; ディレクトリを上書きする場合は, その中の追跡対象ファイルのスナップショットを作成します
+* `改善` ゴミ箱の一覧の各項目に期限までのカウントダウン (ゴミ箱の保持日数に基づく, 無制限の場合は非表示) を表示し, 24 時間以内に期限が切れる項目を強調表示します
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

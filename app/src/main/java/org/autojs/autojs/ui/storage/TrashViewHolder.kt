@@ -1,9 +1,12 @@
 package org.autojs.autojs.ui.storage
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.history.TrashEntities
+import org.autojs.autojs.storage.history.TrashExpiry
+import org.autojs.autojs.storage.history.TrashPreviewController
 import org.autojs.autojs.util.StringUtils.normalizeTrailingSlash
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ItemTrashBinding
@@ -24,8 +27,9 @@ internal class TrashViewHolder(
 
     private var boundItem: TrashEntities.TrashItem? = null
 
-    fun bind(item: TrashEntities.TrashItem, selectionMode: Boolean, selected: Boolean) {
+    fun bind(item: TrashEntities.TrashItem, selectionMode: Boolean, selected: Boolean, expiryMaxDays: Int, now: Long) {
         boundItem = item
+        val context = binding.root.context
 
         binding.icon.setImageResource(if (item.isDirectory) R.drawable.ic_simple_folder else R.drawable.ic_simple_file)
         binding.title.text = File(item.originalPath).name
@@ -34,13 +38,22 @@ internal class TrashViewHolder(
         val timeText = fmt.format(Date(item.trashedAt))
         val sizeText = PFiles.formatSizeWithUnit(item.sizeBytes)
 
+        val remaining = TrashExpiry.expiresAtOrNull(item.trashedAt, expiryMaxDays)?.let { TrashExpiry.remaining(it, now) }
         binding.subtitle.text = buildString {
             append(timeText)
             append("  |  ")
             append(sizeText)
-            append("\n")
+            if (remaining != null) {
+                append("  |  ")
+                append(TrashPreviewController.formatRemaining(context, remaining))
+            }
+            append('\n')
             append(item.originalPath.normalizeTrailingSlash(item.isDirectory))
         }
+        // Items expiring within a day are highlighted.
+        // zh-CN: 一天内到期的条目高亮.
+        val subtitleColor = if (remaining?.withinOneDay == true) R.color.trash_expiring_soon else R.color.day_night_alpha_70
+        binding.subtitle.setTextColor(ContextCompat.getColor(context, subtitleColor))
 
         binding.checkbox.visibility = if (selectionMode) View.VISIBLE else View.GONE
         binding.checkbox.isChecked = selected
