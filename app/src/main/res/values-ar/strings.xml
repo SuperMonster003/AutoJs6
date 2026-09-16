@@ -734,6 +734,7 @@
     <string name="summary_github_token_not_set">غير معين. طلبات GitHub API مجهولة.</string>
     <string name="summary_github_token_set">معين. مخفي للخصوصية; ينتهي بـ %1$s.</string>
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
+    <string name="summary_lan_discovery">الإعلان عن هذا الجهاز باسم _autojs6._tcp ليعرضه VSCode (الإضافة 1.1.0+) عند الاتصال عبر الشبكة المحلية</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
     <string name="summary_notify_client_connection_changes">إظهار تنبيه عند اتصال VSCode أو انقطاعه</string>
@@ -1475,6 +1476,7 @@
     <string name="text_label">التسمية</string>
     <string name="text_label_name">ملصق</string>
     <string name="text_label_state">الحالة</string>
+    <string name="text_lan_discovery">الاكتشاف في الشبكة المحلية (mDNS)</string>
     <string name="text_last_activity">آخر نشاط</string>
     <string name="text_last_error">آخر خطأ</string>
     <string name="text_last_event">آخر حدث</string>
@@ -2263,6 +2265,7 @@
     <string name="text_vscode_disconnected_format">انقطع اتصال VSCode: %s</string>
     <string name="text_vscode_host">مضيف VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">بانتظار اكتمال معالجة جميع البيانات...</string>
+    <string name="text_waiting_for_vscode_approval">في انتظار الموافقة في VSCode...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
     <string name="text_window_state_changes_only">تغييرات حالة النافذة فقط</string>

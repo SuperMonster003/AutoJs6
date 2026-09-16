@@ -259,6 +259,7 @@
     <string name="key_screen_capture_request_delay" translatable="false">key_$_screen_capture_request_delay_ms</string>
     <string name="key_scripts_after_app_restart" translatable="false">key_$_scripts_after_app_restart</string>
     <string name="key_server_address" translatable="false">key_$_server_address</string>
+    <string name="key_server_mode_lan_discovery" translatable="false">key_$_server_mode_lan_discovery</string>
     <string name="key_server_mode_notify_connection_changes" translatable="false">key_$_server_mode_notify_connection_changes</string>
     <string name="key_server_mode_restore_on_launch" translatable="false">key_$_server_mode_restore_on_launch</string>
     <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>

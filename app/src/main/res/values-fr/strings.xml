@@ -732,6 +732,7 @@
     <string name="summary_github_token_not_set">Non défini. Les requêtes à l\'API GitHub sont anonymes.</string>
     <string name="summary_github_token_set">Défini. Masqué pour protéger la confidentialité; se termine par %1$s.</string>
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan.</string>
+    <string name="summary_lan_discovery">Annoncer cet appareil en tant que _autojs6._tcp pour que VSCode (extension 1.1.0+) le liste lors de la connexion sur le réseau local</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale.</string>
     <string name="summary_notify_client_connection_changes">Afficher un toast lorsque VSCode se connecte ou se déconnecte</string>
@@ -1473,6 +1474,7 @@
     <string name="text_label">Libellé</string>
     <string name="text_label_name">Étiquette</string>
     <string name="text_label_state">État</string>
+    <string name="text_lan_discovery">Découverte sur le réseau local (mDNS)</string>
     <string name="text_last_activity">Dernière activité</string>
     <string name="text_last_error">Dernière erreur</string>
     <string name="text_last_event">Dernier événement</string>
@@ -2261,6 +2263,7 @@
     <string name="text_vscode_disconnected_format">VSCode déconnecté: %s</string>
     <string name="text_vscode_host">Hôte VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
+    <string name="text_waiting_for_vscode_approval">En attente d\'approbation dans VSCode...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_window_state_changes_only">Changements d\'état de fenêtre uniquement</string>

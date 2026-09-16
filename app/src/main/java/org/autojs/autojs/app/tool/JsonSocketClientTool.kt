@@ -404,6 +404,11 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                     ViewUtils.showToast(context, context.getString(R.string.error_invalid_qr_code_content, text), true)
                     return@runOnMain
                 }
+                // Hand the one-time pairing token to the upcoming connection (roadmap 4.4).
+                // zh-CN: 将一次性配对令牌交给即将建立的连接 (roadmap 4.4).
+                DevPluginService.pendingQrToken = DevPluginService.parseQrToken(text)?.let { token ->
+                    endpoint.substringBeforeLast(':').trim('[', ']') to token
+                }
                 if (dialog.isShowing) {
                     dialog.inputEditText?.setText(endpoint)
                     validateAndConnectToRemoteServer(dialog)

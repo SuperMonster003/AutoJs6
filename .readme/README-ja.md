@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 16 日 に更新されました.
+データは 2026 年 9 月 17 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -383,6 +383,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` ゴミ箱がデータファイルの欠落した無効な項目を検出します: 一覧では "データ欠落" を強調色で表示し, タップ時は詳細と削除のみを提供し, 新しいメニュー "無効な項目を削除" でまとめて削除できます. 定期クリーンアップは件数を記録するだけで自動削除しません
 * `新機能` VSCode 拡張機能の接続: クライアントモードとサーバーモードの両方に "マネージャー" ダイアログを追加 (ドロワー項目の "マネージャー" ボタンまたは長押しで開く). 接続状態, サーバーまたは待機アドレス, 相手ホスト, 拡張機能とプロトコルのバージョン, 接続時間, 最終アクティビティ, 再接続セッション, 最後のエラーをリアルタイム表示 (各行コピー可), 接続, 切断, 今すぐ再接続, 再接続の停止, 開始, 停止, 再起動, すべてのクライアントを切断, アドレスのコピーの操作, および自動再接続, ネットワーク変更時の再試行, 起動時の接続復元 (またはサーバー開始), クライアント変化の通知のスイッチを提供; サーバーモードマネージャーに "クライアント" セクションを追加し, 接続中の VSCode を個別に表示, 詳細の確認, 切断, 再接続が可能
 * `新機能` VSCode 拡張機能の接続: クライアントモードは予期しない切断 (拡張機能のクラッシュ, VSCode の再起動, ネットワークの乱れ) の後に指数バックオフで自動再接続し, ネットワークが利用可能になれば直ちに再試行, アプリ起動時にも復元. 双方が bye メッセージで意図的な切断を宣言するため, どちらかが明示的に切断した後に自動再接続することはない
+* `新機能` VSCode 拡張機能接続: ペアリング確認 - クライアントモードで初めて接続する未知のデバイスは VSCode 側での許可が必要 (記憶も可能), QR コードをスキャンして接続したデバイスは自動的に信頼されます; 拡張機能 1.1.0+ が必要
+* `新機能` サーバーモード: LAN 検出 (mDNS) - 有効にすると VSCode 拡張機能 (1.1.0+) が LAN 接続の選択画面にこのデバイスを表示し, アドレス入力が不要になります
+* `新機能` VSCode リモートファイル: 分割転送 - 大きなファイルを 1 MiB 単位で読み書きし, VSCode 側に進捗を表示; 拡張機能 1.1.0+ が必要
 * `修正` Flow の予約サンプルで医師行を解析できない場合に null ではなく false を返し, 真偽値への変換エラーを回避
 * `修正` メイン画面からプラグインの権限結果が正しく返され, 許可後に保留中の有効化操作を完了できる
 * `修正` HTTP の isInsecure / insecure オプションによって後続のリクエストでも証明書とホスト名の検証が無効になる問題に対応し, 現在のリクエストのみに適用
@@ -1009,7 +1012,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 16 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 17 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

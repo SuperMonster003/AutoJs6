@@ -728,6 +728,7 @@
     <string name="summary_github_token_not_set">未设置. GitHub API 请求将匿名发起.</string>
     <string name="summary_github_token_set">已设置. 已在界面隐藏, 末尾为 %1$s.</string>
     <string name="summary_guard_mode">当 AutoJs6 前置时禁用自动化行为以避免误操作</string>
+    <string name="summary_lan_discovery">以 _autojs6._tcp 广播本设备, 使 VSCode (插件 1.1.0+) 建立局域网连接时可直接列出本设备</string>
     <string name="summary_nodejs_doctor_report">生成已隐去隐私信息的 Node 运行时诊断报告, 用于提交错误报告</string>
     <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
     <string name="summary_notify_client_connection_changes">VSCode 连接或断开时显示提示</string>
@@ -1470,6 +1471,7 @@
     <string name="text_label">标签</string>
     <string name="text_label_name">名称</string>
     <string name="text_label_state">状态</string>
+    <string name="text_lan_discovery">局域网发现 (mDNS)</string>
     <string name="text_last_activity">最近活动</string>
     <string name="text_last_error">最近错误</string>
     <string name="text_last_event">最近事件</string>
@@ -2258,6 +2260,7 @@
     <string name="text_vscode_disconnected_format">VSCode 已断开: %s</string>
     <string name="text_vscode_host">VSCode 主机</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">正在等待全部数据处理完毕...</string>
+    <string name="text_waiting_for_vscode_approval">等待 VSCode 端确认...</string>
     <string name="text_weekly_task">每周任务</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少选择一天</string>
     <string name="text_window_state_changes_only">仅窗口状态变化</string>

@@ -76,6 +76,17 @@ class ServerModeManagerDialog private constructor(
             R.string.key_server_mode_notify_connection_changes,
             R.bool.pref_server_mode_notify_connection_changes,
         )
+        addSwitch(
+            R.string.text_lan_discovery,
+            R.string.summary_lan_discovery,
+            R.string.key_server_mode_lan_discovery,
+            R.bool.pref_server_mode_lan_discovery,
+        ) { enabled ->
+            // Take effect at once while listening. zh-CN: 监听期间立即生效.
+            if (service.isServerSocketConnected) {
+                if (enabled) service.discovery.register(DevPluginService.Port.AJ_SERVER) else service.discovery.unregister()
+            }
+        }
     }
 
     override fun onShown() {

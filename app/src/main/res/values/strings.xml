@@ -727,6 +727,7 @@
     <string name="summary_github_token_not_set">Not set. GitHub API requests are anonymous.</string>
     <string name="summary_github_token_set">Set. Hidden for privacy; ending in %1$s.</string>
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
+    <string name="summary_lan_discovery">Advertise this device as _autojs6._tcp so VSCode (extension 1.1.0+) lists it when connecting over LAN</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
     <string name="summary_notify_client_connection_changes">Show a toast when VSCode connects or disconnects</string>
@@ -1469,6 +1470,7 @@
     <string name="text_label">Label</string>
     <string name="text_label_name">Label</string>
     <string name="text_label_state">State</string>
+    <string name="text_lan_discovery">LAN discovery (mDNS)</string>
     <string name="text_last_activity">Last activity</string>
     <string name="text_last_error">Last error</string>
     <string name="text_last_event">Last event</string>
@@ -2257,6 +2259,7 @@
     <string name="text_vscode_disconnected_format">VSCode disconnected: %s</string>
     <string name="text_vscode_host">VSCode host</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
+    <string name="text_waiting_for_vscode_approval">Waiting for approval in VSCode...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_window_state_changes_only">Window state changes only</string>

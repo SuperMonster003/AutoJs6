@@ -34,6 +34,15 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
     var isExtensionVersionCheckFailed = false
     var hasErrorMessageOnHello = false
 
+    /** One-time token from the connection QR code, sent in our hello (roadmap 4.4). zh-CN: 连接二维码中的一次性令牌, 随 hello 发送 (roadmap 4.4). */
+    @Volatile
+    var helloQrToken: String? = null
+
+    /** True after the extension answered with a `pending` hello (it is asking the person). zh-CN: 插件回复 pending hello (正在询问用户) 后为 true. */
+    @Volatile
+    var isWaitingForApproval = false
+        private set
+
     // Unique id for guarding against stale state emission from old instances.
     // zh-CN: 用于防止旧实例发出的状态污染 UI 的唯一 id.
     internal val instanceId: Long = System.nanoTime()
@@ -169,6 +178,8 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
 
     override fun getContext() = ctx
 
+    override fun getQrToken(): String? = helloQrToken
+
     private fun onHello(message: JsonObject) {
         var currentVersion: String? = null
         val requiredVersion = BuildConfig.VSCODE_EXT_REQUIRED_VERSION
@@ -195,6 +206,23 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
                 }
                 return
             }
+
+            val pending = data.asJsonObject["pending"]
+            if (pending != null && pending.isJsonPrimitive && runCatching { pending.asBoolean }.getOrDefault(false)) {
+                // The extension is asking the person whether this device may connect (roadmap 4.4); the final hello
+                // (or an errorMessage) follows once they answer. Keep CONNECTING and tell the person where to look.
+                // zh-CN: 插件正在询问用户是否允许本设备连接 (roadmap 4.4); 用户回答后会收到最终 hello (或 errorMessage).
+                // 保持 CONNECTING 状态并提示用户前往 VSCode 确认.
+                if (!isWaitingForApproval) {
+                    isWaitingForApproval = true
+                    cancelHandshakeTimeout()
+                    val hint = ctx.getString(R.string.text_waiting_for_vscode_approval)
+                    service.clientConnectionIpAddress.onNext(hint)
+                    ViewUtils.showToast(ctx, hint, true)
+                }
+                return
+            }
+            isWaitingForApproval = false
 
             val extensionVersion = data.asJsonObject["extensionVersion"]
             if (extensionVersion != null && extensionVersion.isJsonPrimitive) {

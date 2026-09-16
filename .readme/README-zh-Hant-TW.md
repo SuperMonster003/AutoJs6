@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 16 日.
+資料更新於 2026 年 9 月 17 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -383,6 +383,9 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 回收站識別資料檔案缺失的失效項目: 列表以醒目顏色標記 "資料缺失", 點擊僅提供詳情與移除, 選單新增 "移除失效項目" 一鍵清理; 週期清理任務只記錄失效項目數量而不自動刪除
 * `新增` VSCode 擴充功能連線: 客戶端模式與伺服端模式均新增 "管理器" 對話框 (抽屜條目的 "管理器" 按鈕或長按條目開啟), 實時顯示連線狀態, 伺服端或監聽位址, 對端主機, 擴充功能與協定版本, 連線時長, 最近活動, 重連工作階段與最近錯誤等 (逐行可複製), 提供連線, 斷開, 立即重連, 停止重連, 啟動, 停止, 重啟, 斷開所有客戶端, 複製位址等操作, 以及自動重連, 網路變化時重試, 啟動時恢復連線 (或開啟伺服端), 客戶端連線變化提示等開關; 伺服端管理器新增 "客戶端" 區域, 逐個列出已連線的 VSCode, 點擊可查看基礎資訊, 斷開或要求其重新連線
 * `新增` VSCode 擴充功能連線: 客戶端模式支援意外斷開 (擴充功能崩潰, VSCode 重啟, 網路抖動) 後自動重連 (指數退避, 網路恢復時立即重試, 應用程式啟動時亦可恢復上次連線); 雙方以 bye 訊息宣告主動關閉, 任一方顯式斷開連線後均不再自動重連
+* `新增` VSCode 插件連線支援配對確認: 未知裝置以客戶端模式首次連線時需在 VSCode 端允許 (可選擇記住), 掃描 QR Code 連線的裝置自動信任; 需 VSCode 插件 1.1.0+
+* `新增` 伺服端模式支援區域網路探索 (mDNS): 開啟後 VSCode 插件 (1.1.0+) 建立區域網路連線時可直接列出本裝置, 無需手動輸入位址
+* `新增` VSCode 遠端檔案支援分塊傳輸: 大檔案讀寫按 1 MiB 分塊並在 VSCode 端顯示進度; 需 VSCode 插件 1.1.0+
 * `修復` Flow 掛號範例在醫師列解析失敗時傳回 false 而非 null, 避免布林轉換例外
 * `修復` 主頁正確回傳外掛授權結果, 授權成功後可繼續完成本次外掛啟用
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效
@@ -1009,7 +1012,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 16 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 17 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

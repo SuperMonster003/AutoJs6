@@ -732,6 +732,7 @@
     <string name="summary_github_token_not_set">Не задан. Запросы к GitHub API выполняются анонимно.</string>
     <string name="summary_github_token_set">Задан. Скрыт для конфиденциальности; оканчивается на %1$s.</string>
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
+    <string name="summary_lan_discovery">Объявлять это устройство как _autojs6._tcp, чтобы VSCode (расширение 1.1.0+) показывал его при подключении по локальной сети</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
     <string name="summary_notify_client_connection_changes">Показывать уведомление при подключении и отключении VSCode</string>
@@ -1473,6 +1474,7 @@
     <string name="text_label">Метка</string>
     <string name="text_label_name">Метка</string>
     <string name="text_label_state">Состояние</string>
+    <string name="text_lan_discovery">Обнаружение в локальной сети (mDNS)</string>
     <string name="text_last_activity">Последняя активность</string>
     <string name="text_last_error">Последняя ошибка</string>
     <string name="text_last_event">Последнее событие</string>
@@ -2261,6 +2263,7 @@
     <string name="text_vscode_disconnected_format">VSCode отключён: %s</string>
     <string name="text_vscode_host">Хост VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
+    <string name="text_waiting_for_vscode_approval">Ожидание подтверждения в VSCode...</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_window_state_changes_only">Только изменения состояния окна</string>

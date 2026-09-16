@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 16 de September de 2026.
+Datos actualizados el 17 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -383,6 +383,9 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` La papelera detecta elementos dañados cuyo archivo de datos falta: la lista los marca como "Datos ausentes" con un color destacado, al tocarlos solo se ofrecen detalles y eliminación, y una nueva acción de menú "Eliminar elementos dañados" los limpia de una vez; la limpieza periódica solo registra su número y nunca los elimina automáticamente
 * `Nuevo` Conexión de la extensión de VSCode: el modo cliente y el modo servidor incorporan un diálogo "Administrador" (botón "Administrador" de la entrada del cajón o pulsación larga) con estado en vivo (estado de la conexión, dirección del servidor o de escucha, host remoto, versiones de la extensión y del protocolo, duración de la conexión, última actividad, sesión de reconexión, último error; cada fila se puede copiar), acciones (conectar, desconectar, reconectar ahora, dejar de reconectar, iniciar, detener, reiniciar, desconectar todos los clientes, copiar dirección) e interruptores (reconexión automática, reintento al cambiar de red, restaurar la conexión o iniciar el servidor al arrancar, notificar cambios de clientes); el administrador del modo servidor incorpora una sección "Clientes" que lista cada VSCode conectado, con detalles, desconexión y reconexión por cliente
 * `Nuevo` Conexión de la extensión de VSCode: el modo cliente se reconecta automáticamente tras una desconexión inesperada (fallo de la extensión, reinicio de VSCode, corte de red) con retroceso exponencial, reintento inmediato al haber red disponible y restauración al iniciar la aplicación; ambas partes anuncian los cierres intencionados con un mensaje bye, por lo que una desconexión explícita de cualquiera de ellas nunca va seguida de una reconexión automática
+* `Nuevo` Conexión de la extensión de VSCode: confirmación de emparejamiento - un dispositivo desconocido que se conecta en modo cliente debe permitirse primero en VSCode (opcionalmente recordado), mientras que los dispositivos que escanearon el código QR se confían automáticamente; requiere extensión 1.1.0+
+* `Nuevo` Modo servidor: descubrimiento en la LAN (mDNS) - al activarlo, la extensión de VSCode (1.1.0+) lista este dispositivo en su selector de conexión LAN sin escribir la dirección
+* `Nuevo` Archivos remotos de VSCode: transferencia por fragmentos - los archivos grandes se leen y escriben en fragmentos de 1 MiB con progreso mostrado en VSCode; requiere extensión 1.1.0+
 * `Corrección` El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana
 * `Corrección` Los resultados de autorización del plugin se transmiten correctamente desde la pantalla principal para completar la activación pendiente tras conceder el permiso
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual
@@ -1009,7 +1012,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 16 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 17 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

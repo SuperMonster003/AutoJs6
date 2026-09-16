@@ -733,6 +733,7 @@
     <string name="summary_github_token_not_set">未設定です. GitHub API リクエストは匿名で行われます.</string>
     <string name="summary_github_token_set">設定済みです. プライバシー保護のため非表示で, 末尾は %1$s です.</string>
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
+    <string name="summary_lan_discovery">このデバイスを _autojs6._tcp として通知し, VSCode (拡張機能 1.1.0+) が LAN 接続時に一覧表示できるようにします</string>
     <string name="summary_nodejs_doctor_report">不具合報告用にプライバシー情報を除去した Node ランタイム診断レポートを生成</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
     <string name="summary_notify_client_connection_changes">VSCode の接続時と切断時にトーストを表示します</string>
@@ -1474,6 +1475,7 @@
     <string name="text_label">ラベル</string>
     <string name="text_label_name">ラベル</string>
     <string name="text_label_state">状態</string>
+    <string name="text_lan_discovery">LAN 検出 (mDNS)</string>
     <string name="text_last_activity">最終アクティビティ</string>
     <string name="text_last_error">最後のエラー</string>
     <string name="text_last_event">最新のイベント</string>
@@ -2262,6 +2264,7 @@
     <string name="text_vscode_disconnected_format">VSCode が切断しました: %s</string>
     <string name="text_vscode_host">VSCode ホスト</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">すべてのデータ処理が完了するのを待機しています...</string>
+    <string name="text_waiting_for_vscode_approval">VSCode 側の承認を待っています...</string>
     <string name="text_weekly_task">週次タスク</string>
     <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
     <string name="text_window_state_changes_only">ウィンドウ状態の変化のみ</string>

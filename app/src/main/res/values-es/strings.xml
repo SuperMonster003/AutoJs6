@@ -732,6 +732,7 @@
     <string name="summary_github_token_not_set">Sin configurar. Las solicitudes a la API de GitHub son anónimas.</string>
     <string name="summary_github_token_set">Configurado. Oculto por privacidad; termina en %1$s.</string>
     <string name="summary_guard_mode">Evitar las acciones de automatización de los scripts cuando AutoJs6 está en primer plano</string>
+    <string name="summary_lan_discovery">Anunciar este dispositivo como _autojs6._tcp para que VSCode (extensión 1.1.0+) lo liste al conectar por LAN</string>
     <string name="summary_nodejs_doctor_report">Generar un informe de diagnóstico del entorno de ejecución de Node con datos privados eliminados para informar errores</string>
     <string name="summary_not_showing_main_activity">Ejecutar el script directamente sin mostrar la actividad principal</string>
     <string name="summary_notify_client_connection_changes">Mostrar un aviso cuando VSCode se conecte o se desconecte</string>
@@ -1473,6 +1474,7 @@
     <string name="text_label">Etiqueta</string>
     <string name="text_label_name">Etiqueta</string>
     <string name="text_label_state">Estado</string>
+    <string name="text_lan_discovery">Descubrimiento en la LAN (mDNS)</string>
     <string name="text_last_activity">Última actividad</string>
     <string name="text_last_error">Último error</string>
     <string name="text_last_event">Último evento</string>
@@ -2261,6 +2263,7 @@
     <string name="text_vscode_disconnected_format">VSCode desconectado: %s</string>
     <string name="text_vscode_host">Host de VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Esperando a que se complete el procesamiento de todos los datos...</string>
+    <string name="text_waiting_for_vscode_approval">Esperando la aprobación en VSCode...</string>
     <string name="text_weekly_task">Tarea semanal</string>
     <string name="text_weekly_task_should_check_day_of_week">Debe seleccionarse al menos un día</string>
     <string name="text_window_state_changes_only">Solo cambios de estado de ventana</string>

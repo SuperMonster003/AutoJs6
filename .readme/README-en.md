@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 16, 2026.
+Data updated on Sep 17, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -383,6 +383,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` The trash detects broken items whose data file is missing: the list marks them as "Data missing" in a highlight color, tapping offers only details and removal, and a new "Remove broken items" menu action clears them in one go; the periodic cleanup only logs their count and never deletes them automatically
 * `Feature` VSCode extension connection: both client mode and server mode gain a "Manager" dialog (opened by the "Manager" button of the drawer entry or by long-pressing it) showing live status (connection state, server or listening address, peer host, extension and protocol versions, connection duration, last activity, reconnect session, last error; each row copyable), actions (connect, disconnect, reconnect now, stop reconnecting, start, stop, restart, disconnect all clients, copy address) and switches (auto reconnect, retry on network change, restore connection or start server on launch, notify on client changes); the server mode manager gains a "Clients" section listing every connected VSCode, with per-client details, disconnect and reconnect
 * `Feature` VSCode extension connection: client mode reconnects automatically after an unexpected disconnect (extension crash, VSCode restart, network hiccup) with exponential backoff, immediate retry once a network is available and restore on app launch; both sides announce intentional closes with a bye message, so an explicit disconnect on either side is never followed by an automatic reconnect
+* `Feature` VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+
+* `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
+* `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -1009,7 +1012,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 16, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 17, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

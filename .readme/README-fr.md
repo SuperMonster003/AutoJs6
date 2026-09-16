@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 16 September 2026.
+Données mises à jour le 17 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -383,6 +383,9 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` La corbeille détecte les éléments défectueux dont le fichier de données est manquant : la liste les marque "Données manquantes" en couleur de mise en évidence, un appui ne propose que les détails et la suppression, et une nouvelle action de menu "Supprimer les éléments défectueux" les nettoie en une fois ; le nettoyage périodique ne fait que journaliser leur nombre et ne les supprime jamais automatiquement
 * `Fonctionnalité` Connexion de l'extension VSCode : le mode client et le mode serveur reçoivent un dialogue "Gestionnaire" (bouton "Gestionnaire" de l'entrée du tiroir ou appui long) avec un état en direct (état de la connexion, adresse du serveur ou d'écoute, hôte distant, versions de l'extension et du protocole, durée de connexion, dernière activité, session de reconnexion, dernière erreur ; chaque ligne est copiable), des actions (connecter, déconnecter, reconnecter maintenant, arrêter la reconnexion, démarrer, arrêter, redémarrer, déconnecter tous les clients, copier l'adresse) et des interrupteurs (reconnexion automatique, nouvel essai au changement de réseau, restauration de la connexion ou démarrage du serveur au lancement, notification des changements de clients); le gestionnaire du mode serveur reçoit une section "Clients" listant chaque VSCode connecté, avec détails, déconnexion et reconnexion par client
 * `Fonctionnalité` Connexion de l'extension VSCode : le mode client se reconnecte automatiquement après une déconnexion inattendue (plantage de l'extension, redémarrage de VSCode, incident réseau) avec un délai exponentiel, un nouvel essai immédiat dès qu'un réseau est disponible et une restauration au lancement de l'application ; les deux côtés annoncent les fermetures volontaires par un message bye, si bien qu'une déconnexion explicite de l'un ou l'autre n'est jamais suivie d'une reconnexion automatique
+* `Fonctionnalité` Connexion de l'extension VSCode : confirmation d'appairage - un appareil inconnu se connectant en mode client doit d'abord être autorisé dans VSCode (mémorisation possible), tandis que les appareils ayant scanné le QR code sont approuvés automatiquement ; extension 1.1.0+ requise
+* `Fonctionnalité` Mode serveur : découverte sur le réseau local (mDNS) - une fois activée, l'extension VSCode (1.1.0+) liste cet appareil dans son sélecteur de connexion LAN sans saisie d'adresse
+* `Fonctionnalité` Fichiers distants VSCode : transfert par morceaux - les gros fichiers sont lus et écrits par morceaux de 1 MiB avec progression affichée dans VSCode ; extension 1.1.0+ requise
 * `Correction` L'exemple Flow de réservation retourne false au lieu de null si une ligne de médecin ne peut pas être analysée, évitant les erreurs de conversion booléenne
 * `Correction` Les résultats des autorisations du plugin sont correctement transmis depuis l'écran principal, ce qui permet de terminer l'activation en attente après accord
 * `Correction` L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours
@@ -1009,7 +1012,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 16 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 17 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

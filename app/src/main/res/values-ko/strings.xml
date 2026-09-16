@@ -734,6 +734,7 @@
     <string name="summary_github_token_not_set">설정되지 않았습니다. GitHub API 요청은 익명으로 전송됩니다.</string>
     <string name="summary_github_token_set">설정되었습니다. 개인정보 보호를 위해 숨겨지며 끝 문자는 %1$s입니다.</string>
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
+    <string name="summary_lan_discovery">이 기기를 _autojs6._tcp 로 알려 VSCode (확장 1.1.0+) 가 LAN 연결 시 목록에 표시하도록 합니다</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>
     <string name="summary_notify_client_connection_changes">VSCode가 연결되거나 연결이 끊길 때 토스트를 표시합니다</string>
@@ -1475,6 +1476,7 @@
     <string name="text_label">레이블</string>
     <string name="text_label_name">이름</string>
     <string name="text_label_state">상태</string>
+    <string name="text_lan_discovery">LAN 검색 (mDNS)</string>
     <string name="text_last_activity">최근 활동</string>
     <string name="text_last_error">최근 오류</string>
     <string name="text_last_event">최근 이벤트</string>
@@ -2263,6 +2265,7 @@
     <string name="text_vscode_disconnected_format">VSCode 연결 끊김: %s</string>
     <string name="text_vscode_host">VSCode 호스트</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">모든 데이터 처리가 완료될 때까지 대기 중입니다...</string>
+    <string name="text_waiting_for_vscode_approval">VSCode 에서 승인 대기 중...</string>
     <string name="text_weekly_task">주간 과제</string>
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>
     <string name="text_window_state_changes_only">창 상태 변경만</string>

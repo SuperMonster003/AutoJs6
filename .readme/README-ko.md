@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 16 일.
+데이터 갱신일: 2026 년 9 월 17 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -383,6 +383,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 휴지통이 데이터 파일이 없는 손상된 항목을 감지합니다: 목록에서 "데이터 없음"을 강조색으로 표시하고, 탭하면 상세 정보와 제거만 제공하며, 새 메뉴 "손상된 항목 제거"로 한 번에 정리할 수 있습니다. 주기적 정리 작업은 개수만 기록하고 자동으로 삭제하지 않습니다
 * `추가` VSCode 확장 프로그램 연결: 클라이언트 모드와 서버 모드 모두에 "관리자" 대화상자 추가 (드로어 항목의 "관리자" 버튼 또는 길게 누르기로 열기). 연결 상태, 서버 또는 수신 주소, 상대 호스트, 확장 프로그램과 프로토콜 버전, 연결 시간, 최근 활동, 재연결 세션, 최근 오류를 실시간 표시 (각 행 복사 가능), 연결, 연결 해제, 지금 재연결, 재연결 중지, 시작, 중지, 재시작, 모든 클라이언트 연결 해제, 주소 복사 작업, 그리고 자동 재연결, 네트워크 변경 시 재시도, 시작 시 연결 복원 (또는 서버 시작), 클라이언트 변경 알림 스위치 제공; 서버 모드 관리자에 "클라이언트" 섹션 추가, 연결된 VSCode 를 개별 표시하고 상세 정보 확인, 연결 끊기, 다시 연결 가능
 * `추가` VSCode 확장 프로그램 연결: 클라이언트 모드는 예기치 않은 연결 끊김 (확장 프로그램 충돌, VSCode 재시작, 네트워크 불안정) 후 지수 백오프로 자동 재연결하며, 네트워크가 사용 가능해지면 즉시 재시도하고 앱 시작 시에도 복원. 양측이 bye 메시지로 의도적인 종료를 알리므로 어느 한쪽이 명시적으로 연결을 해제한 후에는 자동으로 재연결하지 않음
+* `추가` VSCode 확장 연결: 페어링 확인 - 클라이언트 모드로 처음 연결하는 알 수 없는 기기는 VSCode 에서 먼저 허용해야 하며 (기억 가능), QR 코드를 스캔해 연결한 기기는 자동으로 신뢰됩니다; 확장 1.1.0+ 필요
+* `추가` 서버 모드: LAN 검색 (mDNS) - 켜면 VSCode 확장 (1.1.0+) 이 LAN 연결 선택 화면에 이 기기를 표시하여 주소 입력이 필요 없습니다
+* `추가` VSCode 원격 파일: 분할 전송 - 큰 파일을 1 MiB 단위로 읽고 쓰며 VSCode 에 진행률을 표시; 확장 1.1.0+ 필요
 * `수정` Flow 병원 예약 예제에서 의사 행을 분석하지 못하면 null 대신 false를 반환하여 불리언 변환 오류 방지
 * `수정` 메인 화면에서 플러그인 권한 결과가 올바르게 전달되어 허용 후 대기 중인 활성화 작업을 완료할 수 있음
 * `수정` HTTP isInsecure / insecure 옵션으로 인해 후속 요청에서도 인증서와 호스트 이름 검증이 비활성화되던 문제를 해결하고 현재 요청에만 적용
@@ -1009,7 +1012,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 16 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 17 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

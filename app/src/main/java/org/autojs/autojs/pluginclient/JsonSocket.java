@@ -10,6 +10,7 @@ import android.util.Pair;
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -97,6 +98,17 @@ abstract public class JsonSocket extends Socket {
     public static final String BYE_REASON_SHUTDOWN = "shutdown";
     public static final String BYE_REASON_RESTART = "restart";
     public static final String BYE_REASON_REPLACED = "replaced";
+
+    /** Capabilities announced in our hello; the extension (1.1.0+) reads them. zh-CN: 在 hello 中声明的能力, 插件 (1.1.0+) 据此判断. */
+    public static final String FEATURE_HEARTBEAT = "heartbeat";
+    public static final String FEATURE_REQUEST = "request";
+    public static final String FEATURE_FS = "fs";
+    public static final String FEATURE_BYE = "bye";
+    /** `fs.read` accepts offset/length and `fs.write` accepts append (chunked transfer). zh-CN: 支持分块读写. */
+    public static final String FEATURE_FS_CHUNKED = "fs.chunked";
+    /** Understands the extension's `pending` hello and sends `qr_token` (pairing). zh-CN: 支持配对确认与二维码令牌. */
+    public static final String FEATURE_PAIRING = "pairing";
+    public static final String[] FEATURES = { FEATURE_HEARTBEAT, FEATURE_REQUEST, FEATURE_FS, FEATURE_BYE, FEATURE_FS_CHUNKED, FEATURE_PAIRING };
 
     protected static final HashMap<String, Bytes> sBytes = new HashMap<>();
     protected static final HashMap<String, JsonObject> sRequiredBytesCommands = new HashMap<>();
@@ -283,13 +295,34 @@ abstract public class JsonSocket extends Socket {
     public abstract JsonSocket setStateConnected();
 
     public void sayHello() {
-        writeMap(TYPE_HELLO, new MapBuilder<String, Object>()
+        MapBuilder<String, Object> builder = new MapBuilder<String, Object>()
                 .put("device_name", Build.BRAND + " " + Build.MODEL)
                 .put("app_version", BuildConfig.VERSION_NAME)
                 .put("app_version_code", BuildConfig.VERSION_CODE)
                 .put("device_id", new Device(mContext).getAndroidId())
                 .put("protocol_version", PROTOCOL_VERSION)
-                .build());
+                .put("features", featuresJson());
+        String qrToken = getQrToken();
+        if (qrToken != null && !qrToken.isEmpty()) {
+            // One-time token from the connection QR code; the extension trusts this device without asking.
+            // zh-CN: 来自连接二维码的一次性令牌; 插件据此直接信任本设备而不再询问.
+            builder.put("qr_token", qrToken);
+        }
+        writeMap(TYPE_HELLO, builder.build());
+    }
+
+    public static JsonArray featuresJson() {
+        JsonArray array = new JsonArray();
+        for (String feature : FEATURES) {
+            array.add(feature);
+        }
+        return array;
+    }
+
+    /** Token to include in the next hello, if any (client mode after a QR scan). zh-CN: 下次 hello 携带的令牌 (客户端模式扫码后). */
+    @Nullable
+    protected String getQrToken() {
+        return null;
     }
 
     @SuppressWarnings("unused")

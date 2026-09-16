@@ -17,6 +17,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.io.File
 import java.io.IOException
+import java.io.RandomAccessFile
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -65,7 +66,7 @@ class DevPluginRequestHandler(private val context: Context) {
         "fs.roots" -> roots()
         "fs.list" -> list(requireFile(params, "path"))
         "fs.stat" -> stat(requireFile(params, "path"))
-        "fs.read" -> read(requireFile(params, "path"), params.optString("encoding") ?: "utf8")
+        "fs.read" -> read(requireFile(params, "path"), params.optString("encoding") ?: "utf8", params.optLong("offset"), params.optLong("length"))
         "fs.write" -> write(
             requireFile(params, "path"),
             params.optString("content") ?: "",
@@ -73,6 +74,7 @@ class DevPluginRequestHandler(private val context: Context) {
             create = params.optBoolean("create", true),
             overwrite = params.optBoolean("overwrite", true),
             mkdirs = params.optBoolean("mkdirs", true),
+            append = params.optBoolean("append", false),
         )
         "fs.mkdir" -> mkdir(requireFile(params, "path"))
         "fs.delete" -> delete(requireFile(params, "path"), params.optBoolean("recursive", false))
@@ -87,6 +89,7 @@ class DevPluginRequestHandler(private val context: Context) {
         addProperty("appVersion", BuildConfig.VERSION_NAME)
         addProperty("appVersionCode", BuildConfig.VERSION_CODE)
         addProperty("protocolVersion", JsonSocket.PROTOCOL_VERSION)
+        add("features", JsonSocket.featuresJson())
         addProperty("deviceName", "${Build.BRAND} ${Build.MODEL}")
         addProperty("sdk", Build.VERSION.SDK_INT)
         addProperty("workingDir", WorkingDirectoryUtils.path)
@@ -132,14 +135,37 @@ class DevPluginRequestHandler(private val context: Context) {
         }
     }
 
-    private fun read(file: File, encoding: String): JsonElement {
+    /**
+     * Read a whole file, or the piece `[offset, offset + length)` when either is given (chunked transfer, extension
+     * 1.1.0+). The response carries the total `size`, the piece `offset`/`length` and `eof`.
+     * zh-CN: 读取整个文件, 或在给出 offset / length 之一时读取 `[offset, offset + length)` 片段 (分块传输, 插件 1.1.0+).
+     * 响应包含文件总大小 `size`, 片段 `offset`/`length` 与 `eof`.
+     */
+    private fun read(file: File, encoding: String, offset: Long?, length: Long?): JsonElement {
         if (!file.exists()) throw IOException("Not found: ${file.path}")
         if (file.isDirectory) throw IOException("Is a directory: ${file.path}")
-        if (file.length() > MAX_READ_SIZE) throw IOException("File too large (${file.length()} bytes, max $MAX_READ_SIZE)")
-        val bytes = file.readBytes()
+        val total = file.length()
+        val chunked = offset != null || length != null
+        val start = (offset ?: 0L).coerceIn(0L, total)
+        val count = (length ?: (total - start)).coerceIn(0L, total - start)
+        if (count > MAX_READ_SIZE) throw IOException("File too large ($count bytes, max $MAX_READ_SIZE); read it in pieces with offset/length")
+        val bytes: ByteArray = if (!chunked) file.readBytes() else RandomAccessFile(file, "r").use { raf ->
+            raf.seek(start)
+            val buffer = ByteArray(count.toInt())
+            var read = 0
+            while (read < buffer.size) {
+                val n = raf.read(buffer, read, buffer.size - read)
+                if (n < 0) break
+                read += n
+            }
+            if (read == buffer.size) buffer else buffer.copyOf(read)
+        }
         return JsonObject().apply {
             addProperty("path", file.path)
-            addProperty("size", bytes.size)
+            addProperty("size", total)
+            addProperty("offset", start)
+            addProperty("length", bytes.size)
+            addProperty("eof", start + bytes.size >= total)
             if (encoding.equals("base64", ignoreCase = true)) {
                 addProperty("encoding", "base64")
                 addProperty("content", Base64.encodeToString(bytes, Base64.NO_WRAP))
@@ -150,20 +176,29 @@ class DevPluginRequestHandler(private val context: Context) {
         }
     }
 
-    private fun write(file: File, content: String, encoding: String, create: Boolean, overwrite: Boolean, mkdirs: Boolean): JsonElement {
+    /**
+     * Write a file; with `append` the bytes are added to an existing file (later pieces of a chunked upload).
+     * zh-CN: 写入文件; `append` 为 true 时追加到已有文件 (分块上传的后续片段).
+     */
+    private fun write(file: File, content: String, encoding: String, create: Boolean, overwrite: Boolean, mkdirs: Boolean, append: Boolean = false): JsonElement {
         if (file.isDirectory) throw IOException("Is a directory: ${file.path}")
-        if (file.exists() && !overwrite) throw IOException("Already exists: ${file.path}")
-        if (!file.exists() && !create) throw IOException("Not found: ${file.path}")
+        if (append) {
+            if (!file.exists()) throw IOException("Not found (cannot append): ${file.path}")
+        } else {
+            if (file.exists() && !overwrite) throw IOException("Already exists: ${file.path}")
+            if (!file.exists() && !create) throw IOException("Not found: ${file.path}")
+        }
         val parent = file.parentFile
         if (parent != null && !parent.exists()) {
             if (!mkdirs) throw IOException("Not found: ${parent.path}")
             if (!parent.mkdirs() && !parent.isDirectory) throw IOException("Cannot create directory: ${parent.path}")
         }
         val bytes = if (encoding.equals("base64", ignoreCase = true)) Base64.decode(content, Base64.DEFAULT) else content.toByteArray(Charsets.UTF_8)
-        file.writeBytes(bytes)
+        if (append) file.appendBytes(bytes) else file.writeBytes(bytes)
         return JsonObject().apply {
             addProperty("path", file.path)
-            addProperty("size", bytes.size)
+            addProperty("size", file.length())
+            addProperty("written", bytes.size)
             addProperty("mtime", file.lastModified())
         }
     }
@@ -256,6 +291,8 @@ class DevPluginRequestHandler(private val context: Context) {
     }
 
     private fun JsonObject.optString(key: String): String? = get(key)?.takeIf { it.isJsonPrimitive }?.asString
+
+    private fun JsonObject.optLong(key: String): Long? = get(key)?.takeIf { it.isJsonPrimitive }?.let { runCatching { it.asLong }.getOrNull() }
 
     private fun JsonObject.optBoolean(key: String, default: Boolean): Boolean = get(key)?.takeIf { it.isJsonPrimitive }?.let {
         runCatching { it.asBoolean }.getOrDefault(default)

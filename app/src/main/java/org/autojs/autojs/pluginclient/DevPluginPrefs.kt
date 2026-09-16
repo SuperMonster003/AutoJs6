@@ -29,4 +29,8 @@ object DevPluginPrefs {
     val isServerNotifyConnectionChangesEnabled: Boolean
         get() = Pref.getBoolean(R.string.key_server_mode_notify_connection_changes, R.bool.pref_server_mode_notify_connection_changes)
 
+    /** Server mode: advertise the server via mDNS as `_autojs6._tcp` (roadmap 3.10). zh-CN: 服务端模式: 通过 mDNS 以 `_autojs6._tcp` 广播服务端 (roadmap 3.10). */
+    val isServerLanDiscoveryEnabled: Boolean
+        get() = Pref.getBoolean(R.string.key_server_mode_lan_discovery, R.bool.pref_server_mode_lan_discovery)
+
 }

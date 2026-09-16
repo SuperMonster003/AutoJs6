@@ -63,6 +63,9 @@ class DevPluginService(val context: Context) {
     // zh-CN: 意外断开后恢复客户端模式连接 (roadmap 3.9).
     val clientReconnector = DevPluginClientReconnector(this)
 
+    /** mDNS advertisement of the local server (roadmap 3.10). zh-CN: 本地服务端的 mDNS 广播 (roadmap 3.10). */
+    val discovery = DevPluginDiscovery(context)
+
     // Publish current server-side connection count.
     // zh-CN: 发布当前服务端连接数量.
     val serverConnectionCount = BehaviorSubject.createDefault(0)
@@ -188,8 +191,15 @@ class DevPluginService(val context: Context) {
             // zh-CN: 立即显示正在连接的 subtitle.
             clientConnectionIpAddress.onNext("$ip ...")
 
+            val client = JsonSocketClient(this, context, ip, port)
+            pendingQrToken?.let { (tokenHost, token) ->
+                // Attach the token only to the host it was scanned for, then forget it (one-time).
+                // zh-CN: 仅将令牌附加到扫码得到的主机, 随后丢弃 (一次性).
+                if (tokenHost.equals(ip, ignoreCase = true)) client.helloQrToken = token
+                pendingQrToken = null
+            }
             return Observable
-                .just(JsonSocketClient(this, context, ip, port))
+                .just(client)
                 .observeOn(Schedulers.newThread())
                 .doOnNext { client ->
                     try {
@@ -321,6 +331,7 @@ class DevPluginService(val context: Context) {
                     this.jsonSocketServer = it
                     it.setStateConnected()
                     serverStartedAt = System.currentTimeMillis()
+                    if (DevPluginPrefs.isServerLanDiscoveryEnabled) discovery.register(Port.AJ_SERVER)
                     emitter.onNext(it)
                 }
 
@@ -362,6 +373,7 @@ class DevPluginService(val context: Context) {
                     // zh-CN: 循环退出后允许再次启动.
                     mEnableLocalServerStarted.set(false)
                     serverStartedAt = 0L
+                    discovery.unregister()
                 }
             }
             // Run blocking accept loop on IO scheduler to avoid ANR.
@@ -409,6 +421,22 @@ class DevPluginService(val context: Context) {
         const val TYPE_REQUEST = "request"
         const val TYPE_RESPONSE = "response"
         const val TYPE_BYE = "bye"
+
+        /**
+         * `host to token` captured from the last scanned QR code; consumed by the next connection to that host so
+         * its hello carries the one-time token (roadmap 4.4).
+         * zh-CN: 最近一次扫码得到的 `host to token`; 由下一次到该主机的连接消费, 使其 hello 携带一次性令牌 (roadmap 4.4).
+         */
+        @Volatile
+        var pendingQrToken: Pair<String, String>? = null
+
+        /** Extract the pairing token of a connection QR code, if any. zh-CN: 提取连接二维码中的配对令牌 (如有). */
+        fun parseQrToken(text: String?): String? {
+            val s = text?.trim().orEmpty()
+            if (!s.startsWith("autojs6://", ignoreCase = true)) return null
+            val uri = runCatching { android.net.Uri.parse(s) }.getOrNull() ?: return null
+            return uri.getQueryParameter("token")?.trim()?.takeIf { it.isNotEmpty() }
+        }
 
         /**
          * Convert the text of a connection QR code into a `host[:port]` string accepted by the address dialog.
