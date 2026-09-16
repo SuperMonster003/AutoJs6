@@ -406,6 +406,7 @@
     <string name="error_invalid_path">مسار غير صالح: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">اسم كائن الربط غير صالح</string>
     <string name="error_invalid_plugin_mount_point">تنسيق نقطة الربط غير صالح</string>
+    <string name="error_invalid_qr_code_content">محتوى رمز QR غير صالح: %1$s</string>
     <string name="error_invalid_rest_compass">بوصلة راحة غير صالحة: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
     <string name="error_invalid_time_format_pattern">تنسيق الوقت غير صالح</string>
@@ -1251,6 +1252,7 @@
     <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
+    <string name="text_external_storage">التخزين الخارجي</string>
     <string name="text_extract">استخراج</string>
     <string name="text_extract_archive_current_folder">استخراج المجلد الحالي</string>
     <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
@@ -1888,6 +1890,8 @@
     <string name="text_save_simplified">احفظ</string>
     <string name="text_save_to">حفظ في</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>
+    <string name="text_scan_qr_code">مسح رمز QR</string>
+    <string name="text_scan_qr_code_to_connect_hint">وجّه الكاميرا نحو رمز QR المعروض في إضافة AutoJs6 لبرنامج VSCode</string>
     <string name="text_scheduled_restart_backend">المحرّك</string>
     <string name="text_scheduled_restart_start_delay">تأخير البدء</string>
     <string name="text_screen_capture_request_delay">تأخير طلب إذن التقاط الشاشة</string>
@@ -2170,6 +2174,7 @@
     <string name="text_windows">النوافذ</string>
     <string name="text_working_dir_path">مسار دليل العمل</string>
     <string name="text_working_dir_path_with_value">دليل العمل: %1$s</string>
+    <string name="text_working_directory">دليل العمل</string>
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="text_writing_app_icon">جارٍ كتابة ايقونة التطبيق</string>

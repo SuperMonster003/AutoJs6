@@ -406,6 +406,7 @@
     <string name="error_invalid_path">잘못된 경로: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">마운트 객체 이름이 올바르지 않습니다</string>
     <string name="error_invalid_plugin_mount_point">마운트 지점 형식이 올바르지 않습니다</string>
+    <string name="error_invalid_qr_code_content">잘못된 QR 코드 내용: %1$s</string>
     <string name="error_invalid_rest_compass">잘못된 휴식 나침반: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">잘못된 선택기 맵 요소: { %s: %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">잘못된 시간 형식입니다</string>
@@ -1251,6 +1252,7 @@
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
+    <string name="text_external_storage">외부 저장소</string>
     <string name="text_extract">압축 풀기</string>
     <string name="text_extract_archive_current_folder">현재 폴더 압축 풀기</string>
     <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
@@ -1888,6 +1890,8 @@
     <string name="text_save_simplified">구하다</string>
     <string name="text_save_to">저장</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>
+    <string name="text_scan_qr_code">QR 코드 스캔</string>
+    <string name="text_scan_qr_code_to_connect_hint">AutoJs6 VSCode 확장에 표시된 QR 코드에 카메라를 맞추세요</string>
     <string name="text_scheduled_restart_backend">엔진</string>
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
@@ -2170,6 +2174,7 @@
     <string name="text_windows">창</string>
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
     <string name="text_working_dir_path_with_value">작업 디렉토리: %1$s</string>
+    <string name="text_working_directory">작업 디렉터리</string>
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_writing_app_icon">앱 아이콘 기록 중</string>

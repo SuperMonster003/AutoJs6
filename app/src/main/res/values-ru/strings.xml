@@ -404,6 +404,7 @@
     <string name="error_invalid_path">Недопустимый путь: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Недопустимое имя объекта монтирования</string>
     <string name="error_invalid_plugin_mount_point">Недопустимый формат точки монтирования</string>
+    <string name="error_invalid_qr_code_content">Недопустимое содержимое QR-кода: %1$s</string>
     <string name="error_invalid_rest_compass">Неверный остаток компаса: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Неверный элемент карты селектора: { %s: %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">Недопустимый формат времени</string>
@@ -1249,6 +1250,7 @@
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
+    <string name="text_external_storage">Внешнее хранилище</string>
     <string name="text_extract">Извлечь</string>
     <string name="text_extract_archive_current_folder">Извлечь текущую папку</string>
     <string name="text_extracted_plugin_assets">Assets плагина извлечены</string>
@@ -1886,6 +1888,8 @@
     <string name="text_save_simplified">Сохран</string>
     <string name="text_save_to">Сохранить в</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Сохранение...</string>
+    <string name="text_scan_qr_code">Сканировать QR-код</string>
+    <string name="text_scan_qr_code_to_connect_hint">Наведите камеру на QR-код, показанный расширением AutoJs6 для VSCode</string>
     <string name="text_scheduled_restart_backend">Движок</string>
     <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
@@ -2168,6 +2172,7 @@
     <string name="text_windows">Окна</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
     <string name="text_working_dir_path_with_value">Рабочий каталог: %1$s</string>
+    <string name="text_working_directory">Рабочий каталог</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_writing_app_icon">Запись значка приложения</string>

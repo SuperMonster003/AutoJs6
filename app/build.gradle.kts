@@ -553,6 +553,9 @@ dependencies /* Unclassified */ {
     // Version Compare
     implementation(libs.versioncompare)
 
+    // ZXing Android Embedded (QR code scanning for VSCode extension connection)
+    implementation(libs.zxing.android.embedded)
+
     // Terminal Emulator
     implementation(project(":libs:jackpal-androidterm-libtermexec-1_0"))
     implementation(project(":libs:jackpal-androidterm-emulatorview-1_0_42"))

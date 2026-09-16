@@ -399,6 +399,7 @@
     <string name="error_invalid_path">Invalid path: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Invalid mount object name</string>
     <string name="error_invalid_plugin_mount_point">Invalid mount point format</string>
+    <string name="error_invalid_qr_code_content">Invalid QR code content: %1$s</string>
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">Invalid time format pattern</string>
@@ -1245,6 +1246,7 @@
     <string name="text_exported">Exported</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
     <string name="text_extensibility">Extensibility</string>
+    <string name="text_external_storage">External storage</string>
     <string name="text_extract">Extract</string>
     <string name="text_extract_archive_current_folder">Extract current folder</string>
     <string name="text_extracted_plugin_assets">Extracted plugin assets</string>
@@ -1882,6 +1884,8 @@
     <string name="text_save_simplified">Save</string>
     <string name="text_save_to">Save to</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Saving...</string>
+    <string name="text_scan_qr_code">Scan QR code</string>
+    <string name="text_scan_qr_code_to_connect_hint">Point the camera at the QR code shown by the AutoJs6 VSCode extension</string>
     <string name="text_scheduled_restart_backend">Backend</string>
     <string name="text_scheduled_restart_start_delay">Start delay</string>
     <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
@@ -2164,6 +2168,7 @@
     <string name="text_windows">Windows</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_working_dir_path_with_value">Working directory: %1$s</string>
+    <string name="text_working_directory">Working directory</string>
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_writing_app_icon">Writing app icon</string>

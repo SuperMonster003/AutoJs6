@@ -404,6 +404,7 @@
     <string name="error_invalid_path">Chemin invalide : %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Nom d\'objet monte invalide</string>
     <string name="error_invalid_plugin_mount_point">Format du point de montage invalide</string>
+    <string name="error_invalid_qr_code_content">Contenu du code QR non valide : %1$s</string>
     <string name="error_invalid_rest_compass">Invalid rest compass : %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide : { %s : %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">Format de l\'heure non valide</string>
@@ -1249,6 +1250,7 @@
     <string name="text_exported">Exporté</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
+    <string name="text_external_storage">Stockage externe</string>
     <string name="text_extract">Extraire</string>
     <string name="text_extract_archive_current_folder">Extraire le dossier actuel</string>
     <string name="text_extracted_plugin_assets">Assets du plugin extraits</string>
@@ -1886,6 +1888,8 @@
     <string name="text_save_simplified">Enreg</string>
     <string name="text_save_to">Enregistrer dans</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Enregistrement...</string>
+    <string name="text_scan_qr_code">Scanner le code QR</string>
+    <string name="text_scan_qr_code_to_connect_hint">Pointez la caméra vers le code QR affiché par l\'extension AutoJs6 pour VSCode</string>
     <string name="text_scheduled_restart_backend">Moteur</string>
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
@@ -2168,6 +2172,7 @@
     <string name="text_windows">Fenêtres</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail.</string>
     <string name="text_working_dir_path_with_value">Chemin du répertoire de travail: %1$s</string>
+    <string name="text_working_directory">Répertoire de travail</string>
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité.</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_writing_app_icon">Ecriture de l\'icone de l\'appli</string>

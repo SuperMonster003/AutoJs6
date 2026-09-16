@@ -54,6 +54,10 @@ class DevPluginService(val context: Context) {
 
     val responseHandler = DevPluginResponseHandler(context, File(context.cacheDir, "remote_project"))
 
+    // Handles protocol v2 requests (remote file management etc.).
+    // zh-CN: 处理协议 v2 请求 (远程文件管理等).
+    val requestHandler = DevPluginRequestHandler(context)
+
     // Publish current server-side connection count.
     // zh-CN: 发布当前服务端连接数量.
     val serverConnectionCount = BehaviorSubject.createDefault(0)
@@ -353,6 +357,30 @@ class DevPluginService(val context: Context) {
         const val TYPE_HELLO = "hello"
         const val TYPE_COMMAND = "command"
         const val TYPE_BYTES_COMMAND = "bytes_command"
+        const val TYPE_PING = "ping"
+        const val TYPE_PONG = "pong"
+        const val TYPE_REQUEST = "request"
+        const val TYPE_RESPONSE = "response"
+
+        /**
+         * Convert the text of a connection QR code into a `host[:port]` string accepted by the address dialog.
+         * Supports `autojs6://connect?host=<ip>&port=<port>` and plain `host[:port]`. Returns null when invalid.
+         * zh-CN: 将连接二维码文本转换为地址对话框接受的 `host[:port]` 形式.
+         * 支持 `autojs6://connect?host=..&port=..` 与纯 `host[:port]`. 无效时返回 null.
+         */
+        fun parseQrConnectPayload(text: String?): String? {
+            val s = text?.trim().orEmpty()
+            if (s.isEmpty()) return null
+            if (s.startsWith("autojs6://", ignoreCase = true)) {
+                val uri = runCatching { android.net.Uri.parse(s) }.getOrNull() ?: return null
+                val host = uri.getQueryParameter("host")?.trim().orEmpty()
+                if (host.isEmpty()) return null
+                val port = uri.getQueryParameter("port")?.toIntOrNull()?.takeIf { it in 1..65535 } ?: Port.PC_SERVER
+                val hostPart = if (host.contains(':') && !host.startsWith("[")) "[$host]" else host
+                return "$hostPart:$port"
+            }
+            return if (Regex("""[0-9a-zA-Z.\-_:\[\]%]+""").matches(s)) s else null
+        }
 
         fun setState(cxn: Subject<State?>, state: Int) {
             cxn.onNext(State(state))

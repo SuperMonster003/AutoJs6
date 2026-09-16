@@ -369,6 +369,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Bun Runtime 插件動態呼叫能力橋與首批兩項能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一項授權開啟 (預設) 時, `runScript` 請求攜帶 `hostCapabilityBridgeVersion = 1`, 綁定插件 UID 與本次執行的 `IBunHostCapabilityBroker` binder 以及已授權的能力 ID; Bun 指令碼經插件的 unix socket 呼叫 `GET /v1/info` 與 `POST /v1/<能力>`, 宿主原樣轉發 JSON (請求 64 KiB, 結果 256 KiB, 每次執行 1024 次, 4 路並行, 單次 10 s) 並經 `IBunHostCapabilityCallback` 回應. `ui.toast` 每次執行最多在主執行緒顯示四則 toast, `device.info` 只回傳 `android.os.Build` 欄位; 兩個開關位於插件中心的插件設定頁, 未宣告該能力的插件收到的請求與之前完全相同
 * `新增` 設定頁 "回收站與版本歷史" 分類: 保留策略子頁可編輯版本歷史 (保留天數, 每檔案版本數, 每檔案容量, 總容量, 納管檔案大小上限), 回收站 (保留天數, 容量上限) 與緊急草稿 (保留天數, 容量上限), 0 表示不限制, 修改後立即執行一次清理; 另含 "徹底刪除時同時清除版本歷史" 開關
 * `新增` 回收站與版本歷史頁面選單增加 "立即清理" 與 "設定", 側欄中長按這兩個條目直接開啟保留策略設定
+* `新增` 用戶端模式位址輸入框支援掃描 VSCode 擴充功能 (1.1.0+) 顯示的二維碼, 免輸入位址直接連線
+* `新增` VSCode 擴充功能通訊協定 v2: 增加請求/回應訊息與遠端檔案管理方法 (瀏覽, 讀取, 寫入, 重新命名, 刪除裝置檔案及執行裝置指令碼), 供 VSCode 擴充功能 1.1.0+ 使用
 * `修復` Flow 掛號範例在醫師列解析失敗時傳回 false 而非 null, 避免布林轉換例外
 * `修復` 主頁正確回傳外掛授權結果, 授權成功後可繼續完成本次外掛啟用
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效
@@ -561,6 +563,9 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 回收站恢復衝突時的自動改名按條目類型判斷目錄, 名稱含點的目錄 (如 my.project) 不再被拆出副檔名
 * `修復` 版本歷史對話框列出全部已保留的版本 (此前最多 20 條), 編輯器入口同樣提供預覽, 刪除某個版本後重新載入時保持原模式
 * `修復` 版本歷史的孤立 blob 清理增加 30 分鐘最小保護期, 避免誤刪資料庫記錄尚未寫入的新快照
+* `修復` VSCode 擴充功能儲存專案時, PC 端已刪除的檔案仍殘留在裝置上以及快取目錄中歷史檔案反覆出現的問題 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `修復` VSCode 擴充功能連線接收專案封存時將整個位元組陣列轉為字串寫入日誌, 可能導致 OOM 崩潰的問題 _[`issue #523`](http://issues.autojs6.com/523)_
+* `修復` VSCode 擴充功能連線因單個半死連線阻塞日誌寫入執行緒, 導致新連線無法接收日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_
 * `最佳化` Flow 例外的 flowStack 與 stack 保留非同步工作方法, 指令碼檔案和行號, console.error 自動顯示診斷堆疊
 * `最佳化` Flow repeatUntil 的 maxAttempts 預設為 0, 表示在總逾時範圍內不限嘗試次數
 * `最佳化` Flow 穩定等待支援有序節點集合比較與 snapshot 資料投影, 完善子流程截止時間, 取消及錯誤傳播
@@ -696,6 +701,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 版本歷史跳過與最新已存版本內容完全相同的快照, 避免重複儲存
 * `最佳化` 移入回收站前檢查容量上限, 待移入條目超過上限時提示繼續移入, 徹底刪除或取消; 移入完成後立即清理更早的條目, 且容量上限始終保留最新條目
 * `最佳化` 週期清理任務套用完整的保留策略 (版本歷史的天數, 版本數, 單檔案與總容量; 回收站的天數與容量), 並移除不再擁有版本的檔案條目; 緊急草稿的保留策略同樣以 0 表示不限制
+* `最佳化` VSCode 擴充功能連線增加應用層心跳 (ping/pong) 與幀長度上限校驗, 及時釋放失效連線並避免失步時的超大記憶體配置 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `最佳化` VSCode 擴充功能儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

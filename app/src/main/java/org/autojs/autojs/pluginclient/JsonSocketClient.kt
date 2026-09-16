@@ -94,6 +94,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
     @Throws(IOException::class)
     override fun close() {
         Log.w(TAG, "closing socket...")
+        releaseResources()
         cancelHandshakeTimeout()
         setStateDisconnected()
         mSocket?.apply { close() }
@@ -237,7 +238,11 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
             val type = typeElement.asString
             Log.d(TAG, "json type: $type")
             when (type) {
-                TYPE_HELLO -> onHello(obj)
+                TYPE_HELLO -> {
+                    onPeerHello(obj)
+                    onHello(obj)
+                }
+                TYPE_PING, TYPE_PONG, TYPE_REQUEST, TYPE_RESPONSE -> handleProtocolMessage(type, obj)
                 TYPE_BYTES_COMMAND -> {
                     val md5 = obj["md5"].asString
                     val bytes = sBytes.remove(md5)

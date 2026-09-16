@@ -401,6 +401,7 @@
     <string name="error_invalid_path">無效的路徑: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">掛載對象名稱不合法</string>
     <string name="error_invalid_plugin_mount_point">掛載點格式不合法</string>
+    <string name="error_invalid_qr_code_content">無效的二維碼內容: %1$s</string>
     <string name="error_invalid_rest_compass">無效的剩餘羅盤參數: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">不合法的選擇器集合元素: { %s: %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">無效的時間格式</string>
@@ -1246,6 +1247,7 @@
     <string name="text_exported">已導出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內置對象擴展</string>
     <string name="text_extensibility">擴展性</string>
+    <string name="text_external_storage">外部儲存</string>
     <string name="text_extract">解壓縮</string>
     <string name="text_extract_archive_current_folder">解壓縮目前資料夾</string>
     <string name="text_extracted_plugin_assets">已提取插件資源</string>
@@ -1883,6 +1885,8 @@
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存到</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">正在保存...</string>
+    <string name="text_scan_qr_code">掃描二維碼</string>
+    <string name="text_scan_qr_code_to_connect_hint">將鏡頭對準 AutoJs6 VSCode 插件顯示的二維碼</string>
     <string name="text_scheduled_restart_backend">調度引擎</string>
     <string name="text_scheduled_restart_start_delay">啓動延遲</string>
     <string name="text_screen_capture_request_delay">屏幕捕獲權限申請延遲</string>
@@ -2165,6 +2169,7 @@
     <string name="text_windows">窗口</string>
     <string name="text_working_dir_path">工作路徑</string>
     <string name="text_working_dir_path_with_value">工作路徑: %1$s</string>
+    <string name="text_working_directory">工作目錄</string>
     <string name="text_write_secure_settings">修改安全設置</string>
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="text_writing_app_icon">正在寫入應用圖標</string>

@@ -7,6 +7,10 @@ import android.os.Handler
 import android.os.Looper
 import android.text.InputFilter
 import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
+import android.widget.EditText
+import androidx.core.content.ContextCompat
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
@@ -18,6 +22,7 @@ import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.ui.qrcode.QrCodeScanActivity
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.toggleActionButtonAbilityByItems
 import org.autojs.autojs.util.DialogUtils.toggleContentViewByItems
@@ -317,6 +322,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                 }
 
                 val editText = dialog.inputEditText ?: return@also
+                attachQrCodeScanner(dialog, editText)
                 editText.filters += InputFilter { source, start, end, dest, dstart, dend ->
                     if (end > start) {
                         val fullText = dest.substring(0, dstart) +
@@ -354,6 +360,55 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         .replace(Regex("$REGEX_COLON+"), ":")
                 }
             }
+    }
+
+    /**
+     * Add a "scan QR code" icon at the end of the address input; tapping it opens the camera scanner.
+     * zh-CN: 在地址输入框末尾添加 "扫描二维码" 图标, 点击后打开摄像头扫码.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun attachQrCodeScanner(dialog: MaterialDialog, editText: EditText) {
+        val icon = ContextCompat.getDrawable(context, R.drawable.ic_qr_code_scanner_black_24dp)?.mutate() ?: return
+        icon.setTint(ContextCompat.getColor(context, R.color.day_night))
+        editText.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, icon, null)
+        editText.compoundDrawablePadding = (8 * context.resources.displayMetrics.density).toInt()
+        editText.contentDescription = context.getString(R.string.text_scan_qr_code)
+        editText.setOnTouchListener { view, event ->
+            if (event.action != MotionEvent.ACTION_UP) return@setOnTouchListener false
+            val drawable = editText.compoundDrawablesRelative[2] ?: return@setOnTouchListener false
+            val isRtl = editText.layoutDirection == View.LAYOUT_DIRECTION_RTL
+            val hit = if (isRtl) {
+                event.x <= editText.paddingStart + drawable.bounds.width()
+            } else {
+                event.x >= editText.width - editText.paddingEnd - drawable.bounds.width()
+            }
+            if (!hit) return@setOnTouchListener false
+            view.performClick()
+            scanQrCodeToConnect(dialog)
+            true
+        }
+    }
+
+    /**
+     * Scan the QR code shown by the VSCode extension, fill the address and connect.
+     * zh-CN: 扫描 VSCode 插件显示的二维码, 填入地址并连接.
+     */
+    private fun scanQrCodeToConnect(dialog: MaterialDialog) {
+        QrCodeScanActivity.launch(context) { text ->
+            runOnMain(mainHandler) {
+                val endpoint = DevPluginService.parseQrConnectPayload(text)
+                if (endpoint == null) {
+                    ViewUtils.showToast(context, context.getString(R.string.error_invalid_qr_code_content, text), true)
+                    return@runOnMain
+                }
+                if (dialog.isShowing) {
+                    dialog.inputEditText?.setText(endpoint)
+                    validateAndConnectToRemoteServer(dialog)
+                } else {
+                    connectToServerWithStatus(endpoint, null)
+                }
+            }
+        }
     }
 
     private fun connectToServerWithStatus(host: String, dismissInputDialog: MaterialDialog?, permissionRequested: Boolean = false) {

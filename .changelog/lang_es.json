@@ -201,7 +201,9 @@
         "Instantánea de información del host para el plugin Bun Runtime: cuando el plugin declara `SUPPORTS_HOST_INFO` y la autorización `host_info` está activa (por defecto), las solicitudes `runScript` llevan `hostInfoVersion = 1` y un Bundle `hostInfo` con el nombre del paquete del host, `BuildConfig.VERSION_DATE` y la etiqueta de idioma preferida, de modo que los scripts Bun pueden leer mediante la variable de entorno `AUTOJS6_HOST_INFO_FILE` la instantánea de host/plugin/ejecución que el plugin verifica y escribe; el host nunca envía su propia versión (el plugin la resuelve mediante PackageManager), la autorización puede revocarse en cada ejecución (`BunHostCapabilityGrants`) y los plugins sin esta capacidad reciben exactamente la solicitud anterior",
         "Puente de capacidades para llamadas dinámicas del plugin Bun Runtime con las dos primeras capacidades `ui.toast` / `device.info`: cuando el plugin declara `SUPPORTS_HOST_CAPABILITY_BRIDGE` y al menos una de las autorizaciones `ui_toast` / `device_info` está activa (por defecto), las solicitudes `runScript` llevan `hostCapabilityBridgeVersion = 1`, un binder `IBunHostCapabilityBroker` fijado al UID del plugin y a esta ejecución, y los ID de capacidad autorizados; los scripts Bun llaman `GET /v1/info` y `POST /v1/<capacidad>` a través del socket unix del plugin, el host reenvía el JSON sin interpretarlo (solicitudes de 64 KiB, resultados de 256 KiB, 1024 llamadas por ejecución, 4 en curso, 10 s cada una) y responde mediante `IBunHostCapabilityCallback`. `ui.toast` muestra como máximo cuatro toasts por ejecución desde el hilo principal, `device.info` devuelve solo campos de `android.os.Build`; ambos interruptores están en la página del plugin del Centro de plugins, y los plugins sin esta capacidad reciben exactamente la solicitud anterior",
         "Categoría de ajustes \"Papelera e historial de versiones\": una subpágina de políticas de retención permite editar el historial de versiones (días de retención, versiones por archivo, tamaño por archivo, tamaño total, tamaño máximo de archivo a rastrear), la papelera (días de retención, límite de tamaño) y los borradores de emergencia (días de retención, límite de tamaño), donde 0 significa sin límite y un cambio ejecuta una limpieza de inmediato; además de un interruptor \"Borrar también el historial de versiones al eliminar permanentemente\"",
-        "Entradas \"Limpiar ahora\" y \"Ajustes\" en los menús de las páginas de papelera e historial de versiones, y una pulsación larga en cualquiera de los dos elementos del cajón abre los ajustes de políticas de retención"
+        "Entradas \"Limpiar ahora\" y \"Ajustes\" en los menús de las páginas de papelera e historial de versiones, y una pulsación larga en cualquiera de los dos elementos del cajón abre los ajustes de políticas de retención",
+        "El cuadro de dirección del modo cliente puede escanear el código QR mostrado por la extensión de VSCode (1.1.0+) para conectarse sin escribir la dirección",
+        "Protocolo v2 de la extensión de VSCode con mensajes de solicitud/respuesta y métodos de gestión remota de archivos (explorar, leer, escribir, renombrar y eliminar archivos del dispositivo, ejecutar scripts del dispositivo) para la extensión de VSCode 1.1.0+"
       ],
       "fix": [
         "El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana",
@@ -395,7 +397,10 @@
         "Antes de restaurar una versión al disco o restaurar un archivo desde la papelera con sobrescritura, el contenido actual del destino se registra primero como una revisión RESTORE_PRE; la restauración con sobrescritura desde la papelera escribe en un archivo temporal y luego reemplaza el destino, así que una cancelación o un fallo ya no deja un archivo a medio escribir",
         "El renombrado automático ante un conflicto de restauración desde la papelera decide los directorios por el tipo de elemento, así que un directorio con un punto en el nombre (como my.project) ya no pierde parte del nombre como extensión",
         "El diálogo del historial de versiones lista todas las revisiones conservadas (antes como máximo 20), ofrece Vista previa también desde el editor y mantiene su modo tras eliminar una revisión y recargar la lista",
-        "La limpieza de blobs huérfanos del historial de versiones protege los blobs de menos de 30 minutos, así que una instantánea reciente cuya fila en la base de datos aún está pendiente ya no se elimina"
+        "La limpieza de blobs huérfanos del historial de versiones protege los blobs de menos de 30 minutos, así que una instantánea reciente cuya fila en la base de datos aún está pendiente ya no se elimina",
+        "Los archivos eliminados en el PC permanecían en el dispositivo tras guardar un proyecto desde la extensión de VSCode, y los archivos obsoletos del directorio de caché reaparecían _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
+        "Al recibir un archivo de proyecto desde la extensión de VSCode se convertía todo el arreglo de bytes en cadena para el registro, lo que podía provocar un fallo por OOM _[`issue #523`](http://issues.autojs6.com/523)_",
+        "Una sola conexión medio muerta de la extensión de VSCode bloqueaba el hilo de escritura de registros, de modo que las nuevas conexiones no recibían registros _[`issue #385`](http://issues.autojs6.com/385)_"
       ],
       "improvement": [
         "Los errores Flow conservan métodos, archivos de script y números de línea de tareas asíncronas en flowStack y stack, y console.error muestra la pila automáticamente",
@@ -532,7 +537,9 @@
         "Los límites de retención del historial de versiones y la papelera (días, versiones, bytes por archivo, bytes totales, tamaño de archivo rastreado) tratan de forma uniforme cero o valores negativos como ilimitado y comparten un único objeto de política",
         "El historial de versiones omite una instantánea cuyo contenido es idéntico a la revisión más reciente almacenada, evitando almacenamiento duplicado",
         "Mover elementos a la papelera comprueba primero el límite de tamaño y, cuando los elementos lo superan, ofrece mover de todos modos, eliminar permanentemente o cancelar; las entradas más antiguas se eliminan justo después del movimiento, y el límite de tamaño siempre conserva la entrada más reciente",
-        "La limpieza periódica aplica la política de retención completa (días, versiones, tamaño por archivo y total para el historial de versiones; días y tamaño para la papelera) y descarta las entradas de archivo sin revisiones; los límites de los borradores de emergencia también tratan 0 como sin límite"
+        "La limpieza periódica aplica la política de retención completa (días, versiones, tamaño por archivo y total para el historial de versiones; días y tamaño para la papelera) y descarta las entradas de archivo sin revisiones; los límites de los borradores de emergencia también tratan 0 como sin límite",
+        "Las conexiones de la extensión de VSCode incorporan un latido a nivel de aplicación (ping/pong) y un límite de longitud de trama, liberando conexiones muertas con rapidez y evitando asignaciones enormes en caso de desincronización _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
+        "Los archivos guardados desde la extensión de VSCode pueden conservar su estructura de directorios relativa dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_"
       ],
       "dependency": [
         "Android AXML modularizado",
@@ -563,7 +570,8 @@
         "Se elimina Pinyin4j version 2.5.1",
         "Se elimina Jieba Analysis version 1.0.3-SNAPSHOT (modificada)",
         "Se elimina la biblioteca local Rapid OCR",
-        "Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0"
+        "Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0",
+        "Anexado ZXing Android Embedded versión 4.3.0"
       ]
     },
     "v6.7.0": {

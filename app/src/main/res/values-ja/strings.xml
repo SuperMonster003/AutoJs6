@@ -405,6 +405,7 @@
     <string name="error_invalid_path">無効なパス: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">マウントオブジェクト名が不正です</string>
     <string name="error_invalid_plugin_mount_point">マウントポイント形式が不正です</string>
+    <string name="error_invalid_qr_code_content">無効な QR コードの内容: %1$s</string>
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタマップ要素です. { %s: %s (%s) } です</string>
     <string name="error_invalid_time_format_pattern">時刻の形式が無効です</string>
@@ -1250,6 +1251,7 @@
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
+    <string name="text_external_storage">外部ストレージ</string>
     <string name="text_extract">展開</string>
     <string name="text_extract_archive_current_folder">現在のフォルダーを展開</string>
     <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
@@ -1887,6 +1889,8 @@
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存先</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">保存中...</string>
+    <string name="text_scan_qr_code">QR コードをスキャン</string>
+    <string name="text_scan_qr_code_to_connect_hint">AutoJs6 VSCode 拡張機能に表示された QR コードにカメラを向けてください</string>
     <string name="text_scheduled_restart_backend">エンジン</string>
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
@@ -2169,6 +2173,7 @@
     <string name="text_windows">ウィンドウ</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_working_dir_path_with_value">作業ディレクトリ: %1$s</string>
+    <string name="text_working_directory">作業ディレクトリ</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_writing_app_icon">アプリアイコンを書き込み中</string>

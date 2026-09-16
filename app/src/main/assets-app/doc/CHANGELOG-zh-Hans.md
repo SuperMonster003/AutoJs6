@@ -183,6 +183,8 @@
 * `新增` Bun Runtime 插件动态调用能力桥与首批两项能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一项授权开启 (默认) 时, `runScript` 请求携带 `hostCapabilityBridgeVersion = 1`, 绑定插件 UID 与本次执行的 `IBunHostCapabilityBroker` binder 以及已授权的能力 ID; Bun 脚本经插件的 unix socket 调用 `GET /v1/info` 与 `POST /v1/<能力>`, 宿主原样转发 JSON (请求 64 KiB, 结果 256 KiB, 每次运行 1024 次, 4 路并发, 单次 10 s) 并经 `IBunHostCapabilityCallback` 应答. `ui.toast` 每次运行最多在主线程显示四条 toast, `device.info` 只返回 `android.os.Build` 字段; 两枚开关位于插件中心的插件设置页, 未宣告该能力的插件收到的请求与之前完全相同
 * `新增` 设置页 "回收站与版本历史" 分类: 保留策略子页可编辑版本历史 (保留天数, 每文件版本数, 每文件容量, 总容量, 纳管文件大小上限), 回收站 (保留天数, 容量上限) 与紧急草稿 (保留天数, 容量上限), 0 表示不限制, 修改后立即执行一次清理; 另含 "彻底删除时同时清除版本历史" 开关
 * `新增` 回收站与版本历史页面菜单增加 "立即清理" 与 "设置", 抽屉中长按这两个条目直接打开保留策略设置
+* `新增` 客户端模式地址输入框支持扫描 VSCode 插件 (1.1.0+) 显示的二维码, 免输入地址直接连接
+* `新增` VSCode 插件通信协议 v2: 增加请求/响应消息与远程文件管理方法 (浏览, 读取, 写入, 重命名, 删除设备文件及运行设备脚本), 供 VSCode 插件 1.1.0+ 使用
 * `修复` Flow 挂号示例在医生行解析失败时返回 false 而非 null, 避免布尔转换异常
 * `修复` 主页正确回传插件授权结果, 授权成功后可继续完成本次插件启用
 * `修复` HTTP 请求的 isInsecure / insecure 选项可能使后续请求继续跳过证书和主机名校验, 现仅对当前请求生效
@@ -375,6 +377,9 @@
 * `修复` 回收站恢复冲突时的自动改名按条目类型判断目录, 名称含点的目录 (如 my.project) 不再被拆出扩展名
 * `修复` 版本历史对话框列出全部已保留的版本 (此前最多 20 条), 编辑器入口同样提供预览, 删除某个版本后重新加载时保持原模式
 * `修复` 版本历史的孤立 blob 清理增加 30 分钟最小保护期, 避免误删数据库记录尚未写入的新快照
+* `修复` VSCode 插件保存项目时, PC 端已删除的文件仍残留在设备上以及缓存目录中历史文件反复出现的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `修复` VSCode 插件连接接收项目归档时将整个字节数组转为字符串写入日志, 可能导致 OOM 崩溃的问题 _[`issue #523`](http://issues.autojs6.com/523)_
+* `修复` VSCode 插件连接因单个半死连接阻塞日志写入线程, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
 * `优化` Flow 异常的 flowStack 与 stack 保留异步任务方法, 脚本文件和行号, console.error 自动显示诊断栈
 * `优化` Flow repeatUntil 的 maxAttempts 默认为 0, 表示在总超时范围内不限尝试次数
 * `优化` Flow 稳定等待支持有序节点集合比较与 snapshot 数据投影, 完善子流程截止时间, 取消及错误传播
@@ -513,6 +518,8 @@
 * `优化` 版本历史跳过与最新已存版本内容完全相同的快照, 避免重复存储
 * `优化` 移入回收站前检查容量上限, 待移入条目超过上限时提示继续移入, 彻底删除或取消; 移入完成后立即清理更早的条目, 且容量上限始终保留最新条目
 * `优化` 周期清理任务应用完整的保留策略 (版本历史的天数, 版本数, 单文件与总容量; 回收站的天数与容量), 并移除不再拥有版本的文件条目; 紧急草稿的保留策略同样以 0 表示不限制
+* `优化` VSCode 插件连接增加应用层心跳 (ping/pong) 与帧长度上限校验, 及时释放失效连接并避免失步时的超大内存分配 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `优化` VSCode 插件保存文件时支持按相对目录结构保存到工作目录 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
@@ -542,6 +549,7 @@
 * `依赖` 移除 Pinyin4j 版本 2.5.1
 * `依赖` 移除 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
 * `依赖` 移除 Rapid OCR 本地库
+* `依赖` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0
 

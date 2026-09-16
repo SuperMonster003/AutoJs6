@@ -207,6 +207,8 @@
 * `Fonctionnalité` Pont de capacités pour les appels dynamiques du plugin Bun Runtime avec les deux premières capacités `ui.toast` / `device.info`: quand le plugin déclare `SUPPORTS_HOST_CAPABILITY_BRIDGE` et qu'au moins une des autorisations `ui_toast` / `device_info` est active (par défaut), les requêtes `runScript` portent `hostCapabilityBridgeVersion = 1`, un binder `IBunHostCapabilityBroker` lié à l'UID du plugin et à cette exécution, ainsi que les ID de capacité autorisés; les scripts Bun appellent `GET /v1/info` et `POST /v1/<capacité>` via le socket unix du plugin, l'hôte relaie le JSON sans l'interpréter (requêtes de 64 KiB, résultats de 256 KiB, 1024 appels par exécution, 4 en cours, 10 s chacun) et répond par `IBunHostCapabilityCallback`. `ui.toast` affiche au plus quatre toasts par exécution depuis le thread principal, `device.info` ne renvoie que des champs de `android.os.Build`; les deux interrupteurs se trouvent sur la page du plugin du Centre de plugins, et les plugins sans cette capacité reçoivent exactement la requête précédente
 * `Fonctionnalité` Catégorie de paramètres "Corbeille et historique des versions": une sous-page de politiques de conservation permet de modifier l'historique des versions (jours de conservation, versions par fichier, taille par fichier, taille totale, taille maximale des fichiers suivis), la corbeille (jours de conservation, limite de taille) et les brouillons d'urgence (jours de conservation, limite de taille), où 0 signifie illimité et où toute modification déclenche immédiatement un nettoyage; plus un interrupteur "Effacer aussi l'historique des versions lors d'une suppression définitive"
 * `Fonctionnalité` Entrées "Nettoyer maintenant" et "Paramètres" dans les menus des pages corbeille et historique des versions, et un appui long sur l'un des deux éléments du tiroir ouvre les paramètres des politiques de conservation
+* `Fonctionnalité` La boîte de dialogue d'adresse du mode client peut scanner le code QR affiché par l'extension VSCode (1.1.0+) pour se connecter sans saisir l'adresse
+* `Fonctionnalité` Protocole v2 de l'extension VSCode avec messages requête/réponse et méthodes de gestion de fichiers à distance (parcourir, lire, écrire, renommer et supprimer les fichiers de l'appareil, exécuter des scripts de l'appareil) pour l'extension VSCode 1.1.0+
 * `Correction` L'exemple Flow de réservation retourne false au lieu de null si une ligne de médecin ne peut pas être analysée, évitant les erreurs de conversion booléenne
 * `Correction` Les résultats des autorisations du plugin sont correctement transmis depuis l'écran principal, ce qui permet de terminer l'activation en attente après accord
 * `Correction` L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours
@@ -399,6 +401,9 @@
 * `Correction` Le renommage automatique lors d'un conflit de restauration depuis la corbeille détermine les dossiers d'après le type de l'élément, ainsi un dossier dont le nom contient un point (comme my.project) ne se voit plus retirer une extension
 * `Correction` La boîte de dialogue de l'historique des versions liste toutes les révisions conservées (auparavant 20 au maximum), propose l'aperçu également depuis l'éditeur et conserve son mode après la suppression d'une révision et le rechargement de la liste
 * `Correction` Le nettoyage des blobs orphelins de l'historique des versions protège les blobs de moins de 30 minutes, de sorte qu'un instantané récent dont la ligne en base est encore en attente n'est plus supprimé
+* `Correction` Les fichiers supprimés sur le PC restaient sur l'appareil après l'enregistrement d'un projet depuis l'extension VSCode, et les fichiers obsolètes du répertoire de cache réapparaissaient _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `Correction` La réception d'une archive de projet depuis l'extension VSCode convertissait tout le tableau d'octets en chaîne pour le journal, ce qui pouvait provoquer un plantage OOM _[`issue #523`](http://issues.autojs6.com/523)_
+* `Correction` Une seule connexion semi-morte de l'extension VSCode bloquait le thread d'écriture des journaux, de sorte que les nouvelles connexions ne recevaient aucun journal _[`issue #385`](http://issues.autojs6.com/385)_
 * `Amélioration` Les erreurs Flow conservent les méthodes, fichiers de script et numéros de ligne des tâches asynchrones dans flowStack et stack, affichés automatiquement par console.error
 * `Amélioration` Le paramètre maxAttempts de Flow repeatUntil vaut 0 par défaut pour des tentatives illimitées dans le délai total
 * `Amélioration` Comparaison des collections ordonnées de noeuds et des projections snapshot immuables, avec gestion des délais et de l'annulation des sous-flux
@@ -534,6 +539,8 @@
 * `Amélioration` L'historique des versions ignore un instantané dont le contenu est identique à la révision la plus récente stockée, évitant un stockage en double
 * `Amélioration` Le déplacement vers la corbeille vérifie d'abord la limite de taille et, lorsque les éléments la dépassent, propose de déplacer quand même, de supprimer définitivement ou d'annuler; les entrées plus anciennes sont supprimées juste après le déplacement, et la limite de taille conserve toujours l'entrée la plus récente
 * `Amélioration` Le nettoyage périodique applique la politique de conservation complète (jours, versions, taille par fichier et totale pour l'historique des versions; jours et taille pour la corbeille) et supprime les entrées de fichier sans révision; les limites des brouillons d'urgence traitent aussi 0 comme illimité
+* `Amélioration` Les connexions de l'extension VSCode disposent d'un battement de coeur applicatif (ping/pong) et d'une limite de longueur de trame, libérant rapidement les connexions mortes et évitant les allocations énormes en cas de désynchronisation _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `Amélioration` Les fichiers enregistrés depuis l'extension VSCode peuvent conserver leur structure de répertoires relative dans le répertoire de travail _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise
@@ -563,6 +570,7 @@
 * `Dépendance` Suppression de Pinyin4j version 2.5.1
 * `Dépendance` Suppression de Jieba Analysis version 1.0.3-SNAPSHOT (modifiée)
 * `Dépendance` Suppression de la bibliothèque locale Rapid OCR
+* `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 
 # v6.7.0
 

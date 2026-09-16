@@ -56,6 +56,7 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
 
     @Throws(IOException::class)
     override fun close() {
+        releaseResources()
         if (isSocketReady) {
             mSocket?.close()
             mSocket = null
@@ -80,7 +81,11 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
             val type = typeElement.asString
             Log.d(TAG, "json type: $type")
             when (type) {
-                TYPE_HELLO -> setStateConnected()
+                TYPE_HELLO -> {
+                    onPeerHello(obj)
+                    setStateConnected()
+                }
+                TYPE_PING, TYPE_PONG, TYPE_REQUEST, TYPE_RESPONSE -> handleProtocolMessage(type, obj)
                 TYPE_BYTES_COMMAND -> {
                     val md5 = obj["md5"].asString
                     val bytes = sBytes.remove(md5)

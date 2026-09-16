@@ -369,6 +369,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Bun Runtime plugin capability bridge for dynamic calls with the first two capabilities `ui.toast` and `device.info`: when the plugin declares `SUPPORTS_HOST_CAPABILITY_BRIDGE` and at least one of the `ui_toast` / `device_info` grants is on (default), `runScript` requests carry `hostCapabilityBridgeVersion = 1`, a per-run `IBunHostCapabilityBroker` binder pinned to the plugin UID and execution ID, and the granted capability IDs; Bun scripts call `GET /v1/info` and `POST /v1/<capability>` over the plugin's unix socket, the host relays JSON uninterpreted (64 KiB requests, 256 KiB results, 1024 calls per run, 4 in flight, 10 s each) and answers through `IBunHostCapabilityCallback`. `ui.toast` shows at most four toasts per run from the main thread, `device.info` returns only `android.os.Build` facts; both switches live in the plugin's page of the Plugin Center, and plugins without the capability receive exactly the previous request
 * `Feature` "Trash and version history" settings category: a retention policies sub-page edits version history (retention days, versions per file, size per file, total size, max tracked file size), trash (retention days, size limit) and emergency drafts (retention days, size limit), where 0 means unlimited and a change triggers a cleanup right away; plus an "Also clear version history when deleting permanently" switch
 * `Feature` "Clean up now" and "Settings" entries in the trash and version history page menus, and a long press on either drawer item opens the retention policy settings
+* `Feature` Client mode address dialog can scan the QR code shown by the VSCode extension (1.1.0+) to connect without typing the address
+* `Feature` VSCode extension protocol v2 with request/response messages and remote file management methods (browse, read, write, rename and delete device files, run device scripts) for VSCode extension 1.1.0+
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -561,6 +563,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Auto rename on a trash restore conflict decides directories by the item type, so a directory with a dot in its name (such as my.project) no longer has an extension split off
 * `Fix` The version history dialog lists every retained revision (previously at most 20), offers Preview from the editor entry as well, and keeps its mode after a revision is deleted and the list reloads
 * `Fix` Orphan blob cleanup for version history now protects blobs younger than 30 minutes, so a fresh snapshot whose database row is still pending is no longer deleted
+* `Fix` Files deleted on the PC remained on the device after saving a project from the VSCode extension, and stale files in the cache directory kept reappearing _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `Fix` Receiving a project archive from the VSCode extension converted the whole byte array to a string for logging, which could crash with OOM _[`issue #523`](http://issues.autojs6.com/523)_
+* `Fix` A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -696,6 +701,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Version history skips a snapshot whose content is identical to the newest stored revision, avoiding duplicate storage
 * `Improvement` Moving items to the trash checks the size limit first and, when the items exceed it, offers to move anyway, delete permanently or cancel; older entries are evicted right after the move, and the size limit always keeps the newest entry
 * `Improvement` The periodic cleanup applies the complete retention policy (days, versions, per-file and total size for version history; days and size for the trash) and drops file entries that own no revisions; emergency draft limits treat 0 as unlimited as well
+* `Improvement` VSCode extension connections gain an application-level heartbeat (ping/pong) and a frame length limit, releasing dead connections promptly and avoiding huge allocations on desync _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `Improvement` Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

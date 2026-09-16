@@ -404,6 +404,7 @@
     <string name="error_invalid_path">Ruta no valida: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Nombre de objeto montado no valido</string>
     <string name="error_invalid_plugin_mount_point">Formato de punto de montaje no valido</string>
+    <string name="error_invalid_qr_code_content">Contenido del código QR no válido: %1$s</string>
     <string name="error_invalid_rest_compass">Compás de reposo inválido: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elemento de mapa selector no válido: { %s: %s (%s) }</string>
     <string name="error_invalid_time_format_pattern">Formato de hora no válido</string>
@@ -1249,6 +1250,7 @@
     <string name="text_exported">Exportado</string>
     <string name="text_extending_js_build_in_objects">Extensión de los objetos incorporados de JavaScript</string>
     <string name="text_extensibility">Extensibilidad</string>
+    <string name="text_external_storage">Almacenamiento externo</string>
     <string name="text_extract">Extraer</string>
     <string name="text_extract_archive_current_folder">Extraer carpeta actual</string>
     <string name="text_extracted_plugin_assets">Assets del plugin extraidos</string>
@@ -1886,6 +1888,8 @@
     <string name="text_save_simplified">Guarda</string>
     <string name="text_save_to">Guardar en</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Guardando...</string>
+    <string name="text_scan_qr_code">Escanear código QR</string>
+    <string name="text_scan_qr_code_to_connect_hint">Apunte la cámara al código QR mostrado por la extensión AutoJs6 para VSCode</string>
     <string name="text_scheduled_restart_backend">Motor</string>
     <string name="text_scheduled_restart_start_delay">Retraso de inicio</string>
     <string name="text_screen_capture_request_delay">Retraso de solicitud del permiso de captura de pantalla</string>
@@ -2168,6 +2172,7 @@
     <string name="text_windows">Ventanas</string>
     <string name="text_working_dir_path">Ruta del directorio de trabajo</string>
     <string name="text_working_dir_path_with_value">Ruta del directorio de trabajo: %1$s</string>
+    <string name="text_working_directory">Directorio de trabajo</string>
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="text_writing_app_icon">Escribiendo icono de la app</string>
