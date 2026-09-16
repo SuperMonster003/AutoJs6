@@ -557,6 +557,7 @@
 * `Mejora` El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas
 * `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
 * `Mejora` Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción
+* `Mejora` Cuando un elemento de la papelera se restaura en una ubicación distinta de su ruta original, el historial de versiones del archivo (o de todos los archivos del directorio) lo sigue a la nueva ruta; al mover un archivo a la papelera se registra la entrada del historial de versiones a la que estaba vinculado en ese momento
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

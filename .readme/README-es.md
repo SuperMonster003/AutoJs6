@@ -719,6 +719,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas
 * `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
 * `Mejora` Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción
+* `Mejora` Cuando un elemento de la papelera se restaura en una ubicación distinta de su ruta original, el historial de versiones del archivo (o de todos los archivos del directorio) lo sigue a la nueva ruta; al mover un archivo a la papelera se registra la entrada del historial de versiones a la que estaba vinculado en ese momento
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

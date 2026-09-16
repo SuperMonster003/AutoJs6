@@ -557,6 +557,7 @@
 * `Amélioration` L'explorateur enregistre le contenu actuel d'un fichier comme révision OVERWRITE_PRE avant qu'une copie ou un déplacement ne le remplace; lorsqu'un dossier est écrasé, les fichiers suivis qu'il contient reçoivent des instantanés
 * `Amélioration` Chaque élément de la liste de la corbeille affiche un compte à rebours avant expiration (dérivé des jours de conservation de la corbeille, masqué si illimité), et les éléments expirant sous 24 heures sont mis en évidence
 * `Amélioration` Lorsqu'un élément de la corbeille ne peut être ni prévisualisé ni restauré parce que son fichier de données est manquant ou endommagé, un message localisé est affiché à la place du texte brut de l'exception
+* `Amélioration` Lorsqu'un élément de la corbeille est restauré à un emplacement différent de son chemin d'origine, l'historique des versions du fichier (ou de tous les fichiers du dossier) le suit vers le nouveau chemin ; le déplacement d'un fichier vers la corbeille enregistre l'entrée d'historique des versions à laquelle il était lié à ce moment
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

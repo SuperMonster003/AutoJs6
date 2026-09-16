@@ -719,6 +719,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots
 * `Improvement` Each trash list item shows an expiry countdown (derived from the trash retention days, hidden when unlimited), and items expiring within 24 hours are highlighted
 * `Improvement` When a trash item cannot be previewed or restored because its data file is missing or damaged, a localized message is shown instead of the raw exception text
+* `Improvement` When a trash item is restored to a location other than its original path, the version history of the file (or of every file under the directory) follows it to the new path; moving a file to the trash records the version history entry it was linked to at that time
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -224,10 +224,14 @@ class TrashRepository(private val context: Context) {
 
             val sha = sha256HexFromDigest(digest)
 
+            // Link the item to the version history entry that owns this path at move time (files only).
+            // zh-CN: 把条目关联到移入时拥有该路径的版本历史条目 (仅文件).
+            val historyFileId = if (isDir) null else dao.findFileByPath(HistoryPaths.normalizePath(logicalPath))?.fileId
+
             val item = TrashEntities.TrashItem(
                 trashId = trashId,
                 originalPath = logicalPath,
-                fileId = null,
+                fileId = historyFileId,
                 trashedAt = now,
                 isDirectory = isDir,
                 sizeBytes = sizeBytes.coerceAtLeast(0L),
@@ -480,6 +484,14 @@ class TrashRepository(private val context: Context) {
         // zh-CN: 恢复成功后删除回收站记录与 blob.
         dao.deleteTrashItemsByIds(listOf(item.trashId))
         blobs.deleteBlobByRelPath(item.blobRelPath)
+
+        // Version history follows the item when it is restored to a different path (files and directories).
+        // zh-CN: 恢复到不同路径时, 版本历史跟随条目 (文件与目录均适用).
+        val originalNormalized = HistoryPaths.normalizePath(item.originalPath)
+        val destNormalized = HistoryPaths.normalizePath(dest.path)
+        if (originalNormalized != destNormalized) {
+            HistoryRepository(context.applicationContext).relocate(originalNormalized, destNormalized)
+        }
     }
 
     /** Restores only when the destination name is still unused; existing data is never replaced. */
