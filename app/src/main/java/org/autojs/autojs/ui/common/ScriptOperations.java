@@ -40,6 +40,8 @@ import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.storage.history.HistoryPaths;
 import org.autojs.autojs.storage.history.HistoryPrefs;
 import org.autojs.autojs.storage.history.HistoryRepository;
+import org.autojs.autojs.storage.history.HistoryRetentionPolicy;
+import org.autojs.autojs.storage.history.TrashEntities;
 import org.autojs.autojs.storage.history.TrashRepository;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
@@ -1141,7 +1143,11 @@ public class ScriptOperations {
                         dialog.dismiss();
 
                         if (which == 0) {
-                            moveToTrashWithProgress(scriptFile);
+                            checkTrashQuotaThenRun(
+                                    Collections.singletonList(scriptFile),
+                                    () -> moveToTrashWithProgress(scriptFile),
+                                    () -> deleteWithoutConfirm(scriptFile)
+                            );
                         } else if (which == 1) {
                             deleteWithoutConfirm(scriptFile);
                         }
@@ -1172,7 +1178,11 @@ public class ScriptOperations {
                         dialog.dismiss();
 
                         if (which == 0) {
-                            moveToTrashWithProgress(scriptFiles);
+                            checkTrashQuotaThenRun(
+                                    scriptFiles,
+                                    () -> moveToTrashWithProgress(scriptFiles),
+                                    () -> deleteWithoutConfirm(scriptFiles)
+                            );
                         } else if (which == 1) {
                             deleteWithoutConfirm(scriptFiles);
                         }
@@ -1207,6 +1217,73 @@ public class ScriptOperations {
                 .build());
     }
 
+    /**
+     * Compare the size of the items about to be trashed with the trash size limit. Items that fit
+     * proceed silently; otherwise the user chooses between moving anyway (older trash items are
+     * evicted to make room, and these items go first once newer ones arrive), deleting permanently,
+     * or cancelling. Size measurement runs off the main thread.
+     *
+     * zh-CN: 比较待移入条目的大小与回收站容量上限. 能放下的直接继续; 否则由用户选择仍然移入
+     * (回收站中更早的条目会被清理以腾出空间, 且这些条目会在更新的条目移入后被优先清理),
+     * 彻底删除, 或取消. 大小统计在非主线程执行.
+     */
+    private void checkTrashQuotaThenRun(@NonNull List<ScriptFile> scriptFiles, @NonNull Runnable proceed, @NonNull Runnable deletePermanently) {
+        long limit = HistoryPrefs.INSTANCE.trashMaxTotalBytes();
+        if (HistoryRetentionPolicy.INSTANCE.isUnlimited(limit)) {
+            proceed.run();
+            return;
+        }
+        Observable.fromCallable(() -> {
+                    long total = 0L;
+                    for (ScriptFile file : scriptFiles) {
+                        total += computeTotalBytes(file);
+                    }
+                    return total;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(total -> {
+                    if (total <= limit) {
+                        proceed.run();
+                        return;
+                    }
+                    DialogUtils.buildAndShowAdaptive(() -> new MaterialDialog.Builder(mContext)
+                            .title(R.string.text_prompt)
+                            .content(mContext.getString(
+                                    R.string.text_trash_quota_exceeded_prompt,
+                                    PFiles.formatSizeWithUnit(total),
+                                    PFiles.formatSizeWithUnit(limit)
+                            ))
+                            .neutralText(R.string.item_delete_permanently)
+                            .neutralColorRes(R.color.dialog_button_caution)
+                            .onNeutral((dialog, which) -> deletePermanently.run())
+                            .negativeText(R.string.dialog_button_cancel)
+                            .negativeColorRes(R.color.dialog_button_default)
+                            .positiveText(R.string.item_move_to_trash)
+                            .positiveColorRes(R.color.dialog_button_attraction)
+                            .onPositive((dialog, which) -> proceed.run())
+                            .build());
+                }, e -> {
+                    // Measuring failed: fall back to the plain move, which reports its own errors.
+                    // zh-CN: 统计失败: 回退为直接移入, 由移入流程自行报告错误.
+                    e.printStackTrace();
+                    proceed.run();
+                });
+    }
+
+    /**
+     * Evict older trash items so the trash fits its size limit again, keeping the items just moved in.
+     * Failures are logged only: the move itself has already succeeded.
+     * zh-CN: 清理更早的回收站条目使总量重新满足上限, 保留刚移入的条目. 失败仅记录日志: 移入本身已成功.
+     */
+    private static void enforceTrashQuotaAfterMove(@NonNull TrashRepository repository, @NonNull Set<String> movedTrashIds) {
+        try {
+            repository.enforceTotalBytesLimit(movedTrashIds);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void moveToTrashWithProgress(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
         boolean isProject = ProjectConfig.isProject(scriptFile);
@@ -1235,21 +1312,22 @@ public class ScriptOperations {
 
                         // Move into trash (blob + db) then notify explorer.
                         // zh-CN: 移入回收站 (blob + db), 然后通知资源管理器.
-                        new TrashRepository(mContext.getApplicationContext())
-                                .moveToTrashWithProgress(
-                                        scriptFile.getPath(),
-                                        (processed, total) -> {
-                                            controller.throwIfCancelled();
-                                            if (total > 0) {
-                                                session.setProgressThrottled(processed, total);
-                                            }
-                                        },
-                                        (currentFile) -> {
-                                            controller.throwIfCancelled();
-                                            session.setContentThrottled(toContentList(scriptFile, currentFile));
-                                        },
-                                        controller
-                                );
+                        TrashRepository repository = new TrashRepository(mContext.getApplicationContext());
+                        TrashEntities.TrashItem moved = repository.moveToTrashWithProgress(
+                                scriptFile.getPath(),
+                                (processed, total) -> {
+                                    controller.throwIfCancelled();
+                                    if (total > 0) {
+                                        session.setProgressThrottled(processed, total);
+                                    }
+                                },
+                                (currentFile) -> {
+                                    controller.throwIfCancelled();
+                                    session.setContentThrottled(toContentList(scriptFile, currentFile));
+                                },
+                                controller
+                        );
+                        enforceTrashQuotaAfterMove(repository, Collections.singleton(moved.getTrashId()));
 
                         return 1;
                     } catch (OperationAbortedException aborted) {
@@ -1320,10 +1398,11 @@ public class ScriptOperations {
                         session.scheduleShow(builder);
 
                         long[] processedBase = new long[]{0L};
+                        Set<String> movedTrashIds = new HashSet<>();
                         TrashRepository repository = new TrashRepository(mContext.getApplicationContext());
                         for (DeleteTarget target : targets) {
                             controller.throwIfCancelled();
-                            repository.moveToTrashWithProgress(
+                            TrashEntities.TrashItem moved = repository.moveToTrashWithProgress(
                                     target.file.getPath(),
                                     (processed, total) -> {
                                         controller.throwIfCancelled();
@@ -1338,8 +1417,10 @@ public class ScriptOperations {
                                     controller
                             );
                             processedBase[0] += target.totalBytes;
+                            movedTrashIds.add(moved.getTrashId());
                             notifyFileRemoved(target.isProject, target.isDir, target.file);
                         }
+                        enforceTrashQuotaAfterMove(repository, movedTrashIds);
 
                         return 1;
                     } catch (OperationAbortedException aborted) {

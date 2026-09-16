@@ -275,6 +275,7 @@
     <string name="key_timed_task_backend_alarm" translatable="false">key_$_timed_task_backend_alarm</string>
     <string name="key_timed_task_backend_job" translatable="false">key_$_timed_task_backend_job</string>
     <string name="key_timed_task_backend_work" translatable="false">key_$_timed_task_backend_work</string>
+    <string name="key_trash_and_version_history_settings" translatable="false">key_$_trash_and_version_history_settings</string>
     <string name="key_trash_max_days" translatable="false">key_$_trash_max_days</string>
     <string name="key_trash_max_total_bytes" translatable="false">key_$_trash_max_total_bytes</string>
     <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>

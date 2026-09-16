@@ -62,6 +62,32 @@ object HistoryRetentionPolicy {
     }
 
     /**
+     * Like [selectOverBytes], but never selects an item for which [isProtected] is true; the protected
+     * items still count towards the total. Used by the trash so the newest item (typically the one the
+     * user just moved in) survives even when it alone exceeds the limit.
+     * zh-CN: 与 [selectOverBytes] 相同, 但不会选中 [isProtected] 为 true 的条目 (其大小仍计入总量).
+     * 回收站用它保证最新条目 (通常是刚移入的) 即使单独超过上限也不会被立即清理.
+     */
+    fun <T> selectOverBytesProtecting(
+        itemsOldestFirst: List<T>,
+        maxBytes: Long,
+        isProtected: (T) -> Boolean,
+        sizeOf: (T) -> Long,
+    ): List<T> {
+        if (isUnlimited(maxBytes)) return emptyList()
+        var total = itemsOldestFirst.sumOf { sizeOf(it).coerceAtLeast(0L) }
+        if (total <= maxBytes) return emptyList()
+        val result = ArrayList<T>()
+        for (item in itemsOldestFirst) {
+            if (total <= maxBytes) break
+            if (isProtected(item)) continue
+            result.add(item)
+            total -= sizeOf(item).coerceAtLeast(0L)
+        }
+        return result
+    }
+
+    /**
      * Apply days, then count, then bytes; returns the union to delete (oldest first, no duplicates).
      * zh-CN: 依次应用天数 / 条数 / 字节上限, 返回应删除条目的并集 (最旧优先, 无重复).
      */

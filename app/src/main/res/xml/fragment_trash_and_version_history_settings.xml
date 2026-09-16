@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_version_history">
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_history_max_days"
+            app:title="@string/text_history_max_days" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_history_max_versions"
+            app:title="@string/text_history_max_versions" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_history_max_total_bytes_per_file"
+            app:title="@string/text_history_max_total_bytes_per_file" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_history_max_total_bytes"
+            app:title="@string/text_history_max_total_bytes" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_history_max_file_size_to_track_bytes"
+            app:title="@string/text_history_max_file_size_to_track" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_trash">
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_trash_max_days"
+            app:title="@string/text_trash_max_days" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_trash_max_total_bytes"
+            app:title="@string/text_trash_max_total_bytes" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_emergency_drafts">
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_drafts_max_days"
+            app:title="@string/text_drafts_max_days" />
+
+        <org.autojs.autojs.ui.settings.RetentionLimitPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_drafts_max_total_bytes"
+            app:title="@string/text_drafts_max_total_bytes" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+</PreferenceScreen>

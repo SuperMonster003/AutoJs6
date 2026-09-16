@@ -400,6 +400,7 @@
     <string name="error_invalid_github_repo">Repositorio GitHub inválido: %s</string>
     <string name="error_invalid_ip_address">Dirección IP no válida</string>
     <string name="error_invalid_login_credentials">Credenciales de acceso no válidas</string>
+    <string name="error_invalid_number_input">Introduzca un número entero igual o mayor que 0</string>
     <string name="error_invalid_path">Ruta no valida: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Nombre de objeto montado no valido</string>
     <string name="error_invalid_plugin_mount_point">Formato de punto de montaje no valido</string>
@@ -698,6 +699,7 @@
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
     <string name="summary_clear_media_playback_history">Eliminar todas las posiciones de reproducción guardadas por el host</string>
     <string name="summary_code_editor_settings">Abrir la página completa de ajustes del editor de código</string>
+    <string name="summary_delete_permanently_also_clear_history">Elimina el historial de versiones del archivo o directorio que se elimina permanentemente</string>
     <string name="summary_dex_compiler_experimental_disabled">Solo D8/dx integrado; AAR siempre usa la ruta integrada</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Solo D8/dx integrado; provider conservado: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Los JAR sin procesar de runtime.loadJar prefieren %1$s; los fallos recurren al D8/dx integrado</string>
@@ -736,6 +738,7 @@
     <string name="summary_plugin_instruction_view">Mostrar ejemplos de uso y notas de este plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Abrir la Activity de inicio de este plugin</string>
     <string name="summary_plugin_no_launch_page">El plugin actual no tiene página de inicio</string>
+    <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
     <string name="text_bun_host_capabilities">Puente de capacidades de Bun</string>
     <string name="text_bun_host_info_grant">Instantánea de información del host</string>
     <string name="summary_bun_host_info_grant">Ofrecer a los scripts Bun una instantánea de solo lectura de la versión y el idioma de AutoJs6 mediante AUTOJS6_HOST_INFO_FILE; se aplica a partir de la próxima ejecución</string>
@@ -993,7 +996,10 @@
     <string name="text_class_or_package_name">Nombre de la clase/paquete</string>
     <string name="text_clean">Limpiar</string>
     <string name="text_clean_completed">Limpieza completada</string>
+    <string name="text_clean_up_failed">Error al limpiar</string>
+    <string name="text_clean_up_now">Limpiar ahora</string>
     <string name="text_cleaning_archive_extraction">Limpiando la salida incompleta</string>
+    <string name="text_cleaning_in_progress">Limpiando, espere</string>
     <string name="text_cleaning_workspace">Limpiando el espacio de trabajo</string>
     <string name="text_clear">Borrar</string>
     <string name="text_clear_file_selection">Borrar selección de archivos</string>
@@ -1117,6 +1123,7 @@
     <string name="text_delete_folder">Eliminar carpeta</string>
     <string name="text_delete_items">Eliminar elementos</string>
     <string name="text_delete_line">Borrar línea</string>
+    <string name="text_delete_permanently_also_clear_history">Borrar también el historial de versiones al eliminar permanentemente</string>
     <string name="text_delete_revision_confirm">¿Eliminar esta revision de forma permanente?</string>
     <string name="text_deleting">Eliminando</string>
     <string name="text_description">Descripción</string>
@@ -1164,6 +1171,8 @@
     <string name="text_download_url">URL de descarga</string>
     <string name="text_downloading">Descargando</string>
     <string name="text_draft_file_path">Ruta del borrador</string>
+    <string name="text_drafts_max_days">Días de retención de los borradores de emergencia</string>
+    <string name="text_drafts_max_total_bytes">Tamaño máximo de los borradores de emergencia</string>
     <string name="text_drag_to_sort">Arrastrar para ordenar</string>
     <string name="text_drawer_close">Cerrar cajón</string>
     <string name="text_drawer_open">Abrir el cajón</string>
@@ -1201,6 +1210,7 @@
     <string name="text_email">Correo electrónico</string>
     <string name="text_email_cannot_be_empty">El correo electrónico no puede estar vacío</string>
     <string name="text_email_format_error">Formato de correo electrónico no válido</string>
+    <string name="text_emergency_drafts">Borradores de emergencia</string>
     <string name="text_empty_configuration">Configuracion vacia</string>
     <string name="text_empty_release_note">No hay nota de publicación</string>
     <string name="text_enable_a11y_service">Habilitar el servicio de accesibilidad</string>
@@ -1340,6 +1350,11 @@
     <string name="text_hint">Sugerencia</string>
     <string name="text_history">Historial</string>
     <string name="text_history_has_been_cleared">El historial se ha borrado</string>
+    <string name="text_history_max_days">Días de retención del historial de versiones</string>
+    <string name="text_history_max_file_size_to_track">Tamaño máximo de archivo a rastrear</string>
+    <string name="text_history_max_total_bytes">Tamaño máximo total del historial</string>
+    <string name="text_history_max_total_bytes_per_file">Tamaño máximo del historial por archivo</string>
+    <string name="text_history_max_versions">Máximo de versiones por archivo</string>
     <string name="text_icon">Icono</string>
     <string name="text_ignore_battery_optimizations">Ignorar las optimizaciones de la batería</string>
     <string name="text_ignored_updates">Ignorar actualizaciones</string>
@@ -1488,6 +1503,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">Moviendo...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moviendo a la papelera...</string>
     <string name="text_multiple_options">Opciones múltiples</string>
+    <string name="text_n_days">%d días</string>
+    <string name="text_n_versions">%d versiones</string>
     <string name="text_name">Nombre</string>
     <string name="text_need_to_enable_a11y_service">Necesidad de habilitar el servicio de accesibilidad</string>
     <string name="text_new_color_library">Nueva biblioteca de colores</string>
@@ -1831,6 +1848,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restaurando...</string>
     <string name="text_result">Resultado</string>
     <string name="text_resume">Reanudar</string>
+    <string name="text_retention_policies">Políticas de retención</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Obteniendo el registro de cambios...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Obteniendo datos de la lista de complementos...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Obteniendo las notas de la versión...</string>
@@ -2060,6 +2078,10 @@
     <string name="text_total_size_colon_value">Tamano: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">El ícono de iniciador con fondo transparente puede ser enmascarado automáticamente o recibir un fondo por parte del sistema, por lo que el efecto real puede variar entre dispositivos</string>
     <string name="text_trash">Papelera</string>
+    <string name="text_trash_and_version_history">Papelera e historial de versiones</string>
+    <string name="text_trash_max_days">Días de retención de la papelera</string>
+    <string name="text_trash_max_total_bytes">Tamaño máximo de la papelera</string>
+    <string name="text_trash_quota_exceeded_prompt">El tamaño de los elementos a mover (%1$s) supera el límite de tamaño de la papelera (%2$s). Si continúa, se eliminarán los elementos más antiguos de la papelera para hacer espacio, y estos elementos se eliminarán primero cuando lleguen otros más nuevos.</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Tipo</string>
     <string name="text_type_file">Archivo</string>
@@ -2079,11 +2101,14 @@
     <string name="text_undo">Revocar</string>
     <string name="text_undo_simplified">Revoc</string>
     <string name="text_uninstall">Desinstalar</string>
+    <string name="text_unit_days">Días</string>
+    <string name="text_unit_versions">Versiones</string>
     <string name="text_unknown">Desconocido</string>
     <string name="text_unknown_author_for_plugin">Autor Desconocido</string>
     <string name="text_unknown_description_for_plugin">Descripción Desconocida</string>
     <string name="text_unknown_title_for_plugin">Título Desconocido</string>
     <string name="text_unknown_version_for_plugin">Versión Desconocida</string>
+    <string name="text_unlimited">Sin límite</string>
     <string name="text_unsaved_changes">Cambios sin guardar</string>
     <string name="text_unsigned_apk_created">APK sin firmar creado</string>
     <string name="text_unverified">No verificado</string>
@@ -2152,6 +2177,7 @@
     <string name="text_writing_signed_apk">Escribiendo APK firmado</string>
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="text_yearly_task">Tarea anual</string>
+    <string name="text_zero_means_unlimited">0 significa sin límite</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La biblioteca nativa %1$s tiene una alineación de %2$d bytes. El APK generado puede ser incompatible con páginas de 16 KB. Actualice la biblioteca o el plugin.</string>

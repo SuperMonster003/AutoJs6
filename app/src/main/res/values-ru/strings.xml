@@ -400,6 +400,7 @@
     <string name="error_invalid_github_repo">Неверный репозиторий GitHub: %s</string>
     <string name="error_invalid_ip_address">Неверный IP-адрес</string>
     <string name="error_invalid_login_credentials">Неверные учетные данные для входа в систему</string>
+    <string name="error_invalid_number_input">Введите целое число не меньше 0</string>
     <string name="error_invalid_path">Недопустимый путь: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Недопустимое имя объекта монтирования</string>
     <string name="error_invalid_plugin_mount_point">Недопустимый формат точки монтирования</string>
@@ -698,6 +699,7 @@
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
     <string name="summary_clear_media_playback_history">Удалить все позиции воспроизведения, сохранённые хостом</string>
     <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
+    <string name="summary_delete_permanently_also_clear_history">Удаляет историю версий файла или каталога при его окончательном удалении</string>
     <string name="summary_dex_compiler_experimental_disabled">Только встроенный D8/dx; AAR всегда остается на встроенном пути</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Только встроенный D8/dx; сохраненный provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Для необработанных JAR runtime.loadJar предпочитает %1$s; при сбое используется встроенный D8/dx</string>
@@ -736,6 +738,7 @@
     <string name="summary_plugin_instruction_view">Показать примеры использования и описание этого плагина</string>
     <string name="summary_plugin_jump_to_launch_page">Открыть Activity запуска этого плагина</string>
     <string name="summary_plugin_no_launch_page">У текущего плагина нет страницы запуска</string>
+    <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
     <string name="text_bun_host_capabilities">Мост возможностей Bun</string>
     <string name="text_bun_host_info_grant">Снимок сведений о хосте</string>
     <string name="summary_bun_host_info_grant">Предоставлять Bun-скриптам снимок версии и языка AutoJs6 только для чтения через AUTOJS6_HOST_INFO_FILE; действует со следующего запуска</string>
@@ -993,7 +996,10 @@
     <string name="text_class_or_package_name">Имя класса / пакета</string>
     <string name="text_clean">Очистить</string>
     <string name="text_clean_completed">Очистка завершена</string>
+    <string name="text_clean_up_failed">Не удалось выполнить очистку</string>
+    <string name="text_clean_up_now">Очистить сейчас</string>
     <string name="text_cleaning_archive_extraction">Очистка незавершенного вывода</string>
+    <string name="text_cleaning_in_progress">Идет очистка, подождите</string>
     <string name="text_cleaning_workspace">Очистка рабочей области</string>
     <string name="text_clear">Очистить</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
@@ -1117,6 +1123,7 @@
     <string name="text_delete_folder">Удалить папку</string>
     <string name="text_delete_items">Удалить элементы</string>
     <string name="text_delete_line">Удалить строку</string>
+    <string name="text_delete_permanently_also_clear_history">Очищать историю версий при окончательном удалении</string>
     <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
     <string name="text_deleting">Удаление</string>
     <string name="text_description">Описание</string>
@@ -1164,6 +1171,8 @@
     <string name="text_download_url">URL-адрес загрузки</string>
     <string name="text_downloading">Загрузка</string>
     <string name="text_draft_file_path">Путь к черновику</string>
+    <string name="text_drafts_max_days">Срок хранения аварийных черновиков (дней)</string>
+    <string name="text_drafts_max_total_bytes">Максимальный размер аварийных черновиков</string>
     <string name="text_drag_to_sort">Перетащите для сортировки</string>
     <string name="text_drawer_close">Закрыть ящик</string>
     <string name="text_drawer_open">Открыть ящик</string>
@@ -1201,6 +1210,7 @@
     <string name="text_email">Электронная почта</string>
     <string name="text_email_cannot_be_empty">Электронная почта не может быть пустой</string>
     <string name="text_email_format_error">Неверный формат электронной почты</string>
+    <string name="text_emergency_drafts">Аварийные черновики</string>
     <string name="text_empty_configuration">Пустая конфигурация</string>
     <string name="text_empty_release_note">Отсутствует примечание к релизу</string>
     <string name="text_enable_a11y_service">Включить службу доступности</string>
@@ -1340,6 +1350,11 @@
     <string name="text_hint">Подсказка</string>
     <string name="text_history">История</string>
     <string name="text_history_has_been_cleared">История очищена</string>
+    <string name="text_history_max_days">Срок хранения истории версий (дней)</string>
+    <string name="text_history_max_file_size_to_track">Максимальный размер отслеживаемого файла</string>
+    <string name="text_history_max_total_bytes">Максимальный общий размер истории</string>
+    <string name="text_history_max_total_bytes_per_file">Максимальный размер истории на файл</string>
+    <string name="text_history_max_versions">Максимум версий на файл</string>
     <string name="text_icon">Значок</string>
     <string name="text_ignore_battery_optimizations">Игнорировать оптимизацию батареи</string>
     <string name="text_ignored_updates">Игнорировать обновления</string>
@@ -1488,6 +1503,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">Перемещение...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Перемещение в корзину...</string>
     <string name="text_multiple_options">Несколько вариантов</string>
+    <string name="text_n_days">%d дн.</string>
+    <string name="text_n_versions">%d вер.</string>
     <string name="text_name">Имя</string>
     <string name="text_need_to_enable_a11y_service">Необходимо включить службу доступности</string>
     <string name="text_new_color_library">Новая цветовая библиотека</string>
@@ -1831,6 +1848,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Восстановление...</string>
     <string name="text_result">Результат</string>
     <string name="text_resume">Продолжить</string>
+    <string name="text_retention_policies">Политики хранения</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
@@ -2060,6 +2078,10 @@
     <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
     <string name="text_trash">Корзина</string>
+    <string name="text_trash_and_version_history">Корзина и история версий</string>
+    <string name="text_trash_max_days">Срок хранения в корзине (дней)</string>
+    <string name="text_trash_max_total_bytes">Максимальный размер корзины</string>
+    <string name="text_trash_quota_exceeded_prompt">Размер перемещаемых элементов (%1$s) превышает ограничение размера корзины (%2$s). Если продолжить, более старые элементы корзины будут удалены, чтобы освободить место, а эти элементы будут удалены первыми при поступлении новых.</string>
     <string name="text_tutorial">Учебник</string>
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>
@@ -2079,11 +2101,14 @@
     <string name="text_undo">Отозвать</string>
     <string name="text_undo_simplified">Верни</string>
     <string name="text_uninstall">Удалить</string>
+    <string name="text_unit_days">Дней</string>
+    <string name="text_unit_versions">Версий</string>
     <string name="text_unknown">Неизвестно</string>
     <string name="text_unknown_author_for_plugin">Неизвестный Автор</string>
     <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
+    <string name="text_unlimited">Без ограничений</string>
     <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
     <string name="text_unverified">Не подтверждено</string>
@@ -2152,6 +2177,7 @@
     <string name="text_writing_signed_apk">Запись подписанного APK</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="text_yearly_task">Ежегодная задача</string>
+    <string name="text_zero_means_unlimited">0 означает отсутствие ограничений</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>

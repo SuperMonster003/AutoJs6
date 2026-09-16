@@ -57,6 +57,7 @@ import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryPrefs
+import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.accessibility.A11yServiceManagerDialog
@@ -66,6 +67,7 @@ import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
 import org.autojs.autojs.ui.terminal.TerminalActivity
@@ -721,6 +723,7 @@ open class DrawerFragment : Fragment() {
             title = R.string.text_trash,
         ).apply {
             setAction { TrashActivity.launch(mContext) }
+            setLongClickAction { TrashAndVersionHistorySettingsActivity.launch(mContext) }
         }
 
         mVersionHistoryItem = DrawerMenuShortcutItem(
@@ -728,6 +731,7 @@ open class DrawerFragment : Fragment() {
             title = R.string.text_version_history,
         ).apply {
             setAction { VersionHistoryActivity.launch(mContext) }
+            setLongClickAction { TrashAndVersionHistorySettingsActivity.launch(mContext) }
         }
 
         mAboutAppAndDevItem = DrawerMenuShortcutItem(
@@ -773,18 +777,16 @@ open class DrawerFragment : Fragment() {
             ) { stats, limitBytes ->
                 val count = stats.count.coerceAtLeast(0L)
                 val totalBytes = (stats.totalBytes ?: 0L).coerceAtLeast(0L)
-                val limit = limitBytes.coerceAtLeast(0L)
-
                 val sizeText = PFiles.formatSizeWithUnit(totalBytes)
 
-                val percentText = if (limit > 0L) {
-                    val ratio = (totalBytes.toDouble() / limit.toDouble()).coerceAtLeast(0.0)
-                    String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)
+                // An unlimited size limit (zero or negative) has no meaningful percentage.
+                // zh-CN: 容量上限为不限制 (0 或负数) 时, 百分比没有意义.
+                if (HistoryRetentionPolicy.isUnlimited(limitBytes)) {
+                    "$count | $sizeText"
                 } else {
-                    String.format(Locale.getDefault(), "%.1f%%", 0.0)
+                    val ratio = (totalBytes.toDouble() / limitBytes.toDouble()).coerceAtLeast(0.0)
+                    "$count | $sizeText | ${String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)}"
                 }
-
-                "$count | $sizeText | $percentText"
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { subtitle ->
@@ -808,18 +810,16 @@ open class DrawerFragment : Fragment() {
             ) { stats, limitBytes ->
                 val count = stats.fileCount.coerceAtLeast(0L)
                 val totalBytes = (stats.totalBytes ?: 0L).coerceAtLeast(0L)
-                val limit = limitBytes.coerceAtLeast(0L)
-
                 val sizeText = PFiles.formatSizeWithUnit(totalBytes)
 
-                val percentText = if (limit > 0L) {
-                    val ratio = (totalBytes.toDouble() / limit.toDouble()).coerceAtLeast(0.0)
-                    String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)
+                // An unlimited size limit (zero or negative) has no meaningful percentage.
+                // zh-CN: 容量上限为不限制 (0 或负数) 时, 百分比没有意义.
+                if (HistoryRetentionPolicy.isUnlimited(limitBytes)) {
+                    "$count | $sizeText"
                 } else {
-                    String.format(Locale.getDefault(), "%.1f%%", 0.0)
+                    val ratio = (totalBytes.toDouble() / limitBytes.toDouble()).coerceAtLeast(0.0)
+                    "$count | $sizeText | ${String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)}"
                 }
-
-                "$count | $sizeText | $percentText"
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { subtitle ->

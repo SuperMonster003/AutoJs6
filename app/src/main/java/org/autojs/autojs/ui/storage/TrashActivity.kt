@@ -11,11 +11,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.PrefRx
+import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.TrashEntities
 import org.autojs.autojs.storage.history.TrashRepository
 import org.autojs.autojs.storage.history.TrashRestoreController
+import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityTrashBinding
@@ -171,6 +173,8 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
     override fun onExtraMenuItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_clear_trash -> true.also { confirmAndClearTrash() }
+            R.id.action_clean_up_now -> true.also { HistoryCleanupUi.runNow(this) { load() } }
+            R.id.action_trash_and_version_history_settings -> true.also { TrashAndVersionHistorySettingsActivity.launch(this) }
             else -> false
         }
     }

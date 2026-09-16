@@ -40,4 +40,14 @@
         android:id="@+id/action_clear_version_history"
         android:title="@string/text_clear_version_history"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clean_up_now"
+        android:title="@string/text_clean_up_now"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_trash_and_version_history_settings"
+        android:title="@string/text_settings"
+        app:showAsAction="never" />
 </menu>

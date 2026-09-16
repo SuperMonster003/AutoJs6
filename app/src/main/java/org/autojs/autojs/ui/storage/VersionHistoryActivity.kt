@@ -11,12 +11,14 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.PrefRx
+import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryEntities
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityVersionHistoryBinding
 import java.io.File
@@ -182,6 +184,8 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
     override fun onExtraMenuItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_clear_version_history -> true.also { confirmAndClearAllHistory() }
+            R.id.action_clean_up_now -> true.also { HistoryCleanupUi.runNow(this) { load() } }
+            R.id.action_trash_and_version_history_settings -> true.also { TrashAndVersionHistorySettingsActivity.launch(this) }
             else -> false
         }
     }

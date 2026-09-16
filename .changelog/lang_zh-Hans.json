@@ -175,7 +175,9 @@
         "官方插件无障碍伴生契约: 发布 `follow-host` 服务策略的伴生插件随 AutoJs6 无障碍服务一同启用和禁用, 使用已配置的 root, 安全设置或 Shizuku 策略, 并接收宿主服务状态广播",
         "Bun Runtime 插件项目执行: 位于含 `project.json` 或 `package.json` 目录下的脚本会打成有界工作区归档 (最多 16384 条目与 64 MiB, 只收普通文件与目录) 交给声明了 `SUPPORTS_WORKSPACE_ARCHIVE` 的插件, 项目内的相对导入可以解析; 入口文件使用编辑器当前源码, 符号链接与特殊文件直接中止运行, 裸脚本或旧版插件保持单源码路径",
         "Bun Runtime 插件宿主信息快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授权开启 (默认) 时, `runScript` 请求携带 `hostInfoVersion = 1` 与 `hostInfo` Bundle (宿主包名, `BuildConfig.VERSION_DATE` 与首选语言标签), Bun 脚本即可通过环境变量 `AUTOJS6_HOST_INFO_FILE` 读取由插件核实并写出的宿主/插件/运行快照; 宿主不发送自身版本 (插件经 PackageManager 解析), 授权可逐次撤销 (`BunHostCapabilityGrants`), 未宣告该能力的插件收到的请求与之前完全相同",
-        "Bun Runtime 插件动态调用能力桥与首批两项能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一项授权开启 (默认) 时, `runScript` 请求携带 `hostCapabilityBridgeVersion = 1`, 绑定插件 UID 与本次执行的 `IBunHostCapabilityBroker` binder 以及已授权的能力 ID; Bun 脚本经插件的 unix socket 调用 `GET /v1/info` 与 `POST /v1/<能力>`, 宿主原样转发 JSON (请求 64 KiB, 结果 256 KiB, 每次运行 1024 次, 4 路并发, 单次 10 s) 并经 `IBunHostCapabilityCallback` 应答. `ui.toast` 每次运行最多在主线程显示四条 toast, `device.info` 只返回 `android.os.Build` 字段; 两枚开关位于插件中心的插件设置页, 未宣告该能力的插件收到的请求与之前完全相同"
+        "Bun Runtime 插件动态调用能力桥与首批两项能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一项授权开启 (默认) 时, `runScript` 请求携带 `hostCapabilityBridgeVersion = 1`, 绑定插件 UID 与本次执行的 `IBunHostCapabilityBroker` binder 以及已授权的能力 ID; Bun 脚本经插件的 unix socket 调用 `GET /v1/info` 与 `POST /v1/<能力>`, 宿主原样转发 JSON (请求 64 KiB, 结果 256 KiB, 每次运行 1024 次, 4 路并发, 单次 10 s) 并经 `IBunHostCapabilityCallback` 应答. `ui.toast` 每次运行最多在主线程显示四条 toast, `device.info` 只返回 `android.os.Build` 字段; 两枚开关位于插件中心的插件设置页, 未宣告该能力的插件收到的请求与之前完全相同",
+        "设置页 \"回收站与版本历史\" 分类: 保留策略子页可编辑版本历史 (保留天数, 每文件版本数, 每文件容量, 总容量, 纳管文件大小上限), 回收站 (保留天数, 容量上限) 与紧急草稿 (保留天数, 容量上限), 0 表示不限制, 修改后立即执行一次清理; 另含 \"彻底删除时同时清除版本历史\" 开关",
+        "回收站与版本历史页面菜单增加 \"立即清理\" 与 \"设置\", 抽屉中长按这两个条目直接打开保留策略设置"
       ],
       "fix": [
         "Flow 挂号示例在医生行解析失败时返回 false 而非 null, 避免布尔转换异常",
@@ -507,7 +509,9 @@
         "特征匹配仅保留 RANSAC 内点并校验投影四边形, 匹配器与描述子类型不兼容时自动修正而非抛出异常, `scale` 允许大于 1 以放大小目标, ORB 默认检测最多 20000 个关键点, 避免纹理丰富的场景挤占目标区域的关键点",
         "Node bridge 新增只读的 app.listDocs / app.readDoc (枚举与读取已安装 AutoJs6-Plugin-Offline-Docs 经校验的离线文档资产, 路径限制在文档根内, 单次读取上限 1 MiB, 无可用插件时返回 available: false), 供 MCP Server 插件提供 autojs6://docs/ 资源",
         "版本历史与回收站的保留策略 (天数, 版本数, 单文件容量, 总容量, 纳管文件大小上限) 统一为 0 或负数表示不限制, 并由共享的策略对象实现",
-        "版本历史跳过与最新已存版本内容完全相同的快照, 避免重复存储"
+        "版本历史跳过与最新已存版本内容完全相同的快照, 避免重复存储",
+        "移入回收站前检查容量上限, 待移入条目超过上限时提示继续移入, 彻底删除或取消; 移入完成后立即清理更早的条目, 且容量上限始终保留最新条目",
+        "周期清理任务应用完整的保留策略 (版本历史的天数, 版本数, 单文件与总容量; 回收站的天数与容量), 并移除不再拥有版本的文件条目; 紧急草稿的保留策略同样以 0 表示不限制"
       ],
       "dependency": [
         "模块化 Android AXML",

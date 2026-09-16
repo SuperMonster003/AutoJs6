@@ -395,6 +395,7 @@
     <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
     <string name="error_invalid_ip_address">Invalid IP address</string>
     <string name="error_invalid_login_credentials">Invalid login credentials</string>
+    <string name="error_invalid_number_input">Enter a whole number of 0 or more</string>
     <string name="error_invalid_path">Invalid path: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Invalid mount object name</string>
     <string name="error_invalid_plugin_mount_point">Invalid mount point format</string>
@@ -693,6 +694,7 @@
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
     <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
+    <string name="summary_delete_permanently_also_clear_history">Removes the version history of a file or directory that is deleted permanently</string>
     <string name="summary_dex_compiler_experimental_disabled">Built-in D8/dx only; AAR always stays built-in</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">Built-in D8/dx only; retained provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Raw runtime.loadJar JARs prefer %1$s; failures fall back to built-in D8/dx</string>
@@ -731,6 +733,7 @@
     <string name="summary_plugin_instruction_view">Show usage examples and notes for this plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
+    <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
     <string name="text_bun_host_info_grant">Host info snapshot</string>
     <string name="summary_bun_host_info_grant">Offer Bun scripts a read-only snapshot of the AutoJs6 version and language through AUTOJS6_HOST_INFO_FILE; applies from the next run</string>
@@ -988,7 +991,10 @@
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clean">Clean</string>
     <string name="text_clean_completed">Clean completed</string>
+    <string name="text_clean_up_failed">Clean up failed</string>
+    <string name="text_clean_up_now">Clean up now</string>
     <string name="text_cleaning_archive_extraction">Cleaning up incomplete output</string>
+    <string name="text_cleaning_in_progress">Cleaning up, please wait</string>
     <string name="text_cleaning_workspace">Cleaning workspace</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
@@ -1113,6 +1119,7 @@
     <string name="text_delete_folder">Delete folder</string>
     <string name="text_delete_items">Delete items</string>
     <string name="text_delete_line">Delete line</string>
+    <string name="text_delete_permanently_also_clear_history">Also clear version history when deleting permanently</string>
     <string name="text_delete_revision_confirm">Delete this revision permanently?</string>
     <string name="text_deleting">Deleting</string>
     <string name="text_description">Description</string>
@@ -1160,6 +1167,8 @@
     <string name="text_download_url">Download URL</string>
     <string name="text_downloading">Downloading</string>
     <string name="text_draft_file_path">Draft file path</string>
+    <string name="text_drafts_max_days">Emergency draft retention days</string>
+    <string name="text_drafts_max_total_bytes">Max emergency drafts size</string>
     <string name="text_drag_to_sort">Drag to sort</string>
     <string name="text_drawer_close">Close drawer</string>
     <string name="text_drawer_open">Open drawer</string>
@@ -1197,6 +1206,7 @@
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
+    <string name="text_emergency_drafts">Emergency drafts</string>
     <string name="text_empty_configuration">Empty configuration</string>
     <string name="text_empty_release_note">No release note</string>
     <string name="text_enable_a11y_service">Enable accessibility service</string>
@@ -1336,6 +1346,11 @@
     <string name="text_hint">Hint</string>
     <string name="text_history">History</string>
     <string name="text_history_has_been_cleared">The history has been cleared</string>
+    <string name="text_history_max_days">Version history retention days</string>
+    <string name="text_history_max_file_size_to_track">Max file size to track</string>
+    <string name="text_history_max_total_bytes">Max total history size</string>
+    <string name="text_history_max_total_bytes_per_file">Max history size per file</string>
+    <string name="text_history_max_versions">Max versions per file</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="text_ignored_updates">Ignored updates</string>
@@ -1484,6 +1499,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">Moving...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
+    <string name="text_n_days">%d days</string>
+    <string name="text_n_versions">%d versions</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
     <string name="text_new_color_library">New color library</string>
@@ -1827,6 +1844,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>
     <string name="text_result">Result</string>
     <string name="text_resume">Resume</string>
+    <string name="text_retention_policies">Retention policies</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
@@ -2056,6 +2074,10 @@
     <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
     <string name="text_trash">Trash</string>
+    <string name="text_trash_and_version_history">Trash and version history</string>
+    <string name="text_trash_max_days">Trash retention days</string>
+    <string name="text_trash_max_total_bytes">Max trash size</string>
+    <string name="text_trash_quota_exceeded_prompt">The items to move (%1$s) exceed the trash size limit (%2$s). If you continue, older trash items will be removed to make room, and these items will be removed first once newer items arrive.</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>
@@ -2075,11 +2097,14 @@
     <string name="text_undo">Undo</string>
     <string name="text_undo_simplified">Undo</string>
     <string name="text_uninstall">Uninstall</string>
+    <string name="text_unit_days">Days</string>
+    <string name="text_unit_versions">Versions</string>
     <string name="text_unknown">Unknown</string>
     <string name="text_unknown_author_for_plugin">Unknown Author</string>
     <string name="text_unknown_description_for_plugin">Unknown Description</string>
     <string name="text_unknown_title_for_plugin">Unknown Title</string>
     <string name="text_unknown_version_for_plugin">Unknown Version</string>
+    <string name="text_unlimited">Unlimited</string>
     <string name="text_unsaved_changes">Unsaved changes</string>
     <string name="text_unsigned_apk_created">Unsigned APK created</string>
     <string name="text_unverified">Unverified</string>
@@ -2148,6 +2173,7 @@
     <string name="text_writing_signed_apk">Writing signed APK</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="text_yearly_task">Yearly task</string>
+    <string name="text_zero_means_unlimited">0 means unlimited</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
 

@@ -186,6 +186,25 @@ class HistoryRepository(private val context: Context) {
     }
 
     /**
+     * Apply the complete retention policy to every tracked file: per-file days / count / bytes,
+     * then the global byte limit, then drop file entries that no longer own any revision.
+     * Used by the cleanup worker, the on-demand cleanup after a settings change and "Clean up now".
+     *
+     * zh-CN: 对所有已纳管文件执行完整保留策略: 单文件的天数 / 条数 / 容量, 然后是全局容量上限,
+     * 最后移除不再拥有任何 revision 的 file entry. 供清理 Worker, 设置变更后的即时清理与 "立即清理" 使用.
+     */
+    @JvmOverloads
+    fun enforceRetentionPolicy(now: Long = System.currentTimeMillis()) {
+        dao.listAllFiles().forEach { entry -> cleanupPerFile(entry.fileId, now) }
+        cleanupGlobal()
+
+        val emptyFileIds = dao.listFileIdsWithoutRevisions()
+        if (emptyFileIds.isNotEmpty()) {
+            dao.deleteFileEntriesByIds(emptyFileIds)
+        }
+    }
+
+    /**
      * Find or create the file entry for a logical path.
      *
      * [lookupFingerprint] is the fingerprint of the content currently on disk (used to find an

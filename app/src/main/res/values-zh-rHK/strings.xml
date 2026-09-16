@@ -397,6 +397,7 @@
     <string name="error_invalid_github_repo">無效的 GitHub 倉庫: %s</string>
     <string name="error_invalid_ip_address">無效的 IP 地址</string>
     <string name="error_invalid_login_credentials">無效的登錄憑證</string>
+    <string name="error_invalid_number_input">請輸入 0 或更大的整數</string>
     <string name="error_invalid_path">無效的路徑: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">掛載對象名稱不合法</string>
     <string name="error_invalid_plugin_mount_point">掛載點格式不合法</string>
@@ -695,6 +696,7 @@
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
     <string name="summary_clear_media_playback_history">清除宿主儲存的全部媒體播放位置</string>
     <string name="summary_code_editor_settings">打開完整的代碼編輯器設置頁面</string>
+    <string name="summary_delete_permanently_also_clear_history">徹底刪除文件或目錄時一併移除其版本歷史</string>
     <string name="summary_dex_compiler_experimental_disabled">僅使用內置 D8/dx; AAR 始終使用內置路徑</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">僅使用內置 D8/dx; 保留的 provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar 的 raw JAR 優先使用 %1$s; 失敗時回退至內置 D8/dx</string>
@@ -733,6 +735,7 @@
     <string name="summary_plugin_instruction_view">查看此插件的使用示例與説明</string>
     <string name="summary_plugin_jump_to_launch_page">打開此插件的啓動 Activity</string>
     <string name="summary_plugin_no_launch_page">當前插件沒有啓動頁</string>
+    <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
     <string name="text_bun_host_capabilities">Bun 能力橋</string>
     <string name="text_bun_host_info_grant">宿主資訊快照</string>
     <string name="summary_bun_host_info_grant">透過 AUTOJS6_HOST_INFO_FILE 向 Bun 腳本提供唯讀的 AutoJs6 版本與語言快照; 下次執行起生效</string>
@@ -990,7 +993,10 @@
     <string name="text_class_or_package_name">類/包名</string>
     <string name="text_clean">清理</string>
     <string name="text_clean_completed">清理完成</string>
+    <string name="text_clean_up_failed">清理失敗</string>
+    <string name="text_clean_up_now">立即清理</string>
     <string name="text_cleaning_archive_extraction">正在清理未完成的輸出</string>
+    <string name="text_cleaning_in_progress">正在清理, 請稍候</string>
     <string name="text_cleaning_workspace">正在清理工作區</string>
     <string name="text_clear">清空</string>
     <string name="text_clear_file_selection">清空文件選擇</string>
@@ -1114,6 +1120,7 @@
     <string name="text_delete_folder">刪除文件夾</string>
     <string name="text_delete_items">刪除項目</string>
     <string name="text_delete_line">刪除行</string>
+    <string name="text_delete_permanently_also_clear_history">徹底刪除時同時清除版本歷史</string>
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
     <string name="text_deleting">正在刪除</string>
     <string name="text_description">描述</string>
@@ -1161,6 +1168,8 @@
     <string name="text_download_url">下載地址</string>
     <string name="text_downloading">下載中</string>
     <string name="text_draft_file_path">草稿文件路徑</string>
+    <string name="text_drafts_max_days">緊急草稿保留天數</string>
+    <string name="text_drafts_max_total_bytes">緊急草稿容量上限</string>
     <string name="text_drag_to_sort">拖拽排序</string>
     <string name="text_drawer_close">關閉側拉抽屜</string>
     <string name="text_drawer_open">打開側拉抽屜</string>
@@ -1198,6 +1207,7 @@
     <string name="text_email">郵箱</string>
     <string name="text_email_cannot_be_empty">郵箱不能為空</string>
     <string name="text_email_format_error">郵箱格式錯誤</string>
+    <string name="text_emergency_drafts">緊急草稿</string>
     <string name="text_empty_configuration">空白配置</string>
     <string name="text_empty_release_note">無版本信息</string>
     <string name="text_enable_a11y_service">啓用無障礙服務</string>
@@ -1337,6 +1347,11 @@
     <string name="text_hint">提示</string>
     <string name="text_history">歷史記錄</string>
     <string name="text_history_has_been_cleared">歷史記錄已清空</string>
+    <string name="text_history_max_days">版本歷史保留天數</string>
+    <string name="text_history_max_file_size_to_track">納管文件大小上限</string>
+    <string name="text_history_max_total_bytes">版本歷史總容量上限</string>
+    <string name="text_history_max_total_bytes_per_file">每個文件的歷史容量上限</string>
+    <string name="text_history_max_versions">每個文件的最大版本數</string>
     <string name="text_icon">圖標</string>
     <string name="text_ignore_battery_optimizations">忽略電池優化</string>
     <string name="text_ignored_updates">已忽略更新</string>
@@ -1485,6 +1500,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">移動中...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">正在移入回收站...</string>
     <string name="text_multiple_options">多個可選項</string>
+    <string name="text_n_days">%d 天</string>
+    <string name="text_n_versions">%d 個版本</string>
     <string name="text_name">名稱</string>
     <string name="text_need_to_enable_a11y_service">需要啓用無障礙服務</string>
     <string name="text_new_color_library">新建顏色庫</string>
@@ -1828,6 +1845,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">正在恢復...</string>
     <string name="text_result">結果</string>
     <string name="text_resume">繼續</string>
+    <string name="text_retention_policies">保留策略</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取插件列表數據...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行説明...</string>
@@ -2057,6 +2075,10 @@
     <string name="text_total_size_colon_value">大小: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啓動器圖標可能被系統自動添加遮罩或背景, 因此不同設備的實際效果與預期可能不完全一致</string>
     <string name="text_trash">回收站</string>
+    <string name="text_trash_and_version_history">回收站與版本歷史</string>
+    <string name="text_trash_max_days">回收站保留天數</string>
+    <string name="text_trash_max_total_bytes">回收站容量上限</string>
+    <string name="text_trash_quota_exceeded_prompt">待移入條目的大小 (%1$s) 超過回收站容量上限 (%2$s). 繼續移入將清理回收站中更早的條目以騰出空間, 且這些條目會在更新的條目移入後被優先清理.</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">類型</string>
     <string name="text_type_file">文件</string>
@@ -2076,11 +2098,14 @@
     <string name="text_undo">撤銷</string>
     <string name="text_undo_simplified">撤銷</string>
     <string name="text_uninstall">卸載</string>
+    <string name="text_unit_days">天</string>
+    <string name="text_unit_versions">版本</string>
     <string name="text_unknown">未知</string>
     <string name="text_unknown_author_for_plugin">未知開發者</string>
     <string name="text_unknown_description_for_plugin">未知描述</string>
     <string name="text_unknown_title_for_plugin">未知標題</string>
     <string name="text_unknown_version_for_plugin">未知版本</string>
+    <string name="text_unlimited">不限制</string>
     <string name="text_unsaved_changes">未保存的更改</string>
     <string name="text_unsigned_apk_created">未簽名 APK 已創建</string>
     <string name="text_unverified">未驗證</string>
@@ -2149,6 +2174,7 @@
     <string name="text_writing_signed_apk">正在寫入已簽名 APK</string>
     <string name="text_xiaomi_background_popup_permission">後台彈出界面</string>
     <string name="text_yearly_task">每年任務</string>
+    <string name="text_zero_means_unlimited">0 表示不限制</string>
     <string name="warn_continue_operation_without_saving_settings">設置尚未保存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設置尚未保存, 確定要退出嗎</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生程式庫 %1$s 的對齊值為 %2$d 位元組. 產生的 APK 可能無法在頁面大小為 16 KB 的裝置上執行. 請升級原生程式庫或外掛程式.</string>

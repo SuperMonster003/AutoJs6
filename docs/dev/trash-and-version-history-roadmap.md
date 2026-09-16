@@ -23,6 +23,9 @@
 | D4 | 覆盖类写入前留快照 | 凡是应用自身以 "覆盖已有文件" 方式写入内部存储的路径 (历史恢复到磁盘, 回收站覆盖恢复, 资源管理器复制 / 移动覆盖), 都先为目标文件记录一条 revision (受纳管文件大小上限约束), `op` 使用 `RESTORE_PRE` / `OVERWRITE_PRE`. 脚本 API (`files.write` 等) 不纳管 (见 Q2). |
 | D5 | 可测逻辑必须与 Android 类型解耦 | JVM 单测环境只有 JUnit4 (无 Robolectric, `android.net.Uri` / `Pref` / Room 不可用), 策略与路径逻辑抽成基于原始类型参数的纯对象 (`HistoryRetentionPolicy`, `HistoryPaths`, `TrashRestoreNaming` 等), 测试只触碰这些对象. |
 | D6 | Roadmap 位于 `docs/dev/` | 与仓库内既有 roadmap 的位置与风格一致. |
+| D7 | 回收站容量上限始终保留最新条目 | `TrashRepository.enforceTotalBytesLimit` 经 `HistoryRetentionPolicy.selectOverBytesProtecting` 从最旧开始清理, 最新条目与刚移入的批次不参与清理; 单个超大条目保留到按天数过期或有更新条目移入为止. 版本历史的容量上限不采用此保护 (纳管文件大小上限已在入口处约束). |
+| D8 | 待移入条目超过回收站上限时默认 "继续移入" (Q3 拍板) | 对话框三选一: 移入回收站 (默认, positive) / 彻底删除 (neutral, caution 色) / 取消; 批量移入以整批总大小与上限比较. |
+| D9 | 保留策略数值项放在设置子页而非主页平铺 | 9 个数值项 + 1 个开关过多; 主设置页 "回收站与版本历史" 分类只含 "保留策略" 子页入口与 "彻底删除时同时清除版本历史" 开关. 数值项使用数字输入对话框 (`RetentionLimitDialogBuilder`, 字节以 MB 输入) 而非滑杆, 附 "使用默认值" / "不限制" 选项. |
 
 ---
 
@@ -83,15 +86,15 @@
 - [x] P0.7 保留策略单点化 (F7, D1): 新增纯对象 `HistoryRetentionPolicy` (`selectExpired` / `selectOverCount` / `selectOverBytes`), 仓库与 Worker 共用, `0` 或负数表示不限; 单测覆盖天数 / 条数 / 单文件容量 / 全局容量 / 0 值边界. 证据: `HistoryRetentionPolicyTest` (JVM), 2026-09-16.
 - [x] P0.8 历史 orphan blob 清理增加 30 分钟最小年龄保护 (F9). 证据: `HistoryCleanupWorker.cleanupOrphanHistoryBlobs`, 2026-09-16.
 - [x] P0.9 连续相同快照去重 (F10): 最新 revision 的 sha256 与大小均相同时不再写入新 blob, 只刷新 `lastSeenAt` 与指纹; 决策纳入 `HistoryFingerprintPolicy` 单测. 证据: `HistoryFingerprintPolicyTest` (JVM), 2026-09-16.
-- [x] P0.10 编译 (`:app:compileAppDebugKotlin`) 与单测 (`:app:testAppDebugUnitTest --tests "org.autojs.autojs.storage.history.*"`) 通过, changelog (fix / improvement) 落盘, 本表证据回填. 证据: E1, JVM 单测 4 类 24/24 通过, changelog 10 语言 (fix 6 条 / improvement 2 条) 已落盘, 2026-09-16; 提交 hash 由 P1 首次提交回填.
+- [x] P0.10 编译 (`:app:compileAppDebugKotlin`) 与单测 (`:app:testAppDebugUnitTest --tests "org.autojs.autojs.storage.history.*"`) 通过, changelog (fix / improvement) 落盘, 本表证据回填. 证据: E1, JVM 单测 4 类 24/24 通过, changelog 10 语言 (fix 6 条 / improvement 2 条) 已落盘, 2026-09-16; 提交 `765331c77`.
 
 ### P1 策略设置与配额 (F7, F8, F11)
 
-- [ ] P1.1 设置页新增 "回收站与版本历史" 分类: 版本历史 (保留天数 / 每文件版本数 / 每文件容量 / 总容量 / 纳管文件大小上限), 回收站 (保留天数 / 总容量), 紧急草稿 (保留天数 / 总容量), "彻底删除时同时清除版本历史" 开关. 数值项复用 `EditorThresholdDialogBuilder` 风格的输入对话框, 摘要显示当前值, `0` 显示为 "不限制".
-- [ ] P1.2 策略变更即时生效: 偏好变化后排队一次 `OneTimeWorkRequest` 清理; `HistoryCleanupWorker` 应用完整策略 (天数 + 版本数 + 单文件容量 + 全局容量), 而不只是天数.
-- [ ] P1.3 回收站移入后执行容量策略; 单个条目自身超过上限时移入前提示 (继续移入 / 改为彻底删除 / 取消), 默认动作见 Q3.
-- [ ] P1.4 回收站页与版本历史页菜单增加 "立即清理" 与 "设置" 入口; 抽屉条目长按打开对应设置.
-- [ ] P1.5 10 语言字符串与 changelog.
+- [x] P1.1 设置页新增 "回收站与版本历史" 分类: 版本历史 (保留天数 / 每文件版本数 / 每文件容量 / 总容量 / 纳管文件大小上限), 回收站 (保留天数 / 总容量), 紧急草稿 (保留天数 / 总容量), "彻底删除时同时清除版本历史" 开关. 数值项摘要显示当前值, `0` 显示为 "不限制". 证据: 按 D9 落地为子页 `TrashAndVersionHistorySettingsActivity` (`res/xml/fragment_trash_and_version_history_settings.xml`, `RetentionLimitPreference` + `RetentionLimitDialogBuilder`, 规格表 `RetentionLimitSettings`), 主页分类含子页入口 + 开关; 单位换算 `RetentionLimitUnits` 有 `RetentionLimitUnitsTest` (JVM), 2026-09-16.
+- [x] P1.2 策略变更即时生效: 确认对话框后 `HistoryCleanupScheduler.scheduleOnDemandCleanup` 排队唯一的一次性 Worker (REPLACE, 2 秒去抖); 清理过程抽为 `HistoryCleanup.runAll` (Worker 只做薄封装), 其中 `HistoryRepository.enforceRetentionPolicy` 应用天数 + 版本数 + 单文件容量 + 全局容量并移除不再拥有 revision 的 file entry, `TrashRepository.enforceRetentionPolicy` 应用天数 + 容量, 紧急草稿改为 D1 语义. 证据: 编译 + JVM 单测, 2026-09-16.
+- [x] P1.3 回收站移入后执行容量策略; 待移入条目超过上限时移入前提示 (继续移入 / 彻底删除 / 取消, D8). 证据: `ScriptOperations.checkTrashQuotaThenRun` (单个与批量共用, IO 线程统计大小), 移入成功后 `enforceTrashQuotaAfterMove` 调用 `TrashRepository.enforceTotalBytesLimit(movedTrashIds)`; D7 保护逻辑见 `HistoryRetentionPolicyTest.protectedItemsSurviveBytesLimit` (JVM), 2026-09-16.
+- [x] P1.4 回收站页与版本历史页菜单增加 "立即清理" 与 "设置" 入口; 抽屉条目长按打开对应设置. 证据: `menu_trash.xml` / `menu_version_history.xml` 的 `action_clean_up_now` / `action_trash_and_version_history_settings`, `HistoryCleanupUi.runNow` (IO 线程执行 + 完成 toast + 重新加载, 并发调用去重), `DrawerMenuItem.setLongClickAction` 与 `DrawerMenuItemViewHolder` 长按分发, 抽屉副标题在容量不限制时不再显示百分比, 2026-09-16.
+- [x] P1.5 10 语言字符串与 changelog. 证据: 26 条字符串 x 11 个 `strings.xml` (`values` 与 `values-en` 均为英文), changelog feature 2 条 / improvement 2 条 x 10 语言并重新生成 markdown, 2026-09-16; 提交 hash 由 P2 首次提交回填.
 
 ### P2 版本历史精进 (F12, F13, F15)
 
@@ -130,7 +133,7 @@
 | --- | --- | --- |
 | Q1 | 历史快照 blob 是否 gzip 压缩 (schema 加 `compression TEXT` 列, 读取时按列解码)? | 建议在 P2.5 的 schema v3 中一并加列但默认不压缩, 压缩作为设置项后续开放. |
 | Q2 | 脚本 API (`files.write` / `files.append` 等) 的写入是否纳入版本历史? | 建议不纳管 (热路径, 且脚本写入多为数据文件), 维持 D4 的 "应用自身覆盖写入" 范围. |
-| Q3 | P1.3 单个条目超过回收站上限时的默认动作? | 建议默认 "继续移入" 并提示, 由用户在对话框中改为彻底删除. |
+| Q3 | P1.3 单个条目超过回收站上限时的默认动作? | 已拍板, 见 D8. |
 | Q4 | P2.4 diff 的实现选型: 引入 `java-diff-utils` 依赖, 还是自实现 Myers 行 diff? | 建议自实现最小 Myers (约 150 行, 无新依赖, 可单测), 大文件用阈值退化. |
 | Q5 | 版本历史是否记录 `SAVE_PRE` 之外的 "保存后" 内容 (即每次保存两条)? | 建议不记录, 当前 "保存前 + 磁盘现状" 已覆盖全部状态; 改为在列表中标记 "与当前文件一致". |
 
@@ -158,11 +161,12 @@
 | 关注点 | 文件 |
 | --- | --- |
 | 数据模型 | `storage/history/HistoryEntities.kt`, `TrashItemEntity.kt`, `HistoryDao.kt`, `HistoryDatabase.kt` |
-| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1) |
+| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `RetentionLimitUnits.kt` (P1.1) |
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
-| 清理 | `storage/history/HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
+| 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
 | 交互 | `storage/history/VersionHistoryController.kt`, `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |
 | 页面 | `ui/storage/TrashActivity.kt`, `VersionHistoryActivity.kt`, `BaseSearchSortListActivity.kt` |
+| 设置 | `ui/settings/TrashAndVersionHistorySettingsActivity.kt` / `...Fragment.kt` / `...Preference.kt`, `RetentionLimitSettings.kt`, `RetentionLimitPreference.kt`, `RetentionLimitDialogBuilder.kt`, `res/xml/fragment_trash_and_version_history_settings.xml`, `res/xml/fragment_preferences.xml` (分类) |
 | 接入 | `ui/edit/editor/service/EditorVersionHistoryService.kt`, `ui/common/ScriptOperations.java`, `ui/explorer/ExplorerBuiltInActionHandler.kt`, `ui/main/drawer/DrawerFragment.kt`, `App.kt` |
 | 单测 | `app/src/test/java/org/autojs/autojs/storage/history/*Test.kt` |

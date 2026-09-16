@@ -402,6 +402,7 @@
     <string name="error_invalid_github_repo">유효하지 않은 GitHub 저장소: %s</string>
     <string name="error_invalid_ip_address">잘못된 IP 주소</string>
     <string name="error_invalid_login_credentials">로그인 자격 증명이 잘못되었습니다</string>
+    <string name="error_invalid_number_input">0 이상의 정수를 입력하세요</string>
     <string name="error_invalid_path">잘못된 경로: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">마운트 객체 이름이 올바르지 않습니다</string>
     <string name="error_invalid_plugin_mount_point">마운트 지점 형식이 올바르지 않습니다</string>
@@ -700,6 +701,7 @@
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_clear_media_playback_history">호스트가 저장한 모든 미디어 재생 위치 삭제</string>
     <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
+    <string name="summary_delete_permanently_also_clear_history">영구 삭제한 파일이나 디렉터리의 버전 기록도 함께 제거합니다</string>
     <string name="summary_dex_compiler_experimental_disabled">내장 D8/dx만 사용; AAR는 항상 내장 경로 사용</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">내장 D8/dx만 사용; 유지된 provider: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar의 raw JAR는 %1$s 우선; 실패 시 내장 D8/dx로 폴백</string>
@@ -738,6 +740,7 @@
     <string name="summary_plugin_instruction_view">이 플러그인의 사용 예시와 설명을 표시합니다</string>
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
+    <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
     <string name="text_bun_host_info_grant">호스트 정보 스냅샷</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE을 통해 Bun 스크립트에 AutoJs6 버전과 언어의 읽기 전용 스냅샷을 제공합니다; 다음 실행부터 적용</string>
@@ -995,7 +998,10 @@
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
     <string name="text_clean">정리</string>
     <string name="text_clean_completed">정리 완료</string>
+    <string name="text_clean_up_failed">정리 실패</string>
+    <string name="text_clean_up_now">지금 정리</string>
     <string name="text_cleaning_archive_extraction">완료되지 않은 출력을 정리하는 중</string>
+    <string name="text_cleaning_in_progress">정리 중입니다, 잠시 기다려 주세요</string>
     <string name="text_cleaning_workspace">작업 공간 정리 중</string>
     <string name="text_clear">분명한</string>
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
@@ -1119,6 +1125,7 @@
     <string name="text_delete_folder">폴더 삭제</string>
     <string name="text_delete_items">항목 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
+    <string name="text_delete_permanently_also_clear_history">영구 삭제 시 버전 기록도 지우기</string>
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
     <string name="text_deleting">삭제 중</string>
     <string name="text_description">설명</string>
@@ -1166,6 +1173,8 @@
     <string name="text_download_url">URL 을 다운로드하십시오</string>
     <string name="text_downloading">다운로드</string>
     <string name="text_draft_file_path">초안 경로</string>
+    <string name="text_drafts_max_days">긴급 초안 보관 일수</string>
+    <string name="text_drafts_max_total_bytes">긴급 초안 용량 상한</string>
     <string name="text_drag_to_sort">드래그하여 정렬</string>
     <string name="text_drawer_close">가까운 서랍</string>
     <string name="text_drawer_open">열린 서랍</string>
@@ -1203,6 +1212,7 @@
     <string name="text_email">이메일</string>
     <string name="text_email_cannot_be_empty">이메일이 비어질 수 없다</string>
     <string name="text_email_format_error">잘못된 이메일 형식</string>
+    <string name="text_emergency_drafts">긴급 초안</string>
     <string name="text_empty_configuration">빈 설정</string>
     <string name="text_empty_release_note">릴리스 노트가 없습니다</string>
     <string name="text_enable_a11y_service">접근성 서비스를 활성화합니다</string>
@@ -1342,6 +1352,11 @@
     <string name="text_hint">힌트</string>
     <string name="text_history">기록</string>
     <string name="text_history_has_been_cleared">기록이 삭제되었습니다</string>
+    <string name="text_history_max_days">버전 기록 보관 일수</string>
+    <string name="text_history_max_file_size_to_track">추적할 파일 크기 상한</string>
+    <string name="text_history_max_total_bytes">버전 기록 총 용량 상한</string>
+    <string name="text_history_max_total_bytes_per_file">파일당 기록 용량 상한</string>
+    <string name="text_history_max_versions">파일당 최대 버전 수</string>
     <string name="text_icon">상</string>
     <string name="text_ignore_battery_optimizations">배터리 최적화를 무시합니다</string>
     <string name="text_ignored_updates">업데이트를 무시했습니다</string>
@@ -1490,6 +1505,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">이동 중...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
+    <string name="text_n_days">%d일</string>
+    <string name="text_n_versions">%d개 버전</string>
     <string name="text_name">이름</string>
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
     <string name="text_new_color_library">새 색상 라이브러리</string>
@@ -1833,6 +1850,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">복원 중...</string>
     <string name="text_result">결과</string>
     <string name="text_resume">계속</string>
+    <string name="text_retention_policies">보관 정책</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">변경 로그를 가져오는 중...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">플러그인 목록 데이터를 가져오는 중입니다...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트를 가져오는 중...</string>
@@ -2062,6 +2080,10 @@
     <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
     <string name="text_trash">휴지통</string>
+    <string name="text_trash_and_version_history">휴지통 및 버전 기록</string>
+    <string name="text_trash_max_days">휴지통 보관 일수</string>
+    <string name="text_trash_max_total_bytes">휴지통 용량 상한</string>
+    <string name="text_trash_quota_exceeded_prompt">이동할 항목의 크기(%1$s)가 휴지통 용량 상한(%2$s)을 초과합니다. 계속하면 공간을 확보하기 위해 휴지통의 오래된 항목이 제거되며, 이 항목들은 새 항목이 들어오면 먼저 제거됩니다.</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>
@@ -2081,11 +2103,14 @@
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
     <string name="text_uninstall">삭제</string>
+    <string name="text_unit_days">일</string>
+    <string name="text_unit_versions">버전</string>
     <string name="text_unknown">알 수 없음</string>
     <string name="text_unknown_author_for_plugin">알 수 없는 작성자</string>
     <string name="text_unknown_description_for_plugin">알 수 없는 설명</string>
     <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
     <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
+    <string name="text_unlimited">제한 없음</string>
     <string name="text_unsaved_changes">저장되지 않은 변경 사항</string>
     <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
     <string name="text_unverified">미확인</string>
@@ -2154,6 +2179,7 @@
     <string name="text_writing_signed_apk">서명된 APK 기록 중</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="text_yearly_task">연간 작업</string>
+    <string name="text_zero_means_unlimited">0은 제한 없음을 의미합니다</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
     <string name="warning_apk_native_page_alignment_unsupported">네이티브 라이브러리 %1$s의 정렬은 %2$d바이트입니다. 생성된 APK는 페이지 크기가 16 KB인 기기에서 실행되지 않을 수 있습니다. 라이브러리 또는 플러그인을 업데이트하세요.</string>

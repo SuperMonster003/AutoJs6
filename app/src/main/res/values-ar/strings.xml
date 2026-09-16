@@ -402,6 +402,7 @@
     <string name="error_invalid_github_repo">مستودع جيثب غير صالح: %s</string>
     <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
     <string name="error_invalid_login_credentials">اعتماد تسجيل الدخول غير صالح</string>
+    <string name="error_invalid_number_input">ادخل عددا صحيحا يساوي 0 او اكبر</string>
     <string name="error_invalid_path">مسار غير صالح: %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">اسم كائن الربط غير صالح</string>
     <string name="error_invalid_plugin_mount_point">تنسيق نقطة الربط غير صالح</string>
@@ -700,6 +701,7 @@
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
     <string name="summary_clear_media_playback_history">حذف جميع مواضع تشغيل الوسائط التي حفظها المضيف</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
+    <string name="summary_delete_permanently_also_clear_history">يزيل سجل الاصدارات للملف او المجلد الذي يتم حذفه نهائيا</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx المدمج فقط; يظل AAR على المسار المدمج دائما</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">D8/dx المدمج فقط; provider المحتفظ به: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">runtime.loadJar لملفات JAR الخام يفضل %1$s; وعند الفشل يجري الرجوع إلى D8/dx المدمج</string>
@@ -738,6 +740,7 @@
     <string name="summary_plugin_instruction_view">عرض امثلة الاستخدام والملاحظات الخاصة بهذه الاضافة</string>
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
+    <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
     <string name="text_bun_host_info_grant">لقطة معلومات المضيف</string>
     <string name="summary_bun_host_info_grant">تقديم لقطة للقراءة فقط عن إصدار AutoJs6 ولغته إلى Bun scripts عبر AUTOJS6_HOST_INFO_FILE; تسري من التشغيل التالي</string>
@@ -995,7 +998,10 @@
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
     <string name="text_clean">تنظيف</string>
     <string name="text_clean_completed">اكتمل التنظيف</string>
+    <string name="text_clean_up_failed">فشل التنظيف</string>
+    <string name="text_clean_up_now">تنظيف الان</string>
     <string name="text_cleaning_archive_extraction">جار تنظيف الإخراج غير المكتمل</string>
+    <string name="text_cleaning_in_progress">جار التنظيف, يرجى الانتظار</string>
     <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
     <string name="text_clear">صافي</string>
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
@@ -1119,6 +1125,7 @@
     <string name="text_delete_folder">حذف المجلد</string>
     <string name="text_delete_items">حذف العناصر</string>
     <string name="text_delete_line">حذف الخط</string>
+    <string name="text_delete_permanently_also_clear_history">مسح سجل الاصدارات ايضا عند الحذف النهائي</string>
     <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
     <string name="text_deleting">جارٍ الحذف</string>
     <string name="text_description">الوصف</string>
@@ -1166,6 +1173,8 @@
     <string name="text_download_url">تنزيل URL</string>
     <string name="text_downloading">جارى التحميل</string>
     <string name="text_draft_file_path">مسار المسودة</string>
+    <string name="text_drafts_max_days">ايام الاحتفاظ بالمسودات الطارئة</string>
+    <string name="text_drafts_max_total_bytes">الحد الاقصى لحجم المسودات الطارئة</string>
     <string name="text_drag_to_sort">اسحب للترتيب</string>
     <string name="text_drawer_close">وثيق درج</string>
     <string name="text_drawer_open">درج مفتوح</string>
@@ -1203,6 +1212,7 @@
     <string name="text_email">البريد الإلكتروني</string>
     <string name="text_email_cannot_be_empty">البريد الإلكتروني لا يمكن أن يكون فارغًا</string>
     <string name="text_email_format_error">تنسيق البريد الإلكتروني غير صالح</string>
+    <string name="text_emergency_drafts">المسودات الطارئة</string>
     <string name="text_empty_configuration">اعدادات فارغة</string>
     <string name="text_empty_release_note">لا ملاحظة إطلاق</string>
     <string name="text_enable_a11y_service">تمكين خدمة إمكانية الوصول</string>
@@ -1342,6 +1352,11 @@
     <string name="text_hint">تلميح</string>
     <string name="text_history">السجل</string>
     <string name="text_history_has_been_cleared">تم مسح السجل</string>
+    <string name="text_history_max_days">ايام الاحتفاظ بسجل الاصدارات</string>
+    <string name="text_history_max_file_size_to_track">الحد الاقصى لحجم الملف المتتبع</string>
+    <string name="text_history_max_total_bytes">الحد الاقصى لاجمالي حجم السجل</string>
+    <string name="text_history_max_total_bytes_per_file">الحد الاقصى لحجم السجل لكل ملف</string>
+    <string name="text_history_max_versions">الحد الاقصى للاصدارات لكل ملف</string>
     <string name="text_icon">أيقونة</string>
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
     <string name="text_ignored_updates">تحديثات تجاهل</string>
@@ -1490,6 +1505,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">جارٍ النقل...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">جارٍ النقل الى سلة المحذوفات...</string>
     <string name="text_multiple_options">خيارات متعددة</string>
+    <string name="text_n_days">%d يوم</string>
+    <string name="text_n_versions">%d اصدار</string>
     <string name="text_name">اسم</string>
     <string name="text_need_to_enable_a11y_service">تحتاج إلى تمكين خدمة الوصول</string>
     <string name="text_new_color_library">مكتبة ألوان جديدة</string>
@@ -1833,6 +1850,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">جارٍ الاستعادة...</string>
     <string name="text_result">نتيجة</string>
     <string name="text_resume">استئناف</string>
+    <string name="text_retention_policies">سياسات الاحتفاظ</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">جارٍ جلب سجل التغييرات...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">جارٍ جلب بيانات قائمة المكونات الإضافية...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">جارٍ جلب ملاحظات الإصدار...</string>
@@ -2062,6 +2080,10 @@
     <string name="text_total_size_colon_value">الحجم: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
     <string name="text_trash">سلة المحذوفات</string>
+    <string name="text_trash_and_version_history">سلة المحذوفات وسجل الاصدارات</string>
+    <string name="text_trash_max_days">ايام الاحتفاظ في سلة المحذوفات</string>
+    <string name="text_trash_max_total_bytes">الحد الاقصى لحجم سلة المحذوفات</string>
+    <string name="text_trash_quota_exceeded_prompt">حجم العناصر المراد نقلها (%1$s) يتجاوز حد حجم سلة المحذوفات (%2$s). اذا تابعت, ستتم ازالة العناصر الاقدم من سلة المحذوفات لتوفير مساحة, وستتم ازالة هذه العناصر اولا عند وصول عناصر احدث.</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>
@@ -2081,11 +2103,14 @@
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_simplified">ينسحب</string>
     <string name="text_uninstall">الغاء التثبيت</string>
+    <string name="text_unit_days">ايام</string>
+    <string name="text_unit_versions">اصدارات</string>
     <string name="text_unknown">غير معروف</string>
     <string name="text_unknown_author_for_plugin">مؤلف غير معروف</string>
     <string name="text_unknown_description_for_plugin">وصف غير معروف</string>
     <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
     <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
+    <string name="text_unlimited">بلا حدود</string>
     <string name="text_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
     <string name="text_unverified">لم يتم التحقق</string>
@@ -2154,6 +2179,7 @@
     <string name="text_writing_signed_apk">جارٍ كتابة APK الموقّع</string>
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_yearly_task">مهمة سنوية</string>
+    <string name="text_zero_means_unlimited">0 يعني بلا حدود</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>

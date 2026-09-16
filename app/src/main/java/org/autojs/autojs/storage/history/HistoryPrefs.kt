@@ -63,16 +63,16 @@ object HistoryPrefs {
     fun deletePermanentlyAlsoClearHistory(): Boolean =
         Pref.getBoolean(R.string.key_delete_permanently_also_clear_history, false)
 
-    private const val DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES: Long = 20L * 1024L * 1024L
+    internal const val DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES: Long = 20L * 1024L * 1024L
 
-    private const val DEFAULT_HISTORY_MAX_DAYS: Int = 30
-    private const val DEFAULT_HISTORY_MAX_VERSIONS: Int = 50
+    internal const val DEFAULT_HISTORY_MAX_DAYS: Int = 30
+    internal const val DEFAULT_HISTORY_MAX_VERSIONS: Int = 50
     internal const val DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE: Long = 200L * 1024L * 1024L
     internal const val DEFAULT_HISTORY_MAX_TOTAL_BYTES: Long = 2L * 1024L * 1024L * 1024L
 
-    private const val DEFAULT_TRASH_MAX_DAYS: Int = 30
+    internal const val DEFAULT_TRASH_MAX_DAYS: Int = 30
     internal const val DEFAULT_TRASH_MAX_TOTAL_BYTES: Long = 500L * 1024L * 1024L
 
-    private const val DEFAULT_DRAFTS_MAX_DAYS: Int = 7
-    private const val DEFAULT_DRAFTS_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
+    internal const val DEFAULT_DRAFTS_MAX_DAYS: Int = 7
+    internal const val DEFAULT_DRAFTS_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
 }

@@ -22,6 +22,8 @@ public class DrawerMenuItem {
     private CharSequence mContent;
     @Nullable
     private Action mAction;
+    @Nullable
+    private Runnable mLongClickAction;
     private boolean mIsHidden;
     private boolean mAntiShake;
     private boolean mOnProgress;
@@ -46,6 +48,26 @@ public class DrawerMenuItem {
 
     public void setAction(Action action) {
         mAction = action;
+    }
+
+    /**
+     * Optional long-press handler for shortcut items (for example, opening the matching settings page).
+     * zh-CN: 快捷条目可选的长按处理 (例如打开对应的设置页).
+     */
+    public void setLongClickAction(@Nullable Runnable action) {
+        mLongClickAction = action;
+    }
+
+    /**
+     * @return true when a long-press handler existed and ran.
+     */
+    public boolean performLongClickAction() {
+        Runnable action = mLongClickAction;
+        if (action == null) {
+            return false;
+        }
+        action.run();
+        return true;
     }
 
     public void setContent(CharSequence content) {

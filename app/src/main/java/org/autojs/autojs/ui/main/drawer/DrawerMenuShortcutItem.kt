@@ -8,4 +8,6 @@ class DrawerMenuShortcutItem : DrawerMenuItem {
 
     fun setAction(action: Runnable): DrawerMenuShortcutItem = also { super.setAction { action.run() } }
 
+    fun setLongClickAction(action: Runnable): DrawerMenuShortcutItem = also { super.setLongClickAction(action) }
+
 }

@@ -205,6 +205,8 @@
 * `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區封存 (最多 16384 項目與 64 MiB, 只收一般檔案與目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 進入點檔案使用編輯器目前原始碼, 符號連結與特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑
 * `新增` Bun Runtime 插件宿主資訊快照: 插件宣告 `SUPPORTS_HOST_INFO` 且 `host_info` 授權開啟 (預設) 時, `runScript` 請求攜帶 `hostInfoVersion = 1` 與 `hostInfo` Bundle (宿主套件名稱, `BuildConfig.VERSION_DATE` 與偏好語言標籤), Bun 腳本即可透過環境變數 `AUTOJS6_HOST_INFO_FILE` 讀取由插件核實並寫出的宿主/插件/執行快照; 宿主不發送自身版本 (插件經 PackageManager 解析), 授權可逐次撤銷 (`BunHostCapabilityGrants`), 未宣告該能力的插件收到的請求與之前完全相同
 * `新增` Bun Runtime 插件動態呼叫能力橋與首批兩項能力 `ui.toast` / `device.info`: 插件宣告 `SUPPORTS_HOST_CAPABILITY_BRIDGE` 且 `ui_toast` / `device_info` 至少一項授權開啟 (預設) 時, `runScript` 請求攜帶 `hostCapabilityBridgeVersion = 1`, 綁定插件 UID 與本次執行的 `IBunHostCapabilityBroker` binder 以及已授權的能力 ID; Bun 指令碼經插件的 unix socket 呼叫 `GET /v1/info` 與 `POST /v1/<能力>`, 宿主原樣轉發 JSON (請求 64 KiB, 結果 256 KiB, 每次執行 1024 次, 4 路並行, 單次 10 s) 並經 `IBunHostCapabilityCallback` 回應. `ui.toast` 每次執行最多在主執行緒顯示四則 toast, `device.info` 只回傳 `android.os.Build` 欄位; 兩個開關位於插件中心的插件設定頁, 未宣告該能力的插件收到的請求與之前完全相同
+* `新增` 設定頁 "回收站與版本歷史" 分類: 保留策略子頁可編輯版本歷史 (保留天數, 每檔案版本數, 每檔案容量, 總容量, 納管檔案大小上限), 回收站 (保留天數, 容量上限) 與緊急草稿 (保留天數, 容量上限), 0 表示不限制, 修改後立即執行一次清理; 另含 "徹底刪除時同時清除版本歷史" 開關
+* `新增` 回收站與版本歷史頁面選單增加 "立即清理" 與 "設定", 側欄中長按這兩個條目直接開啟保留策略設定
 * `修復` Flow 掛號範例在醫師列解析失敗時傳回 false 而非 null, 避免布林轉換例外
 * `修復` 主頁正確回傳外掛授權結果, 授權成功後可繼續完成本次外掛啟用
 * `修復` HTTP 請求的 isInsecure / insecure 選項可能使後續請求繼續略過憑證和主機名稱驗證, 現僅對目前請求生效
@@ -530,6 +532,8 @@
 * `最佳化` Node bridge 新增唯讀的 app.listDocs / app.readDoc (列舉與讀取已安裝 AutoJs6-Plugin-Offline-Docs 經校驗的離線文件資產, 路徑限制在文件根內, 單次讀取上限 1 MiB, 無可用外掛時回傳 available: false), 供 MCP Server 外掛提供 autojs6://docs/ 資源
 * `最佳化` 版本歷史與回收站的保留策略 (天數, 版本數, 單檔案容量, 總容量, 納管檔案大小上限) 統一為 0 或負數表示不限制, 並由共用的策略物件實現
 * `最佳化` 版本歷史跳過與最新已存版本內容完全相同的快照, 避免重複儲存
+* `最佳化` 移入回收站前檢查容量上限, 待移入條目超過上限時提示繼續移入, 徹底刪除或取消; 移入完成後立即清理更早的條目, 且容量上限始終保留最新條目
+* `最佳化` 週期清理任務套用完整的保留策略 (版本歷史的天數, 版本數, 單檔案與總容量; 回收站的天數與容量), 並移除不再擁有版本的檔案條目; 緊急草稿的保留策略同樣以 0 表示不限制
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

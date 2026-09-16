@@ -130,6 +130,25 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_trash_and_version_history">
+
+        <org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_trash_and_version_history_settings"
+            app:title="@string/text_retention_policies"
+            app:summary="@string/summary_retention_policies" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_delete_permanently_also_clear_history"
+            app:defaultValue="false"
+            app:title="@string/text_delete_permanently_also_clear_history"
+            app:summary="@string/summary_delete_permanently_also_clear_history" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_code_editor">
 
         <org.autojs.autojs.ui.settings.EditorEnginePreference

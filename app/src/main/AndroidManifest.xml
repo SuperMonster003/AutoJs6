@@ -513,6 +513,10 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 

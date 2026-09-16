@@ -400,6 +400,7 @@
     <string name="error_invalid_github_repo">Invalide le dépôt GitHub : %s</string>
     <string name="error_invalid_ip_address">Adresse IP invalide</string>
     <string name="error_invalid_login_credentials">Crédentiels de connexion invalides</string>
+    <string name="error_invalid_number_input">Saisissez un nombre entier supérieur ou égal à 0</string>
     <string name="error_invalid_path">Chemin invalide : %1$s</string>
     <string name="error_invalid_plugin_mount_object_name">Nom d\'objet monte invalide</string>
     <string name="error_invalid_plugin_mount_point">Format du point de montage invalide</string>
@@ -698,6 +699,7 @@
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
     <string name="summary_clear_media_playback_history">Supprimer toutes les positions de lecture enregistrées par l\'hôte</string>
     <string name="summary_code_editor_settings">Ouvrir la page complète des paramètres de l\'éditeur de code</string>
+    <string name="summary_delete_permanently_also_clear_history">Supprime l\'historique des versions d\'un fichier ou d\'un dossier supprimé définitivement</string>
     <string name="summary_dex_compiler_experimental_disabled">D8/dx intégré uniquement; AAR reste toujours intégré</string>
     <string name="summary_dex_compiler_experimental_disabled_with_selection">D8/dx intégré uniquement; provider conservé: %1$s</string>
     <string name="summary_dex_compiler_experimental_selected">Les JAR bruts de runtime.loadJar préfèrent %1$s; en cas d\'échec, repli sur D8/dx intégré</string>
@@ -736,6 +738,7 @@
     <string name="summary_plugin_instruction_view">Afficher des exemples d\'utilisation et des notes pour ce plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Ouvrir l\'Activity de lancement de ce plugin</string>
     <string name="summary_plugin_no_launch_page">Le plugin actuel n\'a pas de page de lancement</string>
+    <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
     <string name="text_bun_host_capabilities">Pont de capacités Bun</string>
     <string name="text_bun_host_info_grant">Instantané des informations de l\'hôte</string>
     <string name="summary_bun_host_info_grant">Fournir aux scripts Bun un instantané en lecture seule de la version et de la langue d\'AutoJs6 via AUTOJS6_HOST_INFO_FILE; s\'applique à partir de la prochaine exécution</string>
@@ -993,7 +996,10 @@
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
     <string name="text_clean">Nettoyer</string>
     <string name="text_clean_completed">Nettoyage termine</string>
+    <string name="text_clean_up_failed">Échec du nettoyage</string>
+    <string name="text_clean_up_now">Nettoyer maintenant</string>
     <string name="text_cleaning_archive_extraction">Nettoyage de la sortie incomplète</string>
+    <string name="text_cleaning_in_progress">Nettoyage en cours, veuillez patienter</string>
     <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
     <string name="text_clear">Effacer</string>
     <string name="text_clear_file_selection">Effacer la sélection de fichiers</string>
@@ -1117,6 +1123,7 @@
     <string name="text_delete_folder">Supprimer le dossier</string>
     <string name="text_delete_items">Supprimer les éléments</string>
     <string name="text_delete_line">Supprimer la ligne</string>
+    <string name="text_delete_permanently_also_clear_history">Effacer aussi l\'historique des versions lors d\'une suppression définitive</string>
     <string name="text_delete_revision_confirm">Supprimer definitivement cette revision?</string>
     <string name="text_deleting">Suppression</string>
     <string name="text_description">Description</string>
@@ -1164,6 +1171,8 @@
     <string name="text_download_url">Url de téléchargement</string>
     <string name="text_downloading">Téléchargement</string>
     <string name="text_draft_file_path">Chemin du brouillon</string>
+    <string name="text_drafts_max_days">Jours de conservation des brouillons d\'urgence</string>
+    <string name="text_drafts_max_total_bytes">Taille maximale des brouillons d\'urgence</string>
     <string name="text_drag_to_sort">Glisser pour trier</string>
     <string name="text_drawer_close">Fermer le tiroir</string>
     <string name="text_drawer_open">Ouvrir le tiroir</string>
@@ -1201,6 +1210,7 @@
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">L\'e-mail ne peut être vide</string>
     <string name="text_email_format_error">Format d\'e-mail invalide</string>
+    <string name="text_emergency_drafts">Brouillons d\'urgence</string>
     <string name="text_empty_configuration">Config vide</string>
     <string name="text_empty_release_note">Pas de release note</string>
     <string name="text_enable_a11y_service">Activer le service d\'accessibilité</string>
@@ -1340,6 +1350,11 @@
     <string name="text_hint">Astuce</string>
     <string name="text_history">Historique</string>
     <string name="text_history_has_been_cleared">L\'historique a ete efface</string>
+    <string name="text_history_max_days">Jours de conservation de l\'historique des versions</string>
+    <string name="text_history_max_file_size_to_track">Taille maximale des fichiers suivis</string>
+    <string name="text_history_max_total_bytes">Taille totale maximale de l\'historique</string>
+    <string name="text_history_max_total_bytes_per_file">Taille maximale de l\'historique par fichier</string>
+    <string name="text_history_max_versions">Nombre maximal de versions par fichier</string>
     <string name="text_icon">Icône</string>
     <string name="text_ignore_battery_optimizations">Ignorer les optimisations de la batterie.</string>
     <string name="text_ignored_updates">Ignorer les mises à jour</string>
@@ -1488,6 +1503,8 @@
     <string name="text_moving" tools:ignore="TypographyEllipsis">Deplacement...</string>
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Deplacement vers la corbeille...</string>
     <string name="text_multiple_options">Options multiples</string>
+    <string name="text_n_days">%d jours</string>
+    <string name="text_n_versions">%d versions</string>
     <string name="text_name">Nom</string>
     <string name="text_need_to_enable_a11y_service">Nécessité d\'activer le service d\'accessibilité</string>
     <string name="text_new_color_library">Nouvelle bibliothèque de couleurs</string>
@@ -1831,6 +1848,7 @@
     <string name="text_restoring" tools:ignore="TypographyEllipsis">Restauration...</string>
     <string name="text_result">Résultat</string>
     <string name="text_resume">Reprendre</string>
+    <string name="text_retention_policies">Politiques de conservation</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
@@ -2060,6 +2078,10 @@
     <string name="text_total_size_colon_value">Taille: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>
     <string name="text_trash">Corbeille</string>
+    <string name="text_trash_and_version_history">Corbeille et historique des versions</string>
+    <string name="text_trash_max_days">Jours de conservation de la corbeille</string>
+    <string name="text_trash_max_total_bytes">Taille maximale de la corbeille</string>
+    <string name="text_trash_quota_exceeded_prompt">La taille des éléments à déplacer (%1$s) dépasse la limite de taille de la corbeille (%2$s). Si vous continuez, les éléments plus anciens de la corbeille seront supprimés pour faire de la place, et ces éléments seront supprimés en premier dès l\'arrivée d\'éléments plus récents.</string>
     <string name="text_tutorial">Tutoriel</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>
@@ -2079,11 +2101,14 @@
     <string name="text_undo">Révoquer</string>
     <string name="text_undo_simplified">Révoq</string>
     <string name="text_uninstall">Desinstaller</string>
+    <string name="text_unit_days">Jours</string>
+    <string name="text_unit_versions">Versions</string>
     <string name="text_unknown">Inconnu</string>
     <string name="text_unknown_author_for_plugin">Auteur Inconnu</string>
     <string name="text_unknown_description_for_plugin">Description Inconnue</string>
     <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
     <string name="text_unknown_version_for_plugin">Version Inconnue</string>
+    <string name="text_unlimited">Illimité</string>
     <string name="text_unsaved_changes">Modifications non enregistrées</string>
     <string name="text_unsigned_apk_created">APK non signe cree</string>
     <string name="text_unverified">Non vérifié</string>
@@ -2152,6 +2177,7 @@
     <string name="text_writing_signed_apk">Ecriture de l\'APK signe</string>
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="text_yearly_task">Tâche annuelle</string>
+    <string name="text_zero_means_unlimited">0 signifie illimité</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La bibliothèque native %1$s est alignée sur %2$d octets. Le fichier APK généré peut être incompatible avec les pages de 16 KB. Mettez à jour la bibliothèque ou le plugin.</string>

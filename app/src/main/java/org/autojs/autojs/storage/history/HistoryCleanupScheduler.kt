@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit
 object HistoryCleanupScheduler {
 
     private const val UNIQUE_WORK_NAME = "history_cleanup_periodic"
+    private const val ON_DEMAND_WORK_NAME = "history_cleanup_on_demand"
+    private const val ON_DEMAND_CLEANUP_DELAY_SECONDS = 2L
 
     fun scheduleStartupCleanup(context: Context) {
         val appContext = context.applicationContext
@@ -37,6 +39,29 @@ object HistoryCleanupScheduler {
                 .enqueueUniqueWork(
                     "startup-trash-partial-cleanup",
                     ExistingWorkPolicy.KEEP,
+                    req,
+                )
+        }
+    }
+
+    /**
+     * Enqueue one cleanup run shortly after a retention setting changed, so the new limits take
+     * effect without waiting for the daily run. Repeated calls within the delay collapse into one run.
+     *
+     * zh-CN: 在保留策略变更后不久排队一次清理, 使新上限立即生效而无需等待每日任务;
+     * 延迟窗口内的多次调用合并为一次.
+     */
+    fun scheduleOnDemandCleanup(context: Context) {
+        val appContext = context.applicationContext
+        runCatching {
+            val req = OneTimeWorkRequestBuilder<HistoryCleanupWorker>()
+                .setInitialDelay(ON_DEMAND_CLEANUP_DELAY_SECONDS, TimeUnit.SECONDS)
+                .build()
+
+            WorkManager.getInstance(appContext)
+                .enqueueUniqueWork(
+                    ON_DEMAND_WORK_NAME,
+                    ExistingWorkPolicy.REPLACE,
                     req,
                 )
         }

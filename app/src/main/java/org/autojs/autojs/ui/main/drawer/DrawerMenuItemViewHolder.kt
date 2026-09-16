@@ -75,7 +75,7 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
                 is DrawerMenuToggleableItem -> {
                     menuItem.launchManagerIfPossible()
                 }
-                else -> false
+                else -> menuItem.performLongClickAction()
             }
         }
 
@@ -93,7 +93,7 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
                 is DrawerMenuToggleableItem -> {
                     menuItem.launchManagerIfPossible()
                 }
-                else -> false
+                else -> menuItem.performLongClickAction()
             }
         }
     }

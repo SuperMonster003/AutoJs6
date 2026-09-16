@@ -100,4 +100,21 @@ class HistoryRetentionPolicyTest {
         val result = HistoryRetentionPolicy.selectToDelete(items, now, 0, 0, 0L, { it.createdAt }, { it.size })
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun protectedItemsSurviveBytesLimit() {
+        val a = Item("a", now - 3 * day, 100)
+        val b = Item("b", now - 2 * day, 100)
+        val c = Item("c", now - day, 700)
+        val items = oldestFirst(a, b, c)
+
+        // The newest item alone exceeds the limit: everything else goes, the protected one stays.
+        assertEquals(listOf(a, b), HistoryRetentionPolicy.selectOverBytesProtecting(items, 500, { it == c }) { it.size })
+        // Without protection the newest item is removed as well.
+        assertEquals(listOf(a, b, c), HistoryRetentionPolicy.selectOverBytes(items, 500) { it.size })
+        // Within the limit nothing is selected.
+        assertEquals(emptyList<Item>(), HistoryRetentionPolicy.selectOverBytesProtecting(items, 900, { it == c }) { it.size })
+        // Unlimited never selects.
+        assertEquals(emptyList<Item>(), HistoryRetentionPolicy.selectOverBytesProtecting(items, 0, { false }) { it.size })
+    }
 }

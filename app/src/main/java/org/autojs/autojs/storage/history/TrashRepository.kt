@@ -298,6 +298,55 @@ class TrashRepository(private val context: Context) {
     fun findTrashItem(trashId: String): TrashEntities.TrashItem? = dao.getTrashItem(trashId)
 
     /**
+     * Apply the trash retention policy: expire items by days, then enforce the total byte limit
+     * while keeping the newest item (zero or negative limits mean unlimited).
+     * zh-CN: 执行回收站保留策略: 先按天数过期, 再执行总容量上限并保留最新条目 (0 或负数表示不限制).
+     */
+    @JvmOverloads
+    fun enforceRetentionPolicy(now: Long = System.currentTimeMillis()) {
+        HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryPrefs.trashMaxDays())?.let { expiredBefore ->
+            val expired = dao.listExpiredTrashItems(expiredBefore)
+            if (expired.isNotEmpty()) {
+                dao.deleteTrashItemsByIds(expired.map { it.trashId })
+                expired.forEach { blobs.deleteBlobByRelPath(it.blobRelPath) }
+            }
+        }
+        enforceTotalBytesLimit()
+    }
+
+    /**
+     * Remove the oldest items until the trash fits its total byte limit. The newest item and every
+     * item in [protectedTrashIds] (for example the batch that was just moved in) are never removed,
+     * so a single oversized entry stays until it expires by days or a newer item arrives.
+     *
+     * zh-CN: 从最旧开始删除, 直到回收站总量不超过容量上限. 最新条目与 [protectedTrashIds] 中的条目
+     * (例如刚移入的一批) 永远不会被删除, 因此单个超大条目会保留到按天数过期或有更新的条目移入为止.
+     *
+     * @return the removed items, oldest first.
+     */
+    @JvmOverloads
+    fun enforceTotalBytesLimit(protectedTrashIds: Set<String> = emptySet()): List<TrashEntities.TrashItem> {
+        val limit = HistoryPrefs.trashMaxTotalBytes()
+        if (HistoryRetentionPolicy.isUnlimited(limit)) return emptyList()
+
+        val newestFirst = dao.listTrashItemsDesc()
+        if (newestFirst.isEmpty()) return emptyList()
+
+        val newestId = newestFirst.first().trashId
+        val toRemove = HistoryRetentionPolicy.selectOverBytesProtecting(
+            itemsOldestFirst = newestFirst.asReversed(),
+            maxBytes = limit,
+            isProtected = { it.trashId == newestId || it.trashId in protectedTrashIds },
+            sizeOf = { it.sizeBytes },
+        )
+        if (toRemove.isEmpty()) return emptyList()
+
+        dao.deleteTrashItemsByIds(toRemove.map { it.trashId })
+        toRemove.forEach { blobs.deleteBlobByRelPath(it.blobRelPath) }
+        return toRemove
+    }
+
+    /**
      * Clear all trash items.
      * zh-CN: 清空回收站.
      */
