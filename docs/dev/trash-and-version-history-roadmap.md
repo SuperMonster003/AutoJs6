@@ -99,8 +99,8 @@
 ### P2 版本历史精进 (F12, F13, F15)
 
 - [x] P2.1 重命名 / 移动迁移历史: `HistoryRepository.relocate(oldPath, newPath)` (文件精确匹配, 目录按前缀批量改写 `logicalPath`), 目标路径已有条目时合并 revisions 到目标 `fileId` (`HistoryDao.moveRevisionsToFile`, 目标条目沿用被移动文件的指纹); 接入 `ScriptOperations.rename` (IO 线程异步) / 单个与批量 `move` (移动成功后同步调用). 路径映射抽为纯函数 `HistoryRelocation`. 证据: `HistoryRelocationTest` (JVM, 5 例), 2026-09-16.
-- [x] P2.2 覆盖类写入统一留快照 (D4): 资源管理器单个 (`confirmOverwriteIfNeeded`) 与批量 (`executeCopyMovePlans`) 复制 / 移动覆盖前调用 `snapshotBeforeOverwrite`: 文件走 `recordSnapshotBeforeOverwrite(OP_OVERWRITE_PRE)`, 目录走 `recordSnapshotsBeforeOverwriteUnderDirectory` (只为已纳管文件留快照, 代价受历史规模约束). 证据: 编译 + JVM 单测, 2026-09-16; 提交 hash 由 P2.3 提交回填.
-- [ ] P2.3 按文件的版本列表页 (RecyclerView, 替代单选对话框): 显示时间 / 大小 / `op` / 编码 / "与当前文件一致" 标记 (sha 对比), 支持多选删除; 资源管理器与编辑器入口均切换到该页, 保留 "恢复到编辑器" 与 "恢复到磁盘" 两种模式.
+- [x] P2.2 覆盖类写入统一留快照 (D4): 资源管理器单个 (`confirmOverwriteIfNeeded`) 与批量 (`executeCopyMovePlans`) 复制 / 移动覆盖前调用 `snapshotBeforeOverwrite`: 文件走 `recordSnapshotBeforeOverwrite(OP_OVERWRITE_PRE)`, 目录走 `recordSnapshotsBeforeOverwriteUnderDirectory` (只为已纳管文件留快照, 代价受历史规模约束). 证据: 编译 + JVM 单测, 2026-09-16; 提交 `777398c1e`.
+- [x] P2.3 按文件的版本列表页 `ui/storage/RevisionListActivity` (基于 `BaseSearchSortListActivity`, 替代单选对话框): 每行显示时间 / 大小 / `op` 标签 / 编码 (含 BOM) / "当前" 标记 (磁盘文件 sha256 与 revision 对比, 文件缺失或超过纳管上限则不标记); 点击弹出详情 (预览 / 恢复 / 删除), 长按进入多选, 菜单提供批量删除 / 全选 / 取消全选 / 排序 (时间, 大小) / 打开文件. 两种模式由 `VersionHistoryController.Mode` 区分: 资源管理器 `RESTORE_TO_DISK` (覆盖前留 `RESTORE_PRE` 快照), 编辑器 `RESTORE_TO_EDITOR` (回调经 `VersionHistoryEditorBridge` 以弱引用 token 跨 Activity 传递, 编辑器已销毁时提示 "编辑器已不可用"). 证据: 编译 + JVM 单测 (34 例), 2026-09-16; 提交 hash 由 P2.4 提交回填.
 - [ ] P2.4 差异视图: 所选 revision 与当前文件, 或两条 revision 之间的行级 diff (只读页面, 新增 / 删除行着色); 超过阈值的大文件退化为 "仅显示行数与大小统计". 实现选型见 Q4.
 - [ ] P2.5 手动快照与标签: 编辑器菜单 "创建快照" (op = `MANUAL`, 可选标签); schema v3 增加 `label TEXT` 与 `pinned INTEGER NOT NULL DEFAULT 0` 列 (D3); pinned 的 revision 不参与天数 / 版本数 / 单文件容量清理, 但仍受全局总容量的最终保护.
 - [ ] P2.6 revision 导出: "另存为" 到任意目录 (复用 `FileChooserDialogBuilder`), 保留原编码与 BOM.
@@ -165,8 +165,8 @@
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
-| 交互 | `storage/history/VersionHistoryController.kt`, `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |
-| 页面 | `ui/storage/TrashActivity.kt`, `VersionHistoryActivity.kt`, `BaseSearchSortListActivity.kt` |
+| 交互 | `storage/history/VersionHistoryController.kt`, `VersionHistoryEditorBridge.kt` (P2.3), `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |
+| 页面 | `ui/storage/TrashActivity.kt`, `VersionHistoryActivity.kt`, `RevisionListActivity.kt` / `RevisionAdapter.kt` / `RevisionViewHolder.kt` (P2.3), `BaseSearchSortListActivity.kt` |
 | 设置 | `ui/settings/TrashAndVersionHistorySettingsActivity.kt` / `...Fragment.kt` / `...Preference.kt`, `RetentionLimitSettings.kt`, `RetentionLimitPreference.kt`, `RetentionLimitDialogBuilder.kt`, `res/xml/fragment_trash_and_version_history_settings.xml`, `res/xml/fragment_preferences.xml` (分类) |
 | 接入 | `ui/edit/editor/service/EditorVersionHistoryService.kt`, `ui/common/ScriptOperations.java`, `ui/explorer/ExplorerBuiltInActionHandler.kt`, `ui/main/drawer/DrawerFragment.kt`, `App.kt` |
 | 单测 | `app/src/test/java/org/autojs/autojs/storage/history/*Test.kt` |

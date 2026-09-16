@@ -1128,6 +1128,7 @@
     <string name="text_delete_line">حذف الخط</string>
     <string name="text_delete_permanently_also_clear_history">مسح سجل الاصدارات ايضا عند الحذف النهائي</string>
     <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
+    <string name="text_delete_selected_revisions_confirm">حذف %d من الاصدارات المحددة نهائيا؟</string>
     <string name="text_deleting">جارٍ الحذف</string>
     <string name="text_description">الوصف</string>
     <string name="text_deselect_all">الغاء التحديد</string>
@@ -1199,6 +1200,7 @@
     <string name="text_editor_gestures">الإيماءات</string>
     <string name="text_editor_gutter_markers">علامات هامش المحرر</string>
     <string name="text_editor_gutter_width_mode">عرض هامش المحرر</string>
+    <string name="text_editor_is_no_longer_available">المحرر لم يعد متاحا</string>
     <string name="text_editor_large_file_mode_always_disabled">تعطيل وضع الملفات الكبيرة دائما</string>
     <string name="text_editor_large_file_mode_always_enabled">تفعيل وضع الملفات الكبيرة دائما</string>
     <string name="text_editor_large_file_mode_threshold">حد وضع الملفات الكبيرة</string>
@@ -1577,6 +1579,7 @@
     <string name="text_open_in_terminal">فتح في الطرفية</string>
     <string name="text_open_main_activity">فتح النشاط الرئيسي</string>
     <string name="text_open_with">مفتوحة مع</string>
+    <string name="text_operation">العملية</string>
     <string name="text_operation_aborted">تم الإيقاف</string>
     <string name="text_operation_completed">اكتمل</string>
     <string name="text_operation_is_completed">تم الانتهاء من العملية</string>
@@ -1856,6 +1859,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">جارٍ جلب سجل التغييرات...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">جارٍ جلب بيانات قائمة المكونات الإضافية...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">جارٍ جلب ملاحظات الإصدار...</string>
+    <string name="text_revision_op_overwrite_pre">قبل الكتابة فوق</string>
+    <string name="text_revision_op_restore_pre">قبل الاستعادة</string>
+    <string name="text_revision_op_save_pre">قبل الحفظ</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">تغليف الأنواع البدائية في Java</string>
     <string name="text_root_access">صلاحية root</string>
@@ -1881,6 +1887,7 @@
     <string name="text_run_script">النصي تشغيل</string>
     <string name="text_run_simplified">يجري</string>
     <string name="text_running_task">تشغيل المهمة</string>
+    <string name="text_same_as_current_file">مطابق للملف الحالي</string>
     <string name="text_sample">عينات</string>
     <string name="text_sample_name">خدمة التشغيل</string>
     <string name="text_save">احفظ</string>

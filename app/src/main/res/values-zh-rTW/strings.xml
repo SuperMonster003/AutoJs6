@@ -1123,6 +1123,7 @@
     <string name="text_delete_line">刪除行</string>
     <string name="text_delete_permanently_also_clear_history">徹底刪除時同時清除版本歷史</string>
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
+    <string name="text_delete_selected_revisions_confirm">永久刪除選取的 %d 個版本?</string>
     <string name="text_deleting">正在刪除</string>
     <string name="text_description">描述</string>
     <string name="text_deselect_all">取消全選</string>
@@ -1194,6 +1195,7 @@
     <string name="text_editor_gestures">操作手勢</string>
     <string name="text_editor_gutter_markers">邊欄標記</string>
     <string name="text_editor_gutter_width_mode">邊欄寬度</string>
+    <string name="text_editor_is_no_longer_available">編輯器已不可用</string>
     <string name="text_editor_large_file_mode_always_disabled">總是停用大檔案模式</string>
     <string name="text_editor_large_file_mode_always_enabled">總是啟用大檔案模式</string>
     <string name="text_editor_large_file_mode_threshold">大檔案模式閾值</string>
@@ -1572,6 +1574,7 @@
     <string name="text_open_in_terminal">在終端機中開啟</string>
     <string name="text_open_main_activity">開啟主介面</string>
     <string name="text_open_with">開啟方式</string>
+    <string name="text_operation">操作</string>
     <string name="text_operation_aborted">已中止</string>
     <string name="text_operation_completed">已完成</string>
     <string name="text_operation_is_completed">操作已完成</string>
@@ -1851,6 +1854,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取外掛列表資料...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行說明...</string>
+    <string name="text_revision_op_overwrite_pre">覆寫前</string>
+    <string name="text_revision_op_restore_pre">還原前</string>
+    <string name="text_revision_op_save_pre">儲存前</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 許可權</string>
     <string name="text_rhino_java_primitive_wrap">Java 原始型別包裝</string>
     <string name="text_root_access">root 權限</string>
@@ -1876,6 +1882,7 @@
     <string name="text_run_script">執行指令碼</string>
     <string name="text_run_simplified">執行</string>
     <string name="text_running_task">執行中任務</string>
+    <string name="text_same_as_current_file">與目前檔案一致</string>
     <string name="text_sample">示例程式碼</string>
     <string name="text_sample_name">正在執行的服務</string>
     <string name="text_save">儲存</string>

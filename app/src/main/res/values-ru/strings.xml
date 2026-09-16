@@ -1126,6 +1126,7 @@
     <string name="text_delete_line">Удалить строку</string>
     <string name="text_delete_permanently_also_clear_history">Очищать историю версий при окончательном удалении</string>
     <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
+    <string name="text_delete_selected_revisions_confirm">Удалить %d выбранных версий навсегда?</string>
     <string name="text_deleting">Удаление</string>
     <string name="text_description">Описание</string>
     <string name="text_deselect_all">Снять выделение</string>
@@ -1197,6 +1198,7 @@
     <string name="text_editor_gestures">Жесты</string>
     <string name="text_editor_gutter_markers">Маркеры поля</string>
     <string name="text_editor_gutter_width_mode">Ширина поля</string>
+    <string name="text_editor_is_no_longer_available">Редактор больше недоступен</string>
     <string name="text_editor_large_file_mode_always_disabled">Всегда отключать режим больших файлов</string>
     <string name="text_editor_large_file_mode_always_enabled">Всегда включать режим больших файлов</string>
     <string name="text_editor_large_file_mode_threshold">Порог режима больших файлов</string>
@@ -1575,6 +1577,7 @@
     <string name="text_open_in_terminal">Открыть в терминале</string>
     <string name="text_open_main_activity">Открыть основную деятельность</string>
     <string name="text_open_with">Открыть с</string>
+    <string name="text_operation">Операция</string>
     <string name="text_operation_aborted">Прервано</string>
     <string name="text_operation_completed">Завершено</string>
     <string name="text_operation_is_completed">Операция завершена</string>
@@ -1854,6 +1857,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
+    <string name="text_revision_op_overwrite_pre">Перед перезаписью</string>
+    <string name="text_revision_op_restore_pre">Перед восстановлением</string>
+    <string name="text_revision_op_save_pre">Перед сохранением</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Отмена привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
     <string name="text_root_access">Root-доступ</string>
@@ -1879,6 +1885,7 @@
     <string name="text_run_script">Запуск скрипта</string>
     <string name="text_run_simplified">Запуст</string>
     <string name="text_running_task">Выполняемая задача</string>
+    <string name="text_same_as_current_file">Совпадает с текущим файлом</string>
     <string name="text_sample">Образцы</string>
     <string name="text_sample_name">Запуск сервиса</string>
     <string name="text_save">Сохранить</string>

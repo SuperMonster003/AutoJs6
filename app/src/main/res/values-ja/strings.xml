@@ -1127,6 +1127,7 @@
     <string name="text_delete_line">行削除</string>
     <string name="text_delete_permanently_also_clear_history">完全に削除する際にバージョン履歴も消去</string>
     <string name="text_delete_revision_confirm">この履歴を完全に削除しますか?</string>
+    <string name="text_delete_selected_revisions_confirm">選択した %d 件のバージョンを完全に削除しますか?</string>
     <string name="text_deleting">削除中</string>
     <string name="text_description">説明</string>
     <string name="text_deselect_all">全て解除</string>
@@ -1198,6 +1199,7 @@
     <string name="text_editor_gestures">ジェスチャー</string>
     <string name="text_editor_gutter_markers">ガターマーカー</string>
     <string name="text_editor_gutter_width_mode">ガター幅</string>
+    <string name="text_editor_is_no_longer_available">エディターは利用できなくなりました</string>
     <string name="text_editor_large_file_mode_always_disabled">大容量ファイルモードを常に無効化</string>
     <string name="text_editor_large_file_mode_always_enabled">大容量ファイルモードを常に有効化</string>
     <string name="text_editor_large_file_mode_threshold">大容量ファイルモードしきい値</string>
@@ -1576,6 +1578,7 @@
     <string name="text_open_in_terminal">ターミナルで開く</string>
     <string name="text_open_main_activity">メインのアクティビティを開く</string>
     <string name="text_open_with">で開く</string>
+    <string name="text_operation">操作</string>
     <string name="text_operation_aborted">中止</string>
     <string name="text_operation_completed">完了</string>
     <string name="text_operation_is_completed">操作が完了しました</string>
@@ -1855,6 +1858,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">リリースノートを取得しています...</string>
+    <string name="text_revision_op_overwrite_pre">上書き前</string>
+    <string name="text_revision_op_restore_pre">復元前</string>
+    <string name="text_revision_op_save_pre">保存前</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
     <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
     <string name="text_root_access">root 権限</string>
@@ -1880,6 +1886,7 @@
     <string name="text_run_script">スクリプトの実行</string>
     <string name="text_run_simplified">実行</string>
     <string name="text_running_task">タスクの実行</string>
+    <string name="text_same_as_current_file">現在のファイルと同一</string>
     <string name="text_sample">サンプル</string>
     <string name="text_sample_name">サービスの実行</string>
     <string name="text_save">保存する</string>

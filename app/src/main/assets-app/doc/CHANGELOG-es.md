@@ -209,6 +209,7 @@
 * `Nuevo` Entradas "Limpiar ahora" y "Ajustes" en los menús de las páginas de papelera e historial de versiones, y una pulsación larga en cualquiera de los dos elementos del cajón abre los ajustes de políticas de retención
 * `Nuevo` El cuadro de dirección del modo cliente puede escanear el código QR mostrado por la extensión de VSCode (1.1.0+) para conectarse sin escribir la dirección
 * `Nuevo` Protocolo v2 de la extensión de VSCode con mensajes de solicitud/respuesta y métodos de gestión remota de archivos (explorar, leer, escribir, renombrar y eliminar archivos del dispositivo, ejecutar scripts del dispositivo) para la extensión de VSCode 1.1.0+
+* `Nuevo` Página de lista del historial de versiones: las entradas del editor y del explorador ahora abren una lista dedicada que muestra hora, tamaño, operación y codificación de cada revisión y marca la que coincide con el archivo actual; tocar para previsualizar, restaurar o eliminar, mantener pulsado para selección múltiple y eliminación, ordenación por hora o tamaño
 * `Corrección` El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana
 * `Corrección` Los resultados de autorización del plugin se transmiten correctamente desde la pantalla principal para completar la activación pendiente tras conceder el permiso
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual

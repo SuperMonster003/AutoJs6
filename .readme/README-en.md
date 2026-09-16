@@ -371,6 +371,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` "Clean up now" and "Settings" entries in the trash and version history page menus, and a long press on either drawer item opens the retention policy settings
 * `Feature` Client mode address dialog can scan the QR code shown by the VSCode extension (1.1.0+) to connect without typing the address
 * `Feature` VSCode extension protocol v2 with request/response messages and remote file management methods (browse, read, write, rename and delete device files, run device scripts) for VSCode extension 1.1.0+
+* `Feature` Version history list page: the editor and explorer entries now open a dedicated list showing time, size, operation and encoding per revision and marking the one identical to the current file; tap to preview, restore or delete, long-press for multi-selection delete, sort by time or size
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request

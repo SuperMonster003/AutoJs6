@@ -1126,6 +1126,7 @@
     <string name="text_delete_line">Supprimer la ligne</string>
     <string name="text_delete_permanently_also_clear_history">Effacer aussi l\'historique des versions lors d\'une suppression définitive</string>
     <string name="text_delete_revision_confirm">Supprimer definitivement cette revision?</string>
+    <string name="text_delete_selected_revisions_confirm">Supprimer définitivement les %d révisions sélectionnées ?</string>
     <string name="text_deleting">Suppression</string>
     <string name="text_description">Description</string>
     <string name="text_deselect_all">Tout deselectionner</string>
@@ -1197,6 +1198,7 @@
     <string name="text_editor_gestures">Gestes</string>
     <string name="text_editor_gutter_markers">Repères de gouttière</string>
     <string name="text_editor_gutter_width_mode">Largeur de la gouttière</string>
+    <string name="text_editor_is_no_longer_available">L\'éditeur n\'est plus disponible</string>
     <string name="text_editor_large_file_mode_always_disabled">Toujours desactiver le mode gros fichier</string>
     <string name="text_editor_large_file_mode_always_enabled">Toujours activer le mode gros fichier</string>
     <string name="text_editor_large_file_mode_threshold">Seuil du mode gros fichier</string>
@@ -1575,6 +1577,7 @@
     <string name="text_open_in_terminal">Ouvrir dans le terminal</string>
     <string name="text_open_main_activity">Ouvrir l\'activité principale</string>
     <string name="text_open_with">Ouvrir avec</string>
+    <string name="text_operation">Opération</string>
     <string name="text_operation_aborted">Interrompu</string>
     <string name="text_operation_completed">Termine</string>
     <string name="text_operation_is_completed">L\'opération est terminée</string>
@@ -1854,6 +1857,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
+    <string name="text_revision_op_overwrite_pre">Avant écrasement</string>
+    <string name="text_revision_op_restore_pre">Avant restauration</string>
+    <string name="text_revision_op_save_pre">Avant enregistrement</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Encapsulation des types primitifs Java</string>
     <string name="text_root_access">Accès root</string>
@@ -1879,6 +1885,7 @@
     <string name="text_run_script">Exécuter un script</string>
     <string name="text_run_simplified">Exéc</string>
     <string name="text_running_task">Exécution d\'une tâche</string>
+    <string name="text_same_as_current_file">Identique au fichier actuel</string>
     <string name="text_sample">Echantillons</string>
     <string name="text_sample_name">Service en cours d\'exécution</string>
     <string name="text_save">Enregistrer</string>

@@ -1128,6 +1128,7 @@
     <string name="text_delete_line">라인 삭제</string>
     <string name="text_delete_permanently_also_clear_history">영구 삭제 시 버전 기록도 지우기</string>
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
+    <string name="text_delete_selected_revisions_confirm">선택한 %d개 버전을 영구 삭제할까요?</string>
     <string name="text_deleting">삭제 중</string>
     <string name="text_description">설명</string>
     <string name="text_deselect_all">전체 해제</string>
@@ -1199,6 +1200,7 @@
     <string name="text_editor_gestures">제스처</string>
     <string name="text_editor_gutter_markers">거터 표시</string>
     <string name="text_editor_gutter_width_mode">거터 너비</string>
+    <string name="text_editor_is_no_longer_available">편집기를 더 이상 사용할 수 없습니다</string>
     <string name="text_editor_large_file_mode_always_disabled">대용량 파일 모드 항상 비활성화</string>
     <string name="text_editor_large_file_mode_always_enabled">대용량 파일 모드 항상 활성화</string>
     <string name="text_editor_large_file_mode_threshold">대용량 파일 모드 임계값</string>
@@ -1577,6 +1579,7 @@
     <string name="text_open_in_terminal">터미널에서 열기</string>
     <string name="text_open_main_activity">열린 주요 활동</string>
     <string name="text_open_with">함께 열립니다</string>
+    <string name="text_operation">작업</string>
     <string name="text_operation_aborted">중지됨</string>
     <string name="text_operation_completed">완료</string>
     <string name="text_operation_is_completed">작동이 완료되었습니다</string>
@@ -1856,6 +1859,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">변경 로그를 가져오는 중...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">플러그인 목록 데이터를 가져오는 중입니다...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트를 가져오는 중...</string>
+    <string name="text_revision_op_overwrite_pre">덮어쓰기 전</string>
+    <string name="text_revision_op_restore_pre">복원 전</string>
+    <string name="text_revision_op_save_pre">저장 전</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 취소하기</string>
     <string name="text_rhino_java_primitive_wrap">Java 원시 타입 래핑</string>
     <string name="text_root_access">root 권한</string>
@@ -1881,6 +1887,7 @@
     <string name="text_run_script">스크립트를 실행하십시오</string>
     <string name="text_run_simplified">운영</string>
     <string name="text_running_task">실행 작업</string>
+    <string name="text_same_as_current_file">현재 파일과 동일</string>
     <string name="text_sample">샘플</string>
     <string name="text_sample_name">실행 서비스</string>
     <string name="text_save">구하다</string>

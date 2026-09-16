@@ -1122,6 +1122,7 @@
     <string name="text_delete_line">Delete line</string>
     <string name="text_delete_permanently_also_clear_history">Also clear version history when deleting permanently</string>
     <string name="text_delete_revision_confirm">Delete this revision permanently?</string>
+    <string name="text_delete_selected_revisions_confirm">Delete the %d selected revisions permanently?</string>
     <string name="text_deleting">Deleting</string>
     <string name="text_description">Description</string>
     <string name="text_deselect_all">Deselect all</string>
@@ -1193,6 +1194,7 @@
     <string name="text_editor_gestures">Gestures</string>
     <string name="text_editor_gutter_markers">Gutter markers</string>
     <string name="text_editor_gutter_width_mode">Gutter width</string>
+    <string name="text_editor_is_no_longer_available">The editor is no longer available</string>
     <string name="text_editor_large_file_mode_always_disabled">Always disable large file mode</string>
     <string name="text_editor_large_file_mode_always_enabled">Always enable large file mode</string>
     <string name="text_editor_large_file_mode_threshold">Large file mode threshold</string>
@@ -1571,6 +1573,7 @@
     <string name="text_open_in_terminal">Open in terminal</string>
     <string name="text_open_main_activity">Open main activity</string>
     <string name="text_open_with">Open with</string>
+    <string name="text_operation">Operation</string>
     <string name="text_operation_aborted">Aborted</string>
     <string name="text_operation_completed">Completed</string>
     <string name="text_operation_is_completed">Operation is completed</string>
@@ -1850,6 +1853,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
+    <string name="text_revision_op_overwrite_pre">Before overwrite</string>
+    <string name="text_revision_op_restore_pre">Before restore</string>
+    <string name="text_revision_op_save_pre">Before save</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
     <string name="text_root_access">Root access</string>
@@ -1875,6 +1881,7 @@
     <string name="text_run_script">Run script</string>
     <string name="text_run_simplified">Run</string>
     <string name="text_running_task">Running task</string>
+    <string name="text_same_as_current_file">Same as the current file</string>
     <string name="text_sample">Samples</string>
     <string name="text_sample_name">Running service</string>
     <string name="text_save">Save</string>

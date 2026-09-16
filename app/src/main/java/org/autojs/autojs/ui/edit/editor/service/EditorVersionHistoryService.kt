@@ -8,6 +8,7 @@ import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.storage.history.HistoryUriUtils
 import org.autojs.autojs.storage.history.VersionHistoryController
+import org.autojs.autojs.storage.history.VersionHistoryEditorBridge
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs6.R
@@ -18,6 +19,16 @@ class EditorVersionHistoryService(
     private val onRestoredToEditor: () -> Unit,
     private val onRestoredUi: () -> Unit,
 ) {
+
+    // Held strongly here: the bridge only keeps a weak reference, so the callbacks live as long as this service.
+    // zh-CN: 此处强引用持有: bridge 仅弱引用, 回调随本服务存活.
+    private val editorCallbacks = VersionHistoryEditorBridge.Callbacks(
+        onRestoreToEditor = { restoredText ->
+            currentEditor().text = restoredText
+            onRestoredToEditor()
+        },
+        onRestoredUi = onRestoredUi,
+    )
 
     fun recordSavePreIfNeeded(
         uri: Uri,
@@ -55,14 +66,7 @@ class EditorVersionHistoryService(
             return
         }
 
-        VersionHistoryController(context).showForEditor(
-            uri = uri,
-            onRestoreToEditor = { restoredText ->
-                currentEditor().text = restoredText
-                onRestoredToEditor()
-            },
-            onRestoredUi = onRestoredUi,
-        )
+        VersionHistoryController(context).showForEditor(uri, editorCallbacks)
     }
 
     private fun shouldTrackHistory(oldBytes: ByteArray, newBytes: ByteArray): Boolean {
