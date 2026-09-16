@@ -1029,6 +1029,8 @@
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
     <string name="text_comment">註釋</string>
     <string name="text_committing_archive_extraction">正在完成檔案解壓縮</string>
+    <string name="text_compare_selected">比較選取項目</string>
+    <string name="text_compare_with_current_file">與目前文件比較</string>
     <string name="text_compatibility">兼容性</string>
     <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
@@ -1092,6 +1094,7 @@
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須為兩個大寫字母</string>
     <string name="text_creating_unsigned_apk">正在創建未簽名 APK</string>
     <string name="text_current">當前</string>
+    <string name="text_current_file">目前文件</string>
     <string name="text_current_page_configuration">當前頁面配置</string>
     <string name="text_current_version">當前版本</string>
     <string name="text_custom">自訂</string>
@@ -1148,6 +1151,8 @@
     <string name="text_device_name">設備名稱</string>
     <string name="text_device_product_name">設備產品名稱</string>
     <string name="text_device_screen_resolution">設備屏幕分辨率</string>
+    <string name="text_diff_stats">新增 %1$d 行, 刪除 %2$d 行</string>
+    <string name="text_diff_too_large">內容過大, 無法逐行比較, 僅顯示統計資訊</string>
     <string name="text_directly_download">直接下載</string>
     <string name="text_directory">目錄</string>
     <string name="text_disabled">已禁用</string>
@@ -1454,6 +1459,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
     <string name="text_layout_saved_to">佈局已儲存到 %1$s</string>
     <string name="text_licenses">開源許可信息</string>
+    <string name="text_lines_and_size">%1$d 行, %2$s</string>
     <string name="text_listeners">監聽者</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
     <string name="text_loading_completed">加載完畢</string>
@@ -1505,6 +1511,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">正在移入回收站...</string>
     <string name="text_multiple_options">多個可選項</string>
     <string name="text_n_days">%d 天</string>
+    <string name="text_n_unchanged_lines_hidden">已隱藏 %d 行未變更內容, 點擊展開</string>
     <string name="text_n_versions">%d 個版本</string>
     <string name="text_name">名稱</string>
     <string name="text_need_to_enable_a11y_service">需要啓用無障礙服務</string>
@@ -1526,6 +1533,7 @@
     <string name="text_no_content">無內容</string>
     <string name="text_no_content_description">無內容描述</string>
     <string name="text_no_data">無數據</string>
+    <string name="text_no_differences">無差異</string>
     <string name="text_no_exif_information">沒有 EXIF 資訊</string>
     <string name="text_no_hidden_plugins">暫無隱藏插件</string>
     <string name="text_no_history">無歷史記錄</string>

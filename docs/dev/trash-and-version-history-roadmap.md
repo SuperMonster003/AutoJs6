@@ -100,8 +100,8 @@
 
 - [x] P2.1 重命名 / 移动迁移历史: `HistoryRepository.relocate(oldPath, newPath)` (文件精确匹配, 目录按前缀批量改写 `logicalPath`), 目标路径已有条目时合并 revisions 到目标 `fileId` (`HistoryDao.moveRevisionsToFile`, 目标条目沿用被移动文件的指纹); 接入 `ScriptOperations.rename` (IO 线程异步) / 单个与批量 `move` (移动成功后同步调用). 路径映射抽为纯函数 `HistoryRelocation`. 证据: `HistoryRelocationTest` (JVM, 5 例), 2026-09-16.
 - [x] P2.2 覆盖类写入统一留快照 (D4): 资源管理器单个 (`confirmOverwriteIfNeeded`) 与批量 (`executeCopyMovePlans`) 复制 / 移动覆盖前调用 `snapshotBeforeOverwrite`: 文件走 `recordSnapshotBeforeOverwrite(OP_OVERWRITE_PRE)`, 目录走 `recordSnapshotsBeforeOverwriteUnderDirectory` (只为已纳管文件留快照, 代价受历史规模约束). 证据: 编译 + JVM 单测, 2026-09-16; 提交 `777398c1e`.
-- [x] P2.3 按文件的版本列表页 `ui/storage/RevisionListActivity` (基于 `BaseSearchSortListActivity`, 替代单选对话框): 每行显示时间 / 大小 / `op` 标签 / 编码 (含 BOM) / "当前" 标记 (磁盘文件 sha256 与 revision 对比, 文件缺失或超过纳管上限则不标记); 点击弹出详情 (预览 / 恢复 / 删除), 长按进入多选, 菜单提供批量删除 / 全选 / 取消全选 / 排序 (时间, 大小) / 打开文件. 两种模式由 `VersionHistoryController.Mode` 区分: 资源管理器 `RESTORE_TO_DISK` (覆盖前留 `RESTORE_PRE` 快照), 编辑器 `RESTORE_TO_EDITOR` (回调经 `VersionHistoryEditorBridge` 以弱引用 token 跨 Activity 传递, 编辑器已销毁时提示 "编辑器已不可用"). 证据: 编译 + JVM 单测 (34 例), 2026-09-16; 提交 hash 由 P2.4 提交回填.
-- [ ] P2.4 差异视图: 所选 revision 与当前文件, 或两条 revision 之间的行级 diff (只读页面, 新增 / 删除行着色); 超过阈值的大文件退化为 "仅显示行数与大小统计". 实现选型见 Q4.
+- [x] P2.3 按文件的版本列表页 `ui/storage/RevisionListActivity` (基于 `BaseSearchSortListActivity`, 替代单选对话框): 每行显示时间 / 大小 / `op` 标签 / 编码 (含 BOM) / "当前" 标记 (磁盘文件 sha256 与 revision 对比, 文件缺失或超过纳管上限则不标记); 点击弹出详情 (预览 / 恢复 / 删除), 长按进入多选, 菜单提供批量删除 / 全选 / 取消全选 / 排序 (时间, 大小) / 打开文件. 两种模式由 `VersionHistoryController.Mode` 区分: 资源管理器 `RESTORE_TO_DISK` (覆盖前留 `RESTORE_PRE` 快照), 编辑器 `RESTORE_TO_EDITOR` (回调经 `VersionHistoryEditorBridge` 以弱引用 token 跨 Activity 传递, 编辑器已销毁时提示 "编辑器已不可用"). 证据: 编译 + JVM 单测 (34 例), 2026-09-16; 提交 `f8bec51ed`.
+- [x] P2.4 差异视图 `ui/storage/DiffActivity` (基于 `BaseSearchSortListActivity`): 版本列表的详情对话框提供 "与当前文件比较", 多选恰好两条时菜单提供 "比较选中项" (较旧者在左); 逐行显示左右行号 / 标记 / 文本, 新增与删除行着色 (`diff_line_inserted_bg` / `diff_line_deleted_bg`, 含夜间色), 未变更段落保留 3 行上下文后折叠, 点击或 "全部展开" 展开, 搜索框按文本过滤行; 任一侧超过 6000 行或 1 MiB 时退化为仅显示两侧行数与大小 (`LineDiff.exceedsLimits`). 算法按 Q4 自实现: `storage/history/LineDiff` 为线性空间 Myers (中间蛇 + 显式工作栈, 行先 intern 为整数, 每段变更内先删除后新增); `HistoryTextCodec` 统一 revision 与磁盘文件的解码. 磁盘文件按 revision 记录的编码解码, 编辑器入口比较的也是磁盘文件而非未保存缓冲. 证据: `LineDiffTest` (JVM, 8 例, 含 400 组随机输入的重建与 LCS 最小性校验), 2026-09-16; 提交 hash 由 P2.5 提交回填.
 - [ ] P2.5 手动快照与标签: 编辑器菜单 "创建快照" (op = `MANUAL`, 可选标签); schema v3 增加 `label TEXT` 与 `pinned INTEGER NOT NULL DEFAULT 0` 列 (D3); pinned 的 revision 不参与天数 / 版本数 / 单文件容量清理, 但仍受全局总容量的最终保护.
 - [ ] P2.6 revision 导出: "另存为" 到任意目录 (复用 `FileChooserDialogBuilder`), 保留原编码与 BOM.
 - [ ] P2.7 编辑器 "恢复并保存" 选项 (现有 "仅恢复到编辑器" 保持默认).
@@ -134,7 +134,7 @@
 | Q1 | 历史快照 blob 是否 gzip 压缩 (schema 加 `compression TEXT` 列, 读取时按列解码)? | 建议在 P2.5 的 schema v3 中一并加列但默认不压缩, 压缩作为设置项后续开放. |
 | Q2 | 脚本 API (`files.write` / `files.append` 等) 的写入是否纳入版本历史? | 建议不纳管 (热路径, 且脚本写入多为数据文件), 维持 D4 的 "应用自身覆盖写入" 范围. |
 | Q3 | P1.3 单个条目超过回收站上限时的默认动作? | 已拍板, 见 D8. |
-| Q4 | P2.4 diff 的实现选型: 引入 `java-diff-utils` 依赖, 还是自实现 Myers 行 diff? | 建议自实现最小 Myers (约 150 行, 无新依赖, 可单测), 大文件用阈值退化. |
+| Q4 | P2.4 diff 的实现选型: 引入 `java-diff-utils` 依赖, 还是自实现 Myers 行 diff? | 已拍板: 自实现线性空间 Myers (`LineDiff`, 无新依赖, 随机输入对照 LCS 单测), 大文件用阈值退化. |
 | Q5 | 版本历史是否记录 `SAVE_PRE` 之外的 "保存后" 内容 (即每次保存两条)? | 建议不记录, 当前 "保存前 + 磁盘现状" 已覆盖全部状态; 改为在列表中标记 "与当前文件一致". |
 
 ## 附录 B. 冒烟清单 (P4.5)
@@ -165,7 +165,8 @@
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
-| 交互 | `storage/history/VersionHistoryController.kt`, `VersionHistoryEditorBridge.kt` (P2.3), `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |
+| 交互 | `storage/history/VersionHistoryController.kt`, `VersionHistoryEditorBridge.kt` (P2.3), `HistoryTextCodec.kt` (P2.4), `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |
+| 差异 | `storage/history/LineDiff.kt` (P2.4, 纯函数), `ui/storage/DiffActivity.kt` / `DiffLineAdapter.kt` (P2.4) |
 | 页面 | `ui/storage/TrashActivity.kt`, `VersionHistoryActivity.kt`, `RevisionListActivity.kt` / `RevisionAdapter.kt` / `RevisionViewHolder.kt` (P2.3), `BaseSearchSortListActivity.kt` |
 | 设置 | `ui/settings/TrashAndVersionHistorySettingsActivity.kt` / `...Fragment.kt` / `...Preference.kt`, `RetentionLimitSettings.kt`, `RetentionLimitPreference.kt`, `RetentionLimitDialogBuilder.kt`, `res/xml/fragment_trash_and_version_history_settings.xml`, `res/xml/fragment_preferences.xml` (分类) |
 | 接入 | `ui/edit/editor/service/EditorVersionHistoryService.kt`, `ui/common/ScriptOperations.java`, `ui/explorer/ExplorerBuiltInActionHandler.kt`, `ui/main/drawer/DrawerFragment.kt`, `App.kt` |

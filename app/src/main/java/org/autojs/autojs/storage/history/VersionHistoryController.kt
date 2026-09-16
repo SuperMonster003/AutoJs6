@@ -15,14 +15,11 @@ import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.storage.RevisionListActivity
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
-import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
 import java.io.IOException
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -342,13 +339,7 @@ class VersionHistoryController(private val context: Context) {
     }
 
     private fun decodeRevisionBytes(bytes: ByteArray, encodingName: String, hadBom: Boolean): String {
-        val charset = runCatching { Charset.forName(encodingName) }.getOrElse { DEFAULT_CHARSET }
-        val effective = if (hadBom) {
-            // Drop BOM before decoding because BOM presence is tracked by metadata.
-            // zh-CN: BOM 是否存在由元数据记录, 解码前需丢弃 BOM.
-            StringUtils.dropBom(bytes, charset)
-        } else bytes
-        return String(effective, charset)
+        return HistoryTextCodec.decodeRevision(bytes, encodingName, hadBom)
     }
 
     private fun sha256(bytes: ByteArray): ByteArray {
@@ -356,8 +347,6 @@ class VersionHistoryController(private val context: Context) {
     }
 
     companion object {
-        private val DEFAULT_CHARSET: Charset = StandardCharsets.UTF_8
-
         // Keep Intent extras payload under a conservative threshold.
         // zh-CN: 将 Intent extras 的载荷控制在一个保守阈值以内.
         private const val PREVIEW_INTENT_MAX_BYTES: Int = 64 * 1024

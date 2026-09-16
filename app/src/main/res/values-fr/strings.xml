@@ -1032,6 +1032,8 @@
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
     <string name="text_comment">Commentaire</string>
     <string name="text_committing_archive_extraction">Finalisation de l\'extraction de l\'archive</string>
+    <string name="text_compare_selected">Comparer la sélection</string>
+    <string name="text_compare_with_current_file">Comparer avec le fichier actuel</string>
     <string name="text_compatibility">Compatibilité</string>
     <string name="text_confidence_level">Confiance</string>
     <string name="text_config">Configuration</string>
@@ -1095,6 +1097,7 @@
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
     <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
     <string name="text_current">Actuel</string>
+    <string name="text_current_file">Fichier actuel</string>
     <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
     <string name="text_custom">Personnalisé</string>
@@ -1151,6 +1154,8 @@
     <string name="text_device_name">Nom de l\'appareil</string>
     <string name="text_device_product_name">Nom du produit de l\'appareil</string>
     <string name="text_device_screen_resolution">Résolution d\'écran de l\'appareil</string>
+    <string name="text_diff_stats">%1$d ajoutées, %2$d supprimées</string>
+    <string name="text_diff_too_large">Le contenu est trop volumineux pour une comparaison ligne par ligne, seules les statistiques sont affichées</string>
     <string name="text_directly_download">Téléchargement immédiat</string>
     <string name="text_directory">Repertoire</string>
     <string name="text_disabled">Désactivé</string>
@@ -1457,6 +1462,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
     <string name="text_layout_saved_to">Mise en page enregistrée dans %1$s</string>
     <string name="text_licenses">Licences Open Sources</string>
+    <string name="text_lines_and_size">%1$d lignes, %2$s</string>
     <string name="text_listeners">Écouteurs</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
     <string name="text_loading_completed">Chargement termine</string>
@@ -1508,6 +1514,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Deplacement vers la corbeille...</string>
     <string name="text_multiple_options">Options multiples</string>
     <string name="text_n_days">%d jours</string>
+    <string name="text_n_unchanged_lines_hidden">%d lignes inchangées masquées, appuyez pour développer</string>
     <string name="text_n_versions">%d versions</string>
     <string name="text_name">Nom</string>
     <string name="text_need_to_enable_a11y_service">Nécessité d\'activer le service d\'accessibilité</string>
@@ -1529,6 +1536,7 @@
     <string name="text_no_content">Pas de contenu</string>
     <string name="text_no_content_description">Aucune description de contenu</string>
     <string name="text_no_data">Aucune donnee</string>
+    <string name="text_no_differences">Aucune différence</string>
     <string name="text_no_exif_information">Aucune information EXIF</string>
     <string name="text_no_hidden_plugins">Aucun plugin masqué</string>
     <string name="text_no_history">Aucun historique</string>

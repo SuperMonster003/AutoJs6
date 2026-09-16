@@ -11,6 +11,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_compare_selected"
+        android:title="@string/text_compare_selected"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_select_all"
         android:title="@string/text_select_all"
         android:visible="false"

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="6dp"
+    android:paddingVertical="1dp">
+
+    <TextView
+        android:id="@+id/left_line_no"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:gravity="end"
+        android:textColor="@color/day_night_alpha_60"
+        android:textSize="12sp"
+        tools:text="1234" />
+
+    <TextView
+        android:id="@+id/right_line_no"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:gravity="end"
+        android:textColor="@color/day_night_alpha_60"
+        android:textSize="12sp"
+        tools:text="1235" />
+
+    <TextView
+        android:id="@+id/marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:paddingHorizontal="6dp"
+        android:textColor="@color/day_night"
+        android:textSize="13sp"
+        tools:text="+" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="monospace"
+        android:textColor="@color/day_night"
+        android:textSize="13sp"
+        tools:text="console.log('hello');" />
+</LinearLayout>

@@ -1034,6 +1034,8 @@
     <string name="text_command_already_copied_to_clip">클립 보드에 복사 된 명령</string>
     <string name="text_comment">논평</string>
     <string name="text_committing_archive_extraction">압축 풀기를 완료하는 중</string>
+    <string name="text_compare_selected">선택 항목 비교</string>
+    <string name="text_compare_with_current_file">현재 파일과 비교</string>
     <string name="text_compatibility">호환성</string>
     <string name="text_confidence_level">신뢰도</string>
     <string name="text_config">구성</string>
@@ -1097,6 +1099,7 @@
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
     <string name="text_current">현재</string>
+    <string name="text_current_file">현재 파일</string>
     <string name="text_current_page_configuration">현재 페이지 설정</string>
     <string name="text_current_version">현재 버전</string>
     <string name="text_custom">사용자 지정</string>
@@ -1153,6 +1156,8 @@
     <string name="text_device_name">장치 이름</string>
     <string name="text_device_product_name">장치 제품 이름</string>
     <string name="text_device_screen_resolution">기기 화면 해상도</string>
+    <string name="text_diff_stats">추가 %1$d줄, 삭제 %2$d줄</string>
+    <string name="text_diff_too_large">내용이 너무 커서 줄 단위로 비교할 수 없으므로 통계만 표시합니다</string>
     <string name="text_directly_download">지금 다운로드하십시오</string>
     <string name="text_directory">디렉터리</string>
     <string name="text_disabled">비활성화됨</string>
@@ -1459,6 +1464,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_layout_saved_to">레이아웃이 %1$s 에 저장되었습니다</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
+    <string name="text_lines_and_size">%1$d줄, %2$s</string>
     <string name="text_listeners">리스너</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
     <string name="text_loading_completed">로딩 완료</string>
@@ -1510,6 +1516,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_n_days">%d일</string>
+    <string name="text_n_unchanged_lines_hidden">변경되지 않은 %d줄 숨김, 탭하여 펼치기</string>
     <string name="text_n_versions">%d개 버전</string>
     <string name="text_name">이름</string>
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
@@ -1531,6 +1538,7 @@
     <string name="text_no_content">내용 없음</string>
     <string name="text_no_content_description">콘텐츠 설명 없음</string>
     <string name="text_no_data">데이터 없음</string>
+    <string name="text_no_differences">차이 없음</string>
     <string name="text_no_exif_information">EXIF 정보가 없습니다</string>
     <string name="text_no_hidden_plugins">숨겨진 플러그인이 없습니다</string>
     <string name="text_no_history">기록 없음</string>

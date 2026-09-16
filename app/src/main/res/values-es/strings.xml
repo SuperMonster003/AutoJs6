@@ -1032,6 +1032,8 @@
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
     <string name="text_committing_archive_extraction">Finalizando la extracción del archivo</string>
+    <string name="text_compare_selected">Comparar seleccionados</string>
+    <string name="text_compare_with_current_file">Comparar con el archivo actual</string>
     <string name="text_compatibility">Compatibilidad</string>
     <string name="text_confidence_level">Confianza</string>
     <string name="text_config">Configuración</string>
@@ -1095,6 +1097,7 @@
     <string name="text_country_code_must_be_two_capital_letters">El código del país debe ser de dos letras mayúsculas</string>
     <string name="text_creating_unsigned_apk">Creando APK sin firmar</string>
     <string name="text_current">Actual</string>
+    <string name="text_current_file">Archivo actual</string>
     <string name="text_current_page_configuration">Configuracion de la página actual</string>
     <string name="text_current_version">Versión actual</string>
     <string name="text_custom">Personalizado</string>
@@ -1151,6 +1154,8 @@
     <string name="text_device_name">Nombre del dispositivo</string>
     <string name="text_device_product_name">Nombre del producto del dispositivo</string>
     <string name="text_device_screen_resolution">Resolución de pantalla del dispositivo</string>
+    <string name="text_diff_stats">%1$d añadidas, %2$d eliminadas</string>
+    <string name="text_diff_too_large">El contenido es demasiado grande para una comparación línea por línea, por lo que solo se muestran estadísticas</string>
     <string name="text_directly_download">Descargar ahora</string>
     <string name="text_directory">Directorio</string>
     <string name="text_disabled">Desactivado</string>
@@ -1457,6 +1462,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspeccionando el diseño...</string>
     <string name="text_layout_saved_to">Diseño guardado en %1$s</string>
     <string name="text_licenses">Licencias de fuentes abiertas</string>
+    <string name="text_lines_and_size">%1$d líneas, %2$s</string>
     <string name="text_listeners">Oyentes</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Intentando una solución alternativa...</string>
     <string name="text_loading_completed">Carga completada</string>
@@ -1508,6 +1514,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moviendo a la papelera...</string>
     <string name="text_multiple_options">Opciones múltiples</string>
     <string name="text_n_days">%d días</string>
+    <string name="text_n_unchanged_lines_hidden">%d líneas sin cambios ocultas, toca para expandir</string>
     <string name="text_n_versions">%d versiones</string>
     <string name="text_name">Nombre</string>
     <string name="text_need_to_enable_a11y_service">Necesidad de habilitar el servicio de accesibilidad</string>
@@ -1529,6 +1536,7 @@
     <string name="text_no_content">Sin contenido</string>
     <string name="text_no_content_description">Sin descripción de contenido</string>
     <string name="text_no_data">Sin datos</string>
+    <string name="text_no_differences">Sin diferencias</string>
     <string name="text_no_exif_information">No hay información EXIF</string>
     <string name="text_no_hidden_plugins">No hay plugins ocultos</string>
     <string name="text_no_history">Sin historial</string>

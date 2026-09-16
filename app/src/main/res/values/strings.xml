@@ -1028,6 +1028,8 @@
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_comment">Comment</string>
     <string name="text_committing_archive_extraction">Finishing archive extraction</string>
+    <string name="text_compare_selected">Compare selected</string>
+    <string name="text_compare_with_current_file">Compare with current file</string>
     <string name="text_compatibility">Compatibility</string>
     <string name="text_confidence_level">Confidence</string>
     <string name="text_config">Config</string>
@@ -1091,6 +1093,7 @@
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
     <string name="text_current">Current</string>
+    <string name="text_current_file">Current file</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
     <string name="text_custom">Custom</string>
@@ -1147,6 +1150,8 @@
     <string name="text_device_name">Device name</string>
     <string name="text_device_product_name">Device product name</string>
     <string name="text_device_screen_resolution">Device screen resolution</string>
+    <string name="text_diff_stats">%1$d added, %2$d removed</string>
+    <string name="text_diff_too_large">The content is too large for a line-by-line comparison, so only statistics are shown</string>
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_disabled">Disabled</string>
@@ -1453,6 +1458,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_layout_saved_to">Layout saved to %1$s</string>
     <string name="text_licenses">Open Sources Licenses</string>
+    <string name="text_lines_and_size">%1$d lines, %2$s</string>
     <string name="text_listeners">Listeners</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_completed">Loading completed</string>
@@ -1504,6 +1510,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_n_days">%d days</string>
+    <string name="text_n_unchanged_lines_hidden">%d unchanged lines hidden, tap to expand</string>
     <string name="text_n_versions">%d versions</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
@@ -1525,6 +1532,7 @@
     <string name="text_no_content">No content</string>
     <string name="text_no_content_description">No content description</string>
     <string name="text_no_data">No data</string>
+    <string name="text_no_differences">No differences</string>
     <string name="text_no_exif_information">No EXIF information</string>
     <string name="text_no_hidden_plugins">No hidden plugins</string>
     <string name="text_no_history">No history</string>

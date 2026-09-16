@@ -1032,6 +1032,8 @@
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
     <string name="text_comment">Комментарий</string>
     <string name="text_committing_archive_extraction">Завершение извлечения архива</string>
+    <string name="text_compare_selected">Сравнить выбранные</string>
+    <string name="text_compare_with_current_file">Сравнить с текущим файлом</string>
     <string name="text_compatibility">Совместимость</string>
     <string name="text_confidence_level">Доверие</string>
     <string name="text_config">Конфигурация</string>
@@ -1095,6 +1097,7 @@
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current">Текущая</string>
+    <string name="text_current_file">Текущий файл</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_custom">Пользовательский</string>
@@ -1151,6 +1154,8 @@
     <string name="text_device_name">Название устройства</string>
     <string name="text_device_product_name">Название продукта устройства</string>
     <string name="text_device_screen_resolution">Разрешение экрана устройства</string>
+    <string name="text_diff_stats">Добавлено: %1$d, удалено: %2$d</string>
+    <string name="text_diff_too_large">Содержимое слишком велико для построчного сравнения, показана только статистика</string>
     <string name="text_directly_download">Загрузить сейчас</string>
     <string name="text_directory">Каталог</string>
     <string name="text_disabled">Отключено</string>
@@ -1457,6 +1462,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_layout_saved_to">Компоновка сохранена в %1$s</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
+    <string name="text_lines_and_size">Строк: %1$d, %2$s</string>
     <string name="text_listeners">Слушатели</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
     <string name="text_loading_completed">Загрузка завершена</string>
@@ -1508,6 +1514,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Перемещение в корзину...</string>
     <string name="text_multiple_options">Несколько вариантов</string>
     <string name="text_n_days">%d дн.</string>
+    <string name="text_n_unchanged_lines_hidden">Скрыто неизмененных строк: %d, нажмите, чтобы развернуть</string>
     <string name="text_n_versions">%d вер.</string>
     <string name="text_name">Имя</string>
     <string name="text_need_to_enable_a11y_service">Необходимо включить службу доступности</string>
@@ -1529,6 +1536,7 @@
     <string name="text_no_content">Нет содержимого</string>
     <string name="text_no_content_description">Нет описания содержимого</string>
     <string name="text_no_data">Нет данных</string>
+    <string name="text_no_differences">Различий нет</string>
     <string name="text_no_exif_information">Нет информации EXIF</string>
     <string name="text_no_hidden_plugins">Нет скрытых плагинов</string>
     <string name="text_no_history">Истории нет</string>

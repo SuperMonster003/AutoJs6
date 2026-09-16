@@ -201,5 +201,6 @@
     <color name="floating_console_title_bar_bg">#cc181818</color>
     <color name="floating_controller_background">#E6FAFAFA</color>
     <color name="floating_controller_stroke">#1F000000</color>
-
+    <color name="diff_line_inserted_bg">#DDF4DD</color>
+    <color name="diff_line_deleted_bg">#F9DEDE</color>
 </resources>

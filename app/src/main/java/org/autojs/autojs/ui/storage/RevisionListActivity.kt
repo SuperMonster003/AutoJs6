@@ -151,6 +151,7 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val selecting = adapter.selectionMode
         menu.findItem(R.id.action_delete_selected)?.isVisible = selecting
+        menu.findItem(R.id.action_compare_selected)?.isVisible = selecting && adapter.selectedCount == 2
         menu.findItem(R.id.action_select_all)?.isVisible = selecting
         menu.findItem(R.id.action_deselect_all)?.isVisible = selecting
         menu.findItem(R.id.action_sort)?.isVisible = !selecting
@@ -162,6 +163,7 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
         R.id.action_select_all -> true.also { adapter.selectAll() }
         R.id.action_deselect_all -> true.also { adapter.clearSelection() }
         R.id.action_delete_selected -> true.also { confirmAndDelete(adapter.selectedRows()) }
+        R.id.action_compare_selected -> true.also { compareSelected(adapter.selectedRows()) }
         R.id.action_open_file -> true.also { Scripts.edit(this, canonicalPath) }
         else -> false
     }
@@ -194,7 +196,14 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
                 append(getString(R.string.text_same_as_current_file))
             }
         }
-        val optionDelete = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_delete)) { dialog ->
+        val options = ArrayList<MaterialDialog.OptionMenuItemSpec>()
+        if (File(canonicalPath).isFile) {
+            options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_compare_with_current_file)) { dialog ->
+                dialog.dismiss()
+                DiffActivity.launch(this, canonicalPath, displayPath, leftRevId = rev.revId, rightRevId = null)
+            }
+        }
+        options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_delete)) { dialog ->
             dialog.dismiss()
             confirmAndDelete(listOf(row))
         }
@@ -202,7 +211,7 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
             MaterialDialog.Builder(this)
                 .title(timeText)
                 .content(details)
-                .options(listOf(optionDelete))
+                .options(options)
                 .neutralText(R.string.dialog_button_preview)
                 .neutralColorRes(R.color.dialog_button_hint)
                 .onNeutral { _, _ -> controller.previewInReadOnlyEditor(rev, displayPath) }
@@ -235,6 +244,16 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
                 controller.confirmAndRestoreToDisk(row.rev, canonicalPath) { load() }
             }
         }
+    }
+
+    /**
+     * Diff two selected revisions, older on the left.
+     * zh-CN: 比较选中的两条 revision, 较旧的在左侧.
+     */
+    private fun compareSelected(rows: List<RevisionRow>) {
+        if (rows.size != 2) return
+        val sorted = rows.sortedBy { it.rev.createdAt }
+        DiffActivity.launch(this, canonicalPath, displayPath, leftRevId = sorted[0].rev.revId, rightRevId = sorted[1].rev.revId)
     }
 
     private fun confirmAndDelete(rows: List<RevisionRow>) {

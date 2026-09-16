@@ -1033,6 +1033,8 @@
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
     <string name="text_comment">コメント</string>
     <string name="text_committing_archive_extraction">アーカイブの展開を完了中</string>
+    <string name="text_compare_selected">選択項目を比較</string>
+    <string name="text_compare_with_current_file">現在のファイルと比較</string>
     <string name="text_compatibility">互換性</string>
     <string name="text_confidence_level">信頼度</string>
     <string name="text_config">設定</string>
@@ -1096,6 +1098,7 @@
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current">現在</string>
+    <string name="text_current_file">現在のファイル</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
     <string name="text_custom">カスタム</string>
@@ -1152,6 +1155,8 @@
     <string name="text_device_name">デバイス名</string>
     <string name="text_device_product_name">デバイスの製品名</string>
     <string name="text_device_screen_resolution">デバイスの画面解像度</string>
+    <string name="text_diff_stats">追加 %1$d 行, 削除 %2$d 行</string>
+    <string name="text_diff_too_large">内容が大きすぎるため行単位の比較はできません. 統計のみ表示します</string>
     <string name="text_directly_download">今すぐダウンロード</string>
     <string name="text_directory">ディレクトリ</string>
     <string name="text_disabled">無効</string>
@@ -1458,6 +1463,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
     <string name="text_layout_saved_to">レイアウトを %1$s に保存しました</string>
     <string name="text_licenses">オープンソースライセンス</string>
+    <string name="text_lines_and_size">%1$d 行, %2$s</string>
     <string name="text_listeners">リスナー</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
     <string name="text_loading_completed">読み込み完了</string>
@@ -1509,6 +1515,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">ゴミ箱に移動中...</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_n_days">%d 日</string>
+    <string name="text_n_unchanged_lines_hidden">変更のない %d 行を非表示中. タップして展開</string>
     <string name="text_n_versions">%d バージョン</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">アクセシビリティサービスを有効にする必要があります</string>
@@ -1530,6 +1537,7 @@
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
     <string name="text_no_data">データなし</string>
+    <string name="text_no_differences">差異はありません</string>
     <string name="text_no_exif_information">EXIF 情報がありません</string>
     <string name="text_no_hidden_plugins">非表示のプラグインはありません</string>
     <string name="text_no_history">履歴なし</string>

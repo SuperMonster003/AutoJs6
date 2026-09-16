@@ -1034,6 +1034,8 @@
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
     <string name="text_comment">تعليق</string>
     <string name="text_committing_archive_extraction">جار إنهاء استخراج الأرشيف</string>
+    <string name="text_compare_selected">مقارنة المحدد</string>
+    <string name="text_compare_with_current_file">مقارنة مع الملف الحالي</string>
     <string name="text_compatibility">التوافق</string>
     <string name="text_confidence_level">ثقة</string>
     <string name="text_config">تكوين</string>
@@ -1097,6 +1099,7 @@
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current">الحالي</string>
+    <string name="text_current_file">الملف الحالي</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
     <string name="text_current_version">النسخة الحالية</string>
     <string name="text_custom">مخصص</string>
@@ -1153,6 +1156,8 @@
     <string name="text_device_name">اسم الجهاز</string>
     <string name="text_device_product_name">اسم منتج الجهاز</string>
     <string name="text_device_screen_resolution">دقّة شاشة الجهاز</string>
+    <string name="text_diff_stats">اضيف %1$d, حذف %2$d</string>
+    <string name="text_diff_too_large">المحتوى كبير جدا للمقارنة سطرا بسطر, لذلك تعرض الاحصائيات فقط</string>
     <string name="text_directly_download">التحميل الان</string>
     <string name="text_directory">دليل</string>
     <string name="text_disabled">معطّل</string>
@@ -1459,6 +1464,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">فحص التصميم ...</string>
     <string name="text_layout_saved_to">تم حفظ التخطيط في %1$s</string>
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
+    <string name="text_lines_and_size">%1$d سطر, %2$s</string>
     <string name="text_listeners">المستمعون</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">جارٍ تجربة حل بديل...</string>
     <string name="text_loading_completed">اكتمل التحميل</string>
@@ -1510,6 +1516,7 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">جارٍ النقل الى سلة المحذوفات...</string>
     <string name="text_multiple_options">خيارات متعددة</string>
     <string name="text_n_days">%d يوم</string>
+    <string name="text_n_unchanged_lines_hidden">تم اخفاء %d سطر دون تغيير, انقر للتوسيع</string>
     <string name="text_n_versions">%d اصدار</string>
     <string name="text_name">اسم</string>
     <string name="text_need_to_enable_a11y_service">تحتاج إلى تمكين خدمة الوصول</string>
@@ -1531,6 +1538,7 @@
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
     <string name="text_no_data">لا توجد بيانات</string>
+    <string name="text_no_differences">لا توجد اختلافات</string>
     <string name="text_no_exif_information">لا توجد معلومات EXIF</string>
     <string name="text_no_hidden_plugins">لا توجد مكونات إضافية مخفية</string>
     <string name="text_no_history">لا يوجد سجل</string>
