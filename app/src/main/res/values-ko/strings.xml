@@ -1259,6 +1259,8 @@
     <string name="text_exit_directly">출구</string>
     <string name="text_exit_fullscreen_mode">전체 화면 종료</string>
     <string name="text_expand_all">모두 펼치기</string>
+    <string name="text_expired">만료됨</string>
+    <string name="text_expires_at">만료</string>
     <string name="text_export">내보내다</string>
     <string name="text_export_all">모두 내보내기</string>
     <string name="text_export_selected">선택 항목 내보내기</string>
@@ -1523,7 +1525,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_n_days">%d일</string>
+    <string name="text_n_days_n_hours_left">%1$d일 %2$d시간 남음</string>
     <string name="text_n_files_n_folders">파일 %1$d개, 폴더 %2$d개</string>
+    <string name="text_n_hours_left">%d시간 남음</string>
     <string name="text_n_items">%d개 항목</string>
     <string name="text_n_items_conflict">%2$d개 항목 중 %1$d개가 대상 위치에 이미 있습니다</string>
     <string name="text_n_unchanged_lines_hidden">변경되지 않은 %d줄 숨김, 탭하여 펼치기</string>

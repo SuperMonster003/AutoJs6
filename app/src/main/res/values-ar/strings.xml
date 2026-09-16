@@ -1259,6 +1259,8 @@
     <string name="text_exit_directly">مخرج</string>
     <string name="text_exit_fullscreen_mode">الخروج من وضع ملء الشاشة</string>
     <string name="text_expand_all">توسيع الكل</string>
+    <string name="text_expired">منتهي</string>
+    <string name="text_expires_at">ينتهي</string>
     <string name="text_export">يصدّر</string>
     <string name="text_export_all">تصدير الكل</string>
     <string name="text_export_selected">تصدير المحدد</string>
@@ -1523,7 +1525,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">جارٍ النقل الى سلة المحذوفات...</string>
     <string name="text_multiple_options">خيارات متعددة</string>
     <string name="text_n_days">%d يوم</string>
+    <string name="text_n_days_n_hours_left">متبقي %1$d يوم و %2$d ساعة</string>
     <string name="text_n_files_n_folders">%1$d ملف, %2$d مجلد</string>
+    <string name="text_n_hours_left">متبقي %d ساعة</string>
     <string name="text_n_items">%d عنصر</string>
     <string name="text_n_items_conflict">%1$d من اصل %2$d عنصر موجودة بالفعل في الوجهة</string>
     <string name="text_n_unchanged_lines_hidden">تم اخفاء %d سطر دون تغيير, انقر للتوسيع</string>

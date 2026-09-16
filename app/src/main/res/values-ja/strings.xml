@@ -1258,6 +1258,8 @@
     <string name="text_exit_directly">終了</string>
     <string name="text_exit_fullscreen_mode">全画面表示を終了</string>
     <string name="text_expand_all">すべて展開する</string>
+    <string name="text_expired">期限切れ</string>
+    <string name="text_expires_at">期限</string>
     <string name="text_export">輸出</string>
     <string name="text_export_all">全てエクスポート</string>
     <string name="text_export_selected">選択をエクスポート</string>
@@ -1522,7 +1524,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">ゴミ箱に移動中...</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_n_days">%d 日</string>
+    <string name="text_n_days_n_hours_left">残り %1$d 日 %2$d 時間</string>
     <string name="text_n_files_n_folders">ファイル %1$d 件, フォルダー %2$d 件</string>
+    <string name="text_n_hours_left">残り %d 時間</string>
     <string name="text_n_items">%d 件</string>
     <string name="text_n_items_conflict">%2$d 件のうち %1$d 件は移動先に既に存在します</string>
     <string name="text_n_unchanged_lines_hidden">変更のない %d 行を非表示中. タップして展開</string>

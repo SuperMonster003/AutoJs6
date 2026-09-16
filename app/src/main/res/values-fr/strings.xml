@@ -1257,6 +1257,8 @@
     <string name="text_exit_directly">Quitter</string>
     <string name="text_exit_fullscreen_mode">Quitter le plein écran</string>
     <string name="text_expand_all">Tout développer</string>
+    <string name="text_expired">Expiré</string>
+    <string name="text_expires_at">Expire</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Tout exporter</string>
     <string name="text_export_selected">Exporter la selection</string>
@@ -1521,7 +1523,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Deplacement vers la corbeille...</string>
     <string name="text_multiple_options">Options multiples</string>
     <string name="text_n_days">%d jours</string>
+    <string name="text_n_days_n_hours_left">%1$d jours %2$d heures restants</string>
     <string name="text_n_files_n_folders">%1$d fichiers, %2$d dossiers</string>
+    <string name="text_n_hours_left">%d heures restantes</string>
     <string name="text_n_items">%d éléments</string>
     <string name="text_n_items_conflict">%1$d des %2$d éléments existent déjà dans la destination</string>
     <string name="text_n_unchanged_lines_hidden">%d lignes inchangées masquées, appuyez pour développer</string>

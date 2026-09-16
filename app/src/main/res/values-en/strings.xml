@@ -1245,6 +1245,8 @@
     <string name="text_exit_directly">Exit</string>
     <string name="text_exit_fullscreen_mode">Exit fullscreen</string>
     <string name="text_expand_all">Expand all</string>
+    <string name="text_expired">Expired</string>
+    <string name="text_expires_at">Expires</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Export all</string>
     <string name="text_export_selected">Export selected</string>
@@ -1509,7 +1511,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_n_days">%d days</string>
+    <string name="text_n_days_n_hours_left">%1$d days %2$d hours left</string>
     <string name="text_n_files_n_folders">%1$d files, %2$d folders</string>
+    <string name="text_n_hours_left">%d hours left</string>
     <string name="text_n_items">%d items</string>
     <string name="text_n_items_conflict">%1$d of %2$d items already exist at the destination</string>
     <string name="text_n_unchanged_lines_hidden">%d unchanged lines hidden, tap to expand</string>

@@ -1254,6 +1254,8 @@
     <string name="text_exit_directly">直接退出</string>
     <string name="text_exit_fullscreen_mode">退出全屏</string>
     <string name="text_expand_all">展开全部</string>
+    <string name="text_expired">已到期</string>
+    <string name="text_expires_at">到期时间</string>
     <string name="text_export">导出</string>
     <string name="text_export_all">导出全部</string>
     <string name="text_export_selected">导出选中项</string>
@@ -1518,7 +1520,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">正在移入回收站...</string>
     <string name="text_multiple_options">多个可选项</string>
     <string name="text_n_days">%d 天</string>
+    <string name="text_n_days_n_hours_left">剩余 %1$d 天 %2$d 小时</string>
     <string name="text_n_files_n_folders">%1$d 个文件, %2$d 个文件夹</string>
+    <string name="text_n_hours_left">剩余 %d 小时</string>
     <string name="text_n_items">%d 个条目</string>
     <string name="text_n_items_conflict">%2$d 个条目中有 %1$d 个在目标位置已存在</string>
     <string name="text_n_unchanged_lines_hidden">已隐藏 %d 行未变更内容, 点击展开</string>

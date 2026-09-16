@@ -1257,6 +1257,8 @@
     <string name="text_exit_directly">Salir de</string>
     <string name="text_exit_fullscreen_mode">Salir de pantalla completa</string>
     <string name="text_expand_all">Expandir todo</string>
+    <string name="text_expired">Caducado</string>
+    <string name="text_expires_at">Caduca</string>
     <string name="text_export">Exportar</string>
     <string name="text_export_all">Exportar todo</string>
     <string name="text_export_selected">Exportar seleccionados</string>
@@ -1521,7 +1523,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moviendo a la papelera...</string>
     <string name="text_multiple_options">Opciones múltiples</string>
     <string name="text_n_days">%d días</string>
+    <string name="text_n_days_n_hours_left">Quedan %1$d días y %2$d horas</string>
     <string name="text_n_files_n_folders">%1$d archivos, %2$d carpetas</string>
+    <string name="text_n_hours_left">Quedan %d horas</string>
     <string name="text_n_items">%d elementos</string>
     <string name="text_n_items_conflict">%1$d de %2$d elementos ya existen en el destino</string>
     <string name="text_n_unchanged_lines_hidden">%d líneas sin cambios ocultas, toca para expandir</string>

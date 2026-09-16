@@ -47,10 +47,14 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
                     d.dismiss()
                     TrashPreviewController(this).preview(item)
                 }
+                val optionMenuItemDetails = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_details)) { d ->
+                    d.dismiss()
+                    TrashPreviewController(this).showDetails(item)
+                }
                 val optionMenuItemRemove = MaterialDialog.OptionMenuItemSpec(getString(R.string.text_remove_from_trash)) { d ->
                     confirmAndRemoveFromTrash(item, d)
                 }
-                TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemPreview, optionMenuItemRemove)) {
+                TrashRestoreController(this).startRestoreFlow(item, listOf(optionMenuItemPreview, optionMenuItemDetails, optionMenuItemRemove)) {
                     load()
                 }
             }

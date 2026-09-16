@@ -1257,6 +1257,8 @@
     <string name="text_exit_directly">Выйти</string>
     <string name="text_exit_fullscreen_mode">Выход из полноэкранного режима</string>
     <string name="text_expand_all">Развернуть всё</string>
+    <string name="text_expired">Истек</string>
+    <string name="text_expires_at">Истекает</string>
     <string name="text_export">Экспорт</string>
     <string name="text_export_all">Экспортировать все</string>
     <string name="text_export_selected">Экспорт выбранного</string>
@@ -1521,7 +1523,9 @@
     <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Перемещение в корзину...</string>
     <string name="text_multiple_options">Несколько вариантов</string>
     <string name="text_n_days">%d дн.</string>
+    <string name="text_n_days_n_hours_left">Осталось %1$d дн. %2$d ч.</string>
     <string name="text_n_files_n_folders">Файлов: %1$d, папок: %2$d</string>
+    <string name="text_n_hours_left">Осталось %d ч.</string>
     <string name="text_n_items">Элементов: %d</string>
     <string name="text_n_items_conflict">%1$d из %2$d элементов уже существуют в месте назначения</string>
     <string name="text_n_unchanged_lines_hidden">Скрыто неизмененных строк: %d, нажмите, чтобы развернуть</string>
