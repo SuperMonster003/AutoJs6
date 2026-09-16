@@ -152,6 +152,76 @@ class HistoryRepository(private val context: Context) {
     }
 
     /**
+     * Store [bytes] as a MANUAL revision of [logicalPath]: pinned, with an optional label.
+     * If the newest revision already holds this content it is pinned and labelled instead of
+     * storing a duplicate blob. The entry's fingerprint follows the on-disk content (the snapshot
+     * may come from an unsaved editor buffer) so a later rename can still re-attach the entry.
+     *
+     * zh-CN: 把 [bytes] 存为 [logicalPath] 的 MANUAL revision: 默认固定, 可选标签.
+     * 若最新 revision 已是相同内容, 则改为固定并写入标签, 不再重复存储 blob. 条目指纹跟随磁盘内容
+     * (快照可能来自未保存的编辑器缓冲), 以便之后重命名仍能重新绑定.
+     */
+    fun recordManualSnapshot(
+        logicalPath: String,
+        bytes: ByteArray,
+        encodingName: String,
+        hadBom: Boolean,
+        label: String?,
+    ): HistoryEntities.Revision? = runCatching {
+        val normalizedLabel = HistorySnapshotLabel.normalizeOrNull(label)
+        val now = System.currentTimeMillis()
+        val sha = sha256Hex(bytes)
+        val diskSha = runCatching {
+            File(logicalPath).takeIf { it.isFile }?.readBytes()?.let { sha256Hex(it) }
+        }.getOrNull()
+
+        val fileEntry = getOrCreateFileEntry(
+            logicalPath = logicalPath,
+            lookupFingerprint = diskSha ?: sha,
+            latestFingerprint = diskSha ?: sha,
+            now = now,
+        )
+
+        val latest = dao.findLatestRevision(fileEntry.fileId)
+        if (latest != null && HistoryFingerprintPolicy.isDuplicateSnapshot(latest.sha256, latest.sizeBytes, sha, bytes.size.toLong())) {
+            if (normalizedLabel != null) dao.updateRevisionLabel(latest.revId, normalizedLabel)
+            dao.updateRevisionPinned(latest.revId, true)
+            return@runCatching latest.copy(label = normalizedLabel ?: latest.label, pinned = true)
+        }
+
+        val revId = blobs.newRevId()
+        val blobRel = blobs.writeRevisionBlob(fileEntry.fileId, revId, bytes)
+        val revision = HistoryEntities.Revision(
+            revId = revId,
+            fileId = fileEntry.fileId,
+            op = OP_MANUAL,
+            createdAt = now,
+            logicalPathAtThatTime = logicalPath,
+            encoding = encodingName,
+            hadBom = hadBom,
+            sizeBytes = bytes.size.toLong(),
+            sha256 = sha,
+            blobRelPath = blobRel,
+            label = normalizedLabel,
+            pinned = true,
+        )
+        dao.insertRevision(revision)
+
+        cleanupPerFile(fileEntry.fileId, now)
+        cleanupGlobal()
+
+        revision
+    }.onFailure { it.printStackTrace() }.getOrNull()
+
+    fun setRevisionLabel(rev: HistoryEntities.Revision, label: String?) {
+        dao.updateRevisionLabel(rev.revId, HistorySnapshotLabel.normalizeOrNull(label))
+    }
+
+    fun setRevisionPinned(rev: HistoryEntities.Revision, pinned: Boolean) {
+        dao.updateRevisionPinned(rev.revId, pinned)
+    }
+
+    /**
      * Clear all history revisions/blobs for a given path.
      *
      * Rules:
@@ -330,10 +400,12 @@ class HistoryRepository(private val context: Context) {
 
     /**
      * Enforce per-file retention (days, count, bytes); zero or negative limits mean unlimited.
+     * Pinned revisions neither count towards the limits nor get deleted here.
      * zh-CN: 执行单文件保留策略 (天数 / 条数 / 容量); 上限为 0 或负数表示不限.
+     * 固定的 revision 既不计入上限, 也不会在此被删除.
      */
     private fun cleanupPerFile(fileId: String, now: Long) {
-        val revisions = dao.listRevisionsAsc(fileId)
+        val revisions = dao.listRevisionsAsc(fileId).filter { !it.pinned }
         if (revisions.isEmpty()) return
 
         val toDelete = HistoryRetentionPolicy.selectToDelete(
@@ -389,8 +461,9 @@ class HistoryRepository(private val context: Context) {
     }
 
     /**
-     * Enforce global history total bytes limit (remove oldest revisions first).
-     * zh-CN: 约束全局历史总容量上限 (优先删除最旧 revision).
+     * Enforce global history total bytes limit (remove oldest revisions first). Unpinned revisions
+     * go first; pinned ones are only removed once no unpinned revision is left.
+     * zh-CN: 约束全局历史总容量上限 (优先删除最旧 revision). 先删未固定的, 仅当没有未固定的 revision 时才删固定的.
      */
     private fun cleanupGlobal() {
         val maxTotalBytes = HistoryPrefs.historyMaxTotalBytes()
@@ -404,7 +477,7 @@ class HistoryRepository(private val context: Context) {
         val batchSize = 50
 
         while (totalBytes > maxTotalBytes) {
-            val oldest = dao.listOldestRevisions(batchSize)
+            val oldest = dao.listOldestUnpinnedRevisions(batchSize).ifEmpty { dao.listOldestRevisions(batchSize) }
             if (oldest.isEmpty()) break
 
             val toRemove = HistoryRetentionPolicy.selectOverBytes(oldest, maxTotalBytes, totalBytes) { it.sizeBytes }
@@ -424,5 +497,8 @@ class HistoryRepository(private val context: Context) {
 
         /** Content captured right before an explorer copy / move overwrote it. */
         const val OP_OVERWRITE_PRE: String = "OVERWRITE_PRE"
+
+        /** Snapshot created on purpose by the user (pinned by default, may carry a label). */
+        const val OP_MANUAL: String = "MANUAL"
     }
 }

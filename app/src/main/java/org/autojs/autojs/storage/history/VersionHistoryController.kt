@@ -202,6 +202,27 @@ class VersionHistoryController(private val context: Context) {
         }
     }
 
+    fun setPinned(rev: HistoryEntities.Revision, pinned: Boolean, onDone: (() -> Unit)? = null) {
+        updateRevision(onDone) { it.setRevisionPinned(rev, pinned) }
+    }
+
+    fun setLabel(rev: HistoryEntities.Revision, label: String?, onDone: (() -> Unit)? = null) {
+        updateRevision(onDone) { it.setRevisionLabel(rev, label) }
+    }
+
+    private fun updateRevision(onDone: (() -> Unit)?, block: (HistoryRepository) -> Unit) {
+        val appCtx = context.applicationContext
+        Schedulers.io().scheduleDirect {
+            runCatching { block(HistoryRepository(appCtx)) }.onFailure {
+                it.printStackTrace()
+                AndroidSchedulers.mainThread().scheduleDirect {
+                    ViewUtils.showToast(context, it.message, true)
+                }
+            }
+            AndroidSchedulers.mainThread().scheduleDirect { onDone?.invoke() }
+        }
+    }
+
     private fun restoreToEditor(
         rev: HistoryEntities.Revision,
         callbacks: VersionHistoryEditorBridge.Callbacks,
@@ -360,6 +381,7 @@ class VersionHistoryController(private val context: Context) {
             HistoryRepository.OP_SAVE_PRE -> context.getString(R.string.text_revision_op_save_pre)
             HistoryRepository.OP_RESTORE_PRE -> context.getString(R.string.text_revision_op_restore_pre)
             HistoryRepository.OP_OVERWRITE_PRE -> context.getString(R.string.text_revision_op_overwrite_pre)
+            HistoryRepository.OP_MANUAL -> context.getString(R.string.text_revision_op_manual)
             else -> op
         }
     }

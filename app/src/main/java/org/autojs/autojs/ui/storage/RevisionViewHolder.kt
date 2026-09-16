@@ -27,10 +27,10 @@ internal class RevisionViewHolder(
         val rev = row.rev
 
         val timeText = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(rev.createdAt))
-        binding.title.text = if (row.isCurrent) {
-            "$timeText  ·  ${context.getString(R.string.text_current)}"
-        } else {
-            timeText
+        binding.title.text = buildString {
+            append(timeText)
+            rev.label?.takeIf { it.isNotBlank() }?.let { append("  ·  ").append(it) }
+            if (row.isCurrent) append("  ·  ").append(context.getString(R.string.text_current))
         }
 
         binding.subtitle.text = buildString {
@@ -40,6 +40,7 @@ internal class RevisionViewHolder(
             append("  |  ")
             append(rev.encoding)
             if (rev.hadBom) append(" (BOM)")
+            if (rev.pinned) append("  |  ").append(context.getString(R.string.text_pinned))
         }
 
         binding.checkbox.visibility = if (selectionMode) View.VISIBLE else View.GONE

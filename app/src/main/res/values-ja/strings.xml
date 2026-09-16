@@ -526,6 +526,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">TypeScript TSX のテキストの子は末端のテキストコントロールでのみサポートされます.</string>
     <string name="error_typescript_tsx_tree_too_deep">TypeScript TSX ツリーのネストが深すぎます.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">現在のファイルパスが不明なため, ファイルのエンコーディングを変更できません</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">現在のファイルパスが不明なため, スナップショットを作成できません</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">現在のファイルパスが不明のため, ファイル詳細を表示できません</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">現在のファイルパスが不明のため, バージョン履歴を表示できません</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">現在のファイルパスが不明のため, 他のアプリで開けません</string>
@@ -1096,6 +1097,7 @@
     <string name="text_countdown_task">カウントダウンタスク</string>
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
+    <string name="text_create_snapshot">スナップショットを作成</string>
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current">現在</string>
     <string name="text_current_file">現在のファイル</string>
@@ -1186,6 +1188,7 @@
     <string name="text_drawer_open">ドロワーを開く</string>
     <string name="text_edit">編集する</string>
     <string name="text_edit_by_other_apps">他のアプリで編集</string>
+    <string name="text_edit_label">ラベルを編集</string>
     <string name="text_edit_prepare_script">実行前スクリプトの編集</string>
     <string name="text_edit_script">スクリプトの編集</string>
     <string name="text_editor_assistance">支援機能</string>
@@ -1439,6 +1442,7 @@
     <string name="text_key_store_has_been_verified">キーストアは確認されました</string>
     <string name="text_key_store_has_not_been_verified">キーストアは確認されていません</string>
     <string name="text_key_store_password">キーストアのパスワード</string>
+    <string name="text_label">ラベル</string>
     <string name="text_label_name">ラベル</string>
     <string name="text_label_state">状態</string>
     <string name="text_last_event">最新のイベント</string>
@@ -1703,8 +1707,11 @@
     <string name="text_permission_test">許可テスト</string>
     <string name="text_permissions">許可</string>
     <string name="text_permissions_list">許可リスト</string>
+    <string name="text_pin">固定</string>
     <string name="text_pin_shortcut_not_unsupported">ショートカットをランチャーにピン留めすることはサポートされていません</string>
     <string name="text_pinch_to_zoom">ピンチ操作</string>
+    <string name="text_pinned">固定済み</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">固定済み, ファイル単位のクリーンアップの対象外</string>
     <string name="text_play">再生</string>
     <string name="text_please_choose">選択してください</string>
     <string name="text_please_choose_a_script">スクリプトを選択してください</string>
@@ -1866,6 +1873,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">リリースノートを取得しています...</string>
+    <string name="text_revision_op_manual">手動スナップショット</string>
     <string name="text_revision_op_overwrite_pre">上書き前</string>
     <string name="text_revision_op_restore_pre">復元前</string>
     <string name="text_revision_op_save_pre">保存前</string>
@@ -1963,6 +1971,9 @@
     <string name="text_signature_configuration">署名設定</string>
     <string name="text_signature_scheme">署名スキーム</string>
     <string name="text_size">サイズ</string>
+    <string name="text_snapshot_created">スナップショットを作成しました</string>
+    <string name="text_snapshot_label_optional">ラベル (任意)</string>
+    <string name="text_snapshot_requires_internal_storage_file">スナップショットは内部ストレージ内のファイルでのみ利用できます</string>
     <string name="text_some_items_exported">エクスポートされた項目 %d</string>
     <string name="text_sort">並べ替え</string>
     <string name="text_sort_ascending">昇順</string>
@@ -2129,6 +2140,7 @@
     <string name="text_unknown_title_for_plugin">不明なタイトル</string>
     <string name="text_unknown_version_for_plugin">不明なバージョン</string>
     <string name="text_unlimited">無制限</string>
+    <string name="text_unpin">固定を解除</string>
     <string name="text_unsaved_changes">未保存の変更</string>
     <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
     <string name="text_unverified">未確認</string>

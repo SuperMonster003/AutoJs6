@@ -5543,6 +5543,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         versionHistoryService.showDialog(uri)
     }
 
+    fun showCreateSnapshotDialog() {
+        if (mEncodingOperationInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+            mEditorLoading || editor.isLoadingText || mDraftRestoreInProgress
+        ) {
+            showSnack(this, R.string.text_please_wait)
+            return
+        }
+        versionHistoryService.showCreateSnapshotDialog(uri, mCurrentCharset, mHadBom)
+    }
+
     fun forceStop() {
         doWithCurrentEngine { obj: ScriptEngine<*> -> obj.forceStop() }
     }
@@ -7209,6 +7219,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
             ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
             ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
+            ACTION_CREATE_SNAPSHOT -> true.also { showCreateSnapshotDialog() }
             ACTION_THEME_PREVIEWER -> true.also { openThemePreviewer(returnToThemeDialog = false) }
             ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
             ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
@@ -7356,6 +7367,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_copy_ace_diagnostics -> historyAction(ACTION_COPY_ACE_DIAGNOSTICS, R.string.text_copy_ace_diagnostics, mutatesText = false)
         R.id.action_open_by_other_apps -> historyAction(ACTION_OPEN_BY_OTHER_APPS, R.string.text_open_by_other_apps, mutatesText = false)
         R.id.action_version_history -> historyAction(ACTION_VERSION_HISTORY, R.string.text_version_history, mutatesText = false)
+        R.id.action_create_snapshot -> historyAction(ACTION_CREATE_SNAPSHOT, R.string.text_create_snapshot, mutatesText = false)
         else -> null
     }
 
@@ -7921,6 +7933,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
         private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"
         private const val ACTION_VERSION_HISTORY = "editor:version_history"
+        private const val ACTION_CREATE_SNAPSHOT = "editor:create_snapshot"
         private const val ACTION_THEME_PREVIEWER = "editor:theme_previewer"
         private const val ACTION_EXIT_EDITOR = "editor:exit"
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"

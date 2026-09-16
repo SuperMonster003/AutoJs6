@@ -1,6 +1,7 @@
 package org.autojs.autojs.storage.history
 
 import android.net.Uri
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -70,5 +71,14 @@ object HistoryEntities {
         // Blob relative path under filesDir.
         // zh-CN: 位于 filesDir 下的相对路径.
         val blobRelPath: String,
+
+        // Optional user label (schema v3).
+        // zh-CN: 可选的用户标签 (schema v3).
+        val label: String? = null,
+
+        // Pinned revisions are exempt from per-file retention limits (schema v3).
+        // zh-CN: 固定的 revision 不参与单文件保留上限清理 (schema v3).
+        @ColumnInfo(defaultValue = "0")
+        val pinned: Boolean = false,
     )
 }

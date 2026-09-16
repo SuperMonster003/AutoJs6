@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         HistoryEntities.Revision::class,
         TrashEntities.TrashItem::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class HistoryDatabase : RoomDatabase() {
@@ -51,13 +51,22 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from v2 to v3 (revision.label, revision.pinned).
+        // zh-CN: 从 v2 到 v3 的迁移 (revision 表新增 label 与 pinned 列).
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE revision ADD COLUMN label TEXT")
+                db.execSQL("ALTER TABLE revision ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getInstance(applicationContext: Context): HistoryDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 applicationContext,
                 HistoryDatabase::class.java,
                 "history-database.db",
             ).apply {
-                addMigrations(MIGRATION_1_2)
+                addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             }.build().also { instance = it }
         }
     }

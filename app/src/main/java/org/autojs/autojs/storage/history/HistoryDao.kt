@@ -34,6 +34,12 @@ interface HistoryDao {
     @Query("SELECT * FROM revision WHERE revId = :revId LIMIT 1")
     fun findRevisionById(revId: String): HistoryEntities.Revision?
 
+    @Query("UPDATE revision SET label = :label WHERE revId = :revId")
+    fun updateRevisionLabel(revId: String, label: String?)
+
+    @Query("UPDATE revision SET pinned = :pinned WHERE revId = :revId")
+    fun updateRevisionPinned(revId: String, pinned: Boolean)
+
     @Query("DELETE FROM revision WHERE revId IN (:revIds)")
     fun deleteRevisionsByIds(revIds: List<String>)
 
@@ -113,6 +119,9 @@ interface HistoryDao {
 
     @Query("SELECT * FROM revision ORDER BY createdAt ASC LIMIT :limit")
     fun listOldestRevisions(limit: Int): List<HistoryEntities.Revision>
+
+    @Query("SELECT * FROM revision WHERE pinned = 0 ORDER BY createdAt ASC LIMIT :limit")
+    fun listOldestUnpinnedRevisions(limit: Int): List<HistoryEntities.Revision>
 
     /**
      * Aggregated stats for trash.

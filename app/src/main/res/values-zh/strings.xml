@@ -521,6 +521,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">TypeScript TSX 文本子项仅受叶级文本控件支持.</string>
     <string name="error_typescript_tsx_tree_too_deep">TypeScript TSX 树嵌套过深.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">当前文件路径未知, 无法更改文件编码</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">当前文件路径未知, 无法创建快照</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">当前文件路径未知, 无法显示文件详情</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">当前文件路径未知, 无法显示版本历史</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">当前文件路径未知, 无法使用其他应用打开</string>
@@ -1092,6 +1093,7 @@
     <string name="text_countdown_task">倒计时任务</string>
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
+    <string name="text_create_snapshot">创建快照</string>
     <string name="text_creating_unsigned_apk">正在创建未签名 APK</string>
     <string name="text_current">当前</string>
     <string name="text_current_file">当前文件</string>
@@ -1182,6 +1184,7 @@
     <string name="text_drawer_open">打开侧拉抽屉</string>
     <string name="text_edit">编辑</string>
     <string name="text_edit_by_other_apps">使用其他应用编辑</string>
+    <string name="text_edit_label">编辑标签</string>
     <string name="text_edit_prepare_script">编辑预执行脚本</string>
     <string name="text_edit_script">编辑脚本</string>
     <string name="text_editor_assistance">辅助</string>
@@ -1435,6 +1438,7 @@
     <string name="text_key_store_has_been_verified">密钥已验证</string>
     <string name="text_key_store_has_not_been_verified">密钥尚未验证</string>
     <string name="text_key_store_password">密钥库密码</string>
+    <string name="text_label">标签</string>
     <string name="text_label_name">名称</string>
     <string name="text_label_state">状态</string>
     <string name="text_last_event">最近事件</string>
@@ -1699,8 +1703,11 @@
     <string name="text_permission_test">权限测试</string>
     <string name="text_permissions">权限</string>
     <string name="text_permissions_list">权限列表</string>
+    <string name="text_pin">固定</string>
     <string name="text_pin_shortcut_not_unsupported">将快捷方式固定到启动器不被支持</string>
     <string name="text_pinch_to_zoom">手势缩放</string>
+    <string name="text_pinned">已固定</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">已固定, 不参与单文件清理</string>
     <string name="text_play">播放</string>
     <string name="text_please_choose">请选择</string>
     <string name="text_please_choose_a_script">请选择脚本</string>
@@ -1862,6 +1869,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在获取更新日志...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在获取插件列表数据...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在获取发行说明...</string>
+    <string name="text_revision_op_manual">手动快照</string>
     <string name="text_revision_op_overwrite_pre">覆盖前</string>
     <string name="text_revision_op_restore_pre">恢复前</string>
     <string name="text_revision_op_save_pre">保存前</string>
@@ -1959,6 +1967,9 @@
     <string name="text_signature_configuration">签名配置</string>
     <string name="text_signature_scheme">签名方案</string>
     <string name="text_size">大小</string>
+    <string name="text_snapshot_created">快照已创建</string>
+    <string name="text_snapshot_label_optional">标签 (可选)</string>
+    <string name="text_snapshot_requires_internal_storage_file">仅内部存储中的文件支持创建快照</string>
     <string name="text_some_items_exported">已导出 %d 个条目</string>
     <string name="text_sort">排序</string>
     <string name="text_sort_ascending">升序</string>
@@ -2125,6 +2136,7 @@
     <string name="text_unknown_title_for_plugin">未知标题</string>
     <string name="text_unknown_version_for_plugin">未知版本</string>
     <string name="text_unlimited">不限制</string>
+    <string name="text_unpin">取消固定</string>
     <string name="text_unsaved_changes">未保存的更改</string>
     <string name="text_unsigned_apk_created">未签名 APK 已创建</string>
     <string name="text_unverified">未验证</string>

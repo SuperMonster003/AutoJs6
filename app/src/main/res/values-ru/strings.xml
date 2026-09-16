@@ -525,6 +525,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">Текстовые дочерние элементы TypeScript TSX поддерживаются только конечными текстовыми элементами управления.</string>
     <string name="error_typescript_tsx_tree_too_deep">Дерево TypeScript TSX вложено слишком глубоко.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно изменить кодировку файла</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">Путь к текущему файлу неизвестен, невозможно создать снимок</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать сведения о файле</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать историю версий</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно открыть в других приложениях</string>
@@ -1095,6 +1096,7 @@
     <string name="text_countdown_task">Задача с обратным отсчётом</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
+    <string name="text_create_snapshot">Создать снимок</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current">Текущая</string>
     <string name="text_current_file">Текущий файл</string>
@@ -1185,6 +1187,7 @@
     <string name="text_drawer_open">Открыть ящик</string>
     <string name="text_edit">Редактировать</string>
     <string name="text_edit_by_other_apps">Редактировать в других приложениях</string>
+    <string name="text_edit_label">Изменить метку</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
     <string name="text_editor_assistance">Помощь</string>
@@ -1438,6 +1441,7 @@
     <string name="text_key_store_has_been_verified">Хранилище ключей подтверждено</string>
     <string name="text_key_store_has_not_been_verified">Хранилище ключей не подтверждено</string>
     <string name="text_key_store_password">Пароль хранилища ключей</string>
+    <string name="text_label">Метка</string>
     <string name="text_label_name">Метка</string>
     <string name="text_label_state">Состояние</string>
     <string name="text_last_event">Последнее событие</string>
@@ -1702,8 +1706,11 @@
     <string name="text_permission_test">Проверка разрешения</string>
     <string name="text_permissions">Разрешения</string>
     <string name="text_permissions_list">Разрешения</string>
+    <string name="text_pin">Закрепить</string>
     <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
     <string name="text_pinch_to_zoom">Уменьшение масштаба</string>
+    <string name="text_pinned">Закреплено</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">Закреплено, не подлежит очистке на уровне файла</string>
     <string name="text_play">Воспроизвести</string>
     <string name="text_please_choose">Пожалуйста, выберите</string>
     <string name="text_please_choose_a_script">Выберите сценарий</string>
@@ -1865,6 +1872,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
+    <string name="text_revision_op_manual">Ручной снимок</string>
     <string name="text_revision_op_overwrite_pre">Перед перезаписью</string>
     <string name="text_revision_op_restore_pre">Перед восстановлением</string>
     <string name="text_revision_op_save_pre">Перед сохранением</string>
@@ -1962,6 +1970,9 @@
     <string name="text_signature_configuration">Конфигурация подписи</string>
     <string name="text_signature_scheme">Схема подписи</string>
     <string name="text_size">Размер</string>
+    <string name="text_snapshot_created">Снимок создан</string>
+    <string name="text_snapshot_label_optional">Метка (необязательно)</string>
+    <string name="text_snapshot_requires_internal_storage_file">Снимки доступны только для файлов во внутреннем хранилище</string>
     <string name="text_some_items_exported">Экспортировано %d элементов</string>
     <string name="text_sort">Сортировать</string>
     <string name="text_sort_ascending">По возрастанию</string>
@@ -2128,6 +2139,7 @@
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
     <string name="text_unlimited">Без ограничений</string>
+    <string name="text_unpin">Открепить</string>
     <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
     <string name="text_unverified">Не подтверждено</string>

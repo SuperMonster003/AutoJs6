@@ -521,6 +521,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">TypeScript TSX text children are supported only by leaf text controls.</string>
     <string name="error_typescript_tsx_tree_too_deep">TypeScript TSX tree is nested too deeply.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Current file path is unknown, unable to change file encoding</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">Current file path is unknown, unable to create snapshot</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
@@ -1088,6 +1089,7 @@
     <string name="text_countdown_task">Countdown task</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
+    <string name="text_create_snapshot">Create snapshot</string>
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
     <string name="text_current">Current</string>
     <string name="text_current_file">Current file</string>
@@ -1173,6 +1175,7 @@
     <string name="text_drawer_open">Open drawer</string>
     <string name="text_edit">Edit</string>
     <string name="text_edit_by_other_apps">Edit with other apps</string>
+    <string name="text_edit_label">Edit label</string>
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_assistance">Assistance</string>
@@ -1426,6 +1429,7 @@
     <string name="text_key_store_has_been_verified">Keystore has been verified</string>
     <string name="text_key_store_has_not_been_verified">Keystore has not been verified</string>
     <string name="text_key_store_password">Key Store Password</string>
+    <string name="text_label">Label</string>
     <string name="text_label_name">Label</string>
     <string name="text_label_state">State</string>
     <string name="text_last_event">Last event</string>
@@ -1690,8 +1694,11 @@
     <string name="text_permission_test">Perm test</string>
     <string name="text_permissions">Permissions</string>
     <string name="text_permissions_list">Permissions</string>
+    <string name="text_pin">Pin</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
     <string name="text_pinch_to_zoom">Pinch to zoom</string>
+    <string name="text_pinned">Pinned</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">Pinned, exempt from per-file cleanup</string>
     <string name="text_play">Play</string>
     <string name="text_please_choose">Please choose</string>
     <string name="text_please_choose_a_script">Choose a script</string>
@@ -1853,6 +1860,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
+    <string name="text_revision_op_manual">Manual snapshot</string>
     <string name="text_revision_op_overwrite_pre">Before overwrite</string>
     <string name="text_revision_op_restore_pre">Before restore</string>
     <string name="text_revision_op_save_pre">Before save</string>
@@ -1950,6 +1958,9 @@
     <string name="text_signature_configuration">Signature Configuration</string>
     <string name="text_signature_scheme">Signature Scheme</string>
     <string name="text_size">Size</string>
+    <string name="text_snapshot_created">Snapshot created</string>
+    <string name="text_snapshot_label_optional">Label (optional)</string>
+    <string name="text_snapshot_requires_internal_storage_file">Snapshots are only available for files under internal storage</string>
     <string name="text_some_items_exported">%d items exported</string>
     <string name="text_sort">Sort</string>
     <string name="text_sort_ascending">Ascending</string>
@@ -2116,6 +2127,7 @@
     <string name="text_unknown_title_for_plugin">Unknown Title</string>
     <string name="text_unknown_version_for_plugin">Unknown Version</string>
     <string name="text_unlimited">Unlimited</string>
+    <string name="text_unpin">Unpin</string>
     <string name="text_unsaved_changes">Unsaved changes</string>
     <string name="text_unsigned_apk_created">Unsigned APK created</string>
     <string name="text_unverified">Unverified</string>

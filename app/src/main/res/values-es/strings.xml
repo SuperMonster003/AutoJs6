@@ -525,6 +525,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">Los elementos secundarios de texto TypeScript TSX solo son compatibles con controles de texto hoja.</string>
     <string name="error_typescript_tsx_tree_too_deep">El árbol TypeScript TSX está anidado demasiado profundamente.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede cambiar la codificación del archivo</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">Se desconoce la ruta del archivo actual, no se puede crear la instantánea</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se pueden mostrar los detalles del archivo</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede mostrar el historial de versiones</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede abrir con otras apps</string>
@@ -1095,6 +1096,7 @@
     <string name="text_countdown_task">Tarea de cuenta atrás</string>
     <string name="text_country_code">Código de país (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">El código del país debe ser de dos letras mayúsculas</string>
+    <string name="text_create_snapshot">Crear instantánea</string>
     <string name="text_creating_unsigned_apk">Creando APK sin firmar</string>
     <string name="text_current">Actual</string>
     <string name="text_current_file">Archivo actual</string>
@@ -1185,6 +1187,7 @@
     <string name="text_drawer_open">Abrir el cajón</string>
     <string name="text_edit">Editar</string>
     <string name="text_edit_by_other_apps">Editar con otras aplicaciones</string>
+    <string name="text_edit_label">Editar etiqueta</string>
     <string name="text_edit_prepare_script">Editar script de preejecución</string>
     <string name="text_edit_script">Editar script</string>
     <string name="text_editor_assistance">Asistencia</string>
@@ -1438,6 +1441,7 @@
     <string name="text_key_store_has_been_verified">El almacén de claves ha sido verificado</string>
     <string name="text_key_store_has_not_been_verified">El almacén de claves no ha sido verificado</string>
     <string name="text_key_store_password">Contraseña del almacén de claves</string>
+    <string name="text_label">Etiqueta</string>
     <string name="text_label_name">Etiqueta</string>
     <string name="text_label_state">Estado</string>
     <string name="text_last_event">Último evento</string>
@@ -1702,8 +1706,11 @@
     <string name="text_permission_test">Prueba de permisos</string>
     <string name="text_permissions">Permisos</string>
     <string name="text_permissions_list">Permisos</string>
+    <string name="text_pin">Fijar</string>
     <string name="text_pin_shortcut_not_unsupported">No es posible anclar accesos directos al lanzador</string>
     <string name="text_pinch_to_zoom">Pellizcar para ampliar</string>
+    <string name="text_pinned">Fijada</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">Fijada, exenta de la limpieza por archivo</string>
     <string name="text_play">Reproducir</string>
     <string name="text_please_choose">Elija</string>
     <string name="text_please_choose_a_script">Elija un script</string>
@@ -1865,6 +1872,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Obteniendo el registro de cambios...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Obteniendo datos de la lista de complementos...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Obteniendo las notas de la versión...</string>
+    <string name="text_revision_op_manual">Instantánea manual</string>
     <string name="text_revision_op_overwrite_pre">Antes de sobrescribir</string>
     <string name="text_revision_op_restore_pre">Antes de restaurar</string>
     <string name="text_revision_op_save_pre">Antes de guardar</string>
@@ -1962,6 +1970,9 @@
     <string name="text_signature_configuration">Configuración de firma</string>
     <string name="text_signature_scheme">Esquema de firma</string>
     <string name="text_size">Tamaño</string>
+    <string name="text_snapshot_created">Instantánea creada</string>
+    <string name="text_snapshot_label_optional">Etiqueta (opcional)</string>
+    <string name="text_snapshot_requires_internal_storage_file">Las instantáneas solo están disponibles para archivos del almacenamiento interno</string>
     <string name="text_some_items_exported">%d elementos exportados</string>
     <string name="text_sort">Ordenar</string>
     <string name="text_sort_ascending">Ascendente</string>
@@ -2128,6 +2139,7 @@
     <string name="text_unknown_title_for_plugin">Título Desconocido</string>
     <string name="text_unknown_version_for_plugin">Versión Desconocida</string>
     <string name="text_unlimited">Sin límite</string>
+    <string name="text_unpin">Dejar de fijar</string>
     <string name="text_unsaved_changes">Cambios sin guardar</string>
     <string name="text_unsigned_apk_created">APK sin firmar creado</string>
     <string name="text_unverified">No verificado</string>

@@ -150,6 +150,11 @@
                 app:showAsAction="never" />
 
             <item
+                android:id="@+id/action_create_snapshot"
+                android:title="@string/text_create_snapshot"
+                app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_file_encoding"
                 android:title="@string/text_file_encoding"
                 app:showAsAction="never" />

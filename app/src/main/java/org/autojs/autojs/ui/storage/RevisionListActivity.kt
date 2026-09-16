@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.storage
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
@@ -16,6 +17,7 @@ import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.storage.history.VersionHistoryEditorBridge
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -191,6 +193,14 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
             append(getString(R.string.text_property_colon_value, getString(R.string.text_file_encoding), rev.encoding + if (rev.hadBom) " (BOM)" else ""))
             append('\n')
             append(getString(R.string.text_property_colon_value, "SHA-256", rev.sha256.take(SHA_PREVIEW_CHARS)))
+            rev.label?.takeIf { it.isNotBlank() }?.let {
+                append('\n')
+                append(getString(R.string.text_property_colon_value, getString(R.string.text_label), it))
+            }
+            if (rev.pinned) {
+                append('\n')
+                append(getString(R.string.text_pinned_exempt_from_per_file_cleanup))
+            }
             if (row.isCurrent) {
                 append('\n')
                 append(getString(R.string.text_same_as_current_file))
@@ -202,6 +212,14 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
                 dialog.dismiss()
                 DiffActivity.launch(this, canonicalPath, displayPath, leftRevId = rev.revId, rightRevId = null)
             }
+        }
+        options += MaterialDialog.OptionMenuItemSpec(getString(if (rev.pinned) R.string.text_unpin else R.string.text_pin)) { dialog ->
+            dialog.dismiss()
+            controller.setPinned(rev, !rev.pinned) { load() }
+        }
+        options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_edit_label)) { dialog ->
+            dialog.dismiss()
+            showEditLabelDialog(row)
         }
         options += MaterialDialog.OptionMenuItemSpec(getString(R.string.text_delete)) { dialog ->
             dialog.dismiss()
@@ -243,6 +261,23 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
             VersionHistoryController.Mode.RESTORE_TO_DISK -> {
                 controller.confirmAndRestoreToDisk(row.rev, canonicalPath) { load() }
             }
+        }
+    }
+
+    private fun showEditLabelDialog(row: RevisionRow) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(this)
+                .title(R.string.text_edit_label)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(getString(R.string.text_snapshot_label_optional), row.rev.label.orEmpty(), true) { _, input ->
+                    controller.setLabel(row.rev, input.toString()) { load() }
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .apply { widgetThemeColor() }
+                .build()
         }
     }
 

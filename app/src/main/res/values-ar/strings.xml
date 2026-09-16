@@ -527,6 +527,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">تدعم عناصر التحكم النصية الطرفية فقط العناصر النصية الفرعية في TypeScript TSX.</string>
     <string name="error_typescript_tsx_tree_too_deep">شجرة TypeScript TSX متداخلة بعمق كبير.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف, لا يمكن تغيير ترميز الملف</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف, تعذر انشاء اللقطة</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض تفاصيل الملف</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض سجل الاصدارات</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن الفتح بتطبيقات اخرى</string>
@@ -1097,6 +1098,7 @@
     <string name="text_countdown_task">مهمة عد تنازلي</string>
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
+    <string name="text_create_snapshot">انشاء لقطة</string>
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current">الحالي</string>
     <string name="text_current_file">الملف الحالي</string>
@@ -1187,6 +1189,7 @@
     <string name="text_drawer_open">درج مفتوح</string>
     <string name="text_edit">يحرر</string>
     <string name="text_edit_by_other_apps">تحرير باستخدام تطبيقات أخرى</string>
+    <string name="text_edit_label">تعديل التسمية</string>
     <string name="text_edit_prepare_script">تحرير البرنامج النصي قبل التنفيذ</string>
     <string name="text_edit_script">تحرير البرنامج النصي</string>
     <string name="text_editor_assistance">المساعدة</string>
@@ -1440,6 +1443,7 @@
     <string name="text_key_store_has_been_verified">تم التحقق من المخزن</string>
     <string name="text_key_store_has_not_been_verified">لم يتم التحقق من المخزن</string>
     <string name="text_key_store_password">كلمة مرور مخزن المفاتيح</string>
+    <string name="text_label">التسمية</string>
     <string name="text_label_name">ملصق</string>
     <string name="text_label_state">الحالة</string>
     <string name="text_last_event">آخر حدث</string>
@@ -1704,8 +1708,11 @@
     <string name="text_permission_test">اختبار بيرم</string>
     <string name="text_permissions">أذونات</string>
     <string name="text_permissions_list">الأذونات</string>
+    <string name="text_pin">تثبيت</string>
     <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
     <string name="text_pinch_to_zoom">قرصة للتكبير</string>
+    <string name="text_pinned">مثبت</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">مثبت, مستثنى من التنظيف على مستوى الملف</string>
     <string name="text_play">تشغيل</string>
     <string name="text_please_choose">اختر من فضلك</string>
     <string name="text_please_choose_a_script">اختر نصًا</string>
@@ -1867,6 +1874,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">جارٍ جلب سجل التغييرات...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">جارٍ جلب بيانات قائمة المكونات الإضافية...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">جارٍ جلب ملاحظات الإصدار...</string>
+    <string name="text_revision_op_manual">لقطة يدوية</string>
     <string name="text_revision_op_overwrite_pre">قبل الكتابة فوق</string>
     <string name="text_revision_op_restore_pre">قبل الاستعادة</string>
     <string name="text_revision_op_save_pre">قبل الحفظ</string>
@@ -1964,6 +1972,9 @@
     <string name="text_signature_configuration">تكوين التوقيع</string>
     <string name="text_signature_scheme">خطة التوقيع</string>
     <string name="text_size">مقاس</string>
+    <string name="text_snapshot_created">تم انشاء اللقطة</string>
+    <string name="text_snapshot_label_optional">التسمية (اختياري)</string>
+    <string name="text_snapshot_requires_internal_storage_file">اللقطات متاحة فقط للملفات الموجودة في وحدة التخزين الداخلية</string>
     <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
     <string name="text_sort">فرز</string>
     <string name="text_sort_ascending">تصاعدي</string>
@@ -2130,6 +2141,7 @@
     <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
     <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
     <string name="text_unlimited">بلا حدود</string>
+    <string name="text_unpin">الغاء التثبيت</string>
     <string name="text_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
     <string name="text_unverified">لم يتم التحقق</string>

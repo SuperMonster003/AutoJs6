@@ -522,6 +522,7 @@
     <string name="error_typescript_tsx_text_children_leaf_only">只有葉節點文字控制項支援 TypeScript TSX 文字子項.</string>
     <string name="error_typescript_tsx_tree_too_deep">TypeScript TSX 樹的巢狀層級過深.</string>
     <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">目前檔案路徑未知, 無法變更檔案編碼</string>
+    <string name="error_unable_to_create_snapshot_as_current_file_path_is_unknown">目前檔案路徑未知, 無法建立快照</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">當前檔案路徑未知, 無法顯示檔案詳情</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">當前檔案路徑未知, 無法顯示版本歷史</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">當前檔案路徑未知, 無法使用其他應用開啟</string>
@@ -1092,6 +1093,7 @@
     <string name="text_countdown_task">倒數計時任務</string>
     <string name="text_country_code">國家代碼 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須是兩個大寫字母</string>
+    <string name="text_create_snapshot">建立快照</string>
     <string name="text_creating_unsigned_apk">正在建立未簽名 APK</string>
     <string name="text_current">目前</string>
     <string name="text_current_file">目前檔案</string>
@@ -1182,6 +1184,7 @@
     <string name="text_drawer_open">開啟側拉抽屜</string>
     <string name="text_edit">編輯</string>
     <string name="text_edit_by_other_apps">使用其他應用程式編輯</string>
+    <string name="text_edit_label">編輯標籤</string>
     <string name="text_edit_prepare_script">編輯預執行指令碼</string>
     <string name="text_edit_script">編輯指令碼</string>
     <string name="text_editor_assistance">輔助</string>
@@ -1435,6 +1438,7 @@
     <string name="text_key_store_has_been_verified">密鑰已驗證</string>
     <string name="text_key_store_has_not_been_verified">密鑰尚未驗證</string>
     <string name="text_key_store_password">密鑰庫密碼</string>
+    <string name="text_label">標籤</string>
     <string name="text_label_name">名稱</string>
     <string name="text_label_state">狀態</string>
     <string name="text_last_event">最近事件</string>
@@ -1699,8 +1703,11 @@
     <string name="text_permission_test">許可權測試</string>
     <string name="text_permissions">許可權</string>
     <string name="text_permissions_list">許可權列表</string>
+    <string name="text_pin">固定</string>
     <string name="text_pin_shortcut_not_unsupported">將快捷方式固定到啟動器不被支援</string>
     <string name="text_pinch_to_zoom">手勢縮放</string>
+    <string name="text_pinned">已固定</string>
+    <string name="text_pinned_exempt_from_per_file_cleanup">已固定, 不參與單檔案清理</string>
     <string name="text_play">播放</string>
     <string name="text_please_choose">請選擇</string>
     <string name="text_please_choose_a_script">請選擇指令碼</string>
@@ -1862,6 +1869,7 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取外掛列表資料...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行說明...</string>
+    <string name="text_revision_op_manual">手動快照</string>
     <string name="text_revision_op_overwrite_pre">覆寫前</string>
     <string name="text_revision_op_restore_pre">還原前</string>
     <string name="text_revision_op_save_pre">儲存前</string>
@@ -1959,6 +1967,9 @@
     <string name="text_signature_configuration">簽名設定</string>
     <string name="text_signature_scheme">簽名方案</string>
     <string name="text_size">大小</string>
+    <string name="text_snapshot_created">快照已建立</string>
+    <string name="text_snapshot_label_optional">標籤 (可選)</string>
+    <string name="text_snapshot_requires_internal_storage_file">僅內部儲存空間中的檔案支援建立快照</string>
     <string name="text_some_items_exported">已匯出 %d 個條目</string>
     <string name="text_sort">排序</string>
     <string name="text_sort_ascending">升序</string>
@@ -2125,6 +2136,7 @@
     <string name="text_unknown_title_for_plugin">未知標題</string>
     <string name="text_unknown_version_for_plugin">未知版本</string>
     <string name="text_unlimited">不限制</string>
+    <string name="text_unpin">取消固定</string>
     <string name="text_unsaved_changes">未儲存的變更</string>
     <string name="text_unsigned_apk_created">未簽名 APK 已建立</string>
     <string name="text_unverified">未驗證</string>

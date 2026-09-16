@@ -26,6 +26,7 @@
 | D7 | 回收站容量上限始终保留最新条目 | `TrashRepository.enforceTotalBytesLimit` 经 `HistoryRetentionPolicy.selectOverBytesProtecting` 从最旧开始清理, 最新条目与刚移入的批次不参与清理; 单个超大条目保留到按天数过期或有更新条目移入为止. 版本历史的容量上限不采用此保护 (纳管文件大小上限已在入口处约束). |
 | D8 | 待移入条目超过回收站上限时默认 "继续移入" (Q3 拍板) | 对话框三选一: 移入回收站 (默认, positive) / 彻底删除 (neutral, caution 色) / 取消; 批量移入以整批总大小与上限比较. |
 | D9 | 保留策略数值项放在设置子页而非主页平铺 | 9 个数值项 + 1 个开关过多; 主设置页 "回收站与版本历史" 分类只含 "保留策略" 子页入口与 "彻底删除时同时清除版本历史" 开关. 数值项使用数字输入对话框 (`RetentionLimitDialogBuilder`, 字节以 MB 输入) 而非滑杆, 附 "使用默认值" / "不限制" 选项. |
+| D10 | 手动快照默认 pinned; pinned 只豁免单文件清理 | 用户主动创建的快照不应被 "最多 N 个版本" 挤掉, 因此 `recordManualSnapshot` 写入时 `pinned = 1`, 可在版本列表取消; 与最新 revision 内容相同时改为给该 revision 打标签并固定, 不重复存 blob. `cleanupPerFile` 先排除 pinned (不计入天数 / 条数 / 容量), `cleanupGlobal` 先删未固定的最旧 revision, 只有全部为 pinned 时才删 pinned, 保证全局上限仍是硬上限. |
 
 ---
 
@@ -101,8 +102,8 @@
 - [x] P2.1 重命名 / 移动迁移历史: `HistoryRepository.relocate(oldPath, newPath)` (文件精确匹配, 目录按前缀批量改写 `logicalPath`), 目标路径已有条目时合并 revisions 到目标 `fileId` (`HistoryDao.moveRevisionsToFile`, 目标条目沿用被移动文件的指纹); 接入 `ScriptOperations.rename` (IO 线程异步) / 单个与批量 `move` (移动成功后同步调用). 路径映射抽为纯函数 `HistoryRelocation`. 证据: `HistoryRelocationTest` (JVM, 5 例), 2026-09-16.
 - [x] P2.2 覆盖类写入统一留快照 (D4): 资源管理器单个 (`confirmOverwriteIfNeeded`) 与批量 (`executeCopyMovePlans`) 复制 / 移动覆盖前调用 `snapshotBeforeOverwrite`: 文件走 `recordSnapshotBeforeOverwrite(OP_OVERWRITE_PRE)`, 目录走 `recordSnapshotsBeforeOverwriteUnderDirectory` (只为已纳管文件留快照, 代价受历史规模约束). 证据: 编译 + JVM 单测, 2026-09-16; 提交 `777398c1e`.
 - [x] P2.3 按文件的版本列表页 `ui/storage/RevisionListActivity` (基于 `BaseSearchSortListActivity`, 替代单选对话框): 每行显示时间 / 大小 / `op` 标签 / 编码 (含 BOM) / "当前" 标记 (磁盘文件 sha256 与 revision 对比, 文件缺失或超过纳管上限则不标记); 点击弹出详情 (预览 / 恢复 / 删除), 长按进入多选, 菜单提供批量删除 / 全选 / 取消全选 / 排序 (时间, 大小) / 打开文件. 两种模式由 `VersionHistoryController.Mode` 区分: 资源管理器 `RESTORE_TO_DISK` (覆盖前留 `RESTORE_PRE` 快照), 编辑器 `RESTORE_TO_EDITOR` (回调经 `VersionHistoryEditorBridge` 以弱引用 token 跨 Activity 传递, 编辑器已销毁时提示 "编辑器已不可用"). 证据: 编译 + JVM 单测 (34 例), 2026-09-16; 提交 `f8bec51ed`.
-- [x] P2.4 差异视图 `ui/storage/DiffActivity` (基于 `BaseSearchSortListActivity`): 版本列表的详情对话框提供 "与当前文件比较", 多选恰好两条时菜单提供 "比较选中项" (较旧者在左); 逐行显示左右行号 / 标记 / 文本, 新增与删除行着色 (`diff_line_inserted_bg` / `diff_line_deleted_bg`, 含夜间色), 未变更段落保留 3 行上下文后折叠, 点击或 "全部展开" 展开, 搜索框按文本过滤行; 任一侧超过 6000 行或 1 MiB 时退化为仅显示两侧行数与大小 (`LineDiff.exceedsLimits`). 算法按 Q4 自实现: `storage/history/LineDiff` 为线性空间 Myers (中间蛇 + 显式工作栈, 行先 intern 为整数, 每段变更内先删除后新增); `HistoryTextCodec` 统一 revision 与磁盘文件的解码. 磁盘文件按 revision 记录的编码解码, 编辑器入口比较的也是磁盘文件而非未保存缓冲. 证据: `LineDiffTest` (JVM, 8 例, 含 400 组随机输入的重建与 LCS 最小性校验), 2026-09-16; 提交 hash 由 P2.5 提交回填.
-- [ ] P2.5 手动快照与标签: 编辑器菜单 "创建快照" (op = `MANUAL`, 可选标签); schema v3 增加 `label TEXT` 与 `pinned INTEGER NOT NULL DEFAULT 0` 列 (D3); pinned 的 revision 不参与天数 / 版本数 / 单文件容量清理, 但仍受全局总容量的最终保护.
+- [x] P2.4 差异视图 `ui/storage/DiffActivity` (基于 `BaseSearchSortListActivity`): 版本列表的详情对话框提供 "与当前文件比较", 多选恰好两条时菜单提供 "比较选中项" (较旧者在左); 逐行显示左右行号 / 标记 / 文本, 新增与删除行着色 (`diff_line_inserted_bg` / `diff_line_deleted_bg`, 含夜间色), 未变更段落保留 3 行上下文后折叠, 点击或 "全部展开" 展开, 搜索框按文本过滤行; 任一侧超过 6000 行或 1 MiB 时退化为仅显示两侧行数与大小 (`LineDiff.exceedsLimits`). 算法按 Q4 自实现: `storage/history/LineDiff` 为线性空间 Myers (中间蛇 + 显式工作栈, 行先 intern 为整数, 每段变更内先删除后新增); `HistoryTextCodec` 统一 revision 与磁盘文件的解码. 磁盘文件按 revision 记录的编码解码, 编辑器入口比较的也是磁盘文件而非未保存缓冲. 证据: `LineDiffTest` (JVM, 8 例, 含 400 组随机输入的重建与 LCS 最小性校验), 2026-09-16; 提交 `c8ae91354`.
+- [x] P2.5 手动快照与标签: 编辑器菜单 "创建快照" (`EditorView.showCreateSnapshotDialog`, 与版本历史相同的忙碌守卫; 输入可选标签后把当前编辑器文本按当前编码 / BOM 编码为字节, `HistoryRepository.recordManualSnapshot` 写入 op = `MANUAL`); schema v3 (`HistoryDatabase` version 3, `MIGRATION_2_3`: `ALTER TABLE revision ADD COLUMN label TEXT` / `pinned INTEGER NOT NULL DEFAULT 0`, 实体字段带默认值, D3). 规则 (D10): 手动快照默认 pinned; 与最新 revision 内容相同时不重复存 blob, 改为给该 revision 打标签并固定; `cleanupPerFile` 先排除 pinned 再套用天数 / 条数 / 容量; `cleanupGlobal` 先删未固定的最旧 revision (`listOldestUnpinnedRevisions`), 没有未固定的才动 pinned. 版本列表: 标题显示标签, 副标题显示 "已固定", 详情对话框提供 "固定 / 取消固定" 与 "编辑标签" (`HistorySnapshotLabel.normalizeOrNull`: 去首尾空白, 折叠内部空白, 上限 80 字符). Q1 的 `compression` 列未随 v3 加入 (无消费者, 留待需要时再加). 证据: `HistorySnapshotLabelTest` (JVM, 3 例) + 编译 + 全部 history 单测 (45 例), 2026-09-16; 迁移未在设备上验证, 列入 P4.5 冒烟; 提交 hash 由 P2.6 提交回填.
 - [ ] P2.6 revision 导出: "另存为" 到任意目录 (复用 `FileChooserDialogBuilder`), 保留原编码与 BOM.
 - [ ] P2.7 编辑器 "恢复并保存" 选项 (现有 "仅恢复到编辑器" 保持默认).
 
@@ -131,7 +132,7 @@
 
 | 编号 | 问题 | 建议 |
 | --- | --- | --- |
-| Q1 | 历史快照 blob 是否 gzip 压缩 (schema 加 `compression TEXT` 列, 读取时按列解码)? | 建议在 P2.5 的 schema v3 中一并加列但默认不压缩, 压缩作为设置项后续开放. |
+| Q1 | 历史快照 blob 是否 gzip 压缩 (schema 加 `compression TEXT` 列, 读取时按列解码)? | 建议在 P2.5 的 schema v3 中一并加列但默认不压缩, 压缩作为设置项后续开放. 2026-09-16: v3 未加该列 (无消费者的列徒增迁移面), 需要时按 D3 走 v4. |
 | Q2 | 脚本 API (`files.write` / `files.append` 等) 的写入是否纳入版本历史? | 建议不纳管 (热路径, 且脚本写入多为数据文件), 维持 D4 的 "应用自身覆盖写入" 范围. |
 | Q3 | P1.3 单个条目超过回收站上限时的默认动作? | 已拍板, 见 D8. |
 | Q4 | P2.4 diff 的实现选型: 引入 `java-diff-utils` 依赖, 还是自实现 Myers 行 diff? | 已拍板: 自实现线性空间 Myers (`LineDiff`, 无新依赖, 随机输入对照 LCS 单测), 大文件用阈值退化. |
@@ -146,6 +147,8 @@
 5. 大文件 (>50 MB) 覆盖恢复时中止, 原文件内容完整 (P0.4).
 6. 修改设置中的保留天数为 1 并等待清理任务, 历史条目按预期消失 (P1.2).
 7. 多用户 / 工作资料环境 (可选): 历史与回收站可用 (P0.2).
+8. 已安装 schema v2 的版本 (含至少一条 revision) 升级到本版后打开版本列表, 旧 revision 正常显示且未固定 / 无标签 (P2.5 `MIGRATION_2_3`); 编辑器 "创建快照" 一次后列表出现 `手动快照` 且 "已固定", 连续创建两次相同内容不新增条目.
+9. 把 "每个文件最多版本数" 设为 1 后再保存两次, pinned 的快照仍在, 未固定的只剩最新一条 (P2.5 / D10).
 
 ## 附录 C. 证据等级
 
@@ -161,7 +164,7 @@
 | 关注点 | 文件 |
 | --- | --- |
 | 数据模型 | `storage/history/HistoryEntities.kt`, `TrashItemEntity.kt`, `HistoryDao.kt`, `HistoryDatabase.kt` |
-| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `RetentionLimitUnits.kt` (P1.1) |
+| 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `HistorySnapshotLabel.kt` (P2.5), `RetentionLimitUnits.kt` (P1.1) |
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
