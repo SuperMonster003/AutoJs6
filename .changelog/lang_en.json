@@ -400,7 +400,8 @@
         "Orphan blob cleanup for version history now protects blobs younger than 30 minutes, so a fresh snapshot whose database row is still pending is no longer deleted",
         "Files deleted on the PC remained on the device after saving a project from the VSCode extension, and stale files in the cache directory kept reappearing _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
         "Receiving a project archive from the VSCode extension converted the whole byte array to a string for logging, which could crash with OOM _[`issue #523`](http://issues.autojs6.com/523)_",
-        "A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_"
+        "A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_",
+        "Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path"
       ],
       "improvement": [
         "Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically",
@@ -539,7 +540,8 @@
         "Moving items to the trash checks the size limit first and, when the items exceed it, offers to move anyway, delete permanently or cancel; older entries are evicted right after the move, and the size limit always keeps the newest entry",
         "The periodic cleanup applies the complete retention policy (days, versions, per-file and total size for version history; days and size for the trash) and drops file entries that own no revisions; emergency draft limits treat 0 as unlimited as well",
         "VSCode extension connections gain an application-level heartbeat (ping/pong) and a frame length limit, releasing dead connections promptly and avoiding huge allocations on desync _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
-        "Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_"
+        "Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
+        "The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots"
       ],
       "dependency": [
         "Modularized Android AXML",

@@ -376,7 +376,8 @@
         "版本历史的孤立 blob 清理增加 30 分钟最小保护期, 避免误删数据库记录尚未写入的新快照",
         "VSCode 插件保存项目时, PC 端已删除的文件仍残留在设备上以及缓存目录中历史文件反复出现的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
         "VSCode 插件连接接收项目归档时将整个字节数组转为字符串写入日志, 可能导致 OOM 崩溃的问题 _[`issue #523`](http://issues.autojs6.com/523)_",
-        "VSCode 插件连接因单个半死连接阻塞日志写入线程, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_"
+        "VSCode 插件连接因单个半死连接阻塞日志写入线程, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_",
+        "资源管理器重命名或移动文件 / 目录后, 版本历史停留在旧路径; 现在历史跟随新路径 (目录按前缀批量改写), 移动覆盖已纳管文件时两份历史合并到目标路径"
       ],
       "improvement": [
         "Flow 异常的 flowStack 与 stack 保留异步任务方法, 脚本文件和行号, console.error 自动显示诊断栈",
@@ -518,7 +519,8 @@
         "移入回收站前检查容量上限, 待移入条目超过上限时提示继续移入, 彻底删除或取消; 移入完成后立即清理更早的条目, 且容量上限始终保留最新条目",
         "周期清理任务应用完整的保留策略 (版本历史的天数, 版本数, 单文件与总容量; 回收站的天数与容量), 并移除不再拥有版本的文件条目; 紧急草稿的保留策略同样以 0 表示不限制",
         "VSCode 插件连接增加应用层心跳 (ping/pong) 与帧长度上限校验, 及时释放失效连接并避免失步时的超大内存分配 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
-        "VSCode 插件保存文件时支持按相对目录结构保存到工作目录 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_"
+        "VSCode 插件保存文件时支持按相对目录结构保存到工作目录 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
+        "资源管理器以复制或移动覆盖已有文件前, 先把目标文件的当前内容记录为一条 OVERWRITE_PRE 版本; 覆盖目录时为其中已纳管的文件留快照"
       ],
       "dependency": [
         "模块化 Android AXML",

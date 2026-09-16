@@ -186,6 +186,70 @@ class HistoryRepository(private val context: Context) {
     }
 
     /**
+     * Snapshot every tracked regular file under [dirPath] before the directory is replaced.
+     * Only files that already own a history entry are read, so the cost is bounded by the history,
+     * not by the directory size. Never throws.
+     *
+     * zh-CN: 目录被整体覆盖前, 为其下所有已纳管的普通文件留快照. 只读取已有 file entry 的文件,
+     * 代价由历史规模而非目录大小决定. 不抛异常.
+     *
+     * @return the number of revisions recorded.
+     */
+    fun recordSnapshotsBeforeOverwriteUnderDirectory(dirPath: String): Int = runCatching {
+        val dir = HistoryPaths.normalizePath(dirPath)
+        if (!HistoryPaths.isUnderInternalStorage(dir)) return@runCatching 0
+        val prefix = "$dir/"
+        dao.listFilesByPathPrefix(prefix)
+            .filter { it.logicalPath.startsWith(prefix) }
+            .count { recordSnapshotBeforeOverwrite(it.logicalPath, OP_OVERWRITE_PRE) != null }
+    }.onFailure { it.printStackTrace() }.getOrDefault(0)
+
+    /**
+     * Follow a rename or move: entries for [oldPath] (a file) or beneath it (a directory) get the
+     * corresponding path under [newPath]. When the mapped path already owns an entry (the move
+     * overwrote a tracked file), the revisions of both are merged into that entry and the moved
+     * file's fingerprint wins, so the history of a path stays continuous. Never throws.
+     *
+     * zh-CN: 跟随重命名 / 移动: [oldPath] (文件) 或其下 (目录) 的条目改为 [newPath] 下的对应路径.
+     * 映射后的路径已有条目时 (移动覆盖了已纳管文件), 两者的 revision 合并到该条目, 并沿用被移动文件的指纹,
+     * 使同一路径的历史保持连续. 不抛异常.
+     *
+     * @return the number of entries relocated (including merged ones).
+     */
+    fun relocate(oldPath: String, newPath: String): Int = runCatching {
+        val old = HistoryPaths.normalizePath(oldPath)
+        val new = HistoryPaths.normalizePath(newPath)
+        if (old == new) return@runCatching 0
+        if (!HistoryPaths.isUnderInternalStorage(old) || !HistoryPaths.isUnderInternalStorage(new)) return@runCatching 0
+
+        val prefix = "$old/"
+        val affected = LinkedHashMap<String, HistoryEntities.FileEntry>()
+        dao.findFileByPath(old)?.let { affected[it.fileId] = it }
+        dao.listFilesByPathPrefix(prefix)
+            .filter { HistoryRelocation.isAffected(it.logicalPath, old) }
+            .forEach { affected[it.fileId] = it }
+        if (affected.isEmpty()) return@runCatching 0
+
+        val now = System.currentTimeMillis()
+        var relocated = 0
+        for (entry in affected.values) {
+            val mapped = HistoryRelocation.mapPath(entry.logicalPath, old, new) ?: continue
+            val existing = dao.findFileByPath(mapped)
+            if (existing != null && existing.fileId != entry.fileId) {
+                // Merge into the entry that already owns the destination path.
+                // zh-CN: 合并到已拥有目标路径的条目.
+                dao.moveRevisionsToFile(entry.fileId, existing.fileId)
+                dao.deleteFileEntriesByIds(listOf(entry.fileId))
+                dao.upsertFile(existing.copy(lastSeenAt = now, latestFingerprint = entry.latestFingerprint))
+            } else {
+                dao.upsertFile(entry.copy(logicalPath = mapped, lastSeenAt = now))
+            }
+            relocated++
+        }
+        relocated
+    }.onFailure { it.printStackTrace() }.getOrDefault(0)
+
+    /**
      * Apply the complete retention policy to every tracked file: per-file days / count / bytes,
      * then the global byte limit, then drop file entries that no longer own any revision.
      * Used by the cleanup worker, the on-demand cleanup after a settings change and "Clean up now".

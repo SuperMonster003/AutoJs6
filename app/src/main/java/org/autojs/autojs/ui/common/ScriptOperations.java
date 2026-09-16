@@ -384,6 +384,7 @@ public class ScriptOperations {
                     if (ObjectHelper.equals(newItem.toScriptFile(), item.toScriptFile())) {
                         throw new IOException();
                     }
+                    relocateHistoryAsync(item.toScriptFile().getPath(), newItem.toScriptFile().getPath());
                     notifyFileChanged(item, newItem);
                     return newItem;
                 });
@@ -452,6 +453,7 @@ public class ScriptOperations {
                                             },
                                             controller
                                     );
+                                    relocateHistory(source.getPath(), dest.getPath());
 
                                     notifyFileRemovedAtItsParent(sourceIsProject, sourceIsDir, source);
                                 } else {
@@ -587,6 +589,7 @@ public class ScriptOperations {
                             controller.throwIfCancelled();
                             touchedDestinations.add(new ScriptFile(plan.dest.getPath()));
                             if (plan.overwrite) {
+                                snapshotBeforeOverwrite(plan.dest);
                                 deleteDestinationIfExists(plan.dest);
                             }
 
@@ -605,6 +608,7 @@ public class ScriptOperations {
                                         },
                                         controller
                                 );
+                                relocateHistory(plan.source.getPath(), plan.dest.getPath());
                                 notifyFileRemovedAtItsParent(plan.sourceIsProject, plan.sourceIsDir, plan.source);
                             } else {
                                 copyFileOrDirWithProgress(
@@ -1079,6 +1083,7 @@ public class ScriptOperations {
                         return Observable.empty();
                     }
                     return Observable.fromCallable(() -> {
+                        snapshotBeforeOverwrite(dest);
                         boolean deleted;
                         if (dest.isDirectory()) {
                             deleted = PFiles.deleteRecursively(dest);
@@ -1215,6 +1220,44 @@ public class ScriptOperations {
                 .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
                 .build());
+    }
+
+    /**
+     * Keep version history attached to a path that was just renamed or moved (D4 / P2.1). Best effort:
+     * the repository swallows its own failures, the file operation has already succeeded.
+     * zh-CN: 让版本历史跟随刚刚重命名 / 移动的路径 (D4 / P2.1). 尽力而为: 仓库自行吞掉失败, 文件操作已经成功.
+     */
+    private void relocateHistory(@NonNull String oldPath, @NonNull String newPath) {
+        try {
+            new HistoryRepository(mContext.getApplicationContext()).relocate(oldPath, newPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Room rejects main-thread access, and the rename dialog callback may run there.
+    // zh-CN: Room 拒绝主线程访问, 而重命名对话框的回调可能在主线程执行.
+    private void relocateHistoryAsync(@NonNull String oldPath, @NonNull String newPath) {
+        Schedulers.io().scheduleDirect(() -> relocateHistory(oldPath, newPath));
+    }
+
+    /**
+     * Record the current content of a destination the explorer is about to replace by a copy or move
+     * (OVERWRITE_PRE, D4 / P2.2). For a directory only files that already own history are captured.
+     * zh-CN: 资源管理器即将以复制 / 移动覆盖目标前, 记录其当前内容 (OVERWRITE_PRE, D4 / P2.2).
+     * 目标为目录时只为已纳管的文件留快照.
+     */
+    private void snapshotBeforeOverwrite(@NonNull File dest) {
+        try {
+            HistoryRepository repository = new HistoryRepository(mContext.getApplicationContext());
+            if (dest.isDirectory()) {
+                repository.recordSnapshotsBeforeOverwriteUnderDirectory(dest.getPath());
+            } else if (dest.isFile()) {
+                repository.recordSnapshotBeforeOverwrite(dest.getPath(), HistoryRepository.OP_OVERWRITE_PRE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

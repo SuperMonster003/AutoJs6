@@ -404,6 +404,7 @@
 * `Fix` Files deleted on the PC remained on the device after saving a project from the VSCode extension, and stale files in the cache directory kept reappearing _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `Fix` Receiving a project archive from the VSCode extension converted the whole byte array to a string for logging, which could crash with OOM _[`issue #523`](http://issues.autojs6.com/523)_
 * `Fix` A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_
+* `Fix` Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -541,6 +542,7 @@
 * `Improvement` The periodic cleanup applies the complete retention policy (days, versions, per-file and total size for version history; days and size for the trash) and drops file entries that own no revisions; emergency draft limits treat 0 as unlimited as well
 * `Improvement` VSCode extension connections gain an application-level heartbeat (ping/pong) and a frame length limit, releasing dead connections promptly and avoiding huge allocations on desync _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `Improvement` Files saved from the VSCode extension can keep their relative directory structure inside the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `Improvement` The explorer records the current content of a file as an OVERWRITE_PRE revision before a copy or move replaces it; when a directory is overwritten, the tracked files inside get snapshots
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

@@ -566,6 +566,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les fichiers supprimés sur le PC restaient sur l'appareil après l'enregistrement d'un projet depuis l'extension VSCode, et les fichiers obsolètes du répertoire de cache réapparaissaient _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `Correction` La réception d'une archive de projet depuis l'extension VSCode convertissait tout le tableau d'octets en chaîne pour le journal, ce qui pouvait provoquer un plantage OOM _[`issue #523`](http://issues.autojs6.com/523)_
 * `Correction` Une seule connexion semi-morte de l'extension VSCode bloquait le thread d'écriture des journaux, de sorte que les nouvelles connexions ne recevaient aucun journal _[`issue #385`](http://issues.autojs6.com/385)_
+* `Correction` L'historique des versions restait à l'ancien chemin après le renommage ou le déplacement d'un fichier ou d'un dossier dans l'explorateur; il suit désormais le nouveau chemin (les dossiers réécrivent tous les chemins suivis qu'ils contiennent), et lorsqu'un déplacement écrase un fichier suivi, les deux historiques sont fusionnés dans le chemin de destination
 * `Amélioration` Les erreurs Flow conservent les méthodes, fichiers de script et numéros de ligne des tâches asynchrones dans flowStack et stack, affichés automatiquement par console.error
 * `Amélioration` Le paramètre maxAttempts de Flow repeatUntil vaut 0 par défaut pour des tentatives illimitées dans le délai total
 * `Amélioration` Comparaison des collections ordonnées de noeuds et des projections snapshot immuables, avec gestion des délais et de l'annulation des sous-flux
@@ -703,6 +704,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le nettoyage périodique applique la politique de conservation complète (jours, versions, taille par fichier et totale pour l'historique des versions; jours et taille pour la corbeille) et supprime les entrées de fichier sans révision; les limites des brouillons d'urgence traitent aussi 0 comme illimité
 * `Amélioration` Les connexions de l'extension VSCode disposent d'un battement de coeur applicatif (ping/pong) et d'une limite de longueur de trame, libérant rapidement les connexions mortes et évitant les allocations énormes en cas de désynchronisation _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `Amélioration` Les fichiers enregistrés depuis l'extension VSCode peuvent conserver leur structure de répertoires relative dans le répertoire de travail _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `Amélioration` L'explorateur enregistre le contenu actuel d'un fichier comme révision OVERWRITE_PRE avant qu'une copie ou un déplacement ne le remplace; lorsqu'un dossier est écrasé, les fichiers suivis qu'il contient reçoivent des instantanés
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

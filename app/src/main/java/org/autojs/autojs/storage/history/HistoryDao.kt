@@ -63,6 +63,9 @@ interface HistoryDao {
     @Query("SELECT fileId FROM file_entry WHERE fileId NOT IN (SELECT DISTINCT fileId FROM revision)")
     fun listFileIdsWithoutRevisions(): List<String>
 
+    @Query("UPDATE revision SET fileId = :toFileId WHERE fileId = :fromFileId")
+    fun moveRevisionsToFile(fromFileId: String, toFileId: String)
+
     @Query("SELECT * FROM revision WHERE createdAt < :expiredBefore ORDER BY createdAt ASC")
     fun listExpiredRevisions(expiredBefore: Long): List<HistoryEntities.Revision>
 

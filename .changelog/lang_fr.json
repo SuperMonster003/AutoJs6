@@ -400,7 +400,8 @@
         "Le nettoyage des blobs orphelins de l'historique des versions protège les blobs de moins de 30 minutes, de sorte qu'un instantané récent dont la ligne en base est encore en attente n'est plus supprimé",
         "Les fichiers supprimés sur le PC restaient sur l'appareil après l'enregistrement d'un projet depuis l'extension VSCode, et les fichiers obsolètes du répertoire de cache réapparaissaient _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
         "La réception d'une archive de projet depuis l'extension VSCode convertissait tout le tableau d'octets en chaîne pour le journal, ce qui pouvait provoquer un plantage OOM _[`issue #523`](http://issues.autojs6.com/523)_",
-        "Une seule connexion semi-morte de l'extension VSCode bloquait le thread d'écriture des journaux, de sorte que les nouvelles connexions ne recevaient aucun journal _[`issue #385`](http://issues.autojs6.com/385)_"
+        "Une seule connexion semi-morte de l'extension VSCode bloquait le thread d'écriture des journaux, de sorte que les nouvelles connexions ne recevaient aucun journal _[`issue #385`](http://issues.autojs6.com/385)_",
+        "L'historique des versions restait à l'ancien chemin après le renommage ou le déplacement d'un fichier ou d'un dossier dans l'explorateur; il suit désormais le nouveau chemin (les dossiers réécrivent tous les chemins suivis qu'ils contiennent), et lorsqu'un déplacement écrase un fichier suivi, les deux historiques sont fusionnés dans le chemin de destination"
       ],
       "improvement": [
         "Les erreurs Flow conservent les méthodes, fichiers de script et numéros de ligne des tâches asynchrones dans flowStack et stack, affichés automatiquement par console.error",
@@ -539,7 +540,8 @@
         "Le déplacement vers la corbeille vérifie d'abord la limite de taille et, lorsque les éléments la dépassent, propose de déplacer quand même, de supprimer définitivement ou d'annuler; les entrées plus anciennes sont supprimées juste après le déplacement, et la limite de taille conserve toujours l'entrée la plus récente",
         "Le nettoyage périodique applique la politique de conservation complète (jours, versions, taille par fichier et totale pour l'historique des versions; jours et taille pour la corbeille) et supprime les entrées de fichier sans révision; les limites des brouillons d'urgence traitent aussi 0 comme illimité",
         "Les connexions de l'extension VSCode disposent d'un battement de coeur applicatif (ping/pong) et d'une limite de longueur de trame, libérant rapidement les connexions mortes et évitant les allocations énormes en cas de désynchronisation _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
-        "Les fichiers enregistrés depuis l'extension VSCode peuvent conserver leur structure de répertoires relative dans le répertoire de travail _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_"
+        "Les fichiers enregistrés depuis l'extension VSCode peuvent conserver leur structure de répertoires relative dans le répertoire de travail _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
+        "L'explorateur enregistre le contenu actuel d'un fichier comme révision OVERWRITE_PRE avant qu'une copie ou un déplacement ne le remplace; lorsqu'un dossier est écrasé, les fichiers suivis qu'il contient reçoivent des instantanés"
       ],
       "dependency": [
         "Android AXML modularise",

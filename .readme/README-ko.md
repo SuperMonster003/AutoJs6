@@ -566,6 +566,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` VSCode 확장에서 프로젝트를 저장할 때 PC 에서 삭제한 파일이 기기에 남고 캐시 디렉터리의 오래된 파일이 반복해서 나타나는 문제 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `수정` VSCode 확장에서 프로젝트 아카이브를 수신할 때 전체 바이트 배열을 문자열로 변환하여 로그에 기록해 OOM 으로 충돌할 수 있는 문제 _[`issue #523`](http://issues.autojs6.com/523)_
 * `수정` VSCode 확장의 반응 없는 연결 하나가 로그 쓰기 스레드를 차단하여 새 연결이 로그를 받지 못하는 문제 _[`issue #385`](http://issues.autojs6.com/385)_
+* `수정` 탐색기에서 파일이나 디렉터리의 이름을 바꾸거나 이동한 뒤에도 버전 기록이 이전 경로에 남아 있었습니다; 이제 기록이 새 경로를 따라가며(디렉터리는 하위의 모든 추적 경로를 다시 씀), 이동이 추적 중인 파일을 덮어쓰면 두 기록이 대상 경로로 병합됩니다
 * `개선` Flow 오류의 flowStack 및 stack에 비동기 작업 메서드, 스크립트 파일과 줄 번호를 보존하고 console.error에서 진단 스택을 자동으로 표시
 * `개선` Flow repeatUntil의 maxAttempts 기본값을 0으로 설정하여 전체 제한 시간 내에서 무제한 시도 지원
 * `개선` 안정화 대기에서 순서가 있는 노드 모음과 snapshot 데이터 투영을 비교하고 하위 흐름의 기한, 취소 및 오류 전파 개선
@@ -703,6 +704,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 주기적 정리가 전체 보관 정책(버전 기록의 일수, 버전 수, 파일당 및 총 용량; 휴지통의 일수와 용량)을 적용하고 리비전이 없는 파일 항목을 제거합니다; 긴급 초안의 상한도 0을 제한 없음으로 처리합니다
 * `개선` VSCode 확장 연결에 애플리케이션 수준 하트비트 (ping/pong) 와 프레임 길이 제한을 추가하여 끊긴 연결을 즉시 해제하고 동기화 오류 시 대용량 메모리 할당을 방지 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `개선` VSCode 확장에서 저장한 파일이 작업 디렉터리 내에서 상대 디렉터리 구조를 유지 가능 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `개선` 탐색기는 복사 또는 이동으로 파일을 교체하기 전에 현재 내용을 OVERWRITE_PRE 리비전으로 기록합니다; 디렉터리를 덮어쓸 때는 그 안의 추적 중인 파일에 대해 스냅샷을 남깁니다
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

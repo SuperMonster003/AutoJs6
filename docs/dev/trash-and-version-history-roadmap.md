@@ -94,12 +94,12 @@
 - [x] P1.2 策略变更即时生效: 确认对话框后 `HistoryCleanupScheduler.scheduleOnDemandCleanup` 排队唯一的一次性 Worker (REPLACE, 2 秒去抖); 清理过程抽为 `HistoryCleanup.runAll` (Worker 只做薄封装), 其中 `HistoryRepository.enforceRetentionPolicy` 应用天数 + 版本数 + 单文件容量 + 全局容量并移除不再拥有 revision 的 file entry, `TrashRepository.enforceRetentionPolicy` 应用天数 + 容量, 紧急草稿改为 D1 语义. 证据: 编译 + JVM 单测, 2026-09-16.
 - [x] P1.3 回收站移入后执行容量策略; 待移入条目超过上限时移入前提示 (继续移入 / 彻底删除 / 取消, D8). 证据: `ScriptOperations.checkTrashQuotaThenRun` (单个与批量共用, IO 线程统计大小), 移入成功后 `enforceTrashQuotaAfterMove` 调用 `TrashRepository.enforceTotalBytesLimit(movedTrashIds)`; D7 保护逻辑见 `HistoryRetentionPolicyTest.protectedItemsSurviveBytesLimit` (JVM), 2026-09-16.
 - [x] P1.4 回收站页与版本历史页菜单增加 "立即清理" 与 "设置" 入口; 抽屉条目长按打开对应设置. 证据: `menu_trash.xml` / `menu_version_history.xml` 的 `action_clean_up_now` / `action_trash_and_version_history_settings`, `HistoryCleanupUi.runNow` (IO 线程执行 + 完成 toast + 重新加载, 并发调用去重), `DrawerMenuItem.setLongClickAction` 与 `DrawerMenuItemViewHolder` 长按分发, 抽屉副标题在容量不限制时不再显示百分比, 2026-09-16.
-- [x] P1.5 10 语言字符串与 changelog. 证据: 26 条字符串 x 11 个 `strings.xml` (`values` 与 `values-en` 均为英文), changelog feature 2 条 / improvement 2 条 x 10 语言并重新生成 markdown, 2026-09-16; 提交 hash 由 P2 首次提交回填.
+- [x] P1.5 10 语言字符串与 changelog. 证据: 26 条字符串 x 11 个 `strings.xml` (`values` 与 `values-en` 均为英文), changelog feature 2 条 / improvement 2 条 x 10 语言并重新生成 markdown, 2026-09-16; 提交 `782e512f2`.
 
 ### P2 版本历史精进 (F12, F13, F15)
 
-- [ ] P2.1 重命名 / 移动迁移历史: `HistoryRepository.relocate(oldPath, newPath)` (文件精确匹配, 目录按前缀批量改写 `logicalPath`), 目标路径已有条目时合并 revisions 到目标 `fileId`; 接入 `ScriptOperations.rename` / `move` (含批量移动). 路径映射抽为纯函数并单测.
-- [ ] P2.2 覆盖类写入统一留快照 (D4): 资源管理器复制 / 移动覆盖已有文件前记录 `OVERWRITE_PRE`; 复用 P0.3 的 `recordSnapshotBeforeOverwrite`.
+- [x] P2.1 重命名 / 移动迁移历史: `HistoryRepository.relocate(oldPath, newPath)` (文件精确匹配, 目录按前缀批量改写 `logicalPath`), 目标路径已有条目时合并 revisions 到目标 `fileId` (`HistoryDao.moveRevisionsToFile`, 目标条目沿用被移动文件的指纹); 接入 `ScriptOperations.rename` (IO 线程异步) / 单个与批量 `move` (移动成功后同步调用). 路径映射抽为纯函数 `HistoryRelocation`. 证据: `HistoryRelocationTest` (JVM, 5 例), 2026-09-16.
+- [x] P2.2 覆盖类写入统一留快照 (D4): 资源管理器单个 (`confirmOverwriteIfNeeded`) 与批量 (`executeCopyMovePlans`) 复制 / 移动覆盖前调用 `snapshotBeforeOverwrite`: 文件走 `recordSnapshotBeforeOverwrite(OP_OVERWRITE_PRE)`, 目录走 `recordSnapshotsBeforeOverwriteUnderDirectory` (只为已纳管文件留快照, 代价受历史规模约束). 证据: 编译 + JVM 单测, 2026-09-16; 提交 hash 由 P2.3 提交回填.
 - [ ] P2.3 按文件的版本列表页 (RecyclerView, 替代单选对话框): 显示时间 / 大小 / `op` / 编码 / "与当前文件一致" 标记 (sha 对比), 支持多选删除; 资源管理器与编辑器入口均切换到该页, 保留 "恢复到编辑器" 与 "恢复到磁盘" 两种模式.
 - [ ] P2.4 差异视图: 所选 revision 与当前文件, 或两条 revision 之间的行级 diff (只读页面, 新增 / 删除行着色); 超过阈值的大文件退化为 "仅显示行数与大小统计". 实现选型见 Q4.
 - [ ] P2.5 手动快照与标签: 编辑器菜单 "创建快照" (op = `MANUAL`, 可选标签); schema v3 增加 `label TEXT` 与 `pinned INTEGER NOT NULL DEFAULT 0` 列 (D3); pinned 的 revision 不参与天数 / 版本数 / 单文件容量清理, 但仍受全局总容量的最终保护.
@@ -162,7 +162,7 @@
 | --- | --- |
 | 数据模型 | `storage/history/HistoryEntities.kt`, `TrashItemEntity.kt`, `HistoryDao.kt`, `HistoryDatabase.kt` |
 | 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `RetentionLimitUnits.kt` (P1.1) |
-| 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryUriUtils.kt` |
+| 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |
 | 清理 | `storage/history/HistoryCleanup.kt` (P1.2, 全部清理过程), `HistoryCleanupUi.kt` (P1.4), `HistoryCleanupScheduler.kt`, `HistoryCleanupWorker.kt`, `TrashPartialCleanupWorker.kt` |
 | 交互 | `storage/history/VersionHistoryController.kt`, `TrashRestoreController.kt`, `TrashRestoreNaming.kt` (P0.5) |

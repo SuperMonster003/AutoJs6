@@ -400,7 +400,8 @@
         "版本歷史的孤立 blob 清理增加 30 分鐘最小保護期, 避免誤刪資料庫記錄尚未寫入的新快照",
         "VSCode 擴充功能儲存專案時, PC 端已刪除的檔案仍殘留在裝置上以及快取目錄中歷史檔案反覆出現的問題 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_",
         "VSCode 擴充功能連線接收專案封存時將整個位元組陣列轉為字串寫入日誌, 可能導致 OOM 崩潰的問題 _[`issue #523`](http://issues.autojs6.com/523)_",
-        "VSCode 擴充功能連線因單個半死連線阻塞日誌寫入執行緒, 導致新連線無法接收日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_"
+        "VSCode 擴充功能連線因單個半死連線阻塞日誌寫入執行緒, 導致新連線無法接收日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_",
+        "檔案管理器重新命名或移動檔案 / 目錄後, 版本歷史停留在舊路徑; 現在歷史跟隨新路徑 (目錄按前綴批次改寫), 移動覆蓋已納管檔案時兩份歷史合併到目標路徑"
       ],
       "improvement": [
         "Flow 例外的 flowStack 與 stack 保留非同步工作方法, 指令碼檔案和行號, console.error 自動顯示診斷堆疊",
@@ -539,7 +540,8 @@
         "移入回收站前檢查容量上限, 待移入條目超過上限時提示繼續移入, 徹底刪除或取消; 移入完成後立即清理更早的條目, 且容量上限始終保留最新條目",
         "週期清理任務套用完整的保留策略 (版本歷史的天數, 版本數, 單檔案與總容量; 回收站的天數與容量), 並移除不再擁有版本的檔案條目; 緊急草稿的保留策略同樣以 0 表示不限制",
         "VSCode 擴充功能連線增加應用層心跳 (ping/pong) 與幀長度上限校驗, 及時釋放失效連線並避免失步時的超大記憶體配置 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_",
-        "VSCode 擴充功能儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_"
+        "VSCode 擴充功能儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_",
+        "檔案管理器以複製或移動覆蓋已有檔案前, 先把目標檔案的目前內容記錄為一條 OVERWRITE_PRE 版本; 覆蓋目錄時為其中已納管的檔案留快照"
       ],
       "dependency": [
         "模組化 Android AXML",

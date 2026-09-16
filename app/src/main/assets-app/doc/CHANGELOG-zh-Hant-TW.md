@@ -404,6 +404,7 @@
 * `修復` VSCode 擴充功能儲存專案時, PC 端已刪除的檔案仍殘留在裝置上以及快取目錄中歷史檔案反覆出現的問題 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `修復` VSCode 擴充功能連線接收專案封存時將整個位元組陣列轉為字串寫入日誌, 可能導致 OOM 崩潰的問題 _[`issue #523`](http://issues.autojs6.com/523)_
 * `修復` VSCode 擴充功能連線因單個半死連線阻塞日誌寫入執行緒, 導致新連線無法接收日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_
+* `修復` 檔案管理器重新命名或移動檔案 / 目錄後, 版本歷史停留在舊路徑; 現在歷史跟隨新路徑 (目錄按前綴批次改寫), 移動覆蓋已納管檔案時兩份歷史合併到目標路徑
 * `最佳化` Flow 例外的 flowStack 與 stack 保留非同步工作方法, 指令碼檔案和行號, console.error 自動顯示診斷堆疊
 * `最佳化` Flow repeatUntil 的 maxAttempts 預設為 0, 表示在總逾時範圍內不限嘗試次數
 * `最佳化` Flow 穩定等待支援有序節點集合比較與 snapshot 資料投影, 完善子流程截止時間, 取消及錯誤傳播
@@ -541,6 +542,7 @@
 * `最佳化` 週期清理任務套用完整的保留策略 (版本歷史的天數, 版本數, 單檔案與總容量; 回收站的天數與容量), 並移除不再擁有版本的檔案條目; 緊急草稿的保留策略同樣以 0 表示不限制
 * `最佳化` VSCode 擴充功能連線增加應用層心跳 (ping/pong) 與幀長度上限校驗, 及時釋放失效連線並避免失步時的超大記憶體配置 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `最佳化` VSCode 擴充功能儲存檔案時支援按相對目錄結構儲存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `最佳化` 檔案管理器以複製或移動覆蓋已有檔案前, 先把目標檔案的目前內容記錄為一條 OVERWRITE_PRE 版本; 覆蓋目錄時為其中已納管的檔案留快照
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer
