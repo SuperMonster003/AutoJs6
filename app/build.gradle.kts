@@ -443,6 +443,12 @@ if (apkBuilderIncludeBuiltInTemplate.get()) {
     utils.registerTemplateApkCopy(project)
 }
 
+ksp {
+    // Room schema snapshots (HistoryDatabase has exportSchema = true) for migration regression tests.
+    // zh-CN: Room schema 快照 (HistoryDatabase 已开启 exportSchema), 用于迁移回归测试.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies /* Unclassified */ {
     // Compose
     // implementation("androidx.compose.ui:ui-android:1.6.7")

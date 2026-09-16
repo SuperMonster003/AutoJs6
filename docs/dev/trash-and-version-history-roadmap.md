@@ -119,8 +119,8 @@
 
 ### P4 质量, 验证与文档
 
-- [x] P4.1 单测扩展: 配额提示决策抽为纯对象 `TrashQuotaHint` (`needsMeasurement` / `decide`, D8 语义: 无上限不统计, 等于上限仍放行), `ScriptOperations.checkTrashQuotaThenRun` 改用它; 新增 `TrashQuotaHintTest` (3 例), `HistoryRelocationTest` 增加回收站恢复到其他目录 / 自动改名 / 同路径映射 (2 例), `TrashExpiryTest` 增加一天边界与不足一小时 / 大保留期 (1 例), `TrashArchiveListingTest` 增加仅目录归档与恰好等于 maxEntries (2 例). 证据: 全部 history 单测 68 例通过, 2026-09-16; 提交 hash 由 P4.2 提交回填.
-- [ ] P4.2 Room `exportSchema = true` 并提交 `app/schemas/` 快照, 2 -> 3 迁移有可回归的 schema 文件 (F18).
+- [x] P4.1 单测扩展: 配额提示决策抽为纯对象 `TrashQuotaHint` (`needsMeasurement` / `decide`, D8 语义: 无上限不统计, 等于上限仍放行), `ScriptOperations.checkTrashQuotaThenRun` 改用它; 新增 `TrashQuotaHintTest` (3 例), `HistoryRelocationTest` 增加回收站恢复到其他目录 / 自动改名 / 同路径映射 (2 例), `TrashExpiryTest` 增加一天边界与不足一小时 / 大保留期 (1 例), `TrashArchiveListingTest` 增加仅目录归档与恰好等于 maxEntries (2 例). 证据: 全部 history 单测 68 例通过, 2026-09-16; 提交 `93ec9ea4c`.
+- [x] P4.2 Room schema 快照: `HistoryDatabase` 改为 `exportSchema = true`, `app/build.gradle.kts` 增加 `ksp { arg("room.schemaLocation", "$projectDir/schemas") }`, 由 KSP 生成 `app/schemas/org.autojs.autojs.storage.history.HistoryDatabase/3.json`; `1.json` / `2.json` 由 3.json 按迁移 SQL 反推 (去掉 label / pinned, 再去掉 trash_item), 其 identityHash 为自定义摘要而非 Room 编译期哈希 (历史版本从未导出, 仅用于建旧库). 回归载体: `androidTest/.../HistoryDatabaseMigrationTest` (离线缓存无 `room-testing`, 改用原生 `SQLiteOpenHelper` 按 1.json / 2.json 的 CREATE 语句建旧库并写入数据, 再经 `HistoryDatabase.createBuilder(context, name)` (新增 internal, `getInstance` 复用) 打开, 由 Room 执行迁移并按 v3 实体校验; 2 例: 2 -> 3 保留数据且 label / pinned 可读写, 1 -> 3 建出 trash_item). 证据: `:app:kspAppDebugKotlin` 生成 3.json, `:app:compileAppDebugAndroidTestKotlin` 通过, 2026-09-16; 真机执行留待 P4.5 (附录 B 第 8 项). 提交 hash 由 P4.3 提交回填.
 - [ ] P4.3 zip 解压的 canonical path 检查与损坏 zip 的容错 (单个条目失败时记录并继续, 最终提示).
 - [ ] P4.4 两个列表页改用 `ListAdapter` + `DiffUtil`; `VersionHistoryFileViewHolder` 改用布局文件并加文件图标 (F17).
 - [ ] P4.5 真机 / AVD 冒烟 (附录 B) 并回填证据.
@@ -164,6 +164,7 @@
 | 关注点 | 文件 |
 | --- | --- |
 | 数据模型 | `storage/history/HistoryEntities.kt`, `TrashItemEntity.kt`, `HistoryDao.kt`, `HistoryDatabase.kt` |
+| schema | `app/schemas/org.autojs.autojs.storage.history.HistoryDatabase/{1,2,3}.json` (P4.2; 3.json 由 KSP 生成, 1 / 2 为反推), `app/src/androidTest/java/org/autojs/autojs/storage/history/HistoryDatabaseMigrationTest.kt` |
 | 策略 | `storage/history/HistoryPrefs.kt`, `HistoryRetentionPolicy.kt` (P0.7), `HistoryFingerprintPolicy.kt` (P0.1), `HistorySnapshotLabel.kt` (P2.5), `HistoryExportNaming.kt` (P2.6), `TrashExpiry.kt` (P3.3 / P3.5), `TrashQuotaHint.kt` (P4.1), `RetentionLimitUnits.kt` (P1.1) |
 | 路径 | `storage/history/HistoryPaths.kt` (P0.2), `HistoryRelocation.kt` (P2.1), `HistoryUriUtils.kt` |
 | 仓库与 blob | `storage/history/HistoryRepository.kt`, `HistoryBlobStore.kt`, `TrashRepository.kt`, `TrashBlobStore.kt` |

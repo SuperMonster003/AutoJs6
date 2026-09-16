@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TrashEntities.TrashItem::class,
     ],
     version = 3,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class HistoryDatabase : RoomDatabase() {
 
@@ -60,14 +60,21 @@ abstract class HistoryDatabase : RoomDatabase() {
             }
         }
 
+        const val DATABASE_NAME = "history-database.db"
+
         fun getInstance(applicationContext: Context): HistoryDatabase = instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(
-                applicationContext,
-                HistoryDatabase::class.java,
-                "history-database.db",
-            ).apply {
+            instance ?: createBuilder(applicationContext, DATABASE_NAME).build().also { instance = it }
+        }
+
+        /**
+         * Builder with every migration registered. Shared by [getInstance] and the migration test,
+         * which opens a throwaway database file under a different name.
+         * zh-CN: 注册了全部迁移的 builder. 供 [getInstance] 与迁移测试 (使用不同名称的临时数据库文件) 共用.
+         */
+        internal fun createBuilder(applicationContext: Context, name: String): RoomDatabase.Builder<HistoryDatabase> {
+            return Room.databaseBuilder(applicationContext, HistoryDatabase::class.java, name).apply {
                 addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-            }.build().also { instance = it }
+            }
         }
     }
 }
