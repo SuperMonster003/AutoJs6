@@ -43,6 +43,7 @@ import org.autojs.autojs.storage.history.HistoryRepository;
 import org.autojs.autojs.storage.history.HistoryRetentionPolicy;
 import org.autojs.autojs.storage.history.TrashEntities;
 import org.autojs.autojs.storage.history.TrashRepository;
+import com.google.android.material.snackbar.Snackbar;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
@@ -322,6 +323,7 @@ public class ScriptOperations {
     private void showMessage(final int resId) {
         if (isMainThread()) {
             showMessageWithoutThreadSwitch(resId);
+            return;
         }
         // switch to ui thread to show message
         GlobalAppContext.post(() -> showMessageWithoutThreadSwitch(resId));
@@ -1331,6 +1333,7 @@ public class ScriptOperations {
         boolean isDir = scriptFile.isDirectory();
         boolean isProject = ProjectConfig.isProject(scriptFile);
         int titleRes = isDir ? R.string.text_move_folder_to_trash : R.string.text_move_file_to_trash;
+        final List<TrashEntities.TrashItem> movedItems = new ArrayList<>();
 
         Observable.fromCallable(() -> {
                     OperationController controller = new OperationController();
@@ -1370,6 +1373,7 @@ public class ScriptOperations {
                                 },
                                 controller
                         );
+                        movedItems.add(moved);
                         enforceTrashQuotaAfterMove(repository, Collections.singleton(moved.getTrashId()));
 
                         return 1;
@@ -1384,7 +1388,7 @@ public class ScriptOperations {
                 .subscribe(result -> {
                     switch (result) {
                         case 1 -> {
-                            showMessage(R.string.text_moved_to_trash);
+                            showMovedToTrashWithUndo(movedItems);
                             notifyFileRemoved(isProject, isDir, scriptFile);
                         }
                         case -1 -> showMessage(R.string.text_operation_aborted);
@@ -1408,6 +1412,7 @@ public class ScriptOperations {
     }
 
     private void moveToTrashWithProgress(final List<ScriptFile> scriptFiles) {
+        final List<TrashEntities.TrashItem> movedItems = new ArrayList<>();
         Observable.fromCallable(() -> {
                     OperationController controller = new OperationController();
                     ProgressDialogSession session = new ProgressDialogSession(controller);
@@ -1461,6 +1466,7 @@ public class ScriptOperations {
                             );
                             processedBase[0] += target.totalBytes;
                             movedTrashIds.add(moved.getTrashId());
+                            movedItems.add(moved);
                             notifyFileRemoved(target.isProject, target.isDir, target.file);
                         }
                         enforceTrashQuotaAfterMove(repository, movedTrashIds);
@@ -1476,7 +1482,7 @@ public class ScriptOperations {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     switch (result) {
-                        case 1 -> showMessage(R.string.text_moved_to_trash);
+                        case 1 -> showMovedToTrashWithUndo(movedItems);
                         case -1 -> showMessage(R.string.text_operation_aborted);
                         default -> showMessage(R.string.text_failed_to_delete);
                     }
@@ -1494,6 +1500,69 @@ public class ScriptOperations {
                             .positiveText(R.string.dialog_button_dismiss)
                             .positiveColorRes(R.color.dialog_button_default)
                             .cancelable(false)::build);
+                });
+    }
+
+    /**
+     * "Moved to trash" with an Undo action. Undo restores each item to its original path only while
+     * that path is still free (never overwriting); items already gone from the trash are skipped.
+     * zh-CN: 带 "撤销" 的 "已移入回收站" 提示. 撤销仅在原路径仍空闲时把条目恢复回去 (绝不覆盖), 已不在回收站的条目跳过.
+     */
+    private void showMovedToTrashWithUndo(@NonNull List<TrashEntities.TrashItem> movedItems) {
+        if (mView == null || movedItems.isEmpty()) {
+            showMessage(R.string.text_moved_to_trash);
+            return;
+        }
+        final List<TrashEntities.TrashItem> items = new ArrayList<>(movedItems);
+        try {
+            Snackbar.make(mView, R.string.text_moved_to_trash, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.text_undo, v -> undoMoveToTrash(items))
+                    .show();
+        } catch (IllegalStateException e) {
+            showMessage(R.string.text_moved_to_trash);
+        }
+    }
+
+    private void undoMoveToTrash(@NonNull List<TrashEntities.TrashItem> items) {
+        Observable.fromCallable(() -> {
+                    TrashRepository repository = new TrashRepository(mContext.getApplicationContext());
+                    OperationController controller = new OperationController();
+                    int restored = 0;
+                    int skipped = 0;
+                    int failed = 0;
+                    for (TrashEntities.TrashItem moved : items) {
+                        TrashEntities.TrashItem current = repository.findTrashItem(moved.getTrashId());
+                        if (current == null) {
+                            skipped++;
+                            continue;
+                        }
+                        File dest = new File(current.getOriginalPath());
+                        if (dest.exists()) {
+                            skipped++;
+                            continue;
+                        }
+                        try {
+                            repository.restoreTrashItemToPathWithoutOverwrite(current, dest, controller);
+                            notifyChildrenChangedAtItsParent(new ScriptFile(dest.getPath()));
+                            restored++;
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                            failed++;
+                        }
+                    }
+                    return new int[]{restored, skipped, failed};
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(counts -> {
+                    if (counts[1] == 0 && counts[2] == 0) {
+                        showMessage(R.string.text_done);
+                    } else {
+                        ViewUtils.showToast(mContext, mContext.getString(R.string.text_batch_restore_summary, counts[0], counts[1], counts[2]), true);
+                    }
+                }, e -> {
+                    e.printStackTrace();
+                    ViewUtils.showToast(mContext, e.getMessage(), true);
                 });
     }
 

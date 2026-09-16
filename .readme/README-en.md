@@ -379,6 +379,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Trash multi-selection: long-press an item to start selecting, with select all / deselect all, batch restore (to each item's original path or one chosen directory; when names clash, choose skip / overwrite / auto-rename for the whole batch, and items sharing a name inside the batch are always auto-renamed; the progress dialog can be aborted and a summary reports restored / skipped / failed counts) and batch removal from the trash
 * `Feature` Trash content preview: the item dialog gains "Preview", which opens text files in the read-only editor, lists the files inside a trashed directory (relative path, size, file and folder counts) and reports binary content instead of opening it
 * `Feature` Trash item details: the item dialog gains "Details", showing name, type, original path, time moved to trash, size, SHA-256 and the expected expiry (with days and hours left) as selectable text that can be copied to the clipboard in one tap
+* `Feature` After the explorer moves a file or directory to the trash, the snackbar offers "Undo", which restores each item to its original path only while that path is still free (never overwriting); items already gone from the trash or whose path is occupied are reported as skipped in the summary
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request
@@ -576,6 +577,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` A single half-dead VSCode extension connection blocked the log writer thread so that new connections received no logs _[`issue #385`](http://issues.autojs6.com/385)_
 * `Fix` Version history stayed at the old path after a file or directory was renamed or moved in the explorer; it now follows the new path (directories rewrite every tracked path beneath them), and when a move overwrites a tracked file both histories merge into the destination path
 * `Fix` Restoring a single trash item reported "done" even when the restore had failed because the progress dialog swallowed the exception; the actual error is now shown
+* `Fix` Explorer operation messages shown from the main thread (such as "Moved to trash") appeared twice
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
