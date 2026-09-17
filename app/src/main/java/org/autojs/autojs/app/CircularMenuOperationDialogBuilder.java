@@ -2,6 +2,8 @@ package org.autojs.autojs.app;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,16 +11,19 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.OperationDialogItemBinding;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.FutureTask;
 import java.util.function.Supplier;
 
 /**
@@ -35,19 +40,21 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
 
     private static final ExecutorService SUBTITLE_EXECUTOR = Executors.newFixedThreadPool(4);
 
-    // Simple cache to avoid repeated calculations during dialog display (especially currentPackage/currentActivity).
-    // zh-CN: 简单缓存, 避免对话框展示期间重复计算 (尤其是 currentPackage/currentActivity).
-    private final Map<Integer, String> mSubtitleCache = new ConcurrentHashMap<>();
+    private static final Object SUBTITLE_PAYLOAD = new Object();
 
-    // Token sequence to prevent misaligned updates caused by RecyclerView reuse.
-    // zh-CN: Token 序列, 防止 RecyclerView 复用导致错位更新.
-    private final AtomicLong mSubtitleRequestSeq = new AtomicLong(0);
+    // Requests belong to dialog items, not recycled views. All state is owned by the main thread.
+    // zh-CN: 查询绑定到对话框条目而非复用的视图. 所有状态均由主线程管理.
+    private final Map<Integer, String> mSubtitleCache = new HashMap<>();
+    private final Map<Integer, FutureTask<String>> mSubtitleRequests = new HashMap<>();
+    private final Handler mSubtitleHandler = new Handler(Looper.getMainLooper());
+    private final RecyclerView.Adapter<ViewHolder> mAdapter;
+    private boolean mSubtitleLoadingCancelled;
 
     public CircularMenuOperationDialogBuilder(@NonNull Context context) {
         super(context);
         RecyclerView operations = new RecyclerView(context);
         operations.setLayoutManager(new LinearLayoutManager(context));
-        operations.setAdapter(new RecyclerView.Adapter<ViewHolder>() {
+        mAdapter = new RecyclerView.Adapter<>() {
             @NonNull
             @Override
             public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -66,13 +73,6 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
 
                 var subtitleSupplier = mSubtitleSuppliers.get(position);
 
-                // Cancel old task first (critical when holder is reused).
-                // zh-CN: 先取消旧任务 (holder 复用时很关键).
-                if (holder.subtitleFuture != null) {
-                    holder.subtitleFuture.cancel(true);
-                    holder.subtitleFuture = null;
-                }
-
                 if (subtitleSupplier != null) {
                     holder.binding.subtitle.setVisibility(View.VISIBLE);
                     holder.binding.subtitle.setTextColor(context.getColor(R.color.day_night));
@@ -83,38 +83,7 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
                     } else {
                         holder.binding.subtitle.setText(context.getString(R.string.ellipsis_six));
 
-                        // Record the token for this bind, validate it in the callback to avoid misaligned updates.
-                        // zh-CN: 记录本次 bind 的 token, 回调时校验避免错位更新.
-                        final long requestToken = mSubtitleRequestSeq.incrementAndGet();
-                        holder.subtitleRequestToken = requestToken;
-
-                        holder.subtitleFuture = SUBTITLE_EXECUTOR.submit(() -> {
-                            String subtitle;
-                            try {
-                                subtitle = subtitleSupplier.get();
-                            } catch (Exception e) {
-                                subtitle = "[ " + context.getString(R.string.error_an_error_occurred) + " ]";
-                            }
-                            if (subtitle == null || subtitle.isEmpty()) {
-                                subtitle = "[ " + context.getString(R.string.text_no_content) + " ]";
-                            }
-
-                            final String finalSubtitle = subtitle;
-
-                            // Cache the result (valid for the lifetime of this dialog).
-                            // zh-CN: 缓存结果 (本次对话框生命周期内有效).
-                            mSubtitleCache.put(position, finalSubtitle);
-
-                            // Return to main thread to update, and token validation is required.
-                            // zh-CN: 回到主线程更新, 同时需要做 token 校验.
-                            holder.itemView.post(() -> {
-                                if (holder.subtitleRequestToken != requestToken) return;
-                                // Prevent holder from being recycled or position from being invalid.
-                                // zh-CN: 防止 holder 已被回收, 或 position 已失效.
-                                if (holder.getBindingAdapterPosition() == RecyclerView.NO_POSITION) return;
-                                holder.binding.subtitle.setText(finalSubtitle);
-                            });
-                        });
+                        loadSubtitle(position, subtitleSupplier);
                     }
                 } else {
                     holder.binding.subtitle.setVisibility(View.GONE);
@@ -125,13 +94,11 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
             }
 
             @Override
-            public void onViewRecycled(@NonNull ViewHolder holder) {
-                super.onViewRecycled(holder);
-                // Cancel task on recycle to avoid meaningless background work and callbacks that may update the wrong holder.
-                // zh-CN: 回收时取消任务, 避免无意义的后台工作以及回调可能会更新错误的 holder.
-                if (holder.subtitleFuture != null) {
-                    holder.subtitleFuture.cancel(true);
-                    holder.subtitleFuture = null;
+            public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+                if (payloads.contains(SUBTITLE_PAYLOAD) && mSubtitleCache.containsKey(position)) {
+                    holder.binding.subtitle.setText(mSubtitleCache.get(position));
+                } else {
+                    onBindViewHolder(holder, position);
                 }
             }
 
@@ -139,8 +106,66 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
             public int getItemCount() {
                 return mOnClickListeners.size();
             }
-        });
+        };
+        operations.setAdapter(mAdapter);
         customView(operations, false);
+    }
+
+    private void loadSubtitle(int position, Supplier<String> supplier) {
+        if (mSubtitleLoadingCancelled || mSubtitleRequests.containsKey(position)) {
+            return;
+        }
+        FutureTask<String> request = new FutureTask<>(() -> {
+            String subtitle = supplier.get();
+            return subtitle == null || subtitle.isEmpty()
+                    ? "[ " + getContext().getString(R.string.text_no_content) + " ]"
+                    : subtitle;
+        }) {
+            @Override
+            protected void done() {
+                if (isCancelled()) {
+                    return;
+                }
+                mSubtitleHandler.post(() -> {
+                    if (mSubtitleLoadingCancelled || mSubtitleRequests.get(position) != this) {
+                        return;
+                    }
+                    mSubtitleRequests.remove(position);
+                    String subtitle;
+                    try {
+                        subtitle = get();
+                    } catch (CancellationException e) {
+                        return;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    } catch (ExecutionException e) {
+                        subtitle = "[ " + getContext().getString(R.string.error_an_error_occurred) + " ]";
+                    }
+                    if (!subtitle.equals(mSubtitleCache.put(position, subtitle))) {
+                        mAdapter.notifyItemChanged(position, SUBTITLE_PAYLOAD);
+                    }
+                });
+            }
+        };
+        mSubtitleRequests.put(position, request);
+        SUBTITLE_EXECUTOR.execute(request);
+    }
+
+    @Override
+    public MaterialDialog build() {
+        MaterialDialog dialog = super.build();
+        var listener = dismissListener;
+        dialog.setOnDismissListener(d -> {
+            mSubtitleLoadingCancelled = true;
+            mSubtitleRequests.values().forEach(request -> request.cancel(true));
+            mSubtitleRequests.clear();
+            mSubtitleHandler.removeCallbacksAndMessages(null);
+            if (listener != null) {
+                listener.onDismiss(d);
+            }
+        });
+        return dialog;
     }
 
     public CircularMenuOperationDialogBuilder item(int iconRes, int titleRes) {
@@ -175,10 +200,6 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
 
         @NonNull
         public final OperationDialogItemBinding binding;
-
-        public Future<?> subtitleFuture;
-
-        public long subtitleRequestToken;
 
         public ViewHolder(View itemView) {
             super(itemView);

@@ -55,6 +55,8 @@ import org.jetbrains.annotations.NotNull;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static org.autojs.autojs.util.ContextUtils.withHostConfiguration;
 
@@ -86,8 +88,6 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private MaterialDialog mScriptListDialog;
     private ExplorerView mScriptListDialogExplorerView;
     private MaterialDialog mLayoutInspectDialog;
-    private String mCurrentPackage;
-    private String mCurrentActivity;
     private Deferred<Capture, Void, Void> mCaptureDeferred;
     private final AccessibilityTool mA11yTool;
     private final PointerLocationTool mPointerLocationTool;
@@ -282,29 +282,20 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
             }
         });
         binding.actionMenuMore.setOnClickListener(v -> {
-            captureCurrentComponentBeforeDialog();
+            // Only snapshot in-memory accessibility data before the overlay takes focus.
+            // zh-CN: 悬浮菜单获取焦点前仅保留内存中的无障碍信息快照.
+            CurrentComponent previousComponent = createCurrentComponent(AutoJs.getInstance().getInfoProvider().getLatestExternalComponent());
+            FutureTask<CurrentComponent> currentComponent = new FutureTask<>(() -> resolveCurrentComponent(previousComponent));
             mWindow.collapse();
 
-            if (mMenuOperationDialog != null && mMenuOperationDialog.isShowing()) {
-                mMenuOperationDialog.dismiss();
-            }
+            dismissSettingsDialog();
 
             mMenuOperationDialog = new CircularMenuOperationDialogBuilder(mContext)
                     .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_a11y_service), this::getA11yState, onCircularMenuItemClick(itemView -> {
                         mA11yTool.launchSettings(false, true);
                     }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package), this::getCurrentPackageText, onCircularMenuItemClick(itemView -> {
-                        if (!TextUtils.isEmpty(mCurrentPackage)) {
-                            ClipboardUtils.setClip(mContext, mCurrentPackage);
-                            ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_package));
-                        }
-                    }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity), this::getCurrentActivityText, onCircularMenuItemClick(itemView -> {
-                        if (!TextUtils.isEmpty(mCurrentActivity)) {
-                            ClipboardUtils.setClip(mContext, mCurrentActivity);
-                            ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_activity));
-                        }
-                    }))
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package), () -> getCurrentComponentText(currentComponent, false), onCurrentComponentClick(currentComponent, false))
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity), () -> getCurrentComponentText(currentComponent, true), onCurrentComponentClick(currentComponent, true))
                     .item(R.drawable.ic_home_black_48dp, mContext.getString(R.string.text_open_main_activity), onCircularMenuItemClick(itemView -> {
                         MainActivity.launch(mContext);
                     }))
@@ -324,6 +315,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                         closeAndSaveState(false);
                     }))
                     .title(mContext.getString(R.string.text_more))
+                    .dismissListener(dialog -> currentComponent.cancel(true))
                     .build();
 
             DialogUtils.showAdaptive(mMenuOperationDialog);
@@ -340,10 +332,46 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         return mPointerLocationTool.isShowing() ? mContext.getString(R.string.text_enabled) : mContext.getString(R.string.text_disabled);
     }
 
-    private void captureCurrentComponentBeforeDialog() {
-        CurrentComponent currentComponent = resolveCurrentComponent();
-        mCurrentPackage = currentComponent == null ? "" : currentComponent.packageName();
-        mCurrentActivity = currentComponent == null ? "" : currentComponent.activityName();
+    private String getCurrentComponentText(FutureTask<CurrentComponent> request, boolean activity) {
+        // Both subtitle suppliers run off the main thread and share one query per dialog.
+        // zh-CN: 两个副标题在后台共享本次对话框的一次查询.
+        request.run();
+        String text = getCurrentComponentValue(request, activity);
+        return TextUtils.isEmpty(text) ? getEmptyInfoHint() : text;
+    }
+
+    private String getCurrentComponentValue(FutureTask<CurrentComponent> request, boolean activity) {
+        try {
+            CurrentComponent component = request.get();
+            return component == null ? "" : activity ? component.activityName() : component.packageName();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException(e.getCause());
+        }
+    }
+
+    private View.OnClickListener onCurrentComponentClick(FutureTask<CurrentComponent> request, boolean activity) {
+        return view -> {
+            // Never wait for a subtitle or copy a previous dialog's data on a tap.
+            // zh-CN: 点击时不等待副标题加载, 也不复制上次对话框的数据.
+            if (!request.isDone() || request.isCancelled()) {
+                return;
+            }
+            String text;
+            try {
+                text = getCurrentComponentValue(request, activity);
+            } catch (IllegalStateException e) {
+                return;
+            }
+            onCircularMenuItemClick(itemView -> {
+                if (!TextUtils.isEmpty(text)) {
+                    ClipboardUtils.setClip(mContext, text);
+                    ViewUtils.showToast(mContext, getTextAlreadyCopied(activity ? R.string.text_latest_activity : R.string.text_latest_package));
+                }
+            }).onClick(view);
+        };
     }
 
     @NonNull
@@ -476,7 +504,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         mWindow.savePosition(newConfig);
     }
 
-    private CurrentComponent resolveCurrentComponent() {
+    private CurrentComponent resolveCurrentComponent(CurrentComponent previousComponent) {
         CurrentComponent component = getCurrentComponentByShizuku();
         if (component != null) {
             return component;
@@ -485,7 +513,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         if (component != null) {
             return component;
         }
-        return getCurrentComponentByAccessibility();
+        return previousComponent != null ? previousComponent : getCurrentComponentByAccessibility();
     }
 
     private CurrentComponent getCurrentComponentByShizuku() {
@@ -549,14 +577,6 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     private boolean isExternalPackage(String packageName) {
         return !TextUtils.isEmpty(packageName) && !mContext.getPackageName().equals(packageName);
-    }
-
-    private String getCurrentPackageText() {
-        return TextUtils.isEmpty(mCurrentPackage) ? getEmptyInfoHint() : mCurrentPackage;
-    }
-
-    private String getCurrentActivityText() {
-        return TextUtils.isEmpty(mCurrentActivity) ? getEmptyInfoHint() : mCurrentActivity;
     }
 
     private String getEmptyInfoHint() {
