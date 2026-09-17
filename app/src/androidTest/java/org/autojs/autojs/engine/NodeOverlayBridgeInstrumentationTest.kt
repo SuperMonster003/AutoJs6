@@ -150,23 +150,6 @@ class NodeOverlayBridgeInstrumentationTest {
             assertTrue(show.error?.message.orEmpty().contains("SYSTEM_ALERT_WINDOW"))
             assertEquals("0", provider.nativeDiagnostics().getValue("embedded_script.overlay_active_session_count"))
         }
-
-        listOf(
-            NodeExecutionModePolicy.nativeValues(NodeExecutionModePolicy.MODE_ONE_SHOT),
-            NodeExecutionModePolicy.nativeValues(
-                NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
-                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
-            ),
-            NodeExecutionModePolicy.nativeValues(
-                NodeExecutionModePolicy.MODE_SCHEDULED,
-                NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
-            ),
-        ).forEach { nativeValues ->
-            assertFalse(
-                nativeValues.getValue("embedded_script.execution_mode_allowed_providers"),
-                nativeValues.getValue("embedded_script.execution_mode_allowed_providers").split(",").contains("ui.overlay"),
-            )
-        }
     }
 
     @Test

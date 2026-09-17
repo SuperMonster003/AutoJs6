@@ -200,7 +200,7 @@ object NodeLifecycleCheckpointStore {
         }
         throw NodeLifecycleCheckpointException(
             NodeBridgeError.permissionDenied(
-                message = "AutoJs6 lifecycle.$method is available only inside the explicit interactive or packaged long-running runtime.",
+                message = "AutoJs6 lifecycle.$method is available only inside the explicit interactive long-running runtime.",
                 module = BRIDGE_MODULE_NAME,
                 method = method,
             ),
@@ -213,10 +213,7 @@ object NodeLifecycleCheckpointStore {
 
     private fun isExplicitLongRunningLifecycle(executionMode: String, launchSurface: String): Boolean {
         return executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
-            launchSurface in setOf(
-                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
-                NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
-            )
+            NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(launchSurface)
     }
 
     private fun readCheckpoint(context: Context, scope: ProjectScope): JSONObject? {

@@ -186,17 +186,6 @@ object NodeProjectRuntimeCompatibilityDescriptor {
         }
     }
 
-    @JvmStatic
-    fun currentText(
-        esmPartial: Boolean = DEFAULT_ESM_PARTIAL,
-        dynamicImportLocal: Boolean = DEFAULT_DYNAMIC_IMPORT_LOCAL,
-        workerThreads: Boolean = DEFAULT_WORKER_THREADS,
-    ): String = currentJson(
-        esmPartial = esmPartial,
-        dynamicImportLocal = dynamicImportLocal,
-        workerThreads = workerThreads,
-    ).toString() + "\n"
-
     private fun requireVersionVector(json: JSONObject, source: String) {
         val versions = json.optJSONObject("versions")
             ?: throw IllegalArgumentException(
