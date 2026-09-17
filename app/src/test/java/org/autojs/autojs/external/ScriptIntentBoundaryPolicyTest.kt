@@ -1,6 +1,7 @@
 package org.autojs.autojs.external
 
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.LuaScriptSource
 import org.autojs.autojs.script.PythonLaunchBoundaryError
 import org.autojs.autojs.script.PythonLaunchBoundaryException
@@ -16,8 +17,9 @@ import org.junit.Test
 class ScriptIntentBoundaryPolicyTest {
 
     @Test
-    fun androidIntentArgumentIsExcludedOnlyFromLua() {
+    fun androidIntentArgumentIsExcludedFromIsolatedTypedRuntimes() {
         assertFalse(ScriptIntents.shouldExposeAndroidIntentArgument(LuaScriptSource.ENGINE))
+        assertFalse(ScriptIntents.shouldExposeAndroidIntentArgument(JvmFileSource.ENGINE))
         assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(JavaScriptSource.ENGINE))
         assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(JavaScriptSource.ENGINE_NODEJS))
         assertTrue(ScriptIntents.shouldExposeAndroidIntentArgument(PythonScriptSource.ENGINE))

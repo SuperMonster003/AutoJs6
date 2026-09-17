@@ -7,13 +7,20 @@ import org.autojs.plugin.jvmsource.api.JvmCancellationReason
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmDexLoaderKind
 import org.autojs.plugin.jvmsource.api.JvmIsolationCapability
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheMissReason
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheOutcome
+import org.autojs.plugin.jvmsource.api.JvmObservationPhase
+import org.autojs.plugin.jvmsource.api.JvmObservationProcess
+import org.autojs.plugin.jvmsource.api.JvmObservationStartProfile
 import org.autojs.plugin.jvmsource.api.JvmProviderInfo
+import org.autojs.plugin.jvmsource.api.JvmProtocolVersion
 import org.autojs.plugin.jvmsource.api.JvmScriptCapability
 import org.autojs.plugin.jvmsource.api.JvmSha256
 import org.autojs.plugin.jvmsource.api.JvmSourceCapabilities
 import org.autojs.plugin.jvmsource.api.JvmSourceCodec
 import org.autojs.plugin.jvmsource.api.JvmSourceCompilerFamily
 import org.autojs.plugin.jvmsource.api.JvmSourceContract
+import org.autojs.plugin.jvmsource.api.JvmSourceContractException
 import org.autojs.plugin.jvmsource.api.JvmSourceCancellation
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceError
@@ -21,12 +28,17 @@ import org.autojs.plugin.jvmsource.api.JvmSourceErrorCode
 import org.autojs.plugin.jvmsource.api.JvmSourceFailurePhase
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
+import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
+import org.autojs.plugin.jvmsource.api.JvmSourceResourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
 import org.autojs.plugin.jvmsource.api.JvmSourceStarted
 import org.autojs.plugin.jvmsource.api.JvmToolchainFingerprint
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -39,6 +51,195 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.measureTimeMillis
 
 class RemoteJvmSourceHostTest {
+    @Test
+    fun legacyProviderCompletesWithoutAnObservationOrNewRequiredFields() {
+        val directory = Files.createTempDirectory("jvm-source-legacy-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val capabilities = CAPABILITIES.copy(
+            toolchainFingerprint = JvmToolchainFingerprint.compute(
+                CAPABILITIES.languages.single(), CAPABILITIES.sourceCompilerFamily,
+                CAPABILITIES.sourceCompilerVersion, CAPABILITIES.d8Version,
+                CAPABILITIES.runtimeLibraryFingerprint, entryApiVersion = 2,
+            ),
+            scriptCapabilities = CAPABILITIES.scriptCapabilities.filterNot {
+                it == JvmScriptCapability.CLIPBOARD_READ || it == JvmScriptCapability.CLIPBOARD_WRITE
+            },
+        )
+        val transport = FakeTransport(
+            capabilities = capabilities,
+            providerInfo = PROVIDER_INFO.copy(
+                protocolMin = JvmProtocolVersion(1, 1),
+                protocolMax = JvmProtocolVersion(1, 1),
+                entryApiVersion = 2,
+            ),
+            omitObservationOnce = true,
+        )
+        try {
+            val result = newEnabledHost(transport, sourceFile, executor).execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile), JvmSourceExecutionControl(),
+            )
+            assertEquals("{\"ok\":true}", result.resultJson)
+            assertEquals(2, result.entryApiVersion)
+            assertNull(result.observation)
+            assertEquals(JvmProtocolVersion(1, 1), transport.lastRequest?.protocolVersion)
+            assertEquals("{}", transport.lastRequest?.argsJson)
+            assertTrue(transport.sessionClosed)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun sourcePackageRequestBindsCanonicalArchiveCountAndContentClaims() {
+        val directory = Files.createTempDirectory("jvm-source-package-request-test").toFile()
+        val packageDirectory = directory.resolve("demo").apply { check(mkdir()) }
+        val entry = packageDirectory.resolve("Main.java").apply {
+            writeText("package demo; public final class Main {}")
+        }
+        packageDirectory.resolve("Helper.java").writeText("package demo; final class Helper {}")
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = RemoteJvmSourceHost(
+                transport = transport,
+                artifactStore = FakeArtifactStore(entry.readBytes()),
+                blockingExecutor = executor,
+                featureEnabled = true,
+                selectedComponent = { _ -> COMPONENT },
+                hostVersionCode = HOST_VERSION,
+                hostRuntimeApi = 24,
+                hostIdentity = HOST_IDENTITY,
+                launchPackage = { true },
+            )
+
+            host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSourcePackage(directory, entry),
+                JvmSourceExecutionControl(),
+            )
+
+            val request = requireNotNull(transport.lastRequest)
+            assertEquals(JvmSourcePayloadKind.SOURCE_ARCHIVE, request.sourcePayloadKind)
+            assertEquals(2, request.sourceFileCount)
+            assertEquals(
+                entry.readBytes().size.toLong() +
+                    packageDirectory.resolve("Helper.java").readBytes().size.toLong(),
+                request.sourceContentBytes,
+            )
+            assertTrue(request.sourceSizeBytes > request.sourceContentBytes)
+            assertEquals("Main.java", request.sourceFileName)
+            assertEquals("demo.Main", request.entryClassName)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun sourcePackageRequestCarriesCallerSelectedNonMainEntry() {
+        val directory = Files.createTempDirectory("jvm-source-package-entry-test").toFile()
+        val packageDirectory = directory.resolve("demo").apply { check(mkdir()) }
+        val entry = packageDirectory.resolve("ScriptEntry.java").apply {
+            writeText("package demo; public final class ScriptEntry {}")
+        }
+        packageDirectory.resolve("Helper.java").writeText("package demo; final class Helper {}")
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = RemoteJvmSourceHost(
+                transport = transport,
+                artifactStore = FakeArtifactStore(entry.readBytes()),
+                blockingExecutor = executor,
+                featureEnabled = true,
+                selectedComponent = { _ -> COMPONENT },
+                hostVersionCode = HOST_VERSION,
+                hostRuntimeApi = 24,
+                hostIdentity = HOST_IDENTITY,
+                launchPackage = { true },
+            )
+
+            val result = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSourcePackage(
+                    directory,
+                    entry,
+                    "ScriptEntry",
+                ),
+                JvmSourceExecutionControl(),
+            )
+
+            assertEquals("ScriptEntry.java", transport.lastRequest?.sourceFileName)
+            assertEquals("demo.ScriptEntry", transport.lastRequest?.entryClassName)
+            assertEquals("ScriptEntry.java", result.sourceFileName)
+            assertEquals("demo.ScriptEntry", result.entryClassName)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun callerSelectedNonMainEntryFlowsThroughSnapshotRequestAndResult() {
+        val directory = Files.createTempDirectory("jvm-source-non-main-request-test").toFile()
+        val sourceFile = File(directory, "arbitrary-physical-name.java").apply {
+            writeText("package demo.entries; public final class ScriptEntry {}")
+        }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = newEnabledHost(transport, sourceFile, executor)
+
+            val result = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile, "ScriptEntry"),
+                JvmSourceExecutionControl(),
+            )
+
+            val request = requireNotNull(transport.lastRequest)
+            assertEquals("ScriptEntry.java", request.sourceFileName)
+            assertEquals("demo.entries.ScriptEntry", request.entryClassName)
+            assertEquals("ScriptEntry.java", result.sourceFileName)
+            assertEquals("demo.entries.ScriptEntry", result.entryClassName)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun invalidArgumentJsonFailsBeforeProviderInspectionOrBinding() {
+        val directory = Files.createTempDirectory("jvm-source-invalid-args-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport()
+        try {
+            val host = RemoteJvmSourceHost(
+                transport = transport,
+                artifactStore = FakeArtifactStore(sourceFile.readBytes()),
+                blockingExecutor = executor,
+                featureEnabled = true,
+                selectedComponent = { _ -> COMPONENT },
+                hostVersionCode = HOST_VERSION,
+                hostRuntimeApi = 24,
+                hostIdentity = HOST_IDENTITY,
+                launchPackage = { true },
+            )
+
+            assertThrows(JvmSourceContractException::class.java) {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    JvmSourceExecutionControl(),
+                    argsJson = "{\"value\":NaN}",
+                )
+            }
+            assertEquals(0, transport.inspections)
+            assertEquals(0, transport.binds)
+            assertEquals(null, transport.lastRequest)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
     @Test
     fun closeIsIdempotentAndReleasesOwnedArtifactStoreAndExecutor() {
         val executor = Executors.newSingleThreadExecutor()
@@ -134,6 +335,7 @@ class RemoteJvmSourceHostTest {
             val result = host.execute(
                 JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
                 JvmSourceExecutionControl(),
+                argsJson = ARGS_JSON,
             )
 
             assertEquals("{\"ok\":true}", result.resultJson)
@@ -141,6 +343,7 @@ class RemoteJvmSourceHostTest {
             assertEquals("hello stdout", result.stdout)
             assertEquals("warning stderr", result.stderr)
             assertEquals("org.example.target", launchedPackage)
+            assertEquals(ARGS_JSON, transport.lastRequest?.argsJson)
             assertTrue(result.requestSha256.matches(Regex("[0-9a-f]{64}")))
             assertEquals(1, result.allowlistedBridgeOperationCount)
             assertEquals(0, result.rejectedBridgeOperationCount)
@@ -153,6 +356,10 @@ class RemoteJvmSourceHostTest {
             assertEquals(1, result.internalBridgeCallCount)
             assertEquals("037", result.dexVersion)
             assertEquals("PRIVATE_DEX_CLASS_LOADER", result.loaderKind)
+            val observation = requireNotNull(result.observation)
+            assertEquals(3L, observation.sessionElapsedMillis)
+            assertEquals(JvmObservationCacheOutcome.MISS, observation.cacheOutcome)
+            assertEquals(2, observation.resources.size)
             assertTrue(transport.sessionClosed)
             assertEquals(3, transport.inspections)
         } finally {
@@ -687,12 +894,71 @@ class RemoteJvmSourceHostTest {
     @Test
     fun compilationFailurePublishesCompilerDiagnosticBeforeThrowingTerminalError() {
         val directory = Files.createTempDirectory("jvm-source-compile-diagnostic-test").toFile()
-        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val sourceFile = File(directory, "selected-entry-source.java").apply {
+            writeText("package demo.entries; public final class ScriptEntry {}")
+        }
         val executor = Executors.newSingleThreadExecutor()
         val transport = FakeTransport(
             failureCode = JvmSourceErrorCode.COMPILATION_FAILED,
             failurePhase = JvmSourceFailurePhase.COMPILATION,
             emitDiagnosticBeforeFailure = true,
+        )
+        val published = mutableListOf<JvmSourceDiagnostic>()
+        val publishedObservations = mutableListOf<JvmSourceObservation>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
+                published += diagnostics
+            }
+
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+
+            override fun publishObservation(observation: JvmSourceObservation) {
+                publishedObservations += observation
+            }
+        }
+        try {
+            val host = newEnabledHost(transport, sourceFile, executor)
+
+            val failure = runCatching {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile, "ScriptEntry"),
+                    JvmSourceExecutionControl(),
+                    sink,
+                )
+            }.exceptionOrNull()
+
+            assertTrue(failure is RemoteJvmSourceException)
+            assertEquals(JvmSourceUserFailureCode.COMPILE_FAILED, (failure as RemoteJvmSourceException).userFailure.code)
+            assertEquals(1, published.size)
+            assertEquals("ScriptEntry.java", transport.lastRequest?.sourceFileName)
+            assertEquals("demo.entries.ScriptEntry", transport.lastRequest?.entryClassName)
+            assertEquals(JvmDiagnosticSeverity.ERROR, published.single().severity)
+            assertEquals("ECJ_ERROR", published.single().code)
+            assertEquals("ScriptEntry.java", published.single().sourceFileName)
+            assertEquals(4, published.single().line)
+            assertEquals(28, published.single().column)
+            assertTrue(published.single().message.contains("println2"))
+            assertEquals(
+                "ScriptEntry.java",
+                JvmSourcePublicDiagnosticPolicy.project(published.single()).sourceFileName,
+            )
+            assertEquals(1, publishedObservations.size)
+            assertEquals(JvmObservationCacheOutcome.MISS, publishedObservations.single().cacheOutcome)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun runtimeFailurePublishesOnlyTheSafeExceptionClassAndLocationBeforeTerminalError() {
+        val directory = Files.createTempDirectory("jvm-source-runtime-diagnostic-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport(
+            failureCode = JvmSourceErrorCode.EXECUTION_FAILED,
+            failurePhase = JvmSourceFailurePhase.EXECUTION,
+            emitRuntimeDiagnosticBeforeFailure = true,
         )
         val published = mutableListOf<JvmSourceDiagnostic>()
         val sink = object : JvmSourceExecutionSink {
@@ -714,14 +980,18 @@ class RemoteJvmSourceHostTest {
             }.exceptionOrNull()
 
             assertTrue(failure is RemoteJvmSourceException)
-            assertEquals(JvmSourceUserFailureCode.COMPILE_FAILED, (failure as RemoteJvmSourceException).userFailure.code)
+            assertEquals(JvmSourceUserFailureCode.RUNTIME_FAILED, (failure as RemoteJvmSourceException).userFailure.code)
             assertEquals(1, published.size)
-            assertEquals(JvmDiagnosticSeverity.ERROR, published.single().severity)
-            assertEquals("ECJ_ERROR", published.single().code)
-            assertEquals("Main.java", published.single().sourceFileName)
-            assertEquals(4, published.single().line)
-            assertEquals(28, published.single().column)
-            assertTrue(published.single().message.contains("println2"))
+            val diagnostic = published.single()
+            assertEquals(JvmDiagnosticSeverity.ERROR, diagnostic.severity)
+            assertEquals("JAVA_RUNTIME_EXCEPTION", diagnostic.code)
+            assertEquals("Main.java", diagnostic.sourceFileName)
+            assertEquals(4, diagnostic.line)
+            assertEquals(1, diagnostic.column)
+            assertEquals("java.lang.IllegalStateException", diagnostic.runtimeExceptionClassName)
+            assertEquals("Java execution failed", diagnostic.message)
+            assertFalse(diagnostic.toString().contains("M9-3 secret"))
+            assertFalse(diagnostic.toString().contains("private"))
         } finally {
             executor.shutdownNow()
             directory.deleteRecursively()
@@ -977,6 +1247,40 @@ class RemoteJvmSourceHostTest {
     }
 
     @Test
+    fun missingProtocol15ObservationIsQuarantinedAndFreshRunRecovers() {
+        val directory = Files.createTempDirectory("jvm-source-missing-observation-test").toFile()
+        val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
+        val executor = Executors.newSingleThreadExecutor()
+        val transport = FakeTransport(
+            omitObservationOnce = true,
+            transportDeathOnCancellationOnce = true,
+        )
+        try {
+            val host = newEnabledHost(transport, sourceFile, executor)
+
+            val failure = runCatching {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    JvmSourceExecutionControl(),
+                )
+            }.exceptionOrNull()
+
+            assertTrue(failure is RemoteJvmSourceException)
+            assertTrue(failure?.allMessages().orEmpty().contains("observation presence"))
+            assertTrue(transport.transportRetirementObserved)
+
+            val recovered = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                JvmSourceExecutionControl(),
+            )
+            assertEquals("{\"ok\":true}", recovered.resultJson)
+        } finally {
+            executor.shutdownNow()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun protocolViolationWithoutRetirementAckReleasesHostAfterBoundedQuarantine() {
         val directory = Files.createTempDirectory("jvm-source-no-retirement-ack-test").toFile()
         val sourceFile = File(directory, "Main.java").apply { writeText("public final class Main {}") }
@@ -1032,6 +1336,7 @@ class RemoteJvmSourceHostTest {
     private class FakeTransport(
         private val corruptStdoutMetadata: Boolean = false,
         private val capabilities: JvmSourceCapabilities = CAPABILITIES,
+        private val providerInfo: JvmProviderInfo = PROVIDER_INFO,
         private val omitTerminal: Boolean = false,
         private val omitTerminalOnce: Boolean = false,
         private val acknowledgeCancellation: Boolean = false,
@@ -1046,10 +1351,12 @@ class RemoteJvmSourceHostTest {
         private val failurePhase: JvmSourceFailurePhase = JvmSourceFailurePhase.EXECUTION,
         private val failureOnce: Boolean = false,
         private val emitDiagnosticBeforeFailure: Boolean = false,
+        private val emitRuntimeDiagnosticBeforeFailure: Boolean = false,
         private val dexVersion: String = "037",
         private val loaderKind: JvmDexLoaderKind = JvmDexLoaderKind.PRIVATE_DEX_CLASS_LOADER,
         private val loaderKindOnce: JvmDexLoaderKind? = null,
         private val malformedResultOnce: Boolean = false,
+        private val omitObservationOnce: Boolean = false,
         private val transportDeathOnCancellationOnce: Boolean = false,
         private val bridgeCallerPids: Set<Int> = setOf(COMPILER_PID),
         private val discoveredCandidates: List<JvmSourceServiceCandidate> = listOf(CANDIDATE),
@@ -1103,7 +1410,7 @@ class RemoteJvmSourceHostTest {
             val bindingOrdinal = binds
             val bindingCallback = callback
             callback.onConnected(object : JvmSourceRemoteConnection {
-                override fun getProviderInfo(): ByteArray = JvmSourceCodec.encodeProviderInfo(PROVIDER_INFO)
+                override fun getProviderInfo(): ByteArray = JvmSourceCodec.encodeProviderInfo(providerInfo)
 
                 override fun getCapabilities(): ByteArray = JvmSourceCodec.encodeCapabilities(capabilities)
 
@@ -1140,7 +1447,7 @@ class RemoteJvmSourceHostTest {
                                     severity = JvmDiagnosticSeverity.INFO,
                                     code = "QUEUED_BEFORE_CANCEL",
                                     message = "diagnostic queued before cancellation reached the provider",
-                                    sourceFileName = "Main.java",
+                                    sourceFileName = request.sourceFileName,
                                     line = 1,
                                     column = 1,
                                 ),
@@ -1189,6 +1496,8 @@ class RemoteJvmSourceHostTest {
                             compilationElapsedMillis = 1,
                             executionElapsedMillis = 1,
                             elapsedMillis = 3,
+                            observation = observation(request.requestId)
+                                .takeUnless { omitObservationOnce && bindingOrdinal == 1 },
                         ),
                     )
                     val omitThisTerminal = omitTerminal || (omitTerminalOnce && binds == 1)
@@ -1209,9 +1518,25 @@ class RemoteJvmSourceHostTest {
                                             severity = JvmDiagnosticSeverity.ERROR,
                                             code = "ECJ_ERROR",
                                             message = "The method println2(String) is undefined for the type PrintStream",
-                                            sourceFileName = "Main.java",
+                                            sourceFileName = request.sourceFileName,
                                             line = 4,
                                             column = 28,
+                                        ),
+                                    ),
+                                )
+                            }
+                            if (emitRuntimeDiagnosticBeforeFailure) {
+                                callback.onDiagnostic(
+                                    JvmSourceCodec.encodeDiagnostic(
+                                        JvmSourceDiagnostic(
+                                            requestId = request.requestId,
+                                            severity = JvmDiagnosticSeverity.ERROR,
+                                            code = "JAVA_RUNTIME_EXCEPTION",
+                                            message = "M9-3 secret C:\\private\\classes.dex uid=1000 pid=2000",
+                                            sourceFileName = request.sourceFileName,
+                                            line = 4,
+                                            column = 1,
+                                            runtimeExceptionClassName = "java.lang.IllegalStateException",
                                         ),
                                     ),
                                 )
@@ -1224,6 +1549,7 @@ class RemoteJvmSourceHostTest {
                                         phase = failurePhase,
                                         message = "controlled fake provider failure",
                                         retryable = false,
+                                        observation = observation(request.requestId),
                                     ),
                                 ),
                             )
@@ -1259,6 +1585,7 @@ class RemoteJvmSourceHostTest {
                                                     reason = JvmCancellationReason.REQUESTED,
                                                     phase = JvmSourceFailurePhase.EXECUTION,
                                                     elapsedMillis = 1,
+                                                    observation = observation(request.requestId),
                                                 ),
                                             ),
                                         )
@@ -1294,11 +1621,47 @@ class RemoteJvmSourceHostTest {
         override fun snapshotJavaSource(file: File, maximumBytes: Long): JvmSourceInputSnapshot =
             snapshot(JvmSourceKind.JAVA)
 
-        override fun snapshotSource(file: File, maximumBytes: Long): JvmSourceInputSnapshot =
-            snapshot(requireNotNull(JvmSourceKind.fromFileName(file.name)))
+        override fun snapshotSource(
+            file: File,
+            maximumBytes: Long,
+            entrySimpleName: String,
+        ): JvmSourceInputSnapshot =
+            snapshot(requireNotNull(JvmSourceKind.fromFileName(file.name)), entrySimpleName)
 
-        private fun snapshot(kind: JvmSourceKind): JvmSourceInputSnapshot {
-            val layout = JvmSourceR1Policy.inspect(kind, source)
+        override fun snapshotSourcePackage(
+            sourceRoot: File,
+            entryFile: File,
+            maximumBytes: Long,
+            entrySimpleName: String,
+        ): JvmSourceInputSnapshot {
+            val data = JvmSourcePackageSnapshotPolicy.collect(
+                sourceRoot,
+                entryFile,
+                JVM_PACKAGE_OPERATIONS,
+                entrySimpleName,
+            )
+            require(data.archiveBytes.size.toLong() <= maximumBytes)
+            return object : JvmSourceInputSnapshot {
+                override val sizeBytes = data.archiveBytes.size.toLong()
+                override val sha256Hex = MessageDigest.getInstance("SHA-256")
+                    .digest(data.archiveBytes)
+                    .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+                override val sourceFileName = data.sourceFileName
+                override val entryClassName = data.entryClassName
+                override val sourcePayloadKind = JvmSourcePayloadKind.SOURCE_ARCHIVE
+                override val sourceFileCount = data.sourceFileCount
+                override val sourceContentBytes = data.sourceContentBytes
+
+                override fun claimReadDescriptor(): JvmSourceOwnedDescriptor = Descriptor()
+                override fun close() = Unit
+            }
+        }
+
+        private fun snapshot(
+            kind: JvmSourceKind,
+            entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
+        ): JvmSourceInputSnapshot {
+            val layout = JvmSourceR1Policy.inspect(kind, source, entrySimpleName)
             return object : JvmSourceInputSnapshot {
                 override val sizeBytes = source.size.toLong()
                 override val sha256Hex = MessageDigest.getInstance("SHA-256").digest(source).joinToString("") {
@@ -1323,6 +1686,31 @@ class RemoteJvmSourceHostTest {
         }
 
         private var nextCapture = 0
+
+        private companion object {
+            val JVM_PACKAGE_OPERATIONS = object : JvmSourcePackageSnapshotPolicy.Operations {
+                override fun typeNoFollow(file: File): JvmSourcePackageSnapshotPolicy.NodeType {
+                    val attributes = runCatching {
+                        Files.readAttributes(
+                            file.toPath(),
+                            java.nio.file.attribute.BasicFileAttributes::class.java,
+                            java.nio.file.LinkOption.NOFOLLOW_LINKS,
+                        )
+                    }.getOrNull() ?: return JvmSourcePackageSnapshotPolicy.NodeType.MISSING
+                    return when {
+                        attributes.isSymbolicLink -> JvmSourcePackageSnapshotPolicy.NodeType.SYMBOLIC_LINK
+                        attributes.isDirectory -> JvmSourcePackageSnapshotPolicy.NodeType.DIRECTORY
+                        attributes.isRegularFile -> JvmSourcePackageSnapshotPolicy.NodeType.REGULAR_FILE
+                        else -> JvmSourcePackageSnapshotPolicy.NodeType.OTHER
+                    }
+                }
+
+                override fun children(directory: File): List<File>? = directory.listFiles()?.toList()
+
+                override fun readRegularFile(file: File, maximumBytes: Long): ByteArray =
+                    file.readBytes().also { require(it.size.toLong() <= maximumBytes) }
+            }
+        }
     }
 
     private class Capture(private val bytes: ByteArray) : JvmSourceOutputCapture {
@@ -1351,6 +1739,7 @@ class RemoteJvmSourceHostTest {
         const val HOST_VERSION = 5_300L
         const val COMPILER_PID = 20_001
         const val WORKER_PID = 20_002
+        const val ARGS_JSON = "{\"count\":2,\"nested\":[true,null]}"
         const val FINAL_INSPECTION_BEFORE_FIRST_DISPATCH = 3
         val HOST_IDENTITY = JvmSourceHostProcessIdentity(10_001, 10_000, "org.autojs.autojs6")
         val COMPONENT = JvmSourceComponent(
@@ -1386,6 +1775,38 @@ class RemoteJvmSourceHostTest {
         val DEX_ARTIFACT = "classes.dex".toByteArray()
         val STDOUT = "hello stdout".toByteArray()
         val STDERR = "warning stderr".toByteArray()
+        fun observation(requestId: org.autojs.plugin.jvmsource.api.JvmRequestId) = JvmSourceObservation(
+            requestId = requestId,
+            sessionElapsedMillis = 3L,
+            workerStartupDurationMillis = 1L,
+            compilerStartProfile = JvmObservationStartProfile.WARM,
+            workerStartProfile = JvmObservationStartProfile.COLD,
+            compileDurationMillis = 1L,
+            d8DurationMillis = 1L,
+            loadDurationMillis = 1L,
+            runDurationMillis = 1L,
+            terminationDurationMillis = 1L,
+            cacheOutcome = JvmObservationCacheOutcome.MISS,
+            cacheMissReason = JvmObservationCacheMissReason.NOT_FOUND,
+            resources = listOf(
+                JvmSourceResourceObservation(
+                    process = JvmObservationProcess.COMPILER,
+                    phase = JvmObservationPhase.COMPILE,
+                    rssBytes = 1_024L,
+                    openFileDescriptorCount = 8,
+                    temporaryStorageBytes = 512L,
+                    outputBytes = 0L,
+                ),
+                JvmSourceResourceObservation(
+                    process = JvmObservationProcess.WORKER,
+                    phase = JvmObservationPhase.RUN,
+                    rssBytes = 2_048L,
+                    openFileDescriptorCount = 9,
+                    temporaryStorageBytes = 256L,
+                    outputBytes = 64L,
+                ),
+            ),
+        )
         val CAPABILITIES = JvmSourceCapabilities(
             languages = listOf(JvmSourceLanguage.JAVA),
             isolationCapabilities = JvmIsolationCapability.entries,

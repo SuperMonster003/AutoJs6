@@ -235,6 +235,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Lua Runtime 插件, 内置 PUC Lua 5.4.8, 支持识别文件扩展名 (.lua) 运行 Lua 脚本
 * `新增` 独立 Java/Kotlin JVM Source Runtime 插件后端, 支持在隔离进程中编译和运行单文件 .java/.kt 脚本, 提供 package/import, 实时 console 输出, 可取消 sleep, 宿主 toast 与显式能力协商
 * `新增` JVM Source Runtime 支持范围为单文件 Java 8 (Java provider 最低 API 24) 与 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次发布仅在 API 31/arm64-v8a 真机完成 smoke, 不声明未验证 API 级别
+* `新增` JVM Source Runtime 显式执行通过协议 1.6 / Entry API 4 支持有界 JSON 参数, 独立授权的剪贴板访问, Java 多文件源码包与指定入口类, 安全的运行时异常定位和执行观测; 既有协议 1.1 / Entry API 2 插件保持单文件执行兼容
 * `新增` AutoJs6 官方插件可通过签名权限保护的版本化只读设置契约, 读取宿主主题色, 暗色模式策略及语言的外观快照
 * `新增` 全局 JavaScript (Rhino) ai 的所有本地与在线请求统一通过 AI Provider 插件目标执行; 开发者选项会打开可信 3-Stone AI 设置入口, 或提供精确的安装/启用/更新指引, 宿主不再保存 AI 档案或凭据, 也不再包含提供商 HTTP 传输
 * `新增` 全局 JavaScript (Rhino) `ai.catalog` API 公开统一的本地/在线插件目标目录; 省略 `plugin` 与 `target` 时选择官方插件声明的默认目标, `target` 精确选择一个目标, `plugin` 精确选择第三方组件; 响应包含 reasoning, 完整 usage 与耗时, finish reason, profile 及实际目标元数据, 稳定错误绝不静默改路由

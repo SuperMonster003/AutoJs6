@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -26,7 +27,14 @@ internal class AndroidJvmSourceArtifactStore(
     private val root = allocation.root
     private val rootLease = allocation.lease
 
-    override fun snapshotJavaSource(file: File, maximumBytes: Long): JvmSourceInputSnapshot {
+    override fun snapshotJavaSource(file: File, maximumBytes: Long): JvmSourceInputSnapshot =
+        snapshotSource(file, maximumBytes, JvmSourceR1Policy.ENTRY_SIMPLE_NAME)
+
+    override fun snapshotSource(
+        file: File,
+        maximumBytes: Long,
+        entrySimpleName: String,
+    ): JvmSourceInputSnapshot {
         check(!closed.get()) { "JVM source artifact store is closed" }
         require(maximumBytes > 0L)
         val sourceKind = requireNotNull(org.autojs.autojs.script.JvmSourceKind.fromFileName(file.name)) {
@@ -49,7 +57,7 @@ internal class AndroidJvmSourceArtifactStore(
             require(OsConstants.S_ISREG(opened.st_mode)) { "JVM source must remain a regular file when opened" }
             JvmSourceBoundedTransfer.read(input, maximumBytes).bytes
         }
-        val layout = JvmSourceR1Policy.inspect(sourceKind, bytes)
+        val layout = JvmSourceR1Policy.inspect(sourceKind, bytes, entrySimpleName)
         val snapshot = newPrivateFile("source", ".${sourceKind.canonicalExtension}")
         try {
             FileOutputStream(snapshot).use { output ->
@@ -65,6 +73,49 @@ internal class AndroidJvmSourceArtifactStore(
                     .joinToString("") { "%02x".format(it.toInt() and 0xff) },
                 sourceFileName = layout.sourceFileName,
                 entryClassName = layout.entryClassName,
+                onClosed = ::cleanupClosedRoot,
+            )
+        } catch (error: Throwable) {
+            snapshot.delete()
+            throw error
+        }
+    }
+
+    override fun snapshotSourcePackage(
+        sourceRoot: File,
+        entryFile: File,
+        maximumBytes: Long,
+        entrySimpleName: String,
+    ): JvmSourceInputSnapshot {
+        check(!closed.get()) { "JVM source artifact store is closed" }
+        require(maximumBytes in 1L..org.autojs.plugin.jvmsource.api.JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES)
+        val data = JvmSourcePackageSnapshotPolicy.collect(
+            sourceRoot,
+            entryFile,
+            SOURCE_PACKAGE_FILE_OPERATIONS,
+            entrySimpleName,
+        )
+        require(data.archiveBytes.size.toLong() <= maximumBytes) {
+            "Java source archive exceeds the negotiated payload limit"
+        }
+        val snapshot = newPrivateFile("source-package", ".zip")
+        try {
+            FileOutputStream(snapshot).use { output ->
+                output.write(data.archiveBytes)
+                output.fd.sync()
+            }
+            Os.chmod(snapshot.absolutePath, OWNER_READ_ONLY_MODE)
+            return InputSnapshot(
+                file = snapshot,
+                sizeBytes = data.archiveBytes.size.toLong(),
+                sha256Hex = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(data.archiveBytes)
+                    .joinToString("") { "%02x".format(it.toInt() and 0xff) },
+                sourceFileName = data.sourceFileName,
+                entryClassName = data.entryClassName,
+                sourcePayloadKind = JvmSourcePayloadKind.SOURCE_ARCHIVE,
+                sourceFileCount = data.sourceFileCount,
+                sourceContentBytes = data.sourceContentBytes,
                 onClosed = ::cleanupClosedRoot,
             )
         } catch (error: Throwable) {
@@ -125,6 +176,9 @@ internal class AndroidJvmSourceArtifactStore(
         override val sha256Hex: String,
         override val sourceFileName: String,
         override val entryClassName: String,
+        override val sourcePayloadKind: JvmSourcePayloadKind = JvmSourcePayloadKind.SINGLE_FILE,
+        override val sourceFileCount: Int = 1,
+        override val sourceContentBytes: Long = sizeBytes,
         private val onClosed: () -> Unit,
     ) : JvmSourceInputSnapshot {
         private val claimed = AtomicBoolean(false)
@@ -232,6 +286,46 @@ internal class AndroidJvmSourceArtifactStore(
                 Os.remove(directory.absolutePath)
                 true
             }.getOrDefault(false)
+        }
+
+        val SOURCE_PACKAGE_FILE_OPERATIONS = object : JvmSourcePackageSnapshotPolicy.Operations {
+            override fun typeNoFollow(file: File): JvmSourcePackageSnapshotPolicy.NodeType = try {
+                val mode = Os.lstat(file.absolutePath).st_mode
+                when {
+                    OsConstants.S_ISDIR(mode) -> JvmSourcePackageSnapshotPolicy.NodeType.DIRECTORY
+                    OsConstants.S_ISREG(mode) -> JvmSourcePackageSnapshotPolicy.NodeType.REGULAR_FILE
+                    OsConstants.S_ISLNK(mode) -> JvmSourcePackageSnapshotPolicy.NodeType.SYMBOLIC_LINK
+                    else -> JvmSourcePackageSnapshotPolicy.NodeType.OTHER
+                }
+            } catch (error: ErrnoException) {
+                if (error.errno == OsConstants.ENOENT) {
+                    JvmSourcePackageSnapshotPolicy.NodeType.MISSING
+                } else {
+                    JvmSourcePackageSnapshotPolicy.NodeType.OTHER
+                }
+            }
+
+            override fun children(directory: File): List<File>? = directory.listFiles()?.toList()
+
+            override fun readRegularFile(file: File, maximumBytes: Long): ByteArray {
+                val descriptor = Os.open(
+                    file.absolutePath,
+                    OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                    0,
+                )
+                val stream = try {
+                    FileInputStream(descriptor)
+                } catch (error: Throwable) {
+                    runCatching { Os.close(descriptor) }
+                    throw error
+                }
+                return stream.use { input ->
+                    require(OsConstants.S_ISREG(Os.fstat(input.fd).st_mode)) {
+                        "Java source package child changed type while opening"
+                    }
+                    JvmSourceBoundedTransfer.read(input, maximumBytes).bytes
+                }
+            }
         }
 
         fun allocateRoot(context: Context): RootAllocation {

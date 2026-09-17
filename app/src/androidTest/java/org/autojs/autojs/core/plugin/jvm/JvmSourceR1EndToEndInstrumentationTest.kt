@@ -14,13 +14,19 @@ import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.ScriptExecutionListener
 import org.autojs.autojs.script.JvmFileSource
+import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.jvmsource.api.JvmDexRuntimeProfile
+import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmHostCall
+import org.autojs.plugin.jvmsource.api.JvmObservationCacheOutcome
 import org.autojs.plugin.jvmsource.api.JvmRequestId
 import org.autojs.plugin.jvmsource.api.JvmSourceCodec
 import org.autojs.plugin.jvmsource.api.JvmSourceContract
+import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
+import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
 import org.autojs.plugin.jvmsource.api.JvmSourceValidation
 import org.json.JSONArray
 import org.json.JSONObject
@@ -61,6 +67,457 @@ class JvmSourceR1EndToEndInstrumentationTest {
     @Test
     fun explicitJavaMainRunsThroughPinnedProductionProvider() {
         emitCanonicalRuntimeRecord(runCanonicalProductionPipeline())
+    }
+
+    @Test
+    fun rapidJavaExecutionsAlwaysReceiveTheirTerminalCallbacks() {
+        repeat(12) { runCanonicalProductionPipeline() }
+    }
+
+    @Test
+    fun legacyKotlinProviderRunsWithoutRequiringNewEntryMethodsOrObservations() {
+        assertTrue(BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED)
+        val language = JvmSourceLanguage.KOTLIN
+        val provider = ComponentName(
+            "io.github.supermonster003.autojs6.plugin.kotlin.runtime",
+            "org.autojs.plugin.jvmsource.kotlin.service.JavaSourceCompilerService",
+        )
+        val previous = JvmSourceProviderSelection.getExact(context, language)
+        val directory = File(context.cacheDir, "jvm-source-legacy-kotlin-${UUID.randomUUID()}").apply {
+            assertTrue(mkdir())
+        }
+        val source = File(directory, "Main.kt").apply {
+            writeText("""
+                import org.autojs.plugin.jvmsource.api.AutoJsJvmEntry
+                import org.autojs.plugin.jvmsource.api.JvmScriptContext
+                class Main : AutoJsJvmEntry {
+                    override fun run(context: JvmScriptContext): Any {
+                        context.console().log("legacy-kotlin=PASS")
+                        return 42
+                    }
+                }
+            """.trimIndent())
+        }
+        try {
+            JvmSourceProviderSelection.setExact(context, language, provider)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourceExplicit(
+                    service, source, listener, ExecutionConfig(workingDirectory = directory.absolutePath),
+                )
+            }
+            outcome.error?.let { throw AssertionError("Legacy Kotlin execution failed", it) }
+            val result = outcome.result as RemoteJvmScriptResult
+            assertEquals(provider.flattenToString(), result.providerComponent)
+            assertEquals(2, result.entryApiVersion)
+            assertEquals("42", result.resultJson)
+            assertTrue(result.stdout.contains("legacy-kotlin=PASS"))
+            assertNull(result.observation)
+            assertEquals(3, setOf(result.hostPid, result.compilerPid, result.workerPid).size)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, language, previous)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun foregroundJavaClipboardRoundTripsThroughTheHost() {
+        assertTrue(BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED)
+        requireProductionProviderBoundary()
+        val activity = instrumentation.startActivitySync(
+            Intent(context, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+        instrumentation.waitForIdleSync()
+        val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+        var previousClip: android.content.ClipData? = null
+        instrumentation.runOnMainSync { previousClip = clipboard.primaryClip }
+        val previous = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-clipboard-${UUID.randomUUID()}").apply {
+            assertTrue(mkdir())
+        }
+        val source = File(directory, "Main.java").apply {
+            writeText("""
+                public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+                    public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                        context.clipboard().setText("branch-audit-clipboard");
+                        return context.clipboard().getText();
+                    }
+                }
+            """.trimIndent())
+        }
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourceExplicit(
+                    service, source, listener, ExecutionConfig(workingDirectory = directory.absolutePath),
+                )
+            }
+            outcome.error?.let { throw AssertionError("Java clipboard execution failed", it) }
+            val result = outcome.result as RemoteJvmScriptResult
+            assertEquals("\"branch-audit-clipboard\"", result.resultJson)
+            assertEquals(2, result.allowlistedBridgeOperationCount)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, previous)
+            directory.deleteRecursively()
+            instrumentation.runOnMainSync {
+                previousClip?.let { clipboard.setPrimaryClip(it) } ?: clipboard.clearPrimaryClip()
+                activity.finish()
+            }
+        }
+    }
+
+    @Test
+    fun explicitNonMainJavaEntryRunsThroughPinnedProductionProvider() {
+        assertTrue(
+            "M9-7 non-Main selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-entry-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-7 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = nonMainJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "arbitrary-physical-name.java").apply { writeBytes(sourceBytes) }
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourceWithEntryExplicit(
+                    service = service,
+                    file = sourceFile,
+                    entrySimpleName = "ScriptEntry",
+                    listener = listener,
+                    config = ExecutionConfig(workingDirectory = directory.absolutePath),
+                )
+            }
+            outcome.error?.let { failure ->
+                val handshakeFailure = diagnoseProviderHandshakeAfterExecutionFailure()
+                if (handshakeFailure != null) {
+                    throw AssertionError("M9-7 provider handshake diagnosis failed", handshakeFailure)
+                }
+                val directHostFailure = diagnoseDirectHostAfterExecutionFailure(
+                    sourceFile,
+                    entrySimpleName = "ScriptEntry",
+                )
+                throw AssertionError(
+                    "M9-7 non-Main execution failed after a verified provider handshake",
+                    directHostFailure ?: failure,
+                )
+            }
+            val result = outcome.result as? RemoteJvmScriptResult
+                ?: throw AssertionError("M9-7 result did not use RemoteJvmScriptResult")
+
+            assertEquals("ScriptEntry.java", result.sourceFileName)
+            assertEquals("demo.entries.ScriptEntry", result.entryClassName)
+            assertEquals("single-file", result.sourcePayloadKind)
+            assertEquals(1, result.sourceFileCount)
+            assertEquals(sourceBytes.size.toLong(), result.sourceContentBytes)
+            assertEquals("\"demo.entries.ScriptEntry\"", result.resultJson)
+            assertEquals(PRODUCTION_PROVIDER.flattenToString(), result.providerComponent)
+            assertEquals(3, setOf(result.hostPid, result.compilerPid, result.workerPid).size)
+            emitEntryRuntimeRecord(result)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun explicitMultiFileJavaPackageRunsThroughPinnedProductionProvider() {
+        assertTrue(
+            "M9-5 source-package selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val root = File(context.cacheDir, "jvm-source-m9-package-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-5 source root", mkdir())
+        }.canonicalFile
+        val demo = File(root, "demo").apply { assertTrue("Unable to create the M9-5 package", mkdir()) }
+        val entryBytes = """
+            package demo;
+            public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+                @Override
+                public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                    return Helper.answer();
+                }
+            }
+        """.trimIndent().toByteArray()
+        val helperBytes = """
+            package demo;
+            final class Helper {
+                static int answer() { return 42; }
+            }
+        """.trimIndent().toByteArray()
+        val entry = File(demo, "Main.java").apply { writeBytes(entryBytes) }
+        File(demo, "Helper.java").writeBytes(helperBytes)
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourcePackageExplicit(
+                    service = service,
+                    sourceRoot = root,
+                    entryFile = entry,
+                    listener = listener,
+                    config = ExecutionConfig(workingDirectory = root.absolutePath),
+                )
+            }
+            outcome.error?.let { throw AssertionError("M9-5 multi-file execution failed", it) }
+            val result = outcome.result as? RemoteJvmScriptResult
+                ?: throw AssertionError("M9-5 result did not use RemoteJvmScriptResult")
+
+            assertEquals("42", result.resultJson)
+            assertEquals("Main.java", result.sourceFileName)
+            assertEquals("demo.Main", result.entryClassName)
+            assertEquals("source-archive", result.sourcePayloadKind)
+            assertEquals(2, result.sourceFileCount)
+            assertEquals(entryBytes.size.toLong() + helperBytes.size.toLong(), result.sourceContentBytes)
+            assertTrue(result.sourceSizeBytes > result.sourceContentBytes)
+            assertEquals(PRODUCTION_PROVIDER.flattenToString(), result.providerComponent)
+            emitSourcePackageRuntimeRecord(result)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun explicitJavaArgumentsRoundTripThroughPinnedProductionProvider() {
+        assertTrue(
+            "M9-2 JVM argument selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-args-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-2 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = argumentJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "Main.java").apply { writeBytes(sourceBytes) }
+        val config = ExecutionConfig(workingDirectory = directory.absolutePath).apply {
+            setArgument("tags", listOf("java", "m9"))
+            setArgument("nested", linkedMapOf<String, Any?>("nullable" to null, "count" to 3))
+            setArgument("name", "AutoJs6")
+            setArgument("enabled", true)
+        }
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val outcome = executeAndAwait { listener ->
+                JvmSourceExplicitRunner.runJvmSourceExplicit(
+                    service = service,
+                    file = sourceFile,
+                    listener = listener,
+                    config = config,
+                )
+            }
+            outcome.error?.let { failure ->
+                val handshakeFailure = diagnoseProviderHandshakeAfterExecutionFailure()
+                if (handshakeFailure != null) {
+                    throw AssertionError("M9-2 provider handshake diagnosis failed", handshakeFailure)
+                }
+                val directHostFailure = diagnoseDirectHostAfterExecutionFailure(sourceFile, SCRIPT_ARGS_JSON)
+                throw AssertionError(
+                    "M9-2 argument execution failed after a verified provider handshake",
+                    directHostFailure ?: failure,
+                )
+            }
+            val result = outcome.result as? RemoteJvmScriptResult
+                ?: throw AssertionError("M9-2 result did not use RemoteJvmScriptResult")
+
+            assertEquals(EXPECTED_SCRIPT_ARGS_RESULT_JSON, result.resultJson)
+            assertEquals(sha256(EXPECTED_SCRIPT_ARGS_RESULT_JSON.toByteArray()), result.resultSha256)
+            assertEquals(JvmSourceContract.ENTRY_API_VERSION, result.entryApiVersion)
+            assertEquals(PRODUCTION_PROVIDER.flattenToString(), result.providerComponent)
+            assertEquals(0, result.allowlistedBridgeOperationCount)
+            assertEquals(0, result.rejectedBridgeOperationCount)
+            assertEquals(0, result.internalBridgeCallCount)
+            assertTrue(result.hostBridgeCallerPids.isEmpty())
+            assertEquals(sourceBytes.size.toLong(), result.sourceSizeBytes)
+            assertEquals(sha256(sourceBytes), result.sourceSha256)
+
+            emitArgumentRuntimeRecord(result)
+        } finally {
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun runtimeExceptionShowsOnlyTheSafeClassAndRequestedSourceLine() {
+        assertTrue(
+            "M9-3 runtime diagnostic selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-runtime-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-3 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = runtimeExceptionJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "Main.java").apply { writeBytes(sourceBytes) }
+        val publishedDiagnostics = mutableListOf<JvmSourceDiagnostic>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
+                publishedDiagnostics += diagnostics
+            }
+
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+        }
+        val host = RemoteJvmSourceHost.createAndroid(
+            context = context,
+            featureEnabled = true,
+            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+            launchPackage = { true },
+            hasResumedActivity = { true },
+        )
+        val control = JvmSourceExecutionControl()
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+
+            val failure = try {
+                host.execute(
+                    JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                    control,
+                    sink,
+                )
+                throw AssertionError("M9-3 runtime exception source unexpectedly completed")
+            } catch (expected: RemoteJvmSourceException) {
+                expected
+            }
+
+            assertEquals(JvmSourceUserFailureCode.RUNTIME_FAILED, failure.userFailure.code)
+            assertEquals(1, publishedDiagnostics.size)
+            val diagnostic = publishedDiagnostics.single()
+            assertEquals(JvmDiagnosticSeverity.ERROR, diagnostic.severity)
+            assertEquals("JAVA_RUNTIME_EXCEPTION", diagnostic.code)
+            assertEquals("Main.java", diagnostic.sourceFileName)
+            assertEquals(4, diagnostic.line)
+            assertEquals(1, diagnostic.column)
+            assertEquals("java.lang.IllegalStateException", diagnostic.runtimeExceptionClassName)
+            assertEquals("Java execution failed", diagnostic.message)
+
+            val projected = JvmSourcePublicDiagnosticPolicy.project(diagnostic)
+            val publicText = JvmSourcePublicDiagnosticFormatter.format(projected)
+            assertEquals(
+                "Main.java:4:1: JAVA_RUNTIME_EXCEPTION [java.lang.IllegalStateException]: " +
+                    "Java execution failed",
+                publicText,
+            )
+            listOf(diagnostic.toString(), publicText, failure.toString()).forEach { visible ->
+                assertFalse(visible.contains(RUNTIME_SECRET))
+                assertFalse(visible.contains("classes.dex"))
+                assertFalse(visible.contains("uid="))
+                assertFalse(visible.contains("pid="))
+            }
+
+            emitRuntimeDiagnosticRecord(
+                sourceSha256 = sha256(sourceBytes),
+                diagnostic = diagnostic,
+                publicText = publicText,
+            )
+        } finally {
+            control.close()
+            host.close()
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun negotiatedObservationIsVisibleAfterProductionProviderCleanup() {
+        assertTrue(
+            "M9-4 observation selector requires -Pautojs.jvmSource.experimental=true",
+            BuildConfig.JVM_SOURCE_EXPERIMENTAL_ENABLED,
+        )
+        requireProductionProviderBoundary()
+
+        val priorSelection = JvmSourceProviderSelection.getExact(context)
+        val directory = File(context.cacheDir, "jvm-source-m9-observation-${UUID.randomUUID()}").apply {
+            assertTrue("Unable to create the M9-4 source directory", mkdir())
+        }.canonicalFile
+        val sourceBytes = observationJavaSource().toByteArray(Charsets.UTF_8)
+        val sourceFile = File(directory, "Main.java").apply { writeBytes(sourceBytes) }
+        val publishedObservations = mutableListOf<JvmSourceObservation>()
+        val sink = object : JvmSourceExecutionSink {
+            override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) = Unit
+            override fun publishOutput(stdout: String, stderr: String) = Unit
+            override fun publishObservation(observation: JvmSourceObservation) {
+                publishedObservations += observation
+            }
+        }
+        val host = RemoteJvmSourceHost.createAndroid(
+            context = context,
+            featureEnabled = true,
+            hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+            launchPackage = { true },
+            hasResumedActivity = { true },
+        )
+        val control = JvmSourceExecutionControl()
+
+        try {
+            JvmSourceProviderSelection.setExact(context, PRODUCTION_PROVIDER)
+            val result = host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile),
+                control,
+                sink,
+            )
+
+            assertEquals("42", result.resultJson)
+            assertEquals(1, publishedObservations.size)
+            val observation = publishedObservations.single()
+            assertEquals(result.observation, observation)
+            assertEquals(result.requestId, observation.requestId.toString())
+            assertTrue(observation.sessionElapsedMillis >= 0L)
+            assertNotNull(observation.workerStartupDurationMillis)
+            assertNotNull(observation.workerStartProfile)
+            assertNotNull(observation.loadDurationMillis)
+            assertNotNull(observation.runDurationMillis)
+            assertNotNull(observation.terminationDurationMillis)
+            assertTrue(observation.cacheOutcome != JvmObservationCacheOutcome.NOT_EVALUATED)
+            if (observation.cacheOutcome == JvmObservationCacheOutcome.HIT) {
+                assertNull(observation.compileDurationMillis)
+                assertNull(observation.d8DurationMillis)
+                assertNull(observation.cacheMissReason)
+            } else {
+                assertEquals(JvmObservationCacheOutcome.MISS, observation.cacheOutcome)
+                assertNotNull(observation.cacheMissReason)
+            }
+            assertTrue(observation.resources.isNotEmpty())
+            assertTrue(observation.resources.size <= JvmSourceContract.MAX_OBSERVATION_RESOURCE_SAMPLES)
+            assertEquals(
+                observation.resources.size,
+                observation.resources.distinctBy { it.process to it.phase }.size,
+            )
+            JvmSourceValidation.validateObservation(observation)
+            val encoded = JvmSourceCodec.encodeObservation(observation)
+            assertTrue(encoded.size <= JvmSourceContract.MAX_OBSERVATION_BYTES)
+            assertEquals(observation, JvmSourceCodec.decodeObservation(encoded))
+
+            val publicText = JvmSourcePublicObservationFormatter.format(
+                JvmSourcePublicObservationPolicy.project(observation),
+            )
+            assertTrue(publicText.contains("compile="))
+            assertTrue(publicText.contains("run="))
+            assertTrue(publicText.contains("cache="))
+            assertTrue(publicText.contains("samples="))
+            listOf(
+                result.requestId,
+                directory.absolutePath,
+                PRODUCTION_PROVIDER.flattenToString(),
+            ).forEach { secret -> assertFalse(publicText.contains(secret)) }
+
+            emitObservationRuntimeRecord(result, observation, encoded.size, publicText)
+        } finally {
+            control.close()
+            host.close()
+            JvmSourceProviderSelection.setExact(context, priorSelection)
+            directory.deleteRecursively()
+        }
     }
 
     /** Shared by the R1 selector and the R2 API-24 outer selector without forging a nested JUnit result. */
@@ -132,6 +589,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
             val sourceSha256 = sha256(sourceBytes)
             assertEquals(sourceBytes.size.toLong(), result.sourceSizeBytes)
             assertEquals(sourceSha256, result.sourceSha256)
+            assertEquals("Main.java", result.sourceFileName)
+            assertEquals("Main", result.entryClassName)
             assertTrue(SHA256.matches(result.requestSha256))
             assertEquals("false", result.resultJson)
             assertEquals(EXPECTED_RESULT_SHA256, result.resultSha256)
@@ -146,7 +605,10 @@ class JvmSourceR1EndToEndInstrumentationTest {
             assertEquals(PRODUCTION_PROVIDER.packageName, result.providerPackageName)
             assertEquals("ecj", result.sourceCompilerFamily)
             assertEquals("3.26.0", result.sourceCompilerVersion)
-            assertEquals("8.13.17", result.d8Version)
+            assertEquals(
+                InstrumentationRegistry.getArguments().getString("jvmD8Version", "8.13.17"),
+                result.d8Version,
+            )
             assertEquals(24, result.minApi)
             assertTrue(SHA256.matches(result.runtimeLibrarySha256))
             assertTrue(SHA256.matches(result.toolchainSha256))
@@ -193,6 +655,179 @@ class JvmSourceR1EndToEndInstrumentationTest {
         instrumentation.sendStatus(
             0,
             Bundle().apply { putString(RUNTIME_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitArgumentRuntimeRecord(result: RemoteJvmScriptResult) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-2")
+            .put("recordType", "production-provider-script-arguments")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("requestSha256", result.requestSha256)
+            .put("sourceSha256", result.sourceSha256)
+            .put("resultJson", result.resultJson)
+            .put("resultSha256", result.resultSha256)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("hostBridgeOperationCount", result.allowlistedBridgeOperationCount)
+            .put("internalBridgeCallCount", result.internalBridgeCallCount)
+        Log.i(TAG, "$ARGS_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(ARGS_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitEntryRuntimeRecord(result: RemoteJvmScriptResult) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-7")
+            .put("recordType", "production-provider-arbitrary-entry")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sourcePayloadKind", result.sourcePayloadKind)
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClassName", result.entryClassName)
+            .put("sourceBytes", result.sourceSizeBytes)
+            .put("sourceSha256", result.sourceSha256)
+            .put("requestSha256", result.requestSha256)
+            .put("resultJson", result.resultJson)
+            .put("resultSha256", result.resultSha256)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$ENTRY_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(ENTRY_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitSourcePackageRuntimeRecord(result: RemoteJvmScriptResult) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-5")
+            .put("recordType", "production-provider-multi-file-source-package")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sourcePayloadKind", result.sourcePayloadKind)
+            .put("sourceFileCount", result.sourceFileCount)
+            .put("sourceContentBytes", result.sourceContentBytes)
+            .put("sourceArchiveBytes", result.sourceSizeBytes)
+            .put("sourceArchiveSha256", result.sourceSha256)
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClassName", result.entryClassName)
+            .put("requestSha256", result.requestSha256)
+            .put("resultJson", result.resultJson)
+            .put("resultSha256", result.resultSha256)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$SOURCE_PACKAGE_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(SOURCE_PACKAGE_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitRuntimeDiagnosticRecord(
+        sourceSha256: String,
+        diagnostic: JvmSourceDiagnostic,
+        publicText: String,
+    ) {
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-3")
+            .put("recordType", "production-provider-runtime-diagnostic")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", JvmSourceContract.ENTRY_API_VERSION)
+            .put("providerComponent", PRODUCTION_PROVIDER.flattenToString())
+            .put("sourceSha256", sourceSha256)
+            .put("severity", diagnostic.severity.name)
+            .put("code", diagnostic.code)
+            .put("sourceFileName", diagnostic.sourceFileName)
+            .put("line", diagnostic.line)
+            .put("column", diagnostic.column)
+            .put("runtimeExceptionClassName", diagnostic.runtimeExceptionClassName)
+            .put("message", diagnostic.message)
+            .put("publicText", publicText)
+            .put("secretAbsent", !publicText.contains(RUNTIME_SECRET))
+            .put("hostPid", Process.myPid())
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY, record.toString()) },
+        )
+    }
+
+    private fun emitObservationRuntimeRecord(
+        result: RemoteJvmScriptResult,
+        observation: JvmSourceObservation,
+        encodedBytes: Int,
+        publicText: String,
+    ) {
+        val resources = JSONArray().apply {
+            observation.resources.forEach { resource ->
+                put(
+                    JSONObject()
+                        .put("process", resource.process.name)
+                        .put("phase", resource.phase.name)
+                        .put("rssBytes", resource.rssBytes ?: JSONObject.NULL)
+                        .put("openFileDescriptorCount", resource.openFileDescriptorCount ?: JSONObject.NULL)
+                        .put("temporaryStorageBytes", resource.temporaryStorageBytes ?: JSONObject.NULL)
+                        .put("outputBytes", resource.outputBytes ?: JSONObject.NULL),
+                )
+            }
+        }
+        val record = JSONObject()
+            .put("schemaVersion", 1)
+            .put("phase", "M9-4")
+            .put("recordType", "production-provider-terminal-observation")
+            .put("protocolVersion", "${JvmSourceContract.PROTOCOL_MAJOR}.${JvmSourceContract.PROTOCOL_MINOR}")
+            .put("entryApiVersion", result.entryApiVersion)
+            .put("hostVersionCode", BuildConfig.VERSION_CODE)
+            .put("providerComponent", result.providerComponent)
+            .put("providerVersionName", result.providerVersionName)
+            .put("providerVersionCode", result.providerVersionCode)
+            .put("sessionElapsedMillis", observation.sessionElapsedMillis)
+            .put("workerStartupDurationMillis", observation.workerStartupDurationMillis ?: JSONObject.NULL)
+            .put("compilerStartProfile", observation.compilerStartProfile.name)
+            .put("workerStartProfile", observation.workerStartProfile?.name ?: JSONObject.NULL)
+            .put("compileDurationMillis", observation.compileDurationMillis ?: JSONObject.NULL)
+            .put("d8DurationMillis", observation.d8DurationMillis ?: JSONObject.NULL)
+            .put("loadDurationMillis", observation.loadDurationMillis ?: JSONObject.NULL)
+            .put("runDurationMillis", observation.runDurationMillis ?: JSONObject.NULL)
+            .put("terminationDurationMillis", observation.terminationDurationMillis ?: JSONObject.NULL)
+            .put("cacheOutcome", observation.cacheOutcome.name)
+            .put("cacheMissReason", observation.cacheMissReason?.name ?: JSONObject.NULL)
+            .put("resources", resources)
+            .put("encodedBytes", encodedBytes)
+            .put("publicText", publicText)
+            .put("hostPid", result.hostPid)
+            .put("compilerPid", result.compilerPid)
+            .put("workerPid", result.workerPid)
+            .put("deviceApi", Build.VERSION.SDK_INT)
+        Log.i(TAG, "$OBSERVATION_EVIDENCE_PREFIX$record")
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply { putString(OBSERVATION_EVIDENCE_STATUS_KEY, record.toString()) },
         )
     }
 
@@ -315,16 +950,25 @@ class JvmSourceR1EndToEndInstrumentationTest {
      * Failure-only replay through the same production transport while retaining the internal host
      * exception for the private runner log. A successful canonical first attempt never reaches it.
      */
-    private fun diagnoseDirectHostAfterExecutionFailure(sourceFile: File): Throwable? {
+    private fun diagnoseDirectHostAfterExecutionFailure(
+        sourceFile: File,
+        argsJson: String = "{}",
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
+    ): Throwable? {
         val host = RemoteJvmSourceHost.createAndroid(
             context = context,
             featureEnabled = true,
             hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
             launchPackage = { true },
+            hasResumedActivity = { true },
         )
         val control = JvmSourceExecutionControl()
         return try {
-            host.execute(JvmSourceExplicitRunner.createAuthorizedSource(sourceFile), control)
+            host.execute(
+                JvmSourceExplicitRunner.createAuthorizedSource(sourceFile, entrySimpleName),
+                control,
+                argsJson = argsJson,
+            )
             IllegalStateException("R1 direct-host failure replay unexpectedly succeeded")
         } catch (failure: Throwable) {
             failure
@@ -408,7 +1052,8 @@ class JvmSourceR1EndToEndInstrumentationTest {
             .put("requestId", result.requestId)
             .put("requestSha256", result.requestSha256)
             .put("sessionId", result.requestId)
-            .put("entryClass", "Main")
+            .put("sourceFileName", result.sourceFileName)
+            .put("entryClass", result.entryClassName)
             .put("resultJson", result.resultJson)
             .put("expectedResultSha256", EXPECTED_RESULT_SHA256)
             .put("resultSha256", result.resultSha256))
@@ -483,6 +1128,58 @@ class JvmSourceR1EndToEndInstrumentationTest {
         }
     """.trimIndent()
 
+    private fun nonMainJavaSource(): String = """
+        package demo.entries;
+
+        public final class ScriptEntry implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                return ScriptEntry.class.getName();
+            }
+        }
+    """.trimIndent()
+
+    private fun argumentJavaSource(): String = """
+        import java.util.LinkedHashMap;
+        import java.util.List;
+        import java.util.Map;
+
+        public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                Map<String, Object> args = context.args();
+                Map<?, ?> nested = (Map<?, ?>) args.get("nested");
+                List<?> tags = (List<?>) args.get("tags");
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("name", args.get("name"));
+                result.put("enabled", args.get("enabled"));
+                result.put("count", nested.get("count"));
+                result.put("firstTag", tags.get(0));
+                result.put("tagCount", tags.size());
+                result.put("nullValue", nested.get("nullable"));
+                return result;
+            }
+        }
+    """.trimIndent()
+
+    private fun runtimeExceptionJavaSource(): String = """
+        public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                throw new IllegalStateException("$RUNTIME_SECRET");
+            }
+        }
+    """.trimIndent()
+
+    private fun observationJavaSource(): String = """
+        public final class Main implements org.autojs.plugin.jvmsource.api.AutoJsJvmEntry {
+            @Override
+            public Object run(org.autojs.plugin.jvmsource.api.JvmScriptContext context) {
+                return 42;
+            }
+        }
+    """.trimIndent()
+
     private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
         .digest(bytes)
         .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
@@ -500,6 +1197,23 @@ class JvmSourceR1EndToEndInstrumentationTest {
         const val ENGINE_CLEANUP_TIMEOUT_MILLIS = 5_000L
         const val RUNTIME_EVIDENCE_STATUS_KEY = "JVM_SOURCE_R1_RUNTIME_EVIDENCE"
         const val RUNTIME_EVIDENCE_PREFIX = "JVM_SOURCE_R1_RUNTIME_EVIDENCE="
+        const val ARGS_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_ARGS_EVIDENCE"
+        const val ARGS_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ARGS_EVIDENCE="
+        const val ENTRY_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_ENTRY_EVIDENCE"
+        const val ENTRY_EVIDENCE_PREFIX = "JVM_SOURCE_M9_ENTRY_EVIDENCE="
+        const val RUNTIME_DIAGNOSTIC_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE"
+        const val RUNTIME_DIAGNOSTIC_EVIDENCE_PREFIX = "JVM_SOURCE_M9_RUNTIME_DIAGNOSTIC_EVIDENCE="
+        const val OBSERVATION_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE"
+        const val OBSERVATION_EVIDENCE_PREFIX = "JVM_SOURCE_M9_OBSERVATION_EVIDENCE="
+        const val SOURCE_PACKAGE_EVIDENCE_STATUS_KEY = "JVM_SOURCE_M9_PACKAGE_EVIDENCE"
+        const val SOURCE_PACKAGE_EVIDENCE_PREFIX = "JVM_SOURCE_M9_PACKAGE_EVIDENCE="
+        const val RUNTIME_SECRET = "M9-3 secret must never cross"
+        const val SCRIPT_ARGS_JSON =
+            "{\"enabled\":true,\"name\":\"AutoJs6\",\"nested\":{\"count\":3,\"nullable\":null}," +
+                "\"tags\":[\"java\",\"m9\"]}"
+        const val EXPECTED_SCRIPT_ARGS_RESULT_JSON =
+            "{\"name\":\"AutoJs6\",\"enabled\":true,\"count\":3,\"firstTag\":\"java\"," +
+                "\"tagCount\":2,\"nullValue\":null}"
         const val EXPECTED_RESULT_SHA256 =
             "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
         val SHA256 = Regex("[0-9a-f]{64}")

@@ -2,16 +2,21 @@ package org.autojs.autojs.engine
 
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionControl
 import org.autojs.autojs.core.plugin.jvm.JvmSourceExecutionSink
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticFormatter
 import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicDiagnosticPolicy
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicObservationFormatter
+import org.autojs.autojs.core.plugin.jvm.JvmSourcePublicObservationPolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserExperiencePolicy
 import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmScriptResult
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceException
 import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceHost
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -42,7 +47,12 @@ class RemoteJvmScriptEngine internal constructor(
             error("Remote JVM script engine is stopped")
         }
         return try {
-            host.execute(scriptSource, control, ConsoleSink())
+            val argsJson = try {
+                executionArgumentsJson()
+            } catch (_: IllegalArgumentException) {
+                throw JvmSourceUserFacingException(JvmSourceUserExperiencePolicy.invalidArguments())
+            }
+            host.execute(scriptSource, control, ConsoleSink(), argsJson)
         } catch (error: RemoteJvmSourceException) {
             // ScriptEngineService is a user-facing boundary. Do not surface the internal cause
             // chain: transport failures may contain component, Binder, UID/PID, or path details.
@@ -71,6 +81,14 @@ class RemoteJvmScriptEngine internal constructor(
         super.destroy()
     }
 
+    private fun executionArgumentsJson(): String = when (val config = getTag(ExecutionConfig.tag)) {
+        null -> JvmExecutionArgumentMapper.encode(emptyMap<String, Any?>())
+        is ExecutionConfig -> JvmExecutionArgumentMapper.encode(config.arguments)
+        else -> throw IllegalArgumentException(
+            "JVM source execution config tag has unsupported type ${config.javaClass.name}",
+        )
+    }
+
     /**
      * Publishes as the execution progresses instead of only on success: a compilation failure must
      * still show its ECJ diagnostics, otherwise the user only sees a stable error code.
@@ -80,10 +98,7 @@ class RemoteJvmScriptEngine internal constructor(
         override fun publishDiagnostics(diagnostics: List<JvmSourceDiagnostic>) {
             diagnostics.forEach { diagnostic ->
                 val projected = JvmSourcePublicDiagnosticPolicy.project(diagnostic)
-                val location = projected.sourceFileName?.let { fileName ->
-                    "$fileName:${projected.line}:${projected.column}: "
-                }.orEmpty()
-                val message = "$location${projected.code}: ${projected.message}"
+                val message = JvmSourcePublicDiagnosticFormatter.format(projected)
                 when (projected.severity) {
                     JvmDiagnosticSeverity.INFO -> console.info(message)
                     JvmDiagnosticSeverity.WARNING -> console.warn(message)
@@ -95,6 +110,14 @@ class RemoteJvmScriptEngine internal constructor(
         override fun publishOutput(stdout: String, stderr: String) {
             if (stdout.isNotEmpty()) console.log(stdout)
             if (stderr.isNotEmpty()) console.error(stderr)
+        }
+
+        override fun publishObservation(observation: JvmSourceObservation) {
+            console.info(
+                JvmSourcePublicObservationFormatter.format(
+                    JvmSourcePublicObservationPolicy.project(observation),
+                ),
+            )
         }
     }
 }

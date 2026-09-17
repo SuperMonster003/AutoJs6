@@ -10,6 +10,11 @@ object JvmSourceCodec {
         maxFieldBytes = JvmSourceContract.MAX_METADATA_BYTES,
         maxFields = 128,
     )
+    private val OBSERVATION_WIRE_LIMITS = TaggedWireLimits(
+        maxDocumentBytes = JvmSourceContract.MAX_OBSERVATION_BYTES,
+        maxFieldBytes = JvmSourceContract.MAX_OBSERVATION_BYTES,
+        maxFields = 32,
+    )
 
     @JvmStatic
     fun encodeProviderInfo(value: JvmProviderInfo): ByteArray {
@@ -187,6 +192,9 @@ object JvmSourceCodec {
                 value.sourceFileName?.let { string(DiagnosticTags.SOURCE_FILE_NAME, it) }
                 value.line?.let { int32(DiagnosticTags.LINE, it) }
                 value.column?.let { int32(DiagnosticTags.COLUMN, it) }
+                value.runtimeExceptionClassName?.let {
+                    string(DiagnosticTags.RUNTIME_EXCEPTION_CLASS_NAME, it, requiredForReader = true)
+                }
             }
             .encode()
     }
@@ -205,6 +213,7 @@ object JvmSourceCodec {
             sourceFileName = document.optionalString(DiagnosticTags.SOURCE_FILE_NAME),
             line = document.optionalInt32(DiagnosticTags.LINE),
             column = document.optionalInt32(DiagnosticTags.COLUMN),
+            runtimeExceptionClassName = document.optionalString(DiagnosticTags.RUNTIME_EXCEPTION_CLASS_NAME),
         ).also(JvmSourceValidation::validateDiagnostic)
     }
 
@@ -235,6 +244,20 @@ object JvmSourceCodec {
                 value.expectedToolchainFingerprint.toByteArray(),
                 requiredForReader = true,
             )
+            .apply {
+                if (value.protocolVersion >= JvmSourceContract.ARGS_PROTOCOL_VERSION) {
+                    string(RequestTags.ARGS_JSON, value.argsJson, requiredForReader = true)
+                }
+                if (value.protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+                    string(
+                        RequestTags.SOURCE_PAYLOAD_KIND,
+                        value.sourcePayloadKind.wireName,
+                        requiredForReader = true,
+                    )
+                    int32(RequestTags.SOURCE_FILE_COUNT, value.sourceFileCount, requiredForReader = true)
+                    int64(RequestTags.SOURCE_CONTENT_BYTES, value.sourceContentBytes, requiredForReader = true)
+                }
+            }
             .encode()
     }
 
@@ -246,18 +269,38 @@ object JvmSourceCodec {
             RequestTags.ALL,
             RequestTags.REPEATED,
         )
+        val protocolVersion = JvmProtocolVersion(
+            document.requireInt32(RequestTags.PROTOCOL_MAJOR),
+            document.requireInt32(RequestTags.PROTOCOL_MINOR),
+        )
+        val encodedArgs = document.optionalString(RequestTags.ARGS_JSON)
+        if (protocolVersion >= JvmSourceContract.ARGS_PROTOCOL_VERSION && encodedArgs == null) {
+            throw JvmSourceContractException(
+                JvmSourceContractViolation.INVALID_VALUE,
+                "Protocol ${protocolVersion.major}.${protocolVersion.minor} request is missing arguments JSON",
+            )
+        }
+        val encodedPayloadKind = document.optionalString(RequestTags.SOURCE_PAYLOAD_KIND)
+        val encodedSourceFileCount = document.optionalInt32(RequestTags.SOURCE_FILE_COUNT)
+        val encodedSourceContentBytes = document.optionalInt64(RequestTags.SOURCE_CONTENT_BYTES)
+        if (protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION &&
+            (encodedPayloadKind == null || encodedSourceFileCount == null || encodedSourceContentBytes == null)
+        ) {
+            throw JvmSourceContractException(
+                JvmSourceContractViolation.INVALID_VALUE,
+                "Protocol ${protocolVersion.major}.${protocolVersion.minor} request is missing source payload metadata",
+            )
+        }
+        val sourceSizeBytes = document.requireInt64(RequestTags.SOURCE_SIZE_BYTES)
         return JvmSourceRequest(
             requestId = JvmRequestId.fromBytes(document.requireBytes(RequestTags.REQUEST_ID)),
-            protocolVersion = JvmProtocolVersion(
-                document.requireInt32(RequestTags.PROTOCOL_MAJOR),
-                document.requireInt32(RequestTags.PROTOCOL_MINOR),
-            ),
+            protocolVersion = protocolVersion,
             language = enumByName<JvmSourceLanguage>(
                 document.requireString(RequestTags.LANGUAGE),
                 "source language",
             ) { it.wireName },
             sourceFileName = document.requireString(RequestTags.SOURCE_FILE_NAME),
-            sourceSizeBytes = document.requireInt64(RequestTags.SOURCE_SIZE_BYTES),
+            sourceSizeBytes = sourceSizeBytes,
             sourceSha256 = JvmSha256.fromBytes(document.requireBytes(RequestTags.SOURCE_SHA256)),
             expectedToolchainFingerprint = JvmSha256.fromBytes(
                 document.requireBytes(RequestTags.EXPECTED_TOOLCHAIN_FINGERPRINT),
@@ -272,6 +315,12 @@ object JvmSourceCodec {
             grantedCapabilities = document.strings(RequestTags.GRANTED_CAPABILITIES).map { value ->
                 enumByName<JvmScriptCapability>(value, "granted script capability") { it.wireName }
             },
+            argsJson = encodedArgs ?: "{}",
+            sourcePayloadKind = encodedPayloadKind?.let { value ->
+                enumByName<JvmSourcePayloadKind>(value, "source payload kind") { it.wireName }
+            } ?: JvmSourcePayloadKind.SINGLE_FILE,
+            sourceFileCount = encodedSourceFileCount ?: 1,
+            sourceContentBytes = encodedSourceContentBytes ?: sourceSizeBytes,
         ).also(JvmSourceValidation::validateRequest)
     }
 
@@ -334,6 +383,15 @@ object JvmSourceCodec {
             )
             .string(ResultTags.DEX_VERSION, value.dexVersion, requiredForReader = true)
             .int32(ResultTags.LOADER_KIND, value.loaderKind.wireCode, requiredForReader = true)
+            .apply {
+                value.observation?.let { observation ->
+                    document(
+                        ResultTags.OBSERVATION,
+                        encodeObservation(observation),
+                        requiredForReader = true,
+                    )
+                }
+            }
             .encode()
     }
 
@@ -373,6 +431,7 @@ object JvmSourceCodec {
             compilationElapsedMillis = document.requireInt64(ResultTags.COMPILATION_ELAPSED_MILLIS),
             executionElapsedMillis = document.requireInt64(ResultTags.EXECUTION_ELAPSED_MILLIS),
             elapsedMillis = document.requireInt64(ResultTags.ELAPSED_MILLIS),
+            observation = document.optionalDocument(ResultTags.OBSERVATION)?.let(::decodeObservation),
         ).also(JvmSourceValidation::validateResult)
     }
 
@@ -385,6 +444,15 @@ object JvmSourceCodec {
             .int32(ErrorTags.PHASE, value.phase.wireCode, requiredForReader = true)
             .string(ErrorTags.MESSAGE, value.message, requiredForReader = true)
             .boolean(ErrorTags.RETRYABLE, value.retryable, requiredForReader = true)
+            .apply {
+                value.observation?.let { observation ->
+                    document(
+                        ErrorTags.OBSERVATION,
+                        encodeObservation(observation),
+                        requiredForReader = true,
+                    )
+                }
+            }
             .encode()
     }
 
@@ -401,6 +469,7 @@ object JvmSourceCodec {
             },
             message = document.requireString(ErrorTags.MESSAGE),
             retryable = document.requireBoolean(ErrorTags.RETRYABLE),
+            observation = document.optionalDocument(ErrorTags.OBSERVATION)?.let(::decodeObservation),
         ).also(JvmSourceValidation::validateError)
     }
 
@@ -412,6 +481,15 @@ object JvmSourceCodec {
             .int32(CancellationTags.REASON, value.reason.wireCode, requiredForReader = true)
             .int32(CancellationTags.PHASE, value.phase.wireCode, requiredForReader = true)
             .int64(CancellationTags.ELAPSED_MILLIS, value.elapsedMillis, requiredForReader = true)
+            .apply {
+                value.observation?.let { observation ->
+                    document(
+                        CancellationTags.OBSERVATION,
+                        encodeObservation(observation),
+                        requiredForReader = true,
+                    )
+                }
+            }
             .encode()
     }
 
@@ -429,7 +507,137 @@ object JvmSourceCodec {
                 "failure phase",
             ) { it.wireCode },
             elapsedMillis = document.requireInt64(CancellationTags.ELAPSED_MILLIS),
+            observation = document.optionalDocument(CancellationTags.OBSERVATION)?.let(::decodeObservation),
         ).also(JvmSourceValidation::validateCancellation)
+    }
+
+    @JvmStatic
+    fun encodeObservation(value: JvmSourceObservation): ByteArray {
+        JvmSourceValidation.validateObservation(value)
+        return writer(JvmSourceContract.SCHEMA_OBSERVATION, OBSERVATION_WIRE_LIMITS)
+            .bytes(ObservationTags.REQUEST_ID, value.requestId.toByteArray(), requiredForReader = true)
+            .int64(
+                ObservationTags.SESSION_ELAPSED_MILLIS,
+                value.sessionElapsedMillis,
+                requiredForReader = true,
+            )
+            .int32(
+                ObservationTags.COMPILER_START_PROFILE,
+                value.compilerStartProfile.wireCode,
+                requiredForReader = true,
+            )
+            .int32(
+                ObservationTags.CACHE_OUTCOME,
+                value.cacheOutcome.wireCode,
+                requiredForReader = true,
+            )
+            .apply {
+                value.workerStartupDurationMillis?.let {
+                    int64(ObservationTags.WORKER_STARTUP_DURATION_MILLIS, it)
+                }
+                value.workerStartProfile?.let {
+                    int32(ObservationTags.WORKER_START_PROFILE, it.wireCode)
+                }
+                value.compileDurationMillis?.let { int64(ObservationTags.COMPILE_DURATION_MILLIS, it) }
+                value.d8DurationMillis?.let { int64(ObservationTags.D8_DURATION_MILLIS, it) }
+                value.loadDurationMillis?.let { int64(ObservationTags.LOAD_DURATION_MILLIS, it) }
+                value.runDurationMillis?.let { int64(ObservationTags.RUN_DURATION_MILLIS, it) }
+                value.terminationDurationMillis?.let {
+                    int64(ObservationTags.TERMINATION_DURATION_MILLIS, it)
+                }
+                value.cacheMissReason?.let { int32(ObservationTags.CACHE_MISS_REASON, it.wireCode) }
+                value.resources.forEach { resource ->
+                    document(
+                        ObservationTags.RESOURCES,
+                        encodeResourceObservation(resource),
+                        requiredForReader = true,
+                    )
+                }
+            }
+            .encode()
+    }
+
+    @JvmStatic
+    fun decodeObservation(bytes: ByteArray): JvmSourceObservation {
+        if (bytes.size !in 1..JvmSourceContract.MAX_OBSERVATION_BYTES) {
+            throw JvmSourceContractException(
+                JvmSourceContractViolation.INVALID_VALUE,
+                "Observation document exceeds the protocol byte limit",
+            )
+        }
+        val document = document(
+            bytes,
+            JvmSourceContract.SCHEMA_OBSERVATION,
+            ObservationTags.ALL,
+            ObservationTags.REPEATED,
+            OBSERVATION_WIRE_LIMITS,
+        )
+        return JvmSourceObservation(
+            requestId = JvmRequestId.fromBytes(document.requireBytes(ObservationTags.REQUEST_ID)),
+            sessionElapsedMillis = document.requireInt64(ObservationTags.SESSION_ELAPSED_MILLIS),
+            workerStartupDurationMillis =
+                document.optionalInt64(ObservationTags.WORKER_STARTUP_DURATION_MILLIS),
+            compilerStartProfile = enumByCode<JvmObservationStartProfile>(
+                document.requireInt32(ObservationTags.COMPILER_START_PROFILE),
+                "observation compiler start profile",
+            ) { it.wireCode },
+            workerStartProfile = document.optionalInt32(ObservationTags.WORKER_START_PROFILE)?.let { code ->
+                enumByCode<JvmObservationStartProfile>(code, "observation worker start profile") { it.wireCode }
+            },
+            compileDurationMillis = document.optionalInt64(ObservationTags.COMPILE_DURATION_MILLIS),
+            d8DurationMillis = document.optionalInt64(ObservationTags.D8_DURATION_MILLIS),
+            loadDurationMillis = document.optionalInt64(ObservationTags.LOAD_DURATION_MILLIS),
+            runDurationMillis = document.optionalInt64(ObservationTags.RUN_DURATION_MILLIS),
+            terminationDurationMillis = document.optionalInt64(ObservationTags.TERMINATION_DURATION_MILLIS),
+            cacheOutcome = enumByCode<JvmObservationCacheOutcome>(
+                document.requireInt32(ObservationTags.CACHE_OUTCOME),
+                "observation cache outcome",
+            ) { it.wireCode },
+            cacheMissReason = document.optionalInt32(ObservationTags.CACHE_MISS_REASON)?.let { code ->
+                enumByCode<JvmObservationCacheMissReason>(code, "observation cache miss reason") { it.wireCode }
+            },
+            resources = document.documents(ObservationTags.RESOURCES).map(::decodeResourceObservation),
+        ).also(JvmSourceValidation::validateObservation)
+    }
+
+    private fun encodeResourceObservation(value: JvmSourceResourceObservation): ByteArray =
+        writer(JvmSourceContract.SCHEMA_RESOURCE_OBSERVATION, OBSERVATION_WIRE_LIMITS)
+            .int32(ResourceObservationTags.PROCESS, value.process.wireCode, requiredForReader = true)
+            .int32(ResourceObservationTags.PHASE, value.phase.wireCode, requiredForReader = true)
+            .apply {
+                value.rssBytes?.let { int64(ResourceObservationTags.RSS_BYTES, it) }
+                value.openFileDescriptorCount?.let {
+                    int32(ResourceObservationTags.OPEN_FILE_DESCRIPTOR_COUNT, it)
+                }
+                value.temporaryStorageBytes?.let {
+                    int64(ResourceObservationTags.TEMPORARY_STORAGE_BYTES, it)
+                }
+                value.outputBytes?.let { int64(ResourceObservationTags.OUTPUT_BYTES, it) }
+            }
+            .encode()
+
+    private fun decodeResourceObservation(bytes: ByteArray): JvmSourceResourceObservation {
+        val document = document(
+            bytes,
+            JvmSourceContract.SCHEMA_RESOURCE_OBSERVATION,
+            ResourceObservationTags.ALL,
+            limits = OBSERVATION_WIRE_LIMITS,
+        )
+        return JvmSourceResourceObservation(
+            process = enumByCode<JvmObservationProcess>(
+                document.requireInt32(ResourceObservationTags.PROCESS),
+                "observation process",
+            ) { it.wireCode },
+            phase = enumByCode<JvmObservationPhase>(
+                document.requireInt32(ResourceObservationTags.PHASE),
+                "observation phase",
+            ) { it.wireCode },
+            rssBytes = document.optionalInt64(ResourceObservationTags.RSS_BYTES),
+            openFileDescriptorCount =
+                document.optionalInt32(ResourceObservationTags.OPEN_FILE_DESCRIPTOR_COUNT),
+            temporaryStorageBytes = document.optionalInt64(ResourceObservationTags.TEMPORARY_STORAGE_BYTES),
+            outputBytes = document.optionalInt64(ResourceObservationTags.OUTPUT_BYTES),
+        )
     }
 
     @JvmStatic
@@ -484,11 +692,14 @@ object JvmSourceCodec {
         ).also(JvmSourceValidation::validateHostResponse)
     }
 
-    private fun writer(schemaId: Int): TaggedWireWriter = TaggedWireWriter(
+    private fun writer(
+        schemaId: Int,
+        limits: TaggedWireLimits = WIRE_LIMITS,
+    ): TaggedWireWriter = TaggedWireWriter(
         schemaId = schemaId,
         schemaMajor = JvmSourceContract.SCHEMA_MAJOR,
         schemaMinor = JvmSourceContract.SCHEMA_MINOR,
-        limits = WIRE_LIMITS,
+        limits = limits,
     )
 
     private fun document(
@@ -496,7 +707,8 @@ object JvmSourceCodec {
         schemaId: Int,
         knownTags: Set<Int>,
         repeatedTags: Set<Int> = emptySet(),
-    ): TaggedWireDocument = TaggedWireDocument.decode(bytes, WIRE_LIMITS)
+        limits: TaggedWireLimits = WIRE_LIMITS,
+    ): TaggedWireDocument = TaggedWireDocument.decode(bytes, limits)
         .requireSchema(schemaId, JvmSourceContract.SCHEMA_MAJOR)
         .rejectUnknownRequiredFields(knownTags)
         .validateKnownCardinality(knownTags, repeatedTags)
@@ -573,7 +785,8 @@ object JvmSourceCodec {
         const val SOURCE_FILE_NAME = 5
         const val LINE = 6
         const val COLUMN = 7
-        val ALL = (1..7).toSet()
+        const val RUNTIME_EXCEPTION_CLASS_NAME = 8
+        val ALL = (1..8).toSet()
     }
 
     private object RequestTags {
@@ -593,7 +806,11 @@ object JvmSourceCodec {
         const val ALLOWED_HOST_CALLS = 14
         const val EXPECTED_TOOLCHAIN_FINGERPRINT = 15
         const val GRANTED_CAPABILITIES = 16
-        val ALL = (1..16).toSet()
+        const val ARGS_JSON = 17
+        const val SOURCE_PAYLOAD_KIND = 18
+        const val SOURCE_FILE_COUNT = 19
+        const val SOURCE_CONTENT_BYTES = 20
+        val ALL = (1..20).toSet()
         val REPEATED = setOf(ALLOWED_HOST_CALLS, GRANTED_CAPABILITIES)
     }
 
@@ -621,7 +838,8 @@ object JvmSourceCodec {
         const val INTERNAL_BRIDGE_CALL_COUNT = 21
         const val DEX_VERSION = 22
         const val LOADER_KIND = 23
-        val ALL = (1..23).toSet()
+        const val OBSERVATION = 24
+        val ALL = (1..24).toSet()
     }
 
     private object ErrorTags {
@@ -630,7 +848,8 @@ object JvmSourceCodec {
         const val PHASE = 3
         const val MESSAGE = 4
         const val RETRYABLE = 5
-        val ALL = (1..5).toSet()
+        const val OBSERVATION = 6
+        val ALL = (1..6).toSet()
     }
 
     private object CancellationTags {
@@ -638,7 +857,36 @@ object JvmSourceCodec {
         const val REASON = 2
         const val PHASE = 3
         const val ELAPSED_MILLIS = 4
-        val ALL = (1..4).toSet()
+        const val OBSERVATION = 5
+        val ALL = (1..5).toSet()
+    }
+
+    private object ObservationTags {
+        const val REQUEST_ID = 1
+        const val SESSION_ELAPSED_MILLIS = 2
+        const val WORKER_STARTUP_DURATION_MILLIS = 3
+        const val COMPILER_START_PROFILE = 4
+        const val WORKER_START_PROFILE = 5
+        const val COMPILE_DURATION_MILLIS = 6
+        const val D8_DURATION_MILLIS = 7
+        const val LOAD_DURATION_MILLIS = 8
+        const val RUN_DURATION_MILLIS = 9
+        const val TERMINATION_DURATION_MILLIS = 10
+        const val CACHE_OUTCOME = 11
+        const val CACHE_MISS_REASON = 12
+        const val RESOURCES = 13
+        val ALL = (1..13).toSet()
+        val REPEATED = setOf(RESOURCES)
+    }
+
+    private object ResourceObservationTags {
+        const val PROCESS = 1
+        const val PHASE = 2
+        const val RSS_BYTES = 3
+        const val OPEN_FILE_DESCRIPTOR_COUNT = 4
+        const val TEMPORARY_STORAGE_BYTES = 5
+        const val OUTPUT_BYTES = 6
+        val ALL = (1..6).toSet()
     }
 
     private object HostCallTags {

@@ -7,7 +7,7 @@ object JvmSourceNegotiation {
     @JvmField
     val HOST_MIN = JvmProtocolVersion(
         JvmSourceContract.PROTOCOL_MAJOR,
-        JvmSourceContract.PROTOCOL_MINOR,
+        1,
     )
 
     @JvmField
@@ -37,9 +37,20 @@ object JvmSourceNegotiation {
         ) {
             return null
         }
-        val lower = maxOf(hostMin, providerInfo.protocolMin)
-        val upper = minOf(hostMax, providerInfo.protocolMax)
+        // Entry API 2 belongs to Protocol 1.1, API 3 to 1.2, and API 4 to 1.3+.
+        // Intersect this range too: a wire-compatible provider must still use the right entry ABI.
+        val entryMin = JvmProtocolVersion(1, providerInfo.entryApiVersion - 1)
+        val entryMax = if (providerInfo.entryApiVersion == JvmSourceContract.ENTRY_API_VERSION) {
+            HOST_MAX
+        } else entryMin
+        val lower = maxOf(hostMin, providerInfo.protocolMin, entryMin)
+        val upper = minOf(hostMax, providerInfo.protocolMax, entryMax)
         return upper.takeIf { lower <= upper }
+    }
+
+    internal fun entryApiVersionFor(protocolVersion: JvmProtocolVersion): Int {
+        require(protocolVersion in HOST_MIN..HOST_MAX) { "Unsupported JVM source protocol" }
+        return minOf(protocolVersion.minor + 1, JvmSourceContract.ENTRY_API_VERSION)
     }
 
     @JvmStatic
@@ -62,6 +73,10 @@ object JvmSourceValidation {
         "[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*",
     )
     private val DIAGNOSTIC_CODE = Regex("[A-Z0-9][A-Z0-9._-]{0,127}")
+    private val RUNTIME_EXCEPTION_CLASS_NAME = Regex(
+        "(?:java|javax)(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+|" +
+            JvmSourceContract.USER_RUNTIME_EXCEPTION_CLASS_NAME,
+    )
     private val HOST_METHOD = Regex("[a-z][a-z0-9_-]*(?:\\.[a-z][a-z0-9_-]*)+")
     private val ERROR_CODE = Regex("[A-Z0-9][A-Z0-9._-]{0,127}")
     private val TOOL_VERSION = Regex("[A-Za-z0-9][A-Za-z0-9._+-]{0,127}")
@@ -78,7 +93,7 @@ object JvmSourceValidation {
             JvmSourceContract.MAX_VERSION_TEXT_BYTES,
         )
         requireValue(info.providerVersionCode > 0L) { "Provider version code must be positive" }
-        requireValue(info.entryApiVersion == JvmSourceContract.ENTRY_API_VERSION) {
+        requireValue(info.entryApiVersion in JvmSourceContract.MIN_SUPPORTED_ENTRY_API_VERSION..JvmSourceContract.ENTRY_API_VERSION) {
             "Provider entry API version is unsupported"
         }
         info.minHostVersionCode?.let {
@@ -95,7 +110,8 @@ object JvmSourceValidation {
     }
 
     @JvmStatic
-    fun validateCapabilities(capabilities: JvmSourceCapabilities) {
+    @JvmOverloads
+    fun validateCapabilities(capabilities: JvmSourceCapabilities, entryApiVersion: Int? = null) {
         requireDistinctNonEmpty(capabilities.languages, "languages")
         requireValue(capabilities.languages.size == 1) {
             "Protocol v1 requires exactly one source language per provider"
@@ -108,20 +124,23 @@ object JvmSourceValidation {
         }
         validateToolVersion(capabilities.sourceCompilerVersion, "Source compiler version")
         validateToolVersion(capabilities.d8Version, "D8 version")
-        requireValue(
+        val entryVersions = entryApiVersion?.let { listOf(it) }
+            ?: (JvmSourceContract.MIN_SUPPORTED_ENTRY_API_VERSION..JvmSourceContract.ENTRY_API_VERSION).toList()
+        requireValue(entryVersions.any { version ->
             capabilities.toolchainFingerprint == JvmToolchainFingerprint.compute(
                 language = capabilities.languages.single(),
                 sourceCompilerFamily = capabilities.sourceCompilerFamily,
                 sourceCompilerVersion = capabilities.sourceCompilerVersion,
                 d8Version = capabilities.d8Version,
                 runtimeLibraryFingerprint = capabilities.runtimeLibraryFingerprint,
-            ),
-        ) { "Combined toolchain fingerprint does not match its declared components" }
+                entryApiVersion = version,
+            )
+        }) { "Combined toolchain fingerprint does not match its declared components and entry API" }
         requireDistinctNonEmpty(capabilities.isolationCapabilities, "isolation capabilities")
         requireValue(capabilities.isolationCapabilities.toSet().containsAll(REQUIRED_ISOLATION)) {
             "Provider does not satisfy the required disposable-worker isolation contract"
         }
-        requireValue(capabilities.maxSourceBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+        requireValue(capabilities.maxSourceBytes in 1L..JvmSourceContract.MAX_SOURCE_PAYLOAD_BYTES) {
             "Source byte limit is invalid"
         }
         requireValue(capabilities.maxStdoutBytes in 0L..JvmSourceContract.MAX_STDOUT_BYTES) {
@@ -165,7 +184,7 @@ object JvmSourceValidation {
         validateStarted(started)
         validateRequest(request)
         validateProviderInfo(providerInfo)
-        validateCapabilities(capabilities)
+        validateCapabilities(capabilities, providerInfo.entryApiVersion)
         requireCapability(started.requestId == request.requestId) {
             "Started request ID differs from the submitted request"
         }
@@ -190,7 +209,7 @@ object JvmSourceValidation {
             "Diagnostic message",
             JvmSourceContract.MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS,
         )
-        diagnostic.sourceFileName?.let(::validateSourceFileName)
+        diagnostic.sourceFileName?.let(::validateDiagnosticSourceName)
         val line = diagnostic.line
         val column = diagnostic.column
         requireValue((line == null) == (column == null)) {
@@ -200,6 +219,45 @@ object JvmSourceValidation {
             requireValue(diagnostic.sourceFileName != null) { "Located diagnostic requires a source file name" }
             requireValue(line > 0 && column > 0) {
                 "Diagnostic line and column must be positive"
+            }
+        }
+        diagnostic.runtimeExceptionClassName?.let { className ->
+            requireValue(diagnostic.code == "JAVA_RUNTIME_EXCEPTION") {
+                "Runtime exception class requires a Java runtime diagnostic"
+            }
+            requireValue(diagnostic.severity == JvmDiagnosticSeverity.ERROR) {
+                "Runtime exception class requires error severity"
+            }
+            requireValue(diagnostic.sourceFileName != null && line != null && column != null) {
+                "Runtime exception class requires a source location"
+            }
+            requireUtf8Text(
+                className,
+                "Runtime exception class name",
+                JvmSourceContract.MAX_RUNTIME_EXCEPTION_CLASS_NAME_BYTES,
+            )
+            requireValue(RUNTIME_EXCEPTION_CLASS_NAME.matches(className)) {
+                "Runtime exception class name is outside the public profile"
+            }
+        }
+    }
+
+    @JvmStatic
+    fun validateDiagnosticAgainst(diagnostic: JvmSourceDiagnostic, request: JvmSourceRequest) {
+        validateDiagnostic(diagnostic)
+        validateRequest(request)
+        requireCapability(diagnostic.requestId == request.requestId) {
+            "Diagnostic request ID differs from the submitted request"
+        }
+        val supportsRuntimeClass =
+            request.protocolVersion >= JvmSourceContract.RUNTIME_EXCEPTION_CLASS_PROTOCOL_VERSION
+        if (diagnostic.code == "JAVA_RUNTIME_EXCEPTION") {
+            requireCapability((diagnostic.runtimeExceptionClassName != null) == supportsRuntimeClass) {
+                "Runtime exception class presence differs from the negotiated protocol"
+            }
+        } else {
+            requireCapability(diagnostic.runtimeExceptionClassName == null) {
+                "Non-runtime diagnostic contains a runtime exception class"
             }
         }
     }
@@ -214,8 +272,40 @@ object JvmSourceValidation {
         requireValue(!request.sourceFileName.endsWith(".kts", ignoreCase = true)) {
             "Kotlin script files are not supported"
         }
-        requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
-            "Source size is outside the protocol limit"
+        when (request.sourcePayloadKind) {
+            JvmSourcePayloadKind.SINGLE_FILE -> {
+                requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+                    "Single-source size is outside the protocol limit"
+                }
+                requireValue(request.sourceFileCount == 1 && request.sourceContentBytes == request.sourceSizeBytes) {
+                    "Single-source payload metadata is inconsistent"
+                }
+            }
+            JvmSourcePayloadKind.SOURCE_ARCHIVE -> {
+                requireValue(request.protocolVersion >= JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+                    "Source packages require the negotiated source-package protocol"
+                }
+                requireValue(request.language == JvmSourceLanguage.JAVA) {
+                    "Protocol 1.6 source packages admit Java sources only"
+                }
+                requireValue(request.sourceSizeBytes in 1L..JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES) {
+                    "Source archive size is outside the protocol limit"
+                }
+                requireValue(request.sourceFileCount in 2..JvmSourceContract.MAX_SOURCE_FILES) {
+                    "Source package file count is outside the protocol limit"
+                }
+                requireValue(request.sourceContentBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES) {
+                    "Source package content size is outside the protocol limit"
+                }
+            }
+        }
+        if (request.protocolVersion < JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION) {
+            requireValue(request.sourcePayloadKind == JvmSourcePayloadKind.SINGLE_FILE &&
+                request.sourceFileCount == 1 && request.sourceContentBytes == request.sourceSizeBytes
+            ) {
+                "Source payload metadata requires Protocol ${JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION.major}." +
+                    JvmSourceContract.SOURCE_PACKAGE_PROTOCOL_VERSION.minor
+            }
         }
         requireUtf8Text(
             request.entryClassName,
@@ -251,6 +341,18 @@ object JvmSourceValidation {
         requireValue(request.grantedCapabilities.distinct().size == request.grantedCapabilities.size) {
             "Granted script capability list contains duplicates"
         }
+        if (request.protocolVersion < JvmProtocolVersion(1, 2)) {
+            requireValue(request.grantedCapabilities.none {
+                it == JvmScriptCapability.CLIPBOARD_READ || it == JvmScriptCapability.CLIPBOARD_WRITE
+            }) { "Clipboard capabilities require Protocol 1.2" }
+        }
+        if (request.protocolVersion < JvmSourceContract.ARGS_PROTOCOL_VERSION) {
+            requireValue(request.argsJson == "{}") {
+                "Execution arguments require Protocol ${JvmSourceContract.ARGS_PROTOCOL_VERSION.major}." +
+                    JvmSourceContract.ARGS_PROTOCOL_VERSION.minor
+            }
+        }
+        JvmJsonArguments.decode(request.argsJson)
         val grantedHostMethods = request.grantedCapabilities.mapNotNull(JvmScriptCapability::hostMethod).toSet()
         requireValue(request.allowedHostCalls.toSet() == grantedHostMethods) {
             "Host-call allowlist differs from the granted host capabilities"
@@ -264,8 +366,8 @@ object JvmSourceValidation {
         negotiatedVersion: JvmProtocolVersion,
     ) {
         validateRequest(request)
-        validateCapabilities(capabilities)
         validateProtocolVersion(negotiatedVersion, "negotiated")
+        validateCapabilities(capabilities, JvmSourceNegotiation.entryApiVersionFor(negotiatedVersion))
         requireCapability(request.protocolVersion == negotiatedVersion) {
             "Request protocol version differs from the negotiated version"
         }
@@ -343,6 +445,12 @@ object JvmSourceValidation {
         requireValue(result.executionElapsedMillis <= result.elapsedMillis - result.compilationElapsedMillis) {
             "Compilation and execution elapsed time exceed total elapsed time"
         }
+        result.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == result.requestId) {
+                "Result observation request ID differs from the result"
+            }
+        }
     }
 
     @JvmStatic
@@ -392,11 +500,91 @@ object JvmSourceValidation {
             "Error message",
             JvmSourceContract.MAX_ERROR_MESSAGE_CODE_POINTS,
         )
+        error.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == error.requestId) {
+                "Error observation request ID differs from the error"
+            }
+        }
     }
 
     @JvmStatic
     fun validateCancellation(cancellation: JvmSourceCancellation) {
         requireValue(cancellation.elapsedMillis >= 0L) { "Cancellation elapsed time is negative" }
+        cancellation.observation?.let { observation ->
+            validateObservation(observation)
+            requireValue(observation.requestId == cancellation.requestId) {
+                "Cancellation observation request ID differs from the cancellation"
+            }
+        }
+    }
+
+    @JvmStatic
+    fun validateObservation(observation: JvmSourceObservation) {
+        requireValue(
+            observation.sessionElapsedMillis in 0L..JvmSourceContract.MAX_OBSERVATION_SESSION_ELAPSED_MILLIS,
+        ) { "Observation session elapsed time is outside the protocol limit" }
+        requireValue(
+            observation.workerStartupDurationMillis == null ||
+                observation.workerStartupDurationMillis in 0L..observation.sessionElapsedMillis,
+        ) { "Observation worker startup duration exceeds the session elapsed time" }
+        listOf(
+            observation.compileDurationMillis,
+            observation.d8DurationMillis,
+            observation.loadDurationMillis,
+            observation.runDurationMillis,
+        ).forEach { duration ->
+            requireValue(
+                duration == null || duration in 0L..JvmSourceContract.MAX_OBSERVATION_PHASE_DURATION_MILLIS,
+            ) { "Observation phase duration is outside the protocol limit" }
+        }
+        requireValue(
+            observation.terminationDurationMillis == null ||
+                observation.terminationDurationMillis in
+                0L..JvmSourceContract.MAX_OBSERVATION_TERMINATION_DURATION_MILLIS,
+        ) { "Observation termination duration is outside the protocol limit" }
+        requireValue(
+            (observation.cacheOutcome == JvmObservationCacheOutcome.MISS) ==
+                (observation.cacheMissReason != null),
+        ) { "Observation cache miss reason differs from the cache outcome" }
+        requireValue(
+            observation.cacheOutcome != JvmObservationCacheOutcome.HIT ||
+                (observation.compileDurationMillis == null && observation.d8DurationMillis == null),
+        ) { "Cache-hit observation contains compile or D8 duration" }
+        requireValue(observation.resources.size <= JvmSourceContract.MAX_OBSERVATION_RESOURCE_SAMPLES) {
+            "Observation resource sample count exceeds the protocol limit"
+        }
+        requireValue(
+            observation.resources.distinctBy { resource -> resource.process to resource.phase }.size ==
+                observation.resources.size,
+        ) { "Observation contains duplicate process/phase resource samples" }
+        observation.resources.forEach(::validateResourceObservation)
+    }
+
+    @JvmStatic
+    fun validateObservationAgainst(
+        observation: JvmSourceObservation,
+        request: JvmSourceRequest,
+    ) {
+        validateObservation(observation)
+        validateRequest(request)
+        requireCapability(observation.requestId == request.requestId) {
+            "Observation request ID differs from the submitted request"
+        }
+    }
+
+    /** Enforces the negotiated Protocol 1.5 presence rule at an external terminal boundary. */
+    @JvmStatic
+    fun validateTerminalObservationAgainst(
+        observation: JvmSourceObservation?,
+        request: JvmSourceRequest,
+    ) {
+        validateRequest(request)
+        val negotiated = request.protocolVersion >= JvmSourceContract.OBSERVATION_PROTOCOL_VERSION
+        requireCapability((observation != null) == negotiated) {
+            "Terminal observation presence differs from the negotiated protocol"
+        }
+        observation?.let { validateObservationAgainst(it, request) }
     }
 
     @JvmStatic
@@ -412,6 +600,44 @@ object JvmSourceValidation {
         requireValue(call.timeoutMillis in 1L..JvmSourceContract.MAX_TIMEOUT_MILLIS) {
             "Host-call timeout is invalid"
         }
+    }
+
+    private fun validateResourceObservation(resource: JvmSourceResourceObservation) {
+        val phaseIsLegal = when (resource.process) {
+            JvmObservationProcess.COMPILER -> resource.phase in setOf(
+                JvmObservationPhase.COMPILE,
+                JvmObservationPhase.D8,
+                JvmObservationPhase.TERMINATION,
+            )
+            JvmObservationProcess.WORKER -> resource.phase in setOf(
+                JvmObservationPhase.LOAD,
+                JvmObservationPhase.RUN,
+                JvmObservationPhase.TERMINATION,
+            )
+        }
+        requireValue(phaseIsLegal) { "Observation process/phase resource pair is invalid" }
+        requireValue(
+            resource.rssBytes == null || resource.rssBytes in 0L..JvmSourceContract.MAX_OBSERVATION_RSS_BYTES,
+        ) { "Observation RSS value is outside the protocol limit" }
+        requireValue(
+            resource.openFileDescriptorCount == null ||
+                resource.openFileDescriptorCount in 0..JvmSourceContract.MAX_OBSERVATION_OPEN_FILE_DESCRIPTORS,
+        ) { "Observation file-descriptor count is outside the protocol limit" }
+        requireValue(
+            resource.temporaryStorageBytes == null ||
+                resource.temporaryStorageBytes in
+                0L..JvmSourceContract.MAX_OBSERVATION_TEMPORARY_STORAGE_BYTES,
+        ) { "Observation temporary-storage value is outside the protocol limit" }
+        requireValue(
+            resource.outputBytes == null ||
+                resource.outputBytes in 0L..JvmSourceContract.MAX_OBSERVATION_OUTPUT_BYTES,
+        ) { "Observation output value is outside the protocol limit" }
+        requireValue(
+            resource.rssBytes != null ||
+                resource.openFileDescriptorCount != null ||
+                resource.temporaryStorageBytes != null ||
+                resource.outputBytes != null,
+        ) { "Observation resource sample contains no available measurement" }
     }
 
     @JvmStatic
@@ -465,6 +691,19 @@ object JvmSourceValidation {
         )
         requireValue(value !in setOf(".", "..") && '/' !in value && '\\' !in value && '\u0000' !in value) {
             "Source file name must be a single safe path segment"
+        }
+    }
+
+    private fun validateDiagnosticSourceName(value: String) {
+        requireUtf8Text(
+            value,
+            "Diagnostic source name",
+            JvmSourceContract.MAX_SOURCE_FILE_NAME_BYTES,
+        )
+        if ('/' !in value) {
+            validateSourceFileName(value)
+        } else {
+            JvmSourcePackagePathPolicy.requireSourcePath(value)
         }
     }
 

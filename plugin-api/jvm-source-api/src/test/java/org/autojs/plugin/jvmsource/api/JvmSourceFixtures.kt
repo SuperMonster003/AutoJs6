@@ -84,6 +84,7 @@ internal object JvmSourceFixtures {
         expectedToolchainFingerprint: JvmSha256 = capabilities(language).toolchainFingerprint,
         maxStdoutBytes: Long = JvmSourceContract.MAX_STDOUT_BYTES,
         maxStderrBytes: Long = JvmSourceContract.MAX_STDERR_BYTES,
+        argsJson: String = "{}",
     ) = JvmSourceRequest(
         requestId = requestId,
         protocolVersion = JvmSourceNegotiation.HOST_MAX,
@@ -100,11 +101,13 @@ internal object JvmSourceFixtures {
         diagnosticByteLimit = JvmSourceContract.MAX_DIAGNOSTIC_BYTES,
         allowedHostCalls = JvmScriptCapability.entries.mapNotNull(JvmScriptCapability::hostMethod),
         grantedCapabilities = JvmScriptCapability.entries,
+        argsJson = argsJson,
     )
 
     fun result(
         dexVersion: String = DEX_VERSION,
         loaderKind: JvmDexLoaderKind = this.loaderKind,
+        observation: JvmSourceObservation? = null,
     ) = JvmSourceResult(
         requestId = requestId,
         toolchainFingerprint = capabilities().toolchainFingerprint,
@@ -129,6 +132,43 @@ internal object JvmSourceFixtures {
         compilationElapsedMillis = 1L,
         executionElapsedMillis = 1L,
         elapsedMillis = 2L,
+        observation = observation,
+    )
+
+    fun observation(
+        requestId: JvmRequestId = this.requestId,
+        resources: Collection<JvmSourceResourceObservation> = listOf(
+            JvmSourceResourceObservation(
+                process = JvmObservationProcess.COMPILER,
+                phase = JvmObservationPhase.COMPILE,
+                rssBytes = 64L * 1024L * 1024L,
+                openFileDescriptorCount = 48,
+                temporaryStorageBytes = 4_096L,
+                outputBytes = 0L,
+            ),
+            JvmSourceResourceObservation(
+                process = JvmObservationProcess.WORKER,
+                phase = JvmObservationPhase.RUN,
+                rssBytes = 32L * 1024L * 1024L,
+                openFileDescriptorCount = 32,
+                temporaryStorageBytes = 1_024L,
+                outputBytes = 128L,
+            ),
+        ),
+    ) = JvmSourceObservation(
+        requestId = requestId,
+        sessionElapsedMillis = 1_209L,
+        workerStartupDurationMillis = 283L,
+        compilerStartProfile = JvmObservationStartProfile.WARM,
+        workerStartProfile = JvmObservationStartProfile.COLD,
+        compileDurationMillis = 224L,
+        d8DurationMillis = 480L,
+        loadDurationMillis = 5L,
+        runDurationMillis = 2L,
+        terminationDurationMillis = 18L,
+        cacheOutcome = JvmObservationCacheOutcome.MISS,
+        cacheMissReason = JvmObservationCacheMissReason.CACHE_DISABLED,
+        resources = resources,
     )
 
     private fun compilerFamily(language: JvmSourceLanguage): JvmSourceCompilerFamily = when (language) {

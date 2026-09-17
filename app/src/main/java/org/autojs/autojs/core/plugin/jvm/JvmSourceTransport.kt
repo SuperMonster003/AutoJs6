@@ -12,6 +12,12 @@ internal interface JvmSourceInputSnapshot : Closeable {
     val sha256Hex: String
     val sourceFileName: String
     val entryClassName: String
+    val sourcePayloadKind: org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
+        get() = org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind.SINGLE_FILE
+    val sourceFileCount: Int
+        get() = 1
+    val sourceContentBytes: Long
+        get() = sizeBytes
     val language: org.autojs.plugin.jvmsource.api.JvmSourceLanguage
         get() = requireNotNull(
             org.autojs.plugin.jvmsource.api.JvmSourceLanguage.fromFileName(sourceFileName),
@@ -52,8 +58,22 @@ internal interface JvmSourceOutputObserver {
 internal interface JvmSourceArtifactStore : Closeable {
     /** Compatibility name retained for existing test doubles; the implementation admits Java and Kotlin. */
     fun snapshotJavaSource(file: java.io.File, maximumBytes: Long): JvmSourceInputSnapshot
-    fun snapshotSource(file: java.io.File, maximumBytes: Long): JvmSourceInputSnapshot =
-        snapshotJavaSource(file, maximumBytes)
+    fun snapshotSource(
+        file: java.io.File,
+        maximumBytes: Long,
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
+    ): JvmSourceInputSnapshot {
+        require(entrySimpleName == JvmSourceR1Policy.ENTRY_SIMPLE_NAME) {
+            "This JVM source artifact store does not support an explicit entry name"
+        }
+        return snapshotJavaSource(file, maximumBytes)
+    }
+    fun snapshotSourcePackage(
+        sourceRoot: java.io.File,
+        entryFile: java.io.File,
+        maximumBytes: Long,
+        entrySimpleName: String = JvmSourceR1Policy.ENTRY_SIMPLE_NAME,
+    ): JvmSourceInputSnapshot = throw UnsupportedOperationException("JVM source packages are not supported")
     fun outputCapture(
         maximumBytes: Long,
         observer: JvmSourceOutputObserver = JvmSourceOutputObserver.NONE,
@@ -70,6 +90,7 @@ internal interface JvmSourceArtifactStore : Closeable {
 internal interface JvmSourceExecutionSink {
     fun publishDiagnostics(diagnostics: List<org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic>)
     fun publishOutput(stdout: String, stderr: String)
+    fun publishObservation(observation: org.autojs.plugin.jvmsource.api.JvmSourceObservation) = Unit
 
     companion object {
         val NONE: JvmSourceExecutionSink = object : JvmSourceExecutionSink {

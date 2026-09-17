@@ -2,6 +2,10 @@
 
 最后更新：2026-08-22
 
+> 后续状态（2026-08-26）：本文 M0–M6 记录保留为历史推进背景。Protocol 已演进至 1.6；M9-5 已支持
+> 有界多文件 Java 源码包，M9-7 又增加显式非 `Main` 入口选择。旧 API 与编辑器普通启动仍默认
+> `Main`，但 `Main` 已不再是 Java provider 的固定入口限制；当前规范以 `PROTOCOL.md` 为准。
+
 本文取代旧版 Roadmap（R0–R4 阶段制），是 JVM 源文件执行的唯一推进入口。
 旧的 `R0_ACCEPTANCE.md`–`R4_ACCEPTANCE.md`、`SECURITY_MODEL.md`、`INTEGRATION_PLAN.md`、
 `COMPLETION_ROADMAP.md` 全部转为历史归档：可以查阅，但不再构成任何门禁、

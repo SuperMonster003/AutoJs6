@@ -31,6 +31,17 @@ class JvmSourceR1JavaPolicyTest {
     }
 
     @Test
+    fun callerSelectedEntryProducesDynamicProtocolLayout() {
+        val layout = JvmSourceR1JavaPolicy.inspect(
+            "package com.example.scripts; public final class ScriptEntry {}".toByteArray(),
+            "ScriptEntry",
+        )
+
+        assertEquals("ScriptEntry.java", layout.sourceFileName)
+        assertEquals("com.example.scripts.ScriptEntry", layout.entryClassName)
+    }
+
+    @Test
     fun anyWellFormedJavaFileNameIsAccepted() {
         listOf("Main.java", "main.java", "test-17.java", "My_Script.JAVA", "has space.java").forEach { fileName ->
             JvmSourceR1JavaPolicy.requireSupportedFileName(fileName)

@@ -1,6 +1,7 @@
 package org.autojs.plugin.jvmsource.api
 
 import org.autojs.plugin.protocol.wire.TaggedWireError
+import org.autojs.plugin.protocol.wire.TaggedWireDocument
 import org.autojs.plugin.protocol.wire.TaggedWireException
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
 import org.junit.Assert.assertEquals
@@ -12,6 +13,60 @@ import org.junit.Test
 class JvmSourceCompatibilityTest {
 
     @Test
+    fun legacyEntryApisNegotiateOnlyTheirCompatibleProtocol() {
+        for ((minor, entryApi) in listOf(1 to 2, 2 to 3, 6 to 4)) {
+            val version = JvmProtocolVersion(1, minor)
+            val provider = JvmSourceFixtures.providerInfo(version, version).copy(entryApiVersion = entryApi)
+            assertEquals(provider, JvmSourceCodec.decodeProviderInfo(JvmSourceCodec.encodeProviderInfo(provider)))
+            assertEquals(version, JvmSourceNegotiation.requireNegotiated(provider, JvmSourceFixtures.HOST_VERSION_CODE))
+        }
+        val incompatible = JvmSourceFixtures.providerInfo().copy(entryApiVersion = 2)
+        assertNull(JvmSourceNegotiation.negotiate(incompatible, JvmSourceFixtures.HOST_VERSION_CODE))
+        assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceCodec.encodeProviderInfo(incompatible.copy(entryApiVersion = 99))
+        }
+    }
+
+    @Test
+    fun legacyKotlinFingerprintAndRequestRemainBoundToEntryApiTwo() {
+        val current = JvmSourceFixtures.capabilities(JvmSourceLanguage.KOTLIN)
+        val capabilities = current.copy(
+            toolchainFingerprint = JvmToolchainFingerprint.compute(
+                current.languages.single(), current.sourceCompilerFamily, current.sourceCompilerVersion,
+                current.d8Version, current.runtimeLibraryFingerprint, entryApiVersion = 2,
+            ),
+            scriptCapabilities = current.scriptCapabilities.filterNot {
+                it == JvmScriptCapability.CLIPBOARD_READ || it == JvmScriptCapability.CLIPBOARD_WRITE
+            },
+        )
+        assertEquals(capabilities, JvmSourceCodec.decodeCapabilities(JvmSourceCodec.encodeCapabilities(capabilities)))
+        JvmSourceValidation.validateCapabilities(capabilities, 2)
+        assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceValidation.validateCapabilities(capabilities, 4)
+        }
+        val request = JvmSourceFixtures.request(JvmSourceLanguage.KOTLIN, "Main.kt").copy(
+            protocolVersion = JvmProtocolVersion(1, 1),
+            expectedToolchainFingerprint = capabilities.toolchainFingerprint,
+            grantedCapabilities = capabilities.scriptCapabilities,
+            allowedHostCalls = capabilities.scriptCapabilities.mapNotNull(JvmScriptCapability::hostMethod),
+        )
+        JvmSourceValidation.validateRequestAgainst(request, capabilities, request.protocolVersion)
+        val encoded = JvmSourceCodec.encodeRequest(request)
+        TaggedWireDocument.decode(encoded).rejectUnknownRequiredFields((1..16).toSet())
+        assertEquals(request, JvmSourceCodec.decodeRequest(encoded))
+        JvmSourceValidation.validateTerminalObservationAgainst(null, request)
+        assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceCodec.encodeRequest(request.copy(argsJson = "{\"unsupported\":true}"))
+        }
+        assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceCodec.encodeRequest(request.copy(
+                grantedCapabilities = current.scriptCapabilities,
+                allowedHostCalls = current.scriptCapabilities.mapNotNull(JvmScriptCapability::hostMethod),
+            ))
+        }
+    }
+
+    @Test
     fun negotiatesHighestProtocolInIntersection() {
         val provider = JvmSourceFixtures.providerInfo(
             min = JvmProtocolVersion(1, 0),
@@ -19,12 +74,12 @@ class JvmSourceCompatibilityTest {
         )
 
         assertEquals(
-            JvmProtocolVersion(1, 2),
+            JvmProtocolVersion(1, 4),
             JvmSourceNegotiation.negotiate(
                 provider,
                 hostVersionCode = JvmSourceFixtures.HOST_VERSION_CODE,
                 hostMin = JvmProtocolVersion(1, 1),
-                hostMax = JvmProtocolVersion(1, 2),
+                hostMax = JvmProtocolVersion(1, 5),
             ),
         )
     }
@@ -167,6 +222,54 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
+    fun protocol12RequestRemainsDecodableOnlyWithEmptyLegacyArguments() {
+        val legacy = JvmSourceFixtures.request().copy(
+            protocolVersion = JvmProtocolVersion(1, 2),
+            argsJson = "{}",
+        )
+        assertEquals(legacy, JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(legacy)))
+
+        val failure = assertThrows(JvmSourceContractException::class.java) {
+            JvmSourceCodec.encodeRequest(legacy.copy(argsJson = "{\"new\":true}"))
+        }
+        assertEquals(JvmSourceContractViolation.INVALID_VALUE, failure.violation)
+    }
+
+    @Test
+    fun protocol13MarksArgumentsAsRequiredForOlderWireReaders() {
+        val encoded = JvmSourceCodec.encodeRequest(
+            JvmSourceFixtures.request(argsJson = "{\"new\":true}"),
+        )
+
+        val failure = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(encoded).rejectUnknownRequiredFields((1..16).toSet())
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, failure.error)
+    }
+
+    @Test
+    fun protocol15SingleFileRequestKeepsLegacySourceMetadataDefaults() {
+        val legacy = JvmSourceFixtures.request().copy(
+            protocolVersion = JvmProtocolVersion(1, 5),
+        )
+
+        assertEquals(legacy, JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(legacy)))
+        assertEquals(JvmSourcePayloadKind.SINGLE_FILE, legacy.sourcePayloadKind)
+        assertEquals(1, legacy.sourceFileCount)
+        assertEquals(legacy.sourceSizeBytes, legacy.sourceContentBytes)
+    }
+
+    @Test
+    fun protocol16MarksSourcePayloadMetadataAsRequiredForOlderWireReaders() {
+        val encoded = JvmSourceCodec.encodeRequest(JvmSourceFixtures.request())
+
+        val failure = assertThrows(TaggedWireException::class.java) {
+            TaggedWireDocument.decode(encoded).rejectUnknownRequiredFields((1..17).toSet())
+        }
+        assertEquals(TaggedWireError.UNKNOWN_REQUIRED_FIELD, failure.error)
+    }
+
+    @Test
     fun bindsRequestStartedAndResultToOneToolchainFingerprint() {
         val provider = JvmSourceFixtures.providerInfo()
         val capabilities = JvmSourceFixtures.capabilities()
@@ -251,10 +354,10 @@ class JvmSourceCompatibilityTest {
     }
 
     @Test
-    fun freezesTheProtocol11Entry2CombinedToolchainFingerprint() {
+    fun freezesTheProtocol15Entry4CombinedToolchainFingerprint() {
         val capabilities = JvmSourceFixtures.capabilities()
         assertEquals(
-            "7bc50c1632540bf29c8a35f3ad638928d3470f761f03ac2efe184d6a5e63aee9",
+            "12143f542f36552a23a7c4f388baa37e076fec35932231dc7510765bb5f153c8",
             capabilities.toolchainFingerprint.toHexString(),
         )
         assertNotEquals(

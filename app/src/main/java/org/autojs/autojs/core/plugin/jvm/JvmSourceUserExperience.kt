@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.jvm
 
 import org.autojs.plugin.jvmsource.api.JvmDiagnosticSeverity
 import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
+import org.autojs.plugin.jvmsource.api.JvmSourcePackagePathPolicy
 import org.autojs.plugin.jvmsource.api.JvmSourceError
 import org.autojs.plugin.jvmsource.api.JvmSourceErrorCode
 import org.autojs.plugin.jvmsource.api.JvmSourceFailurePhase
@@ -19,6 +20,7 @@ enum class JvmSourceUserFailureCode(val stableCode: String) {
     PROVIDER_UPDATE_DRIFT("JVM_SOURCE_PROVIDER_UPDATE_DRIFT"),
     PROVIDER_ROLLBACK_REQUIRED("JVM_SOURCE_PROVIDER_ROLLBACK_REQUIRED"),
     PROVIDER_QUARANTINED("JVM_SOURCE_PROVIDER_QUARANTINED"),
+    INVALID_ARGUMENTS("JVM_SOURCE_INVALID_ARGUMENTS"),
     COMPILE_FAILED("JVM_SOURCE_COMPILE_FAILED"),
     RUNTIME_FAILED("JVM_SOURCE_RUNTIME_FAILED"),
     CANCELLED("JVM_SOURCE_CANCELLED"),
@@ -34,6 +36,7 @@ enum class JvmSourceRecoveryAction {
     RESTORE_TRUSTED_PROVIDER,
     UPDATE_HOST_OR_PROVIDER,
     RETRY_LATER,
+    FIX_INVOCATION,
     FIX_SOURCE,
     REVIEW_RUNTIME_FAILURE,
     NONE,
@@ -83,6 +86,7 @@ data class JvmSourcePublicDiagnostic(
     val sourceFileName: String?,
     val line: Int?,
     val column: Int?,
+    val runtimeExceptionClassName: String?,
     val message: String,
 )
 
@@ -105,6 +109,9 @@ internal object JvmSourcePublicDiagnosticPolicy {
         "KOTLIN_RUNTIME_EXCEPTION",
     )
     private val SAFE_SOURCE_FILE = Regex("[A-Za-z0-9_.$-]{1,255}")
+    private val SAFE_RUNTIME_EXCEPTION_CLASS = Regex(
+        "(?:java|javax)(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+|UserException",
+    )
     private val UNSAFE_TEXT = Regex(
         "[A-Za-z]:[\\\\/]|(?:/[\\w.@$+~%-]+){2,}|\\b[0-9a-fA-F]{32,}\\b|" +
             "\\b(?:uid|pid|component|signer|classpath)\\s*[=:]|\\bBinder@[0-9a-fA-F]+",
@@ -113,20 +120,28 @@ internal object JvmSourcePublicDiagnosticPolicy {
 
     fun project(value: JvmSourceDiagnostic): JvmSourcePublicDiagnostic {
         val safeCode = value.code.takeIf(SAFE_CODES::contains) ?: "COMPILER_DIAGNOSTIC"
-        val safeLocation = value.sourceFileName?.let(SAFE_SOURCE_FILE::matches) == true &&
+        val safeLocation = value.sourceFileName?.let(::isSafeSourceName) == true &&
             value.line in 1..MAX_SOURCE_POSITION && value.column in 1..MAX_SOURCE_POSITION
+        val safeRuntimeExceptionClassName = value.runtimeExceptionClassName?.takeIf { className ->
+            safeCode == "JAVA_RUNTIME_EXCEPTION" && safeLocation &&
+                SAFE_RUNTIME_EXCEPTION_CLASS.matches(className)
+        }
         return JvmSourcePublicDiagnostic(
             severity = value.severity,
             code = safeCode,
             sourceFileName = value.sourceFileName.takeIf { safeLocation },
             line = value.line.takeIf { safeLocation },
             column = value.column.takeIf { safeLocation },
+            runtimeExceptionClassName = safeRuntimeExceptionClassName,
             message = projectMessage(value),
         )
     }
 
     private fun projectMessage(value: JvmSourceDiagnostic): String {
         val language = if (value.code.startsWith("KOTLIN_")) "Kotlin" else "Java"
+        if (value.code == "JAVA_RUNTIME_EXCEPTION" || value.code == "KOTLIN_RUNTIME_EXCEPTION") {
+            return "$language execution failed"
+        }
         val fallback = when (value.severity) {
             JvmDiagnosticSeverity.INFO -> "$language compiler diagnostic"
             JvmDiagnosticSeverity.WARNING -> "$language compiler warning"
@@ -142,6 +157,11 @@ internal object JvmSourcePublicDiagnosticPolicy {
         return bounded
     }
 
+    private fun isSafeSourceName(value: String): Boolean =
+        SAFE_SOURCE_FILE.matches(value) || runCatching {
+            JvmSourcePackagePathPolicy.requireSourcePath(value)
+        }.isSuccess
+
     /** Keeps the Protocol V1 container while removing every provider-controlled text/location. */
     fun sanitize(value: JvmSourceDiagnostic): JvmSourceDiagnostic = project(value).let { projected ->
         JvmSourceDiagnostic(
@@ -152,11 +172,22 @@ internal object JvmSourcePublicDiagnosticPolicy {
             sourceFileName = projected.sourceFileName,
             line = projected.line,
             column = projected.column,
+            runtimeExceptionClassName = projected.runtimeExceptionClassName,
         )
     }
 
     private const val MAX_SOURCE_POSITION = 1_000_000
     private const val MAX_MESSAGE_CODE_POINTS = 4_096
+}
+
+internal object JvmSourcePublicDiagnosticFormatter {
+    fun format(value: JvmSourcePublicDiagnostic): String {
+        val location = value.sourceFileName?.let { fileName ->
+            "$fileName:${value.line}:${value.column}: "
+        }.orEmpty()
+        val runtimeClass = value.runtimeExceptionClassName?.let { " [$it]" }.orEmpty()
+        return "$location${value.code}$runtimeClass: ${value.message}"
+    }
 }
 
 /** Product policy shared by discovery, lifecycle revalidation, and provider terminal mapping. */
@@ -278,6 +309,12 @@ internal object JvmSourceUserExperiencePolicy {
     fun sourcePolicyViolation(
         language: JvmSourceLanguage,
     ): JvmSourceUserFailure = invalidRequest(JvmSourceFailurePhase.INPUT, language)
+
+    fun invalidArguments(): JvmSourceUserFailure = failure(
+        JvmSourceUserFailureCode.INVALID_ARGUMENTS,
+        "JVM source arguments do not satisfy the supported JSON profile",
+        JvmSourceRecoveryAction.FIX_INVOCATION,
+    )
 
     private fun invalidRequest(
         phase: JvmSourceFailurePhase,

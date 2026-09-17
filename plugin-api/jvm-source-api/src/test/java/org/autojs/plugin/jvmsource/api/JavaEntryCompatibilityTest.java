@@ -1,5 +1,7 @@
 package org.autojs.plugin.jvmsource.api;
 
+import java.util.Collections;
+import java.util.Map;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -10,6 +12,7 @@ public final class JavaEntryCompatibilityTest {
     @Test
     public void implementsAndRunsEntryFromJava() throws Exception {
         StringBuilder output = new StringBuilder();
+        String[] clipboard = new String[] { "initial" };
         JvmCancellation cancellation = new JvmCancellation() {
             @Override
             public boolean isCancellationRequested() {
@@ -25,6 +28,26 @@ public final class JavaEntryCompatibilityTest {
             @Override
             public JvmAppApi app() {
                 return packageName -> packageName.equals("com.example.app");
+            }
+
+            @Override
+            public Map<String, Object> args() {
+                return Collections.singletonMap("name", "entry-api-4");
+            }
+
+            @Override
+            public JvmClipboardApi clipboard() {
+                return new JvmClipboardApi() {
+                    @Override
+                    public String getText() {
+                        return clipboard[0];
+                    }
+
+                    @Override
+                    public void setText(String value) {
+                        clipboard[0] = value;
+                    }
+                };
             }
 
             @Override
@@ -68,6 +91,9 @@ public final class JavaEntryCompatibilityTest {
         assertEquals(Boolean.TRUE, entry.run(context));
         assertEquals("log:hello;error:oops;toast:ready;", output.toString());
         assertTrue(context.app().launch("com.example.app"));
+        assertEquals("entry-api-4", context.args().get("name"));
+        context.clipboard().setText("M9 clipboard");
+        assertEquals("M9 clipboard", context.clipboard().getText());
         context.throwIfCancellationRequested();
     }
 }

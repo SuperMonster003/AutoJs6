@@ -245,6 +245,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 獨立 Lua Runtime 插件後端, 支持通過單獨的 PUC Lua 5.4.8 插件進程運行本地 .lua 文件, 並校驗固定組件/簽名/協議/ABI, 提供有界執行且絕不回退到 JavaScript
 * `新增` 獨立 Java/Kotlin JVM Source Runtime 插件後端, 支持在隔離進程中編譯及運行單文件 .java/.kt 腳本, 提供 package/import, 實時 console 輸出, 可取消 sleep, 宿主 toast 及顯式能力協商
 * `新增` JVM Source Runtime 支持範圍為單文件 Java 8 (Java provider 最低 API 24) 及 Kotlin 2.3 (Kotlin provider 最低 API 26); 本次發佈僅在 API 31/arm64-v8a 真機完成 smoke, 不聲明未驗證 API 級別
+* `新增` JVM Source Runtime 顯式執行透過協議 1.6 / Entry API 4 支援有界 JSON 參數, 獨立授權的剪貼簿存取, Java 多檔案原始碼套件與指定入口類別, 安全的執行階段例外定位和執行觀測; 既有協議 1.1 / Entry API 2 外掛程式保持單檔案執行相容
 * `新增` `ocr` 預設按 ML Kit/Paddle/Rapid 順序動態選擇引擎; `ocr.mode` 返回選中的引擎或空字串, 顯式模式保持固定, 可透過 `mode` 或 `tap` 設定 `auto`, 空字串或 nullish 值以恢復自動選擇
 * `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文本轉換/媒體信息等擴展接口
 * `新增` 插件系統提供版本化 TaggedWire 傳輸及 DEX 編譯與 AI Provider 文本生成 v1 開發協議包, 並配備專用的一致性測試應用程式及惡意場景夾具

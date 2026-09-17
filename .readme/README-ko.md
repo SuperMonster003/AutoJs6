@@ -245,6 +245,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 독립 Lua Runtime 플러그인 백엔드에서 로컬 .lua 파일을 별도의 PUC Lua 5.4.8 플러그인 프로세스에서 실행하고 고정 컴포넌트/서명/프로토콜/ABI 검증, 제한된 실행, JavaScript 폴백 금지를 지원
 * `추가` Java/Kotlin용 독립 JVM Source Runtime 플러그인 백엔드에서 단일 .java/.kt 파일을 격리 프로세스로 컴파일 및 실행하고 package/import, 실시간 console 출력, 취소 가능한 sleep, 호스트 toast, 명시적 capability 협상을 지원
 * `추가` JVM Source Runtime 지원 범위는 단일 파일 Java 8 (Java provider 최소 API 24) 및 Kotlin 2.3 (Kotlin provider 최소 API 26)이며, 이번 릴리스의 실제 기기 smoke는 API 31/arm64-v8a에서만 수행했고 검증하지 않은 API 수준은 지원을 주장하지 않음
+* `추가` JVM Source Runtime 명시적 실행은 Protocol 1.6 / Entry API 4를 통해 제한된 JSON 인수, 개별 승인 클립보드 접근, 다중 파일 Java 소스 패키지와 지정 진입 클래스, 안전한 런타임 예외 위치 및 실행 관측을 지원; 기존 Protocol 1.1 / Entry API 2 플러그인은 단일 파일 실행 호환성을 유지
 * `추가` `ocr`이 기본적으로 ML Kit/Paddle/Rapid 순서로 엔진을 동적으로 선택; `ocr.mode`는 선택된 엔진 또는 빈 문자열을 반환하고, 명시적 모드는 고정되며, `mode` 또는 `tap`에 `auto`, 빈 문자열 또는 nullish 값을 설정하면 자동 선택 복원
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/텍스트 변환/미디어 정보 등의 확장 API 지원
 * `추가` 플러그인 시스템에서 버전 지정 TaggedWire 전송과 DEX 컴파일/AI Provider 텍스트 생성을 위한 v1 개발 프로토콜 팩을 지원하고 전용 적합성 테스트 앱 및 적대적 fixture 제공

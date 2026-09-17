@@ -3,6 +3,7 @@ package org.autojs.plugin.jvmsource.api
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -25,7 +26,9 @@ class JvmSourceCodecRoundTripTest {
 
     @Test
     fun roundTripsRequestAndProgressMetadata() {
-        val request = JvmSourceFixtures.request()
+        val request = JvmSourceFixtures.request(
+            argsJson = "{\"count\":2,\"nested\":[true,null]}",
+        )
         assertEquals(
             request,
             JvmSourceCodec.decodeRequest(JvmSourceCodec.encodeRequest(request)),
@@ -58,6 +61,11 @@ class JvmSourceCodecRoundTripTest {
             diagnostic,
             JvmSourceCodec.decodeDiagnostic(JvmSourceCodec.encodeDiagnostic(diagnostic)),
         )
+        val packageDiagnostic = diagnostic.copy(sourceFileName = "demo/Helper.java")
+        assertEquals(
+            packageDiagnostic,
+            JvmSourceCodec.decodeDiagnostic(JvmSourceCodec.encodeDiagnostic(packageDiagnostic)),
+        )
     }
 
     @Test
@@ -86,6 +94,7 @@ class JvmSourceCodecRoundTripTest {
             compilationElapsedMillis = 120L,
             executionElapsedMillis = 30L,
             elapsedMillis = 160L,
+            observation = JvmSourceFixtures.observation(),
         )
         assertEquals(
             result,
@@ -98,6 +107,7 @@ class JvmSourceCodecRoundTripTest {
             JvmSourceFailurePhase.COMPILATION,
             "ECJ rejected the source",
             retryable = false,
+            observation = JvmSourceFixtures.observation(),
         )
         val decodedError = JvmSourceCodec.decodeError(JvmSourceCodec.encodeError(error))
         assertEquals(error, decodedError)
@@ -108,11 +118,28 @@ class JvmSourceCodecRoundTripTest {
             JvmCancellationReason.REQUESTED,
             JvmSourceFailurePhase.EXECUTION,
             elapsedMillis = 42L,
+            observation = JvmSourceFixtures.observation(),
         )
         assertEquals(
             cancellation,
             JvmSourceCodec.decodeCancellation(JvmSourceCodec.encodeCancellation(cancellation)),
         )
+    }
+
+    @Test
+    fun roundTripsStandaloneObservationAndFreezesResourceList() {
+        val mutableResources = JvmSourceFixtures.observation().resources.toMutableList()
+        val observation = JvmSourceFixtures.observation(resources = mutableResources)
+        mutableResources.clear()
+
+        assertEquals(2, observation.resources.size)
+        assertEquals(
+            observation,
+            JvmSourceCodec.decodeObservation(JvmSourceCodec.encodeObservation(observation)),
+        )
+        assertThrows(UnsupportedOperationException::class.java) {
+            (observation.resources as MutableList<JvmSourceResourceObservation>).clear()
+        }
     }
 
     @Test

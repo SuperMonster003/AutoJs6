@@ -130,6 +130,7 @@ data class JvmSourceDiagnostic(
     val sourceFileName: String? = null,
     val line: Int? = null,
     val column: Int? = null,
+    val runtimeExceptionClassName: String? = null,
 )
 
 /** A request pinned to the exact toolchain advertised during negotiation. */
@@ -149,6 +150,10 @@ class JvmSourceRequest(
     val diagnosticByteLimit: Int,
     allowedHostCalls: List<String> = emptyList(),
     grantedCapabilities: List<JvmScriptCapability> = emptyList(),
+    val argsJson: String = "{}",
+    val sourcePayloadKind: JvmSourcePayloadKind = JvmSourcePayloadKind.SINGLE_FILE,
+    val sourceFileCount: Int = 1,
+    val sourceContentBytes: Long = sourceSizeBytes,
 ) {
     val allowedHostCalls: List<String> = defensiveList(allowedHostCalls)
     val grantedCapabilities: List<JvmScriptCapability> = defensiveList(grantedCapabilities)
@@ -169,6 +174,10 @@ class JvmSourceRequest(
         diagnosticByteLimit: Int = this.diagnosticByteLimit,
         allowedHostCalls: List<String> = this.allowedHostCalls,
         grantedCapabilities: List<JvmScriptCapability> = this.grantedCapabilities,
+        argsJson: String = this.argsJson,
+        sourcePayloadKind: JvmSourcePayloadKind = this.sourcePayloadKind,
+        sourceFileCount: Int = this.sourceFileCount,
+        sourceContentBytes: Long = this.sourceContentBytes,
     ): JvmSourceRequest = JvmSourceRequest(
         requestId,
         protocolVersion,
@@ -185,6 +194,10 @@ class JvmSourceRequest(
         diagnosticByteLimit,
         allowedHostCalls,
         grantedCapabilities,
+        argsJson,
+        sourcePayloadKind,
+        sourceFileCount,
+        sourceContentBytes,
     )
 
     override fun equals(other: Any?): Boolean = other is JvmSourceRequest &&
@@ -202,7 +215,11 @@ class JvmSourceRequest(
         maxStderrBytes == other.maxStderrBytes &&
         diagnosticByteLimit == other.diagnosticByteLimit &&
         allowedHostCalls == other.allowedHostCalls &&
-        grantedCapabilities == other.grantedCapabilities
+        grantedCapabilities == other.grantedCapabilities &&
+        argsJson == other.argsJson &&
+        sourcePayloadKind == other.sourcePayloadKind &&
+        sourceFileCount == other.sourceFileCount &&
+        sourceContentBytes == other.sourceContentBytes
 
     override fun hashCode(): Int {
         var result = requestId.hashCode()
@@ -219,7 +236,11 @@ class JvmSourceRequest(
         result = 31 * result + maxStderrBytes.hashCode()
         result = 31 * result + diagnosticByteLimit
         result = 31 * result + allowedHostCalls.hashCode()
-        return 31 * result + grantedCapabilities.hashCode()
+        result = 31 * result + grantedCapabilities.hashCode()
+        result = 31 * result + argsJson.hashCode()
+        result = 31 * result + sourcePayloadKind.hashCode()
+        result = 31 * result + sourceFileCount
+        return 31 * result + sourceContentBytes.hashCode()
     }
 
     override fun toString(): String =
@@ -228,7 +249,10 @@ class JvmSourceRequest(
             "expectedToolchainFingerprint=$expectedToolchainFingerprint, entryClassName=$entryClassName, " +
             "minApi=$minApi, timeoutMillis=$timeoutMillis, maxStdoutBytes=$maxStdoutBytes, " +
             "maxStderrBytes=$maxStderrBytes, diagnosticByteLimit=$diagnosticByteLimit, " +
-            "allowedHostCalls=$allowedHostCalls, grantedCapabilities=$grantedCapabilities)"
+            "allowedHostCalls=$allowedHostCalls, grantedCapabilities=$grantedCapabilities, " +
+            "argsJsonUtf8Bytes=${argsJson.toByteArray(Charsets.UTF_8).size}, " +
+            "sourcePayloadKind=$sourcePayloadKind, sourceFileCount=$sourceFileCount, " +
+            "sourceContentBytes=$sourceContentBytes)"
 }
 
 /**
@@ -260,6 +284,7 @@ data class JvmSourceResult(
     val compilationElapsedMillis: Long,
     val executionElapsedMillis: Long,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmSourceError(
@@ -268,6 +293,7 @@ data class JvmSourceError(
     val phase: JvmSourceFailurePhase,
     val message: String,
     val retryable: Boolean,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmSourceCancellation(
@@ -275,6 +301,7 @@ data class JvmSourceCancellation(
     val reason: JvmCancellationReason,
     val phase: JvmSourceFailurePhase,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation? = null,
 )
 
 data class JvmHostCall(

@@ -38,11 +38,20 @@ internal object JvmSourceR1Policy {
         }
     }
 
-    fun inspect(kind: JvmSourceKind, source: ByteArray): JvmSourceR1Layout = when (kind) {
-        JvmSourceKind.JAVA -> JvmSourceR1JavaPolicy.inspect(source).let {
+    fun inspect(
+        kind: JvmSourceKind,
+        source: ByteArray,
+        entrySimpleName: String = ENTRY_SIMPLE_NAME,
+    ): JvmSourceR1Layout = when (kind) {
+        JvmSourceKind.JAVA -> JvmSourceR1JavaPolicy.inspect(source, entrySimpleName).let {
             JvmSourceR1Layout(it.sourceFileName, it.entryClassName)
         }
-        JvmSourceKind.KOTLIN -> inspectKotlin(source)
+        JvmSourceKind.KOTLIN -> {
+            require(entrySimpleName == ENTRY_SIMPLE_NAME) {
+                "Explicit non-default entry names currently admit Java sources only"
+            }
+            inspectKotlin(source)
+        }
     }
 
     private fun inspectKotlin(bytes: ByteArray): JvmSourceR1Layout {

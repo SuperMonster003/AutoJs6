@@ -13,11 +13,24 @@ object JvmSourceContract {
     const val ENGINE_ID = "jvm-source"
 
     const val PROTOCOL_MAJOR = 1
-    const val PROTOCOL_MINOR = 1
-    const val ENTRY_API_VERSION = 2
+    const val PROTOCOL_MINOR = 6
+    const val ENTRY_API_VERSION = 4
+    const val MIN_SUPPORTED_ENTRY_API_VERSION = 2
+
+    @JvmField
+    val ARGS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 3)
+
+    @JvmField
+    val RUNTIME_EXCEPTION_CLASS_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 4)
+
+    @JvmField
+    val OBSERVATION_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 5)
+
+    @JvmField
+    val SOURCE_PACKAGE_PROTOCOL_VERSION = JvmProtocolVersion(PROTOCOL_MAJOR, 6)
 
     const val SCHEMA_MAJOR = 1
-    const val SCHEMA_MINOR = 1
+    const val SCHEMA_MINOR = 3
     const val SCHEMA_PROVIDER_INFO = 0x0301
     const val SCHEMA_CAPABILITIES = 0x0302
     const val SCHEMA_STARTED = 0x0310
@@ -26,6 +39,8 @@ object JvmSourceContract {
     const val SCHEMA_RESULT = 0x0313
     const val SCHEMA_ERROR = 0x0314
     const val SCHEMA_CANCELLATION = 0x0315
+    const val SCHEMA_OBSERVATION = 0x0316
+    const val SCHEMA_RESOURCE_OBSERVATION = 0x0317
     const val SCHEMA_HOST_CALL = 0x0320
     const val SCHEMA_HOST_RESPONSE = 0x0321
 
@@ -36,10 +51,17 @@ object JvmSourceContract {
     const val MIN_ANDROID_API = 24
     const val MAX_METADATA_BYTES = 128 * 1024
     const val MAX_SOURCE_BYTES = 4L * 1024L * 1024L
+    const val MAX_SOURCE_ARCHIVE_BYTES = MAX_SOURCE_BYTES + 64L * 1024L
+    const val MAX_SOURCE_PAYLOAD_BYTES = MAX_SOURCE_ARCHIVE_BYTES
+    const val MAX_SOURCE_FILES = 32
+    const val MAX_SOURCE_PATH_BYTES = 240
+    const val MAX_SOURCE_PACKAGE_DEPTH = 16
+    const val MAX_SOURCE_MANIFEST_BYTES = 16 * 1024
     const val MAX_STDOUT_BYTES = 1024L * 1024L
     const val MAX_STDERR_BYTES = 1024L * 1024L
     const val MAX_DIAGNOSTIC_BYTES = 64 * 1024
     const val MAX_RESULT_JSON_BYTES = 64 * 1024
+    const val MAX_ARGS_JSON_BYTES = MAX_RESULT_JSON_BYTES
     const val MAX_HOST_PAYLOAD_BYTES = 64 * 1024
     const val MAX_CLASS_ARTIFACT_BYTES = 20L * 1024L * 1024L
     const val MAX_DEX_ARTIFACT_BYTES = 32L * 1024L * 1024L
@@ -50,15 +72,34 @@ object JvmSourceContract {
     const val MAX_ERROR_CODE_BYTES = 128
     const val MAX_ERROR_MESSAGE_CODE_POINTS = 2_048
     const val MAX_DIAGNOSTIC_MESSAGE_CODE_POINTS = 4_096
+    const val MAX_RUNTIME_EXCEPTION_CLASS_NAME_BYTES = 255
+    const val DEFAULT_TIMEOUT_MILLIS = 30_000L
+    const val MAX_TIMEOUT_MILLIS = 120_000L
+    const val MAX_OBSERVATION_BYTES = 4 * 1024
+    const val MAX_OBSERVATION_RESOURCE_SAMPLES = 6
+    const val MAX_OBSERVATION_SESSION_ELAPSED_MILLIS = MAX_TIMEOUT_MILLIS + 60_000L
+    const val MAX_OBSERVATION_PHASE_DURATION_MILLIS = MAX_TIMEOUT_MILLIS + 10_000L
+    const val MAX_OBSERVATION_TERMINATION_DURATION_MILLIS =
+        MAX_OBSERVATION_PHASE_DURATION_MILLIS * 2L
+    const val MAX_OBSERVATION_RSS_BYTES = 8L * 1024L * 1024L * 1024L
+    const val MAX_OBSERVATION_OPEN_FILE_DESCRIPTORS = 32_768
+    const val MAX_OBSERVATION_TEMPORARY_STORAGE_BYTES =
+        MAX_SOURCE_PAYLOAD_BYTES + MAX_CLASS_ARTIFACT_BYTES + MAX_DEX_ARTIFACT_BYTES
+    const val MAX_OBSERVATION_OUTPUT_BYTES = MAX_STDOUT_BYTES + MAX_STDERR_BYTES
+    const val USER_RUNTIME_EXCEPTION_CLASS_NAME = "UserException"
     const val MAX_HOST_METHOD_BYTES = 128
     const val MAX_PROCESS_NAME_BYTES = 256
     const val MAX_ALLOWED_HOST_CALLS = 32
     const val MAX_SCRIPT_CAPABILITIES = 32
     const val MAX_TOAST_MESSAGE_BYTES = 8 * 1024
+    const val MAX_CLIPBOARD_TEXT_BYTES = 16 * 1024
     const val MAX_JSON_DEPTH = 64
-    const val DEFAULT_TIMEOUT_MILLIS = 30_000L
-    const val MAX_TIMEOUT_MILLIS = 120_000L
     const val MAX_CONCURRENT_SESSIONS = 1
+}
+
+enum class JvmSourcePayloadKind(val wireName: String) {
+    SINGLE_FILE("single-file"),
+    SOURCE_ARCHIVE("source-archive"),
 }
 
 data class JvmProtocolVersion(
@@ -109,6 +150,8 @@ enum class JvmScriptCapability(
     val hostMethod: String? = null,
 ) {
     APP_LAUNCH("app.launch", "app.launch"),
+    CLIPBOARD_READ("clipboard.read", "clipboard.get"),
+    CLIPBOARD_WRITE("clipboard.write", "clipboard.set"),
     CONSOLE_STREAM("console.stream"),
     SLEEP("runtime.sleep"),
     TOAST("toast.show", "toast.show"),
@@ -254,13 +297,16 @@ object JvmToolchainFingerprint {
     private const val DOMAIN = "org.autojs.jvm-source.toolchain"
 
     @JvmStatic
+    @JvmOverloads
     fun compute(
         language: JvmSourceLanguage,
         sourceCompilerFamily: JvmSourceCompilerFamily,
         sourceCompilerVersion: String,
         d8Version: String,
         runtimeLibraryFingerprint: JvmSha256,
+        entryApiVersion: Int = JvmSourceContract.ENTRY_API_VERSION,
     ): JvmSha256 {
+        require(entryApiVersion in JvmSourceContract.MIN_SUPPORTED_ENTRY_API_VERSION..JvmSourceContract.ENTRY_API_VERSION)
         val digest = MessageDigest.getInstance("SHA-256")
 
         fun add(value: ByteArray) {
@@ -277,7 +323,7 @@ object JvmToolchainFingerprint {
 
         add(DOMAIN)
         add(JvmSourceContract.PROTOCOL_MAJOR.toString())
-        add(JvmSourceContract.ENTRY_API_VERSION.toString())
+        add(entryApiVersion.toString())
         add(language.wireName)
         add(sourceCompilerFamily.wireName)
         add(sourceCompilerVersion)

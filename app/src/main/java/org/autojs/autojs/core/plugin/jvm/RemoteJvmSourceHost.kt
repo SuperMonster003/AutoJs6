@@ -5,6 +5,7 @@ import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.JvmSourceKind
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.plugin.jvmsource.api.JvmIsolationCapability
+import org.autojs.plugin.jvmsource.api.JvmJsonArguments
 import org.autojs.plugin.jvmsource.api.JvmProviderInfo
 import org.autojs.plugin.jvmsource.api.JvmRequestId
 import org.autojs.plugin.jvmsource.api.JvmScriptCapability
@@ -17,6 +18,8 @@ import org.autojs.plugin.jvmsource.api.JvmSourceDiagnostic
 import org.autojs.plugin.jvmsource.api.JvmSourceError
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 import org.autojs.plugin.jvmsource.api.JvmSourceNegotiation
+import org.autojs.plugin.jvmsource.api.JvmSourceObservation
+import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
 import org.autojs.plugin.jvmsource.api.JvmSourceRequest
 import org.autojs.plugin.jvmsource.api.JvmSourceResult
 import org.autojs.plugin.jvmsource.api.JvmSourceStarted
@@ -42,6 +45,11 @@ data class RemoteJvmScriptResult(
     val requestSha256: String,
     val sourceSizeBytes: Long,
     val sourceSha256: String,
+    val sourceFileName: String,
+    val entryClassName: String,
+    val sourcePayloadKind: String,
+    val sourceFileCount: Int,
+    val sourceContentBytes: Long,
     val resultJson: String,
     val resultSha256: String,
     val stdout: String,
@@ -87,6 +95,7 @@ data class RemoteJvmScriptResult(
     val compilationElapsedMillis: Long,
     val executionElapsedMillis: Long,
     val elapsedMillis: Long,
+    val observation: JvmSourceObservation?,
     val allowlistedBridgeOperationCount: Int,
     val rejectedBridgeOperationCount: Int,
     val hostBridgeCallerPids: List<Int>,
@@ -152,6 +161,8 @@ internal class RemoteJvmSourceHost(
     private val hostIdentity: JvmSourceHostProcessIdentity,
     private val launchPackage: (String) -> Boolean,
     private val showToast: (String) -> Unit = {},
+    private val readClipboard: () -> String = { "" },
+    private val writeClipboard: (String) -> Unit = {},
     private val ownedExecutors: List<ExecutorService> = emptyList(),
     private val providerRetirementTimeoutMillis: Long = PROVIDER_CANCELLATION_ACK_TIMEOUT_MILLIS,
 ) : Closeable {
@@ -168,10 +179,12 @@ internal class RemoteJvmSourceHost(
         source: JvmFileSource,
         control: JvmSourceExecutionControl,
         sink: JvmSourceExecutionSink = JvmSourceExecutionSink.NONE,
+        argsJson: String = "{}",
     ): RemoteJvmScriptResult {
         require(JvmSourceExplicitRunner.isAuthorized(source)) {
             "JVM source execution requires runJvmSourceExplicit; generic script execution is not authorized"
         }
+        JvmJsonArguments.decode(argsJson)
         JvmSourceR1Policy.requireSupportedFileName(source.sourceKind, source.file.name)
         val language = JvmSourceR1Policy.language(source.sourceKind)
         when (executionGate.tryAcquire(control)) {
@@ -185,7 +198,7 @@ internal class RemoteJvmSourceHost(
                 throw RemoteJvmSourceException("JVM source host is closed")
         }
         try {
-            return executeOne(source, language, control, sink)
+            return executeOne(source, language, control, sink, argsJson)
         } finally {
             check(executionGate.release(control))
         }
@@ -203,6 +216,7 @@ internal class RemoteJvmSourceHost(
         language: JvmSourceLanguage,
         control: JvmSourceExecutionControl,
         sink: JvmSourceExecutionSink,
+        argsJson: String,
     ): RemoteJvmScriptResult {
         if (!featureEnabled) {
             throw RemoteJvmSourceException(
@@ -309,8 +323,26 @@ internal class RemoteJvmSourceHost(
         }
         try {
             ensureActive(control)
+            val packageInput = JvmSourceExplicitRunner.packageInput(source)
+            val entrySimpleName = requireNotNull(JvmSourceExplicitRunner.entrySimpleName(source)) {
+                "Authorized JVM source omitted its entry selection"
+            }
             val inputSnapshot = try {
-                artifactStore.snapshotSource(source.file, JvmSourceContract.MAX_SOURCE_BYTES)
+                if (packageInput == null) {
+                    artifactStore.snapshotSource(
+                        source.file,
+                        JvmSourceContract.MAX_SOURCE_BYTES,
+                        entrySimpleName,
+                    )
+                } else {
+                    require(language == JvmSourceLanguage.JAVA) { "Source packages currently admit Java only" }
+                    artifactStore.snapshotSourcePackage(
+                        packageInput.sourceRoot,
+                        packageInput.entryFile,
+                        JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES,
+                        entrySimpleName,
+                    )
+                }
             } catch (error: IllegalArgumentException) {
                 throw RemoteJvmSourceException(
                     "JVM source failed host input policy",
@@ -319,7 +351,11 @@ internal class RemoteJvmSourceHost(
                 )
             }
             snapshot = inputSnapshot
-            require(inputSnapshot.sizeBytes in 1L..JvmSourceContract.MAX_SOURCE_BYTES)
+            val maximumPayloadBytes = when (inputSnapshot.sourcePayloadKind) {
+                JvmSourcePayloadKind.SINGLE_FILE -> JvmSourceContract.MAX_SOURCE_BYTES
+                JvmSourcePayloadKind.SOURCE_ARCHIVE -> JvmSourceContract.MAX_SOURCE_ARCHIVE_BYTES
+            }
+            require(inputSnapshot.sizeBytes in 1L..maximumPayloadBytes)
             require(inputSnapshot.language == language) { "JVM source snapshot language changed during admission" }
             val candidates = JvmSourceProviderLanguagePolicy.matching(
                 transport.discoverExactAction(JvmSourceContract.SERVICE_ACTION),
@@ -391,7 +427,7 @@ internal class RemoteJvmSourceHost(
             }
             requireNoFatalTransportEvent()
             val negotiated = validateHandshake(identity, handshake, language)
-            val request = request(inputSnapshot, handshake.capabilities, negotiated)
+            val request = request(inputSnapshot, handshake.capabilities, negotiated, argsJson)
             val encodedRequest = JvmSourceCodec.encodeRequest(request).requireMetadataSize()
             val requestSha256 = JvmSha256.digest(encodedRequest).toHexString()
             val collector = CallbackCollector(request, handshake.info, handshake.capabilities, identity)
@@ -406,6 +442,8 @@ internal class RemoteJvmSourceHost(
                 allowedMethods = request.allowedHostCalls,
                 launchPackage = launchPackage,
                 showToast = showToast,
+                readClipboard = readClipboard,
+                writeClipboard = writeClipboard,
                 onViolation = collector::protocolViolation,
             )
             bridge = hostBridge
@@ -479,6 +517,13 @@ internal class RemoteJvmSourceHost(
             publishDiagnostics()
             publishUnstreamedOutput(stdout, stderr)
             requireNoFatalTransportEvent()
+            val terminalObservation = when (terminal) {
+                is Terminal.Completed -> terminal.result.observation
+                is Terminal.Failed -> terminal.error.observation
+                is Terminal.Cancelled -> terminal.cancellation.observation
+            }
+            // Callback admission enforces presence for Protocol 1.5+ and absence for older peers.
+            terminalObservation?.let { runCatching { sink.publishObservation(it) } }
             if (executionTimedOut) throw RemoteJvmSourceException(
                 "JVM source execution timed out",
                 userFailure = JvmSourceUserExperiencePolicy.timeout(),
@@ -496,6 +541,11 @@ internal class RemoteJvmSourceHost(
                         requestSha256 = requestSha256,
                         sourceSizeBytes = inputSnapshot.sizeBytes,
                         sourceSha256 = inputSnapshot.sha256Hex,
+                        sourceFileName = request.sourceFileName,
+                        entryClassName = request.entryClassName,
+                        sourcePayloadKind = inputSnapshot.sourcePayloadKind.wireName,
+                        sourceFileCount = inputSnapshot.sourceFileCount,
+                        sourceContentBytes = inputSnapshot.sourceContentBytes,
                         resultJson = terminal.result.resultJson,
                         resultSha256 = JvmSha256.digest(
                             terminal.result.resultJson.toByteArray(Charsets.UTF_8),
@@ -543,6 +593,7 @@ internal class RemoteJvmSourceHost(
                         compilationElapsedMillis = terminal.result.compilationElapsedMillis,
                         executionElapsedMillis = terminal.result.executionElapsedMillis,
                         elapsedMillis = terminal.result.elapsedMillis,
+                        observation = terminalObservation,
                         allowlistedBridgeOperationCount = bridgeStats.allowlistedOperationCount,
                         rejectedBridgeOperationCount = bridgeStats.rejectedOperationCount,
                         hostBridgeCallerPids = bridgeCallerPids.sorted(),
@@ -705,7 +756,7 @@ internal class RemoteJvmSourceHost(
             "Provider version differs from pinned package identity"
         }
         JvmSourceValidation.validateProviderInfo(handshake.info)
-        JvmSourceValidation.validateCapabilities(handshake.capabilities)
+        JvmSourceValidation.validateCapabilities(handshake.capabilities, handshake.info.entryApiVersion)
         val isolation = handshake.capabilities.isolationCapabilities.toSet()
         val current = transport.inspectExact(identity.component)
         val gate = JvmSourceExperimentalGate.decide(
@@ -739,6 +790,7 @@ internal class RemoteJvmSourceHost(
         snapshot: JvmSourceInputSnapshot,
         capabilities: JvmSourceCapabilities,
         protocolVersion: org.autojs.plugin.jvmsource.api.JvmProtocolVersion,
+        argsJson: String,
     ): JvmSourceRequest {
         val request = JvmSourceRequest(
             requestId = JvmRequestId.fromUuid(UUID.randomUUID()),
@@ -756,6 +808,10 @@ internal class RemoteJvmSourceHost(
             diagnosticByteLimit = minOf(JvmSourceContract.MAX_DIAGNOSTIC_BYTES, capabilities.maxDiagnosticBytes),
             allowedHostCalls = capabilities.scriptCapabilities.mapNotNull(JvmScriptCapability::hostMethod),
             grantedCapabilities = capabilities.scriptCapabilities,
+            argsJson = argsJson,
+            sourcePayloadKind = snapshot.sourcePayloadKind,
+            sourceFileCount = snapshot.sourceFileCount,
+            sourceContentBytes = snapshot.sourceContentBytes,
         )
         JvmSourceValidation.validateRequestAgainst(request, capabilities, protocolVersion)
         return request
@@ -936,8 +992,7 @@ internal class RemoteJvmSourceHost(
             diagnostic,
             JvmSourceCodec::decodeDiagnostic,
         ) { value ->
-            JvmSourceValidation.validateDiagnostic(value)
-            accept(value.requestId == request.requestId, "Diagnostic request ID differs")
+            JvmSourceValidation.validateDiagnosticAgainst(value, request)
             accept(lifecycle.acceptDiagnostic(diagnostic.size), "Invalid or over-quota diagnostic")
             synchronized(diagnosticValues) {
                 diagnosticValues += JvmSourcePublicDiagnosticPolicy.sanitize(value)
@@ -949,6 +1004,7 @@ internal class RemoteJvmSourceHost(
             bridgeCallerPids: Set<Int>,
         ) = decode(result, JvmSourceCodec::decodeResult) { value ->
             JvmSourceValidation.validateResultAgainstRuntime(value, request, hostRuntimeApi)
+            JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
             accept(bridgeCallerPids.all { it > 0 }, "Host bridge caller PID is invalid")
             accept(
                 bridgeCallerPidValues.compareAndSet(null, bridgeCallerPids.toSet()),
@@ -962,6 +1018,7 @@ internal class RemoteJvmSourceHost(
         override fun onFailed(error: ByteArray) = decode(error, JvmSourceCodec::decodeError) { value ->
             JvmSourceValidation.validateError(value)
             accept(value.requestId == request.requestId, "Error request ID differs")
+            JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
             accept(lifecycle.acceptFailed(), "Invalid onFailed ordering")
             retirement.complete(ProviderRetirement.VALID_TERMINAL)
             accept(terminal.complete(Terminal.Failed(value)), "Terminal callback was already recorded")
@@ -972,6 +1029,7 @@ internal class RemoteJvmSourceHost(
                 val value = JvmSourceCodec.decodeCancellation(cancellation.requireMetadataSize())
                 JvmSourceValidation.validateCancellation(value)
                 accept(value.requestId == request.requestId, "Cancellation request ID differs")
+                JvmSourceValidation.validateTerminalObservationAgainst(value.observation, request)
                 if (tryAcceptQuarantineCancellation()) return
                 val lifecycleAccepted = lifecycle.acceptCancelled()
                 if (!lifecycleAccepted && tryAcceptQuarantineCancellation()) return
@@ -1070,6 +1128,7 @@ internal class RemoteJvmSourceHost(
             featureEnabled: Boolean,
             hostVersionCode: Long,
             launchPackage: (String) -> Boolean,
+            hasResumedActivity: () -> Boolean,
         ): RemoteJvmSourceHost {
             val drains = java.util.concurrent.Executors.newFixedThreadPool(
                 2,
@@ -1085,6 +1144,7 @@ internal class RemoteJvmSourceHost(
                 ThreadPoolExecutor.AbortPolicy(),
             )
             val transport = AndroidJvmSourceTransport(context)
+            val clipboard = AndroidJvmClipboardActions(context, hasResumedActivity)
             return RemoteJvmSourceHost(
                 transport = transport,
                 artifactStore = AndroidJvmSourceArtifactStore(context, drains),
@@ -1102,6 +1162,8 @@ internal class RemoteJvmSourceHost(
                 ),
                 launchPackage = launchPackage,
                 showToast = { message -> ViewUtils.showToast(context.applicationContext, message) },
+                readClipboard = clipboard::getText,
+                writeClipboard = clipboard::setText,
                 ownedExecutors = listOf(drains, binderCalls),
             )
         }
