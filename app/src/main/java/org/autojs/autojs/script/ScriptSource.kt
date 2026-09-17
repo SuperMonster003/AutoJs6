@@ -32,10 +32,10 @@ abstract class ScriptSource @JvmOverloads constructor(
     val fullPath: String
         get() = originPath ?: originUri ?: toString()
 
-    open val elegantPath: String
+    val elegantPath: String
         get() {
-            val niceFullPath = overriddenFullPath?.let { "$it [cache]" } ?: fullPath
-            return PFiles.getElegantPath(niceFullPath, WorkingDirectoryUtils.path, true)
+            val displayPath = PFiles.getElegantPath(fullPath, WorkingDirectoryUtils.path, true)
+            return if (overriddenFullPath != null) "$displayPath [cache]" else displayPath
         }
 
     abstract val engineName: String?

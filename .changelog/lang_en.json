@@ -440,6 +440,7 @@
         "Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons",
         "Creating or resuming a session from the terminal manager opens a terminal activity while preserving the manager for Back navigation; tapping the directory subtitle copies its full path instead of using a Copy home path menu item",
         "Time visibility and format are remembered independently for the editor log panel, log activity, globalconsole element, console element and floating console; time is shown by default on the two log pages and hidden on the other three surfaces",
+        "Task lists and script start/finish logs consistently abbreviate known roots as $cwd, $sdcard, $sample, $files, $cache and $data while retaining actual entry names and extensions; directory matching respects component boundaries and trailing separators",
         "The MCP Server drawer entry uses the MCP protocol icon with slightly thicker strokes, with size and tint matching the other entries",
         "Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically",
         "Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout",

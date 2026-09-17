@@ -544,40 +544,36 @@ object PFiles {
 
     @JvmStatic
     fun getElegantPath(path: String, workingDirectory: String?, hasPrefix: Boolean): String {
-        if (workingDirectory != null && path.startsWith(workingDirectory)) {
-            return (if (hasPrefix) "\$cwd" else "") + path.substring(workingDirectory.length)
+        fun shorten(directory: String?, label: String): String? {
+            return relativePathWithin(path, directory)?.let { (if (hasPrefix) label else "") + it }
         }
-        if (path.startsWith(EnvironmentUtils.externalStoragePath)) {
-            return (if (hasPrefix) "\$sdcard" else "") + path.substring(EnvironmentUtils.externalStoragePath.length)
-        }
+
+        shorten(workingDirectory, "\$cwd")?.let { return it }
+        shorten(EnvironmentUtils.externalStoragePath, "\$sdcard")?.let { return it }
 
         val filesPrefix = sGlobalAppContext.filesDir.path
         val samplePrefix = filesPrefix + separator + "sample"
-
-        if (path.startsWith(samplePrefix)) {
-            return (if (hasPrefix) "\$sample" else "") + path.substring(samplePrefix.length)
-        }
-        if (path.startsWith(filesPrefix)) {
-            return (if (hasPrefix) "\$files" else "") + path.substring(filesPrefix.length)
-        }
-
-        val cachePrefix = sGlobalAppContext.cacheDir.path
-
-        if (isCachePrefix(path)) {
-            return (if (hasPrefix) "\$cache" else "") + path.substring(cachePrefix.length)
-        }
-
-        val dataPrefix = sGlobalAppContext.dataDir.path
-
-        if (path.startsWith(dataPrefix)) {
-            return (if (hasPrefix) "\$data" else "") + path.substring(dataPrefix.length)
-        }
-
+        shorten(samplePrefix, "\$sample")?.let { return it }
+        shorten(filesPrefix, "\$files")?.let { return it }
+        shorten(sGlobalAppContext.cacheDir.path, "\$cache")?.let { return it }
+        shorten(sGlobalAppContext.dataDir.path, "\$data")?.let { return it }
         return path
     }
 
+    /** Matches complete directory components, retaining the separator before a child path. */
+    internal fun relativePathWithin(path: String, directory: String?): String? {
+        if (directory.isNullOrEmpty()) return null
+        val root = directory.trimEnd('/').ifEmpty { "/" }
+        return when {
+            path == root -> ""
+            root == "/" && path.startsWith('/') -> path
+            path.startsWith("$root/") -> path.substring(root.length)
+            else -> null
+        }
+    }
+
     @JvmStatic
-    fun isCachePrefix(path: String) = path.startsWith(sGlobalAppContext.cacheDir.path)
+    fun isCachePrefix(path: String) = relativePathWithin(path, sGlobalAppContext.cacheDir.path) != null
 
     @JvmStatic
     fun readBytes(path: String?): ByteArray {

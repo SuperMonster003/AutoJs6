@@ -19,9 +19,9 @@ class JavaScriptSourceTest {
             val source = NodeProjectJavaScriptFileSource(project, entry, "Project title")
             assertEquals("Project title", source.name)
             assertEquals(entry.absolutePath, source.fullPath)
-            assertEquals(entry.absolutePath, source.elegantPath)
+            assertEquals(entry.absolutePath, source.toString())
             source.overriddenFullPath = File(project, "original/$relative").absolutePath
-            assertEquals("${source.overriddenFullPath} [cache]", source.elegantPath)
+            assertEquals(source.overriddenFullPath, source.fullPath)
         }
     }
 

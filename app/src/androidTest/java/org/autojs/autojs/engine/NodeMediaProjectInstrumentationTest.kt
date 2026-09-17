@@ -7,7 +7,9 @@ import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
+import org.autojs.autojs.ui.main.task.Task
 import org.autojs.autojs.ui.log.LogActivity
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeNotNull
@@ -35,12 +37,15 @@ class NodeMediaProjectInstrumentationTest {
         assertTrue("Missing sample entry: $entry", entry.isFile)
         assertEquals(entry.canonicalFile, NodeProjectRunner.resolveProjectEntryFileIfNodeProject(projectDir)?.canonicalFile)
         val launch = ScriptLaunchSourceFactory.createProjectEntryLaunch(projectDir, entry)
-        assertEquals(entry.absolutePath, launch.source.elegantPath)
+        assertEquals(entry.absolutePath, launch.source.fullPath)
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val activity = instrumentation.startActivitySync(
             Intent(instrumentation.targetContext, LogActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
+        val previousWorkingDirectory = WorkingDirectoryUtils.path
+        WorkingDirectoryUtils.path = checkNotNull(sampleRoot)
+        val expectedPath = "\$cwd/$name/main.cjs"
         val service = AutoJs.instance.scriptEngineService
         val console = service.globalConsole as ConsoleImpl
         val firstLogId = console.snapshotLogEntries().lastOrNull()?.id ?: -1
@@ -58,6 +63,8 @@ class NodeMediaProjectInstrumentationTest {
         }
         val execution = service.execute(launch.source, listener, launch.createExecutionConfig())
         try {
+            assertEquals(expectedPath, launch.source.elegantPath)
+            assertEquals(expectedPath, Task.RunningTask(instrumentation.targetContext, execution).desc)
             assertTrue("Timed out running $name", completed.await(90, TimeUnit.SECONDS))
             failure.get()?.let { throw AssertionError("$name failed", it) }
             val engine = execution.engine as NodePluginJavaScriptEngine
@@ -71,13 +78,14 @@ class NodeMediaProjectInstrumentationTest {
             var lifecycleLogs: List<String>
             do {
                 lifecycleLogs = console.snapshotLogEntries().filter { it.id > firstLogId }
-                    .map { it.content.toString() }.filter { it.contains("[${entry.absolutePath}]") }
+                    .map { it.content.toString() }.filter { it.contains("[$expectedPath]") }
                 if (lifecycleLogs.size >= 2) break
                 Thread.sleep(50)
             } while (System.currentTimeMillis() < deadline)
             assertEquals(lifecycleLogs.joinToString("\n"), 2, lifecycleLogs.size)
         } finally {
             if (completed.count != 0L) execution.engine?.forceStop()
+            WorkingDirectoryUtils.path = previousWorkingDirectory
             instrumentation.runOnMainSync { activity.finish() }
         }
     }
