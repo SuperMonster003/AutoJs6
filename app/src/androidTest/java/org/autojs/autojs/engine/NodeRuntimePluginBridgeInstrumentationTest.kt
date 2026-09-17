@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.system.Os
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
@@ -8,6 +9,7 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -178,6 +180,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                 "0",
                 result.nativeValues["embedded_script.module_provider.transport_failure_count"],
             )
+            assertNoOpenProjectFiles(workDir)
         }
     }
 
@@ -219,10 +222,18 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             "module.exports = { part: 'demo-pkg' };\n",
             StandardCharsets.UTF_8,
         )
+        val unchanged = File(workDir, "lib/helper.cjs")
+        val unchangedIdentity = Os.stat(unchanged.path)
+        val changed = File(workDir, "changed.txt").apply { writeText("before") }
+        val deleted = File(workDir, "deleted.txt").apply { writeText("delete me") }
         val mainSource = """
             "nodejs";
             const helper = require("./lib/helper.cjs");
             const demo = require("demo-pkg");
+            const fs = require("node:fs");
+            fs.writeFileSync("changed.txt", "after!");
+            fs.writeFileSync("created.txt", "created");
+            fs.unlinkSync("deleted.txt");
             console.log("plugin.project.parts=" + [helper.part, demo.part].join("+"));
         """.trimIndent()
         File(workDir, "main.cjs").writeText(mainSource, StandardCharsets.UTF_8)
@@ -242,6 +253,22 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("plugin.project.parts=helper+demo-pkg"))
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.workspace.mapped"])
+        val unchangedAfter = Os.stat(unchanged.path)
+        assertEquals("Reading a dependency must not replace its inode", unchangedIdentity.st_ino, unchangedAfter.st_ino)
+        assertEquals("Reading a dependency must not change its timestamp", unchangedIdentity.st_mtime, unchangedAfter.st_mtime)
+        assertEquals("after!", changed.readText())
+        assertEquals("created", File(workDir, "created.txt").readText())
+        assertFalse("Explicit workspace deletions must still be synchronized", deleted.exists())
+        assertNoOpenProjectFiles(workDir)
+    }
+
+    private fun assertNoOpenProjectFiles(workDir: File) {
+        val roots = setOf(workDir.absolutePath, workDir.canonicalPath).map { "$it/" }
+        val descriptors = checkNotNull(File("/proc/self/fd").listFiles())
+        val openProjectFiles = descriptors.mapNotNull { descriptor ->
+            runCatching { Os.readlink(descriptor.path) }.getOrNull()
+        }.filter { target -> roots.any(target::startsWith) }
+        assertEquals("Finished workspace/module reads must release all project descriptors", emptyList<String>(), openProjectFiles)
     }
 
     /**

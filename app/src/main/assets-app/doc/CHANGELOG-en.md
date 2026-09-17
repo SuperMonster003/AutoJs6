@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/16
+###### 2026/09/17
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -224,6 +224,8 @@
 * `Feature` VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+
 * `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
 * `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device
+* `Fix` Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files
+* `Fix` Node.js project writeback no longer replaces unchanged files, avoiding slow script completion and sluggish application response with large dependency trees
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
 * `Fix` Plugin authorization results return correctly from the main screen so a successful grant can complete the pending enable action
 * `Fix` The HTTP isInsecure / insecure option could leave certificate and hostname verification disabled for later requests; it now applies only to the current request

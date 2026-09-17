@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/16
+###### 2026/09/17
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -224,6 +224,8 @@
 * `Nuevo` Conexión de la extensión de VSCode: confirmación de emparejamiento - un dispositivo desconocido que se conecta en modo cliente debe permitirse primero en VSCode (opcionalmente recordado), mientras que los dispositivos que escanearon el código QR se confían automáticamente; requiere extensión 1.1.0+
 * `Nuevo` Modo servidor: descubrimiento en la LAN (mDNS) - al activarlo, la extensión de VSCode (1.1.0+) lista este dispositivo en su selector de conexión LAN sin escribir la dirección
 * `Nuevo` Archivos remotos de VSCode: transferencia por fragmentos - los archivos grandes se leen y escriben en fragmentos de 1 MiB con progreso mostrado en VSCode; requiere extensión 1.1.0+; fs.list puede devolver el md5 de los archivos bajo demanda para que la extensión compare archivos al traer cambios del proyecto desde el dispositivo
+* `Corrección` Fuga de descriptores de archivo al transferir espacios de trabajo y cargar módulos Node.js, que ralentizaba los scripts posteriores y el reinicio de la aplicación tras ejecutar proyectos con muchos archivos
+* `Corrección` La sincronización de proyectos Node.js ya no reemplaza archivos sin cambios, evitando lentitud al finalizar scripts y en la respuesta de la aplicación con muchas dependencias
 * `Corrección` El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana
 * `Corrección` Los resultados de autorización del plugin se transmiten correctamente desde la pantalla principal para completar la activación pendiente tras conceder el permiso
 * `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual

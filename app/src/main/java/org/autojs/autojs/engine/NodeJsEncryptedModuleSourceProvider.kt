@@ -350,6 +350,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
         }
         val expectedIdentity = FileIdentity.capture(pathStat)
 
+        var parcelDescriptor: ParcelFileDescriptor? = null
         val descriptor = try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 Os.open(
@@ -361,7 +362,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
                 ParcelFileDescriptor.open(
                     canonicalFile,
                     ParcelFileDescriptor.MODE_READ_ONLY
-                ).fileDescriptor
+                ).also { parcelDescriptor = it }.fileDescriptor
             }
         } catch (error: ErrnoException) {
             return resultForErrno(error, "Unable to open module-source path.")
@@ -374,7 +375,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
         val input = try {
             FileInputStream(descriptor)
         } catch (error: Exception) {
-            runCatching { Os.close(descriptor) }
+            runCatching { parcelDescriptor?.close() ?: Os.close(descriptor) }
             return failed(
                 message = error.message ?: "Unable to read module-source path.",
                 denialReason = "stream_open_failed",
@@ -502,6 +503,9 @@ internal class NodeJsEncryptedModuleSourceProvider(
                 message = error.message ?: "Reading encrypted module source was denied.",
                 reason = "read_denied",
             )
+        } finally {
+            // The stream borrows the descriptor on Android, including early plaintext returns.
+            runCatching { parcelDescriptor?.close() ?: Os.close(descriptor) }
         }
 
         abortResult(requestDeadline)?.let { return it }

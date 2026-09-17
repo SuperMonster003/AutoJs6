@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/16
+###### 2026/09/17
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -224,6 +224,8 @@
 * `Fonctionnalité` Connexion de l'extension VSCode : confirmation d'appairage - un appareil inconnu se connectant en mode client doit d'abord être autorisé dans VSCode (mémorisation possible), tandis que les appareils ayant scanné le QR code sont approuvés automatiquement ; extension 1.1.0+ requise
 * `Fonctionnalité` Mode serveur : découverte sur le réseau local (mDNS) - une fois activée, l'extension VSCode (1.1.0+) liste cet appareil dans son sélecteur de connexion LAN sans saisie d'adresse
 * `Fonctionnalité` Fichiers distants VSCode : transfert par morceaux - les gros fichiers sont lus et écrits par morceaux de 1 MiB avec progression affichée dans VSCode ; extension 1.1.0+ requise; fs.list peut renvoyer le md5 des fichiers à la demande pour que l'extension compare les fichiers lors de la récupération des modifications du projet depuis l'appareil
+* `Correction` Fuite de descripteurs de fichiers lors du transfert des espaces de travail et du chargement des modules Node.js, ralentissant les scripts suivants et le redémarrage après des projets contenant de nombreux fichiers
+* `Correction` La synchronisation des projets Node.js ne remplace plus les fichiers inchangés, évitant les lenteurs de fin de script et de réponse de l'application avec de nombreuses dépendances
 * `Correction` L'exemple Flow de réservation retourne false au lieu de null si une ligne de médecin ne peut pas être analysée, évitant les erreurs de conversion booléenne
 * `Correction` Les résultats des autorisations du plugin sont correctement transmis depuis l'écran principal, ce qui permet de terminer l'activation en attente après accord
 * `Correction` L'option HTTP isInsecure / insecure pouvait laisser la vérification des certificats et des noms d'hôte désactivée pour les requêtes suivantes; elle ne s'applique désormais qu'à la requête en cours

@@ -23,6 +23,7 @@ import java.util.LinkedHashSet
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
@@ -359,27 +360,32 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                                 OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                                 0,
                             )
-                            FileInputStream(descriptor).use { input ->
-                                val openedStat = Os.fstat(input.fd)
-                                if (
-                                    !OsConstants.S_ISREG(openedStat.st_mode) ||
-                                    openedStat.st_dev != stat.st_dev ||
-                                    openedStat.st_ino != stat.st_ino ||
-                                    openedDescriptorPath(input.fd) != explicit.file.absolutePath
-                                ) {
-                                    throw IOException("Node.js plugin explicit workspace input changed during open.")
-                                }
-                                val buffer = ByteArray(COPY_BUFFER_BYTES)
-                                while (true) {
-                                    val count = input.read(buffer)
-                                    if (count < 0) break
-                                    if (count == 0) continue
-                                    totalBytes += count
-                                    if (totalBytes > MAX_BYTES) {
-                                        throw IOException("Node.js plugin workspace exceeds the byte limit.")
+                            try {
+                                FileInputStream(descriptor).use { input ->
+                                    val openedStat = Os.fstat(input.fd)
+                                    if (
+                                        !OsConstants.S_ISREG(openedStat.st_mode) ||
+                                        openedStat.st_dev != stat.st_dev ||
+                                        openedStat.st_ino != stat.st_ino ||
+                                        openedDescriptorPath(input.fd) != explicit.file.absolutePath
+                                    ) {
+                                        throw IOException("Node.js plugin explicit workspace input changed during open.")
                                     }
-                                    output.write(buffer, 0, count)
+                                    val buffer = ByteArray(COPY_BUFFER_BYTES)
+                                    while (true) {
+                                        val count = input.read(buffer)
+                                        if (count < 0) break
+                                        if (count == 0) continue
+                                        totalBytes += count
+                                        if (totalBytes > MAX_BYTES) {
+                                            throw IOException("Node.js plugin workspace exceeds the byte limit.")
+                                        }
+                                        output.write(buffer, 0, count)
+                                    }
                                 }
+                            } finally {
+                                // Android's FileInputStream(FileDescriptor) does not own the fd.
+                                Os.close(descriptor)
                             }
                             output.closeEntry()
                         }
@@ -456,58 +462,93 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             val plan = inspectOutputArchive(archive, deleteEligibleInputFiles)
             var fileCount = 0
             var totalBytes = 0L
-            ZipInputStream(BufferedInputStream(FileInputStream(archive))).use { input ->
-                while (true) {
-                    val entry = input.nextEntry ?: break
-                    if (entry.name == OUTPUT_TOMBSTONE_PATH) {
-                        drainManifestEntry(input)
-                        input.closeEntry()
-                        continue
-                    }
-                    fileCount = checkedFileCount(fileCount)
-                    val relative = validatedArchivePath(entry.name)
-                    if (isEphemeralModuleSourceOutput(relative, ephemeralModuleSourceFiles)) {
-                        if (!entry.isDirectory) {
-                            totalBytes = drainArchiveEntry(input, totalBytes)
+            ZipFile(archive).use { snapshot ->
+                ZipInputStream(BufferedInputStream(FileInputStream(archive))).use { input ->
+                    while (true) {
+                        val entry = input.nextEntry ?: break
+                        if (entry.name == OUTPUT_TOMBSTONE_PATH) {
+                            drainManifestEntry(input)
+                            input.closeEntry()
+                            continue
                         }
-                        input.closeEntry()
-                        continue
-                    }
-                    val target = File(root, relative)
-                    ensureContainedTarget(root, target)
-                    if (entry.isDirectory) {
-                        ensureSafeDirectories(root, target)
-                    } else {
-                        val parent = target.parentFile
-                            ?: throw IOException("Node.js plugin workspace output has no parent.")
-                        ensureSafeDirectories(root, parent)
-                        rejectSymbolicLink(target)
-                        val temporary = File.createTempFile(".node-plugin-", ".tmp", parent)
-                        try {
-                            FileOutputStream(temporary).use { output ->
-                                val buffer = ByteArray(COPY_BUFFER_BYTES)
-                                while (true) {
-                                    val count = input.read(buffer)
-                                    if (count < 0) break
-                                    if (count == 0) continue
-                                    totalBytes += count
-                                    if (totalBytes > MAX_BYTES) {
-                                        throw IOException("Node.js plugin workspace output exceeds the byte limit.")
-                                    }
-                                    output.write(buffer, 0, count)
-                                }
+                        fileCount = checkedFileCount(fileCount)
+                        val relative = validatedArchivePath(entry.name)
+                        if (isEphemeralModuleSourceOutput(relative, ephemeralModuleSourceFiles)) {
+                            if (!entry.isDirectory) {
+                                totalBytes = drainArchiveEntry(input, totalBytes)
                             }
-                            rejectSymbolicLink(target)
-                            Os.rename(temporary.path, target.path)
-                            if (entry.time > 0L) target.setLastModified(entry.time)
-                        } finally {
-                            runCatching { temporary.delete() }
+                            input.closeEntry()
+                            continue
                         }
+                        val target = File(root, relative)
+                        ensureContainedTarget(root, target)
+                        if (entry.isDirectory) {
+                            ensureSafeDirectories(root, target)
+                        } else {
+                            val parent = target.parentFile
+                                ?: throw IOException("Node.js plugin workspace output has no parent.")
+                            ensureSafeDirectories(root, parent)
+                            rejectSymbolicLink(target)
+                            // A returned snapshot also contains every unchanged dependency. Replacing
+                            // those files triggers thousands of shared-storage writes and MediaProvider
+                            // updates even for a script that only reads its project.
+                            if (archiveEntryMatchesFile(snapshot, entry.name, target)) {
+                                totalBytes = drainArchiveEntry(input, totalBytes)
+                                input.closeEntry()
+                                continue
+                            }
+                            val temporary = File.createTempFile(".node-plugin-", ".tmp", parent)
+                            try {
+                                FileOutputStream(temporary).use { output ->
+                                    val buffer = ByteArray(COPY_BUFFER_BYTES)
+                                    while (true) {
+                                        val count = input.read(buffer)
+                                        if (count < 0) break
+                                        if (count == 0) continue
+                                        totalBytes += count
+                                        if (totalBytes > MAX_BYTES) {
+                                            throw IOException("Node.js plugin workspace output exceeds the byte limit.")
+                                        }
+                                        output.write(buffer, 0, count)
+                                    }
+                                }
+                                rejectSymbolicLink(target)
+                                Os.rename(temporary.path, target.path)
+                                if (entry.time > 0L) target.setLastModified(entry.time)
+                            } finally {
+                                runCatching { temporary.delete() }
+                            }
+                        }
+                        input.closeEntry()
                     }
-                    input.closeEntry()
                 }
             }
             plan.deletedFiles.forEach { relative -> deleteExplicitInputFile(root, relative) }
+        }
+
+        internal fun archiveEntryMatchesFile(archive: ZipFile, name: String, target: File): Boolean {
+            val entry = archive.getEntry(name) ?: return false
+            if (!target.isFile || target.length() != entry.size) return false
+            archive.getInputStream(entry).use { expected ->
+                FileInputStream(target).use { actual ->
+                    val expectedBytes = ByteArray(COPY_BUFFER_BYTES)
+                    val actualBytes = ByteArray(COPY_BUFFER_BYTES)
+                    while (true) {
+                        val count = expected.read(expectedBytes)
+                        if (count < 0) return actual.read() == -1
+                        if (count == 0) continue
+                        var actualCount = 0
+                        while (actualCount < count) {
+                            val read = actual.read(actualBytes, actualCount, count - actualCount)
+                            if (read < 0) return false
+                            actualCount += read
+                        }
+                        for (index in 0 until count) {
+                            if (expectedBytes[index] != actualBytes[index]) return false
+                        }
+                    }
+                }
+            }
         }
 
         /**
@@ -664,16 +705,18 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                 OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                 0,
             )
-            FileInputStream(descriptor).use { input ->
-                val opened = Os.fstat(input.fd)
+            try {
+                val opened = Os.fstat(descriptor)
                 if (
                     !OsConstants.S_ISREG(opened.st_mode) ||
                     opened.st_dev != before.st_dev ||
                     opened.st_ino != before.st_ino ||
-                    openedDescriptorPath(input.fd) != target.absolutePath
+                    openedDescriptorPath(descriptor) != target.absolutePath
                 ) {
                     throw IOException("Node.js plugin workspace deletion target changed during open.")
                 }
+            } finally {
+                Os.close(descriptor)
             }
             val after = Os.lstat(target.path)
             if (after.st_dev != before.st_dev || after.st_ino != before.st_ino) {
