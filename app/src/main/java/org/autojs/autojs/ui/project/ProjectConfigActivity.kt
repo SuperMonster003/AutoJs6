@@ -118,7 +118,7 @@ class ProjectConfigActivity : BaseActivity() {
                 return
             }
             mDirectory = File(dir)
-            mProjectConfig = ProjectConfig.fromProjectDir(dir)
+            mProjectConfig = ProjectConfig.fromProjectDir(dir) ?: ProjectConfig.fromProjectDirForExecution(dir)
             if (mProjectConfig == null) {
                 MaterialDialog.Builder(this)
                     .title(R.string.text_invalid_project)

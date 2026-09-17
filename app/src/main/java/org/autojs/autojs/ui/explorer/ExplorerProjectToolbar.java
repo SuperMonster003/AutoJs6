@@ -48,6 +48,8 @@ public class ExplorerProjectToolbar extends CardView {
 
     private boolean mRunnableOnly;
 
+    private boolean mBuildable;
+
     TextView mProjectName;
 
     private OnOperateListener mOnOperateListener;
@@ -105,6 +107,10 @@ public class ExplorerProjectToolbar extends CardView {
                 return true;
             }
             ProjectConfig projectConfig = ProjectConfig.fromProjectDir(dir.getPath());
+            mBuildable = projectConfig != null;
+            if (projectConfig == null) {
+                projectConfig = ProjectConfig.fromProjectDirForExecution(dir.getPath());
+            }
             if (projectConfig == null) {
                 clearProject();
                 return false;
@@ -120,6 +126,7 @@ public class ExplorerProjectToolbar extends CardView {
     private void activateProject(PFile dir, CharSequence projectName, boolean pythonProject) {
         mDirectory = dir;
         mPythonProject = pythonProject;
+        if (pythonProject) mBuildable = false;
         mProjectName.setText(projectName);
         updateCommandVisibility();
         setVisibility(VISIBLE);
@@ -128,6 +135,7 @@ public class ExplorerProjectToolbar extends CardView {
     void clearProject() {
         mDirectory = null;
         mPythonProject = false;
+        mBuildable = false;
         mProjectName.setText(null);
         updateCommandVisibility();
         setVisibility(GONE);
@@ -170,7 +178,7 @@ public class ExplorerProjectToolbar extends CardView {
             clearProject();
             return;
         }
-        if (mPythonProject) {
+        if (mPythonProject || !mBuildable) {
             return;
         }
         BuildActivity.launch(getContext(), directory.getPath());
@@ -235,7 +243,9 @@ public class ExplorerProjectToolbar extends CardView {
         for (int i = 0; i < viewGroup.getChildCount(); i += 1) {
             ImageView view = (ImageView) viewGroup.getChildAt(i);
             boolean runOnly = mRunnableOnly || mPythonProject;
-            view.setVisibility(!runOnly || view.getId() == R.id.project_run ? VISIBLE : GONE);
+            boolean visible = !runOnly || view.getId() == R.id.project_run;
+            if (view.getId() == R.id.project_build && !mBuildable) visible = false;
+            view.setVisibility(visible ? VISIBLE : GONE);
         }
     }
 

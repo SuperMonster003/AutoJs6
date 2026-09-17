@@ -1,5 +1,7 @@
 # Terminal sessions and manager dialogs, 2026-09-17
 
+Follow-up: [terminal and manager interaction refinements](terminal-manager-refinements-20260917.md) supersede the separate command field and startup-close implementation described here.
+
 ## Scope
 
 - Drawer terminal switch reflects live shell sessions. Enabling creates a new session and opens the terminal; disabling closes all sessions. The Chinese subtitle is exactly `运行中  [ 会话: 1 ]`, with U+0020 U+0020 after `运行中`, and disappears when no session remains.

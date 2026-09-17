@@ -152,6 +152,7 @@
     <string name="description_release_history_preference">Consulter l\'historique des versions publiées d\'AutoJs6 sur GitHub ainsi que les statistiques des principales catégories.</string>
     <string name="description_restart_strategy">La stratégie de redémarrage n\'affecte que le bouton de redémarrage dans le tiroir de la page d\'accueil.\n\nRedémarrage rapide : redémarre rapidement l\'application. Si le redémarrage échoue ou qu\'un comportement inattendu survient, essayez de passer à \"Redémarrage planifié\".\nRedémarrage planifié : configure à l\'avance une tâche de courte durée. Après l\'arrêt de l\'application, elle redémarrera selon la planification afin de relancer l\'application.</string>
     <string name="description_rhino_java_primitive_wrap">Interrupteur activé (par défaut) : les valeurs retournées par les méthodes Java de type Number/Boolean/Character sont encapsulées comme objets Java et exposées au script (String exclu). typeof vaut \"object\", species vaut \"JavaObject\" ; les méthodes Java restent accessibles, ce qui permet de conserver les caractéristiques de type précises de Java et la résolution de surcharge.\n\nInterrupteur désactivé : les types ci-dessus ne sont plus encapsulés et sont exposés directement comme primitives JavaScript (number/boolean/chaîne à un seul caractère). typeof correspond au type JavaScript respectif, plus conforme à la sémantique/à l\'écosystème JavaScript. Il est toujours possible de déclarer explicitement un wrapper Java avec new, par ex. new java.lang.Boolean(true).\n\nVoir : http://issues.autojs6.com/435</string>
+    <string name="description_root_manager_apps">Applications installées pouvant gérer les droits root. Ouvrez une application pour vérifier ses autorisations, ou ajoutez un candidat manuellement.</string>
     <string name="description_root_mode_preference">Si vous avez un accès exotique à la racine ou un état anormal pour l\'accès à la racine, vous pouvez forcer le réglage de la racine sur racine ou non-racine.</string>
     <string name="description_root_record_out_file_type_preference">Type binaire : non modifiable, avec l\'extension de fichier \"auto\".\nType JavaScript : peut être édité ou copié directement, avec l\'extension de fichier \"js\".</string>
     <string name="description_screen_capture_request_delay">Lors de la demande d\'autorisation de capture d\'écran, la fenêtre de demande affichée peut comporter une animation de fondu lors de sa disparition. Si `images.captureScreen` est appelé immédiatement, la capture obtenue peut contenir le contenu de cette fenêtre et être partiellement masquée.\n\nLa valeur de cette option ajoute un délai (en millisecondes) avant d\'effectuer la capture juste après l\'obtention de l\'autorisation, afin d\'éviter le problème de masquage ci-dessus.\n\nCette option ne s\'applique qu\'à la première capture après l\'obtention de l\'autorisation ; les captures suivantes ne seront plus affectées par cette valeur.</string>
@@ -193,6 +194,7 @@
     <string name="dialog_button_discard_changes">Ignorer</string>
     <string name="dialog_button_dismiss">Quitter</string>
     <string name="dialog_button_download_with_browser">Navigateur</string>
+    <string name="dialog_button_enable">Activer</string>
     <string name="dialog_button_exception_details">Détails</string>
     <string name="dialog_button_file_information">Infos fichier</string>
     <string name="dialog_button_history">Histoire</string>
@@ -574,7 +576,6 @@
     <string name="hint_plugin_process_failed_to_start">Le processus du plugin n\'a pas pu démarrer de manière fiable. Mettez à jour ou réinstallez le plugin; si le problème persiste, contactez le développeur du plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Le plugin actuel nécessite une version plus élevée de l\'environnement hôte AutoJs6 (versionCode requis: %1$d, versionCode actuel: %2$d). Une mise à niveau d\'AutoJs6 est nécessaire.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Le protocole du plugin n\'est pas compatible avec la version actuelle d\'AutoJs6. Une mise à niveau du plugin est requise.</string>
-    <string name="hint_terminal_command">Commande</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
     <string name="image_editor_brightness">Luminosité</string>
@@ -872,6 +873,7 @@
     <string name="text_active_window_root">Nœud racine de la fenêtre active</string>
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
+    <string name="text_add_application">Ajouter une application</string>
     <string name="text_add_bom">Ajouter un BOM</string>
     <string name="text_add_color_library">Ajouter une bibliothèque de couleurs</string>
     <string name="text_add_files_or_folders">Ajouter des fichiers ou des dossiers</string>
@@ -1942,6 +1944,8 @@
     <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Encapsulation des types primitifs Java</string>
     <string name="text_root_access">Accès root</string>
+    <string name="text_root_manager_apps">Applications de gestion root</string>
+    <string name="text_root_manager_apps_empty">Aucun candidat trouvé. Vous pouvez ajouter une application installée.</string>
     <string name="text_root_mode_title">Vérification de l\'accès root</string>
     <string name="text_run">Exécuter</string>
     <string name="text_run_on_battery_change">Sur changement de batterie</string>
@@ -2068,6 +2072,7 @@
     <string name="text_source_processing_completed">Traitement du code source termine</string>
     <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
+    <string name="text_stable_mode_advice">Si l\'analyse de la disposition est instable, essayez le mode stable. Désactivez-le si des éléments attendus sont absents.\nRedémarrez le service d\'accessibilité après modification. Accordez les droits root, de modification des paramètres sécurisés ou Shizuku pour le redémarrer depuis ce gestionnaire, ou utilisez les paramètres système.</string>
     <string name="text_star">Étoile</string>
     <string name="text_start">Démarrer</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
@@ -2112,7 +2117,7 @@
     <string name="text_terminal_copy_home_path">Copier le chemin du répertoire personnel</string>
     <string name="text_terminal_copy_transcript">Copier la transcription</string>
     <string name="text_terminal_data_cleared">Données du terminal effacées</string>
-    <string name="text_terminal_input_tips">Le champ de commande renvoie les lignes longues. Touchez le terminal pour saisir directement. Tab transmet le brouillon au shell pour la complétion; Ctrl / Alt agissent sur la saisie directe.</string>
+    <string name="text_terminal_input_tips">Saisissez directement dans le terminal. Appuyez longuement sur le texte, ajustez la sélection avec les poignées, puis choisissez Copier ou Tout sélectionner.\nBalayez la zone de touches gauche pour afficher plus de symboles. CTRL et ALT s\'appliquent à la touche suivante.</string>
     <string name="text_terminal_manager">Gestion du terminal</string>
     <string name="text_terminal_new_session">Nouvelle session</string>
     <string name="text_terminal_no_npm_scripts">package.json ne déclare aucun script</string>
@@ -2141,6 +2146,7 @@
     <string name="text_terminal_npm_setup_failed">npm et corepack n\'ont pas pu être préparés depuis le plugin Node.js Runtime, seuls node et le shell système sont disponibles</string>
     <string name="text_terminal_other_package_managers">Autres gestionnaires de paquets (yarn / pnpm)</string>
     <string name="text_terminal_other_package_managers_content">yarn et pnpm sont fournis via corepack et téléchargés depuis le registre à la première utilisation. Exécutez \"yarn --version\" ou \"pnpm --version\" pour les activer.</string>
+    <string name="text_terminal_package_management">Gestion des paquets</string>
     <string name="text_terminal_package_name_hint">Nom du paquet, par ex. is-odd</string>
     <string name="text_terminal_preparing_npm">Préparation de npm et corepack depuis le plugin Node.js Runtime...</string>
     <string name="text_terminal_running">En cours</string>
@@ -2153,6 +2159,7 @@
     <string name="text_terminal_sessions">Sessions</string>
     <string name="text_terminal_share_transcript">Partager la transcription</string>
     <string name="text_terminal_show_keyboard">Afficher le clavier</string>
+    <string name="text_terminal_text_actions">Texte</string>
     <string name="text_terminal_tips">Conseils du terminal</string>
     <string name="text_terminal_tips_content">Le shell s\'exécute en tant qu\'utilisateur de l\'application AutoJs6 avec son propre répertoire personnel (%1$s). La barre de touches fournit Esc / Tab / Ctrl / Alt et les touches de curseur, un appui long sur l\'écran sélectionne du texte, et le menu copie ou partage la transcription. node et npm deviennent disponibles une fois qu\'un plugin Node.js Runtime prenant en charge le terminal est installé. Quitter le terminal laisse la session et ses processus tourner en arrière-plan (avec une notification) ; \"Fermer la session\" dans le menu y met fin.</string>
     <string name="text_text_size">Taille du texte</string>

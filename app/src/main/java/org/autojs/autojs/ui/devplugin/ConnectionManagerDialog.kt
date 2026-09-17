@@ -25,6 +25,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.A11yServiceManagerEntryItemBinding
 import org.autojs.autojs6.databinding.A11yServiceManagerSwitchItemBinding
 import org.autojs.autojs6.databinding.ConnectionManagerHeaderButtonBinding
+import org.autojs.autojs6.databinding.ConnectionManagerClientItemBinding
 import org.autojs.autojs6.databinding.DialogConnectionManagerBinding
 import org.autojs.autojs6.databinding.OperationDialogItemBinding
 import kotlin.math.roundToInt
@@ -78,6 +79,8 @@ abstract class ConnectionManagerDialog protected constructor(
         @DrawableRes val iconRes: Int,
         val title: String,
         val subtitle: String,
+        val onOpen: (() -> Unit)? = null,
+        val onClose: (() -> Unit)? = null,
         val onClick: () -> Unit,
     )
 
@@ -93,7 +96,7 @@ abstract class ConnectionManagerDialog protected constructor(
     private val actionRows = LinkedHashMap<Action, OperationDialogItemBinding>()
     private val headerButtons = LinkedHashMap<Action, ImageButton>()
     private val actionVisible = HashMap<Action, Boolean>()
-    private val clientRows = ArrayList<OperationDialogItemBinding>()
+    private val clientRows = ArrayList<ConnectionManagerClientItemBinding>()
     private var clientEntries: List<ClientRow> = emptyList()
     private var statusLevel = Level.entries[Pref.getInt(statusLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
     private var controlLevel = Level.entries[Pref.getInt(controlLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
@@ -264,6 +267,10 @@ abstract class ConnectionManagerDialog protected constructor(
                 if (row.title.text != entry.title) row.title.text = entry.title
                 if (row.subtitle.text != entry.subtitle) row.subtitle.text = entry.subtitle
                 row.subtitle.visibility = if (entry.subtitle.isEmpty()) View.GONE else View.VISIBLE
+                row.open.visibility = if (entry.onOpen != null) View.VISIBLE else View.GONE
+                row.close.visibility = if (entry.onClose != null) View.VISIBLE else View.GONE
+                row.open.contentDescription = "${getString(R.string.text_open)}: ${entry.title}"
+                row.close.contentDescription = "${getString(R.string.text_terminal_close_session)}: ${entry.title}"
             }
         }
         applyClientsLevel()
@@ -293,11 +300,11 @@ abstract class ConnectionManagerDialog protected constructor(
         setStepEnabled(binding.clientsMore, clientsLevel != Level.ALL)
     }
 
-    private fun createClientRow(index: Int): OperationDialogItemBinding {
-        return OperationDialogItemBinding.inflate(inflater, binding.clientsContainer, true).apply {
-            val verticalPadding = DisplayUtils.dpToPx(10f).roundToInt()
-            root.setPadding(root.paddingLeft, verticalPadding, root.paddingRight, verticalPadding)
+    private fun createClientRow(index: Int): ConnectionManagerClientItemBinding {
+        return ConnectionManagerClientItemBinding.inflate(inflater, binding.clientsContainer, true).apply {
             icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
+            open.setOnClickListener { clientEntries.getOrNull(index)?.onOpen?.invoke() }
+            close.setOnClickListener { clientEntries.getOrNull(index)?.onClose?.invoke() }
             root.setOnClickListener {
                 val entry = clientEntries.getOrNull(index) ?: return@setOnClickListener
                 runCatching { entry.onClick() }.onFailure { e ->
@@ -344,6 +351,13 @@ abstract class ConnectionManagerDialog protected constructor(
     protected fun setActionVisible(action: Action, visible: Boolean) {
         actionVisible[action] = visible
         applyActionVisibility(action)
+    }
+
+    protected fun setActionEnabled(action: Action, enabled: Boolean) {
+        listOfNotNull(actionRows[action]?.root, headerButtons[action]).forEach {
+            it.isEnabled = enabled
+            it.alpha = if (enabled) 1f else STEP_LIMIT_ALPHA
+        }
     }
 
     private fun applyActionVisibility(action: Action) {

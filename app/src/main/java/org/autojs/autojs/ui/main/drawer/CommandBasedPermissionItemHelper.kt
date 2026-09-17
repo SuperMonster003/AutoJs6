@@ -95,11 +95,7 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
     fun withAdb(action: ACTION): Boolean {
         val dialogDismissSignal = CountDownLatch(1)
 
-        AdbDialogBuilder(context, getCommand(action))
-            .setChecker(object : AdbDialogBuilder.Checker {
-                override fun check() = has()
-            })
-            .build()
+        adbDialog(action)
             .dismissListener { dialogDismissSignal.countDown() }
             .let { Handler(Looper.getMainLooper()).post { it.show() } }
 
@@ -111,6 +107,13 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
 
         return has()
     }
+
+    /** Builds the same ADB guidance for callers that must not block the UI thread. */
+    fun adbDialog(action: ACTION): MaterialDialog.Builder = AdbDialogBuilder(context, getCommand(action))
+        .setChecker(object : AdbDialogBuilder.Checker {
+            override fun check() = has()
+        })
+        .build()
 
     private class AdbDialogBuilder(private val context: Context, command: String) {
 

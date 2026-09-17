@@ -147,6 +147,7 @@
     <string name="description_release_history_preference">View the release history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one-character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
+    <string name="description_root_manager_apps">Installed apps that may manage root access. Open an app to review its authorization settings, or add a candidate manually.</string>
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
     <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
@@ -188,6 +189,7 @@
     <string name="dialog_button_discard_changes">Discard changes</string>
     <string name="dialog_button_dismiss">Dismiss</string>
     <string name="dialog_button_download_with_browser">Browser</string>
+    <string name="dialog_button_enable">Enable</string>
     <string name="dialog_button_exception_details">Details</string>
     <string name="dialog_button_file_information">File info</string>
     <string name="dialog_button_history">History</string>
@@ -569,7 +571,6 @@
     <string name="hint_plugin_process_failed_to_start">The plugin process could not start reliably. Update or reinstall the plugin; if the problem persists, contact the plugin developer.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Current plugin requires a higher version of the AutoJs6 host environment (required versionCode: %1$d, current versionCode: %2$d), AutoJs6 upgrade needed.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Plugin protocol is incompatible with current AutoJs6, plugin version upgrade required.</string>
-    <string name="hint_terminal_command">Command</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
     <string name="image_editor_brightness">Brightness</string>
@@ -867,6 +868,7 @@
     <string name="text_active_window_root">Active window root</string>
     <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
+    <string name="text_add_application">Add app</string>
     <string name="text_add_bom">Add BOM</string>
     <string name="text_add_color_library">Add a color library</string>
     <string name="text_add_files_or_folders">Add files or folders</string>
@@ -1938,6 +1940,8 @@
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
     <string name="text_root_access">Root access</string>
+    <string name="text_root_manager_apps">Root management apps</string>
+    <string name="text_root_manager_apps_empty">No candidates found. You can add an installed app.</string>
     <string name="text_root_mode_title">Root access check</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
@@ -2064,6 +2068,7 @@
     <string name="text_source_processing_completed">Source processing completed</string>
     <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
+    <string name="text_stable_mode_advice">If layout analysis is unstable, try enabling stable mode. Disable it if expected UI elements are missing.\nAfter changing it, restart the accessibility service. Grant root, secure settings or Shizuku access to restart it from this manager; otherwise restart it in system settings.</string>
     <string name="text_star">Star</string>
     <string name="text_start">Start</string>
     <string name="text_start_record">Start recording</string>
@@ -2108,7 +2113,7 @@
     <string name="text_terminal_copy_home_path">Copy home path</string>
     <string name="text_terminal_copy_transcript">Copy transcript</string>
     <string name="text_terminal_data_cleared">Terminal data cleared</string>
-    <string name="text_terminal_input_tips">The command field wraps long input. Tap the terminal for direct input. Tab hands the draft to the shell for completion; Ctrl / Alt apply to direct input.</string>
+    <string name="text_terminal_input_tips">Type directly in the terminal. Long press text to select it, drag the handles to adjust the range, then choose Copy or Select all.\nSwipe the left key area for more symbols. CTRL and ALT apply to the next key.</string>
     <string name="text_terminal_manager">Terminal manager</string>
     <string name="text_terminal_new_session">New session</string>
     <string name="text_terminal_no_npm_scripts">package.json declares no scripts</string>
@@ -2137,6 +2142,7 @@
     <string name="text_terminal_npm_setup_failed">npm and corepack could not be prepared from the Node.js Runtime plugin, so only node and the system shell are available</string>
     <string name="text_terminal_other_package_managers">Other package managers (yarn / pnpm)</string>
     <string name="text_terminal_other_package_managers_content">yarn and pnpm are provided through corepack and are downloaded from the registry on first use. Run \"yarn --version\" or \"pnpm --version\" to activate them.</string>
+    <string name="text_terminal_package_management">Package management</string>
     <string name="text_terminal_package_name_hint">Package name, e.g. is-odd</string>
     <string name="text_terminal_preparing_npm">Preparing npm and corepack from the Node.js Runtime plugin...</string>
     <string name="text_terminal_running">Running</string>
@@ -2149,6 +2155,7 @@
     <string name="text_terminal_sessions">Sessions</string>
     <string name="text_terminal_share_transcript">Share transcript</string>
     <string name="text_terminal_show_keyboard">Show keyboard</string>
+    <string name="text_terminal_text_actions">Text</string>
     <string name="text_terminal_tips">Terminal tips</string>
     <string name="text_terminal_tips_content">The shell runs as the AutoJs6 app user with its own home directory (%1$s). The key bar provides Esc / Tab / Ctrl / Alt and the cursor keys, a long press on the screen selects text, and the menu copies or shares the transcript. node and npm become available once a Node.js Runtime plugin with terminal support is installed. Leaving the terminal keeps the session and its processes running in the background (with a notification); \"Close session\" in the menu ends it.</string>
     <string name="text_text_size">Text size</string>

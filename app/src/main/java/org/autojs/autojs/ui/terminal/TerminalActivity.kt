@@ -2,18 +2,14 @@ package org.autojs.autojs.ui.terminal
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
-import android.view.ContextMenu
 import android.view.GestureDetector
 import android.view.Menu
-import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.terminal.NodeCliLocator
 import org.autojs.autojs.core.terminal.NodeCliLocator.Resolution
 import org.autojs.autojs.core.terminal.ShellQuoting
@@ -63,6 +60,7 @@ class TerminalActivity : BaseActivity() {
     private lateinit var terminalView: TerminalEmulatorView
     private var startJob: Job? = null
     private var managerDialog: MaterialDialog? = null
+    private var textSelection: TerminalTextSelection? = null
     private lateinit var npmActions: TerminalNpmActions
     private var session: TerminalSessionManager.Session? = null
     private var nodeResolution: Resolution? = null
@@ -87,7 +85,6 @@ class TerminalActivity : BaseActivity() {
         terminalView = binding.terminal
         npmActions = TerminalNpmActions(this, ::typeCommand) { session?.pty?.currentDirectory() }
 
-        setUpCommandInput()
         setUpKeyBar()
         setUpBackHandling()
         setUpNodeBanner()
@@ -185,6 +182,7 @@ class TerminalActivity : BaseActivity() {
     }
 
     override fun onPause() {
+        textSelection?.dismiss()
         terminalView.onPause()
         super.onPause()
     }
@@ -212,7 +210,6 @@ class TerminalActivity : BaseActivity() {
     }
 
     private fun detachSession() {
-        session?.commandDraft = binding.commandInput.text.toString()
         session?.pty?.let {
             it.onProcessExited = null
             it.onInputAfterExit = null
@@ -225,7 +222,7 @@ class TerminalActivity : BaseActivity() {
         if (session?.id == newSession.id) return
         detachSession()
         terminalView.onPause()
-        unregisterForContextMenu(terminalView)
+        textSelection?.dismiss()
         val parent = terminalView.parent as ViewGroup
         val index = parent.indexOfChild(terminalView)
         val params = terminalView.layoutParams
@@ -233,8 +230,6 @@ class TerminalActivity : BaseActivity() {
         terminalView = TerminalEmulatorView(this).apply { id = R.id.terminal }
         parent.addView(terminalView, index, params)
         session = newSession
-        binding.commandInput.setText(newSession.commandDraft)
-        binding.commandInput.setSelection(binding.commandInput.length())
         val pty = newSession.pty
         val view = terminalView
         val scheme = ColorScheme(getColor(R.color.day_night), getColor(R.color.window_background))
@@ -245,17 +240,17 @@ class TerminalActivity : BaseActivity() {
         view.setColorScheme(scheme)
         view.setExtGestureListener(object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent): Boolean {
-                if (view.selectingText) {
-                    copyToClipboard(view.selectedText)
-                    view.toggleSelectingText()
-                    return true
-                }
                 showSoftKeyboard(view)
                 return false
             }
         })
         view.onResume()
-        registerForContextMenu(view)
+        view.onSelectionRequested = { x, y ->
+            textSelection?.dismiss()
+            val selection = TerminalTextSelection(view) { textSelection = null }
+            textSelection = selection
+            selection.show(x, y)
+        }
         pty.onProcessExited = { onSessionEnded() }
         pty.onInputAfterExit = { finish() }
         pty.onModifiersChanged = { ctrl, alt -> binding.keyBar.setModifiers(ctrl, alt) }
@@ -264,76 +259,18 @@ class TerminalActivity : BaseActivity() {
             onSessionEnded()
         } else {
             view.postDelayed({ if (!isDestroyed) refreshSubtitle() }, SUBTITLE_REFRESH_DELAY_MILLIS)
-            view.post { if (!isDestroyed) binding.commandInput.requestFocus() }
+            view.post { if (!isDestroyed) view.requestFocus() }
         }
-    }
-
-    private fun setUpCommandInput() {
-        val color = ColorUtils.adjustThemeColorForContrast(getColor(R.color.window_background), 4.5)
-        binding.commandInput.backgroundTintList = ColorStateList.valueOf(color)
-        binding.sendCommand.imageTintList = ColorStateList.valueOf(color)
-        binding.commandInput.imeOptions = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_EXTRACT_UI
-        binding.commandInput.setOnEditorActionListener { _, action, event ->
-            if (action == EditorInfo.IME_ACTION_SEND || event?.let { it.keyCode == KeyEvent.KEYCODE_ENTER && !it.isShiftPressed } == true) {
-                if (event == null || event.action == KeyEvent.ACTION_DOWN) sendCommand()
-                true
-            } else false
-        }
-        binding.sendCommand.setOnClickListener { sendCommand() }
-    }
-
-    private fun sendCommand() {
-        val pty = session?.pty?.takeIf { it.isProcessAlive } ?: return
-        val command = binding.commandInput.text.toString()
-        if (command.isEmpty()) return
-        pty.clearModifiers()
-        pty.write(command.replace("\r\n", "\n").replace('\n', '\r') + TerminalKeySequences.ENTER)
-        binding.commandInput.text.clear()
-        session?.commandDraft = ""
-    }
-
-    private fun insertCommandText(text: String) {
-        val input = binding.commandInput
-        val start = input.selectionStart.coerceAtLeast(0)
-        val end = input.selectionEnd.coerceAtLeast(0)
-        input.text.replace(minOf(start, end), maxOf(start, end), text)
     }
 
     private fun setUpKeyBar() {
         binding.keyBar.listener = object : TerminalToolbarView.Listener {
             override fun onKey(key: TerminalKeySequences.Key) {
-                val input = binding.commandInput
-                if (input.hasFocus()) {
-                    // Tab hands a draft to the shell for its own completion and history editing.
-                    if (key == TerminalKeySequences.Key.TAB || key == TerminalKeySequences.Key.ESC ||
-                        (input.length() == 0 && key in listOf(TerminalKeySequences.Key.UP, TerminalKeySequences.Key.DOWN))) {
-                        if (key == TerminalKeySequences.Key.TAB && input.length() > 0) {
-                            session?.pty?.write(input.text.toString())
-                            input.text.clear()
-                        }
-                        showSoftKeyboard(terminalView)
-                    } else {
-                        val code = when (key) {
-                            TerminalKeySequences.Key.LEFT -> KeyEvent.KEYCODE_DPAD_LEFT
-                            TerminalKeySequences.Key.RIGHT -> KeyEvent.KEYCODE_DPAD_RIGHT
-                            TerminalKeySequences.Key.UP -> KeyEvent.KEYCODE_DPAD_UP
-                            TerminalKeySequences.Key.DOWN -> KeyEvent.KEYCODE_DPAD_DOWN
-                            TerminalKeySequences.Key.HOME -> KeyEvent.KEYCODE_MOVE_HOME
-                            TerminalKeySequences.Key.END -> KeyEvent.KEYCODE_MOVE_END
-                            TerminalKeySequences.Key.PAGE_UP -> KeyEvent.KEYCODE_PAGE_UP
-                            TerminalKeySequences.Key.PAGE_DOWN -> KeyEvent.KEYCODE_PAGE_DOWN
-                            TerminalKeySequences.Key.DELETE -> KeyEvent.KEYCODE_FORWARD_DEL
-                        }
-                        input.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
-                        input.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
-                        return
-                    }
-                }
                 session?.pty?.sendKey(key)
             }
 
             override fun onText(text: String) {
-                if (binding.commandInput.hasFocus()) insertCommandText(text) else session?.pty?.write(text)
+                session?.pty?.write(text)
             }
 
             override fun onToggleCtrl() {
@@ -351,7 +288,7 @@ class TerminalActivity : BaseActivity() {
     private fun setUpBackHandling() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                leave()
+                if (textSelection != null) textSelection?.dismiss() else leave()
             }
         })
     }
@@ -547,6 +484,11 @@ class TerminalActivity : BaseActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_npm_ignore_scripts)?.isChecked = Pref.getBoolean(R.string.key_terminal_npm_ignore_scripts, false)
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId in NPM_MENU_ITEMS && !ensureNodeAvailable()) {
             return true
@@ -563,6 +505,12 @@ class TerminalActivity : BaseActivity() {
             R.id.action_share_transcript -> IntentUtils.shareText(this, session?.pty?.transcriptText.orEmpty())
             R.id.action_copy_home_path -> copyToClipboard(session?.paths?.home?.path)
             R.id.action_text_size -> showTextSizeDialog()
+            R.id.action_npm_registry -> TerminalSettingsDialogs.showNpmRegistry(this)
+            R.id.action_npm_ignore_scripts -> {
+                Pref.putBoolean(R.string.key_terminal_npm_ignore_scripts, !item.isChecked)
+                invalidateOptionsMenu()
+            }
+            R.id.action_node_probe -> nodeResolution?.let(::showProbeDetails)
             R.id.action_show_keyboard -> showSoftKeyboard()
             R.id.action_clear -> clearScreen()
             R.id.action_tips -> showTips()
@@ -573,23 +521,6 @@ class TerminalActivity : BaseActivity() {
             }
             R.id.action_close_session -> requestCloseSession()
             else -> return super.onOptionsItemSelected(item)
-        }
-        return true
-    }
-
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        menu.add(Menu.NONE, CONTEXT_SELECT_TEXT, Menu.NONE, R.string.text_terminal_select_text)
-        menu.add(Menu.NONE, CONTEXT_COPY_ALL, Menu.NONE, R.string.text_copy_all)
-        menu.add(Menu.NONE, CONTEXT_PASTE, Menu.NONE, R.string.text_paste)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            CONTEXT_SELECT_TEXT -> terminalView.toggleSelectingText()
-            CONTEXT_COPY_ALL -> copyToClipboard(session?.pty?.transcriptText)
-            CONTEXT_PASTE -> paste()
-            else -> return super.onContextItemSelected(item)
         }
         return true
     }
@@ -605,7 +536,7 @@ class TerminalActivity : BaseActivity() {
     private fun paste() {
         val text = ClipboardUtils.getClip(this)?.toString().orEmpty()
         if (text.isEmpty()) return
-        if (binding.commandInput.hasFocus()) insertCommandText(text) else session?.pty?.write(text)
+        session?.pty?.write(text)
     }
 
     private fun copyToClipboard(text: String?) {
@@ -622,7 +553,7 @@ class TerminalActivity : BaseActivity() {
         }
     }
 
-    private fun showSoftKeyboard(view: View = binding.commandInput) {
+    private fun showSoftKeyboard(view: View = terminalView) {
         view.requestFocus()
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.showSoftInput(view, 0)
@@ -647,9 +578,6 @@ class TerminalActivity : BaseActivity() {
         private const val EXTRA_SESSION_ID = "session_id"
         private const val EXTRA_DIRECTORY = "directory"
         private const val STATE_SESSION_ID = "session_id"
-        private const val CONTEXT_SELECT_TEXT = 1
-        private const val CONTEXT_COPY_ALL = 2
-        private const val CONTEXT_PASTE = 3
         private const val SUBTITLE_REFRESH_DELAY_MILLIS = 800L
 
         private val NPM_MENU_ITEMS = listOf(

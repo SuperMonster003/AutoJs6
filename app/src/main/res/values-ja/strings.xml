@@ -153,6 +153,7 @@
     <string name="description_release_history_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は, \"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後, スケジュールに従って再度起動し, アプリの再起動を実現します.</string>
     <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ, スクリプトに公開されます (String は除外). typeof は \"object\", species は \"JavaObject\". Java のメソッドを呼び出せるため, Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず, JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり, JavaScript のセマンティクス/エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
+    <string name="description_root_manager_apps">root 権限を管理する可能性のあるインストール済みアプリです. アプリを開いて権限設定を確認するか, 候補を手動で追加できます.</string>
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
     <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間 (ミリ秒) を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
@@ -194,6 +195,7 @@
     <string name="dialog_button_discard_changes">破棄</string>
     <string name="dialog_button_dismiss">削除</string>
     <string name="dialog_button_download_with_browser">ブラウザ</string>
+    <string name="dialog_button_enable">有効化</string>
     <string name="dialog_button_exception_details">詳細</string>
     <string name="dialog_button_file_information">ファイル情報</string>
     <string name="dialog_button_history">履歴</string>
@@ -575,7 +577,6 @@
     <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">プラグインプロトコルは現在の AutoJs6 と互換性がありません. プラグインをアップグレードしてください.</string>
-    <string name="hint_terminal_command">コマンド入力</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
     <string name="image_editor_brightness">明るさ</string>
@@ -873,6 +874,7 @@
     <string name="text_active_window_root">アクティブウィンドウのルートノード</string>
     <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
+    <string name="text_add_application">アプリを追加</string>
     <string name="text_add_bom">BOM を追加</string>
     <string name="text_add_color_library">カラーライブラリを追加</string>
     <string name="text_add_files_or_folders">ファイルまたはフォルダーを追加</string>
@@ -1943,6 +1945,8 @@
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
     <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
     <string name="text_root_access">root 権限</string>
+    <string name="text_root_manager_apps">root 管理アプリ</string>
+    <string name="text_root_manager_apps_empty">候補が見つかりません. インストール済みアプリを追加できます.</string>
     <string name="text_root_mode_title">Root 権限の確認</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
@@ -2069,6 +2073,7 @@
     <string name="text_source_processing_completed">ソース処理完了</string>
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
+    <string name="text_stable_mode_advice">レイアウト解析が不安定な場合は安定モードを有効にし, 必要な UI 要素が見つからない場合は無効にしてみてください.\n変更後はアクセシビリティサービスの再起動が必要です. root, セキュア設定の変更, または Shizuku の権限を付与して管理画面から再起動するか, システム設定で手動で再起動してください.</string>
     <string name="text_star">スター</string>
     <string name="text_start">起動</string>
     <string name="text_start_record">記録開始</string>
@@ -2113,7 +2118,7 @@
     <string name="text_terminal_copy_home_path">ホームディレクトリのパスをコピー</string>
     <string name="text_terminal_copy_transcript">出力ログをコピー</string>
     <string name="text_terminal_data_cleared">ターミナルデータを消去しました</string>
-    <string name="text_terminal_input_tips">コマンド欄は長い入力を折り返します. ターミナルをタップすると直接入力できます. Tab は入力を shell に渡して補完し, Ctrl / Alt は直接入力に適用されます.</string>
+    <string name="text_terminal_input_tips">ターミナルに直接入力します. テキストを長押しし, ハンドルをドラッグして範囲を調整すると, コピーや全選択ができます.\n左側のキー領域を左右にスワイプすると他の記号が表示されます. CTRL と ALT は次のキーに適用されます.</string>
     <string name="text_terminal_manager">ターミナル管理</string>
     <string name="text_terminal_new_session">新規セッション</string>
     <string name="text_terminal_no_npm_scripts">package.json に scripts が定義されていません</string>
@@ -2142,6 +2147,7 @@
     <string name="text_terminal_npm_setup_failed">Node.js ランタイムプラグインから npm と corepack を準備できなかったため, 現在は node とシステムシェルのみ使用できます</string>
     <string name="text_terminal_other_package_managers">他のパッケージマネージャー (yarn / pnpm)</string>
     <string name="text_terminal_other_package_managers_content">yarn と pnpm は corepack を通じて提供され, 初回使用時にレジストリからダウンロードされます. \"yarn --version\" または \"pnpm --version\" を実行すると有効になります.</string>
+    <string name="text_terminal_package_management">パッケージ管理</string>
     <string name="text_terminal_package_name_hint">パッケージ名 (例: is-odd)</string>
     <string name="text_terminal_preparing_npm">Node.js ランタイムプラグインから npm と corepack を準備しています...</string>
     <string name="text_terminal_running">実行中</string>
@@ -2154,6 +2160,7 @@
     <string name="text_terminal_sessions">セッション</string>
     <string name="text_terminal_share_transcript">出力ログを共有</string>
     <string name="text_terminal_show_keyboard">キーボードを表示</string>
+    <string name="text_terminal_text_actions">テキスト</string>
     <string name="text_terminal_tips">ターミナルのヒント</string>
     <string name="text_terminal_tips_content">シェルは AutoJs6 アプリのユーザーとして実行され, 専用のホームディレクトリ (%1$s) を持ちます. キーバーには Esc / Tab / Ctrl / Alt とカーソルキーがあり, 画面を長押しするとテキストを選択でき, メニューから出力ログをコピーまたは共有できます. ターミナル対応の Node.js ランタイムプラグインをインストールすると node と npm が使えるようになります. ターミナルを離れてもセッションとそのプロセスはバックグラウンドで実行を続けます (通知付き). メニューの \"セッションを閉じる\" で終了できます.</string>
     <string name="text_text_size">文字サイズ</string>

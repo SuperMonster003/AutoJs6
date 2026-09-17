@@ -149,6 +149,7 @@
     <string name="description_release_history_preference">查看 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計數據.</string>
     <string name="description_restart_strategy">重啓策略僅作用於主頁抽屜欄的重啓按鈕.\n\n快速重啓: 快速重啓應用, 如果重啓失敗或出現非預期情況, 可嘗試切換至 \"計劃重啓\".\n計劃重啓: 提前設置一個短時定時任務, 應用停止後會再次定時啓動, 以實現應用重啓.</string>
     <string name="description_rhino_java_primitive_wrap">開關啓用 (默認): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 對象暴露到腳本 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些對象的 Java 方法, 利於保留 Java 精確類型特徵與方法重載行為.\n\n開關禁用: 不再包裝上述類型, 直接作為 JavaScript 基元值 (number/boolean/單字符字符串). typeof 為相應 JavaScript 類型, 更貼近 JavaScript 語義與生態. 但仍可通過 new 關鍵字顯式聲明一個 Java 包裝類型, 如 new java.lang.Boolean(true).\n\n參閲: http://issues.autojs6.com/435</string>
+    <string name="description_root_manager_apps">可能管理 root 權限的已安裝應用程式. 可開啟應用程式查看授權設定, 或手動新增候選應用程式.</string>
     <string name="description_root_mode_preference">如果設備使用非常規 Root 方式或 Root 權限檢測結果異常, 可設置 \"強制 Root 模式\" 或 \"強制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二進制文件: 不可編輯, 文件擴展名為 \"auto\"\nJavaScript 文件: 可編輯或直接複製, 文件擴展名為 \"js\"</string>
     <string name="description_screen_capture_request_delay">申請屏幕捕獲權限時, 彈出的權限申請窗口消失時可能存在漸變動畫, 此時如果立即調用 `images.captureScreen` 方法, 獲取的屏幕截圖中會出現權限申請的窗口內容而造成遮擋.\n\n當前設置選項值用於在截圖權限申請後立即獲取屏幕截圖前增加一個延遲時間 (單位為毫秒), 可用於避免上述遮擋問題.\n\n當前設置選項僅適用於獲取截圖權限後的首次截圖操作, 後續截圖操作不再受此設置值影響.</string>
@@ -190,6 +191,7 @@
     <string name="dialog_button_discard_changes">放棄更改</string>
     <string name="dialog_button_dismiss">關閉</string>
     <string name="dialog_button_download_with_browser">瀏覽器下載</string>
+    <string name="dialog_button_enable">啟用</string>
     <string name="dialog_button_exception_details">異常詳情</string>
     <string name="dialog_button_file_information">文件信息</string>
     <string name="dialog_button_history">歷史記錄</string>
@@ -571,7 +573,6 @@
     <string name="hint_plugin_process_failed_to_start">插件進程無法穩定啓動. 請更新或重新安裝插件; 如問題持續, 請聯絡插件開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前插件需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">插件協議與當前 AutoJs6 不兼容, 需升級插件版本.</string>
-    <string name="hint_terminal_command">輸入命令</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點擊 \"激活\" 按鈕激活一次插件.\n如激活成功, 按鈕將在一定時間內自動開啓.</string>
     <string name="image_editor_brightness">亮度</string>
@@ -869,6 +870,7 @@
     <string name="text_active_window_root">活動窗口根節點</string>
     <string name="text_activity_not_found_for_apk_installing">找不到 APK 安裝器</string>
     <string name="text_adb_tool_needed">需要 ADB 命令行工具</string>
+    <string name="text_add_application">新增應用程式</string>
     <string name="text_add_bom">添加 BOM</string>
     <string name="text_add_color_library">添加顏色庫</string>
     <string name="text_add_files_or_folders">加入文件或文件夾</string>
@@ -1939,6 +1941,8 @@
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 權限</string>
     <string name="text_rhino_java_primitive_wrap">Java 原始類型包裝</string>
     <string name="text_root_access">root 權限</string>
+    <string name="text_root_manager_apps">root 管理應用程式</string>
+    <string name="text_root_manager_apps_empty">未找到候選應用程式. 可手動新增已安裝的應用程式.</string>
     <string name="text_root_mode_title">Root 權限檢查</string>
     <string name="text_run">運行</string>
     <string name="text_run_on_battery_change">電量變化時</string>
@@ -2065,6 +2069,7 @@
     <string name="text_source_processing_completed">源代碼處理完成</string>
     <string name="text_special_permissions">特殊權限</string>
     <string name="text_stable_mode">穩定模式</string>
+    <string name="text_stable_mode_advice">版面分析不穩定時可嘗試啟用穩定模式; 缺少預期控制項時可嘗試停用.\n修改後需重新啟動無障礙服務. 可授予 root, 修改安全設定或 Shizuku 權限後在管理器中重新啟動, 或前往系統設定手動重新啟動.</string>
     <string name="text_star">收藏</string>
     <string name="text_start">啓動</string>
     <string name="text_start_record">開始錄製</string>
@@ -2109,7 +2114,7 @@
     <string name="text_terminal_copy_home_path">複製主目錄路徑</string>
     <string name="text_terminal_copy_transcript">複製終端記錄</string>
     <string name="text_terminal_data_cleared">終端資料已清除</string>
-    <string name="text_terminal_input_tips">命令輸入區支援自動換行. 點按終端機內容可直接互動輸入. Tab 將草稿交給 shell 補全, Ctrl / Alt 用於直接輸入的快捷鍵.</string>
+    <string name="text_terminal_input_tips">直接在終端機中輸入. 長按文字後可拖動控制柄調整選取範圍, 並選擇複製或全選.\n左右滑動左側按鍵區域可查看更多符號. CTRL 和 ALT 作用於下一個按鍵.</string>
     <string name="text_terminal_manager">終端機管理員</string>
     <string name="text_terminal_new_session">建立工作階段</string>
     <string name="text_terminal_no_npm_scripts">package.json 未宣告 scripts</string>
@@ -2138,6 +2143,7 @@
     <string name="text_terminal_npm_setup_failed">無法從 Node.js 執行階段外掛準備 npm 與 corepack, 目前僅可使用 node 與系統 shell</string>
     <string name="text_terminal_other_package_managers">其他套件管理器 (yarn / pnpm)</string>
     <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 \"yarn --version\" 或 \"pnpm --version\" 即可啟用.</string>
+    <string name="text_terminal_package_management">套件管理</string>
     <string name="text_terminal_package_name_hint">套件名稱, 如 is-odd</string>
     <string name="text_terminal_preparing_npm">正在從 Node.js 執行階段外掛準備 npm 與 corepack...</string>
     <string name="text_terminal_running">執行中</string>
@@ -2150,6 +2156,7 @@
     <string name="text_terminal_sessions">工作階段</string>
     <string name="text_terminal_share_transcript">分享終端記錄</string>
     <string name="text_terminal_show_keyboard">顯示鍵盤</string>
+    <string name="text_terminal_text_actions">文字</string>
     <string name="text_terminal_tips">終端提示</string>
     <string name="text_terminal_tips_content">shell 以 AutoJs6 應用程式使用者身份執行, 擁有獨立的主目錄 (%1$s). 按鍵欄提供 Esc / Tab / Ctrl / Alt 及方向鍵, 長按螢幕可選擇文字, 選單可複製或分享終端記錄. 安裝支援終端的 Node.js 執行階段外掛後即可使用 node 與 npm. 離開終端後工作階段及其程序在背景繼續執行 (帶通知), 選單中的 \"關閉工作階段\" 可將其結束.</string>
     <string name="text_text_size">字體大小</string>

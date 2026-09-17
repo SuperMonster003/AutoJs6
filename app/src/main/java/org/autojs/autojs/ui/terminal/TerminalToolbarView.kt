@@ -31,7 +31,7 @@ class TerminalToolbarView @JvmOverloads constructor(
 
     var listener: Listener? = null
 
-    private var row: LinearLayout
+    private var column: LinearLayout
 
     private val ctrlButton: TextView
     private val altButton: TextView
@@ -47,34 +47,46 @@ class TerminalToolbarView @JvmOverloads constructor(
 
     init {
         orientation = HORIZONTAL
+        layoutDirection = View.LAYOUT_DIRECTION_LTR
         gravity = Gravity.CENTER_VERTICAL
-        val symbols = LinearLayout(context).apply { orientation = VERTICAL }
+        val symbols = LinearLayout(context).apply { orientation = HORIZONTAL }
         addView(HorizontalScrollView(context).apply {
             isHorizontalScrollBarEnabled = false
             isFillViewport = true
             addView(symbols, ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-        row = newRow(symbols)
-        ctrlButton = button("Ctrl") { listener?.onToggleCtrl() }
-        altButton = button("Alt") { listener?.onToggleAlt() }
-        listOf("-", "/", "|", "~", "$", "_", "=", ":").forEach(::textButton)
-        row = newRow(symbols)
-        listOf(Key.HOME, Key.END, Key.PAGE_UP, Key.PAGE_DOWN, Key.DELETE).forEach(::keyButton)
-        listOf("\\", "'", "\"", "(", ")").forEach(::textButton)
+        column = newColumn(symbols)
+        keyButton(Key.ESC)
+        keyButton(Key.TAB)
+        column = newColumn(symbols)
+        textButton("/")
+        ctrlButton = button("CTRL") { listener?.onToggleCtrl() }
+        column = newColumn(symbols)
+        textButton("|")
+        altButton = button("ALT") { listener?.onToggleAlt() }
+        listOf("-" to "`", "~" to "\\", "$" to "_", "=" to ":", "'" to "\"", "(" to ")", "[" to "]", "{" to "}", "&" to ";", "*" to "?").forEach { (top, bottom) ->
+            column = newColumn(symbols)
+            textButton(top)
+            textButton(bottom)
+        }
+        column = newColumn(symbols)
+        keyButton(Key.DELETE)
+        textButton("!")
         addView(View(context).apply { setBackgroundColor(context.getColor(R.color.divider)) }, LayoutParams(dp(1), LayoutParams.MATCH_PARENT))
-        val navigation = LinearLayout(context).apply { orientation = VERTICAL }
+        val navigation = LinearLayout(context).apply { orientation = HORIZONTAL }
         addView(navigation, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        row = newRow(navigation)
-        listOf(Key.ESC, Key.UP, Key.TAB).forEach(::keyButton)
-        row = newRow(navigation)
-        listOf(Key.LEFT, Key.DOWN, Key.RIGHT).forEach(::keyButton)
+        listOf(Key.HOME to Key.LEFT, Key.UP to Key.DOWN, Key.END to Key.RIGHT, Key.PAGE_UP to Key.PAGE_DOWN).forEach { (top, bottom) ->
+            column = newColumn(navigation)
+            keyButton(top)
+            keyButton(bottom)
+        }
         setModifiers(ctrl = false, alt = false)
     }
 
-    private fun newRow(parent: LinearLayout) = LinearLayout(context).apply {
-        orientation = HORIZONTAL
+    private fun newColumn(parent: LinearLayout) = LinearLayout(context).apply {
+        orientation = VERTICAL
         gravity = Gravity.CENTER_VERTICAL
-        parent.addView(this, LayoutParams(LayoutParams.WRAP_CONTENT, dp(40)))
+        parent.addView(this, LayoutParams(dp(44), LayoutParams.WRAP_CONTENT))
     }
 
     fun setModifiers(ctrl: Boolean, alt: Boolean) {
@@ -96,7 +108,7 @@ class TerminalToolbarView @JvmOverloads constructor(
         }
     }
 
-    private fun keyButton(key: Key) = button(key.label) { listener?.onKey(key) }
+    private fun keyButton(key: Key) = button(key.label.uppercase(java.util.Locale.ROOT)) { listener?.onKey(key) }
 
     private fun textButton(text: String) = button(text) { listener?.onText(text) }
 
@@ -106,16 +118,17 @@ class TerminalToolbarView @JvmOverloads constructor(
         isSingleLine = true
         isClickable = true
         isFocusable = false
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(this, 9, 12, 1, TypedValue.COMPLEX_UNIT_SP)
         setTextColor(context.getColor(R.color.day_night))
         setBackgroundResource(idleBackground)
         contentDescription = label
         minWidth = dp(40)
-        val horizontal = dp(4)
+        val horizontal = dp(2)
         setPadding(horizontal, 0, horizontal, 0)
         layoutParams = LinearLayout.LayoutParams(dp(44), dp(40))
         setOnClickListener { onClick() }
-        row.addView(this)
+        column.addView(this)
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density + 0.5f).toInt()

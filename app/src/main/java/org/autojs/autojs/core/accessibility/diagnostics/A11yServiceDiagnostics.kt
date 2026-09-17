@@ -73,6 +73,7 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
         SHIZUKU(R.string.text_shizuku_access),
         LISTENERS(R.string.text_listeners),
         SELF_CHECK(R.string.text_self_check),
+        STABLE_MODE(R.string.text_stable_mode),
     }
 
     data class Entry(val field: Field, val label: String, val value: String)
@@ -189,6 +190,7 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
                     " | observer ${AccessibilityService.eventObserverCount}",
         )
         probes.selfCheck?.let { add(Field.SELF_CHECK, it) }
+        add(Field.STABLE_MODE, enabledText(Pref.isStableModeEnabled))
 
         return Report(status, header(), string(R.string.text_label_state), entries)
     }

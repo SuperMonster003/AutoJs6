@@ -19,9 +19,7 @@ object TerminalSessionManager {
         val initialDirectory: String,
         val paths: TerminalPaths,
         val createdAt: Long = System.currentTimeMillis(),
-    ) {
-        var commandDraft: String = ""
-    }
+    )
 
     private val nextId = AtomicLong(1)
     private val sessions = LinkedHashMap<String, Session>()

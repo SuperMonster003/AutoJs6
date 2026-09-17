@@ -59,7 +59,7 @@ class ServerModeManagerDialog private constructor(
         refresh()
     })
 
-    private val disconnectAllClients = addAction(Action(R.string.text_disconnect_all_clients, R.drawable.ic_phonelink_off_black_48dp) {
+    private val disconnectAllClients = addAction(Action(R.string.text_disconnect_all_clients, R.drawable.ic_phonelink_off_black_48dp, header = true) {
         service.disconnectServerClients()
         refresh()
     })

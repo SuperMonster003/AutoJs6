@@ -249,6 +249,8 @@
     <string name="key_restart_strategy_quick" translatable="false">key_$_restart_strategy_quick</string>
     <string name="key_restart_strategy_scheduled" translatable="false">key_$_restart_strategy_scheduled</string>
     <string name="key_rhino_java_primitive_wrap" translatable="false">key_$_rhino_java_primitive_wrap</string>
+    <string name="key_root_manager_apps_cache" translatable="false">root_manager_apps_cache</string>
+    <string name="key_root_manager_apps_custom" translatable="false">root_manager_apps_custom</string>
     <string name="key_root_mode" translatable="false">key_$_root_mode</string>
     <string name="key_root_mode_auto_detect" translatable="false">key_$_root_mode_auto_detect</string>
     <string name="key_root_mode_force_non_root" translatable="false">key_$_root_mode_force_non_root</string>

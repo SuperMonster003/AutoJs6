@@ -31,6 +31,9 @@ class TerminalEmulatorView @JvmOverloads constructor(
         }
 
     var onTextSizeChanged: ((Int) -> Unit)? = null
+    var onSelectionRequested: ((Float, Float) -> Unit)? = null
+
+    val transcriptTopLine: Int get() = computeVerticalScrollOffset()
 
     private var scaleAccumulator = 1f
 
@@ -75,6 +78,10 @@ class TerminalEmulatorView @JvmOverloads constructor(
             return true
         }
         return super.onTouchEvent(event)
+    }
+
+    override fun onLongPress(event: MotionEvent) {
+        onSelectionRequested?.invoke(event.x, event.y)
     }
 
     companion object {

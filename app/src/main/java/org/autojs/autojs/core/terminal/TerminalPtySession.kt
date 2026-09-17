@@ -28,6 +28,7 @@ class TerminalPtySession(
 
     private val ptmx: ParcelFileDescriptor = ParcelFileDescriptor.open(File("/dev/ptmx"), ParcelFileDescriptor.MODE_READ_WRITE)
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val processLock = Any()
     @Volatile
     private var finished = false
     @Volatile
@@ -81,27 +82,27 @@ class TerminalPtySession(
         started = true
         thread(name = "TerminalPtySession-$command") {
             val childPid = try {
-                PtyBridge.createSubprocess(
-                    ptmx,
-                    command.first(),
-                    command.toTypedArray(),
-                    TerminalEnvironment.toEnvp(environment),
-                )
+                synchronized(processLock) {
+                    if (finished) null else PtyBridge.createSubprocess(
+                        ptmx,
+                        command.first(),
+                        command.toTypedArray(),
+                        TerminalEnvironment.toEnvp(environment),
+                    ).also { pid = it }
+                }
             } catch (e: IOException) {
                 Log.w(TAG, "Failed to start terminal child: ${e.message}")
+                exitCode = START_FAILURE_CODE
                 mainHandler.post {
-                    exitCode = START_FAILURE_CODE
                     appendMessage("\r\n[Failed to start shell: ${e.message}]\r\n")
                     onProcessExited?.invoke(START_FAILURE_CODE)
                     onProcessReaped?.invoke(START_FAILURE_CODE)
                 }
                 return@thread
             }
-            pid = childPid
-            if (finished) hangup()
-            val code = PtyBridge.waitFor(childPid)
+            val code = childPid?.let(PtyBridge::waitFor) ?: 0
+            exitCode = code
             mainHandler.post {
-                exitCode = code
                 appendMessage("\r\n[Process completed (code $code)]\r\n")
                 onProcessExited?.invoke(code)
                 onProcessReaped?.invoke(code)
@@ -214,9 +215,18 @@ class TerminalPtySession(
     }
 
     override fun finish() {
-        if (finished) return
-        finished = true
-        hangup()
+        synchronized(processLock) {
+            if (finished) return
+            finished = true
+            hangup()
+            // A just-forked child may not have called setsid() yet, and can inherit ignored SIGHUP.
+            // Explicitly stopping a session must also terminate that child, before closing its pty.
+            // zh-CN: 刚 fork 的子进程可能尚未调用 setsid(), 也可能继承被忽略的 SIGHUP.
+            // 显式停止会话时, 还需在关闭 pty 前终止该子进程.
+            if (pid > 0 && exitCode == null) {
+                runCatching { PtyBridge.sendSignal(pid, PtyBridge.SIGKILL) }
+            }
+        }
         if (!emulatorInitialized) {
             // The library's finish() assumes initializeEmulator() has already run.
             // Before a view is attached, only the pty descriptor needs closing.

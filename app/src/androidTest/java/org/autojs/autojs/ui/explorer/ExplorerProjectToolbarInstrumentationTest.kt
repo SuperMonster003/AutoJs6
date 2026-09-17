@@ -6,6 +6,9 @@ import android.widget.ImageView
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import org.autojs.autojs.pio.PFile
+import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.model.explorer.ExplorerProjectPage
+import org.autojs.autojs.model.explorer.WorkspaceFileProvider
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -21,6 +24,27 @@ class ExplorerProjectToolbarInstrumentationTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val targetContext = instrumentation.targetContext
+
+    @Test
+    fun nodeProjectWithoutPackagingMetadataIsRecognizedByToolbarAndFileList() = withProjectDirectory { root ->
+        val project = File(root, "host-events").apply { mkdir() }
+        File(project, "project.json").writeText("""{"name":"host-events","type":"node","main":"main.cjs","node":{"timeoutMs":65000,"permissions":["events","events.key","events.notification","events.toast"]}}""")
+        File(project, "package.json").writeText("""{"name":"@autojs6-sample/host-events","private":true,"version":"1.0.0","type":"commonjs"}""")
+        File(project, "main.cjs").writeText("console.log('ready');")
+        val toolbar = createToolbar()
+        assertTrue(onMain { toolbar.trySetProject(PFile(project.path)) })
+        onMain {
+            assertEquals("host-events", toolbar.mProjectName.text.toString())
+            assertEquals(View.VISIBLE, toolbar.action(R.id.project_run).visibility)
+            assertEquals(View.VISIBLE, toolbar.action(R.id.project_terminal).visibility)
+            assertEquals(View.VISIBLE, toolbar.action(R.id.project_edit).visibility)
+            assertEquals(View.GONE, toolbar.action(R.id.project_build).visibility)
+        }
+        val page = WorkspaceFileProvider(targetContext) { true }.getExplorerPage(ExplorerDirPage(root, null)).blockingGet()
+        val entry = page.single { it.path == project.path }
+        assertTrue(entry is ExplorerProjectPage)
+        assertEquals(page, entry.parent)
+    }
 
     @Test
     fun twoKeyPythonManifestIsRunnableOnlyAndKeepsAValidDirectory() = withProjectDirectory { root ->

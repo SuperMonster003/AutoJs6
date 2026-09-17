@@ -38,8 +38,11 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                 .collectInto(createExplorerPage(path, parent), (p, file) -> {
                     if (file.isDirectory()) {
                         ProjectConfig projectConfig = ProjectConfig.fromProjectDir(file.getPath());
+                        if (projectConfig == null) {
+                            projectConfig = ProjectConfig.fromProjectDirForExecution(file.getPath());
+                        }
                         if (projectConfig != null) {
-                            p.addChild(new ExplorerProjectPage(file, parent, projectConfig));
+                            p.addChild(new ExplorerProjectPage(file, p, projectConfig));
                             return;
                         }
                         if (isInSampleDir(file)) {

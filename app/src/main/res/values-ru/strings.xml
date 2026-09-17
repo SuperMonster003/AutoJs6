@@ -152,6 +152,7 @@
     <string name="description_release_history_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_restart_strategy">Стратегия перезагрузки влияет только на кнопку перезапуска в выдвижном меню главной страницы.\n\nБыстрая перезагрузка: быстро перезапускает приложение. Если перезапуск не удался или возникли непредвиденные ситуации, попробуйте переключиться на \"Запланированную перезагрузку\".\nЗапланированная перезагрузка: заранее настраивает краткосрочную задачу. После остановки приложение будет запущено по расписанию для выполнения перезапуска.</string>
     <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java-обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
+    <string name="description_root_manager_apps">Установленные приложения, которые могут управлять правами root. Откройте приложение для проверки разрешений или добавьте его вручную.</string>
     <string name="description_root_mode_preference">Если у вас есть экзотический root или аномальное состояние для root-доступа, вы можете принудительно установить root на root или non-root.</string>
     <string name="description_root_record_out_file_type_preference">Бинарный тип: не редактируемый, с расширением файла \"auto\"\nТип JavaScript: может быть отредактирован или скопирован напрямую, с расширением файла \"js\".</string>
     <string name="description_screen_capture_request_delay">При запросе разрешения на захват экрана отображаемое окно запроса может иметь анимацию затухания при исчезновении. Если сразу вызвать `images.captureScreen`, полученный снимок может содержать содержимое этого окна и быть частично перекрыт.\n\nЗначение этой опции добавляет задержку (в миллисекундах) перед выполнением снимка экрана сразу после получения разрешения, что позволяет избежать описанной выше проблемы перекрытия.\n\nЭта опция применяется только к первому снимку после получения разрешения; последующие снимки не будут зависеть от этого значения.</string>
@@ -193,6 +194,7 @@
     <string name="dialog_button_discard_changes">Отменить</string>
     <string name="dialog_button_dismiss">Удалить</string>
     <string name="dialog_button_download_with_browser">Браузер</string>
+    <string name="dialog_button_enable">Включить</string>
     <string name="dialog_button_exception_details">Детали</string>
     <string name="dialog_button_file_information">Информация о файле</string>
     <string name="dialog_button_history">История</string>
@@ -574,7 +576,6 @@
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
-    <string name="hint_terminal_command">Введите команду</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
     <string name="image_editor_brightness">Яркость</string>
@@ -872,6 +873,7 @@
     <string name="text_active_window_root">Корневой узел активного окна</string>
     <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
+    <string name="text_add_application">Добавить приложение</string>
     <string name="text_add_bom">Добавить BOM</string>
     <string name="text_add_color_library">Добавить цветовую библиотеку</string>
     <string name="text_add_files_or_folders">Добавить файлы или папки</string>
@@ -1942,6 +1944,8 @@
     <string name="text_revoke_autojs6_access_in_shizuku_app">Отмена привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
     <string name="text_root_access">Root-доступ</string>
+    <string name="text_root_manager_apps">Приложения для управления root</string>
+    <string name="text_root_manager_apps_empty">Подходящие приложения не найдены. Можно добавить установленное приложение вручную.</string>
     <string name="text_root_mode_title">Проверка прав root</string>
     <string name="text_run">Запустить</string>
     <string name="text_run_on_battery_change">При смене батареи</string>
@@ -2068,6 +2072,7 @@
     <string name="text_source_processing_completed">Обработка исходников завершена</string>
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
+    <string name="text_stable_mode_advice">При нестабильном анализе интерфейса попробуйте включить стабильный режим. Отключите его, если нужные элементы не обнаруживаются.\nПосле изменения перезапустите службу специальных возможностей. Предоставьте права root, изменения защищенных настроек или Shizuku для перезапуска из этого диспетчера либо перезапустите службу в системных настройках.</string>
     <string name="text_star">Звезда</string>
     <string name="text_start">Запустить</string>
     <string name="text_start_record">Начало записи</string>
@@ -2112,7 +2117,7 @@
     <string name="text_terminal_copy_home_path">Копировать путь домашнего каталога</string>
     <string name="text_terminal_copy_transcript">Копировать вывод</string>
     <string name="text_terminal_data_cleared">Данные терминала очищены</string>
-    <string name="text_terminal_input_tips">Поле команды переносит длинные строки. Нажмите на терминал для прямого ввода. Tab передает черновик shell для дополнения; Ctrl / Alt применяются к прямому вводу.</string>
+    <string name="text_terminal_input_tips">Вводите текст прямо в терминале. Нажмите и удерживайте текст, настройте выделение маркерами и выберите Копировать или Выделить все.\nПрокрутите левую область клавиш по горизонтали для доступа к другим символам. CTRL и ALT применяются к следующей клавише.</string>
     <string name="text_terminal_manager">Диспетчер терминала</string>
     <string name="text_terminal_new_session">Новый сеанс</string>
     <string name="text_terminal_no_npm_scripts">В package.json нет раздела scripts</string>
@@ -2141,6 +2146,7 @@
     <string name="text_terminal_npm_setup_failed">Не удалось подготовить npm и corepack из плагина Node.js Runtime, поэтому доступны только node и системная оболочка</string>
     <string name="text_terminal_other_package_managers">Другие менеджеры пакетов (yarn / pnpm)</string>
     <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните \"yarn --version\" или \"pnpm --version\", чтобы активировать их.</string>
+    <string name="text_terminal_package_management">Управление пакетами</string>
     <string name="text_terminal_package_name_hint">Имя пакета, например is-odd</string>
     <string name="text_terminal_preparing_npm">Подготовка npm и corepack из плагина Node.js Runtime...</string>
     <string name="text_terminal_running">Работает</string>
@@ -2153,6 +2159,7 @@
     <string name="text_terminal_sessions">Сеансы</string>
     <string name="text_terminal_share_transcript">Поделиться выводом</string>
     <string name="text_terminal_show_keyboard">Показать клавиатуру</string>
+    <string name="text_terminal_text_actions">Текст</string>
     <string name="text_terminal_tips">Подсказки по терминалу</string>
     <string name="text_terminal_tips_content">Оболочка работает от имени пользователя приложения AutoJs6 и имеет собственный домашний каталог (%1$s). Панель клавиш содержит Esc / Tab / Ctrl / Alt и клавиши курсора, долгое нажатие на экран выделяет текст, а меню копирует или отправляет вывод. node и npm становятся доступны после установки плагина Node.js Runtime с поддержкой терминала. После выхода из терминала сеанс и его процессы продолжают работать в фоне (с уведомлением); пункт меню \"Закрыть сеанс\" завершает его.</string>
     <string name="text_text_size">Размер текста</string>

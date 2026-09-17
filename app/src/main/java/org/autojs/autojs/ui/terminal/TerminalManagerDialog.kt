@@ -2,9 +2,18 @@ package org.autojs.autojs.ui.terminal
 
 import android.content.Context
 import com.afollestad.materialdialogs.MaterialDialog
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.terminal.NodeCliLocator
+import org.autojs.autojs.core.terminal.TerminalNodeSetup
+import org.autojs.autojs.core.terminal.TerminalPaths
+import org.autojs.autojs.core.terminal.TerminalPreferences
 import org.autojs.autojs.core.terminal.TerminalSessionManager
 import org.autojs.autojs.ui.devplugin.ConnectionManagerDialog
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 
 /** Session controls share the layout and section behavior of the connection managers. */
@@ -20,8 +29,7 @@ class TerminalManagerDialog private constructor(
     R.string.key_terminal_manager_sessions_level,
 ) {
     private val newSession = addAction(Action(R.string.text_terminal_new_session, R.drawable.ic_add_white_48dp, header = true) {
-        dialog.dismiss()
-        TerminalActivity.launchNew(context)
+        createSession()
     })
     private val closeAll = addAction(Action(R.string.text_terminal_close_all_sessions, R.drawable.ic_stop_button_fill, header = true) {
         TerminalSessionManager.closeAll()
@@ -61,12 +69,44 @@ class TerminalManagerDialog private constructor(
         setClients(sessions.map { session ->
             val directory = session.pty.currentDirectory()?.path ?: session.initialDirectory
             ClientRow(R.drawable.ic_terminal_black_48dp, getString(R.string.text_terminal_session_title, session.id),
-                "${session.paths.toTildePath(directory)}\nPID: ${session.pty.pid} | ${formatElapsed(now - session.createdAt)}") {
+                "${session.paths.toTildePath(directory)}\nPID: ${session.pty.pid} | ${formatElapsed(now - session.createdAt)}",
+                onOpen = { openSession(session.id) },
+                onClose = { TerminalSessionManager.close(session.id); refresh() }) {
                 showSession(session.id)
             }
         })
         setActionVisible(newSession, true)
         setActionVisible(closeAll, sessions.isNotEmpty())
+    }
+
+    private fun createSession() {
+        setActionEnabled(newSession, false)
+        val directory = WorkingDirectoryUtils.path
+        val options = TerminalPreferences.nodeEnvironmentOptions()
+        disposables.add(Single.fromCallable { runBlocking {
+            val paths = TerminalPaths.of(context).ensureLayout()
+            val resolution = runCatching { NodeCliLocator.resolve(context.applicationContext) }
+                .getOrElse { NodeCliLocator.Resolution.Unavailable.PluginMissing }
+            TerminalNodeSetup.prepare(context.applicationContext, paths, resolution, options)
+        } }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ prepared ->
+                setActionEnabled(newSession, true)
+                runCatching {
+                    // Start reading output even before a terminal view is attached.
+                    // zh-CN: 终端视图附加前即开始读取输出.
+                    TerminalSessionManager.create(context, directory, prepared.environment).pty.updateSize(80, 24)
+                }.onFailure { snack(it.message) }
+                refresh()
+            }, { error ->
+                setActionEnabled(newSession, true)
+                snack(error.message)
+            }))
+    }
+
+    private fun openSession(id: String) {
+        if (TerminalSessionManager.get(id)?.pty?.isProcessAlive != true) return refresh()
+        dialog.dismiss()
+        TerminalActivity.launchSession(context, id)
     }
 
     private fun showSession(id: String) {
@@ -85,7 +125,7 @@ class TerminalManagerDialog private constructor(
             .onNegative { _, _ -> TerminalSessionManager.close(id); refresh() }
             .positiveText(R.string.text_open)
             .positiveColorRes(R.color.dialog_button_attraction)
-            .onPositive { _, _ -> dialog.dismiss(); TerminalActivity.launchSession(context, id) }
+            .onPositive { _, _ -> openSession(id) }
             .widgetThemeColor()
             .show()
     }

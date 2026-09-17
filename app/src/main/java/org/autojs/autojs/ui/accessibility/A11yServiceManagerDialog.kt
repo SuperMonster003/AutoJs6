@@ -24,11 +24,16 @@ import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.R
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceSelfCheck
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.permission.WriteSecureSettingsPermission
+import org.autojs.autojs.permission.ShizukuPermission
+import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.ui.main.drawer.IPermissionItem.Companion.ACTION
 import org.autojs.autojs.ui.common.ManagerSettingsSection
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.ThreadUtils
@@ -44,20 +49,20 @@ import kotlin.math.roundToInt
 
 /**
  * Accessibility service manager, opened from the drawer entry's "Manager" button or by long-pressing
- * the entry. A dialog (not an Activity) with three sections: live status rows (each copyable), control
+ * the entry. A dialog (not an Activity) with three sections: live status rows, control
  * actions and the auto-enable preferences; the title's "more" menu copies the whole diagnostics text and
  * opens the system accessibility settings. It doubles as the on-device debugging panel of the accessibility
  * automation roadmap.
  *
  * The status and control sections have a persisted verbosity level stepped by the header buttons;
- * row heights are fixed per field so that values changing length (last event, latest activity, ...)
- * do not move the control rows under the user's finger.
+ * dynamic values have a line limit without reserving empty lines for short states. Permission and
+ * stable-mode rows open their controls; other status values can be copied.
  *
  * zh-CN: 无障碍服务管理器, 由抽屉条目的 "管理器" 按钮或长按条目打开. 对话框形式 (非 Activity), 含三个区块:
- * 实时状态行 (逐行可复制), 控制动作, 自动启用偏好; 标题栏 "更多" 菜单可复制完整诊断文本及打开系统无障碍设置.
+ * 实时状态行, 控制动作, 自动启用偏好; 标题栏 "更多" 菜单可复制完整诊断文本及打开系统无障碍设置.
  * 兼作无障碍自动化 Roadmap 的真机调试面板.
- * 状态与控制区各有一个由标题按钮逐级切换并持久化的详略等级; 各行高度按字段固定, 使长度变化的数值 (最近事件, 最近活动等)
- * 不会让控制行在用户手指下移动.
+ * 状态与控制区各有一个由标题按钮逐级切换并持久化的详略等级; 动态值限制最大行数, 短状态不预留空行.
+ * 权限与稳定模式条目打开对应控件, 其他状态值可复制.
  *
  * Created by SuperMonster003 on Sep 5, 2026.
  */
@@ -86,7 +91,7 @@ class A11yServiceManagerDialog private constructor(
         IMPORTANT(
             BASIC.fields + setOf(
                 Field.UPTIME, Field.LAST_EVENT, Field.WINDOWS, Field.ACTIVE_WINDOW_ROOT, Field.LATEST_PACKAGE, Field.LATEST_ACTIVITY,
-                Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU,
+                Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU, Field.STABLE_MODE,
             ),
         ),
         ALL(Field.entries.toSet());
@@ -132,6 +137,7 @@ class A11yServiceManagerDialog private constructor(
     private var selfCheckResult: String? = null
 
     private val settingsSection: ManagerSettingsSection
+    private var permissionDialog: MaterialDialog? = null
     private val dialog: MaterialDialog
 
     private val refreshTask = object : Runnable {
@@ -193,6 +199,7 @@ class A11yServiceManagerDialog private constructor(
             R.string.key_enable_a11y_service_with_shizuku,
             R.bool.pref_enable_a11y_service_with_shizuku,
         )
+        createSwitchRow(R.string.text_stable_mode, R.string.summary_stable_mode, R.string.key_stable_mode, R.bool.pref_stable_mode)
 
         dialog = MaterialDialog.Builder(context)
             .title(R.string.text_a11y_service_manager)
@@ -237,6 +244,7 @@ class A11yServiceManagerDialog private constructor(
         AccessibilityService.registry.removeListener(this)
         disposables.clear()
         settingsSection.dismiss()
+        permissionDialog?.dismiss()
     }
 
     // Collection reads windows / root node / service info over binder; keep it off the main thread and never overlap.
@@ -327,6 +335,27 @@ class A11yServiceManagerDialog private constructor(
             reserveLines(this, field)
             root.visibility = View.GONE
             root.setOnClickListener {
+                when (field) {
+                    Field.ROOT_ACCESS -> {
+                        permissionDialog?.dismiss()
+                        permissionDialog = RootManagerAppsDialog.show(context)
+                        return@setOnClickListener
+                    }
+                    Field.WRITE_SECURE_SETTINGS -> {
+                        permissionDialog?.dismiss()
+                        permissionDialog = WriteSecureSettingsPermission(context).adbDialog(ACTION.REQUEST).showAdaptive()
+                        return@setOnClickListener
+                    }
+                    Field.SHIZUKU -> {
+                        if (WrappedShizuku.hasPermission() || !WrappedShizuku.isRunning()) {
+                            if (WrappedShizuku.isInstalled(context)) WrappedShizuku.configWithContext(context)
+                            else ViewUtils.showToast(context, R.string.error_shizuku_is_not_installed)
+                        } else ShizukuPermission(context).request()
+                        return@setOnClickListener
+                    }
+                    Field.STABLE_MODE -> { showStableModeAdvice(); return@setOnClickListener }
+                    else -> Unit
+                }
                 val entry = latestReport?.entries?.firstOrNull { it.field == field } ?: return@setOnClickListener
                 ClipboardUtils.setClip(context, "${entry.label}: ${entry.value}")
                 ViewUtils.showSnack(dialog.view, R.string.text_already_copied_to_clip)
@@ -335,17 +364,15 @@ class A11yServiceManagerDialog private constructor(
     }
 
     /**
-     * Fixes the height of a row so that the dialog does not jump while values change: fields whose
-     * length varies on every refresh get a constant line count (the copy still holds the full text),
-     * fields that change rarely only get a cap, and the static or user-triggered ones stay free.
-     * zh-CN: 固定行高, 避免数值变化时对话框跳动: 每次刷新长度都可能变化的字段使用固定行数 (复制内容仍是全文),
-     * 很少变化的字段只设上限, 静态或由用户触发的字段不限制.
+     * Cap dynamic values without reserving blank lines for short states such as "Unbound".
+     * Copyable values retain their full text; configuration and self-check results stay unrestricted.
+     * zh-CN: 限制动态值的最大行数, 不为 "未绑定" 等短状态预留空行. 可复制的值保留全文, 配置与自检结果不限制行数.
      */
     private fun reserveLines(row: A11yServiceManagerEntryItemBinding, field: Field) {
         val (min, max) = when (field) {
             Field.SERVICE_STATUS, Field.SYSTEM_SETTINGS, Field.UPTIME, Field.EVENTS, Field.WINDOWS -> 1 to 1
-            Field.IN_PROCESS_INSTANCE, Field.LAST_EVENT, Field.ACTIVE_WINDOW_ROOT, Field.LATEST_PACKAGE, Field.LATEST_ACTIVITY, Field.LISTENERS -> 2 to 2
-            Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU -> 1 to 2
+            Field.IN_PROCESS_INSTANCE, Field.LAST_EVENT, Field.ACTIVE_WINDOW_ROOT, Field.LATEST_PACKAGE, Field.LATEST_ACTIVITY, Field.LISTENERS -> 1 to 2
+            Field.ROOT_ACCESS, Field.WRITE_SECURE_SETTINGS, Field.SHIZUKU, Field.STABLE_MODE -> 1 to 2
             Field.CONFIG, Field.SELF_CHECK -> return
         }
         row.value.minLines = min
@@ -373,8 +400,33 @@ class A11yServiceManagerDialog private constructor(
             title.setText(titleRes)
             subtitle.setText(summaryRes)
             sw.setPrefKey(context.getString(keyRes), context.resources.getBoolean(defaultRes))
+            if (keyRes == R.string.key_stable_mode) {
+                sw.setOnCheckedChangeListener { _, _ -> refresh() }
+            }
             root.setOnClickListener { sw.toggle() }
         }
+    }
+
+    private fun showStableModeAdvice() {
+        permissionDialog?.dismiss()
+        permissionDialog = MaterialDialog.Builder(context)
+            .title(R.string.text_stable_mode)
+            .content(R.string.text_stable_mode_advice)
+            .neutralText(R.string.dialog_button_dismiss)
+            .neutralColorRes(R.color.dialog_button_default)
+            .negativeText(R.string.dialog_button_disable)
+            .negativeColorRes(R.color.dialog_button_warn)
+            .onNegative { _, _ -> setStableMode(false) }
+            .positiveText(R.string.dialog_button_enable)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { _, _ -> setStableMode(true) }
+            .widgetThemeColor()
+            .showAdaptive()
+    }
+
+    private fun setStableMode(enabled: Boolean) {
+        Pref.putBoolean(R.string.key_stable_mode, enabled)
+        refresh()
     }
 
     private fun runAction(action: Action) {

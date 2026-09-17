@@ -440,7 +440,7 @@ open class DrawerFragment : Fragment() {
             val tool = this
             mMcpServerItem = DrawerMenuDisposableItem(
                 helper = tool,
-                icon = R.drawable.ic_cast_connected_black_48dp,
+                icon = R.drawable.ic_mcp_black_48dp,
                 title = R.string.text_mcp_server,
                 descriptionRes = R.string.description_mcp_server,
             ) {
