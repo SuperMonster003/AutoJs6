@@ -1333,7 +1333,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
             NodeBridgeModules.INPUT_OBSERVER to setOf("observeKeys", "drainEvents", "close", "getAvailableSources"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
-            NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove", "install", "update", "remove"),
+            NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "listApps", "verify", "prune", "planInstall", "planUpdate", "planRemove", "install", "update", "remove"),
             NodeBridgeModules.FILES to setOf("list", "stat", "read", "write", "mkdir", "rename", "delete"),
             NodeBridgeModules.CONSOLE to setOf("tail"),
         )

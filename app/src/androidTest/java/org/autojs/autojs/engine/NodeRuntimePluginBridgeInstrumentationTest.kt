@@ -108,7 +108,9 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_present"])
         assertEquals("exact_metadata_snapshot", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_present"])
-        assertEquals("bridge_engine_info", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_source"])
+        // Since plugin 1.5.5 the request executionMode is the authoritative lifecycle
+        // source; engine-info only provides the bridge context.
+        assertEquals("request_contract_with_bridge_context", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_source"])
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
@@ -328,12 +330,14 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                 expectedMessagePart = "no-such-module",
             ),
             FailureCase(
-                label = "unsupported tsx entry",
+                // Raw TypeScript (including TSX) never reaches the runtime; the plugin
+                // fails closed and asks for the host Compiler route.
+                label = "raw tsx entry",
                 sourceName = File(workDir, "widget.tsx").absolutePath,
                 source = "export default <div />;",
-                expectedCode = "ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION",
+                expectedCode = "ERR_AUTOJS6_TYPESCRIPT_COMPILER_REQUIRED",
                 expectedName = null,
-                expectedMessagePart = "TSX",
+                expectedMessagePart = "Raw TypeScript must be compiled",
             ),
         ).forEach { case ->
             val result = NodeJsRuntimePluginBridge.runScript(
