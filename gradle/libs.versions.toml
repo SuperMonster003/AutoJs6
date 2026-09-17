@@ -19,18 +19,6 @@ okhttp = "4.12.0"
 #noinspection NewerVersionAvailable,GradleDependency
 core-ktx = "1.15.0"
 
-#strictly : 2.8.0
-#purpose  : Compatibility for Android API Level < 26 (Android 8.0) [O]
-#because  : Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'
-#noinspection NewerVersionAvailable
-commons-io = "2.8.0"
-
-#strictly : 2.13.4.2
-#purpose  : Compatibility for Android API Level < 26 (Android 8.0) [O]
-#because  : Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'
-#noinspection NewerVersionAvailable
-jackson-databind = "2.13.4.2"
-
 #strictly : 1.2.17
 #purpose  : Compatibility for Android API Level < 26 (Android 8.0) [O]
 #because  : Version 2.x.x requires Android API Level which is not lower than 26 (current is 24)
@@ -53,7 +41,6 @@ circleimageview = "3.1.0"
 circularreveal = "2.0.1"
 commonmark = "commonmark-parent-0.9.0"
 commons-compress = "1.28.0"
-commons-lang3 = "3.18.0"
 constraintlayout = "2.2.1"
 easywindow = "10.3"
 eventbus = "3.3.1"
@@ -117,8 +104,6 @@ circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circ
 circularreveal = { module = "com.github.ozodrukh:CircularReveal", version.ref = "circularreveal" }
 commonmark = { module = "com.github.atlassian.commonmark-java:commonmark", version.ref = "commonmark" }
 commonmark-ext-heading-anchor = { module = "com.github.atlassian.commonmark-java:commonmark-ext-heading-anchor", version.ref = "commonmark" }
-commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
@@ -128,7 +113,6 @@ flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbo
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 jdeferred = { module = "org.jdeferred:jdeferred-android-aar", version.ref = "jdeferred" }
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }

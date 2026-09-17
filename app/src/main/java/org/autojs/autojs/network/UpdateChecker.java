@@ -19,11 +19,17 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
-import org.autojs.autojs.annotation.Lazy;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.ui.widget.CustomSnackbar;
 import org.autojs.autojs.network.api.StreamingUrlApi;
+import org.autojs.autojs.network.github.GitHubApiException;
+import org.autojs.autojs.network.github.GitHubRelease;
+import org.autojs.autojs.network.github.GitHubReleaseAsset;
+import org.autojs.autojs.network.github.GitHubReleaseAssetPicker;
+import org.autojs.autojs.network.github.GitHubReleaseClient;
+import org.autojs.autojs.network.github.GitHubRepositoryNotFoundException;
+import org.autojs.autojs.network.github.GitHubResponseFormatException;
 import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
 import org.autojs.autojs.network.entity.VersionInfo;
@@ -42,25 +48,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.kohsuke.github.GHAsset;
-import org.kohsuke.github.GHRelease;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.MarkdownMode;
-import org.kohsuke.github.PagedIterable;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.Reader;
-import java.net.URL;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -128,13 +124,17 @@ public class UpdateChecker {
         mRrlVersionPropsBlob = URL_BASE_GITHUB_HOME + gitHubUser + "/" + gitHubRepo + "/" + "blob" + "/" + gitHubMainBranch + "/" + gitHubVersionProperties;
     }
 
-    private static @Nullable Spanned getLatestReleaseFromGitHubRelease(GHRepository repo, GHRelease release) {
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-            return GitHubRepoUtils.getReleaseHtml(repo, release);
-        });
+    // Release notes are GitHub-flavored Markdown; render them locally with the bundled CommonMark parser
+    // instead of asking GitHub's /markdown endpoint (one fewer request, works with the anonymous rate limit).
+    // zh-CN: release 说明是 GitHub 风格 Markdown, 用内置 CommonMark 解析器本地渲染, 不再请求 GitHub 的 /markdown 端点
+    // (少一次请求, 且不受匿名限流影响).
+    private static @Nullable Spanned renderReleaseNotes(@Nullable String markdownBody) {
+        if (markdownBody == null || markdownBody.isBlank()) {
+            return null;
+        }
         try {
-            String rawHtmlContent = future.get(30, TimeUnit.SECONDS);
-            return Html.fromHtml(rawHtmlContent, Html.FROM_HTML_MODE_COMPACT);
+            String html = TextUtils.markdownToHtml(markdownBody.replace("\r\n", "\n"));
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -386,35 +386,36 @@ public class UpdateChecker {
         mUpdateDialog.show();
 
         mGitHubExecutor.execute(() -> {
-            GitHub github = GitHubRepoUtils.getConnection(context);
-            if (github == null) {
-                Dialog.setDialogContent(mUpdateDialog, R.string.error_cannot_connect_to_github);
-                return;
-            }
-
-            GHRepository repo = GitHubRepoUtils.getRepo(github, mGitHubUser, mGitHubRepo);
-            if (repo == null) {
+            GitHubRelease release;
+            try {
+                release = GitHubReleaseClient.create(context).getLatestRelease(mGitHubUser, mGitHubRepo);
+            } catch (GitHubRepositoryNotFoundException e) {
+                e.printStackTrace();
                 Dialog.setDialogContent(mUpdateDialog, context.getString(R.string.error_invalid_github_repo, mGitHubRepo));
                 return;
-            }
-
-            GHRelease release = GitHubRepoUtils.getRelease(repo);
-            if (release == null) {
-                Dialog.setDialogContent(mUpdateDialog, R.string.error_get_github_latest_release);
+            } catch (GitHubApiException | GitHubResponseFormatException e) {
+                // Non-2xx answers (no release, rate limit, invalid token) and malformed JSON: show GitHub's reason.
+                // zh-CN: 非 2xx 应答 (无 release, 限流, 令牌无效) 与 JSON 格式异常: 附带 GitHub 给出的原因.
+                e.printStackTrace();
+                Dialog.setDialogContent(mUpdateDialog, context.getString(R.string.error_get_github_latest_release) + "\n\n" + e.getMessage());
+                return;
+            } catch (IOException | RuntimeException e) {
+                e.printStackTrace();
+                Dialog.setDialogContent(mUpdateDialog, R.string.error_cannot_connect_to_github);
                 return;
             }
 
             mHandler.post(() -> setUpdateDialogButtonNeutral(context, release.getHtmlUrl()));
 
             String releaseTag = release.getTagName();
-            if (!GitHubRepoUtils.isTagMatches(releaseTag, propVersion)) {
+            if (!isTagMatches(releaseTag, propVersion)) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_corresponding_github_release_may_not_published);
                 return;
             }
 
-            fetchLatestChangelog(context, versionInfo, repo, release, releaseTag);
-            PagedIterable<GHAsset> assets = GitHubRepoUtils.getAssets(release);
-            if (assets == null) {
+            fetchLatestChangelog(context, versionInfo, release, releaseTag);
+            List<GitHubReleaseAsset> assets = release.getAssets();
+            if (assets.isEmpty()) {
                 mHandler.post(() -> new Dialog.Builder
                         .Prompt(context, R.string.error_empty_github_release_assets)
                         .build().show());
@@ -424,13 +425,13 @@ public class UpdateChecker {
         });
     }
 
-    private void fetchLatestChangelog(Context context, VersionInfo versionInfo, GHRepository repo, GHRelease release, String releaseTag) {
+    private void fetchLatestChangelog(Context context, VersionInfo versionInfo, GitHubRelease release, String releaseTag) {
         Language language = Objects.requireNonNullElse(Language.getPrefLanguageOrNull(), Language.EN);
         String languageTag = language.getLocalCompatibleLanguageTag();
         String urlSuffix = mGitHubChangelogFileProvider.with(languageTag);
 
         if (urlSuffix == null) {
-            Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(repo, release);
+            Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(release);
             if (fallbackLatestReleaseNotes == null) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_failed_to_retrieve_release_notes);
             } else {
@@ -505,7 +506,7 @@ public class UpdateChecker {
                         },
                         e -> {
                             e.printStackTrace();
-                            Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(repo, release);
+                            Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(release);
                             if (fallbackLatestReleaseNotes == null) {
                                 Dialog.setDialogContent(mUpdateDialog, R.string.error_failed_to_retrieve_release_notes);
                                 return;
@@ -631,8 +632,8 @@ public class UpdateChecker {
     }
 
     @Nullable
-    private Spanned getFallbackLatestReleaseNotes(GHRepository repo, GHRelease release) {
-        Spanned htmlSpannedContent = getLatestReleaseFromGitHubRelease(repo, release);
+    private Spanned getFallbackLatestReleaseNotes(GitHubRelease release) {
+        Spanned htmlSpannedContent = renderReleaseNotes(release.getBody());
         if (htmlSpannedContent == null || htmlSpannedContent.toString().isBlank()) {
             Log.d(TAG, "Failed to fetch the latest release notes (fallback)");
             return null;
@@ -641,8 +642,8 @@ public class UpdateChecker {
         return htmlSpannedContent;
     }
 
-    private void setUpdateDialogButtonNeutral(Context context, URL htmlUrl) {
-        String url = htmlUrl == null ? "" : htmlUrl.toString();
+    private void setUpdateDialogButtonNeutral(Context context, @Nullable String htmlUrl) {
+        String url = htmlUrl == null ? "" : htmlUrl;
         if (url.isEmpty()) return;
 
         mUpdateDialog.getActionButton(DialogAction.NEUTRAL).setText(R.string.dialog_button_view_with_browser);
@@ -652,7 +653,7 @@ public class UpdateChecker {
         });
     }
 
-    private void setUpdateDialogButtonPositive(@NonNull Context ctx, PagedIterable<GHAsset> ghAssets, VersionInfo versionInfo) {
+    private void setUpdateDialogButtonPositive(@NonNull Context ctx, List<GitHubReleaseAsset> assets, VersionInfo versionInfo) {
         MDButton positiveButton = mUpdateDialog.getActionButton(DialogAction.POSITIVE);
         positiveButton.setTextColor(ctx.getColor(R.color.dialog_button_attraction));
         positiveButton.setOnClickListener(v -> {
@@ -665,11 +666,11 @@ public class UpdateChecker {
             mGitHubExecutor.execute(() -> {
                 List<String> abiList = AndroidUtils.getDeviceFilteredAbiList();
                 abiList.add("universal");
-                GitHubRepoUtils.Asset targetAsset = GitHubRepoUtils.pickAssetIntelligently(ghAssets, abiList);
+                GitHubReleaseAssetPicker.Picked targetAsset = GitHubReleaseAssetPicker.pick(assets, abiList);
 
                 mPendingDialog.dismiss();
 
-                if (targetAsset == null) {
+                if (targetAsset == null || targetAsset.getAsset().getBrowserDownloadUrl() == null) {
                     mHandler.post(() -> new Dialog.Builder
                             .Prompt(ctx, R.string.error_parse_github_release_assets)
                             .positiveText(R.string.dialog_button_dismiss)
@@ -678,12 +679,10 @@ public class UpdateChecker {
                     return;
                 }
 
-                if (targetAsset.getAbi() != null) {
-                    versionInfo.setAbi(targetAsset.getAbi());
-                }
-                versionInfo.setFileName(targetAsset.getFileName());
-                versionInfo.setSize(targetAsset.getSize());
-                versionInfo.setDownloadUrl(targetAsset.getDownloadUrl());
+                versionInfo.setAbi(targetAsset.getAbi());
+                versionInfo.setFileName(targetAsset.getAsset().getName());
+                versionInfo.setSize(targetAsset.getAsset().getSize());
+                versionInfo.setDownloadUrl(targetAsset.getAsset().getBrowserDownloadUrl());
 
                 mHandler.post(() -> download(ctx, versionInfo));
             });
@@ -872,156 +871,9 @@ public class UpdateChecker {
 
     }
 
-    private static class GitHubRepoUtils {
-
-        private static GitHub mGitHubConnection;
-        private static String mGitHubConnectionTokenKey;
-
-        @Nullable
-        @Lazy
-        private static GitHub getConnection(Context context) {
-            try {
-                String token = GitHubTokenStore.getToken(context);
-                String tokenKey = token == null ? "anonymous" : token.length() + ":" + token.hashCode();
-                if (mGitHubConnection == null || !Objects.equals(mGitHubConnectionTokenKey, tokenKey)) {
-                    // FIXME by SuperMonster003 on May 31, 2022.
-                    //  ! Given that java.time package was added only in Android O (API 26),
-                    //  ! API 24 and 25 will throw an java.lang.NoClassDefFoundError here.
-                    //  ! zh-CN:
-                    //  ! 鉴于安卓 O (API 26) 才开始引入 java.time 包,
-                    //  ! API 24 以及 25 在此处将抛出一个 java.lang.NoClassDefFoundError 异常.
-                    mGitHubConnection = token == null ? GitHub.connectAnonymously() : GitHub.connectUsingOAuth(token);
-                    mGitHubConnectionTokenKey = tokenKey;
-                }
-                return mGitHubConnection;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Nullable
-        private static PagedIterable<GHAsset> getAssets(GHRelease release) {
-            try {
-                PagedIterable<GHAsset> assets = release.listAssets();
-                if (assets.toArray().length > 0) {
-                    return assets;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        private static Asset pickAssetIntelligently(PagedIterable<GHAsset> ghAssets, List<String> presetAbiList) {
-            Asset targetAsset = null;
-            try {
-                int pointer = presetAbiList.size();
-                for (GHAsset ghAsset : ghAssets) {
-                    String assetName = ghAsset.getName();
-                    for (int i = 0; i < presetAbiList.size(); i += 1) {
-                        String abi = presetAbiList.get(i);
-                        String regex = ".*\\b" + abi + "\\b.*";
-                        if (assetName.matches(regex)) {
-                            targetAsset = new Asset(ghAsset);
-                            pointer = Math.min(pointer, i);
-                            if (pointer == 0) {
-                                targetAsset.setAbi(abi);
-                                return targetAsset;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ignore) {
-                /* Ignored. */
-            }
-            return targetAsset;
-        }
-
-        @Nullable
-        private static String getReleaseHtml(GHRepository repo, GHRelease release) {
-            Reader reader;
-            try {
-                reader = repo.renderMarkdown(release.getBody(), MarkdownMode.MARKDOWN);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-            StringBuilder textBuilder = new StringBuilder();
-            try (Reader r = new BufferedReader(reader)) {
-                int c;
-                while ((c = r.read()) != -1) {
-                    textBuilder.append((char) c);
-                }
-                return textBuilder.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Nullable
-        private static GHRelease getRelease(GHRepository repo) {
-            try {
-                return repo.getLatestRelease();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Nullable
-        private static GHRepository getRepo(GitHub github, String userName, String repoName) {
-            try {
-                GHUser user = github.getUser(userName);
-                return user.getRepository(repoName);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Contract(pure = true)
-        private static boolean isTagMatches(String releaseTag, String propVersion) {
-            return releaseTag.endsWith(propVersion);
-        }
-
-        private static class Asset implements ExtendedVersionInfo {
-
-            private final GHAsset mGitHubAsset;
-
-            private String mAbi;
-
-            public Asset(GHAsset gitHubAsset) {
-                mGitHubAsset = gitHubAsset;
-            }
-
-            @Override
-            public String getAbi() {
-                return mAbi;
-            }
-
-            public void setAbi(String abi) {
-                mAbi = abi;
-            }
-
-            @Override
-            public String getFileName() {
-                return mGitHubAsset.getName();
-            }
-
-            @Override
-            public long getSize() {
-                return mGitHubAsset.getSize();
-            }
-
-            @Override
-            public String getDownloadUrl() {
-                return mGitHubAsset.getBrowserDownloadUrl();
-            }
-
-        }
-
+    @Contract(pure = true)
+    private static boolean isTagMatches(String releaseTag, String propVersion) {
+        return releaseTag.endsWith(propVersion);
     }
 
     private static class ObservableEmptyException extends RuntimeException {

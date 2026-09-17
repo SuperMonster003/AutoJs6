@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 17 日 に更新されました.
+データは 2026 年 9 月 18 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -168,7 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `新機能` Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言
 * `新機能` Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応
@@ -602,6 +602,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` VSCode 拡張機能から送信された TypeScript, Lua, Node.js, Bun, QuickJS, Python などのスクリプトがすべて Rhino JavaScript として実行されていた問題. ファイル名に対応するエンジンへルーティングするよう修正
 * `修正` VSCode 拡張機能接続のハンドシェイク拒否や接続失敗のダイアログが Activity 破棄後 (言語やダークモードの切り替え) に異常となる可能性があった問題. トーストで表示するよう変更
 * `修正` クライアントモードのサーバーアドレス履歴がハンドシェイク失敗時にのみ書き込まれ, 接続に成功したアドレスは記録されず, アドレスダイアログの "履歴" が常に空になる問題
+* `修正` 更新用 APK の選択で, 最優先 ABI に一致するパッケージがないリリースでは, 次点 ABI のパッケージではなくリスト後方の低優先度パッケージ (ユニバーサル版など) が選ばれることがあった問題
 * `改善` ユーザー補助サービス, クライアントモード, サーバーモードとターミナルの管理画面で各区画の展開ボタンと区切り線を統一; 設定は完全に折りたたみ, 歯車から別のダイアログで表示可能; クライアント操作の折りたたみ時に履歴を表示; 折りたたんだサーバー操作にも全クライアント切断ボタンを表示
 * `改善` ターミナルを直接 shell 入力に統一し, 大文字ラベルの2行キー, 固定ナビゲーションとスクロールする記号領域, 標準の選択ハンドルとコピー / 全選択, 用途別メニュー, 余白と独立したディレクトリ行を提供; ヒントはメニューのみで表示し, セッション作成後も管理画面を維持して各セッションの再開 / 停止ボタンを表示
 * `改善` ターミナル管理画面からセッションを作成または再開すると管理画面を保持してターミナルを開き, 戻る操作で管理を続行可能; ホームディレクトリのパスをコピーするメニュー項目を削除し, ディレクトリのサブタイトルをタップして完全なパスをコピー
@@ -756,6 +757,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` クライアントモードのアドレスダイアログ: "QR コードをスキャン" を入力欄末尾のアイコンからタイトルバーの "その他" メニュー項目に移動; スキャン画面のフラッシュライトボタンを削除 (コードは画面に表示され, 自ら発光するため)
 * `改善` クライアントモードとサーバーモードのマネージャー: ステータス欄とコントロール欄がユーザー補助サービスマネージャーと同様に段階的に展開 / 折りたたみ可能 (各 3 段階, 選択した段階を記憶; 全て折りたたむとステータスのタイトルに接続状態を表示し, 主要な操作はコントロール欄のタイトル行に移動); 3 つのマネージャーの "コピー" ボタンをタイトルバーの "その他" メニューの "情報をコピー" に移動, ユーザー補助サービスマネージャーの "システム" ボタンも同メニューの "システム設定" に移動
 * `改善` APK サイズを縮小: 使われていない HTML から Markdown への変換経路と未使用の依存関係を削除, CommonMark と Spongy Castle 経由で JUnit が製品版 DEX に入らないようにし, Rhino ランタイムに JLine ターミナルライブラリを同梱しない
+* `改善` 更新チェックは GitHub REST API (OkHttp + Gson) を直接呼び出して最新リリースと APK 一覧を取得し, フォールバックのリリースノートは GitHub の Markdown レンダリング API を使わずローカルで描画
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1037,7 +1039,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 17 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 18 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

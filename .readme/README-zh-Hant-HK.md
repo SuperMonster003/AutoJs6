@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 9 月 17 日.
+數據更新於 2026 年 9 月 18 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `新增` Android 17 本地網絡權限管理, 支援側欄, 設定頁及 VS Code 連接時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別及可複製報告
@@ -602,6 +602,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` VSCode 擴充功能傳送的 TypeScript, Lua, Node.js, Bun, QuickJS 及 Python 等指令碼一律按 Rhino JavaScript 執行的問題, 現按檔名路由至對應引擎
 * `修復` VSCode 擴充功能連線的握手拒絕或連線失敗對話框在 Activity 已銷毀 (切換語言或深色模式) 時可能異常的問題, 改為以 toast 顯示
 * `修復` 客戶端模式的伺服端位址歷史記錄僅在握手失敗時寫入, 成功連線過的位址反而從不記錄, 導致位址對話框的 "歷史記錄" 始終為空的問題
+* `修復` 檢查更新選擇安裝包時, 若列表中沒有與首選 ABI 匹配的安裝包, 可能選中列表靠後的低優先級安裝包 (如通用包) 而非次優先 ABI 的安裝包
 * `優化` 無障礙服務, 用戶端模式, 伺服器模式與終端機管理員統一分區標題的加減按鈕和分隔線; 設定區可完全收合並透過齒輪開啟獨立設定對話方塊; 用戶端模式收合後的控制列提供歷史記錄入口; 伺服器模式收合後的控制列提供中斷所有用戶端連線按鈕
 * `優化` 終端機直接使用 shell 輸入, 兩行按鍵採用大寫標籤, 固定導覽鍵並支援滑動符號區; 文字選取支援系統控制柄及複製 / 全選選單, 選單按用途分組, 內容保留邊距與獨立目錄提示行; 提示僅由選單開啟, 管理員建立工作階段後保持開啟並提供各工作階段繼續 / 停止按鈕
 * `優化` 終端管理器新建或繼續工作階段時打開終端頁面並保留管理器, 返回後可繼續管理; 點擊目錄副標題複製完整路徑, 取代複製主目錄路徑選單項目
@@ -756,6 +757,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 客戶端模式位址對話框的 "掃描二維碼" 由輸入框末尾圖示改為標題列 "更多" 選單項; 掃碼頁面移除閃光燈按鈕 (二維碼顯示於螢幕, 無需補光)
 * `優化` 客戶端模式與伺服端模式管理器的狀態區與控制區支援與無障礙服務管理器相同的逐級展開與收起 (狀態與控制各 3 級, 所選等級會被記住, 全部收起時狀態標題附帶連線狀態, 主要動作移入控制區標題列); 三個管理器的 "複製" 按鈕移入標題列 "更多" 選單作為 "複製信息", 無障礙服務管理器的 "系統" 按鈕同樣移入該選單作為 "系統設置"
 * `優化` 安裝包體積縮減: 移除停用的 HTML 轉 Markdown 鏈路與未使用的依賴, JUnit 不再隨 CommonMark 與 Spongy Castle 進入生產 DEX, Rhino 運行時不再打包 JLine 終端庫
+* `優化` 檢查更新改為直接調用 GitHub REST API (OkHttp + Gson) 獲取最新版本與安裝包列表, 更新說明的 release 回退內容改為本地渲染, 不再請求 GitHub 的 Markdown 渲染接口
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1037,7 +1039,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 17 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 9 月 18 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

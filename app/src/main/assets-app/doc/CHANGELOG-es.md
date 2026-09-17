@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -440,6 +440,7 @@
 * `Corrección` Los scripts enviados por la extensión de VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) se ejecutaban todos como JavaScript de Rhino; ahora se enrutan al motor correspondiente al nombre del archivo
 * `Corrección` Los diálogos de rechazo del handshake o de fallo de conexión de la extensión de VSCode podían comportarse mal tras destruirse la Activity (cambio de idioma o de modo oscuro); ahora recurren a un aviso
 * `Corrección` El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el "Historial" del diálogo de dirección permanecía vacío
+* `Corrección` Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida
 * `Mejora` Los gestores de accesibilidad, cliente, servidor y terminal comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial; los controles del servidor contraídos también ofrecen Desconectar todos los clientes
 * `Mejora` El terminal usa entrada shell directa, dos filas de teclas en mayúsculas con navegación fija y símbolos desplazables, controles de selección nativos con Copiar / Seleccionar todo, menús agrupados, márgenes y una línea de directorio separada; consejos solo desde el menú, gestor abierto tras crear sesiones y botones individuales para continuar / detener
 * `Mejora` Crear o reanudar una sesión abre el terminal y conserva el administrador para volver a él; tocar el subtítulo del directorio copia su ruta completa y sustituye la opción de copiar la ruta del directorio personal
@@ -594,6 +595,7 @@
 * `Mejora` Diálogo de dirección del modo cliente: "Escanear código QR" pasa del icono al final del campo al menú "Más" de la barra de título; la página de escaneo ya no tiene botón de linterna (el código se muestra en una pantalla, que se ilumina sola)
 * `Mejora` Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón "Copiar" de los tres administradores pasa al menú "Más" de la barra de título como "Copiar información", y el botón "Sistema" del administrador del servicio de accesibilidad igualmente como "Ajustes del sistema"
 * `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
+* `Mejora` La comprobación de actualizaciones ahora llama directamente a la GitHub REST API (OkHttp + Gson) para obtener la última versión y su lista de APK, y las notas de la versión de respaldo se renderizan localmente en lugar de usar el servicio de renderizado de Markdown de GitHub
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
@@ -623,6 +625,10 @@
 * `Dependencia` Se elimina la biblioteca local Rapid OCR
 * `Dependencia` Se elimina Flexmark Java HTML to Markdown version 0.64.8
 * `Dependencia` Se elimina la biblioteca local JavaMail for Android
+* `Dependencia` Se elimina GitHub API version 1.306
+* `Dependencia` Se elimina Jackson DataBind version 2.13.4.2
+* `Dependencia` Se elimina Commons IO version 2.8.0
+* `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
 * `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 

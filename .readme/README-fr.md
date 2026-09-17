@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 17 September 2026.
+Données mises à jour le 18 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -602,6 +602,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les scripts envoyés par l'extension VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) étaient tous exécutés comme du JavaScript Rhino ; ils sont désormais dirigés vers le moteur correspondant au nom du fichier
 * `Correction` Les dialogues de refus de handshake ou d'échec de connexion de l'extension VSCode pouvaient dysfonctionner une fois l'Activity détruite (changement de langue ou de mode sombre) ; ils se rabattent sur un toast
 * `Correction` L'historique des adresses de serveur du mode client n'était écrit qu'en cas d'échec de la poignée de main et jamais lors d'une connexion réussie, de sorte que l'"Historique" du dialogue d'adresse restait vide
+* `Correction` Lors du choix de l'APK d'une mise à jour, une version sans paquet pour la première ABI préférée pouvait sélectionner un paquet ultérieur de priorité inférieure dans la liste (comme le paquet universel) au lieu du paquet de l'ABI préférée suivante
 * `Amélioration` Les gestionnaires accessibilité, client, serveur et terminal partagent les boutons de déploiement et séparateurs; les réglages repliés sont accessibles dans une boîte de dialogue par une roue dentée, et les commandes client repliées incluent l'historique; les commandes serveur repliées proposent aussi Déconnecter tous les clients
 * `Amélioration` Le terminal utilise la saisie shell directe, deux rangées de touches en majuscules avec navigation fixe et symboles défilants, les poignées natives avec Copier / Tout sélectionner, des menus groupés, des marges et une ligne de répertoire séparée; conseils dans le menu uniquement, gestionnaire maintenu ouvert après création et boutons reprendre / arrêter par session
 * `Amélioration` Créer ou reprendre une session ouvre le terminal tout en conservant son gestionnaire pour le retour; toucher le sous-titre du répertoire copie son chemin complet et remplace la commande de copie du chemin du répertoire personnel
@@ -756,6 +757,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Dialogue d'adresse du mode client : "Scanner le code QR" passe de l'icône en fin de champ au menu "Plus" de la barre de titre ; la page de scan n'a plus de bouton de lampe (le code est affiché sur un écran, qui s'éclaire lui-même)
 * `Amélioration` Gestionnaires des modes client et serveur : les sections d'état et de contrôle se développent et se replient par paliers comme dans le gestionnaire du service d'accessibilité (3 niveaux chacune, le niveau choisi est mémorisé ; entièrement repliée, le titre de l'état porte l'état de connexion et les actions principales passent dans l'en-tête de contrôle) ; le bouton "Copier" des trois gestionnaires passe dans le menu "Plus" de la barre de titre sous "Copier les informations", et le bouton "Système" du gestionnaire du service d'accessibilité de même sous "Paramètres système"
 * `Amélioration` APK plus léger : suppression du chemin HTML vers Markdown désactivé et des dépendances inutilisées, JUnit n'entre plus dans le DEX de production via CommonMark et Spongy Castle, et le runtime Rhino n'embarque plus la bibliothèque de terminal JLine
+* `Amélioration` La vérification des mises à jour appelle désormais directement la GitHub REST API (OkHttp + Gson) pour la dernière version et sa liste d'APK, et les notes de version de secours sont rendues localement au lieu de passer par le service de rendu Markdown de GitHub
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1037,7 +1039,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 17 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 18 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

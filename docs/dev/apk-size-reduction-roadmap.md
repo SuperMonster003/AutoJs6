@@ -37,6 +37,7 @@
 | D14 | 内置 CHANGELOG 只保留 zh-Hans 与 en (Q5, 2026-09-17) | 其余 8 个语言与重复的 `CHANGELOG.md` 在资产合并时剪除, 离线回退链为 asset(当前语言) -> 缓存(当前语言) -> asset(en); 生成脚本与仓库内文件不变 (P6.5). |
 | D15 | 资源优化进入 (Q6, 2026-09-17) | P6.6: 仅无损 WebP 转换与 lint `UnusedResources` 驱动的删除, 不重绘. |
 | D16 | `com.stardust` 兼容包保留 (Q7, 2026-09-17) | P6.8 关闭; SpongyCastle 去留等 P4.2 设备证据 (Q8), 流程不变. |
+| D17 | log4j 代理类以自有实现同名提供 (Q9 方案 a, 2026-09-18) | P6.2 (d): `LogConfigurator` / `Level` / `LogManager` 三个脚本全局代理类由自有实现提供, 覆盖文档化用法 (`LogConfigurator` 的 fileName / filePattern / maxFileSize / maxBackupSize / rootLevel / configure(); `Level` 常量; `LogManager.getLogger(name)` / `getRootLogger()` 的 debug / info / warn / error / fatal); 其余 log4j API 不再提供, 文档与 d.ts 同步. |
 
 ---
 
@@ -89,19 +90,19 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | `org.spongycastle` | 2.28 | `modules/apk-signer` -> `libs.prov` | P4 |
 | `androidx.media3` + `com.google.common` (Guava, 经 `media3-common` 传入) | 2.18 + 1.13 | `libs.media3.*`, 仅 `core/media/ScriptMusicService.kt` | P6.1 (Q2) |
 | `kotlin.reflect` | 1.44 | `kotlin("reflect")`, 5 个调用点 | P3 |
-| `com.fasterxml` (Jackson) | 0.93 | `libs.jackson.databind`, 仅 `github-api` 需要 | P2 |
+| `com.fasterxml` (Jackson) | 0.93 | `libs.jackson.databind`, 仅 `github-api` 需要 | P2.4 已移除 (2026-09-18) |
 | `com.vladsch` (Flexmark) | 0.71 | `libs.flexmark.html2md`, 仅 `TextUtils.htmlToMarkdown`, 其唯一调用在已注释的 `parseHtmlFlow` | P1.1 |
 | `com.android.dx` + `com.legacy.android.dx` + `com.android.dex` | 0.45 + 0.43 + 0.03 | 两个本地 dx jar, 仅 `AndroidClassLoader.dexJar()` (单类 `defineClass` 路径) 与 `com.stardust` 兼容加载器 | P5.1 |
 | `com.stardust` | 0.43 | 旧 Auto.js 兼容包 | 保留 (Q7) |
-| `org.apache.commons.lang3` | 0.41 | `libs.commons.lang3`; 宿主直接引用仅 `ExplorerSorter.isAsciiPrintable`, 但 `github-api` 在运行时解析 `StringUtils` / `ToStringBuilder` (`GitHubClient`, `GHRepository`, `GHObject` 等 22 个类) | P1.5 去掉宿主引用, 依赖随 P2.4 移除 |
+| `org.apache.commons.lang3` | 0.41 | `libs.commons.lang3`; 宿主直接引用仅 `ExplorerSorter.isAsciiPrintable`, 但 `github-api` 在运行时解析 `StringUtils` / `ToStringBuilder` (`GitHubClient`, `GHRepository`, `GHObject` 等 22 个类) | P1.5 去掉宿主引用, P2.4 已移除 (2026-09-18) |
 | `org.jline` (+0.13 松散资源) | 0.36 | `libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar` 内打包的 JLine, 只有 Rhino shell 控制台用到; 宿主只引用 `tools.shell.ShellContextFactory` 与 `tools.debugger.*` | P1.7 |
 | `androidx.appcompatlegacy` | 0.33 | `libs/androidx-appcompat-1_0_2`, 供 `JsTextViewLegacy` | P6.4 (Q4) |
 | `org.joda` (+0.12 时区表) | 0.33 | `libs.joda.time`, 8 个文件; 文档记载的脚本 API | 保留 (D2) |
-| `org.kohsuke` | 0.27 | `libs/github-api-1_306.jar`, 仅 `UpdateChecker` | P2 |
+| `org.kohsuke` | 0.27 | `libs/github-api-1_306.jar`, 仅 `UpdateChecker` | P2.4 已移除 (2026-09-18) |
 | `org.apache.log4j` | 0.23 | `libs.log4j` + `android-logging-log4j`, `GlobalConsole` 文件日志; 5 个已知 CVE | P6.2 (Q3) |
-| `org.jsoup` | 0.23 | `UpdateChecker` (解析 GitHub 渲染的 HTML) 与 `parseHtmlFlow` (停用) | P2.5 |
+| `org.jsoup` | 0.23 | `UpdateChecker` (解析 GitHub 渲染的 changelog 页面, blob 链路) | P2.5 评估后保留 |
 | `javax.mail` + `com.sun.mail` + `javax.activation` | 0.25 | `libs/javamail-android/*.jar`, 全仓库 (含 assets / 文档 / d.ts) 无任何引用 | P1.3 |
-| `org.apache.commons.io` | 0.14 | `github-api` 与 `apk-signer` 传入, 宿主无直接引用 | P1.4 (模块侧) / P2.4 (宿主侧) |
+| `org.apache.commons.io` | 0.14 | `github-api` 与 `apk-signer` 传入, 宿主无直接引用 | P1.4 (模块侧) / P2.4 (宿主侧) 已移除 (2026-09-18) |
 | `org.apache.commons.codec` (+0.09 音标表) | 0.12 | `modules/apk-signer` 声明但模块源码无引用 | P1.4 |
 | `org.junit` + `junit` + `org.hamcrest` | 0.14 | 两条生产传入路径: `com.github.atlassian:commonmark-java` 聚合坐标带入 `commonmark-test-util`; `com.madgag.spongycastle:prov` 的 POM 把 `junit:junit:4.12` 声明为编译依赖. `resources.excludes("junit/**/*")` 只排除资源, 不影响 DEX | P1.2 |
 
@@ -115,7 +116,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | DEX 编译器 | 成立, 但拆分: dx 两个 jar 的用途 (单类 `defineClass`) 可以直接合并到 D8 (D8 已在 API 24 上用于 jar 编译, 依赖 `desugar_jdk_libs` 的 `java.nio.file`); R8 的移除受 D5 门禁. |
 | APK 签名依赖 | 成立, 但 `modules/apk-signer` 也被 `plugins/apk-builder-template` 依赖, 所以是模块拆分而非移除; `KeyStoreHelper.loadBks` 已经先尝试系统 `"BKS", "BC"` 再回退 SpongyCastle, 回退是否仍需要必须先测. |
 
-理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3); P3 约 0.6 MiB; P4 约 1.0 MiB; P5.1 约 0.4 MiB; P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
+理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3; 实测 -1.07 MiB, 见 P2.6); P3 约 0.6 MiB; P4 约 1.0 MiB; P5.1 约 0.4 MiB; P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
 
 ---
 
@@ -140,12 +141,12 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ### P2 更新检查瘦身 (GitHub SDK -> REST)
 
-- [ ] P2.1 盘点 `UpdateChecker.GitHubRepoUtils` 用到的接口: `GitHub.connectAnonymously` / `connectUsingOAuth(token)`, `getUser(name).getRepository(repo)`, `repo.getLatestRelease()` (含 `getTagName` / `getBody` / `getPublishedAt`), `release.listAssets()` (`getName` / `getSize` / `getBrowserDownloadUrl`), `repo.renderMarkdown(body, MARKDOWN)`; 记录鉴权头 / 限流 / 错误处理与 ABI 选包 (`pickAssetIntelligently`) 和多语言更新说明 (`fetchLatestChangelog`) 的现有行为作为回归清单.
-- [ ] P2.2 新增 `network/github/GitHubReleaseClient` (OkHttp + Gson, 复用宿主已有的 `OkHttpClient`): `GET /repos/{owner}/{repo}/releases/latest` 与 assets 列表, 可选 `Authorization: Bearer <token>`, 与 SDK 相同的超时与 `User-Agent`; 数据类只保留宿主使用的字段. JSON 解析与选包逻辑抽为纯函数并加 JVM 单测 (固定 JSON fixture).
-- [ ] P2.3 Markdown 渲染本地化: `renderMarkdown` 远程渲染改为 `TextUtils.markdownToHtml` (commonmark 已在宿主), 保留后续 `Jsoup` 解析到 `Spanned` 的流程不变; 无网络渲染失败分支随之消失.
-- [ ] P2.4 删除 `libs/github-api-1_306.jar`, `libs.jackson.databind`, 宿主侧 `libs.commons.io` (确认 `modules/apk-signer` 在 P1.4 后不再传入) 与 `libs.commons.lang3` (P1.5 之后只剩 github-api 的运行时引用), 相关 `strictly` 注释与 `libs.versions.toml` 条目; `coreLibraryDesugaring` 保留 (与 GitHub 段落无关). 预计 -1.75 MiB 归属 DEX.
-- [ ] P2.5 `jsoup` 去留评估: P2.3 后 `Jsoup` 只用于 "HTML -> Spanned" (`UpdateChecker` 第 600 行附近); 若 `HtmlCompat.fromHtml` + 现有 `CommonMarkdownView` 能覆盖列表 / 链接 / 代码块的显示, 移除 `libs.jsoup` (-0.23 MiB); 否则记录原因并保留.
-- [ ] P2.6 验证: JVM 单测 (解析 / 选包 / 令牌头); 设备冒烟 (附录 B 第 1 项) 覆盖有无令牌, 最新版本与已是最新两种结果, 更新说明多语言回退; 体积报告 `evidence/apk-size-p2-<日期>.md`; changelog `dependency` (移除 GitHub API 1.306 / Jackson Databind 2.13.4.2 / Apache Commons IO 2.8.0 / Apache Commons Lang3 3.18.0 / 视 P2.5 而定的 jsoup).
+- [x] P2.1 盘点完成: SDK 只用到 `GitHub.connectAnonymously` / `connectUsingOAuth(token)` (令牌来自 `GitHubTokenStore.getToken`), `getUser().getRepository()`, `repo.getLatestRelease()` (`getTagName` / `getHtmlUrl` / `getBody`), `release.listAssets()` (`getName` / `getSize` / `getBrowserDownloadUrl`), `repo.renderMarkdown(body, MARKDOWN)`. 回归清单: 六个错误分支的字符串 (`error_cannot_connect_to_github`, `error_invalid_github_repo`, `error_get_github_latest_release`, `error_empty_github_release_assets`, `error_corresponding_github_release_may_not_published`, `error_failed_to_retrieve_release_notes`) 与触发条件不变; ABI 选包顺序 `AndroidUtils.deviceFilteredAbiList + universal` 不变; 多语言更新说明的 blob / raw 竞速与 release 正文回退不变. 2026-09-18.
+- [x] P2.2 新增 `network/github/GitHubReleaseClient.kt` (OkHttp, 连接 15 s / 读取 20 s, `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`, `User-Agent: AutoJs6/<版本> (UpdateChecker)`, 有令牌时 `Authorization: Bearer`; 404 时再探测 `GET /repos/{owner}/{repo}` 以区分 "仓库不存在" 与 "无 release", 其他非 2xx 抛 `GitHubApiException(code, "HTTP <code>: <GitHub message>")`), `GitHubRelease.kt` (数据类与 `GitHubReleaseParser`, Gson `JsonParser`, 只保留 `tag_name` / `name` / `html_url` / `body` / `published_at` / `prerelease` / `assets[name, size, browser_download_url]`), `GitHubReleaseAssetPicker.kt` (纯函数; 顺带修正旧 `pickAssetIntelligently` 在首选 ABI 无匹配时会被列表靠后的低优先级资产覆盖的问题, `abi` 总是随资产返回). JVM 单测 `app/src/test/java/org/autojs/autojs/network/github/` 3 个类 14 个用例 (解析 / 选包 / 请求头与 404 区分 / 错误消息), 夹具 `app/src/test/resources/github/release-latest.json` 取自 v6.7.0 的真实应答; 全部通过 2026-09-18.
+- [x] P2.3 `UpdateChecker.renderReleaseNotes` 以 `TextUtils.markdownToHtml` + `Html.fromHtml(FROM_HTML_MODE_COMPACT)` 本地渲染 release 正文, 原 `CompletableFuture` 30 s 远程 `renderMarkdown` 及 `GitHubRepoUtils` 整体删除; 多语言 changelog 的 blob (Jsoup) / raw (commonmark) 竞速链路不变. 2026-09-18.
+- [x] P2.4 删除 `libs/github-api-1_306.jar`, `libs.jackson.databind`, `libs.commons.io`, `libs.commons.lang3` 及 `libs.versions.toml` 中的版本与 `strictly` 注释; 原 `dependencies /* GitHub API */` 段改为 `/* Desugar */` 只保留 `coreLibraryDesugaring`. 实测归属: `com.fasterxml` -0.93, `org.apache.commons.lang3` -0.41, `org.kohsuke` -0.27, `org.apache.commons.io` -0.14 MiB, 四者归零且无 "referenced only" 残留; `j$.time` -0.06 (desugar 按需裁剪). 2026-09-18.
+- [x] P2.5 `jsoup` 保留: P2.3 之后它仍承担多语言 changelog 的 blob 链路 (`parseLatestChangelogFromHtml` 选择 GitHub 服务端渲染页面的 `div.markdown-heading` 及其后续兄弟节点; 2026-09-18 抓取 blob 页面确认该 DOM 仍然存在), 该链路是 raw.githubusercontent.com 不可达时的真实回退, `HtmlCompat.fromHtml` 不能做 DOM 选择; 0.23 MiB 保留, 不计入 P2 收益. 2026-09-18.
+- [x] P2.6 验证: `:app:testAppDebugUnitTest --tests org.autojs.autojs.network.github.*` 14/14; `:app:assembleAppRelease` 通过; 体积报告 `evidence/apk-size-p2-20260918.md`: universal 38,683,730 字节 (对基线 -2.35 MiB, 对 P1 -1.07 MiB), arm64-v8a 37,486,704 字节 (-2.35 MiB), DEX 文件 10 -> 9, 定义方法 433,419 -> 392,456. 设备冒烟 Redmi 22120RN86C (API 33, 未存令牌): 脚本直接调用 `GitHubReleaseClient.create(context).getLatestRelease("SuperMonster003", "AutoJs6")` 822 ms 返回 v6.7.0 (6 个资产), 选包 `arm64-v8a` -> `autojs6-v6.7.0-arm64-v8a-62db1ff8.apk`, 正文 13,001 字符 Markdown 本地渲染为 8,828 字符 Spanned; 不存在的仓库 -> `GitHubRepositoryNotFoundException`, 无 release 的仓库 (`github/gitignore`) -> `GitHubReleaseNotFoundException`, 无效令牌 -> `GitHubApiException: HTTP 401: Bad credentials` (令牌头链路); UI 脚本以 `UpdateChecker.Builder(activity).setGitHubMainBranch("master").build().checkNow(true)` (与开发者选项 "检查更新 (忽略本地版本)" 相同) 弹出 "6.7.0" 对话框, 内容为英文 changelog (设备 UI 语言 en, 走 blob / raw 链路), 按钮 BROWSER / CANCEL / UPDATE; 指向 `v6.7.0` 标签的再跑一次结果相同. "远端 tag 与 version.properties 不匹配" 分支因远端 master 仍为 6.7.0 无法在线触发, 该逻辑 (`isTagMatches`) 未改动. changelog 10 语言已写入 (dependency 4 条, improvement 1 条, fix 1 条). 2026-09-18.
 
 ### P3 kotlin-reflect 移除
 
@@ -168,7 +169,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 ### P6 功能级候选 (需拍板)
 
 - [ ] P6.1 (Q2 已拍板: 替换, D11) `androidx.media3` (2.18 MiB) 与其带入的 Guava (1.13 MiB) 移除. 现状: `ScriptMusicService` (213 行) 是 `MediaSessionService`, 用到 `ExoPlayer.Builder`, `MediaItem` / `MediaMetadata`, `DefaultMediaNotificationProvider`, `MediaSession.Callback` (`ControllerInfo` / `ConnectionResult` / `SessionResult`), 播放器 API 为 setMediaItem / prepare / play / pause / stop / seekTo / duration / currentPosition / volume / repeatMode (OFF / ONE) / playbackState / isPlaying / addListener / clearMediaItems / release, 清单声明 `androidx.media3.session.MediaSessionService` intent-filter. 步骤: (a) 以 `MediaPlayer` 实现同一套播放器操作 (单曲 / 循环 / 进度 / 音量 / 状态回调), 用 `AudioManager` + `AudioFocusRequest` 处理焦点, 用平台 `MediaSession` + `Notification.MediaStyle` 提供通知控制与媒体按键, 服务仍为 `foregroundServiceType="mediaPlayback"`; (b) 清单去掉 media3 intent-filter; (c) 删除 `libs.media3.*` 与 catalog 条目; (d) 回归: 脚本 `media` 模块公开行为, `evidence/android-sdk-37-media3-20260914.md` 的前台服务 / 通知 / 焦点用例在 API 24 AVD 与 API 33+ 真机重跑; changelog `dependency` (移除 AndroidX Media3 ExoPlayer / Session 1.11.0; 6.8.0 内 "附加" 后又移除, 按 D7 删除 "附加" 条目) 与 `improvement`. 本地文件与 http(s) 直链 (`MediaPlayer.setDataSource`) 为支持范围, DASH / HLS 自适应流不在承诺内.
-- [ ] P6.2 (Q3 已拍板: 替换, D12) log4j 1.2.17 (0.23 MiB, 5 个 CVE) 与 `android-logging-log4j`: 现状为 `GlobalConsole` 经 `org.apache.log4j.Logger` 镜像每行日志, `Console.setGlobalLogConfig` (`runtime/api/augment/console/Console.kt:604`) 用 `LogConfigurator` 配置 file / filePattern / maxFileSize / maxBackupSize / immediateFlush / resetConfiguration / rootLevel, `resetGlobalLogConfig` 调 `LogManager.getLoggerRepository().resetConfiguration()`; 文档 `console.md` 记载全部选项且 `filePattern` 指向 log4j PatternLayout. 步骤: (a) 新增自有滚动文件日志器 (按 maxFileSize 分卷, maxBackupSize 轮换, immediateFlush 控制刷盘, rootLevel 过滤), 实现 PatternLayout 子集 `%d{fmt}` / `%p` / `%c` / `%C` / `%m` / `%n` / `%t` / `%r` 与 `%-5p` 一类宽度修饰, 未知转换符原样输出; 默认格式 `%d - [%p::%c::%C] - %m%n` 与默认文件 `android-log4j.log` 不变; (b) `GlobalConsole` 与两个 console API 改接新日志器, 行为用 JVM 单测固化 (格式, 分卷, 轮换, 级别); (c) 删除 `libs.log4j` / `libs.android.logging.log4j`; (d) 脚本全局代理类 `LogConfigurator` / `Level` / `LogManager` (`augment/global/Classes.kt:144, 210, 213`, 文档 `global.md`) 按 Q9 处理; changelog `dependency` (移除 Log4j 1.2.17 / Android Logging Log4j 1.0.3) 与 `improvement`.
+- [ ] P6.2 (Q3 已拍板: 替换, D12) log4j 1.2.17 (0.23 MiB, 5 个 CVE) 与 `android-logging-log4j`: 现状为 `GlobalConsole` 经 `org.apache.log4j.Logger` 镜像每行日志, `Console.setGlobalLogConfig` (`runtime/api/augment/console/Console.kt:604`) 用 `LogConfigurator` 配置 file / filePattern / maxFileSize / maxBackupSize / immediateFlush / resetConfiguration / rootLevel, `resetGlobalLogConfig` 调 `LogManager.getLoggerRepository().resetConfiguration()`; 文档 `console.md` 记载全部选项且 `filePattern` 指向 log4j PatternLayout. 步骤: (a) 新增自有滚动文件日志器 (按 maxFileSize 分卷, maxBackupSize 轮换, immediateFlush 控制刷盘, rootLevel 过滤), 实现 PatternLayout 子集 `%d{fmt}` / `%p` / `%c` / `%C` / `%m` / `%n` / `%t` / `%r` 与 `%-5p` 一类宽度修饰, 未知转换符原样输出; 默认格式 `%d - [%p::%c::%C] - %m%n` 与默认文件 `android-log4j.log` 不变; (b) `GlobalConsole` 与两个 console API 改接新日志器, 行为用 JVM 单测固化 (格式, 分卷, 轮换, 级别); (c) 删除 `libs.log4j` / `libs.android.logging.log4j`; (d) 脚本全局代理类 `LogConfigurator` / `Level` / `LogManager` (`augment/global/Classes.kt:144, 210, 213`, 文档 `global.md`) 按 D17 以自有实现同名提供; changelog `dependency` (移除 Log4j 1.2.17 / Android Logging Log4j 1.0.3) 与 `improvement`.
 - [ ] P6.3 `joda-time`: 文档记载的脚本 API, 保留 (D2); 仅评估 `org/joda/time/tz` 时区表是否可按 `supportedResourceLocales` 之外的策略裁剪 (不建议, 时区与语言无关).
 - [ ] P6.4 (Q4 已拍板: 为 Android 7.x 预留, 允许更好方案, D13) `androidx.appcompatlegacy` (0.33 MiB 归属 DEX; `appcompat-legacy.aar` 另带一整套 appcompat 1.0.2 资源: `values.xml` 179 KB 与 `abc_*` 布局, 并入 `res/` 与 `resources.arsc`): `ViewAttributesFactory` / `DynamicLayoutInflater` / `XmlConverter` 在 `SDK_INT < 26` 时把 UI 模式 `text` 元素映射到 `JsTextViewLegacy` (appcompat 1.0.2 的 `AppCompatTextView`), 修复 6.0.2 记录的 issue #4 / #9. 步骤: (a) 在 API 24 与 25 AVD 上把映射临时切到 `JsTextView` (现行 appcompat 1.7.1) 复现异常并记录堆栈; (b) 定位根因 (主题属性缺失 / emoji2 初始化 / TextClassifier 等), 优先在 `DynamicLayoutInflater` 侧用 `ContextThemeWrapper` 或属性补齐修复; (c) 修复经 API 24 / 25 AVD 与一台 Android 7.x 真机 (若可得) 验证后, 删除 `libs/androidx-appcompat-1_0_2`, `JsTextViewLegacy*` 3 个文件, `AppCompatTextViewLegacyAttributes`, `TextViewLegacyInflater`, `Classes.kt:477` 的别名与三处版本分支; (d) 无法修复则保留并把根因写入本条, 不再重复评估. 预计 -0.33 MiB DEX 加资源.
 - [ ] P6.5 (Q5 已拍板: 只内置 zh-Hans 与 en, D14) `assets/doc` 0.95 MiB: 现状 `assets-app/doc/` 有 10 个语言文件 (0.23-0.48 MB 各), 与 zh-Hans 同内容的 `CHANGELOG.md` (228,958 字节, 无代码读取) 和 `RHINO.md`; 只有 `ReleaseHistoryRepository.readBestLocalSample` 读取 `doc/CHANGELOG-<lang>.md`, 在线路径与缓存 (`CHANGELOG-<lang>.cache.md`) 已存在. 步骤: (a) `appMergedAssetPruneIncludes` 增加 `doc/CHANGELOG-{ar,es,fr,ja,ko,ru,zh-Hant-HK,zh-Hant-TW}.md` 与 `doc/CHANGELOG.md` (合并期剪除, 生成脚本与仓库文件不变, `RHINO.md` 保留); (b) `readBestLocalSample` 回退链改为 asset(当前语言) -> 缓存(当前语言) -> asset(en), 并加 JVM 单测 (纯函数选择逻辑); (c) 验证 zh-Hant-TW 语言下离线打开版本历史显示 en 样本, 联网后显示对应语言并写入缓存; 体积报告. 预计 -0.7 MiB.
@@ -196,7 +197,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | Q6 | PNG -> WebP 与未用资源清理是否进入本 Roadmap? | 建议进入, 仅无损转换与 lint 报告驱动的删除. | 进入 (D15). |
 | Q7 | `com.stardust` 兼容包去留? | 建议保留. | 保留 (D16). |
 | Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. | 等待设备证据. |
-| Q9 | log4j 替换后, 文档 `global.md` 列出的脚本全局代理类 `LogConfigurator` (`de.mindpipe...LogConfigurator`), `Level`, `LogManager` (`org.apache.log4j.*`) 如何处理? | 建议 (a): 用自有实现提供同名代理类, 覆盖文档化用法 (`LogConfigurator` 的 fileName / filePattern / maxFileSize / maxBackupSize / rootLevel / configure(); `Level` 常量; `LogManager.getLogger(name)` 与 `getRootLogger()` 的 debug / info / warn / error / fatal), 其余 log4j API 不再提供, 文档与 d.ts 同步; 备选 (b): 从 `Classes` 与 `global.md` 移除三个代理并在 changelog 标注. | 待拍板. |
+| Q9 | log4j 替换后, 文档 `global.md` 列出的脚本全局代理类 `LogConfigurator` (`de.mindpipe...LogConfigurator`), `Level`, `LogManager` (`org.apache.log4j.*`) 如何处理? | 建议 (a): 用自有实现提供同名代理类, 覆盖文档化用法, 其余 log4j API 不再提供, 文档与 d.ts 同步; 备选 (b): 从 `Classes` 与 `global.md` 移除三个代理并在 changelog 标注. | 方案 (a) (D17, 2026-09-18). |
 
 ## 附录 B. 冒烟清单
 
@@ -221,7 +222,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | 度量 | `tools/size/apk_size_report.py`, `docs/dev/evidence/apk-size-*.{md,json}` |
 | 依赖声明 | `app/build.gradle.kts` (`dependencies` 各段, `resourceExcludePatterns`, `packaging`), `gradle/libs.versions.toml`, `libs/*.jar`, `libs/javamail-android/`, `modules/apk-signer/build.gradle.kts` |
 | P1 代码 | `util/TextUtils.kt`, `ui/settings/ReleaseHistoryRepository.kt`, `model/explorer/ExplorerSorter.java` |
-| P2 代码 | `network/UpdateChecker.java` (`GitHubRepoUtils`), `network/api/*`, `ui/widget/CommonMarkdownView.kt` |
+| P2 代码 | `network/UpdateChecker.java`, `network/github/GitHubReleaseClient.kt` / `GitHubRelease.kt` / `GitHubReleaseAssetPicker.kt`, `app/src/test/java/org/autojs/autojs/network/github/`, `network/api/*` |
 | P3 代码 | `runtime/api/augment/global/GlobalClasses.kt`, `ocr/Ocr.kt`, `s13n/S13n.kt`, `selector/Selector.kt`, `web/WebSocketFields.kt` |
 | P4 代码 | `modules/apk-signer/src/main/java/com/mcal/apksigner/utils/KeyStoreHelper.kt`, `JksKeyStore.kt`, `JKS.java`, `apkbuilder/template/RemoteBuildExpectedSignerResolver.kt`, `RemoteBuildApkValidator.kt`, `plugins/apk-builder-template/` |
 | P5 代码 | `rhino/AndroidClassLoader.kt` (`dexJar`, `loadJarLocally*`), `com/stardust/autojs/rhino/AndroidClassLoader.java`, `docs/dev/dex-compiler-plugin-evaluation.md` |

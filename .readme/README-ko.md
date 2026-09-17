@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026/09/17.
+데이터 갱신일: 2026/09/18.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공
@@ -602,6 +602,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` VSCode 확장 프로그램이 보낸 TypeScript, Lua, Node.js, Bun, QuickJS, Python 등의 스크립트가 모두 Rhino JavaScript로 실행되던 문제. 이제 파일 이름에 맞는 엔진으로 라우팅
 * `수정` VSCode 확장 프로그램 연결의 핸드셰이크 거부 또는 연결 실패 대화상자가 Activity 소멸 후 (언어 또는 다크 모드 전환) 비정상 동작할 수 있던 문제. 토스트로 표시하도록 변경
 * `수정` 클라이언트 모드의 서버 주소 기록이 핸드셰이크 실패 시에만 기록되고 성공적으로 연결한 주소는 기록되지 않아 주소 대화 상자의 "기록"이 항상 비어 있던 문제
+* `수정` 업데이트용 APK 선택 시 최우선 ABI 에 맞는 패키지가 없는 릴리스에서 다음 우선순위 ABI 의 패키지 대신 목록 뒤쪽의 낮은 우선순위 패키지 (유니버설 등) 가 선택될 수 있었던 문제
 * `개선` 접근성 서비스, 클라이언트 모드, 서버 모드 및 터미널 관리자의 영역별 확장 버튼과 구분선을 통일; 설정을 완전히 접으면 톱니바퀴로 별도 대화상자를 열 수 있고, 접힌 클라이언트 제어에 기록 항목 표시; 접힌 서버 제어에도 모든 클라이언트 연결 해제 버튼 표시
 * `개선` 터미널을 직접 shell 입력으로 통일하고 대문자 레이블의 두 줄 키, 고정 탐색키와 스크롤 기호 영역, 시스템 선택 핸들과 복사 / 전체 선택, 용도별 메뉴, 여백과 별도 디렉터리 행을 제공; 도움말은 메뉴에서만 표시하고 세션 생성 후에도 관리자를 유지하며 개별 계속 / 중지 버튼 제공
 * `개선` 터미널 관리자에서 세션을 만들거나 재개하면 관리자를 유지한 채 터미널 화면을 열고 뒤로 가기로 관리 계속 가능; 홈 디렉터리 경로 복사 메뉴 대신 디렉터리 부제목을 눌러 전체 경로 복사
@@ -756,6 +757,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 클라이언트 모드 주소 대화 상자: "QR 코드 스캔"을 입력란 끝 아이콘에서 제목 표시줄의 "더보기" 메뉴 항목으로 이동; 스캔 화면의 손전등 버튼 제거 (코드가 화면에 표시되어 자체 발광하므로)
 * `개선` 클라이언트 모드 및 서버 모드 관리자: 상태 영역과 제어 영역을 접근성 서비스 관리자와 같이 단계별로 펼치고 접을 수 있음 (각 3단계, 선택한 단계 기억; 모두 접으면 상태 제목에 연결 상태가 표시되고 주요 작업은 제어 영역 제목 행으로 이동); 세 관리자의 "복사" 버튼을 제목 표시줄 "더보기" 메뉴의 "정보 복사"로 이동, 접근성 서비스 관리자의 "시스템" 버튼도 같은 메뉴의 "시스템 설정"으로 이동
 * `개선` APK 크기 축소: 사용하지 않는 HTML -> Markdown 변환 경로와 미사용 의존성을 제거, JUnit이 CommonMark 및 Spongy Castle을 통해 프로덕션 DEX에 포함되지 않도록 하고, Rhino 런타임에 JLine 터미널 라이브러리를 더 이상 포함하지 않음
+* `개선` 업데이트 확인이 GitHub REST API (OkHttp + Gson) 를 직접 호출하여 최신 릴리스와 APK 목록을 가져오고, 대체 릴리스 노트는 GitHub 의 Markdown 렌더링 API 대신 로컬에서 렌더링
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1037,7 +1039,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026/09/17 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026/09/18 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

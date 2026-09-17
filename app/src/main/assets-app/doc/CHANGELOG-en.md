@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -440,6 +440,7 @@
 * `Fix` Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name
 * `Fix` Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast
 * `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
+* `Fix` When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI
 * `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
 * `Improvement` Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons
 * `Improvement` Creating or resuming a session from the terminal manager opens a terminal activity while preserving the manager for Back navigation; tapping the directory subtitle copies its full path instead of using a Copy home path menu item
@@ -594,6 +595,7 @@
 * `Improvement` Client mode address dialog: "Scan QR code" moved from the icon at the end of the input to the "more" menu in the title bar; the scan page no longer has a flashlight button (the code is shown on a screen, which lights itself)
 * `Improvement` Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the "Copy" button of all three managers moved into the title bar "more" menu as "Copy information", and the "System" button of the accessibility service manager likewise as "System settings"
 * `Improvement` Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library
+* `Improvement` Update check now calls the GitHub REST API directly (OkHttp + Gson) for the latest release and its APK list, and the release-notes fallback is rendered locally instead of through GitHub's Markdown rendering endpoint
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -624,6 +626,10 @@
 * `Dependency` Removed local Rapid OCR library
 * `Dependency` Removed Flexmark Java HTML to Markdown version 0.64.8
 * `Dependency` Removed local JavaMail for Android library
+* `Dependency` Removed GitHub API version 1.306
+* `Dependency` Removed Jackson DataBind version 2.13.4.2
+* `Dependency` Removed Commons IO version 2.8.0
+* `Dependency` Removed Apache Commons Lang3 version 3.18.0
 * `Dependency` Appended ZXing Android Embedded version 4.3.0
 
 # v6.7.0

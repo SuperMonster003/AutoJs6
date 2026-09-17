@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -440,6 +440,7 @@
 * `Correction` Les scripts envoyés par l'extension VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) étaient tous exécutés comme du JavaScript Rhino ; ils sont désormais dirigés vers le moteur correspondant au nom du fichier
 * `Correction` Les dialogues de refus de handshake ou d'échec de connexion de l'extension VSCode pouvaient dysfonctionner une fois l'Activity détruite (changement de langue ou de mode sombre) ; ils se rabattent sur un toast
 * `Correction` L'historique des adresses de serveur du mode client n'était écrit qu'en cas d'échec de la poignée de main et jamais lors d'une connexion réussie, de sorte que l'"Historique" du dialogue d'adresse restait vide
+* `Correction` Lors du choix de l'APK d'une mise à jour, une version sans paquet pour la première ABI préférée pouvait sélectionner un paquet ultérieur de priorité inférieure dans la liste (comme le paquet universel) au lieu du paquet de l'ABI préférée suivante
 * `Amélioration` Les gestionnaires accessibilité, client, serveur et terminal partagent les boutons de déploiement et séparateurs; les réglages repliés sont accessibles dans une boîte de dialogue par une roue dentée, et les commandes client repliées incluent l'historique; les commandes serveur repliées proposent aussi Déconnecter tous les clients
 * `Amélioration` Le terminal utilise la saisie shell directe, deux rangées de touches en majuscules avec navigation fixe et symboles défilants, les poignées natives avec Copier / Tout sélectionner, des menus groupés, des marges et une ligne de répertoire séparée; conseils dans le menu uniquement, gestionnaire maintenu ouvert après création et boutons reprendre / arrêter par session
 * `Amélioration` Créer ou reprendre une session ouvre le terminal tout en conservant son gestionnaire pour le retour; toucher le sous-titre du répertoire copie son chemin complet et remplace la commande de copie du chemin du répertoire personnel
@@ -594,6 +595,7 @@
 * `Amélioration` Dialogue d'adresse du mode client : "Scanner le code QR" passe de l'icône en fin de champ au menu "Plus" de la barre de titre ; la page de scan n'a plus de bouton de lampe (le code est affiché sur un écran, qui s'éclaire lui-même)
 * `Amélioration` Gestionnaires des modes client et serveur : les sections d'état et de contrôle se développent et se replient par paliers comme dans le gestionnaire du service d'accessibilité (3 niveaux chacune, le niveau choisi est mémorisé ; entièrement repliée, le titre de l'état porte l'état de connexion et les actions principales passent dans l'en-tête de contrôle) ; le bouton "Copier" des trois gestionnaires passe dans le menu "Plus" de la barre de titre sous "Copier les informations", et le bouton "Système" du gestionnaire du service d'accessibilité de même sous "Paramètres système"
 * `Amélioration` APK plus léger : suppression du chemin HTML vers Markdown désactivé et des dépendances inutilisées, JUnit n'entre plus dans le DEX de production via CommonMark et Spongy Castle, et le runtime Rhino n'embarque plus la bibliothèque de terminal JLine
+* `Amélioration` La vérification des mises à jour appelle désormais directement la GitHub REST API (OkHttp + Gson) pour la dernière version et sa liste d'APK, et les notes de version de secours sont rendues localement au lieu de passer par le service de rendu Markdown de GitHub
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise
@@ -624,6 +626,10 @@
 * `Dépendance` Suppression de la bibliothèque locale Rapid OCR
 * `Dépendance` Suppression de Flexmark Java HTML to Markdown version 0.64.8
 * `Dépendance` Suppression de la bibliothèque locale JavaMail for Android
+* `Dépendance` Suppression de GitHub API version 1.306
+* `Dépendance` Suppression de Jackson DataBind version 2.13.4.2
+* `Dépendance` Suppression de Commons IO version 2.8.0
+* `Dépendance` Suppression de Apache Commons Lang3 version 3.18.0
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 
 # v6.7.0

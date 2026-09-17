@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sept 17, 2026.
+Data updated on Sept 18, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -602,6 +602,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name
 * `Fix` Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast
 * `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
+* `Fix` When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI
 * `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
 * `Improvement` Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons
 * `Improvement` Creating or resuming a session from the terminal manager opens a terminal activity while preserving the manager for Back navigation; tapping the directory subtitle copies its full path instead of using a Copy home path menu item
@@ -756,6 +757,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Client mode address dialog: "Scan QR code" moved from the icon at the end of the input to the "more" menu in the title bar; the scan page no longer has a flashlight button (the code is shown on a screen, which lights itself)
 * `Improvement` Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the "Copy" button of all three managers moved into the title bar "more" menu as "Copy information", and the "System" button of the accessibility service manager likewise as "System settings"
 * `Improvement` Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library
+* `Improvement` Update check now calls the GitHub REST API directly (OkHttp + Gson) for the latest release and its APK list, and the release-notes fallback is rendered locally instead of through GitHub's Markdown rendering endpoint
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1037,7 +1039,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sept 17, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 18, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

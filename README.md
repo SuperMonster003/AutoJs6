@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 17 日.
+数据更新于 2026 年 9 月 18 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/17
+###### 2026/09/18
 
 * `新增` Android 17 本地网络权限管理, 支持抽屉, 设置页与 VS Code 连接时按需申请, 并按实际 targetSdk 声明权限
 * `新增` 设置页支持查看 Android 11 及以上的进程退出记录, 包含多进程近期系统原因, 内存限制器识别与可复制报告
@@ -578,6 +578,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` VSCode 插件发送的 TypeScript, Lua, Node.js, Bun, QuickJS 及 Python 等脚本一律按 Rhino JavaScript 执行的问题, 现按文件名路由到对应引擎
 * `修复` VSCode 插件连接的握手拒绝或连接失败对话框在 Activity 已销毁 (切换语言或暗色模式) 时可能异常的问题, 改为以 toast 展示
 * `修复` 客户端模式的服务端地址历史记录仅在握手失败时写入, 成功连接过的地址反而从不记录, 导致地址对话框的 "历史记录" 始终为空的问题
+* `修复` 检查更新选择安装包时, 若列表中没有与首选 ABI 匹配的安装包, 可能选中列表靠后的低优先级安装包 (如通用包) 而非次优先 ABI 的安装包
 * `优化` 无障碍服务, 客户端模式, 服务端模式与终端管理器统一分区标题的加减按钮和分隔线; 设置区可完全收起并通过齿轮打开独立设置对话框; 客户端模式收起后的控制栏提供历史记录入口; 服务端模式收起后的控制栏提供断开所有客户端按钮
 * `优化` 终端直接使用 shell 输入, 两行按键采用大写标签, 固定导航键并支持滑动符号区; 文本选择支持系统手柄及复制 / 全选菜单, 菜单按用途分组, 内容保留边距与独立目录提示行; 提示仅由菜单打开, 管理器新建会话后保持打开并提供逐会话继续 / 停止按钮
 * `优化` 终端管理器新建或继续会话时打开终端页面并保留管理器, 返回后可继续管理; 点击目录副标题复制完整路径, 替代复制主目录路径菜单项
@@ -735,6 +736,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 客户端模式地址对话框的 "扫描二维码" 由输入框末尾图标改为标题栏 "更多" 菜单项; 扫码页面移除闪光灯按钮 (二维码显示于屏幕, 无需补光)
 * `优化` 客户端模式与服务端模式管理器的状态区与控制区支持与无障碍服务管理器相同的逐级展开与收起 (状态与控制各 3 级, 所选等级会被记住, 全部收起时状态标题附带连接状态, 主要动作移入控制区标题行); 三个管理器的 "复制" 按钮移入标题栏 "更多" 菜单作为 "复制信息", 无障碍服务管理器的 "系统" 按钮同样移入该菜单作为 "系统设置"
 * `优化` 安装包体积缩减: 移除停用的 HTML 转 Markdown 链路与未使用的依赖, JUnit 不再随 CommonMark 与 Spongy Castle 进入生产 DEX, Rhino 运行时不再打包 JLine 终端库
+* `优化` 检查更新改为直接调用 GitHub REST API (OkHttp + Gson) 获取最新版本与安装包列表, 更新说明的 release 回退内容改为本地渲染, 不再请求 GitHub 的 Markdown 渲染接口
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1016,7 +1018,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 17 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 18 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

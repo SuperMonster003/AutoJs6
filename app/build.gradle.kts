@@ -827,28 +827,15 @@ dependencies /* View */ {
     implementation(libs.animated.svg.view)
 }
 
-dependencies /* GitHub API */ {
-    // GitHub API
-    implementation(files("$rootDir/libs/github-api-1_306.jar"))
+dependencies /* Desugar */ {
+    // The update checker used to depend on github-api (org.kohsuke) together with Jackson Databind,
+    // Commons IO and Commons Lang3; it now talks to the GitHub REST API through OkHttp + Gson
+    // (network/github/GitHubReleaseClient), see docs/dev/apk-size-reduction-roadmap.md P2.
+    // zh-CN: 更新检查曾依赖 github-api (org.kohsuke) 及 Jackson Databind, Commons IO, Commons Lang3;
+    // 现在经 OkHttp + Gson 直接访问 GitHub REST API (network/github/GitHubReleaseClient), 见 docs/dev/apk-size-reduction-roadmap.md P2.
 
-    // @Hint by SuperMonster003 on Sep 25, 2025.
-    //  ! Strict version: "2.8.0".
-    //  ! Compatibility for Android API Level < 26 (Android 8.0) [O].
-    //  ! Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'.
-    // Commons IO
-    implementation(libs.commons.io)
-
-    // Jackson Databind
-    implementation(libs.jackson.databind)
-
-    // Apache Commons Lang3: no longer referenced by host code, but github-api resolves StringUtils and
-    // ToStringBuilder at runtime (GitHubClient, GHRepository, GHObject); removed together with github-api
-    // (docs/dev/apk-size-reduction-roadmap.md P2.4).
-    // zh-CN: Apache Commons Lang3: 宿主代码已不再引用, 但 github-api 在运行时解析 StringUtils 与 ToStringBuilder
-    // (GitHubClient, GHRepository, GHObject); 随 github-api 一起移除 (docs/dev/apk-size-reduction-roadmap.md P2.4).
-    implementation(libs.commons.lang3)
-
-    // Desugar
+    // Desugar (java.time and other Java 8+ library APIs on API 24 / 25)
+    // zh-CN: Desugar (API 24 / 25 上的 java.time 等 Java 8+ 类库 API)
     coreLibraryDesugaring(libs.desugar)
 }
 

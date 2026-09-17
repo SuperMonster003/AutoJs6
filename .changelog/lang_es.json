@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/17",
+      "released_date": "2026/09/18",
       "feature": [
         "Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real",
         "Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar",
@@ -436,7 +436,8 @@
         "Al restaurar un directorio desde la papelera, los nombres de las entradas del archivo se validan contra la ruta canónica del destino, por lo que las entradas con \"..\" o rutas absolutas ya no pueden escribirse fuera del destino (dichas entradas se omiten y se registran)",
         "Los scripts enviados por la extensión de VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) se ejecutaban todos como JavaScript de Rhino; ahora se enrutan al motor correspondiente al nombre del archivo",
         "Los diálogos de rechazo del handshake o de fallo de conexión de la extensión de VSCode podían comportarse mal tras destruirse la Activity (cambio de idioma o de modo oscuro); ahora recurren a un aviso",
-        "El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el \"Historial\" del diálogo de dirección permanecía vacío"
+        "El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el \"Historial\" del diálogo de dirección permanecía vacío",
+        "Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida"
       ],
       "improvement": [
         "Los gestores de accesibilidad, cliente, servidor y terminal comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial; los controles del servidor contraídos también ofrecen Desconectar todos los clientes",
@@ -592,7 +593,8 @@
         "Escanear código QR para conectar: la cámara usa enfoque continuo con medición y la decodificación usa TRY_HARDER, lo que facilita mucho apuntar a un código en pantalla",
         "Diálogo de dirección del modo cliente: \"Escanear código QR\" pasa del icono al final del campo al menú \"Más\" de la barra de título; la página de escaneo ya no tiene botón de linterna (el código se muestra en una pantalla, que se ilumina sola)",
         "Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón \"Copiar\" de los tres administradores pasa al menú \"Más\" de la barra de título como \"Copiar información\", y el botón \"Sistema\" del administrador del servicio de accesibilidad igualmente como \"Ajustes del sistema\"",
-        "APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine"
+        "APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine",
+        "La comprobación de actualizaciones ahora llama directamente a la GitHub REST API (OkHttp + Gson) para obtener la última versión y su lista de APK, y las notas de la versión de respaldo se renderizan localmente en lugar de usar el servicio de renderizado de Markdown de GitHub"
       ],
       "dependency": [
         "Android AXML modularizado",
@@ -624,6 +626,10 @@
         "Se elimina la biblioteca local Rapid OCR",
         "Se elimina Flexmark Java HTML to Markdown version 0.64.8",
         "Se elimina la biblioteca local JavaMail for Android",
+        "Se elimina GitHub API version 1.306",
+        "Se elimina Jackson DataBind version 2.13.4.2",
+        "Se elimina Commons IO version 2.8.0",
+        "Se elimina Apache Commons Lang3 version 3.18.0",
         "Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0",
         "Anexado ZXing Android Embedded versión 4.3.0"
       ]
