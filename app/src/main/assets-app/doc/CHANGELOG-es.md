@@ -593,6 +593,7 @@
 * `Mejora` Escanear código QR para conectar: la cámara usa enfoque continuo con medición y la decodificación usa TRY_HARDER, lo que facilita mucho apuntar a un código en pantalla
 * `Mejora` Diálogo de dirección del modo cliente: "Escanear código QR" pasa del icono al final del campo al menú "Más" de la barra de título; la página de escaneo ya no tiene botón de linterna (el código se muestra en una pantalla, que se ilumina sola)
 * `Mejora` Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón "Copiar" de los tres administradores pasa al menú "Más" de la barra de título como "Copiar información", y el botón "Sistema" del administrador del servicio de accesibilidad igualmente como "Ajustes del sistema"
+* `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
@@ -600,7 +601,6 @@
 * `Dependencia` Spongy Castle Prov modularizado version 1.58.0.0
 * `Dependencia` Image Quantization modularizado version 2.17.0
 * `Dependencia` OpenCV modularizado version 4.8.0
-* `Dependencia` Se agrega Apache Commons Codec version 1.15
 * `Dependencia` Se agrega juniversalchardet version 2.0.4
 * `Dependencia` Se agrega AndroidX AsyncLayoutInflater version 1.1.0
 * `Dependencia` Se elimina Android Annotations version 4.8.0
@@ -621,6 +621,8 @@
 * `Dependencia` Se elimina Pinyin4j version 2.5.1
 * `Dependencia` Se elimina Jieba Analysis version 1.0.3-SNAPSHOT (modificada)
 * `Dependencia` Se elimina la biblioteca local Rapid OCR
+* `Dependencia` Se elimina Flexmark Java HTML to Markdown version 0.64.8
+* `Dependencia` Se elimina la biblioteca local JavaMail for Android
 * `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 

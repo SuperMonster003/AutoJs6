@@ -1,7 +1,5 @@
 package org.autojs.autojs.model.explorer;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -33,14 +31,24 @@ public class ExplorerSorter {
         String name1 = o1.getName();
         String name2 = o2.getName();
 
-        boolean isName1Ascii = StringUtils.isAsciiPrintable(name1.substring(0, 1));
-        boolean isName2Ascii = StringUtils.isAsciiPrintable(name2.substring(0, 1));
+        boolean isName1Ascii = startsWithAsciiPrintable(name1);
+        boolean isName2Ascii = startsWithAsciiPrintable(name2);
 
         if (isName1Ascii && isName2Ascii) return name1.compareToIgnoreCase(name2);
         if (isName1Ascii) return -1;
         if (isName2Ascii) return 1;
         return collator.compare(name1, name2);
     };
+
+    // Replaces StringUtils.isAsciiPrintable(name.substring(0, 1)) (Commons Lang3, removed for APK size);
+    // an empty name, which the former call would have rejected with an exception, sorts as non-ASCII.
+    // zh-CN: 替代 StringUtils.isAsciiPrintable(name.substring(0, 1)) (Commons Lang3 已因体积移除);
+    // 空名称 (原调用会抛出异常) 按非 ASCII 处理.
+    private static boolean startsWithAsciiPrintable(String name) {
+        if (name.isEmpty()) return false;
+        char first = name.charAt(0);
+        return first >= ' ' && first <= '~';
+    }
 
     public static final Comparator<ExplorerItem> DATE = Comparator.comparingLong(ExplorerItem::lastModified);
 

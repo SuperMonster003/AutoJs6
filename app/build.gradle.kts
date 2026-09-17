@@ -220,10 +220,16 @@ val resourcePickFirstPatterns = listOf(
 val resourceExcludePatterns = listOf(
     "com/**/*",
     "frameworks/**/*",
-    "junit/**/*",
-    "LICENSE-junit.txt",
-    "spec.txt",
-    "EmojiReference.txt",
+    // prism4j-bundler ships its Prism_*.java language templates and GrammarLocator template as resources;
+    // nothing reads them at runtime. Patterns are java.nio glob patterns: "languages/**/*" would only match
+    // entries nested at least two levels deep, so the single-level form is used.
+    // zh-CN: prism4j-bundler 把 Prism_*.java 语言模板与 GrammarLocator 模板打包为资源, 运行时无消费者.
+    // 模式是 java.nio glob: "languages/**/*" 只匹配至少两层深的条目, 因此使用单层形式.
+    "languages/*",
+    "GrammarLocator.template.java",
+    // kotlinx-coroutines debug probes.
+    // zh-CN: kotlinx-coroutines 调试探针.
+    "DebugProbesKt.bin",
 )
 
 val appMergedAssetPruneIncludes = listOf(
@@ -449,6 +455,23 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
+// The local Rhino build is a fat jar that bundles JLine (org.jline.**, native terminal helpers including
+// Windows DLLs) for Rhino's interactive shell. The host only uses ShellContextFactory and the debugger
+// API, so the packaged runtime jar is derived without JLine; the original jar stays untouched.
+// zh-CN: 本地 Rhino 构建是打包了 JLine (org.jline.**, 含 Windows DLL 的原生终端助手) 的 fat jar, JLine 只供
+// Rhino 交互式 shell 使用. 宿主只用到 ShellContextFactory 与调试器 API, 因此打包的运行时 jar 从原 jar 派生并去掉 JLine,
+// 原 jar 保持不变.
+val rhinoJar = file("$rootDir/libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar")
+val slimRhinoJar by tasks.registering(Jar::class) {
+    description = "Derives the Rhino runtime jar without the JLine shell console."
+    from(zipTree(rhinoJar)) {
+        exclude("org/jline/**", "META-INF/maven/org.jline/**", "META-INF/native-image/**", "META-INF/services/org/jline/**")
+    }
+    includeEmptyDirs = false
+    archiveFileName.set(rhinoJar.name.removeSuffix(".jar") + "-slim.jar")
+    destinationDirectory.set(layout.buildDirectory.dir("slim-libs"))
+}
+
 dependencies /* Unclassified */ {
     // Compose
     // implementation("androidx.compose.ui:ui-android:1.6.7")
@@ -482,17 +505,15 @@ dependencies /* Unclassified */ {
     // FlexboxLayout
     implementation(libs.flexbox)
 
-    // Common Markdown
+    // Common Markdown (only the core parser and the heading-anchor extension are used;
+    // the JitPack aggregate coordinate also pulled commonmark-test-util and therefore JUnit into the APK)
+    // zh-CN: Common Markdown (只使用核心解析器与 heading-anchor 扩展;
+    // JitPack 聚合坐标还会把 commonmark-test-util 及 JUnit 带入 APK)
     implementation(libs.commonmark)
-
-    // Flexmark Java HTML to Markdown Extensible Converter
-    implementation(libs.flexmark.html2md)
+    implementation(libs.commonmark.ext.heading.anchor)
 
     // Licenses Dialog
     implementation(libs.licensesdialog)
-
-    // Apache Commons
-    implementation(libs.commons.lang3)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -587,17 +608,16 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:markwon-syntax-highlight-4_6_2"))
 
     // Rhino
-    implementation(files("$rootDir/libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar"))
+    // Compile against the full jar (IDE resolution, test compilation) but package and run the derived jar
+    // without the JLine shell console (see slimRhinoJar above).
+    // zh-CN: 编译使用完整 jar (IDE 解析, 测试编译), 打包与运行使用去掉 JLine shell 控制台的派生 jar (见上方 slimRhinoJar).
+    compileOnly(files(rhinoJar))
+    runtimeOnly(files(slimRhinoJar.map { it.archiveFile }))
 
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9_0_0"))
     implementation(project(":libs:android-assertion-9_0_0"))
     implementation(project(":libs:android-plugin-client-sdk-for-locale-9_0_0"))
-
-    // JavaMail for Android
-    implementation(files("$rootDir/libs/javamail-android/activation.jar"))
-    implementation(files("$rootDir/libs/javamail-android/additionnal.jar"))
-    implementation(files("$rootDir/libs/javamail-android/mail.jar"))
 
     // Shizuku
     implementation(libs.shizuku.api)
@@ -734,6 +754,11 @@ dependencies /* Script music playback */ {
 dependencies /* Test */ {
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.runner)
+
+    // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.
+    // zh-CN: Rhino 在主源码集是 compileOnly, 测试的编译类路径也需要它.
+    testCompileOnly(files(rhinoJar))
+    androidTestCompileOnly(files(rhinoJar))
 }
 
 dependencies /* Annotations */ {
@@ -815,6 +840,13 @@ dependencies /* GitHub API */ {
 
     // Jackson Databind
     implementation(libs.jackson.databind)
+
+    // Apache Commons Lang3: no longer referenced by host code, but github-api resolves StringUtils and
+    // ToStringBuilder at runtime (GitHubClient, GHRepository, GHObject); removed together with github-api
+    // (docs/dev/apk-size-reduction-roadmap.md P2.4).
+    // zh-CN: Apache Commons Lang3: 宿主代码已不再引用, 但 github-api 在运行时解析 StringUtils 与 ToStringBuilder
+    // (GitHubClient, GHRepository, GHObject); 随 github-api 一起移除 (docs/dev/apk-size-reduction-roadmap.md P2.4).
+    implementation(libs.commons.lang3)
 
     // Desugar
     coreLibraryDesugaring(libs.desugar)

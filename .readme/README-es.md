@@ -755,6 +755,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Escanear código QR para conectar: la cámara usa enfoque continuo con medición y la decodificación usa TRY_HARDER, lo que facilita mucho apuntar a un código en pantalla
 * `Mejora` Diálogo de dirección del modo cliente: "Escanear código QR" pasa del icono al final del campo al menú "Más" de la barra de título; la página de escaneo ya no tiene botón de linterna (el código se muestra en una pantalla, que se ilumina sola)
 * `Mejora` Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón "Copiar" de los tres administradores pasa al menú "Más" de la barra de título como "Copiar información", y el botón "Sistema" del administrador del servicio de accesibilidad igualmente como "Ajustes del sistema"
+* `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

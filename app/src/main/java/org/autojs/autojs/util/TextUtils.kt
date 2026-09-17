@@ -3,7 +3,6 @@ package org.autojs.autojs.util
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter
 import org.commonmark.ext.heading.anchor.HeadingAnchorExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
@@ -20,15 +19,8 @@ object TextUtils {
             .build()
     }
 
-    private val mHtmlParser by lazy {
-        FlexmarkHtmlConverter.builder().build()
-    }
-
     @JvmStatic
     fun markdownToHtml(markdown: String): String = mMarkdownParser.parse(markdown).let { mHtmlRender.render(it) }
-
-    @JvmStatic
-    fun htmlToMarkdown(html: String): String = mHtmlParser.convert(html)
 
     @JvmStatic
     @JvmOverloads

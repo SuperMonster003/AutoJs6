@@ -593,6 +593,7 @@
 * `개선` QR 코드 스캔으로 연결: 카메라가 연속 초점과 측광을 사용하고, 디코딩에 TRY_HARDER를 사용하여 화면의 코드를 맞추기가 훨씬 쉬워짐
 * `개선` 클라이언트 모드 주소 대화 상자: "QR 코드 스캔"을 입력란 끝 아이콘에서 제목 표시줄의 "더보기" 메뉴 항목으로 이동; 스캔 화면의 손전등 버튼 제거 (코드가 화면에 표시되어 자체 발광하므로)
 * `개선` 클라이언트 모드 및 서버 모드 관리자: 상태 영역과 제어 영역을 접근성 서비스 관리자와 같이 단계별로 펼치고 접을 수 있음 (각 3단계, 선택한 단계 기억; 모두 접으면 상태 제목에 연결 상태가 표시되고 주요 작업은 제어 영역 제목 행으로 이동); 세 관리자의 "복사" 버튼을 제목 표시줄 "더보기" 메뉴의 "정보 복사"로 이동, 접근성 서비스 관리자의 "시스템" 버튼도 같은 메뉴의 "시스템 설정"으로 이동
+* `개선` APK 크기 축소: 사용하지 않는 HTML -> Markdown 변환 경로와 미사용 의존성을 제거, JUnit이 CommonMark 및 Spongy Castle을 통해 프로덕션 DEX에 포함되지 않도록 하고, Rhino 런타임에 JLine 터미널 라이브러리를 더 이상 포함하지 않음
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer
@@ -601,7 +602,6 @@
 * `의존성` 모듈화 Image Quantization 버전 2.17.0
 * `의존성` 모듈화 OpenCV 버전 4.8.0
 * `의존성` AndroidX Media3 ExoPlayer / Session 버전 1.11.0 추가
-* `의존성` Apache Commons Codec 버전 1.15 추가
 * `의존성` juniversalchardet 버전 2.0.4 추가
 * `의존성` AndroidX AsyncLayoutInflater 버전 1.1.0 추가
 * `의존성` Android Annotations 버전 4.8.0 제거
@@ -622,6 +622,8 @@
 * `의존성` Pinyin4j 버전 2.5.1 제거
 * `의존성` Jieba Analysis 버전 1.0.3-SNAPSHOT (수정된 버전) 제거
 * `의존성` Rapid OCR 로컬 라이브러리 제거
+* `의존성` Flexmark Java HTML to Markdown 버전 0.64.8 제거
+* `의존성` JavaMail for Android 로컬 라이브러리 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

@@ -11,8 +11,6 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
 import org.autojs.autojs.util.ProcessLogger
-import org.autojs.autojs.util.TextUtils
-import org.jsoup.Jsoup
 import java.io.File
 import org.autojs.autojs6.R
 import java.util.EnumSet
@@ -57,9 +55,6 @@ class ReleaseHistoryRepository {
             }
 
             ProcessLogger.i("URL: $niceUrlBlob")
-
-            // val html = fetchStreamString(niceUrlBlob)
-            // return@channelFlow parseHtmlFlow(html).collect { send(it) }
 
             val markdown = fetchStreamString(niceUrlBlob)
             ProcessLogger.i(context.getString(R.string.logger_ver_history_blob_thread_success))
@@ -243,24 +238,6 @@ class ReleaseHistoryRepository {
                 }
             }
             flush(true)
-        }
-
-        private fun parseHtmlFlow(html: String) = channelFlow {
-            val doc = Jsoup.parse(html)
-            doc.select("div.markdown-heading").filter { it.children().first()?.tagName() == "h1" }.forEach { h1Container ->
-                val h1 = h1Container.getElementsByTag("h1").first() ?: return@forEach
-                val version = h1.text()
-                val nextSibling = h1Container.nextElementSibling()
-                val date = nextSibling?.getElementsByTag("h6")?.first()?.text() ?: ""
-                val ul = nextSibling?.nextElementSibling()
-
-                if (ul?.tagName() == "ul") {
-                    val lines = ul.getElementsByTag("li").map { li ->
-                        TextUtils.htmlToMarkdown(li.outerHtml()).trim()
-                    }
-                    send(ReleaseHistoryItem(version, date, lines))
-                }
-            }
         }
 
         fun compareVersion(v1: String, v2: String): Int {

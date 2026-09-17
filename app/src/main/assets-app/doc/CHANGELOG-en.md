@@ -593,6 +593,7 @@
 * `Improvement` Scan QR code to connect: the camera uses continuous focus with metering and decoding uses TRY_HARDER, which makes aiming at an on-screen code much easier
 * `Improvement` Client mode address dialog: "Scan QR code" moved from the icon at the end of the input to the "more" menu in the title bar; the scan page no longer has a flashlight button (the code is shown on a screen, which lights itself)
 * `Improvement` Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the "Copy" button of all three managers moved into the title bar "more" menu as "Copy information", and the "System" button of the accessibility service manager likewise as "System settings"
+* `Improvement` Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -601,7 +602,6 @@
 * `Dependency` Modularized Image Quantization version 2.17.0
 * `Dependency` Modularized OpenCV version 4.8.0
 * `Dependency` Added AndroidX Media3 ExoPlayer / Session version 1.11.0
-* `Dependency` Added Apache Commons Codec version 1.15
 * `Dependency` Added juniversalchardet version 2.0.4
 * `Dependency` Added AndroidX AsyncLayoutInflater version 1.1.0
 * `Dependency` Removed Android Annotations version 4.8.0
@@ -622,6 +622,8 @@
 * `Dependency` Removed Pinyin4j version 2.5.1
 * `Dependency` Removed Jieba Analysis version 1.0.3-SNAPSHOT (modified)
 * `Dependency` Removed local Rapid OCR library
+* `Dependency` Removed Flexmark Java HTML to Markdown version 0.64.8
+* `Dependency` Removed local JavaMail for Android library
 * `Dependency` Appended ZXing Android Embedded version 4.3.0
 
 # v6.7.0

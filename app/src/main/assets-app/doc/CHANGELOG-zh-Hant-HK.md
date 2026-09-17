@@ -593,6 +593,7 @@
 * `優化` 掃描二維碼連線: 相機改用連續對焦並啟用測光, 解碼啟用 TRY_HARDER, 更易對準螢幕上的二維碼
 * `優化` 客戶端模式位址對話框的 "掃描二維碼" 由輸入框末尾圖示改為標題列 "更多" 選單項; 掃碼頁面移除閃光燈按鈕 (二維碼顯示於螢幕, 無需補光)
 * `優化` 客戶端模式與伺服端模式管理器的狀態區與控制區支援與無障礙服務管理器相同的逐級展開與收起 (狀態與控制各 3 級, 所選等級會被記住, 全部收起時狀態標題附帶連線狀態, 主要動作移入控制區標題列); 三個管理器的 "複製" 按鈕移入標題列 "更多" 選單作為 "複製信息", 無障礙服務管理器的 "系統" 按鈕同樣移入該選單作為 "系統設置"
+* `優化` 安裝包體積縮減: 移除停用的 HTML 轉 Markdown 鏈路與未使用的依賴, JUnit 不再隨 CommonMark 與 Spongy Castle 進入生產 DEX, Rhino 運行時不再打包 JLine 終端庫
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer
@@ -601,7 +602,6 @@
 * `依賴` 模塊化 Image Quantization 版本 2.17.0
 * `依賴` 模塊化 OpenCV 版本 4.8.0
 * `依賴` 附加 AndroidX Media3 ExoPlayer / Session 版本 1.11.0
-* `依賴` 附加 Apache Commons Codec 版本 1.15
 * `依賴` 附加 juniversalchardet 版本 2.0.4
 * `依賴` 附加 AndroidX AsyncLayoutInflater 版本 1.1.0
 * `依賴` 移除 Android Annotations 版本 4.8.0
@@ -622,6 +622,8 @@
 * `依賴` 移除 Pinyin4j 版本 2.5.1
 * `依賴` 移除 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
 * `依賴` 移除 Rapid OCR 本地庫
+* `依賴` 移除 Flexmark Java HTML to Markdown 版本 0.64.8
+* `依賴` 移除 JavaMail for Android 本地庫
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

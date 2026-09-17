@@ -572,6 +572,7 @@
 * `优化` 扫描二维码连接: 摄像头改用连续对焦并启用测光, 解码启用 TRY_HARDER, 更易对准屏幕上的二维码
 * `优化` 客户端模式地址对话框的 "扫描二维码" 由输入框末尾图标改为标题栏 "更多" 菜单项; 扫码页面移除闪光灯按钮 (二维码显示于屏幕, 无需补光)
 * `优化` 客户端模式与服务端模式管理器的状态区与控制区支持与无障碍服务管理器相同的逐级展开与收起 (状态与控制各 3 级, 所选等级会被记住, 全部收起时状态标题附带连接状态, 主要动作移入控制区标题行); 三个管理器的 "复制" 按钮移入标题栏 "更多" 菜单作为 "复制信息", 无障碍服务管理器的 "系统" 按钮同样移入该菜单作为 "系统设置"
+* `优化` 安装包体积缩减: 移除停用的 HTML 转 Markdown 链路与未使用的依赖, JUnit 不再随 CommonMark 与 Spongy Castle 进入生产 DEX, Rhino 运行时不再打包 JLine 终端库
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
@@ -580,7 +581,6 @@
 * `依赖` 模块化 Image Quantization 版本 2.17.0
 * `依赖` 模块化 OpenCV 版本 4.8.0
 * `依赖` 附加 AndroidX Media3 ExoPlayer / Session 版本 1.11.0
-* `依赖` 附加 Apache Commons Codec 版本 1.15
 * `依赖` 附加 juniversalchardet 版本 2.0.4
 * `依赖` 附加 AndroidX AsyncLayoutInflater 版本 1.1.0
 * `依赖` 移除 Android Annotations 版本 4.8.0
@@ -601,6 +601,8 @@
 * `依赖` 移除 Pinyin4j 版本 2.5.1
 * `依赖` 移除 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
 * `依赖` 移除 Rapid OCR 本地库
+* `依赖` 移除 Flexmark Java HTML to Markdown 版本 0.64.8
+* `依赖` 移除 JavaMail for Android 本地库
 * `依赖` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

@@ -24,7 +24,6 @@ core-ktx = "1.15.0"
 #because  : Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'
 #noinspection NewerVersionAvailable
 commons-io = "2.8.0"
-commons-codec = "1.15"
 
 #strictly : 2.13.4.2
 #purpose  : Compatibility for Android API Level < 26 (Android 8.0) [O]
@@ -59,7 +58,6 @@ constraintlayout = "2.2.1"
 easywindow = "10.3"
 eventbus = "3.3.1"
 flexbox = "3.0.0"
-flexmark-html2md = "0.64.8"
 foojay-resolver-convention = "1.0.0"
 glide = "5.0.5"
 gson = "2.13.2"
@@ -117,8 +115,8 @@ bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bc
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 circularreveal = { module = "com.github.ozodrukh:CircularReveal", version.ref = "circularreveal" }
-commonmark = { module = "com.github.atlassian:commonmark-java", version.ref = "commonmark" }
-commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+commonmark = { module = "com.github.atlassian.commonmark-java:commonmark", version.ref = "commonmark" }
+commonmark-ext-heading-anchor = { module = "com.github.atlassian.commonmark-java:commonmark-ext-heading-anchor", version.ref = "commonmark" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
@@ -127,7 +125,6 @@ desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desuga
 easywindow = { module = "com.github.getActivity:EasyWindow", version.ref = "easywindow" }
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
-flexmark-html2md = { module = "com.vladsch.flexmark:flexmark-html2md-converter", version.ref = "flexmark-html2md" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }

@@ -40,9 +40,11 @@ dependencies {
     //  ! |         +--- com.madgag.spongycastle:core:1.58.0.0
     //  ! |         \--- junit:junit:4.12 (*)
     //  # implementation("com.madgag.spongycastle:core:1.58.0.0")
-    implementation(libs.prov)
-    implementation(libs.commons.codec)
-    implementation(libs.commons.io)
+    // The prov POM declares junit:junit:4.12 as a compile dependency; keep it out of the host APK.
+    // zh-CN: prov 的 POM 把 junit:junit:4.12 声明为编译依赖, 不能让它进入宿主 APK.
+    implementation(libs.prov) {
+        exclude(group = "junit")
+    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.ext.junit)
