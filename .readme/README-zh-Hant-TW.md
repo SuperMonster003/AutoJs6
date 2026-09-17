@@ -187,6 +187,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` `pangu` 全域物件, 內建 pangu.js 10.1.0, 支援 `spaceText` 文字混排間距處理與 `hasProperSpacing` 檢查, 同步 TypeScript 宣告與文件
 * `新增` `pinyin` 新增僅目前呼叫生效的 `customDictionary` 自訂讀音覆寫, 完善 `compare` 與 `compact`, 並透過具備明確 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 開放相同外置外掛能力
 * `新增` `pinyin4j` 新增經 capability 協商的 `readings` 全讀音矩陣, 支援 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 與 Gwoyeu Romatzyh; 舊外掛僅對 Hanyu 安全回退, 相同外置外掛能力透過具備明確 `pinyin4j` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 開放
+* `新增` OpenCC 外掛契約版本 2 支援動態轉換類型探索, 最多 1024 段的批次轉換與最多 32 階段的鏈式轉換; 16 個組合方法在新外掛上從最多 3 次 Binder 往返降至 1 次, 舊外掛透明回退原有逐項或逐階段呼叫
 * `新增` Image Quantization 選項透過 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 與 `maxMemoryBytes`, 預設限制 16000000 像素和 256 MiB 額外工作記憶體; 超出預算時回傳帶資源詳情的型別化例外, 結果報告計入預算的峰值記憶體, 停止腳本會取消其活動原生量化
 * `新增` `images.quantizeToFile` 將索引 PNG 直接串流寫入磁碟並回傳大小與品質指標; Image Quantization 選項新增 `preserveAlpha`, 常見 Bitmap 配置, 硬體輸入與廣色域輸入透過 `OPTIONS_API_VERSION>=3` 統一正規化為 sRGB
 * `新增` `images.quantize` 現會回傳 PNG 位元組, 大小, 實際品質與量化誤差; 省略品質下限時採用盡力而為 (`minQuality=0`), 明確下限無法滿足時拋出帶錯誤碼 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 結果介面要求 `OPTIONS_API_VERSION>=2`
@@ -271,6 +272,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 檔案管理器 Explorer Action 協定 v21 提供由主機持有的持久來源項目垃圾桶建立批次, 以不透明歷史、逐項結果與跨工作階段盡力還原保留精確邊界; 既有名稱絕不被覆寫, 還原來源項目不會刪除已建立的壓縮檔, 中斷復原證據繼續由主機私有保存
 * `新增` 檔案管理器 Explorer Action 協定 v22 允許單一檔案唯讀動作宣告有界關聯檔案後綴; 主機僅凍結精確的 `<所選名稱><後綴>` 候選項並透過唯讀描述元開啟, 不公開上層目錄清單、路徑或任意同層檔案
 * `新增` 外掛中心支援全域設定頁面及使用說明頁面
+* `新增` 外掛中繼資料 `instruction` 支援本地化 `@raw/...` 說明資源, 通用外掛資源解析器現可讀取本地或帶套件名稱的 `@string/...` 與 `@raw/...` 引用
 * `新增` 外掛中心支援 SDK 外掛自動掛載功能
 * `新增` 外掛中心支援多變體優先順序排序功能
 * `新增` 外掛中心支援線上安裝外掛/線上更新外掛

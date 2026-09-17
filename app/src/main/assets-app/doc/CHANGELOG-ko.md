@@ -25,6 +25,7 @@
 * `추가` pangu.js 10.1.0 을 내장한 전역 객체 `pangu`, CJK 혼합 텍스트 간격을 처리하는 `spaceText` 와 `hasProperSpacing` 검사 지원, TypeScript 선언 및 문서 동기화
 * `추가` `pinyin` 에 호출 단위 `customDictionary` 발음 재정의를 추가하고 `compare` 와 `compact` 를 완성하며, 명시적 `pinyin` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개
 * `추가` `pinyin4j` 에 capability 협상형 `readings` 전체 발음 행렬을 추가하고 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 및 Gwoyeu Romatzyh 를 지원합니다; 이전 플러그인은 Hanyu 에서만 안전하게 대체되며, 명시적 `pinyin4j` capability 가 있는 `autojs6:bridge.callAutoJs` 를 통해 동일한 외부 플러그인 provider 를 Node.js 에 공개합니다
+* `추가` OpenCC 플러그인 계약 버전 2는 동적 변환 유형 검색, 최대 1024개 텍스트의 일괄 변환, 최대 32단계의 체인 변환을 추가합니다. 새 플러그인에서는 16개 조합 메서드가 최대 3회의 Binder 왕복에서 1회로 줄고, 이전 플러그인은 기존 항목별 또는 단계별 호출로 자동 폴백합니다
 * `추가` Image Quantization 옵션은 `OPTIONS_API_VERSION>=4`를 통해 `maxPixels`와 `maxMemoryBytes`를 추가하고 기본 16000000 픽셀 및 256 MiB 추가 작업 메모리 예산을 적용합니다; 예산 초과는 리소스 세부 정보가 있는 형식화 예외로 실패하고, 결과는 계산된 최대 메모리를 보고하며, 스크립트 중지는 활성 네이티브 양자화를 취소합니다
 * `추가` `images.quantizeToFile`은 인덱스 PNG를 디스크에 직접 스트리밍하고 크기와 품질 지표를 반환합니다; Image Quantization 옵션은 이제 `preserveAlpha`, 일반 Bitmap 구성, 하드웨어 입력 및 `OPTIONS_API_VERSION>=3`을 통해 sRGB로 정규화된 광색역 입력을 지원합니다
 * `추가` `images.quantize`가 이제 PNG 바이트, 크기, 실제 품질 및 양자화 오차를 반환합니다; 최소 품질을 생략하면 최선 노력 방식 (`minQuality=0`)을 사용하고, 명시한 하한을 충족할 수 없으면 코드 `PNG_QUANTIZATION_QUALITY_TOO_LOW`의 `PngQuantBridge.QualityTooLowException`을 발생시킵니다; 결과 API에는 `OPTIONS_API_VERSION>=2`가 필요합니다
@@ -109,6 +110,7 @@
 * `추가` 파일 관리자 Explorer Action 프로토콜 v21은 호스트 소유의 영구적인 원본-휴지통 생성 배치와 불투명한 기록, 항목별 결과, 세션 간 최선 복원을 제공함; 기존 이름을 덮어쓰지 않고, 원본 복원은 생성된 압축 파일을 삭제하지 않으며, 중단된 복구 증거는 호스트 내부에 비공개로 유지됨
 * `추가` 파일 관리자 Explorer Action 프로토콜 v22는 단일 파일 읽기 전용 작업이 제한된 관련 파일 접미사를 선언하도록 지원함; 호스트는 정확한 `<선택한 이름><접미사>` 후보만 고정해 읽기 전용 설명자로 열며, 상위 디렉터리 목록, 경로 또는 임의의 형제 파일을 공개하지 않음
 * `추가` 플러그인 센터에서 전역 설정 페이지 및 사용 설명 페이지 지원
+* `추가` 플러그인 메타데이터 `instruction`은 현지화된 `@raw/...` 설명 리소스를 지원하며, 공용 플러그인 리소스 해석기는 로컬 또는 패키지 한정 `@string/...` 및 `@raw/...` 참조를 읽을 수 있습니다
 * `추가` 플러그인 센터에서 SDK 플러그인 자동 마운트 기능 지원
 * `추가` 플러그인 센터에서 다중 변형의 우선순위 정렬 기능 지원
 * `추가` 플러그인 센터에서 플러그인 온라인 설치/온라인 업데이트 지원

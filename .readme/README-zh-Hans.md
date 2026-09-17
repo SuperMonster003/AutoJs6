@@ -188,6 +188,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` `pangu` 全局对象, 内置 pangu.js 10.1.0, 支持 `spaceText` 文本混排间距处理与 `hasProperSpacing` 检查, 同步 TypeScript 声明与文档
 * `新增` `pinyin` 新增仅当前调用生效的 `customDictionary` 自定义读音覆盖, 完善 `compare` 与 `compact`, 并通过带显式 `pinyin` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放同一外置插件能力
 * `新增` `pinyin4j` 新增经 capability 协商的 `readings` 全读音矩阵, 支持 Hanyu, Tongyong, Wade-Giles, MPS2, Yale 与 Gwoyeu Romatzyh; 旧插件仅对 Hanyu 安全回退, 同一外置插件能力通过带显式 `pinyin4j` capability 的 `autojs6:bridge.callAutoJs` 向 Node.js 开放
+* `新增` OpenCC 插件契约版本 2 支持动态转换类型发现, 最多 1024 段的批量转换与最多 32 阶段的链式转换; 16 个组合方法在新插件上从最多 3 次 Binder 往返降为 1 次, 旧插件透明回退原有逐项或逐阶段调用
 * `新增` Image Quantization 选项通过 `OPTIONS_API_VERSION>=4` 新增 `maxPixels` 与 `maxMemoryBytes`, 默认限制 16000000 像素和 256 MiB 附加工作内存; 超出预算时返回带资源详情的类型化异常, 结果报告计入预算的峰值内存, 停止脚本会取消其活动原生量化
 * `新增` `images.quantizeToFile` 将索引 PNG 直接流式写入磁盘并返回大小与质量指标; Image Quantization 选项新增 `preserveAlpha`, 常见 Bitmap 配置, 硬件输入与广色域输入通过 `OPTIONS_API_VERSION>=3` 统一归一化为 sRGB
 * `新增` `images.quantize` 现返回 PNG 字节, 大小, 实际质量与量化误差; 省略质量下限时采用尽力而为 (`minQuality=0`), 显式下限无法满足时抛出带错误码 `PNG_QUANTIZATION_QUALITY_TOO_LOW` 的 `PngQuantBridge.QualityTooLowException`; 结果接口要求 `OPTIONS_API_VERSION>=2`
@@ -292,6 +293,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 代码编辑器支持专属设置页面及编辑器内设置对话框, 提供主题预览/亮暗模式独立配置/字体/行号槽/自动换行等显示选项
 * `新增` 定时任务支持按月/按年/倒计时任务及重复结束条件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 插件中心支持在线安装插件及更新插件; 全局设置页面及使用说明页面; SDK 插件自动挂载功能; 多变体优先级排序功能; 启动页跳转/隐藏插件; 可用 ABI 交集检测及提示
+* `新增` 插件元数据 `instruction` 支持本地化 `@raw/...` 说明资源, 通用插件资源解析器现可读取本地或带包名的 `@string/...` 与 `@raw/...` 引用
 * `新增` 插件中心通过宿主兼容矩阵解析官方 APK Builder Template 配套版本, 按设备精确 ABI 选择资产并回退 universal, 保留现有发行索引/标签通道, 配套版本低于已安装插件时引导卸载重装
 * `新增` APK Builder Runtime Kit 可声明经显式授权和验证的宿主补丁级闭区间; 实际构建所用宿主无提示继续, 区间内非精确宿主显示本地化警告, 区间外或格式错误的声明在模板传输前阻止
 * `新增` 开发者选项新增默认关闭的实验性远程 APK 构建 R1 开关; 关闭时阻止 provider 发现与会话打开, 失败会在不自动本地回退的情况下终止本次构建, 已有产物继续由原子发布保护, 进程内诊断仅保留有界的 enum 与数值字段

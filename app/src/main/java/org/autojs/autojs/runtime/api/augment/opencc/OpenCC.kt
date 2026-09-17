@@ -10,7 +10,9 @@ import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.plugin.opencc.api.OpenccConversionTypes
 import org.mozilla.javascript.Wrapper
+import java.util.Locale
 
 @Suppress("unused")
 object OpenCC : Augmentable(), Invokable {
@@ -70,12 +72,11 @@ object OpenCC : Augmentable(), Invokable {
             is String -> rawType
             is Enum<*> -> rawType.name
             else -> throw WrappedIllegalArgumentException("Argument \"type\" ${type.jsBrief()} for opencc.convert is invalid")
-        }.lowercase()
-        return when (name.uppercase()) {
-            in coreConversionTypes -> cvt(s, name)
-            else -> compositeConversions[name]?.invoke(s)
-                ?: throw WrappedIllegalArgumentException("Unknown OpenCC conversion type \"$type\"")
-        }
+        }.lowercase(Locale.ROOT)
+        val normalizedName = name.uppercase(Locale.ROOT)
+        if (normalizedName in OpenccConversionTypes.ALL) return cvt(s, normalizedName)
+        return OpenccConversionPlan.chainFor(name)?.let { cvtChain(s, it) }
+            ?: throw WrappedIllegalArgumentException("Unknown OpenCC conversion type \"$type\"")
     }
 
     /* OpenCC internal conversion. */
@@ -86,7 +87,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2sRhino(s: Any?) = cvt(s, "HK2S")
+    fun hk2sRhino(s: Any?) = cvt(s, OpenccConversionTypes.HK2S)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -94,7 +95,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2tRhino(s: Any?) = cvt(s, "HK2T")
+    fun hk2tRhino(s: Any?) = cvt(s, OpenccConversionTypes.HK2T)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -102,7 +103,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2tRhino(s: Any?) = cvt(s, "JP2T")
+    fun jp2tRhino(s: Any?) = cvt(s, OpenccConversionTypes.JP2T)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -110,7 +111,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2hkRhino(s: Any?) = cvt(s, "S2HK")
+    fun s2hkRhino(s: Any?) = cvt(s, OpenccConversionTypes.S2HK)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -118,7 +119,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2tRhino(s: Any?) = cvt(s, "S2T")
+    fun s2tRhino(s: Any?) = cvt(s, OpenccConversionTypes.S2T)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -126,7 +127,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twRhino(s: Any?) = cvt(s, "S2TW")
+    fun s2twRhino(s: Any?) = cvt(s, OpenccConversionTypes.S2TW)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -134,7 +135,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twpRhino(s: Any?) = cvt(s, "S2TWP")
+    fun s2twpRhino(s: Any?) = cvt(s, OpenccConversionTypes.S2TWP)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -142,7 +143,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2hkRhino(s: Any?) = cvt(s, "T2HK")
+    fun t2hkRhino(s: Any?) = cvt(s, OpenccConversionTypes.T2HK)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -150,7 +151,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2sRhino(s: Any?) = cvt(s, "T2S")
+    fun t2sRhino(s: Any?) = cvt(s, OpenccConversionTypes.T2S)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -158,7 +159,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2twRhino(s: Any?) = cvt(s, "T2TW")
+    fun t2twRhino(s: Any?) = cvt(s, OpenccConversionTypes.T2TW)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -166,7 +167,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2jpRhino(s: Any?) = cvt(s, "T2JP")
+    fun t2jpRhino(s: Any?) = cvt(s, OpenccConversionTypes.T2JP)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -174,7 +175,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2sRhino(s: Any?) = cvt(s, "TW2S")
+    fun tw2sRhino(s: Any?) = cvt(s, OpenccConversionTypes.TW2S)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -182,7 +183,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2tRhino(s: Any?) = cvt(s, "TW2T")
+    fun tw2tRhino(s: Any?) = cvt(s, OpenccConversionTypes.TW2T)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -190,7 +191,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2spRhino(s: Any?) = cvt(s, "TW2SP")
+    fun tw2spRhino(s: Any?) = cvt(s, OpenccConversionTypes.TW2SP)
 
     /* Encapsulated conversion. */
 
@@ -200,7 +201,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twiRhino(s: Any?) = cvt(s, "S2TWP")
+    fun s2twiRhino(s: Any?) = cvt(s, OpenccConversionTypes.S2TWP)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -208,7 +209,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2sRhino(s: Any?) = cvt(s, "TW2SP")
+    fun twi2sRhino(s: Any?) = cvt(s, OpenccConversionTypes.TW2SP)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -216,7 +217,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2jpRhino(s: Any?) = t2jpRhino(s2tRhino(s))
+    fun s2jpRhino(s: Any?) = cvtComposite(s, ::s2jp.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -224,7 +225,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2twiRhino(s: Any?) = s2twiRhino(t2sRhino(s))
+    fun t2twiRhino(s: Any?) = cvtComposite(s, ::t2twi.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -232,7 +233,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2twRhino(s: Any?) = t2twRhino(hk2tRhino(s))
+    fun hk2twRhino(s: Any?) = cvtComposite(s, ::hk2tw.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -240,7 +241,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2twiRhino(s: Any?) = s2twiRhino(hk2sRhino(s))
+    fun hk2twiRhino(s: Any?) = cvtComposite(s, ::hk2twi.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -248,7 +249,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2jpRhino(s: Any?) = t2jpRhino(hk2tRhino(s))
+    fun hk2jpRhino(s: Any?) = cvtComposite(s, ::hk2jp.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -256,7 +257,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2hkRhino(s: Any?) = t2hkRhino(tw2tRhino(s))
+    fun tw2hkRhino(s: Any?) = cvtComposite(s, ::tw2hk.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -264,7 +265,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2twiRhino(s: Any?) = s2twiRhino(tw2sRhino(s))
+    fun tw2twiRhino(s: Any?) = cvtComposite(s, ::tw2twi.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -272,7 +273,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2jpRhino(s: Any?) = t2jpRhino(tw2tRhino(s))
+    fun tw2jpRhino(s: Any?) = cvtComposite(s, ::tw2jp.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -280,7 +281,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2tRhino(s: Any?) = s2tRhino(twi2sRhino(s))
+    fun twi2tRhino(s: Any?) = cvtComposite(s, ::twi2t.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -288,7 +289,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2hkRhino(s: Any?) = s2hkRhino(twi2sRhino(s))
+    fun twi2hkRhino(s: Any?) = cvtComposite(s, ::twi2hk.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -296,7 +297,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2twRhino(s: Any?) = s2twRhino(twi2sRhino(s))
+    fun twi2twRhino(s: Any?) = cvtComposite(s, ::twi2tw.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -304,7 +305,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2jpRhino(s: Any?) = t2jpRhino(s2tRhino(twi2sRhino(s)))
+    fun twi2jpRhino(s: Any?) = cvtComposite(s, ::twi2jp.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -312,7 +313,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2sRhino(s: Any?) = t2sRhino(jp2tRhino(s))
+    fun jp2sRhino(s: Any?) = cvtComposite(s, ::jp2s.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -320,7 +321,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2hkRhino(s: Any?) = t2hkRhino(jp2tRhino(s))
+    fun jp2hkRhino(s: Any?) = cvtComposite(s, ::jp2hk.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -328,7 +329,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2twRhino(s: Any?) = t2twRhino(jp2tRhino(s))
+    fun jp2twRhino(s: Any?) = cvtComposite(s, ::jp2tw.name)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -336,38 +337,20 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2twiRhino(s: Any?) = s2twiRhino(t2sRhino(jp2tRhino(s)))
+    fun jp2twiRhino(s: Any?) = cvtComposite(s, ::jp2twi.name)
 
     /* Private methods. */
 
-    private val coreConversionTypes = setOf(
-        "HK2S", "HK2T", "JP2T", "S2HK", "S2T", "S2TW", "S2TWP",
-        "T2HK", "T2S", "T2TW", "T2JP", "TW2S", "TW2T", "TW2SP",
-    )
-
-    private val compositeConversions: Map<String, (Any?) -> String> = mapOf(
-        "s2twi" to ::s2twiRhino,
-        "twi2s" to ::twi2sRhino,
-        "s2jp" to ::s2jpRhino,
-        "t2twi" to ::t2twiRhino,
-        "hk2tw" to ::hk2twRhino,
-        "hk2twi" to ::hk2twiRhino,
-        "hk2jp" to ::hk2jpRhino,
-        "tw2hk" to ::tw2hkRhino,
-        "tw2twi" to ::tw2twiRhino,
-        "tw2jp" to ::tw2jpRhino,
-        "twi2t" to ::twi2tRhino,
-        "twi2hk" to ::twi2hkRhino,
-        "twi2tw" to ::twi2twRhino,
-        "twi2jp" to ::twi2jpRhino,
-        "jp2s" to ::jp2sRhino,
-        "jp2hk" to ::jp2hkRhino,
-        "jp2tw" to ::jp2twRhino,
-        "jp2twi" to ::jp2twiRhino,
-    )
-
     private fun cvt(s: Any?, type: String): String = runBlocking {
-        OpenccPluginHost.convert(globalContext, coerceString(s), type.uppercase())
+        OpenccPluginHost.convert(globalContext, coerceString(s), type.uppercase(Locale.ROOT))
+    }
+
+    private fun cvtComposite(s: Any?, name: String): String {
+        return cvtChain(s, requireNotNull(OpenccConversionPlan.chainFor(name)))
+    }
+
+    private fun cvtChain(s: Any?, conversionTypes: List<String>): String = runBlocking {
+        OpenccPluginHost.convertChain(globalContext, coerceString(s), conversionTypes)
     }
 
 }
