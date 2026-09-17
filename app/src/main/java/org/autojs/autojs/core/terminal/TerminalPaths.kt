@@ -40,7 +40,7 @@ class TerminalPaths(val root: File) {
      */
     fun ensureLayout(): TerminalPaths {
         listOf(home, bin, etc, tmp, lib).forEach { it.mkdirs() }
-        if (!profile.exists()) {
+        if (!profile.exists() || profile.readText() == LEGACY_DEFAULT_PROFILE) {
             profile.writeText(DEFAULT_PROFILE)
         }
         return this
@@ -66,7 +66,7 @@ class TerminalPaths(val root: File) {
          * Interactive-shell profile. mksh reads it through `$ENV`; the prompt shows the cwd with `~`.
          * zh-CN: 交互式 shell 的 profile. mksh 通过 `$ENV` 读取; 提示符以 `~` 显示当前目录.
          */
-        val DEFAULT_PROFILE: String = """
+        internal val LEGACY_DEFAULT_PROFILE: String = """
             |# AutoJs6 terminal profile (managed by AutoJs6, edits may be overwritten)
             |PS1='${'$'}(case "${'$'}PWD" in "${'$'}HOME") printf "~";; "${'$'}HOME"/*) printf "~%s" "${'$'}{PWD#"${'$'}HOME"}";; *) printf "%s" "${'$'}PWD";; esac) ${'$'} '
             |HISTFILE="${'$'}HOME/.sh_history"
@@ -74,6 +74,10 @@ class TerminalPaths(val root: File) {
             |export HISTFILE HISTSIZE
             |
         """.trimMargin()
+
+        // Keep the directory on its own line so shell editing has the full terminal width.
+        // Only migrate the exact managed profile; preserve user customizations.
+        val DEFAULT_PROFILE: String = LEGACY_DEFAULT_PROFILE.replace("; esac) ", "; esac)\n")
 
         @JvmStatic
         fun of(context: Context): TerminalPaths = TerminalPaths(File(context.filesDir, ROOT_DIR_NAME))

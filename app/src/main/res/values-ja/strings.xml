@@ -160,6 +160,7 @@
     <string name="description_server_mode">サーバーモードは, AutoJs6 が端末上でサービスを起動して外部クライアントからの接続を待ち, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\nAutoJs6 のサーバーモードは 2 つの接続方式に対応しています:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku を使用すると, ADB 権限を取得し, システム API にアクセスできるようになります</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
+    <string name="description_terminal">独立した shell セッションでコマンドを実行します. 画面を離れてもセッションは実行を続けます. スイッチをオフにすると全セッションが終了します.</string>
     <string name="description_theme_color_preference">テーマカラーは, 以下のウィジェットに適用されますが, これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では, 原色, 原色暗色, アクセントカラーの区別はまだありません</string>
     <string name="description_timed_task_backend">スクリプトを定時で起動するための基盤メカニズムを制御します.\n\nAlarmManager: システムの \"アラームとリマインダーの設定を許可\" 権限を付与すると, より正確な時刻での実行に近づきます.\nWorkManager: システムに優しく, 一定の遅延を許容できる非重要タスクに適しています.\nJobScheduler: 旧来の実装で互換性のために残されていますが, 遅延が発生しやすいです.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">利用シーンと違い:\n\n1. AlarmManager\n[リマインダー/厳密な時刻のスクリプト/...] など, 時刻精度が重要なタスクに適しています.\nAndroid 12 以降で \"アラームとリマインダーの設定を許可\" 権限がある場合, 画面消灯/待機中でも比較的正確に実行されます.\n権限がない場合, システムにより不正確または遅延実行になる可能性があります.\n\n2. WorkManager\n[非重要な同期/クリーンアップ/統計/...] など, 厳密な時刻精度を必要としないタスクに適しています.\n[バッテリー/ネットワーク/充電状況/待機ポリシー/...] に応じてスケジューリングされ, 消灯/待機中は実行が遅れることがあります.\n時間精度は保証されませんが, [確実な完了/失敗時の再試行/チェーン実行/一意タスクの重複排除] に強みがあります.\n\n3. JobScheduler\n互換性維持のための歴史的実装です.\n新しい Android では遅延が大きくなりやすい傾向があります.\n互換性の必要がない限り, 通常は非推奨です.</string>
@@ -574,6 +575,7 @@
     <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">現在のプラグインには, より新しいバージョンの AutoJs6 ホスト環境が必要です (必要な versionCode: %1$d, 現在の versionCode: %2$d). AutoJs6 をアップグレードしてください.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">プラグインプロトコルは現在の AutoJs6 と互換性がありません. プラグインをアップグレードしてください.</string>
+    <string name="hint_terminal_command">コマンド入力</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
     <string name="image_editor_brightness">明るさ</string>
@@ -2104,14 +2106,19 @@
     <string name="text_task">タスク</string>
     <string name="text_terminal">ターミナル</string>
     <string name="text_terminal_clear_data">ターミナルデータを消去</string>
+    <string name="text_terminal_close_all_sessions">全セッションを閉じる</string>
     <string name="text_terminal_close_session">セッションを閉じる</string>
     <string name="text_terminal_confirm_clear_data">%1$s 以下のターミナルデータをすべて削除しますか? 実行中のセッションは閉じられます.</string>
     <string name="text_terminal_confirm_close_running">このセッションではまだプロセスが実行中です. それでも閉じますか?</string>
     <string name="text_terminal_copy_home_path">ホームディレクトリのパスをコピー</string>
     <string name="text_terminal_copy_transcript">出力ログをコピー</string>
     <string name="text_terminal_data_cleared">ターミナルデータを消去しました</string>
+    <string name="text_terminal_input_tips">コマンド欄は長い入力を折り返します. ターミナルをタップすると直接入力できます. Tab は入力を shell に渡して補完し, Ctrl / Alt は直接入力に適用されます.</string>
+    <string name="text_terminal_manager">ターミナル管理</string>
+    <string name="text_terminal_new_session">新規セッション</string>
     <string name="text_terminal_no_npm_scripts">package.json に scripts が定義されていません</string>
     <string name="text_terminal_no_package_json">現在のディレクトリに package.json が見つかりません</string>
+    <string name="text_terminal_no_sessions">実行中のセッションなし</string>
     <string name="text_terminal_node_exec_denied">このデバイスはプラグインの Node.js ランチャーの実行を拒否したため, システムシェルのみ使用できます</string>
     <string name="text_terminal_node_executable_missing">Node.js ランタイムプラグインに ABI %1$s 用のランチャーがありません</string>
     <string name="text_terminal_node_missing">Node.js ランタイムプラグインがインストールされていないため, システムシェルのみ使用できます</string>
@@ -2137,10 +2144,14 @@
     <string name="text_terminal_other_package_managers_content">yarn と pnpm は corepack を通じて提供され, 初回使用時にレジストリからダウンロードされます. \"yarn --version\" または \"pnpm --version\" を実行すると有効になります.</string>
     <string name="text_terminal_package_name_hint">パッケージ名 (例: is-odd)</string>
     <string name="text_terminal_preparing_npm">Node.js ランタイムプラグインから npm と corepack を準備しています...</string>
+    <string name="text_terminal_running">実行中</string>
+    <string name="text_terminal_running_sessions">実行中\u0020\u0020[ セッション: %1$d ]</string>
     <string name="text_terminal_search_npm">npm パッケージを検索</string>
     <string name="text_terminal_select_text">テキストを選択</string>
     <string name="text_terminal_session_ended">セッションが終了しました</string>
     <string name="text_terminal_session_kept_running">セッションはバックグラウンドで実行を続けます. 終了するには \"セッションを閉じる\" を使用してください</string>
+    <string name="text_terminal_session_title">セッション %1$s</string>
+    <string name="text_terminal_sessions">セッション</string>
     <string name="text_terminal_share_transcript">出力ログを共有</string>
     <string name="text_terminal_show_keyboard">キーボードを表示</string>
     <string name="text_terminal_tips">ターミナルのヒント</string>

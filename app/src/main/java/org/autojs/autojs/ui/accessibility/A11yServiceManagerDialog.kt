@@ -24,6 +24,7 @@ import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.R
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceSelfCheck
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.ui.common.ManagerSettingsSection
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
@@ -130,6 +131,7 @@ class A11yServiceManagerDialog private constructor(
     @Volatile
     private var selfCheckResult: String? = null
 
+    private val settingsSection: ManagerSettingsSection
     private val dialog: MaterialDialog
 
     private val refreshTask = object : Runnable {
@@ -153,6 +155,7 @@ class A11yServiceManagerDialog private constructor(
         listOf(
             binding.statusRefresh, binding.statusLess, binding.statusMore,
             binding.controlStart, binding.controlStop, binding.controlRestart, binding.controlLess, binding.controlMore,
+            binding.settingsOpen, binding.settingsLess, binding.settingsMore,
         ).forEach { it.imageTintList = headerTint }
 
         Field.entries.forEach { field -> statusRows[field] = createStatusRow(field) }
@@ -167,6 +170,8 @@ class A11yServiceManagerDialog private constructor(
         binding.statusMore.setOnClickListener { stepStatusLevel(+1) }
         binding.controlLess.setOnClickListener { stepControlLevel(-1) }
         binding.controlMore.setOnClickListener { stepControlLevel(+1) }
+        settingsSection = ManagerSettingsSection(context, binding.settingsContainer, binding.settingsOpen,
+            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, R.string.key_a11y_service_manager_settings_collapsed)
         applyStatusLevel()
         applyControlLevel()
 
@@ -231,6 +236,7 @@ class A11yServiceManagerDialog private constructor(
         handler.removeCallbacksAndMessages(null)
         AccessibilityService.registry.removeListener(this)
         disposables.clear()
+        settingsSection.dismiss()
     }
 
     // Collection reads windows / root node / service info over binder; keep it off the main thread and never overlap.

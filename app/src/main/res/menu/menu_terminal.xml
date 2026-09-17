@@ -5,6 +5,16 @@
     app:popupTheme="@style/Widget.AppCompat.PopupMenu">
 
     <item
+        android:id="@+id/action_new_session"
+        android:title="@string/text_terminal_new_session"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_session_manager"
+        android:title="@string/text_terminal_manager"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_npm_init"
         android:title="@string/text_terminal_npm_init"
         app:showAsAction="never" />

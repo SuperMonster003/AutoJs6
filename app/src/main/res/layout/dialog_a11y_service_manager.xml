@@ -39,6 +39,15 @@
                 android:contentDescription="@string/text_refresh"
                 android:src="@drawable/ic_refresh_white_24dp" />
 
+            <View
+                android:id="@+id/status_header_divider"
+                android:layout_width="1dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:alpha="0.24"
+                android:background="@color/day_night" />
+
             <ImageButton
                 android:id="@+id/status_less"
                 style="@style/A11yServiceManagerHeaderButton"
@@ -137,18 +146,56 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <TextView
-            android:id="@+id/settings_title"
+        <LinearLayout
+            android:id="@+id/settings_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:minHeight="36dp"
+            android:orientation="horizontal"
             android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:text="@string/text_settings"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/settings_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/text_settings"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/settings_open"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_settings"
+                android:src="@drawable/ic_settings_black_48dp"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/settings_header_divider"
+                android:layout_width="1dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:alpha="0.24"
+                android:background="@color/day_night"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/settings_less"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_less"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/settings_more"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_more"
+                android:src="@drawable/ic_add_white_48dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/settings_container"

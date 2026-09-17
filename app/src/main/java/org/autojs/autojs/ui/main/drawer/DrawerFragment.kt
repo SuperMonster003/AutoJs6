@@ -73,6 +73,8 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
+import org.autojs.autojs.core.terminal.TerminalSessionManager
+import org.autojs.autojs.ui.terminal.TerminalManagerDialog
 import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.IntentUtils.App.exit
@@ -137,7 +139,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mFloatingButtonItem: DrawerMenuToggleableItem
     private lateinit var mPointerLocationItem: DrawerMenuToggleableItem
     private lateinit var mScreenColorPickerItem: DrawerMenuToggleableItem
-    private lateinit var mTerminalItem: DrawerMenuShortcutItem
+    private lateinit var mTerminalItem: DrawerMenuToggleableItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mMcpServerItem: DrawerMenuDisposableItem
@@ -173,6 +175,10 @@ open class DrawerFragment : Fragment() {
     // The VSCode connection managers (client / server mode), held the same way.
     // zh-CN: VSCode 连接管理器 (客户端 / 服务端模式), 以同样方式持有.
     private var mClientModeManagerDialog: WeakReference<MaterialDialog>? = null
+    private var mTerminalManagerDialog: WeakReference<MaterialDialog>? = null
+    private val terminalSessionListener: () -> Unit = {
+        activity?.runOnUiThread { if (view != null && ::mTerminalItem.isInitialized) mTerminalItem.sync() }
+    }
     private var mServerModeManagerDialog: WeakReference<MaterialDialog>? = null
 
     private val screenColorPickerLauncher = registerForActivityResult(
@@ -309,13 +315,12 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_eyedropper_black_48dp,
             title = R.string.text_screen_color_picker,
             descriptionRes = R.string.description_screen_color_picker,
+            onTitleContainerClickListener = { neutralText(R.string.text_settings) },
         ).also { item ->
             item.isHidden = true
             item.setOnLaunchManagerListener {
-                PluginCenterActivity.launch(
-                    context = mContext,
-                    initialQuery = ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
-                )
+                mContext.packageManager.getLaunchIntentForPackage(ScreenColorPickerContract.DEFAULT_PACKAGE_NAME)
+                    ?.startSafely(mContext)
             }
         }
         ScreenColorPickerPluginStateMonitor.addListener(
@@ -717,12 +722,39 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_keep_screen_on_when_in_foreground,
         )
 
-        mTerminalItem = DrawerMenuShortcutItem(
+        mTerminalItem = DrawerMenuToggleableItem(
+            helper = object : DrawerMenuItemCustomHelper(mContext) {
+                override val isInMainThread = true
+                override val isActive get() = TerminalSessionManager.hasSessions
+                override fun toggle(): Boolean {
+                    if (isActive) TerminalSessionManager.closeAll() else TerminalActivity.launchNew(context)
+                    return true
+                }
+                override fun refreshSubtitle(aimState: Boolean) {
+                    val count = TerminalSessionManager.activeSessions.size
+                    val subtitle = if (count > 0) context.getString(R.string.text_terminal_running_sessions, count) else null
+                    if (mTerminalItem.subtitle != subtitle) {
+                        mTerminalItem.subtitle = subtitle
+                        mTerminalItem.isChecked = mTerminalItem.isChecked
+                    }
+                }
+            },
             icon = R.drawable.ic_terminal_black_48dp,
             title = R.string.text_terminal,
-        ).apply {
-            setAction { TerminalActivity.launch(mContext) }
+            descriptionRes = R.string.description_terminal,
+            onTitleContainerClickListener = {
+                positiveText(R.string.text_terminal_new_session)
+                positiveColorRes(R.color.dialog_button_attraction)
+                onPositive { d, _ -> d.dismiss(); TerminalActivity.launchNew(mContext) }
+            },
+        ).also { item ->
+            item.setOnLaunchManagerListener { d ->
+                d?.dismiss()
+                mTerminalManagerDialog?.get()?.dismiss()
+                mTerminalManagerDialog = WeakReference(TerminalManagerDialog.show(mContext))
+            }
         }
+        TerminalSessionManager.addListener(terminalSessionListener)
 
         mThemeColorItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_personalize_thicker,
@@ -899,6 +931,9 @@ open class DrawerFragment : Fragment() {
 
         dismissA11yServiceManager()
         dismissConnectionManagers()
+        mTerminalManagerDialog?.get()?.dismiss()
+        mTerminalManagerDialog = null
+        TerminalSessionManager.removeListener(terminalSessionListener)
 
         // mActivity.unregisterReceiver(mReceiver)
 

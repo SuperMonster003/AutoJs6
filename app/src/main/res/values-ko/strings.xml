@@ -161,6 +161,7 @@
     <string name="description_server_mode">서버 모드는 AutoJs6 가 현재 기기에서 서비스를 실행하고 외부 클라이언트 연결을 대기하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\nAutoJs6 서버 모드는 두 가지 연결 방식을 지원합니다:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
+    <string name="description_terminal">독립적인 shell 세션에서 명령을 실행합니다. 화면을 나가도 세션은 계속 실행됩니다. 스위치를 끄면 모든 세션이 종료됩니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
     <string name="description_timed_task_backend">스크립트를 정해진 시간에 실행하는 기본 메커니즘을 제어합니다.\n\nAlarmManager: 시스템의 \"알람 및 알림 설정 허용\" 권한을 부여하면 보다 정확한 시각에 가깝게 실행됩니다.\nWorkManager: 시스템 친화적이며, 일정 지연을 허용할 수 있는 비중요 작업에 적합합니다.\nJobScheduler: 호환성 유지를 위해 남겨둔 구방식으로, 지연 발생 가능성이 큽니다.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n호환성 유지를 위한 기존 구현입니다.\n신형 Android 에서는 지연이 더 커질 수 있습니다.\n특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
@@ -575,6 +576,7 @@
     <string name="hint_plugin_process_failed_to_start">플러그인 프로세스를 안정적으로 시작할 수 없습니다. 플러그인을 업데이트하거나 다시 설치하십시오. 문제가 계속되면 플러그인 개발자에게 문의하십시오.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">현재 플러그인은 더 높은 버전의 AutoJs6 호스트 환경이 필요합니다 (필요한 versionCode: %1$d, 현재 versionCode: %2$d). AutoJs6를 업그레이드해야 합니다.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">플러그인 프로토콜이 현재 AutoJs6와 호환되지 않습니다. 플러그인 버전을 업그레이드해야 합니다.</string>
+    <string name="hint_terminal_command">명령 입력</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
     <string name="image_editor_brightness">밝기</string>
@@ -2105,14 +2107,19 @@
     <string name="text_task">일</string>
     <string name="text_terminal">터미널</string>
     <string name="text_terminal_clear_data">터미널 데이터 지우기</string>
+    <string name="text_terminal_close_all_sessions">모든 세션 닫기</string>
     <string name="text_terminal_close_session">세션 닫기</string>
     <string name="text_terminal_confirm_clear_data">%1$s 아래의 모든 터미널 데이터를 삭제할까요? 실행 중인 세션은 닫힙니다.</string>
     <string name="text_terminal_confirm_close_running">이 세션에서 아직 프로세스가 실행 중입니다. 그래도 닫을까요?</string>
     <string name="text_terminal_copy_home_path">홈 디렉터리 경로 복사</string>
     <string name="text_terminal_copy_transcript">출력 기록 복사</string>
     <string name="text_terminal_data_cleared">터미널 데이터를 지웠습니다</string>
+    <string name="text_terminal_input_tips">명령 입력란은 긴 입력을 자동 줄 바꿈합니다. 터미널을 누르면 직접 입력할 수 있습니다. Tab은 초안을 shell로 보내 자동 완성하고 Ctrl / Alt는 직접 입력에 적용됩니다.</string>
+    <string name="text_terminal_manager">터미널 관리자</string>
+    <string name="text_terminal_new_session">새 세션</string>
     <string name="text_terminal_no_npm_scripts">package.json 에 scripts 가 선언되어 있지 않습니다</string>
     <string name="text_terminal_no_package_json">현재 디렉터리에서 package.json 을 찾을 수 없습니다</string>
+    <string name="text_terminal_no_sessions">실행 중인 세션 없음</string>
     <string name="text_terminal_node_exec_denied">이 기기가 플러그인의 Node.js 런처 실행을 거부하여 시스템 셸만 사용할 수 있습니다</string>
     <string name="text_terminal_node_executable_missing">Node.js 런타임 플러그인에 ABI %1$s 용 런처가 없습니다</string>
     <string name="text_terminal_node_missing">Node.js 런타임 플러그인이 설치되어 있지 않아 시스템 셸만 사용할 수 있습니다</string>
@@ -2138,10 +2145,14 @@
     <string name="text_terminal_other_package_managers_content">yarn 과 pnpm 은 corepack 을 통해 제공되며 처음 사용할 때 레지스트리에서 다운로드됩니다. \"yarn --version\" 또는 \"pnpm --version\" 을 실행하면 활성화됩니다.</string>
     <string name="text_terminal_package_name_hint">패키지 이름, 예: is-odd</string>
     <string name="text_terminal_preparing_npm">Node.js 런타임 플러그인에서 npm 과 corepack 을 준비하는 중...</string>
+    <string name="text_terminal_running">실행 중</string>
+    <string name="text_terminal_running_sessions">실행 중\u0020\u0020[ 세션: %1$d ]</string>
     <string name="text_terminal_search_npm">npm 패키지 검색</string>
     <string name="text_terminal_select_text">텍스트 선택</string>
     <string name="text_terminal_session_ended">세션이 종료되었습니다</string>
     <string name="text_terminal_session_kept_running">세션은 백그라운드에서 계속 실행됩니다. 종료하려면 \"세션 닫기\" 를 사용하세요</string>
+    <string name="text_terminal_session_title">세션 %1$s</string>
+    <string name="text_terminal_sessions">세션</string>
     <string name="text_terminal_share_transcript">출력 기록 공유</string>
     <string name="text_terminal_show_keyboard">키보드 표시</string>
     <string name="text_terminal_tips">터미널 도움말</string>

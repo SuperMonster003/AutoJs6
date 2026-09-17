@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
@@ -15,16 +16,11 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 
-/**
- * Horizontal key bar above the soft keyboard: Esc, Tab, a few shell punctuation keys, sticky
- * Ctrl / Alt, cursor and editing keys. Modifier highlighting follows the theme color.
- *
- * zh-CN: 软键盘上方的横向按键栏: Esc, Tab, 常用 shell 标点, 粘滞 Ctrl / Alt, 光标与编辑键. 修饰键高亮跟随主题色.
- */
+/** Two rows of shell keys with a fixed navigation pad, matching the editor keyboard. */
 class TerminalToolbarView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-) : HorizontalScrollView(context, attrs) {
+) : LinearLayout(context, attrs) {
 
     interface Listener {
         fun onKey(key: Key)
@@ -35,10 +31,7 @@ class TerminalToolbarView @JvmOverloads constructor(
 
     var listener: Listener? = null
 
-    private val container = LinearLayout(context).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
-    }
+    private var row: LinearLayout
 
     private val ctrlButton: TextView
     private val altButton: TextView
@@ -53,26 +46,35 @@ class TerminalToolbarView @JvmOverloads constructor(
     }
 
     init {
-        isHorizontalScrollBarEnabled = false
-        isFillViewport = true
-        addView(container, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        keyButton(Key.ESC)
-        keyButton(Key.TAB)
-        textButton("-")
-        textButton("/")
-        textButton("|")
+        orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        val symbols = LinearLayout(context).apply { orientation = VERTICAL }
+        addView(HorizontalScrollView(context).apply {
+            isHorizontalScrollBarEnabled = false
+            isFillViewport = true
+            addView(symbols, ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+        row = newRow(symbols)
         ctrlButton = button("Ctrl") { listener?.onToggleCtrl() }
         altButton = button("Alt") { listener?.onToggleAlt() }
-        keyButton(Key.UP)
-        keyButton(Key.LEFT)
-        keyButton(Key.DOWN)
-        keyButton(Key.RIGHT)
-        keyButton(Key.HOME)
-        keyButton(Key.END)
-        keyButton(Key.PAGE_UP)
-        keyButton(Key.PAGE_DOWN)
-        keyButton(Key.DELETE)
+        listOf("-", "/", "|", "~", "$", "_", "=", ":").forEach(::textButton)
+        row = newRow(symbols)
+        listOf(Key.HOME, Key.END, Key.PAGE_UP, Key.PAGE_DOWN, Key.DELETE).forEach(::keyButton)
+        listOf("\\", "'", "\"", "(", ")").forEach(::textButton)
+        addView(View(context).apply { setBackgroundColor(context.getColor(R.color.divider)) }, LayoutParams(dp(1), LayoutParams.MATCH_PARENT))
+        val navigation = LinearLayout(context).apply { orientation = VERTICAL }
+        addView(navigation, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        row = newRow(navigation)
+        listOf(Key.ESC, Key.UP, Key.TAB).forEach(::keyButton)
+        row = newRow(navigation)
+        listOf(Key.LEFT, Key.DOWN, Key.RIGHT).forEach(::keyButton)
         setModifiers(ctrl = false, alt = false)
+    }
+
+    private fun newRow(parent: LinearLayout) = LinearLayout(context).apply {
+        orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        parent.addView(this, LayoutParams(LayoutParams.WRAP_CONTENT, dp(40)))
     }
 
     fun setModifiers(ctrl: Boolean, alt: Boolean) {
@@ -107,12 +109,13 @@ class TerminalToolbarView @JvmOverloads constructor(
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
         setTextColor(context.getColor(R.color.day_night))
         setBackgroundResource(idleBackground)
-        minWidth = dp(44)
-        val horizontal = dp(10)
+        contentDescription = label
+        minWidth = dp(40)
+        val horizontal = dp(4)
         setPadding(horizontal, 0, horizontal, 0)
-        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(40))
+        layoutParams = LinearLayout.LayoutParams(dp(44), dp(40))
         setOnClickListener { onClick() }
-        container.addView(this)
+        row.addView(this)
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density + 0.5f).toInt()

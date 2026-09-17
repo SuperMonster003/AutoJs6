@@ -28,7 +28,11 @@ class TerminalPtySession(
 
     private val ptmx: ParcelFileDescriptor = ParcelFileDescriptor.open(File("/dev/ptmx"), ParcelFileDescriptor.MODE_READ_WRITE)
     private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile
+    private var finished = false
+    @Volatile
     private var started = false
+    private var emulatorInitialized = false
     private var pendingMessages = ArrayList<String>()
 
     @Volatile
@@ -39,7 +43,7 @@ class TerminalPtySession(
     var exitCode: Int? = null
         private set
 
-    val isProcessAlive: Boolean get() = started && exitCode == null
+    val isProcessAlive: Boolean get() = started && !finished && exitCode == null
 
     var ctrlArmed: Boolean = false
         private set
@@ -94,6 +98,7 @@ class TerminalPtySession(
                 return@thread
             }
             pid = childPid
+            if (finished) hangup()
             val code = PtyBridge.waitFor(childPid)
             mainHandler.post {
                 exitCode = code
@@ -106,6 +111,7 @@ class TerminalPtySession(
 
     override fun initializeEmulator(columns: Int, rows: Int) {
         super.initializeEmulator(columns, rows)
+        emulatorInitialized = true
         runCatching { PtyBridge.setUtf8Mode(ptmx.fd, true) }
         applyWindowSize(columns, rows)
         val pending = pendingMessages
@@ -124,7 +130,7 @@ class TerminalPtySession(
     }
 
     override fun write(data: ByteArray, offset: Int, count: Int) {
-        if (exitCode != null) {
+        if (finished || exitCode != null) {
             onInputAfterExit?.invoke()
             return
         }
@@ -156,7 +162,7 @@ class TerminalPtySession(
      * zh-CN: 发送原始按键序列, 绕过粘滞修饰键 (光标键仍应用 Alt).
      */
     fun sendKey(key: TerminalKeySequences.Key) {
-        if (exitCode != null) {
+        if (finished || exitCode != null) {
             onInputAfterExit?.invoke()
             return
         }
@@ -208,11 +214,21 @@ class TerminalPtySession(
     }
 
     override fun finish() {
+        if (finished) return
+        finished = true
         hangup()
-        super.finish()
+        if (!emulatorInitialized) {
+            // The library's finish() assumes initializeEmulator() has already run.
+            // Before a view is attached, only the pty descriptor needs closing.
+            runCatching { ptmx.close() }
+        } else {
+            super.finish()
+        }
+        pendingMessages.clear()
     }
 
     private fun appendMessage(message: String) {
+        if (finished) return
         if (!isRunning) {
             pendingMessages.add(message)
             return

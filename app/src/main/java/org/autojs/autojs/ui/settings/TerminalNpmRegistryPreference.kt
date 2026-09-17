@@ -51,7 +51,7 @@ class TerminalNpmRegistryPreference : MaterialListPreference {
         return false
     }
 
-    private fun promptCustomUrl() {
+    fun promptCustomUrl() {
         MaterialDialog.Builder(context)
             .title(R.string.text_terminal_npm_registry_custom_url)
             .content(R.string.text_terminal_npm_registry_https_only)

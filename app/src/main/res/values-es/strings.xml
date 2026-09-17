@@ -159,6 +159,7 @@
     <string name="description_server_mode">El modo servidor permite que AutoJs6 inicie un servicio en el dispositivo actual y espere conexiones de clientes externos para realizar [ transferencia de scripts / impresión de registros / control remoto ].\n\nEl modo servidor de AutoJs6 admite dos métodos de conexión:\n1. Red de área local (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku te permite obtener privilegios ADB y acceso a las APIs del sistema</string>
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
+    <string name="description_terminal">Ejecute comandos en sesiones de shell independientes. Las sesiones continúan en segundo plano al salir. Desactivar el interruptor finaliza todas las sesiones.</string>
     <string name="description_theme_color_preference">El color del tema se aplica a los widgets, incluidos, entre otros, los siguientes\nBarra de estado\nBarra de aplicaciones\nIcono de archivo\nIcono de elemento de tarea\nFAB\nTítulo de la categoría de ajustes\nBotón de cambio\n\nNota: A partir de la versión 6.2.0 de AutoJs6, todavía no hay diferencia entre el color primario, el color primario oscuro y el color de acento.</string>
     <string name="description_timed_task_backend">Controla el mecanismo subyacente para activar scripts de forma programada.\n\nAlarmManager: Mediante la concesión del permiso \"Permitir configurar alarmas y recordatorios\", las tareas programadas pueden dispararse con mayor puntualidad.\nWorkManager: Amigable con el sistema; adecuado para tareas no críticas que toleran cierta demora.\nJobScheduler: Implementación antigua, mantenida por compatibilidad; la ejecución puede retrasarse con mayor probabilidad.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Escenarios de uso y diferencias:\n\n1. AlarmManager\nAdecuado para tareas sensibles a la puntualidad, p. ej., [recordatorios/scripts estrictamente programados/...].\nEn Android 12+ y con el permiso \"Permitir configurar alarmas y recordatorios\", puede ejecutar tareas de forma más puntual con la pantalla apagada o en estado de espera.\nSin dicho permiso, el sistema puede degradar la exactitud o retrasar la ejecución.\n\n2. WorkManager\nAdecuado para tareas que no requieren estricta puntualidad, p. ej., [sincronización no crítica/limpieza/estadísticas/...].\nSe programa según [batería/red/carga/estrategias de reposo/...], por lo que puede posponer la ejecución con la pantalla apagada o en espera.\nAunque no garantiza precisión temporal, tiene ventajas en [finalización fiable/reintentos en caso de fallo/encadenamiento/deduplicación de trabajos].\n\n3. JobScheduler\nImplementación histórica para compatibilidad.\nEn versiones recientes de Android, las tareas pueden experimentar mayores retrasos.\nPor lo general, no se recomienda salvo por motivos de compatibilidad.</string>
@@ -573,6 +574,7 @@
     <string name="hint_plugin_process_failed_to_start">El proceso del plugin no pudo iniciarse de forma estable. Actualiza o reinstala el plugin; si el problema persiste, contacta con el desarrollador del plugin.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">El plugin actual requiere una versión más alta del entorno host de AutoJs6 (versionCode requerido: %1$d, versionCode actual: %2$d). Es necesario actualizar AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">El protocolo del plugin no es compatible con la versión actual de AutoJs6. Debes actualizar el plugin.</string>
+    <string name="hint_terminal_command">Comando</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Prueba a pulsar el boton \"Activar\" para activar el plugin una vez.\nSi la activacion se realiza correctamente, el boton se activara automaticamente en un periodo de tiempo.</string>
     <string name="image_editor_brightness">Brillo</string>
@@ -2103,14 +2105,19 @@
     <string name="text_task">Tarea</string>
     <string name="text_terminal">Terminal</string>
     <string name="text_terminal_clear_data">Borrar datos de la terminal</string>
+    <string name="text_terminal_close_all_sessions">Cerrar todas las sesiones</string>
     <string name="text_terminal_close_session">Cerrar sesión</string>
     <string name="text_terminal_confirm_clear_data">¿Eliminar todos los datos de la terminal en %1$s? Las sesiones en ejecución se cerrarán.</string>
     <string name="text_terminal_confirm_close_running">Todavía hay un proceso en ejecución en esta sesión. ¿Cerrar de todos modos?</string>
     <string name="text_terminal_copy_home_path">Copiar ruta del directorio personal</string>
     <string name="text_terminal_copy_transcript">Copiar transcripción</string>
     <string name="text_terminal_data_cleared">Datos de la terminal borrados</string>
+    <string name="text_terminal_input_tips">El campo de comando ajusta las líneas largas. Toque el terminal para escribir directamente. Tab envía el borrador al shell para completarlo; Ctrl / Alt se aplican a la entrada directa.</string>
+    <string name="text_terminal_manager">Gestor del terminal</string>
+    <string name="text_terminal_new_session">Nueva sesión</string>
     <string name="text_terminal_no_npm_scripts">package.json no declara scripts</string>
     <string name="text_terminal_no_package_json">No se encontró package.json en el directorio actual</string>
+    <string name="text_terminal_no_sessions">No hay sesiones activas</string>
     <string name="text_terminal_node_exec_denied">Este dispositivo rechazó ejecutar el lanzador de Node.js del plugin, solo está disponible el shell del sistema</string>
     <string name="text_terminal_node_executable_missing">El plugin Node.js Runtime no tiene lanzador para la ABI %1$s</string>
     <string name="text_terminal_node_missing">El plugin Node.js Runtime no está instalado, solo está disponible el shell del sistema</string>
@@ -2136,10 +2143,14 @@
     <string name="text_terminal_other_package_managers_content">yarn y pnpm se proporcionan a través de corepack y se descargan del registro en el primer uso. Ejecuta \"yarn --version\" o \"pnpm --version\" para activarlos.</string>
     <string name="text_terminal_package_name_hint">Nombre del paquete, p. ej. is-odd</string>
     <string name="text_terminal_preparing_npm">Preparando npm y corepack desde el plugin Node.js Runtime...</string>
+    <string name="text_terminal_running">En ejecución</string>
+    <string name="text_terminal_running_sessions">En ejecución\u0020\u0020[ Sesiones: %1$d ]</string>
     <string name="text_terminal_search_npm">Buscar paquetes npm</string>
     <string name="text_terminal_select_text">Seleccionar texto</string>
     <string name="text_terminal_session_ended">Sesión finalizada</string>
     <string name="text_terminal_session_kept_running">La sesión sigue ejecutándose en segundo plano; usa \"Cerrar sesión\" para terminarla</string>
+    <string name="text_terminal_session_title">Sesión %1$s</string>
+    <string name="text_terminal_sessions">Sesiones</string>
     <string name="text_terminal_share_transcript">Compartir transcripción</string>
     <string name="text_terminal_show_keyboard">Mostrar teclado</string>
     <string name="text_terminal_tips">Consejos de la terminal</string>

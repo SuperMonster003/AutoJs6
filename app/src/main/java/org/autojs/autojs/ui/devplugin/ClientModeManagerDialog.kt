@@ -30,6 +30,8 @@ class ClientModeManagerDialog private constructor(
     R.string.text_client_mode_manager,
     R.string.key_client_mode_manager_status_level,
     R.string.key_client_mode_manager_control_level,
+    R.string.key_client_mode_manager_settings_collapsed,
+    R.string.key_client_mode_manager_clients_level,
 ) {
 
     private val service = AutoJs.instance.devPluginService
@@ -55,7 +57,7 @@ class ClientModeManagerDialog private constructor(
     })
 
     init {
-        addAction(Action(R.string.text_history, R.drawable.ic_history_black_48dp, R.string.summary_server_address_history, level = Level.ALL) {
+        addAction(Action(R.string.text_history, R.drawable.ic_history_black_48dp, R.string.summary_server_address_history, header = true) {
             tool.showServerAddressHistory { address -> tool.connectTo(address) }
         })
         addAction(Action(R.string.text_copy_address, R.drawable.ic_content_copy_black_24dp, level = Level.ALL) {

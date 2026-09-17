@@ -155,6 +155,7 @@
     <string name="description_server_mode">服务端模式用于让 AutoJs6 在当前设备开启服务并等待外部客户端连接, 以便进行 [ 脚本传输 / 打印日志 / 远程控制 ] 等.\n\nAutoJs6 服务端模式支持两种连接方式:\n1. 局域网 (LAN)\n2. 安卓调试桥 (ADB)</string>
     <string name="description_shizuku_access">通过 Shizuku 可以获得 ADB 特权并使用系统 API</string>
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
+    <string name="description_terminal">在独立的 shell 会话中执行命令. 离开页面后会话继续运行, 关闭开关将结束全部会话.</string>
     <string name="description_theme_color_preference">主题色的应用范围包括但不限于以下部件:\n系统通知栏\n应用栏 (AppBar)\n文件图标\n任务项图标\n浮动操作按钮 (FAB)\n设置页面类别标题\n按钮开关\n\n注: 截至 6.2.0 版本, AutoJs6 主题色暂未对 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 强调色 (Accent Color) ] 作出区分.</string>
     <string name="description_timed_task_backend">控制脚本定时触发的底层机制.\n\nAlarmManager: 通过申请 \"允许设置闹钟和提醒\" 权限, 可使定时任务的触发更接近准时.\nWorkManager: 系统友好, 适合可接受一定延迟的非关键定时任务.\nJobScheduler: 旧实现, 仅用作兼容保留, 定时任务出现延迟的概率较大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用场景与差异说明: \n\n1. AlarmManager\n适用于准时性敏感的定时任务, 如 [提醒/严格定时脚本/...].\n在 Android 12+ 设备上获取 \"允许设置闹钟和提醒\" 权限后, 在息屏或待机状态时能够较准时地执行定时任务.\n在未授予 \"允许设置闹钟和提醒\" 权限时, 系统可能降级为不准时或延后执行任务.\n\n2. WorkManager\n适用于不要求严格准时执行的定时任务, 如 [非关键性同步/清理/统计/...].\n根据系统 [ 电量/网络/充电情况/待机策略/... ] 进行调度, 息屏或待机状态时可能推迟任务执行.\n虽无法保证时间精确性, 但在 [ 可靠完成/失败重试/链式执行/唯一任务去重 ] 等方面拥有独特优势.\n\n3. Job\n历史实现, 为兼容保留.\n在高版本安卓系统中定时任务可能存在较大的延迟执行问题.\n除非出于兼容需要, 一般不推荐使用.</string>
@@ -569,6 +570,7 @@
     <string name="hint_plugin_process_failed_to_start">插件进程无法稳定启动. 请更新或重新安装插件; 如问题持续, 请联系插件开发者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">当前插件需要更高版本的 AutoJs6 宿主环境 (要求 versionCode: %1$d, 当前 versionCode: %2$d), 需要升级 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">插件协议与当前 AutoJs6 不兼容, 需升级插件版本.</string>
+    <string name="hint_terminal_command">输入命令</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可尝试点击 \"激活\" 按钮激活一次插件.\n如激活成功, 按钮将在一定时间内自动开启.</string>
     <string name="image_editor_brightness">亮度</string>
@@ -2100,14 +2102,19 @@
     <string name="text_task">任务</string>
     <string name="text_terminal">终端</string>
     <string name="text_terminal_clear_data">清除终端数据</string>
+    <string name="text_terminal_close_all_sessions">关闭全部会话</string>
     <string name="text_terminal_close_session">关闭会话</string>
     <string name="text_terminal_confirm_clear_data">删除 %1$s 下的全部终端数据? 运行中的会话将被关闭.</string>
     <string name="text_terminal_confirm_close_running">会话中仍有进程在运行, 确定关闭?</string>
     <string name="text_terminal_copy_home_path">复制主目录路径</string>
     <string name="text_terminal_copy_transcript">复制终端记录</string>
     <string name="text_terminal_data_cleared">终端数据已清除</string>
+    <string name="text_terminal_input_tips">命令输入区支持自动换行. 点按终端内容可直接交互输入. Tab 将草稿交给 shell 补全, Ctrl / Alt 用于直接输入的快捷键.</string>
+    <string name="text_terminal_manager">终端管理器</string>
+    <string name="text_terminal_new_session">新建会话</string>
     <string name="text_terminal_no_npm_scripts">package.json 未声明 scripts</string>
     <string name="text_terminal_no_package_json">当前目录未找到 package.json</string>
+    <string name="text_terminal_no_sessions">无运行会话</string>
     <string name="text_terminal_node_exec_denied">此设备拒绝运行插件的 Node.js 启动器, 当前仅可使用系统 shell</string>
     <string name="text_terminal_node_executable_missing">Node.js 运行时插件缺少 ABI %1$s 的启动器</string>
     <string name="text_terminal_node_missing">未安装 Node.js 运行时插件, 当前仅可使用系统 shell</string>
@@ -2133,10 +2140,14 @@
     <string name="text_terminal_other_package_managers_content">yarn 与 pnpm 由 corepack 提供, 首次使用时从 registry 下载. 运行 \"yarn --version\" 或 \"pnpm --version\" 即可启用.</string>
     <string name="text_terminal_package_name_hint">包名, 如 is-odd</string>
     <string name="text_terminal_preparing_npm">正在从 Node.js 运行时插件准备 npm 与 corepack...</string>
+    <string name="text_terminal_running">运行中</string>
+    <string name="text_terminal_running_sessions">运行中\u0020\u0020[ 会话: %1$d ]</string>
     <string name="text_terminal_search_npm">搜索 npm 包</string>
     <string name="text_terminal_select_text">选择文本</string>
     <string name="text_terminal_session_ended">会话已结束</string>
     <string name="text_terminal_session_kept_running">会话将在后台继续运行, 可通过 \"关闭会话\" 结束</string>
+    <string name="text_terminal_session_title">会话 %1$s</string>
+    <string name="text_terminal_sessions">会话</string>
     <string name="text_terminal_share_transcript">分享终端记录</string>
     <string name="text_terminal_show_keyboard">显示键盘</string>
     <string name="text_terminal_tips">终端提示</string>

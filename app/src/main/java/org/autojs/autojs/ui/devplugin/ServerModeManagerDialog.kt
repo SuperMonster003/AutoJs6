@@ -35,6 +35,8 @@ class ServerModeManagerDialog private constructor(
     R.string.text_server_mode_manager,
     R.string.key_server_mode_manager_status_level,
     R.string.key_server_mode_manager_control_level,
+    R.string.key_server_mode_manager_settings_collapsed,
+    R.string.key_server_mode_manager_clients_level,
 ) {
 
     private val service = AutoJs.instance.devPluginService

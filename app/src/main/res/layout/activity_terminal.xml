@@ -30,18 +30,62 @@
             android:orientation="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <org.autojs.autojs.ui.terminal.TerminalEmulatorView
-                android:id="@+id/terminal"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@color/window_background"
-                android:paddingStart="4dp"
-                android:paddingEnd="2dp" />
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="8dp">
+
+                <org.autojs.autojs.ui.terminal.TerminalEmulatorView
+                    android:id="@+id/terminal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
 
             <include
                 android:id="@+id/node_banner"
                 layout="@layout/include_terminal_node_banner" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp">
+
+                <EditText
+                    android:id="@+id/command_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="monospace"
+                    android:hint="@string/hint_terminal_command"
+                    android:imeOptions="actionSend|flagNoExtractUi"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:maxLines="5"
+                    android:minLines="1"
+                    android:scrollHorizontally="false"
+                    android:textColor="@color/day_night"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:id="@+id/send_command"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/text_send"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_send_black_48dp" />
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

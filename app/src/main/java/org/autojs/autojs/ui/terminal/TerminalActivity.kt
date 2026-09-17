@@ -2,14 +2,18 @@ package org.autojs.autojs.ui.terminal
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ContextMenu
 import android.view.GestureDetector
 import android.view.Menu
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,6 +21,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.MaterialDialog
 import jackpal.androidterm.emulatorview.ColorScheme
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,7 +37,6 @@ import org.autojs.autojs.core.terminal.TerminalPaths
 import org.autojs.autojs.core.terminal.TerminalPreferences
 import org.autojs.autojs.core.terminal.TerminalSessionManager
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.settings.TerminalNodeProbePreference
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
@@ -55,10 +60,16 @@ import java.io.File
 class TerminalActivity : BaseActivity() {
 
     private lateinit var binding: ActivityTerminalBinding
+    private lateinit var terminalView: TerminalEmulatorView
+    private var startJob: Job? = null
+    private var managerDialog: MaterialDialog? = null
     private lateinit var npmActions: TerminalNpmActions
     private var session: TerminalSessionManager.Session? = null
     private var nodeResolution: Resolution? = null
     private var nodeBannerDismissed = false
+    private val sessionListener: () -> Unit = {
+        runOnUiThread { if (!isDestroyed && session?.pty?.isProcessAlive == false) onSessionEnded() }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,29 +84,39 @@ class TerminalActivity : BaseActivity() {
         }
         ViewCompat.requestApplyInsets(binding.root)
 
+        terminalView = binding.terminal
         npmActions = TerminalNpmActions(this, ::typeCommand) { session?.pty?.currentDirectory() }
 
-        val directory = resolveDirectory(intent)
+        setUpCommandInput()
         setUpKeyBar()
         setUpBackHandling()
         setUpNodeBanner()
-        // A recreated activity restores its own session; a fresh launch reattaches the newest live
-        // session (kept by TerminalSessionService) and only starts a shell when there is none.
-        // zh-CN: 重建的 Activity 恢复自己的会话; 新启动时接回最新的存活会话 (由 TerminalSessionService 保持), 没有时才启动新 shell.
-        val restored = savedInstanceState?.getString(STATE_SESSION_ID)?.let(TerminalSessionManager::get)
-            ?: TerminalSessionManager.activeSessions.lastOrNull { it.pty.isProcessAlive }
-        if (restored != null) {
+        TerminalSessionManager.addListener(sessionListener)
+        openSession(intent, savedInstanceState?.getString(STATE_SESSION_ID))
+    }
+
+    private fun openSession(request: Intent, restoredId: String? = null) {
+        startJob?.cancel()
+        val explicitId = restoredId ?: request.getStringExtra(EXTRA_SESSION_ID)
+        val restored = explicitId?.let(TerminalSessionManager::get)?.takeIf { it.pty.isProcessAlive }
+            ?: if (explicitId == null && !request.getBooleanExtra(EXTRA_NEW_SESSION, false)) {
+                TerminalSessionManager.activeSessions.lastOrNull()
+            } else null
+        if (explicitId != null && restored == null) {
+            ViewUtils.showToast(this, R.string.text_terminal_session_ended)
+            if (session == null) finish()
+            return
+        }
+        if (restored == null) {
+            startSession(resolveDirectory(request))
+        } else {
             attachSession(restored)
-            updateSubtitle(restored.initialDirectory)
-            val requested = intent.getStringExtra(EXTRA_DIRECTORY)?.takeIf { it.isNotBlank() }
-            if (savedInstanceState == null && requested != null) {
-                changeDirectory(requested)
+            updateSubtitle(restored.pty.currentDirectory()?.path ?: restored.initialDirectory)
+            if (restoredId == null && explicitId == null) {
+                request.getStringExtra(EXTRA_DIRECTORY)?.takeIf { it.isNotBlank() }?.let(::changeDirectory)
             }
             refreshNodeAvailability()
-        } else {
-            startSession(directory)
         }
-        showTipsIfNeeded()
     }
 
     /**
@@ -104,7 +125,7 @@ class TerminalActivity : BaseActivity() {
      * zh-CN: 先解析插件启动器, 让 shell 启动时 PATH 中即有 node / npm; 资产解压 (插件安装或更新后的首次) 显示进度对话框.
      */
     private fun startSession(directory: String) {
-        lifecycleScope.launch {
+        startJob = lifecycleScope.launch {
             val paths = TerminalPaths.of(this@TerminalActivity).ensureLayout()
             val resolution = withContext(Dispatchers.IO) {
                 runCatching { NodeCliLocator.resolve(applicationContext) }
@@ -121,10 +142,17 @@ class TerminalActivity : BaseActivity() {
                 null
             }
             val options = TerminalPreferences.nodeEnvironmentOptions()
-            val prepared = withContext(Dispatchers.IO) {
-                TerminalNodeSetup.prepare(applicationContext, paths, resolution, options)
+            val prepared = try {
+                withContext(Dispatchers.IO) { TerminalNodeSetup.prepare(applicationContext, paths, resolution, options) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                ViewUtils.showToast(this@TerminalActivity, e.message ?: getString(R.string.error_an_error_occurred), true)
+                if (session == null) finish()
+                return@launch
+            } finally {
+                progress?.dismiss()
             }
-            progress?.dismiss()
             if (isFinishing || isDestroyed) return@launch
             nodeResolution = prepared.resolution
             attachSession(TerminalSessionManager.create(this@TerminalActivity, directory, prepared.environment))
@@ -137,8 +165,7 @@ class TerminalActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val requested = intent.getStringExtra(EXTRA_DIRECTORY)?.takeIf { it.isNotBlank() } ?: return
-        changeDirectory(requested)
+        openSession(intent)
     }
 
     /** Types a `cd` into the running shell (used when the terminal is reopened for a directory). zh-CN: 向运行中的 shell 键入 `cd` (为某目录重新打开终端时使用). */
@@ -152,12 +179,13 @@ class TerminalActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        binding.terminal.onResume()
+        terminalView.textSizeSp = TerminalPreferences.textSizeSp
+        terminalView.onResume()
         refreshSubtitle()
     }
 
     override fun onPause() {
-        binding.terminal.onPause()
+        terminalView.onPause()
         super.onPause()
     }
 
@@ -172,15 +200,9 @@ class TerminalActivity : BaseActivity() {
      * zh-CN: 离开界面不会结束会话: 它由前台服务保持在 [TerminalSessionManager] 中, 直到 "关闭会话" 或 shell 自行退出; 仅移除已死亡的 shell.
      */
     override fun onDestroy() {
-        val current = session
-        if (current != null) {
-            current.pty.onProcessExited = null
-            current.pty.onInputAfterExit = null
-            current.pty.onModifiersChanged = null
-            if (isFinishing && !current.pty.isProcessAlive) {
-                TerminalSessionManager.close(current.id)
-            }
-        }
+        managerDialog?.dismiss()
+        TerminalSessionManager.removeListener(sessionListener)
+        detachSession()
         super.onDestroy()
     }
 
@@ -189,10 +211,32 @@ class TerminalActivity : BaseActivity() {
         return requested?.takeIf { File(it).isDirectory } ?: WorkingDirectoryUtils.path
     }
 
+    private fun detachSession() {
+        session?.commandDraft = binding.commandInput.text.toString()
+        session?.pty?.let {
+            it.onProcessExited = null
+            it.onInputAfterExit = null
+            it.onModifiersChanged = null
+            it.setUpdateCallback(null)
+        }
+    }
+
     private fun attachSession(newSession: TerminalSessionManager.Session) {
+        if (session?.id == newSession.id) return
+        detachSession()
+        terminalView.onPause()
+        unregisterForContextMenu(terminalView)
+        val parent = terminalView.parent as ViewGroup
+        val index = parent.indexOfChild(terminalView)
+        val params = terminalView.layoutParams
+        parent.removeView(terminalView)
+        terminalView = TerminalEmulatorView(this).apply { id = R.id.terminal }
+        parent.addView(terminalView, index, params)
         session = newSession
+        binding.commandInput.setText(newSession.commandDraft)
+        binding.commandInput.setSelection(binding.commandInput.length())
         val pty = newSession.pty
-        val view = binding.terminal
+        val view = terminalView
         val scheme = ColorScheme(getColor(R.color.day_night), getColor(R.color.window_background))
         pty.setColorScheme(scheme)
         view.attachSession(pty)
@@ -206,10 +250,11 @@ class TerminalActivity : BaseActivity() {
                     view.toggleSelectingText()
                     return true
                 }
-                showSoftKeyboard()
+                showSoftKeyboard(view)
                 return false
             }
         })
+        view.onResume()
         registerForContextMenu(view)
         pty.onProcessExited = { onSessionEnded() }
         pty.onInputAfterExit = { finish() }
@@ -219,24 +264,85 @@ class TerminalActivity : BaseActivity() {
             onSessionEnded()
         } else {
             view.postDelayed({ if (!isDestroyed) refreshSubtitle() }, SUBTITLE_REFRESH_DELAY_MILLIS)
+            view.post { if (!isDestroyed) binding.commandInput.requestFocus() }
         }
+    }
+
+    private fun setUpCommandInput() {
+        val color = ColorUtils.adjustThemeColorForContrast(getColor(R.color.window_background), 4.5)
+        binding.commandInput.backgroundTintList = ColorStateList.valueOf(color)
+        binding.sendCommand.imageTintList = ColorStateList.valueOf(color)
+        binding.commandInput.imeOptions = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        binding.commandInput.setOnEditorActionListener { _, action, event ->
+            if (action == EditorInfo.IME_ACTION_SEND || event?.let { it.keyCode == KeyEvent.KEYCODE_ENTER && !it.isShiftPressed } == true) {
+                if (event == null || event.action == KeyEvent.ACTION_DOWN) sendCommand()
+                true
+            } else false
+        }
+        binding.sendCommand.setOnClickListener { sendCommand() }
+    }
+
+    private fun sendCommand() {
+        val pty = session?.pty?.takeIf { it.isProcessAlive } ?: return
+        val command = binding.commandInput.text.toString()
+        if (command.isEmpty()) return
+        pty.clearModifiers()
+        pty.write(command.replace("\r\n", "\n").replace('\n', '\r') + TerminalKeySequences.ENTER)
+        binding.commandInput.text.clear()
+        session?.commandDraft = ""
+    }
+
+    private fun insertCommandText(text: String) {
+        val input = binding.commandInput
+        val start = input.selectionStart.coerceAtLeast(0)
+        val end = input.selectionEnd.coerceAtLeast(0)
+        input.text.replace(minOf(start, end), maxOf(start, end), text)
     }
 
     private fun setUpKeyBar() {
         binding.keyBar.listener = object : TerminalToolbarView.Listener {
             override fun onKey(key: TerminalKeySequences.Key) {
+                val input = binding.commandInput
+                if (input.hasFocus()) {
+                    // Tab hands a draft to the shell for its own completion and history editing.
+                    if (key == TerminalKeySequences.Key.TAB || key == TerminalKeySequences.Key.ESC ||
+                        (input.length() == 0 && key in listOf(TerminalKeySequences.Key.UP, TerminalKeySequences.Key.DOWN))) {
+                        if (key == TerminalKeySequences.Key.TAB && input.length() > 0) {
+                            session?.pty?.write(input.text.toString())
+                            input.text.clear()
+                        }
+                        showSoftKeyboard(terminalView)
+                    } else {
+                        val code = when (key) {
+                            TerminalKeySequences.Key.LEFT -> KeyEvent.KEYCODE_DPAD_LEFT
+                            TerminalKeySequences.Key.RIGHT -> KeyEvent.KEYCODE_DPAD_RIGHT
+                            TerminalKeySequences.Key.UP -> KeyEvent.KEYCODE_DPAD_UP
+                            TerminalKeySequences.Key.DOWN -> KeyEvent.KEYCODE_DPAD_DOWN
+                            TerminalKeySequences.Key.HOME -> KeyEvent.KEYCODE_MOVE_HOME
+                            TerminalKeySequences.Key.END -> KeyEvent.KEYCODE_MOVE_END
+                            TerminalKeySequences.Key.PAGE_UP -> KeyEvent.KEYCODE_PAGE_UP
+                            TerminalKeySequences.Key.PAGE_DOWN -> KeyEvent.KEYCODE_PAGE_DOWN
+                            TerminalKeySequences.Key.DELETE -> KeyEvent.KEYCODE_FORWARD_DEL
+                        }
+                        input.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
+                        input.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
+                        return
+                    }
+                }
                 session?.pty?.sendKey(key)
             }
 
             override fun onText(text: String) {
-                session?.pty?.write(text)
+                if (binding.commandInput.hasFocus()) insertCommandText(text) else session?.pty?.write(text)
             }
 
             override fun onToggleCtrl() {
+                showSoftKeyboard(terminalView)
                 session?.pty?.toggleCtrl()
             }
 
             override fun onToggleAlt() {
+                showSoftKeyboard(terminalView)
                 session?.pty?.toggleAlt()
             }
         }
@@ -459,7 +565,12 @@ class TerminalActivity : BaseActivity() {
             R.id.action_text_size -> showTextSizeDialog()
             R.id.action_show_keyboard -> showSoftKeyboard()
             R.id.action_clear -> clearScreen()
-            R.id.action_tips -> showTips(force = true)
+            R.id.action_tips -> showTips()
+            R.id.action_new_session -> openSession(intent(this).putExtra(EXTRA_NEW_SESSION, true))
+            R.id.action_session_manager -> {
+                managerDialog?.dismiss()
+                managerDialog = TerminalManagerDialog.show(this) { terminalView.textSizeSp = TerminalPreferences.textSizeSp }
+            }
             R.id.action_close_session -> requestCloseSession()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -475,7 +586,7 @@ class TerminalActivity : BaseActivity() {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            CONTEXT_SELECT_TEXT -> binding.terminal.toggleSelectingText()
+            CONTEXT_SELECT_TEXT -> terminalView.toggleSelectingText()
             CONTEXT_COPY_ALL -> copyToClipboard(session?.pty?.transcriptText)
             CONTEXT_PASTE -> paste()
             else -> return super.onContextItemSelected(item)
@@ -494,7 +605,7 @@ class TerminalActivity : BaseActivity() {
     private fun paste() {
         val text = ClipboardUtils.getClip(this)?.toString().orEmpty()
         if (text.isEmpty()) return
-        session?.pty?.write(text)
+        if (binding.commandInput.hasFocus()) insertCommandText(text) else session?.pty?.write(text)
     }
 
     private fun copyToClipboard(text: String?) {
@@ -511,51 +622,20 @@ class TerminalActivity : BaseActivity() {
         }
     }
 
-    private fun showSoftKeyboard() {
-        val view = binding.terminal
+    private fun showSoftKeyboard(view: View = binding.commandInput) {
         view.requestFocus()
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.showSoftInput(view, 0)
     }
 
     private fun showTextSizeDialog() {
-        val sizes = TEXT_SIZE_CHOICES
-        val currentSize = binding.terminal.textSizeSp
-        val current = sizes.indexOf(currentSize).takeIf { it >= 0 }
-            ?: sizes.indexOfFirst { it >= currentSize }.takeIf { it >= 0 }
-            ?: sizes.lastIndex
-        MaterialDialog.Builder(this)
-            .title(R.string.text_text_size)
-            .items(sizes.map { "$it sp" })
-            .itemsCallbackSingleChoice(current) { dialog, _, which, _ ->
-                binding.terminal.textSizeSp = sizes[which]
-                dialog.dismiss()
-                true
-            }
-            .negativeText(R.string.dialog_button_cancel)
-            .widgetThemeColor()
-            .show()
+        TerminalSettingsDialogs.showTextSize(this) { terminalView.textSizeSp = TerminalPreferences.textSizeSp }
     }
 
-    private fun showTipsIfNeeded() = showTips(force = false)
-
-    private fun showTips(force: Boolean) {
-        // The first-run tip appears before the session exists, so the home comes from the layout itself.
-        // zh-CN: 首次提示在会话创建之前弹出, 因此主目录直接取自目录布局.
-        val home = TerminalPaths.of(this).home.path
-        val content = getString(R.string.text_terminal_tips_content, home)
-        if (force) {
-            MaterialDialog.Builder(this)
-                .title(R.string.text_terminal_tips)
-                .content(content)
-                .positiveText(R.string.dialog_button_confirm)
-                .widgetThemeColor()
-                .show()
-            return
-        }
-        NotAskAgainDialog.Builder(this, getString(R.string.key_dialog_terminal_tips))
+    private fun showTips() {
+        MaterialDialog.Builder(this)
             .title(R.string.text_terminal_tips)
-            .content(content)
+            .content(getString(R.string.text_terminal_tips_content, TerminalPaths.of(this).home.path) + "\n\n" + getString(R.string.text_terminal_input_tips))
             .positiveText(R.string.dialog_button_confirm)
             .widgetThemeColor()
             .show()
@@ -563,14 +643,14 @@ class TerminalActivity : BaseActivity() {
 
     companion object {
 
+        private const val EXTRA_NEW_SESSION = "new_session"
+        private const val EXTRA_SESSION_ID = "session_id"
         private const val EXTRA_DIRECTORY = "directory"
         private const val STATE_SESSION_ID = "session_id"
         private const val CONTEXT_SELECT_TEXT = 1
         private const val CONTEXT_COPY_ALL = 2
         private const val CONTEXT_PASTE = 3
         private const val SUBTITLE_REFRESH_DELAY_MILLIS = 800L
-
-        private val TEXT_SIZE_CHOICES = listOf(8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 28, 32)
 
         private val NPM_MENU_ITEMS = listOf(
             R.id.action_npm_init,
@@ -584,6 +664,14 @@ class TerminalActivity : BaseActivity() {
         @JvmOverloads
         fun intent(context: Context, directory: String? = null): Intent = Intent(context, TerminalActivity::class.java).apply {
             directory?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_DIRECTORY, it) }
+        }
+
+        fun launchNew(context: Context) {
+            intent(context).putExtra(EXTRA_NEW_SESSION, true).startSafely(context)
+        }
+
+        fun launchSession(context: Context, id: String) {
+            intent(context).putExtra(EXTRA_SESSION_ID, id).startSafely(context)
         }
 
         @JvmStatic

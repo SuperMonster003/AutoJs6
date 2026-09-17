@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 17, 2026.
+Data updated on Sept 17, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -361,6 +361,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color
 * `Feature` Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); "Save layout to file" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline
 * `Feature` Terminal: an in-app shell (drawer "Tools" group, directory menu "Open in terminal", project toolbar) running /system/bin/sh in a pty, with a key bar for Esc / Tab / Ctrl / Alt and the cursor keys, pinch-to-zoom text size, transcript copy / share, an npm helper menu, and a banner explaining why node from the Node.js Runtime plugin is unavailable
+* `Feature` Terminal drawer switch follows live sessions and their count, with session creation, close-all control, and a manager for opening and closing individual sessions
 * `Feature` Terminal: node, npm, npx, corepack, yarn and pnpm from the Node.js Runtime plugin (1.5.0+), with the npm / corepack archive verified by SHA-256 and installed once per plugin build, command links rebuilt on every session, npm caches and global installs kept under the terminal prefix, and a new "Terminal" settings group (npm registry: npmjs.org / npmmirror.com / custom https URL, ignore lifecycle scripts, clear terminal data)
 * `Feature` `images.matchFeatures` accepts an image or path for either argument and detects features on the fly; new options `ransacThreshold`, `minInliers` and `maxFeatures`, `ObjectFrame` exposes `width`, `height`, `angle`, `bounds`, `points`, `matches` and `inliers`, and `ImageFeatures` exposes `count` and `method`
 * `Feature` Accessibility companion contract for official plugins: companions that publish a `follow-host` service policy are enabled and disabled together with the AutoJs6 accessibility service using the configured root, secure settings or Shizuku strategies, and receive the host service state broadcast
@@ -386,7 +387,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+
 * `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
 * `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device
-* `Feature` Client mode manager: a "History" entry in the control section (listed when all controls are expanded) shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all
+* `Feature` Client mode manager: a "History" entry in the control section shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all
+* `Fix` The screen color picker settings button opens the plugin main page, and the MCP Server drawer subtitle is hidden when stopped
 * `Fix` Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files
 * `Fix` Node.js project writeback no longer replaces unchanged files, avoiding slow script completion and sluggish application response with large dependency trees
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
@@ -591,6 +593,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name
 * `Fix` Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast
 * `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
+* `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history
+* `Improvement` Terminal adds a wrapping command field and separate session drafts while retaining direct input, a two-row key bar with fixed navigation keys, content padding, a separate directory prompt line, and tips available only from the menu
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -968,7 +972,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -1019,7 +1023,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 17, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 17, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

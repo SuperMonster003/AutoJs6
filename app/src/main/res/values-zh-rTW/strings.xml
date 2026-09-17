@@ -156,6 +156,7 @@
     <string name="description_server_mode">服務端模式用於讓 AutoJs6 在當前裝置開啟服務並等待外部客戶端連線, 以便進行 [ 指令碼傳輸 / 列印日誌 / 遠端控制 ] 等.\n\nAutoJs6 服務端模式支援兩種連線方式:\n1. 區域網 (LAN)\n2. 安卓除錯橋 (ADB)</string>
     <string name="description_shizuku_access">透過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 指令碼分析佈局時更穩定, 但可能影響獲取的控制元件總量.\n需重啟無障礙服務.</string>
+    <string name="description_terminal">在獨立的 shell 工作階段中執行命令. 離開頁面後工作階段繼續執行, 關閉開關將結束全部工作階段.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n檔案圖示\n任務項圖示\n浮動操作按鈕 (FAB)\n設定頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
     <string name="description_timed_task_backend">控制指令碼定時觸發的底層機制.\n\nAlarmManager: 透過申請 \"允許設定鬧鐘和提醒\" 許可權, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作相容保留, 定時任務出現延遲的機率較大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異說明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時指令碼/...].\n在 Android 12+ 裝置上獲取 \"允許設定鬧鐘和提醒\" 許可權後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設定鬧鐘和提醒\" 許可權時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網路/充電情況/待機策略/... ] 進行排程, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為相容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於相容需要, 一般不推薦使用.</string>
@@ -570,6 +571,7 @@
     <string name="hint_plugin_process_failed_to_start">外掛程序無法穩定啟動. 請更新或重新安裝外掛; 如問題持續, 請聯絡外掛開發者.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">當前外掛需要更高版本的 AutoJs6 宿主環境 (要求 versionCode: %1$d, 當前 versionCode: %2$d), 需要升級 AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">外掛協議與當前 AutoJs6 不相容, 需升級外掛版本.</string>
+    <string name="hint_terminal_command">輸入命令</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
     <string name="image_editor_brightness">亮度</string>
@@ -2100,14 +2102,19 @@
     <string name="text_task">任務</string>
     <string name="text_terminal">終端機</string>
     <string name="text_terminal_clear_data">清除終端機資料</string>
+    <string name="text_terminal_close_all_sessions">關閉全部工作階段</string>
     <string name="text_terminal_close_session">關閉工作階段</string>
     <string name="text_terminal_confirm_clear_data">刪除 %1$s 下的全部終端機資料? 執行中的工作階段將被關閉.</string>
     <string name="text_terminal_confirm_close_running">工作階段中仍有程序在執行, 確定關閉?</string>
     <string name="text_terminal_copy_home_path">複製主目錄路徑</string>
     <string name="text_terminal_copy_transcript">複製終端機記錄</string>
     <string name="text_terminal_data_cleared">終端機資料已清除</string>
+    <string name="text_terminal_input_tips">命令輸入區支援自動換行. 點按終端機內容可直接互動輸入. Tab 將草稿交給 shell 補全, Ctrl / Alt 用於直接輸入的快捷鍵.</string>
+    <string name="text_terminal_manager">終端機管理員</string>
+    <string name="text_terminal_new_session">建立工作階段</string>
     <string name="text_terminal_no_npm_scripts">package.json 未宣告 scripts</string>
     <string name="text_terminal_no_package_json">目前目錄未找到 package.json</string>
+    <string name="text_terminal_no_sessions">無執行中的工作階段</string>
     <string name="text_terminal_node_exec_denied">此裝置拒絕執行外掛程式的 Node.js 啟動器, 目前僅可使用系統 shell</string>
     <string name="text_terminal_node_executable_missing">Node.js 執行階段外掛程式缺少 ABI %1$s 的啟動器</string>
     <string name="text_terminal_node_missing">未安裝 Node.js 執行階段外掛程式, 目前僅可使用系統 shell</string>
@@ -2133,10 +2140,14 @@
     <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 \"yarn --version\" 或 \"pnpm --version\" 即可啟用.</string>
     <string name="text_terminal_package_name_hint">套件名稱, 如 is-odd</string>
     <string name="text_terminal_preparing_npm">正在從 Node.js 執行階段外掛程式準備 npm 與 corepack...</string>
+    <string name="text_terminal_running">執行中</string>
+    <string name="text_terminal_running_sessions">執行中\u0020\u0020[ 工作階段: %1$d ]</string>
     <string name="text_terminal_search_npm">搜尋 npm 套件</string>
     <string name="text_terminal_select_text">選取文字</string>
     <string name="text_terminal_session_ended">工作階段已結束</string>
     <string name="text_terminal_session_kept_running">工作階段將在背景繼續執行, 可透過 \"關閉工作階段\" 結束</string>
+    <string name="text_terminal_session_title">工作階段 %1$s</string>
+    <string name="text_terminal_sessions">工作階段</string>
     <string name="text_terminal_share_transcript">分享終端機記錄</string>
     <string name="text_terminal_show_keyboard">顯示鍵盤</string>
     <string name="text_terminal_tips">終端機提示</string>

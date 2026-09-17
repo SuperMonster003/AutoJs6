@@ -19,17 +19,19 @@ object TerminalSessionManager {
         val initialDirectory: String,
         val paths: TerminalPaths,
         val createdAt: Long = System.currentTimeMillis(),
-    )
+    ) {
+        var commandDraft: String = ""
+    }
 
     private val nextId = AtomicLong(1)
     private val sessions = LinkedHashMap<String, Session>()
     private val listeners = ArrayList<() -> Unit>()
 
     val activeSessions: List<Session>
-        @Synchronized get() = sessions.values.toList()
+        @Synchronized get() = sessions.values.filter { it.pty.isProcessAlive }
 
     val hasSessions: Boolean
-        @Synchronized get() = sessions.isNotEmpty()
+        @Synchronized get() = sessions.values.any { it.pty.isProcessAlive }
 
     @Synchronized
     fun get(id: String?): Session? = id?.let(sessions::get)

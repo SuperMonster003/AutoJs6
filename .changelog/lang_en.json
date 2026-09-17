@@ -194,6 +194,7 @@
         "Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color",
         "Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); \"Save layout to file\" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline",
         "Terminal: an in-app shell (drawer \"Tools\" group, directory menu \"Open in terminal\", project toolbar) running /system/bin/sh in a pty, with a key bar for Esc / Tab / Ctrl / Alt and the cursor keys, pinch-to-zoom text size, transcript copy / share, an npm helper menu, and a banner explaining why node from the Node.js Runtime plugin is unavailable",
+        "Terminal drawer switch follows live sessions and their count, with session creation, close-all control, and a manager for opening and closing individual sessions",
         "Terminal: node, npm, npx, corepack, yarn and pnpm from the Node.js Runtime plugin (1.5.0+), with the npm / corepack archive verified by SHA-256 and installed once per plugin build, command links rebuilt on every session, npm caches and global installs kept under the terminal prefix, and a new \"Terminal\" settings group (npm registry: npmjs.org / npmmirror.com / custom https URL, ignore lifecycle scripts, clear terminal data)",
         "`images.matchFeatures` accepts an image or path for either argument and detects features on the fly; new options `ransacThreshold`, `minInliers` and `maxFeatures`, `ObjectFrame` exposes `width`, `height`, `angle`, `bounds`, `points`, `matches` and `inliers`, and `ImageFeatures` exposes `count` and `method`",
         "Accessibility companion contract for official plugins: companions that publish a `follow-host` service policy are enabled and disabled together with the AutoJs6 accessibility service using the configured root, secure settings or Shizuku strategies, and receive the host service state broadcast",
@@ -219,9 +220,10 @@
         "VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+",
         "Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed",
         "VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device",
-        "Client mode manager: a \"History\" entry in the control section (listed when all controls are expanded) shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all"
+        "Client mode manager: a \"History\" entry in the control section shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all"
       ],
       "fix": [
+        "The screen color picker settings button opens the plugin main page, and the MCP Server drawer subtitle is hidden when stopped",
         "Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files",
         "Node.js project writeback no longer replaces unchanged files, avoiding slow script completion and sluggish application response with large dependency trees",
         "The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors",
@@ -428,6 +430,8 @@
         "Client mode server address history was only written on a failed handshake and never for a successful connection, so the \"History\" of the address dialog stayed empty"
       ],
       "improvement": [
+        "Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history",
+        "Terminal adds a wrapping command field and separate session drafts while retaining direct input, a two-row key bar with fixed navigation keys, content padding, a separate directory prompt line, and tips available only from the menu",
         "Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically",
         "Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout",
         "Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling",

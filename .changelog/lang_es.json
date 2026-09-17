@@ -194,6 +194,7 @@
         "Entrada \"Ejecución flotante\" en el menú de script del explorador de archivos, con una barra flotante translúcida para iniciar / detener, editar y ver el registro del script, que sigue el modo nocturno y el color del tema",
         "Análisis de diseño: mantén pulsado un atributo en el diálogo de información del nodo para marcar varios y copiarlos como un selector encadenado (id('x').text('y')) o un selector de objeto aceptado por pickup() / detect(); \"Guardar diseño en archivo\" escribe el árbol de nodos capturado en <directorio de trabajo>/layouts/<hora>.layout.json, y tocar ese archivo en el explorador de archivos lo analiza sin conexión",
         "Terminal: un shell integrado (grupo \"Herramientas\" del menú lateral, \"Abrir en la terminal\" en el menú de directorio, barra del proyecto) que ejecuta /system/bin/sh en un pty, con barra de teclas Esc / Tab / Ctrl / Alt y teclas de cursor, tamaño de texto con gesto de pellizco, copia / compartir de la transcripción, menú de ayudas npm y un aviso que explica por qué node del plugin Node.js Runtime no está disponible",
+        "El interruptor del terminal refleja las sesiones activas y su cantidad, con creación, cierre global y gestión individual de cada sesión",
         "Terminal: node, npm, npx, corepack, yarn y pnpm del plugin Node.js Runtime (1.5.0+); el archivo npm / corepack se verifica con SHA-256 y se instala una vez por compilación del plugin, los enlaces de comandos se reconstruyen en cada sesión, las cachés de npm y las instalaciones globales se mantienen bajo el prefijo de la terminal, y un nuevo grupo de ajustes \"Terminal\" (registro de npm: npmjs.org / npmmirror.com / URL https personalizada, ignorar scripts de ciclo de vida, borrar datos de la terminal)",
         "`images.matchFeatures` acepta una imagen o una ruta en cualquiera de sus dos argumentos y detecta las características al vuelo; nuevas opciones `ransacThreshold`, `minInliers` y `maxFeatures`, `ObjectFrame` expone `width`, `height`, `angle`, `bounds`, `points`, `matches` e `inliers`, e `ImageFeatures` expone `count` y `method`",
         "Contrato de complemento de accesibilidad para complementos oficiales: los complementos que publican una política de servicio `follow-host` se habilitan y deshabilitan junto con el servicio de accesibilidad de AutoJs6 mediante las estrategias configuradas de root, ajustes seguros o Shizuku, y reciben la difusión de estado del servicio anfitrión",
@@ -219,9 +220,10 @@
         "Conexión de la extensión de VSCode: confirmación de emparejamiento - un dispositivo desconocido que se conecta en modo cliente debe permitirse primero en VSCode (opcionalmente recordado), mientras que los dispositivos que escanearon el código QR se confían automáticamente; requiere extensión 1.1.0+",
         "Modo servidor: descubrimiento en la LAN (mDNS) - al activarlo, la extensión de VSCode (1.1.0+) lista este dispositivo en su selector de conexión LAN sin escribir la dirección",
         "Archivos remotos de VSCode: transferencia por fragmentos - los archivos grandes se leen y escriben en fragmentos de 1 MiB con progreso mostrado en VSCode; requiere extensión 1.1.0+; fs.list puede devolver el md5 de los archivos bajo demanda para que la extensión compare archivos al traer cambios del proyecto desde el dispositivo",
-        "Administrador del modo cliente: una entrada \"Historial\" en la sección de control (visible con todos los controles desplegados) muestra las direcciones de servidor usadas anteriormente; toque para conectar, mantenga pulsado para eliminar o borre todas"
+        "Administrador del modo cliente: una entrada \"Historial\" en la sección de control muestra las direcciones de servidor usadas anteriormente; toque para conectar, mantenga pulsado para eliminar o borre todas"
       ],
       "fix": [
+        "El botón de ajustes del selector de color abre la página principal del plugin y el subtítulo de MCP Server se oculta al detenerse",
         "Fuga de descriptores de archivo al transferir espacios de trabajo y cargar módulos Node.js, que ralentizaba los scripts posteriores y el reinicio de la aplicación tras ejecutar proyectos con muchos archivos",
         "La sincronización de proyectos Node.js ya no reemplaza archivos sin cambios, evitando lentitud al finalizar scripts y en la respuesta de la aplicación con muchas dependencias",
         "El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana",
@@ -428,6 +430,8 @@
         "El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el \"Historial\" del diálogo de dirección permanecía vacío"
       ],
       "improvement": [
+        "Los gestores de accesibilidad, cliente, servidor y terminal comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial",
+        "El terminal incorpora un campo de comando con ajuste de líneas y borradores por sesión conservando la entrada directa; teclado de dos filas con navegación fija, márgenes, indicador de directorio separado y consejos solo desde el menú",
         "Los errores Flow conservan métodos, archivos de script y números de línea de tareas asíncronas en flowStack y stack, y console.error muestra la pila automáticamente",
         "maxAttempts de Flow repeatUntil usa 0 de forma predeterminada para intentos ilimitados dentro del tiempo total",
         "Comparación de colecciones ordenadas de nodos y proyecciones snapshot inmutables, con plazos y cancelación de subflujos",

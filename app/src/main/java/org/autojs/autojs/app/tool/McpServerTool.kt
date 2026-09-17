@@ -132,7 +132,7 @@ class McpServerTool(override val context: Context) : SocketItemHelper {
     companion object {
         fun openPluginCenter(context: Context) = PluginCenterActivity.launch(context, sourceScope = PluginIndexSource.OFFICIAL, initialQuery = "MCP Server")
 
-        fun subtitle(context: Context, value: McpServerToolState): String = when (value.state) {
+        fun subtitle(context: Context, value: McpServerToolState): String? = when (value.state) {
             McpServerUiState.NOT_INSTALLED -> context.getString(R.string.mcp_server_state_not_installed)
             McpServerUiState.APPLICATION_DISABLED, McpServerUiState.PLUGIN_DISABLED -> context.getString(R.string.mcp_server_state_disabled)
             McpServerUiState.ACTIVATION_REQUIRED -> context.getString(R.string.mcp_server_state_activation)
@@ -143,7 +143,7 @@ class McpServerTool(override val context: Context) : SocketItemHelper {
             McpServerUiState.HOST_UNAVAILABLE -> context.getString(R.string.mcp_server_state_host_unavailable)
             McpServerUiState.STOPPING -> context.getString(R.string.mcp_server_state_stopping)
             McpServerUiState.FAILED -> context.getString(R.string.mcp_server_state_failed)
-            else -> context.getString(R.string.mcp_server_state_stopped)
+            else -> null
         }
     }
 }

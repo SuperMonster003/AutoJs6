@@ -46,6 +46,24 @@ class TerminalPathsTest {
     }
 
     @Test
+    fun upgradesTheManagedPromptWithoutOverwritingCustomProfiles() {
+        val root = Files.createTempDirectory("terminal-profile-migration").toFile()
+        try {
+            val paths = TerminalPaths(root).ensureLayout()
+            paths.profile.writeText(TerminalPaths.LEGACY_DEFAULT_PROFILE)
+            paths.ensureLayout()
+            assertEquals(TerminalPaths.DEFAULT_PROFILE, paths.profile.readText())
+            assertTrue(paths.profile.readText().contains("; esac)\n"))
+            val custom = TerminalPaths.LEGACY_DEFAULT_PROFILE + "\n# custom setting\n"
+            paths.profile.writeText(custom)
+            paths.ensureLayout()
+            assertEquals(custom, paths.profile.readText())
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun tildePathCollapsesOnlyTheHomePrefix() {
         val home = "/data/user/0/app/files/terminal/home"
         assertEquals("~", TerminalPaths.toTildePath(home, home))

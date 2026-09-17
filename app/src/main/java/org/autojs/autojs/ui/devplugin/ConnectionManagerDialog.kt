@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.disposables.CompositeDisposable
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceInfoFormat
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.ui.common.ManagerSettingsSection
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
@@ -51,6 +52,8 @@ abstract class ConnectionManagerDialog protected constructor(
     @StringRes titleRes: Int,
     @StringRes private val statusLevelKeyRes: Int,
     @StringRes private val controlLevelKeyRes: Int,
+    @StringRes settingsCollapsedKeyRes: Int,
+    @StringRes private val clientsLevelKeyRes: Int,
 ) {
 
     /** Verbosity of a section, stored by ordinal. zh-CN: 区块的详略等级, 按序号存储. */
@@ -95,6 +98,12 @@ abstract class ConnectionManagerDialog protected constructor(
     private var statusLevel = Level.entries[Pref.getInt(statusLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
     private var controlLevel = Level.entries[Pref.getInt(controlLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
 
+    private var clientsLevel = Level.entries[Pref.getInt(clientsLevelKeyRes, Level.ALL.ordinal).coerceIn(Level.entries.indices)]
+    private var clientsTitleRes = R.string.text_clients
+    private var emptyClientsRes = R.string.text_no_clients_connected
+    private var emptyClientsIconRes = R.drawable.ic_laptop_black_48dp
+    private val settingsSection: ManagerSettingsSection
+
     val dialog: MaterialDialog
 
     private val refreshTask = object : Runnable {
@@ -109,15 +118,21 @@ abstract class ConnectionManagerDialog protected constructor(
         val sectionTitleColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 3.2)
         headerTint = ColorStateList.valueOf(sectionTitleColor)
         listOf(binding.statusTitle, binding.clientsTitle, binding.controlTitle, binding.settingsTitle).forEach { it.setTextColor(sectionTitleColor) }
-        listOf(binding.statusRefresh, binding.statusLess, binding.statusMore, binding.controlLess, binding.controlMore).forEach { it.imageTintList = headerTint }
+        listOf(binding.statusRefresh, binding.statusLess, binding.statusMore, binding.controlLess, binding.controlMore,
+            binding.clientsLess, binding.clientsMore, binding.settingsOpen, binding.settingsLess, binding.settingsMore).forEach { it.imageTintList = headerTint }
 
         binding.statusRefresh.setOnClickListener { refresh() }
         binding.statusLess.setOnClickListener { stepStatusLevel(-1) }
         binding.statusMore.setOnClickListener { stepStatusLevel(+1) }
         binding.controlLess.setOnClickListener { stepControlLevel(-1) }
         binding.controlMore.setOnClickListener { stepControlLevel(+1) }
+        binding.clientsLess.setOnClickListener { stepClientsLevel(-1) }
+        binding.clientsMore.setOnClickListener { stepClientsLevel(+1) }
+        settingsSection = ManagerSettingsSection(context, binding.settingsContainer, binding.settingsOpen,
+            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, settingsCollapsedKeyRes)
         applyStatusLevel()
         applyControlLevel()
+        applyClientsLevel()
 
         dialog = MaterialDialog.Builder(context)
             .title(titleRes)
@@ -147,6 +162,7 @@ abstract class ConnectionManagerDialog protected constructor(
     protected open fun onDismissed() {
         handler.removeCallbacksAndMessages(null)
         disposables.clear()
+        settingsSection.dismiss()
     }
 
     fun show(): MaterialDialog = dialog.showAdaptive()
@@ -221,7 +237,7 @@ abstract class ConnectionManagerDialog protected constructor(
     /** Show or hide the clients section (server mode only). zh-CN: 显示或隐藏客户端区 (仅服务端模式). */
     protected fun setClientsSectionVisible(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
-        binding.clientsTitle.visibility = visibility
+        binding.clientsHeader.visibility = visibility
         binding.clientsContainer.visibility = visibility
     }
 
@@ -233,7 +249,7 @@ abstract class ConnectionManagerDialog protected constructor(
     protected fun setClients(entries: List<ClientRow>) {
         clientEntries = entries
         val rows = if (entries.isEmpty()) {
-            listOf(ClientRow(R.drawable.ic_laptop_black_48dp, getString(R.string.text_no_clients_connected), "") {})
+            listOf(ClientRow(emptyClientsIconRes, getString(emptyClientsRes), "") {})
         } else entries
         while (clientRows.size < rows.size) clientRows += createClientRow(clientRows.size)
         clientRows.forEachIndexed { index, row ->
@@ -250,6 +266,31 @@ abstract class ConnectionManagerDialog protected constructor(
                 row.subtitle.visibility = if (entry.subtitle.isEmpty()) View.GONE else View.VISIBLE
             }
         }
+        applyClientsLevel()
+    }
+
+    protected fun configureClientsSection(@StringRes titleRes: Int, @StringRes emptyRes: Int, @DrawableRes emptyIconRes: Int) {
+        clientsTitleRes = titleRes
+        emptyClientsRes = emptyRes
+        emptyClientsIconRes = emptyIconRes
+        setClientsSectionVisible(true)
+        applyClientsLevel()
+    }
+
+    private fun stepClientsLevel(delta: Int) {
+        clientsLevel = Level.entries.getOrNull(clientsLevel.ordinal + delta) ?: return
+        Pref.putInt(clientsLevelKeyRes, clientsLevel.ordinal)
+        applyClientsLevel()
+    }
+
+    private fun applyClientsLevel() {
+        binding.clientsContainer.visibility = if (binding.clientsHeader.visibility == View.VISIBLE && clientsLevel != Level.NONE) View.VISIBLE else View.GONE
+        binding.clientsTitle.text = if (clientsLevel == Level.NONE) "${getString(clientsTitleRes)} [${clientEntries.size}]" else getString(clientsTitleRes)
+        clientRows.forEachIndexed { index, row ->
+            row.subtitle.visibility = if (clientsLevel == Level.ALL && clientEntries.getOrNull(index)?.subtitle?.isNotEmpty() == true) View.VISIBLE else View.GONE
+        }
+        setStepEnabled(binding.clientsLess, clientsLevel != Level.NONE)
+        setStepEnabled(binding.clientsMore, clientsLevel != Level.ALL)
     }
 
     private fun createClientRow(index: Int): OperationDialogItemBinding {
@@ -353,7 +394,7 @@ abstract class ConnectionManagerDialog protected constructor(
         @StringRes titleRes: Int,
         @StringRes summaryRes: Int,
         @StringRes keyRes: Int,
-        defaultRes: Int,
+        defaultRes: Int? = null,
         onChanged: ((Boolean) -> Unit)? = null,
     ) {
         A11yServiceManagerSwitchItemBinding.inflate(inflater, binding.settingsContainer, true).apply {
@@ -361,9 +402,18 @@ abstract class ConnectionManagerDialog protected constructor(
             subtitle.setText(summaryRes)
             // PrefSwitch persists through setChecked(), so a checked-change listener does not interfere.
             // zh-CN: PrefSwitch 通过 setChecked() 持久化, 因此选中变化监听器不会与之冲突.
-            sw.setPrefKey(context.getString(keyRes), context.resources.getBoolean(defaultRes))
+            sw.setPrefKey(context.getString(keyRes), defaultRes?.let(context.resources::getBoolean) ?: false)
             onChanged?.let { listener -> sw.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) } }
             root.setOnClickListener { sw.toggle() }
+        }
+    }
+
+    protected fun addSetting(@StringRes titleRes: Int, @DrawableRes iconRes: Int, onClick: () -> Unit) {
+        OperationDialogItemBinding.inflate(inflater, binding.settingsContainer, true).apply {
+            title.setText(titleRes)
+            icon.setImageResource(iconRes)
+            icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
+            root.setOnClickListener { onClick() }
         }
     }
 

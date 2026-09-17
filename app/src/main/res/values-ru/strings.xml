@@ -159,6 +159,7 @@
     <string name="description_server_mode">Серверный режим позволяет AutoJs6 запускать службу на текущем устройстве и ожидать подключения внешних клиентов для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nСерверный режим AutoJs6 поддерживает два способа подключения:\n1. Локальная сеть (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku позволяет получить привилегии ADB и доступ к системным API.</string>
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
+    <string name="description_terminal">Выполняйте команды в отдельных сеансах shell. После выхода сеансы продолжают работать в фоне. Выключение переключателя завершает все сеансы.</string>
     <string name="description_theme_color_preference">Цвет темы применяется к виджетам, включая следующие, но не ограничиваясь ими:\nСтрока состояния\nПанель приложений\nЗначок файла\nЗначок элемента задачи\nFAB\nЗаголовок каталога настроек\nКнопка переключения\n\nПримечание: Начиная с версии AutoJs6 6.2.0, пока не существует различий между основным цветом, основным темным цветом и цветом акцента.</string>
     <string name="description_timed_task_backend">Управляет базовым механизмом по расписанию запуска скриптов.\n\nAlarmManager: При выдаче разрешения \"Разрешить настройку будильников и напоминаний\" задачи выполняются более точно по времени.\nWorkManager: Дружелюбен к системе; подходит для некритичных задач, допускающих задержку.\nJobScheduler: Устаревшая реализация, сохранена для совместимости; вероятность задержек выше.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Сценарии и отличия:\n\n1. AlarmManager\nПодходит для задач, чувствительных к точности времени, например [напоминания/строго по расписанию/...].\nВ Android 12+ при наличии разрешения \"Разрешить настройку будильников и напоминаний\" задачи запускаются более точно даже при выключенном экране/в ожидании.\nБез него система может понизить точность или отложить выполнение.\n\n2. WorkManager\nПодходит для задач без строгих требований к времени, например [некритичная синхронизация/очистка/статистика/...].\nПланирование учитывает [батарею/сеть/зарядку/политику сна/...], возможны задержки при выключенном экране или в ожидании.\nХотя точность не гарантируется, он силён в [надёжном завершении/повторных попытках/цепочках/дедупликации работ].\n\n3. JobScheduler\nИсторическая реализация для совместимости.\nНа новых версиях Android возможны более существенные задержки.\nНе рекомендуется, если это не необходимо ради совместимости.</string>
@@ -573,6 +574,7 @@
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
     <string name="hint_plugin_requires_higher_host_version_with_required_and_current">Текущий плагин требует более новой версии хост-среды AutoJs6 (требуемый versionCode: %1$d, текущий versionCode: %2$d). Необходимо обновить AutoJs6.</string>
     <string name="hint_plugin_upgrade_required_due_to_protocol_mismatch">Протокол плагина несовместим с текущей версией AutoJs6. Требуется обновить плагин.</string>
+    <string name="hint_terminal_command">Введите команду</string>
     <string name="hint_terminal_npm_registry_custom_url">https://registry.example.com/</string>
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
     <string name="image_editor_brightness">Яркость</string>
@@ -2103,14 +2105,19 @@
     <string name="text_task">Задание</string>
     <string name="text_terminal">Терминал</string>
     <string name="text_terminal_clear_data">Очистить данные терминала</string>
+    <string name="text_terminal_close_all_sessions">Закрыть все сеансы</string>
     <string name="text_terminal_close_session">Закрыть сеанс</string>
     <string name="text_terminal_confirm_clear_data">Удалить все данные терминала в %1$s? Запущенные сеансы будут закрыты.</string>
     <string name="text_terminal_confirm_close_running">В этом сеансе все еще выполняется процесс. Все равно закрыть?</string>
     <string name="text_terminal_copy_home_path">Копировать путь домашнего каталога</string>
     <string name="text_terminal_copy_transcript">Копировать вывод</string>
     <string name="text_terminal_data_cleared">Данные терминала очищены</string>
+    <string name="text_terminal_input_tips">Поле команды переносит длинные строки. Нажмите на терминал для прямого ввода. Tab передает черновик shell для дополнения; Ctrl / Alt применяются к прямому вводу.</string>
+    <string name="text_terminal_manager">Диспетчер терминала</string>
+    <string name="text_terminal_new_session">Новый сеанс</string>
     <string name="text_terminal_no_npm_scripts">В package.json нет раздела scripts</string>
     <string name="text_terminal_no_package_json">В текущем каталоге нет package.json</string>
+    <string name="text_terminal_no_sessions">Нет активных сеансов</string>
     <string name="text_terminal_node_exec_denied">Устройство отказалось запускать загрузчик Node.js плагина, доступна только системная оболочка</string>
     <string name="text_terminal_node_executable_missing">У плагина Node.js Runtime нет загрузчика для ABI %1$s</string>
     <string name="text_terminal_node_missing">Плагин Node.js Runtime не установлен, доступна только системная оболочка</string>
@@ -2136,10 +2143,14 @@
     <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните \"yarn --version\" или \"pnpm --version\", чтобы активировать их.</string>
     <string name="text_terminal_package_name_hint">Имя пакета, например is-odd</string>
     <string name="text_terminal_preparing_npm">Подготовка npm и corepack из плагина Node.js Runtime...</string>
+    <string name="text_terminal_running">Работает</string>
+    <string name="text_terminal_running_sessions">Работает\u0020\u0020[ Сеансы: %1$d ]</string>
     <string name="text_terminal_search_npm">Поиск пакетов npm</string>
     <string name="text_terminal_select_text">Выделить текст</string>
     <string name="text_terminal_session_ended">Сеанс завершен</string>
     <string name="text_terminal_session_kept_running">Сеанс продолжает работать в фоне; чтобы завершить его, используйте \"Закрыть сеанс\"</string>
+    <string name="text_terminal_session_title">Сеанс %1$s</string>
+    <string name="text_terminal_sessions">Сеансы</string>
     <string name="text_terminal_share_transcript">Поделиться выводом</string>
     <string name="text_terminal_show_keyboard">Показать клавиатуру</string>
     <string name="text_terminal_tips">Подсказки по терминалу</string>

@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 17 일.
+데이터 갱신일: 2026/09/17.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -136,7 +136,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -361,6 +361,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 파일 관리자 스크립트 메뉴의 "플로팅 실행" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다
 * `추가` 레이아웃 분석: 노드 정보 대화상자에서 속성을 길게 누르면 여러 개를 선택해 하나의 체인 선택자 (id('x').text('y')) 또는 pickup() / detect() 가 받아들이는 객체 선택자로 복사할 수 있고, "레이아웃을 파일로 저장" 은 캡처한 노드 트리를 <작업 디렉터리>/layouts/<시각>.layout.json 에 기록하며, 파일 관리자에서 해당 파일을 탭하면 오프라인으로 분석할 수 있습니다
 * `추가` 터미널: 앱 내 셸 (드로어 "도구" 그룹, 디렉터리 메뉴 "터미널에서 열기", 프로젝트 툴바). pty 에서 /system/bin/sh 를 실행하며, Esc / Tab / Ctrl / Alt 와 커서 키 바, 핀치 줌 글자 크기, 출력 기록 복사 / 공유, npm 보조 메뉴, Node.js 런타임 플러그인의 node 를 사용할 수 없는 이유를 알리는 배너를 제공합니다
+* `추가` 터미널 서랍 스위치가 활성 세션과 개수를 반영하며 세션 생성, 전체 종료, 관리자에서 개별 세션 열기와 닫기를 지원
 * `추가` 터미널: Node.js 런타임 플러그인 (1.5.0 이상) 의 node, npm, npx, corepack, yarn, pnpm. npm / corepack 자산은 SHA-256 으로 검증하여 플러그인 빌드마다 한 번 설치하고, 명령 링크는 세션마다 재구성하며, npm 캐시와 전역 설치는 터미널 프리픽스 안에 유지. 새 "터미널" 설정 그룹 (npm 레지스트리: npmjs.org / npmmirror.com / 사용자 지정 https URL, 라이프사이클 스크립트 무시, 터미널 데이터 지우기)
 * `추가` `images.matchFeatures`의 두 인수에 이미지나 경로를 직접 전달하면 즉시 특징을 검출합니다; `ransacThreshold`, `minInliers`, `maxFeatures` 옵션이 추가되고 `ObjectFrame`은 `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers`를, `ImageFeatures`는 `count`와 `method`를 제공합니다
 * `추가` 공식 플러그인용 접근성 컴패니언 계약: `follow-host` 서비스 정책을 게시하는 컴패니언은 구성된 root, 보안 설정 또는 Shizuku 전략으로 AutoJs6 접근성 서비스와 함께 활성화 및 비활성화되며 호스트 서비스 상태 브로드캐스트를 받습니다
@@ -386,7 +387,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` VSCode 확장 연결: 페어링 확인 - 클라이언트 모드로 처음 연결하는 알 수 없는 기기는 VSCode 에서 먼저 허용해야 하며 (기억 가능), QR 코드를 스캔해 연결한 기기는 자동으로 신뢰됩니다; 확장 1.1.0+ 필요
 * `추가` 서버 모드: LAN 검색 (mDNS) - 켜면 VSCode 확장 (1.1.0+) 이 LAN 연결 선택 화면에 이 기기를 표시하여 주소 입력이 필요 없습니다
 * `추가` VSCode 원격 파일: 분할 전송 - 큰 파일을 1 MiB 단위로 읽고 쓰며 VSCode 에 진행률을 표시; 확장 1.1.0+ 필요; fs.list 는 요청 시 파일 md5 를 반환하여 확장이 기기에서 프로젝트 변경 사항을 가져올 때 파일을 비교할 수 있게 합니다
-* `추가` 클라이언트 모드 관리자 제어 영역의 "기록" 항목 (모든 제어 항목을 펼쳤을 때 표시): 이전에 연결한 서버 주소를 확인하고, 탭하여 연결, 길게 눌러 삭제, 전체 삭제 가능
+* `추가` 클라이언트 모드 관리자 제어 영역의 "기록" 항목: 이전에 연결한 서버 주소를 확인하고, 탭하여 연결, 길게 눌러 삭제, 전체 삭제 가능
+* `수정` 화면 색상 선택기의 설정 버튼이 플러그인 기본 화면을 열고, MCP Server 중지 시 서랍 부제목을 숨김
 * `수정` Node.js 작업 공간 전송 및 모듈 로딩의 파일 디스크립터 누수로 인해, 파일이 많은 프로젝트 실행 후 후속 스크립트와 앱 재시작이 느려지는 문제
 * `수정` Node.js 프로젝트의 결과 반영 시 변경되지 않은 파일을 교체하지 않아, 많은 의존성 파일로 인한 스크립트 종료 지연과 앱 응답 저하 방지
 * `수정` Flow 병원 예약 예제에서 의사 행을 분석하지 못하면 null 대신 false를 반환하여 불리언 변환 오류 방지
@@ -591,6 +593,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` VSCode 확장 프로그램이 보낸 TypeScript, Lua, Node.js, Bun, QuickJS, Python 등의 스크립트가 모두 Rhino JavaScript로 실행되던 문제. 이제 파일 이름에 맞는 엔진으로 라우팅
 * `수정` VSCode 확장 프로그램 연결의 핸드셰이크 거부 또는 연결 실패 대화상자가 Activity 소멸 후 (언어 또는 다크 모드 전환) 비정상 동작할 수 있던 문제. 토스트로 표시하도록 변경
 * `수정` 클라이언트 모드의 서버 주소 기록이 핸드셰이크 실패 시에만 기록되고 성공적으로 연결한 주소는 기록되지 않아 주소 대화 상자의 "기록"이 항상 비어 있던 문제
+* `개선` 접근성 서비스, 클라이언트 모드, 서버 모드 및 터미널 관리자의 영역별 확장 버튼과 구분선을 통일; 설정을 완전히 접으면 톱니바퀴로 별도 대화상자를 열 수 있고, 접힌 클라이언트 제어에 기록 항목 표시
+* `개선` 터미널에 자동 줄 바꿈 명령 입력란과 세션별 초안을 제공하고 직접 입력도 유지; 키를 두 줄로 배치하고 방향키를 고정하며 여백과 별도 디렉터리 프롬프트 행을 추가; 도움말은 메뉴에서만 표시
 * `개선` Flow 오류의 flowStack 및 stack에 비동기 작업 메서드, 스크립트 파일과 줄 번호를 보존하고 console.error에서 진단 스택을 자동으로 표시
 * `개선` Flow repeatUntil의 maxAttempts 기본값을 0으로 설정하여 전체 제한 시간 내에서 무제한 시도 지원
 * `개선` 안정화 대기에서 순서가 있는 노드 모음과 snapshot 데이터 투영을 비교하고 하위 흐름의 기한, 취소 및 오류 전파 개선
@@ -968,7 +972,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -1019,7 +1023,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 17 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026/09/17 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1185,7 +1189,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026 년 3 월 18 일.
+데이터 갱신일: 2026/03/18.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 
