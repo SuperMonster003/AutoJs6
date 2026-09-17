@@ -617,6 +617,7 @@ object NodeBridgeModules {
     const val BARCODE = NodeBridgePermissionManifest.BARCODE
     const val MEDIA = NodeBridgePermissionManifest.MEDIA
     const val MEDIAINFO = "mediainfo"
+    const val MEDIA_STORE = "media_store"
     const val RECORDER = "recorder"
     const val PINYIN = NodeBridgePermissionManifest.PINYIN
     const val PINYIN4J = NodeBridgePermissionManifest.PINYIN4J
@@ -707,7 +708,10 @@ object NodeBridgeModules {
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
-    val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume")
+    val mediaAudioStreamMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo", "setAudioStreamVolume")
+    val mediaPlaybackMethods = setOf("play", "pause", "resume", "stop", "seekTo", "getPlaybackStatus")
+    val mediaMethods = mediaAudioStreamMethods + mediaPlaybackMethods
+    val mediaStoreMethods = setOf("capabilities", "query", "get", "insert", "update", "delete", "scanFile", "exportFile")
     val mediainfoMethods = setOf("read", "get", "countGet", "capabilities")
     val recorderMethods = setOf("getStatus", "start", "stop")
     val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
@@ -759,6 +763,7 @@ object NodeBridgeModules {
         BARCODE to barcodeMethods,
         MEDIA to mediaMethods,
         MEDIAINFO to mediainfoMethods,
+        MEDIA_STORE to mediaStoreMethods,
         RECORDER to recorderMethods,
         PINYIN to pinyinMethods,
         PINYIN4J to pinyin4jMethods,
@@ -849,6 +854,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val eventObservers = NodeEventObservers(appContext)
     private val dialogs = NodeDialogs(appContext)
     private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveAndroidFile) }
+    private val mediaPlayback = lazy { NodeMediaPlayback(appContext, ::resolveAndroidFile) }
+    private val mediaStore = lazy { NodeMediaStore(appContext, ::resolveAndroidFile) }
     private val imageOperations = NodeImageOperations(appContext)
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
@@ -917,7 +924,9 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
             request.module == NodeBridgeModules.BARCODE && request.method in NodeBridgeModules.barcodeMethods -> dispatchBarcode(request, auditedCallback)
-            request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaMethods -> dispatchMedia(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaPlaybackMethods -> dispatchMediaPlayback(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaAudioStreamMethods -> dispatchMedia(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA_STORE && request.method in NodeBridgeModules.mediaStoreMethods -> dispatchMediaStore(request, auditedCallback)
             request.module == NodeBridgeModules.MEDIAINFO && request.method in NodeBridgeModules.mediainfoMethods -> dispatchMediainfo(request, auditedCallback)
             request.module == NodeBridgeModules.RECORDER && request.method in NodeBridgeModules.recorderMethods -> dispatchRecorder(request, auditedCallback)
             request.module == NodeBridgeModules.PINYIN && request.method in NodeBridgeModules.pinyinMethods -> auditedCallback(NodePinyinBridge.dispatch(request, pinyinBackend))
@@ -1011,6 +1020,8 @@ class AndroidNodeBridgeCapabilityProvider(
         eventObservers.closeAll()
         dialogs.closeAll()
         if (audioRecorder.isInitialized()) audioRecorder.value.close()
+        if (mediaPlayback.isInitialized()) mediaPlayback.value.close()
+        if (mediaStore.isInitialized()) mediaStore.value.close()
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
@@ -2497,6 +2508,30 @@ class AndroidNodeBridgeCapabilityProvider(
                 })) },
             )
         }
+    }
+
+    private fun dispatchMediaPlayback(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        mediaPlayback.value.dispatch(request.method, request.argsArray()) { result ->
+            result.fold(
+                onSuccess = { callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(it))) },
+                onFailure = { error -> callback(NodeBridgeResponse.failure(request.id, mediaBridgeError(error, request, "Android could not control media playback."))) },
+            )
+        }
+    }
+
+    private fun dispatchMediaStore(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        mediaStore.value.dispatch(request.method, request.argsArray()) { result ->
+            result.fold(
+                onSuccess = { callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(it))) },
+                onFailure = { error -> callback(NodeBridgeResponse.failure(request.id, mediaBridgeError(error, request, "Android MediaStore request failed."))) },
+            )
+        }
+    }
+
+    private fun mediaBridgeError(error: Throwable, request: NodeBridgeRequest, fallback: String): NodeBridgeError = when (error) {
+        is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Android denied the media request.", request.module, request.method)
+        is IllegalArgumentException, is java.io.FileNotFoundException -> NodeBridgeError.invalidRequest(error.message ?: fallback, request.module, request.method)
+        else -> NodeBridgeError.providerFailed(error.message ?: fallback, request.module, request.method)
     }
 
     private fun audioManager(): AudioManager {

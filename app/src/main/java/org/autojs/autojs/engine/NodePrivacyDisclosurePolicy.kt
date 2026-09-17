@@ -63,6 +63,15 @@ object NodePrivacyDisclosurePolicy {
             settingsIntent = "android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS",
         ),
         ConsentSurface(
+            id = "media_library",
+            capability = NodeBridgePermissionManifest.MEDIA_LIBRARY,
+            androidPermissions = NodeBridgePermissionManifest.androidPermissionsForCapabilities(
+                listOf(NodeBridgePermissionManifest.MEDIA_LIBRARY, NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE),
+            ),
+            consent = CONSENT_ANDROID_PERMISSION_DIALOG,
+            settingsIntent = "android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS",
+        ),
+        ConsentSurface(
             id = "ui_overlay",
             capability = NodeBridgePermissionManifest.UI_OVERLAY,
             androidPermissions = listOf(
