@@ -3,16 +3,13 @@ package org.autojs.autojs.ui.qrcode
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.CaptureManager
-import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.journeyapps.barcodescanner.camera.CameraSettings
 import org.autojs.autojs.ui.BaseActivity
@@ -20,8 +17,9 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityQrCodeScanBinding
 
 /**
- * Camera QR code scanner used to connect to the VSCode extension without typing the address.
- * zh-CN: 摄像头二维码扫描器, 用于免输入地址连接 VSCode 插件.
+ * Camera QR code scanner used to connect to the VSCode extension without typing the address. There is no
+ * flashlight toggle on purpose: the code is shown on a screen, which lights itself.
+ * zh-CN: 摄像头二维码扫描器, 用于免输入地址连接 VSCode 插件. 刻意不提供闪光灯开关: 二维码显示在屏幕上, 屏幕自身发光.
  *
  * Created by SuperMonster003 on Sep 16, 2026.
  */
@@ -30,7 +28,6 @@ class QrCodeScanActivity : BaseActivity() {
     private lateinit var binding: ActivityQrCodeScanBinding
     private lateinit var capture: CaptureManager
     private var delivered = false
-    private var isTorchOn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,26 +62,6 @@ class QrCodeScanActivity : BaseActivity() {
             null,
             Intents.Scan.NORMAL_SCAN,
         )
-
-        // Flashlight toggle for dim rooms; hidden on devices without a flash unit.
-        // zh-CN: 昏暗环境下的闪光灯开关; 无闪光灯的设备上隐藏.
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-            binding.torch.visibility = View.GONE
-        }
-        binding.barcodeScanner.setTorchListener(object : DecoratedBarcodeView.TorchListener {
-            override fun onTorchOn() {
-                isTorchOn = true
-                binding.torch.setImageResource(R.drawable.ic_flash_on_black_48dp)
-            }
-
-            override fun onTorchOff() {
-                isTorchOn = false
-                binding.torch.setImageResource(R.drawable.ic_flash_off_black_48dp)
-            }
-        })
-        binding.torch.setOnClickListener {
-            if (isTorchOn) binding.barcodeScanner.setTorchOff() else binding.barcodeScanner.setTorchOn()
-        }
 
         binding.barcodeScanner.decodeSingle(object : BarcodeCallback {
             override fun barcodeResult(result: BarcodeResult) {

@@ -778,6 +778,7 @@
     <string name="summary_record_prompt">Afficher un message lors du démarrage ou de l\'arrêt de l\'enregistrement d\'un script</string>
     <string name="summary_release_history_preference">Voir l\'historique des versions et les statistiques</string>
     <string name="summary_rhino_java_primitive_wrap">Les types primitifs Java seront exposés comme objets Java dans les scripts</string>
+    <string name="summary_server_address_history">Adresses de serveur déjà utilisées, appuyez pour vous connecter</string>
     <string name="summary_stable_mode">Analyse de la mise en page plus stable mais moins bonne compatibilité du code (redémarrage du service a11y nécessaire).</string>
     <string name="summary_terminal_clear_data">Supprimer le répertoire personnel du terminal, les paquets installés et les caches npm</string>
     <string name="summary_terminal_node_probe">Vérifier si le terminal peut exécuter node depuis le plugin Node.js Runtime</string>
@@ -1088,6 +1089,7 @@
     <string name="text_copy_ace_diagnostics">Copier les diagnostics Ace</string>
     <string name="text_copy_address">Copier l\'adresse</string>
     <string name="text_copy_all">Copier tout</string>
+    <string name="text_copy_info">Copier les informations</string>
     <string name="text_copy_all_files_to_new_directory">Copier tous les fichiers dans un nouveau répertoire</string>
     <string name="text_copy_chained_selector">Copier le sélecteur chaîné</string>
     <string name="text_copy_command">Copie de cmd</string>
@@ -2168,7 +2170,6 @@
     <string name="text_title_bar_opacity">Opacité de la barre de titre</string>
     <string name="text_to_be_chosen">A choisir</string>
     <string name="text_toggle_all">Basculer tout</string>
-    <string name="text_toggle_flashlight">Activer ou désactiver la lampe</string>
     <string name="text_tools">Outils</string>
     <string name="text_total_size_colon_value">Taille: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>

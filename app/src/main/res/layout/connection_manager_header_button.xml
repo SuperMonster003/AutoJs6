@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon-only action in a section header of the connection managers; icon and description are set in code. -->
+<!-- zh-CN: 连接管理器区块标题中的纯图标动作; 图标与说明由代码设置. -->
+<ImageButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/A11yServiceManagerHeaderButton"
+    tools:ignore="ContentDescription" />

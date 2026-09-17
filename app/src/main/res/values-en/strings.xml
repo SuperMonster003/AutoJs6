@@ -771,6 +771,7 @@
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
     <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
+    <string name="summary_server_address_history">Server addresses connected before, tap one to connect</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
     <string name="summary_terminal_clear_data">Remove the terminal home, installed packages and npm caches</string>
     <string name="summary_terminal_node_probe">Check whether the terminal can run node from the Node.js Runtime plugin</string>
@@ -1081,6 +1082,7 @@
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_address">Copy address</string>
     <string name="text_copy_all">Copy all</string>
+    <string name="text_copy_info">Copy information</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_chained_selector">Copy chained selector</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -2156,7 +2158,6 @@
     <string name="text_title_bar_opacity">Title bar opacity</string>
     <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_toggle_all">Toggle all</string>
-    <string name="text_toggle_flashlight">Toggle flashlight</string>
     <string name="text_tools">Tools</string>
     <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>

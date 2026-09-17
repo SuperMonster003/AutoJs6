@@ -780,6 +780,7 @@
     <string name="summary_record_prompt">스크립트 기록을 시작하거나 중지할 때 메시지 표시</string>
     <string name="summary_release_history_preference">릴리스 기록과 통계를 보기</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
+    <string name="summary_server_address_history">이전에 연결한 서버 주소, 탭하여 연결</string>
     <string name="summary_stable_mode">보다 안정적인 레이아웃 분석이지만 더 나쁜 코드 호환성 (접근성 서비스 재시작 필요)</string>
     <string name="summary_terminal_clear_data">터미널 홈, 설치된 패키지, npm 캐시를 삭제합니다</string>
     <string name="summary_terminal_node_probe">터미널이 Node.js 런타임 플러그인의 node 를 실행할 수 있는지 확인합니다</string>
@@ -1090,6 +1091,7 @@
     <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
     <string name="text_copy_address">주소 복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
+    <string name="text_copy_info">정보 복사</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_chained_selector">체인 선택자 복사</string>
     <string name="text_copy_command">CMD 를 복사하십시오</string>
@@ -2170,7 +2172,6 @@
     <string name="text_title_bar_opacity">제목 표시줄 불투명도</string>
     <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_toggle_all">전체 전환</string>
-    <string name="text_toggle_flashlight">손전등 전환</string>
     <string name="text_tools">도구</string>
     <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>

@@ -12,8 +12,8 @@
         android:orientation="vertical"
         android:paddingBottom="8dp">
 
-        <!-- Status section: live rows (each copyable) refreshed every second, plus a manual refresh button. -->
-        <!-- zh-CN: 状态区: 每秒刷新的实时行 (逐行可复制), 以及手动刷新按钮. -->
+        <!-- Status section: live rows (each copyable) refreshed every second, plus refresh / show less / show more. -->
+        <!-- zh-CN: 状态区: 每秒刷新的实时行 (逐行可复制), 以及刷新 / 显示更少 / 显示更多按钮. -->
         <LinearLayout
             android:id="@+id/status_header"
             android:layout_width="match_parent"
@@ -38,6 +38,18 @@
                 style="@style/A11yServiceManagerHeaderButton"
                 android:contentDescription="@string/text_refresh"
                 android:src="@drawable/ic_refresh_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/status_less"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_less"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/status_more"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_more"
+                android:src="@drawable/ic_add_white_48dp" />
 
         </LinearLayout>
 
@@ -70,18 +82,59 @@
             android:orientation="vertical"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/control_title"
+        <!-- Control section header: the primary actions move up here (as icon buttons) when the rows are hidden. -->
+        <!-- zh-CN: 控制区标题: 控制行全部隐藏时, 主要动作以图标按钮形式移到这里. -->
+        <LinearLayout
+            android:id="@+id/control_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:minHeight="36dp"
+            android:orientation="horizontal"
             android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:text="@string/text_control"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/control_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/text_control"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/control_header_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/control_header_divider"
+                android:layout_width="1dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:alpha="0.24"
+                android:background="@color/day_night"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/control_less"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_less"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/control_more"
+                style="@style/A11yServiceManagerHeaderButton"
+                android:contentDescription="@string/text_show_more"
+                android:src="@drawable/ic_add_white_48dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/control_container"

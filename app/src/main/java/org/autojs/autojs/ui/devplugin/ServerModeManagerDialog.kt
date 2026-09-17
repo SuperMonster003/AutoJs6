@@ -18,33 +18,38 @@ import java.util.Date
  * listening state and address, uptime, client count. Clients: one row per connected VSCode with host,
  * extension / protocol version, address, duration and last activity; tapping a row opens its details with
  * "reconnect" (`bye(restart)`, VSCode re-establishes the connection) and "disconnect" (`bye(user)`).
- * Controls: start, stop, restart, disconnect all clients, copy address. Settings: start on launch, notify on
- * client changes.
+ * Controls: start, stop, restart (also as header buttons when the rows are collapsed), disconnect all
+ * clients, copy address. Settings: start on launch, notify on client changes, LAN discovery.
  * zh-CN: 服务端模式 (VSCode 插件连接到 AutoJs6, 如 ADB 或局域网) 管理器. 状态: 监听状态与地址, 运行时长, 客户端数量.
  * 客户端: 每个已连接的 VSCode 一行, 含主机, 插件 / 协议版本, 地址, 时长与最近活动; 点击行打开详情, 提供 "重新连接"
- * (`bye(restart)`, 由 VSCode 重新建立连接) 与 "断开连接" (`bye(user)`). 控制: 启动, 停止, 重启, 断开所有客户端, 复制地址.
- * 设置: 启动时开启服务端, 客户端连接变化提示.
+ * (`bye(restart)`, 由 VSCode 重新建立连接) 与 "断开连接" (`bye(user)`). 控制: 启动, 停止, 重启 (控制行收起时亦作为标题按钮),
+ * 断开所有客户端, 复制地址. 设置: 启动时开启服务端, 客户端连接变化提示, 局域网发现.
  *
  * Created by SuperMonster003 on Sep 16, 2026.
  */
 class ServerModeManagerDialog private constructor(
     context: Context,
     private val tool: JsonSocketServerTool,
-) : ConnectionManagerDialog(context, R.string.text_server_mode_manager) {
+) : ConnectionManagerDialog(
+    context,
+    R.string.text_server_mode_manager,
+    R.string.key_server_mode_manager_status_level,
+    R.string.key_server_mode_manager_control_level,
+) {
 
     private val service = AutoJs.instance.devPluginService
 
-    private val start = addAction(Action(R.string.text_start, R.drawable.ic_play_arrow_white_48dp) {
+    private val start = addAction(Action(R.string.text_start, R.drawable.ic_play_arrow_white_48dp, header = true) {
         tool.connect()
         refresh()
     })
 
-    private val stop = addAction(Action(R.string.text_stop, R.drawable.ic_stop_button_fill) {
+    private val stop = addAction(Action(R.string.text_stop, R.drawable.ic_stop_button_fill, header = true) {
         tool.disconnect()
         refresh()
     })
 
-    private val restart = addAction(Action(R.string.text_restart, R.drawable.ic_refresh_white_24dp) {
+    private val restart = addAction(Action(R.string.text_restart, R.drawable.ic_refresh_white_24dp, header = true) {
         tool.disconnect()
         // The listening socket closes synchronously; give the accept loop a moment to exit before rebinding.
         // zh-CN: 监听 socket 同步关闭; 给 accept 循环一点时间退出后再重新绑定.
@@ -60,7 +65,7 @@ class ServerModeManagerDialog private constructor(
     init {
         setClientsSectionVisible(true)
 
-        addAction(Action(R.string.text_copy_address, R.drawable.ic_content_copy_black_24dp) {
+        addAction(Action(R.string.text_copy_address, R.drawable.ic_content_copy_black_24dp, level = Level.ALL) {
             copyText(listeningAddress())
         })
 
@@ -102,14 +107,15 @@ class ServerModeManagerDialog private constructor(
         val connections = service.serverConnections.filter { it.peerHelloAt > 0L }.sortedBy { it.peerHelloAt }
         val now = System.currentTimeMillis()
 
-        val entries = ArrayList<Pair<String, String>>()
-        entries += getString(R.string.text_connection_status) to getString(if (isListening) R.string.text_listening else R.string.text_stopped)
-        entries += getString(R.string.text_listening_address) to listeningAddress()
+        val status = getString(if (isListening) R.string.text_listening else R.string.text_stopped)
+        val entries = ArrayList<StatusRow>()
+        entries += StatusRow(getString(R.string.text_connection_status), status)
+        entries += StatusRow(getString(R.string.text_listening_address), listeningAddress())
         if (isListening && service.serverStartedAt > 0L) {
-            entries += getString(R.string.text_uptime) to formatElapsed(now - service.serverStartedAt)
+            entries += StatusRow(getString(R.string.text_uptime), formatElapsed(now - service.serverStartedAt), basic = false)
         }
-        entries += getString(R.string.text_connected_clients) to "${connections.size}"
-        setStatus(entries)
+        entries += StatusRow(getString(R.string.text_connected_clients), "${connections.size}")
+        setStatus(entries, status)
 
         setClients(connections.map { conn ->
             ClientRow(

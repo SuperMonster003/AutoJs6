@@ -7,10 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.InputFilter
 import android.view.KeyEvent
-import android.view.MotionEvent
-import android.view.View
-import android.widget.EditText
-import androidx.core.content.ContextCompat
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
@@ -227,6 +223,9 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         }
         MaterialDialog.Builder(context)
             .title(R.string.text_pc_server_address)
+            // "Scan QR code" lives in the title's "more" menu (the input keeps its full width).
+            // zh-CN: "扫描二维码" 放在标题栏 "更多" 菜单中 (输入框保持完整宽度).
+            .options(listOf(MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_scan_qr_code)) { dialog -> scanQrCodeToConnect(dialog) }))
             .input(context.getString(R.string.hint_pc_server_address_supported_formats), prefill) { dialog, _ ->
                 validateAndConnectToRemoteServer(dialog)
             }
@@ -234,72 +233,10 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .neutralText(R.string.dialog_button_history)
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { dialog, _ ->
-                MaterialDialog.Builder(context)
-                    .title(R.string.text_history)
-                    .content(R.string.text_no_history)
-                    .items(JsonSocketClient.serverAddressHistory)
-                    .itemsCallback { dHistory, _, _, text ->
-                        dHistory.dismiss()
-                        dialog.inputEditText?.setText(text)
-                        validateAndConnectToRemoteServer(dialog)
-                    }
-                    .choiceWidgetThemeColor()
-                    .itemsLongCallback { dHistory, _, _, text ->
-                        MaterialDialog.Builder(context)
-                            .title(R.string.text_prompt)
-                            .content(R.string.text_confirm_to_delete)
-                            .negativeText(R.string.dialog_button_cancel)
-                            .neutralColorRes(R.color.dialog_button_default)
-                            .positiveText(R.string.dialog_button_confirm)
-                            .positiveColorRes(R.color.dialog_button_caution)
-                            .onPositive { ds, _ ->
-                                ds.dismiss()
-                                JsonSocketClient.removeFromHistory(text.toString())
-                                dHistory.items?.let {
-                                    it.remove(text)
-                                    dHistory.run {
-                                        notifyItemsChanged()
-                                        toggleContentViewByItems()
-                                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
-                                    }
-                                }
-                            }
-                            .show()
-                        return@itemsLongCallback false
-                    }
-                    .neutralText(R.string.dialog_button_clear_items)
-                    .neutralColorRes(R.color.dialog_button_warn)
-                    .onNeutral { dHistory, _ ->
-                        MaterialDialog.Builder(context)
-                            .title(R.string.text_prompt)
-                            .content(R.string.text_confirm_to_clear_the_history)
-                            .negativeText(R.string.dialog_button_cancel)
-                            .negativeColorRes(R.color.dialog_button_default)
-                            .positiveText(R.string.dialog_button_confirm)
-                            .positiveColorRes(R.color.dialog_button_caution)
-                            .onPositive { _, _ ->
-                                JsonSocketClient.clearHistory()
-                                dHistory.items?.let {
-                                    it.clear()
-                                    dHistory.run {
-                                        notifyItemsChanged()
-                                        toggleContentViewByItems()
-                                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
-                                    }
-                                }
-                                ViewUtils.showSnack(dHistory.view, R.string.text_history_has_been_cleared)
-                            }
-                            .show()
-                    }
-                    .positiveText(R.string.dialog_button_back)
-                    .positiveColorRes(R.color.dialog_button_default)
-                    .onPositive { dHistory, _ -> dHistory.dismiss() }
-                    .autoDismiss(false)
-                    .show()
-                    .apply {
-                        toggleContentViewByItems()
-                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
-                    }
+                showServerAddressHistory { text ->
+                    dialog.inputEditText?.setText(text)
+                    validateAndConnectToRemoteServer(dialog)
+                }
             }
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
@@ -325,7 +262,6 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                 }
 
                 val editText = dialog.inputEditText ?: return@also
-                attachQrCodeScanner(dialog, editText)
                 editText.filters += InputFilter { source, start, end, dest, dstart, dend ->
                     if (end > start) {
                         val fullText = dest.substring(0, dstart) +
@@ -366,30 +302,89 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     /**
-     * Add a "scan QR code" icon at the end of the address input; tapping it opens the camera scanner.
-     * zh-CN: 在地址输入框末尾添加 "扫描二维码" 图标, 点击后打开摄像头扫码.
+     * History of server addresses (most recent first): tap to hand an entry to [onSelected], long-press to
+     * delete it, "Clear" to drop them all. Opened from the address dialog and from the client mode manager.
+     * zh-CN: 服务端地址历史记录 (最近的在前): 点击将条目交给 [onSelected], 长按删除, "清空" 则全部清除.
+     * 由地址对话框与客户端模式管理器打开.
      */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun attachQrCodeScanner(dialog: MaterialDialog, editText: EditText) {
-        val icon = ContextCompat.getDrawable(context, R.drawable.ic_qr_code_scanner_black_24dp)?.mutate() ?: return
-        icon.setTint(ContextCompat.getColor(context, R.color.day_night))
-        editText.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, icon, null)
-        editText.compoundDrawablePadding = (8 * context.resources.displayMetrics.density).toInt()
-        editText.contentDescription = context.getString(R.string.text_scan_qr_code)
-        editText.setOnTouchListener { view, event ->
-            if (event.action != MotionEvent.ACTION_UP) return@setOnTouchListener false
-            val drawable = editText.compoundDrawablesRelative[2] ?: return@setOnTouchListener false
-            val isRtl = editText.layoutDirection == View.LAYOUT_DIRECTION_RTL
-            val hit = if (isRtl) {
-                event.x <= editText.paddingStart + drawable.bounds.width()
-            } else {
-                event.x >= editText.width - editText.paddingEnd - drawable.bounds.width()
+    fun showServerAddressHistory(onSelected: (String) -> Unit) {
+        if (isContextInvalidForDialog()) return
+        MaterialDialog.Builder(context)
+            .title(R.string.text_history)
+            .content(R.string.text_no_history)
+            .items(JsonSocketClient.serverAddressHistory)
+            .itemsCallback { dHistory, _, _, text ->
+                dHistory.dismiss()
+                onSelected(text.toString())
             }
-            if (!hit) return@setOnTouchListener false
-            view.performClick()
-            scanQrCodeToConnect(dialog)
-            true
-        }
+            .choiceWidgetThemeColor()
+            .itemsLongCallback { dHistory, _, _, text ->
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_confirm_to_delete)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .neutralColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { ds, _ ->
+                        ds.dismiss()
+                        JsonSocketClient.removeFromHistory(text.toString())
+                        dHistory.items?.let {
+                            it.remove(text)
+                            dHistory.run {
+                                notifyItemsChanged()
+                                toggleContentViewByItems()
+                                toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
+                            }
+                        }
+                    }
+                    .show()
+                return@itemsLongCallback false
+            }
+            .neutralText(R.string.dialog_button_clear_items)
+            .neutralColorRes(R.color.dialog_button_warn)
+            .onNeutral { dHistory, _ ->
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_confirm_to_clear_the_history)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { _, _ ->
+                        JsonSocketClient.clearHistory()
+                        dHistory.items?.let {
+                            it.clear()
+                            dHistory.run {
+                                notifyItemsChanged()
+                                toggleContentViewByItems()
+                                toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
+                            }
+                        }
+                        ViewUtils.showSnack(dHistory.view, R.string.text_history_has_been_cleared)
+                    }
+                    .show()
+            }
+            .positiveText(R.string.dialog_button_back)
+            .positiveColorRes(R.color.dialog_button_default)
+            .onPositive { dHistory, _ -> dHistory.dismiss() }
+            .autoDismiss(false)
+            .show()
+            .apply {
+                toggleContentViewByItems()
+                toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
+            }
+    }
+
+    /**
+     * Connect to [host] with the connecting status dialog, e.g. an entry picked from the history in the client
+     * mode manager. A live connection is closed first so that the new attempt is not short-circuited by it.
+     * zh-CN: 连接到 [host] 并显示连接状态对话框, 如在客户端模式管理器中从历史记录选中的条目. 已有连接会先关闭,
+     * 以免新的尝试被其直接短路.
+     */
+    fun connectTo(host: String) {
+        if (isConnected) disconnect()
+        connectToServerWithStatus(host, null)
     }
 
     /**
@@ -524,7 +519,12 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .connectToRemoteServer(context, trimmedHost)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { Pref.setServerAddress(trimmedHost) },
+                {
+                    Pref.setServerAddress(trimmedHost)
+                    // The history used to be written only on a failed handshake; a reached server is what it is for.
+                    // zh-CN: 历史记录此前仅在握手失败时写入; 而能连上的服务端才是它应记录的.
+                    JsonSocketClient.addIntoHistory(trimmedHost)
+                },
                 { e ->
                     // Do not toast here; show failure dialog.
                     // zh-CN: 不在这里 toast; 改为失败对话框.

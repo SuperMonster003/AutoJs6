@@ -775,6 +775,7 @@
     <string name="summary_record_prompt">錄製開始及停止時顯示提示消息</string>
     <string name="summary_release_history_preference">查看發行版本歷史更新記錄與統計數據</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始類型在腳本中將被包裝為對應的 Java 對象</string>
+    <string name="summary_server_address_history">曾連接過的伺服端位址, 點擊即可連接</string>
     <string name="summary_stable_mode">增強佈局分析穩定性但降低代碼兼容性 (需重啓無障礙服務)</string>
     <string name="summary_terminal_clear_data">刪除終端主目錄, 已安裝的套件與 npm 快取</string>
     <string name="summary_terminal_node_probe">檢測終端能否執行 Node.js 執行階段外掛提供的 node</string>
@@ -1085,6 +1086,7 @@
     <string name="text_copy_ace_diagnostics">複製 Ace 診斷資料</string>
     <string name="text_copy_address">複製位址</string>
     <string name="text_copy_all">複製全部</string>
+    <string name="text_copy_info">複製信息</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄文件到新目錄</string>
     <string name="text_copy_chained_selector">複製鏈式選擇器</string>
     <string name="text_copy_command">複製指令</string>
@@ -2165,7 +2167,6 @@
     <string name="text_title_bar_opacity">標題列不透明度</string>
     <string name="text_to_be_chosen">待選擇</string>
     <string name="text_toggle_all">全選切換</string>
-    <string name="text_toggle_flashlight">切換閃光燈</string>
     <string name="text_tools">工具</string>
     <string name="text_total_size_colon_value">大小: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啓動器圖標可能被系統自動添加遮罩或背景, 因此不同設備的實際效果與預期可能不完全一致</string>

@@ -778,6 +778,7 @@
     <string name="summary_record_prompt">Mostrar mensaje al iniciar o detener la grabación de un guion</string>
     <string name="summary_release_history_preference">Ver historial de lanzamientos y estadisticas</string>
     <string name="summary_rhino_java_primitive_wrap">Los tipos primitivos de Java se envolverán como objetos Java en los scripts</string>
+    <string name="summary_server_address_history">Direcciones de servidor usadas anteriormente, toque una para conectar</string>
     <string name="summary_stable_mode">Análisis de diseño más estable pero peor compatibilidad de código (se necesita reiniciar el servicio de accesibilidad)</string>
     <string name="summary_terminal_clear_data">Eliminar el directorio personal de la terminal, los paquetes instalados y las cachés de npm</string>
     <string name="summary_terminal_node_probe">Comprobar si la terminal puede ejecutar node desde el plugin Node.js Runtime</string>
@@ -1088,6 +1089,7 @@
     <string name="text_copy_ace_diagnostics">Copiar diagnóstico de Ace</string>
     <string name="text_copy_address">Copiar dirección</string>
     <string name="text_copy_all">Copiar todo</string>
+    <string name="text_copy_info">Copiar información</string>
     <string name="text_copy_all_files_to_new_directory">Copiar todos los archivos en el nuevo directorio</string>
     <string name="text_copy_chained_selector">Copiar selector encadenado</string>
     <string name="text_copy_command">Copiar cmd</string>
@@ -2168,7 +2170,6 @@
     <string name="text_title_bar_opacity">Opacidad de la barra de título</string>
     <string name="text_to_be_chosen">Por elegir</string>
     <string name="text_toggle_all">Alternar todo</string>
-    <string name="text_toggle_flashlight">Alternar la linterna</string>
     <string name="text_tools">Herramientas</string>
     <string name="text_total_size_colon_value">Tamano: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">El ícono de iniciador con fondo transparente puede ser enmascarado automáticamente o recibir un fondo por parte del sistema, por lo que el efecto real puede variar entre dispositivos</string>

@@ -779,6 +779,7 @@
     <string name="summary_record_prompt">スクリプトの録音を開始または停止するときにメッセージを表示する</string>
     <string name="summary_release_history_preference">リリース履歴と統計を表示</string>
     <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
+    <string name="summary_server_address_history">以前に接続したサーバーアドレス, タップして接続</string>
     <string name="summary_stable_mode">レイアウト解析はより安定するが, コードの互換性は低下 (アクセシビリティサービスの再起動が必要)</string>
     <string name="summary_terminal_clear_data">ターミナルのホーム, インストール済みパッケージ, npm キャッシュを削除します</string>
     <string name="summary_terminal_node_probe">ターミナルが Node.js ランタイムプラグインの node を実行できるか確認します</string>
@@ -1089,6 +1090,7 @@
     <string name="text_copy_ace_diagnostics">Ace 診断情報をコピー</string>
     <string name="text_copy_address">アドレスをコピー</string>
     <string name="text_copy_all">すべてコピー</string>
+    <string name="text_copy_info">情報をコピー</string>
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
     <string name="text_copy_chained_selector">チェーン形式セレクタをコピー</string>
     <string name="text_copy_command">cmd をコピー</string>
@@ -2169,7 +2171,6 @@
     <string name="text_title_bar_opacity">タイトルバーの不透明度</string>
     <string name="text_to_be_chosen">未選択</string>
     <string name="text_toggle_all">全て切替</string>
-    <string name="text_toggle_flashlight">フラッシュライトを切り替え</string>
     <string name="text_tools">ツール</string>
     <string name="text_total_size_colon_value">サイズ: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>

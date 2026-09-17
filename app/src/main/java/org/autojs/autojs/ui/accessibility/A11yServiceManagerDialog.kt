@@ -44,15 +44,17 @@ import kotlin.math.roundToInt
 /**
  * Accessibility service manager, opened from the drawer entry's "Manager" button or by long-pressing
  * the entry. A dialog (not an Activity) with three sections: live status rows (each copyable), control
- * actions and the auto-enable preferences, plus a copy of the whole diagnostics text. It doubles as the
- * on-device debugging panel of the accessibility automation roadmap.
+ * actions and the auto-enable preferences; the title's "more" menu copies the whole diagnostics text and
+ * opens the system accessibility settings. It doubles as the on-device debugging panel of the accessibility
+ * automation roadmap.
  *
  * The status and control sections have a persisted verbosity level stepped by the header buttons;
  * row heights are fixed per field so that values changing length (last event, latest activity, ...)
  * do not move the control rows under the user's finger.
  *
  * zh-CN: 无障碍服务管理器, 由抽屉条目的 "管理器" 按钮或长按条目打开. 对话框形式 (非 Activity), 含三个区块:
- * 实时状态行 (逐行可复制), 控制动作, 自动启用偏好, 并可复制完整诊断文本. 兼作无障碍自动化 Roadmap 的真机调试面板.
+ * 实时状态行 (逐行可复制), 控制动作, 自动启用偏好; 标题栏 "更多" 菜单可复制完整诊断文本及打开系统无障碍设置.
+ * 兼作无障碍自动化 Roadmap 的真机调试面板.
  * 状态与控制区各有一个由标题按钮逐级切换并持久化的详略等级; 各行高度按字段固定, 使长度变化的数值 (最近事件, 最近活动等)
  * 不会让控制行在用户手指下移动.
  *
@@ -189,6 +191,12 @@ class A11yServiceManagerDialog private constructor(
 
         dialog = MaterialDialog.Builder(context)
             .title(R.string.text_a11y_service_manager)
+            .options(
+                listOf(
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_copy_info)) { copyReport() },
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_system_settings)) { tool.launchSettings(false) },
+                ),
+            )
             // Not wrapInScrollView: the library pads the inner view horizontally, which would cut the row ripples short.
             // zh-CN: 不使用 wrapInScrollView: 库会给内部视图加水平内边距, 使整行 ripple 被截断.
             .customView(binding.root, false)
@@ -196,12 +204,6 @@ class A11yServiceManagerDialog private constructor(
             .negativeText(R.string.dialog_button_dismiss)
             .negativeColorRes(R.color.dialog_button_default)
             .onNegative { d, _ -> d.dismiss() }
-            .neutralText(R.string.dialog_button_copy)
-            .neutralColorRes(R.color.dialog_button_hint)
-            .onNeutral { _, _ -> copyReport() }
-            .positiveText(R.string.dialog_button_system_settings_simplified)
-            .positiveColorRes(R.color.dialog_button_advanced_settings)
-            .onPositive { _, _ -> tool.launchSettings(false) }
             .showListener { onShown() }
             .dismissListener { onDismissed() }
             .build()

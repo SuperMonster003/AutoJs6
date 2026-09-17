@@ -386,6 +386,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` VSCode extension connection: pairing confirmation - an unknown device connecting in client mode must be allowed in VSCode first (optionally remembered), while devices that scanned the QR code are trusted automatically; requires extension 1.1.0+
 * `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
 * `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device
+* `Feature` Client mode manager: a "History" entry in the control section (listed when all controls are expanded) shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all
 * `Fix` Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files
 * `Fix` Node.js project writeback no longer replaces unchanged files, avoiding slow script completion and sluggish application response with large dependency trees
 * `Fix` The Flow hospital registration example returns false instead of null when a doctor row cannot be parsed, avoiding boolean coercion errors
@@ -589,6 +590,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` When restoring a directory from the trash, archive entry names are validated against the destination's canonical path, so entries containing ".." or absolute paths can no longer be written outside the destination (such entries are skipped and logged)
 * `Fix` Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name
 * `Fix` Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast
+* `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -732,7 +734,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` When a trash item is restored to a location other than its original path, the version history of the file (or of every file under the directory) follows it to the new path; moving a file to the trash records the version history entry it was linked to at that time
 * `Improvement` A damaged directory archive in the trash no longer aborts the whole restore: readable entries are restored as usual, damaged ones are recorded and skipped (half-written files are removed), the restored / failed counts are reported at the end, and the item stays in the trash
 * `Improvement` The version history file list shows the same file-type icons as the explorer; the version history and trash lists now refresh incrementally by diff, so stat / countdown / selection changes no longer redraw the whole list
-* `Improvement` Scan QR code to connect: the camera uses continuous focus with metering, a flashlight toggle was added and decoding uses TRY_HARDER, which makes aiming at an on-screen code much easier
+* `Improvement` Scan QR code to connect: the camera uses continuous focus with metering and decoding uses TRY_HARDER, which makes aiming at an on-screen code much easier
+* `Improvement` Client mode address dialog: "Scan QR code" moved from the icon at the end of the input to the "more" menu in the title bar; the scan page no longer has a flashlight button (the code is shown on a screen, which lights itself)
+* `Improvement` Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the "Copy" button of all three managers moved into the title bar "more" menu as "Copy information", and the "System" button of the accessibility service manager likewise as "System settings"
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

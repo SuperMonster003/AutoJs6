@@ -778,6 +778,7 @@
     <string name="summary_record_prompt">Показывать сообщение при начале или прекращении записи сценария</string>
     <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
+    <string name="summary_server_address_history">Адреса серверов, к которым подключались ранее, нажмите для подключения</string>
     <string name="summary_stable_mode">Более стабильный анализ макета, но худшая совместимость кода (требуется перезапуск службы доступности)</string>
     <string name="summary_terminal_clear_data">Удалить домашний каталог терминала, установленные пакеты и кэш npm</string>
     <string name="summary_terminal_node_probe">Проверить, может ли терминал запускать node из плагина Node.js Runtime</string>
@@ -1088,6 +1089,7 @@
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
     <string name="text_copy_address">Копировать адрес</string>
     <string name="text_copy_all">Скопировать все</string>
+    <string name="text_copy_info">Копировать информацию</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_chained_selector">Копировать цепочечный селектор</string>
     <string name="text_copy_command">Копировать cmd</string>
@@ -2168,7 +2170,6 @@
     <string name="text_title_bar_opacity">Непрозрачность заголовка</string>
     <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_toggle_all">Переключить все</string>
-    <string name="text_toggle_flashlight">Переключить фонарик</string>
     <string name="text_tools">Инструменты</string>
     <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>

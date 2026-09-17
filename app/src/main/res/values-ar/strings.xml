@@ -780,6 +780,7 @@
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
     <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
+    <string name="summary_server_address_history">عناوين الخوادم التي تم الاتصال بها سابقا, انقر للاتصال</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
     <string name="summary_terminal_clear_data">إزالة الدليل الرئيسي للطرفية والحزم المثبتة وذاكرة npm المؤقتة</string>
     <string name="summary_terminal_node_probe">التحقق مما إذا كانت الطرفية تستطيع تشغيل node من إضافة Node.js Runtime</string>
@@ -1090,6 +1091,7 @@
     <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
     <string name="text_copy_address">نسخ العنوان</string>
     <string name="text_copy_all">نسخ جميع</string>
+    <string name="text_copy_info">نسخ المعلومات</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_chained_selector">نسخ المحدد المتسلسل</string>
     <string name="text_copy_command">نسخ CMD</string>
@@ -2170,7 +2172,6 @@
     <string name="text_title_bar_opacity">عتامة شريط العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
-    <string name="text_toggle_flashlight">تبديل المصباح</string>
     <string name="text_tools">أدوات</string>
     <string name="text_total_size_colon_value">الحجم: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
