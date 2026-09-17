@@ -5,6 +5,7 @@
 每个条目均可独立 Check 并落地, 后续会话按阶段逐步推进.
 输入包括 Codex 于 2026-09-17 给出的五条建议 (Flexmark, 更新检查 SDK, JUnit 传入路径, DEX 编译器, APK 签名依赖);
 第 3 节对其逐条核实, 核实结果与建议不一致处已按证据改写.
+2026-09-17 维护者已对附录 A 的 Q1-Q8 拍板, 结果回填为 D10-D16; 新增 Q9 待决.
 
 使用方式:
 
@@ -29,6 +30,13 @@
 | D7 | 依赖变更遵守 `AGENTS.md` | `dependency` 日志 10 语言同步, 每种语言只用既有固定术语 (如 zh-Hans 的 "移除 X 版本 Y"). 6.8.0 尚未发布: 同一版本内先 "附加" 后又移除的依赖 (Apache Commons Codec 1.15) 直接删除其 "附加" 条目, 而不是追加 "移除" 条目. 本地 jar 无版本号时按既有条目省略版本 (如 "模块化 Android AXML"). |
 | D8 | 二进制 jar 不手工改写 | 需要裁剪的本地 jar (Rhino fat jar 内的 JLine) 通过 `app/build.gradle.kts` 中的 Gradle `Jar` 任务从原 jar 派生: 原 jar 保持 `compileOnly` 供 IDE 与编译使用, 派生 jar 走 `runtimeOnly`, 打包与单测使用派生 jar. 原始 jar 与其来源不变, 裁剪规则可审阅. |
 | D9 | Roadmap 位于 `docs/dev/`, 证据位于 `docs/dev/evidence/` | 与仓库内既有 roadmap 的位置与风格一致. |
+| D10 | release 不启用 minify (Q1, 2026-09-17) | D3 定案, P6.7 的测量实验取消; R8 收缩 / 混淆不再作为体积手段评估. |
+| D11 | media3 替换为平台播放器 (Q2, 2026-09-17) | P6.1 进入实施: `ScriptMusicService` 改用 `android.media.MediaPlayer` + 平台 `android.media.session.MediaSession` + `Notification.MediaStyle`, 不引入新依赖; 脚本 `media` 模块的公开行为与 `evidence/android-sdk-37-media3-20260914.md` 记录的前台服务 / 通知 / 焦点行为作为回归清单. |
+| D12 | log4j 替换为自有文件日志 (Q3, 2026-09-17) | P6.2 进入实施: 保留文档化的 `console.setGlobalLogConfig` / `resetGlobalLogConfig` 全部选项与 PatternLayout 子集语义; 脚本全局代理类 `LogConfigurator` / `Level` / `LogManager` (文档 `global.md` 列出) 的去留见 Q9. |
+| D13 | `JsTextViewLegacy` 为 Android 7.x 预留 (Q4, 2026-09-17) | 该分支修复 issue #4 / #9 (Android 7.x 解析 UI 模式 `text` 元素异常). 允许更好方案: 只有在 API 24 / 25 上复现并用现行 appcompat 修复后, 才移除 `libs/androidx-appcompat-1_0_2` 与 4 个 legacy 文件 (P6.4). |
+| D14 | 内置 CHANGELOG 只保留 zh-Hans 与 en (Q5, 2026-09-17) | 其余 8 个语言与重复的 `CHANGELOG.md` 在资产合并时剪除, 离线回退链为 asset(当前语言) -> 缓存(当前语言) -> asset(en); 生成脚本与仓库内文件不变 (P6.5). |
+| D15 | 资源优化进入 (Q6, 2026-09-17) | P6.6: 仅无损 WebP 转换与 lint `UnusedResources` 驱动的删除, 不重绘. |
+| D16 | `com.stardust` 兼容包保留 (Q7, 2026-09-17) | P6.8 关闭; SpongyCastle 去留等 P4.2 设备证据 (Q8), 流程不变. |
 
 ---
 
@@ -149,7 +157,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 - [ ] P4.1 模块拆分: 新建 `modules/apk-verifier` (只含 `com.android.apksig.**`, `com.mcal.apksigner.utils.{KeyStoreHelper,JksKeyStore,JKS,LoadKeystoreException}` 与 `Base64` 等必要工具, 不依赖 SpongyCastle 之外的任何第三方库), 宿主改依赖它; `modules/apk-signer` 保留完整内容供 `plugins/apk-builder-template` 使用, 并依赖 `apk-verifier` 以免重复源码. 删除 `src/main/resources/keystore/testkey.*` 在宿主侧的打包 (仅 `ApkSigner.kt` 的调试签名使用, 留在 `apk-signer`).
 - [ ] P4.2 BKS 兼容证据: 用 SpongyCastle 生成 BKS v1 与 v2 (当前插件 `CertCreator` 路径) 各一份, 在 API 24 / 28 / 33 / 35 AVD 与一台真机上通过系统 `KeyStore.getInstance("BKS", "BC")` 加载并读出证书; 同时覆盖 `assets/autojs.keystore` 与用户常见的 keytool JKS. 结果写入 `evidence/apk-size-p4-bks-<日期>.md`.
-- [ ] P4.3 依 P4.2 拍板 (Q8): 系统 BKS 全部通过则 `apk-verifier` 的 `loadBks` 去掉 SpongyCastle 回退, 宿主不再打包 `org.spongycastle` (-2.28 MiB 归属 DEX, -0.01 MiB `org/spongycastle/x509` 资源); 存在失败机型则保留回退并记录失败样本, 本条目标记为 "保留".
+- [ ] P4.3 依 P4.2 的设备证据决定 (Q8 拍板: 等待证据, 不预设结论): 系统 BKS 全部通过则 `apk-verifier` 的 `loadBks` 去掉 SpongyCastle 回退, 宿主不再打包 `org.spongycastle` (-2.28 MiB 归属 DEX, -0.01 MiB `org/spongycastle/x509` 资源); 存在失败机型则保留回退并记录失败样本, 本条目标记为 "保留".
 - [ ] P4.4 验证: 远程构建签名解析与输出校验的既有单测 (`apkbuilder/template/*Test`) 通过; `plugins/apk-builder-template` 编译与打包不变; 体积报告; changelog `dependency` (视 P4.3 结果: 移除 Spongy Castle Prov 1.58.0.0, 或 "模块化 APK Verifier").
 
 ### P5 DEX 编译器宿主依赖
@@ -159,14 +167,14 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ### P6 功能级候选 (需拍板)
 
-- [ ] P6.1 (Q2) `androidx.media3` (2.18 MiB) 与其带入的 Guava (1.13 MiB): `ScriptMusicService` 改用平台 `MediaPlayer` + `androidx.media` `MediaSessionCompat` (或 `android.media.session.MediaSession`), 保留前台服务 / 通知控制 / 焦点处理; 或者保留 media3 但排除未用的 `media3-exoplayer` 子模块 (仅保留 `media3-session` + `media3-common` 时 Guava 仍在). 需要维护者确认脚本音乐播放的格式范围 (ExoPlayer 支持的流媒体 / DASH 是否是承诺).
-- [ ] P6.2 (Q3) log4j 1.2.17 (0.23 MiB, 5 个 CVE): `GlobalConsole` 的文件日志改为宿主自有的滚动文件 appender (与 `android-logging-log4j` 的 `LogConfigurator` 等价的路径 / 大小 / 滚动策略), 删除两个依赖.
+- [ ] P6.1 (Q2 已拍板: 替换, D11) `androidx.media3` (2.18 MiB) 与其带入的 Guava (1.13 MiB) 移除. 现状: `ScriptMusicService` (213 行) 是 `MediaSessionService`, 用到 `ExoPlayer.Builder`, `MediaItem` / `MediaMetadata`, `DefaultMediaNotificationProvider`, `MediaSession.Callback` (`ControllerInfo` / `ConnectionResult` / `SessionResult`), 播放器 API 为 setMediaItem / prepare / play / pause / stop / seekTo / duration / currentPosition / volume / repeatMode (OFF / ONE) / playbackState / isPlaying / addListener / clearMediaItems / release, 清单声明 `androidx.media3.session.MediaSessionService` intent-filter. 步骤: (a) 以 `MediaPlayer` 实现同一套播放器操作 (单曲 / 循环 / 进度 / 音量 / 状态回调), 用 `AudioManager` + `AudioFocusRequest` 处理焦点, 用平台 `MediaSession` + `Notification.MediaStyle` 提供通知控制与媒体按键, 服务仍为 `foregroundServiceType="mediaPlayback"`; (b) 清单去掉 media3 intent-filter; (c) 删除 `libs.media3.*` 与 catalog 条目; (d) 回归: 脚本 `media` 模块公开行为, `evidence/android-sdk-37-media3-20260914.md` 的前台服务 / 通知 / 焦点用例在 API 24 AVD 与 API 33+ 真机重跑; changelog `dependency` (移除 AndroidX Media3 ExoPlayer / Session 1.11.0; 6.8.0 内 "附加" 后又移除, 按 D7 删除 "附加" 条目) 与 `improvement`. 本地文件与 http(s) 直链 (`MediaPlayer.setDataSource`) 为支持范围, DASH / HLS 自适应流不在承诺内.
+- [ ] P6.2 (Q3 已拍板: 替换, D12) log4j 1.2.17 (0.23 MiB, 5 个 CVE) 与 `android-logging-log4j`: 现状为 `GlobalConsole` 经 `org.apache.log4j.Logger` 镜像每行日志, `Console.setGlobalLogConfig` (`runtime/api/augment/console/Console.kt:604`) 用 `LogConfigurator` 配置 file / filePattern / maxFileSize / maxBackupSize / immediateFlush / resetConfiguration / rootLevel, `resetGlobalLogConfig` 调 `LogManager.getLoggerRepository().resetConfiguration()`; 文档 `console.md` 记载全部选项且 `filePattern` 指向 log4j PatternLayout. 步骤: (a) 新增自有滚动文件日志器 (按 maxFileSize 分卷, maxBackupSize 轮换, immediateFlush 控制刷盘, rootLevel 过滤), 实现 PatternLayout 子集 `%d{fmt}` / `%p` / `%c` / `%C` / `%m` / `%n` / `%t` / `%r` 与 `%-5p` 一类宽度修饰, 未知转换符原样输出; 默认格式 `%d - [%p::%c::%C] - %m%n` 与默认文件 `android-log4j.log` 不变; (b) `GlobalConsole` 与两个 console API 改接新日志器, 行为用 JVM 单测固化 (格式, 分卷, 轮换, 级别); (c) 删除 `libs.log4j` / `libs.android.logging.log4j`; (d) 脚本全局代理类 `LogConfigurator` / `Level` / `LogManager` (`augment/global/Classes.kt:144, 210, 213`, 文档 `global.md`) 按 Q9 处理; changelog `dependency` (移除 Log4j 1.2.17 / Android Logging Log4j 1.0.3) 与 `improvement`.
 - [ ] P6.3 `joda-time`: 文档记载的脚本 API, 保留 (D2); 仅评估 `org/joda/time/tz` 时区表是否可按 `supportedResourceLocales` 之外的策略裁剪 (不建议, 时区与语言无关).
-- [ ] P6.4 (Q4) `androidx.appcompatlegacy` (0.33 MiB): 盘点 `JsTextViewLegacy` 的使用面, 若可由现行 `appcompat` 的 `AppCompatTextView` 替代则删除 `libs/androidx-appcompat-1_0_2` 模块.
-- [ ] P6.5 (Q5) `assets/doc` CHANGELOG 0.95 MiB: 选项 (a) 只内置 zh-Hans 与 en, 其它语言在线获取 (现有 `ReleaseHistoryRepository` 已支持 raw / blob 两条在线路径与本地缓存); (b) 保留全部; (c) 内置 gzip 并在读取时解压 (zip 已压缩, 收益接近 0, 不推荐).
-- [ ] P6.6 (Q6) `res/`: 用 lint `UnusedResources` 列出宿主未引用的 drawable / layout, PNG 转 WebP (无损, `cwebp -lossless`), 报告体积差; 不重绘.
-- [ ] P6.7 (Q1) minify 实验 (只测量, 不发布): 本地 release 打开 `isMinifyEnabled` 并使用 "保留全部公开 API" 规则 (`-keep public class * { public protected *; }` + 现有 `proguard-rules.pro`), 记录体积差与启动 / 脚本冒烟结果, 作为 D3 的复审材料.
-- [ ] P6.8 (Q7) `com.stardust` 兼容包 (0.43 MiB): 维护者确认旧 Auto.js 脚本兼容承诺; 默认保留.
+- [ ] P6.4 (Q4 已拍板: 为 Android 7.x 预留, 允许更好方案, D13) `androidx.appcompatlegacy` (0.33 MiB 归属 DEX; `appcompat-legacy.aar` 另带一整套 appcompat 1.0.2 资源: `values.xml` 179 KB 与 `abc_*` 布局, 并入 `res/` 与 `resources.arsc`): `ViewAttributesFactory` / `DynamicLayoutInflater` / `XmlConverter` 在 `SDK_INT < 26` 时把 UI 模式 `text` 元素映射到 `JsTextViewLegacy` (appcompat 1.0.2 的 `AppCompatTextView`), 修复 6.0.2 记录的 issue #4 / #9. 步骤: (a) 在 API 24 与 25 AVD 上把映射临时切到 `JsTextView` (现行 appcompat 1.7.1) 复现异常并记录堆栈; (b) 定位根因 (主题属性缺失 / emoji2 初始化 / TextClassifier 等), 优先在 `DynamicLayoutInflater` 侧用 `ContextThemeWrapper` 或属性补齐修复; (c) 修复经 API 24 / 25 AVD 与一台 Android 7.x 真机 (若可得) 验证后, 删除 `libs/androidx-appcompat-1_0_2`, `JsTextViewLegacy*` 3 个文件, `AppCompatTextViewLegacyAttributes`, `TextViewLegacyInflater`, `Classes.kt:477` 的别名与三处版本分支; (d) 无法修复则保留并把根因写入本条, 不再重复评估. 预计 -0.33 MiB DEX 加资源.
+- [ ] P6.5 (Q5 已拍板: 只内置 zh-Hans 与 en, D14) `assets/doc` 0.95 MiB: 现状 `assets-app/doc/` 有 10 个语言文件 (0.23-0.48 MB 各), 与 zh-Hans 同内容的 `CHANGELOG.md` (228,958 字节, 无代码读取) 和 `RHINO.md`; 只有 `ReleaseHistoryRepository.readBestLocalSample` 读取 `doc/CHANGELOG-<lang>.md`, 在线路径与缓存 (`CHANGELOG-<lang>.cache.md`) 已存在. 步骤: (a) `appMergedAssetPruneIncludes` 增加 `doc/CHANGELOG-{ar,es,fr,ja,ko,ru,zh-Hant-HK,zh-Hant-TW}.md` 与 `doc/CHANGELOG.md` (合并期剪除, 生成脚本与仓库文件不变, `RHINO.md` 保留); (b) `readBestLocalSample` 回退链改为 asset(当前语言) -> 缓存(当前语言) -> asset(en), 并加 JVM 单测 (纯函数选择逻辑); (c) 验证 zh-Hant-TW 语言下离线打开版本历史显示 en 样本, 联网后显示对应语言并写入缓存; 体积报告. 预计 -0.7 MiB.
+- [ ] P6.6 (Q6 已拍板: 进入, D15) `res/` (2.55 MiB, 其中 PNG 1.86 MiB): (a) `lint` 的 `UnusedResources` 报告 (注意脚本 UI 模式经名字引用的资源与 `R.drawable` 反射访问, 逐项确认后再删); (b) PNG 无损转 WebP (`cwebp -lossless`, 仅对转换后更小的文件生效, 启动图标与 `mipmap` 除外), 记录逐文件体积差; (c) 体积报告与 `improvement` 日志.
+- [x] P6.7 (Q1) minify 实验: 取消. 2026-09-17 维护者拍板 release 不启用 minify (D10), 不再做测量实验.
+- [x] P6.8 (Q7) `com.stardust` 兼容包 (0.43 MiB): 保留. 2026-09-17 维护者拍板 (D16), 关闭.
 
 ### P7 门禁与收尾
 
@@ -178,16 +186,17 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ## 附录 A. 待决事项
 
-| 编号 | 问题 | 建议 |
-| --- | --- | --- |
-| Q1 | 是否在 release 启用 minify (R8 收缩 / 优化, 不混淆)? | 默认不启用 (D3). P6.7 只做测量; 若实验表明 "保留全部公开 API" 规则下仍有 >= 15% 收益且脚本冒烟无回归, 再单独立项评估 `Packages.*` 可见性与插件 AIDL 的完整 keep 规则. |
-| Q2 | media3 是否替换为平台播放器? | 建议替换 (约 1.3 MiB, 最大的功能级项); 前提是确认脚本音乐播放不承诺 ExoPlayer 独有格式. |
-| Q3 | log4j 是否自研替换? | 建议替换 (体积小但 CVE 清零), 与 `console` 文件日志格式保持逐字节兼容. |
-| Q4 | `JsTextViewLegacy` 是否仍需要旧版 appcompat? | 待盘点后决定. |
-| Q5 | 内置 CHANGELOG 的语言范围? | 建议只内置当前 UI 语言之外的两种 (zh-Hans, en), 其余在线; 需维护者确认离线场景要求. |
-| Q6 | PNG -> WebP 与未用资源清理是否进入本 Roadmap? | 建议进入, 仅无损转换与 lint 报告驱动的删除. |
-| Q7 | `com.stardust` 兼容包去留? | 建议保留. |
-| Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. |
+| 编号 | 问题 | 建议 | 拍板 (2026-09-17) |
+| --- | --- | --- | --- |
+| Q1 | 是否在 release 启用 minify (R8 收缩 / 优化, 不混淆)? | 默认不启用 (D3). | 不启用 (D10), P6.7 取消. |
+| Q2 | media3 是否替换为平台播放器? | 建议替换 (约 1.3 MiB, 最大的功能级项). | 替换 (D11). |
+| Q3 | log4j 是否自研替换? | 建议替换 (体积小但 CVE 清零), 保留 `console.setGlobalLogConfig` 语义. | 替换 (D12); 派生 Q9. |
+| Q4 | `JsTextViewLegacy` 是否仍需要旧版 appcompat? | 待盘点后决定. | 为 Android 7.x 专门预留; 有更好方案可实施 (D13, P6.4 的复现 / 修复 / 验证流程). |
+| Q5 | 内置 CHANGELOG 的语言范围? | 只内置 zh-Hans 与 en, 其余在线. | 按建议实施 (D14). |
+| Q6 | PNG -> WebP 与未用资源清理是否进入本 Roadmap? | 建议进入, 仅无损转换与 lint 报告驱动的删除. | 进入 (D15). |
+| Q7 | `com.stardust` 兼容包去留? | 建议保留. | 保留 (D16). |
+| Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. | 等待设备证据. |
+| Q9 | log4j 替换后, 文档 `global.md` 列出的脚本全局代理类 `LogConfigurator` (`de.mindpipe...LogConfigurator`), `Level`, `LogManager` (`org.apache.log4j.*`) 如何处理? | 建议 (a): 用自有实现提供同名代理类, 覆盖文档化用法 (`LogConfigurator` 的 fileName / filePattern / maxFileSize / maxBackupSize / rootLevel / configure(); `Level` 常量; `LogManager.getLogger(name)` 与 `getRootLogger()` 的 debug / info / warn / error / fatal), 其余 log4j API 不再提供, 文档与 d.ts 同步; 备选 (b): 从 `Classes` 与 `global.md` 移除三个代理并在 changelog 标注. | 待拍板. |
 
 ## 附录 B. 冒烟清单
 
