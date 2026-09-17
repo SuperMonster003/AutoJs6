@@ -12,6 +12,20 @@ import java.nio.file.Files
 class JavaScriptSourceTest {
 
     @Test
+    fun nodeProjectEntryLogsRetainTheRealPathAndExtension() {
+        val project = File(System.getProperty("java.io.tmpdir"), "node-project-log").absoluteFile
+        listOf("main.cjs", "index.mjs", "nested/entry.js").forEach { relative ->
+            val entry = File(project, relative)
+            val source = NodeProjectJavaScriptFileSource(project, entry, "Project title")
+            assertEquals("Project title", source.name)
+            assertEquals(entry.absolutePath, source.fullPath)
+            assertEquals(entry.absolutePath, source.elegantPath)
+            source.overriddenFullPath = File(project, "original/$relative").absolutePath
+            assertEquals("${source.overriddenFullPath} [cache]", source.elegantPath)
+        }
+    }
+
+    @Test
     fun typeScriptDeclarationsAreNotExecutableScriptFiles() {
         assertTrue(JavaScriptSource.isTypeScriptDeclarationFileName("types.d.ts"))
         assertFalse(JavaScriptSource.isJavaScriptFileName("types.d.ts"))

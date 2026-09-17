@@ -111,7 +111,47 @@ class NodeMediaBridgeInstrumentationTest {
                 NodeBridgePermissionManifest.requiredCapabilitiesFor("recorder", method),
             )
         }
-        assertFalse(NodeBridgeModules.supports("media", "play"))
+        listOf("play", "pause", "resume", "stop", "seekTo", "getPlaybackStatus").forEach { method ->
+            assertTrue(NodeBridgeModules.supports("media", method))
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_PLAYBACK),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor("media", method),
+            )
+        }
+        listOf("capabilities", "query", "get", "scanFile", "exportFile").forEach { method ->
+            assertTrue(NodeBridgeModules.supports("media_store", method))
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_LIBRARY),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor("media_store", method),
+            )
+        }
+        listOf("insert", "update", "delete").forEach { method ->
+            assertTrue(NodeBridgeModules.supports("media_store", method))
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_LIBRARY, NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor("media_store", method),
+            )
+        }
+        assertFalse(NodeBridgeModules.supports("media", "playlist"))
+        assertFalse(NodeBridgeModules.supports("media_store", "openFile"))
+        // Playback, the library and mutation are explicit capabilities; "media" alone never implies them.
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA_PLAYBACK),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_AUDIO),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_PLAYBACK),
+            ),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_LIBRARY),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_LIBRARY, NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.MEDIA_PLAYBACK, NodeBridgePermissionManifest.normalizeCapability("media-playback"))
+        assertEquals(NodeBridgePermissionManifest.MEDIA_LIBRARY, NodeBridgePermissionManifest.normalizeCapability("media_store"))
+        assertEquals(NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE, NodeBridgePermissionManifest.normalizeCapability("media_store.mutate"))
         assertEquals(NodeBridgePermissionManifest.MEDIA_METADATA, NodeBridgePermissionManifest.normalizeCapability("mediainfo"))
         assertEquals(NodeBridgePermissionManifest.MEDIA_RECORDING, NodeBridgePermissionManifest.normalizeCapability("recorder"))
 
@@ -474,11 +514,246 @@ class NodeMediaBridgeInstrumentationTest {
         }
     }
 
+    @Test
+    fun androidProviderPlaysWorkspaceAudioAsSessionsWithControls() {
+        val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+        // Foreground media playback needs a visible activity (or another Android exemption); the host test brings one up.
+        val activity = instrumentation.startActivitySync(
+            android.content.Intent(context, org.autojs.autojs.ui.log.LogActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+        val workDir = File(context.cacheDir, "node-bridge-media-playback").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create media playback directory: $absolutePath" }
+            resolve("silence.wav").writeBytes(silentPcmWave(seconds = 5))
+        }
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "media-playback", sourceName = "play.cjs", cwd = workDir.absolutePath),
+        )
+        try {
+            val missing = dispatch(provider, "media", "play", """["missing.wav"]""")
+            assertFalse(missing.toString(), missing.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, missing.error?.code)
+
+            val played = dispatch(provider, "media", "play", """["silence.wav",{"volume":0.2}]""", timeoutMs = 40_000L)
+            assertTrue(played.toString(), played.ok)
+            val session = jsonObject(played.resultJson.orEmpty())
+            assertEquals(NodeMediaPlayback.SCHEMA, session.getString("schema"))
+            val id = session.getString("id")
+            assertTrue(id.startsWith("media-playback-"))
+            assertEquals(workDir.resolve("silence.wav").absolutePath, session.getString("path"))
+            assertTrue(session.toString(), session.getBoolean("active"))
+            assertTrue(session.toString(), session.getBoolean("playing"))
+            assertFalse(session.getBoolean("ended"))
+            assertFalse(session.getBoolean("looping"))
+            assertEquals(0.2, session.getDouble("volume"), 1e-9)
+            assertTrue(session.toString(), session.getInt("durationMs") in 4_000..6_000)
+            assertTrue(session.toString(), session.getInt("positionMs") >= 0)
+
+            val paused = jsonObject(dispatch(provider, "media", "pause", """[{"id":"$id"}]""").resultJson.orEmpty())
+            assertTrue(paused.getBoolean("active"))
+            assertFalse(paused.toString(), paused.getBoolean("playing"))
+
+            val sought = jsonObject(dispatch(provider, "media", "seekTo", """[3000,{"id":"$id"}]""").resultJson.orEmpty())
+            assertTrue(sought.toString(), sought.getInt("positionMs") in 2_500..3_500)
+
+            val resumed = jsonObject(dispatch(provider, "media", "resume", """[{"id":"$id"}]""").resultJson.orEmpty())
+            assertTrue(resumed.toString(), resumed.getBoolean("playing"))
+
+            val stale = jsonObject(dispatch(provider, "media", "pause", """[{"id":"media-playback-stale"}]""").resultJson.orEmpty())
+            assertFalse(stale.getBoolean("active"))
+            assertEquals("media-playback-stale", stale.getString("id"))
+            val still = jsonObject(dispatch(provider, "media", "getPlaybackStatus", "[]").resultJson.orEmpty())
+            assertTrue("a stale id must not pause the current session: $still", still.getBoolean("playing"))
+
+            val stopped = jsonObject(dispatch(provider, "media", "stop", """[{"id":"$id"}]""").resultJson.orEmpty())
+            assertFalse(stopped.getBoolean("active"))
+            assertEquals(id, stopped.getString("id"))
+            val after = jsonObject(dispatch(provider, "media", "getPlaybackStatus", """[{"id":"$id"}]""").resultJson.orEmpty())
+            assertFalse(after.getBoolean("active"))
+            assertEquals(-1, after.getInt("positionMs"))
+
+            val looping = jsonObject(dispatch(provider, "media", "play", """["silence.wav",{"looping":true,"volume":0}]""", timeoutMs = 40_000L).resultJson.orEmpty())
+            assertTrue(looping.getBoolean("looping"))
+            assertTrue(looping.getBoolean("playing"))
+        } finally {
+            provider.destroy()
+            instrumentation.runOnMainSync { activity.finish() }
+            workDir.deleteRecursively()
+        }
+        assertTrue("execution cleanup must release the script music lease", ScriptMusicPlayerProbe.isIdle(context))
+    }
+
+    @Test
+    fun androidProviderRoundTripsAppOwnedMediaStoreItems() {
+        if (android.os.Build.VERSION.SDK_INT < 29) {
+            org.junit.Assume.assumeTrue(
+                "MediaStore mutation below Android 10 needs WRITE_EXTERNAL_STORAGE",
+                context.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED,
+            )
+        }
+        val workDir = File(context.cacheDir, "node-bridge-media-store").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create media store directory: $absolutePath" }
+            resolve("clip.wav").writeBytes(silentPcmWave(seconds = 1))
+        }
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "media-store", sourceName = "library.cjs", cwd = workDir.absolutePath),
+        )
+        val displayName = "autojs6-node-${java.util.UUID.randomUUID()}.wav"
+        var insertedId: Long? = null
+        try {
+            val capabilities = okJson(dispatch(provider, "media_store", "capabilities", "[]"))
+            assertEquals(NodeMediaStore.CAPABILITIES_SCHEMA, capabilities.getString("schema"))
+            assertTrue(capabilities.getJSONArray("collections").toString().contains("\"audio\""))
+            assertEquals("structured_json_filters_only", capabilities.getString("filterPolicy"))
+
+            val badCollection = dispatch(provider, "media_store", "query", """["playlists"]""")
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, badCollection.error?.code)
+            val badColumn = dispatch(provider, "media_store", "query", """["audio",{"filter":{"_data":"x"}}]""")
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, badColumn.error?.code)
+
+            val inserted = dispatch(
+                provider, "media_store", "insert",
+                """["audio",{"displayName":"$displayName","mimeType":"audio/wav","source":"clip.wav","relativePath":"Music/AutoJs6NodeTest/"}]""",
+            )
+            assertTrue(inserted.toString(), inserted.ok)
+            val item = jsonObject(inserted.resultJson.orEmpty())
+            assertEquals(NodeMediaStore.ITEM_SCHEMA, item.getString("schema"))
+            assertEquals("audio", item.getString("collection"))
+            assertEquals(displayName, item.getString("displayName"))
+            // MediaStore may normalise audio/wav to audio/x-wav depending on the platform MIME map.
+            assertTrue(item.getString("mimeType"), item.getString("mimeType") in setOf("audio/wav", "audio/x-wav"))
+            assertTrue(item.getString("uri").startsWith("content://media/"))
+            insertedId = item.getLong("id")
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                assertEquals(context.packageName, item.getString("ownerPackageName"))
+                assertFalse(item.getBoolean("isPending"))
+            }
+
+            val queried = jsonObject(
+                dispatch(provider, "media_store", "query", """["audio",{"filter":{"displayName":{"startsWith":"autojs6-node-"},"ownedOnly":true},"sort":"-dateAdded","limit":10,"columns":["displayName","size","mimeType"]}]""").resultJson.orEmpty(),
+            )
+            assertEquals(NodeMediaStore.QUERY_SCHEMA, queried.getString("schema"))
+            val items = queried.getJSONArray("items")
+            assertTrue(queried.toString(), (0 until items.length()).any { items.getJSONObject(it).getLong("id") == insertedId })
+            assertTrue(items.getJSONObject(0).has("size"))
+            assertFalse(items.getJSONObject(0).has("title"))
+
+            val got = okJson(dispatch(provider, "media_store", "get", """["audio",$insertedId]"""))
+            assertEquals(displayName, got.getString("displayName"))
+            assertEquals(workDir.resolve("clip.wav").length(), got.getLong("size"))
+
+            val renamedName = displayName.replace(".wav", "-renamed.wav")
+            val updated = okJson(dispatch(provider, "media_store", "update", """["audio",$insertedId,{"displayName":"$renamedName"}]"""))
+            assertEquals(renamedName, updated.getString("displayName"))
+            // MediaProvider derives TITLE from metadata, so the bridge rejects it instead of pretending the write happened.
+            val rejected = dispatch(provider, "media_store", "update", """["audio",$insertedId,{"title":"x"}]""")
+            assertFalse(rejected.toJson(), rejected.ok)
+            assertTrue(rejected.toJson(), rejected.toJson().contains("ERR_AUTOJS6_BRIDGE_INVALID_REQUEST"))
+
+            val exported = okJson(dispatch(provider, "media_store", "exportFile", """["audio",$insertedId,"exported/clip-copy.wav"]"""))
+            assertEquals(workDir.resolve("exported/clip-copy.wav").absolutePath, exported.getString("path"))
+            assertEquals(workDir.resolve("clip.wav").length(), exported.getLong("sizeBytes"))
+            assertTrue(workDir.resolve("exported/clip-copy.wav").readBytes().contentEquals(workDir.resolve("clip.wav").readBytes()))
+
+            val scanned = okJson(dispatch(provider, "media_store", "scanFile", """["clip.wav",{"mimeType":"audio/wav"}]""", timeoutMs = 40_000L))
+            assertEquals(NodeMediaStore.SCAN_SCHEMA, scanned.getString("schema"))
+            assertEquals(workDir.resolve("clip.wav").absolutePath, scanned.getString("path"))
+            assertTrue(scanned.has("scanned"))
+
+            val deleted = okJson(dispatch(provider, "media_store", "delete", """["audio",$insertedId]"""))
+            assertTrue(deleted.getBoolean("deleted"))
+            insertedId = null
+            assertEquals("null", dispatch(provider, "media_store", "get", """["audio",${deleted.getLong("id")}]""").resultJson)
+        } finally {
+            insertedId?.let { dispatch(provider, "media_store", "delete", """["audio",$it]""") }
+            provider.destroy()
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun jsMediaPlaybackSessionsAndMediaStoreThroughThePlugin() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node media playback and media_store live bridge regression")
+        val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+        val activity = instrumentation.startActivitySync(
+            android.content.Intent(context, org.autojs.autojs.ui.log.LogActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+        val workDir = File(context.cacheDir, "node-bridge-media-live").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create media live directory: $absolutePath" }
+            resolve("silence.wav").writeBytes(silentPcmWave(seconds = 3))
+            resolve("project.json").writeText(
+                """
+                {
+                  "type": "node",
+                  "node": {
+                    "permissions": ["media", "media.playback", "media.library"]
+                  }
+                }
+                """.trimIndent(),
+            )
+        }
+        try {
+            val result = NodePluginTestHarness.runPluginScript(
+                """
+                "nodejs";
+                (async function main() {
+                  const media = require("media");
+                  const store = require("media_store");
+                  const compat = require("autojs6:compat");
+                  const session = await media.play("silence.wav", { volume: 0 });
+                  const started = await session.status();
+                  await session.pause();
+                  const paused = await session.status();
+                  await session.seekTo(1000);
+                  await session.resume();
+                  const resumed = await session.status();
+                  const stopped = await session.stop();
+                  const after = await media.getPlaybackStatus();
+                  console.log("media.session=" + [typeof session.id, started.active, started.playing, paused.playing, resumed.playing, resumed.positionMs >= 900, stopped.active, after.active].join("|"));
+                  const capabilities = await store.capabilities();
+                  const query = await store.query("audio", { filter: { ownedOnly: true }, limit: 5 });
+                  console.log("media.store=" + [capabilities.schema, Array.isArray(capabilities.collections), query.schema, Array.isArray(query.items), query.limit].join("|"));
+                  let mutate = "allowed";
+                  try { await store.delete("audio", 1); } catch (error) { mutate = error.code + "|" + error.missingCapabilities; }
+                  console.log("media.mutate=" + mutate);
+                  console.log("media.compat=" + [typeof compat.media.playMusic, typeof compat.media.pauseMusic, typeof compat.media.stopMusic, typeof compat.media.isMusicPlaying, typeof compat.media.scanFile].join("|"));
+                })().catch(function(error) { console.error(error && error.stack || String(error)); process.exitCode = 1; });
+                """.trimIndent(),
+                "media-live.cjs",
+                workingDirectory = workDir,
+                timeoutMs = 90_000L,
+            )
+            NodePluginTestHarness.assertSucceeded("media playback and media_store through the plugin", result)
+            assertTrue(result.stdout, result.stdout.contains("media.session=string|true|true|false|true|true|false|false"))
+            assertTrue(result.stdout, result.stdout.contains("media.store=${NodeMediaStore.CAPABILITIES_SCHEMA}|true|${NodeMediaStore.QUERY_SCHEMA}|true|5"))
+            assertTrue(result.stdout, result.stdout.contains("media.mutate=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|media.library.mutate"))
+            assertTrue(result.stdout, result.stdout.contains("media.compat=function|function|function|function|function"))
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+            workDir.deleteRecursively()
+        }
+    }
+
+    private fun silentPcmWave(seconds: Int): ByteArray {
+        val sampleRate = 8_000
+        val dataSize = sampleRate * 2 * seconds
+        val buffer = java.nio.ByteBuffer.allocate(44 + dataSize).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        buffer.put("RIFF".toByteArray(Charsets.US_ASCII)).putInt(36 + dataSize).put("WAVEfmt ".toByteArray(Charsets.US_ASCII))
+            .putInt(16).putShort(1).putShort(1).putInt(sampleRate).putInt(sampleRate * 2)
+            .putShort(2).putShort(16).put("data".toByteArray(Charsets.US_ASCII)).putInt(dataSize)
+        return buffer.array()
+    }
+
     private fun dispatch(
         provider: NodeBridgeCapabilityProvider,
         module: String,
         method: String,
         argsJson: String,
+        timeoutMs: Long = 5_000L,
     ): NodeBridgeResponse {
         val latch = CountDownLatch(1)
         var response: NodeBridgeResponse? = null
@@ -487,15 +762,20 @@ class NodeMediaBridgeInstrumentationTest {
             module = module,
             method = method,
             argsJson = argsJson,
-            timeoutMs = 5_000L,
+            timeoutMs = timeoutMs,
             permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
         )
         provider.dispatch(request) { bridgeResponse ->
             response = bridgeResponse
             latch.countDown()
         }
-        assertTrue("Timed out waiting for $module.$method response", latch.await(5, TimeUnit.SECONDS))
+        assertTrue("Timed out waiting for $module.$method response", latch.await(timeoutMs, TimeUnit.MILLISECONDS))
         return checkNotNull(response) { "Missing $module.$method response" }
+    }
+
+    private fun okJson(response: NodeBridgeResponse): JSONObject {
+        assertTrue(response.toJson(), response.ok)
+        return jsonObject(response.resultJson.orEmpty())
     }
 
     private fun jsonObject(raw: String): JSONObject {
@@ -530,6 +810,19 @@ class NodeMediaBridgeInstrumentationTest {
             putIntLe(40, pcm.size)
             pcm.copyInto(bytes, 44)
         }
+    }
+}
+
+/** The script music notification is the observable lease; it is gone once the execution released playback. */
+private object ScriptMusicPlayerProbe {
+    fun isIdle(context: android.content.Context): Boolean {
+        val manager = context.getSystemService(android.app.NotificationManager::class.java)
+        val deadline = System.currentTimeMillis() + 10_000L
+        while (System.currentTimeMillis() < deadline) {
+            if (manager.activeNotifications.none { it.id == org.autojs.autojs.core.media.ScriptMusicService.NOTIFICATION_ID }) return true
+            Thread.sleep(200)
+        }
+        return false
     }
 }
 

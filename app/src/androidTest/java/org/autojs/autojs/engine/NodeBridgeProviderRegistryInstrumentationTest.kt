@@ -13,7 +13,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(22, definitions.size)
+        assertEquals(27, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -41,12 +41,15 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         )
         assertProvider(
             id = "media",
-            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.RECORDER),
+            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.MEDIA_STORE, NodeBridgeModules.RECORDER),
             capabilities = listOf(
                 NodeBridgePermissionManifest.MEDIA,
                 NodeBridgePermissionManifest.MEDIA_AUDIO,
                 NodeBridgePermissionManifest.MEDIA_METADATA,
                 NodeBridgePermissionManifest.MEDIA_RECORDING,
+                NodeBridgePermissionManifest.MEDIA_PLAYBACK,
+                NodeBridgePermissionManifest.MEDIA_LIBRARY,
+                NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE,
             ),
         )
         assertProvider(
@@ -132,7 +135,10 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("barcode").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("media_projection").status)
-        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
+        assertEquals(
+            if (org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost.isAvailable(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED,
+            healthById.getValue("image").status,
+        )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
         assertTrue(
             healthById.getValue("input_observer").status in setOf(
@@ -140,7 +146,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
                 NodeBridgeProviderStatus.DEGRADED,
             ),
         )
-        assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
+        assertEquals("mlkit-ocr", healthById.getValue("ocr").details.getValue("defaultEngine"))
         assertEquals("mlkit-barcode", healthById.getValue("barcode").details.getValue("defaultEngine"))
         assertTrue(healthById.getValue("barcode").details.getValue("liveMethods").contains("detectAll"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
@@ -149,8 +155,12 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals("accessibility", healthById.getValue("input_observer").details.getValue("liveSource"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
-        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("media").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("media").status)
         assertTrue(healthById.getValue("media").details.getValue("liveMethods").contains("mediainfo.read"))
+        assertTrue(healthById.getValue("media").details.getValue("liveMethods").contains("media.play"))
+        assertTrue(healthById.getValue("media").details.getValue("liveMethods").contains("media_store.query"))
+        assertEquals(NodeBridgePermissionManifest.MEDIA_PLAYBACK, healthById.getValue("media").details.getValue("playbackCapability"))
+        assertEquals(NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE, healthById.getValue("media").details.getValue("libraryMutateCapability"))
         assertEquals(NodeBridgePermissionManifest.MEDIA_RECORDING, healthById.getValue("media").details.getValue("recordingCapability"))
         assertTrue(
             healthById.getValue("pinyin").status in setOf(

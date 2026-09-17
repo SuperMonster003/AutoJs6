@@ -2110,7 +2110,6 @@
     <string name="text_terminal_close_session">Close session</string>
     <string name="text_terminal_confirm_clear_data">Delete all terminal data under %1$s? Running sessions will be closed.</string>
     <string name="text_terminal_confirm_close_running">A process is still running in this session. Close it anyway?</string>
-    <string name="text_terminal_copy_home_path">Copy home path</string>
     <string name="text_terminal_copy_transcript">Copy transcript</string>
     <string name="text_terminal_data_cleared">Terminal data cleared</string>
     <string name="text_terminal_input_tips">Type directly in the terminal. Long press text to select it, drag the handles to adjust the range, then choose Copy or Select all.\nSwipe the left key area for more symbols. CTRL and ALT apply to the next key.</string>

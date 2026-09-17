@@ -2111,7 +2111,6 @@
     <string name="text_terminal_close_session">关闭会话</string>
     <string name="text_terminal_confirm_clear_data">删除 %1$s 下的全部终端数据? 运行中的会话将被关闭.</string>
     <string name="text_terminal_confirm_close_running">会话中仍有进程在运行, 确定关闭?</string>
-    <string name="text_terminal_copy_home_path">复制主目录路径</string>
     <string name="text_terminal_copy_transcript">复制终端记录</string>
     <string name="text_terminal_data_cleared">终端数据已清除</string>
     <string name="text_terminal_input_tips">直接在终端中输入. 长按文本后可拖动手柄调整选区, 并选择复制或全选.\n左右滑动左侧按键区域可查看更多符号. CTRL 和 ALT 作用于下一个按键.</string>

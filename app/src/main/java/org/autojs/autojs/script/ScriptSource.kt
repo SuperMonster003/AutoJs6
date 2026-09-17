@@ -32,7 +32,7 @@ abstract class ScriptSource @JvmOverloads constructor(
     val fullPath: String
         get() = originPath ?: originUri ?: toString()
 
-    val elegantPath: String
+    open val elegantPath: String
         get() {
             val niceFullPath = overriddenFullPath?.let { "$it [cache]" } ?: fullPath
             return PFiles.getElegantPath(niceFullPath, WorkingDirectoryUtils.path, true)

@@ -2,11 +2,21 @@ package org.autojs.autojs.core.terminal
 
 import android.content.Intent
 import android.os.SystemClock
+import android.view.View
+import android.widget.TextView
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
+import com.afollestad.materialdialogs.MaterialDialog
 import jackpal.androidterm.emulatorview.TerminalSelectionSnapshot
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.ui.terminal.TerminalEmulatorView
+import org.autojs.autojs.ui.terminal.TerminalManagerDialog
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ViewUtils.subtitleView
+import org.autojs.autojs6.databinding.DialogConnectionManagerBinding
+import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs6.R
 import org.junit.Assert.*
 import org.junit.Test
@@ -113,6 +123,77 @@ class TerminalSessionsInstrumentationTest {
             }
         }
     }
+
+    @Test
+    fun managerSurvivesNewAndResumedSessionActivitiesAndRestoresTheOriginalTerminal() {
+        val paths = TerminalPaths.of(context).ensureLayout()
+        val initialIds = TerminalSessionManager.activeSessions.map { it.id }.toSet()
+        val first = onMain { TerminalSessionManager.create(context, paths.home.path) }
+        val host = instrumentation.startActivitySync(TerminalActivity.intent(context)
+            .putExtra("session_id", first.id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as TerminalActivity
+        var manager: MaterialDialog? = null
+        var child: TerminalActivity? = null
+        try {
+            await { onMain { first.pty.transcriptText.contains("$") } }
+            manager = onMain { TerminalManagerDialog.show(host) }
+            val dialog = manager
+            val views = onMain { DialogConnectionManagerBinding.bind(dialog.customView!!) }
+            onMain { views.controlContainer.getChildAt(0).performClick() }
+            await { onMain { resumedTerminal()?.let { it !== host } == true } }
+            val createdTerminal = onMain { resumedTerminal()!! }
+            child = createdTerminal
+            val second = TerminalSessionManager.activeSessions.single { it.id !in initialIds && it.id != first.id }
+            await { onMain { createdTerminal.findViewById<TerminalEmulatorView>(R.id.terminal).termSession === second.pty } }
+            onMain {
+                assertTrue(dialog.isShowing)
+                createdTerminal.onSupportNavigateUp()
+            }
+            await { onMain { resumedTerminal() === host && dialog.window?.decorView?.hasWindowFocus() == true } }
+            onMain {
+                assertTrue(dialog.isShowing)
+                val row = (0 until views.clientsContainer.childCount).map(views.clientsContainer::getChildAt)
+                    .single { it.findViewById<TextView>(R.id.title).text.toString() == host.getString(R.string.text_terminal_session_title, first.id) }
+                row.findViewById<View>(R.id.open).performClick()
+            }
+            await { onMain { resumedTerminal()?.let { it !== host } == true } }
+            val resumed = onMain { resumedTerminal()!! }
+            child = resumed
+            await { onMain { resumed.findViewById<TerminalEmulatorView>(R.id.terminal).termSession === first.pty } }
+            onMain {
+                assertTrue(dialog.isShowing)
+                resumed.onSupportNavigateUp()
+            }
+            await { onMain { resumedTerminal() === host && dialog.window?.decorView?.hasWindowFocus() == true } }
+            onMain {
+                dialog.dismiss()
+                first.pty.write("printf '__RETURNED_%s__\\n' alive\r")
+            }
+            await { onMain { first.pty.transcriptText.contains("__RETURNED_alive__") } }
+            onMain {
+                val toolbar = host.findViewById<Toolbar>(R.id.toolbar)
+                assertEquals("~", toolbar.subtitle.toString())
+                toolbar.subtitleView!!.performClick()
+                assertEquals(paths.home.canonicalPath, ClipboardUtils.getClip(host).toString())
+            }
+            // Also copy the real current directory after cd, rather than a stale or abbreviated label.
+            onMain { first.pty.write("cd '${paths.tmp.path}'\r") }
+            await { first.pty.currentDirectory()?.canonicalPath == paths.tmp.canonicalPath }
+            onMain {
+                host.findViewById<Toolbar>(R.id.toolbar).subtitleView!!.performClick()
+                assertEquals(paths.tmp.canonicalPath, ClipboardUtils.getClip(host).toString())
+            }
+        } finally {
+            onMain {
+                manager?.dismiss()
+                child?.takeUnless { it.isDestroyed }?.finish()
+                host.finish()
+                TerminalSessionManager.activeSessions.filter { it.id !in initialIds }.forEach { TerminalSessionManager.close(it.id) }
+            }
+        }
+    }
+
+    private fun resumedTerminal() = ActivityLifecycleMonitorRegistry.getInstance()
+        .getActivitiesInStage(Stage.RESUMED).filterIsInstance<TerminalActivity>().singleOrNull()
 
     private fun await(condition: () -> Boolean) {
         val deadline = SystemClock.uptimeMillis() + 15_000

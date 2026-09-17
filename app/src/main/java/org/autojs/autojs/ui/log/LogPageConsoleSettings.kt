@@ -2,8 +2,8 @@ package org.autojs.autojs.ui.log
 
 import android.content.Context
 import androidx.annotation.StringRes
-import org.autojs.autojs.core.console.ConsoleLogFormat
 import org.autojs.autojs.core.console.ConsoleSettingsDialog
+import org.autojs.autojs.core.console.ConsoleTimeSettings
 import org.autojs.autojs.core.console.ConsoleView
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs6.R
@@ -11,25 +11,27 @@ import kotlin.math.roundToInt
 
 /**
  * Persisted display settings of the embedded log pages (the log activity and the editor log panel).
- * Display options (time prefix, time format, log coloring, text size) are shared by both pages,
- * while the input bar toggle is stored per page under [inputBarKeyRes].
+ * Time display and input bar preferences are stored per page; coloring and text size remain shared.
  *
- * zh-CN: 内嵌日志页 (日志页与编辑器日志面板) 的持久化显示设置. 显示选项 (时间前缀, 时间格式, 日志着色, 文字大小)
- * 由两个页面共享, 输入栏开关则按页面分别存储于 [inputBarKeyRes].
+ * zh-CN: 内嵌日志页 (日志页与编辑器日志面板) 的持久化显示设置. 时间显示与输入栏按页面分别记忆, 着色与文字大小共享.
  */
-class LogPageConsoleSettings(private val view: ConsoleView, @StringRes private val inputBarKeyRes: Int) : ConsoleSettingsDialog.Model {
+class LogPageConsoleSettings(
+    private val view: ConsoleView,
+    @StringRes private val inputBarKeyRes: Int,
+    private val timeSettings: ConsoleTimeSettings = ConsoleTimeSettings.LOG_ACTIVITY,
+) : ConsoleSettingsDialog.Model {
 
     override var isTimeVisible: Boolean
-        get() = Pref.getBoolean(R.string.key_log_activity_time_visible, DEFAULT_TIME_VISIBLE)
+        get() = timeSettings.isTimeVisible
         set(value) {
-            Pref.putBoolean(R.string.key_log_activity_time_visible, value)
+            timeSettings.isTimeVisible = value
             view.isTimeVisible = value
         }
 
     override var timeFormat: String
-        get() = Pref.getString(R.string.key_log_activity_time_format, ConsoleLogFormat.DEFAULT_TIME_PATTERN)
+        get() = timeSettings.timeFormat
         set(value) {
-            Pref.putString(R.string.key_log_activity_time_format, value)
+            timeSettings.timeFormat = value
             view.timeFormat = value
         }
 
@@ -77,7 +79,6 @@ class LogPageConsoleSettings(private val view: ConsoleView, @StringRes private v
     fun showDialog(context: Context) = ConsoleSettingsDialog(context, this).show()
 
     companion object {
-        private const val DEFAULT_TIME_VISIBLE = false
         private const val DEFAULT_COLORFUL = true
         private const val DEFAULT_INPUT_BAR_VISIBLE = false
     }

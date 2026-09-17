@@ -479,11 +479,17 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
 
         override var isTimeVisible: Boolean
             get() = configurator.isTimeVisible
-            set(value) = console.setTimeVisible(value)
+            set(value) {
+                ConsoleTimeSettings.FLOATING_WINDOW.isTimeVisible = value
+                console.setTimeVisible(value)
+            }
 
         override var timeFormat: String
             get() = configurator.timeFormat
-            set(value) = console.setTimeFormat(value)
+            set(value) {
+                ConsoleTimeSettings.FLOATING_WINDOW.timeFormat = value
+                console.setTimeFormat(value)
+            }
 
         override var isColorful: Boolean
             get() = configurator.isColorful

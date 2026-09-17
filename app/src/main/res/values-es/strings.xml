@@ -2114,7 +2114,6 @@
     <string name="text_terminal_close_session">Cerrar sesión</string>
     <string name="text_terminal_confirm_clear_data">¿Eliminar todos los datos de la terminal en %1$s? Las sesiones en ejecución se cerrarán.</string>
     <string name="text_terminal_confirm_close_running">Todavía hay un proceso en ejecución en esta sesión. ¿Cerrar de todos modos?</string>
-    <string name="text_terminal_copy_home_path">Copiar ruta del directorio personal</string>
     <string name="text_terminal_copy_transcript">Copiar transcripción</string>
     <string name="text_terminal_data_cleared">Datos de la terminal borrados</string>
     <string name="text_terminal_input_tips">Escriba directamente en el terminal. Mantenga pulsado el texto, arrastre los controles para ajustar la selección y elija Copiar o Seleccionar todo.\nDeslice la zona izquierda de teclas para ver más símbolos. CTRL y ALT se aplican a la siguiente tecla.</string>

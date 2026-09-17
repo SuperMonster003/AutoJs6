@@ -137,6 +137,14 @@ open class ConsoleView @JvmOverloads constructor(
 
     // ========== Display options / 显示选项 ==========
 
+    private var timeSettings: ConsoleTimeSettings? = null
+
+    internal fun restoreTimePreferences(settings: ConsoleTimeSettings) {
+        timeSettings = settings
+        isTimeVisible = settings.isTimeVisible
+        timeFormat = settings.timeFormat
+    }
+
     var isTimeVisible: Boolean = false
         set(value) {
             if (field != value) {
@@ -317,12 +325,14 @@ open class ConsoleView @JvmOverloads constructor(
         override var isTimeVisible: Boolean
             get() = this@ConsoleView.isTimeVisible
             set(value) {
+                timeSettings?.isTimeVisible = value
                 this@ConsoleView.isTimeVisible = value
             }
 
         override var timeFormat: String
             get() = this@ConsoleView.timeFormat
             set(value) {
+                timeSettings?.timeFormat = value
                 this@ConsoleView.timeFormat = value
             }
 

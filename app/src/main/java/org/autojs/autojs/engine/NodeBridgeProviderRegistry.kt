@@ -209,15 +209,18 @@ object NodeBridgeProviderRegistry {
         ),
         provider(
             id = MEDIA_PROVIDER,
-            displayName = "media/mediainfo/recorder",
-            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.RECORDER),
+            displayName = "media/mediainfo/media_store/recorder",
+            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.MEDIA_STORE, NodeBridgeModules.RECORDER),
             capabilities = listOf(
                 NodeBridgePermissionManifest.MEDIA,
                 NodeBridgePermissionManifest.MEDIA_AUDIO,
                 NodeBridgePermissionManifest.MEDIA_METADATA,
                 NodeBridgePermissionManifest.MEDIA_RECORDING,
+                NodeBridgePermissionManifest.MEDIA_PLAYBACK,
+                NodeBridgePermissionManifest.MEDIA_LIBRARY,
+                NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE,
             ),
-            packagedSupport = packagedProviderDependent("P13-26 partial media provider exposes scoped metadata and read-only audio status; recording, playback, MediaStore, and foreground disclosure require separate packaged evidence"),
+            packagedSupport = packagedProviderDependent("metadata, audio stream control, recording, session playback and scoped MediaStore access follow the packaged app's Android permissions; playback needs the foreground media notification and MediaStore mutation is limited to items the packaged app created on Android 10+"),
         ),
         provider(
             id = PINYIN_PROVIDER,
@@ -415,7 +418,7 @@ object NodeBridgeProviderRegistry {
         BARCODE_PROVIDER -> if (BarcodePluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        MEDIA_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        MEDIA_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         PINYIN_PROVIDER -> if (PinyinPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         PINYIN4J_PROVIDER -> if (Pinyin4jPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
@@ -456,13 +459,24 @@ object NodeBridgeProviderRegistry {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
-            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,mediainfo.read,mediainfo.get,mediainfo.countGet,mediainfo.capabilities,recorder.getStatus,recorder.start,recorder.stop",
-            "blockedMethods" to "media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,media.setAudioStreamVolume,media.play,media.pause,media.resume,media.stop,media.seekTo,media.getPlaybackStatus,mediainfo.read,mediainfo.get,mediainfo.countGet,mediainfo.capabilities,media_store.capabilities,media_store.query,media_store.get,media_store.insert,media_store.update,media_store.delete,media_store.scanFile,media_store.exportFile,recorder.getStatus,recorder.start,recorder.stop",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
             "metadataCapability" to NodeBridgePermissionManifest.MEDIA_METADATA,
             "recordingCapability" to NodeBridgePermissionManifest.MEDIA_RECORDING,
+            "playbackCapability" to NodeBridgePermissionManifest.MEDIA_PLAYBACK,
+            "libraryCapability" to NodeBridgePermissionManifest.MEDIA_LIBRARY,
+            "libraryMutateCapability" to NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE,
             "recordingAndroidPermissions" to NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.MEDIA_RECORDING)).joinToString(","),
+            "playbackAndroidPermissions" to NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.MEDIA_PLAYBACK)).joinToString(","),
+            "libraryAndroidPermissions" to NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.MEDIA_LIBRARY, NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE)).joinToString(","),
+            "playbackStatusSchema" to NodeMediaPlayback.SCHEMA,
+            "playbackSessionPolicy" to "one session per execution over the shared ScriptMusicService (same ExoPlayer, audio focus and foreground media notification as Rhino media.playMusic); a newer play replaces the previous session; stale session ids are inactive no-ops; execution cleanup stops playback",
+            "playbackEligibilityPolicy" to "Android decides foreground media service eligibility; background schedules and boot do not guarantee audio eligibility",
+            "mediaStoreCapabilitiesSchema" to NodeMediaStore.CAPABILITIES_SCHEMA,
+            "mediaStoreItemSchema" to NodeMediaStore.ITEM_SCHEMA,
+            "mediaStoreQueryPolicy" to "audio/images/video (downloads on Android 10+) with structured JSON filters, whitelisted columns, sort and limit/offset; no raw SQL; Android 10+ returns granted media permissions or app-owned items",
+            "mediaStoreMutatePolicy" to "insert copies a script-readable file into a pending MediaStore item; update/delete apply to items AutoJs6 created on Android 10+ (WRITE_EXTERNAL_STORAGE below); no system consent flow is bridged",
             "audioStatusSchema" to "autojs6-node-media-audio-stream-v1",
             "mediainfoSchema" to "autojs6-node-mediainfo-snapshot-v1",
             "mediainfoPluginSchemas" to MediainfoSnapshotSchemas.VALUES.joinToString(","),
@@ -475,13 +489,9 @@ object NodeBridgeProviderRegistry {
             "recorderForegroundDisclosurePolicy" to "microphone_foreground_disclosure_and_stop_action_required_before_start",
             "recorderOutputPolicy" to "workspace output is retained; recorder and descriptor are released on stop or script cleanup",
             "recorderValidation" to "permission regression passed; physical microphone and packaged recording acceptance pending",
-            "phase14MediaPlaybackMediaStoreBoundary" to "P14-26 media playback and MediaStore boundary decision gate",
-            "mediaPlaybackPolicy" to "v1_2_stable_denied_until_scoped_provider_audio_focus_lifecycle_packaged_evidence",
-            "mediaStoreBoundaryPolicy" to "query_insert_update_delete_scanFile_broad_media_library_permissions_stable_denied",
-            "mediaFutureCapabilityPolicy" to "future_media_playback_media_library_media_library_mutate_capabilities_require_new_gate",
             "recorderPolicy" to "getStatus/start/stop use the execution-owned Android MediaRecorder provider",
-            "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
-            "statusReason" to "metadata, audio stream control and recording are available; playback and MediaStore remain blocked",
+            "rawObjectPolicy" to "no raw MediaPlayer, ExoPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge; MediaStore rows carry URI strings only",
+            "statusReason" to "metadata, audio stream control, recording, session playback and scoped MediaStore access are available",
         )
         PINYIN_PROVIDER -> linkedMapOf(
             "liveMethods" to NodeBridgeModules.pinyinMethods.sorted().joinToString(","),

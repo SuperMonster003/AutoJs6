@@ -31,6 +31,9 @@ object NodeBridgePermissionManifest {
     const val MEDIA_AUDIO = "media.audio"
     const val MEDIA_METADATA = "media.metadata"
     const val MEDIA_RECORDING = "media.recording"
+    const val MEDIA_PLAYBACK = "media.playback"
+    const val MEDIA_LIBRARY = "media.library"
+    const val MEDIA_LIBRARY_MUTATE = "media.library.mutate"
     const val PINYIN = "pinyin"
     const val PINYIN4J = "pinyin4j"
     const val STORAGE = "storage"
@@ -82,6 +85,13 @@ object NodeBridgePermissionManifest {
         "android.permission.FOREGROUND_SERVICE_MICROPHONE"
     const val ANDROID_PERMISSION_POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
     const val ANDROID_PERMISSION_RECORD_AUDIO = "android.permission.RECORD_AUDIO"
+    const val ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PLAYBACK =
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+    const val ANDROID_PERMISSION_READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO"
+    const val ANDROID_PERMISSION_READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES"
+    const val ANDROID_PERMISSION_READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO"
+    const val ANDROID_PERMISSION_READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+    const val ANDROID_PERMISSION_WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE"
 
     val definedCapabilities: List<String> = listOf(
         TOAST,
@@ -103,6 +113,9 @@ object NodeBridgePermissionManifest {
         MEDIA_AUDIO,
         MEDIA_METADATA,
         MEDIA_RECORDING,
+        MEDIA_PLAYBACK,
+        MEDIA_LIBRARY,
+        MEDIA_LIBRARY_MUTATE,
         PINYIN,
         PINYIN4J,
         STORAGE,
@@ -180,6 +193,20 @@ object NodeBridgePermissionManifest {
         "media-recording" to MEDIA_RECORDING,
         "recorder" to MEDIA_RECORDING,
         "audio.recording" to MEDIA_RECORDING,
+        "media:playback" to MEDIA_PLAYBACK,
+        "media-playback" to MEDIA_PLAYBACK,
+        "media.play" to MEDIA_PLAYBACK,
+        "music" to MEDIA_PLAYBACK,
+        "media:library" to MEDIA_LIBRARY,
+        "media-library" to MEDIA_LIBRARY,
+        "media_store" to MEDIA_LIBRARY,
+        "media-store" to MEDIA_LIBRARY,
+        "mediastore" to MEDIA_LIBRARY,
+        "media:library.mutate" to MEDIA_LIBRARY_MUTATE,
+        "media-library.mutate" to MEDIA_LIBRARY_MUTATE,
+        "media_store.mutate" to MEDIA_LIBRARY_MUTATE,
+        "media-store.mutate" to MEDIA_LIBRARY_MUTATE,
+        "mediastore.mutate" to MEDIA_LIBRARY_MUTATE,
         "notification" to NOTIFICATIONS,
         "notification.settings" to NOTIFICATIONS_SETTINGS,
         "notifications:settings" to NOTIFICATIONS_SETTINGS,
@@ -239,6 +266,17 @@ object NodeBridgePermissionManifest {
             ANDROID_PERMISSION_FOREGROUND_SERVICE,
             ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
         ),
+        MEDIA_PLAYBACK to listOf(
+            ANDROID_PERMISSION_FOREGROUND_SERVICE,
+            ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PLAYBACK,
+        ),
+        MEDIA_LIBRARY to listOf(
+            ANDROID_PERMISSION_READ_MEDIA_AUDIO,
+            ANDROID_PERMISSION_READ_MEDIA_IMAGES,
+            ANDROID_PERMISSION_READ_MEDIA_VIDEO,
+            ANDROID_PERMISSION_READ_EXTERNAL_STORAGE,
+        ),
+        MEDIA_LIBRARY_MUTATE to listOf(ANDROID_PERMISSION_WRITE_EXTERNAL_STORAGE),
         NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
         RAW_NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
         SCREEN_CAPTURE to listOf(
@@ -256,6 +294,12 @@ object NodeBridgePermissionManifest {
         ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
         ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
         ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
+        ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PLAYBACK,
+        ANDROID_PERMISSION_READ_MEDIA_AUDIO,
+        ANDROID_PERMISSION_READ_MEDIA_IMAGES,
+        ANDROID_PERMISSION_READ_MEDIA_VIDEO,
+        ANDROID_PERMISSION_READ_EXTERNAL_STORAGE,
+        ANDROID_PERMISSION_WRITE_EXTERNAL_STORAGE,
     )
 
     fun normalizeCapability(value: String): String {
@@ -430,7 +474,14 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
             NodeBridgeModules.BARCODE -> listOf(BARCODE, IMAGE)
-            NodeBridgeModules.MEDIA -> listOf(MEDIA, MEDIA_AUDIO)
+            NodeBridgeModules.MEDIA -> when (method) {
+                "play", "pause", "resume", "stop", "seekTo", "getPlaybackStatus" -> listOf(MEDIA, MEDIA_PLAYBACK)
+                else -> listOf(MEDIA, MEDIA_AUDIO)
+            }
+            NodeBridgeModules.MEDIA_STORE -> when (method) {
+                "insert", "update", "delete" -> listOf(MEDIA, MEDIA_LIBRARY, MEDIA_LIBRARY_MUTATE)
+                else -> listOf(MEDIA, MEDIA_LIBRARY)
+            }
             NodeBridgeModules.MEDIAINFO -> listOf(MEDIA, MEDIA_METADATA)
             NodeBridgeModules.RECORDER -> listOf(MEDIA, MEDIA_RECORDING)
             NodeBridgeModules.PINYIN -> listOf(PINYIN)
@@ -542,6 +593,10 @@ object NodeBridgePermissionManifest {
             required == MEDIA_AUDIO ||
             required == MEDIA_METADATA ||
             required == MEDIA_RECORDING ||
+            // M18.2: playback and the media library are never implied by "media"; mutation is never implied by "media.library".
+            required == MEDIA_PLAYBACK ||
+            required == MEDIA_LIBRARY ||
+            required == MEDIA_LIBRARY_MUTATE ||
             required == APP_QUERY ||
             required == PACKAGE_MANAGER_MUTATE ||
             // MCP roadmap P1.3: writing and deleting workspace files are never implied by "files".

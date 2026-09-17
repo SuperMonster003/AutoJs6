@@ -126,6 +126,7 @@ class ScriptMusicService : MediaSessionService() {
         if (owner === request) player.seekTo(position.toLong().coerceAtLeast(0))
     }
     internal fun isPlaying(request: ScriptMusicPlayer.Connection) = owner === request && player.isPlaying
+    internal fun hasEnded(request: ScriptMusicPlayer.Connection) = owner === request && player.playbackState == Player.STATE_ENDED
     internal fun duration(request: ScriptMusicPlayer.Connection): Int =
         if (owner === request && player.duration != C.TIME_UNSET) player.duration.coerceIn(0, Int.MAX_VALUE.toLong()).toInt() else 0
     internal fun position(request: ScriptMusicPlayer.Connection): Int =

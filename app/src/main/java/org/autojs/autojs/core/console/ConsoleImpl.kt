@@ -1035,11 +1035,11 @@ open class ConsoleImpl @JvmOverloads constructor(
             private set
 
         @Volatile
-        var isTimeVisible: Boolean = DEFAULT_TIME_VISIBLE
+        var isTimeVisible: Boolean = ConsoleTimeSettings.FLOATING_WINDOW.isTimeVisible
             private set
 
         @Volatile
-        var timeFormat: String = ConsoleLogFormat.DEFAULT_TIME_PATTERN
+        var timeFormat: String = ConsoleTimeSettings.FLOATING_WINDOW.timeFormat
             private set
 
         @Volatile
@@ -1196,8 +1196,8 @@ open class ConsoleImpl @JvmOverloads constructor(
             isTouchable = DEFAULT_TOUCHABLE
             isExitOnClose = false
             exitOnCloseTimeout = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
-            isTimeVisible = DEFAULT_TIME_VISIBLE
-            timeFormat = ConsoleLogFormat.DEFAULT_TIME_PATTERN
+            isTimeVisible = ConsoleTimeSettings.FLOATING_WINDOW.isTimeVisible
+            timeFormat = ConsoleTimeSettings.FLOATING_WINDOW.timeFormat
             isColorful = DEFAULT_COLORFUL
             isAvoidStatusBar = DEFAULT_AVOID_STATUS_BAR
             isInputVisible = DEFAULT_INPUT_VISIBLE

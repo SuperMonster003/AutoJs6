@@ -128,6 +128,8 @@
     <string name="key_client_mode_restore_on_launch" translatable="false">key_$_client_mode_restore_on_launch</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
     <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
+    <string name="key_console_element_time_format" translatable="false">key_$_console_element_time_format</string>
+    <string name="key_console_element_time_visible" translatable="false">key_$_console_element_time_visible</string>
     <string name="key_delete_permanently_also_clear_history" translatable="false">key_$_delete_permanently_also_clear_history</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
@@ -160,6 +162,8 @@
     <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
     <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
     <string name="key_editor_log_panel_input_bar_visible" translatable="false">key_$_editor_log_panel_input_bar_visible</string>
+    <string name="key_editor_log_panel_time_format" translatable="false">key_$_editor_log_panel_time_format</string>
+    <string name="key_editor_log_panel_time_visible" translatable="false">key_$_editor_log_panel_time_visible</string>
     <string name="key_editor_log_panel_typescript_console_visible" translatable="false">key_$_editor_log_panel_typescript_console_visible</string>
     <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
     <string name="key_editor_pinch_to_zoom_change_text_size_enabled" translatable="false">key_$_editor_pinch_to_zoom_change_text_size_enabled</string>
@@ -188,10 +192,14 @@
     <string name="key_file_extensions_not_show" translatable="false">key_$_file_extensions_not_show</string>
     <string name="key_file_extensions_show_all" translatable="false">key_$_file_extensions_show_all</string>
     <string name="key_file_extensions_show_all_but_executable" translatable="false">key_$_file_extensions_show_all_but_executable</string>
+    <string name="key_floating_console_time_format" translatable="false">key_$_floating_console_time_format</string>
+    <string name="key_floating_console_time_visible" translatable="false">key_$_floating_console_time_visible</string>
     <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
     <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
     <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
     <string name="key_github_token" translatable="false">key_$_github_token</string>
+    <string name="key_global_console_element_time_format" translatable="false">key_$_global_console_element_time_format</string>
+    <string name="key_global_console_element_time_visible" translatable="false">key_$_global_console_element_time_visible</string>
     <string name="key_guard_mode" translatable="false">key_$_guard_mode</string>
     <string name="key_hidden_files" translatable="false">key_$_hidden_files</string>
     <string name="key_hidden_files_not_show" translatable="false">key_$_hidden_files_not_show</string>

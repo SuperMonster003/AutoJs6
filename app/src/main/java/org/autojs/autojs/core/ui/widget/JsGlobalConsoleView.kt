@@ -2,6 +2,7 @@ package org.autojs.autojs.core.ui.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import org.autojs.autojs.core.console.ConsoleTimeSettings
 
 /**
  * The `<globalconsole>` element of UI mode, equivalent to `<console global="true">`: a view of
@@ -16,5 +17,9 @@ class JsGlobalConsoleView : JsConsoleView {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    init {
+        restoreTimePreferences(ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT)
+    }
 
 }

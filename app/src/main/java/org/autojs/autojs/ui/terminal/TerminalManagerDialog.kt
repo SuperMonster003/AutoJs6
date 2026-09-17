@@ -94,7 +94,9 @@ class TerminalManagerDialog private constructor(
                 runCatching {
                     // Start reading output even before a terminal view is attached.
                     // zh-CN: 终端视图附加前即开始读取输出.
-                    TerminalSessionManager.create(context, directory, prepared.environment).pty.updateSize(80, 24)
+                    val session = TerminalSessionManager.create(context, directory, prepared.environment)
+                    session.pty.updateSize(80, 24)
+                    openSession(session.id)
                 }.onFailure { snack(it.message) }
                 refresh()
             }, { error ->
@@ -105,8 +107,7 @@ class TerminalManagerDialog private constructor(
 
     private fun openSession(id: String) {
         if (TerminalSessionManager.get(id)?.pty?.isProcessAlive != true) return refresh()
-        dialog.dismiss()
-        TerminalActivity.launchSession(context, id)
+        TerminalActivity.launchSession(context, id, preserveManager = true)
     }
 
     private fun showSession(id: String) {

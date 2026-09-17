@@ -2114,7 +2114,6 @@
     <string name="text_terminal_close_session">Fermer la session</string>
     <string name="text_terminal_confirm_clear_data">Supprimer toutes les données du terminal dans %1$s ? Les sessions en cours seront fermées.</string>
     <string name="text_terminal_confirm_close_running">Un processus est encore en cours dans cette session. Fermer quand même ?</string>
-    <string name="text_terminal_copy_home_path">Copier le chemin du répertoire personnel</string>
     <string name="text_terminal_copy_transcript">Copier la transcription</string>
     <string name="text_terminal_data_cleared">Données du terminal effacées</string>
     <string name="text_terminal_input_tips">Saisissez directement dans le terminal. Appuyez longuement sur le texte, ajustez la sélection avec les poignées, puis choisissez Copier ou Tout sélectionner.\nBalayez la zone de touches gauche pour afficher plus de symboles. CTRL et ALT s\'appliquent à la touche suivante.</string>

@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 17, 2026.
+Data updated on Sept 17, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -205,6 +205,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Ace LSP defaults now include .mts/.cts and their declaration-file variants, allowing the external Ace editor to select the same Rhino/Node TypeScript execution profile; legacy default selections migrate while explicit custom suffix sets remain unchanged
 * `Feature` APK Builder now compiles Rhino TypeScript projects at build time; packaged APKs contain only encrypted JavaScript and optional Source Maps without embedded source, never TypeScript sources or the compiler; encrypted projects use one-time AES-256-GCM staging, with cleartext held only in memory and zeroed after re-encryption
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
+* `Feature` Node.js host support for media playback sessions and media_store library access, including pause, resume, seek, status and cleanup, plus MediaStore query, import, rename, export, scan and delete; media.playback, media.library and media.library.mutate remain separate capabilities
 * `Feature` Node.js ESM, dynamic import(), network and WebSocket, native network modules, worker_threads, child_process, and Java interop are stable features enabled by default, while permission declarations, allowlists, sandboxing, and resource budgets remain enforced
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
 * `Feature` Node.js runtime supports a per-execution on-demand encrypted-module source provider that probes and decrypts only candidates actually selected by the module resolver
@@ -391,6 +392,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Client mode manager: a "History" entry in the control section shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all
 * `Fix` Unnecessary blank lines below short accessibility manager status values such as Unbound and None
 * `Fix` Runnable Node.js projects without APK packaging metadata, such as host-events, not recognized as projects in the file list and project toolbar
+* `Fix` Node.js project start and finish logs showed main.js without its path instead of the full path and actual extension of the entry file, such as main.cjs
 * `Fix` Closing a terminal session during startup could leave its shell process running in the background
 * `Fix` The screen color picker settings button opens the plugin main page, and the MCP Server drawer subtitle is hidden when stopped
 * `Fix` Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files
@@ -599,7 +601,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
 * `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
 * `Improvement` Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons
-* `Improvement` The MCP Server drawer entry uses the MCP protocol icon, with size and tint matching the other entries
+* `Improvement` Creating or resuming a session from the terminal manager opens a terminal activity while preserving the manager for Back navigation; tapping the directory subtitle copies its full path instead of using a Copy home path menu item
+* `Improvement` Time visibility and format are remembered independently for the editor log panel, log activity, globalconsole element, console element and floating console; time is shown by default on the two log pages and hidden on the other three surfaces
+* `Improvement` The MCP Server drawer entry uses the MCP protocol icon with slightly thicker strokes, with size and tint matching the other entries
 * `Improvement` Flow errors retain asynchronous task methods, script files and line numbers in flowStack and stack, and console.error displays the diagnostic stack automatically
 * `Improvement` Flow repeatUntil maxAttempts defaults to 0 for unlimited attempts within the total timeout
 * `Improvement` Stability waits compare ordered node collections and immutable snapshot projections, with subflow deadline and cancellation handling
@@ -977,7 +981,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -1028,7 +1032,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 17, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sept 17, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

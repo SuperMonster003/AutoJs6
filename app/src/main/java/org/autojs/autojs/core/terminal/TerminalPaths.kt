@@ -56,7 +56,10 @@ class TerminalPaths(val root: File) {
      * Renders [path] relative to `$HOME` using `~`, mirroring what the prompt shows.
      * zh-CN: 以 `~` 表示相对 `$HOME` 的路径, 与提示符显示一致.
      */
-    fun toTildePath(path: String): String = toTildePath(path, home.path)
+    fun toTildePath(path: String): String {
+        val abbreviated = toTildePath(path, home.path)
+        return if (abbreviated != path) abbreviated else toTildePath(path, runCatching { home.canonicalPath }.getOrDefault(home.path))
+    }
 
     companion object {
 

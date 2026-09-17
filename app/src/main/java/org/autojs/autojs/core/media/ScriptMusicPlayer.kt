@@ -58,6 +58,7 @@ class ScriptMusicPlayer(context: Context) : AutoCloseable {
     fun resume() = onMain { connection?.let { it.service?.resume(it) }; Unit }
     fun seekTo(position: Int) = onMain { connection?.let { it.service?.seekTo(it, position) }; Unit }
     fun isPlaying(): Boolean = onMain { connection?.let { it.service?.isPlaying(it) } ?: false }
+    fun hasEnded(): Boolean = onMain { connection?.let { it.service?.hasEnded(it) } ?: false }
     fun duration(): Int = onMain { connection?.let { it.service?.duration(it) } ?: 0 }
     fun position(): Int = onMain { connection?.let { it.service?.position(it) } ?: -1 }
     fun stop() = onMain { connection?.dispose(); Unit }

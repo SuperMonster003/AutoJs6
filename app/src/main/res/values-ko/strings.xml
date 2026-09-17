@@ -2116,7 +2116,6 @@
     <string name="text_terminal_close_session">세션 닫기</string>
     <string name="text_terminal_confirm_clear_data">%1$s 아래의 모든 터미널 데이터를 삭제할까요? 실행 중인 세션은 닫힙니다.</string>
     <string name="text_terminal_confirm_close_running">이 세션에서 아직 프로세스가 실행 중입니다. 그래도 닫을까요?</string>
-    <string name="text_terminal_copy_home_path">홈 디렉터리 경로 복사</string>
     <string name="text_terminal_copy_transcript">출력 기록 복사</string>
     <string name="text_terminal_data_cleared">터미널 데이터를 지웠습니다</string>
     <string name="text_terminal_input_tips">터미널에 직접 입력하세요. 텍스트를 길게 누른 후 핸들을 드래그하여 범위를 조정하고 복사 또는 전체 선택을 사용할 수 있습니다.\n왼쪽 키 영역을 좌우로 밀면 더 많은 기호가 표시됩니다. CTRL과 ALT는 다음 키에 적용됩니다.</string>

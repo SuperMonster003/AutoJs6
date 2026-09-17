@@ -2115,7 +2115,6 @@
     <string name="text_terminal_close_session">セッションを閉じる</string>
     <string name="text_terminal_confirm_clear_data">%1$s 以下のターミナルデータをすべて削除しますか? 実行中のセッションは閉じられます.</string>
     <string name="text_terminal_confirm_close_running">このセッションではまだプロセスが実行中です. それでも閉じますか?</string>
-    <string name="text_terminal_copy_home_path">ホームディレクトリのパスをコピー</string>
     <string name="text_terminal_copy_transcript">出力ログをコピー</string>
     <string name="text_terminal_data_cleared">ターミナルデータを消去しました</string>
     <string name="text_terminal_input_tips">ターミナルに直接入力します. テキストを長押しし, ハンドルをドラッグして範囲を調整すると, コピーや全選択ができます.\n左側のキー領域を左右にスワイプすると他の記号が表示されます. CTRL と ALT は次のキーに適用されます.</string>

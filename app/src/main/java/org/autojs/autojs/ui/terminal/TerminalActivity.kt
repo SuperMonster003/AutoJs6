@@ -42,6 +42,7 @@ import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.subtitleView
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityTerminalBinding
@@ -63,6 +64,8 @@ class TerminalActivity : BaseActivity() {
     private var textSelection: TerminalTextSelection? = null
     private lateinit var npmActions: TerminalNpmActions
     private var session: TerminalSessionManager.Session? = null
+    private var sessionAttached = false
+    private var subtitleDirectory: String? = null
     private var nodeResolution: Resolution? = null
     private var nodeBannerDismissed = false
     private val sessionListener: () -> Unit = {
@@ -90,6 +93,7 @@ class TerminalActivity : BaseActivity() {
         setUpNodeBanner()
         TerminalSessionManager.addListener(sessionListener)
         openSession(intent, savedInstanceState?.getString(STATE_SESSION_ID))
+        if (!isFinishing && savedInstanceState?.getBoolean(STATE_MANAGER_OPEN) == true) showSessionManager()
     }
 
     private fun openSession(request: Intent, restoredId: String? = null) {
@@ -176,6 +180,7 @@ class TerminalActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        session?.let(::attachSession)
         terminalView.textSizeSp = TerminalPreferences.textSizeSp
         terminalView.onResume()
         refreshSubtitle()
@@ -184,12 +189,16 @@ class TerminalActivity : BaseActivity() {
     override fun onPause() {
         textSelection?.dismiss()
         terminalView.onPause()
+        // A foreground terminal may attach the same PTY while this activity keeps its manager open.
+        // zh-CN: 当前 Activity 保留管理器时, 前台终端可能会附加同一个 PTY.
+        detachSession()
         super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(STATE_SESSION_ID, session?.id)
+        outState.putBoolean(STATE_MANAGER_OPEN, managerDialog?.isShowing == true)
     }
 
     /**
@@ -210,6 +219,8 @@ class TerminalActivity : BaseActivity() {
     }
 
     private fun detachSession() {
+        if (!sessionAttached) return
+        sessionAttached = false
         session?.pty?.let {
             it.onProcessExited = null
             it.onInputAfterExit = null
@@ -219,7 +230,7 @@ class TerminalActivity : BaseActivity() {
     }
 
     private fun attachSession(newSession: TerminalSessionManager.Session) {
-        if (session?.id == newSession.id) return
+        if (session?.id == newSession.id && sessionAttached) return
         detachSession()
         terminalView.onPause()
         textSelection?.dismiss()
@@ -230,6 +241,7 @@ class TerminalActivity : BaseActivity() {
         terminalView = TerminalEmulatorView(this).apply { id = R.id.terminal }
         parent.addView(terminalView, index, params)
         session = newSession
+        sessionAttached = true
         val pty = newSession.pty
         val view = terminalView
         val scheme = ColorScheme(getColor(R.color.day_night), getColor(R.color.window_background))
@@ -335,13 +347,22 @@ class TerminalActivity : BaseActivity() {
     }
 
     private fun onSessionEnded() {
+        subtitleDirectory = null
         binding.toolbar.subtitle = getString(R.string.text_terminal_session_ended)
         binding.keyBar.setModifiers(ctrl = false, alt = false)
     }
 
     private fun updateSubtitle(directory: String) {
         val paths = session?.paths ?: return
+        subtitleDirectory = directory
         binding.toolbar.subtitle = paths.toTildePath(directory)
+        binding.toolbar.subtitleView?.setOnClickListener {
+            val current = session?.pty?.takeIf { it.isProcessAlive }?.currentDirectory()?.path ?: subtitleDirectory
+            if (current != null) {
+                updateSubtitle(current)
+                copyToClipboard(current)
+            }
+        }
     }
 
     /**
@@ -503,7 +524,6 @@ class TerminalActivity : BaseActivity() {
             R.id.action_copy_transcript -> copyToClipboard(session?.pty?.transcriptText)
             R.id.action_paste -> paste()
             R.id.action_share_transcript -> IntentUtils.shareText(this, session?.pty?.transcriptText.orEmpty())
-            R.id.action_copy_home_path -> copyToClipboard(session?.paths?.home?.path)
             R.id.action_text_size -> showTextSizeDialog()
             R.id.action_npm_registry -> TerminalSettingsDialogs.showNpmRegistry(this)
             R.id.action_npm_ignore_scripts -> {
@@ -515,10 +535,7 @@ class TerminalActivity : BaseActivity() {
             R.id.action_clear -> clearScreen()
             R.id.action_tips -> showTips()
             R.id.action_new_session -> openSession(intent(this).putExtra(EXTRA_NEW_SESSION, true))
-            R.id.action_session_manager -> {
-                managerDialog?.dismiss()
-                managerDialog = TerminalManagerDialog.show(this) { terminalView.textSizeSp = TerminalPreferences.textSizeSp }
-            }
+            R.id.action_session_manager -> showSessionManager()
             R.id.action_close_session -> requestCloseSession()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -526,6 +543,11 @@ class TerminalActivity : BaseActivity() {
     }
 
     // endregion
+
+    private fun showSessionManager() {
+        managerDialog?.dismiss()
+        managerDialog = TerminalManagerDialog.show(this) { terminalView.textSizeSp = TerminalPreferences.textSizeSp }
+    }
 
     private fun typeCommand(command: String) {
         val pty = session?.pty ?: return
@@ -578,6 +600,7 @@ class TerminalActivity : BaseActivity() {
         private const val EXTRA_SESSION_ID = "session_id"
         private const val EXTRA_DIRECTORY = "directory"
         private const val STATE_SESSION_ID = "session_id"
+        private const val STATE_MANAGER_OPEN = "manager_open"
         private const val SUBTITLE_REFRESH_DELAY_MILLIS = 800L
 
         private val NPM_MENU_ITEMS = listOf(
@@ -591,6 +614,7 @@ class TerminalActivity : BaseActivity() {
         @JvmStatic
         @JvmOverloads
         fun intent(context: Context, directory: String? = null): Intent = Intent(context, TerminalActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             directory?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_DIRECTORY, it) }
         }
 
@@ -598,8 +622,12 @@ class TerminalActivity : BaseActivity() {
             intent(context).putExtra(EXTRA_NEW_SESSION, true).startSafely(context)
         }
 
-        fun launchSession(context: Context, id: String) {
-            intent(context).putExtra(EXTRA_SESSION_ID, id).startSafely(context)
+        fun launchSession(context: Context, id: String, preserveManager: Boolean = false) {
+            intent(context).putExtra(EXTRA_SESSION_ID, id).apply {
+                // Keep the caller and its dialog underneath a distinct terminal activity.
+                // zh-CN: 在独立终端 Activity 下保留调用页面及其对话框.
+                if (preserveManager) removeFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }.startSafely(context)
         }
 
         @JvmStatic

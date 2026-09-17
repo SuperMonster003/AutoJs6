@@ -2116,7 +2116,6 @@
     <string name="text_terminal_close_session">إغلاق الجلسة</string>
     <string name="text_terminal_confirm_clear_data">هل تريد حذف كل بيانات الطرفية ضمن %1$s? سيتم إغلاق الجلسات قيد التشغيل.</string>
     <string name="text_terminal_confirm_close_running">لا تزال هناك عملية قيد التشغيل في هذه الجلسة. هل تريد الإغلاق على أي حال?</string>
-    <string name="text_terminal_copy_home_path">نسخ مسار الدليل الرئيسي</string>
     <string name="text_terminal_copy_transcript">نسخ النص الكامل</string>
     <string name="text_terminal_data_cleared">تم مسح بيانات الطرفية</string>
     <string name="text_terminal_input_tips">اكتب مباشرة في الطرفية. اضغط مطولا على النص واسحب المقابض لضبط التحديد ثم اختر نسخ أو تحديد الكل.\nاسحب منطقة المفاتيح اليسرى أفقيا لعرض المزيد من الرموز. يطبق CTRL و ALT على المفتاح التالي.</string>

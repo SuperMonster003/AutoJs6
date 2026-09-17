@@ -40,7 +40,6 @@
     <item android:title="@string/text_help">
         <menu>
             <item android:id="@+id/action_tips" android:title="@string/text_terminal_tips" />
-            <item android:id="@+id/action_copy_home_path" android:title="@string/text_terminal_copy_home_path" />
             <item android:id="@+id/action_node_probe" android:title="@string/text_terminal_node_probe" />
         </menu>
     </item>

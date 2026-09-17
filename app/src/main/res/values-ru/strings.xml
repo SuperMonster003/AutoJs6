@@ -2114,7 +2114,6 @@
     <string name="text_terminal_close_session">Закрыть сеанс</string>
     <string name="text_terminal_confirm_clear_data">Удалить все данные терминала в %1$s? Запущенные сеансы будут закрыты.</string>
     <string name="text_terminal_confirm_close_running">В этом сеансе все еще выполняется процесс. Все равно закрыть?</string>
-    <string name="text_terminal_copy_home_path">Копировать путь домашнего каталога</string>
     <string name="text_terminal_copy_transcript">Копировать вывод</string>
     <string name="text_terminal_data_cleared">Данные терминала очищены</string>
     <string name="text_terminal_input_tips">Вводите текст прямо в терминале. Нажмите и удерживайте текст, настройте выделение маркерами и выберите Копировать или Выделить все.\nПрокрутите левую область клавиш по горизонтали для доступа к другим символам. CTRL и ALT применяются к следующей клавише.</string>

@@ -130,6 +130,14 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
 
     override fun getNodeProjectRoot(): File = nodeProjectRootFile
 
+    override fun toString(): String = originPath ?: originUri
+        ?: if (nodeProjectLaunchKind == NodeProjectLaunchKind.PROJECT_ENTRY) file.absolutePath else super.toString()
+
+    override val elegantPath: String
+        get() = if (nodeProjectLaunchKind == NodeProjectLaunchKind.PROJECT_ENTRY) {
+            overriddenFullPath?.let { "$it [cache]" } ?: fullPath
+        } else super.elegantPath
+
     private fun NodeProjectLaunchOptions.normalized(): NodeProjectLaunchOptions {
         return copy(
             packageDir = packageDir?.normalizedCanonicalFile(),

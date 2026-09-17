@@ -3,6 +3,7 @@ package org.autojs.autojs.core.ui.widget
 import android.content.Context
 import android.util.AttributeSet
 import org.autojs.autojs.core.console.ConsoleView
+import org.autojs.autojs.core.console.ConsoleTimeSettings
 
 /**
  * The `<console>` element of UI mode: a view of the script runtime's own console (or of the
@@ -22,7 +23,7 @@ open class JsConsoleView : ConsoleView {
 
     init {
         isTitleBarVisible = false
-        isTimeVisible = false
+        restoreTimePreferences(ConsoleTimeSettings.CONSOLE_ELEMENT)
     }
 
 }

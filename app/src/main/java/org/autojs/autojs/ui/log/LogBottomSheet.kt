@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.console.ConsoleTimeSettings
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.util.ColorUtils
@@ -233,7 +234,8 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
-        mSettings = LogPageConsoleSettings(binding.console, R.string.key_editor_log_panel_input_bar_visible).also { it.apply() }
+        mSettings = LogPageConsoleSettings(binding.console, R.string.key_editor_log_panel_input_bar_visible,
+            ConsoleTimeSettings.EDITOR_PANEL).also { it.apply() }
         binding.console.setOnCommandSubmitListener { source ->
             binding.console.setCommandInputBusy(true)
             mTypeScriptEvaluator.evaluate(source) {

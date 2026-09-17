@@ -584,7 +584,7 @@
             android:exported="false"
             android:label="@string/text_terminal"
             android:taskAffinity="org.autojs.autojs.ui.terminal.TerminalActivity"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:windowSoftInputMode="adjustResize|stateVisible"
             android:theme="@style/AppTheme.FullScreen" />
 

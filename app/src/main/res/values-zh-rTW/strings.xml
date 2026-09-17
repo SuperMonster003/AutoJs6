@@ -2111,7 +2111,6 @@
     <string name="text_terminal_close_session">關閉工作階段</string>
     <string name="text_terminal_confirm_clear_data">刪除 %1$s 下的全部終端機資料? 執行中的工作階段將被關閉.</string>
     <string name="text_terminal_confirm_close_running">工作階段中仍有程序在執行, 確定關閉?</string>
-    <string name="text_terminal_copy_home_path">複製主目錄路徑</string>
     <string name="text_terminal_copy_transcript">複製終端機記錄</string>
     <string name="text_terminal_data_cleared">終端機資料已清除</string>
     <string name="text_terminal_input_tips">直接在終端機中輸入. 長按文字後可拖動控點調整選取範圍, 並選擇複製或全選.\n左右滑動左側按鍵區域可查看更多符號. CTRL 和 ALT 作用於下一個按鍵.</string>
