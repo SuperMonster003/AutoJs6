@@ -56,6 +56,9 @@ AGENTS.md
 !/tools/sdk37/
 !/tools/sdk37/**
 /tools/sdk37/__pycache__/
+!/tools/size/
+!/tools/size/**
+/tools/size/__pycache__/
 !/tools/ocr/
 !/tools/ocr/auto_mode_smoke.js
 !/tools/ocr/auto_mode_smoke.py
