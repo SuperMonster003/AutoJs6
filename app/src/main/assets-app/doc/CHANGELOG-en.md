@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/18
+###### 2026/09/19
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -298,6 +298,7 @@
 * `Fix` Running the project directly from IntelliJ IDEA failed native page alignment verification because the APK lookup did not use the current build's artifact directory
 * `Fix` IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
+* `Fix` RemoveWorkManagerInitializer Lint error during builds caused by a conflict between WorkManager's default initializer and on-demand initialization
 * `Fix` APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI

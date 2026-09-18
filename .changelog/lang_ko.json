@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/18",
+      "released_date": "2026/09/19",
       "feature": [
         "서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언",
         "Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공",
@@ -295,6 +295,7 @@
         "IntelliJ IDEA에서 프로젝트를 직접 실행할 때 APK 검색에 현재 빌드의 산출물 디렉터리를 사용하지 않아 네이티브 라이브러리 페이지 정렬 검증에서 APK를 찾을 수 없다고 잘못 보고하는 문제",
         "IntelliJ IDEA에서 Android 모듈을 빌드할 때 compileJava 작업 일치가 모호하여 실패하는 문제",
         "Clean 후 IntelliJ IDEA 전체 프로젝트 빌드에서 Python Runtime API 배포 AAR을 생성 전에 해석하고 conformance fixture가 추가된 AIDL 메서드를 구현하지 않아 실패하는 문제",
+        "WorkManager 기본 초기화 도구와 주문형 초기화 설정의 충돌로 빌드 시 RemoveWorkManagerInitializer Lint 오류가 발생하는 문제",
         "기본 Runtime Kit 디렉터리에 `universal` 변형 접미사가 없어 `clean` 후 APK Builder Template 빌드가 실패하는 문제",
         "Android가 현재 할당된 네이티브 힙 바이트를 0으로 보고할 때 정상적인 Node.js R6 상주 런타임 soak 증거가 거부되는 문제",
         "수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제",

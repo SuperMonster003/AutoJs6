@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/18
+###### 2026/09/19
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -460,6 +460,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La ejecución directa del proyecto desde IntelliJ IDEA fallaba al verificar la alineación de páginas de las bibliotecas nativas porque la búsqueda de APK no utilizaba el directorio de artefactos de la compilación actual
 * `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
+* `Corrección` Error de Lint RemoveWorkManagerInitializer durante la compilación por un conflicto entre el inicializador predeterminado de WorkManager y la inicialización bajo demanda
 * `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
 * `Corrección` La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo
 * `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
