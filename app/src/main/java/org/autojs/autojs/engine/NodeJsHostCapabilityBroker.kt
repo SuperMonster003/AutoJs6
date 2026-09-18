@@ -64,6 +64,8 @@ internal class NodeJsHostCapabilityBroker(
                 NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_TRANSPORT,
                 NodeJsRuntimeContract.BRIDGE_REQUEST_BINARY_TRANSPORT_PFD,
             )
+            // M20.2 batch 15: the plugin runtime shows this allowlist as java.policy instead of its own copy.
+            putString(NodeJsRuntimeContract.KEY_JAVA_INTEROP_POLICY_JSON, ControlledJavaInteropPolicy.policyJson().toString())
             putStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD, nativePayload(nativeDiagnostics()))
         }
     }

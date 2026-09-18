@@ -102,6 +102,8 @@ object NodeJsRuntimeContract {
     const val KEY_WORKER_THREADS_ENABLED = "workerThreadsEnabled"
     const val KEY_CHILD_PROCESS_ENABLED = "childProcessEnabled"
     const val KEY_JAVA_INTEROP_ENABLED = "javaInteropEnabled"
+    /** Broker info: the host Java interop allowlist as JSON (M20.2 batch 15). */
+    const val KEY_JAVA_INTEROP_POLICY_JSON = "javaInteropPolicyJson"
 
     const val KEY_SUCCEEDED = "succeeded"
     const val KEY_EXIT_CODE = "exitCode"
