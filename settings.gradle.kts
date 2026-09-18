@@ -124,6 +124,7 @@ private val pluginApi = listOf(
     "rapid-ocr-engine",
     "screen-color-picker-api",
     "mcp-server-api",
+    "mail-api",
 )
 
 private val plugins = listOf(

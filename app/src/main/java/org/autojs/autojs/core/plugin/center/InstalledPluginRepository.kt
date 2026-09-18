@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -32,6 +33,7 @@ import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.mail.api.MailActions
 import org.autojs.plugin.mcp.server.api.McpServerActions
 import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.autojs.plugin.screencolorpicker.api.ScreenColorPickerContract
@@ -197,6 +199,9 @@ class InstalledPluginRepository {
                 }
             }
         }
+        MailPluginHost.ACTION_MAIL -> MailPluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = MailPluginHost.ACTION_MAIL)
+        }
         else -> listOf(preferred)
     }
 
@@ -219,6 +224,10 @@ class InstalledPluginRepository {
                 action = McpServerPluginHost.ACTION_MCP_SERVER,
                 category = McpServerActions.SERVICE_CATEGORY,
                 packageName = McpServerIds.DEFAULT_PACKAGE_NAME,
+            ),
+            ServiceQuery(
+                action = MailPluginHost.ACTION_MAIL,
+                category = MailActions.SERVICE_CATEGORY,
             ),
         )
         return specs.flatMap { spec ->

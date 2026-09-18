@@ -726,6 +726,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: MCP Server API
     implementation(project(":plugin-api:mcp-server-api"))
+
+    // Plugin API: Mail API
+    implementation(project(":plugin-api:mail-api"))
 }
 
 dependencies /* MIME */ {

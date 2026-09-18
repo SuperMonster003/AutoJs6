@@ -62,6 +62,10 @@
             <category android:name="mcp-server" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.MAIL" />
+            <category android:name="mail" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />
         </intent>
         <intent>

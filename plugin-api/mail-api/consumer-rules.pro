@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.mail.api.** { *; }
+-dontwarn org.autojs.plugin.mail.api.**

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -38,6 +39,7 @@ import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginActions
 import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
+import org.autojs.plugin.mail.api.MailIds
 import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
@@ -1046,6 +1048,7 @@ class PluginCenterViewModel : ViewModel() {
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
             ScreenColorPickerContract.ENGINE to ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
             McpServerIds.ENGINE to McpServerPluginHost.ACTION_MCP_SERVER,
+            MailIds.ENGINE to MailPluginHost.ACTION_MAIL,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
             QuickJsPluginIds.ENGINE to QuickJsPluginActions.RUNTIME,
