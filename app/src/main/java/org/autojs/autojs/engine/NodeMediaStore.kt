@@ -394,7 +394,10 @@ internal class NodeMediaStore(private val context: Context, private val resolveF
         val clauses = mutableListOf<String>()
         val args = mutableListOf<String>()
         filter?.keys()?.forEach { key ->
-            val value = filter.opt(key)
+            // Declared as Any? on purpose: with the platform type of JSONObject.opt, Kotlin 2.4 reports the when below
+            // as non-exhaustive (UNEXHAUSTIVE_WHEN_BASED_ON_JAVA_ANNOTATIONS) even though it has an else branch.
+            // zh-CN: 有意声明为 Any?: 若保留 JSONObject.opt 的平台类型, Kotlin 2.4 会对下方的 when 误报非穷尽 (尽管它有 else 分支).
+            val value: Any? = filter.opt(key)
             if (key == "ownedOnly") {
                 require(value is Boolean) { "The ownedOnly filter must be a boolean." }
                 if (value && Build.VERSION.SDK_INT >= 29) {

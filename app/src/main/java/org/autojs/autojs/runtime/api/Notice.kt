@@ -80,6 +80,14 @@ class Notice(scriptRuntime: ScriptRuntime) {
              */
             var defaultLockscreenVisibilityForChannel: Any? = null
 
+            /**
+             * A fresh configuration for the same runtime; `notice.config` reads the value a preset falls back to
+             * from it when a script passes `null` / `undefined` for that preset.
+             *
+             * zh-CN: 同一运行时的全新配置; 脚本给某个预设传 `null` / `undefined` 时, `notice.config` 从中读取该预设的回退值.
+             */
+            internal fun pristine() = Config(scriptRuntime)
+
         }
 
     }
