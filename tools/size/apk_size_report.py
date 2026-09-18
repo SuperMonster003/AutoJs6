@@ -9,6 +9,11 @@ Usage:
   python tools/size/apk_size_report.py <apk> [<apk> ...]
       [--json out.json] [--markdown out.md] [--compare baseline.json]
       [--apkanalyzer PATH] [--no-dex] [--top N] [--dex-depth N] [--dex-min-kib N] [--dex-keep-kib N]
+      [--max-growth-percent N]
+
+`--max-growth-percent N` is the release gate from docs/dev/apk-size-maintainer-checklist.md:
+with `--compare <previous release JSON>` the script exits with status 3 (after writing the
+reports) when any APK is more than N percent larger than its counterpart.
 
 APKs are matched to baseline entries by file name with the version replaced by `*`
 (`autojs6-v6.8.0-universal.apk` -> `autojs6-v*-universal.apk`), so a newer build can be
@@ -321,7 +326,11 @@ def main(argv=None):
     parser.add_argument("--dex-depth", type=int, default=2, help="package depth listed in the DEX table (1 = top-level)")
     parser.add_argument("--dex-min-kib", type=int, default=150)
     parser.add_argument("--dex-keep-kib", type=int, default=8, help="packages below this size are dropped from the JSON unless watched")
+    parser.add_argument("--max-growth-percent", type=float,
+                        help="release gate: exit 3 when an APK is larger than its --compare counterpart by more than this percentage")
     args = parser.parse_args(argv)
+    if args.max_growth_percent is not None and not args.compare:
+        parser.error("--max-growth-percent needs --compare")
 
     apkanalyzer = None if args.no_dex else find_apkanalyzer(args.apkanalyzer)
     if not args.no_dex and not apkanalyzer:
@@ -346,16 +355,27 @@ def main(argv=None):
         with open(args.markdown, "w", encoding="utf-8") as stream:
             stream.write(render_markdown(reports, baseline_by_key, args))
 
+    gate_failures = []
     for report in reports:
         base = baseline_by_key.get(report["key"])
         summary = "%s: %s bytes (%.2f MiB), %d entries, dex files %d" % (
             report["name"], format(report["bytes"], ","), mib(report["bytes"]), report["entries"], report["dex"]["files"])
         if base:
-            summary += ", vs baseline %+.2f MiB" % ((report["bytes"] - base["bytes"]) / MIB)
+            growth = (report["bytes"] - base["bytes"]) * 100.0 / base["bytes"] if base["bytes"] else 0.0
+            summary += ", vs baseline %+.2f MiB (%+.1f%%)" % ((report["bytes"] - base["bytes"]) / MIB, growth)
+            if args.max_growth_percent is not None and growth > args.max_growth_percent:
+                gate_failures.append("%s grew %+.1f%% (%s -> %s bytes), above the %.1f%% gate" % (
+                    report["name"], growth, format(base["bytes"], ","), format(report["bytes"], ","), args.max_growth_percent))
+        elif args.max_growth_percent is not None:
+            gate_failures.append("%s has no counterpart in %s, cannot apply the growth gate" % (report["name"], args.compare))
         total = report["dex"].get("total")
         if total:
             summary += ", dex raw %.2f MiB, %s methods" % (mib(total["bytes"]), format(total["defined"], ","))
         print(summary)
+    if gate_failures:
+        for failure in gate_failures:
+            print("SIZE GATE: " + failure, file=sys.stderr)
+        return 3
     return 0
 
 

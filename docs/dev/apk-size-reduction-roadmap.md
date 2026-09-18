@@ -47,7 +47,7 @@
 
 - 依赖声明: `app/build.gradle.kts` (`dependencies` 各段, `packaging`, `resourceExcludePatterns`), `gradle/libs.versions.toml`, 本地 jar `libs/*.jar` 与 `libs/javamail-android/`, 共用模块 `modules/apk-signer`.
 - 直接受影响的宿主代码: `util/TextUtils.kt`, `ui/settings/ReleaseHistoryRepository.kt`, `network/UpdateChecker.java`, `model/explorer/ExplorerSorter.java`, `rhino/AndroidClassLoader.kt` 与 `com/stardust/autojs/rhino/AndroidClassLoader.java`, `apkbuilder/template/RemoteBuild*.kt`, 5 个 `kotlin-reflect` 调用点 (`runtime/api/augment/{global/GlobalClasses,ocr/Ocr,s13n/S13n,selector/Selector,web/WebSocketFields}.kt`; 实施时另发现第 6 处 `Augmentable.createNewThrowableInstance`).
-- 度量工具 `tools/size/apk_size_report.py` 与证据文件.
+- 度量工具 `tools/size/apk_size_report.py` 与证据文件; 发版检查与日常默认值见 [apk-size-maintainer-checklist.md](apk-size-maintainer-checklist.md) (P7.1).
 - `inrt` flavor 与 runtime-kit 模板随宿主依赖同步受益, 不单独处理.
 
 非目标 (本 Roadmap 不处理):
@@ -180,7 +180,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ### P7 门禁与收尾
 
-- [ ] P7.1 发布检查项: 发版前运行 `apk_size_report.py --compare <上一发布的 JSON>`, 报告存入 `evidence/`, universal APK 相对上一发布增长超过 5% 时在 PR / 提交说明中给出原因. 与 `page-size-16kb-maintainer-checklist.md` 并列.
+- [x] P7.1 发布检查项: 发版前运行 `apk_size_report.py --compare <上一发布的 JSON>`, 报告存入 `evidence/`, universal APK 相对上一发布增长超过 5% 时在 PR / 提交说明中给出原因. 与 `page-size-16kb-maintainer-checklist.md` 并列. 落地 (2026-09-18): [apk-size-maintainer-checklist.md](apk-size-maintainer-checklist.md) 第 1 节给出发版命令与处理规则; `tools/size/apk_size_report.py` 新增 `--max-growth-percent N` (需 `--compare`, 任一 APK 比上一发布大超过 N% 时写完报告后退出码 3, 摘要行同时打印百分比), 本机以 P6.6 产物对 P6.5 报告 (-1.5%, 退出 0) 与人为 -2% 阈值 (退出 3) 验证; 发布报告命名 `evidence/apk-size-release-<ver>.{json,md}`, 下一次发布以其为 `--compare` 输入. 第 2 / 3 节收录日常默认值与受门禁项 (P5.2 / P5.3 / Q11).
 - [ ] P7.2 关联项目同步: 依赖移除后按 `AGENTS.md` 执行 d.ts 发布 (`aj6dts.bat -Publish`), 使 `libraries.d.ts` 不再声明已移除的库; 文档项目无需改动 (D2). P6.2 追加 (2026-09-18): 文档 `console.md` (`setGlobalLogConfig` 的 `filePattern` 默认值实为 `%m%n`, PatternLayout 链接改为自有子集说明) 与 `global.md` ("OkHttp 和 Log4j 类代理" 一节的 `LogConfigurator` / `Level` / `LogManager` 改为自有 `org.autojs.autojs.core.console.log.*`), d.ts `aj6-int-init.d.ts` 三个 `declare class` 的基类与 `aj6-int-console.d.ts` 的 log4j 示例同步 (见 `evidence/apk-size-p6-2-log4j-20260918.md` 后续).
 - [ ] P7.3 Roadmap 收尾: 汇总各阶段体积报告为 `evidence/apk-size-summary-<日期>.md` (基线 -> 各阶段 -> 最终), 回填第 3 节 "理论收益" 的实际值.
 
