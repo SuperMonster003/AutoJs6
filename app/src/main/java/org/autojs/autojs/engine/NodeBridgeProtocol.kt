@@ -100,6 +100,7 @@ import org.autojs.plugin.mlkit.barcode.api.BarcodeValueTypes
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
 import java.net.URL
@@ -4428,7 +4429,10 @@ class AndroidNodeBridgeCapabilityProvider(
             override fun onResponse(call: Call, response: okhttp3.Response) {
                 response.use { okResponse ->
                     val result = runCatching {
-                        controlled.toBridgeResponse(okResponse)
+                        controlled.toBridgeResponse(
+                            okResponse,
+                            binaryDeliveryDir = if (request.binary) appContext.cacheDir else null,
+                        )
                     }.getOrElse { error ->
                         val code = (error as? ControlledFetchException)?.code ?: NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD
                         if (code == NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE || code == NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED) {
@@ -4448,7 +4452,15 @@ class AndroidNodeBridgeCapabilityProvider(
                         return
                     }
                     networkDiagnostics.recordCompleted()
-                    complete(NodeBridgeResponse.success(request.id, result.toString()))
+                    complete(
+                        NodeBridgeResponse(
+                            id = request.id,
+                            ok = true,
+                            resultJson = result.json.toString(),
+                            binary = result.binary,
+                            binaryByteCount = result.binaryByteCount,
+                        ),
+                    )
                 }
             }
         })
@@ -6659,6 +6671,13 @@ private class ControlledFetchDiagnostics {
     }
 }
 
+/** Controlled fetch reply: JSON plus an optional body descriptor (`bodyTransport: "pfd"`). */
+private class ControlledFetchBridgeResult(
+    val json: JSONObject,
+    val binary: android.os.ParcelFileDescriptor?,
+    val binaryByteCount: Long,
+)
+
 private data class ControlledFetchRequest(
     val url: String,
     val method: String,
@@ -6680,23 +6699,73 @@ private data class ControlledFetchRequest(
         return builder.build()
     }
 
-    fun toBridgeResponse(response: okhttp3.Response): JSONObject {
-        val bytes = response.body?.byteStream()?.use { input ->
-            readBoundedBytes(input, maxResponseBytes)
-        } ?: ByteArray(0)
+    /** Inline reply: the body travels as base64 inside the response JSON (plugins that do not ask for `binary`). */
+    fun toBridgeResponse(response: okhttp3.Response): JSONObject = toBridgeResponse(response, null).json
+
+    /**
+     * With [binaryDeliveryDir] (the plugin sent `binary: true`) the body is written to a
+     * private cache file and handed over as a read-only descriptor together with
+     * `"bodyTransport": "pfd"`, so the reply JSON stays far below the Binder transaction
+     * size whatever the body size. Empty bodies stay inline and carry no descriptor.
+     */
+    fun toBridgeResponse(response: okhttp3.Response, binaryDeliveryDir: File?): ControlledFetchBridgeResult {
         val headersJson = JSONArray()
         response.headers.forEach { header ->
             headersJson.put(JSONArray().put(header.first).put(header.second))
         }
-        return JSONObject().apply {
+        val result = JSONObject().apply {
             put("url", response.request.url.toString())
             put("status", response.code)
             put("statusText", response.message)
             put("headers", headersJson)
-            put("bodyBase64", Base64.encodeToString(bytes, Base64.NO_WRAP))
-            put("bodyBytes", bytes.size)
             put("redirected", response.isRedirect)
             put("maxRedirects", maxRedirects)
+        }
+        val stream = response.body?.byteStream()
+        if (binaryDeliveryDir == null) {
+            val bytes = stream?.use { input -> readBoundedBytes(input, maxResponseBytes) } ?: ByteArray(0)
+            result.put("bodyBase64", Base64.encodeToString(bytes, Base64.NO_WRAP))
+            result.put("bodyBytes", bytes.size)
+            return ControlledFetchBridgeResult(result, null, 0L)
+        }
+        val file = File.createTempFile("node-fetch-body-", ".bin", binaryDeliveryDir)
+        try {
+            val byteCount = stream?.use { input ->
+                FileOutputStream(file).use { output -> copyBounded(input, output, maxResponseBytes) }
+            } ?: 0L
+            result.put("bodyBytes", byteCount)
+            if (byteCount <= 0L) {
+                result.put("bodyBase64", "")
+                return ControlledFetchBridgeResult(result, null, 0L)
+            }
+            result.put("bodyTransport", "pfd")
+            return ControlledFetchBridgeResult(
+                result,
+                android.os.ParcelFileDescriptor.open(file, android.os.ParcelFileDescriptor.MODE_READ_ONLY),
+                byteCount,
+            )
+        } finally {
+            // The open descriptor keeps the unlinked file readable until the plugin has mapped it.
+            file.delete()
+        }
+    }
+
+    private fun copyBounded(input: InputStream, output: FileOutputStream, maxBytes: Long): Long {
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var total = 0L
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) {
+                return total
+            }
+            if (total + read > maxBytes) {
+                throw ControlledFetchException(
+                    NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE,
+                    "AutoJs6 controlled fetch response exceeded ${maxBytes} bytes.",
+                )
+            }
+            output.write(buffer, 0, read)
+            total += read
         }
     }
 

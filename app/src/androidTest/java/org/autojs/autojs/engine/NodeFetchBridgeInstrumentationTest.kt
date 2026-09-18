@@ -1,23 +1,34 @@
 package org.autojs.autojs.engine
 
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.os.TransactionTooLargeException
+import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.URI
+import java.security.MessageDigest
 import java.util.Base64
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 class NodeFetchBridgeInstrumentationTest {
 
@@ -977,6 +988,184 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
+    fun hostDeliversControlledFetchBodiesThroughTheBinaryTransport() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch binary body transport")
+
+        ControlledFetchLoopbackServer().use { server ->
+            val baseUrl = server.baseUrl
+            val expectedHash = sha256Hex(patternBytes(LARGE_BODY_BYTES))
+            val result = NodePluginTestHarness.runPluginScript(
+                """
+                "nodejs";
+                (async function main() {
+                  const fetchModule = require("fetch");
+                  const crypto = require("crypto");
+                  const base = "$baseUrl";
+                  function codeOf(error) {
+                    return error && (error.autojs6Code || error.code) || "";
+                  }
+                  const large = await fetchModule(base + "/large-bytes?n=$LARGE_BODY_BYTES", { timeoutMs: 20000 });
+                  const bytes = Buffer.from(await large.arrayBuffer());
+                  let pattern = bytes.length === $LARGE_BODY_BYTES;
+                  for (let index = 0; pattern && index < bytes.length; index += 4099) {
+                    pattern = bytes[index] === index % 251;
+                  }
+                  const hash = crypto.createHash("sha256").update(bytes).digest("hex");
+                  const empty = await fetchModule(base + "/empty");
+                  const emptyLength = (await empty.arrayBuffer()).byteLength;
+                  const redirected = await fetchModule(base + "/redirect-with-body");
+                  const redirectedJson = await redirected.json();
+                  let tooLargeCode = "";
+                  try {
+                    await fetchModule(base + "/large-bytes?n=65536", { maxResponseBytes: 1024 });
+                  } catch (error) {
+                    tooLargeCode = codeOf(error);
+                  }
+                  const small = await (await fetchModule(base + "/get?via=pfd")).json();
+                  const parallel = await Promise.all(Array.from({ length: 24 }, (_, index) =>
+                    fetchModule(base + "/large-bytes?n=" + (4096 + index)).then((response) => response.arrayBuffer()).then((buffer) => buffer.byteLength)));
+                  console.log("live.fetch.pfd=" + [
+                    large.status,
+                    bytes.length,
+                    pattern,
+                    hash,
+                    empty.status,
+                    emptyLength,
+                    redirected.status,
+                    redirectedJson.query,
+                    tooLargeCode,
+                    small.query,
+                    parallel.every((length, index) => length === 4096 + index)
+                  ].join("|"));
+                })();
+                """.trimIndent(),
+                "<embedded-autojs-fetch-binary-transport.js>",
+                timeoutMs = 40_000L,
+            )
+
+            NodePluginTestHarness.assertSucceeded("fetch binary transport", result)
+            val resultDetails = NodePluginTestHarness.describeResult("fetch binary transport", result)
+            assertTrue(
+                resultDetails,
+                result.stdout.contains(
+                    "live.fetch.pfd=200|$LARGE_BODY_BYTES|true|$expectedHash|200|0|200|via=redirect-body|" +
+                        "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|via=pfd|true",
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun hostBrokerReportsOversizedInlineRepliesInsteadOfSwallowingThem() {
+        ControlledFetchLoopbackServer().use { server ->
+            val broker = NodeJsHostCapabilityBroker(
+                context,
+                NodePluginScriptRequest(
+                    source = "",
+                    sourceName = "<broker-transaction-size>",
+                    workingDirectory = context.cacheDir.absolutePath,
+                    sandboxRoot = context.cacheDir.absolutePath,
+                    executionId = "broker-transaction-size-${System.nanoTime()}",
+                ),
+                "instrumentation",
+            )
+            try {
+                val replies = LinkedBlockingQueue<Bundle>()
+                val oversized = AtomicInteger()
+                val binarySummary = AtomicReference("")
+                val callback = object : INodeJsHostCapabilityCallback.Stub() {
+                    override fun onResponse(response: Bundle) {
+                        val json = response.getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty()
+                        if (json.length > SIMULATED_BINDER_LIMIT_CHARS) {
+                            oversized.incrementAndGet()
+                            throw TransactionTooLargeException()
+                        }
+                        @Suppress("DEPRECATION")
+                        val descriptor = response.getParcelable<ParcelFileDescriptor>(NodeJsRuntimeContract.KEY_BRIDGE_BINARY_PFD)
+                        if (descriptor != null) {
+                            // The broker closes the descriptor after onResponse returns, like the real Binder path.
+                            val bytes = FileInputStream(descriptor.fileDescriptor).use { it.readBytes() }
+                            binarySummary.set(
+                                "${bytes.size}|${sha256Hex(bytes)}|" +
+                                    response.getLong(NodeJsRuntimeContract.KEY_BRIDGE_BINARY_BYTE_COUNT, -1L),
+                            )
+                        }
+                        replies.add(response)
+                    }
+                }
+
+                fun fetchRequest(id: String, binary: Boolean): Bundle {
+                    val request = JSONObject()
+                        .put("id", id)
+                        .put("module", "fetch")
+                        .put("method", "request")
+                        .put(
+                            "args",
+                            JSONArray().put(
+                                JSONObject()
+                                    .put("url", "${server.baseUrl}/large-bytes?n=$LARGE_BODY_BYTES")
+                                    .put("timeoutMs", 10_000),
+                            ),
+                        )
+                        .put("timeoutMs", 10_000)
+                        .put("permissions", JSONArray().put("network"))
+                    if (binary) {
+                        request.put("binary", true)
+                    }
+                    return Bundle().apply {
+                        putString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON, request.toString())
+                    }
+                }
+
+                broker.dispatch(fetchRequest("inline-1", binary = false), callback)
+                val inlineReply = replies.poll(20, TimeUnit.SECONDS)
+                assertNotNull("inline reply missing", inlineReply)
+                assertEquals(1, oversized.get())
+                assertFalse(inlineReply!!.getBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, true))
+                val inlineParsed = NodeBridgeResponse.fromJson(
+                    inlineReply.getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty(),
+                )
+                assertEquals("inline-1", inlineParsed.id)
+                assertEquals(NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED, inlineParsed.error?.code)
+                assertEquals(NodeBridgeErrorCategory.PROVIDER_FAILED, inlineParsed.error?.category)
+                assertEquals("fetch", inlineParsed.error?.module)
+                assertEquals("request", inlineParsed.error?.method)
+                assertTrue(
+                    inlineParsed.error?.message.orEmpty(),
+                    inlineParsed.error?.message.orEmpty().contains("exceeded the Binder transaction size"),
+                )
+                assertEquals(
+                    inlineParsed.error?.message,
+                    inlineReply.getString(NodeJsRuntimeContract.KEY_BRIDGE_ERROR_MESSAGE),
+                )
+
+                broker.dispatch(fetchRequest("binary-1", binary = true), callback)
+                val binaryReply = replies.poll(20, TimeUnit.SECONDS)
+                assertNotNull("binary reply missing", binaryReply)
+                assertEquals(1, oversized.get())
+                assertTrue(binaryReply!!.getBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, false))
+                val binaryJson = binaryReply.getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty()
+                val binaryResult = JSONObject(binaryJson).getJSONObject("result")
+                assertEquals("pfd", binaryResult.getString("bodyTransport"))
+                assertEquals(LARGE_BODY_BYTES.toLong(), binaryResult.getLong("bodyBytes"))
+                assertFalse(binaryResult.has("bodyBase64"))
+                assertEquals(200, binaryResult.getInt("status"))
+                assertTrue(binaryJson.length < SIMULATED_BINDER_LIMIT_CHARS)
+                assertEquals(
+                    "$LARGE_BODY_BYTES|${sha256Hex(patternBytes(LARGE_BODY_BYTES))}|$LARGE_BODY_BYTES",
+                    binarySummary.get(),
+                )
+                assertTrue(
+                    "fetch body cache files must not survive delivery",
+                    context.cacheDir.listFiles().orEmpty().none { it.name.startsWith("node-fetch-body-") },
+                )
+            } finally {
+                broker.destroy(null)
+            }
+        }
+    }
+
+    @Test
     fun jsFetchAndAxiosUseAndroidLiveProvider() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch live provider smoke")
 
@@ -1321,6 +1510,20 @@ class NodeFetchBridgeInstrumentationTest {
                     listOf("Location" to "/get?via=redirect"),
                 )
                 "/large" -> HttpResponse(200, "OK", "text/plain", "abcdef".toByteArray())
+                "/large-bytes" -> HttpResponse(
+                    200,
+                    "OK",
+                    "application/octet-stream",
+                    patternBytes(request.query.substringAfter("n=", "").substringBefore('&').toIntOrNull() ?: 0),
+                )
+                "/empty" -> HttpResponse(200, "OK", "text/plain", ByteArray(0))
+                "/redirect-with-body" -> HttpResponse(
+                    302,
+                    "Found",
+                    "application/octet-stream",
+                    patternBytes(4096),
+                    listOf("Location" to "/get?via=redirect-body"),
+                )
                 "/slow" -> {
                     slowRequestStarted.countDown()
                     Thread.sleep(2_000)
@@ -1381,4 +1584,14 @@ class NodeFetchBridgeInstrumentationTest {
         val body: ByteArray,
         val headers: List<Pair<String, String>> = emptyList(),
     )
+
+    private companion object {
+        const val LARGE_BODY_BYTES = 3 * 1024 * 1024
+        const val SIMULATED_BINDER_LIMIT_CHARS = 1_000_000
+
+        fun patternBytes(count: Int): ByteArray = ByteArray(count.coerceAtLeast(0)) { index -> (index % 251).toByte() }
+
+        fun sha256Hex(bytes: ByteArray): String =
+            MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+    }
 }

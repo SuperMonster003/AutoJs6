@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Process
 import android.os.RemoteException
+import android.os.TransactionTooLargeException
+import android.util.Log
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityBroker
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -93,7 +95,7 @@ internal class NodeJsHostCapabilityBroker(
         }
         runCatching {
             provider.dispatch(bridgeRequest) { response ->
-                sendResponse(callback, response)
+                sendResponse(callback, response, bridgeRequest.module, bridgeRequest.method)
             }
         }.onFailure { error ->
             sendResponse(
@@ -137,9 +139,12 @@ internal class NodeJsHostCapabilityBroker(
     private fun sendResponse(
         callback: INodeJsHostCapabilityCallback,
         response: NodeBridgeResponse,
+        module: String? = null,
+        method: String? = null,
     ) {
+        val responseJson = response.toJson()
         val responseBundle = Bundle().apply {
-            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, response.toJson())
+            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, responseJson)
             if (response.event) putBoolean("event", true)
             putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, response.ok)
             response.binary?.let { descriptor ->
@@ -152,10 +157,52 @@ internal class NodeJsHostCapabilityBroker(
         }
         try {
             callback.onResponse(responseBundle)
+        } catch (error: TransactionTooLargeException) {
+            // Binder refused the reply, so the plugin never saw it. Answer with a small
+            // provider failure instead of leaving the script to its bridge timeout.
+            reportOversizedResponse(callback, response, responseJson.length, module, method, error)
         } catch (_: RemoteException) {
             // Plugin process may have died; the script result path will surface the runtime failure.
         } finally {
             response.binary?.close()
+        }
+    }
+
+    private fun reportOversizedResponse(
+        callback: INodeJsHostCapabilityCallback,
+        response: NodeBridgeResponse,
+        jsonLength: Int,
+        module: String?,
+        method: String?,
+        error: TransactionTooLargeException,
+    ) {
+        val target = listOfNotNull(module, method).joinToString(".").ifBlank { "bridge call" }
+        if (response.event) {
+            Log.w(
+                TAG,
+                "AutoJs6 host event for $target ($jsonLength JSON chars) exceeded the Binder transaction size and was dropped: ${error.message}",
+            )
+            return
+        }
+        val failure = NodeBridgeResponse.failure(
+            response.id,
+            NodeBridgeError.providerFailed(
+                message = "AutoJs6 host response for $target ($jsonLength JSON chars) exceeded the Binder transaction size; " +
+                    "use the descriptor-based binary transport or request a smaller payload.",
+                module = module,
+                method = method,
+                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+            ),
+        )
+        val failureBundle = Bundle().apply {
+            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, failure.toJson())
+            putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, false)
+            failure.error?.message?.let { putString(NodeJsRuntimeContract.KEY_BRIDGE_ERROR_MESSAGE, it) }
+        }
+        try {
+            callback.onResponse(failureBundle)
+        } catch (_: RemoteException) {
+            // Plugin process may have died; nothing else to report.
         }
     }
 
@@ -169,5 +216,9 @@ internal class NodeJsHostCapabilityBroker(
 
     private fun nativePayload(values: Map<String, String>): Array<String> {
         return values.map { (key, value) -> "$key=$value" }.toTypedArray()
+    }
+
+    private companion object {
+        private const val TAG = "NodeJsHostCapabilityBroker"
     }
 }
