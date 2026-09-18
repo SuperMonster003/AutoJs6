@@ -596,6 +596,7 @@
 * `Mejora` Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón "Copiar" de los tres administradores pasa al menú "Más" de la barra de título como "Copiar información", y el botón "Sistema" del administrador del servicio de accesibilidad igualmente como "Ajustes del sistema"
 * `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
 * `Mejora` La comprobación de actualizaciones ahora llama directamente a la GitHub REST API (OkHttp + Gson) para obtener la última versión y su lista de APK, y las notas de la versión de respaldo se renderizan localmente en lugar de usar el servicio de renderizado de Markdown de GitHub
+* `Mejora` La escritura del registro global en archivo (console.setGlobalLogConfig / resetGlobalLogConfig y las clases globales LogConfigurator / Level / LogManager) usa un registrador de archivos rotativo integrado en lugar de Log4j; se conservan las opciones documentadas y el subconjunto de PatternLayout (%d / %p / %c / %C / %m / %n / %t / %r con modificadores de ancho), y el resto de la API de Log4j deja de estar disponible
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
@@ -632,6 +633,8 @@
 * `Dependencia` Se elimina Kotlin Reflect version 2.4.0
 * `Dependencia` Se elimina Spongy Castle Prov version 1.58.0.0
 * `Dependencia` Se elimina Android dx version 1.14
+* `Dependencia` Se elimina Log4j version 1.2.17
+* `Dependencia` Se elimina Android Logging Log4j version 1.0.3
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 
 # v6.7.0

@@ -758,6 +758,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 客戶端模式與伺服端模式管理器的狀態區與控制區支援與無障礙服務管理器相同的逐級展開與收起 (狀態與控制各 3 級, 所選等級會被記住, 全部收起時狀態標題附帶連線狀態, 主要動作移入控制區標題列); 三個管理器的 "複製" 按鈕移入標題列 "更多" 選單作為 "複製資訊", 無障礙服務管理器的 "系統" 按鈕同樣移入該選單作為 "系統設定"
 * `最佳化` 安裝套件體積縮減: 移除停用的 HTML 轉 Markdown 鏈路與未使用的相依套件, JUnit 不再隨 CommonMark 與 Spongy Castle 進入生產 DEX, Rhino 執行階段不再打包 JLine 終端機程式庫
 * `最佳化` 檢查更新改為直接呼叫 GitHub REST API (OkHttp + Gson) 取得最新版本與安裝套件清單, 更新說明的 release 回退內容改為本機渲染, 不再請求 GitHub 的 Markdown 渲染介面
+* `最佳化` 全域日誌寫入檔案 (console.setGlobalLogConfig / resetGlobalLogConfig 及全域類別 LogConfigurator / Level / LogManager) 改用內建滾動檔案日誌器取代 Log4j; 文件化選項與 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及寬度修飾) 保持不變, 其餘 Log4j API 不再提供
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

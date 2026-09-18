@@ -596,6 +596,7 @@
 * `Improvement` Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the "Copy" button of all three managers moved into the title bar "more" menu as "Copy information", and the "System" button of the accessibility service manager likewise as "System settings"
 * `Improvement` Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library
 * `Improvement` Update check now calls the GitHub REST API directly (OkHttp + Gson) for the latest release and its APK list, and the release-notes fallback is rendered locally instead of through GitHub's Markdown rendering endpoint
+* `Improvement` Global log file writing (console.setGlobalLogConfig / resetGlobalLogConfig and the LogConfigurator / Level / LogManager globals) uses a built-in rolling file logger instead of Log4j; the documented options and the PatternLayout subset (%d / %p / %c / %C / %m / %n / %t / %r with width modifiers) are preserved, and the rest of the Log4j API is no longer available
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -632,6 +633,8 @@
 * `Dependency` Removed Kotlin Reflect version 2.4.0
 * `Dependency` Removed Spongy Castle Prov version 1.58.0.0
 * `Dependency` Removed Android dx version 1.14
+* `Dependency` Removed Log4j version 1.2.17
+* `Dependency` Removed Android Logging Log4j version 1.0.3
 * `Dependency` Appended ZXing Android Embedded version 4.3.0
 
 # v6.7.0

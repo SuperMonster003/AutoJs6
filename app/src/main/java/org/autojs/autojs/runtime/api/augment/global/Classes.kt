@@ -141,7 +141,7 @@ class Classes {
     val MaterialDialog = com.afollestad.materialdialogs.MaterialDialog::class
 
     @JvmField
-    val LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator::class
+    val LogConfigurator = org.autojs.autojs.core.console.log.LogConfigurator::class
 
     @JvmField
     val Version = io.github.g00fy2.versioncompare.Version::class
@@ -207,10 +207,10 @@ class Classes {
     val RequestBody = okhttp3.RequestBody::class
 
     @JvmField
-    val Level = org.apache.log4j.Level::class
+    val Level = org.autojs.autojs.core.console.log.Level::class
 
     @JvmField
-    val LogManager = org.apache.log4j.LogManager::class
+    val LogManager = org.autojs.autojs.core.console.log.LogManager::class
 
     @JvmField
     val GlobalAppContext = org.autojs.autojs.app.GlobalAppContext::class

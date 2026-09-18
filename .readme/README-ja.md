@@ -758,6 +758,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` クライアントモードとサーバーモードのマネージャー: ステータス欄とコントロール欄がユーザー補助サービスマネージャーと同様に段階的に展開 / 折りたたみ可能 (各 3 段階, 選択した段階を記憶; 全て折りたたむとステータスのタイトルに接続状態を表示し, 主要な操作はコントロール欄のタイトル行に移動); 3 つのマネージャーの "コピー" ボタンをタイトルバーの "その他" メニューの "情報をコピー" に移動, ユーザー補助サービスマネージャーの "システム" ボタンも同メニューの "システム設定" に移動
 * `改善` APK サイズを縮小: 使われていない HTML から Markdown への変換経路と未使用の依存関係を削除, CommonMark と Spongy Castle 経由で JUnit が製品版 DEX に入らないようにし, Rhino ランタイムに JLine ターミナルライブラリを同梱しない
 * `改善` 更新チェックは GitHub REST API (OkHttp + Gson) を直接呼び出して最新リリースと APK 一覧を取得し, フォールバックのリリースノートは GitHub の Markdown レンダリング API を使わずローカルで描画
+* `改善` グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

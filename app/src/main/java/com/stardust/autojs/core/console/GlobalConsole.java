@@ -2,9 +2,8 @@ package com.stardust.autojs.core.console;
 
 import com.stardust.util.UiHandler;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
+import org.autojs.autojs.core.console.log.Level;
+import org.autojs.autojs.core.console.log.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,13 +27,13 @@ public class GlobalConsole extends ConsoleImpl {
     public String println(int level, CharSequence charSequence) {
         String log = String.format(Locale.getDefault(), "%s/%s: %s",
                 DATE_FORMAT.format(new Date()), getLevelChar(level), charSequence.toString());
-        LOGGER.log(toLog4jLevel(level), log);
+        LOGGER.log(toLogLevel(level), log);
         android.util.Log.d(LOG_tAG, log);
         super.println(level, log);
         return log;
     }
 
-    private Priority toLog4jLevel(int level) {
+    private Level toLogLevel(int level) {
         switch (level) {
             case android.util.Log.VERBOSE:
                 return Level.DEBUG;

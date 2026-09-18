@@ -594,7 +594,8 @@
         "Dialogue d'adresse du mode client : \"Scanner le code QR\" passe de l'icône en fin de champ au menu \"Plus\" de la barre de titre ; la page de scan n'a plus de bouton de lampe (le code est affiché sur un écran, qui s'éclaire lui-même)",
         "Gestionnaires des modes client et serveur : les sections d'état et de contrôle se développent et se replient par paliers comme dans le gestionnaire du service d'accessibilité (3 niveaux chacune, le niveau choisi est mémorisé ; entièrement repliée, le titre de l'état porte l'état de connexion et les actions principales passent dans l'en-tête de contrôle) ; le bouton \"Copier\" des trois gestionnaires passe dans le menu \"Plus\" de la barre de titre sous \"Copier les informations\", et le bouton \"Système\" du gestionnaire du service d'accessibilité de même sous \"Paramètres système\"",
         "APK plus léger : suppression du chemin HTML vers Markdown désactivé et des dépendances inutilisées, JUnit n'entre plus dans le DEX de production via CommonMark et Spongy Castle, et le runtime Rhino n'embarque plus la bibliothèque de terminal JLine",
-        "La vérification des mises à jour appelle désormais directement la GitHub REST API (OkHttp + Gson) pour la dernière version et sa liste d'APK, et les notes de version de secours sont rendues localement au lieu de passer par le service de rendu Markdown de GitHub"
+        "La vérification des mises à jour appelle désormais directement la GitHub REST API (OkHttp + Gson) pour la dernière version et sa liste d'APK, et les notes de version de secours sont rendues localement au lieu de passer par le service de rendu Markdown de GitHub",
+        "L'écriture du journal global dans un fichier (console.setGlobalLogConfig / resetGlobalLogConfig et les classes globales LogConfigurator / Level / LogManager) utilise un enregistreur de fichiers tournant intégré à la place de Log4j ; les options documentées et le sous-ensemble PatternLayout (%d / %p / %c / %C / %m / %n / %t / %r avec modificateurs de largeur) sont conservés, le reste de l'API Log4j n'est plus disponible"
       ],
       "dependency": [
         "Android AXML modularise",
@@ -633,6 +634,8 @@
         "Suppression de Kotlin Reflect version 2.4.0",
         "Suppression de Spongy Castle Prov version 1.58.0.0",
         "Suppression de Android dx version 1.14",
+        "Suppression de Log4j version 1.2.17",
+        "Suppression de Android Logging Log4j version 1.0.3",
         "Ajout de ZXing Android Embedded version 4.3.0"
       ]
     },

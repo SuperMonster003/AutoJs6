@@ -596,6 +596,7 @@
 * `改善` クライアントモードとサーバーモードのマネージャー: ステータス欄とコントロール欄がユーザー補助サービスマネージャーと同様に段階的に展開 / 折りたたみ可能 (各 3 段階, 選択した段階を記憶; 全て折りたたむとステータスのタイトルに接続状態を表示し, 主要な操作はコントロール欄のタイトル行に移動); 3 つのマネージャーの "コピー" ボタンをタイトルバーの "その他" メニューの "情報をコピー" に移動, ユーザー補助サービスマネージャーの "システム" ボタンも同メニューの "システム設定" に移動
 * `改善` APK サイズを縮小: 使われていない HTML から Markdown への変換経路と未使用の依存関係を削除, CommonMark と Spongy Castle 経由で JUnit が製品版 DEX に入らないようにし, Rhino ランタイムに JLine ターミナルライブラリを同梱しない
 * `改善` 更新チェックは GitHub REST API (OkHttp + Gson) を直接呼び出して最新リリースと APK 一覧を取得し, フォールバックのリリースノートは GitHub の Markdown レンダリング API を使わずローカルで描画
+* `改善` グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった
 * `依存関係` モジュール化 Android AXML
 * `依存関係` モジュール化 Android ARSC Editor
 * `依存関係` モジュール化 APK Signer
@@ -632,6 +633,8 @@
 * `依存関係` Kotlin Reflect バージョン 2.4.0 を削除
 * `依存関係` Spongy Castle Prov バージョン 1.58.0.0 を削除
 * `依存関係` Android dx バージョン 1.14 を削除
+* `依存関係` Log4j バージョン 1.2.17 を削除
+* `依存関係` Android Logging Log4j バージョン 1.0.3 を削除
 * `依存関係` ZXing Android Embedded バージョン 4.3.0 を追加
 
 # v6.7.0

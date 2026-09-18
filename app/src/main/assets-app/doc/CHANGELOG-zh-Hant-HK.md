@@ -596,6 +596,7 @@
 * `優化` 客戶端模式與伺服端模式管理器的狀態區與控制區支援與無障礙服務管理器相同的逐級展開與收起 (狀態與控制各 3 級, 所選等級會被記住, 全部收起時狀態標題附帶連線狀態, 主要動作移入控制區標題列); 三個管理器的 "複製" 按鈕移入標題列 "更多" 選單作為 "複製信息", 無障礙服務管理器的 "系統" 按鈕同樣移入該選單作為 "系統設置"
 * `優化` 安裝包體積縮減: 移除停用的 HTML 轉 Markdown 鏈路與未使用的依賴, JUnit 不再隨 CommonMark 與 Spongy Castle 進入生產 DEX, Rhino 運行時不再打包 JLine 終端庫
 * `優化` 檢查更新改為直接調用 GitHub REST API (OkHttp + Gson) 獲取最新版本與安裝包列表, 更新說明的 release 回退內容改為本地渲染, 不再請求 GitHub 的 Markdown 渲染接口
+* `優化` 全域日誌寫入檔案 (console.setGlobalLogConfig / resetGlobalLogConfig 及全域類 LogConfigurator / Level / LogManager) 改用內置滾動檔案日誌器取代 Log4j; 文件化選項與 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及寬度修飾) 保持不變, 其餘 Log4j API 不再提供
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer
@@ -632,6 +633,8 @@
 * `依賴` 移除 Kotlin Reflect 版本 2.4.0
 * `依賴` 移除 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 移除 Android dx 版本 1.14
+* `依賴` 移除 Log4j 版本 1.2.17
+* `依賴` 移除 Android Logging Log4j 版本 1.0.3
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

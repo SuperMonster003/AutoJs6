@@ -596,6 +596,7 @@
 * `개선` 클라이언트 모드 및 서버 모드 관리자: 상태 영역과 제어 영역을 접근성 서비스 관리자와 같이 단계별로 펼치고 접을 수 있음 (각 3단계, 선택한 단계 기억; 모두 접으면 상태 제목에 연결 상태가 표시되고 주요 작업은 제어 영역 제목 행으로 이동); 세 관리자의 "복사" 버튼을 제목 표시줄 "더보기" 메뉴의 "정보 복사"로 이동, 접근성 서비스 관리자의 "시스템" 버튼도 같은 메뉴의 "시스템 설정"으로 이동
 * `개선` APK 크기 축소: 사용하지 않는 HTML -> Markdown 변환 경로와 미사용 의존성을 제거, JUnit이 CommonMark 및 Spongy Castle을 통해 프로덕션 DEX에 포함되지 않도록 하고, Rhino 런타임에 JLine 터미널 라이브러리를 더 이상 포함하지 않음
 * `개선` 업데이트 확인이 GitHub REST API (OkHttp + Gson) 를 직접 호출하여 최신 릴리스와 APK 목록을 가져오고, 대체 릴리스 노트는 GitHub 의 Markdown 렌더링 API 대신 로컬에서 렌더링
+* `개선` 전역 로그 파일 쓰기 (console.setGlobalLogConfig / resetGlobalLogConfig 및 전역 클래스 LogConfigurator / Level / LogManager)가 Log4j 대신 내장 롤링 파일 로거를 사용; 문서화된 옵션과 PatternLayout 하위 집합 (%d / %p / %c / %C / %m / %n / %t / %r 및 너비 지정자)은 유지되며 그 외 Log4j API는 더 이상 제공되지 않음
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer
@@ -632,6 +633,8 @@
 * `의존성` Kotlin Reflect 버전 2.4.0 제거
 * `의존성` Spongy Castle Prov 버전 1.58.0.0 제거
 * `의존성` Android dx 버전 1.14 제거
+* `의존성` Log4j 버전 1.2.17 제거
+* `의존성` Android Logging Log4j 버전 1.0.3 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

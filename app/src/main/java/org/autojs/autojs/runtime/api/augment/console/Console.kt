@@ -1,12 +1,12 @@
 package org.autojs.autojs.runtime.api.augment.console
 
 import android.util.Log
-import de.mindpipe.android.logging.log4j.LogConfigurator
-import org.apache.log4j.Level
-import org.apache.log4j.LogManager
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleImpl.Companion.DEFAULT_EXIT_ON_CLOSE_TIMEOUT
+import org.autojs.autojs.core.console.log.Level
+import org.autojs.autojs.core.console.log.LogConfigurator
+import org.autojs.autojs.core.console.log.LogManager
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
@@ -609,11 +609,7 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
                 isUseFileAppender = true
                 isImmediateFlush = config.inquire("immediateFlush", ::coerceBoolean, true)
                 isResetConfiguration = config.inquire("resetConfiguration", ::coerceBoolean, true)
-                Level::class.java.getDeclaredField(
-                    config.inquire("rootLevel", ::coerceStringUppercase, "ALL")
-                ).apply { isAccessible = true }.get(null)?.let {
-                    rootLevel = it as Level
-                }
+                rootLevel = Level.valueOf(config.inquire("rootLevel", ::coerceStringUppercase, "ALL"))
             }.configure()
             UNDEFINED
         }
