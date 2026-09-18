@@ -29,14 +29,14 @@ import java.util.function.Supplier
  * The global `mail` object (mail roadmap P3.1, appendix A.1 and A.2): `connect(options | alias)`
  * / `connectAsync`, `setDefault(client | options | alias)`, `default`, `providers.list() / get(id)
  * / resolve(address)`, `accounts.list() / has(alias)`, the `MailError` constructor and `close()`;
- * the convenience methods (`test`, `send`, `fetch`, `search`, `get`, `download`, `markRead`,
- * `markUnread`, `move`, `delete`, `folders`, `watch` and their `Async` forms) forward to the
- * default client and throw `NO_DEFAULT_ACCOUNT` without one. Argument shapes are checked in
- * `MailScriptOptions` (pure Kotlin); only the Rhino conversion happens here.
+ * every client method of appendix A.3 ([FORWARDED], with the `Async` forms) is mirrored here and
+ * forwards to the default client, throwing (or rejecting with) `NO_DEFAULT_ACCOUNT` without one.
+ * Argument shapes are checked in `MailScriptOptions` (pure Kotlin); only the Rhino conversion
+ * happens here.
  * zh-CN: 全局 `mail` 对象 (邮件路线图 P3.1, 附录 A.1 与 A.2): `connect(options | alias)` / `connectAsync`, `setDefault(client | options | alias)`,
- * `default`, `providers.list() / get(id) / resolve(address)`, `accounts.list() / has(alias)`, `MailError` 构造器与 `close()`; 便捷方法 (`test`,
- * `send`, `fetch`, `search`, `get`, `download`, `markRead`, `markUnread`, `move`, `delete`, `folders`, `watch` 及其 `Async` 形态) 转发到默认
- * 客户端, 无默认客户端时抛 `NO_DEFAULT_ACCOUNT`. 参数形态在 `MailScriptOptions` (纯 Kotlin) 检查; 这里只做 Rhino 转换.
+ * `default`, `providers.list() / get(id) / resolve(address)`, `accounts.list() / has(alias)`, `MailError` 构造器与 `close()`; 附录 A.3 的每个客户端
+ * 方法 ([FORWARDED], 含 `Async` 形态) 在此镜像并转发到默认客户端, 无默认客户端时抛出 (或拒绝为) `NO_DEFAULT_ACCOUNT`. 参数形态在
+ * `MailScriptOptions` (纯 Kotlin) 检查; 这里只做 Rhino 转换.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
 class Mail(
@@ -51,29 +51,6 @@ class Mail(
         ::connectAsync.name,
         ::setDefault.name,
         ::close.name,
-        ::test.name,
-        ::testAsync.name,
-        ::send.name,
-        ::sendAsync.name,
-        ::fetch.name,
-        ::fetchAsync.name,
-        ::search.name,
-        ::searchAsync.name,
-        ::get.name,
-        ::getAsync.name,
-        ::download.name,
-        ::downloadAsync.name,
-        ::markRead.name,
-        ::markReadAsync.name,
-        ::markUnread.name,
-        ::markUnreadAsync.name,
-        ::move.name,
-        ::moveAsync.name,
-        ::delete.name,
-        ::deleteAsync.name,
-        ::folders.name,
-        ::foldersAsync.name,
-        ::watch.name,
     )
 
     /** `MailError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `MailError` 实例不经包装到达脚本. */
@@ -85,11 +62,13 @@ class Mail(
     )
 
     override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
-        listOf(
+        listOf<Pair<Any, Any?>>(
             MailJsErrors.NAME to MailJsErrors.constructor(scriptRuntime),
             "providers" to providersObject(),
             "accounts" to accountsObject(),
-        )
+        ) + FORWARDED
+            .flatMap { name -> if (name == "folder") listOf(name) else listOf(name, name + ASYNC_SUFFIX) }
+            .map { name -> name to newBaseFunction(scriptRuntime.topLevelScope, name, { args -> forward(name, args) }, NOT_CONSTRUCTABLE) }
     }
 
     @RhinoRuntimeFunctionInterface
@@ -105,7 +84,7 @@ class Mail(
             } catch (t: Throwable) {
                 return@ensureArgumentsOnlyOne MailPromises.rejected(scriptRuntime, t)
             }
-            client.async {
+            client.async { _ ->
                 try {
                     client.session.open()
                     client
@@ -134,75 +113,6 @@ class Mail(
         }
     }
 
-    @RhinoRuntimeFunctionInterface
-    fun test(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::test.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun testAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::testAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun send(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::send.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun sendAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::sendAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun fetch(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::fetch.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun fetchAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::fetchAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun search(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::search.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun searchAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::searchAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun get(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::get.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun getAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::getAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun download(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::download.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun downloadAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::downloadAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun markRead(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::markRead.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun markReadAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::markReadAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun markUnread(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::markUnread.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun markUnreadAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::markUnreadAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun move(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::move.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun moveAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::moveAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun delete(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::delete.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun deleteAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::deleteAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun folders(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::folders.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun foldersAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::foldersAsync.name, args)
-
-    @RhinoRuntimeFunctionInterface
-    fun watch(runtime: ScriptRuntime, args: Array<out Any?>): Any? = forward(::watch.name, args)
-
     // ------------------------------------------------------------------ internals
 
     /** Opens a client for [raw] eagerly, so refusals of the plugin surface at `connect`. zh-CN: 为 [raw] 立即打开客户端, 插件的拒绝在 `connect` 处即浮现. */
@@ -213,7 +123,7 @@ class Mail(
             MailJsErrors.throwInto(scriptRuntime, t)
         }
         try {
-            client.sync { client.session.open() }
+            client.sync { _ -> client.session.open() }
         } catch (t: Throwable) {
             client.discard()
             throw t
@@ -324,5 +234,12 @@ class Mail(
 
     private companion object {
         const val ASYNC_SUFFIX = "Async"
+
+        /** Client methods mirrored on `mail` (appendix A.3); each has an `Async` form except `folder`. zh-CN: 在 `mail` 上镜像的客户端方法 (附录 A.3); 除 `folder` 外各有 `Async` 形态. */
+        val FORWARDED: List<String> = listOf(
+            "test", "send", "folders", "folder", "folderStatus", "createFolder", "deleteFolder", "renameFolder",
+            "fetch", "search", "get", "fetchBody", "download", "raw", "setFlags", "markRead", "markUnread", "flag", "unflag",
+            "move", "copy", "delete", "expunge", "append", "watch",
+        )
     }
 }
