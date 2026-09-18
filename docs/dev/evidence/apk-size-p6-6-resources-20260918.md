@@ -89,7 +89,7 @@ lint 报告取自 `app/build/reports/lint-results-appDebug.xml` (2026-09-14 19:3
 
 - 新增位图资源时直接放 WebP (无损) 即可, 不必再走脚本; `mipmap*/` 继续保持 PNG.
 - AOSP 动画集: 维护者已拍板保留 (Q11 方案 a, D19), 清单已写入文档, 见下一节.
-- 下次 lint 成功后 (需守护进程有更大堆或单独执行 `lintAnalyzeAppDebug`), 用新报告复核本次保留项是否有变化.
+- lint 已于当日下午重跑成功并复核, 见文末 "lint 复核" 一节: 删除集完整, 保留项无变化.
 
 ## Q11 落地: `res/anim` 保留为脚本目录, 文档补齐 `@anim/` 清单 (2026-09-18)
 
@@ -108,3 +108,16 @@ lint 报告取自 `app/build/reports/lint-results-appDebug.xml` (2026-09-14 19:3
 - 4 个 `activity_close_enter` / `activity_close_exit` / `activity_open_enter` / `activity_open_exit` 使用 `<extend>` 元素 (Android 12 起支持), 在 API 24 / 28 上加载抛 RuntimeException; 首轮 Sony 的 UI 脚本用了 `activity_open_enter`, 整个 `ui.layout` 因 InflateException 失败, 文档据此注明 "API 31+" 与 "引用不可加载的资源会使整个布局解析失败".
 - 文档: AutoJs6-Documentation `a0234d0` 在 `api/uiAttributes.md` 新增「动画资源」一节 (131 个名称按 9 组列出, `animIn` / `animOut` 行指向该节), `python auto-generate.py uiAttributes` 重新生成 `docs/uiAttributes.html` 与 `json/uiAttributes.json`; 生成脚本 `build/tmp-size/p6_6_anim_docs.py` (`normalize-markdown.py` 会把「」改为半角引号, 先跑一次再生成).
 - 体积不变 (无资源改动); 新增或删除 `res/anim` 视图动画时同步该清单 (维护者清单第 2 节).
+
+## lint 复核 (2026-09-18 15:34 报告)
+
+`./gradlew :app:lintAppDebug --offline --no-daemon "-Dorg.gradle.jvmargs=-Xms1g -Xmx10g -Dfile.encoding=UTF-8 -XX:+UseParallelGC"` 9 分 29 秒完成 (上午默认 4 GB 堆的守护进程跑约 60 分钟后消失; lint 在守护进程内运行, 堆大小决定成败). 新报告 3130 项, `UnusedResources` 1574 项 (drawable 997, string 265, anim 183, interpolator 51, color 48, integer 17, dimen 5, style 4, bool 3, raw 1).
+
+与 09-14 报告 (1595 项) 对比 (`build/tmp-size/p6_6/unused_diff.json`):
+
+| 变化 | 数量 | 内容 |
+| --- | ---: | --- |
+| 消失 | 29 | 本次删除的 18 项 (4 layout, 3 menu, 1 xml, 2 mipmap, 5 dimen, 2 array, 1 plurals); 8 个 drawable (`ic_android_black_48dp`, `ic_history_black_48dp`, `ic_laptop_*_48dp` x 3, `ic_launch_black_48dp`, `ic_pause_black_48dp`, `ic_phonelink_off_black_48dp`) 与 3 个 string (`text_clean_completed`, `text_exported`, `text_help`) 已被其间的设备插件 / 终端 / 回收站等提交引用 |
+| 新增 | 8 | 7 个 string (`key_dialog_layout_inspector_exit_tips`, `key_dialog_terminal_tips`, `mcp_server_state_stopped`, `text_apk_builder`, `text_client_n`, `text_terminal_select_text`, `text_volume_down_to_exit_layout_inspector`, 均属其它会话进行中的功能) 与 1 个 drawable (`ic_qr_code_scanner_black_24dp`, 在 `drawable-xhdpi` 图标集内) |
+
+可删类型 (layout / menu / xml / mipmap / array / plurals) 现为 0 项. 剩余 dimen 5 (`button_elevation_material`, `button_pressed_z_material`, `popup_enter_animation_from_y_delta`, `popup_exit_animation_to_y_delta`, 示例引用的 `dimen_25dp`) 与 integer 17 全部是 D19 保留的动画集配置项或示例引用; bool 3 为库覆盖项; raw 1 为示例引用; style 4, color 48, string 265, drawable 997 按脚本按名字引用的策略保留. 结论: P6.6 的删除集完整, 保留项无需变化, 不追加删除.

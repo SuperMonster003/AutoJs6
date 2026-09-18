@@ -42,3 +42,4 @@
 - 度量工具 `tools/size/apk_size_report.py` (P0.1): zip 分组, 最大条目, `apkanalyzer dex packages` 的包级 DEX 原始字节, `--compare` 差异表, `--max-growth-percent` 门禁.
 - 基线 [apk-size-baseline-20260917.{json,md}](evidence/apk-size-baseline-20260917.md); 各阶段报告 `evidence/apk-size-p*-2026091{7,8}.{json,md}` 与说明文档 `evidence/apk-size-p*-<主题>-<日期>.md`.
 - 设备验证脚本 (未纳入仓库) 位于 `build/tmp-size/`; 复现方法写在各阶段证据的 "验证" 一节.
+- `:app:lintAppDebug` 需要更大的守护进程堆: `./gradlew :app:lintAppDebug --offline --no-daemon "-Dorg.gradle.jvmargs=-Xms1g -Xmx10g -Dfile.encoding=UTF-8 -XX:+UseParallelGC"` 约 10 分钟; 默认 4 GB 堆会在约 60 分钟后守护进程消失 (2026-09-18 实测). 报告 `app/build/reports/lint-results-appDebug.xml` 的 `UnusedResources` 只是候选集, 处理规则见第 2 节.
