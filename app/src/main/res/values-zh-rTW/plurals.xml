@@ -12,10 +12,6 @@
         <item quantity="other">方法僅可接受不多於 %d 個引數</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="other">使用 %1$d 次</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">已停止執行 %d 個指令碼</item>
     </plurals>

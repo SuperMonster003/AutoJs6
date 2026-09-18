@@ -18,12 +18,6 @@
         <item quantity="other">La méthode n\'accepte pas plus de %d arguments</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="one">Utilisée %1$d fois</item>
-        <item quantity="many">Utilisée %1$d fois</item>
-        <item quantity="other">Utilisée %1$d fois</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script arrêté</item>
         <item quantity="many">%d scripts arrêtés</item>

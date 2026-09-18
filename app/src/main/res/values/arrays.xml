@@ -190,32 +190,6 @@
         <item>@string/entry_editor_gutter_width_mode_fixed</item>
     </string-array>
 
-    <string-array name="keys_ace_editor_font">
-        <item>@string/key_ace_editor_font_system_monospace</item>
-        <item>@string/key_ace_editor_font_iosevka</item>
-        <item>@string/key_ace_editor_font_iosevka_slab</item>
-        <item>@string/key_ace_editor_font_jetbrains_mono</item>
-        <item>@string/key_ace_editor_font_fira_code</item>
-        <item>@string/key_ace_editor_font_cascadia_code</item>
-        <item>@string/key_ace_editor_font_intel_one_mono</item>
-        <item>@string/key_ace_editor_font_ibm_plex_mono</item>
-        <item>@string/key_ace_editor_font_hack</item>
-        <item>@string/key_ace_editor_font_source_code_pro</item>
-    </string-array>
-
-    <string-array name="values_ace_editor_font">
-        <item>@string/entry_ace_editor_font_system_monospace</item>
-        <item>@string/entry_ace_editor_font_iosevka</item>
-        <item>@string/entry_ace_editor_font_iosevka_slab</item>
-        <item>@string/entry_ace_editor_font_jetbrains_mono</item>
-        <item>@string/entry_ace_editor_font_fira_code</item>
-        <item>@string/entry_ace_editor_font_cascadia_code</item>
-        <item>@string/entry_ace_editor_font_intel_one_mono</item>
-        <item>@string/entry_ace_editor_font_ibm_plex_mono</item>
-        <item>@string/entry_ace_editor_font_hack</item>
-        <item>@string/entry_ace_editor_font_source_code_pro</item>
-    </string-array>
-
     <string-array name="keys_editor_word_wrap_indent_style">
         <item>@string/key_editor_word_wrap_indent_style_continuation</item>
         <item>@string/key_editor_word_wrap_indent_style_classic</item>

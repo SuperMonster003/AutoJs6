@@ -23,13 +23,6 @@
         <item quantity="other">Метод принимает не более %d аргумента</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="one">Использовано %1$d раз</item>
-        <item quantity="few">Использовано %1$d раза</item>
-        <item quantity="many">Использовано %1$d раз</item>
-        <item quantity="other">Использовано %1$d раза</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d скрипт остановлен</item>
         <item quantity="few">%d скрипта остановлено</item>

@@ -15,11 +15,6 @@
         <item quantity="other">Method only accepts no more than %d arguments</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="one">Used %1$d time</item>
-        <item quantity="other">Used %1$d times</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script stopped</item>
         <item quantity="other">%d scripts stopped</item>

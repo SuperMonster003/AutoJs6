@@ -30,15 +30,6 @@
         <item quantity="other">تقبل الدالة %d مُعامل كحد أقصى</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="zero">لم يستخدم</item>
-        <item quantity="one">استخدم مرة واحدة</item>
-        <item quantity="two">استخدم مرتين</item>
-        <item quantity="few">استخدم %1$d مرات</item>
-        <item quantity="many">استخدم %1$d مرة</item>
-        <item quantity="other">استخدم %1$d مرة</item>
-    </plurals>
-
     <!-- تم إيقاف %d سكربت -->
     <plurals name="text_already_stop_n_scripts">
         <item quantity="zero">لم يُوقَف أي سكربت</item>

@@ -764,6 +764,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった
 * `改善` Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に
 * `改善` アプリに内蔵するリリース履歴を簡体字中国語と英語のみに変更; その他の言語はオンラインで取得してキャッシュし, オフライン時は現在の言語のキャッシュ, 次いで内蔵の英語版を表示
+* `改善` リソースディレクトリ内の PNG ビットマップをロスレス WebP に変換 (ランチャーアイコンを除く) し, 未使用のリソースをいくつか削除して APK サイズを縮小
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

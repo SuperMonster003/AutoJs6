@@ -17,8 +17,7 @@ class JsMenuInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParse
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): View {
             when (parent) {
                 is ActionMenuView -> {
-                    // val activity = context as Activity
-                    // activity.menuInflater.inflate(R.menu.menu_js_sample, parent.menu)
+                    // no-op
                 }
                 is MenuItem -> {
 

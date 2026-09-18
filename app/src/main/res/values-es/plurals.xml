@@ -18,12 +18,6 @@
         <item quantity="other">El método solo acepta como máximo %d argumentos</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="one">Utilizada %1$d vez</item>
-        <item quantity="many">Utilizada %1$d veces</item>
-        <item quantity="other">Utilizada %1$d veces</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script detenido</item>
         <item quantity="many">%d scripts detenidos</item>

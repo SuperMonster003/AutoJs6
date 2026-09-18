@@ -1,9 +1,7 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="about_item_avatar_side_length">50dp</dimen>
-    <dimen name="about_item_avatar_side_length_compat">42dp</dimen>
     <dimen name="about_item_avatar_side_length_land">60dp</dimen>
-    <dimen name="about_item_avatar_side_length_land_compact">54dp</dimen>
     <dimen name="plugin_center_action_icon_size">18dp</dimen>
     <dimen name="plugin_center_item_side_length">64dp</dimen>
     <dimen name="plugin_center_item_icon_border_width">1dp</dimen>
@@ -20,7 +18,6 @@
     <dimen name="github_font_size_nickname">15sp</dimen>
     <dimen name="github_font_size_nickname_compat">12sp</dimen>
     <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
-    <dimen name="icon_developer_identifier_image_padding_compact">3dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length_compact">40dp</dimen>
     <dimen name="level_beam_view_line_offset">3dp</dimen>
@@ -50,8 +47,6 @@
     <dimen name="main_subtitle_text_size">12sp</dimen>
     <dimen name="textSize_item_property">14sp</dimen>
     <dimen name="first_char_view_stroke_width">2dp</dimen>
-    <dimen name="expanded_view_initial_width">280dp</dimen>
-    <dimen name="expanded_view_initial_height">518dp</dimen>
     <dimen name="toolbar_content_inset_start_with_navigation">64dp</dimen>
     <dimen name="dimen_25dp">25dp</dimen>
 

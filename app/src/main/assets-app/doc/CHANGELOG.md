@@ -581,6 +581,7 @@
 * `优化` 全局日志写入文件 (console.setGlobalLogConfig / resetGlobalLogConfig 及全局类 LogConfigurator / Level / LogManager) 改用内置滚动文件日志器替代 Log4j; 文档化选项与 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及宽度修饰) 保持不变, 其余 Log4j API 不再提供
 * `优化` Rhino 引擎在发现 Java 方法时跳过参数类型在当前系统上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整个类的反射失败; UI 模式 text 元素在 Android 7.x 上改用现行 AppCompatTextView, 不再需要旧版 appcompat 1.0.2 库
 * `优化` 应用仅内置简体中文与英文两份版本历史; 其余语言在线获取并缓存, 离线时依次显示当前语言的缓存副本与内置英文版本
+* `优化` 资源目录中的 PNG 位图无损转换为 WebP (启动图标除外), 并移除若干未使用的资源, 缩减安装包体积
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

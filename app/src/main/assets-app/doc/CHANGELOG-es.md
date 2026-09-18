@@ -602,6 +602,7 @@
 * `Mejora` La escritura del registro global en archivo (console.setGlobalLogConfig / resetGlobalLogConfig y las clases globales LogConfigurator / Level / LogManager) usa un registrador de archivos rotativo integrado en lugar de Log4j; se conservan las opciones documentadas y el subconjunto de PatternLayout (%d / %p / %c / %C / %m / %n / %t / %r con modificadores de ancho), y el resto de la API de Log4j deja de estar disponible
 * `Mejora` El motor Rhino ahora omite los metodos Java cuyos tipos de parametros no existen en el sistema en ejecucion (como AppCompatTextView.setTextClassifier en Android 7.x) en lugar de fallar la reflexion de toda la clase; el elemento text del modo UI usa el AppCompatTextView actual en Android 7.x y la biblioteca heredada appcompat 1.0.2 ya no es necesaria
 * `Mejora` La aplicacion solo incluye el historial de versiones en chino simplificado e ingles; los demas idiomas se descargan y se almacenan en cache, y sin conexion se muestra la copia en cache del idioma actual y, en su defecto, la version en ingles incluida
+* `Mejora` Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

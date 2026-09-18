@@ -764,6 +764,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Global log file writing (console.setGlobalLogConfig / resetGlobalLogConfig and the LogConfigurator / Level / LogManager globals) uses a built-in rolling file logger instead of Log4j; the documented options and the PatternLayout subset (%d / %p / %c / %C / %m / %n / %t / %r with width modifiers) are preserved, and the rest of the Log4j API is no longer available
 * `Improvement` Rhino engine now skips Java methods whose parameter types do not exist on the running system (such as AppCompatTextView.setTextClassifier on Android 7.x) instead of failing reflection of the whole class; the UI mode text element uses the current AppCompatTextView on Android 7.x and the legacy appcompat 1.0.2 library is no longer needed
 * `Improvement` Only the Simplified Chinese and English release histories are bundled in the app; other languages are fetched online and cached, and offline the cached copy of the current language is shown, then the bundled English one
+* `Improvement` PNG bitmaps in the resource directory are converted to lossless WebP (launcher icons excluded) and a handful of unused resources are removed to shrink the APK
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

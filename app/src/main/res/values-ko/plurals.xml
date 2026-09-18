@@ -12,10 +12,6 @@
         <item quantity="other">메서드는 최대 %d개의 인자만 허용합니다</item>
     </plurals>
 
-    <plurals name="text_ace_action_used_times">
-        <item quantity="other">%1$d회 사용</item>
-    </plurals>
-
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">%d개의 스크립트가 중지되었습니다</item>
     </plurals>
