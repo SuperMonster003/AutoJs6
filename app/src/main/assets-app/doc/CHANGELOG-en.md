@@ -453,7 +453,7 @@
 * `Improvement` Android 17 local network authorization moves to plugin-center enablement and plugin settings, with no launcher permission page; missing permission keeps the plugin disabled and automatic startup silent
 * `Improvement` Explain Advanced Protection in the host and companion, showing the global mode separately from actual service availability and secure settings control
 * `Improvement` Packaged apps request storage access only when the project requires shared paths; permission denial, settings return, hidden launcher recovery and boot startup use the actual access state
-* `Improvement` media.playMusic uses a Media3 foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
+* `Improvement` media.playMusic uses a foreground music service with audio focus, notification controls, script ownership, and cleanup when the script exits
 * `Improvement` Foreground service help explains Android 17 background audio restrictions and how to restart the service from the visible app before retrying playback
 * `Improvement` Make the Screen Color Picker plugin's Activity launch delegation explicit, using sender options tied to host visibility on Android 16 and later
 * `Improvement` LAN connection recovery hints for HTTP, WebSocket and the Node controlled network bridge preserve original errors and explain retry after authorization; generic permission-name conversion is independent of the system language
@@ -603,7 +603,6 @@
 * `Dependency` Modularized ARSCLib version 1.3.8
 * `Dependency` Modularized Image Quantization version 2.17.0
 * `Dependency` Modularized OpenCV version 4.8.0
-* `Dependency` Added AndroidX Media3 ExoPlayer / Session version 1.11.0
 * `Dependency` Added juniversalchardet version 2.0.4
 * `Dependency` Added AndroidX AsyncLayoutInflater version 1.1.0
 * `Dependency` Removed Android Annotations version 4.8.0

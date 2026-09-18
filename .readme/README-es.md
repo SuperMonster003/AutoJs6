@@ -615,7 +615,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Autorización de red local de Android 17 integrada en la activación y los ajustes del plugin, sin página de permisos en el lanzador; sin permiso, el plugin permanece desactivado y se omite el inicio automático sin avisos
 * `Mejora` Explicación de la protección avanzada en el anfitrión y el complemento, diferenciando el modo global de la disponibilidad real del servicio y el control de ajustes seguros
 * `Mejora` Las apps empaquetadas solicitan almacenamiento según las rutas compartidas del proyecto; la denegación, el regreso de ajustes, la recuperación del acceso de inicio y el arranque comprueban el acceso real
-* `Mejora` media.playMusic utiliza un servicio de música en primer plano Media3 con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
+* `Mejora` media.playMusic utiliza un servicio de música en primer plano con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
 * `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
 * `Mejora` Explicitar la delegación de inicio de Activity del complemento Selector de color de pantalla, con opciones del emisor vinculadas a la visibilidad del anfitrión en Android 16 y posteriores
 * `Mejora` Indicaciones para recuperar conexiones LAN HTTP, WebSocket y del puente de red controlado de Node, conservando los errores originales y explicando el reintento tras la autorización; conversión de permisos independiente del idioma del sistema

@@ -754,11 +754,6 @@ dependencies /* MIME */ {
     implementation(files("$rootDir/libs/mime-util-2_1_3.jar"))
 }
 
-dependencies /* Script music playback */ {
-    implementation(libs.media3.exoplayer)
-    implementation(libs.media3.session)
-}
-
 dependencies /* Test */ {
     testImplementation(libs.junit)
     // BKS keystores in JVM tests need a provider named "BC" (Android ships one, the desktop JDK does not).

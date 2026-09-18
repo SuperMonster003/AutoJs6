@@ -656,11 +656,7 @@
         <service
             android:name="org.autojs.autojs.core.media.ScriptMusicService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
+            android:foregroundServiceType="mediaPlayback" />
 
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
