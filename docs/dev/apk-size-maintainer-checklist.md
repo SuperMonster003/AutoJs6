@@ -29,14 +29,13 @@
 - 资产剪除清单在 `app/build.gradle.kts` 的 `appMergedAssetPruneIncludes`; 内置版本历史只保留 zh-Hans 与 en (`bundledChangelogLanguageTags`, P6.5), 新增语言时把标签加进推导列表.
 - Rhino 只打包瘦身 jar (`slimRhinoJar`, 去掉 `org/jline/**`), 编译与测试仍用完整 jar (P1).
 - 打包排除 (`packaging.resources.excludes`) 用 java.nio glob, `dir/**/*` 只匹配深度 >= 2, 需要时写 `dir/*` (P1).
-- 不做 minify / R8 (D10); `com.stardust` 兼容包保留 (D16); joda-time 时区表保留 (P6.3); 旧版 dx 1.7.0 为 API 24 / 25 保留 (Q10 前不动).
+- 不做 minify / R8 (D10); `com.stardust` 兼容包保留 (D16); joda-time 时区表保留 (P6.3); 旧版 dx 1.7.0 为 API 24 / 25 保留 (D18, 7.x 退出支持时再删).
 
 ## 3. 受门禁的体积项 (发布不阻塞, 评审时只更新状态)
 
 | 编号 | 内容 | 门禁 | 预估 |
 | --- | --- | --- | --- |
 | P5.2 | 去掉运行时 R8 (`com.android.tools.r8` + `new_api_database.ser`) | D5: DEX 编译器插件晋级默认路径, 且 `loadAar` / `defineClass` 有非 R8 方案 | 约 5.5 MiB |
-| P5.3 | 旧版 dx 1.7.0 | Q10: 需要 `desugar_jdk_libs_nio` 或放弃 7.x 动态类加载, 建议保持现状 | 约 0.17 MiB |
 | Q11 | `res/anim` AOSP 动画集 (183 个未引用 anim + 51 interpolator) | 维护者拍板是否作为脚本目录保留 | 源文件约 0.33 MiB |
 
 ## 4. 证据与工具

@@ -49,7 +49,7 @@ arm64-v8a 与 universal 的逐阶段差值完全相同 (两者只差其它 ABI �
 | P6.7 minify 实验 | 取消 | D10: release 不启用 minify |
 | P6.8 `com.stardust` 兼容包 (0.43 MiB) | 保留 | D16 |
 | P5.2 运行时 R8 (约 5.5 MiB) | 门禁 D5 | DEX 编译器插件晋级默认路径, 且 `loadAar` / `defineClass` 有非 R8 方案 |
-| P5.3 旧版 dx 1.7.0 (约 0.17 MiB) | 门禁 Q10 | API 24 / 25 唯一的 class -> dex 转换器, 建议保持现状 |
+| P5.3 旧版 dx 1.7.0 (约 0.17 MiB) | 保留 | D18 (Q10 方案 c, 2026-09-18): API 24 / 25 唯一的 class -> dex 转换器, 7.x 退出支持时再删 |
 | Q11 `res/anim` AOSP 动画集 (源文件约 0.33 MiB) | 待拍板 | 脚本 UI 可按名字引用 `@anim/`, 但无文档化清单 (P6.6) |
 
 ## 4. 第 3 节 "理论收益" 对照
@@ -74,4 +74,4 @@ arm64-v8a 与 universal 的逐阶段差值完全相同 (两者只差其它 ABI �
 ## 5. 尚未完成
 
 - P7.2 关联项目同步: `aj6dts.bat -Publish` 让 `libraries.d.ts` 不再声明已移除的库; 文档 `console.md` / `global.md` 与 d.ts `aj6-int-init.d.ts` / `aj6-int-console.d.ts` 的 log4j 代理说明同步 (见 `apk-size-p6-2-log4j-20260918.md` 后续).
-- 发布时按 [apk-size-maintainer-checklist.md](../apk-size-maintainer-checklist.md) 生成 `apk-size-release-<ver>.{json,md}`; 本汇总在 P5.2 / P5.3 / Q11 有变化时重新生成.
+- 发布时按 [apk-size-maintainer-checklist.md](../apk-size-maintainer-checklist.md) 生成 `apk-size-release-<ver>.{json,md}`; 本汇总在 P5.2 有变化时重新生成.
