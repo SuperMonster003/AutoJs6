@@ -203,7 +203,8 @@
         "服务端模式支持局域网发现 (mDNS): 开启后 VSCode 插件 (1.1.0+) 建立局域网连接时可直接列出本设备, 无需手动输入地址",
         "VSCode 远程文件支持分块传输: 大文件读写按 1 MiB 分块并在 VSCode 端显示进度; 需 VSCode 插件 1.1.0+; fs.list 可按需返回文件 md5, 供 VSCode 插件 \"从设备拉取项目变更\" 时比较文件",
         "客户端模式管理器控制区提供 \"历史记录\" 入口: 查看曾连接过的服务端地址, 点击即可连接, 长按删除, 亦可清空",
-        "邮件插件契约模块 (plugin-api/mail-api), 含冻结的 AIDL 接口, 以专用绑定租约打开账户会话, 在插件进程死亡后自动重开, XOAUTH2 令牌刷新后重试一次并经管道流式落盘附件的宿主客户端, 以及默认启用的插件中心注册"
+        "邮件插件契约模块 (plugin-api/mail-api), 含冻结的 AIDL 接口, 以专用绑定租约打开账户会话, 在插件进程死亡后自动重开, XOAUTH2 令牌刷新后重试一次并经管道流式落盘附件的宿主客户端, 以及默认启用的插件中心注册",
+        "邮件插件的脚本 API `mail` (邮件路线图 P3.1 与 P3.2): `mail.connect(选项或别名)` 支持服务商预设与 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (脚本路径的附件经只读描述符传输), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 带客户端回退标记的 `search`, `get` / `fetchBody`, 流式落盘到工作目录并支持 `onProgress` 的 `download` 与 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 与 `close`, 每个方法都有在脚本线程落定的 `Async` Promise 形态; 邮件结果携带 `Date` 字段, 可打印的地址与绑定的 `load` / `download` 方法, 失败为带 `code` 与 `retryable` 的 `MailError` 对象, 全局对象上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 与全部客户端方法的转发"
       ],
       "fix": [
         "插件中心启用 YOLO 插件时探测握手要求插件已处于启用状态, 导致开关无法启用的问题; 探测现仅要求授权与精确组件握手, 运行时入口仍要求已保存的启用记录",

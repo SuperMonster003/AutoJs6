@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-數據更新於 2026 年 9 月 18 日.
+數據更新於 2026 年 9 月 19 日.
 
 數據條目按 `最近活躍` 降序排序.
 
@@ -395,6 +395,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` VSCode 遠端檔案支援分塊傳輸: 大檔案讀寫按 1 MiB 分塊並在 VSCode 端顯示進度; 需 VSCode 插件 1.1.0+; fs.list 可按需返回檔案 md5, 供 VSCode 插件 "從裝置拉取專案變更" 時比較檔案
 * `新增` 客戶端模式管理器控制區提供 "歷史記錄" 入口: 查看曾連線過的伺服端位址, 點擊即可連線, 長按刪除, 亦可清空
 * `新增` 郵件插件契約模組 (plugin-api/mail-api), 含凍結的 AIDL 介面, 以專用綁定租約開啟帳戶會話, 在插件進程死亡後自動重開, XOAUTH2 權杖刷新後重試一次並經管道串流落盤附件的宿主客戶端, 以及預設啟用的插件中心註冊
+* `新增` 郵件插件的腳本 API `mail` (郵件路線圖 P3.1 與 P3.2): `mail.connect(選項或別名)` 支援服務商預設與 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (腳本路徑的附件經唯讀描述符傳輸), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 帶客戶端回退標記的 `search`, `get` / `fetchBody`, 串流落盤到工作目錄並支援 `onProgress` 的 `download` 與 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 與 `close`, 每個方法都有在腳本線程落定的 `Async` Promise 形態; 郵件結果攜帶 `Date` 欄位, 可列印的地址與綁定的 `load` / `download` 方法, 失敗為帶 `code` 與 `retryable` 的 `MailError` 物件, 全域物件上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 與全部客戶端方法的轉發
 * `修復` 插件中心啟用 YOLO 插件時探測握手要求插件已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確組件握手, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題
@@ -1051,7 +1052,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 18 日, AutoJs6 可支持 JDK 最高版本為 `26`.
+截至 2026 年 9 月 19 日, AutoJs6 可支持 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

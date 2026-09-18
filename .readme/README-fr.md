@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 18 September 2026.
+Données mises à jour le 19 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -395,6 +395,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Fichiers distants VSCode : transfert par morceaux - les gros fichiers sont lus et écrits par morceaux de 1 MiB avec progression affichée dans VSCode ; extension 1.1.0+ requise; fs.list peut renvoyer le md5 des fichiers à la demande pour que l'extension compare les fichiers lors de la récupération des modifications du projet depuis l'appareil
 * `Fonctionnalité` Gestionnaire du mode client : une entrée "Historique" dans la section de contrôle liste les adresses de serveur déjà utilisées ; appuyer pour se connecter, appui long pour supprimer, ou tout effacer
 * `Fonctionnalité` Module de contrat du plugin Mail (plugin-api/mail-api): surface AIDL figee, client hote qui ouvre les sessions de compte via un bail de liaison dedie, les rouvre apres la mort du processus du plugin, reessaie une fois apres un rafraichissement du jeton XOAUTH2 et ecrit les pieces jointes sur disque en flux via des tubes, et enregistrement dans le Centre de plugins comme plugin active par defaut
+* `Fonctionnalité` API de script `mail` du plugin Mail (feuille de route Mail P3.1 et P3.2) : `mail.connect(options ou alias)` avec les preselections de fournisseurs et un `tokenProvider` pour XOAUTH2, `MailClient` avec `test`, `send` (pieces jointes depuis des chemins du script via des descripteurs en lecture seule), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, `search` avec un marqueur de repli cote client, `get` / `fetchBody`, `download` et `raw` ecrivant en flux dans le repertoire de travail avec `onProgress`, `setFlags` avec `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` et `close`, chacun avec une forme `Async` dont la Promise se resout sur le thread du script ; les messages resultants portent des champs `Date`, des adresses imprimables et des methodes liees `load` / `download`, les echecs sont des objets `MailError` avec `code` et `retryable`, et le global expose `mail.providers`, `mail.accounts`, `mail.setDefault` ainsi que le renvoi de chaque methode du client
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
 * `Correction` Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun
@@ -1051,7 +1052,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 18 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 19 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

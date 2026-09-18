@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 18 일.
+데이터 갱신일: 2026 년 9 월 19 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -395,6 +395,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` VSCode 원격 파일: 분할 전송 - 큰 파일을 1 MiB 단위로 읽고 쓰며 VSCode 에 진행률을 표시; 확장 1.1.0+ 필요; fs.list 는 요청 시 파일 md5 를 반환하여 확장이 기기에서 프로젝트 변경 사항을 가져올 때 파일을 비교할 수 있게 합니다
 * `추가` 클라이언트 모드 관리자 제어 영역의 "기록" 항목: 이전에 연결한 서버 주소를 확인하고, 탭하여 연결, 길게 눌러 삭제, 전체 삭제 가능
 * `추가` Mail 플러그인 계약 모듈 (plugin-api/mail-api): 고정된 AIDL 인터페이스, 전용 바인딩 임대로 계정 세션을 열고 플러그인 프로세스 종료 후 다시 열며 XOAUTH2 토큰 갱신 후 한 번 재시도하고 파이프를 통해 첨부 파일을 디스크로 스트리밍하는 호스트 클라이언트, 그리고 기본 켜짐 상태의 플러그인 센터 등록
+* `추가` Mail 플러그인의 스크립트 API `mail` (Mail 로드맵 P3.1 및 P3.2): 제공업체 프리셋과 XOAUTH2용 `tokenProvider`를 지원하는 `mail.connect(옵션 또는 별칭)`, `test`, `send` (스크립트 경로의 첨부 파일을 읽기 전용 디스크립터로 전달), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 클라이언트 측 폴백 표시가 있는 `search`, `get` / `fetchBody`, 작업 디렉터리로 스트리밍하며 `onProgress`를 지원하는 `download`와 `raw`, `markRead` / `markUnread` / `flag` / `unflag`를 포함한 `setFlags`, `move`, `copy`, `delete`, `expunge`, `append`, `close`를 갖춘 `MailClient` (각 메서드는 스크립트 스레드에서 확정되는 `Async` Promise 형태 제공); 메시지 결과는 `Date` 필드, 출력 가능한 주소, 바인딩된 `load` / `download` 메서드를 갖고, 실패는 `code`와 `retryable`을 가진 `MailError` 객체이며, 전역에는 `mail.providers`, `mail.accounts`, `mail.setDefault`와 모든 클라이언트 메서드의 전달이 있습니다
 * `수정` 플러그인 센터에서 YOLO 플러그인을 활성화할 때 탐색 핸드셰이크가 이미 활성화된 상태를 요구하여 스위치로 활성화할 수 없던 문제. 탐색은 이제 권한 부여와 정확한 컴포넌트 핸드셰이크만 요구하고, 실행 시 진입점은 계속 저장된 활성화 기록을 요구
 * `수정` adb로 설치한 MCP Server에 저장된 활성화 설정이 없으면 플러그인 센터에서는 활성화, 실행 시에는 비활성화로 판단하던 문제. 양쪽 기본값을 비활성화로 통일하고 사용자가 명시적으로 선택한 상태 유지
 * `수정` 접근성 관리자에서 바인딩되지 않음, 없음 등 짧은 상태 값 아래의 불필요한 빈 줄
@@ -1051,7 +1052,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 18 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 19 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

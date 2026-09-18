@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 18 September 2026.
+تم تحديث البيانات في 19 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -395,6 +395,7 @@
 * `إضافة جديدة` ملفات VSCode البعيدة: النقل المجزأ - تُقرأ الملفات الكبيرة وتُكتب على أجزاء بحجم 1 MiB مع عرض التقدم في VSCode; يتطلب الإضافة 1.1.0+; يمكن لـ fs.list إرجاع md5 للملفات عند الطلب ليتمكن الامتداد من مقارنة الملفات عند سحب تغييرات المشروع من الجهاز
 * `إضافة جديدة` مدير وضع العميل: إدخال "السجل" في قسم التحكم يعرض عناوين الخوادم التي تم الاتصال بها سابقا; انقر للاتصال, واضغط مطولا للحذف, أو امسح الكل
 * `إضافة جديدة` وحدة عقد اضافة Mail (plugin-api/mail-api): واجهة AIDL مجمدة, عميل مضيف يفتح جلسات الحساب عبر عقد ربط مخصص ويعيد فتحها بعد موت عملية الاضافة ويعيد المحاولة مرة واحدة بعد تحديث رمز XOAUTH2 ويبث المرفقات الى القرص عبر الانابيب, وتسجيل في مركز الاضافات كاضافة مفعلة افتراضيا
+* `إضافة جديدة` واجهة السكربت `mail` لاضافة Mail (خارطة طريق Mail P3.1 و P3.2): `mail.connect(خيارات او اسم مستعار)` مع الاعدادات المسبقة لمزودي الخدمة و `tokenProvider` لـ XOAUTH2, و `MailClient` مع `test`, و `send` (المرفقات من مسارات السكربت عبر واصفات للقراءة فقط), و `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, و `fetch`, و `search` مع علامة تراجع من جهة العميل, و `get` / `fetchBody`, و `download` و `raw` بالبث الى دليل العمل مع `onProgress`, و `setFlags` مع `markRead` / `markUnread` / `flag` / `unflag`, و `move`, و `copy`, و `delete`, و `expunge`, و `append` و `close`, ولكل منها صيغة `Async` بوعد يُسوّى في خيط السكربت; تحمل نتائج الرسائل حقول `Date` وعناوين قابلة للطباعة وطرق مربوطة `load` / `download`, والاخفاقات كائنات `MailError` مع `code` و `retryable`, ويوفر الكائن العام `mail.providers` و `mail.accounts` و `mail.setDefault` مع تمرير كل طرق العميل
 * `تصليح` تفعيل إضافة YOLO من مركز الإضافات كان يفشل لأن مصافحة الفحص كانت تشترط أن تكون الإضافة مفعلة مسبقا; الفحص الآن يشترط التخويل ومصافحة المكون الدقيق فقط, بينما تظل نقاط دخول وقت التشغيل تشترط سجل التفعيل المحفوظ
 * `تصليح` تثبيت إضافة MCP Server عبر adb قد يجعل مركز الإضافات يعرضها كمفعلة بينما يعتبرها وقت التشغيل معطلة عند غياب تفضيل محفوظ; الحالة الافتراضية الآن معطلة في كليهما مع الاحتفاظ باختيارات المستخدم
 * `تصليح` أسطر فارغة زائدة أسفل قيم الحالة القصيرة في مدير تسهيل الاستخدام مثل غير مرتبط ولا شيء
@@ -1051,7 +1052,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 18 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 19 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

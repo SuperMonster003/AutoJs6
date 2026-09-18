@@ -411,6 +411,51 @@ API 24 emulator `session.test` 123 ms, `SESSION_CLOSED` 149 ms after the force-s
 three IMAP connections per run. `am force-stop` also delivers `onServiceDisconnected` to the
 dedicated binding, whose own death recipient releases the lease.
 
+## Script API (P3)
+
+The `mail` global and the `MailClient` object of the host script API (mail roadmap P3.1 and
+P3.2, appendix A.3 of the plugin roadmap) sit on the host client above: every script method
+normalizes its arguments in pure Kotlin (`MailScriptArguments`), issues exactly one operation of
+the table above through `MailSessionClient.call` and decorates the result on the script thread
+(`MailJsResults`). Each method has a synchronous form that blocks the script thread inside the
+runtime's coroutine context (stopping the script cancels the call on the plugin side) and an
+`Async` form that returns a Promise settled on the script thread; `mail.<method>` forwards to
+the default client (`mail.setDefault`) and answers `NO_DEFAULT_ACCOUNT` without one.
+
+| Script method | op | Notes |
+| --- | --- | --- |
+| `mail.connect(options or alias)` / `connectAsync` | `openSession` (Binder method, no operation) | no network; `client.account` is the account document without secrets |
+| `client.test()` | `session.test` | the result document as a plain object |
+| `client.send(message, {saveToSent?})` | `mail.send` | attachment paths (or `{path, fileName?, mimeType?, contentId?, inline?}`) become `{descriptorIndex, fileName, mimeType?, contentId?, inline?, size?}` plus read-only descriptors from `MailAttachmentSource`; `date` accepts a `Date`, UTC milliseconds or ISO-8601 |
+| `client.folders({subscribedOnly?, status?})` | `folders.list` | the tree as plain objects |
+| `client.folderStatus(path)`, `client.folder(path).status()` | `folders.status` | `client.folder(path)` also offers `create()`, `delete()`, `rename(newPath)` |
+| `client.createFolder(path)` | `folders.create` | |
+| `client.deleteFolder(path)` | `folders.delete` | `true` |
+| `client.renameFolder(path, newPath)` | `folders.rename` | |
+| `client.fetch({folder?, limit?, before?, after?, order?, unseenOnly?})` | `messages.list` | `MailMessage[]` envelopes |
+| `client.search(query, {folder?, limit?, before?, fallback?})` | `messages.search` | the `messages` array with a non-enumerable `fallback` property (`server` or `client`) |
+| `client.get(uid or message, {folder?, peek?, includeRaw?})`, alias `fetchBody`, `message.load(options?)` | `messages.get` | a message object supplies `uid` and, unless the options name one, `folder` |
+| `client.raw(uid or message, target?, {folder?, overwrite?})` | `messages.raw` | streams into `<uid>.eml` under the working directory, a directory or a file path; returns the path |
+| `client.download(attachment or {uid, partId}, target?, {folder?, overwrite?, onProgress?})`, `attachment.download(target?, options?)` | `attachments.download` | same targets; `onProgress(transferred, total)` is called on the script thread by the `Async` form only; the attachment `size` (encoded part size) budgets the timeout and the progress total |
+| `client.setFlags(uids, flags, mode?, {folder?})` | `messages.setFlags` | `uids` is a UID, a message or an array of them (the first message's `folder` rides along); returns the UID array |
+| `client.markRead(uids)` / `markUnread` / `flag` / `unflag` | `messages.setFlags` | `seen` or `flagged` with `add` or `remove` |
+| `client.move(uids, folder, {from?})` | `messages.move` | the target UIDs when the server reported them, else `true` |
+| `client.copy(uids, folder, {from?})` | `messages.copy` | same result rule |
+| `client.delete(uids, {folder?, expunge?})` | `messages.delete` | the UID array |
+| `client.expunge(folder?)` | `messages.expunge` | the count |
+| `client.append(folder, message, flags?)` | `messages.append` | the UID or null |
+| `client.close()` | `close` (Binder method) | `isClosed` turns true; later calls answer `SESSION_CLOSED` |
+
+Result decoration: `date` and `receivedDate` are JavaScript `Date` values (decision D26 keeps
+the wire format at UTC milliseconds), address objects print as `Name <address>`, attachments and
+`bodyParts` carry the `uid` and `folder` of their message plus bound `download` / `downloadAsync`,
+messages carry bound `load` / `loadAsync`; the bound methods are non-enumerable, so
+`JSON.stringify(message)` and passing a message back into the API keep working. Argument
+errors and host failures reach the script as `MailError` (`code`, `retryable`, `details`), the
+`Async` forms reject with the same objects; `WrappedIllegalArgumentException` of the host
+argument guards maps to `INVALID_ARGUMENT`. With `debug: true` the redacted trace lines of the
+progress documents go to `console.verbose`.
+
 ## Open Items
 
 - P1.3: closed on 2026-09-18 with `MailPluginRoundTripTest` on the API 24 emulator and a Redmi
@@ -419,4 +464,6 @@ dedicated binding, whose own death recipient releases the lease.
 - P2: done in plugin build 12 (account layer, SMTP send with sent copies, IMAP receive, the POP3
   degraded path, router, limits, caller guard); the account store behind `listSavedAccounts` and
   the alias form of `openSession` is plugin roadmap P4, watches (`idle`) are P5.
-- P3: script API `mail` and the documentation sync it requires.
+- P3: the script API `mail` (P3.1 connection layer, P3.2 send and receive methods) is in the
+  host; the plugin repository records the device evidence in `docs/dev/p3-script-api-evidence.md`
+  (QQ and 163 on the API 24 emulator and a Redmi API 33; Gmail waits for a fresh access token).
