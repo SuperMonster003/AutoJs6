@@ -158,6 +158,11 @@ public class NodeJsRuntimeContractTest {
         assertEquals("inspectorEnabled", NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED);
     }
 
+    @Test
+    public void theExecutionHeapCapUsesAnExplicitPerExecutionRequestKey() {
+        assertEquals("maxOldGenerationSizeMb", NodeJsRuntimeContract.KEY_MAX_OLD_GENERATION_SIZE_MB);
+    }
+
     @SuppressWarnings("deprecation")
     @Test
     public void executionModeIsLiveWhileRuntimeAdapterRemainsAStableLegacyKey() {

@@ -104,6 +104,14 @@ object NodeJsRuntimeContract {
     const val KEY_JAVA_INTEROP_ENABLED = "javaInteropEnabled"
     /** Broker info: the host Java interop allowlist as JSON (M20.2 batch 15). */
     const val KEY_JAVA_INTEROP_POLICY_JSON = "javaInteropPolicyJson"
+    /**
+     * Optional JS heap cap for this execution: the V8 old-generation limit in MB (absent or nonpositive keeps
+     * the runtime default derived from device memory; the runtime bootstrap alone uses about 12 MB). A script that
+     * exceeds it aborts its runtime slot with a V8 fatal error; the failure carries the exit record plus the
+     * Node.js diagnostic report (`slotExit.crash`) and getRuntimeInfo exposes the newest report as `lastCrash`
+     * (M12.5).
+     */
+    const val KEY_MAX_OLD_GENERATION_SIZE_MB = "maxOldGenerationSizeMb"
 
     const val KEY_SUCCEEDED = "succeeded"
     const val KEY_EXIT_CODE = "exitCode"
