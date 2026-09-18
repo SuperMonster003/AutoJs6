@@ -31,6 +31,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.ParcelFileDescriptor
 import android.os.PowerManager
 import android.os.Process
 import android.os.VibrationEffect
@@ -90,7 +91,9 @@ import org.autojs.plugin.mediainfo.api.MediainfoQueryOptions
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import okio.BufferedSink
 import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.toByteString
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
 import org.autojs.plugin.mlkit.barcode.api.BarcodeOptions
@@ -118,6 +121,48 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.UUID
 import kotlin.concurrent.thread
 
+/**
+ * A fetch request body or WebSocket message the plugin handed over as a read-only file
+ * descriptor instead of inline base64 JSON (M20.2 batch 14), so Binder carries only the
+ * small descriptor JSON whatever the payload size. The host owns [descriptor]; the broker
+ * closes it once the call that consumed it has answered.
+ */
+class NodeBridgeRequestUpload(
+    val descriptor: ParcelFileDescriptor,
+    val byteCount: Long,
+) : java.io.Closeable {
+
+    /** Opens an independent stream over the same file, positioned at its start. */
+    fun openStream(): java.io.FileInputStream {
+        val stream = ParcelFileDescriptor.AutoCloseInputStream(descriptor.dup())
+        stream.channel.position(0L)
+        return stream
+    }
+
+    /** Reads the whole upload; callers apply their own size policy before calling. */
+    fun readBytes(): ByteArray {
+        if (byteCount < 0L || byteCount > Int.MAX_VALUE.toLong()) {
+            throw IOException("AutoJs6 bridge upload byte count $byteCount is not readable.")
+        }
+        openStream().use { input ->
+            val bytes = ByteArray(byteCount.toInt())
+            var offset = 0
+            while (offset < bytes.size) {
+                val read = input.read(bytes, offset, bytes.size - offset)
+                if (read < 0) {
+                    throw IOException("AutoJs6 bridge upload ended after $offset of $byteCount bytes.")
+                }
+                offset += read
+            }
+            return bytes
+        }
+    }
+
+    override fun close() {
+        runCatching { descriptor.close() }
+    }
+}
+
 data class NodeBridgeRequest(
     val id: String,
     val module: String,
@@ -127,6 +172,8 @@ data class NodeBridgeRequest(
     val permissions: List<String> = emptyList(),
     val events: Boolean = false,
     val binary: Boolean = false,
+    /** Request body or message handed over as a descriptor (M20.2 batch 14); owned by the host. */
+    val upload: NodeBridgeRequestUpload? = null,
 ) {
     fun toJson(): String = JSONObject().apply {
         put("id", id)
@@ -137,6 +184,7 @@ data class NodeBridgeRequest(
         put("permissions", JSONArray(permissions))
         if (events) put("events", true)
         if (binary) put("binary", true)
+        upload?.let { put("upload", JSONObject().put("byteCount", it.byteCount)) }
     }.toString()
 
     companion object {
@@ -1034,7 +1082,15 @@ class AndroidNodeBridgeCapabilityProvider(
         barcodeOperations.clear()
         databaseDestroyed.set(true)
         databaseExecutor.shutdownNow()
+        val closingWebSockets = websocketSessions.values.toList()
         synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
+        // The registry only enqueued the 1001 close frames; OkHttp writes them from its task runner.
+        // Cancelling the dispatcher (which runs the WebSocket reader) and evicting the pool right away
+        // would drop the socket first, so peers would see an abrupt disconnect instead of the close.
+        val closeDeadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(WEBSOCKET_DESTROY_CLOSE_WAIT_MS)
+        closingWebSockets.forEach { session ->
+            session.awaitClosed(TimeUnit.NANOSECONDS.toMillis(closeDeadlineNanos - System.nanoTime()).coerceAtLeast(0L))
+        }
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
         networkClient.dispatcher.cancelAll()
         networkClient.dispatcher.executorService.shutdownNow()
@@ -4589,6 +4645,7 @@ class AndroidNodeBridgeCapabilityProvider(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
+                session.markClosed()
                 mainHandler.removeCallbacks(timeoutRunnable)
                 if (websocketResource.release("websocket.failure")) {
                     websocketDiagnostics.finishConnection()
@@ -4615,6 +4672,7 @@ class AndroidNodeBridgeCapabilityProvider(
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                session.markClosed()
                 session.queueClose(code, reason)
                 session.markTerminal()
                 if (eventStream != null) websocketSessions.remove(sessionId)
@@ -6561,6 +6619,7 @@ private object ControlledFetchPolicy {
     const val HARD_TIMEOUT_MS = 120_000L
     const val DEFAULT_MAX_RESPONSE_BYTES = 33_554_432L
     const val HARD_MAX_RESPONSE_BYTES = 67_108_864L
+    const val HARD_MAX_REQUEST_BYTES = 67_108_864L
     const val DEFAULT_MAX_REDIRECTS = 5
     const val HARD_MAX_REDIRECTS = 10
 }
@@ -6678,6 +6737,34 @@ private class ControlledFetchBridgeResult(
     val binaryByteCount: Long,
 )
 
+/** Streams a plugin-supplied descriptor as the OkHttp request body (M20.2 batch 14). */
+private class DescriptorRequestBody(
+    private val upload: NodeBridgeRequestUpload,
+    private val contentType: okhttp3.MediaType?,
+) : okhttp3.RequestBody() {
+    override fun contentType(): okhttp3.MediaType? = contentType
+
+    override fun contentLength(): Long = upload.byteCount
+
+    override fun writeTo(sink: BufferedSink) {
+        // Each attempt reopens the file from its start, so OkHttp may safely retry the call.
+        upload.openStream().use { input ->
+            val chunk = ByteArray(DEFAULT_BUFFER_SIZE)
+            var remaining = upload.byteCount
+            while (remaining > 0L) {
+                val read = input.read(chunk, 0, minOf(remaining, chunk.size.toLong()).toInt())
+                if (read < 0) {
+                    throw IOException(
+                        "AutoJs6 controlled fetch request body ended after ${upload.byteCount - remaining} of ${upload.byteCount} bytes.",
+                    )
+                }
+                sink.write(chunk, 0, read)
+                remaining -= read
+            }
+        }
+    }
+}
+
 private data class ControlledFetchRequest(
     val url: String,
     val method: String,
@@ -6686,6 +6773,8 @@ private data class ControlledFetchRequest(
     val timeoutMs: Long,
     val maxResponseBytes: Long,
     val maxRedirects: Int,
+    /** Descriptor-delivered body (`bodyTransport: "pfd"`); streamed instead of [body]. */
+    val upload: NodeBridgeRequestUpload? = null,
 ) {
     fun toOkHttpRequest(): okhttp3.Request {
         val builder = okhttp3.Request.Builder().url(url)
@@ -6694,7 +6783,7 @@ private data class ControlledFetchRequest(
                 builder.addHeader(name, value)
             }
         }
-        val requestBody = body?.toRequestBody(contentType())
+        val requestBody = upload?.let { DescriptorRequestBody(it, contentType()) } ?: body?.toRequestBody(contentType())
         builder.method(method, requestBody)
         return builder.build()
     }
@@ -6817,8 +6906,41 @@ private data class ControlledFetchRequest(
                     ),
                 )
             }
-            val body = parseBody(payload)
-            if (method == "GET" && body != null && body.isNotEmpty()) {
+            val descriptorBody = payload.optString("bodyTransport", "") == "pfd"
+            val upload = request.upload.takeIf { descriptorBody }
+            if (descriptorBody) {
+                if (upload == null) {
+                    return ControlledFetchParseResult(
+                        error = NodeBridgeError.invalidRequest(
+                            message = "fetch.request declared a descriptor body but no descriptor was attached.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                val declaredBytes = parsePositiveLong(payload.opt("bodyBytes"), -1L)
+                if (declaredBytes != upload.byteCount) {
+                    return ControlledFetchParseResult(
+                        error = NodeBridgeError.invalidRequest(
+                            message = "fetch.request bodyBytes ($declaredBytes) does not match the attached descriptor (${upload.byteCount} bytes).",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                if (upload.byteCount > ControlledFetchPolicy.HARD_MAX_REQUEST_BYTES) {
+                    return ControlledFetchParseResult(
+                        error = NodeBridgeError.network(
+                            message = "fetch.request body exceeded ${ControlledFetchPolicy.HARD_MAX_REQUEST_BYTES} bytes.",
+                            code = NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED,
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+            }
+            val body = if (upload == null) parseBody(payload) else null
+            if (method == "GET" && (upload != null || (body != null && body.isNotEmpty()))) {
                 return ControlledFetchParseResult(
                     error = NodeBridgeError.network(
                         message = "fetch.request GET must not include a body.",
@@ -6833,13 +6955,14 @@ private data class ControlledFetchRequest(
                     url = url,
                     method = method,
                     headers = parseHeaders(payload.opt("headers")),
-                    body = if (method == "POST") body ?: ByteArray(0) else null,
+                    body = if (method == "POST" && upload == null) body ?: ByteArray(0) else null,
                     timeoutMs = parsePositiveLong(payload.opt("timeoutMs"), request.timeoutMs)
                         .coerceIn(1L, ControlledFetchPolicy.HARD_TIMEOUT_MS),
                     maxResponseBytes = parsePositiveLong(payload.opt("maxResponseBytes"), ControlledFetchPolicy.DEFAULT_MAX_RESPONSE_BYTES)
                         .coerceIn(0L, ControlledFetchPolicy.HARD_MAX_RESPONSE_BYTES),
                     maxRedirects = parsePositiveInt(payload.opt("maxRedirects"), ControlledFetchPolicy.DEFAULT_MAX_REDIRECTS)
                         .coerceIn(0, ControlledFetchPolicy.HARD_MAX_REDIRECTS),
+                    upload = if (method == "POST") upload else null,
                 ),
             )
         }
@@ -8312,6 +8435,9 @@ private object ControlledWebSocketPolicy {
     const val HARD_MAX_QUEUE_SIZE = 128
 }
 
+/** Upper bound destroy() spends waiting for the 1001 close frames of live WebSockets to be written. */
+private const val WEBSOCKET_DESTROY_CLOSE_WAIT_MS = 500L
+
 private class ControlledWebSocketDiagnostics {
     private val activeConnectionCount = AtomicInteger(0)
     private val maxActiveConnectionCount = AtomicInteger(0)
@@ -8452,6 +8578,7 @@ private class ControlledWebSocketSession(
     private val eventStream: NodeBridgeEventStream? = null,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
+    private val closed = CountDownLatch(1)
     @Volatile
     private var webSocket: WebSocket? = null
     @Volatile
@@ -8515,9 +8642,18 @@ private class ControlledWebSocketSession(
         return webSocket?.send(bytes) == true
     }
 
+    fun sendBinary(bytes: ByteArray): Boolean = webSocket?.send(bytes.toByteString()) == true
+
     fun close(code: Int, reason: String) {
         webSocket?.close(code, reason)
     }
+
+    /** OkHttp reported the socket closed or failed; destroy() waits for this before tearing the client down. */
+    fun markClosed() {
+        closed.countDown()
+    }
+
+    fun awaitClosed(timeoutMs: Long): Boolean = closed.await(timeoutMs, TimeUnit.MILLISECONDS)
 
     fun toJson(): JSONObject = JSONObject()
         .put("id", id)
@@ -8539,16 +8675,23 @@ private data class ControlledWebSocketSendMessage(
     val type: String,
     val text: String?,
     val dataBase64: String?,
+    /** Descriptor-delivered payload (`messageTransport: "pfd"`, M20.2 batch 14), already read. */
+    val bytes: ByteArray? = null,
 ) {
     fun send(session: ControlledWebSocketSession): Boolean {
-        return when (type) {
-            "binary" -> session.sendBinary(dataBase64.orEmpty())
+        return when {
+            bytes != null && type == "binary" -> session.sendBinary(bytes)
+            bytes != null -> session.sendText(String(bytes, Charsets.UTF_8))
+            type == "binary" -> session.sendBinary(dataBase64.orEmpty())
             else -> session.sendText(text.orEmpty())
         }
     }
 
     companion object {
         fun fromJson(request: NodeBridgeRequest, payload: JSONObject, maxMessageBytes: Int): ControlledWebSocketSendParseResult {
+            if (payload.optString("messageTransport", "") == "pfd") {
+                return fromUpload(request, payload, maxMessageBytes)
+            }
             val text = payload.optString("text").takeIf { payload.has("text") && !payload.isNull("text") }
             val dataBase64 = payload.optString("dataBase64").takeIf { payload.has("dataBase64") && !payload.isNull("dataBase64") }
             val size = when {
@@ -8571,6 +8714,58 @@ private data class ControlledWebSocketSendMessage(
                     type = if (dataBase64 != null) "binary" else "text",
                     text = text,
                     dataBase64 = dataBase64,
+                ),
+            )
+        }
+
+        /** The message bytes arrived as a descriptor; the session policy still bounds them. */
+        private fun fromUpload(request: NodeBridgeRequest, payload: JSONObject, maxMessageBytes: Int): ControlledWebSocketSendParseResult {
+            val upload = request.upload
+                ?: return ControlledWebSocketSendParseResult(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "websocket.send declared a descriptor message but no descriptor was attached.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            val declaredBytes = payload.optLong("messageBytes", -1L)
+            if (declaredBytes != upload.byteCount) {
+                return ControlledWebSocketSendParseResult(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "websocket.send messageBytes ($declaredBytes) does not match the attached descriptor (${upload.byteCount} bytes).",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            if (upload.byteCount > maxMessageBytes) {
+                return ControlledWebSocketSendParseResult(
+                    error = NodeBridgeError.network(
+                        message = "websocket.send message exceeded ${maxMessageBytes} bytes.",
+                        code = NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val bytes = try {
+                upload.readBytes()
+            } catch (error: IOException) {
+                return ControlledWebSocketSendParseResult(
+                    error = NodeBridgeError.providerFailed(
+                        message = error.message ?: error.javaClass.name,
+                        module = request.module,
+                        method = request.method,
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                    ),
+                )
+            }
+            return ControlledWebSocketSendParseResult(
+                value = ControlledWebSocketSendMessage(
+                    type = if (payload.optString("messageKind", "binary") == "text") "text" else "binary",
+                    text = null,
+                    dataBase64 = null,
+                    bytes = bytes,
                 ),
             )
         }

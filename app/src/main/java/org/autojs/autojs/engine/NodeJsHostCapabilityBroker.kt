@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.RemoteException
 import android.os.TransactionTooLargeException
@@ -58,6 +59,11 @@ internal class NodeJsHostCapabilityBroker(
                 NodeJsRuntimeContract.KEY_HOST_CAPABILITY_MODULES,
                 NodeBridgeModules.supportedMethodsByModule.keys.toTypedArray(),
             )
+            // M20.2 batch 14: fetch bodies and WebSocket messages may arrive as descriptors.
+            putString(
+                NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_TRANSPORT,
+                NodeJsRuntimeContract.BRIDGE_REQUEST_BINARY_TRANSPORT_PFD,
+            )
             putStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD, nativePayload(nativeDiagnostics()))
         }
     }
@@ -67,6 +73,7 @@ internal class NodeJsHostCapabilityBroker(
             return
         }
         if (destroyed.get()) {
+            requestUpload(request)?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -79,9 +86,11 @@ internal class NodeJsHostCapabilityBroker(
         val requestJson = request
             ?.getString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON)
             .orEmpty()
+        val upload = requestUpload(request)
         val bridgeRequest = runCatching {
-            NodeBridgeRequest.fromJson(requestJson)
+            NodeBridgeRequest.fromJson(requestJson).copy(upload = upload)
         }.getOrElse { error ->
+            upload?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -95,9 +104,12 @@ internal class NodeJsHostCapabilityBroker(
         }
         runCatching {
             provider.dispatch(bridgeRequest) { response ->
+                // The descriptor served this call; events keep flowing without it.
+                if (!response.event) upload?.close()
                 sendResponse(callback, response, bridgeRequest.module, bridgeRequest.method)
             }
         }.onFailure { error ->
+            upload?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -111,6 +123,17 @@ internal class NodeJsHostCapabilityBroker(
                 ),
             )
         }
+    }
+
+    /** M20.2 batch 14: a request body or message delivered as a descriptor (closed once answered). */
+    private fun requestUpload(request: Bundle?): NodeBridgeRequestUpload? {
+        @Suppress("DEPRECATION")
+        val descriptor = request?.getParcelable<ParcelFileDescriptor>(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_PFD)
+            ?: return null
+        return NodeBridgeRequestUpload(
+            descriptor,
+            request.getLong(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_BYTE_COUNT, -1L),
+        )
     }
 
     override fun getNativeDiagnostics(): Bundle {

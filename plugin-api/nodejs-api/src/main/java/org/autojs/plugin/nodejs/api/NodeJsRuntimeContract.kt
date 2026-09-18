@@ -127,6 +127,10 @@ object NodeJsRuntimeContract {
     const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
     const val KEY_BRIDGE_BINARY_PFD = "bridgeBinaryPfd"
     const val KEY_BRIDGE_BINARY_BYTE_COUNT = "bridgeBinaryByteCount"
+    const val KEY_BRIDGE_REQUEST_BINARY_PFD = "bridgeRequestBinaryPfd"
+    const val KEY_BRIDGE_REQUEST_BINARY_BYTE_COUNT = "bridgeRequestBinaryByteCount"
+    const val KEY_BRIDGE_REQUEST_BINARY_TRANSPORT = "bridgeRequestBinaryTransport"
+    const val BRIDGE_REQUEST_BINARY_TRANSPORT_PFD = "pfd"
     const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
 
     const val KEY_MODULE_SOURCE_PROVIDER = "moduleSourceProvider"

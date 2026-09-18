@@ -185,6 +185,23 @@ class NodeFetchBridgeInstrumentationTest {
                   if (payload.url.indexOf("/timeout") >= 0 || payload.url.indexOf("/abort") >= 0) {
                     return;
                   }
+                  if (payload.url.indexOf("/large") >= 0 && payload.maxResponseBytes < 6) {
+                    // maxResponseBytes is the host provider's policy since M20.2 batch 11.
+                    setImmediate(() => {
+                      bridge.__test.receiveMessage(JSON.stringify({
+                        id: request.id,
+                        ok: false,
+                        error: {
+                          name: "Error",
+                          message: "AutoJs6 controlled fetch response exceeded " + payload.maxResponseBytes + " bytes.",
+                          code: "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE",
+                          module: "fetch",
+                          method: "request"
+                        }
+                      }));
+                    });
+                    return;
+                  }
                   setImmediate(() => {
                     bridge.__test.receiveMessage(JSON.stringify({
                       id: request.id,
@@ -197,12 +214,13 @@ class NodeFetchBridgeInstrumentationTest {
 
               const fetchModule = require("fetch");
               const resolved = require.resolve("fetch");
-              const get = await fetch("https://example.invalid/get", {
+              const get = await fetchModule("https://example.invalid/get", {
                 headers: { "x-test": "yes" },
                 timeoutMs: 1000,
                 maxResponseBytes: 1024
               });
-              const getBodyStreamText = await readWebStream(get.body.stream());
+              // The controlled fetch returns a native Response: stream a clone, then read the text.
+              const getBodyStreamText = await readWebStream(get.clone().body);
               const getText = await get.text();
               const post = await fetchModule("https://example.invalid/post", {
                 method: "POST",
@@ -214,14 +232,14 @@ class NodeFetchBridgeInstrumentationTest {
 
               let timeoutCode = "";
               try {
-                await fetch("https://example.invalid/timeout", { timeoutMs: 25 });
+                await fetchModule("https://example.invalid/timeout", { timeoutMs: 25 });
               } catch (error) {
                 timeoutCode = error && (error.autojs6Code || error.code) || "";
               }
 
               let abortCode = "";
               const controller = new AbortController();
-              const abortPromise = fetch("https://example.invalid/abort", {
+              const abortPromise = fetchModule("https://example.invalid/abort", {
                 signal: controller.signal,
                 timeoutMs: 1000
               });
@@ -234,7 +252,7 @@ class NodeFetchBridgeInstrumentationTest {
 
               let largeCode = "";
               try {
-                await fetch("https://example.invalid/large", {
+                await fetchModule("https://example.invalid/large", {
                   timeoutMs: 1000,
                   maxResponseBytes: 3
                 });
@@ -242,11 +260,12 @@ class NodeFetchBridgeInstrumentationTest {
                 largeCode = error && (error.autojs6Code || error.code) || "";
               }
 
-              let rawHttpCode = "";
+              // http is the controlled client here; net is the raw module that stays disabled.
+              let rawNetCode = "";
               try {
-                require("http").request("http://example.invalid");
+                require("net").connect(80, "127.0.0.1");
               } catch (error) {
-                rawHttpCode = error && (error.autojs6Code || error.code) || "";
+                rawNetCode = error && (error.autojs6Code || error.code) || "";
               }
 
               console.log("fetch.resolve=" + resolved);
@@ -261,30 +280,32 @@ class NodeFetchBridgeInstrumentationTest {
               console.log("fetch.timeout=" + timeoutCode);
               console.log("fetch.abort=" + abortCode);
               console.log("fetch.large=" + largeCode);
-              console.log("fetch.raw_http=" + rawHttpCode);
+              console.log("fetch.raw_net=" + rawNetCode);
               console.log("fetch.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
             "<embedded-autojs-fetch-fake-source.js>",
             workingDirectory = workDir,
             timeoutMs = 10_000L,
+            // Global fetch and raw http are native Node now; only the bridged facade is under test.
+            rawNodeNetworkModulesEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("fetch fake bridge", result)
-        assertTrue(result.stdout.contains("fetch.resolve=fetch"))
-        assertTrue(result.stdout.contains("fetch.shadow=false"))
-        assertTrue(result.stdout.contains("fetch.frozen=true"))
-        assertTrue(result.stdout.contains("fetch.aliases=function|function|true|true"))
-        assertTrue(result.stdout.contains("fetch.get=200|OK|true|https://example.invalid/get|yes|hello"))
-        assertTrue(result.stdout.contains("fetch.get_body_stream=hello"))
-        assertTrue(result.stdout.contains("fetch.post=201|true|POST|payload|text/plain"))
-        assertTrue(result.stdout.contains("fetch.requests=GET:get|POST:post|GET:timeout|GET:abort|GET:large"))
-        assertTrue(result.stdout.contains("fetch.permissions=true"))
-        assertTrue(result.stdout.contains("fetch.timeout=ERR_AUTOJS6_NETWORK_TIMEOUT"))
-        assertTrue(result.stdout.contains("fetch.abort=ERR_AUTOJS6_NETWORK_ABORTED"))
-        assertTrue(result.stdout.contains("fetch.large=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"))
-        assertTrue(result.stdout.contains("fetch.raw_http=ERR_AUTOJS6_NETWORK_DISABLED"))
-        assertTrue(result.stdout.contains("fetch.pending=0"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.resolve=fetch"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.shadow=false"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.frozen=true"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.aliases=function|function|true|true"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.get=200|OK|true|https://example.invalid/get|yes|hello"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.get_body_stream=hello"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.post=201|true|POST|payload|text/plain"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.requests=GET:get|POST:post|GET:timeout|GET:abort|GET:large"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.permissions=true"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.timeout=ERR_AUTOJS6_NETWORK_TIMEOUT"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.abort=ERR_AUTOJS6_NETWORK_ABORTED"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.large=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.raw_net=ERR_AUTOJS6_NETWORK_DISABLED"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.pending=0"))
     }
 
     @Test
@@ -327,6 +348,23 @@ class NodeFetchBridgeInstrumentationTest {
                   const request = JSON.parse(message);
                   requests.push(request);
                   const payload = request.args[0];
+                  if (payload.method === "GET" && (payload.bodyText !== undefined || payload.bodyBase64 !== undefined)) {
+                    // The method/body rules are the host provider's since M20.2 batch 11.
+                    setImmediate(() => {
+                      bridge.__test.receiveMessage(JSON.stringify({
+                        id: request.id,
+                        ok: false,
+                        error: {
+                          name: "Error",
+                          message: "fetch.request GET must not include a body.",
+                          code: "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED",
+                          module: "fetch",
+                          method: "request"
+                        }
+                      }));
+                    });
+                    return;
+                  }
                   let result;
                   if (payload.url.indexOf("/string") >= 0) {
                     result = jsonResponse(payload, {
@@ -390,7 +428,7 @@ class NodeFetchBridgeInstrumentationTest {
                 }
               });
 
-              const stringResponse = await fetch("https://example.invalid/string", {
+              const stringResponse = await fetchModule("https://example.invalid/string", {
                 method: "POST",
                 headers: [["content-type", "text/plain"], ["x-mode", "string"]],
                 body: "alpha",
@@ -398,7 +436,7 @@ class NodeFetchBridgeInstrumentationTest {
               });
               const stringJson = await stringResponse.json();
 
-              const uint8Response = await fetch("https://example.invalid/uint8", {
+              const uint8Response = await fetchModule("https://example.invalid/uint8", {
                 method: "POST",
                 headers: { "x-mode": "uint8" },
                 body: new Uint8Array([98, 105, 110]),
@@ -406,14 +444,14 @@ class NodeFetchBridgeInstrumentationTest {
               });
               const uint8Json = await uint8Response.json();
 
-              const arrayResponse = await fetch(new URL("https://example.invalid/array"), {
+              const arrayResponse = await fetchModule(new URL("https://example.invalid/array"), {
                 headers: [["x-array", "yes"]],
                 timeoutMs: 1000,
                 maxResponseBytes: 8
               });
               const arrayHex = Buffer.from(new Uint8Array(await arrayResponse.arrayBuffer())).toString("hex");
 
-              const manualResponse = await fetch("https://example.invalid/manual", {
+              const manualResponse = await fetchModule("https://example.invalid/manual", {
                 redirect: "manual",
                 timeoutMs: 1000
               });
@@ -421,7 +459,7 @@ class NodeFetchBridgeInstrumentationTest {
 
               let redirectErrorCode = "";
               try {
-                await fetch("https://example.invalid/error-redirect", {
+                await fetchModule("https://example.invalid/error-redirect", {
                   redirect: "error",
                   timeoutMs: 1000
                 });
@@ -431,7 +469,7 @@ class NodeFetchBridgeInstrumentationTest {
 
               let getBodyCode = "";
               try {
-                await fetch("https://example.invalid/get-body", {
+                await fetchModule("https://example.invalid/get-body", {
                   body: "blocked",
                   timeoutMs: 1000
                 });
@@ -444,7 +482,7 @@ class NodeFetchBridgeInstrumentationTest {
               const controller = new AbortController();
               controller.abort();
               try {
-                await fetch("https://example.invalid/abort-before", {
+                await fetchModule("https://example.invalid/abort-before", {
                   signal: controller.signal,
                   timeoutMs: 1000
                 });
@@ -453,11 +491,12 @@ class NodeFetchBridgeInstrumentationTest {
               }
               const abortBeforeStarted = requests.length > requestsBeforeAbort;
 
-              let rawNodeHttpsCode = "";
+              // node:https is the controlled client here; net is the raw module that stays disabled.
+              let rawNodeNetCode = "";
               try {
-                require("node:https").get("https://example.invalid/");
+                require("node:net").connect(443, "127.0.0.1");
               } catch (error) {
-                rawNodeHttpsCode = codeOf(error);
+                rawNodeNetCode = codeOf(error);
               }
 
               console.log("fetch.surface.string=" + [
@@ -489,7 +528,7 @@ class NodeFetchBridgeInstrumentationTest {
                 getBodyCode,
                 abortBeforeCode,
                 abortBeforeStarted,
-                rawNodeHttpsCode
+                rawNodeNetCode
               ].join("|"));
               console.log("fetch.surface.requests=" + requests.map((request) => request.args[0].method + ":" + request.args[0].url.split("/").pop()).join("|"));
               console.log("fetch.surface.policyFrozen=" + (Object.isFrozen(fetchModule.policy) && Object.isFrozen(fetchModule.policy.allowedSchemes)));
@@ -498,21 +537,23 @@ class NodeFetchBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-fetch-partial-surface-source.js>",
             timeoutMs = 10_000L,
+            rawNodeNetworkModulesEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("fetch partial surface", result)
-        assertTrue(result.stdout.contains("fetch.surface.string=POST|alpha|text|text/plain|string"))
-        assertTrue(result.stdout.contains("fetch.surface.uint8=POST|bin|base64|uint8"))
-        assertTrue(result.stdout.contains("fetch.surface.arrayBuffer=200|yes|0102ff"))
-        assertTrue(result.stdout.contains("fetch.surface.redirectManual=302|Found|/manual-target|manual"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.string=POST|alpha|text|text/plain|string"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.uint8=POST|bin|base64|uint8"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.arrayBuffer=200|yes|0102ff"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.redirectManual=302|Found|/manual-target|manual"))
         assertTrue(
+            result.stdout,
             result.stdout.contains(
-                "fetch.surface.denials=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_ABORTED|false|ERR_AUTOJS6_NETWORK_DISABLED",
+                "fetch.surface.denials=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_PERMISSION_DENIED|ERR_AUTOJS6_NETWORK_ABORTED|false|ERR_AUTOJS6_NETWORK_DISABLED",
             ),
         )
-        assertTrue(result.stdout.contains("fetch.surface.requests=POST:string|POST:uint8|GET:array|GET:manual|GET:error-redirect"))
-        assertTrue(result.stdout.contains("fetch.surface.policyFrozen=true"))
-        assertTrue(result.stdout.contains("fetch.surface.pending=0"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.requests=POST:string|POST:uint8|GET:array|GET:manual|GET:error-redirect|GET:get-body"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.policyFrozen=true"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.surface.pending=0"))
     }
 
     @Test
@@ -591,13 +632,19 @@ class NodeFetchBridgeInstrumentationTest {
                     return;
                   }
                   if (payload.url.indexOf("/large") >= 0) {
-                    send(request, {
-                      url: payload.url,
-                      status: 200,
-                      statusText: "OK",
-                      headers: [["content-type", "text/plain"]],
-                      bodyBase64: responseBody("abcdef"),
-                      bodyBytes: 6
+                    // maxResponseBytes is the host provider's policy since M20.2 batch 11.
+                    setImmediate(() => {
+                      bridge.__test.receiveMessage(JSON.stringify({
+                        id: request.id,
+                        ok: false,
+                        error: {
+                          name: "Error",
+                          message: "AutoJs6 controlled fetch response exceeded " + payload.maxResponseBytes + " bytes.",
+                          code: "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE",
+                          module: "fetch",
+                          method: "request"
+                        }
+                      }));
                     });
                     return;
                   }
@@ -605,18 +652,14 @@ class NodeFetchBridgeInstrumentationTest {
                 }
               });
 
-              const holdCount = fetchModule.policy.maxConcurrentRequests;
+              // The runtime no longer caps concurrency (M20.2 batch 11): every request beyond the
+              // former 16 reaches the transport and the host provider applies its own window.
+              const holdCount = 20;
               const holdPromises = Array.from({ length: holdCount }, (_, index) =>
-                fetch("https://example.invalid/hold?i=" + index, { timeoutMs: 1000 }).then((response) => response.text())
+                fetchModule("https://example.invalid/hold?i=" + index, { timeoutMs: 1000 }).then((response) => response.text())
               );
               await waitFor(() => held.length === holdCount, "held requests");
-
-              let concurrentCode = "";
-              try {
-                await fetch("https://example.invalid/hold?overflow=true", { timeoutMs: 1000 });
-              } catch (error) {
-                concurrentCode = codeOf(error);
-              }
+              const inFlight = bridge.__test.pendingCount();
 
               held.splice(0).forEach((request) => {
                 const payload = request.args[0];
@@ -627,7 +670,7 @@ class NodeFetchBridgeInstrumentationTest {
               const schemeCodes = [];
               for (const url of ["file:///tmp/a", "content://autojs6/a", "about:blank", "data:text/plain,hi"]) {
                 try {
-                  await fetch(url, { timeoutMs: 1000 });
+                  await fetchModule(url, { timeoutMs: 1000 });
                 } catch (error) {
                   schemeCodes.push(codeOf(error));
                 }
@@ -635,14 +678,14 @@ class NodeFetchBridgeInstrumentationTest {
 
               let timeoutCode = "";
               try {
-                await fetch("https://example.invalid/timeout", { timeoutMs: 25 });
+                await fetchModule("https://example.invalid/timeout", { timeoutMs: 25 });
               } catch (error) {
                 timeoutCode = codeOf(error);
               }
 
               let abortCode = "";
               const controller = new AbortController();
-              const abortPromise = fetch("https://example.invalid/abort", {
+              const abortPromise = fetchModule("https://example.invalid/abort", {
                 signal: controller.signal,
                 timeoutMs: 1000
               });
@@ -656,29 +699,30 @@ class NodeFetchBridgeInstrumentationTest {
 
               let redirectCode = "";
               try {
-                await fetch("https://example.invalid/redirect-loop", { timeoutMs: 1000, maxRedirects: 1 });
+                await fetchModule("https://example.invalid/redirect-loop", { timeoutMs: 1000, maxRedirects: 1 });
               } catch (error) {
                 redirectCode = codeOf(error);
               }
 
               let largeCode = "";
               try {
-                await fetch("https://example.invalid/large", { timeoutMs: 1000, maxResponseBytes: 3 });
+                await fetchModule("https://example.invalid/large", { timeoutMs: 1000, maxResponseBytes: 3 });
               } catch (error) {
                 largeCode = codeOf(error);
               }
 
               let destroyCode = "";
-              const destroyPromise = fetch("https://example.invalid/destroy", { timeoutMs: 1000 }).catch(codeOf);
+              const destroyPromise = fetchModule("https://example.invalid/destroy", { timeoutMs: 1000 }).catch(codeOf);
               await waitFor(() => requests.some((request) => request.args[0].url.indexOf("/destroy") >= 0), "destroy request");
               bridge.__test.destroy("service destroy test");
               destroyCode = await destroyPromise;
 
-              let rawHttpsCode = "";
+              // https is the controlled client here; tls and net are the raw modules that stay disabled.
+              let rawTlsCode = "";
               try {
-                require("https").request("https://example.invalid/");
+                require("tls").connect(443, "127.0.0.1");
               } catch (error) {
-                rawHttpsCode = codeOf(error);
+                rawTlsCode = codeOf(error);
               }
               let rawNetCode = "";
               try {
@@ -689,19 +733,20 @@ class NodeFetchBridgeInstrumentationTest {
 
               const diagnostics = fetchModule.diagnostics();
               console.log("fetch.policy=" + [
-                fetchModule.policy.maxConcurrentRequests,
                 fetchModule.policy.defaultTimeoutMs,
-                fetchModule.policy.defaultMaxResponseBytes,
-                fetchModule.policy.defaultMaxRedirects
+                fetchModule.policy.defaultMaxRedirects,
+                fetchModule.policy.limitsEnforcedBy,
+                typeof fetchModule.policy.maxConcurrentRequests,
+                typeof fetchModule.policy.defaultMaxResponseBytes
               ].join("|"));
+              console.log("fetch.harden.inFlight=" + inFlight);
               console.log("fetch.harden.codes=" + [
-                concurrentCode,
                 timeoutCode,
                 abortCode,
                 redirectCode,
                 largeCode,
                 destroyCode,
-                rawHttpsCode,
+                rawTlsCode,
                 rawNetCode
               ].join("|"));
               console.log("fetch.harden.schemes=" + schemeCodes.join("|"));
@@ -719,15 +764,17 @@ class NodeFetchBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-fetch-policy-source.js>",
             timeoutMs = 10_000L,
+            rawNodeNetworkModulesEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("fetch policy hardening", result)
         val resultDetails = NodePluginTestHarness.describeResult("fetch policy hardening output", result)
-        assertTrue(resultDetails, result.stdout.contains("fetch.policy=16|30000|33554432|5"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.policy=30000|20|host_provider|undefined|undefined"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.inFlight=20"))
         assertTrue(
             resultDetails,
             result.stdout.contains(
-                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD||ERR_AUTOJS6_NETWORK_DISABLED",
+                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
             ),
         )
         assertTrue(
@@ -737,8 +784,8 @@ class NodeFetchBridgeInstrumentationTest {
             ),
         )
         assertTrue(resultDetails, result.stdout.contains("fetch.harden.redirect_requests=2"))
-        assertTrue(resultDetails, result.stdout.contains("fetch.harden.holds=hold-0|hold-1|hold-2|hold-3|hold-4|hold-5|hold-6|hold-7|hold-8|hold-9|hold-10|hold-11|hold-12|hold-13|hold-14|hold-15"))
-        assertTrue(resultDetails, result.stdout.contains("fetch.harden.diagnostics=0|16|1|7|1"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.holds=hold-0|hold-1|hold-2|hold-3|hold-4|hold-5|hold-6|hold-7|hold-8|hold-9|hold-10|hold-11|hold-12|hold-13|hold-14|hold-15|hold-16|hold-17|hold-18|hold-19"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.diagnostics=0|20|1|6|1"))
         assertTrue(resultDetails, result.stdout.contains("fetch.harden.pending=0"))
     }
 
@@ -912,11 +959,12 @@ class NodeFetchBridgeInstrumentationTest {
                 }
               }
 
-              let rawHttpsCode = "";
+              // node:https is the controlled client here; net is the raw module that stays disabled.
+              let rawNetCode = "";
               try {
-                require("node:https").request("https://example.invalid/");
+                require("node:net").connect(443, "127.0.0.1");
               } catch (error) {
-                rawHttpsCode = codeOf(error);
+                rawNetCode = codeOf(error);
               }
 
               console.log("axios.resolve=" + resolved);
@@ -950,41 +998,45 @@ class NodeFetchBridgeInstrumentationTest {
               console.log("axios.policy=" + policyCodes.join("|"));
               console.log("axios.requests=" + requests.map((request) => request.args[0].method + ":" + request.args[0].url.split("/").pop()).join("|"));
               console.log("axios.permissions=" + requests.every((request) => request.permissions.indexOf("network") >= 0));
-              console.log("axios.raw_https=" + rawHttpsCode);
+              console.log("axios.raw_net=" + rawNetCode);
               console.log("axios.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
             "<embedded-autojs-axios-controlled-fetch-source.js>",
             workingDirectory = workDir,
             timeoutMs = 10_000L,
+            rawNodeNetworkModulesEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("axios controlled fetch", result)
-        assertTrue(result.stdout.contains("axios.resolve=axios"))
-        assertTrue(result.stdout.contains("axios.shadow=false"))
-        assertTrue(result.stdout.contains("axios.surface=function|function|function|function|true|true|autojs6-controlled-fetch"))
+        assertTrue(result.stdout, result.stdout.contains("axios.resolve=axios"))
+        assertTrue(result.stdout, result.stdout.contains("axios.shadow=false"))
+        assertTrue(result.stdout, result.stdout.contains("axios.surface=function|function|function|function|true|true|autojs6-controlled-fetch"))
         assertTrue(
+            result.stdout,
             result.stdout.contains(
                 "axios.get=200|GET|https://api.example.invalid/v1/items?tag=a&tag=b&q=one+two|get|get",
             ),
         )
-        assertTrue(result.stdout.contains("""axios.post=201|Created|POST|{"hello":"world"}|application/json"""))
-        assertTrue(result.stdout.contains("axios.responseTypes=plain-text|070809"))
-        assertTrue(result.stdout.contains("axios.statusError=true|AxiosError|ERR_BAD_RESPONSE|500|bad"))
-        assertTrue(result.stdout.contains("axios.timeout=true|AxiosError|ERR_AUTOJS6_NETWORK_TIMEOUT"))
+        assertTrue(result.stdout, result.stdout.contains("""axios.post=201|Created|POST|{"hello":"world"}|application/json"""))
+        assertTrue(result.stdout, result.stdout.contains("axios.responseTypes=plain-text|070809"))
+        assertTrue(result.stdout, result.stdout.contains("axios.statusError=true|AxiosError|ERR_BAD_RESPONSE|500|bad"))
+        assertTrue(result.stdout, result.stdout.contains("axios.timeout=true|AxiosError|ERR_AUTOJS6_NETWORK_TIMEOUT"))
         assertTrue(
+            result.stdout,
             result.stdout.contains(
                 "axios.policy=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED",
             ),
         )
         assertTrue(
+            result.stdout,
             result.stdout.contains(
                 "axios.requests=GET:items?tag=a&tag=b&q=one+two|POST:post|GET:text|GET:array|GET:status|GET:timeout|GET:policy",
             ),
         )
-        assertTrue(result.stdout.contains("axios.permissions=true"))
-        assertTrue(result.stdout.contains("axios.raw_https=ERR_AUTOJS6_NETWORK_DISABLED"))
-        assertTrue(result.stdout.contains("axios.pending=0"))
+        assertTrue(result.stdout, result.stdout.contains("axios.permissions=true"))
+        assertTrue(result.stdout, result.stdout.contains("axios.raw_net=ERR_AUTOJS6_NETWORK_DISABLED"))
+        assertTrue(result.stdout, result.stdout.contains("axios.pending=0"))
     }
 
     @Test
@@ -1166,6 +1218,166 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
+    fun hostStreamsControlledFetchRequestBodiesFromTheDescriptorTransport() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch request body descriptor transport")
+
+        ControlledFetchLoopbackServer().use { server ->
+            val baseUrl = server.baseUrl
+            val expectedHash = sha256Hex(patternBytes(LARGE_BODY_BYTES))
+            val result = NodePluginTestHarness.runPluginScript(
+                """
+                "nodejs";
+                (async function main() {
+                  const fetchModule = require("fetch");
+                  const axios = require("axios");
+                  const crypto = require("crypto");
+                  const base = "$baseUrl";
+                  const big = Buffer.alloc($LARGE_BODY_BYTES);
+                  for (let index = 0; index < big.length; index += 1) big[index] = index % 251;
+                  const text = "y".repeat($TEXT_BODY_BYTES);
+                  const textHash = crypto.createHash("sha256").update(text, "utf8").digest("hex");
+                  async function post(path, body, headers) {
+                    const response = await fetchModule(base + path, { method: "POST", body, headers, timeoutMs: 20000 });
+                    return Object.assign({ status: response.status }, await response.json());
+                  }
+                  const bytes = await post("/sha256", big, { "content-type": "application/octet-stream" });
+                  const utf8 = await post("/sha256", text, { "content-type": "text/plain" });
+                  const view = await post("/sha256", new Uint8Array(big.buffer, big.byteOffset + 1024, $VIEW_BODY_BYTES));
+                  const small = await post("/sha256", "tiny");
+                  const replayed = await post("/redirect-307", big);
+                  const dropped = await post("/redirect-303", big);
+                  const viaAxios = await axios.post(base + "/sha256", big, {
+                    headers: { "content-type": "application/octet-stream" },
+                    timeout: 20000,
+                    responseType: "json"
+                  });
+                  const parallel = await Promise.all(Array.from({ length: 8 }, (_, index) =>
+                    post("/sha256", Buffer.alloc($PARALLEL_BODY_BYTES + index, index)).then((reply) => reply.bytes)));
+                  console.log("live.fetch.upload=" + [
+                    bytes.status, bytes.method, bytes.bytes, bytes.sha256 === "$expectedHash", bytes.contentType,
+                    utf8.bytes, utf8.sha256 === textHash, utf8.contentType,
+                    view.bytes, small.bytes,
+                    replayed.status, replayed.method, replayed.bytes, replayed.sha256 === "$expectedHash",
+                    dropped.status, dropped.method, dropped.query,
+                    viaAxios.status, viaAxios.data.bytes, viaAxios.data.sha256 === "$expectedHash",
+                    parallel.every((length, index) => length === $PARALLEL_BODY_BYTES + index)
+                  ].join("|"));
+                })();
+                """.trimIndent(),
+                "<embedded-autojs-fetch-upload-transport.js>",
+                timeoutMs = 60_000L,
+            )
+
+            NodePluginTestHarness.assertSucceeded("fetch upload transport", result)
+            val resultDetails = NodePluginTestHarness.describeResult("fetch upload transport", result)
+            assertTrue(
+                resultDetails,
+                result.stdout.contains(
+                    "live.fetch.upload=200|POST|$LARGE_BODY_BYTES|true|application/octet-stream|" +
+                        "$TEXT_BODY_BYTES|true|text/plain|$VIEW_BODY_BYTES|4|" +
+                        "200|POST|$LARGE_BODY_BYTES|true|200|GET|via=303|200|$LARGE_BODY_BYTES|true|true",
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun hostBrokerConsumesRequestDescriptorsAndClosesThem() {
+        ControlledFetchLoopbackServer().use { server ->
+            val broker = NodeJsHostCapabilityBroker(
+                context,
+                NodePluginScriptRequest(
+                    source = "",
+                    sourceName = "<broker-request-upload>",
+                    workingDirectory = context.cacheDir.absolutePath,
+                    sandboxRoot = context.cacheDir.absolutePath,
+                    executionId = "broker-request-upload-${System.nanoTime()}",
+                ),
+                "instrumentation",
+            )
+            val payloadFile = File.createTempFile("node-upload-", ".bin", context.cacheDir)
+            try {
+                payloadFile.writeBytes(patternBytes(LARGE_BODY_BYTES))
+                assertEquals(
+                    NodeJsRuntimeContract.BRIDGE_REQUEST_BINARY_TRANSPORT_PFD,
+                    broker.getBrokerInfo().getString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_TRANSPORT),
+                )
+                val replies = LinkedBlockingQueue<Bundle>()
+                val callback = object : INodeJsHostCapabilityCallback.Stub() {
+                    override fun onResponse(response: Bundle) {
+                        replies.add(response)
+                    }
+                }
+
+                fun descriptor(method: String, bodyBytes: Long): JSONObject = JSONObject()
+                    .put("url", "${server.baseUrl}/sha256")
+                    .put("method", method)
+                    .put("headers", JSONArray().put(JSONArray().put("content-type").put("application/octet-stream")))
+                    .put("bodyTransport", "pfd")
+                    .put("bodyBytes", bodyBytes)
+                    .put("timeoutMs", 20_000)
+
+                fun dispatch(id: String, descriptor: JSONObject, byteCount: Long): ParcelFileDescriptor {
+                    val upload = ParcelFileDescriptor.open(payloadFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                    val request = JSONObject()
+                        .put("id", id)
+                        .put("module", "fetch")
+                        .put("method", "request")
+                        .put("args", JSONArray().put(descriptor))
+                        .put("timeoutMs", 20_000)
+                        .put("permissions", JSONArray().put("network"))
+                        .put("upload", JSONObject().put("byteCount", byteCount))
+                    broker.dispatch(
+                        Bundle().apply {
+                            putString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON, request.toString())
+                            putParcelable(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_PFD, upload)
+                            putLong(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_BYTE_COUNT, byteCount)
+                        },
+                        callback,
+                    )
+                    return upload
+                }
+
+                fun reply(): Bundle {
+                    val bundle = replies.poll(30, TimeUnit.SECONDS)
+                    assertNotNull("broker reply missing", bundle)
+                    return bundle!!
+                }
+
+                val streamed = dispatch("upload-1", descriptor("POST", LARGE_BODY_BYTES.toLong()), LARGE_BODY_BYTES.toLong())
+                val streamedReply = reply()
+                assertTrue(
+                    streamedReply.getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty(),
+                    streamedReply.getBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, false),
+                )
+                val streamedResult = JSONObject(streamedReply.getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty())
+                    .getJSONObject("result")
+                val echoed = JSONObject(String(Base64.getDecoder().decode(streamedResult.getString("bodyBase64")), Charsets.UTF_8))
+                assertEquals("POST", echoed.getString("method"))
+                assertEquals(LARGE_BODY_BYTES, echoed.getInt("bytes"))
+                assertEquals(sha256Hex(patternBytes(LARGE_BODY_BYTES)), echoed.getString("sha256"))
+                assertEquals("application/octet-stream", echoed.getString("contentType"))
+                // In-process the broker receives this very object, so its close is observable here.
+                assertFalse("the broker closes the descriptor once the call has answered", streamed.fileDescriptor.valid())
+
+                val mismatched = dispatch("upload-2", descriptor("POST", 12L), LARGE_BODY_BYTES.toLong())
+                val mismatchedParsed = NodeBridgeResponse.fromJson(reply().getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty())
+                assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, mismatchedParsed.error?.code)
+                assertTrue(mismatchedParsed.error?.message.orEmpty(), mismatchedParsed.error?.message.orEmpty().contains("bodyBytes (12)"))
+                assertFalse(mismatched.fileDescriptor.valid())
+
+                val getWithBody = dispatch("upload-3", descriptor("GET", LARGE_BODY_BYTES.toLong()), LARGE_BODY_BYTES.toLong())
+                val getParsed = NodeBridgeResponse.fromJson(reply().getString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON).orEmpty())
+                assertEquals(NodeRuntimeErrorCodes.NETWORK_PERMISSION_DENIED, getParsed.error?.code)
+                assertFalse(getWithBody.fileDescriptor.valid())
+            } finally {
+                payloadFile.delete()
+                broker.destroy(null)
+            }
+        }
+    }
+
+    @Test
     fun jsFetchAndAxiosUseAndroidLiveProvider() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled fetch live provider smoke")
 
@@ -1208,14 +1420,14 @@ class NodeFetchBridgeInstrumentationTest {
                     });
                   }
 
-                  const getResponse = await fetch(base + "/get?via=fetch", {
+                  const getResponse = await fetchModule(base + "/get?via=fetch", {
                     headers: { "x-test": "live" },
                     timeoutMs: 2000,
                     maxResponseBytes: 2048
                   });
                   const getJson = await getResponse.json();
 
-                  const postTextResponse = await fetch(base + "/echo", {
+                  const postTextResponse = await fetchModule(base + "/echo", {
                     method: "POST",
                     headers: { "content-type": "text/plain" },
                     body: "payload",
@@ -1224,7 +1436,7 @@ class NodeFetchBridgeInstrumentationTest {
                   });
                   const postTextJson = await postTextResponse.json();
 
-                  const postBytesResponse = await fetch(base + "/echo", {
+                  const postBytesResponse = await fetchModule(base + "/echo", {
                     method: "POST",
                     headers: { "x-body": "uint8" },
                     body: new Uint8Array([65, 66, 67]),
@@ -1233,13 +1445,13 @@ class NodeFetchBridgeInstrumentationTest {
                   });
                   const postBytesJson = await postBytesResponse.json();
 
-                  const bytesResponse = await fetch(base + "/bytes", {
+                  const bytesResponse = await fetchModule(base + "/bytes", {
                     timeoutMs: 2000,
                     maxResponseBytes: 16
                   });
                   const bytesHex = Buffer.from(new Uint8Array(await bytesResponse.arrayBuffer())).toString("hex");
 
-                  const redirectResponse = await fetch(base + "/redirect", {
+                  const redirectResponse = await fetchModule(base + "/redirect", {
                     timeoutMs: 2000,
                     maxRedirects: 1
                   });
@@ -1247,14 +1459,14 @@ class NodeFetchBridgeInstrumentationTest {
 
                   let largeCode = "";
                   try {
-                    await fetch(base + "/large", { timeoutMs: 2000, maxResponseBytes: 3 });
+                    await fetchModule(base + "/large", { timeoutMs: 2000, maxResponseBytes: 3 });
                   } catch (error) {
                     largeCode = codeOf(error);
                   }
 
                   let timeoutCode = "";
                   try {
-                    await fetch(base + "/slow", { timeoutMs: 100, maxResponseBytes: 2048 });
+                    await fetchModule(base + "/slow", { timeoutMs: 100, maxResponseBytes: 2048 });
                   } catch (error) {
                     timeoutCode = codeOf(error);
                   }
@@ -1273,15 +1485,23 @@ class NodeFetchBridgeInstrumentationTest {
                   });
                   const httpGet = await readHttpJson(base + "/get?via=http");
 
+                  // Raw http/net are native Node here (rawNodeNetworkModulesEnabled defaults to true);
+                  // close what the probes open so the event loop can exit.
                   let httpListenCode = "";
                   try {
-                    http.createServer(() => {}).listen(0);
+                    const server = http.createServer(() => {});
+                    await new Promise((resolve, reject) => server.once("error", reject).listen(0, "127.0.0.1", resolve));
+                    httpListenCode = typeof server.address().port === "number" ? "native" : "unknown";
+                    await new Promise((resolve) => server.close(resolve));
                   } catch (error) {
                     httpListenCode = codeOf(error);
                   }
                   let rawNetCode = "";
                   try {
-                    require("net").connect(80, "127.0.0.1");
+                    const socket = require("net").connect(Number(new URL(base).port), "127.0.0.1");
+                    await new Promise((resolve, reject) => socket.once("connect", resolve).once("error", reject));
+                    socket.destroy();
+                    rawNetCode = "native";
                   } catch (error) {
                     rawNetCode = codeOf(error);
                   }
@@ -1351,10 +1571,10 @@ class NodeFetchBridgeInstrumentationTest {
             assertTrue(
                 resultDetails,
                 result.stdout.contains(
-                    "live.fetch.denials=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                    "live.fetch.denials=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|native|native",
                 ),
             )
-            assertTrue(resultDetails, result.stdout.contains("live.fetch.diagnostics=0|8|1|1"))
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.diagnostics=0|7|1|1"))
         }
     }
 
@@ -1517,6 +1737,17 @@ class NodeFetchBridgeInstrumentationTest {
                     patternBytes(request.query.substringAfter("n=", "").substringBefore('&').toIntOrNull() ?: 0),
                 )
                 "/empty" -> HttpResponse(200, "OK", "text/plain", ByteArray(0))
+                "/sha256" -> jsonResponse(
+                    200,
+                    "OK",
+                    JSONObject()
+                        .put("method", request.method)
+                        .put("bytes", request.body.size)
+                        .put("sha256", sha256Hex(request.body))
+                        .put("contentType", request.headers["content-type"].orEmpty()),
+                )
+                "/redirect-307" -> HttpResponse(307, "Temporary Redirect", "text/plain", ByteArray(0), listOf("Location" to "/sha256"))
+                "/redirect-303" -> HttpResponse(303, "See Other", "text/plain", ByteArray(0), listOf("Location" to "/get?via=303"))
                 "/redirect-with-body" -> HttpResponse(
                     302,
                     "Found",
@@ -1588,6 +1819,9 @@ class NodeFetchBridgeInstrumentationTest {
     private companion object {
         const val LARGE_BODY_BYTES = 3 * 1024 * 1024
         const val SIMULATED_BINDER_LIMIT_CHARS = 1_000_000
+        const val TEXT_BODY_BYTES = 400 * 1024
+        const val VIEW_BODY_BYTES = 512 * 1024
+        const val PARALLEL_BODY_BYTES = 300 * 1024
 
         fun patternBytes(count: Int): ByteArray = ByteArray(count.coerceAtLeast(0)) { index -> (index % 251).toByte() }
 
