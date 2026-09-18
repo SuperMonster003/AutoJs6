@@ -25,7 +25,7 @@
 
 - 新增依赖前先看它在 DEX 表中的落点: 大于 150 KiB 原始 DEX 的包会出现在报告的 DEX 表 (`--dex-min-kib`), 提交说明写明体积代价; 优先使用平台 API 或已有依赖 (P2 / P6.1 / P6.2 的做法).
 - 位图资源直接放无损 WebP (`res/drawable*/`), 启动 / 快捷方式图标 (`mipmap*/`) 保持 PNG; 九宫格保持 `.9.png` (P6.6).
-- 只给脚本按名字使用的资源目录 (drawable 图标集, `res/anim` AOSP 动画集, string / color / style) 不按 lint `UnusedResources` 删除; 删除应用内部遗留资源前用 `git grep -w` 复核并写入证据 (P6.6, Q11 待拍板).
+- 只给脚本按名字使用的资源目录 (drawable 图标集, `res/anim` AOSP 动画集, string / color / style) 不按 lint `UnusedResources` 删除; 删除应用内部遗留资源前用 `git grep -w` 复核并写入证据 (P6.6, D19); 新增或删除 `res/anim` 视图动画时同步文档 `uiAttributes.md` 的「动画资源」清单.
 - 资产剪除清单在 `app/build.gradle.kts` 的 `appMergedAssetPruneIncludes`; 内置版本历史只保留 zh-Hans 与 en (`bundledChangelogLanguageTags`, P6.5), 新增语言时把标签加进推导列表.
 - Rhino 只打包瘦身 jar (`slimRhinoJar`, 去掉 `org/jline/**`), 编译与测试仍用完整 jar (P1).
 - 打包排除 (`packaging.resources.excludes`) 用 java.nio glob, `dir/**/*` 只匹配深度 >= 2, 需要时写 `dir/*` (P1).
@@ -36,7 +36,6 @@
 | 编号 | 内容 | 门禁 | 预估 |
 | --- | --- | --- | --- |
 | P5.2 | 去掉运行时 R8 (`com.android.tools.r8` + `new_api_database.ser`) | D5: DEX 编译器插件晋级默认路径, 且 `loadAar` / `defineClass` 有非 R8 方案 | 约 5.5 MiB |
-| Q11 | `res/anim` AOSP 动画集 (183 个未引用 anim + 51 interpolator) | 维护者拍板是否作为脚本目录保留 | 源文件约 0.33 MiB |
 
 ## 4. 证据与工具
 

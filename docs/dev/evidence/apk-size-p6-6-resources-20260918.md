@@ -88,5 +88,23 @@ lint 报告取自 `app/build/reports/lint-results-appDebug.xml` (2026-09-14 19:3
 ## 后续
 
 - 新增位图资源时直接放 WebP (无损) 即可, 不必再走脚本; `mipmap*/` 继续保持 PNG.
-- AOSP 动画集 (183 个未引用 anim + 51 interpolator + 相关 integer / dimen, 源文件约 0.33 MiB) 是否保留为脚本可用目录, 由维护者在附录 A 拍板; 若裁剪, 需先在文档中声明脚本可用的 `@anim/` 清单.
+- AOSP 动画集: 维护者已拍板保留 (Q11 方案 a, D19), 清单已写入文档, 见下一节.
 - 下次 lint 成功后 (需守护进程有更大堆或单独执行 `lintAnalyzeAppDebug`), 用新报告复核本次保留项是否有变化.
+
+## Q11 落地: `res/anim` 保留为脚本目录, 文档补齐 `@anim/` 清单 (2026-09-18)
+
+维护者拍板方案 (a) (D19). `res/anim` 的 203 个资源按根元素分类 (`build/tmp-size/p6_6/anim_catalog2.json`): 131 个视图动画 (`set` / `alpha` / `translate` 根元素, 不含 objectAnimator), 61 个 animator (objectAnimator), 9 个插值器 (`*Interpolator` 根元素), 2 个状态列表动画 (`selector`). 脚本 UI 只在 `textswitcher` 的 `animIn` / `animOut` 经 `Strings.parseAnimation` (`getIdentifier(name, "anim", pkg)` + `AnimationUtils.loadAnimation`) 按名字使用它们, 因此可用清单即 131 个视图动画.
+
+### 设备验证 (`build/tmp-size/p6-6-anim-probe.js` 与 `p6-6-anim-ui.js`, 运行脚本 `p6_6_run_anim.sh`)
+
+| 检查项 | AVD API 24 | Sony G8441 API 28 | Redmi 22120RN86C API 33 |
+| --- | --- | --- | --- |
+| 131 个视图动画逐个 `@anim/<name>` 解析并加载 | 127 可加载; 4 个 `activity_*` 失败 (`Unknown animation name: extend`) | 同 API 24 | 131 全部可加载 |
+| 61 animator / 9 插值器 / 2 状态列表动画 | 全部加载失败 (预期, 非视图动画) | 同 | 同 |
+| `@android:anim/fade_in`, `@android:anim/slide_in_left` 经同一解析路径 | 解析为系统资源 (`0x10a0000` AlphaAnimation 500 ms, `0x10a0002` AnimationSet 400 ms) | 同 | 同 |
+| `@anim/does_not_exist` | id 0 (`parseAnimation` 记录 Invalid resource) | 同 | 同 |
+| `"ui"` 脚本 4 个 `textswitcher` (`slide_in_left` / `slide_out_right`, `dialog_enter` / `dialog_exit`, `@android:anim/fade_in` / `fade_out`, `anim="from bottom"`) | 4 个均得到 in / out 动画, `setText` 后动画启动 | 同 | 同 (首轮以 `activity_open_enter` 亦通过) |
+
+- 4 个 `activity_close_enter` / `activity_close_exit` / `activity_open_enter` / `activity_open_exit` 使用 `<extend>` 元素 (Android 12 起支持), 在 API 24 / 28 上加载抛 RuntimeException; 首轮 Sony 的 UI 脚本用了 `activity_open_enter`, 整个 `ui.layout` 因 InflateException 失败, 文档据此注明 "API 31+" 与 "引用不可加载的资源会使整个布局解析失败".
+- 文档: AutoJs6-Documentation `a0234d0` 在 `api/uiAttributes.md` 新增「动画资源」一节 (131 个名称按 9 组列出, `animIn` / `animOut` 行指向该节), `python auto-generate.py uiAttributes` 重新生成 `docs/uiAttributes.html` 与 `json/uiAttributes.json`; 生成脚本 `build/tmp-size/p6_6_anim_docs.py` (`normalize-markdown.py` 会把「」改为半角引号, 先跑一次再生成).
+- 体积不变 (无资源改动); 新增或删除 `res/anim` 视图动画时同步该清单 (维护者清单第 2 节).

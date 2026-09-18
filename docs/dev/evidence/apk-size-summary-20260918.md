@@ -50,7 +50,7 @@ arm64-v8a 与 universal 的逐阶段差值完全相同 (两者只差其它 ABI �
 | P6.8 `com.stardust` 兼容包 (0.43 MiB) | 保留 | D16 |
 | P5.2 运行时 R8 (约 5.5 MiB) | 门禁 D5 | DEX 编译器插件晋级默认路径, 且 `loadAar` / `defineClass` 有非 R8 方案 |
 | P5.3 旧版 dx 1.7.0 (约 0.17 MiB) | 保留 | D18 (Q10 方案 c, 2026-09-18): API 24 / 25 唯一的 class -> dex 转换器, 7.x 退出支持时再删 |
-| Q11 `res/anim` AOSP 动画集 (源文件约 0.33 MiB) | 待拍板 | 脚本 UI 可按名字引用 `@anim/`, 但无文档化清单 (P6.6) |
+| Q11 `res/anim` AOSP 动画集 (源文件约 0.33 MiB) | 保留 | D19 (方案 a, 2026-09-18): 作为脚本目录保留, 131 个可用 `@anim/` 名称已写入文档 `uiAttributes.md` |
 
 ## 4. 第 3 节 "理论收益" 对照
 
