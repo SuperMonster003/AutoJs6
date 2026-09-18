@@ -24,4 +24,31 @@ class PluginDefaultEnabledPolicyTest {
         assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault("paddle-ocr"))
         assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault(null))
     }
+
+    @Test
+    fun officialSignerAutoEnablesDefaultOffEnginesAfterInstall() {
+        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("yolo", PluginAuthorizedState.OFFICIAL))
+        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(" YOLO ", PluginAuthorizedState.OFFICIAL))
+        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(McpServerIds.ENGINE, PluginAuthorizedState.OFFICIAL))
+    }
+
+    @Test
+    fun otherSignersKeepDefaultOffEnginesDisabledAfterInstall() {
+        val nonOfficial = listOf(PluginAuthorizedState.TRUSTED, PluginAuthorizedState.USER_GRANTED, PluginAuthorizedState.REQUIRED)
+        for (state in nonOfficial) {
+            assertFalse(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("yolo", state))
+            assertFalse(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(" MCP-SERVER ", state))
+        }
+    }
+
+    @Test
+    fun legacyEnginesAutoEnableForEveryAuthorizedSigner() {
+        val authorized = listOf(PluginAuthorizedState.OFFICIAL, PluginAuthorizedState.TRUSTED, PluginAuthorizedState.USER_GRANTED)
+        for (state in authorized) {
+            assertTrue(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("paddle-ocr", state))
+            assertTrue(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(null, state))
+        }
+        assertFalse(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("paddle-ocr", PluginAuthorizedState.REQUIRED))
+        assertFalse(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(null, PluginAuthorizedState.REQUIRED))
+    }
 }

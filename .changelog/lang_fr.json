@@ -228,6 +228,7 @@
         "Gestionnaire du mode client : une entrée \"Historique\" dans la section de contrôle liste les adresses de serveur déjà utilisées ; appuyer pour se connecter, appui long pour supprimer, ou tout effacer"
       ],
       "fix": [
+        "L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé",
         "MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur",
         "Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun",
         "Projets Node.js exécutables sans métadonnées de création APK, tels que host-events, non reconnus dans la liste des fichiers et la barre de projet",
@@ -441,6 +442,7 @@
         "Lors du choix de l'APK d'une mise à jour, une version sans paquet pour la première ABI préférée pouvait sélectionner un paquet ultérieur de priorité inférieure dans la liste (comme le paquet universel) au lieu du paquet de l'ABI préférée suivante"
       ],
       "improvement": [
+        "Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé",
         "Les gestionnaires accessibilité, client, serveur et terminal partagent les boutons de déploiement et séparateurs; les réglages repliés sont accessibles dans une boîte de dialogue par une roue dentée, et les commandes client repliées incluent l'historique; les commandes serveur repliées proposent aussi Déconnecter tous les clients",
         "Le terminal utilise la saisie shell directe, deux rangées de touches en majuscules avec navigation fixe et symboles défilants, les poignées natives avec Copier / Tout sélectionner, des menus groupés, des marges et une ligne de répertoire séparée; conseils dans le menu uniquement, gestionnaire maintenu ouvert après création et boutons reprendre / arrêter par session",
         "Créer ou reprendre une session ouvre le terminal tout en conservant son gestionnaire pour le retour; toucher le sous-titre du répertoire copie son chemin complet et remplace la commande de copie du chemin du répertoire personnel",

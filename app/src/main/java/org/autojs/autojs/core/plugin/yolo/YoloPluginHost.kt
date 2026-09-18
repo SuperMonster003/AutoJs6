@@ -171,10 +171,16 @@ object YoloPluginHost {
     suspend fun requireExactTarget(
         context: Context,
         component: ComponentName,
+    ): Target = requireExactTarget(context, component, requireEnabled = true)
+
+    private suspend fun requireExactTarget(
+        context: Context,
+        component: ComponentName,
+        requireEnabled: Boolean,
     ): Target = withContext(Dispatchers.IO) {
         val appContext = context.applicationContext
         val inspectedBefore = inspectExact(appContext, normalizeComponent(component))
-        requireEnabledAndAuthorized(appContext, inspectedBefore.identity.component.packageName)
+        requireAuthorized(appContext, inspectedBefore.identity.component.packageName, requireEnabled)
 
         val provisional = AidlPluginHost.Discovered(
             serviceInfo = inspectedBefore.serviceInfo,
@@ -197,7 +203,7 @@ object YoloPluginHost {
         check(inspectedAfter.identity == inspectedBefore.identity) {
             "YOLO provider package identity changed during discovery"
         }
-        requireEnabledAndAuthorized(appContext, inspectedAfter.identity.component.packageName)
+        requireAuthorized(appContext, inspectedAfter.identity.component.packageName, requireEnabled)
 
         Target(
             identity = inspectedAfter.identity,
@@ -211,19 +217,26 @@ object YoloPluginHost {
         )
     }
 
-    /** Plugin Center entry point: a package is accepted only when it declares one YOLO service. */
+    /**
+     * Plugin Center entry point: a package is accepted only when it declares one YOLO service.
+     * Plugin Center keeps the package logically disabled until this probe succeeds, so the probe
+     * requires authorization and the exact-component handshake but not the saved enable state;
+     * every runtime entry point still requires it.
+     * zh-CN: 插件中心入口. 探测成功前插件中心保持逻辑禁用, 因此这里只要求授权与精确组件握手,
+     * 不要求已保存的启用状态; 所有运行时入口仍然要求.
+     */
     suspend fun probePackage(
         context: Context,
         packageName: String,
     ): Target = withContext(Dispatchers.IO) {
         require(packageName.isNotBlank()) { "YOLO provider package name is blank" }
         val appContext = context.applicationContext
-        requireEnabledAndAuthorized(appContext, packageName)
+        requireAuthorized(appContext, packageName, requireEnabled = false)
         val services = queryYoloServices(appContext, packageName)
         require(services.size == 1) {
             "Expected exactly one YOLO service in $packageName; found ${services.size}"
         }
-        requireExactTarget(appContext, services.single().toComponentName())
+        requireExactTarget(appContext, services.single().toComponentName(), requireEnabled = false)
     }
 
     /**
@@ -396,8 +409,14 @@ object YoloPluginHost {
     }
 
     private fun requireEnabledAndAuthorized(context: Context, packageName: String) {
-        check(PluginEnableStore.isEnabled(context, packageName, defaultEnabled = false)) {
-            "YOLO provider is disabled by default; explicitly enable $packageName in Plugin Center"
+        requireAuthorized(context, packageName, requireEnabled = true)
+    }
+
+    private fun requireAuthorized(context: Context, packageName: String, requireEnabled: Boolean) {
+        if (requireEnabled) {
+            check(PluginEnableStore.isEnabled(context, packageName, defaultEnabled = false)) {
+                "YOLO provider is disabled by default; explicitly enable $packageName in Plugin Center"
+            }
         }
         check(PluginTrustManager.isAuthorized(context, packageName)) {
             "YOLO provider is not authorized: $packageName"

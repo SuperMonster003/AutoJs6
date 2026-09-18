@@ -183,7 +183,9 @@ Provider 内部负责 resize、letterbox、decode、NMS 和逆变换。回调中
   `intent.action == null` 返回 null。
 - Binder Service 必须使用 `org.autojs.permission.PLUGIN`，并运行在独立 provider
   进程。插件还应提供现有插件中心可见的 INFO service。
-- 安装不等于启用。R2 Host 必须把 YOLO 选择默认设为关闭，并要求已授权 provider。
+- 安装不等于启用。R2 Host 运行时必须把 YOLO 选择默认设为关闭，并要求已授权 provider；
+  唯一的自动启用来源是插件中心对宿主同证书 (OFFICIAL) provider 全新安装写入的显式
+  启用记录（2026-09-18），运行时仍只读取该记录。
 - capability/identity 必须从将要 dispatch 的同一 Binder 和同一固定 package identity
   得到；UID、完整 signer set、version/component drift 均失败关闭。
 - 显式请求 YOLO 时，缺少/不兼容/死亡的 provider 产生稳定错误；不得退到 OCR、Rhino、

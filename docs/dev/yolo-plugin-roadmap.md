@@ -2,6 +2,9 @@
 
 本文是 `work-yolo` 的可执行状态表。它以 2026-08-11 的本地代码快照为起点，
 并更新至 2026-08-13 的 R5 证据；不以公开仓库中较旧的 Paddle OCR 结构为准。
+2026-09-18 追加两项产品决定：插件中心对宿主同证书 (OFFICIAL) provider 完成全新安装后
+自动写入显式启用记录（运行时闸门不变），以及 Provider 仓库已公开、宿主正式版不再是
+Provider 公开发布的硬性前置条件。
 
 ## 当前结论
 
@@ -17,7 +20,7 @@
 | R3 当前声明 | `SOURCE / ANDROID_BUILD / DEVICE_E2E / PUBLIC_PREVIEW = PASS`；仍明确不声明 `PRODUCTION` |
 | R4 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E / PUBLIC_MODEL_IMPORT = PASS`；仅覆盖同一 decoder 的 YOLO11 detect 有限兼容集，不声明 `PRODUCTION` |
 | R5 当前声明 | `SOURCE / ANDROID_BUILD / HOSTILE_BINDER / DESCRIPTOR_INTEGRITY / RESOURCE_200_FRAME / APK_PACKAGING / NATIVE_LOAD_ARM64_DEVICE = PASS`；`ELF_16K_COMPATIBLE = PASS_STATIC_ONLY`，性能只记录不设阈值；RC 是 `TEST_SIGNED_NONDEBUGGABLE`，不声明 `PRODUCTION` |
-| 生产入口 | 插件中心可发现但 YOLO 默认关闭；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
+| 生产入口 | 插件中心可发现；无启用记录时 YOLO 默认关闭，2026-09-18 起插件中心对宿主同证书 (OFFICIAL) provider 的全新安装自动写入启用记录，其余签名、adb 侧装与覆盖安装仍需手动启用；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
 
 ## 固定架构决定
 
@@ -31,8 +34,12 @@
    detected/failed/cancelled 终态。cancel/close 幂等。
 5. `openSession` 和 `detect` 一旦 dispatch 就不自动重试。Binder death 使当前
    session 失效，由调用者明确重新加载模型。
-6. 安装 provider 不等于启用。Host 必须保持 default-off，并固定一个已授权的
-   exact component；不静默选择、不跨 provider 回退。
+6. 安装 provider 不等于启用。Host 运行时必须保持 default-off（无启用记录即拒绝），
+   并固定一个已授权的 exact component；不静默选择、不跨 provider 回退。
+   2026-09-18 产品决定：插件中心在前台观察到宿主同证书 (OFFICIAL) provider 完成
+   全新（非替换）安装时，可代替用户写入显式启用记录并完成启用探测；TRUSTED /
+   USER_GRANTED 签名、adb 侧装与覆盖安装不自动启用。该规则对同一策略对象中的
+   MCP Server 同样生效，宿主实现见 `PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall`。
 7. R0/R1 不重构 OCR。首次 YOLO 竖切稳定后，再决定是否把图像传输提取为公共组件。
 
 协议细节见 [YOLO Plugin Protocol V1](yolo-plugin-protocol-v1.md)。
@@ -170,7 +177,8 @@ canonical receipt 必须包含命令、commit/source snapshot、输入 artifact 
 目标：连接真实 provider，但仍不暴露脚本 API。
 
 - [x] 新增 `core/plugin/yolo/YoloPluginHost.kt`，组合现有 `AidlPluginHost`。
-- [x] 增加最窄的 package-visibility query/插件中心发现映射，但不自动启用 provider。
+- [x] 增加最窄的 package-visibility query/插件中心发现映射，但不自动启用 provider
+  （2026-09-18 起按固定架构决定 6 放宽：仅 OFFICIAL 签名的全新安装自动启用）。
 - [x] 为通用选择策略增加兼容的 `defaultEnabled` 参数，YOLO 固定传 `false`。
 - [x] 使用 exact component、授权、签名/UID/version pinning 和 dedicated binding lease。
 - [x] `openSession`、`detect` 均显式 `retryOnRemoteException=false`。
@@ -347,7 +355,8 @@ release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTI
 - [ ] 一台代表性 arm64 物理设备和一个当前 API arm64 环境完成冷/热推理及进程死亡恢复；
   当前主机无法运行 arm64 AVD 时允许 API 35+ arm64 实体机替代。
 - [ ] 发布说明列出实际验证的 API/ABI/backend/model，不暗示未验证能力。
-- [ ] 继续保持 default-off、fail-closed、无 dispatch 后重试。
+- [ ] 继续保持运行时 default-off、fail-closed、无 dispatch 后重试；插件中心对 OFFICIAL
+  签名的自动启用只写入显式记录，不改变运行时闸门。
 
 主 gate：完整 `PRODUCTION` receipt；任何缺少的证据均保留对应的明确限制。
 
@@ -361,8 +370,8 @@ release/RC admission；该新证据不得回写或提升 R5 artifact。`PRODUCTI
   Provider arm64-only/严格 release-entry allowlist、NCNN provenance、NOTICE 和静态 ELF
   包装。Host 仅声明已知 YOLO/NCNN payload absent；已知 R5 TEST-SIGNED certificate 不可被提升。
 - [x] 固定首发恢复/撤回手册：无 code 1 predecessor，不声明版本回滚；允许 exact v2
-  same-version recovery，缺陷版本先禁用/撤回索引并通过 v3 forward-fix，恢复后仍保持
-  default-off 并重新显式授权/启用。
+  same-version recovery，缺陷版本先禁用/撤回索引并通过 v3 forward-fix，恢复后运行时仍保持
+  default-off；adb 重装需重新显式启用，插件中心重装的 OFFICIAL 包会自动写入启用记录。
 - [x] 增加真实 Provider `am force-stop`、旧 session fail-closed/no-retry、显式重新选择并
   reopen 的 opt-in instrumentation 与单 serial gate 源码。
 
@@ -386,8 +395,9 @@ attestation，且设备、索引和发布未完成前不生成 canonical `r6-sum
 
 ### R6-C：索引与首发生命周期边界（待执行）
 
-- [ ] 索引固定 package/exact component/API 与 Host 兼容范围/ABI/backend/APK SHA-256，
-  且安装后保持 default-off、未授权。
+- [ ] 索引固定 package/exact component/API 与 Host 兼容范围/ABI/backend/APK SHA-256；
+  索引项本身不授予授权或启用，安装后运行时保持 default-off，仅插件中心对 OFFICIAL
+  签名包自动写入启用记录。
 - [ ] 索引绑定首发 `0.1.0 / versionCode=2`；本轮不制作 code 1 predecessor，升级与版本回滚
   固定为 `NOT_RUN_BY_PRODUCT_DECISION`。同版本恢复只允许 archived exact v2；缺陷修复使用
   v3 forward-fix，不同 signer/identity/version drift 均 fail-closed。
@@ -408,8 +418,10 @@ attestation，且设备、索引和发布未完成前不生成 canonical `r6-sum
 - [ ] 许可证与最终产物证据刷新后，才允许创建精确 `v0.1.0` tag 和 private Draft
   Release；草稿资产仅保留 Provider APK、脱敏证据摘要和索引准入候选，不上传 Host/
   AndroidTest APK、原始 receipt、设备 serial 或本地绝对路径。
-- [ ] AutoJs6 `6.8.0 / 5275` 正式版公开前，不得将 Provider 仓库转为 public、不得发布
-  Release、不得推送 YOLO 官方索引条目。该边界是产品就绪条件，不得由私有归档证据绕过。
+- [x] 2026-09-18 产品决定：Provider 仓库已转为 public；AutoJs6 `6.8.0 / 5275` 正式版
+  公开不再是 Provider 公开发布的硬性前置条件（宿主发布暂无计划）。
+- [ ] 公开 Release 与 YOLO 官方索引条目仍以 R6-B 生产签名 APK 与 R6-D 设备终验为前置，
+  不得由私有归档证据绕过。
 
 ## 首发后 backlog（不阻塞 R1-R6）
 
