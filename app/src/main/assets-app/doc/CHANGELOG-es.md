@@ -631,6 +631,7 @@
 * `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
 * `Dependencia` Se elimina Kotlin Reflect version 2.4.0
 * `Dependencia` Se elimina Spongy Castle Prov version 1.58.0.0
+* `Dependencia` Se elimina Android dx version 1.14
 * `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 

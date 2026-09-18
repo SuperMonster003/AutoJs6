@@ -611,6 +611,7 @@
 * `依赖` 移除 Apache Commons Lang3 版本 3.18.0
 * `依赖` 移除 Kotlin Reflect 版本 2.4.0
 * `依赖` 移除 Spongy Castle Prov 版本 1.58.0.0
+* `依赖` 移除 Android dx 版本 1.14
 * `依赖` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

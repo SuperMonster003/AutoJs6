@@ -3,7 +3,7 @@ package org.autojs.autojs.rhino
 import android.os.Build
 import android.system.Os
 import android.util.Log
-import com.android.dx.command.dexer.Main
+import androidx.annotation.RequiresApi
 import com.android.tools.r8.CompilationMode
 import com.android.tools.r8.D8
 import com.android.tools.r8.D8Command
@@ -42,7 +42,6 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarInputStream
 import kotlin.random.Random
-import com.legacy.android.dx.command.dexer.Main as LegacyMain
 
 /**
  * Created by Stardust on Apr 5, 2017.
@@ -334,6 +333,11 @@ class AndroidClassLoader internal constructor(
         throwIfInterrupted()
         DexCompilerRuntimeAndroidTestInstrumentation.localCompilerStarted(jar)
         throwIfInterrupted()
+        if (!ClassFileDexer.isD8Available) {
+            // API 24 / 25: D8 cannot run there (no java.nio.file), legacy dx is the only converter.
+            // zh-CN: API 24 / 25: D8 无法运行 (没有 java.nio.file), 旧版 dx 是唯一的转换器.
+            return jarToDexRepacked(jar)
+        }
         try {
             return jarToDexR8(jar)
         } catch (eR8: Throwable) {
@@ -341,12 +345,15 @@ class AndroidClassLoader internal constructor(
             Log.e(TAG, "Failed: jarToDexR8", eR8)
         }
         throwIfInterrupted()
+        // Second D8 attempt on a copy re-packed by zip4j (drops directory entries, normalises headers, keeps the last
+        // of duplicate entries); this slot used to be the dx fallback.
+        // zh-CN: 对 zip4j 重新打包的副本 (去掉目录条目, 规范化文件头, 重名条目保留最后一个) 再试一次 D8; 这个位置以前是 dx 回退.
         try {
-            return jarToDexDx(jar)
-        } catch (eDx: Throwable) {
-            throwIfInterrupted(eDx)
-            Log.e(TAG, "Failed: jarToDexDx", eDx)
-            throw eDx
+            return jarToDexRepacked(jar)
+        } catch (eRepacked: Throwable) {
+            throwIfInterrupted(eRepacked)
+            Log.e(TAG, "Failed: jarToDexRepacked", eRepacked)
+            throw eRepacked
         }
     }
 
@@ -361,7 +368,7 @@ class AndroidClassLoader internal constructor(
         )
     }
 
-    /** R8-only loading seam; it never invokes the raw-JAR D8/dx conversion methods. */
+    /** R8-only loading seam; it never invokes the raw-JAR D8 / legacy dx conversion methods. */
     internal fun loadR8CompilerDexZip(artifact: R8CompilerLoadableDexZip): DexClassLoader {
         throwIfInterrupted()
         return loadVerifiedDexZipSource(
@@ -520,15 +527,19 @@ class AndroidClassLoader internal constructor(
         }
     }
 
+    /**
+     * Re-packs [jar] with zip4j and converts the copy with [dexJar] (D8 on API 26+, legacy dx on API 24 / 25).
+     * zh-CN: 用 zip4j 重新打包 [jar], 再以 [dexJar] 转换副本 (API 26+ 用 D8, API 24 / 25 用旧版 dx).
+     */
     @Throws(IOException::class, FileNotFoundException::class)
-    private fun jarToDexDx(jar: File): DexClassLoader {
+    private fun jarToDexRepacked(jar: File): DexClassLoader {
         val cacheName = generateArtifactsCacheName(jar)
         val cacheFile = File(cacheDir, "$cacheName.jar")
         if (cacheFile.exists()) {
             return loadDex(cacheFile)
         }
         try {
-            val classFile = generateTempFile(jar.path, false)
+            val classFile = generateTempFile(jar.path)
             val zipFile = ZipFile(classFile)
             val jarFile = ZipFile(jar)
             for (header in jarFile.fileHeaders) {
@@ -584,7 +595,7 @@ class AndroidClassLoader internal constructor(
         Log.d(TAG, "defineClass: name = $name data.length = ${data.size}")
         var classFile: File? = null
         return try {
-            classFile = generateTempFile(name, false)
+            classFile = generateTempFile(name)
             ZipFile(classFile).addStream(ByteArrayInputStream(data), ZipParameters().apply {
                 fileNameInZip = name.replace('.', '/') + ".class"
             })
@@ -606,23 +617,16 @@ class AndroidClassLoader internal constructor(
         }
     }
 
+    /**
+     * Converts a jar of class files into a jar of `classes*.dex` and loads it: D8 on API 26+ (also the path of
+     * every Rhino-generated class since 2026-09-18), legacy dx on API 24 / 25. See [ClassFileDexer].
+     * zh-CN: 把 class 文件的 jar 转成 `classes*.dex` 的 jar 并加载: API 26+ 用 D8 (自 2026-09-18 起也是 Rhino 生成类的路径),
+     * API 24 / 25 用旧版 dx. 见 [ClassFileDexer].
+     */
     @Throws(IOException::class)
     private fun dexJar(classFile: File, dexFile: File?): DexClassLoader {
-        val niceDexFile = dexFile ?: generateTempFile("dex-" + classFile.path, true)
-        when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            true -> Main.Arguments().apply {
-                fileNames = arrayOf(classFile.path)
-                outName = niceDexFile.path
-                jarOutput = true
-                Main.run(this)
-            }
-            else -> LegacyMain.Arguments().apply {
-                fileNames = arrayOf(classFile.path)
-                outName = niceDexFile.path
-                jarOutput = true
-                LegacyMain.run(this)
-            }
-        }
+        val niceDexFile = dexFile ?: generateTempFile("dex-" + classFile.path)
+        ClassFileDexer.convertToDexJar(classFile, niceDexFile, cacheDir)
         val loader = loadDex(niceDexFile)
         when (dexFile) {
             // Treat as a temporary file that has been generated.
@@ -636,25 +640,19 @@ class AndroidClassLoader internal constructor(
         return loader
     }
 
+    /** A fresh `.jar` path under the cache directory; any stale file of that name is removed first. */
     @Throws(IOException::class)
-    private fun generateTempFile(name: String, create: Boolean): File {
+    private fun generateTempFile(name: String): File {
         val file = File(cacheDir, "${(name.hashCode() + System.currentTimeMillis())}.jar")
-        if (create) {
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    Log.e(TAG, "file.createNewFile() failed")
-                }
-            }
-        } else {
-            if (file.exists() && !file.delete()) {
-                Log.e(TAG, "file.delete() failed")
-            }
+        if (file.exists() && !file.delete()) {
+            Log.e(TAG, "file.delete() failed")
         }
         return file
     }
 
     private fun generateArtifactsCacheName(jar: File) = md5("${jar.path}_${jar.lastModified()}")
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Throws(IOException::class, FileNotFoundException::class)
     private fun jarToDexR8(jar: File): DexClassLoader {
         val cacheName = generateArtifactsCacheName(jar)
@@ -675,36 +673,7 @@ class AndroidClassLoader internal constructor(
         }
 
         try {
-            val runtimeLibraries = collectRuntimeLibrariesForD8()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val builder = D8Command.builder()
-                    .addProgramFiles(jar.toPath())
-                    .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
-                    .setMode(CompilationMode.RELEASE)
-                    .setMinApiLevel(Build.VERSION.SDK_INT)
-                runtimeLibraries.forEach {
-                    builder.addLibraryFiles(it.toPath())
-                }
-                val cmd = builder.build()
-                D8.run(cmd)
-            } else {
-                val args = mutableListOf(
-                    "--output", tmpOut.absolutePath,
-                    "--release",
-                    "--min-api", Build.VERSION.SDK_INT.toString(),
-                )
-                runtimeLibraries.forEach {
-                    args += "--lib"
-                    args += it.absolutePath
-                }
-                args += jar.absolutePath
-                D8.main(args.toTypedArray())
-            }
-
-            val dexFiles = tmpOut.listFiles { _, name ->
-                Regex("classes\\d*\\.dex").matches(name)
-            }?.sortedBy { it.name } ?: emptyList()
-
+            val dexFiles = ClassFileDexer.runD8(jar, tmpOut)
             if (dexFiles.isEmpty()) {
                 throw IOException("D8 did not produce any classes*.dex")
             }
@@ -720,12 +689,7 @@ class AndroidClassLoader internal constructor(
             } else {
                 // Multi-dex output: pack all classes*.dex into a single jar for DexClassLoader.
                 // zh-CN: 多 dex 输出: 将所有 classes*.dex 打包到单个 jar 文件中供 DexClassLoader 使用.
-                val zip = ZipFile(dexJarFile)
-                dexFiles.forEach { f ->
-                    zip.addStream(f.inputStream(), ZipParameters().apply {
-                        fileNameInZip = f.name
-                    })
-                }
+                ClassFileDexer.packDexJar(dexFiles, dexJarFile)
                 loadDex(dexJarFile)
             }
         } finally {
@@ -918,18 +882,7 @@ class AndroidClassLoader internal constructor(
         }
     }
 
-    private fun collectRuntimeLibrariesForD8(): List<File> = buildList {
-        System.getProperty("java.boot.class.path")?.let(::add)
-        System.getenv("BOOTCLASSPATH")?.let(::add)
-        System.getenv("DEX2OATBOOTCLASSPATH")?.let(::add)
-    }.asSequence()
-        .flatMap { it.split(File.pathSeparator).asSequence() }
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .map(::File)
-        .filter { it.exists() && it.canRead() }
-        .distinctBy { it.path }
-        .toList()
+    private fun collectRuntimeLibrariesForD8(): List<File> = ClassFileDexer.collectRuntimeLibraries()
 
     private fun sha256Hex(file: File): String = FileInputStream(file).use { input ->
         val digest = MessageDigest.getInstance("SHA-256")

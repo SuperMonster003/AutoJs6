@@ -2,10 +2,10 @@ package com.stardust.autojs.rhino;
 
 import android.util.Log;
 
-import com.android.dx.command.dexer.Main;
 import com.stardust.pio.PFiles;
 import com.stardust.util.MD5;
 
+import org.autojs.autojs.rhino.ClassFileDexer;
 import org.mozilla.javascript.GeneratedClassLoader;
 
 import java.io.ByteArrayInputStream;
@@ -137,15 +137,15 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
     }
 
     private DexClassLoader dexJar(File classFile, File dexFile) throws IOException {
-        final Main.Arguments arguments = new Main.Arguments();
-        arguments.fileNames = new String[]{classFile.getPath()};
         boolean isTmpDex = dexFile == null;
         if (isTmpDex) {
-            dexFile = generateTempFile("dex-" + classFile.getPath(), true);
+            dexFile = generateTempFile("dex-" + classFile.getPath(), false);
         }
-        arguments.outName = dexFile.getPath();
-        arguments.jarOutput = true;
-        Main.run(arguments);
+        // Delegates to the host converter: D8 on API 26+, legacy dx on API 24 / 25 (dx 1.14 is gone, and it never
+        // worked on 7.x anyway because the platform's own com.android.dex classes shadowed it).
+        // zh-CN: 委托给宿主的转换器: API 26+ 用 D8, API 24 / 25 用旧版 dx (dx 1.14 已移除; 它在 7.x 上本来就因平台自带的
+        // com.android.dex 类遮蔽而无法工作).
+        ClassFileDexer.convertToDexJar(classFile, dexFile, mCacheDir);
         DexClassLoader loader = loadDex(dexFile);
         if (isTmpDex) {
             dexFile.delete();

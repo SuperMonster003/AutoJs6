@@ -633,6 +633,7 @@
         "Removed Apache Commons Lang3 version 3.18.0",
         "Removed Kotlin Reflect version 2.4.0",
         "Removed Spongy Castle Prov version 1.58.0.0",
+        "Removed Android dx version 1.14",
         "Appended ZXing Android Embedded version 4.3.0"
       ]
     },

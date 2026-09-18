@@ -633,6 +633,7 @@
         "Удален Apache Commons Lang3 версии 3.18.0",
         "Удален Kotlin Reflect версии 2.4.0",
         "Удален Spongy Castle Prov версии 1.58.0.0",
+        "Удален Android dx версии 1.14",
         "Добавлен ZXing Android Embedded версии 4.3.0"
       ]
     },

@@ -632,6 +632,7 @@
 * `Dépendance` Suppression de Apache Commons Lang3 version 3.18.0
 * `Dépendance` Suppression de Kotlin Reflect version 2.4.0
 * `Dépendance` Suppression de Spongy Castle Prov version 1.58.0.0
+* `Dépendance` Suppression de Android dx version 1.14
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 
 # v6.7.0

@@ -111,13 +111,16 @@ The current host has a real extraction boundary rather than a speculative one:
   size, not a direct APK-size claim. The separately reported AGP build
   classpath uses its bundled R8 8.13.19; that build-time tool is not the
   packaged application dependency.
-- The host also packages `com-android-dx-1_14.jar` and
-  `com-legacy-android-dx-1_7_0.jar`. Their raw JAR sizes are 1,030,064
-  bytes and 986,233 bytes, or about 1.92 MiB together before APK compression
-  and shrinking.
+- Since 2026-09-18 the host packages only `com-legacy-android-dx-1_7_0.jar`
+  (986,233 bytes raw); `com-android-dx-1_14.jar` (1,030,064 bytes raw) was
+  removed by the APK size roadmap (P5.1).
 - `app/src/main/java/org/autojs/autojs/rhino/AndroidClassLoader.kt` implements
-  the active conversion path. Its `loadJar()` attempts D8 first and falls back
-  to dx.
+  the active conversion path through `ClassFileDexer`. On API 26+ every
+  conversion (`loadJar()`, `loadAar()`, `defineClass()`) runs D8, with one
+  retry on a zip4j re-packed copy for `loadJar()`. On API 24 / 25 D8 cannot run
+  at all (it needs `java.nio.file`, which the plain `desugar_jdk_libs` variant
+  does not provide), so legacy dx serves those two API levels only; see
+  `docs/dev/evidence/apk-size-p5-dexer-20260918.md`.
 - The D8 path uses the current device API as `minApi`, adds readable runtime
   boot libraries, accepts multi-DEX output, and packages multiple
   `classes*.dex` files for `DexClassLoader`.
@@ -125,9 +128,10 @@ The current host has a real extraction boundary rather than a speculative one:
   entries before conversion. It keeps the first entry name encountered and
   excludes selected `META-INF` signature metadata; the current archive-order
   merge is not evidence of byte-for-byte canonical output.
-- Its `GeneratedClassLoader.defineClass()` implementation still uses the dx path
-  directly. This is a separate compatibility gate and prevents early removal of
-  both dx archives.
+- Its `GeneratedClassLoader.defineClass()` implementation shares the same
+  converter. The remaining compatibility gate is the API 24 / 25 legacy dx,
+  tracked as APK size roadmap Q10 (nio desugaring versus dropping dynamic class
+  loading on Android 7.x).
 - The current artifact cache name is an MD5 of path and modification time, not
   content. The host also owns read-only safe staging motivated by Android 14,
   class loading, and class-loader lifetime. V1 deliberately strengthens the

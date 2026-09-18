@@ -592,8 +592,10 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:jackpal-androidterm-emulatorview-1_0_42"))
     implementation(project(":libs:jackpal-androidterm-1_0_70"))
 
-    // Dex
-    implementation(files("$rootDir/libs/com-android-dx-1_14.jar"))
+    // Legacy dx, API 24 / 25 only: D8 (libs.r8, used on API 26+) needs java.nio.file, which those API levels lack
+    // without the nio desugar variant; see docs/dev/evidence/apk-size-p5-dexer-20260918.md (size roadmap Q10).
+    // zh-CN: 仅供 API 24 / 25 的旧版 dx: D8 (libs.r8, API 26+ 使用) 需要 java.nio.file, 没有 nio 脱糖变体时这两个 API
+    // 级别不具备; 见 docs/dev/evidence/apk-size-p5-dexer-20260918.md (体积 roadmap Q10).
     implementation(files("$rootDir/libs/com-legacy-android-dx-1_7_0.jar"))
 
     // OpenCV Java API. The native runtime is supplied by the official OpenCV plugin.

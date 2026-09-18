@@ -712,7 +712,7 @@ preflight is an environment observation, not a memory-pressure workload test.
 
 ## Dynamic loading
 
-Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: the built-in legacy dx fallback on API 24 / 25 rejects Java 8 class files, and local D8 uses `java.nio.file.Paths`, which is unavailable there. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
+Build the two small fixtures with the installed JDK and Android Build Tools. The Java sources contain no native code or Android API calls. Use JDK 8 to produce a Java 6 class file for the JAR fixture: on API 24 / 25 the built-in legacy dx is the only converter (local D8 needs `java.nio.file`, which is unavailable there without the nio desugar variant) and it rejects Java 8 class files; API 26+ converts everything with D8 since 2026-09-18. This fixture tests loading within that existing compiler boundary. Replace the example paths for your machine:
 
 ```powershell
 $Sdk37Jdk = 'E:/.java/jdk-21.0.1'

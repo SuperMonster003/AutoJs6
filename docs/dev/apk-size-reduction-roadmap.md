@@ -92,7 +92,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | `kotlin.reflect` | 1.44 | `kotlin("reflect")`, 5 个调用点 (实施时另发现第 6 处) | P3 已移除 (2026-09-18) |
 | `com.fasterxml` (Jackson) | 0.93 | `libs.jackson.databind`, 仅 `github-api` 需要 | P2.4 已移除 (2026-09-18) |
 | `com.vladsch` (Flexmark) | 0.71 | `libs.flexmark.html2md`, 仅 `TextUtils.htmlToMarkdown`, 其唯一调用在已注释的 `parseHtmlFlow` | P1.1 |
-| `com.android.dx` + `com.legacy.android.dx` + `com.android.dex` | 0.45 + 0.43 + 0.03 | 两个本地 dx jar, 仅 `AndroidClassLoader.dexJar()` (单类 `defineClass` 路径) 与 `com.stardust` 兼容加载器 | P5.1 |
+| `com.android.dx` + `com.legacy.android.dx` + `com.android.dex` | 0.45 + 0.43 + 0.03 | 两个本地 dx jar, 仅 `AndroidClassLoader.dexJar()` (单类 `defineClass` 路径) 与 `com.stardust` 兼容加载器 | P5.1 已移除 dx 1.14 (2026-09-18, `com.android.dx` + `com.android.dex` 归零); 旧版 dx 1.7.0 是 API 24 / 25 唯一的转换器, 留待 Q10 (P5.3) |
 | `com.stardust` | 0.43 | 旧 Auto.js 兼容包 | 保留 (Q7) |
 | `org.apache.commons.lang3` | 0.41 | `libs.commons.lang3`; 宿主直接引用仅 `ExplorerSorter.isAsciiPrintable`, 但 `github-api` 在运行时解析 `StringUtils` / `ToStringBuilder` (`GitHubClient`, `GHRepository`, `GHObject` 等 22 个类) | P1.5 去掉宿主引用, P2.4 已移除 (2026-09-18) |
 | `org.jline` (+0.13 松散资源) | 0.36 | `libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar` 内打包的 JLine, 只有 Rhino shell 控制台用到; 宿主只引用 `tools.shell.ShellContextFactory` 与 `tools.debugger.*` | P1.7 |
@@ -113,10 +113,10 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | Flexmark 停用链 | 成立. `htmlToMarkdown()` 的唯一调用在 `parseHtmlFlow()`, 其调用点已注释, 发布历史走 Markdown 解析. |
 | 更新检查 SDK 过大 | 成立. `org.kohsuke` 只在 `UpdateChecker` (仓库 / release / assets / 令牌连接 / `renderMarkdown`); Jackson 0.93 MiB 与 Commons IO 只为它服务. |
 | JUnit 两条传入路径 | 成立, 且 `resources.excludes` 确实只能排除资源. |
-| DEX 编译器 | 成立, 但拆分: dx 两个 jar 的用途 (单类 `defineClass`) 可以直接合并到 D8 (D8 已在 API 24 上用于 jar 编译, 依赖 `desugar_jdk_libs` 的 `java.nio.file`); R8 的移除受 D5 门禁. |
+| DEX 编译器 | 成立, 但拆分: dx 两个 jar 的用途 (单类 `defineClass`) 可以直接合并到 D8 (D8 已在 API 24 上用于 jar 编译, 依赖 `desugar_jdk_libs` 的 `java.nio.file`); R8 的移除受 D5 门禁. 2026-09-18 修正 (P5.1): D8 在 API 24 / 25 不能运行 (宿主是不含 `nio` 的 `desugar_jdk_libs` 变体, `java.nio.file` 缺失), 只有 dx 1.14 可并入 D8, 旧版 dx 1.7.0 是 7.x 唯一的转换器 (Q10). |
 | APK 签名依赖 | 成立, 但 `modules/apk-signer` 也被 `plugins/apk-builder-template` 依赖, 所以是模块拆分而非移除; `KeyStoreHelper.loadBks` 已经先尝试系统 `"BKS", "BC"` 再回退 SpongyCastle, 回退是否仍需要必须先测. |
 
-理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3; 实测 -1.07 MiB, 见 P2.6); P3 约 0.6 MiB (实测 -1.03 MiB, 见 P3.3); P4 约 1.0 MiB (实测 -1,421,766 字节 = -1.36 MiB, 见 P4.4); P5.1 约 0.4 MiB; P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
+理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3; 实测 -1.07 MiB, 见 P2.6); P3 约 0.6 MiB (实测 -1.03 MiB, 见 P3.3); P4 约 1.0 MiB (实测 -1,421,766 字节 = -1.36 MiB, 见 P4.4); P5.1 约 0.4 MiB (实测 -316,584 字节 = -0.30 MiB, 仅 dx 1.14, 见 P5.1; 旧版 dx 留待 Q10); P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
 
 ---
 
@@ -163,8 +163,9 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ### P5 DEX 编译器宿主依赖
 
-- [ ] P5.1 dx 合并到 D8: `AndroidClassLoader.dexJar()` (单个 `.class` -> dex, `defineClass` 与兼容路径) 改用与 `loadJarLocally` 相同的 D8 调用 (API 26+ `D8Command.builder`, API 24 / 25 `D8.main` 参数形式, `--min-api` 取运行时 API); `com/stardust/autojs/rhino/AndroidClassLoader.java` 的 dx 调用委托到新实现. 删除 `libs/com-android-dx-1_14.jar` 与 `libs/com-legacy-android-dx-1_7_0.jar`. 验证: 既有 DEX 夹具 / `androidTest` 在 API 24 AVD 与 API 33+ 设备上执行 `defineClass` 路径 (附录 B 第 3 项). 预计 -0.91 MiB 归属 DEX.
+- [x] P5.1 dx 合并到 D8 (范围按设备证据修正, 见 [apk-size-p5-dexer-20260918.md](evidence/apk-size-p5-dexer-20260918.md)): 原设想的 "API 24 / 25 用 `D8.main` 参数形式" 不成立: AVD API 24 上 D8 一律 `NoClassDefFoundError: java.nio.file.Paths` (宿主的 `desugar_jdk_libs` 2.1.5 是不含 `nio` 的变体, `java.nio.file` 在 API 26 才存在), `loadJarLocally` 的 D8 尝试在 7.x 上从未成功过, 一直由旧版 dx 1.7.0 承担; dx 1.14 在 7.x 上则被平台自带的 `com.android.dex` 遮蔽 (`NoSuchFieldError: callSiteIds`, 即 issue #293 引入重打包旧版 dx 的根因), 所以两个 jar 中只有 dx 1.14 (API 26+ 的 `defineClass` 与 `loadJar` 回退) 能并入 D8. 实施: 新增 `rhino/ClassFileDexer.kt` 作为唯一转换入口 (`runD8` 经 `D8Command.builder` + `D8.run`, 不再经会 `System.exit` 的 `D8.main`; `packDexJar` 写出 `classes*.dex` jar; `convertToDexJar` 按 `isD8Available` 分派), API 26+ 的 `loadJar` / `loadAar` / `defineClass` (`dexJar`) 与 `com/stardust/autojs/rhino/AndroidClassLoader.java` 的转换全部走 D8 (`loadJar` 失败后对 zip4j 重打包副本再试一次 D8, 顶替原 dx 回退位; 兼容加载器附带修复 7.x 崩溃), API 24 / 25 直接走旧版 dx; 删除 `libs/com-android-dx-1_14.jar` (`com.android.dx` + `com.android.dex` 0.48 MiB 归属 DEX), `libs/com-legacy-android-dx-1_7_0.jar` 留待 Q10 (P5.3). 验证: JVM `ClassFileDexerTest` 4/4 (桌面 JVM 上同一 r8 8.13.17 编译 / 打包 / 坏输入抛异常), `:app:testAppDebugUnitTest` 全量 2857/0; `:app:assembleAppRelease` 通过; [apk-size-p5-20260918.md](evidence/apk-size-p5-20260918.md): universal 35,869,027 字节 (对基线 -5,277,028 字节 = -5.03 MiB, -12.8%; 对 P4 -316,584 字节 = -0.30 MiB), arm64-v8a 34,672,001 字节, 定义方法 352,078, `com.android.dx` 0.45 -> 0 MiB. 设备冒烟 (`build/tmp-size/p5-smoke.js`, AVD API 24 + Sony G8441 API 28 + Redmi 22120RN86C API 33): dx 1.14 类不存在; `runtime.loadJar` (Java 7 / Java 8 jar, 缓存命中), `JavaAdapter` (接口对象, 抽象类, 双超类型, Java 线程), 两个加载器的 `defineClass`, 兼容加载器 `loadJar`, `runtime.loadAar` 在 API 28 / 33 全部通过 (Java 8 class 文件在 dx 1.14 时会被丢弃, 现经 D8 通过); API 24 经旧版 dx 除 Java 8 class 文件 (既有限制) 外全部通过; 坏 jar 三个环境都以异常报告且进程存活. 单类 D8 稳态约 80-100 ms (含引导类路径 library 输入; 不含约 45-65 ms), 首次运行另加约 200 ms. 等级 E3, 2026-09-18.
 - [ ] P5.2 R8 (账目条目, 受 D5 门禁): 记录 `com.android.tools.r8` 6.59 MiB 归属 DEX + `resources/new_api_database.ser` 2.93 MiB, 约 5.5 MiB APK 收益; 前置条件是 DEX 编译器插件通过缓存命中延迟门禁并晋级默认路径, 且 `loadAar` / 动态 `defineClass` / 失败回退有插件侧或宿主侧的非 R8 方案. 门禁通过前本条不动, 每次评审只更新 "前置条件状态".
+- [ ] P5.3 旧版 dx 1.7.0 (`libs/com-legacy-android-dx-1_7_0.jar`, `com.legacy.android.dx` 0.43 MiB 归属 DEX, 约 0.17 MiB APK) 的去留, 受 Q10 门禁: 它是 API 24 / 25 唯一的 class -> dex 转换器 (P5.1 证据). 方案 a: `desugar_jdk_libs` 改为 `desugar_jdk_libs_nio` 使 D8 在 7.x 可运行后删除 (`java.nio.file` 脱糖作用于整个 APK, 需 API 24 / 25 全面回归, nio 脱糖类本身有体积, 净收益未测); 方案 b: 7.x 放弃动态类加载 (与 D13 为 7.x 预留的方针相悖); 方案 c: 保持现状 (建议). 拍板前本条不动.
 
 ### P6 功能级候选 (需拍板)
 
@@ -198,12 +199,13 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | Q7 | `com.stardust` 兼容包去留? | 建议保留. | 保留 (D16). |
 | Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. | 等待设备证据. 2026-09-18 P4.2 六个环境全部通过, 回退移除 (P4.3). |
 | Q9 | log4j 替换后, 文档 `global.md` 列出的脚本全局代理类 `LogConfigurator` (`de.mindpipe...LogConfigurator`), `Level`, `LogManager` (`org.apache.log4j.*`) 如何处理? | 建议 (a): 用自有实现提供同名代理类, 覆盖文档化用法, 其余 log4j API 不再提供, 文档与 d.ts 同步; 备选 (b): 从 `Classes` 与 `global.md` 移除三个代理并在 changelog 标注. | 方案 (a) (D17, 2026-09-18). |
+| Q10 | 旧版 dx 1.7.0 是否保留给 Android 7.x? P5.1 证实 D8 在 API 24 / 25 无法运行 (`java.nio.file` 缺失, 宿主是不含 `nio` 的 `desugar_jdk_libs` 变体), 旧版 dx 是 7.x 唯一的 class -> dex 转换器. | 建议保持现状 (P5.3 方案 c): 0.43 MiB 归属 DEX 约合 0.17 MiB APK, 而 `desugar_jdk_libs_nio` 的回归面与自身体积代价都不小, 放弃 7.x 动态类加载又与 D13 相悖. | 待拍板 (2026-09-18 提出). |
 
 ## 附录 B. 冒烟清单
 
 1. (P2) 设置页 "检查更新": 无令牌与有令牌各一次; 当前版本为最新与存在新版本各一次 (可临时把本地 `VERSION_NAME` 降低); 更新说明按 UI 语言显示, 缺失语言回退到英文; 点击下载走 ABI 选包.
 2. (P3) 脚本: `ocr.mode = "paddle"` 等大小写变体, `s13n` 的时间转换函数名, 选择器全局函数 `text("x").exists()`, `web.newWebSocket` 后访问 `WebSocket` 静态字段; 与 P3.1 固化的名字集合对照.
-3. (P5.1) 脚本: `runtime.loadJar` 已有夹具, 再加 `new JavaAdapter` / `defineClass` 路径 (例如实现 Java 接口的匿名类) 在 API 24 AVD 与 API 33+ 设备上各跑一次.
+3. (P5.1) 脚本: `runtime.loadJar` 已有夹具, 再加 `new JavaAdapter` / `defineClass` 路径 (例如实现 Java 接口的匿名类) 在 API 24 AVD 与 API 33+ 设备上各跑一次. 已执行 2026-09-18 (`build/tmp-size/p5-smoke.js`, AVD API 24 + API 28 + API 33, 见 P5.1 与 `evidence/apk-size-p5-dexer-20260918.md`).
 4. (P1) 打开 "关于" -> 版本历史 (在线与离线各一次), 编辑器 Markdown 预览 (commonmark), 资源管理器名称排序 (ASCII / 非 ASCII 混合), 运行一段使用 `importClass(Packages.org.mozilla.javascript.tools.shell.ShellContextFactory)` 之外的普通脚本确认 Rhino 未受 JLine 裁剪影响.
 
 ## 附录 C. 证据等级
@@ -225,5 +227,5 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | P2 代码 | `network/UpdateChecker.java`, `network/github/GitHubReleaseClient.kt` / `GitHubRelease.kt` / `GitHubReleaseAssetPicker.kt`, `app/src/test/java/org/autojs/autojs/network/github/`, `network/api/*` |
 | P3 代码 | `runtime/api/augment/global/GlobalClasses.kt`, `ocr/Ocr.kt`, `s13n/S13n.kt`, `selector/Selector.kt`, `web/WebSocketFields.kt`, `Augmentable.kt`, `util/CompanionProperties.kt`; 单测 `app/src/test/java/org/autojs/autojs/runtime/api/augment/{web/WebSocketFieldsTest,s13n/S13nTimeTest,ocr/OcrModeDispatcherTest}.kt`, `util/CompanionPropertiesTest.kt` |
 | P4 代码 | `modules/apk-verifier/` (`com/android/apksig/**`, `com/mcal/apksigner/utils/{KeyStoreHelper.kt, JksKeyStore.kt, JksProvider.kt, JKS.java, LoadKeystoreException.kt, Base64.kt}`, 单测 `KeyStoreHelperTest.kt` 与 `src/test/resources/keystore/`), `modules/apk-signer/` (签名器侧), `apkbuilder/template/RemoteBuildExpectedSignerResolver.kt`, `RemoteBuildApkValidator.kt`, `plugins/apk-builder-template/`; 证据 `evidence/apk-size-p4-bks-20260918.md` |
-| P5 代码 | `rhino/AndroidClassLoader.kt` (`dexJar`, `loadJarLocally*`), `com/stardust/autojs/rhino/AndroidClassLoader.java`, `docs/dev/dex-compiler-plugin-evaluation.md` |
+| P5 代码 | `rhino/ClassFileDexer.kt` (唯一转换入口, 单测 `rhino/ClassFileDexerTest.kt`), `rhino/AndroidClassLoader.kt` (`dexJar`, `loadJarLocally`, `jarToDexR8`, `jarToDexRepacked`), `com/stardust/autojs/rhino/AndroidClassLoader.java`, `libs/com-legacy-android-dx-1_7_0.jar` (Q10), `docs/dev/dex-compiler-plugin-evaluation.md`, `tools/sdk37/README.md` (夹具说明); 证据 `evidence/apk-size-p5-dexer-20260918.md` |
 | P6 代码 | `core/media/ScriptMusicService.kt`, `core/console/GlobalConsole.kt`, `ui/widget/JsTextViewLegacy*`, `app/src/main/assets-app/doc/`, `app/src/main/res/` |

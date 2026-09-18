@@ -632,6 +632,7 @@
 * `의존성` Apache Commons Lang3 버전 3.18.0 제거
 * `의존성` Kotlin Reflect 버전 2.4.0 제거
 * `의존성` Spongy Castle Prov 버전 1.58.0.0 제거
+* `의존성` Android dx 버전 1.14 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

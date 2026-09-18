@@ -632,6 +632,7 @@
         "Se elimina Apache Commons Lang3 version 3.18.0",
         "Se elimina Kotlin Reflect version 2.4.0",
         "Se elimina Spongy Castle Prov version 1.58.0.0",
+        "Se elimina Android dx version 1.14",
         "Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0",
         "Anexado ZXing Android Embedded versión 4.3.0"
       ]

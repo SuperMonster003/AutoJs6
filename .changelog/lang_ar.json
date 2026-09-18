@@ -632,6 +632,7 @@
         "ازالة Apache Commons Lang3 الاصدار 3.18.0",
         "ازالة Kotlin Reflect الاصدار 2.4.0",
         "ازالة Spongy Castle Prov الاصدار 1.58.0.0",
+        "ازالة Android dx الاصدار 1.14",
         "إضافة AndroidX Media3 ExoPlayer / Session الإصدار 1.11.0",
         "إلحاق ZXing Android Embedded الإصدار 4.3.0"
       ]

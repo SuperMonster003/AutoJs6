@@ -633,6 +633,7 @@
         "Apache Commons Lang3 バージョン 3.18.0 を削除",
         "Kotlin Reflect バージョン 2.4.0 を削除",
         "Spongy Castle Prov バージョン 1.58.0.0 を削除",
+        "Android dx バージョン 1.14 を削除",
         "ZXing Android Embedded バージョン 4.3.0 を追加"
       ]
     },
