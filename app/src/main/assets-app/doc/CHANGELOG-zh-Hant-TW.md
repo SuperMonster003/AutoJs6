@@ -599,8 +599,8 @@
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer
+* `依賴` 模組化 APK Verifier
 * `依賴` 模組化 ARSCLib 版本 1.3.8
-* `依賴` 模組化 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 模組化 Image Quantization 版本 2.17.0
 * `依賴` 模組化 OpenCV 版本 4.8.0
 * `依賴` 附加 AndroidX Media3 ExoPlayer / Session 版本 1.11.0
@@ -631,6 +631,7 @@
 * `依賴` 移除 Commons IO 版本 2.8.0
 * `依賴` 移除 Apache Commons Lang3 版本 3.18.0
 * `依賴` 移除 Kotlin Reflect 版本 2.4.0
+* `依賴` 移除 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

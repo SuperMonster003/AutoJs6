@@ -61,6 +61,7 @@ includeBuild("build-logic")
 
 private val modules = listOf(
     "apk-signer",
+    "apk-verifier",
     "apk-parser",
     "android-axml",
     "android-arsc-editor",

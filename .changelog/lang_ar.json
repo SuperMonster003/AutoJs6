@@ -600,8 +600,8 @@
         "Android AXML بعد تحويله الى وحدات",
         "Android ARSC Editor بعد تحويله الى وحدات",
         "APK Signer بعد تحويله الى وحدات",
+        "APK Verifier بعد تحويله الى وحدات",
         "ARSCLib بعد تحويله الى وحدات, الاصدار 1.3.8",
-        "Spongy Castle Prov بعد تحويله الى وحدات, الاصدار 1.58.0.0",
         "Image Quantization بعد تحويله الى وحدات, الاصدار 2.17.0",
         "OpenCV بعد تحويله الى وحدات, الاصدار 4.8.0",
         "اضافة juniversalchardet الاصدار 2.0.4",
@@ -631,6 +631,7 @@
         "ازالة Commons IO الاصدار 2.8.0",
         "ازالة Apache Commons Lang3 الاصدار 3.18.0",
         "ازالة Kotlin Reflect الاصدار 2.4.0",
+        "ازالة Spongy Castle Prov الاصدار 1.58.0.0",
         "إضافة AndroidX Media3 ExoPlayer / Session الإصدار 1.11.0",
         "إلحاق ZXing Android Embedded الإصدار 4.3.0"
       ]

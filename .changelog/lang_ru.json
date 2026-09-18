@@ -600,8 +600,8 @@
         "Модульный Android AXML",
         "Модульный Android ARSC Editor",
         "Модульный APK Signer",
+        "Модульный APK Verifier",
         "Модульный ARSCLib версии 1.3.8",
-        "Модульный Spongy Castle Prov версии 1.58.0.0",
         "Модульный Image Quantization версии 2.17.0",
         "Модульный OpenCV версии 4.8.0",
         "Добавлен AndroidX Media3 ExoPlayer / Session версии 1.11.0",
@@ -632,6 +632,7 @@
         "Удален Commons IO версии 2.8.0",
         "Удален Apache Commons Lang3 версии 3.18.0",
         "Удален Kotlin Reflect версии 2.4.0",
+        "Удален Spongy Castle Prov версии 1.58.0.0",
         "Добавлен ZXing Android Embedded версии 4.3.0"
       ]
     },

@@ -600,8 +600,8 @@
         "모듈화 Android AXML",
         "모듈화 Android ARSC Editor",
         "모듈화 APK Signer",
+        "모듈화 APK Verifier",
         "모듈화 ARSCLib 버전 1.3.8",
-        "모듈화 Spongy Castle Prov 버전 1.58.0.0",
         "모듈화 Image Quantization 버전 2.17.0",
         "모듈화 OpenCV 버전 4.8.0",
         "AndroidX Media3 ExoPlayer / Session 버전 1.11.0 추가",
@@ -632,6 +632,7 @@
         "Commons IO 버전 2.8.0 제거",
         "Apache Commons Lang3 버전 3.18.0 제거",
         "Kotlin Reflect 버전 2.4.0 제거",
+        "Spongy Castle Prov 버전 1.58.0.0 제거",
         "ZXing Android Embedded 버전 4.3.0 추가"
       ]
     },

@@ -599,8 +599,8 @@
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer
+* `의존성` 모듈화 APK Verifier
 * `의존성` 모듈화 ARSCLib 버전 1.3.8
-* `의존성` 모듈화 Spongy Castle Prov 버전 1.58.0.0
 * `의존성` 모듈화 Image Quantization 버전 2.17.0
 * `의존성` 모듈화 OpenCV 버전 4.8.0
 * `의존성` AndroidX Media3 ExoPlayer / Session 버전 1.11.0 추가
@@ -631,6 +631,7 @@
 * `의존성` Commons IO 버전 2.8.0 제거
 * `의존성` Apache Commons Lang3 버전 3.18.0 제거
 * `의존성` Kotlin Reflect 버전 2.4.0 제거
+* `의존성` Spongy Castle Prov 버전 1.58.0.0 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

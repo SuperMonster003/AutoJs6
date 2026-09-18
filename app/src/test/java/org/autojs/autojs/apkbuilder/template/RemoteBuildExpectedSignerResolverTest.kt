@@ -1,12 +1,15 @@
 package org.autojs.autojs.apkbuilder.template
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.IOException
+import java.security.Security
 
 class RemoteBuildExpectedSignerResolverTest {
 
@@ -100,5 +103,16 @@ class RemoteBuildExpectedSignerResolverTest {
         private const val DEFAULT_DIGEST_ASSET =
             "apk_builder_default_signer_certificate_sha256.txt"
         private const val DEFAULT_CREDENTIAL = "AutoJs6"
+
+        // KeyStoreHelper reads BKS through the provider named "BC": the platform's BouncyCastle on Android,
+        // the desktop BouncyCastle registered under the same name here.
+        // zh-CN: KeyStoreHelper 经名为 "BC" 的 provider 读取 BKS: Android 上是平台自带的 BouncyCastle, 这里是以同名注册的桌面版.
+        @JvmStatic
+        @BeforeClass
+        fun registerBouncyCastleAsBc() {
+            if (Security.getProvider("BC") == null) {
+                Security.addProvider(BouncyCastleProvider())
+            }
+        }
     }
 }

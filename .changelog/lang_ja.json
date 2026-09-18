@@ -600,8 +600,8 @@
         "モジュール化 Android AXML",
         "モジュール化 Android ARSC Editor",
         "モジュール化 APK Signer",
+        "モジュール化 APK Verifier",
         "モジュール化 ARSCLib バージョン 1.3.8",
-        "モジュール化 Spongy Castle Prov バージョン 1.58.0.0",
         "モジュール化 Image Quantization バージョン 2.17.0",
         "モジュール化 OpenCV バージョン 4.8.0",
         "AndroidX Media3 ExoPlayer / Session バージョン 1.11.0 を追加",
@@ -632,6 +632,7 @@
         "Commons IO バージョン 2.8.0 を削除",
         "Apache Commons Lang3 バージョン 3.18.0 を削除",
         "Kotlin Reflect バージョン 2.4.0 を削除",
+        "Spongy Castle Prov バージョン 1.58.0.0 を削除",
         "ZXing Android Embedded バージョン 4.3.0 を追加"
       ]
     },

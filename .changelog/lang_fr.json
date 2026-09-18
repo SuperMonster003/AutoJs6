@@ -600,8 +600,8 @@
         "Android AXML modularise",
         "Android ARSC Editor modularise",
         "APK Signer modularise",
+        "APK Verifier modularise",
         "ARSCLib modularise version 1.3.8",
-        "Spongy Castle Prov modularise version 1.58.0.0",
         "Image Quantization modularise version 2.17.0",
         "OpenCV modularise version 4.8.0",
         "Ajout de AndroidX Media3 ExoPlayer / Session version 1.11.0",
@@ -632,6 +632,7 @@
         "Suppression de Commons IO version 2.8.0",
         "Suppression de Apache Commons Lang3 version 3.18.0",
         "Suppression de Kotlin Reflect version 2.4.0",
+        "Suppression de Spongy Castle Prov version 1.58.0.0",
         "Ajout de ZXing Android Embedded version 4.3.0"
       ]
     },

@@ -652,8 +652,10 @@ dependencies /* Unclassified */ {
     // R8
     implementation(libs.r8)
 
-    // APK Signature Verification
-    implementation(project(":modules:apk-signer"))
+    // APK Signature Verification (apksig + keystore reading; the signer, CertCreator and SpongyCastle stay in
+    // modules/apk-signer for the APK builder plugin)
+    // zh-CN: APK 签名校验 (apksig + 密钥库读取; 签名器, CertCreator 与 SpongyCastle 留在 modules/apk-signer 供 APK 构建插件使用)
+    implementation(project(":modules:apk-verifier"))
 
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))
@@ -757,6 +759,9 @@ dependencies /* Script music playback */ {
 
 dependencies /* Test */ {
     testImplementation(libs.junit)
+    // BKS keystores in JVM tests need a provider named "BC" (Android ships one, the desktop JDK does not).
+    // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
+    testImplementation(libs.bcprov.jdk15on)
     androidTestImplementation(libs.test.runner)
 
     // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.

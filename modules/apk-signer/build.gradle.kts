@@ -31,6 +31,11 @@ repositories {
 }
 
 dependencies {
+    // Signature verification, apksig and keystore reading live in apk-verifier (shared with the host);
+    // consumers of this module reach them through it.
+    // zh-CN: 签名校验, apksig 与密钥库读取位于 apk-verifier (与宿主共用); 本模块的使用方经它访问.
+    api(project(":modules:apk-verifier"))
+
     implementation(libs.appcompat)
     implementation(libs.material)
 

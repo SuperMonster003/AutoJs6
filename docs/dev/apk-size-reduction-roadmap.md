@@ -87,7 +87,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | 包 | 归属 MiB | 来源 | 处置 |
 | --- | ---: | --- | --- |
 | `com.android.tools.r8` | 6.59 (+2.93 `.ser`) | `libs.r8`, 本地 D8 编译 (`AndroidClassLoader`) | P5.2, 受 D5 门禁 |
-| `org.spongycastle` | 2.28 | `modules/apk-signer` -> `libs.prov` | P4 |
+| `org.spongycastle` | 2.28 | `modules/apk-signer` -> `libs.prov` | P4 已移除 (2026-09-18, 系统 BKS 证据见 P4.2) |
 | `androidx.media3` + `com.google.common` (Guava, 经 `media3-common` 传入) | 2.18 + 1.13 | `libs.media3.*`, 仅 `core/media/ScriptMusicService.kt` | P6.1 (Q2) |
 | `kotlin.reflect` | 1.44 | `kotlin("reflect")`, 5 个调用点 (实施时另发现第 6 处) | P3 已移除 (2026-09-18) |
 | `com.fasterxml` (Jackson) | 0.93 | `libs.jackson.databind`, 仅 `github-api` 需要 | P2.4 已移除 (2026-09-18) |
@@ -116,7 +116,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | DEX 编译器 | 成立, 但拆分: dx 两个 jar 的用途 (单类 `defineClass`) 可以直接合并到 D8 (D8 已在 API 24 上用于 jar 编译, 依赖 `desugar_jdk_libs` 的 `java.nio.file`); R8 的移除受 D5 门禁. |
 | APK 签名依赖 | 成立, 但 `modules/apk-signer` 也被 `plugins/apk-builder-template` 依赖, 所以是模块拆分而非移除; `KeyStoreHelper.loadBks` 已经先尝试系统 `"BKS", "BC"` 再回退 SpongyCastle, 回退是否仍需要必须先测. |
 
-理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3; 实测 -1.07 MiB, 见 P2.6); P3 约 0.6 MiB (实测 -1.03 MiB, 见 P3.3); P4 约 1.0 MiB; P5.1 约 0.4 MiB; P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
+理论收益 (压缩后, 保守估计): P1 约 1.0-1.5 MiB (实测 -1.28 MiB, 见 P1.8); P2 约 0.8 MiB (含 Commons Lang3; 实测 -1.07 MiB, 见 P2.6); P3 约 0.6 MiB (实测 -1.03 MiB, 见 P3.3); P4 约 1.0 MiB (实测 -1,421,766 字节 = -1.36 MiB, 见 P4.4); P5.1 约 0.4 MiB; P6.1 约 1.3 MiB; P5.2 约 5.5 MiB (受门禁). 不含 R8 约 5 MiB (约 12%), 含 R8 约 10.5 MiB (约 26%).
 
 ---
 
@@ -156,10 +156,10 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 
 ### P4 apk-signer 拆分与 SpongyCastle
 
-- [ ] P4.1 模块拆分: 新建 `modules/apk-verifier` (只含 `com.android.apksig.**`, `com.mcal.apksigner.utils.{KeyStoreHelper,JksKeyStore,JKS,LoadKeystoreException}` 与 `Base64` 等必要工具, 不依赖 SpongyCastle 之外的任何第三方库), 宿主改依赖它; `modules/apk-signer` 保留完整内容供 `plugins/apk-builder-template` 使用, 并依赖 `apk-verifier` 以免重复源码. 删除 `src/main/resources/keystore/testkey.*` 在宿主侧的打包 (仅 `ApkSigner.kt` 的调试签名使用, 留在 `apk-signer`).
-- [ ] P4.2 BKS 兼容证据: 用 SpongyCastle 生成 BKS v1 与 v2 (当前插件 `CertCreator` 路径) 各一份, 在 API 24 / 28 / 33 / 35 AVD 与一台真机上通过系统 `KeyStore.getInstance("BKS", "BC")` 加载并读出证书; 同时覆盖 `assets/autojs.keystore` 与用户常见的 keytool JKS. 结果写入 `evidence/apk-size-p4-bks-<日期>.md`.
-- [ ] P4.3 依 P4.2 的设备证据决定 (Q8 拍板: 等待证据, 不预设结论): 系统 BKS 全部通过则 `apk-verifier` 的 `loadBks` 去掉 SpongyCastle 回退, 宿主不再打包 `org.spongycastle` (-2.28 MiB 归属 DEX, -0.01 MiB `org/spongycastle/x509` 资源); 存在失败机型则保留回退并记录失败样本, 本条目标记为 "保留".
-- [ ] P4.4 验证: 远程构建签名解析与输出校验的既有单测 (`apkbuilder/template/*Test`) 通过; `plugins/apk-builder-template` 编译与打包不变; 体积报告; changelog `dependency` (视 P4.3 结果: 移除 Spongy Castle Prov 1.58.0.0, 或 "模块化 APK Verifier").
+- [x] P4.1 模块拆分: 新建 `modules/apk-verifier` (只含 `com.android.apksig.**`, `com.mcal.apksigner.utils.{KeyStoreHelper,JksKeyStore,JKS,LoadKeystoreException}` 与 `Base64` 等必要工具, 不依赖 SpongyCastle 之外的任何第三方库), 宿主改依赖它; `modules/apk-signer` 保留完整内容供 `plugins/apk-builder-template` 使用, 并依赖 `apk-verifier` 以免重复源码. 删除 `src/main/resources/keystore/testkey.*` 在宿主侧的打包 (仅 `ApkSigner.kt` 的调试签名使用, 留在 `apk-signer`). 证据: 新建 `modules/apk-verifier` (namespace `com.mcal.apkverifier`, 无第三方依赖): `git mv` 整个 `com/android/apksig/**` (128 个文件, `V1SchemeSigner` 在 API < 26 时用到的 `com.mcal.apksigner.utils.Base64` 随之迁入) 与 `com/mcal/apksigner/utils/{KeyStoreHelper.kt, JksKeyStore.kt, JKS.java, LoadKeystoreException.kt}`, 包名不变; `JksKeyStore` 原以 SpongyCastle provider 对象作为 `KeyStore` 构造参数 (仅元数据), 改为新增的 `JksProvider` (不注册任何服务, 名为 `AutoJs6JKS`). `modules/apk-signer` 保留 `ApkSigner` / `ApkSignerTool` / `CertCreator` / `CertConverter` / `DistinguishedNameValues` / `KeySet` / 文件选择器与 `keystore/testkey.*`, 以 `api(project(":modules:apk-verifier"))` 依赖新模块, `plugins/apk-builder-template` 的 `import com.mcal.apksigner.utils.KeyStoreHelper` 经此传递编译, 插件源码未改; 宿主 `app/build.gradle.kts` 改为依赖 `:modules:apk-verifier` (`RemoteBuildApkValidator` 的 `ApkVerifier` 与 `RemoteBuildExpectedSignerResolver` 的 `KeyStoreHelper` 是宿主仅有的两处引用), `settings.gradle.kts` 注册模块. 2026-09-18.
+- [x] P4.2 BKS 兼容证据: 用 SpongyCastle 生成 BKS v1 与 v2 (当前插件 `CertCreator` 路径) 各一份, 在 API 24 / 28 / 33 / 35 AVD 与一台真机上通过系统 `KeyStore.getInstance("BKS", "BC")` 加载并读出证书; 同时覆盖 `assets/autojs.keystore` 与用户常见的 keytool JKS. 结果写入 `evidence/apk-size-p4-bks-<日期>.md`. 证据: [apk-size-p4-bks-20260918.md](evidence/apk-size-p4-bks-20260918.md). 样本以同一对 RSA 2048 密钥 / 证书写出: SpongyCastle 1.58.0.0 的 BKS v2 与 BKS-V1, BouncyCastle 1.70 与 1.81 的 BKS v2 (两者已无 `BKS-V1` 类型), JDK 8 keytool JKS, 仓库资产 `default_key_store.bks` (v2) 与 `autojs.keystore` (JKS, 口令未知, 已被资产剪除); 生成器 `build/tmp-size/p4/BksGen.java` 需用 Temurin 运行 (Oracle JDK 拒绝未签名的 SpongyCastle jar). 环境: AVD API 24 (BC 1.54), Sony G8441 API 28 (BC 1.57), Sony XQ-AT72 API 31, Sony XQ-DQ72 API 33, Redmi 22120RN86C API 33, Xiaomi 23046RP50C API 35 (BC 1.68); 每个环境 5 个 BKS 样本经系统 `KeyStore.getInstance("BKS", "BC")`, `KeyStoreHelper.loadBks`, `loadKeyStore` 共 15/15 读出别名, 私钥与证书, JKS 样本经 `loadJks` 通过, 设备上经 `createKeyStore` + `writeKeyStore` 写出的 `.bks` / `.jks` 回读通过, `loadBks` 的实际 provider 全部为系统 BC (回退从未触发). 附带: Android 各版本的 BC 都没有 `BKS-V1` 类型但 `BKS` 类型能读 v1 文件, Android 没有 JKS provider (宿主纯 Java `JKS.java` 承担). 2026-09-18.
+- [x] P4.3 依 P4.2 的设备证据决定 (Q8 拍板: 等待证据, 不预设结论): 系统 BKS 全部通过则 `apk-verifier` 的 `loadBks` 去掉 SpongyCastle 回退, 宿主不再打包 `org.spongycastle` (-2.28 MiB 归属 DEX, -0.01 MiB `org/spongycastle/x509` 资源); 存在失败机型则保留回退并记录失败样本, 本条目标记为 "保留". 证据: 六个环境全部通过, 判定系统 BKS 足够 (Q8 关闭): `apk-verifier` 的 `loadBks` 只用 `KeyStore.getInstance("BKS", "BC")`, `KeyStoreHelper.provider` 与 SpongyCastle import 删除, 宿主不再打包 `org.spongycastle` (报告: `org.spongycastle` 2.28 -> 0 MiB, `org/spongycastle` 松散资源归零) 及签名器侧的 `com.android.apksigner` / `com.mcal.apksigner.{ApkSigner,CertCreator,CertConverter}` 与 `keystore/testkey.*`; JVM 单测以 `testImplementation(libs.bcprov.jdk15on)` 在 `app` 与 `apk-verifier` 中把桌面 BouncyCastle 注册为 `BC` (`RemoteBuildExpectedSignerResolverTest` 的 `@BeforeClass`, 不进入 APK). 2026-09-18.
+- [x] P4.4 验证: 远程构建签名解析与输出校验的既有单测 (`apkbuilder/template/*Test`) 通过; `plugins/apk-builder-template` 编译与打包不变; 体积报告; changelog `dependency` (视 P4.3 结果: 移除 Spongy Castle Prov 1.58.0.0, 或 "模块化 APK Verifier"). 证据: `:modules:apk-verifier:testDebugUnitTest` 新增 `KeyStoreHelperTest` 6/6 (JKS / BKS v1 / v2 读取, 扩展名分派, 固定错误消息, 移除 `BC` provider 后 `NoSuchProviderException`, JKS / BKS 创建与回读; 样本 `src/test/resources/keystore/`); `:app:testAppDebugUnitTest` 全量 2,853 个用例 0 失败 (472 个结果文件; `RemoteBuildExpectedSignerResolverTest` 5/5 经以 BC 之名注册的桌面 BouncyCastle 读取 `default_key_store.bks`); `:plugins:apk-builder-template:assembleDebug` 通过 (插件源码未改); `:app:assembleAppRelease` 通过; [apk-size-p4-20260918.md](evidence/apk-size-p4-20260918.md): universal 36,185,611 字节 (对基线 -4,960,444 字节, -4.73 MiB, -12.1%; 对 P3 -1,421,766 字节 = -1.36 MiB), arm64-v8a 34,988,585 字节, 条目 4,028 -> 4,024, 定义方法 376,240 -> 356,717. 设备冒烟 (`build/tmp-size/p4-verify-smoke.js`, Redmi 22120RN86C API 33 与 AVD API 24): `org.spongycastle.*` 与 `com.mcal.apksigner.CertCreator` / `com.android.apksigner.ApkSignerTool` 在宿主进程中不存在, `ApkVerifier` / `KeyStoreHelper` / `JksProvider` 存在; 5 个 BKS 样本经 `loadBks` 全部读出 (provider=BC), JKS 经 `loadJks` (provider=AutoJs6JKS), 错误口令报固定消息; `com.android.apksig.ApkVerifier` 校验宿主自身 APK verified=true (v2 方案, 1 个签名者), 对非 APK 文件返回未通过. changelog 10 语言 `dependency`: 新增 "模块化 APK Verifier", 6.8.0 内原 "模块化 Spongy Castle Prov 版本 1.58.0.0" 按 D7 精神改为 "移除 Spongy Castle Prov 版本 1.58.0.0" (该版本对宿主的净效果是移除; SpongyCastle 仍由 apk-signer 与插件使用). 等级 E3, 2026-09-18.
 
 ### P5 DEX 编译器宿主依赖
 
@@ -196,7 +196,7 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | Q5 | 内置 CHANGELOG 的语言范围? | 只内置 zh-Hans 与 en, 其余在线. | 按建议实施 (D14). |
 | Q6 | PNG -> WebP 与未用资源清理是否进入本 Roadmap? | 建议进入, 仅无损转换与 lint 报告驱动的删除. | 进入 (D15). |
 | Q7 | `com.stardust` 兼容包去留? | 建议保留. | 保留 (D16). |
-| Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. | 等待设备证据. |
+| Q8 | 系统 `BKS` 是否足以替代 SpongyCastle 回退? | 由 P4.2 的设备证据决定. | 等待设备证据. 2026-09-18 P4.2 六个环境全部通过, 回退移除 (P4.3). |
 | Q9 | log4j 替换后, 文档 `global.md` 列出的脚本全局代理类 `LogConfigurator` (`de.mindpipe...LogConfigurator`), `Level`, `LogManager` (`org.apache.log4j.*`) 如何处理? | 建议 (a): 用自有实现提供同名代理类, 覆盖文档化用法, 其余 log4j API 不再提供, 文档与 d.ts 同步; 备选 (b): 从 `Classes` 与 `global.md` 移除三个代理并在 changelog 标注. | 方案 (a) (D17, 2026-09-18). |
 
 ## 附录 B. 冒烟清单
@@ -220,10 +220,10 @@ DEX 包归属字节 (原始 MiB) 中与依赖对应的项, 按体积排序, 附�
 | 关注点 | 文件 |
 | --- | --- |
 | 度量 | `tools/size/apk_size_report.py`, `docs/dev/evidence/apk-size-*.{md,json}` |
-| 依赖声明 | `app/build.gradle.kts` (`dependencies` 各段, `resourceExcludePatterns`, `packaging`), `gradle/libs.versions.toml`, `libs/*.jar`, `libs/javamail-android/`, `modules/apk-signer/build.gradle.kts` |
+| 依赖声明 | `app/build.gradle.kts` (`dependencies` 各段, `resourceExcludePatterns`, `packaging`), `gradle/libs.versions.toml`, `libs/*.jar`, `libs/javamail-android/`, `modules/apk-signer/build.gradle.kts`, `modules/apk-verifier/build.gradle.kts`, `settings.gradle.kts` |
 | P1 代码 | `util/TextUtils.kt`, `ui/settings/ReleaseHistoryRepository.kt`, `model/explorer/ExplorerSorter.java` |
 | P2 代码 | `network/UpdateChecker.java`, `network/github/GitHubReleaseClient.kt` / `GitHubRelease.kt` / `GitHubReleaseAssetPicker.kt`, `app/src/test/java/org/autojs/autojs/network/github/`, `network/api/*` |
 | P3 代码 | `runtime/api/augment/global/GlobalClasses.kt`, `ocr/Ocr.kt`, `s13n/S13n.kt`, `selector/Selector.kt`, `web/WebSocketFields.kt`, `Augmentable.kt`, `util/CompanionProperties.kt`; 单测 `app/src/test/java/org/autojs/autojs/runtime/api/augment/{web/WebSocketFieldsTest,s13n/S13nTimeTest,ocr/OcrModeDispatcherTest}.kt`, `util/CompanionPropertiesTest.kt` |
-| P4 代码 | `modules/apk-signer/src/main/java/com/mcal/apksigner/utils/KeyStoreHelper.kt`, `JksKeyStore.kt`, `JKS.java`, `apkbuilder/template/RemoteBuildExpectedSignerResolver.kt`, `RemoteBuildApkValidator.kt`, `plugins/apk-builder-template/` |
+| P4 代码 | `modules/apk-verifier/` (`com/android/apksig/**`, `com/mcal/apksigner/utils/{KeyStoreHelper.kt, JksKeyStore.kt, JksProvider.kt, JKS.java, LoadKeystoreException.kt, Base64.kt}`, 单测 `KeyStoreHelperTest.kt` 与 `src/test/resources/keystore/`), `modules/apk-signer/` (签名器侧), `apkbuilder/template/RemoteBuildExpectedSignerResolver.kt`, `RemoteBuildApkValidator.kt`, `plugins/apk-builder-template/`; 证据 `evidence/apk-size-p4-bks-20260918.md` |
 | P5 代码 | `rhino/AndroidClassLoader.kt` (`dexJar`, `loadJarLocally*`), `com/stardust/autojs/rhino/AndroidClassLoader.java`, `docs/dev/dex-compiler-plugin-evaluation.md` |
 | P6 代码 | `core/media/ScriptMusicService.kt`, `core/console/GlobalConsole.kt`, `ui/widget/JsTextViewLegacy*`, `app/src/main/assets-app/doc/`, `app/src/main/res/` |

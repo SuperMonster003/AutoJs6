@@ -599,8 +599,8 @@
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
+* `Dependencia` APK Verifier modularizado
 * `Dependencia` ARSCLib modularizado version 1.3.8
-* `Dependencia` Spongy Castle Prov modularizado version 1.58.0.0
 * `Dependencia` Image Quantization modularizado version 2.17.0
 * `Dependencia` OpenCV modularizado version 4.8.0
 * `Dependencia` Se agrega juniversalchardet version 2.0.4
@@ -630,6 +630,7 @@
 * `Dependencia` Se elimina Commons IO version 2.8.0
 * `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
 * `Dependencia` Se elimina Kotlin Reflect version 2.4.0
+* `Dependencia` Se elimina Spongy Castle Prov version 1.58.0.0
 * `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 
