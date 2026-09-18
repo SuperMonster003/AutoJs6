@@ -761,6 +761,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 檢查更新改為直接呼叫 GitHub REST API (OkHttp + Gson) 取得最新版本與安裝套件清單, 更新說明的 release 回退內容改為本機渲染, 不再請求 GitHub 的 Markdown 渲染介面
 * `最佳化` 全域日誌寫入檔案 (console.setGlobalLogConfig / resetGlobalLogConfig 及全域類別 LogConfigurator / Level / LogManager) 改用內建滾動檔案日誌器取代 Log4j; 文件化選項與 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及寬度修飾) 保持不變, 其餘 Log4j API 不再提供
 * `最佳化` Rhino 引擎在發現 Java 方法時跳過參數型別在目前系統上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整個類別的反射失敗; UI 模式 text 元素在 Android 7.x 上改用現行 AppCompatTextView, 不再需要舊版 appcompat 1.0.2 程式庫
+* `最佳化` 應用程式僅內建簡體中文與英文兩份版本歷史; 其餘語言線上取得並快取, 離線時依序顯示目前語言的快取副本與內建英文版本
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -239,13 +239,25 @@ val resourceExcludePatterns = listOf(
     "kotlin/**/*.kotlin_builtins",
 )
 
+// Only the zh-Hans and en release histories ship inside the APK (size roadmap P6.5, D14); the other
+// languages are fetched online and cached, with the en asset as the offline fallback (see
+// ReleaseHistoryRepository.readLocalSampleCandidates). doc/CHANGELOG.md duplicates zh-Hans and is not read.
+// The generator and the repository files are unchanged; the pruning happens at asset merge time.
+// zh-CN: APK 只内置 zh-Hans 与 en 两份版本历史 (体积 roadmap P6.5, D14); 其余语言在线获取并缓存, 离线以 en 资产回退
+// (见 ReleaseHistoryRepository.readLocalSampleCandidates). doc/CHANGELOG.md 与 zh-Hans 内容相同且无代码读取.
+// 生成脚本与仓库文件不变, 剪除发生在资产合并期.
+val bundledChangelogLanguageTags = listOf("zh-Hans", "en")
+val prunedChangelogAssets = listOf("ar", "es", "fr", "ja", "ko", "ru", "zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "en")
+    .filterNot { it in bundledChangelogLanguageTags }
+    .map { "doc/CHANGELOG-$it.md" } + "doc/CHANGELOG.md"
+
 val appMergedAssetPruneIncludes = listOf(
     "declarations/**/*",
     "default_key_store.bks",
     "docs/**/*",
     "sample/declarations/**/*",
     "modules/obsolete/**/*",
-)
+) + prunedChangelogAssets
 
 val inrtMergedAssetPruneIncludes = listOf(
     "default_key_store.bks",

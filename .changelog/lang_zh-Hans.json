@@ -576,7 +576,8 @@
         "安装包体积缩减: 移除停用的 HTML 转 Markdown 链路与未使用的依赖, JUnit 不再随 CommonMark 与 Spongy Castle 进入生产 DEX, Rhino 运行时不再打包 JLine 终端库",
         "检查更新改为直接调用 GitHub REST API (OkHttp + Gson) 获取最新版本与安装包列表, 更新说明的 release 回退内容改为本地渲染, 不再请求 GitHub 的 Markdown 渲染接口",
         "全局日志写入文件 (console.setGlobalLogConfig / resetGlobalLogConfig 及全局类 LogConfigurator / Level / LogManager) 改用内置滚动文件日志器替代 Log4j; 文档化选项与 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及宽度修饰) 保持不变, 其余 Log4j API 不再提供",
-        "Rhino 引擎在发现 Java 方法时跳过参数类型在当前系统上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整个类的反射失败; UI 模式 text 元素在 Android 7.x 上改用现行 AppCompatTextView, 不再需要旧版 appcompat 1.0.2 库"
+        "Rhino 引擎在发现 Java 方法时跳过参数类型在当前系统上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整个类的反射失败; UI 模式 text 元素在 Android 7.x 上改用现行 AppCompatTextView, 不再需要旧版 appcompat 1.0.2 库",
+        "应用仅内置简体中文与英文两份版本历史; 其余语言在线获取并缓存, 离线时依次显示当前语言的缓存副本与内置英文版本"
       ],
       "dependency": [
         "模块化 Android AXML",

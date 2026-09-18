@@ -154,43 +154,92 @@ class ReleaseHistoryRepository {
             return "CHANGELOG-$this.cache.md"
         }
 
-        suspend fun readBestLocalSample(context: Context, languageTag: String): List<ReleaseHistoryItem> {
-            val assetStr = runCatching {
-                context.assets.open("doc/${languageTag.toChangelogMarkdownFile()}").bufferedReader().use { it.readText() }
-            }.getOrNull()
+        /** Language whose CHANGELOG asset is always bundled and serves as the offline fallback (D14). */
+        const val FALLBACK_LANGUAGE_TAG = "en"
 
-            val cacheStr = runCatching {
-                File(context.filesDir, languageTag.toChangelogMarkdownCacheFile()).readText()
-            }.getOrNull()
+        enum class LocalSampleSource { ASSET, CACHE, FALLBACK_ASSET }
 
-            assetStr ?: cacheStr ?: return emptyList()
-
-            fun String?.parseFirstVersion() = this
-                ?.lineSequence()
-                ?.firstOrNull { regexValidMarkdownVersion.matches(it.trim()) }
-                ?.removePrefix("#")?.trim()
-                ?.removePrefix("v")?.trim()
-                ?: DEFAULT_VERSION_NAME
-
-            val assetLatestVer = assetStr.parseFirstVersion()
-            val cacheLatestVer = cacheStr.parseFirstVersion()
-
-            val useCache = compareVersion(cacheLatestVer, assetLatestVer) >= 0
-            val chosenMarkdown = if (useCache && !cacheStr.isNullOrBlank()) cacheStr else assetStr
-
-            ProcessLogger.i("${context.getString(R.string.logger_ver_history_local_asset_latest)}: $assetLatestVer")
-            ProcessLogger.i("${context.getString(R.string.logger_ver_history_offline_cache_latest)}: $cacheLatestVer")
-            ProcessLogger.i(
-                context.getString(R.string.logger_ver_history_initial_content_chosen) + ": ${
-                    when (useCache) {
-                        true -> context.getString(R.string.logger_ver_history_offline_cache_file)
-                        else -> context.getString(R.string.logger_ver_history_local_asset_file)
-                    }
-                }"
-            )
-
-            return parseMarkdownFlow(chosenMarkdown ?: "").toList()
+        /** One offline changelog candidate. zh-CN: 一个离线版本历史候选. */
+        data class LocalSampleCandidate(val source: LocalSampleSource, val languageTag: String, val markdown: String) {
+            val latestVersion: String get() = markdown.parseFirstVersion()
         }
+
+        /**
+         * Reads the offline candidates in chain order: the cache of [languageTag], the bundled asset of [languageTag]
+         * (only zh-Hans and en ship, the other languages are pruned at asset merge time, see
+         * `appMergedAssetPruneIncludes`), and the bundled en asset when [languageTag] is not en.
+         *
+         * zh-CN: 按链顺序读取离线候选: [languageTag] 的缓存, [languageTag] 的内置资产 (只内置 zh-Hans 与 en, 其余语言在资产
+         * 合并期剪除, 见 `appMergedAssetPruneIncludes`), 以及 [languageTag] 非 en 时的内置 en 资产.
+         */
+        fun readLocalSampleCandidates(context: Context, languageTag: String): List<LocalSampleCandidate> {
+            fun asset(tag: String) = runCatching {
+                context.assets.open("doc/${tag.toChangelogMarkdownFile()}").bufferedReader().use { it.readText() }
+            }.getOrNull()
+
+            fun cache(tag: String) = runCatching {
+                File(context.filesDir, tag.toChangelogMarkdownCacheFile()).readText()
+            }.getOrNull()
+
+            return listOfNotNull(
+                cache(languageTag)?.let { LocalSampleCandidate(LocalSampleSource.CACHE, languageTag, it) },
+                asset(languageTag)?.let { LocalSampleCandidate(LocalSampleSource.ASSET, languageTag, it) },
+                if (languageTag != FALLBACK_LANGUAGE_TAG) {
+                    asset(FALLBACK_LANGUAGE_TAG)?.let { LocalSampleCandidate(LocalSampleSource.FALLBACK_ASSET, FALLBACK_LANGUAGE_TAG, it) }
+                } else null,
+            )
+        }
+
+        /**
+         * Picks the candidate with the newest first version; on a tie the earlier candidate wins, so the cache beats
+         * the asset of the same language (unchanged behaviour) and the current language beats the en fallback.
+         * Blank candidates are ignored.
+         *
+         * zh-CN: 选首个版本号最新的候选; 版本相同时靠前者胜出, 即同语言缓存优先于资产 (行为不变), 当前语言优先于 en 回退.
+         * 空白候选忽略.
+         */
+        fun chooseLocalSample(candidates: List<LocalSampleCandidate>): LocalSampleCandidate? {
+            var chosen: LocalSampleCandidate? = null
+            for (candidate in candidates) {
+                if (candidate.markdown.isBlank()) continue
+                val current = chosen
+                if (current == null || compareVersion(candidate.latestVersion, current.latestVersion) > 0) {
+                    chosen = candidate
+                }
+            }
+            return chosen
+        }
+
+        suspend fun readBestLocalSample(context: Context, languageTag: String): List<ReleaseHistoryItem> {
+            val candidates = readLocalSampleCandidates(context, languageTag)
+            val chosen = chooseLocalSample(candidates) ?: return emptyList()
+
+            // `this.languageTag` on purpose: the enclosing parameter of the same name would shadow the candidate's.
+            // zh-CN: 此处特意写 `this.languageTag`, 否则同名的外层参数会遮蔽候选自身的语言标签.
+            fun LocalSampleCandidate.label(): String = when (source) {
+                LocalSampleSource.ASSET -> context.getString(R.string.logger_ver_history_local_asset_file)
+                LocalSampleSource.CACHE -> context.getString(R.string.logger_ver_history_offline_cache_file)
+                LocalSampleSource.FALLBACK_ASSET -> "${context.getString(R.string.logger_ver_history_local_asset_file)} (${this.languageTag})"
+            }
+
+            candidates.forEach { candidate ->
+                val what = when (candidate.source) {
+                    LocalSampleSource.CACHE -> context.getString(R.string.logger_ver_history_offline_cache_latest)
+                    else -> context.getString(R.string.logger_ver_history_local_asset_latest) + " (${candidate.languageTag})"
+                }
+                ProcessLogger.i("$what: ${candidate.latestVersion}")
+            }
+            ProcessLogger.i("${context.getString(R.string.logger_ver_history_initial_content_chosen)}: ${chosen.label()}")
+
+            return parseMarkdownFlow(chosen.markdown).toList()
+        }
+
+        internal fun String?.parseFirstVersion(): String = this
+            ?.lineSequence()
+            ?.firstOrNull { regexValidMarkdownVersion.matches(it.trim()) }
+            ?.removePrefix("#")?.trim()
+            ?.removePrefix("v")?.trim()
+            ?: DEFAULT_VERSION_NAME
 
         private fun ensureSuccessfulResponse(response: Response, url: String): ResponseBody {
             require(response.isSuccessful && response.body != null) {

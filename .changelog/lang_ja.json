@@ -597,7 +597,8 @@
         "APK サイズを縮小: 使われていない HTML から Markdown への変換経路と未使用の依存関係を削除, CommonMark と Spongy Castle 経由で JUnit が製品版 DEX に入らないようにし, Rhino ランタイムに JLine ターミナルライブラリを同梱しない",
         "更新チェックは GitHub REST API (OkHttp + Gson) を直接呼び出して最新リリースと APK 一覧を取得し, フォールバックのリリースノートは GitHub の Markdown レンダリング API を使わずローカルで描画",
         "グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった",
-        "Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に"
+        "Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に",
+        "アプリに内蔵するリリース履歴を簡体字中国語と英語のみに変更; その他の言語はオンラインで取得してキャッシュし, オフライン時は現在の言語のキャッシュ, 次いで内蔵の英語版を表示"
       ],
       "dependency": [
         "モジュール化 Android AXML",
