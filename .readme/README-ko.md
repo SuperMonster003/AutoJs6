@@ -759,6 +759,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` APK 크기 축소: 사용하지 않는 HTML -> Markdown 변환 경로와 미사용 의존성을 제거, JUnit이 CommonMark 및 Spongy Castle을 통해 프로덕션 DEX에 포함되지 않도록 하고, Rhino 런타임에 JLine 터미널 라이브러리를 더 이상 포함하지 않음
 * `개선` 업데이트 확인이 GitHub REST API (OkHttp + Gson) 를 직접 호출하여 최신 릴리스와 APK 목록을 가져오고, 대체 릴리스 노트는 GitHub 의 Markdown 렌더링 API 대신 로컬에서 렌더링
 * `개선` 전역 로그 파일 쓰기 (console.setGlobalLogConfig / resetGlobalLogConfig 및 전역 클래스 LogConfigurator / Level / LogManager)가 Log4j 대신 내장 롤링 파일 로거를 사용; 문서화된 옵션과 PatternLayout 하위 집합 (%d / %p / %c / %C / %m / %n / %t / %r 및 너비 지정자)은 유지되며 그 외 Log4j API는 더 이상 제공되지 않음
+* `개선` Rhino 엔진이 Java 메서드를 탐색할 때 매개변수 타입이 실행 중인 시스템에 존재하지 않는 메서드 (Android 7.x 의 AppCompatTextView.setTextClassifier 등)를 클래스 전체의 reflection 실패 대신 건너뜀; UI 모드 text 요소는 Android 7.x 에서도 현행 AppCompatTextView 를 사용하며 구형 appcompat 1.0.2 라이브러리는 더 이상 필요하지 않음
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

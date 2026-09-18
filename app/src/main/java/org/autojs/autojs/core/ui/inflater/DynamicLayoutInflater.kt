@@ -70,7 +70,6 @@ import org.autojs.autojs.core.ui.inflater.inflaters.JsTabLayoutInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsTextClockInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsTextSwitcherInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsTextViewInflater
-import org.autojs.autojs.core.ui.inflater.inflaters.JsTextViewLegacyInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsTimePickerInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsToggleButtonInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsToolbarInflater
@@ -176,7 +175,6 @@ import org.autojs.autojs.core.ui.widget.JsTabLayout
 import org.autojs.autojs.core.ui.widget.JsTextClock
 import org.autojs.autojs.core.ui.widget.JsTextSwitcher
 import org.autojs.autojs.core.ui.widget.JsTextView
-import org.autojs.autojs.core.ui.widget.JsTextViewLegacy
 import org.autojs.autojs.core.ui.widget.JsTimePicker
 import org.autojs.autojs.core.ui.widget.JsToggleButton
 import org.autojs.autojs.core.ui.widget.JsToolbar
@@ -338,10 +336,7 @@ open class DynamicLayoutInflater {
         registerViewAttrSetter(JsViewSwitcher::class.java, JsViewSwitcherInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsWebView::class.java, JsWebViewInflater(scriptRuntime, resourceParser))
 
-        when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            true -> registerViewAttrSetter(JsTextViewLegacy::class.java, JsTextViewLegacyInflater(scriptRuntime, resourceParser))
-            else -> registerViewAttrSetter(JsTextView::class.java, JsTextViewInflater(scriptRuntime, resourceParser))
-        }
+        registerViewAttrSetter(JsTextView::class.java, JsTextViewInflater(scriptRuntime, resourceParser))
 
         registerNativeViewAttrSetter(Space::class.java, SpaceInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(ViewGroup::class.java, ViewGroupInflater<ViewGroup>(scriptRuntime, resourceParser))

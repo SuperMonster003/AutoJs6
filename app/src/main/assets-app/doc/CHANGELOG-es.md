@@ -231,6 +231,7 @@
 * `Nuevo` Modo servidor: descubrimiento en la LAN (mDNS) - al activarlo, la extensión de VSCode (1.1.0+) lista este dispositivo en su selector de conexión LAN sin escribir la dirección
 * `Nuevo` Archivos remotos de VSCode: transferencia por fragmentos - los archivos grandes se leen y escriben en fragmentos de 1 MiB con progreso mostrado en VSCode; requiere extensión 1.1.0+; fs.list puede devolver el md5 de los archivos bajo demanda para que la extensión compare archivos al traer cambios del proyecto desde el dispositivo
 * `Nuevo` Administrador del modo cliente: una entrada "Historial" en la sección de control muestra las direcciones de servidor usadas anteriormente; toque para conectar, mantenga pulsado para eliminar o borre todas
+* `Corrección` MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario
 * `Corrección` Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno
 * `Corrección` Proyectos Node.js ejecutables sin metadatos de empaquetado APK, como host-events, no reconocidos en la lista de archivos y barra de proyecto
 * `Corrección` Los registros de inicio y fin de proyectos Node.js mostraban main.js sin ruta en lugar de la ruta completa y la extensión real del archivo de entrada, como main.cjs
@@ -597,6 +598,7 @@
 * `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
 * `Mejora` La comprobación de actualizaciones ahora llama directamente a la GitHub REST API (OkHttp + Gson) para obtener la última versión y su lista de APK, y las notas de la versión de respaldo se renderizan localmente en lugar de usar el servicio de renderizado de Markdown de GitHub
 * `Mejora` La escritura del registro global en archivo (console.setGlobalLogConfig / resetGlobalLogConfig y las clases globales LogConfigurator / Level / LogManager) usa un registrador de archivos rotativo integrado en lugar de Log4j; se conservan las opciones documentadas y el subconjunto de PatternLayout (%d / %p / %c / %C / %m / %n / %t / %r con modificadores de ancho), y el resto de la API de Log4j deja de estar disponible
+* `Mejora` El motor Rhino ahora omite los metodos Java cuyos tipos de parametros no existen en el sistema en ejecucion (como AppCompatTextView.setTextClassifier en Android 7.x) en lugar de fallar la reflexion de toda la clase; el elemento text del modo UI usa el AppCompatTextView actual en Android 7.x y la biblioteca heredada appcompat 1.0.2 ya no es necesaria
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
@@ -635,6 +637,7 @@
 * `Dependencia` Se elimina Android dx version 1.14
 * `Dependencia` Se elimina Log4j version 1.2.17
 * `Dependencia` Se elimina Android Logging Log4j version 1.0.3
+* `Dependencia` Se elimina la biblioteca local AndroidX AppCompat 1.0.2
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 
 # v6.7.0

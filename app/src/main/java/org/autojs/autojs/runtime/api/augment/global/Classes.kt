@@ -472,11 +472,6 @@ class Classes {
     val Image = ImageWrapper::class
 
     @JvmField
-    val JsTextView = when {
-        android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O -> {
-            org.autojs.autojs.core.ui.widget.JsTextViewLegacy::class
-        }
-        else -> org.autojs.autojs.core.ui.widget.JsTextView::class
-    }
+    val JsTextView = org.autojs.autojs.core.ui.widget.JsTextView::class
 
 }

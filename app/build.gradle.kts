@@ -756,11 +756,6 @@ dependencies /* AppCompat */ {
     //  ! 查看 Appcompat 库的发行版本,
     //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
     implementation(libs.appcompat)
-
-    // AppCompat for legacy views (such as JsTextViewLegacy)
-    implementation(project(":libs:androidx-appcompat-1_0_2")) {
-        setVersion("1.0.2")
-    }
 }
 
 dependencies /* Material Dialogs */ {

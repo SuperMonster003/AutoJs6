@@ -231,6 +231,7 @@
 * `Feature` Server mode: LAN discovery (mDNS) - when enabled, the VSCode extension (1.1.0+) lists this device in its LAN connect picker, no address typing needed
 * `Feature` VSCode remote files: chunked transfer - large files are read and written in 1 MiB pieces with progress shown in VSCode; requires extension 1.1.0+; fs.list can return file md5 on request so the extension can compare files when pulling project changes from the device
 * `Feature` Client mode manager: a "History" entry in the control section shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all
+* `Fix` MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices
 * `Fix` Unnecessary blank lines below short accessibility manager status values such as Unbound and None
 * `Fix` Runnable Node.js projects without APK packaging metadata, such as host-events, not recognized as projects in the file list and project toolbar
 * `Fix` Node.js project start and finish logs showed main.js without its path instead of the full path and actual extension of the entry file, such as main.cjs
@@ -597,6 +598,7 @@
 * `Improvement` Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library
 * `Improvement` Update check now calls the GitHub REST API directly (OkHttp + Gson) for the latest release and its APK list, and the release-notes fallback is rendered locally instead of through GitHub's Markdown rendering endpoint
 * `Improvement` Global log file writing (console.setGlobalLogConfig / resetGlobalLogConfig and the LogConfigurator / Level / LogManager globals) uses a built-in rolling file logger instead of Log4j; the documented options and the PatternLayout subset (%d / %p / %c / %C / %m / %n / %t / %r with width modifiers) are preserved, and the rest of the Log4j API is no longer available
+* `Improvement` Rhino engine now skips Java methods whose parameter types do not exist on the running system (such as AppCompatTextView.setTextClassifier on Android 7.x) instead of failing reflection of the whole class; the UI mode text element uses the current AppCompatTextView on Android 7.x and the legacy appcompat 1.0.2 library is no longer needed
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -635,6 +637,7 @@
 * `Dependency` Removed Android dx version 1.14
 * `Dependency` Removed Log4j version 1.2.17
 * `Dependency` Removed Android Logging Log4j version 1.0.3
+* `Dependency` Removed local AndroidX AppCompat 1.0.2 library
 * `Dependency` Appended ZXing Android Embedded version 4.3.0
 
 # v6.7.0

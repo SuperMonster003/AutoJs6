@@ -75,7 +75,6 @@ private val modules = listOf(
 
 private val libs = listOf(
     "android-job-simplified-1_4_3",
-    "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
     "org-opencv-java-4_8_0",
 

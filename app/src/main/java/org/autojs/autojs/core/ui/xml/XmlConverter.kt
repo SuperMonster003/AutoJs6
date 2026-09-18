@@ -82,14 +82,7 @@ object XmlConverter {
                 .map("viewpager", JsViewPager::class.java.name)
                 .map("viewswitcher", JsViewSwitcher::class.java.name)
                 .map(arrayOf("webview", "web"), JsWebView::class.java.name)
-                .map(
-                    "text",
-                    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) by SuperMonster003 on Mar 20, 2022.
-                    when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                        true -> JsTextViewLegacy::class.java.name
-                        else -> JsTextView::class.java.name
-                    }
-                )
+                .map("text", JsTextView::class.java.name)
                 .map("space", Space::class.java.name)
                 .map("view", View::class.java.name)
         )

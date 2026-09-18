@@ -221,10 +221,7 @@ object ViewAttributesFactory {
         put(ViewAnimator::class.java, ::ViewAnimatorAttributes)
         put(WebView::class.java, ::WebViewAttributes)
 
-        when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            true -> put(JsTextViewLegacy::class.java, ::JsTextViewLegacyAttributes)
-            else -> put(JsTextView::class.java, ::JsTextViewAttributes)
-        }
+        put(JsTextView::class.java, ::JsTextViewAttributes)
 
         /* Level 4. */
 

@@ -228,6 +228,7 @@
         "Client mode manager: a \"History\" entry in the control section shows the server addresses connected before; tap one to connect, long-press to delete, or clear them all"
       ],
       "fix": [
+        "MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices",
         "Unnecessary blank lines below short accessibility manager status values such as Unbound and None",
         "Runnable Node.js projects without APK packaging metadata, such as host-events, not recognized as projects in the file list and project toolbar",
         "Node.js project start and finish logs showed main.js without its path instead of the full path and actual extension of the entry file, such as main.cjs",
@@ -595,7 +596,8 @@
         "Client mode and server mode managers: the status and control sections expand and collapse step by step like in the accessibility service manager (3 levels each, the chosen level is remembered; fully collapsed, the status title carries the connection state and the primary actions move into the control header); the \"Copy\" button of all three managers moved into the title bar \"more\" menu as \"Copy information\", and the \"System\" button of the accessibility service manager likewise as \"System settings\"",
         "Smaller APK: the unused HTML-to-Markdown path and unused dependencies are removed, JUnit no longer reaches the production DEX through CommonMark and Spongy Castle, and the Rhino runtime no longer bundles the JLine terminal library",
         "Update check now calls the GitHub REST API directly (OkHttp + Gson) for the latest release and its APK list, and the release-notes fallback is rendered locally instead of through GitHub's Markdown rendering endpoint",
-        "Global log file writing (console.setGlobalLogConfig / resetGlobalLogConfig and the LogConfigurator / Level / LogManager globals) uses a built-in rolling file logger instead of Log4j; the documented options and the PatternLayout subset (%d / %p / %c / %C / %m / %n / %t / %r with width modifiers) are preserved, and the rest of the Log4j API is no longer available"
+        "Global log file writing (console.setGlobalLogConfig / resetGlobalLogConfig and the LogConfigurator / Level / LogManager globals) uses a built-in rolling file logger instead of Log4j; the documented options and the PatternLayout subset (%d / %p / %c / %C / %m / %n / %t / %r with width modifiers) are preserved, and the rest of the Log4j API is no longer available",
+        "Rhino engine now skips Java methods whose parameter types do not exist on the running system (such as AppCompatTextView.setTextClassifier on Android 7.x) instead of failing reflection of the whole class; the UI mode text element uses the current AppCompatTextView on Android 7.x and the legacy appcompat 1.0.2 library is no longer needed"
       ],
       "dependency": [
         "Modularized Android AXML",
@@ -636,6 +638,7 @@
         "Removed Android dx version 1.14",
         "Removed Log4j version 1.2.17",
         "Removed Android Logging Log4j version 1.0.3",
+        "Removed local AndroidX AppCompat 1.0.2 library",
         "Appended ZXing Android Embedded version 4.3.0"
       ]
     },

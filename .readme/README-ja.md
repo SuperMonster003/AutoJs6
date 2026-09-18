@@ -393,6 +393,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` サーバーモード: LAN 検出 (mDNS) - 有効にすると VSCode 拡張機能 (1.1.0+) が LAN 接続の選択画面にこのデバイスを表示し, アドレス入力が不要になります
 * `新機能` VSCode リモートファイル: 分割転送 - 大きなファイルを 1 MiB 単位で読み書きし, VSCode 側に進捗を表示; 拡張機能 1.1.0+ が必要; fs.list は要求に応じてファイルの md5 を返し, 拡張機能がデバイスからプロジェクトの変更を取得する際のファイル比較に使用します
 * `新機能` クライアントモードマネージャーのコントロール欄の "履歴" 項目: 以前に接続したサーバーアドレスを一覧し, タップで接続, 長押しで削除, 全消去も可能
+* `修正` adb でインストールした MCP Server が有効状態の保存設定がない場合にプラグインセンターでは有効, 実行時には無効と判定される問題. 両方の既定値を無効に統一し, ユーザーが明示的に選択した状態を保持
 * `修正` ユーザー補助サービス管理画面で未バインドやなしなどの短い状態値の下に不要な空行が表示される問題
 * `修正` APK パッケージ情報のない実行可能な Node.js プロジェクト (host-events など) がファイル一覧とプロジェクトツールバーで認識されない問題
 * `修正` Node.js プロジェクトの開始と終了ログがパスのない main.js を表示し, main.cjs など実際のエントリーファイルの完全なパスと拡張子を保持しない問題
@@ -759,6 +760,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` APK サイズを縮小: 使われていない HTML から Markdown への変換経路と未使用の依存関係を削除, CommonMark と Spongy Castle 経由で JUnit が製品版 DEX に入らないようにし, Rhino ランタイムに JLine ターミナルライブラリを同梱しない
 * `改善` 更新チェックは GitHub REST API (OkHttp + Gson) を直接呼び出して最新リリースと APK 一覧を取得し, フォールバックのリリースノートは GitHub の Markdown レンダリング API を使わずローカルで描画
 * `改善` グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった
+* `改善` Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

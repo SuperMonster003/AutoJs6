@@ -369,6 +369,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 服务端模式支持局域网发现 (mDNS): 开启后 VSCode 插件 (1.1.0+) 建立局域网连接时可直接列出本设备, 无需手动输入地址
 * `新增` VSCode 远程文件支持分块传输: 大文件读写按 1 MiB 分块并在 VSCode 端显示进度; 需 VSCode 插件 1.1.0+; fs.list 可按需返回文件 md5, 供 VSCode 插件 "从设备拉取项目变更" 时比较文件
 * `新增` 客户端模式管理器控制区提供 "历史记录" 入口: 查看曾连接过的服务端地址, 点击即可连接, 长按删除, 亦可清空
+* `修复` 通过 adb 安装 MCP Server 且没有保存启用记录时, 插件中心显示已启用而运行时视为未启用的问题; 两者统一为默认关闭并保留用户明确保存的开关状态
 * `修复` 无障碍服务管理器中未绑定, 无等短状态值下方存在多余空行的问题
 * `修复` 缺少 APK 打包信息的可运行 Node.js 项目 (如 host-events) 未被文件列表和项目工具栏识别的问题
 * `修复` Node.js 项目开始运行及运行结束日志显示无路径的 main.js, 未保留 main.cjs 等实际入口文件的完整路径与扩展名的问题
@@ -738,6 +739,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 安装包体积缩减: 移除停用的 HTML 转 Markdown 链路与未使用的依赖, JUnit 不再随 CommonMark 与 Spongy Castle 进入生产 DEX, Rhino 运行时不再打包 JLine 终端库
 * `优化` 检查更新改为直接调用 GitHub REST API (OkHttp + Gson) 获取最新版本与安装包列表, 更新说明的 release 回退内容改为本地渲染, 不再请求 GitHub 的 Markdown 渲染接口
 * `优化` 全局日志写入文件 (console.setGlobalLogConfig / resetGlobalLogConfig 及全局类 LogConfigurator / Level / LogManager) 改用内置滚动文件日志器替代 Log4j; 文档化选项与 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及宽度修饰) 保持不变, 其余 Log4j API 不再提供
+* `优化` Rhino 引擎在发现 Java 方法时跳过参数类型在当前系统上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整个类的反射失败; UI 模式 text 元素在 Android 7.x 上改用现行 AppCompatTextView, 不再需要旧版 appcompat 1.0.2 库
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

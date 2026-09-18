@@ -231,6 +231,7 @@
 * `추가` 서버 모드: LAN 검색 (mDNS) - 켜면 VSCode 확장 (1.1.0+) 이 LAN 연결 선택 화면에 이 기기를 표시하여 주소 입력이 필요 없습니다
 * `추가` VSCode 원격 파일: 분할 전송 - 큰 파일을 1 MiB 단위로 읽고 쓰며 VSCode 에 진행률을 표시; 확장 1.1.0+ 필요; fs.list 는 요청 시 파일 md5 를 반환하여 확장이 기기에서 프로젝트 변경 사항을 가져올 때 파일을 비교할 수 있게 합니다
 * `추가` 클라이언트 모드 관리자 제어 영역의 "기록" 항목: 이전에 연결한 서버 주소를 확인하고, 탭하여 연결, 길게 눌러 삭제, 전체 삭제 가능
+* `수정` adb로 설치한 MCP Server에 저장된 활성화 설정이 없으면 플러그인 센터에서는 활성화, 실행 시에는 비활성화로 판단하던 문제. 양쪽 기본값을 비활성화로 통일하고 사용자가 명시적으로 선택한 상태 유지
 * `수정` 접근성 관리자에서 바인딩되지 않음, 없음 등 짧은 상태 값 아래의 불필요한 빈 줄
 * `수정` APK 패키징 정보가 없는 실행 가능한 Node.js 프로젝트 (예: host-events)가 파일 목록과 프로젝트 도구 모음에서 인식되지 않는 문제
 * `수정` Node.js 프로젝트 시작 및 종료 로그가 main.cjs 같은 실제 진입 파일의 전체 경로와 확장자 대신 경로 없는 main.js를 표시하는 문제
@@ -597,6 +598,7 @@
 * `개선` APK 크기 축소: 사용하지 않는 HTML -> Markdown 변환 경로와 미사용 의존성을 제거, JUnit이 CommonMark 및 Spongy Castle을 통해 프로덕션 DEX에 포함되지 않도록 하고, Rhino 런타임에 JLine 터미널 라이브러리를 더 이상 포함하지 않음
 * `개선` 업데이트 확인이 GitHub REST API (OkHttp + Gson) 를 직접 호출하여 최신 릴리스와 APK 목록을 가져오고, 대체 릴리스 노트는 GitHub 의 Markdown 렌더링 API 대신 로컬에서 렌더링
 * `개선` 전역 로그 파일 쓰기 (console.setGlobalLogConfig / resetGlobalLogConfig 및 전역 클래스 LogConfigurator / Level / LogManager)가 Log4j 대신 내장 롤링 파일 로거를 사용; 문서화된 옵션과 PatternLayout 하위 집합 (%d / %p / %c / %C / %m / %n / %t / %r 및 너비 지정자)은 유지되며 그 외 Log4j API는 더 이상 제공되지 않음
+* `개선` Rhino 엔진이 Java 메서드를 탐색할 때 매개변수 타입이 실행 중인 시스템에 존재하지 않는 메서드 (Android 7.x 의 AppCompatTextView.setTextClassifier 등)를 클래스 전체의 reflection 실패 대신 건너뜀; UI 모드 text 요소는 Android 7.x 에서도 현행 AppCompatTextView 를 사용하며 구형 appcompat 1.0.2 라이브러리는 더 이상 필요하지 않음
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer
@@ -635,6 +637,7 @@
 * `의존성` Android dx 버전 1.14 제거
 * `의존성` Log4j 버전 1.2.17 제거
 * `의존성` Android Logging Log4j 버전 1.0.3 제거
+* `의존성` AndroidX AppCompat 1.0.2 로컬 라이브러리 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

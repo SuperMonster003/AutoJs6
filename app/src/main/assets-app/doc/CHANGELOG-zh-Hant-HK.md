@@ -231,6 +231,7 @@
 * `新增` 伺服端模式支援局域網發現 (mDNS): 開啟後 VSCode 插件 (1.1.0+) 建立局域網連接時可直接列出本裝置, 無需手動輸入地址
 * `新增` VSCode 遠端檔案支援分塊傳輸: 大檔案讀寫按 1 MiB 分塊並在 VSCode 端顯示進度; 需 VSCode 插件 1.1.0+; fs.list 可按需返回檔案 md5, 供 VSCode 插件 "從裝置拉取專案變更" 時比較檔案
 * `新增` 客戶端模式管理器控制區提供 "歷史記錄" 入口: 查看曾連線過的伺服端位址, 點擊即可連線, 長按刪除, 亦可清空
+* `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題
 * `修復` 缺少 APK 封裝資訊的可執行 Node.js 專案 (如 host-events) 未被檔案清單和專案工具列識別的問題
 * `修復` Node.js 專案開始執行及執行結束日誌顯示無路徑的 main.js, 未保留 main.cjs 等實際入口檔案完整路徑與副檔名的問題
@@ -597,6 +598,7 @@
 * `優化` 安裝包體積縮減: 移除停用的 HTML 轉 Markdown 鏈路與未使用的依賴, JUnit 不再隨 CommonMark 與 Spongy Castle 進入生產 DEX, Rhino 運行時不再打包 JLine 終端庫
 * `優化` 檢查更新改為直接調用 GitHub REST API (OkHttp + Gson) 獲取最新版本與安裝包列表, 更新說明的 release 回退內容改為本地渲染, 不再請求 GitHub 的 Markdown 渲染接口
 * `優化` 全域日誌寫入檔案 (console.setGlobalLogConfig / resetGlobalLogConfig 及全域類 LogConfigurator / Level / LogManager) 改用內置滾動檔案日誌器取代 Log4j; 文件化選項與 PatternLayout 子集 (%d / %p / %c / %C / %m / %n / %t / %r 及寬度修飾) 保持不變, 其餘 Log4j API 不再提供
+* `優化` Rhino 引擎在發現 Java 方法時跳過參數類型在當前系統上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整個類的反射失敗; UI 模式 text 元素在 Android 7.x 上改用現行 AppCompatTextView, 不再需要舊版 appcompat 1.0.2 庫
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer
@@ -635,6 +637,7 @@
 * `依賴` 移除 Android dx 版本 1.14
 * `依賴` 移除 Log4j 版本 1.2.17
 * `依賴` 移除 Android Logging Log4j 版本 1.0.3
+* `依賴` 移除 AndroidX AppCompat 1.0.2 本地庫
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0
