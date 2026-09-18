@@ -2,8 +2,11 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.RemoteException
+import android.os.TransactionTooLargeException
+import android.util.Log
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityBroker
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -56,6 +59,13 @@ internal class NodeJsHostCapabilityBroker(
                 NodeJsRuntimeContract.KEY_HOST_CAPABILITY_MODULES,
                 NodeBridgeModules.supportedMethodsByModule.keys.toTypedArray(),
             )
+            // M20.2 batch 14: fetch bodies and WebSocket messages may arrive as descriptors.
+            putString(
+                NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_TRANSPORT,
+                NodeJsRuntimeContract.BRIDGE_REQUEST_BINARY_TRANSPORT_PFD,
+            )
+            // M20.2 batch 15: the plugin runtime shows this allowlist as java.policy instead of its own copy.
+            putString(NodeJsRuntimeContract.KEY_JAVA_INTEROP_POLICY_JSON, ControlledJavaInteropPolicy.policyJson().toString())
             putStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD, nativePayload(nativeDiagnostics()))
         }
     }
@@ -65,6 +75,7 @@ internal class NodeJsHostCapabilityBroker(
             return
         }
         if (destroyed.get()) {
+            requestUpload(request)?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -77,9 +88,11 @@ internal class NodeJsHostCapabilityBroker(
         val requestJson = request
             ?.getString(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_JSON)
             .orEmpty()
+        val upload = requestUpload(request)
         val bridgeRequest = runCatching {
-            NodeBridgeRequest.fromJson(requestJson)
+            NodeBridgeRequest.fromJson(requestJson).copy(upload = upload)
         }.getOrElse { error ->
+            upload?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -93,9 +106,12 @@ internal class NodeJsHostCapabilityBroker(
         }
         runCatching {
             provider.dispatch(bridgeRequest) { response ->
-                sendResponse(callback, response)
+                // The descriptor served this call; events keep flowing without it.
+                if (!response.event) upload?.close()
+                sendResponse(callback, response, bridgeRequest.module, bridgeRequest.method)
             }
         }.onFailure { error ->
+            upload?.close()
             sendResponse(
                 callback,
                 NodeBridgeResponse.failure(
@@ -109,6 +125,17 @@ internal class NodeJsHostCapabilityBroker(
                 ),
             )
         }
+    }
+
+    /** M20.2 batch 14: a request body or message delivered as a descriptor (closed once answered). */
+    private fun requestUpload(request: Bundle?): NodeBridgeRequestUpload? {
+        @Suppress("DEPRECATION")
+        val descriptor = request?.getParcelable<ParcelFileDescriptor>(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_PFD)
+            ?: return null
+        return NodeBridgeRequestUpload(
+            descriptor,
+            request.getLong(NodeJsRuntimeContract.KEY_BRIDGE_REQUEST_BINARY_BYTE_COUNT, -1L),
+        )
     }
 
     override fun getNativeDiagnostics(): Bundle {
@@ -137,9 +164,12 @@ internal class NodeJsHostCapabilityBroker(
     private fun sendResponse(
         callback: INodeJsHostCapabilityCallback,
         response: NodeBridgeResponse,
+        module: String? = null,
+        method: String? = null,
     ) {
+        val responseJson = response.toJson()
         val responseBundle = Bundle().apply {
-            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, response.toJson())
+            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, responseJson)
             if (response.event) putBoolean("event", true)
             putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, response.ok)
             response.binary?.let { descriptor ->
@@ -152,10 +182,52 @@ internal class NodeJsHostCapabilityBroker(
         }
         try {
             callback.onResponse(responseBundle)
+        } catch (error: TransactionTooLargeException) {
+            // Binder refused the reply, so the plugin never saw it. Answer with a small
+            // provider failure instead of leaving the script to its bridge timeout.
+            reportOversizedResponse(callback, response, responseJson.length, module, method, error)
         } catch (_: RemoteException) {
             // Plugin process may have died; the script result path will surface the runtime failure.
         } finally {
             response.binary?.close()
+        }
+    }
+
+    private fun reportOversizedResponse(
+        callback: INodeJsHostCapabilityCallback,
+        response: NodeBridgeResponse,
+        jsonLength: Int,
+        module: String?,
+        method: String?,
+        error: TransactionTooLargeException,
+    ) {
+        val target = listOfNotNull(module, method).joinToString(".").ifBlank { "bridge call" }
+        if (response.event) {
+            Log.w(
+                TAG,
+                "AutoJs6 host event for $target ($jsonLength JSON chars) exceeded the Binder transaction size and was dropped: ${error.message}",
+            )
+            return
+        }
+        val failure = NodeBridgeResponse.failure(
+            response.id,
+            NodeBridgeError.providerFailed(
+                message = "AutoJs6 host response for $target ($jsonLength JSON chars) exceeded the Binder transaction size; " +
+                    "use the descriptor-based binary transport or request a smaller payload.",
+                module = module,
+                method = method,
+                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+            ),
+        )
+        val failureBundle = Bundle().apply {
+            putString(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_JSON, failure.toJson())
+            putBoolean(NodeJsRuntimeContract.KEY_BRIDGE_RESPONSE_OK, false)
+            failure.error?.message?.let { putString(NodeJsRuntimeContract.KEY_BRIDGE_ERROR_MESSAGE, it) }
+        }
+        try {
+            callback.onResponse(failureBundle)
+        } catch (_: RemoteException) {
+            // Plugin process may have died; nothing else to report.
         }
     }
 
@@ -169,5 +241,9 @@ internal class NodeJsHostCapabilityBroker(
 
     private fun nativePayload(values: Map<String, String>): Array<String> {
         return values.map { (key, value) -> "$key=$value" }.toTypedArray()
+    }
+
+    private companion object {
+        private const val TAG = "NodeJsHostCapabilityBroker"
     }
 }

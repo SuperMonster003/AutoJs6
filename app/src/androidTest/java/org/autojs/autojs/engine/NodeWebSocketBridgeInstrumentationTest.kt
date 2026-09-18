@@ -67,6 +67,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                       const websocket = require("websocket");
                       const requests = [];
                       const sessions = new Map();
+                      const openConnections = new Set();
                       let sequence = 0;
 
                       function codeOf(error) {
@@ -120,9 +121,19 @@ class NodeWebSocketBridgeInstrumentationTest {
                             if (payload.url.indexOf("/timeout") >= 0 || payload.url.indexOf("/destroy") >= 0) {
                               return;
                             }
+                            // The connection quota lives in the host provider; the fake mirrors a limit of two.
+                            if (openConnections.size >= 2) {
+                              respond(request, false, null, {
+                                code: "ERR_AUTOJS6_NETWORK_POLICY_DENIED",
+                                message: "fake host connection quota"
+                              });
+                              return;
+                            }
                             sequence += 1;
                             const id = "fake-ws-" + sequence;
+                            openConnections.add(id);
                             const session = sessionFor(id);
+                            session.maxMessageBytes = payload.maxMessageBytes;
                             session.events.push({ type: "open" });
                             if (payload.url.indexOf("/socket") >= 0) {
                               session.events.push({ type: "message", message: { type: "text", text: "server-ready" } });
@@ -138,6 +149,17 @@ class NodeWebSocketBridgeInstrumentationTest {
                           }
                           if (request.method === "send") {
                             const session = sessionFor(payload.id);
+                            // The message cap lives in the host provider; the fake mirrors it per connection.
+                            const messageBytes = payload.dataBase64
+                              ? Buffer.from(payload.dataBase64, "base64").length
+                              : Buffer.byteLength(String(payload.text || ""), "utf8");
+                            if (typeof session.maxMessageBytes === "number" && messageBytes > session.maxMessageBytes) {
+                              respond(request, false, null, {
+                                code: "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE",
+                                message: "fake host message cap"
+                              });
+                              return;
+                            }
                             if (payload.text === "trigger-error") {
                               session.events.push({ type: "error", error: { code: "ERR_FAKE_WS", message: "fake websocket error" } });
                             } else if (payload.dataBase64) {
@@ -149,6 +171,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                             return;
                           }
                           if (request.method === "close") {
+                            openConnections.delete(payload.id);
                             sessionFor(payload.id).events.push({ type: "close", code: payload.code || 1000, reason: payload.reason || "" });
                             respond(request, true, null);
                             return;
@@ -283,9 +306,9 @@ class NodeWebSocketBridgeInstrumentationTest {
                       console.log("websocket.shadow=" + (websocket.shadowed === true));
                       console.log("websocket.frozen=" + Object.isFrozen(websocket));
                       console.log("websocket.policy=" + [
-                        websocket.policy.maxConnections,
                         websocket.policy.defaultTimeoutMs,
-                        websocket.policy.defaultMaxMessageBytes
+                        typeof websocket.policy.maxConnections,
+                        typeof websocket.policy.defaultMaxMessageBytes
                       ].join("|"));
                       console.log("websocket.connect_options=" + [
                         headerValue(socketConnect.headers, "x-mode"),
@@ -328,11 +351,11 @@ class NodeWebSocketBridgeInstrumentationTest {
             )
 
             NodePluginTestHarness.assertSucceeded("websocket bridge MVP", result)
-            assertTrue(result.stdout, result.stdout.contains("websocket.profile=false|false|stable|false"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.profile=true|true|stable|true"))
             assertTrue(result.stdout, result.stdout.contains("websocket.resolve=websocket"))
             assertTrue(result.stdout, result.stdout.contains("websocket.shadow=false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.frozen=true"))
-            assertTrue(result.stdout, result.stdout.contains("websocket.policy=2|10000|65536"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.policy=10000|undefined|undefined"))
             assertTrue(result.stdout, result.stdout.contains("websocket.connect_options=bridge|json,events|4|64"))
             assertTrue(result.stdout, result.stdout.contains("websocket.messages=server-ready|echo:hello"))
             assertTrue(
@@ -347,10 +370,90 @@ class NodeWebSocketBridgeInstrumentationTest {
                     "websocket.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
                 ),
             )
-            assertTrue(result.stdout, result.stdout.contains("websocket.diagnostics=0|2|1|3"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.diagnostics=0|3|1|3"))
             assertTrue(result.stdout, result.stdout.contains("websocket.pending=0"))
         } finally {
             workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun hostReadsControlledWebSocketMessagesFromTheDescriptorTransport() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node controlled WebSocket message descriptor transport")
+
+        ControlledWebSocketLoopbackServer().use { server ->
+            val baseUrl = server.baseUrl
+            val result = NodePluginTestHarness.runPluginScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const websocket = require("websocket");
+                      const crypto = require("crypto");
+                      const base = "$baseUrl";
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+                      function waitForMessage(connection, predicate, label) {
+                        return new Promise((resolve, reject) => {
+                          const timer = setTimeout(() => {
+                            connection.off("message", listener);
+                            reject(new Error("timeout waiting for " + label));
+                          }, 10000);
+                          function listener(message) {
+                            if (predicate(message)) {
+                              clearTimeout(timer);
+                              connection.off("message", listener);
+                              resolve(message);
+                            }
+                          }
+                          connection.on("message", listener);
+                        });
+                      }
+                      const digest = (value) => crypto.createHash("sha256").update(value).digest("hex");
+                      const binary = Buffer.alloc(716800);
+                      for (let index = 0; index < binary.length; index += 1) binary[index] = index % 251;
+                      const text = "z".repeat(307200);
+
+                      const connection = await websocket.connect(base + "/socket?mode=upload", {
+                        timeoutMs: 5000,
+                        maxMessageBytes: 1048576,
+                        maxQueueSize: 8
+                      });
+                      await waitForMessage(connection, (message) => !!message.text && message.text.indexOf("server-ready:") === 0, "ready");
+                      const binaryReply = waitForMessage(connection, (message) => !!message.text && message.text.indexOf("binary-sha256:") === 0, "binary summary");
+                      await connection.send(binary);
+                      const binarySummary = (await binaryReply).text;
+                      const textReply = waitForMessage(connection, (message) => !!message.text && message.text.indexOf("text-sha256:") === 0, "text summary");
+                      await connection.send(text);
+                      const textSummary = (await textReply).text;
+                      const echoReply = waitForMessage(connection, (message) => message.text === "echo:hello", "small echo");
+                      await connection.send("hello");
+                      await echoReply;
+                      await connection.close(1000, "done");
+
+                      const capped = await websocket.connect(base + "/socket?mode=upload", { timeoutMs: 5000, maxMessageBytes: 4096 });
+                      let cappedCode = "";
+                      try {
+                        await capped.send(binary);
+                      } catch (error) {
+                        cappedCode = codeOf(error);
+                      }
+                      await capped.close(1000, "done");
+
+                      console.log("live.websocket.upload=" + [
+                        binarySummary === "binary-sha256:" + digest(binary) + ":" + binary.length,
+                        textSummary === "text-sha256:" + digest(text) + ":" + text.length,
+                        cappedCode
+                      ].join("|"));
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-websocket-upload-transport.js>",
+                timeoutMs = 30_000L,
+            )
+
+            NodePluginTestHarness.assertSucceeded("websocket upload transport", result)
+            val resultDetails = NodePluginTestHarness.describeResult("websocket upload transport", result)
+            assertTrue(resultDetails, result.stdout.contains("live.websocket.upload=true|true|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"))
         }
     }
 
@@ -475,6 +578,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<node-websocket-live-provider.js>",
                 timeoutMs = 15_000L,
+                rawNodeNetworkModulesEnabled = false,
             )
 
             NodePluginTestHarness.assertSucceeded("websocket live provider", result)
@@ -491,7 +595,9 @@ class NodeWebSocketBridgeInstrumentationTest {
             assertTrue(resultDetails, result.stdout.contains("live.websocket.diagnostics=0|3|1|0"))
             result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
             result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.toIntOrNull()?.let {
-                assertTrue(resultDetails, it >= 10)
+                // connect, two sends and a close on /socket, then the /large and /slow connects; events are
+                // pushed through the callback, so there is no drainEvents polling on top.
+                assertTrue(resultDetails, it >= 6)
             }
             result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("1", it) }
             result.nativeValues["embedded_script.websocket_active_connection_count"]?.let { assertEquals("0", it) }
@@ -628,10 +734,23 @@ class NodeWebSocketBridgeInstrumentationTest {
                 query,
             ).joinToString(":")
             writeTextFrame(output, ready)
+            // mode=upload answers large frames with a digest so the reply stays small.
+            val uploadMode = query.contains("mode=upload")
             while (true) {
                 when (val frame = readFrame(input) ?: return) {
-                    is WebSocketFrame.Text -> writeTextFrame(output, "echo:${frame.text}")
-                    is WebSocketFrame.Binary -> writeBinaryFrame(output, frame.bytes)
+                    is WebSocketFrame.Text -> {
+                        val bytes = frame.text.toByteArray(StandardCharsets.UTF_8)
+                        if (uploadMode && bytes.size > 125) {
+                            writeTextFrame(output, "text-sha256:${sha256Hex(bytes)}:${bytes.size}")
+                        } else {
+                            writeTextFrame(output, "echo:${frame.text}")
+                        }
+                    }
+                    is WebSocketFrame.Binary -> if (uploadMode) {
+                        writeTextFrame(output, "binary-sha256:${sha256Hex(frame.bytes)}:${frame.bytes.size}")
+                    } else {
+                        writeBinaryFrame(output, frame.bytes)
+                    }
                     is WebSocketFrame.Close -> {
                         writeCloseFrame(output, frame.code, frame.reason)
                         return
@@ -708,7 +827,7 @@ class NodeWebSocketBridgeInstrumentationTest {
             } else if (length == 127L) {
                 length = readLong(input)
             }
-            if (length > 1_048_576L) {
+            if (length > 4_194_304L) {
                 return null
             }
             val mask = if (masked) readExact(input, 4) else null
@@ -809,6 +928,9 @@ class NodeWebSocketBridgeInstrumentationTest {
             }
             return bytes
         }
+
+        private fun sha256Hex(bytes: ByteArray): String =
+            MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 
         companion object {
             private const val WEB_SOCKET_ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"

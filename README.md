@@ -207,6 +207,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Ace LSP 默认文件类型新增 .mts/.cts 及其声明文件变体, 使外部 Ace 编辑器可选择与执行一致的 Rhino/Node TypeScript profile; 旧版默认选择会自动迁移, 显式自定义后缀集合保持不变
 * `新增` APK Builder 支持在打包阶段编译 Rhino TypeScript 项目; 最终 APK 仅包含加密 JavaScript 与不内嵌源码的可选 Source Map, 不包含 TypeScript 源码或编译器; 加密项目使用一次性 AES-256-GCM staging, 解密与重加密明文仅存于内存并在使用后清零
 * `新增` Node.js Runtime 插件, 内置 Node.js 24.5.0 运行时, 支持识别 "nodejs" 模式参数或识别文件扩展名 (.node.js/.cjs/.mjs) 运行 Node.js 脚本
+* `新增` Node.js Java 互操作由宿主声明式白名单统一管理, 支持 Math, UUID, Rect, Point, Color, Locale, Build, Build.VERSION 与 TimeUnit, 并向插件公开 `java.policy` 与静态字段读取
 * `新增` Node.js 宿主媒体播放会话及 media_store 媒体库支持, 包含暂停, 继续, 定位, 状态与结束清理, 以及 MediaStore 查询, 导入, 重命名, 导出, 扫描和删除; media.playback, media.library 与 media.library.mutate 分别授权
 * `新增` Node.js Runtime 调试构建支持按次执行显式开启仅绑定本机回环地址的 Inspector/CDP 会话, release 构建, 远程监听及阻塞等待保持禁止
 * `新增` 独立 TypeScript 编译插件客户端, 校验冻结的 AIDL/R2 归档协议, 支持 UTF-8 单文件 Rhino 编译, 有界诊断及强制 Source Map 输出
@@ -373,6 +374,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 插件中心启用 YOLO 插件时探测握手要求插件已处于启用状态, 导致开关无法启用的问题; 探测现仅要求授权与精确组件握手, 运行时入口仍要求已保存的启用记录
 * `修复` 通过 adb 安装 MCP Server 且没有保存启用记录时, 插件中心显示已启用而运行时视为未启用的问题; 两者统一为默认关闭并保留用户明确保存的开关状态
 * `修复` 无障碍服务管理器中未绑定, 无等短状态值下方存在多余空行的问题
+* `修复` Node.js 受控 Fetch 内联响应超过 Binder 事务大小限制时静默丢失, 导致脚本等待桥接超时的问题
+* `修复` Node.js WebSocket 提供者销毁时过早取消连接, 导致对端未收到正常关闭帧的问题
 * `修复` 缺少 APK 打包信息的可运行 Node.js 项目 (如 host-events) 未被文件列表和项目工具栏识别的问题
 * `修复` Node.js 项目开始运行及运行结束日志显示无路径的 main.js, 未保留 main.cjs 等实际入口文件的完整路径与扩展名的问题
 * `修复` 终端会话在启动阶段关闭时可能遗留后台 shell 进程的问题
@@ -613,6 +616,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` TypeScript TSX 运行时校验提示现在会跟随应用语言, 已补齐全部 10 种受支持语言, 不再暴露硬编码英文
 * `优化` Ace 字体预览在当前字体尚未下载时于多功能键盘上方显示下载提示, 切换到可用字体或下载完成后自动隐藏
 * `优化` 代码编辑器 `跳转到行` 对话框在输入值超过文档最大行号时立即将其校正为最大值
+* `优化` Node.js 受控 Fetch 请求与响应体, WebSocket 发送消息支持文件描述符传输, 减少大型二进制数据跨 Binder 传输的开销
 * `优化` 移除已过时的 Node.js Runtime legacy TypeScript stripping 请求开关; 原始 TypeScript 仍只可经编译器处理, Runtime 绝不再用正则表达式擦除
 * `优化` 移除宿主侧 Node.js Gradle 开关及重复的样例, 类型声明, 项目向导与校验脚本, 运行时默认值和开发资产现统一由 Node.js Runtime 插件维护
 * `优化` DEX 编译器诊断现在在既有预算内保留经脱敏的 INFO/WARNING/ERROR 详情及可选逻辑来源, 归档条目与位置元数据; 开发者选项会显示仅存于进程内的最近一次 JAR 加载路径, 并提供 BUSY, 超时及回退提示

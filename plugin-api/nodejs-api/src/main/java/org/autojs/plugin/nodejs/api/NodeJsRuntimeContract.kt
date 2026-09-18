@@ -102,6 +102,8 @@ object NodeJsRuntimeContract {
     const val KEY_WORKER_THREADS_ENABLED = "workerThreadsEnabled"
     const val KEY_CHILD_PROCESS_ENABLED = "childProcessEnabled"
     const val KEY_JAVA_INTEROP_ENABLED = "javaInteropEnabled"
+    /** Broker info: the host Java interop allowlist as JSON (M20.2 batch 15). */
+    const val KEY_JAVA_INTEROP_POLICY_JSON = "javaInteropPolicyJson"
 
     const val KEY_SUCCEEDED = "succeeded"
     const val KEY_EXIT_CODE = "exitCode"
@@ -127,6 +129,10 @@ object NodeJsRuntimeContract {
     const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
     const val KEY_BRIDGE_BINARY_PFD = "bridgeBinaryPfd"
     const val KEY_BRIDGE_BINARY_BYTE_COUNT = "bridgeBinaryByteCount"
+    const val KEY_BRIDGE_REQUEST_BINARY_PFD = "bridgeRequestBinaryPfd"
+    const val KEY_BRIDGE_REQUEST_BINARY_BYTE_COUNT = "bridgeRequestBinaryByteCount"
+    const val KEY_BRIDGE_REQUEST_BINARY_TRANSPORT = "bridgeRequestBinaryTransport"
+    const val BRIDGE_REQUEST_BINARY_TRANSPORT_PFD = "pfd"
     const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
 
     const val KEY_MODULE_SOURCE_PROVIDER = "moduleSourceProvider"
