@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
+import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
@@ -52,7 +53,11 @@ object McpServerPluginInspector {
             installed = true,
             applicationEnabled = enabled,
             stopped = app.flags and ApplicationInfo.FLAG_STOPPED != 0,
-            pluginEnabled = PluginEnableStore.isEnabled(context, McpServerIds.DEFAULT_PACKAGE_NAME, false),
+            pluginEnabled = PluginEnableStore.isEnabled(
+                context,
+                McpServerIds.DEFAULT_PACKAGE_NAME,
+                defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE),
+            ),
             authorized = PluginTrustManager.isAuthorized(context, McpServerIds.DEFAULT_PACKAGE_NAME),
             trustedSigner = trust.isOfficial || trust.isTrusted,
             signerConfirmed = confirmed,

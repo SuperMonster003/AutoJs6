@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
+import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityBroker
 import org.autojs.plugin.mcp.server.api.IMcpServerCallback
@@ -39,7 +40,7 @@ object McpServerPluginHost {
         moduleLabel = LABEL,
         proxyFactory = { binder -> IMcpServerPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
-        defaultEnabled = false,
+        defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE),
         preBindValidator = ::validateService,
     )
 
