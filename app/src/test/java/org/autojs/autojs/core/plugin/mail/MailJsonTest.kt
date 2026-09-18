@@ -118,6 +118,15 @@ class MailJsonTest {
         assertEquals(20L, MailJson.decodeProgress("""{"transferred":1,"total":20}""").total)
         assertEquals(0L, MailJson.decodeProgress("""{"transferred":-5}""").transferred)
         assertEquals(0L, MailJson.decodeProgress("""{"transferred":"ten"}""").transferred)
+        assertNull(progress.debug)
+    }
+
+    @Test
+    fun progressCarriesTheDebugTraceLinesWhenPresent() {
+        val traced = MailJson.decodeProgress("""{"transferred":0,"debug":["C: LOGIN alice ****",null,"S: A1 OK"]}""")
+        assertEquals(listOf("C: LOGIN alice ****", "S: A1 OK"), traced.debug)
+        assertNull(MailJson.decodeProgress("""{"transferred":0,"debug":[]}""").debug)
+        assertNull(MailJson.decodeProgress("""{"transferred":0,"debug":"C: NOOP"}""").debug)
     }
 
     @Test

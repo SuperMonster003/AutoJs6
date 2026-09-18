@@ -12,6 +12,8 @@ import org.autojs.plugin.mail.api.IMailWatchCallback
 import org.autojs.plugin.mail.api.MailContract
 import org.autojs.plugin.mail.api.MailErrorCodes
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /** Bundle shapes of the mail contract as written and read by the host. */
 internal object MailBundles {
@@ -39,8 +41,14 @@ internal object MailBundles {
     fun string(bundle: Bundle?, key: String): String? = bundle?.getString(key)
 }
 
-/** Delivers `onStatus` of a session; a `closed` status ends the session on the client side. */
+/**
+ * Delivers `onStatus` of a session; a `closed` status ends the session on the client side. The
+ * callback is oneway, so a refused `openSession` may return null before its `closed` status
+ * arrives; [awaitClosed] bridges that gap for the opener.
+ */
 internal class MailSessionCallbackBinder(private val events: MailSessionEvents) : IMailSessionCallback.Stub() {
+
+    private val closed = CountDownLatch(1)
 
     @Volatile
     var lastStatus: MailJson.Status? = null
@@ -50,8 +58,15 @@ internal class MailSessionCallbackBinder(private val events: MailSessionEvents) 
         val decoded = runCatching { MailJson.decodeStatus(MailBundles.string(status, MailContract.KEY_STATUS_JSON)) }.getOrNull() ?: return
         lastStatus = decoded
         if (decoded.state == MailContract.STATE_CLOSED) {
+            closed.countDown()
             events.onClosed(decoded.lastError ?: MailErrorMapper.normalize(MailErrorCodes.SESSION_CLOSED, decoded.reason, retryable = true))
         }
+    }
+
+    /** The `closed` status of a refusal, waiting up to [timeoutMs] for the oneway callback; null when none arrived. */
+    fun awaitClosed(timeoutMs: Long): MailJson.Status? {
+        if (!closed.await(timeoutMs, TimeUnit.MILLISECONDS)) return null
+        return lastStatus?.takeIf { it.state == MailContract.STATE_CLOSED }
     }
 }
 

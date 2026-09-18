@@ -20,6 +20,9 @@ import org.autojs.plugin.mail.api.MailCapabilityKeys
 import org.autojs.plugin.mail.api.MailContract
 import org.autojs.plugin.mail.api.MailIds
 
+/** How long a refused `openSession` waits for the plugin's `closed` status on the oneway callback. */
+private const val REFUSAL_TIMEOUT_MS = 3_000L
+
 /**
  * Host wrapper for the mail Binder contract (roadmap P1.2, decisions D1 and D19): the plugin is
  * enabled by default, any package answering the `org.autojs.plugin.MAIL` query with the `mail`
@@ -80,10 +83,20 @@ object MailPluginHost {
         val callback = MailSessionCallbackBinder(events)
         val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
             proxy.openSession(MailBundles.accountToBundle(account, BuildConfig.VERSION_CODE.toLong()), callback)
-                ?: throw callback.lastStatus?.lastError?.let(::MailPluginException)
-                    ?: IllegalStateException("mail plugin refused the account")
+                ?: throw refusal(callback)
         }
         BinderMailSessionPort(leased, events)
+    }
+
+    /**
+     * The error of a refused `openSession`: the plugin reports it through the oneway session
+     * callback, which may land after the null return, so the opener waits briefly for it.
+     */
+    private fun refusal(callback: MailSessionCallbackBinder): Exception {
+        val status = callback.awaitClosed(REFUSAL_TIMEOUT_MS)
+        val error = status?.lastError
+            ?: return IllegalStateException("mail plugin refused the account" + (status?.reason?.let { ": $it" } ?: ""))
+        return MailPluginException(error)
     }
 
     fun sessionOpener(context: Context): MailSessionOpener {

@@ -19,7 +19,10 @@ object MailJson {
     /** Response envelope; [result] is the encoded `result` element, [error] the mapped error. */
     data class Response(val id: String?, val ok: Boolean, val result: String?, val error: MailError?)
 
-    data class Progress(val id: String?, val transferred: Long, val total: Long?)
+    private const val FIELD_DEBUG = "debug"
+
+    /** [debug] holds the redacted protocol trace lines of a `debug: true` account (decision D28). */
+    data class Progress(val id: String?, val transferred: Long, val total: Long?, val debug: List<String>? = null)
 
     data class Event(
         val type: String,
@@ -86,7 +89,10 @@ object MailJson {
     fun decodeProgress(json: String?): Progress {
         val root = parseObject(json, "progress")
         val transferred = optionalLong(root, MailContract.FIELD_TRANSFERRED) ?: 0L
-        return Progress(optionalString(root, MailContract.FIELD_ID), transferred.coerceAtLeast(0L), optionalLong(root, MailContract.FIELD_TOTAL)?.takeIf { it >= 0L })
+        val debug = root.get(FIELD_DEBUG)?.takeIf { it.isJsonArray }?.asJsonArray
+            ?.mapNotNull { line -> line.takeIf { it.isJsonPrimitive }?.asString }
+            ?.takeIf { it.isNotEmpty() }
+        return Progress(optionalString(root, MailContract.FIELD_ID), transferred.coerceAtLeast(0L), optionalLong(root, MailContract.FIELD_TOTAL)?.takeIf { it >= 0L }, debug)
     }
 
     fun decodeEvent(json: String?): Event {
