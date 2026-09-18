@@ -209,7 +209,6 @@ val resourcePickFirstPatterns = listOf(
     "META-INF/NOTICE.*",
     "META-INF/notice.*",
     "META-INF/ASL2.0",
-    "META-INF/*.kotlin_module",
     "lib/x86/libc++_shared.so",
     "lib/x86_64/libc++_shared.so",
     "lib/armeabi-v7a/libc++_shared.so",
@@ -230,6 +229,14 @@ val resourceExcludePatterns = listOf(
     // kotlinx-coroutines debug probes.
     // zh-CN: kotlinx-coroutines 调试探针.
     "DebugProbesKt.bin",
+    // Kotlin metadata that only kotlin-reflect reads (module facade tables and the built-ins descriptors);
+    // kotlin-reflect is no longer bundled. Both the single-level and the nested form are listed because of
+    // the glob depth rule above.
+    // zh-CN: 仅由 kotlin-reflect 读取的 Kotlin 元数据 (模块外观表与内建类型描述); kotlin-reflect 已不再打包.
+    // 因上述 glob 深度规则, 单层与嵌套两种形式都列出.
+    "META-INF/*.kotlin_module",
+    "kotlin/*.kotlin_builtins",
+    "kotlin/**/*.kotlin_builtins",
 )
 
 val appMergedAssetPruneIncludes = listOf(
@@ -475,9 +482,6 @@ val slimRhinoJar by tasks.registering(Jar::class) {
 dependencies /* Unclassified */ {
     // Compose
     // implementation("androidx.compose.ui:ui-android:1.6.7")
-
-    // Kotlin reflect
-    implementation(kotlin("reflect"))
 
     // AndroidX Core
     implementation(libs.core.ktx)

@@ -714,12 +714,6 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         }
     }
 
-    private fun createNewThrowableInstance(e: Throwable, message: String): Throwable? = runCatching {
-        e::class.constructors.firstOrNull {
-            it.parameters.size == 1 && it.parameters[0].type.classifier == String::class
-        }?.call(message)
-    }.getOrNull()
-
     companion object : ArgumentGuards() {
 
         private const val LEGACY_PREFIX_ARGUMENT_MESSAGE =

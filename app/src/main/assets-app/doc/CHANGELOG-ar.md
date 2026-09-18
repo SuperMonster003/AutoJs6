@@ -629,6 +629,7 @@
 * `التبعيات` ازالة Jackson DataBind الاصدار 2.13.4.2
 * `التبعيات` ازالة Commons IO الاصدار 2.8.0
 * `التبعيات` ازالة Apache Commons Lang3 الاصدار 3.18.0
+* `التبعيات` ازالة Kotlin Reflect الاصدار 2.4.0
 * `التبعيات` إضافة AndroidX Media3 ExoPlayer / Session الإصدار 1.11.0
 * `التبعيات` إلحاق ZXing Android Embedded الإصدار 4.3.0
 

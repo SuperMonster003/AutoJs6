@@ -630,6 +630,7 @@
 * `依賴` 移除 Jackson DataBind 版本 2.13.4.2
 * `依賴` 移除 Commons IO 版本 2.8.0
 * `依賴` 移除 Apache Commons Lang3 版本 3.18.0
+* `依賴` 移除 Kotlin Reflect 版本 2.4.0
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 
 # v6.7.0

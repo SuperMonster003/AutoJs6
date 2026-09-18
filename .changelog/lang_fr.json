@@ -631,6 +631,7 @@
         "Suppression de Jackson DataBind version 2.13.4.2",
         "Suppression de Commons IO version 2.8.0",
         "Suppression de Apache Commons Lang3 version 3.18.0",
+        "Suppression de Kotlin Reflect version 2.4.0",
         "Ajout de ZXing Android Embedded version 4.3.0"
       ]
     },

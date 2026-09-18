@@ -5,13 +5,11 @@ import org.mozilla.javascript.NativeJavaClass
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Scriptable.NOT_FOUND
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredMemberProperties
 
 @Suppress("unused")
 object GlobalClasses : SimpleGetterProxy {
 
     private val mClasses by lazy { Classes() }
-    private val mClassesMembers by lazy { Classes::class.declaredMemberProperties }
 
     override fun get(scope: Scriptable, key: String): Any? {
 

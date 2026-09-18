@@ -630,6 +630,7 @@
 * `의존성` Jackson DataBind 버전 2.13.4.2 제거
 * `의존성` Commons IO 버전 2.8.0 제거
 * `의존성` Apache Commons Lang3 버전 3.18.0 제거
+* `의존성` Kotlin Reflect 버전 2.4.0 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 
 # v6.7.0

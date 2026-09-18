@@ -631,6 +631,7 @@
         "Jackson DataBind 버전 2.13.4.2 제거",
         "Commons IO 버전 2.8.0 제거",
         "Apache Commons Lang3 버전 3.18.0 제거",
+        "Kotlin Reflect 버전 2.4.0 제거",
         "ZXing Android Embedded 버전 4.3.0 추가"
       ]
     },

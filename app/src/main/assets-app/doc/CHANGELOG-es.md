@@ -629,6 +629,7 @@
 * `Dependencia` Se elimina Jackson DataBind version 2.13.4.2
 * `Dependencia` Se elimina Commons IO version 2.8.0
 * `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
+* `Dependencia` Se elimina Kotlin Reflect version 2.4.0
 * `Dependencia` Añadido AndroidX Media3 ExoPlayer / Session versión 1.11.0
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 

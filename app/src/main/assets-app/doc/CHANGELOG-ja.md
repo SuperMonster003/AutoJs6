@@ -630,6 +630,7 @@
 * `依存関係` Jackson DataBind バージョン 2.13.4.2 を削除
 * `依存関係` Commons IO バージョン 2.8.0 を削除
 * `依存関係` Apache Commons Lang3 バージョン 3.18.0 を削除
+* `依存関係` Kotlin Reflect バージョン 2.4.0 を削除
 * `依存関係` ZXing Android Embedded バージョン 4.3.0 を追加
 
 # v6.7.0

@@ -27,7 +27,6 @@ import org.mozilla.javascript.ScriptableObject
 import java.util.concurrent.TimeUnit
 import kotlin.Double.Companion.NaN
 import kotlin.math.roundToInt
-import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.text.RegexOption.IGNORE_CASE
 import android.graphics.Point as AndroidPoint
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes as CoreBytes
@@ -50,6 +49,11 @@ object S13n : Augmentable() {
     private const val FUNC_NAME_TO_MINUTES = "toMinutes"
     private const val FUNC_NAME_TO_HOURS = "toHours"
     private const val FUNC_NAME_TO_DAYS = "toDays"
+
+    // Parameter list shared by the TimeUtils.toXxx(TimeUnit, Long) conversion functions; they are @JvmStatic
+    // members of an object, so they are looked up as static methods with Java reflection.
+    // zh-CN: TimeUtils.toXxx(TimeUnit, Long) 换算函数共用的参数表; 它们是 object 的 @JvmStatic 成员, 因此用 Java 反射按静态方法查找.
+    private val timeConversionParameterTypes = arrayOf<Class<*>>(TimeUnit::class.java, Long::class.javaPrimitiveType!!)
 
     private val timeUnitRex = mapOf(
         KEY_NANO_SECONDS to Regex("^NANO(SECONDS?|S)?$", IGNORE_CASE),
@@ -156,10 +160,12 @@ object S13n : Augmentable() {
                     else -> {
                         val toUnit = if (arg2.isJsNullish()) TimeUnit.MILLISECONDS else arg2
                         val conversionFuncName = getTimeUnitConversionFunctionName(toUnit)
-                        val function = TimeUtils::class.declaredMemberFunctions.find { it.name == conversionFuncName } ?: throw WrappedIllegalArgumentException(
+                        val function = TimeUtils::class.java.declaredMethods.firstOrNull {
+                            it.name == conversionFuncName && it.parameterTypes.contentEquals(timeConversionParameterTypes)
+                        } ?: throw WrappedIllegalArgumentException(
                             "Conversion function name $conversionFuncName is not found in ${TimeUtils::class.java.name}"
                         )
-                        coerceNumber(function.call(TimeUtils, getTimeUnitSourceObject(fromUnit), num.toLong()), NaN)
+                        coerceNumber(function.invoke(TimeUtils, getTimeUnitSourceObject(fromUnit), num.toLong()), NaN)
                     }
                 }
             }

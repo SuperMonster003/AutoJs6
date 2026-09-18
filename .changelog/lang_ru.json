@@ -631,6 +631,7 @@
         "Удален Jackson DataBind версии 2.13.4.2",
         "Удален Commons IO версии 2.8.0",
         "Удален Apache Commons Lang3 версии 3.18.0",
+        "Удален Kotlin Reflect версии 2.4.0",
         "Добавлен ZXing Android Embedded версии 4.3.0"
       ]
     },

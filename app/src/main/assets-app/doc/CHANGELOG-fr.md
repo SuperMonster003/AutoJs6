@@ -630,6 +630,7 @@
 * `Dépendance` Suppression de Jackson DataBind version 2.13.4.2
 * `Dépendance` Suppression de Commons IO version 2.8.0
 * `Dépendance` Suppression de Apache Commons Lang3 version 3.18.0
+* `Dépendance` Suppression de Kotlin Reflect version 2.4.0
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 
 # v6.7.0
