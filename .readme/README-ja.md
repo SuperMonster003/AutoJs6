@@ -461,6 +461,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` IntelliJ IDEA からプロジェクトを直接実行すると, APK の検索に現在のビルドの成果物ディレクトリが使われず, ネイティブライブラリのページアライメント検証で APK が見つからないと誤判定される問題
 * `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
 * `修正` 複数バリアントのビルド時に Kotlin コンパイルがメモリ不足になる問題
+* `修正` 共有ビルドプラグイン 1.8.3 により, AGP 9.1 での SDK XML v4 解析警告と, JVM 単体テストの組み立て時に APK ネイティブライブラリのアラインメント検証が誤って実行される問題
 * `修正` Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題
 * `修正` WorkManager のデフォルト初期化子とオンデマンド初期化設定の競合により, ビルド時に RemoveWorkManagerInitializer Lint エラーが発生する問題
 * `修正` デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題

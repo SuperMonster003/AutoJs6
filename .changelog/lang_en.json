@@ -296,6 +296,7 @@
         "Running the project directly from IntelliJ IDEA failed native page alignment verification because the APK lookup did not use the current build's artifact directory",
         "IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous",
         "Kotlin compilation running out of memory during multi-variant builds",
+        "SDK XML v4 parsing warnings with AGP 9.1 and APK native alignment checks incorrectly triggered by JVM unit-test assembly tasks, using shared build plugins 1.8.3",
         "IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods",
         "RemoveWorkManagerInitializer Lint error during builds caused by a conflict between WorkManager's default initializer and on-demand initialization",
         "APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix",

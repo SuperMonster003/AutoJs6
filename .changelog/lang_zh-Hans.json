@@ -272,6 +272,7 @@
         "IntelliJ IDEA 直接运行项目时, 原生库页对齐校验因未使用当前构建的 APK 产物目录而误报找不到 APK 的问题",
         "IntelliJ IDEA 构建 Android 模块时因 compileJava 任务匹配歧义而失败的问题",
         "多变体构建时 Kotlin 编译内存不足的问题",
+        "AGP 9.1 构建时的 SDK XML v4 解析警告及 JVM 单元测试组装任务误触发 APK 原生库对齐检查的问题 (共享构建插件 1.8.3)",
         "IntelliJ IDEA 全项目构建在 Clean 后因 Python Runtime API 分发 AAR 尚未生成而无法解析 Android 依赖, 且 conformance 夹具未同步追加的 AIDL 方法导致编译失败的问题",
         "构建时 WorkManager 默认初始化器与按需初始化配置冲突导致的 RemoveWorkManagerInitializer Lint 错误",
         "APK Builder Template 构建在 `clean` 后因默认 Runtime Kit 目录缺少 `universal` 变体后缀而失败的问题",

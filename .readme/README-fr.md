@@ -461,6 +461,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` L'exécution directe du projet depuis IntelliJ IDEA échouait lors de la vérification de l'alignement des pages des bibliothèques natives car la recherche des APK n'utilisait pas le répertoire des artefacts de la compilation en cours
 * `Correction` Les builds de modules Android dans IntelliJ IDEA échouaient en raison d'une correspondance ambiguë de la tâche compileJava
 * `Correction` Épuisement de la mémoire pendant la compilation Kotlin de plusieurs variantes
+* `Correction` Avertissements de lecture SDK XML v4 avec AGP 9.1 et contrôles d'alignement natif des APK déclenchés par erreur lors de l'assemblage des tests unitaires JVM, avec les plugins de compilation partagés 1.8.3
 * `Correction` Les builds de l'ensemble du projet dans IntelliJ IDEA échouaient après Clean car les AAR distribués de l'API Python Runtime étaient résolus avant leur génération et les fixtures de conformité n'implémentaient pas les méthodes AIDL ajoutées
 * `Correction` Erreur Lint RemoveWorkManagerInitializer lors de la compilation due à un conflit entre l'initialiseur par défaut de WorkManager et l'initialisation à la demande
 * `Correction` La compilation d'APK Builder Template échouait après `clean` car le répertoire Runtime Kit par défaut omettait le suffixe de variante `universal`

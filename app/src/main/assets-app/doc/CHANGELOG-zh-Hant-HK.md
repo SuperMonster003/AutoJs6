@@ -299,6 +299,7 @@
 * `修復` IntelliJ IDEA 直接執行項目時, 原生庫頁對齊校驗因未使用當前構建的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 構建 Android 模塊時因 compileJava 任務匹配歧義而失敗的問題
 * `修復` 多變體構建時 Kotlin 編譯記憶體不足的問題
+* `修復` AGP 9.1 構建時的 SDK XML v4 解析警告及 JVM 單元測試組裝任務誤觸發 APK 原生程式庫對齊檢查的問題 (共用構建外掛 1.8.3)
 * `修復` IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` 構建時 WorkManager 預設初始化器與按需初始化配置衝突導致的 RemoveWorkManagerInitializer Lint 錯誤
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題

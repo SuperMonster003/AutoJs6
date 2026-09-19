@@ -461,6 +461,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Running the project directly from IntelliJ IDEA failed native page alignment verification because the APK lookup did not use the current build's artifact directory
 * `Fix` IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous
 * `Fix` Kotlin compilation running out of memory during multi-variant builds
+* `Fix` SDK XML v4 parsing warnings with AGP 9.1 and APK native alignment checks incorrectly triggered by JVM unit-test assembly tasks, using shared build plugins 1.8.3
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
 * `Fix` RemoveWorkManagerInitializer Lint error during builds caused by a conflict between WorkManager's default initializer and on-demand initialization
 * `Fix` APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix

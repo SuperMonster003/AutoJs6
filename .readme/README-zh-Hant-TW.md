@@ -461,6 +461,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` IntelliJ IDEA 直接執行專案時, 原生程式庫頁面對齊驗證因未使用目前建置的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 建置 Android 模組時因 compileJava 工作匹配歧義而失敗的問題
 * `修復` 多變體建置時 Kotlin 編譯記憶體不足的問題
+* `修復` AGP 9.1 建置時的 SDK XML v4 解析警告及 JVM 單元測試組裝工作誤觸發 APK 原生程式庫對齊檢查的問題 (共用建置外掛 1.8.3)
 * `修復` IntelliJ IDEA 全專案建置在 Clean 後因 Python Runtime API 發佈 AAR 尚未產生而無法解析 Android 相依性, 且 conformance 測試夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` 建置時 WorkManager 預設初始化器與隨需初始化設定衝突導致的 RemoveWorkManagerInitializer Lint 錯誤
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題

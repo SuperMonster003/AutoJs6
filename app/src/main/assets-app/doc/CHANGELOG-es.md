@@ -299,6 +299,7 @@
 * `Corrección` La ejecución directa del proyecto desde IntelliJ IDEA fallaba al verificar la alineación de páginas de las bibliotecas nativas porque la búsqueda de APK no utilizaba el directorio de artefactos de la compilación actual
 * `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
 * `Corrección` Memoria insuficiente durante la compilación Kotlin de múltiples variantes
+* `Corrección` Advertencias de lectura de SDK XML v4 con AGP 9.1 y comprobaciones de alineación nativa de APK activadas por error al ensamblar pruebas unitarias JVM, mediante los plugins de compilación compartidos 1.8.3
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
 * `Corrección` Error de Lint RemoveWorkManagerInitializer durante la compilación por un conflicto entre el inicializador predeterminado de WorkManager y la inicialización bajo demanda
 * `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
