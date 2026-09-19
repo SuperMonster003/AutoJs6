@@ -329,6 +329,7 @@ object FileUtils {
         val CREATION = TypeData(IconData("✎", toTop = 4, toEnd = 2, degree = 105), TYPE.IDENTITY_TEXT_EDITABLE)
         val HTML_PREVIEWER = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewerType.HTML)
         val MARKDOWN_PREVIEWER = TypeData(CREATION.iconData, CREATION.identity or TYPE.IDENTITY_PREVIEWABLE, PreviewerType.MARKDOWN)
+        val EPUB_READER = TypeData(IconData("\u25A4", size = 22, toTop = 1), TYPE.IDENTITY_PREVIEWABLE, PreviewerType.EPUB)
         val CONFIG = TypeData(IconData("⚙", toStart = 0.5, toTop = 1), TYPE.IDENTITY_TEXT_EDITABLE)
         val DOCUMENT = TypeData(IconData("⌸", size = 24, toTop = 0.5, toEnd = 0.5), TYPE.IDENTITY_EXTERNAL_EDITABLE)
         val DISK_IMAGE = TypeData(IconData("⊚", size = 25, toTop = 1))
@@ -1097,6 +1098,9 @@ object FileUtils {
 
         /** Portable Document Format, widely used for documents that can be read across various systems. */
         PDF("pdf", TypeDataHolder.DOCUMENT),
+
+        /** Electronic Publication, the e-book container opened by the Readium EPUB Reader plugin (binary, not text-editable). */
+        EPUB("epub", TypeDataHolder.EPUB_READER),
 
         /** StarOffice Calc Spreadsheet, used before OpenOffice.org adoption. */
         SXC("sxc", TypeDataHolder.DOCUMENT),
@@ -3633,6 +3637,7 @@ object FileUtils {
     enum class PreviewerType {
         MARKDOWN,
         HTML,
+        EPUB,
     }
 
     enum class ViewerType {

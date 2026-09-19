@@ -135,7 +135,7 @@ internal class ExplorerArchiveCoordinator(
         }
         val maxBytes = when (action) {
             ExplorerPrimaryAction.DOCUMENT_PREVIEWER ->
-                ExplorerDocumentPreviewerPluginUi.maximumArchiveDocumentBytes()
+                ExplorerDocumentPreviewerPluginUi.maximumArchiveDocumentBytes(item.type.previewerType)
             ExplorerPrimaryAction.IMAGE_VIEW,
             ExplorerPrimaryAction.IMAGE_VIEW_EXTERNAL,
             -> MAX_ARCHIVE_IMAGE_PREVIEW_BYTES

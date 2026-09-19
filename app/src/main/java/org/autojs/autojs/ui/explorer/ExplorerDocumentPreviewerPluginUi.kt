@@ -89,7 +89,11 @@ internal object ExplorerDocumentPreviewerPluginUi {
         }
     }
 
-    fun maximumArchiveDocumentBytes(): Long = MAX_ARCHIVE_DOCUMENT_BYTES
+    /** Per-type limit for opening a document straight out of an archive: EPUB books are large containers. */
+    fun maximumArchiveDocumentBytes(previewerType: FileUtils.PreviewerType?): Long = when (previewerType) {
+        FileUtils.PreviewerType.EPUB -> MAX_ARCHIVE_EPUB_BYTES
+        FileUtils.PreviewerType.HTML, FileUtils.PreviewerType.MARKDOWN, null -> MAX_ARCHIVE_DOCUMENT_BYTES
+    }
 
     private fun specFor(item: ExplorerItem): PreviewerSpec? = when (item.type.previewerType) {
         FileUtils.PreviewerType.HTML -> PreviewerSpec(
@@ -101,6 +105,11 @@ internal object ExplorerDocumentPreviewerPluginUi {
             packageName = MARKDOWN_PREVIEWER_PACKAGE,
             nameRes = R.string.plugin_markdown_previewer_name,
             mimeType = MIME_MARKDOWN,
+        )
+        FileUtils.PreviewerType.EPUB -> PreviewerSpec(
+            packageName = READIUM_EPUB_READER_PACKAGE,
+            nameRes = R.string.plugin_readium_epub_reader_name,
+            mimeType = MIME_EPUB,
         )
         null -> null
     }
@@ -149,9 +158,13 @@ internal object ExplorerDocumentPreviewerPluginUi {
         "io.github.supermonster003.autojs6.plugin.htmlpreviewer"
     private const val MARKDOWN_PREVIEWER_PACKAGE =
         "io.github.supermonster003.autojs6.plugin.markdownpreviewer"
+    private const val READIUM_EPUB_READER_PACKAGE =
+        "io.github.supermonster003.autojs6.plugin.readium.epub.reader"
     private const val MIME_HTML = "text/html"
     private const val MIME_MARKDOWN = "text/markdown"
+    private const val MIME_EPUB = "application/epub+zip"
     private const val MAX_ARCHIVE_DOCUMENT_BYTES = 8L * 1024L * 1024L
+    private const val MAX_ARCHIVE_EPUB_BYTES = 256L * 1024L * 1024L
 }
 
 internal enum class ExplorerDocumentPreviewerAvailability {

@@ -139,6 +139,7 @@
 * `Feature` File manager supports secure Markdown and HTML previews with GFM rendering, multiple themes, custom CSS, and controlled same-directory resource loading
 * `Feature` Markdown and HTML previews support fullscreen mode, with a "Start in fullscreen mode" setting that is disabled by default
 * `Feature` File manager supports leftmost icon actions for Markdown/HTML preview and image viewing/audio/video playback; the app can act as a system media viewer, with background audio playback and notification controls
+* `Feature` File manager recognizes `.epub` e-books as a previewable document type and opens them with the Readium EPUB Reader plugin through the Explorer Action contract; books opened directly from archives get a dedicated 256 MiB limit
 * `Feature` Pinned file manager path bar with current-path display, current-directory highlighting, direct navigation to parent directories, automatic end scrolling for long paths, horizontal browsing, parent/current colors matching category labels/file names, and alpha-weighted ink-centroid alignment across scripts and separator chevrons
 * `Feature` File manager supports image information and detailed EXIF viewing
 * `Feature` Image editing and format conversion are provided by the independent Image Tools plugin; when the plugin is unavailable, only the corresponding actions are hidden, while image viewing, image information, and EXIF viewing remain available
