@@ -41,6 +41,8 @@ import java.util.concurrent.atomic.AtomicReference
  * durations only. [realProviderScript] additionally takes `mail.smoke.script`, the device path
  * of a script pushed by the plugin repository's `.python/run_host_script_smoke.py --script`
  * (the `docs/smoke` scripts there); a script starting with `"ui";` runs in ui mode.
+ * [savedAccountScript] runs such a script with only `mail.smoke.alias` (an account saved on the
+ * plugin's settings page) and `mail.smoke.script`; no credential reaches the host.
  */
 class MailScriptSmokeDeviceTest {
 
@@ -95,6 +97,34 @@ class MailScriptSmokeDeviceTest {
         if (report.has("uiBlocked")) {
             assertFalse("the UI thread stalled: ${report.optInt("ticks")} ticks of ${report.optInt("expectedTicks")} expected", report.optBoolean("uiBlocked"))
         }
+        assertTrue("the client closed at the end", report.optBoolean("closed"))
+    }
+
+    /**
+     * A pushed `docs/smoke` script against an account the user saved on the plugin's settings
+     * page (mail roadmap P4.7): the host receives only `mail.smoke.alias` and `mail.smoke.script`,
+     * never a credential; the script connects with `mail.connect(alias)`.
+     */
+    @Test
+    fun savedAccountScript() {
+        assumePluginInstalled()
+        val arguments = InstrumentationRegistry.getArguments()
+        val alias = arguments.getString("mail.smoke.alias")
+        val scriptPath = arguments.getString("mail.smoke.script")
+        assumeTrue("mail.smoke.alias / mail.smoke.script not given", !alias.isNullOrBlank() && !scriptPath.isNullOrBlank())
+        val source = shellRead(scriptPath!!)
+        assertTrue("$scriptPath is empty or unreadable", source.isNotBlank())
+        val name = scriptPath.substringAfterLast('/').removeSuffix(".js")
+        val workDir = File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null) ?: InstrumentationRegistry.getInstrumentation().targetContext.cacheDir, "mail-smoke").apply { mkdirs() }
+        val reportFile = File(workDir, "$name-report.json").apply { delete() }
+        val prelude = "var MAIL_SMOKE = { alias: ${JSONObject.quote(alias)}, workDir: ${JSONObject.quote(workDir.absolutePath)}, reportPath: ${JSONObject.quote(reportFile.absolutePath)} };\n"
+        val started = System.currentTimeMillis()
+        val report = runScript(name, source, prelude, timeoutMs = 300_000L, reportFile = reportFile)
+        val elapsed = System.currentTimeMillis() - started
+        val steps = report.optJSONArray("steps")
+        Log.i(TAG, "$name: alias=$alias ok=${report.optBoolean("ok")} steps=${steps?.length() ?: 0} total ${elapsed} ms")
+        report.toString().chunked(3000).forEachIndexed { index, chunk -> Log.i(TAG, "$name report[$index]: $chunk") }
+        assertTrue("$name failed after ${steps?.length() ?: 0} steps: ${report.optString("errorCode")} ${report.optString("error")}", report.optBoolean("ok"))
         assertTrue("the client closed at the end", report.optBoolean("closed"))
     }
 
