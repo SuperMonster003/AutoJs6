@@ -138,6 +138,7 @@
     <string name="description_launcher_icon_preference">El ícono del iniciador admite modos de visualización de ícono adaptable o heredado con fondo transparente. El efecto de visualización real puede variar en diferentes sistemas Android. Puede tardar unos segundos en surtir efecto después de cambiar el modo de visualización.</string>
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="description_local_network_permission">Permitir conexiones a dispositivos y servicios de la red local, incluido VS Code. Los scripts pueden solicitar este permiso de forma explícita.</string>
+    <string name="description_mail_settings_preference">Abre Angus Mail para guardar las cuentas de mail.connect(\'alias\'), probar su conexión y elegir la predeterminada.</string>
     <string name="description_manage_ignored_updates_preference">Pulse para ver o gestionar los elementos de la lista.\nHaga una pulsación larga para eliminar el elemento de la lista.</string>
     <string name="description_mcp_server">Permite a clientes de IA vinculados automatizar este dispositivo mediante el complemento MCP Server. Abre Ajustes para elegir puerto, red, token y grupos de herramientas.</string>
     <string name="description_night_mode">Se usa para controlar y reflejar la estrategia de modo nocturno de AutoJs6.\n\nNota: el interruptor de modo nocturno y el interruptor de modo nocturno automático están vinculados y se afectan mutuamente.</string>
@@ -669,6 +670,10 @@
     <string name="prompt_ai_plugin_install_required">Instala 3-Stone AI desde el Centro de plugins antes de abrir los ajustes del servicio de IA.</string>
     <string name="prompt_ai_plugin_settings_unavailable">La instalación de 3-Stone AI no ofrece una entrada de ajustes de confianza. Actualízala o vuelve a instalarla desde el Centro de plugins.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">El archivo actual puede no ser un paquete de complemento válido. ¿Deseas continuar con la instalación?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mail_plugin_application_enable_required">Android ha deshabilitado Angus Mail. Habilítalo en los ajustes de aplicaciones del sistema antes de abrir los ajustes de cuentas de correo.</string>
+    <string name="prompt_mail_plugin_enable_required">Angus Mail está deshabilitado en el Centro de plugins. Habilítalo antes de abrir los ajustes de cuentas de correo.</string>
+    <string name="prompt_mail_plugin_install_required">Instala Angus Mail desde el Centro de plugins antes de abrir los ajustes de cuentas de correo.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">La instalación de Angus Mail no ofrece una entrada de ajustes de confianza. Actualízala o vuelve a instalarla desde el Centro de plugins.</string>
     <string name="prompt_mcp_server_activate">MCP Server está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión de AutoJs6.</string>
     <string name="prompt_mcp_server_application_disabled">Android ha desactivado MCP Server. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
     <string name="prompt_mcp_server_authorize">Este complemento necesita autorización en el Centro de complementos antes de permitir acceso MCP al dispositivo.</string>
@@ -1526,6 +1531,8 @@
     <string name="text_loop_interval">Intervalo de bucle (segundos)</string>
     <string name="text_loop_times">Tiempos de bucle</string>
     <string name="text_lower_than">Inferior a</string>
+    <string name="text_mail">Correo</string>
+    <string name="text_mail_settings">Ajustes de cuentas de correo</string>
     <string name="text_main_file_name">Nombre del archivo principal de la secuencia de comandos</string>
     <string name="text_malfunctioning">Mal funcionamiento</string>
     <string name="text_manage">Gestionar</string>

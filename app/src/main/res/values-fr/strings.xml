@@ -138,6 +138,7 @@
     <string name="description_launcher_icon_preference">L\'icône du lanceur prend en charge les modes d\'affichage d\'icône adaptative ou d\'icône héritée à fond transparent. L\'effet d\'affichage réel peut varier selon les systèmes Android. L\'application du changement peut prendre quelques secondes après avoir basculé de mode d\'affichage.</string>
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="description_local_network_permission">Autoriser les connexions aux appareils et services du réseau local, dont VS Code. Les scripts peuvent demander explicitement cette autorisation.</string>
+    <string name="description_mail_settings_preference">Ouvrez Angus Mail pour enregistrer les comptes de mail.connect(\'alias\'), tester leur connexion et choisir le compte par défaut.</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
     <string name="description_mcp_server">Autorisez les clients IA associés à automatiser cet appareil via le plugin MCP Server. Ouvrez les paramètres pour choisir le port, le réseau, le jeton et les groupes d\'outils.</string>
     <string name="description_night_mode">Permet de contrôler et de refléter la stratégie de mode nuit d\'AutoJs6.\n\nNote : l\'interrupteur de mode nuit et l\'interrupteur de mode nuit automatique sont liés et s\'influencent mutuellement.</string>
@@ -669,6 +670,10 @@
     <string name="prompt_ai_plugin_install_required">Installez 3-Stone AI depuis le Centre de plugins avant d\'ouvrir les paramètres du service IA.</string>
     <string name="prompt_ai_plugin_settings_unavailable">Le plugin 3-Stone AI installé ne fournit aucune entrée de paramètres fiable. Mettez-le à jour ou réinstallez-le depuis le Centre de plugins.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Le fichier actuel n\'est peut-être pas un paquet de plugin valide. Voulez-vous continuer l\'installation ?\n\nURI : \"%1$s\"</string>
+    <string name="prompt_mail_plugin_application_enable_required">Angus Mail est désactivé par Android. Activez-le dans les paramètres système de l\'application avant d\'ouvrir les paramètres des comptes de courrier.</string>
+    <string name="prompt_mail_plugin_enable_required">Angus Mail est désactivé dans le Centre de plugins. Activez-le avant d\'ouvrir les paramètres des comptes de courrier.</string>
+    <string name="prompt_mail_plugin_install_required">Installez Angus Mail depuis le Centre de plugins avant d\'ouvrir les paramètres des comptes de courrier.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">Le plugin Angus Mail installé ne fournit aucune entrée de paramètres fiable. Mettez-le à jour ou réinstallez-le depuis le Centre de plugins.</string>
     <string name="prompt_mcp_server_activate">MCP Server est installé mais pas encore activé par Android. Activez-le pour permettre la connexion d\'AutoJs6.</string>
     <string name="prompt_mcp_server_application_disabled">Android a désactivé MCP Server. Activez l\'application dans les paramètres système et réessayez.</string>
     <string name="prompt_mcp_server_authorize">Ce plugin doit être autorisé dans le Centre de plugins avant de fournir l\'accès MCP à cet appareil.</string>
@@ -1526,6 +1531,8 @@
     <string name="text_loop_interval">Intervalle de boucle (sec)</string>
     <string name="text_loop_times">Temps de boucle</string>
     <string name="text_lower_than">Inférieure à</string>
+    <string name="text_mail">Courrier</string>
+    <string name="text_mail_settings">Paramètres des comptes de courrier</string>
     <string name="text_main_file_name">Nom du fichier du script principal</string>
     <string name="text_malfunctioning">Dysfonctionnement</string>
     <string name="text_manage">Gestion</string>

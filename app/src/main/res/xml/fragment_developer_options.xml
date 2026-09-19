@@ -48,6 +48,19 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_mail">
+
+        <org.autojs.autojs.ui.settings.MailSettingsPreference
+            app:key="@string/key_mail_settings"
+            app:layout="@layout/preference_custom"
+            app:summary="@string/description_mail_settings_preference"
+            app:title="@string/text_mail_settings"
+            app:longClickPrompt="@string/description_mail_settings_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_dex_compiler">
 
         <org.autojs.autojs.ui.settings.DexCompilerPreference

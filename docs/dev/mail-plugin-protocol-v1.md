@@ -285,9 +285,19 @@ envelopes one at a time (two round trips each), so POP3 callers keep `limit` sma
 
 The capabilities bundle of the plugin carries `mailContractVersion`, `mailProtocols` (`imap`,
 `pop3`, `smtp`), `mailAuthMechanisms` (`password`, `xoauth2`), `mailFeatures`,
-`mailProvidersVersion` and `mailLibraryVersion`. Plugin build 12 advertises the features
-`append` and `clientSearchFallback`; `idle` (watches, P5), `savedAccounts` (account store, P4)
-and `backgroundWatch` (P8) are absent until those phases land.
+`mailProvidersVersion`, `mailLibraryVersion` and, from plugin build 27, `mailSettingsVersion`.
+Plugin builds from 24 on advertise the features `append`, `clientSearchFallback` and
+`savedAccounts` (account store, P4); `idle` (watches, P5) and `backgroundWatch` (P8) are absent
+until those phases land.
+
+`mailSettingsVersion` 1 means the plugin exports the parameterless settings entry
+`org.autojs.plugin.MAIL_SETTINGS` (`MailActions.OPEN_SETTINGS`, category DEFAULT, an activity
+behind `org.autojs.permission.PLUGIN` that opens the plugin's saved-accounts page and finishes;
+an intent carrying data, a clip or extras is ignored). The host reaches it from the developer
+options (`MailSettingsPreference` through `OfficialPluginSettingsLauncher`, the same inspection
+and recovery guides as the AI provider entry: install, enable in Plugin Center, enable the
+application, or update when no trusted entry resolves). Accounts saved there open with
+`mail.connect('alias')` and list with `mail.accounts.list()`.
 
 Ceilings the plugin enforces per operation: `MAX_RECIPIENTS` (to + cc + bcc),
 `MAX_ATTACHMENTS_PER_MESSAGE`, `MAX_DESCRIPTORS`, `MAX_PAGE_SIZE` (with `DEFAULT_PAGE_SIZE` when

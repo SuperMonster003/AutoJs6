@@ -140,6 +140,7 @@
     <string name="description_launcher_icon_preference">런처 아이콘은 어댑티브 아이콘과 기존 투명 배경 아이콘 두 가지 표시 모드를 지원합니다. 실제 표시 효과는 안드로이드 시스템별로 다를 수 있습니다. 표시 모드를 전환한 후 적용되기까지 몇 초가 걸릴 수 있습니다.</string>
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="description_local_network_permission">VS Code 를 포함한 로컬 네트워크의 기기 및 서비스 연결을 허용합니다. 스크립트에서 이 권한을 명시적으로 요청할 수 있습니다.</string>
+    <string name="description_mail_settings_preference">Angus Mail을 열어 mail.connect(\'alias\')에 사용할 계정을 저장하고 연결을 테스트하며 기본 계정을 선택합니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
     <string name="description_mcp_server">MCP Server 플러그인으로 페어링된 AI 클라이언트의 기기 자동화를 허용합니다. 설정에서 포트, 네트워크, 토큰, 도구 그룹을 선택하세요.</string>
     <string name="description_night_mode">AutoJs6 의 야간 모드 전략을 제어하고 그 상태를 반영합니다.\n\n참고: 야간 모드 스위치와 자동 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
@@ -671,6 +672,10 @@
     <string name="prompt_ai_plugin_install_required">AI 서비스 설정을 열기 전에 플러그인 센터에서 3-Stone AI를 설치하세요.</string>
     <string name="prompt_ai_plugin_settings_unavailable">설치된 3-Stone AI에 신뢰할 수 있는 설정 진입점이 없습니다. 플러그인 센터에서 업데이트하거나 다시 설치하세요.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">현재 파일이 유효한 플러그인 패키지가 아닐 수 있습니다. 설치를 계속하시겠습니까?\n\nURI: \"%1$s\"</string>
+    <string name="prompt_mail_plugin_application_enable_required">Android에서 Angus Mail이 사용 중지되었습니다. 메일 계정 설정을 열기 전에 시스템 앱 설정에서 사용 설정하세요.</string>
+    <string name="prompt_mail_plugin_enable_required">플러그인 센터에서 Angus Mail이 사용 중지되었습니다. 메일 계정 설정을 열기 전에 사용 설정하세요.</string>
+    <string name="prompt_mail_plugin_install_required">메일 계정 설정을 열기 전에 플러그인 센터에서 Angus Mail을 설치하세요.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">설치된 Angus Mail에 신뢰할 수 있는 설정 진입점이 없습니다. 플러그인 센터에서 업데이트하거나 다시 설치하세요.</string>
     <string name="prompt_mcp_server_activate">MCP Server가 설치되었지만 아직 활성화되지 않았습니다. AutoJs6 연결을 허용하려면 활성화하세요.</string>
     <string name="prompt_mcp_server_application_disabled">Android에서 MCP Server가 비활성화되었습니다. 시스템 설정에서 앱을 활성화한 뒤 다시 시도하세요.</string>
     <string name="prompt_mcp_server_authorize">이 기기에 MCP 접근을 제공하려면 먼저 플러그인 센터에서 승인해야 합니다.</string>
@@ -1528,6 +1533,8 @@
     <string name="text_loop_interval">루프 간격 (초)</string>
     <string name="text_loop_times">루프 시간</string>
     <string name="text_lower_than">보다 낮은</string>
+    <string name="text_mail">메일</string>
+    <string name="text_mail_settings">메일 계정 설정</string>
     <string name="text_main_file_name">기본 스크립트 파일 이름</string>
     <string name="text_malfunctioning">오작동</string>
     <string name="text_manage">관리하다</string>
