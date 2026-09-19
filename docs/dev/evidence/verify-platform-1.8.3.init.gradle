@@ -1,0 +1,33 @@
+gradle.projectsEvaluated {
+    def root = gradle.rootProject
+    def app = root.findProject(':app')
+    if (app == null) return // Included build-logic projects have no Android app.
+    def names = app.tasks.names
+    def preferences = ['Debug', 'UnflavoredDebug', 'MobileDebug', 'SmallDebug', 'ProviderDebug']
+    def variant = preferences.find { names.contains('assemble' + it) && names.contains('test' + it + 'UnitTest') }
+    if (variant == null) throw new GradleException('Cannot select a representative Debug variant: ' + names.findAll { it.startsWith('assemble') })
+    def targets = ['assemble' + variant, 'test' + variant + 'UnitTest', 'assemble' + variant + 'AndroidTest', 'lint' + variant, 'assemble' + variant + 'UnitTest']
+    targets.each { if (!names.contains(it)) throw new GradleException('Missing required verification task ' + it) }
+    root.tasks.register('verifyPlatformRollout') {
+        dependsOn(targets.collect { app.tasks.named(it) })
+        if (root.findProject(':mail-core') != null) dependsOn(':mail-core:test')
+        if (root.findProject(':plugin-api:quickjs-runtime-api') != null) dependsOn(':plugin-api:quickjs-runtime-api:testDebugUnitTest')
+        if (names.contains('verifyDebugApkRuntimeIntegrity')) dependsOn(':app:verifyDebugApkRuntimeIntegrity')
+        doLast {
+            def modules = root.buildscript.configurations.classpath.resolvedConfiguration.resolvedArtifacts.collectEntries {
+                [(it.moduleVersion.id.group + ':' + it.name): it.moduleVersion.id.version]
+            }
+            assert modules['com.android.tools.build:gradle'] == '9.1.1' : modules
+            assert modules['com.android.tools:sdklib'] == '32.2.1' : modules
+            assert modules['com.android.tools:common'] == '32.1.1' : modules
+            def plugin = app.plugins.findPlugin('io.github.supermonster003.autojs6-native-alignment')
+            assert plugin != null
+            def location = plugin.class.protectionDomain.codeSource.location.toString()
+            assert location.contains('autojs6-gradle-platform-versions-1.8.3.jar') : location
+            def unit = app.tasks.named('assemble' + variant + 'UnitTest').get()
+            assert !unit.finalizedBy.getDependencies(unit).any { it.name.endsWith('NativePageAlignment') }
+            println('PLATFORM_ROLLOUT_VERIFIED variant=' + variant + ' agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3')
+        }
+    }
+    println('PLATFORM_ROLLOUT_TASKS ' + targets.join(' '))
+}

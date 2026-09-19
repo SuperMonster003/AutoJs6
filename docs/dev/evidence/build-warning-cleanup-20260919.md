@@ -12,8 +12,9 @@ These changes do not alter the public script API or declaration contracts.
 
 ## Shared build plugin fixes and rollout status
 
-The companion repository `AutoJs6-Gradle-Platform-Versions` contains commit
-`db9d655` preparing version 1.8.3. Its two fixes were verified locally:
+The companion repository `AutoJs6-Gradle-Platform-Versions` contains commits
+`0c5e428` (native alignment) and `65501e1` (SDK XML compatibility), released as
+version 1.8.3. Its two fixes were verified locally and in GitHub Actions:
 
 1. IDEA 2026.2 selects AGP 9.1.1, whose `sdklib:32.1.1` reader supports SDK
    repository XML only through v3. Installed command-line tools write v4 metadata.
@@ -25,13 +26,22 @@ The companion repository `AutoJs6-Gradle-Platform-Versions` contains commit
    tasks, as it already excludes `AndroidTest`. Real APK assemblies still run
    alignment verification and still fail when their APK is missing.
 
-The shared plugin has not yet been published. The host and 44 sibling plugin
-projects still reference their existing public versions. Updating those pins is
-pending publication approval and successful public repository resolution; this
-report does not assert that ordinary consumer builds already use version 1.8.3.
-The host's existing optional composite-build property was used only for local
-verification. No local repository or sibling path was committed into consumer
-settings.
+The existing [publication workflow](https://github.com/SuperMonster003/AutoJs6-Gradle-Platform-Versions/actions/runs/35413646734)
+published version 1.8.3 to Maven Central and Gradle Plugin Portal and created the
+[GitHub release](https://github.com/SuperMonster003/AutoJs6-Gradle-Platform-Versions/releases/tag/v1.8.3).
+Both repositories returned the implementation POM/JAR and both plugin markers.
+The implementation JAR SHA-256 is
+`d2498690b3e163ffae1f7aebc31d4749935d75c142b2324f2878ac79fd6e4e71` in both repositories.
+A fresh consumer using public repositories passed APK, resource, JVM test
+assembly and native alignment checks with `--refresh-dependencies`.
+
+The host and 44 sibling plugin projects now pin both shared plugins to 1.8.3.
+The host's existing optional composite-build property was used only for the
+initial local verification; publication and consumer rollout verification use
+public artifacts. No local repository or sibling path was added to consumer
+settings. The [rollout report](shared-build-plugins-1.8.3-rollout-20260919.md)
+records public-artifact validation, the host upgrade commit `dcbe0821d`, and
+all 44 plugin upgrade commits.
 
 ## Verification
 
@@ -61,7 +71,7 @@ version selection:
 | `:test-apps:ai-provider-conformance:testDebugUnitTest` | 32 passed |
 | `:test-apps:dex-compiler-conformance:testDebugUnitTest` | 25 passed |
 | Five conformance manifest tasks and affected API/library compilation | Passed |
-| Shared plugin `check` | 93 tests passed |
+| Shared plugin `check` | 94 tests passed |
 | Shared plugin scraper tests | 21 tests passed |
 | Shared plugin SDK XML regression fixture | Real APK, resource compilation and JVM test assembly passed |
 | Shared plugin isolated Maven publication and headless sample | Passed |

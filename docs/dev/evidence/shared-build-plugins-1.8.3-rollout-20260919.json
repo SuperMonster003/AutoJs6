@@ -1,0 +1,1071 @@
+{
+  "date": "2026-09-19",
+  "version": "1.8.3",
+  "releaseCommit": "65501e1dbdec0711339d13f6a68f1cd43c179f85",
+  "publicationWorkflow": "https://github.com/SuperMonster003/AutoJs6-Gradle-Platform-Versions/actions/runs/35413646734",
+  "publicArtifacts": [
+    {
+      "url": "https://repo.maven.apache.org/maven2/io/github/supermonster003/autojs6-gradle-platform-versions/1.8.3/autojs6-gradle-platform-versions-1.8.3.pom",
+      "status": 200,
+      "bytes": 2144,
+      "sha256": "584074dc01a6200cb14ffbdf0a6601b992a9ba8fb0cba83bd3a580b7cb104bb9"
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/io/github/supermonster003/autojs6-gradle-platform-versions/1.8.3/autojs6-gradle-platform-versions-1.8.3.jar",
+      "status": 200,
+      "bytes": 175788,
+      "sha256": "d2498690b3e163ffae1f7aebc31d4749935d75c142b2324f2878ac79fd6e4e71"
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/io/github/supermonster003/autojs6-platform-versions/io.github.supermonster003.autojs6-platform-versions.gradle.plugin/1.8.3/io.github.supermonster003.autojs6-platform-versions.gradle.plugin-1.8.3.pom",
+      "status": 200,
+      "bytes": 2091,
+      "sha256": "d10441ec935d5dd8010455eb68f1e26e23e93145de4cf091939837e54f262762"
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/io/github/supermonster003/autojs6-native-alignment/io.github.supermonster003.autojs6-native-alignment.gradle.plugin/1.8.3/io.github.supermonster003.autojs6-native-alignment.gradle.plugin-1.8.3.pom",
+      "status": 200,
+      "bytes": 2089,
+      "sha256": "b1eaa04dad1a20cdd7a67e2ab28fc60375f5b3c110bec9e0aabc3055efe0b703"
+    },
+    {
+      "url": "https://plugins.gradle.org/m2/io/github/supermonster003/autojs6-gradle-platform-versions/1.8.3/autojs6-gradle-platform-versions-1.8.3.pom",
+      "status": 200,
+      "bytes": 2144,
+      "sha256": "584074dc01a6200cb14ffbdf0a6601b992a9ba8fb0cba83bd3a580b7cb104bb9"
+    },
+    {
+      "url": "https://plugins.gradle.org/m2/io/github/supermonster003/autojs6-gradle-platform-versions/1.8.3/autojs6-gradle-platform-versions-1.8.3.jar",
+      "status": 200,
+      "bytes": 175788,
+      "sha256": "d2498690b3e163ffae1f7aebc31d4749935d75c142b2324f2878ac79fd6e4e71"
+    },
+    {
+      "url": "https://plugins.gradle.org/m2/io/github/supermonster003/autojs6-platform-versions/io.github.supermonster003.autojs6-platform-versions.gradle.plugin/1.8.3/io.github.supermonster003.autojs6-platform-versions.gradle.plugin-1.8.3.pom",
+      "status": 200,
+      "bytes": 742,
+      "sha256": "528a437256512668f910e44395e458887895d7a3829878bd0821d158a999efeb"
+    },
+    {
+      "url": "https://plugins.gradle.org/m2/io/github/supermonster003/autojs6-native-alignment/io.github.supermonster003.autojs6-native-alignment.gradle.plugin/1.8.3/io.github.supermonster003.autojs6-native-alignment.gradle.plugin-1.8.3.pom",
+      "status": 200,
+      "bytes": 740,
+      "sha256": "d0ac2b58c183fe1702567a8982a04a27a10f4339bc8fad235dd327126aad0ce5"
+    }
+  ],
+  "host": {
+    "repository": "AutoJs6",
+    "verified": true,
+    "sdkWarning": false,
+    "firstFullTests": {
+      "totals": {
+        "tests": 2992,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 5
+      },
+      "failed": [
+        [
+          "org.autojs.autojs.core.automator.event.IdleWaiterTest",
+          "aBusyStreamTimesOut",
+          "java.lang.AssertionError\n\tat org.junit.Assert.fail(Assert.java:87)\n\tat org.junit.Assert.assertTrue(Assert.java:42)\n\tat org.junit.Assert.assertTrue(Assert.java:53)\n\tat org.autojs.autojs.core.automator.event.IdleWaiterTest.aBusyStreamTimesOut(IdleWaiterTest.kt:96)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)\n\tat org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)\n\tat org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)\n\tat org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)\n\tat org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)\n\tat org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)\n\tat org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)\n\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)\n\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)\n\tat org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)\n\tat org.junit.runners.ParentRunner$1.schedule(ParentRunne"
+        ]
+      ]
+    },
+    "recheckTests": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "versionBuild": 5282,
+    "description": "Public 1.8.3 artifacts were used for `:app:compileInrtReleaseKotlin`, `:app:assembleAppDebug`, `:app:assembleAppDebugUnitTest` and `:app:assembleAppDebugAndroidTest`. The Inrt Release Kotlin compilation passed with the configured 8 GiB Kotlin heap. The App Debug APK passed 16 KB native alignment verification; JVM test assembly had no APK alignment finalizer. Both JVM and Android instrumentation test sources compiled.\n\nThe full host JVM run discovered 2,992 tests: 2,986 passed, 5 were skipped, and `IdleWaiterTest.aBusyStreamTimesOut` failed its assumption of receiving at least five events within a 150 ms timeout under concurrent build load. Its assertions for a non-quiet result and elapsed timeout had passed. The entire `IdleWaiterTest` class was rerun without source changes: all seven tests passed. The targeted test recheck and AndroidTest APK assembly completed successfully. The first full-run result remains recorded as a failure, separately from the successful recheck.\n\nThere were no Kotlin compiler warnings or SDK processing warnings in the initial public-artifact host build. Existing Java deprecation/unchecked-operation notes and Gradle deprecation summaries remain. A JDK thread snapshot during the longer test run showed the worker writing the central directory of an 18,184-entry ZIP fixture, rather than waiting in a deadlock; the shell-launched process had no active IntelliJ debugger session.",
+    "commit": "dcbe0821d933ab0229ca44344f8d4e8f2d5f72f1"
+  },
+  "plugins": [
+    {
+      "repository": "AutoJs6-Plugin-Accessibility-Compat",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 288.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "f5ad1739728d110c08fcdfeb9fa74fc84cb755f4",
+      "versionBuild": 19,
+      "observedHead": "f5ad1739728d110c08fcdfeb9fa74fc84cb755f4",
+      "observedCommitCount": 19,
+      "observedVersionBuild": 19
+    },
+    {
+      "repository": "AutoJs6-Plugin-Ace-Editor",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 612.6,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 169,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "903d626b01ad0def357ff007dbaf41c183b658ed",
+      "versionBuild": 103,
+      "observedHead": "903d626b01ad0def357ff007dbaf41c183b658ed",
+      "observedCommitCount": 103,
+      "observedVersionBuild": 103
+    },
+    {
+      "repository": "AutoJs6-Plugin-Angus-Mail",
+      "checks": {
+        "markdown": 0,
+        "gradle": 0
+      },
+      "seconds": 170.1,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 31,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "8f02dbdce6c1264d7b984e97361baad5300dd967",
+      "versionBuild": 21,
+      "notes": [
+        "Rebased on concurrent mail-core commit 3557167, synchronized build count and reran app/mail-core tests plus APK/Lint verification."
+      ],
+      "observedHead": "08755271ce424eb04fb309fa2f4058dd997fc657",
+      "observedCommitCount": 25,
+      "observedVersionBuild": 25
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Builder-Template",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 847.6,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 38,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "ff2250e45664c3fc900252e75422c17e466dd0d2",
+      "versionBuild": 45,
+      "observedHead": "ff2250e45664c3fc900252e75422c17e466dd0d2",
+      "observedCommitCount": 45,
+      "observedVersionBuild": 45
+    },
+    {
+      "repository": "AutoJs6-Plugin-APK-Inspector",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 646.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 227,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "504bff9b0c0151316bd867e513beecbadb2c52c1",
+      "versionBuild": 40,
+      "observedHead": "504bff9b0c0151316bd867e513beecbadb2c52c1",
+      "observedCommitCount": 40,
+      "observedVersionBuild": 40
+    },
+    {
+      "repository": "AutoJs6-Plugin-Archive-Manager",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 687.2,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 233,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 8
+      },
+      "notes": [
+        "Python contract tests rerun after updating their shared plugin version assertion: 20 passed"
+      ],
+      "commit": "4b0bf9dadfbc7571de9286894a8ab059c8129b77",
+      "versionBuild": 108,
+      "observedHead": "4b0bf9dadfbc7571de9286894a8ab059c8129b77",
+      "observedCommitCount": 108,
+      "observedVersionBuild": 108
+    },
+    {
+      "repository": "AutoJs6-Plugin-Bun-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "compatibility": 0,
+        "gradle": 0
+      },
+      "seconds": 521.4,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 59,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "b0e1a4175220b3e629d90fc7dcf38a7ca985d049",
+      "versionBuild": 115,
+      "observedHead": "b0e1a4175220b3e629d90fc7dcf38a7ca985d049",
+      "observedCommitCount": 115,
+      "observedVersionBuild": 115
+    },
+    {
+      "repository": "AutoJs6-Plugin-DEX-Compiler",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 445.2,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 90,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "82bd137429961045c9125eab4b384366ebe6e60c",
+      "versionBuild": 46,
+      "observedHead": "82bd137429961045c9125eab4b384366ebe6e60c",
+      "observedCommitCount": 46,
+      "observedVersionBuild": 46
+    },
+    {
+      "repository": "AutoJs6-Plugin-File-Inspector",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 686.5,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 61,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "f04fb8d1c4af9d79388dd8b11dd02ca33a7e5923",
+      "versionBuild": 18,
+      "observedHead": "f04fb8d1c4af9d79388dd8b11dd02ca33a7e5923",
+      "observedCommitCount": 18,
+      "observedVersionBuild": 18
+    },
+    {
+      "repository": "AutoJs6-Plugin-HTML-Previewer",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 645.4,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 70,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "85af267e23b668232750e146f60cbe6855ebe1ca",
+      "versionBuild": 24,
+      "observedHead": "85af267e23b668232750e146f60cbe6855ebe1ca",
+      "observedCommitCount": 24,
+      "observedVersionBuild": 24
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Quantization",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 663.6,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "e51428064152763fe766d49f89ff177803e042c4",
+      "versionBuild": 25,
+      "observedHead": "e51428064152763fe766d49f89ff177803e042c4",
+      "observedCommitCount": 25,
+      "observedVersionBuild": 25
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Tools",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 455.1,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 101,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "3aa918e18c41e551d3897b032e45a737990ac985",
+      "versionBuild": 15,
+      "observedHead": "3aa918e18c41e551d3897b032e45a737990ac985",
+      "observedCommitCount": 15,
+      "observedVersionBuild": 15
+    },
+    {
+      "repository": "AutoJs6-Plugin-Image-Viewer",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 491.7,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 53,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "ee1b0ff0033b28576635c2d5e84d43b0ce144450",
+      "versionBuild": 14,
+      "observedHead": "ee1b0ff0033b28576635c2d5e84d43b0ce144450",
+      "observedCommitCount": 14,
+      "observedVersionBuild": 14
+    },
+    {
+      "repository": "AutoJs6-Plugin-ImGui",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 395.0,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 30,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "5d84b5fa05163880eda33603307791b86e47b569",
+      "versionBuild": 16,
+      "observedHead": "5d84b5fa05163880eda33603307791b86e47b569",
+      "observedCommitCount": 16,
+      "observedVersionBuild": 16
+    },
+    {
+      "repository": "AutoJs6-Plugin-Java-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 518.6,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 167,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "d75c940b46e03cf115d652cc37b4ca60afa85248",
+      "versionBuild": 59,
+      "observedHead": "d75c940b46e03cf115d652cc37b4ca60afa85248",
+      "observedCommitCount": 59,
+      "observedVersionBuild": 59
+    },
+    {
+      "repository": "AutoJs6-Plugin-Kotlin-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 594.2,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 154,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "98c7b316571eea0364edbda7d3449f9b8d66c064",
+      "versionBuild": 29,
+      "observedHead": "98c7b316571eea0364edbda7d3449f9b8d66c064",
+      "observedCommitCount": 29,
+      "observedVersionBuild": 29
+    },
+    {
+      "repository": "AutoJs6-Plugin-Lua-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 411.5,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=ProviderDebug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 62,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "a86dce7929bc59181365478770deac5e4eb80769",
+      "versionBuild": 78,
+      "observedHead": "a86dce7929bc59181365478770deac5e4eb80769",
+      "observedCommitCount": 78,
+      "observedVersionBuild": 78
+    },
+    {
+      "repository": "AutoJs6-Plugin-Markdown-Previewer",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 481.7,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 66,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "973e0d6ff151edd7096e89038f9e3a2b882f7c2c",
+      "versionBuild": 20,
+      "observedHead": "973e0d6ff151edd7096e89038f9e3a2b882f7c2c",
+      "observedCommitCount": 20,
+      "observedVersionBuild": 20
+    },
+    {
+      "repository": "AutoJs6-Plugin-MCP-Server",
+      "checks": {
+        "markdown": 0,
+        "gradle": 0
+      },
+      "seconds": 414.7,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 235,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "eb04106d9677ac747875609eb1fbf95976acf619",
+      "versionBuild": 67,
+      "observedHead": "eb04106d9677ac747875609eb1fbf95976acf619",
+      "observedCommitCount": 67,
+      "observedVersionBuild": 67
+    },
+    {
+      "repository": "AutoJs6-Plugin-MediaInfo",
+      "checks": {
+        "markdown": 0,
+        "gradle": 0
+      },
+      "seconds": 830.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 29,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "b9b8596b28edad04da218cf6571cb294b3d398f1",
+      "versionBuild": 52,
+      "observedHead": "b9b8596b28edad04da218cf6571cb294b3d398f1",
+      "observedCommitCount": 52,
+      "observedVersionBuild": 52
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-Barcode",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 486.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "54ceceadc1a8ab215c63f7fa2de254d9e348d128",
+      "versionBuild": 18,
+      "observedHead": "54ceceadc1a8ab215c63f7fa2de254d9e348d128",
+      "observedCommitCount": 18,
+      "observedVersionBuild": 18
+    },
+    {
+      "repository": "AutoJs6-Plugin-MLKit-OCR",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 496.4,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "c95741d683e4f2579bc05dd40ce188e2a33c8320",
+      "versionBuild": 17,
+      "observedHead": "c95741d683e4f2579bc05dd40ce188e2a33c8320",
+      "observedCommitCount": 17,
+      "observedVersionBuild": 17
+    },
+    {
+      "repository": "AutoJs6-Plugin-NodeJs-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 459.0,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 96,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "d9a27bff999a95bc2cdef3d5a086b569b3d5bf5a",
+      "versionBuild": 220,
+      "observedHead": "d9a27bff999a95bc2cdef3d5a086b569b3d5bf5a",
+      "observedCommitCount": 220,
+      "observedVersionBuild": 220
+    },
+    {
+      "repository": "AutoJs6-Plugin-Offline-Docs",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 329.6,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "ba149c354dd24077eba8fb27fefb5bd5d952ce2c",
+      "versionBuild": 45,
+      "observedHead": "ba149c354dd24077eba8fb27fefb5bd5d952ce2c",
+      "observedCommitCount": 45,
+      "observedVersionBuild": 45
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCC",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 492.5,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "3394b56aac49816c44102c47dc45260032716933",
+      "versionBuild": 104,
+      "observedHead": "3394b56aac49816c44102c47dc45260032716933",
+      "observedCommitCount": 104,
+      "observedVersionBuild": 104
+    },
+    {
+      "repository": "AutoJs6-Plugin-OpenCV",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 242.7,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "35976c1cbddd6fa4d9ad2f15ae4851bd7940fd9a",
+      "versionBuild": 23,
+      "observedHead": "35976c1cbddd6fa4d9ad2f15ae4851bd7940fd9a",
+      "observedCommitCount": 23,
+      "observedVersionBuild": 23
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 187.7,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "70c3734770f2bfb78c67adb6daab77d80ddc8efa",
+      "versionBuild": 23,
+      "observedHead": "70c3734770f2bfb78c67adb6daab77d80ddc8efa",
+      "observedCommitCount": 23,
+      "observedVersionBuild": 23
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv4",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 255.1,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=MobileDebug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "0b33f1650aafa60cb2ee74837d6031341d698a35",
+      "versionBuild": 23,
+      "observedHead": "0b33f1650aafa60cb2ee74837d6031341d698a35",
+      "observedCommitCount": 23,
+      "observedVersionBuild": 23
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv5",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 262.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=MobileDebug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "1a014152eb197c0259d1f80379142638f1856bf2",
+      "versionBuild": 25,
+      "observedHead": "1a014152eb197c0259d1f80379142638f1856bf2",
+      "observedCommitCount": 25,
+      "observedVersionBuild": 25
+    },
+    {
+      "repository": "AutoJs6-Plugin-Paddle-OCR-PP-OCRv6",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 292.2,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=SmallDebug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "8073181aaeab9d00ddd69a0ca9202f06a82def9c",
+      "versionBuild": 27,
+      "observedHead": "8073181aaeab9d00ddd69a0ca9202f06a82def9c",
+      "observedCommitCount": 27,
+      "observedVersionBuild": 27
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 328.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "1989f3d2042b5aff08a49800f4848c741d86b0d1",
+      "versionBuild": 19,
+      "observedHead": "1989f3d2042b5aff08a49800f4848c741d86b0d1",
+      "observedCommitCount": 19,
+      "observedVersionBuild": 19
+    },
+    {
+      "repository": "AutoJs6-Plugin-Pinyin4j",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 274.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "3f4753917f9b0abfe642faf3e345326959fa29d9",
+      "versionBuild": 26,
+      "observedHead": "3f4753917f9b0abfe642faf3e345326959fa29d9",
+      "observedCommitCount": 26,
+      "observedVersionBuild": 26
+    },
+    {
+      "repository": "AutoJs6-Plugin-Python-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 298.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 56,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "cd7faa4d14a6c9fdeb69e4ff67a9c1e2bd318b52",
+      "versionBuild": 111,
+      "observedHead": "cd7faa4d14a6c9fdeb69e4ff67a9c1e2bd318b52",
+      "observedCommitCount": 111,
+      "observedVersionBuild": 111
+    },
+    {
+      "repository": "AutoJs6-Plugin-QuickJS-Runtime",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 297.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "c60d62124e7e09ab111f53c3d2e75b63406f8459",
+      "versionBuild": 15,
+      "observedHead": "c60d62124e7e09ab111f53c3d2e75b63406f8459",
+      "observedCommitCount": 15,
+      "observedVersionBuild": 15
+    },
+    {
+      "repository": "AutoJs6-Plugin-R8-Compiler",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 251.8,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 56,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "888a945c523e226289f7a784e2b41bb737487957",
+      "versionBuild": 21,
+      "observedHead": "888a945c523e226289f7a784e2b41bb737487957",
+      "observedCommitCount": 21,
+      "observedVersionBuild": 21
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv3",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 387.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "cda5e5032de5ccbe3cea6a3fd17a229ad20d7192",
+      "versionBuild": 26,
+      "observedHead": "cda5e5032de5ccbe3cea6a3fd17a229ad20d7192",
+      "observedCommitCount": 26,
+      "observedVersionBuild": 26
+    },
+    {
+      "repository": "AutoJs6-Plugin-Rapid-OCR-PP-OCRv6",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 306.9,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "ccdd3731e67173886cd85ce17523aca0bfbbca75",
+      "versionBuild": 28,
+      "observedHead": "ccdd3731e67173886cd85ce17523aca0bfbbca75",
+      "observedCommitCount": 28,
+      "observedVersionBuild": 28
+    },
+    {
+      "repository": "AutoJs6-Plugin-Readium-EPUB-Reader",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 186.5,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 85,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "de0981655bfae2d566d443c5d2478bdcedebae31",
+      "versionBuild": 17,
+      "notes": [
+        "Rebased on concurrently completed reader-preference commits through ca0498a; reran the full build, app JVM tests, AndroidTest APK compilation, Lint and metadata checks; fast-forwarded the original branch."
+      ],
+      "observedHead": "de0981655bfae2d566d443c5d2478bdcedebae31",
+      "observedCommitCount": 17,
+      "observedVersionBuild": 17
+    },
+    {
+      "repository": "AutoJs6-Plugin-Screen-Color-Picker",
+      "checks": {
+        "markdown": 0,
+        "python-.python-tests": 0,
+        "gradle": 0
+      },
+      "seconds": 173.8,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 42,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "cfe757fd9ee31029ce2dd75de43169c4c37b0404",
+      "versionBuild": 16,
+      "observedHead": "cfe757fd9ee31029ce2dd75de43169c4c37b0404",
+      "observedCommitCount": 16,
+      "observedVersionBuild": 16
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Ember-Player",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 396.5,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 138,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "3eb743a6de252417eb462f7c655173159149c57e",
+      "versionBuild": 28,
+      "observedHead": "3eb743a6de252417eb462f7c655173159149c57e",
+      "observedCommitCount": 28,
+      "observedVersionBuild": 28
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Stone-AI",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 517.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 359,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "4654e9759d148e0d7d572a41d4208839f907f607",
+      "versionBuild": 192,
+      "observedHead": "4654e9759d148e0d7d572a41d4208839f907f607",
+      "observedCommitCount": 192,
+      "observedVersionBuild": 192
+    },
+    {
+      "repository": "AutoJs6-Plugin-Three-Terra-Player",
+      "checks": {
+        "markdown": 0,
+        "repository": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 446.2,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 104,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "34d2ae9449b8cbd1b3f86e453c810bb7cbaae7bb",
+      "versionBuild": 38,
+      "observedHead": "34d2ae9449b8cbd1b3f86e453c810bb7cbaae7bb",
+      "observedCommitCount": 38,
+      "observedVersionBuild": 38
+    },
+    {
+      "repository": "AutoJs6-Plugin-TypeScript-Engine",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 303.3,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 534,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "5d6f172936e0b6a923474ab66a0fba9cccdd1354",
+      "versionBuild": 82,
+      "observedHead": "5d6f172936e0b6a923474ab66a0fba9cccdd1354",
+      "observedCommitCount": 82,
+      "observedVersionBuild": 82
+    },
+    {
+      "repository": "AutoJs6-Plugin-Yolo-NCNN",
+      "checks": {
+        "markdown": 0,
+        "python-.python": 0,
+        "gradle": 0
+      },
+      "seconds": 247.1,
+      "tooling": "PLATFORM_ROLLOUT_VERIFIED variant=Debug agp=9.1.1 sdklib=32.2.1 common=32.1.1 plugin=1.8.3",
+      "sdkWarning": false,
+      "appTests": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "commit": "6e7ef6d34b071c7972a34115ed6955166e5a396c",
+      "versionBuild": 39,
+      "observedHead": "6e7ef6d34b071c7972a34115ed6955166e5a396c",
+      "observedCommitCount": 39,
+      "observedVersionBuild": 39
+    }
+  ]
+}
