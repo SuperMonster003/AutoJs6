@@ -37,7 +37,9 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import java.io.Closeable
 import java.io.File
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /** The work of one client method: runs in a coroutine; the dispatcher is present for the `Async` form only. zh-CN: 客户端方法的工作: 在协程里运行; 只有 `Async` 形态带分发器. */
 internal typealias MailWork = suspend (MailAsyncDispatcher?) -> Any?
@@ -48,18 +50,20 @@ internal typealias MailWork = suspend (MailAsyncDispatcher?) -> Any?
  * `folder(path)` / `folderStatus()` / `createFolder()` / `deleteFolder()` / `renameFolder()`,
  * `fetch()`, `search()`, `get()` (alias `fetchBody()`), `download()`, `raw()`, `setFlags()` with
  * `markRead()` / `markUnread()` / `flag()` / `unflag()`, `move()`, `copy()`, `delete()`,
- * `expunge()`, `append()` and `close()`. Every network method has a synchronous form that blocks
- * the script thread inside the runtime's coroutine context (so stopping the script cancels the
- * call on the plugin side) and an `Async` form that returns a Promise settled on the script
- * thread; argument shapes are normalized in [MailScriptArguments] (pure Kotlin) and results are
- * decorated by [MailJsResults]. With `debug: true` (decision D28) the redacted protocol trace the
- * plugin sends before each result goes to `console.verbose`.
+ * `expunge()`, `append()`, `watch(folder?, options?)` (P5, a [MailWatch] emitter) and `close()`.
+ * Every network method has a synchronous form that blocks the script thread inside the runtime's
+ * coroutine context (so stopping the script cancels the call on the plugin side) and an `Async`
+ * form that returns a Promise settled on the script thread; argument shapes are normalized in
+ * [MailScriptArguments] (pure Kotlin) and results are decorated by [MailJsResults]. With
+ * `debug: true` (decision D28) the redacted protocol trace the plugin sends before each result
+ * goes to `console.verbose`. Closing the client (or the script's exit) stops its watches.
  * zh-CN: 脚本可见的 `MailClient` (邮件路线图 P3.1 与 P3.2, 附录 A.3): `account` (不含秘密的选项), `isConnected`, `isClosed`, `test()`, `send()`,
  * `folders()` / `folder(path)` / `folderStatus()` / `createFolder()` / `deleteFolder()` / `renameFolder()`, `fetch()`, `search()`, `get()` (别名
  * `fetchBody()`), `download()`, `raw()`, `setFlags()` 及 `markRead()` / `markUnread()` / `flag()` / `unflag()`, `move()`, `copy()`, `delete()`,
- * `expunge()`, `append()` 与 `close()`. 每个网络方法都有在运行时协程上下文里阻塞脚本线程的同步形态 (停止脚本即在插件侧取消调用) 与返回在脚本
- * 线程落定的 Promise 的 `Async` 形态; 参数形态在 [MailScriptArguments] (纯 Kotlin) 规范化, 结果由 [MailJsResults] 装饰. `debug: true` (决策 D28)
- * 时插件在每个结果前发来的脱敏协议摘要输出到 `console.verbose`.
+ * `expunge()`, `append()`, `watch(folder?, options?)` (P5, [MailWatch] 发射器) 与 `close()`. 每个网络方法都有在运行时协程上下文里阻塞脚本线程的
+ * 同步形态 (停止脚本即在插件侧取消调用) 与返回在脚本线程落定的 Promise 的 `Async` 形态; 参数形态在 [MailScriptArguments] (纯 Kotlin) 规范化,
+ * 结果由 [MailJsResults] 装饰. `debug: true` (决策 D28) 时插件在每个结果前发来的脱敏协议摘要输出到 `console.verbose`. 关闭客户端 (或脚本退出)
+ * 会停止它的监听.
  */
 class MailClientNativeObject(
     private val scriptRuntime: ScriptRuntime,
@@ -69,6 +73,8 @@ class MailClientNativeObject(
 ) : NativeObject(), Closeable, MailJsResults.Binding {
 
     private val closed = AtomicBoolean(false)
+    private val watches = CopyOnWriteArraySet<MailWatchRunner>()
+    private val generations = AtomicLong(0L)
 
     private val progressListener: ((MailJson.Progress) -> Unit)? = if (options.debug) {
         { progress -> progress.debug?.forEach { line -> scriptRuntime.console.verbose(line) } }
@@ -143,12 +149,17 @@ class MailClientNativeObject(
             val work: MailWork = { _ -> (outgoingCall(MailContract.OP_MESSAGES_APPEND, plan) as? Map<*, *>)?.get("uid") }
             work
         }
+        defineFunction(this, "watch") { args -> ensureArgumentsLengthInRange(args, 0..2) { a -> watch(a.getOrNull(0), a.getOrNull(1)) } }
     }
 
     override fun getClassName(): String = "MailClient"
 
     val isClosed: Boolean
         get() = closed.get()
+
+    /** Watches of this client that are still open. zh-CN: 本客户端仍打开着的监听数. */
+    val watchCount: Int
+        get() = watches.size
 
     fun describe(): String = "MailClient { ${options.describe()} }"
 
@@ -359,6 +370,43 @@ class MailClientNativeObject(
 
     private fun sizeOf(path: String): Long? = File(path).takeIf { it.isFile }?.length()
 
+    // ------------------------------------------------------------------ watches
+
+    /**
+     * `client.watch(folder?, options?)` (roadmap P5): opens the plugin watch synchronously (the
+     * plugin's refusal throws `MailError`) and returns the [MailWatch] whose events arrive on
+     * this script thread; the dispatcher behind it keeps the script alive until the watch closed.
+     * zh-CN: `client.watch(folder?, options?)` (路线图 P5): 同步打开插件监听 (插件拒绝时抛 `MailError`), 返回事件在本脚本线程到达的
+     * [MailWatch]; 其背后的分发器让脚本活到监听关闭.
+     */
+    private fun watch(folder: Any?, options: Any?): Any? {
+        val plan = MailScriptArguments.watch(json(folder), json(options))
+        ensureOpen()
+        val controller = MailWatch.Controller(MailAsyncDispatcher(scriptRuntime), scriptRuntime.bridges, plan.options.folder, plan.options.mode)
+        val runner = MailWatchRunner(
+            scope = scriptRuntime.coroutineScope,
+            session = session,
+            options = plan.options,
+            reconnect = plan.reconnect,
+            generations = generations::incrementAndGet,
+            controller = controller,
+            decorate = { value -> RhinoUtils.withRhinoContext(scriptRuntime) { cx -> MailJsResults.message(cx, scriptRuntime.topLevelScope, value, this) } },
+            convertError = { error -> RhinoUtils.withRhinoContext(scriptRuntime) { cx -> MailJsErrors.newMailError(cx, scriptRuntime.topLevelScope, error, null) } },
+            onFinished = { finished -> watches.remove(finished) },
+        )
+        watches.add(runner)
+        try {
+            return sync { _ ->
+                runner.open()
+                controller.watch
+            }
+        } catch (t: Throwable) {
+            watches.remove(runner)
+            controller.cancelSilently()
+            throw t
+        }
+    }
+
     // ------------------------------------------------------------------ folder objects
 
     /** `client.folder(path)`: `path`, `name`, `status()`, `create()`, `delete()`, `rename(newPath)` and their `Async` forms. zh-CN: `client.folder(path)`: `path`, `name`, `status()`, `create()`, `delete()`, `rename(newPath)` 及其 `Async` 形态. */
@@ -381,6 +429,7 @@ class MailClientNativeObject(
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
         service.untrack(this)
+        watches.toList().forEach { runner -> runCatching { runner.stop(MailWatch.REASON_CLIENT_CLOSED) } }
         try {
             runBlocking(scriptRuntime.coroutineContext) { session.close() }
         } catch (t: Throwable) {
@@ -392,12 +441,14 @@ class MailClientNativeObject(
     internal fun discard() {
         closed.set(true)
         service.untrack(this)
+        watches.toList().forEach { runner -> runCatching { runner.cancelSilently() } }
         runBlocking(Dispatchers.IO) { withTimeoutOrNull(CLOSE_ON_EXIT_TIMEOUT_MS) { session.close() } }
     }
 
-    /** Script exit: close without the runtime context (already cancelled) and without throwing. zh-CN: 脚本退出: 不经运行时上下文 (已取消) 且不抛出地关闭. */
+    /** Script exit: close without the runtime context (already cancelled) and without throwing; the session's close stops the watches. zh-CN: 脚本退出: 不经运行时上下文 (已取消) 且不抛出地关闭; 会话关闭会停止监听. */
     internal fun closeOnExit() {
         if (!closed.compareAndSet(false, true)) return
+        watches.toList().forEach { runner -> runCatching { runner.cancelSilently() } }
         runBlocking(Dispatchers.IO) { withTimeoutOrNull(CLOSE_ON_EXIT_TIMEOUT_MS) { session.close() } }
     }
 

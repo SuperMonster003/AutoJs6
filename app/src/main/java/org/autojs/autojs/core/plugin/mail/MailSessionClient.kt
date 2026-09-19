@@ -11,6 +11,7 @@ import org.autojs.plugin.mail.api.MailContract
 import org.autojs.plugin.mail.api.MailErrorCodes
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -56,7 +57,8 @@ fun interface MailSessionOpener {
  * plugin side. A session that died (death notification, `onStatus(closed)` or a transport
  * exception) is marked for reopening and the next call opens a new one with the credentials kept
  * in memory. An `AUTH_FAILED` reply on a token session with a [tokenProvider] refreshes the token,
- * reopens and retries exactly once.
+ * reopens and retries exactly once. Watches (roadmap P5) register a session-loss listener to learn
+ * about the plugin's death, which their own callback cannot report.
  */
 class MailSessionClient(
     account: MailAccountSpec,
@@ -68,6 +70,7 @@ class MailSessionClient(
     private val mutex = Mutex()
     private val inflight = ConcurrentHashMap<String, CancellableContinuation<MailJson.Response>>()
     private val openCounter = AtomicInteger(0)
+    private val lossListeners = CopyOnWriteArrayList<(MailError?) -> Unit>()
 
     @Volatile
     var account: MailAccountSpec = account
@@ -98,7 +101,21 @@ class MailSessionClient(
             lastCloseReason = reason
             needsReopen = true
             failInflight(reason)
+            if (!closedByCaller) lossListeners.forEach { listener -> runCatching { listener(reason) } }
         }
+    }
+
+    /** Whether an `AUTH_FAILED` can be answered with a fresh token (token account with a provider). */
+    val canRefreshToken: Boolean
+        get() = tokenProvider != null && account.accessToken != null
+
+    /** Called (off the caller's thread) when the open session was lost without [close]: plugin death or a `closed` status. */
+    fun addSessionLossListener(listener: (MailError?) -> Unit) {
+        lossListeners.addIfAbsent(listener)
+    }
+
+    fun removeSessionLossListener(listener: (MailError?) -> Unit) {
+        lossListeners.remove(listener)
     }
 
     /** Opens the session eagerly; [call] does the same lazily. */
@@ -127,23 +144,33 @@ class MailSessionClient(
             try {
                 return execute(current, op, argsJson, descriptors, timeoutMs ?: MailContract.callTimeoutMs(op, transferBytes), onSubmitted, onProgress)
             } catch (e: MailPluginException) {
-                val provider = tokenProvider
-                if (e.code == MailErrorCodes.AUTH_FAILED && provider != null && !tokenRefreshed && account.accessToken != null) {
+                if (e.code == MailErrorCodes.AUTH_FAILED && !tokenRefreshed && refreshToken()) {
                     tokenRefreshed = true
-                    val token = try {
-                        provider()
-                    } catch (t: Throwable) {
-                        throw MailPluginException(MailErrorMapper.normalize(MailErrorCodes.AUTH_FAILED, "token refresh failed: ${t.message}", retryable = false), t)
-                    }
-                    mutex.withLock {
-                        account = account.withAccessToken(token)
-                        needsReopen = true
-                    }
                     continue
                 }
                 throw e
             }
         }
+    }
+
+    /**
+     * Asks the [tokenProvider] for a fresh token and marks the session for reopening with it;
+     * false when the account is no token account or has no provider. A provider failure is an
+     * `AUTH_FAILED` that is not retryable.
+     */
+    suspend fun refreshToken(): Boolean {
+        val provider = tokenProvider ?: return false
+        if (account.accessToken == null) return false
+        val token = try {
+            provider()
+        } catch (t: Throwable) {
+            throw MailPluginException(MailErrorMapper.normalize(MailErrorCodes.AUTH_FAILED, "token refresh failed: ${t.message}", retryable = false), t)
+        }
+        mutex.withLock {
+            account = account.withAccessToken(token)
+            needsReopen = true
+        }
+        return true
     }
 
     suspend fun watch(options: MailJson.WatchOptions, generation: Long, sink: MailWatchSink): Pair<MailWatchBridge, MailWatchHandle> {

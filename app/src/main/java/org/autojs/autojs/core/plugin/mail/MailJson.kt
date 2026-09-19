@@ -38,7 +38,7 @@ object MailJson {
 
     data class Status(val state: String, val reason: String?, val lastError: MailError?, val json: String)
 
-    data class WatchOptions(val folder: String, val mode: String?, val pollIntervalMs: Long?)
+    data class WatchOptions(val folder: String, val mode: String?, val pollIntervalMs: Long?, val fetchBody: Boolean? = null)
 
     fun encodeRequest(id: String, op: String, argsJson: String?): Request {
         require(id.isNotBlank()) { "request id must not be blank" }
@@ -69,6 +69,7 @@ object MailJson {
             addProperty(MailContract.FIELD_FOLDER, options.folder)
             options.mode?.let { addProperty(MailContract.FIELD_MODE, it) }
             options.pollIntervalMs?.let { addProperty(MailContract.FIELD_POLL_INTERVAL_MS, it) }
+            options.fetchBody?.let { addProperty(MailContract.FIELD_FETCH_BODY, it) }
             addProperty(MailContract.FIELD_GENERATION, generation)
         }.toString()
     }

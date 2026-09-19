@@ -131,7 +131,7 @@ internal class BinderMailSessionPort(
 
     override fun watch(optionsJson: String, bridge: MailWatchBridge): MailWatchHandle {
         val watch = session.watch(MailBundles.watchOptionsToBundle(optionsJson, bridge.generation), MailWatchCallbackBinder(bridge))
-            ?: throw IllegalStateException("mail plugin returned no watch")
+            ?: throw MailPluginException(refusal())
         return object : MailWatchHandle {
             override fun status(): MailJson.Status {
                 return MailJson.decodeStatus(MailBundles.string(watch.getStatus(), MailContract.KEY_STATUS_JSON))
@@ -143,6 +143,10 @@ internal class BinderMailSessionPort(
             }
         }
     }
+
+    /** A null `watch` (contract B.3) leaves its reason in the session's `lastError`. */
+    private fun refusal(): MailError = runCatching { status().lastError }.getOrNull()
+        ?: MailErrorMapper.normalize(MailErrorCodes.WATCH_CLOSED, "the mail plugin refused the watch", retryable = false)
 
     override fun close() {
         if (closed.compareAndSet(false, true)) {

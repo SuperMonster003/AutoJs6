@@ -180,6 +180,35 @@ class MailScriptArgumentsTest {
         assertTrue(invalidMessage { MailScriptArguments.uids(json("[[1]]"), "uids") }.contains("'uids[0]' must be a UID or a message object"))
     }
 
+    @Test
+    fun watchNormalizesFolderModeIntervalBodyAndReconnect() {
+        val defaults = MailScriptArguments.watch(null, null)
+        assertEquals("INBOX", defaults.options.folder)
+        assertNull(defaults.options.mode)
+        assertNull(defaults.options.pollIntervalMs)
+        assertNull(defaults.options.fetchBody)
+        assertTrue(defaults.reconnect)
+        assertEquals("Archive", MailScriptArguments.watch(json("\" Archive \""), null).options.folder)
+        val full = MailScriptArguments.watch(json("\"INBOX\""), json("""{"mode":"poll","pollIntervalMs":30000,"fetchBody":true,"reconnect":false}"""))
+        assertEquals("poll", full.options.mode)
+        assertEquals(30_000L, full.options.pollIntervalMs)
+        assertEquals(true, full.options.fetchBody)
+        assertFalse(full.reconnect)
+        val single = MailScriptArguments.watch(json("""{"folder":"Sent","mode":"idle"}"""), null)
+        assertEquals("Sent", single.options.folder)
+        assertEquals("idle", single.options.mode)
+        assertNull(MailScriptArguments.watch(json("\"INBOX\""), json("""{"mode":"auto"}""")).options.mode)
+        assertEquals("INBOX", MailScriptArguments.watch(json("\"INBOX\""), json("""{"folder":"INBOX"}""")).options.folder)
+        assertTrue(invalidMessage { MailScriptArguments.watch(json("\"INBOX\""), json("""{"folder":"Sent"}""")) }.contains("different folders"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(json("\"\""), null) }.contains("must not be blank"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(json("7"), null) }.contains("folder path string"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(null, json("""{"mode":"push"}""")) }.contains("options.mode"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(null, json("""{"pollIntervalMs":1000}""")) }.contains("at least 15000"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(null, json("""{"fetchBody":"yes"}""")) }.contains("boolean"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(null, json("""{"interval":5}""")) }.contains("unknown option 'options.interval'"))
+        assertTrue(invalidMessage { MailScriptArguments.watch(null, json("[]")) }.contains("must be an object"))
+    }
+
     private fun json(text: String): JsonElement = JsonParser.parseString(text)
 
     private fun invalidMessage(block: () -> Any?): String {

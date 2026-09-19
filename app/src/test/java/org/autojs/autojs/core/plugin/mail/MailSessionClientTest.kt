@@ -318,6 +318,31 @@ class MailSessionClientTest {
     }
 
     @Test
+    fun sessionLossListenersHearAboutDeathsButNotAboutTheCallersClose() = runBlocking {
+        val opener = FakeOpener()
+        val client = MailSessionClient(account, opener)
+        val heard = ArrayList<String?>()
+        val listener: (MailError?) -> Unit = { error -> heard += error?.code }
+        client.addSessionLossListener(listener)
+        client.addSessionLossListener(listener)
+        client.open()
+        requireNotNull(opener.events).onClosed(MailErrorMapper.normalize(MailErrorCodes.SESSION_CLOSED, "mail plugin process died", retryable = true))
+        assertEquals(listOf(MailErrorCodes.SESSION_CLOSED), heard)
+        assertFalse(client.isOpen)
+        client.call(MailContract.OP_SESSION_TEST)
+        assertEquals(2, opener.ports.size)
+        client.removeSessionLossListener(listener)
+        requireNotNull(opener.events).onClosed(null)
+        assertEquals(1, heard.size)
+        client.addSessionLossListener(listener)
+        client.close()
+        requireNotNull(opener.events).onClosed(null)
+        assertEquals(1, heard.size)
+        assertFalse(client.canRefreshToken)
+        assertFalse(client.refreshToken())
+    }
+
+    @Test
     fun resultAfterTimeoutIsIgnored() = runBlocking {
         val late = CompletableDeferred<MailCallListener>()
         val opener = FakeOpener().apply { configure = { port -> port.handler = { _, listener -> late.complete(listener) } } }

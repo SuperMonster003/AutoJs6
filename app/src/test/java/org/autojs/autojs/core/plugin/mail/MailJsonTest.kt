@@ -175,6 +175,10 @@ class MailJsonTest {
         val json = MailJson.encodeWatchOptions(MailJson.WatchOptions("INBOX", MailContract.WATCH_MODE_POLL, 30_000L), 42L)
         assertEquals(JsonParser.parseString("""{"folder":"INBOX","mode":"poll","pollIntervalMs":30000,"generation":42}"""), JsonParser.parseString(json))
         assertEquals(JsonParser.parseString("""{"folder":"INBOX","generation":1}"""), JsonParser.parseString(MailJson.encodeWatchOptions(MailJson.WatchOptions("INBOX", null, null), 1L)))
+        assertEquals(
+            JsonParser.parseString("""{"folder":"Archive","fetchBody":true,"generation":2}"""),
+            JsonParser.parseString(MailJson.encodeWatchOptions(MailJson.WatchOptions("Archive", null, null, fetchBody = true), 2L)),
+        )
         listOf(
             MailJson.WatchOptions("", null, null),
             MailJson.WatchOptions("INBOX", "push", null),

@@ -4,7 +4,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import org.autojs.autojs.core.plugin.mail.MailJson
 import org.autojs.autojs.core.plugin.mail.MailPluginException
+import org.autojs.plugin.mail.api.MailContract
 import java.io.File
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -30,6 +32,9 @@ internal object MailScriptArguments {
     /** An outgoing message: the operation args plus the attachment files in `descriptorIndex` order. zh-CN: 发出的邮件: 操作参数加按 `descriptorIndex` 排序的附件文件. */
     class Outgoing(val args: JsonObject, val attachmentPaths: List<String>)
 
+    /** A watch: the options for the plugin and whether the host watches again after a plugin death (roadmap P5). zh-CN: 监听: 交给插件的选项, 以及插件死亡后宿主是否重新监听 (路线图 P5). */
+    class Watch(val options: MailJson.WatchOptions, val reconnect: Boolean)
+
     const val FOLDER = "folder"
     const val UID = "uid"
     const val UIDS = "uids"
@@ -43,7 +48,14 @@ internal object MailScriptArguments {
     val FALLBACKS: Set<String> = setOf("client", "none", "always")
     val ORDERS: Set<String> = setOf("desc", "asc")
 
+    const val WATCH_MODE_AUTO = "auto"
+    const val DEFAULT_WATCH_FOLDER = "INBOX"
+
+    /** `auto` leaves the choice to the plugin (IDLE when the server has it, else polling). zh-CN: `auto` 把选择留给插件 (服务器有 IDLE 则 IDLE, 否则轮询). */
+    val WATCH_MODES: Set<String> = setOf(WATCH_MODE_AUTO, MailContract.WATCH_MODE_IDLE, MailContract.WATCH_MODE_POLL)
+
     private val FETCH_KEYS = setOf(FOLDER, "limit", "before", "after", "order", "unseenOnly")
+    private val WATCH_KEYS = setOf(FOLDER, "mode", "pollIntervalMs", "fetchBody", "reconnect")
     private val SEARCH_KEYS = setOf(FOLDER, "limit", "before", "fallback")
     private val GET_KEYS = setOf(FOLDER, "peek", "includeRaw")
     private val RAW_KEYS = setOf(FOLDER, OVERWRITE)
@@ -167,6 +179,39 @@ internal object MailScriptArguments {
     /** `expunge(folder?)` -> `messages.expunge`. */
     fun expunge(folder: JsonElement?): JsonObject = JsonObject().apply {
         optionalFolder(folder, "folder")?.let { addProperty(FOLDER, it) }
+    }
+
+    // ------------------------------------------------------------------ watches
+
+    /**
+     * `watch(folder?, options?)` -> `IMailSession.watch` (roadmap P5); a single object argument
+     * is the options. `folder` defaults to `INBOX` (or `options.folder`), `mode` is `auto`
+     * (default) / `idle` / `poll`, `pollIntervalMs` must be at least `MIN_POLL_INTERVAL_MS`,
+     * `fetchBody` asks for the body with every `message` event, `reconnect` (default true)
+     * watches again after a plugin death.
+     * zh-CN: `watch(folder?, options?)` -> `IMailSession.watch` (路线图 P5); 单个对象参数即选项. `folder` 默认 `INBOX` (或 `options.folder`),
+     * `mode` 为 `auto` (默认) / `idle` / `poll`, `pollIntervalMs` 不得低于 `MIN_POLL_INTERVAL_MS`, `fetchBody` 让每个 `message` 事件带正文,
+     * `reconnect` (默认 true) 在插件死亡后重新监听.
+     */
+    fun watch(folder: JsonElement?, options: JsonElement?): Watch {
+        val single = folder != null && folder.isJsonObject && (options == null || options.isJsonNull)
+        val given = optionalObject(if (single) folder else options, "options")
+        given?.rejectUnknown("options", WATCH_KEYS)
+        val fromArgument = if (single) null else optionalFolder(folder, "folder")
+        val fromOptions = given?.let { optionalFolder(it.get(FOLDER), "options.folder") }
+        if (fromArgument != null && fromOptions != null && fromArgument != fromOptions) {
+            throw invalid("'folder' and 'options.folder' name different folders ($fromArgument, $fromOptions)")
+        }
+        val mode = given?.stringOrNull("options.mode", "mode")?.let { value ->
+            if (value !in WATCH_MODES) throw invalid("'options.mode' must be one of ${WATCH_MODES.joinToString(", ")}")
+            value.takeUnless { it == WATCH_MODE_AUTO }
+        }
+        val interval = given?.longOrNull("options.pollIntervalMs", "pollIntervalMs")?.also { value ->
+            if (value < MailContract.MIN_POLL_INTERVAL_MS) throw invalid("'options.pollIntervalMs' must be at least ${MailContract.MIN_POLL_INTERVAL_MS} ms, got $value")
+        }
+        val fetchBody = given?.booleanOrNull("options.fetchBody", "fetchBody")
+        val reconnect = given?.booleanOrNull("options.reconnect", "reconnect") ?: true
+        return Watch(MailJson.WatchOptions(fromArgument ?: fromOptions ?: DEFAULT_WATCH_FOLDER, mode, interval, fetchBody), reconnect)
     }
 
     // ------------------------------------------------------------------ folders

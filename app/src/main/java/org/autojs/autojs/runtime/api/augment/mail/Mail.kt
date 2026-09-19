@@ -67,7 +67,7 @@ class Mail(
             "providers" to providersObject(),
             "accounts" to accountsObject(),
         ) + FORWARDED
-            .flatMap { name -> if (name == "folder") listOf(name) else listOf(name, name + ASYNC_SUFFIX) }
+            .flatMap { name -> if (name in SYNC_ONLY) listOf(name) else listOf(name, name + ASYNC_SUFFIX) }
             .map { name -> name to newBaseFunction(scriptRuntime.topLevelScope, name, { args -> forward(name, args) }, NOT_CONSTRUCTABLE) }
     }
 
@@ -235,7 +235,10 @@ class Mail(
     private companion object {
         const val ASYNC_SUFFIX = "Async"
 
-        /** Client methods mirrored on `mail` (appendix A.3); each has an `Async` form except `folder`. zh-CN: 在 `mail` 上镜像的客户端方法 (附录 A.3); 除 `folder` 外各有 `Async` 形态. */
+        /** Methods without an `Async` form: they answer without waiting for the network. zh-CN: 没有 `Async` 形态的方法: 它们不等待网络即应答. */
+        val SYNC_ONLY: Set<String> = setOf("folder", "watch")
+
+        /** Client methods mirrored on `mail` (appendix A.3); each has an `Async` form except [SYNC_ONLY]. zh-CN: 在 `mail` 上镜像的客户端方法 (附录 A.3); 除 [SYNC_ONLY] 外各有 `Async` 形态. */
         val FORWARDED: List<String> = listOf(
             "test", "send", "folders", "folder", "folderStatus", "createFolder", "deleteFolder", "renameFolder",
             "fetch", "search", "get", "fetchBody", "download", "raw", "setFlags", "markRead", "markUnread", "flag", "unflag",

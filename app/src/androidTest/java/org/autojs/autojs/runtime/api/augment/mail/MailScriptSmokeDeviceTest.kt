@@ -40,7 +40,9 @@ import java.util.concurrent.atomic.AtomicReference
  * arguments (never stored in the repository) and log the provider, the address domain and
  * durations only. [realProviderScript] additionally takes `mail.smoke.script`, the device path
  * of a script pushed by the plugin repository's `.python/run_host_script_smoke.py --script`
- * (the `docs/smoke` scripts there); a script starting with `"ui";` runs in ui mode.
+ * (the `docs/smoke` scripts there); a script starting with `"ui";` runs in ui mode and
+ * `mail.smoke.timeoutMs` (default 300000) bounds the wait for its report (the watch matrix of
+ * mail roadmap P5 sleeps through a Doze window).
  * [savedAccountScript] runs such a script with only `mail.smoke.alias` (an account saved on the
  * plugin's settings page) and `mail.smoke.script`; no credential reaches the host.
  */
@@ -86,8 +88,9 @@ class MailScriptSmokeDeviceTest {
         val workDir = File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null) ?: InstrumentationRegistry.getInstrumentation().targetContext.cacheDir, "mail-smoke").apply { mkdirs() }
         val reportFile = File(workDir, "$name-report.json").apply { delete() }
         val prelude = account.prelude(mapOf("workDir" to workDir.absolutePath, "reportPath" to reportFile.absolutePath))
+        val timeoutMs = InstrumentationRegistry.getArguments().getString("mail.smoke.timeoutMs")?.toLongOrNull()?.takeIf { it > 0L } ?: 300_000L
         val started = System.currentTimeMillis()
-        val report = runScript(name, source, prelude, timeoutMs = 300_000L, reportFile = reportFile)
+        val report = runScript(name, source, prelude, timeoutMs = timeoutMs, reportFile = reportFile)
         val elapsed = System.currentTimeMillis() - started
         val steps = report.optJSONArray("steps")
         Log.i(TAG, "$name: provider=${account.provider} domain=${account.domain} ok=${report.optBoolean("ok")} steps=${steps?.length() ?: 0} total ${elapsed} ms timings=${report.optJSONObject("timings")} search=${report.optJSONObject("search")} send=${report.optJSONObject("send")} ticks=${report.optInt("ticks", -1)}/${report.optInt("expectedTicks", -1)}")

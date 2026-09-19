@@ -85,6 +85,9 @@ object MailContract {
     const val FIELD_LAST_ERROR = "lastError"
     const val FIELD_POLL_INTERVAL_MS = "pollIntervalMs"
 
+    /** Watch option (P5): every `message` event carries the body, not only the envelope. */
+    const val FIELD_FETCH_BODY = "fetchBody"
+
     // Operations.
 
     const val OP_SESSION_TEST = "session.test"
