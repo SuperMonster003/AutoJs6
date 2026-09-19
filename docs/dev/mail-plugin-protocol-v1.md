@@ -85,7 +85,7 @@ Every Bundle written by the host carries `contractVersion` (`KEY_CONTRACT_VERSIO
 | `getStatus` | synchronous | JSON under `statusJson` |
 | `call` | returns at once with the request id; the result is delivered exactly once by `onResult` after zero or more `onProgress`, from the session thread of the plugin, never from the Binder thread that accepted the request. The plugin runs the calls of one session one at a time (decision D35) and queues up to `MAX_QUEUED_CALLS` behind the call in flight | descriptors are host-owned (see below); a plugin that cannot accept the request (oversized request envelope, queue full, session closed) still answers through `onResult` (`LIMIT_EXCEEDED` / `SESSION_CLOSED`) after closing its descriptor copies |
 | `cancel` | synchronous; a queued call is answered `CANCELLED` before `cancel` returns, the call in flight is interrupted and its sockets are closed, and it still completes exactly once: with `CANCELLED`, unless it had already succeeded, in which case the result stands | unknown and finished ids are ignored |
-| `watch` | synchronous; events start after it returns | null means the watch was refused (`MAX_WATCHES_PER_SESSION`, closed session); the P2 plugin has no watches yet (`idle` is absent from its features) and answers null |
+| `watch` | synchronous; events start after it returns | null means the watch was refused (`MAX_WATCHES_PER_SESSION`, closed session, unusable options, a callback that is already dead) and the reason is the session's `lastError`, which `BinderMailSessionPort` turns into the exception of the host's `watch`; plugin builds from 35 implement watches (feature `idle`): IMAP IDLE renewed every `IDLE_RENEW_MS` with a polling fallback (no IDLE capability, three failed IDLEs), POP3 by UIDL polling, exponential reconnects, `resync` on a UIDVALIDITY change or a queue overflow, and an immediate reconnect when the device's default network changes |
 | `close` | synchronous; queued calls fail with `SESSION_CLOSED`, the call in flight is aborted the same way, then the mail connections close and `onStatus` reports `closed` with `reason` `closed`; watches emit a final `closed` event | idempotent; the host's death does the same with `reason` `host-died` |
 | `stop` | synchronous; a final `closed` event follows | idempotent |
 
@@ -211,11 +211,13 @@ ends the session on the host side.
 ### Watch options (`watchOptionsJson`)
 
 ```json
-{"folder": "INBOX", "mode": "idle", "pollIntervalMs": 60000, "generation": 3}
+{"folder": "INBOX", "mode": "idle", "pollIntervalMs": 60000, "fetchBody": false, "generation": 3}
 ```
 
-`mode` defaults to `idle` when the server advertises IDLE and `poll` otherwise;
-`pollIntervalMs` is clamped to at least `MIN_POLL_INTERVAL_MS`.
+`mode` defaults to `idle` when the server advertises IDLE and `poll` otherwise (POP3 accounts
+are always polled and refuse `idle`); `pollIntervalMs` is clamped into `MIN_POLL_INTERVAL_MS`
+to one hour; `fetchBody` (default false) makes every `message` event carry the body instead of
+the envelope alone. Unknown keys are refused with `INVALID_ARGUMENT`.
 
 ### Event (`eventJson`)
 
@@ -287,8 +289,8 @@ The capabilities bundle of the plugin carries `mailContractVersion`, `mailProtoc
 `pop3`, `smtp`), `mailAuthMechanisms` (`password`, `xoauth2`), `mailFeatures`,
 `mailProvidersVersion`, `mailLibraryVersion` and, from plugin build 27, `mailSettingsVersion`.
 Plugin builds from 24 on advertise the features `append`, `clientSearchFallback` and
-`savedAccounts` (account store, P4); `idle` (watches, P5) and `backgroundWatch` (P8) are absent
-until those phases land.
+`savedAccounts` (account store, P4); builds from 35 add `idle` (watches, P5); `backgroundWatch`
+(P8) is absent until that phase lands.
 
 `mailSettingsVersion` 1 means the plugin exports the parameterless settings entry
 `org.autojs.plugin.MAIL_SETTINGS` (`MailActions.OPEN_SETTINGS`, category DEFAULT, an activity
@@ -405,7 +407,9 @@ cancels or the timeout fires, fails pending calls with `SESSION_CLOSED` when the
 reopens on the next call, and, for XOAUTH2 accounts with a token provider, refreshes the token
 and retries exactly once after `AUTH_FAILED`. `MailAttachmentSink` and `MailAttachmentSource`
 implement the descriptor conventions above; `MailWatchBridge` implements the generation and
-sequence checks and hands accepted events to a `MailWatchSink` (the P3 `MailWatch` object).
+sequence checks and hands accepted events to a `MailWatchSink` (`MailWatchRunner` behind the
+script's `MailWatch` object, P5). `MailSessionClient` tells registered session-loss listeners
+about a plugin death, which is how a watch learns that its plugin side is gone.
 `MailJson` and `MailErrorMapper` are pure Kotlin and covered by JVM tests together with the
 client state machine, the sink, the file-name rules and the bridge.
 
@@ -454,6 +458,7 @@ the default client (`mail.setDefault`) and answers `NO_DEFAULT_ACCOUNT` without 
 | `client.delete(uids, {folder?, expunge?})` | `messages.delete` | the UID array |
 | `client.expunge(folder?)` | `messages.expunge` | the count |
 | `client.append(folder, message, flags?)` | `messages.append` | the UID or null |
+| `client.watch(folder?, {folder?, mode?, pollIntervalMs?, fetchBody?, reconnect?})`, `mail.watch` (P5) | `watch` (Binder method, no operation) | a `MailWatch` emitter (no `Async` form, the plugin answers at once): events `message(message, watch)`, `mode(mode)`, `resync(reason)`, `error(err)` and the single terminal `close(reason)` on the script thread; `stop()`, `folder`, `mode`, `generation`, `isActive`; `mode` is `auto` (default) / `idle` / `poll`; the watch keeps the script alive until it closed; a plugin death yields `error(PLUGIN_UNAVAILABLE)` and, with `reconnect` (default true), a new plugin watch of the next generation on the reopened session plus `resync('rewatched')`, otherwise `close('plugin-died')`; `AUTH_FAILED` on a token account with a `tokenProvider` refreshes and watches again; a script that stops draining gets `error(LIMIT_EXCEEDED)` and `close('overflow')`; `client.close()` closes its watches with `close('closed')`, the script's exit closes them silently |
 | `client.close()` | `close` (Binder method) | `isClosed` turns true; later calls answer `SESSION_CLOSED` |
 
 Result decoration: `date` and `receivedDate` are JavaScript `Date` values (decision D26 keeps
@@ -477,3 +482,8 @@ progress documents go to `console.verbose`.
 - P3: the script API `mail` (P3.1 connection layer, P3.2 send and receive methods) is in the
   host; the plugin repository records the device evidence in `docs/dev/p3-script-api-evidence.md`
   (QQ and 163 on the API 24 emulator and a Redmi API 33; Gmail waits for a fresh access token).
+- P5: watches are in plugin build 35 (`IdleWatcher` / `PollWatcher` / `MailWatchBinder`, feature
+  `idle`) and in the host as `MailWatch` / `MailWatchRunner` / `client.watch` / `mail.watch`;
+  `MailJson.WatchOptions` gained `fetchBody` and `MailSessionClient` the session-loss listeners
+  and `refreshToken`; the plugin repository records the device matrix in
+  `docs/dev/p5-watch-evidence.md`.

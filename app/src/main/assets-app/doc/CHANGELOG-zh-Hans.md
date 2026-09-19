@@ -211,6 +211,7 @@
 * `新增` 客户端模式管理器控制区提供 "历史记录" 入口: 查看曾连接过的服务端地址, 点击即可连接, 长按删除, 亦可清空
 * `新增` 邮件插件契约模块 (plugin-api/mail-api), 含冻结的 AIDL 接口, 以专用绑定租约打开账户会话, 在插件进程死亡后自动重开, XOAUTH2 令牌刷新后重试一次并经管道流式落盘附件的宿主客户端, 以及默认启用的插件中心注册
 * `新增` 邮件插件的脚本 API `mail` (邮件路线图 P3.1 与 P3.2): `mail.connect(选项或别名)` 支持服务商预设与 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (脚本路径的附件经只读描述符传输), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 带客户端回退标记的 `search`, `get` / `fetchBody`, 流式落盘到工作目录并支持 `onProgress` 的 `download` 与 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 与 `close`, 每个方法都有在脚本线程落定的 `Async` Promise 形态; 邮件结果携带 `Date` 字段, 可打印的地址与绑定的 `load` / `download` 方法, 失败为带 `code` 与 `retryable` 的 `MailError` 对象, 全局对象上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 与全部客户端方法的转发
+* `新增` 邮件插件的脚本 API `mail.watch` (邮件路线图 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 与 `mail.watch` 返回 `MailWatch` 发射器, 其 `message(message, watch)`, `mode`, `resync`, `error` 与唯一的 `close(reason)` 事件在脚本线程到达并让脚本活到 `stop()`; 插件以 IMAP IDLE 监听 (可回退轮询, POP3 按 UIDL), 宿主丢弃过期 generation 与乱序投递, 插件死亡报告为 `PLUGIN_UNAVAILABLE` 且默认在重开的会话上重新监听并发 `resync`, 关闭客户端或脚本退出会停止其监听
 * `修复` 插件中心启用 YOLO 插件时探测握手要求插件已处于启用状态, 导致开关无法启用的问题; 探测现仅要求授权与精确组件握手, 运行时入口仍要求已保存的启用记录
 * `修复` 通过 adb 安装 MCP Server 且没有保存启用记录时, 插件中心显示已启用而运行时视为未启用的问题; 两者统一为默认关闭并保留用户明确保存的开关状态
 * `修复` 无障碍服务管理器中未绑定, 无等短状态值下方存在多余空行的问题
