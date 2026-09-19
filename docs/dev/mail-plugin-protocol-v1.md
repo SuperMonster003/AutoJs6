@@ -214,10 +214,15 @@ ends the session on the host side.
 {"folder": "INBOX", "mode": "idle", "pollIntervalMs": 60000, "fetchBody": false, "generation": 3}
 ```
 
-`mode` defaults to `idle` when the server advertises IDLE and `poll` otherwise (POP3 accounts
-are always polled and refuse `idle`); `pollIntervalMs` is clamped into `MIN_POLL_INTERVAL_MS`
-to one hour; `fetchBody` (default false) makes every `message` event carry the body instead of
-the envelope alone. Unknown keys are refused with `INVALID_ARGUMENT`.
+`mode` defaults to `idle` when the server advertises IDLE and the account's preset does not
+say otherwise, and to `poll` when it does not (POP3 accounts are always polled and refuse
+`idle`); plugin builds from 36 carry `idlePush: false` in the presets of QQ and Sina (they
+accept IDLE but push nothing while a client idles) and of 163 and 126 (no IDLE at all), so
+`auto` polls on those from the start and the first status already says `poll` (an explicit
+`idle` still idles; `docs/dev/p5-watch-evidence.md` of the plugin repository has the probes);
+`pollIntervalMs` is clamped into `MIN_POLL_INTERVAL_MS` to one hour; `fetchBody` (default
+false) makes every `message` event carry the body instead of the envelope alone. Unknown keys
+are refused with `INVALID_ARGUMENT`.
 
 ### Event (`eventJson`)
 
@@ -458,7 +463,7 @@ the default client (`mail.setDefault`) and answers `NO_DEFAULT_ACCOUNT` without 
 | `client.delete(uids, {folder?, expunge?})` | `messages.delete` | the UID array |
 | `client.expunge(folder?)` | `messages.expunge` | the count |
 | `client.append(folder, message, flags?)` | `messages.append` | the UID or null |
-| `client.watch(folder?, {folder?, mode?, pollIntervalMs?, fetchBody?, reconnect?})`, `mail.watch` (P5) | `watch` (Binder method, no operation) | a `MailWatch` emitter (no `Async` form, the plugin answers at once): events `message(message, watch)`, `mode(mode)`, `resync(reason)`, `error(err)` and the single terminal `close(reason)` on the script thread; `stop()`, `folder`, `mode`, `generation`, `isActive`; `mode` is `auto` (default) / `idle` / `poll`; the watch keeps the script alive until it closed; a plugin death yields `error(PLUGIN_UNAVAILABLE)` and, with `reconnect` (default true), a new plugin watch of the next generation on the reopened session plus `resync('rewatched')`, otherwise `close('plugin-died')`; `AUTH_FAILED` on a token account with a `tokenProvider` refreshes and watches again; a script that stops draining gets `error(LIMIT_EXCEEDED)` and `close('overflow')`; `client.close()` closes its watches with `close('closed')`, the script's exit closes them silently |
+| `client.watch(folder?, {folder?, mode?, pollIntervalMs?, fetchBody?, reconnect?})`, `mail.watch` (P5) | `watch` (Binder method, no operation) | a `MailWatch` emitter (no `Async` form, the plugin answers at once): events `message(message, watch)`, `mode(mode)`, `resync(reason)`, `error(err)` and the single terminal `close(reason)` on the script thread; `stop()`, `folder`, `mode`, `generation`, `isActive`; `mode` is `auto` (default) / `idle` / `poll`; the watch keeps the script alive until it closed; a plugin death yields `error(PLUGIN_UNAVAILABLE)` and, with `reconnect` (default true), a new plugin watch of the next generation on the reopened session plus `resync('rewatched')`, otherwise `close('plugin-died')`; `AUTH_FAILED` on a token account with a `tokenProvider` refreshes and watches again; a script that stops draining gets `error(LIMIT_EXCEEDED)` and `close('overflow')`; `client.close()` closes its watches with `close('closed')`, the script's exit closes them silently; the events are dispatched on the script thread, so a script must not block it (a `while (...) sleep(...)` loop sees nothing until it ends): return from the top level, let the watch keep the script alive and end it from a listener or a timer, as `docs/smoke/watch.js` of the plugin repository does |
 | `client.close()` | `close` (Binder method) | `isClosed` turns true; later calls answer `SESSION_CLOSED` |
 
 Result decoration: `date` and `receivedDate` are JavaScript `Date` values (decision D26 keeps
@@ -486,4 +491,6 @@ progress documents go to `console.verbose`.
   `idle`) and in the host as `MailWatch` / `MailWatchRunner` / `client.watch` / `mail.watch`;
   `MailJson.WatchOptions` gained `fetchBody` and `MailSessionClient` the session-loss listeners
   and `refreshToken`; the plugin repository records the device matrix in
-  `docs/dev/p5-watch-evidence.md`.
+  `docs/dev/p5-watch-evidence.md` (plugin build 36: QQ on the API 24 emulator and two Sony
+  phones, 163 on a Redmi; plugin kill, network loss, Wi-Fi to cellular and forced Doze; Gmail
+  waits for a fresh access token).
