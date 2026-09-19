@@ -129,7 +129,6 @@ class DexCompilerPersistentCacheTest {
             )
             fail("Manifest commit failure must fail publication")
         } catch (_: TestFileOps.InjectedMoveFailure) {
-            Unit
         }
 
         val retained = cache.lookup(key)
@@ -165,7 +164,6 @@ class DexCompilerPersistentCacheTest {
             )
             fail("Manifest directory sync failure must propagate")
         } catch (_: TestFileOps.InjectedSyncFailure) {
-            Unit
         }
 
         val retained = cache.lookup(key)!!
@@ -279,7 +277,6 @@ class DexCompilerPersistentCacheTest {
             cache(root, ops).lookup("../${"aa".repeat(32)}")
             fail("Traversal-shaped cache key must be rejected")
         } catch (_: IllegalArgumentException) {
-            Unit
         }
 
         assertEquals("preserve", outside.readText())

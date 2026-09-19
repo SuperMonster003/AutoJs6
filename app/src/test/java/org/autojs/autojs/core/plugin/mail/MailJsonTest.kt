@@ -141,7 +141,7 @@ class MailJsonTest {
         assertEquals(MailContract.WATCH_MODE_IDLE, event.mode)
         assertNull(event.reason)
         assertEquals(MailErrorCodes.TIMEOUT, event.error!!.code)
-        assertTrue(event.error!!.retryable)
+        assertTrue(event.error.retryable)
         assertEquals(JsonParser.parseString(json), JsonParser.parseString(event.json))
 
         val minimal = MailJson.decodeEvent("""{"type":"resync"}""")
@@ -165,7 +165,7 @@ class MailJsonTest {
         assertEquals(MailContract.STATE_CLOSED, closed.state)
         assertEquals("idle-timeout", closed.reason)
         assertEquals(MailErrorCodes.AUTH_FAILED, closed.lastError!!.code)
-        assertFalse(closed.lastError!!.retryable)
+        assertFalse(closed.lastError.retryable)
         assertEquals(MailErrorCodes.INTERNAL, codeOf { MailJson.decodeStatus("""{"state":"paused"}""") })
         assertEquals(MailErrorCodes.INTERNAL, codeOf { MailJson.decodeStatus("{}") })
     }

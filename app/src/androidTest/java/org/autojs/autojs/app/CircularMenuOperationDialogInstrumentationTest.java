@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -69,7 +70,7 @@ public class CircularMenuOperationDialogInstrumentationTest {
         CountDownLatch release = gate();
         CountDownLatch updated = new CountDownLatch(1);
         AtomicInteger queries = new AtomicInteger();
-        RecyclerView.Adapter<CircularMenuOperationDialogBuilder.ViewHolder>[] adapter = new RecyclerView.Adapter[1];
+        AtomicReference<RecyclerView.Adapter<CircularMenuOperationDialogBuilder.ViewHolder>> adapter = new AtomicReference<>();
         CircularMenuOperationDialogBuilder.ViewHolder[] holders = new CircularMenuOperationDialogBuilder.ViewHolder[2];
         instrumentation.runOnMainSync(() -> {
             MaterialDialog dialog = newBuilder()
@@ -83,8 +84,12 @@ public class CircularMenuOperationDialogInstrumentationTest {
                     .build();
             dialogs.add(dialog);
             RecyclerView list = (RecyclerView) dialog.getCustomView();
-            adapter[0] = (RecyclerView.Adapter<CircularMenuOperationDialogBuilder.ViewHolder>) list.getAdapter();
-            adapter[0].registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            // The dialog builder owns this adapter and only creates its own ViewHolder.
+            @SuppressWarnings("unchecked")
+            RecyclerView.Adapter<CircularMenuOperationDialogBuilder.ViewHolder> dialogAdapter =
+                    (RecyclerView.Adapter<CircularMenuOperationDialogBuilder.ViewHolder>) list.getAdapter();
+            adapter.set(dialogAdapter);
+            adapter.get().registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
                     assertSame(Looper.getMainLooper(), Looper.myLooper());
@@ -94,16 +99,16 @@ public class CircularMenuOperationDialogInstrumentationTest {
                     updated.countDown();
                 }
             });
-            holders[0] = adapter[0].createViewHolder(list, 0);
-            holders[1] = adapter[0].createViewHolder(list, 0);
-            adapter[0].bindViewHolder(holders[0], 0);
+            holders[0] = adapter.get().createViewHolder(list, 0);
+            holders[1] = adapter.get().createViewHolder(list, 0);
+            adapter.get().bindViewHolder(holders[0], 0);
         });
         assertTrue(entered.await(5, TimeUnit.SECONDS));
         instrumentation.runOnMainSync(() -> {
-            adapter[0].onViewRecycled(holders[0]);
-            adapter[0].bindViewHolder(holders[0], 1);
-            adapter[0].bindViewHolder(holders[1], 0);
-            adapter[0].onBindViewHolder(holders[1], 0);
+            adapter.get().onViewRecycled(holders[0]);
+            adapter.get().bindViewHolder(holders[0], 1);
+            adapter.get().bindViewHolder(holders[1], 0);
+            adapter.get().onBindViewHolder(holders[1], 0);
         });
         release.countDown();
         assertTrue(updated.await(5, TimeUnit.SECONDS));
@@ -111,7 +116,7 @@ public class CircularMenuOperationDialogInstrumentationTest {
             assertEquals(1, queries.get());
             assertEquals("No subtitle", holders[0].binding.title.getText().toString());
             assertEquals(View.GONE, holders[0].binding.subtitle.getVisibility());
-            adapter[0].onBindViewHolder(holders[1], 0);
+            adapter.get().onBindViewHolder(holders[1], 0);
             assertEquals("Result", holders[1].binding.subtitle.getText().toString());
         });
     }

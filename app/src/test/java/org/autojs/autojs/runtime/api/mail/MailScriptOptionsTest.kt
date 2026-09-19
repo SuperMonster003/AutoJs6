@@ -40,7 +40,7 @@ class MailScriptOptionsTest {
         assertEquals("Alice", options.snapshot.get("name").asString)
         assertTrue(options.snapshot.get("debug").asBoolean)
         assertFalse("no auth is implied for a password account", options.snapshot.has("auth"))
-        assertEquals(options.snapshot, JsonParser.parseString(options.spec.accountJson!!))
+        assertEquals(options.snapshot, JsonParser.parseString(options.spec.accountJson))
         assertEquals("provider=qq, address=alice@qq.com", options.describe())
         assertNull(options.spec.validate())
     }

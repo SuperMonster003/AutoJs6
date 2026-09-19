@@ -7,6 +7,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilities
 import org.autojs.plugin.ai.provider.api.AiProviderMimeType
@@ -217,7 +220,7 @@ class AiProviderTargetListingAndroidConformanceTest {
         assertExactModelsPlannable(before.catalog, fixture.modelIds)
 
         restartRealPluginModelManager()
-        awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = true).recycle()
+        NodeLifecycle.default.release(awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = true))
         val target = awaitRealPluginModelRow(fixture.targetModelId, expectedChecked = false)
         try {
             assertTrue("The target model row is not clickable", target.isClickable)
@@ -226,14 +229,14 @@ class AiProviderTargetListingAndroidConformanceTest {
                 target.performAction(AccessibilityNodeInfo.ACTION_CLICK),
             )
         } finally {
-            target.recycle()
+            NodeLifecycle.default.release(target)
         }
-        awaitRealPluginModelRow(fixture.targetModelId, expectedChecked = true).recycle()
-        awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = false).recycle()
+        NodeLifecycle.default.release(awaitRealPluginModelRow(fixture.targetModelId, expectedChecked = true))
+        NodeLifecycle.default.release(awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = false))
 
         restartRealPluginModelManager()
-        awaitRealPluginModelRow(fixture.targetModelId, expectedChecked = true).recycle()
-        awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = false).recycle()
+        NodeLifecycle.default.release(awaitRealPluginModelRow(fixture.targetModelId, expectedChecked = true))
+        NodeLifecycle.default.release(awaitRealPluginModelRow(fixture.initialModelId, expectedChecked = false))
 
         val after = collectRealPluginCatalog(component)
         assertTrue(

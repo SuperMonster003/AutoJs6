@@ -27,7 +27,7 @@ class UiSelectorBuildersTest {
         val actual = committed.takeIf { it.isFile }?.readText()?.replace("\r\n", "\n")
         if (actual != expected) {
             val rendered = File(moduleDir(), "build/generated-selector-builders/UiSelectorBuilders.kt")
-            rendered.parentFile.mkdirs()
+            checkNotNull(rendered.parentFile).mkdirs()
             rendered.writeText(expected)
             fail(
                 "${committed.path} does not match SelectorRegistry; copy the fresh rendering over it: ${rendered.path}",

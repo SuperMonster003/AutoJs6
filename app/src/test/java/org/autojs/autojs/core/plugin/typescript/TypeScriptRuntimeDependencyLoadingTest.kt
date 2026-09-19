@@ -47,7 +47,7 @@ class TypeScriptRuntimeDependencyLoadingTest {
     fun dependencyMutationAfterCompilationHasAStableRuntimeError() {
         val root = temporaryFolder.newFolder("runtime-drift")
         val entry = File(root, "node_modules/demo/index.cjs").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("module.exports = 1;\n")
         }
         val layer = dependencyLayer(root, entry)
@@ -91,11 +91,11 @@ class TypeScriptRuntimeDependencyLoadingTest {
             writeText("module.exports = require('shared');\n")
         }
         val rootShared = File(root, "node_modules/shared/index.cjs").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("module.exports = 'root';\n")
         }
         val nestedShared = File(parentPackage, "node_modules/shared/index.cjs").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("module.exports = 'nested';\n")
         }
         val resolver = TypeScriptRhinoDependencyResolver(

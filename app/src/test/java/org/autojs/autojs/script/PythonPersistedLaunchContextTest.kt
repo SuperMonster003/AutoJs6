@@ -159,7 +159,7 @@ class PythonPersistedLaunchContextTest {
     private fun newProject(entryPoint: String = "main.py"): Pair<File, File> {
         val root = temporaryFolder.newFolder()
         val entry = File(root, entryPoint).apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("print('disk')")
         }
         File(root, "project.json").writeText("""{"type":"python","main":"$entryPoint"}""")

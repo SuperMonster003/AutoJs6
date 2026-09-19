@@ -6,7 +6,6 @@
 
     <application
         android:allowBackup="false"
-        android:extractNativeLibs="false"
         android:label="AutoJs6 MCP Server Conformance"
         android:supportsRtl="true"
         android:testOnly="true"

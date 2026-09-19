@@ -6,8 +6,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.TrashEntities
@@ -74,9 +75,9 @@ class ArchiveManagerPluginIntegrationInstrumentationTest {
                 resourceName = "moveSourcesToTrash",
             )
             assertTrue(moveSourcesToTrash.isEnabled)
-            assertFalse(moveSourcesToTrash.isChecked)
+            assertFalse(AccessibilityNodeInfoCompat.wrap(moveSourcesToTrash).isChecked)
             assertTrue(moveSourcesToTrash.performAction(AccessibilityNodeInfo.ACTION_CLICK))
-            waitForPluginNode(instrumentation, "moveSourcesToTrash") { node -> node.isChecked }
+            waitForPluginNode(instrumentation, "moveSourcesToTrash") { node -> AccessibilityNodeInfoCompat.wrap(node).isChecked }
 
             val createButton = waitForPluginNode(instrumentation, "createButton")
             assertTrue(createButton.isEnabled)

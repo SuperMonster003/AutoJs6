@@ -26,6 +26,10 @@ android {
         buildConfig = false
     }
 
+    packaging {
+        jniLibs.useLegacyPackaging = false
+    }
+
     lint {
         abortOnError = false
     }

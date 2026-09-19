@@ -49,10 +49,10 @@ class WindowMatchArgumentsTest {
         val match = WindowMatchArguments.parse(js("({ type: ['application', 'system'], packageName: /^com\\./, title: 'Settings', displayId: 0, active: true, focused: false, id: 7, layer: 2 })"))
         assertEquals(setOf(1, 3), match.types)
         assertTrue(match.packageName!!.test("com.android.settings"))
-        assertFalse(match.packageName!!.test("org.autojs.autojs6"))
-        assertFalse(match.packageName!!.test(null))
+        assertFalse(match.packageName.test("org.autojs.autojs6"))
+        assertFalse(match.packageName.test(null))
         assertTrue(match.title!!.test("Settings"))
-        assertFalse(match.title!!.test("settings"))
+        assertFalse(match.title.test("settings"))
         assertEquals(0, match.displayId)
         assertEquals(true, match.active)
         assertEquals(false, match.focused)
@@ -73,7 +73,7 @@ class WindowMatchArgumentsTest {
     fun aRegexTitleIsASearch() {
         val match = WindowMatchArguments.parse(js("({ title: /^Sett/i })"))
         assertTrue(match.title!!.test("settings"))
-        assertFalse(match.title!!.test("My settings"))
+        assertFalse(match.title.test("My settings"))
     }
 
     @Test

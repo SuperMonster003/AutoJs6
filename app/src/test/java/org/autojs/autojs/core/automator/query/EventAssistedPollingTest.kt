@@ -2,6 +2,7 @@ package org.autojs.autojs.core.automator.query
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -50,7 +51,7 @@ class EventAssistedPollingTest {
     @Test
     fun aPlainPolicyKeepsTheOrdinarySleep() {
         val result = poller.poll(PollPolicy(times = 2, interval = 50)) { null }
-        assertEquals(null, result)
+        assertNull(result)
         assertEquals(listOf(50L), sleeps)
         assertEquals(emptyList<Long>(), eventSleeps)
     }
@@ -59,7 +60,7 @@ class EventAssistedPollingTest {
     fun withoutAnEventSleepAnAssistedPolicyFallsBackToTheOrdinarySleep() {
         val plain = Poller({ now }) { millis -> sleeps += millis; now += millis }
         val result = plain.poll(PollPolicy(times = 3, interval = 50).assisted()) { null }
-        assertEquals(null, result)
+        assertNull(result)
         assertEquals(listOf(200L, 200L), sleeps)
     }
 

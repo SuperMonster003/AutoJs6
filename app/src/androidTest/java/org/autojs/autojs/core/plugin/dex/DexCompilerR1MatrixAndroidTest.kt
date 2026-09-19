@@ -462,11 +462,11 @@ class DexCompilerR1MatrixAndroidTest {
         identity: DexCompilerPinnedIdentity,
     ): HandshakeEvidence {
         val connected = CountDownLatch(1)
-        val connection = AtomicReference<DexCompilerRemoteConnection?>()
+        val connectionReference = AtomicReference<DexCompilerRemoteConnection?>()
         val failure = AtomicReference<Throwable?>()
         val binding = transport.bindExact(identity, object : DexCompilerBindingCallback {
-            override fun onConnected(value: DexCompilerRemoteConnection) {
-                if (!connection.compareAndSet(null, value)) {
+            override fun onConnected(connection: DexCompilerRemoteConnection) {
+                if (!connectionReference.compareAndSet(null, connection)) {
                     failure.compareAndSet(null, IllegalStateException("Provider connected more than once"))
                 }
                 connected.countDown()
@@ -492,7 +492,7 @@ class DexCompilerR1MatrixAndroidTest {
                     it.initCause(error)
                 }
             }
-            val remote = checkNotNull(connection.get()) { "The real provider connected without a remote interface" }
+            val remote = checkNotNull(connectionReference.get()) { "The real provider connected without a remote interface" }
             val encodedInfo = remote.getCompilerInfo()
             val encodedCapabilities = remote.getCapabilities()
             assertTrue(

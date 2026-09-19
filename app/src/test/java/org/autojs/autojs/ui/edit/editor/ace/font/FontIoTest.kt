@@ -17,7 +17,7 @@ class FontIoTest {
         val executor = Executors.newSingleThreadExecutor()
         try {
             val lockFile = FontIo.storeLockFile(root)
-            assertTrue(lockFile.parentFile.mkdirs())
+            assertTrue(checkNotNull(lockFile.parentFile).mkdirs())
             RandomAccessFile(lockFile, "rw").use { externalFile ->
                 val externalLock = externalFile.channel.lock()
                 val started = CountDownLatch(1)

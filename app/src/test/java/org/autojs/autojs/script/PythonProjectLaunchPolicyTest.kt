@@ -68,7 +68,7 @@ class PythonProjectLaunchPolicyTest {
     fun dottedModuleManifestFlowsIntoSourceAndExecutionConfig() {
         val root = project("""{"type":"python","entryMode":"module","main":"pkg.main"}""")
         File(root, "pkg/__init__.py").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("")
         }
         val entry = File(root, "pkg/main.py").apply { writeText("from . import sibling") }
@@ -417,7 +417,7 @@ class PythonProjectLaunchPolicyTest {
     fun nestedEntryProducesForwardSlashLogicalPath() {
         val root = project("""{"type":"python","main":"src/main.py"}""")
         val entry = File(root, "src/main.py").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("print('nested')")
         }
 

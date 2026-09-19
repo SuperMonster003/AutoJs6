@@ -132,7 +132,7 @@ class PluginLocalNetworkPermissionDeviceTest {
                         result.set(it.resultCode)
                         returned.countDown()
                     }
-                    launcher!!.launch(Intent().setComponent(
+                    launcher.launch(Intent().setComponent(
                         ComponentName(packageName, "$packageName.LocalNetworkPermissionActivity"),
                     ))
                 }

@@ -77,7 +77,6 @@ class R8CompilerProtocolGateTest {
             action()
             fail("Expected R8 negotiation rejection")
         } catch (_: IllegalArgumentException) {
-            Unit
         }
     }
 }

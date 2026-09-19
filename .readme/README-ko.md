@@ -459,6 +459,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제
 * `수정` IntelliJ IDEA에서 프로젝트를 직접 실행할 때 APK 검색에 현재 빌드의 산출물 디렉터리를 사용하지 않아 네이티브 라이브러리 페이지 정렬 검증에서 APK를 찾을 수 없다고 잘못 보고하는 문제
 * `수정` IntelliJ IDEA에서 Android 모듈을 빌드할 때 compileJava 작업 일치가 모호하여 실패하는 문제
+* `수정` 여러 변형 빌드 중 Kotlin 컴파일 메모리 부족 문제
 * `수정` Clean 후 IntelliJ IDEA 전체 프로젝트 빌드에서 Python Runtime API 배포 AAR을 생성 전에 해석하고 conformance fixture가 추가된 AIDL 메서드를 구현하지 않아 실패하는 문제
 * `수정` WorkManager 기본 초기화 도구와 주문형 초기화 설정의 충돌로 빌드 시 RemoveWorkManagerInitializer Lint 오류가 발생하는 문제
 * `수정` 기본 Runtime Kit 디렉터리에 `universal` 변형 접미사가 없어 `clean` 후 APK Builder Template 빌드가 실패하는 문제
@@ -772,6 +773,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Rhino 엔진이 Java 메서드를 탐색할 때 매개변수 타입이 실행 중인 시스템에 존재하지 않는 메서드 (Android 7.x 의 AppCompatTextView.setTextClassifier 등)를 클래스 전체의 reflection 실패 대신 건너뜀; UI 모드 text 요소는 Android 7.x 에서도 현행 AppCompatTextView 를 사용하며 구형 appcompat 1.0.2 라이브러리는 더 이상 필요하지 않음
 * `개선` 앱에 내장되는 릴리스 기록을 간체 중국어와 영어로만 제한; 다른 언어는 온라인에서 가져와 캐시하며, 오프라인 시 현재 언어의 캐시본을 표시하고 없으면 내장 영어본을 표시
 * `개선` 리소스 디렉터리의 PNG 비트맵을 무손실 WebP로 변환하고 (런처 아이콘 제외) 사용되지 않는 리소스 일부를 제거하여 APK 크기 축소
+* `개선` 네이티브 라이브러리 패키징과 Android 버전 호환성을 유지하면서 플러그인 적합성 테스트 앱 및 호스트 테스트의 Manifest, Java, Kotlin 컴파일 경고 감소
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

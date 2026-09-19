@@ -481,7 +481,7 @@ ksp {
 // Rhino 交互式 shell 使用. 宿主只用到 ShellContextFactory 与调试器 API, 因此打包的运行时 jar 从原 jar 派生并去掉 JLine,
 // 原 jar 保持不变.
 val rhinoJar = file("$rootDir/libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar")
-val slimRhinoJar by tasks.registering(Jar::class) {
+val slimRhinoJar = tasks.register<Jar>("slimRhinoJar") {
     description = "Derives the Rhino runtime jar without the JLine shell console."
     from(zipTree(rhinoJar)) {
         exclude("org/jline/**", "META-INF/maven/org.jline/**", "META-INF/native-image/**", "META-INF/services/org/jline/**")
@@ -749,6 +749,7 @@ dependencies /* Test */ {
     // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
     testImplementation(libs.bcprov.jdk15on)
     androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.test.ext.junit)
 
     // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.
     // zh-CN: Rhino 在主源码集是 compileOnly, 测试的编译类路径也需要它.

@@ -8,7 +8,7 @@ import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import com.afollestad.materialdialogs.MaterialDialog
 import jackpal.androidterm.emulatorview.TerminalSelectionSnapshot
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.ui.terminal.TerminalEmulatorView

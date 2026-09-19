@@ -16,7 +16,7 @@ data class MediainfoQueryOptions(val streamNumber: Int = 0, val infoKind: String
                 "MediaInfo streamNumber must be a non-negative integer no greater than ${Int.MAX_VALUE}"
             }
             require(infoKind == null || infoKind is String) { "MediaInfo infoKind must be a string" }
-            val kind = (infoKind as? String)?.trim()?.uppercase(Locale.US) ?: "TEXT"
+            val kind = infoKind?.trim()?.uppercase(Locale.US) ?: "TEXT"
             require(kind in INFO_KINDS) { "Unsupported MediaInfo infoKind: $infoKind" }
             return MediainfoQueryOptions(number.toInt(), kind)
         }

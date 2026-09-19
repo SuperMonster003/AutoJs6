@@ -297,6 +297,7 @@
 * `Correction` La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat
 * `Correction` L'exécution directe du projet depuis IntelliJ IDEA échouait lors de la vérification de l'alignement des pages des bibliothèques natives car la recherche des APK n'utilisait pas le répertoire des artefacts de la compilation en cours
 * `Correction` Les builds de modules Android dans IntelliJ IDEA échouaient en raison d'une correspondance ambiguë de la tâche compileJava
+* `Correction` Épuisement de la mémoire pendant la compilation Kotlin de plusieurs variantes
 * `Correction` Les builds de l'ensemble du projet dans IntelliJ IDEA échouaient après Clean car les AAR distribués de l'API Python Runtime étaient résolus avant leur génération et les fixtures de conformité n'implémentaient pas les méthodes AIDL ajoutées
 * `Correction` Erreur Lint RemoveWorkManagerInitializer lors de la compilation due à un conflit entre l'initialiseur par défaut de WorkManager et l'initialisation à la demande
 * `Correction` La compilation d'APK Builder Template échouait après `clean` car le répertoire Runtime Kit par défaut omettait le suffixe de variante `universal`
@@ -610,6 +611,7 @@
 * `Amélioration` Le moteur Rhino ignore desormais les methodes Java dont les types de parametres n'existent pas sur le systeme en cours (comme AppCompatTextView.setTextClassifier sur Android 7.x) au lieu de faire echouer la reflexion de toute la classe ; l'element text du mode UI utilise l'AppCompatTextView actuel sur Android 7.x et la bibliotheque heritee appcompat 1.0.2 n'est plus necessaire
 * `Amélioration` L'application n'embarque que l'historique des versions en chinois simplifie et en anglais ; les autres langues sont recuperees en ligne et mises en cache, et hors ligne la copie en cache de la langue courante est affichee, puis la version anglaise embarquee
 * `Amélioration` Les images PNG du répertoire de ressources sont converties en WebP sans perte (icônes du lanceur exclues) et quelques ressources inutilisées sont supprimées pour réduire la taille de l'APK
+* `Amélioration` Réduction des avertissements Manifest, Java et Kotlin dans les applications de conformité des plugins et les tests de l'hôte, en conservant le conditionnement des bibliothèques natives et la compatibilité Android
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise
@@ -650,6 +652,7 @@
 * `Dépendance` Suppression de Android Logging Log4j version 1.0.3
 * `Dépendance` Suppression de la bibliothèque locale AndroidX AppCompat 1.0.2
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
+* `Dépendance` Ajout de AndroidX Test Ext JUnit version 1.3.0
 
 # v6.7.0
 

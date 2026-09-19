@@ -158,7 +158,6 @@ internal class RemoteFakeDexCompileSession(
             ensureActive()
             finishCompleted(request, artifact)
         } catch (_: SessionStopped) {
-            Unit
         } catch (error: FakeDexCompileFailure) {
             finishError(request.requestId, error.code, error.phase, error.message ?: "Fixture compilation failed")
         } catch (error: Throwable) {

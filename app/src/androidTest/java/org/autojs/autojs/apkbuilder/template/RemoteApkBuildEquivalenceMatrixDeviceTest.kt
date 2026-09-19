@@ -6,7 +6,7 @@ import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.apkbuilder.ApkBuilder

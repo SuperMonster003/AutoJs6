@@ -716,7 +716,7 @@ class LuaRuntimeAndroidConformanceTest {
 
     private fun assertBinderLanePoisoned() {
         val failure = expectFailure(LuaBinderCallException::class.java) {
-            LuaRuntimeBinderCallLane.call("conformance-poison-probe", LANE_PROBE_TIMEOUT_MILLIS) { Unit }
+            LuaRuntimeBinderCallLane.call("conformance-poison-probe", LANE_PROBE_TIMEOUT_MILLIS) {}
         }
         assertEquals(LuaBinderCallFailure.POISONED, failure.failure)
     }
@@ -796,7 +796,7 @@ class LuaRuntimeAndroidConformanceTest {
         try {
             action()
         } catch (failure: Throwable) {
-            if (type.isInstance(failure)) return type.cast(failure)
+            if (type.isInstance(failure)) return checkNotNull(type.cast(failure))
             throw AssertionError("Expected ${type.name}, got ${failure.javaClass.name}", failure)
         }
         throw AssertionError("Expected ${type.name}, but the operation succeeded")

@@ -294,6 +294,7 @@
         "apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題",
         "IntelliJ IDEA からプロジェクトを直接実行すると, APK の検索に現在のビルドの成果物ディレクトリが使われず, ネイティブライブラリのページアライメント検証で APK が見つからないと誤判定される問題",
         "IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題",
+        "複数バリアントのビルド時に Kotlin コンパイルがメモリ不足になる問題",
         "Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題",
         "WorkManager のデフォルト初期化子とオンデマンド初期化設定の競合により, ビルド時に RemoveWorkManagerInitializer Lint エラーが発生する問題",
         "デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題",
@@ -608,7 +609,8 @@
         "グローバルログのファイル書き込み (console.setGlobalLogConfig / resetGlobalLogConfig とグローバルクラス LogConfigurator / Level / LogManager) は Log4j に代わり内蔵のローリングファイルロガーを使用; ドキュメント化されたオプションと PatternLayout のサブセット (%d / %p / %c / %C / %m / %n / %t / %r と幅指定) は維持され, その他の Log4j API は提供されなくなった",
         "Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に",
         "アプリに内蔵するリリース履歴を簡体字中国語と英語のみに変更; その他の言語はオンラインで取得してキャッシュし, オフライン時は現在の言語のキャッシュ, 次いで内蔵の英語版を表示",
-        "リソースディレクトリ内の PNG ビットマップをロスレス WebP に変換 (ランチャーアイコンを除く) し, 未使用のリソースをいくつか削除して APK サイズを縮小"
+        "リソースディレクトリ内の PNG ビットマップをロスレス WebP に変換 (ランチャーアイコンを除く) し, 未使用のリソースをいくつか削除して APK サイズを縮小",
+        "プラグイン適合性テストアプリとホストテストの Manifest, Java, Kotlin コンパイル警告を削減し, ネイティブライブラリのパッケージングと Android バージョン互換性を維持"
       ],
       "dependency": [
         "モジュール化 Android AXML",
@@ -650,7 +652,8 @@
         "Log4j バージョン 1.2.17 を削除",
         "Android Logging Log4j バージョン 1.0.3 を削除",
         "AndroidX AppCompat 1.0.2 ローカルライブラリを削除",
-        "ZXing Android Embedded バージョン 4.3.0 を追加"
+        "ZXing Android Embedded バージョン 4.3.0 を追加",
+        "AndroidX Test Ext JUnit バージョン 1.3.0 を追加"
       ]
     },
     "v6.7.0": {

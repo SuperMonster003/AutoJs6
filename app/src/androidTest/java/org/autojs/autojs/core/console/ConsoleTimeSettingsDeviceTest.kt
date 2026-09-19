@@ -3,7 +3,7 @@ package org.autojs.autojs.core.console
 import android.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.core.ui.widget.JsConsoleView
 import org.autojs.autojs.core.ui.widget.JsGlobalConsoleView
 import org.autojs.autojs.tool.UiHandler

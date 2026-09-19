@@ -9,7 +9,7 @@ import android.os.SystemClock
 import android.system.Os
 import android.system.OsConstants
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerArchiveInputKeys
 import org.autojs.plugin.explorer.api.ExplorerArchiveInputValues

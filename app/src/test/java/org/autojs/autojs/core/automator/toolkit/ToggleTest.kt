@@ -68,7 +68,7 @@ class ToggleTest {
         assertTrue(outcome.checked)
         assertTrue(switch.checked)
         assertEquals(SmartClick.Method.ANCESTOR, outcome.click!!.method)
-        assertSame(row, outcome.click!!.target)
+        assertSame(row, outcome.click.target)
         assertEquals(listOf("click(row)"), actions.calls)
         assertTrue(rig.sleeps.isEmpty())
     }

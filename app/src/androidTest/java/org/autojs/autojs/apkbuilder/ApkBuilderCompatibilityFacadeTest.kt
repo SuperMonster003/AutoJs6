@@ -1,7 +1,7 @@
 package org.autojs.autojs.apkbuilder
 
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.project.BuildInfo
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress

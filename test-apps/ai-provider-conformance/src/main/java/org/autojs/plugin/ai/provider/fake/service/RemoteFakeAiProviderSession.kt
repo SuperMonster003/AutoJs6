@@ -71,6 +71,8 @@ internal class RemoteFakeAiProviderSession(
     private val futures = ConcurrentLinkedQueue<Future<*>>()
     private val pendingResultDescriptors = FakeOwnedResourceRegistry<OwnedParcelFileDescriptors>()
     private val wrongUidRelayBinding = AtomicReference<IsolatedWrongUidAiCallbackBinding?>()
+    // wait/notifyAll require a Java monitor with these methods exposed.
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val signal = java.lang.Object()
 
     @Volatile
@@ -237,7 +239,6 @@ internal class RemoteFakeAiProviderSession(
                 runHostile(request, materialized, hostile)
             }
         } catch (_: SessionStopped) {
-            Unit
         } catch (_: IllegalArgumentException) {
             finishFailed(AiErrorCode.INVALID_REQUEST, "Fake AI request is invalid")
         } catch (_: IllegalStateException) {

@@ -11,7 +11,10 @@ import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
+import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -35,7 +38,7 @@ class ExplorerAccessibilityInstrumentationTest {
             LayoutSpecification(360, 640, 1.5F, Locale.SIMPLIFIED_CHINESE),
             LayoutSpecification(600, 960, 1.5F, Locale.ENGLISH),
             LayoutSpecification(568, 320, 1.5F, Locale.ENGLISH),
-            LayoutSpecification(640, 360, 1.5F, Locale("ar")),
+            LayoutSpecification(640, 360, 1.5F, Locale.forLanguageTag("ar")),
         )
 
         specifications.forEach { specification ->
@@ -69,7 +72,7 @@ class ExplorerAccessibilityInstrumentationTest {
                     val node = AccessibilityNodeInfoCompat.obtain()
                     action.onInitializeAccessibilityNodeInfo(node.unwrap())
                     assertEquals(Button::class.java.name, node.className)
-                    node.recycle()
+                    NodeLifecycle.default.release(node.unwrap())
                 }
                 assertFalse(actions.zipWithNext().any { (first, second) -> first.right > second.left } && !isRtl(specification.locale))
                 if (isRtl(specification.locale)) {
@@ -79,7 +82,7 @@ class ExplorerAccessibilityInstrumentationTest {
                 }
                 assertEquals(
                     if (isRtl(specification.locale)) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR,
-                    ViewCompat.getLayoutDirection(actionsContainer),
+                    actionsContainer.layoutDirection,
                 )
 
                 selectionLabels(explorer).forEach { label ->

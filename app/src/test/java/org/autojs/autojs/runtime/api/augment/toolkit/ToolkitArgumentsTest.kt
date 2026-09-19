@@ -301,7 +301,7 @@ class ToolkitArgumentsTest {
         assertEquals(20L, o.gestureDuration)
         assertEquals(Toolkit.Locate(100), o.locate)
         assertTrue(o.until!!("stop"))
-        assertFalse(o.until!!("go"))
+        assertFalse(o.until("go"))
         assertEquals(2, invoked.size)
         assertEquals(listOf<Any?>("go"), invoked[1].second)
         assertEquals("$", arguments.listCollector(reader(obj("{ resultType: '$' }"), ToolkitArguments.COLLECT_KEYS), Toolkit.Locate.ONCE).resultType)

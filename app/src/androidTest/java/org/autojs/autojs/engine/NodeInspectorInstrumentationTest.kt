@@ -13,7 +13,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -84,12 +84,12 @@ class NodeInspectorInstrumentationTest {
             val resumed = CountDownLatch(1)
             val failure = AtomicReference<Throwable?>()
             val listener = object : WebSocketListener() {
-                override fun onOpen(socket: WebSocket, response: Response) {
-                    socket.send("{\"id\":1,\"method\":\"Runtime.enable\"}")
-                    socket.send("{\"id\":2,\"method\":\"Debugger.enable\"}")
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send("{\"id\":1,\"method\":\"Runtime.enable\"}")
+                    webSocket.send("{\"id\":2,\"method\":\"Debugger.enable\"}")
                 }
 
-                override fun onMessage(socket: WebSocket, text: String) {
+                override fun onMessage(webSocket: WebSocket, text: String) {
                     runCatching {
                         val message = JSONObject(text)
                         when {
@@ -105,15 +105,15 @@ class NodeInspectorInstrumentationTest {
                                         frame.optString("functionName") == "breakpointTarget"
                                 }
                                 check(sourceSeen) { "Paused event did not contain $sourceName: $message" }
-                                socket.send("{\"id\":3,\"method\":\"Debugger.resume\"}")
+                                webSocket.send("{\"id\":3,\"method\":\"Debugger.resume\"}")
                                 paused.countDown()
                             }
                         }
                     }.onFailure { failure.compareAndSet(null, it) }
                 }
 
-                override fun onFailure(socket: WebSocket, error: Throwable, response: Response?) {
-                    failure.compareAndSet(null, error)
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    failure.compareAndSet(null, t)
                     debuggerEnabled.countDown()
                     paused.countDown()
                     resumed.countDown()

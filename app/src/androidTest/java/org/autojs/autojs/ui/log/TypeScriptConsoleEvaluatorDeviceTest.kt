@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.log
 
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.autojs.autojs.AutoJs

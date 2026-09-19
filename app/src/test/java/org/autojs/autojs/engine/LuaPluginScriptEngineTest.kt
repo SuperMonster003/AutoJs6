@@ -110,7 +110,7 @@ class LuaPluginScriptEngineTest {
         val project = temporaryFolder.newFolder("lua-project")
         val entry = File(project, "main.lua").apply { writeText("return require('helper')") }
         val helper = File(project, "main.modules/helper.lua").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("return 'before'")
         }
         val backend = FakeBackend(Mode.COMPLETE)

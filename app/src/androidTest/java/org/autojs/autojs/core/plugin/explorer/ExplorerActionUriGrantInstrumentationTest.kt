@@ -9,7 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Messenger
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

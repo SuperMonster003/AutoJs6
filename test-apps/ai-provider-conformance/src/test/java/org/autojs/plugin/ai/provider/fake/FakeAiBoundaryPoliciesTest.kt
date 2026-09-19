@@ -116,9 +116,9 @@ class FakeAiBoundaryPoliciesTest {
                 release.await()
             }
             assertTrue(running.await(5, TimeUnit.SECONDS))
-            executor.execute { Unit }
+            executor.execute {}
             assertThrows(RejectedExecutionException::class.java) {
-                executor.execute { Unit }
+                executor.execute {}
             }
             assertEquals(1, executor.maximumPoolSize)
             assertEquals(1, executor.queue.remainingCapacity() + executor.queue.size)

@@ -34,7 +34,6 @@ class R8CompilerDexZipValidatorTest {
                 R8CompilerDexZipValidator.validate(file, 64, 1024)
                 fail("Expected R8 DEX ZIP rejection")
             } catch (_: IllegalArgumentException) {
-                Unit
             }
         }
     }

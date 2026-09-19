@@ -29,7 +29,7 @@ class SelectorGlobalsTest {
         val actual = SelectorGlobals.names.sorted()
         if (actual != expected) {
             val rendered = File("build/selector-global-functions.txt").absoluteFile
-            rendered.parentFile.mkdirs()
+            checkNotNull(rendered.parentFile).mkdirs()
             rendered.writeText(actual.joinToString("\n", postfix = "\n"))
             val added = actual - expected.toSet()
             val removed = expected - actual.toSet()

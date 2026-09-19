@@ -98,7 +98,7 @@ class LuaScriptSourceRoutingTest {
                 path = file.path,
                 preExecuteScript = "console.log('must not run')",
                 workingDirectory = file.parent,
-                defaultWorkingDirectory = file.parent,
+                defaultWorkingDirectory = checkNotNull(file.parent),
             )
         }
 
@@ -114,12 +114,12 @@ class LuaScriptSourceRoutingTest {
         val javaScriptLaunch = ScriptLaunchSourceFactory.createFileLaunch(
             javaScript,
             workingDirectory = javaScript.parent,
-            defaultWorkingDirectory = javaScript.parent,
+            defaultWorkingDirectory = checkNotNull(javaScript.parent),
         )
         val autoLaunch = ScriptLaunchSourceFactory.createFileLaunch(
             auto,
             workingDirectory = auto.parent,
-            defaultWorkingDirectory = auto.parent,
+            defaultWorkingDirectory = checkNotNull(auto.parent),
         )
 
         assertTrue(javaScriptLaunch.source is JavaScriptFileSource)

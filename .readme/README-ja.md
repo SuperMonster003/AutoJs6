@@ -459,6 +459,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題
 * `修正` IntelliJ IDEA からプロジェクトを直接実行すると, APK の検索に現在のビルドの成果物ディレクトリが使われず, ネイティブライブラリのページアライメント検証で APK が見つからないと誤判定される問題
 * `修正` IntelliJ IDEA で Android モジュールをビルドすると compileJava タスクの一致が曖昧になり失敗する問題
+* `修正` 複数バリアントのビルド時に Kotlin コンパイルがメモリ不足になる問題
 * `修正` Clean 後の IntelliJ IDEA 全プロジェクトビルドで, Python Runtime API 配布 AAR が生成前に解決され, conformance フィクスチャに追加済み AIDL メソッドがないため失敗する問題
 * `修正` WorkManager のデフォルト初期化子とオンデマンド初期化設定の競合により, ビルド時に RemoveWorkManagerInitializer Lint エラーが発生する問題
 * `修正` デフォルトの Runtime Kit ディレクトリに `universal` バリアントの接尾辞がなく, `clean` 後に APK Builder Template のビルドが失敗する問題
@@ -772,6 +773,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Rhino エンジンは Java メソッドの探索時に, パラメータ型が実行中のシステムに存在しないメソッド (Android 7.x の AppCompatTextView.setTextClassifier など) をクラス全体のリフレクション失敗とせずにスキップ; UI モードの text 要素は Android 7.x でも現行の AppCompatTextView を使用し, 旧版 appcompat 1.0.2 ライブラリは不要に
 * `改善` アプリに内蔵するリリース履歴を簡体字中国語と英語のみに変更; その他の言語はオンラインで取得してキャッシュし, オフライン時は現在の言語のキャッシュ, 次いで内蔵の英語版を表示
 * `改善` リソースディレクトリ内の PNG ビットマップをロスレス WebP に変換 (ランチャーアイコンを除く) し, 未使用のリソースをいくつか削除して APK サイズを縮小
+* `改善` プラグイン適合性テストアプリとホストテストの Manifest, Java, Kotlin コンパイル警告を削減し, ネイティブライブラリのパッケージングと Android バージョン互換性を維持
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

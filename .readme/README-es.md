@@ -459,6 +459,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
 * `Corrección` La ejecución directa del proyecto desde IntelliJ IDEA fallaba al verificar la alineación de páginas de las bibliotecas nativas porque la búsqueda de APK no utilizaba el directorio de artefactos de la compilación actual
 * `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
+* `Corrección` Memoria insuficiente durante la compilación Kotlin de múltiples variantes
 * `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
 * `Corrección` Error de Lint RemoveWorkManagerInitializer durante la compilación por un conflicto entre el inicializador predeterminado de WorkManager y la inicialización bajo demanda
 * `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
@@ -772,6 +773,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El motor Rhino ahora omite los metodos Java cuyos tipos de parametros no existen en el sistema en ejecucion (como AppCompatTextView.setTextClassifier en Android 7.x) en lugar de fallar la reflexion de toda la clase; el elemento text del modo UI usa el AppCompatTextView actual en Android 7.x y la biblioteca heredada appcompat 1.0.2 ya no es necesaria
 * `Mejora` La aplicacion solo incluye el historial de versiones en chino simplificado e ingles; los demas idiomas se descargan y se almacenan en cache, y sin conexion se muestra la copia en cache del idioma actual y, en su defecto, la version en ingles incluida
 * `Mejora` Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK
+* `Mejora` Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

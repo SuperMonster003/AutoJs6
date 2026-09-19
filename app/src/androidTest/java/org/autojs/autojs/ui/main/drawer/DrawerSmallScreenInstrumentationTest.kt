@@ -8,7 +8,7 @@ import android.view.View
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals

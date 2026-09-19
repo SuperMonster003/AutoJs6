@@ -4,7 +4,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.ImageView
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerProjectPage

@@ -459,6 +459,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Node.js R6 證據收集及驗證因 apksigner 證書摘要輸出格式變更而拒絕 Android Build Tools 37 報告的 APK 簽名身份的問題
 * `修復` IntelliJ IDEA 直接執行項目時, 原生庫頁對齊校驗因未使用當前構建的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 構建 Android 模塊時因 compileJava 任務匹配歧義而失敗的問題
+* `修復` 多變體構建時 Kotlin 編譯記憶體不足的問題
 * `修復` IntelliJ IDEA 全項目構建在 Clean 後因 Python Runtime API 分發 AAR 尚未生成而無法解析 Android 依賴, 且 conformance 夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` 構建時 WorkManager 預設初始化器與按需初始化配置衝突導致的 RemoveWorkManagerInitializer Lint 錯誤
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題
@@ -772,6 +773,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` Rhino 引擎在發現 Java 方法時跳過參數類型在當前系統上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整個類的反射失敗; UI 模式 text 元素在 Android 7.x 上改用現行 AppCompatTextView, 不再需要舊版 appcompat 1.0.2 庫
 * `優化` 應用僅內置簡體中文與英文兩份版本歷史; 其餘語言在線獲取並緩存, 離線時依次顯示當前語言的緩存副本與內置英文版本
 * `優化` 資源目錄中的 PNG 位圖無損轉換為 WebP (啟動圖標除外), 並移除若干未使用的資源, 縮減安裝包體積
+* `優化` 減少插件一致性測試應用及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫打包行為及 Android 版本兼容性
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

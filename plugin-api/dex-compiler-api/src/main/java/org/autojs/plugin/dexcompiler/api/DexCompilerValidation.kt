@@ -216,7 +216,7 @@ object DexCompilerValidation {
         val hasTotal = progress.total != null
         requireValue(hasCurrent == hasTotal) { "Progress current and total must be present together" }
         if (hasCurrent) {
-            val current = progress.current!!
+            val current = progress.current
             val total = progress.total!!
             requireValue(total >= 0L && current in 0L..total) { "Progress range is invalid" }
         }

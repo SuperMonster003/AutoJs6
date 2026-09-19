@@ -83,7 +83,7 @@ class DexCompilerInputBundleCodecTest {
             DexCompilerInputBundleCodec.read(
                 ByteArrayInputStream(encoded),
                 limits = DexCompilerInputBundleLimits(maxEntryCount = 2),
-            ) { _, _ -> Unit }
+            ) { _, _ -> }
         }
         assertEquals(DexCompilerInputBundleError.LIMIT_EXCEEDED, error.error)
     }

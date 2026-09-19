@@ -6,8 +6,9 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.system.Os
+import androidx.core.os.BundleCompat
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.storage.history.HistoryDatabase
@@ -2008,10 +2009,11 @@ class ExplorerActionHostSessionInstrumentationTest {
                 targetTrashItemStates(available),
             )
             assertTrue(
-                session.listTargetTrashBatches()
-                    .getParcelableArrayList<Bundle>(
-                        ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
-                    )
+                BundleCompat.getParcelableArrayList(
+                    session.listTargetTrashBatches(),
+                    ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
+                    Bundle::class.java,
+                )
                     .orEmpty()
                     .any { batch ->
                         batch.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID) ==
@@ -2121,10 +2123,11 @@ class ExplorerActionHostSessionInstrumentationTest {
                 onSourcesTrashed = { refreshCount.incrementAndGet() },
             )
             reopenedSession = reopened
-            val listedIds = reopened.listTargetTrashBatches()
-                .getParcelableArrayList<Bundle>(
-                    ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
-                )
+            val listedIds = BundleCompat.getParcelableArrayList(
+                reopened.listTargetTrashBatches(),
+                ExplorerActionHostSessionKeys.TARGET_TRASH_BATCHES,
+                Bundle::class.java,
+            )
                 .orEmpty()
                 .mapNotNull { batch ->
                     batch.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ID)
@@ -2814,8 +2817,10 @@ class ExplorerActionHostSessionInstrumentationTest {
     }
 
     private fun targetTrashItemStates(batch: Bundle): Map<String, Int> =
-        batch.getParcelableArrayList<Bundle>(
+        BundleCompat.getParcelableArrayList(
+            batch,
             ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_ITEMS,
+            Bundle::class.java,
         ).orEmpty().associate { item ->
             requireNotNull(
                 item.getString(ExplorerActionHostSessionKeys.TARGET_TRASH_ITEM_DISPLAY_NAME),

@@ -18,7 +18,7 @@ class PythonProjectWorkspacePolicyTest {
     fun projectPlanIsSortedAndMarksTheSeparatelyTransportedEntryPoint() {
         val root = temporaryFolder.newFolder()
         val entry = File(root, "src/main.py").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("from lib import value")
         }
         File(root, "lib.py").writeText("value = 42")
@@ -80,7 +80,7 @@ class PythonProjectWorkspacePolicyTest {
     fun editorOverlaySourceIsSeparateFromTheWorkspaceEntry() {
         val root = temporaryFolder.newFolder()
         val entry = File(root, "src/main.py").apply {
-            parentFile.mkdirs()
+            checkNotNull(parentFile).mkdirs()
             writeText("print('disk')")
         }
         File(root, "project.json").writeText("""{"type":"python","main":"src/main.py"}""")

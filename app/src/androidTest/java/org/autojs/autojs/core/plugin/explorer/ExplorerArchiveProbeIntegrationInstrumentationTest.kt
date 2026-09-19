@@ -2,7 +2,7 @@ package org.autojs.autojs.core.plugin.explorer
 
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider

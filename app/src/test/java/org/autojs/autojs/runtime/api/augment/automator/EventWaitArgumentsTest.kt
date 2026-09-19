@@ -132,7 +132,7 @@ class EventWaitArgumentsTest {
 
         val regex = EventWaitArguments.toast(arrayOf<Any?>(js("/^ok$/i"), 2_000.0), 10_000)
         assertTrue((regex.filter as Filter.Text).matches(property("text" to "OK")))
-        assertFalse((regex.filter as Filter.Text).matches(property("text" to "not ok")))
+        assertFalse(regex.filter.matches(property("text" to "not ok")))
         assertEquals(2_000L, regex.timeout)
         assertEquals("text ~ /^ok$/i", regex.detail)
 

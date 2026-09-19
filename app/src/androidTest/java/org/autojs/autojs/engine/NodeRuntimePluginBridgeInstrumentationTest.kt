@@ -213,11 +213,13 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             StandardCharsets.UTF_8,
         )
         File(workDir, "lib/helper.cjs").apply {
-            check(parentFile.mkdirs() || parentFile.isDirectory)
+            val parent = checkNotNull(parentFile)
+            check(parent.mkdirs() || parent.isDirectory)
             writeText("module.exports = { part: 'helper' };\n", StandardCharsets.UTF_8)
         }
         File(workDir, "node_modules/demo-pkg/package.json").apply {
-            check(parentFile.mkdirs() || parentFile.isDirectory)
+            val parent = checkNotNull(parentFile)
+            check(parent.mkdirs() || parent.isDirectory)
             writeText("""{"name":"demo-pkg","main":"./index.js"}""", StandardCharsets.UTF_8)
         }
         File(workDir, "node_modules/demo-pkg/index.js").writeText(

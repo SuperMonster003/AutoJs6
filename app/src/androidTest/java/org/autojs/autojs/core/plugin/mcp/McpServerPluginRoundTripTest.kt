@@ -96,7 +96,6 @@ class McpServerPluginRoundTripTest {
             assertFalse(controller.isOpen)
             assertEquals(McpServerContract.STATE_STOPPED, controller.status.value.state)
             Log.i(TAG, "round trip complete: ${statuses.size} status updates, ${events.size} events")
-            Unit
         } finally {
             runCatching { controller.close() }
             if (!wasEnabled) PluginEnableStore.setEnabled(context, packageName, false)

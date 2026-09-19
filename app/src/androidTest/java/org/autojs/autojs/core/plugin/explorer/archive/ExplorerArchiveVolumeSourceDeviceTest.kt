@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.plugin.explorer.api.ExplorerArchiveVolumeSourceKeys
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

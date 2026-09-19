@@ -6,7 +6,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.EditText
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.concurrent.atomic.AtomicReference
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals

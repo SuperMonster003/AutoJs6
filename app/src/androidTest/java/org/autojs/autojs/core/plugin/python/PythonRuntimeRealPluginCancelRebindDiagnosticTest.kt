@@ -627,7 +627,7 @@ class PythonRuntimeRealPluginCancelRebindDiagnosticTest {
     }
 
     private fun bindProvider(snapshot: AndroidPythonRuntimeProviderIdentitySnapshot): LifecycleBoundProvider {
-        val provider = AtomicReference<IPythonRuntimeProvider?>()
+        val providerReference = AtomicReference<IPythonRuntimeProvider?>()
         val failure = AtomicReference<Throwable?>()
         val connected = CountDownLatch(1)
         val binderDeath = CountDownLatch(1)
@@ -635,8 +635,8 @@ class PythonRuntimeRealPluginCancelRebindDiagnosticTest {
         val binding = transport.bindExact(
             snapshot,
             object : AndroidPythonRuntimeBindingCallback {
-                override fun onConnected(value: IPythonRuntimeProvider) {
-                    if (!provider.compareAndSet(null, value)) {
+                override fun onConnected(provider: IPythonRuntimeProvider) {
+                    if (!providerReference.compareAndSet(null, provider)) {
                         failure.compareAndSet(null, SecurityException("Real Python Runtime connected more than once"))
                     }
                     connected.countDown()
@@ -665,7 +665,7 @@ class PythonRuntimeRealPluginCancelRebindDiagnosticTest {
             binding.close()
             throw AssertionError("Unable to bind exact real Python Runtime component").apply { initCause(error) }
         }
-        val safeProvider = checkNotNull(provider.get()) { "Real Python Runtime binding completed without provider" }
+        val safeProvider = checkNotNull(providerReference.get()) { "Real Python Runtime binding completed without provider" }
         return LifecycleBoundProvider(
             provider = safeProvider,
             binding = binding,

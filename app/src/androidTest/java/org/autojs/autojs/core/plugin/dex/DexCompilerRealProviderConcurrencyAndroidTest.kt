@@ -126,10 +126,10 @@ class DexCompilerRealProviderConcurrencyAndroidTest {
         } finally {
             probe.releaseProducer()
             val cleanup = mutableListOf<() -> Unit>()
-            cleanup += { leader?.awaitForCleanup(); Unit }
-            cleanup += { follower?.awaitForCleanup(); Unit }
-            cleanup += { leader?.stop(); Unit }
-            cleanup += { follower?.stop(); Unit }
+            cleanup += { leader?.awaitForCleanup() }
+            cleanup += { follower?.awaitForCleanup() }
+            cleanup += { leader?.stop() }
+            cleanup += { follower?.stop() }
             cleanup += { registration?.close() }
             cleanup += { cleanupDecision(leader?.decisionOrNull()) }
             cleanup += { cleanupDecision(follower?.decisionOrNull()) }
@@ -186,10 +186,10 @@ class DexCompilerRealProviderConcurrencyAndroidTest {
         } finally {
             probe.releaseProducer()
             val cleanup = mutableListOf<() -> Unit>()
-            cleanup += { leader?.awaitForCleanup(); Unit }
-            cleanup += { follower?.awaitForCleanup(); Unit }
-            cleanup += { leader?.stop(); Unit }
-            cleanup += { follower?.stop(); Unit }
+            cleanup += { leader?.awaitForCleanup() }
+            cleanup += { follower?.awaitForCleanup() }
+            cleanup += { leader?.stop() }
+            cleanup += { follower?.stop() }
             cleanup += { registration?.close() }
             cleanup += { cleanupDecision(leader?.decisionOrNull()) }
             cleanup += { cleanupDecision(follower?.decisionOrNull()) }

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -112,7 +113,15 @@ class NodeRecordingOverlayInstrumentationTest {
                     val label = root?.findViewWithTag<TextView>("m15-overlay-label")
                     if (root != null && label != null && label.text.toString() == "m15-updated") {
                         assertEquals(Color.parseColor("#123456"), label.currentTextColor)
-                        assertEquals(21f, label.textSize / context.resources.displayMetrics.scaledDensity, 0.01f)
+                        assertEquals(
+                            TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                21f,
+                                context.resources.displayMetrics,
+                            ),
+                            label.textSize,
+                            0.01f,
+                        )
                         assertEquals((4 * context.resources.displayMetrics.density).toInt(), label.paddingLeft)
                         assertEquals(0.7f, root.alpha, 0.00001f)
                         val layout = root.layoutParams as WindowManager.LayoutParams

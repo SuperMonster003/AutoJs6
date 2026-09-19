@@ -104,7 +104,6 @@ class R8CompilerHostControlPlaneTest {
             action()
             throw AssertionError("Expected R8 control-plane rejection")
         } catch (_: IllegalArgumentException) {
-            Unit
         }
     }
 

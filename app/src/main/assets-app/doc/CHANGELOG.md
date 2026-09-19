@@ -273,6 +273,7 @@
 * `修复` Node.js R6 证据采集及验证因 apksigner 证书摘要输出格式变更而拒绝 Android Build Tools 37 报告的 APK 签名身份的问题
 * `修复` IntelliJ IDEA 直接运行项目时, 原生库页对齐校验因未使用当前构建的 APK 产物目录而误报找不到 APK 的问题
 * `修复` IntelliJ IDEA 构建 Android 模块时因 compileJava 任务匹配歧义而失败的问题
+* `修复` 多变体构建时 Kotlin 编译内存不足的问题
 * `修复` IntelliJ IDEA 全项目构建在 Clean 后因 Python Runtime API 分发 AAR 尚未生成而无法解析 Android 依赖, 且 conformance 夹具未同步追加的 AIDL 方法导致编译失败的问题
 * `修复` 构建时 WorkManager 默认初始化器与按需初始化配置冲突导致的 RemoveWorkManagerInitializer Lint 错误
 * `修复` APK Builder Template 构建在 `clean` 后因默认 Runtime Kit 目录缺少 `universal` 变体后缀而失败的问题
@@ -589,6 +590,7 @@
 * `优化` Rhino 引擎在发现 Java 方法时跳过参数类型在当前系统上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整个类的反射失败; UI 模式 text 元素在 Android 7.x 上改用现行 AppCompatTextView, 不再需要旧版 appcompat 1.0.2 库
 * `优化` 应用仅内置简体中文与英文两份版本历史; 其余语言在线获取并缓存, 离线时依次显示当前语言的缓存副本与内置英文版本
 * `优化` 资源目录中的 PNG 位图无损转换为 WebP (启动图标除外), 并移除若干未使用的资源, 缩减安装包体积
+* `优化` 减少插件一致性测试应用及宿主测试的 Manifest, Java 和 Kotlin 编译警告, 保持原生库打包行为及 Android 版本兼容性
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
@@ -629,6 +631,7 @@
 * `依赖` 移除 Android Logging Log4j 版本 1.0.3
 * `依赖` 移除 AndroidX AppCompat 1.0.2 本地库
 * `依赖` 附加 ZXing Android Embedded 版本 4.3.0
+* `依赖` 附加 AndroidX Test Ext JUnit 版本 1.3.0
 
 # v6.7.0
 

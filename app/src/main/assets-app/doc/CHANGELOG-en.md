@@ -297,6 +297,7 @@
 * `Fix` Node.js R6 evidence collection and verification rejected APK signer identities reported by Android Build Tools 37 because apksigner changed its certificate digest output format
 * `Fix` Running the project directly from IntelliJ IDEA failed native page alignment verification because the APK lookup did not use the current build's artifact directory
 * `Fix` IntelliJ IDEA builds of Android modules failed because compileJava task matching was ambiguous
+* `Fix` Kotlin compilation running out of memory during multi-variant builds
 * `Fix` IntelliJ IDEA full-project builds failed after Clean because staged Python Runtime API AARs were resolved before generation and conformance fixtures lacked newly appended AIDL methods
 * `Fix` RemoveWorkManagerInitializer Lint error during builds caused by a conflict between WorkManager's default initializer and on-demand initialization
 * `Fix` APK Builder Template builds failed after `clean` because the default Runtime Kit directory omitted the `universal` variant suffix
@@ -610,6 +611,7 @@
 * `Improvement` Rhino engine now skips Java methods whose parameter types do not exist on the running system (such as AppCompatTextView.setTextClassifier on Android 7.x) instead of failing reflection of the whole class; the UI mode text element uses the current AppCompatTextView on Android 7.x and the legacy appcompat 1.0.2 library is no longer needed
 * `Improvement` Only the Simplified Chinese and English release histories are bundled in the app; other languages are fetched online and cached, and offline the cached copy of the current language is shown, then the bundled English one
 * `Improvement` PNG bitmaps in the resource directory are converted to lossless WebP (launcher icons excluded) and a handful of unused resources are removed to shrink the APK
+* `Improvement` Reduce Manifest, Java and Kotlin compiler warnings in plugin conformance apps and host tests while preserving native library packaging and Android version compatibility
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -650,6 +652,7 @@
 * `Dependency` Removed Android Logging Log4j version 1.0.3
 * `Dependency` Removed local AndroidX AppCompat 1.0.2 library
 * `Dependency` Appended ZXing Android Embedded version 4.3.0
+* `Dependency` Appended AndroidX Test Ext JUnit version 1.3.0
 
 # v6.7.0
 

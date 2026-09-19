@@ -166,7 +166,7 @@ class MediaInfoDialogInstrumentationTest {
                     completed.countDown()
                 }
             },
-            ExecutionConfig(workingDirectory = File(path).absoluteFile.parent),
+            ExecutionConfig(workingDirectory = checkNotNull(File(path).absoluteFile.parent)),
         )
         try {
             assertTrue("The demo script did not finish", completed.await(30, TimeUnit.SECONDS))

@@ -297,6 +297,7 @@
 * `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題
 * `修復` IntelliJ IDEA 直接執行專案時, 原生程式庫頁面對齊驗證因未使用目前建置的 APK 產物目錄而誤報找不到 APK 的問題
 * `修復` IntelliJ IDEA 建置 Android 模組時因 compileJava 工作匹配歧義而失敗的問題
+* `修復` 多變體建置時 Kotlin 編譯記憶體不足的問題
 * `修復` IntelliJ IDEA 全專案建置在 Clean 後因 Python Runtime API 發佈 AAR 尚未產生而無法解析 Android 相依性, 且 conformance 測試夾具未同步追加的 AIDL 方法導致編譯失敗的問題
 * `修復` 建置時 WorkManager 預設初始化器與隨需初始化設定衝突導致的 RemoveWorkManagerInitializer Lint 錯誤
 * `修復` APK Builder Template 建置在 `clean` 後因預設 Runtime Kit 目錄缺少 `universal` 變體後綴而失敗的問題
@@ -610,6 +611,7 @@
 * `最佳化` Rhino 引擎在發現 Java 方法時跳過參數型別在目前系統上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整個類別的反射失敗; UI 模式 text 元素在 Android 7.x 上改用現行 AppCompatTextView, 不再需要舊版 appcompat 1.0.2 程式庫
 * `最佳化` 應用程式僅內建簡體中文與英文兩份版本歷史; 其餘語言線上取得並快取, 離線時依序顯示目前語言的快取副本與內建英文版本
 * `最佳化` 資源目錄中的 PNG 點陣圖無失真轉換為 WebP (啟動器圖示除外), 並移除若干未使用的資源, 縮減安裝檔大小
+* `最佳化` 減少外掛一致性測試應用程式及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫封裝行為及 Android 版本相容性
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer
@@ -650,6 +652,7 @@
 * `依賴` 移除 Android Logging Log4j 版本 1.0.3
 * `依賴` 移除 AndroidX AppCompat 1.0.2 本機程式庫
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
+* `依賴` 附加 AndroidX Test Ext JUnit 版本 1.3.0
 
 # v6.7.0
 

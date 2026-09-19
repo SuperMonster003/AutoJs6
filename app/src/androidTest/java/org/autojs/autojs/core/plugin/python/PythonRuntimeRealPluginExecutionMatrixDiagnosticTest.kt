@@ -514,14 +514,14 @@ class PythonRuntimeRealPluginExecutionMatrixDiagnosticTest {
     }
 
     private fun bindProvider(snapshot: AndroidPythonRuntimeProviderIdentitySnapshot): BoundProvider {
-        val provider = AtomicReference<IPythonRuntimeProvider?>()
+        val providerReference = AtomicReference<IPythonRuntimeProvider?>()
         val failure = AtomicReference<Throwable?>()
         val connected = CountDownLatch(1)
         val binding = transport.bindExact(
             snapshot,
             object : AndroidPythonRuntimeBindingCallback {
-                override fun onConnected(value: IPythonRuntimeProvider) {
-                    if (!provider.compareAndSet(null, value)) {
+                override fun onConnected(provider: IPythonRuntimeProvider) {
+                    if (!providerReference.compareAndSet(null, provider)) {
                         failure.compareAndSet(null, SecurityException("Real Python Runtime connected more than once"))
                     }
                     connected.countDown()
@@ -550,7 +550,7 @@ class PythonRuntimeRealPluginExecutionMatrixDiagnosticTest {
             throw AssertionError("Unable to bind exact real Python Runtime component").apply { initCause(error) }
         }
         return BoundProvider(
-            provider = checkNotNull(provider.get()) { "Real Python Runtime binding completed without provider" },
+            provider = checkNotNull(providerReference.get()) { "Real Python Runtime binding completed without provider" },
             binding = binding,
             transportFailure = failure,
         )

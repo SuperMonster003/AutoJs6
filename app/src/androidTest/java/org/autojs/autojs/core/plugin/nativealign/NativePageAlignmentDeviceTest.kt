@@ -3,7 +3,7 @@ package org.autojs.autojs.core.plugin.nativealign
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import jackpal.androidterm.TermExec
 import org.junit.Assert.*
 import org.junit.Test
