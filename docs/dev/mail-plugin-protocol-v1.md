@@ -370,6 +370,16 @@ The envelope ceiling is checked on both sides of a call: the plugin refuses a re
 above `MAX_ENVELOPE_BYTES` before parsing it and replaces a result above the ceiling with a
 `LIMIT_EXCEEDED` error; the host client refuses to send an oversized request.
 
+Message documents are bounded by the plugin (builds from 38, mail roadmap D39) so that one
+message always fits the envelope whatever the mail carries: `to`, `cc`, `bcc` and `replyTo`
+share `MAX_RECIPIENTS` entries (in that order), each address, display name, content id and
+header name is cut to 320 characters, the subject, the ids, declared file names and each header
+value to 4096, the `headers` map of `messages.get` to 64 KiB (a header that does not fit is
+dropped), the MIME tree to a depth of 32 (a deeper multipart is one downloadable `multipart/*`
+leaf) and 256 parts (later parts are neither listed nor downloadable). The cuts add no field to
+the documents; a script that meets `LIMIT_EXCEEDED` on a listing page can always page down to
+`limit: 1`.
+
 ## Versioning
 
 `mailContractVersion` in the plugin capabilities is compared against
