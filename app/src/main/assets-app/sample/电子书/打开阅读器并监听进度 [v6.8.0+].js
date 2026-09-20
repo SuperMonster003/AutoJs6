@@ -63,7 +63,7 @@ setTimeout(() => {
 }, 60 * 1000);
 
 function percent(value) {
-    return typeof value === 'number' ? (value * 100).toFixed(1) + '%' : '-';
+    return typeof value === 'number' && value >= 0 ? (value * 100).toFixed(1) + '%' : '-'; // -1 表示阅读器尚未报告进度.
 }
 
 function findFirstEpub(dirs) {
