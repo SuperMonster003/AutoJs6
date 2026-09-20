@@ -11,8 +11,9 @@ snapshots the literals. Transaction numbers are frozen in declaration order; a l
 version may only append methods and optional keys. The host side of this protocol (discovery,
 book client, reader client, event bridge, launcher, source and output sink) is roadmap P5.4 and
 lives in `org.autojs.autojs.core.plugin.epub`; the delivering host build is recorded in
-`EpubIds.REQUIRED_HOST_VERSION_CODE` (5282). The script API `epub` is roadmap P6 of the plugin
-repository and is not part of this document.
+`EpubIds.REQUIRED_HOST_VERSION_CODE` (5282). The script API `epub` (roadmap P6 of the plugin
+repository, `org.autojs.autojs.runtime.api.augment.epub` over this client) is documented in
+AutoJs6-Documentation (`api/epub.md` and its type pages), not here.
 
 ## Decision
 
@@ -522,5 +523,28 @@ commit `2c08db6`); the physical devices of the plugin matrix carry no host and w
 - P5.5: this document; the host changelog carries the contract (P5.1) and client (P5.4)
   entries under v6.8.0; the plugin changelog carries the service (P5.2) and session (P5.3)
   entries.
-- P6 (script API `epub`): not started; the `requestId` key and the `SESSION_REPLACED` code are
-  reserved for it.
+- P6.1: closed with host commit `a969fdfb0`: the `epub` / `$epub` global with `EpubBook`
+  (metadata, table of contents rebuilt as a tree, reading order, windowed text, cover, resource
+  export, search), the per-call convenience layer, `Async` forms and `EpubError`; JVM 24 tests,
+  `EpubScriptSmokeDeviceTest` (3) on the API 37 and API 33 emulators (2026-09-21).
+- P6.2: closed with host commit `6b9d45ace` and plugin build 51 (`3684eb4`): `epub.read` returns
+  an `EpubReaderSession` event emitter over the reader client; `EpubReaderLauncher` always adds
+  `FLAG_ACTIVITY_SINGLE_TOP` and the plugin relaunches itself for a session delivered through
+  `onNewIntent` (see Reader Sessions, step 2); JVM 10 more tests (34 in the epub suites),
+  `EpubReaderScriptSmokeDeviceTest` (3) on the API 33 and API 37 emulators, the plugin's
+  `ReaderSessionInstrumentationTest` (4) on Sony G8441 (API 28), Redmi 12C (API 33) and the
+  API 33 and API 37 emulators.
+- P6.3: closed with host commits `228715dea` (three sample scripts under `sample/电子书`,
+  changelog) and `26d3dee4e` (Ace completion source); AutoJs6-Documentation `65c838e` /
+  `3d2e38d` (versionCode 72); AutoJs6-TypeScript-Declarations `5b77d01` (4.19.0);
+  AutoJs6-Plugin-Ace-Editor `a2320f6` / `7667888` (1.12.0, builds 106 / 107);
+  AutoJs6-Plugin-Offline-Docs `7a48013` (build 52).
+- Script surface deviations from the plugin roadmap draft (documented in `api/epub.md`): no
+  `epub.progress(path)` / `epub.bookmarks(path)` (contract v1 has no read path into the store;
+  `session.bookmarks()` is the live view); the `open` payload is `{ locator, title, href,
+  positions }`, the `bookmark` payload `{ action, locator, createdAt, title, text }`; the close
+  reasons are `user`, `host`, `replaced`, `timeout`, `error` and `overflow` (a script that stops
+  draining its events), a dying plugin arrives as `error`; `session.progress` is `-1` and
+  `session.positions` is `0` before the first report because Rhino hands boxed numbers to
+  scripts as Java objects under the default `javaPrimitiveWrap`.
+- The `requestId` key and the `SESSION_REPLACED` code stay reserved; P6 did not need them.
