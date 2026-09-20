@@ -1,15 +1,22 @@
 # Mail Plugin Protocol V1
 
-Status: versioned V1 contract. The host contract module `plugin-api/mail-api` (mail roadmap
-P1.1) froze the six AIDL interfaces, the Bundle keys, the JSON envelope, the operation names,
-the error vocabulary and the ceilings listed here. Transaction numbers are frozen in declaration
-order; a later contract version may only append methods and optional keys. The host side of this
+Status: final V1 contract (`MailContract.CONTRACT_VERSION` 1), shipped with plugin release
+1.0.0 on 2026-09-20. The host contract module `plugin-api/mail-api` (mail roadmap P1.1) froze the
+six AIDL interfaces, the Bundle keys, the JSON envelope, the operation names, the error
+vocabulary and the ceilings listed here. Transaction numbers are frozen in declaration order; a
+later contract version may only append methods and optional keys. The host side of this
 protocol (discovery, session client, attachment sink and source, watch bridge) landed with roadmap
 P1.2, and the delivering host build is recorded in `MailIds.REQUIRED_HOST_VERSION_CODE`. The
-plugin side (Angus Mail, package `io.github.supermonster003.autojs6.plugin.angus.mail`, plugin
-roadmap P2, plugin build 12) implements every operation of this document; the cross-process
-round trip of P1.3 is `MailPluginRoundTripTest` (see Host Client). The script API `mail` is
-roadmap P3 of the plugin repository.
+plugin side (Angus Mail, package `io.github.supermonster003.autojs6.plugin.angus.mail`)
+implements every operation of this document: plugin roadmap P2 (build 12) delivered the
+operations, P4 (builds 27 and later) the saved accounts behind `listSavedAccounts` and the alias
+form of `openSession`, P5 (build 35) the watches and P6 (builds 37 to 46) the compatibility
+matrices; the cross-process round trip of P1.3 is `MailPluginRoundTripTest` (see Host Client).
+The script API `mail` is roadmap P3 of the plugin repository and lives in the host; its reference
+is the `mail` module of the AutoJs6 documentation, with the declarations in
+`AutoJs6-TypeScript-Declarations` 4.18.0 (`aj6-int-mail.d.ts`). Nothing in this document changed
+after P1.1 except the additions recorded below (the `idlePush` preset field, the
+`mailSettingsVersion` capability and the `fetchBody` watch option, all optional).
 
 ## Decision
 
@@ -504,3 +511,19 @@ progress documents go to `console.verbose`.
   `docs/dev/p5-watch-evidence.md` (plugin build 36: QQ on the API 24 emulator and two Sony
   phones, 163 on a Redmi; plugin kill, network loss, Wi-Fi to cellular and forced Doze; Gmail
   waits for a fresh access token).
+- P4: saved accounts are in plugin builds 27 and later (the encrypted account store behind
+  `listSavedAccounts`, the alias form of `openSession`, the settings page with its exported
+  `org.autojs.plugin.MAIL_SETTINGS` entry and the `mailSettingsVersion` capability); the plugin
+  repository records the device evidence in `docs/dev/p4-settings-evidence.md`.
+- P6: the TLS, charset, provider, lifecycle, hostile-input, secret-audit, performance and size
+  matrices of the plugin repository (`docs/dev/p6-*.md`, plugin builds 37 to 46) closed without a
+  contract change: the only protocol-visible additions are the `idlePush` preset field (build 36)
+  and the mapping of a server that offers no usable mechanism to the existing
+  `AUTH_MECHANISM_UNSUPPORTED` code (build 46, Outlook.com `LOGINDISABLED`); the Gmail column ran
+  with a renewed token on 2026-09-20 and the Outlook.com column stops at that code because
+  Microsoft refuses app passwords on IMAP, POP3 and SMTP.
+- P7: documentation shipped on 2026-09-20 (the `mail` module pages of `AutoJs6-Documentation`,
+  `aj6-int-mail.d.ts` in the declarations 4.18.0, the Ace Editor and Offline Docs plugin bundles,
+  the plugin README in ten languages); the host changelog carries the contract, script API and
+  watch entries in all ten languages, and the host README has no plugin list to extend. All items
+  of this section are closed; the contract stays at version 1 for plugin release 1.0.0.
