@@ -345,6 +345,7 @@
     <string name="error_empty_github_release_assets">Нет активов релиза GitHub для загрузки</string>
     <string name="error_empty_shell_command">Команда пуста</string>
     <string name="error_enable_server">Не удается включить сервер AutoJs6: %s</string>
+    <string name="error_epub_plugin_unavailable">Плагин Readium EPUB Reader недоступен. Установите, включите или обновите его в Центре плагинов и повторите попытку.</string>
     <string name="error_excessive_height_for_template_n_region">Чрезмерная высота: шаблон [%1$d] > регион [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">Чрезмерная ширина: шаблон [%1$d] > регион [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">Не удалось применить текущую историю цветов</string>

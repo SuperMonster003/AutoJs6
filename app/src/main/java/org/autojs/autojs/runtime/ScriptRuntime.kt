@@ -37,6 +37,7 @@ import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.ai.AiService
+import org.autojs.autojs.runtime.api.epub.EpubService
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.augment.ai.Ai
 import org.autojs.autojs.runtime.api.augment.app.App
@@ -74,6 +75,7 @@ import org.autojs.autojs.runtime.api.augment.jsox.Jsox
 import org.autojs.autojs.runtime.api.augment.jsox.Mathx
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
+import org.autojs.autojs.runtime.api.augment.epub.Epub
 import org.autojs.autojs.runtime.api.augment.mail.Mail
 import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
 import org.autojs.autojs.runtime.api.augment.mime.Mime
@@ -294,6 +296,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val ai: AiService
     private val tts: TtsService
     private val mail: MailService
+    private val epub: EpubService
 
     @JvmField
     @ScriptVariable
@@ -489,6 +492,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         ai = AiService(mUiHandlerAppContext, this)
         tts = TtsService(mUiHandlerAppContext, this)
         mail = MailService(mUiHandlerAppContext, this)
+        epub = EpubService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -814,6 +818,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         }
 
         ignoresException { mail.close() }
+        ignoresException { epub.close() }
         ignoresException { ai.close() }
         ignoresException { tts.close() }
         if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
@@ -1043,6 +1048,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Pinyin4j.augmentWithRuntime(target, this)
         Mediainfo(this).augment(target)
         Mail(this, mail).augment(target)
+        Epub(this, epub).augment(target)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }
