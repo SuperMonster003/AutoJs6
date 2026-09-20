@@ -15,7 +15,7 @@ import org.junit.Test
 class OfficialPluginCatalogDeviceTest {
 
     @Test
-    fun publishedPluginsAreRecognizedInBothPluginCenterViews() = runBlocking {
+    fun publishedPluginsAreRecognizedInBothPluginCenterViews(): Unit = runBlocking {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val expected = InstrumentationRegistry.getArguments()
             .getString("expectedOfficialPackages").orEmpty()
