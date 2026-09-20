@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `新增` Android 17 本地網絡權限管理, 支援側欄, 設定頁及 VS Code 連接時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別及可複製報告
@@ -237,6 +237,7 @@
 * `新增` 郵件插件的腳本 API `mail` (郵件路線圖 P3.1 與 P3.2): `mail.connect(選項或別名)` 支援服務商預設與 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (腳本路徑的附件經唯讀描述符傳輸), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 帶客戶端回退標記的 `search`, `get` / `fetchBody`, 串流落盤到工作目錄並支援 `onProgress` 的 `download` 與 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 與 `close`, 每個方法都有在腳本線程落定的 `Async` Promise 形態; 郵件結果攜帶 `Date` 欄位, 可列印的地址與綁定的 `load` / `download` 方法, 失敗為帶 `code` 與 `retryable` 的 `MailError` 物件, 全域物件上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 與全部客戶端方法的轉發
 * `新增` 郵件插件的腳本 API `mail.watch` (郵件路線圖 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 與 `mail.watch` 回傳 `MailWatch` 發射器, 其 `message(message, watch)`, `mode`, `resync`, `error` 與唯一的 `close(reason)` 事件在腳本線程到達並讓腳本活到 `stop()`; 插件以 IMAP IDLE 監聽 (可回退輪詢, POP3 按 UIDL), 宿主丟棄過期 generation 與亂序投遞, 插件死亡回報為 `PLUGIN_UNAVAILABLE` 且預設在重開的會話上重新監聽並發出 `resync`, 關閉客戶端或腳本退出會停止其監聽
 * `新增` EPUB 外掛程式契約模組 (plugin-api/epub-api), 含凍結的 AIDL 介面 (書籍擷取: 元資料, 目錄, 閱讀順序, 章節文字, 資源與搜尋; 以及基於權杖的閱讀器工作階段), `epub` 引擎的宿主探索封裝, 以及 Readium EPUB Reader 套件的外掛程式中心註冊 (其 Explorer Action 服務與 EPUB 服務共用一個條目)
+* `新增` EPUB 外掛程式宿主用戶端 (core/plugin/epub, 外掛程式路線圖 P5.4): `EpubPluginHost.openBook` 校驗路徑, 以唯讀方式開啟並交出書籍用戶端 (元資料, 目錄, 閱讀順序, 純文字或 Markdown 的分頁章節文字, 經暫存管道匯出的資源, 搜尋, 位置數), 執行在帶死亡回呼的專用繫結租約上; `openReader` 開啟閱讀器工作階段, 讀取其一次性權杖並由宿主自己啟動外掛程式的閱讀器 Activity (兩步啟動), 以 generation 與序號校驗橋接工作階段事件 (open, progress, bookmark, error, close), 並轉發 goTo, navigate, setPreferences, getBookmarks 與 getState; 所有失敗都對應為契約錯誤碼
 * `修復` 插件中心啟用 YOLO 插件時探測握手要求插件已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確組件握手, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題

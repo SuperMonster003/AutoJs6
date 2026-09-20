@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 20 September 2026.
+تم تحديث البيانات في 21 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,7 +168,7 @@
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `إضافة جديدة` إدارة إذن الشبكة المحلية في Android 17 من الدرج والإعدادات واتصالات VS Code التي يبدأها المستخدم, مع التصريح بالإذن حسب targetSdk الفعلي
 * `إضافة جديدة` سجل خروج العمليات في الإعدادات على Android 11 والإصدارات الأحدث, مع أسباب النظام الحديثة عبر عمليات التطبيق وتحديد محدد الذاكرة وتقارير قابلة للنسخ
@@ -399,6 +399,7 @@
 * `إضافة جديدة` واجهة السكربت `mail` لاضافة Mail (خارطة طريق Mail P3.1 و P3.2): `mail.connect(خيارات او اسم مستعار)` مع الاعدادات المسبقة لمزودي الخدمة و `tokenProvider` لـ XOAUTH2, و `MailClient` مع `test`, و `send` (المرفقات من مسارات السكربت عبر واصفات للقراءة فقط), و `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, و `fetch`, و `search` مع علامة تراجع من جهة العميل, و `get` / `fetchBody`, و `download` و `raw` بالبث الى دليل العمل مع `onProgress`, و `setFlags` مع `markRead` / `markUnread` / `flag` / `unflag`, و `move`, و `copy`, و `delete`, و `expunge`, و `append` و `close`, ولكل منها صيغة `Async` بوعد يُسوّى في خيط السكربت; تحمل نتائج الرسائل حقول `Date` وعناوين قابلة للطباعة وطرق مربوطة `load` / `download`, والاخفاقات كائنات `MailError` مع `code` و `retryable`, ويوفر الكائن العام `mail.providers` و `mail.accounts` و `mail.setDefault` مع تمرير كل طرق العميل
 * `إضافة جديدة` واجهة السكربت `mail.watch` لإضافة البريد (خارطة طريق البريد P5): يعيد `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` و `mail.watch` باعث `MailWatch` الذي تصل أحداثه `message(message, watch)` و `mode` و `resync` و `error` وحدث `close(reason)` الوحيد إلى خيط السكربت وتبقي السكربت حيا حتى `stop()`; تراقب الإضافة عبر IMAP IDLE (مع التراجع إلى الاستطلاع, و POP3 حسب UIDL), ويتجاهل المضيف الأجيال القديمة والتسليمات خارج الترتيب, ويبلغ عن موت الإضافة بـ `PLUGIN_UNAVAILABLE` ويتبعه افتراضيا مراقبة جديدة على الجلسة المعاد فتحها مع `resync`, وإغلاق العميل أو الخروج من السكربت يوقف مراقباته
 * `إضافة جديدة` وحدة عقد ملحق EPUB (plugin-api/epub-api) بواجهة AIDL مجمدة لاستخراج الكتب (البيانات الوصفية وجدول المحتويات وترتيب القراءة ونص الفصول والموارد والبحث) وجلسات القارئ المعتمدة على رمز, وغلاف الاكتشاف على جانب المضيف لمحرك `epub`, وتسجيل حزمة Readium EPUB Reader في مركز الملحقات حيث تتشارك خدمتا Explorer Action و EPUB مدخلا واحدا
+* `إضافة جديدة` عميل المضيف لملحق EPUB (core/plugin/epub, خارطة طريق الملحق P5.4): يتحقق `EpubPluginHost.openBook` من المسار ويفتحه للقراءة فقط ويسلم عميل كتاب (البيانات الوصفية وجدول المحتويات وترتيب القراءة ونص الفصول على صفحات كنص عادي أو Markdown وتصدير الموارد عبر أنبوب مؤقت والبحث والمواضع) على إيجار ربط مخصص مع مراقبة الموت; ويفتح `openReader` جلسة قراءة ويقرأ رمزها لمرة واحدة ويبدأ Activity قارئ الملحق بنفسه (تشغيل على خطوتين), ويجسر أحداث الجلسة (open, progress, bookmark, error, close) مع فحص الجيل والتسلسل, ويمرر goTo وnavigate وsetPreferences وgetBookmarks وgetState; وكل فشل يقابل رموز أخطاء العقد
 * `تصليح` تفعيل إضافة YOLO من مركز الإضافات كان يفشل لأن مصافحة الفحص كانت تشترط أن تكون الإضافة مفعلة مسبقا; الفحص الآن يشترط التخويل ومصافحة المكون الدقيق فقط, بينما تظل نقاط دخول وقت التشغيل تشترط سجل التفعيل المحفوظ
 * `تصليح` تثبيت إضافة MCP Server عبر adb قد يجعل مركز الإضافات يعرضها كمفعلة بينما يعتبرها وقت التشغيل معطلة عند غياب تفضيل محفوظ; الحالة الافتراضية الآن معطلة في كليهما مع الاحتفاظ باختيارات المستخدم
 * `تصليح` أسطر فارغة زائدة أسفل قيم الحالة القصيرة في مدير تسهيل الاستخدام مثل غير مرتبط ولا شيء
@@ -1059,7 +1060,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 20 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 21 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

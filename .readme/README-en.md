@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 20, 2026.
+Data updated on Sep 21, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -399,6 +399,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Script API `mail` of the mail plugin (mail roadmap P3.1 and P3.2): `mail.connect(options or alias)` with provider presets and a `tokenProvider` for XOAUTH2, `MailClient` with `test`, `send` (attachments from script paths through read-only descriptors), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, `search` with a client-side fallback marker, `get` / `fetchBody`, `download` and `raw` streaming into the working directory with `onProgress`, `setFlags` with `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` and `close`, each with an `Async` Promise form settled on the script thread; message results carry `Date` fields, printable addresses and bound `load` / `download` methods, failures are `MailError` objects with `code` and `retryable`, and `mail.providers`, `mail.accounts`, `mail.setDefault` plus forwarders of every client method live on the global
 * `Feature` Script API `mail.watch` of the mail plugin (mail roadmap P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` and `mail.watch` return a `MailWatch` emitter whose `message(message, watch)`, `mode`, `resync`, `error` and single `close(reason)` events arrive on the script thread and keep the script alive until `stop()`; the plugin watches with IMAP IDLE (polling fallback, POP3 by UIDL), the host drops stale generations and out-of-order deliveries, a plugin death is reported as `PLUGIN_UNAVAILABLE` and by default followed by a new watch on the reopened session with a `resync`, and closing the client or leaving the script stops its watches
 * `Feature` EPUB plugin contract module (plugin-api/epub-api) with a frozen AIDL surface for book extraction (metadata, table of contents, reading order, chapter text, resources, search) and token-based reader sessions, the host discovery wrapper of the `epub` engine, and Plugin Center registration of the Readium EPUB Reader package, whose Explorer Action and EPUB services share one entry
+* `Feature` EPUB plugin host client (core/plugin/epub, plugin roadmap P5.4): `EpubPluginHost.openBook` validates the path, opens it read-only and hands out a book client (metadata, table of contents, reading order, paged chapter text as plain text or Markdown, resource export through a spooled pipe, search, positions) on a dedicated binding lease with a death recipient; `openReader` opens a reader session, reads its one-time token and starts the plugin's reader Activity itself (two-step launch), bridges the session events (open, progress, bookmark, error, close) with generation and sequence checks, and forwards goTo, navigate, setPreferences, getBookmarks and getState; every failure maps to the contract's error codes
 * `Fix` Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record
 * `Fix` MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices
 * `Fix` Unnecessary blank lines below short accessibility manager status values such as Unbound and None
@@ -1059,7 +1060,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 20, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 21, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

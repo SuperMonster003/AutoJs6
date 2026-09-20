@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `新機能` Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言
 * `新機能` Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応
@@ -237,6 +237,7 @@
 * `新機能` Mail プラグインのスクリプト API `mail` (Mail ロードマップ P3.1 と P3.2): プロバイダープリセットと XOAUTH2 用 `tokenProvider` を持つ `mail.connect(オプションまたはエイリアス)`, `test`, `send` (スクリプトパスの添付ファイルを読み取り専用ディスクリプター経由で転送), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, クライアント側フォールバックマーカー付きの `search`, `get` / `fetchBody`, 作業ディレクトリへストリーミングし `onProgress` に対応する `download` と `raw`, `markRead` / `markUnread` / `flag` / `unflag` を伴う `setFlags`, `move`, `copy`, `delete`, `expunge`, `append`, `close` を備えた `MailClient` (各メソッドにスクリプトスレッドで確定する `Async` Promise 形式あり); メッセージ結果は `Date` フィールド, 表示可能なアドレス, バインド済みの `load` / `download` メソッドを持ち, 失敗は `code` と `retryable` を持つ `MailError` オブジェクトで, グローバルには `mail.providers`, `mail.accounts`, `mail.setDefault` と全クライアントメソッドの転送があります
 * `新機能` メールプラグインのスクリプト API `mail.watch` (メールロードマップ P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` と `mail.watch` は `MailWatch` エミッターを返し, その `message(message, watch)`, `mode`, `resync`, `error` と唯一の `close(reason)` イベントはスクリプトスレッドに届いて `stop()` までスクリプトを生かし続ける; プラグインは IMAP IDLE で監視し (ポーリングへのフォールバック, POP3 は UIDL), ホストは古い generation と順序の乱れた配信を捨て, プラグインの死亡は `PLUGIN_UNAVAILABLE` として報告され既定では再開したセッション上の新しい監視と `resync` が続き, クライアントを閉じるかスクリプトを終えるとその監視は停止する
 * `新機能` EPUB プラグイン契約モジュール (plugin-api/epub-api): 書籍の抽出 (メタデータ, 目次, 読書順序, 章のテキスト, リソース, 検索) とトークンに基づくリーダーセッションのための凍結された AIDL インターフェース, `epub` エンジンのホスト側探索ラッパー, Readium EPUB Reader パッケージのプラグインセンター登録 (Explorer Action サービスと EPUB サービスが 1 つの項目を共有)
+* `新機能` EPUB プラグインのホストクライアント (core/plugin/epub, プラグインロードマップ P5.4): `EpubPluginHost.openBook` はパスを検証し, 読み取り専用で開いて本のクライアント (メタデータ, 目次, 読書順序, プレーンテキストまたは Markdown のページ分割された章テキスト, スプールしたパイプ経由のリソース書き出し, 検索, 位置数) を死活監視付きの専用バインディングリースで渡します. `openReader` はリーダーセッションを開き, 使い捨てトークンを読み取ってプラグインのリーダー Activity をホスト自身が起動し (二段階起動), セッションイベント (open, progress, bookmark, error, close) を generation と連番の検査付きで中継し, goTo, navigate, setPreferences, getBookmarks, getState を転送します. すべての失敗は契約のエラーコードに対応付けられます
 * `修正` プラグインセンターから YOLO プラグインを有効化する際, 探査のハンドシェイクが有効化済みの状態を要求していたためスイッチで有効化できなかった問題. 探査は認可と厳密なコンポーネントのハンドシェイクのみを要求し, 実行時の入口は引き続き保存済みの有効化記録を要求
 * `修正` adb でインストールした MCP Server が有効状態の保存設定がない場合にプラグインセンターでは有効, 実行時には無効と判定される問題. 両方の既定値を無効に統一し, ユーザーが明示的に選択した状態を保持
 * `修正` ユーザー補助サービス管理画面で未バインドやなしなどの短い状態値の下に不要な空行が表示される問題

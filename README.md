@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 20 日.
+数据更新于 2026 年 9 月 21 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `新增` Android 17 本地网络权限管理, 支持抽屉, 设置页与 VS Code 连接时按需申请, 并按实际 targetSdk 声明权限
 * `新增` 设置页支持查看 Android 11 及以上的进程退出记录, 包含多进程近期系统原因, 内存限制器识别与可复制报告
@@ -375,6 +375,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 邮件插件的脚本 API `mail` (邮件路线图 P3.1 与 P3.2): `mail.connect(选项或别名)` 支持服务商预设与 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (脚本路径的附件经只读描述符传输), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 带客户端回退标记的 `search`, `get` / `fetchBody`, 流式落盘到工作目录并支持 `onProgress` 的 `download` 与 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 与 `close`, 每个方法都有在脚本线程落定的 `Async` Promise 形态; 邮件结果携带 `Date` 字段, 可打印的地址与绑定的 `load` / `download` 方法, 失败为带 `code` 与 `retryable` 的 `MailError` 对象, 全局对象上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 与全部客户端方法的转发
 * `新增` 邮件插件的脚本 API `mail.watch` (邮件路线图 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 与 `mail.watch` 返回 `MailWatch` 发射器, 其 `message(message, watch)`, `mode`, `resync`, `error` 与唯一的 `close(reason)` 事件在脚本线程到达并让脚本活到 `stop()`; 插件以 IMAP IDLE 监听 (可回退轮询, POP3 按 UIDL), 宿主丢弃过期 generation 与乱序投递, 插件死亡报告为 `PLUGIN_UNAVAILABLE` 且默认在重开的会话上重新监听并发 `resync`, 关闭客户端或脚本退出会停止其监听
 * `新增` EPUB 插件契约模块 (plugin-api/epub-api), 含冻结的 AIDL 接口 (书籍提取: 元数据, 目录, 阅读顺序, 章节文本, 资源与搜索; 以及基于令牌的阅读器会话), `epub` 引擎的宿主发现封装, 以及 Readium EPUB Reader 包的插件中心注册 (其 Explorer Action 服务与 EPUB 服务共用一个条目)
+* `新增` EPUB 插件宿主客户端 (core/plugin/epub, 插件路线图 P5.4): `EpubPluginHost.openBook` 校验路径, 以只读方式打开并交出书籍客户端 (元数据, 目录, 阅读顺序, 纯文本或 Markdown 的分页章节文本, 经暂存管道导出的资源, 搜索, 位置数), 运行在带死亡回调的专用绑定租约上; `openReader` 打开阅读器会话, 读取其一次性令牌并由宿主自己启动插件的阅读器 Activity (两步启动), 以 generation 与序号校验桥接会话事件 (open, progress, bookmark, error, close), 并转发 goTo, navigate, setPreferences, getBookmarks 与 getState; 所有失败都映射为契约错误码
 * `修复` 插件中心启用 YOLO 插件时探测握手要求插件已处于启用状态, 导致开关无法启用的问题; 探测现仅要求授权与精确组件握手, 运行时入口仍要求已保存的启用记录
 * `修复` 通过 adb 安装 MCP Server 且没有保存启用记录时, 插件中心显示已启用而运行时视为未启用的问题; 两者统一为默认关闭并保留用户明确保存的开关状态
 * `修复` 无障碍服务管理器中未绑定, 无等短状态值下方存在多余空行的问题
@@ -1038,7 +1039,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 20 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 21 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/20
+###### 2026/09/21
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공
@@ -237,6 +237,7 @@
 * `추가` Mail 플러그인의 스크립트 API `mail` (Mail 로드맵 P3.1 및 P3.2): 제공업체 프리셋과 XOAUTH2용 `tokenProvider`를 지원하는 `mail.connect(옵션 또는 별칭)`, `test`, `send` (스크립트 경로의 첨부 파일을 읽기 전용 디스크립터로 전달), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 클라이언트 측 폴백 표시가 있는 `search`, `get` / `fetchBody`, 작업 디렉터리로 스트리밍하며 `onProgress`를 지원하는 `download`와 `raw`, `markRead` / `markUnread` / `flag` / `unflag`를 포함한 `setFlags`, `move`, `copy`, `delete`, `expunge`, `append`, `close`를 갖춘 `MailClient` (각 메서드는 스크립트 스레드에서 확정되는 `Async` Promise 형태 제공); 메시지 결과는 `Date` 필드, 출력 가능한 주소, 바인딩된 `load` / `download` 메서드를 갖고, 실패는 `code`와 `retryable`을 가진 `MailError` 객체이며, 전역에는 `mail.providers`, `mail.accounts`, `mail.setDefault`와 모든 클라이언트 메서드의 전달이 있습니다
 * `추가` 메일 플러그인의 스크립트 API `mail.watch` (메일 로드맵 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 와 `mail.watch` 는 `MailWatch` 이미터를 반환하며, 그 `message(message, watch)`, `mode`, `resync`, `error` 와 단 하나의 `close(reason)` 이벤트는 스크립트 스레드에 도착하고 `stop()` 까지 스크립트를 살려 둠; 플러그인은 IMAP IDLE 로 감시하고 (폴링 폴백, POP3 는 UIDL), 호스트는 오래된 generation 과 순서가 어긋난 전달을 버리며, 플러그인 사망은 `PLUGIN_UNAVAILABLE` 로 보고되고 기본적으로 다시 연 세션에서 새 감시와 `resync` 가 뒤따르며, 클라이언트를 닫거나 스크립트를 끝내면 그 감시가 멈춤
 * `추가` EPUB 플러그인 계약 모듈 (plugin-api/epub-api): 책 추출 (메타데이터, 목차, 읽기 순서, 장 텍스트, 리소스, 검색)과 토큰 기반 리더 세션을 위한 고정된 AIDL 인터페이스, `epub` 엔진의 호스트 검색 래퍼, Readium EPUB Reader 패키지의 플러그인 센터 등록 (Explorer Action 서비스와 EPUB 서비스가 하나의 항목을 공유)
+* `추가` EPUB 플러그인 호스트 클라이언트 (core/plugin/epub, 플러그인 로드맵 P5.4): `EpubPluginHost.openBook`은 경로를 검증하고 읽기 전용으로 열어 책 클라이언트 (메타데이터, 목차, 읽기 순서, 일반 텍스트 또는 Markdown의 페이지 단위 장 텍스트, 스풀된 파이프를 통한 리소스 내보내기, 검색, 위치 수)를 사망 알림이 있는 전용 바인딩 임대 위에서 넘겨줍니다. `openReader`는 리더 세션을 열고 일회용 토큰을 읽어 호스트가 직접 플러그인의 리더 Activity를 시작하며 (2단계 실행), 세션 이벤트 (open, progress, bookmark, error, close)를 generation과 순번 검사와 함께 중계하고 goTo, navigate, setPreferences, getBookmarks, getState를 전달합니다. 모든 실패는 계약의 오류 코드로 매핑됩니다
 * `수정` 플러그인 센터에서 YOLO 플러그인을 활성화할 때 탐색 핸드셰이크가 이미 활성화된 상태를 요구하여 스위치로 활성화할 수 없던 문제. 탐색은 이제 권한 부여와 정확한 컴포넌트 핸드셰이크만 요구하고, 실행 시 진입점은 계속 저장된 활성화 기록을 요구
 * `수정` adb로 설치한 MCP Server에 저장된 활성화 설정이 없으면 플러그인 센터에서는 활성화, 실행 시에는 비활성화로 판단하던 문제. 양쪽 기본값을 비활성화로 통일하고 사용자가 명시적으로 선택한 상태 유지
 * `수정` 접근성 관리자에서 바인딩되지 않음, 없음 등 짧은 상태 값 아래의 불필요한 빈 줄
