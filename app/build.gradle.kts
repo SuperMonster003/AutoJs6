@@ -729,6 +729,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Mail API
     implementation(project(":plugin-api:mail-api"))
+
+    // Plugin API: EPUB API
+    implementation(project(":plugin-api:epub-api"))
 }
 
 dependencies /* MIME */ {

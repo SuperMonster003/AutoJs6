@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 19 September 2026 года.
+Данные обновлены на 20 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -168,7 +168,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/09/19
+###### 2026/09/20
 
 * `Новое` Управление разрешением локальной сети Android 17 в боковой панели, настройках и соединениях VS Code, инициированных пользователем, с объявлением согласно фактическому targetSdk
 * `Новое` История завершений процессов в настройках на Android 11 и новее с недавними системными причинами для нескольких процессов, определением ограничителя памяти и копируемыми отчётами
@@ -398,6 +398,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` Модуль контракта плагина Mail (plugin-api/mail-api): замороженный AIDL-интерфейс, клиент хоста, который открывает сеансы учетной записи через выделенную аренду привязки, повторно открывает их после гибели процесса плагина, повторяет запрос один раз после обновления токена XOAUTH2 и передает вложения на диск потоком через каналы, а также регистрация в Центре плагинов как плагина, включенного по умолчанию
 * `Новое` Скриптовый API `mail` плагина Mail (дорожная карта Mail P3.1 и P3.2): `mail.connect(параметры или псевдоним)` с предустановками провайдеров и `tokenProvider` для XOAUTH2, `MailClient` с `test`, `send` (вложения по путям скрипта через дескрипторы только для чтения), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, `search` с маркером клиентского отката, `get` / `fetchBody`, `download` и `raw` с потоковой записью в рабочий каталог и `onProgress`, `setFlags` с `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` и `close`, у каждого метода есть форма `Async` с Promise, разрешаемым в потоке скрипта; результаты сообщений содержат поля `Date`, печатаемые адреса и привязанные методы `load` / `download`, ошибки являются объектами `MailError` с `code` и `retryable`, а на глобальном объекте есть `mail.providers`, `mail.accounts`, `mail.setDefault` и переадресация всех методов клиента
 * `Новое` Скриптовый API `mail.watch` почтового плагина (дорожная карта почты P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` и `mail.watch` возвращают эмиттер `MailWatch`, чьи события `message(message, watch)`, `mode`, `resync`, `error` и единственное `close(reason)` приходят в поток скрипта и держат скрипт живым до `stop()`; плагин следит через IMAP IDLE (с откатом на опрос, POP3 по UIDL), хост отбрасывает устаревшие generation и доставки не по порядку, смерть плагина сообщается как `PLUGIN_UNAVAILABLE` и по умолчанию сопровождается новым отслеживанием на переоткрытом сеансе с `resync`, а закрытие клиента или выход из скрипта останавливает его отслеживания
+* `Новое` Модуль контракта плагина EPUB (plugin-api/epub-api) с замороженной поверхностью AIDL для извлечения книг (метаданные, оглавление, порядок чтения, текст глав, ресурсы, поиск) и сеансов читалки по токену, обёртка обнаружения движка `epub` на стороне хоста и регистрация пакета Readium EPUB Reader в Центре плагинов, где службы Explorer Action и EPUB делят одну запись
 * `Исправление` Включение плагина YOLO из центра плагинов не удавалось, поскольку проверочное рукопожатие требовало, чтобы плагин уже был включен; теперь проверка требует только авторизацию и рукопожатие точного компонента, а точки входа при выполнении по-прежнему требуют сохраненную запись о включении
 * `Исправление` MCP Server, установленный через adb, мог отображаться включенным в центре плагинов, но считаться выключенным при выполнении, если настройка включения не была сохранена; теперь оба пути по умолчанию считают его выключенным и сохраняют явный выбор пользователя
 * `Исправление` Лишние пустые строки под короткими значениями состояния диспетчера специальных возможностей, например Не привязано и Нет
@@ -1058,7 +1059,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 19 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 20 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

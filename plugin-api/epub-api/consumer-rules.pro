@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.epub.api.** { *; }
+-dontwarn org.autojs.plugin.epub.api.**

@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 19 日.
+資料更新於 2026 年 9 月 20 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/19
+###### 2026/09/20
 
 * `新增` Android 17 本機網路權限管理, 支援側欄, 設定頁及 VS Code 連線時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別與可複製報告
@@ -398,6 +398,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 郵件外掛契約模組 (plugin-api/mail-api), 含凍結的 AIDL 介面, 以專用綁定租約開啟帳戶工作階段, 在外掛程序死亡後自動重開, XOAUTH2 權杖重新整理後重試一次並經管道串流落盤附件的宿主客戶端, 以及預設啟用的外掛中心註冊
 * `新增` 郵件外掛的指令碼 API `mail` (郵件路線圖 P3.1 與 P3.2): `mail.connect(選項或別名)` 支援服務商預設與 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (指令碼路徑的附件經唯讀描述符傳輸), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 帶用戶端回退標記的 `search`, `get` / `fetchBody`, 串流落盤到工作目錄並支援 `onProgress` 的 `download` 與 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 與 `close`, 每個方法都有在指令碼執行緒落定的 `Async` Promise 形態; 郵件結果攜帶 `Date` 欄位, 可列印的地址與繫結的 `load` / `download` 方法, 失敗為帶 `code` 與 `retryable` 的 `MailError` 物件, 全域物件上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 與全部用戶端方法的轉發
 * `新增` 郵件外掛的指令碼 API `mail.watch` (郵件路線圖 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 與 `mail.watch` 回傳 `MailWatch` 發射器, 其 `message(message, watch)`, `mode`, `resync`, `error` 與唯一的 `close(reason)` 事件在指令碼執行緒到達並讓指令碼活到 `stop()`; 外掛以 IMAP IDLE 監聽 (可回退輪詢, POP3 按 UIDL), 宿主丟棄過期 generation 與亂序投遞, 外掛死亡回報為 `PLUGIN_UNAVAILABLE` 且預設在重開的工作階段上重新監聽並發出 `resync`, 關閉用戶端或指令碼退出會停止其監聽
+* `新增` EPUB 外掛程式契約模組 (plugin-api/epub-api), 含凍結的 AIDL 介面 (書籍擷取: 元資料, 目錄, 閱讀順序, 章節文字, 資源與搜尋; 以及基於權杖的閱讀器工作階段), `epub` 引擎的宿主探索封裝, 以及 Readium EPUB Reader 套件的外掛程式中心註冊 (其 Explorer Action 服務與 EPUB 服務共用一個條目)
 * `修復` 外掛中心啟用 YOLO 外掛時探測交握要求外掛已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確元件交握, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題
@@ -1058,7 +1059,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 19 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 20 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

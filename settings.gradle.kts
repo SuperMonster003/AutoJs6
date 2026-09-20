@@ -125,6 +125,7 @@ private val pluginApi = listOf(
     "screen-color-picker-api",
     "mcp-server-api",
     "mail-api",
+    "epub-api",
 )
 
 private val plugins = listOf(

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/19",
+      "released_date": "2026/09/20",
       "feature": [
         "Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言",
         "Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応",
@@ -230,7 +230,8 @@
         "クライアントモードマネージャーのコントロール欄の \"履歴\" 項目: 以前に接続したサーバーアドレスを一覧し, タップで接続, 長押しで削除, 全消去も可能",
         "Mail プラグイン契約モジュール (plugin-api/mail-api): 凍結された AIDL インターフェース, 専用バインディングリースでアカウントセッションを開きプラグインプロセスの死亡後に再オープンし XOAUTH2 トークン更新後に 1 回だけ再試行しパイプ経由で添付ファイルをディスクへストリーミングするホストクライアント, および既定オンのプラグインセンター登録",
         "Mail プラグインのスクリプト API `mail` (Mail ロードマップ P3.1 と P3.2): プロバイダープリセットと XOAUTH2 用 `tokenProvider` を持つ `mail.connect(オプションまたはエイリアス)`, `test`, `send` (スクリプトパスの添付ファイルを読み取り専用ディスクリプター経由で転送), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, クライアント側フォールバックマーカー付きの `search`, `get` / `fetchBody`, 作業ディレクトリへストリーミングし `onProgress` に対応する `download` と `raw`, `markRead` / `markUnread` / `flag` / `unflag` を伴う `setFlags`, `move`, `copy`, `delete`, `expunge`, `append`, `close` を備えた `MailClient` (各メソッドにスクリプトスレッドで確定する `Async` Promise 形式あり); メッセージ結果は `Date` フィールド, 表示可能なアドレス, バインド済みの `load` / `download` メソッドを持ち, 失敗は `code` と `retryable` を持つ `MailError` オブジェクトで, グローバルには `mail.providers`, `mail.accounts`, `mail.setDefault` と全クライアントメソッドの転送があります",
-        "メールプラグインのスクリプト API `mail.watch` (メールロードマップ P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` と `mail.watch` は `MailWatch` エミッターを返し, その `message(message, watch)`, `mode`, `resync`, `error` と唯一の `close(reason)` イベントはスクリプトスレッドに届いて `stop()` までスクリプトを生かし続ける; プラグインは IMAP IDLE で監視し (ポーリングへのフォールバック, POP3 は UIDL), ホストは古い generation と順序の乱れた配信を捨て, プラグインの死亡は `PLUGIN_UNAVAILABLE` として報告され既定では再開したセッション上の新しい監視と `resync` が続き, クライアントを閉じるかスクリプトを終えるとその監視は停止する"
+        "メールプラグインのスクリプト API `mail.watch` (メールロードマップ P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` と `mail.watch` は `MailWatch` エミッターを返し, その `message(message, watch)`, `mode`, `resync`, `error` と唯一の `close(reason)` イベントはスクリプトスレッドに届いて `stop()` までスクリプトを生かし続ける; プラグインは IMAP IDLE で監視し (ポーリングへのフォールバック, POP3 は UIDL), ホストは古い generation と順序の乱れた配信を捨て, プラグインの死亡は `PLUGIN_UNAVAILABLE` として報告され既定では再開したセッション上の新しい監視と `resync` が続き, クライアントを閉じるかスクリプトを終えるとその監視は停止する",
+        "EPUB プラグイン契約モジュール (plugin-api/epub-api): 書籍の抽出 (メタデータ, 目次, 読書順序, 章のテキスト, リソース, 検索) とトークンに基づくリーダーセッションのための凍結された AIDL インターフェース, `epub` エンジンのホスト側探索ラッパー, Readium EPUB Reader パッケージのプラグインセンター登録 (Explorer Action サービスと EPUB サービスが 1 つの項目を共有)"
       ],
       "fix": [
         "プラグインセンターから YOLO プラグインを有効化する際, 探査のハンドシェイクが有効化済みの状態を要求していたためスイッチで有効化できなかった問題. 探査は認可と厳密なコンポーネントのハンドシェイクのみを要求し, 実行時の入口は引き続き保存済みの有効化記録を要求",

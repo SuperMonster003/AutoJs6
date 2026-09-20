@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 19 September 2026.
+Données mises à jour le 20 September 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/19
+###### 2026/09/20
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -398,6 +398,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Module de contrat du plugin Mail (plugin-api/mail-api): surface AIDL figee, client hote qui ouvre les sessions de compte via un bail de liaison dedie, les rouvre apres la mort du processus du plugin, reessaie une fois apres un rafraichissement du jeton XOAUTH2 et ecrit les pieces jointes sur disque en flux via des tubes, et enregistrement dans le Centre de plugins comme plugin active par defaut
 * `Fonctionnalité` API de script `mail` du plugin Mail (feuille de route Mail P3.1 et P3.2) : `mail.connect(options ou alias)` avec les preselections de fournisseurs et un `tokenProvider` pour XOAUTH2, `MailClient` avec `test`, `send` (pieces jointes depuis des chemins du script via des descripteurs en lecture seule), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, `search` avec un marqueur de repli cote client, `get` / `fetchBody`, `download` et `raw` ecrivant en flux dans le repertoire de travail avec `onProgress`, `setFlags` avec `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` et `close`, chacun avec une forme `Async` dont la Promise se resout sur le thread du script ; les messages resultants portent des champs `Date`, des adresses imprimables et des methodes liees `load` / `download`, les echecs sont des objets `MailError` avec `code` et `retryable`, et le global expose `mail.providers`, `mail.accounts`, `mail.setDefault` ainsi que le renvoi de chaque methode du client
 * `Fonctionnalité` API de script `mail.watch` du plugin mail (feuille de route mail P5) : `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` et `mail.watch` renvoient un émetteur `MailWatch` dont les événements `message(message, watch)`, `mode`, `resync`, `error` et l'unique `close(reason)` arrivent sur le fil du script et le maintiennent en vie jusqu'à `stop()` ; le plugin surveille avec IMAP IDLE (repli sur l'interrogation périodique, POP3 par UIDL), l'hôte rejette les générations périmées et les livraisons hors d'ordre, la mort du plugin est signalée par `PLUGIN_UNAVAILABLE` puis suivie par défaut d'une nouvelle surveillance sur la session rouverte avec un `resync`, et fermer le client ou quitter le script arrête ses surveillances
+* `Fonctionnalité` Module de contrat du plugin EPUB (plugin-api/epub-api) avec une surface AIDL figée pour l'extraction des livres (métadonnées, table des matières, ordre de lecture, texte des chapitres, ressources, recherche) et les sessions de lecture à jeton, l'enveloppe de découverte côté hôte du moteur `epub`, et l'enregistrement dans le Centre de plugins du paquet Readium EPUB Reader, dont les services Explorer Action et EPUB partagent une seule entrée
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
 * `Correction` Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun
@@ -1058,7 +1059,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 19 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 20 September 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
