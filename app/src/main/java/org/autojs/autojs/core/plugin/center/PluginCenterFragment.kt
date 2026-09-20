@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
+import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
@@ -999,6 +1000,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER -> ScreenColorPickerPluginHost.probe(contextRef, item.packageName)
             McpServerPluginHost.ACTION_MCP_SERVER -> McpServerPluginHost.probe(contextRef, item.packageName)
             MailPluginHost.ACTION_MAIL -> MailPluginHost.probe(contextRef, item.packageName)
+            EpubPluginHost.ACTION_EPUB -> EpubPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)
