@@ -7038,6 +7038,125 @@
         }
       ]
     },
+    "epub": {
+      "doc": "AutoJs6 Epub API",
+      "members": [
+        {
+          "name": "open",
+          "kind": "function",
+          "doc": "open(source: Epub.Source): Epub.Book;",
+          "signature": "open(source: Epub.Source): Epub.Book;"
+        },
+        {
+          "name": "openAsync",
+          "kind": "function",
+          "doc": "openAsync(source: Epub.Source): Promise<Epub.Book>;",
+          "signature": "openAsync(source: Epub.Source): Promise<Epub.Book>;"
+        },
+        {
+          "name": "metadata",
+          "kind": "function",
+          "doc": "metadata(source: Epub.Source): Epub.Metadata;",
+          "signature": "metadata(source: Epub.Source): Epub.Metadata;"
+        },
+        {
+          "name": "metadataAsync",
+          "kind": "function",
+          "doc": "metadataAsync(source: Epub.Source): Promise<Epub.Metadata>;",
+          "signature": "metadataAsync(source: Epub.Source): Promise<Epub.Metadata>;"
+        },
+        {
+          "name": "toc",
+          "kind": "function",
+          "doc": "toc(source: Epub.Source): Epub.TocEntry[];",
+          "signature": "toc(source: Epub.Source): Epub.TocEntry[];"
+        },
+        {
+          "name": "tocAsync",
+          "kind": "function",
+          "doc": "tocAsync(source: Epub.Source): Promise<Epub.TocEntry[]>;",
+          "signature": "tocAsync(source: Epub.Source): Promise<Epub.TocEntry[]>;"
+        },
+        {
+          "name": "readingOrder",
+          "kind": "function",
+          "doc": "readingOrder(source: Epub.Source): Epub.ReadingOrderEntry[];",
+          "signature": "readingOrder(source: Epub.Source): Epub.ReadingOrderEntry[];"
+        },
+        {
+          "name": "readingOrderAsync",
+          "kind": "function",
+          "doc": "readingOrderAsync(source: Epub.Source): Promise<Epub.ReadingOrderEntry[]>;",
+          "signature": "readingOrderAsync(source: Epub.Source): Promise<Epub.ReadingOrderEntry[]>;"
+        },
+        {
+          "name": "text",
+          "kind": "function",
+          "doc": "text(source: Epub.Source, target?: Epub.TextTarget | null, options?: Epub.TextOptions): string;",
+          "signature": "text(source: Epub.Source, target?: Epub.TextTarget | null, options?: Epub.TextOptions): string;"
+        },
+        {
+          "name": "textAsync",
+          "kind": "function",
+          "doc": "textAsync(source: Epub.Source, target?: Epub.TextTarget | null, options?: Epub.TextOptions): Promise<string>;",
+          "signature": "textAsync(source: Epub.Source, target?: Epub.TextTarget | null, options?: Epub.TextOptions): Promise<string>;"
+        },
+        {
+          "name": "cover",
+          "kind": "function",
+          "doc": "cover(source: Epub.Source): ImageWrapper;",
+          "signature": "cover(source: Epub.Source): ImageWrapper;"
+        },
+        {
+          "name": "coverAsync",
+          "kind": "function",
+          "doc": "coverAsync(source: Epub.Source): Promise<ImageWrapper>;",
+          "signature": "coverAsync(source: Epub.Source): Promise<ImageWrapper>;"
+        },
+        {
+          "name": "search",
+          "kind": "function",
+          "doc": "search(source: Epub.Source, query: string, options?: Epub.SearchOptions): Epub.SearchHit[];",
+          "signature": "search(source: Epub.Source, query: string, options?: Epub.SearchOptions): Epub.SearchHit[];"
+        },
+        {
+          "name": "searchAsync",
+          "kind": "function",
+          "doc": "searchAsync(source: Epub.Source, query: string, options?: Epub.SearchOptions): Promise<Epub.SearchHit[]>;",
+          "signature": "searchAsync(source: Epub.Source, query: string, options?: Epub.SearchOptions): Promise<Epub.SearchHit[]>;"
+        },
+        {
+          "name": "read",
+          "kind": "function",
+          "doc": "read(source: Epub.Source, options?: Epub.ReadOptions): Epub.ReaderSession;",
+          "signature": "read(source: Epub.Source, options?: Epub.ReadOptions): Epub.ReaderSession;"
+        },
+        {
+          "name": "readAsync",
+          "kind": "function",
+          "doc": "readAsync(source: Epub.Source, options?: Epub.ReadOptions): Promise<Epub.ReaderSession>;",
+          "signature": "readAsync(source: Epub.Source, options?: Epub.ReadOptions): Promise<Epub.ReaderSession>;"
+        },
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "isAvailableAsync",
+          "kind": "function",
+          "doc": "isAvailableAsync(): Promise<boolean>;",
+          "signature": "isAvailableAsync(): Promise<boolean>;"
+        },
+        {
+          "name": "EpubError",
+          "kind": "variable",
+          "doc": "EpubError: Epub.EpubErrorConstructor;",
+          "signature": "EpubError: Epub.EpubErrorConstructor;"
+        }
+      ]
+    },
     "events": {
       "doc": "Event emitter and system event helpers",
       "members": [
