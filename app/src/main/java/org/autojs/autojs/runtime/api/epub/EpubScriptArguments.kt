@@ -9,13 +9,13 @@ import org.autojs.plugin.epub.api.EpubErrorCodes
 import kotlin.math.floor
 
 /**
- * Argument normalization of the `epub` script API (plugin roadmap P6.1, appendix A.2 and A.3):
+ * Argument normalization of the `epub` script API (plugin roadmap P6.1 and P6.2, appendix A.2 to A.4):
  * the script values arrive as Gson trees (the Rhino layer serializes each argument like
  * `JSON.stringify`, so functions and `undefined` are already gone) and leave as the request
  * shapes of the host client. Unknown option keys are refused by name before anything reaches the
  * plugin; every refusal is an `INVALID_ARGUMENT`. Nothing here touches Rhino or Android, so the
  * JVM tests cover it.
- * zh-CN: `epub` 脚本 API 的参数规范化 (插件路线图 P6.1, 附录 A.2 与 A.3): 脚本值以 Gson 树到达 (Rhino 层像 `JSON.stringify` 一样序列化每个参数,
+ * zh-CN: `epub` 脚本 API 的参数规范化 (插件路线图 P6.1 与 P6.2, 附录 A.2 至 A.4): 脚本值以 Gson 树到达 (Rhino 层像 `JSON.stringify` 一样序列化每个参数,
  * 函数与 `undefined` 已消失), 离开时是宿主客户端的请求形态. 未知选项键在到达插件前按名拒绝; 每个拒绝都是 `INVALID_ARGUMENT`. 这里不触碰 Rhino
  * 与 Android, 因此由 JVM 测试覆盖.
  */
@@ -157,6 +157,83 @@ internal object EpubScriptArguments {
     /** An `INVALID_ARGUMENT` failure as the script sees it. zh-CN: 脚本眼中的 `INVALID_ARGUMENT` 失败. */
     fun invalid(message: String): EpubPluginException =
         EpubPluginException(EpubErrorMapper.normalize(EpubErrorCodes.INVALID_ARGUMENT, message))
+
+    // ------------------------------------------------------------------ reader sessions (P6.2)
+
+    /** `epub.read(path, options?)`: at most one start target (`locator`, `href` or `progression`) and the start `preferences`. zh-CN: `epub.read(path, options?)`: 至多一个起始目标 (`locator`, `href` 或 `progression`) 与起始 `preferences`. */
+    class Read(val locatorJson: String?, val href: String?, val progression: Double?, val preferencesJson: String?)
+
+    /** `session.goTo(target)`: an href string, a total progression number or a locator object. zh-CN: `session.goTo(target)`: href 字符串, 总进度数字或 locator 对象. */
+    class GoTo(val locatorJson: String?, val href: String?, val progression: Double?)
+
+    class Close(val finish: Boolean)
+
+    const val LOCATOR = "locator"
+    const val PROGRESSION = "progression"
+    const val PREFERENCES = "preferences"
+    const val FINISH = "finish"
+
+    private val READ_KEYS = setOf(LOCATOR, HREF, PROGRESSION, PREFERENCES)
+    private val CLOSE_KEYS = setOf(FINISH)
+
+    fun read(options: JsonElement?): Read {
+        val given = optionalObject(options, "options") ?: return Read(null, null, null, null)
+        given.rejectUnknown("options", READ_KEYS)
+        val locator = given.get(LOCATOR)?.takeUnless { it.isJsonNull }?.let { locatorJson(it, "options.locator") }
+        val href = given.get(HREF)?.takeUnless { it.isJsonNull }?.let { href(it, "options.href") }
+        val progression = given.get(PROGRESSION)?.takeUnless { it.isJsonNull }?.let { progression(it, "options.progression") }
+        if (listOfNotNull(locator, href, progression).size > 1) {
+            throw invalid("'options' must name at most one start target: 'locator', 'href' or 'progression'")
+        }
+        val preferences = given.get(PREFERENCES)?.takeUnless { it.isJsonNull }?.let { preferences(it, "options.preferences") }
+        return Read(locator, href, progression, preferences)
+    }
+
+    fun goTo(target: JsonElement?): GoTo = when {
+        target == null || target.isJsonNull -> throw invalid("'target' is required: an href string, a progression number between 0 and 1 or a locator object")
+        target.isJsonPrimitive && target.asJsonPrimitive.isString -> GoTo(null, href(target, "target"), null)
+        target.isJsonPrimitive && target.asJsonPrimitive.isNumber -> GoTo(null, null, progression(target, "target"))
+        target.isJsonObject -> GoTo(locatorJson(target, "target"), null, null)
+        else -> throw invalid("'target' must be an href string, a progression number or a locator object, got ${brief(target)}")
+    }
+
+    /** A partial preferences object as the JSON document of the contract; the plugin checks keys, types and ranges. zh-CN: 部分偏好对象作为契约的 JSON 文档; 键, 类型与范围由插件检查. */
+    fun preferences(partial: JsonElement?, label: String = "preferences"): String {
+        if (partial == null || partial.isJsonNull) throw invalid("'$label' is required")
+        if (!partial.isJsonObject) throw invalid("'$label' must be an object, got ${brief(partial)}")
+        val json = partial.toString()
+        if (json.toByteArray(Charsets.UTF_8).size > EpubContract.MAX_PREFERENCES_BYTES) {
+            throw EpubPluginException(EpubErrorMapper.normalize(EpubErrorCodes.LIMIT_EXCEEDED, "'$label' exceeds ${EpubContract.MAX_PREFERENCES_BYTES} bytes"))
+        }
+        return json
+    }
+
+    fun close(options: JsonElement?): Close {
+        val given = optionalObject(options, "options")
+        given?.rejectUnknown("options", CLOSE_KEYS)
+        return Close(given?.booleanOrNull("options", FINISH) ?: false)
+    }
+
+    private fun locatorJson(value: JsonElement, label: String): String {
+        if (!value.isJsonObject) throw invalid("'$label' must be a locator object, got ${brief(value)}")
+        val href = value.asJsonObject.get(HREF)
+        if (href == null || !href.isJsonPrimitive || !href.asJsonPrimitive.isString || href.asString.isBlank()) {
+            throw invalid("'$label' must carry a non-blank 'href'")
+        }
+        val json = value.toString()
+        if (json.toByteArray(Charsets.UTF_8).size > EpubContract.MAX_LOCATOR_BYTES) {
+            throw EpubPluginException(EpubErrorMapper.normalize(EpubErrorCodes.LIMIT_EXCEEDED, "'$label' exceeds ${EpubContract.MAX_LOCATOR_BYTES} bytes"))
+        }
+        return json
+    }
+
+    private fun progression(value: JsonElement, label: String): Double {
+        val primitive = value.takeIf { it.isJsonPrimitive }?.asJsonPrimitive?.takeIf { it.isNumber }
+            ?: throw invalid("'$label' must be a number between 0 and 1, got ${brief(value)}")
+        val number = primitive.asDouble
+        if (number.isNaN() || number < 0.0 || number > 1.0) throw invalid("'$label' must be a number between 0 and 1, got ${primitive.asString}")
+        return number
+    }
 
     // ------------------------------------------------------------------ helpers
 

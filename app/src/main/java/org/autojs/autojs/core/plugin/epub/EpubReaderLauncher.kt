@@ -47,6 +47,10 @@ object EpubReaderLauncher {
             this.component = component
             addCategory(Intent.CATEGORY_DEFAULT)
             putExtra(EpubActions.EXTRA_SESSION_TOKEN, token)
+            // A reader already on top of its task (D32 leaves it there) must receive the new session
+            // through onNewIntent; without SINGLE_TOP the activity manager only brings the task to
+            // the front and drops the intent, and the session waits unclaimed until its timeout.
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             if (context !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 

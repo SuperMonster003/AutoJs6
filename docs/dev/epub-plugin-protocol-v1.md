@@ -304,9 +304,15 @@ The two-step launch (plugin decision D12):
    exported and enabled Activity of the plugin package that answers
    `org.autojs.plugin.EPUB_READER_OPEN` with category DEFAULT; zero or several such Activities
    are `PLUGIN_INCOMPATIBLE`), the action, the category and the extra
-   `org.autojs.plugin.epub.extra.SESSION_TOKEN`; `FLAG_ACTIVITY_NEW_TASK` is added when the
-   context is not an Activity. The Activity sits behind `org.autojs.permission.PLUGIN`. The plugin
-   service never starts an Activity on its own (background-launch restrictions).
+   `org.autojs.plugin.epub.extra.SESSION_TOKEN`; `FLAG_ACTIVITY_SINGLE_TOP` is always added and
+   `FLAG_ACTIVITY_NEW_TASK` when the context is not an Activity. The Activity sits behind
+   `org.autojs.permission.PLUGIN`. The plugin service never starts an Activity on its own
+   (background-launch restrictions). A reader Activity that is already on top of its task (a
+   session closed without `finish` leaves it there, D32) receives the launch in `onNewIntent`
+   because of `SINGLE_TOP`; without the flag the activity manager only brings the task to the
+   front and drops the intent, and the new session waits unclaimed until its claim timeout. The
+   Readium plugin answers such a delivery by finishing that reader and relaunching itself with
+   the intent, so the session opens in a fresh reader (plugin build 51, P6.2).
 3. The Activity accepts the intent only when the action matches, the component was explicit and
    the token is well formed; it claims the session with a constant-time comparison. A token that
    is unknown, already claimed or already closed shows the reader's invalid-request panel and

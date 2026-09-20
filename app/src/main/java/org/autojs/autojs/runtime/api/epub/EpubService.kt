@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.epub.EpubErrorMapper
 import org.autojs.autojs.core.plugin.epub.EpubPluginException
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.epub.EpubReaderSessionRunner
 import org.autojs.plugin.epub.api.EpubContract
 import org.autojs.plugin.epub.api.EpubErrorCodes
 import java.io.Closeable
@@ -15,14 +16,15 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Per-script owner of the `epub` script API (plugin roadmap P6.1): the books a script opened
- * through the EPUB plugin and the path rules of the script's working directory. [close] runs on
- * script exit and closes every book that is still open, so a plugin book never outlives its
- * script. Plugin-availability refusals (`PLUGIN_UNAVAILABLE`, `PLUGIN_DISABLED`,
+ * Per-script owner of the `epub` script API (plugin roadmap P6.1 and P6.2): the books a script
+ * opened through the EPUB plugin, its reader sessions and the path rules of the script's working
+ * directory. [close] runs on script exit and closes every book that is still open and ends every
+ * reader session without finishing the reader (plugin decision D32), so nothing of the plugin
+ * outlives its script. Plugin-availability refusals (`PLUGIN_UNAVAILABLE`, `PLUGIN_DISABLED`,
  * `PLUGIN_INCOMPATIBLE`) get the localized hint of the plugin center in front of the technical
  * message.
- * zh-CN: `epub` 脚本 API 的每脚本属主 (插件路线图 P6.1): 脚本经 EPUB 插件打开的书籍与脚本工作目录的路径规则. [close] 在脚本退出时运行并关闭仍打开
- * 的每本书, 因此插件书籍不会比脚本活得更久. 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_DISABLED`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上
+ * zh-CN: `epub` 脚本 API 的每脚本属主 (插件路线图 P6.1 与 P6.2): 脚本经 EPUB 插件打开的书籍, 它的阅读器会话与脚本工作目录的路径规则. [close] 在脚本
+ * 退出时运行, 关闭仍打开的每本书并结束每个阅读器会话而不结束阅读器 (插件决策 D32), 因此插件里的任何东西都不会比脚本活得更久. 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_DISABLED`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上
  * 插件中心的本地化提示.
  */
 class EpubService(context: Context, private val scriptRuntime: ScriptRuntime) : Closeable {
@@ -31,6 +33,7 @@ class EpubService(context: Context, private val scriptRuntime: ScriptRuntime) : 
     val appContext: Context = context.applicationContext
 
     private val books = ConcurrentHashMap.newKeySet<EpubBookClient>()
+    private val sessions = ConcurrentHashMap.newKeySet<EpubReaderSessionRunner>()
     private val closed = AtomicBoolean(false)
 
     val isClosed: Boolean
@@ -39,6 +42,10 @@ class EpubService(context: Context, private val scriptRuntime: ScriptRuntime) : 
     /** How many books are open right now. zh-CN: 当前打开的书籍数. */
     val openBookCount: Int
         get() = books.size
+
+    /** How many reader sessions are open right now. zh-CN: 当前打开的阅读器会话数. */
+    val openSessionCount: Int
+        get() = sessions.size
 
     /** A script path resolved against the script's working directory; absolute paths pass through. zh-CN: 相对脚本工作目录解析的脚本路径; 绝对路径原样通过. */
     fun resolvePath(path: String): String = scriptRuntime.files.path(path) ?: path
@@ -81,8 +88,20 @@ class EpubService(context: Context, private val scriptRuntime: ScriptRuntime) : 
         books.remove(client)
     }
 
+    internal fun trackSession(runner: EpubReaderSessionRunner) {
+        ensureOpen()
+        sessions.add(runner)
+    }
+
+    internal fun untrackSession(runner: EpubReaderSessionRunner) {
+        sessions.remove(runner)
+    }
+
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
+        val active = sessions.toList()
+        sessions.clear()
+        active.forEach { runner -> runCatching { runner.cancelSilently() } }
         val open = books.toList()
         books.clear()
         open.forEach { client -> runCatching { client.close() } }
