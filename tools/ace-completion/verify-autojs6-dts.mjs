@@ -21,10 +21,10 @@ if (actual !== expected) {
 }
 
 const requiredSignatures = [
-  "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
   "read(path: string, encoding?: StandardCharsets): string;",
-  "findImage(img: ImageWrapper, template: ImageWrapper, options?: { threshold?: number, weakThreshold?: number, level?: number, region?: OmniRegion, }): OpenCV.Point | null;",
-  "declare function launch(app: App | App.Alias | App.PackageName): boolean;",
+  "findImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;",
+  "declare function launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
 ];
 
 for (const signature of requiredSignatures) {

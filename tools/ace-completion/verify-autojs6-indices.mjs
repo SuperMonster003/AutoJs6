@@ -64,7 +64,7 @@ for (const [moduleName, memberName] of Object.entries(requiredMembers)) {
 }
 
 const requiredSignatures = {
-  "app.launch": "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "app.launch": "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
   "files.read": "read(path: string, encoding?: StandardCharsets): string;",
 };
 for (const [qualifiedName, signature] of Object.entries(requiredSignatures)) {

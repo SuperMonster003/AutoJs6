@@ -433,14 +433,14 @@ assertDocIncludes(
   "app.la",
   "la",
   "launch",
-  "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
 );
 assertDocIncludes(
   completer,
   "launch",
   "launch",
   "launch",
-  "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
 );
 assertDocIncludes(
   completer,
@@ -454,7 +454,7 @@ assertHoverIncludes(
   'app.launch("org.autojs.autojs6");',
   "launch",
   "app.launch",
-  "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
 );
 assertHoverIncludes(
   completer,
@@ -465,12 +465,12 @@ assertHoverIncludes(
 );
 assertSignatureHelp(completer, "app.launch(", {
   caption: "app.launch",
-  signature: "launch(app: App | App.Alias | App.PackageName): boolean",
+  signature: "launch(app: App.Preset | App.Alias | App.PackageName): boolean",
   activeParameter: 0,
 });
 assertSignatureHelp(completer, "app.autojs.setRootMode('root', ", {
   caption: "app.autojs.setRootMode",
-  signature: "setRootMode(mode: number | boolean | 'auto' | 'root' | 'non-root', isWriteIntoPreference?: boolean | 'write_into_pref'): void",
+  signature: "setRootMode(mode: -1 | 0 | 1 | boolean | 'auto' | 'root' | 'non-root', isWriteIntoPreference?: boolean | 'write_into_pref'): void",
   activeParameter: 1,
 });
 

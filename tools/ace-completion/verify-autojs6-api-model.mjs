@@ -35,7 +35,7 @@ const requiredDeclarationMembers = {
   toast: "dismissAll",
 };
 const requiredDeclarationSignatures = {
-  "app.launch": "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "app.launch": "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",
   "files.read": "read(path: string, encoding?: StandardCharsets): string;",
   "device.getBattery": "getBattery(): number;",
 };
