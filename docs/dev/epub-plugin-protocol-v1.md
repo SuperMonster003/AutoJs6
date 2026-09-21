@@ -282,7 +282,10 @@ Request keys: `query` (trimmed, inner whitespace collapsed, 1 to `MAX_QUERY_LENG
 whatever the paging. The answer carries the normalized `query`, `offset`, `results` and
 `hasMore` (true when hits beyond the page exist and the page end is below the ceiling). Each
 page runs Readium's search service from the start of the book, so deep pages cost more than the
-first one.
+first one. The plugin gives one page at most `SEARCH_BUDGET_MS` (plugin roadmap P7.1): a page that
+is still scanning when the budget runs out answers `TIMEOUT` instead of letting the host-side
+`CALL_TIMEOUT_MS` expire first, so a 1000-chapter book yields `TIMEOUT` for a query that only
+matches its last chapter (plugin performance baseline, roadmap P7.4).
 
 ### `openResource`
 
@@ -376,7 +379,7 @@ the session binder delivers one synthetic `close` (`host` or `error`) unless the
 | `READER_NOT_VISIBLE` | `navigate` before the reader Activity claimed the session | plugin |
 | `UNSUPPORTED_PREFERENCE` | unknown preference keys (an `error` event, never a refusal) | plugin |
 | `CANCELLED` | the host coroutine was cancelled or interrupted | host |
-| `TIMEOUT` | opening took longer than `OPEN_TIMEOUT_MS`; a host-side call timeout | both |
+| `TIMEOUT` | opening took longer than `OPEN_TIMEOUT_MS`; a `search` page took longer than `SEARCH_BUDGET_MS`; a host-side call timeout | both |
 | `IO` | descriptor, pipe or resource read failure | both |
 | `INTERNAL` | anything else, including unknown codes | both |
 
@@ -412,6 +415,7 @@ Every failure surfaces as `EpubPluginException` carrying an `EpubError(code, mes
 | `READER_CLAIM_TIMEOUT_MS` | 60 s | an unclaimed reader session |
 | `PROGRESS_THROTTLE_MS` | 500 ms | `progress` events |
 | `OPEN_TIMEOUT_MS` / `CALL_TIMEOUT_MS` | 30 s / 60 s | host-side timeouts of `openBook` / `openReader` and of every other call |
+| `SEARCH_BUDGET_MS` | 50 s (`CALL_TIMEOUT_MS` - 10 s) | plugin-side budget of one `search` page; exceeded pages answer `TIMEOUT` (plugin `Limits.SEARCH_BUDGET_MS`) |
 
 ## Versioning
 
