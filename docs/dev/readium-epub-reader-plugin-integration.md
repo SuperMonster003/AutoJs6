@@ -70,5 +70,19 @@ size-checked by the host.
 - `archiveDocumentLimitIsPerPreviewerType` checks the 256 MiB and 8 MiB limits.
 
 Device acceptance (opening a book from the file manager, from an archive and after a rename) is
-tracked in the plugin repository's `ROADMAP.md` (P1.5) together with the plugin's own instrumentation
-suite.
+tracked in the plugin repository's `ROADMAP.md` (P1.5, and P8.3 for the release smoke) together with
+the plugin's own instrumentation suite.
+
+## Status
+
+Plugin 1.0.0 (build 65, plugin commit `ca3044b`, release artifact `autojs6-plugin-readium-epub-reader-v1.0.0-d84b0ec1.apk`) is the first release, cut on
+2026-09-21 against this host at 6.8.0 build 5282 (Explorer Action protocol v2, EPUB contract version 1,
+host protocol 22). The host side of that release is complete: the file type and hand-off above, the
+`plugin-api/epub-api` contract module, the `core/plugin/epub` client, the `epub` script module with its
+reader session (`epub.read`) and the three sample scripts under the in-app sample directory `电子书`; the
+host changelog carries one line per piece (file type, contract module, host client, script API, reader
+control, samples). The plugin's roadmap P8 records the release gate (Temurin build, unit tests, lint,
+the device matrix, the signed release artifact and the four entry paths: file manager, launcher,
+`ACTION_VIEW` and script). Highlights, notes and export (plugin roadmap P9, plugin 1.1.0) are planned
+without a host change; a new `epub` capability would go through the contract's append-only AIDL rule
+(`docs/dev/epub-plugin-protocol-v1.md`).
