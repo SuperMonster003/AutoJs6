@@ -16,15 +16,15 @@ import org.autojs.autojs.util.RhinoUtils
 /**
  * The global `epub` object (plugin roadmap P6.1 and P6.2, appendix A.1, A.2 and A.4): `open(path | options)` /
  * `openAsync` -> `EpubBook`, the convenience layer `metadata(path)`, `toc(path)`,
- * `readingOrder(path)`, `text(path, target?, options?)`, `cover(path, outputPath?, options?)`
- * and `search(path, query, options?)` (each opens the book, answers and closes it, with an
+ * `readingOrder(path)`, `text(path, target?, options?)`, `cover(path, outputPath?, options?)`,
+ * `search(path, query, options?)` and `annotations(path)` (each opens the book, answers and closes it, with an
  * `Async` form), `read(path, options?)` / `readAsync` -> `EpubReaderSession` (the reader with
  * its event stream), `isAvailable()` / `isAvailableAsync()` and the `EpubError` constructor. Paths
  * follow the script's working-directory rules (`files.path`); `content://` and other URIs are
  * refused. Argument shapes are checked in [EpubScriptArguments] (pure Kotlin); only the Rhino
  * conversion happens here.
  * zh-CN: 全局 `epub` 对象 (插件路线图 P6.1 与 P6.2, 附录 A.1, A.2 与 A.4): `open(path | options)` / `openAsync` -> `EpubBook`, 便捷层 `metadata(path)`,
- * `toc(path)`, `readingOrder(path)`, `text(path, target?, options?)`, `cover(path, outputPath?, options?)` 与 `search(path, query, options?)`
+ * `toc(path)`, `readingOrder(path)`, `text(path, target?, options?)`, `cover(path, outputPath?, options?)`, `search(path, query, options?)` 与 `annotations(path)`
  * (各自打开书籍, 应答后关闭, 带 `Async` 形态), `read(path, options?)` / `readAsync` -> `EpubReaderSession` (带事件流的阅读器), `isAvailable()` /
  * `isAvailableAsync()` 与 `EpubError` 构造器. 路径遵循脚本工作目录规则
  * (`files.path`); 拒绝 `content://` 等 URI. 参数形态在 [EpubScriptArguments] (纯 Kotlin) 检查; 这里只做 Rhino 转换.
@@ -52,6 +52,8 @@ class Epub(
         ::coverAsync.name,
         ::search.name,
         ::searchAsync.name,
+        ::annotations.name,
+        ::annotationsAsync.name,
         ::read.name,
         ::readAsync.name,
         ::isAvailable.name,
