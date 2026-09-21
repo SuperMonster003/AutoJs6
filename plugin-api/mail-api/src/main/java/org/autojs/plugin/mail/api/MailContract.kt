@@ -1,15 +1,20 @@
 package org.autojs.plugin.mail.api
 
 /**
- * Frozen vocabulary of mail contract version 1: Bundle keys, JSON envelope fields, operation
- * names, closed value sets and the hard ceilings both sides enforce. The JSON documents carried
- * under the `*_JSON` keys are described in `docs/dev/mail-plugin-protocol-v1.md`.
+ * Frozen vocabulary of the mail contract: Bundle keys, JSON envelope fields, operation names,
+ * closed value sets and the hard ceilings both sides enforce. Version 1 shipped with plugin
+ * 1.0.0; version 2 (plugin roadmap P8) appends the trigger vocabulary of the background watches
+ * and changes nothing that version 1 defined. The JSON documents carried under the `*_JSON`
+ * keys are described in `docs/dev/mail-plugin-protocol-v1.md`.
  */
 object MailContract {
 
-    const val CONTRACT_VERSION = 1
+    const val CONTRACT_VERSION = 2
     const val MIN_CONTRACT_VERSION = 1
-    const val MAX_CONTRACT_VERSION = 1
+    const val MAX_CONTRACT_VERSION = 2
+
+    /** First version with `openTrigger` / `listTriggers` (background watches, plugin roadmap P8). */
+    const val TRIGGER_CONTRACT_VERSION = 2
 
     fun supportsContractVersion(version: Int): Boolean = version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
 
@@ -60,6 +65,17 @@ object MailContract {
     /** Long: watch generation chosen by the host and echoed by every event of that watch. */
     const val KEY_GENERATION = "generation"
 
+    // Contract version 2: background watches and triggers (plugin roadmap P8).
+
+    /** String: trigger subscription options `{triggerId, filter}` (`openTrigger`, `IMailTrigger.update`). */
+    const val KEY_TRIGGER_OPTIONS_JSON = "triggerOptionsJson"
+
+    /** String: the background watches configured in the plugin `{triggers: [...]}` (`listTriggers`). */
+    const val KEY_TRIGGERS_JSON = "triggersJson"
+
+    /** String: id of the background watch a host wake-up intent (`MailActions.HOST_TRIGGER_ACTION`) belongs to. */
+    const val KEY_TRIGGER_ID = "triggerId"
+
     // JSON envelope fields.
 
     const val FIELD_ID = "id"
@@ -87,6 +103,19 @@ object MailContract {
 
     /** Watch option (P5): every `message` event carries the body, not only the envelope. */
     const val FIELD_FETCH_BODY = "fetchBody"
+
+    // Trigger documents (contract version 2, plugin roadmap P8).
+
+    const val FIELD_TRIGGER_ID = "triggerId"
+    const val FIELD_TRIGGERS = "triggers"
+    const val FIELD_ALIAS = "alias"
+    const val FIELD_ADDRESS = "address"
+    const val FIELD_ENABLED = "enabled"
+    const val FIELD_FILTER = "filter"
+    const val FIELD_FILTER_FROM = "from"
+    const val FIELD_FILTER_SUBJECT = "subject"
+    const val FIELD_RECEIVED_AT = "receivedAt"
+    const val FIELD_SINCE = "since"
 
     // Operations.
 
@@ -203,6 +232,16 @@ object MailContract {
         FEATURE_BACKGROUND_WATCH,
     )
 
+    /** `type` of the document `IMailTriggerCallback.onMail` and the host wake-up intent carry (contract version 2). */
+    const val TRIGGER_EVENT_MAIL = "mail"
+
+    /** `state` of a background watch (`IMailTrigger.getStatus`, `onStatus`, `listTriggers`). */
+    const val TRIGGER_STATE_STOPPED = "stopped"
+    const val TRIGGER_STATE_CONNECTING = "connecting"
+    const val TRIGGER_STATE_CONNECTED = "connected"
+    const val TRIGGER_STATE_FAILED = "failed"
+    val TRIGGER_STATES: Set<String> = setOf(TRIGGER_STATE_STOPPED, TRIGGER_STATE_CONNECTING, TRIGGER_STATE_CONNECTED, TRIGGER_STATE_FAILED)
+
     // Hard ceilings (roadmap appendix B.5).
 
     /** Largest JSON document carried by one Binder transaction. */
@@ -249,6 +288,20 @@ object MailContract {
 
     /** Longest `error.message` either side keeps; longer text is truncated. */
     const val MAX_ERROR_MESSAGE_BYTES = 4 * 1024
+
+    // Background watches and triggers (contract version 2, plugin roadmap P8).
+
+    /** Background watches the plugin keeps at once. */
+    const val MAX_TRIGGERS = 16
+
+    /** Live `openTrigger` subscriptions per background watch. */
+    const val MAX_TRIGGER_SUBSCRIBERS = 4
+
+    /** Trigger records (envelope summaries, no bodies) the plugin keeps, newest first. */
+    const val MAX_TRIGGER_RECORDS = 100
+
+    /** Shortest spacing between two script launches of one mail-arrival task on the host. */
+    const val MIN_TRIGGER_INTERVAL_MS = 3_000L
 
     // Host-side call timeouts (roadmap appendix B.5, last row).
 

@@ -9,8 +9,10 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * Freezes the transaction order of contract version 1: Binder transaction codes follow the
- * declaration order, so a method may only ever be appended, never inserted, removed, or renamed.
+ * Freezes the transaction order of the contract: Binder transaction codes follow the declaration
+ * order, so a method may only ever be appended, never inserted, removed, or renamed. Version 1
+ * declared the first six files; version 2 (plugin roadmap P8) appended two methods to
+ * `IMailPlugin` and added `IMailTrigger` / `IMailTriggerCallback`.
  */
 class MailAidlOrderTest {
 
@@ -70,6 +72,8 @@ class MailAidlOrderTest {
                     "IMailSession openSession(in Bundle account, IMailSessionCallback callback)",
                     "Bundle listProviders()",
                     "Bundle listSavedAccounts()",
+                    "IMailTrigger openTrigger(in Bundle options, IMailTriggerCallback callback)",
+                    "Bundle listTriggers()",
                 ),
             ),
             "IMailSession.aidl" to Declaration(
@@ -105,6 +109,21 @@ class MailAidlOrderTest {
             "IMailSessionCallback.aidl" to Declaration(
                 oneway = true,
                 methods = listOf(
+                    "void onStatus(in Bundle status)",
+                ),
+            ),
+            "IMailTrigger.aidl" to Declaration(
+                oneway = false,
+                methods = listOf(
+                    "Bundle getStatus()",
+                    "void update(in Bundle options)",
+                    "void stop()",
+                ),
+            ),
+            "IMailTriggerCallback.aidl" to Declaration(
+                oneway = true,
+                methods = listOf(
+                    "void onMail(long generation, long seq, in Bundle event)",
                     "void onStatus(in Bundle status)",
                 ),
             ),

@@ -22,4 +22,13 @@ object MailActions {
 
     /** Parameterless settings entry (accounts page), exported only behind [PLUGIN_PERMISSION]. */
     const val OPEN_SETTINGS = "org.autojs.plugin.MAIL_SETTINGS"
+
+    /**
+     * Explicit broadcast the plugin sends to the host package (contract version 2, plugin roadmap
+     * P8) when a background watch reports mail and no `openTrigger` subscription of the host is
+     * alive; the host's receiver is exported behind [PLUGIN_PERMISSION]. Extras:
+     * `MailContract.KEY_CONTRACT_VERSION`, `KEY_TRIGGER_ID` and `KEY_EVENT_JSON` (the same
+     * document as `IMailTriggerCallback.onMail`, generation 0).
+     */
+    const val HOST_TRIGGER_ACTION = "org.autojs.autojs6.action.MAIL_TRIGGER"
 }

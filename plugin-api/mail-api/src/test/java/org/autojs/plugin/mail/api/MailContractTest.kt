@@ -35,7 +35,10 @@ class MailContractTest {
 
     @Test
     fun contractVersionRangeIncludesItsBoundsAndRejectsNeighbours() {
-        assertEquals(1, MailContract.CONTRACT_VERSION)
+        assertEquals(2, MailContract.CONTRACT_VERSION)
+        assertEquals(1, MailContract.MIN_CONTRACT_VERSION)
+        assertEquals(2, MailContract.TRIGGER_CONTRACT_VERSION)
+        assertTrue(MailContract.supportsContractVersion(MailContract.TRIGGER_CONTRACT_VERSION))
         assertTrue(MailContract.MIN_CONTRACT_VERSION <= MailContract.MAX_CONTRACT_VERSION)
         assertTrue(MailContract.supportsContractVersion(MailContract.MIN_CONTRACT_VERSION))
         assertTrue(MailContract.supportsContractVersion(MailContract.CONTRACT_VERSION))
@@ -63,6 +66,9 @@ class MailContractTest {
         assertEquals("hostVersionCode", MailContract.KEY_HOST_VERSION_CODE)
         assertEquals("generation", MailContract.KEY_GENERATION)
         assertEquals("contractVersion", MailContract.KEY_CONTRACT_VERSION)
+        assertEquals("triggerOptionsJson", MailContract.KEY_TRIGGER_OPTIONS_JSON)
+        assertEquals("triggersJson", MailContract.KEY_TRIGGERS_JSON)
+        assertEquals("triggerId", MailContract.KEY_TRIGGER_ID)
     }
 
     @Test
@@ -149,6 +155,9 @@ class MailContractTest {
         assertEquals(setOf("password", "xoauth2"), MailContract.AUTH_MECHANISMS)
         assertEquals(setOf("ssl", "starttls", "none"), MailContract.TLS_MODES)
         assertEquals(setOf("idle", "savedAccounts", "append", "clientSearchFallback", "backgroundWatch"), MailContract.FEATURES)
+        assertEquals("mail", MailContract.TRIGGER_EVENT_MAIL)
+        assertEquals(setOf("stopped", "connecting", "connected", "failed"), MailContract.TRIGGER_STATES)
+        assertEquals("org.autojs.autojs6.action.MAIL_TRIGGER", MailActions.HOST_TRIGGER_ACTION)
     }
 
     @Test
@@ -178,6 +187,10 @@ class MailContractTest {
             MailContract.BODY_CALL_TIMEOUT_MS,
             MailContract.TRANSFER_CALL_MIN_TIMEOUT_MS,
             MailContract.TRANSFER_CALL_BYTES_PER_SECOND,
+            MailContract.MAX_TRIGGERS.toLong(),
+            MailContract.MAX_TRIGGER_SUBSCRIBERS.toLong(),
+            MailContract.MAX_TRIGGER_RECORDS.toLong(),
+            MailContract.MIN_TRIGGER_INTERVAL_MS,
         )
         ceilings.forEach { value -> assertTrue("ceiling $value must be positive", value > 0L) }
 
@@ -196,6 +209,8 @@ class MailContractTest {
         assertTrue(MailContract.DEFAULT_CONNECT_TIMEOUT_MS <= MailContract.DEFAULT_READ_TIMEOUT_MS)
         assertTrue(MailContract.METADATA_CALL_TIMEOUT_MS < MailContract.BODY_CALL_TIMEOUT_MS)
         assertTrue(MailContract.BODY_CALL_TIMEOUT_MS < MailContract.TRANSFER_CALL_MIN_TIMEOUT_MS)
+        assertTrue(MailContract.MAX_TRIGGER_SUBSCRIBERS <= MailContract.MAX_TRIGGERS)
+        assertTrue(MailContract.MIN_TRIGGER_INTERVAL_MS < MailContract.MIN_POLL_INTERVAL_MS)
     }
 
     @Test
