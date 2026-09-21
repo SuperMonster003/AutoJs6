@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.onEach
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TimedTaskManager
+import org.autojs.plugin.mail.api.MailActions
 
 class DynamicBroadcastReceivers(private val context: Context) {
 
@@ -52,6 +53,12 @@ class DynamicBroadcastReceivers(private val context: Context) {
     fun register(actions: MutableList<String>, local: Boolean) {
         val newActions = LinkedHashSet<String>()
         for (action in actions) {
+            // The mail trigger action is served by the manifest receiver MailTriggerReceiver behind the
+            // host's signature permission; a dynamic receiver would accept it from any application.
+            // zh-CN: 邮件触发动作由清单接收器 MailTriggerReceiver 在宿主签名权限之后处理; 动态接收器会接受任何应用发出的该动作.
+            if (action == MailActions.HOST_TRIGGER_ACTION) {
+                continue
+            }
             if (!StaticBroadcastReceiver.ACTIONS.contains(action) && !StaticBroadcastReceiver.PACKAGE_ACTIONS.contains(action) && !mActions.contains(action)
             ) {
                 newActions.add(action)

@@ -907,6 +907,19 @@
             </intent-filter>
         </receiver>
 
+        <!-- The mail plugin's background watches wake "mail arrived" tasks through this receiver (mail roadmap P8). -->
+        <!-- Exported behind the host's signature permission: only a package signed like the host can send it. -->
+        <!-- zh-CN: 邮件插件的后台守望经此接收器唤醒 "邮件到达" 任务 (邮件路线图 P8). 以宿主签名权限导出: 只有与宿主同签名的包能发送. -->
+        <receiver
+            android:name="org.autojs.autojs.core.plugin.mail.MailTriggerReceiver"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+
+            <intent-filter>
+                <action android:name="org.autojs.autojs6.action.MAIL_TRIGGER" />
+            </intent-filter>
+        </receiver>
+
         <!--<receiver-->
         <!--        android:name="org.autojs.autojs.ui.main.drawer.DrawerFragment.BatteryChangedReceiver"-->
         <!--        android:exported="true">-->

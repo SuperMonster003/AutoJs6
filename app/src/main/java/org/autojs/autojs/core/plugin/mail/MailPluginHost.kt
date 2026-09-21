@@ -23,6 +23,9 @@ import org.autojs.plugin.mail.api.MailIds
 /** How long a refused `openSession` waits for the plugin's `closed` status on the oneway callback. */
 private const val REFUSAL_TIMEOUT_MS = 3_000L
 
+/** The `triggers` document of a plugin without background watches. */
+private const val EMPTY_TRIGGERS = "{\"triggers\":[]}"
+
 /**
  * Host wrapper for the mail Binder contract (roadmap P1.2, decisions D1 and D19): the plugin is
  * enabled by default, any package answering the `org.autojs.plugin.MAIL` query with the `mail`
@@ -72,6 +75,33 @@ object MailPluginHost {
         val target = selectOrThrow(context)
         host.call(context, target) { proxy -> MailBundles.string(proxy.listSavedAccounts(), MailContract.KEY_ACCOUNTS_JSON) ?: "[]" }
     }
+
+    /**
+     * The background watches the plugin keeps (contract version 2, mail roadmap P8) as the
+     * `triggers` document; the empty document when the plugin predates version 2 or does not
+     * offer the `backgroundWatch` feature, so a version 1 plugin never sees the new call.
+     */
+    suspend fun listTriggers(context: Context): String = withContext(Dispatchers.IO) {
+        val target = selectOrThrow(context)
+        host.call(context, target) { proxy ->
+            when {
+                !supportsBackgroundWatch(proxy.getCapabilities()) -> EMPTY_TRIGGERS
+                else -> MailBundles.string(proxy.listTriggers(), MailContract.KEY_TRIGGERS_JSON) ?: EMPTY_TRIGGERS
+            }
+        }
+    }
+
+    /** True when [capabilities] declare contract version 2 or later and the `backgroundWatch` feature. */
+    fun supportsBackgroundWatch(capabilities: Bundle?): Boolean {
+        capabilities ?: return false
+        val version = PluginCapabilityResolver.coerceLong(
+            @Suppress("DEPRECATION") capabilities.get(MailCapabilityKeys.CONTRACT_VERSION),
+        )?.toInt() ?: 0
+        return supportsBackgroundWatch(version, capabilities.getStringArray(MailCapabilityKeys.FEATURES)?.filterNotNull().orEmpty())
+    }
+
+    internal fun supportsBackgroundWatch(contractVersion: Int, features: Collection<String>): Boolean =
+        contractVersion >= MailContract.TRIGGER_CONTRACT_VERSION && MailContract.FEATURE_BACKGROUND_WATCH in features
 
     /**
      * Opens a session on a dedicated binding lease. The returned port owns the lease and the death

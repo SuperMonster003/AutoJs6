@@ -1536,6 +1536,13 @@
     <string name="text_lower_than">보다 낮은</string>
     <string name="text_mail">메일</string>
     <string name="text_mail_settings">메일 계정 설정</string>
+    <string name="text_mail_trigger_filter_from">보낸 사람 포함 (선택, 여러 항목은 쉼표로 구분)</string>
+    <string name="text_mail_trigger_filter_subject">제목 포함 (선택, 여러 항목은 쉼표로 구분)</string>
+    <string name="text_mail_trigger_hint">메일 플러그인이 백그라운드에서 감시 연결을 유지하고 새 메일마다 이 스크립트를 깨웁니다. 스크립트는 engines.myEngine().execArgv.mail 에서 메일을 읽습니다</string>
+    <string name="text_mail_trigger_plugin_unavailable">메일 플러그인이 설치되지 않았거나 백그라운드 감시를 지원하지 않습니다</string>
+    <string name="text_mail_trigger_watch">백그라운드 감시</string>
+    <string name="text_mail_trigger_watch_any">모든 감시</string>
+    <string name="text_mail_trigger_watch_none">아직 설정된 백그라운드 감시가 없습니다. 메일 플러그인 설정의 감시 페이지에서 추가하세요</string>
     <string name="text_main_file_name">기본 스크립트 파일 이름</string>
     <string name="text_malfunctioning">오작동</string>
     <string name="text_manage">관리하다</string>
@@ -1963,6 +1970,7 @@
     <string name="text_run_on_config_change">구성이 변경되었습니다</string>
     <string name="text_run_on_conn_change">인터넷 연결에서 변경되었습니다</string>
     <string name="text_run_on_headset_plug">헤드셋 플러그</string>
+    <string name="text_run_on_mail_arrived">메일 도착 시 (메일 플러그인 백그라운드 감시)</string>
     <string name="text_run_on_package_install">패키지가 설치되어 있습니다</string>
     <string name="text_run_on_package_uninstall">패키지에 제거되지 않았습니다</string>
     <string name="text_run_on_package_update">패키지 업데이트</string>

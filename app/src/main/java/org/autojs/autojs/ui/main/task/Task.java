@@ -16,12 +16,14 @@ import org.autojs.autojs.script.NodeProjectLaunchKind;
 import org.autojs.autojs.script.PythonScriptSource;
 import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.script.ScriptSource;
+import org.autojs.autojs.core.plugin.mail.MailTriggerTaskExtras;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTask;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
+import org.autojs.plugin.mail.api.MailActions;
 import org.joda.time.format.DateTimeFormat;
 
 import java.io.File;
@@ -88,6 +90,11 @@ public abstract class Task {
                         DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").print(nextTime);
             } else {
                 assert mIntentTask != null;
+                if (MailActions.HOST_TRIGGER_ACTION.equals(mIntentTask.getAction())) {
+                    String label = mContext.getString(R.string.text_run_on_mail_arrived);
+                    String triggerId = MailTriggerTaskExtras.parse(mIntentTask.getExtras()).getTriggerId();
+                    return triggerId.isEmpty() ? label : label + ": " + triggerId;
+                }
                 Integer desc = TimedTaskSettingActivity.ACTION_DESC_MAP.get(mIntentTask.getAction());
                 if (desc != null) {
                     return mContext.getString(desc);

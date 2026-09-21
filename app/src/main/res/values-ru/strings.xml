@@ -1534,6 +1534,13 @@
     <string name="text_lower_than">Меньше, чем</string>
     <string name="text_mail">Почта</string>
     <string name="text_mail_settings">Настройки почтовых учётных записей</string>
+    <string name="text_mail_trigger_filter_from">Отправитель содержит (необязательно, несколько значений через запятую)</string>
+    <string name="text_mail_trigger_filter_subject">Тема содержит (необязательно, несколько значений через запятую)</string>
+    <string name="text_mail_trigger_hint">Почтовый плагин держит наблюдение подключённым в фоне и запускает этот скрипт для каждого нового письма; скрипт читает письмо из engines.myEngine().execArgv.mail</string>
+    <string name="text_mail_trigger_plugin_unavailable">Почтовый плагин не установлен или не поддерживает фоновое наблюдение</string>
+    <string name="text_mail_trigger_watch">Фоновое наблюдение</string>
+    <string name="text_mail_trigger_watch_any">Любое наблюдение</string>
+    <string name="text_mail_trigger_watch_none">Фоновое наблюдение ещё не настроено; добавьте его на странице наблюдений в настройках почтового плагина</string>
     <string name="text_main_file_name">Имя файла основного скрипта</string>
     <string name="text_malfunctioning">Неисправность</string>
     <string name="text_manage">Управление</string>
@@ -1961,6 +1968,7 @@
     <string name="text_run_on_config_change">При изменении конфигурации</string>
     <string name="text_run_on_conn_change">При изменении интернет-соединения</string>
     <string name="text_run_on_headset_plug">Подключена гарнитура</string>
+    <string name="text_run_on_mail_arrived">При получении письма (фоновое наблюдение почтового плагина)</string>
     <string name="text_run_on_package_install">Установлен пакет</string>
     <string name="text_run_on_package_uninstall">О деинсталляции пакета</string>
     <string name="text_run_on_package_update">Обновление пакета</string>

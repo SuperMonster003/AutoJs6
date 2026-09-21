@@ -1534,6 +1534,13 @@
     <string name="text_lower_than">Inférieure à</string>
     <string name="text_mail">Courrier</string>
     <string name="text_mail_settings">Paramètres des comptes de courrier</string>
+    <string name="text_mail_trigger_filter_from">L\'expéditeur contient (facultatif, séparez les entrées par des virgules)</string>
+    <string name="text_mail_trigger_filter_subject">Le sujet contient (facultatif, séparez les entrées par des virgules)</string>
+    <string name="text_mail_trigger_hint">Le plugin de messagerie garde la surveillance connectée en arrière-plan et réveille ce script à chaque nouveau courriel ; le script lit le courriel dans engines.myEngine().execArgv.mail</string>
+    <string name="text_mail_trigger_plugin_unavailable">Le plugin de messagerie n\'est pas installé ou n\'offre pas de surveillance en arrière-plan</string>
+    <string name="text_mail_trigger_watch">Surveillance en arrière-plan</string>
+    <string name="text_mail_trigger_watch_any">Toute surveillance</string>
+    <string name="text_mail_trigger_watch_none">Aucune surveillance en arrière-plan n\'est encore configurée ; ajoutez-en une sur la page des surveillances des réglages du plugin de messagerie</string>
     <string name="text_main_file_name">Nom du fichier du script principal</string>
     <string name="text_malfunctioning">Dysfonctionnement</string>
     <string name="text_manage">Gestion</string>
@@ -1961,6 +1968,7 @@
     <string name="text_run_on_config_change">Sur la configuration changée</string>
     <string name="text_run_on_conn_change">Sur la connexion internet changée</string>
     <string name="text_run_on_headset_plug">Sur le casque branché</string>
+    <string name="text_run_on_mail_arrived">À l\'arrivée d\'un courriel (surveillance en arrière-plan du plugin de messagerie)</string>
     <string name="text_run_on_package_install">Sur le paquet installé</string>
     <string name="text_run_on_package_uninstall">Sur le paquet désinstallé</string>
     <string name="text_run_on_package_update">Sur le paquet mis à jour</string>

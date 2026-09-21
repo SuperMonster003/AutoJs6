@@ -607,6 +607,81 @@
                                         tools:ignore="RtlSymmetry" />
 
                                     <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                                        android:id="@+id/run_on_mail_arrived"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="16dp"
+                                        android:paddingStart="8dp"
+                                        android:text="@string/text_run_on_mail_arrived"
+                                        tools:ignore="RtlSymmetry" />
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="36dp"
+                                        android:orientation="vertical">
+
+                                        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="6dp"
+                                            android:hint="@string/text_mail_trigger_watch"
+                                            app:expandedHintEnabled="false">
+
+                                            <androidx.appcompat.widget.AppCompatEditText
+                                                android:id="@+id/mail_trigger_watch"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:clickable="true"
+                                                android:cursorVisible="false"
+                                                android:focusable="false"
+                                                android:inputType="none"
+                                                android:maxLines="1" />
+
+                                        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                                        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="6dp"
+                                            android:hint="@string/text_mail_trigger_filter_from"
+                                            app:expandedHintEnabled="false">
+
+                                            <androidx.appcompat.widget.AppCompatEditText
+                                                android:id="@+id/mail_trigger_from"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:inputType="textEmailAddress|textMultiLine"
+                                                android:maxLines="3" />
+
+                                        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                                        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="6dp"
+                                            android:hint="@string/text_mail_trigger_filter_subject"
+                                            app:expandedHintEnabled="false">
+
+                                            <androidx.appcompat.widget.AppCompatEditText
+                                                android:id="@+id/mail_trigger_subject"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:inputType="text|textMultiLine"
+                                                android:maxLines="3" />
+
+                                        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                                        <TextView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="4dp"
+                                            android:text="@string/text_mail_trigger_hint"
+                                            android:textSize="12sp" />
+
+                                    </LinearLayout>
+
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_custom_broadcast"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"

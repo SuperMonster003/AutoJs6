@@ -22,6 +22,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.autojs.util.RhinoUtils.toJsValue
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -52,7 +53,10 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                 val iterator = tag.arguments.entries.iterator()
                 while (iterator.hasNext()) {
                     val entry = iterator.next()
-                    put(execArgv, entry.key to entry.value)
+                    // Maps and lists (the mail trigger's event document) become plain objects and arrays;
+                    // other values keep their Java identity as before.
+                    // zh-CN: Map 与 List (邮件触发的事件文档) 转为普通对象与数组; 其他值保持原来的 Java 身份.
+                    put(execArgv, entry.key, toJsValue(scriptRuntime.topLevelScope, entry.value))
                 }
                 scriptRuntime.engines.myEngine().setExecArgv(execArgv)
             }

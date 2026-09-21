@@ -1534,6 +1534,13 @@
     <string name="text_lower_than">Inferior a</string>
     <string name="text_mail">Correo</string>
     <string name="text_mail_settings">Ajustes de cuentas de correo</string>
+    <string name="text_mail_trigger_filter_from">El remitente contiene (opcional, separe las entradas con comas)</string>
+    <string name="text_mail_trigger_filter_subject">El asunto contiene (opcional, separe las entradas con comas)</string>
+    <string name="text_mail_trigger_hint">El plugin de correo mantiene la vigilancia conectada en segundo plano y despierta este script con cada correo nuevo; el script lee el correo desde engines.myEngine().execArgv.mail</string>
+    <string name="text_mail_trigger_plugin_unavailable">El plugin de correo no está instalado o no ofrece vigilancias en segundo plano</string>
+    <string name="text_mail_trigger_watch">Vigilancia en segundo plano</string>
+    <string name="text_mail_trigger_watch_any">Cualquier vigilancia</string>
+    <string name="text_mail_trigger_watch_none">Aún no hay ninguna vigilancia en segundo plano configurada; añada una en la página de vigilancias de los ajustes del plugin de correo</string>
     <string name="text_main_file_name">Nombre del archivo principal de la secuencia de comandos</string>
     <string name="text_malfunctioning">Mal funcionamiento</string>
     <string name="text_manage">Gestionar</string>
@@ -1961,6 +1968,7 @@
     <string name="text_run_on_config_change">Al cambiar la configuración</string>
     <string name="text_run_on_conn_change">Al cambiar la conexión a Internet</string>
     <string name="text_run_on_headset_plug">Al conectar los auriculares</string>
+    <string name="text_run_on_mail_arrived">Al llegar un correo (vigilancia en segundo plano del plugin de correo)</string>
     <string name="text_run_on_package_install">En paquete instalado</string>
     <string name="text_run_on_package_uninstall">En paquete desinstalado</string>
     <string name="text_run_on_package_update">Al actualizar el paquete</string>

@@ -24,6 +24,13 @@ public class IntentTask extends BaseModel {
 
     private boolean mLocal;
 
+    /**
+     * Task-specific settings as JSON; the "mail arrived" task keeps the watch it listens to and
+     * its filter here ({@code MailTriggerTaskExtras}), other tasks leave it null.
+     * zh-CN: 任务特有的设置 (JSON); "邮件到达" 任务在此保存所监听的守望与过滤 ({@code MailTriggerTaskExtras}), 其他任务为 null.
+     */
+    private String mExtras;
+
     public IntentFilter getIntentFilter() {
         IntentFilter filter = new IntentFilter();
         if (mAction != null) {
@@ -103,5 +110,13 @@ public class IntentTask extends BaseModel {
 
     public void setLocal(boolean local) {
         mLocal = local;
+    }
+
+    public String getExtras() {
+        return mExtras;
+    }
+
+    public void setExtras(String extras) {
+        mExtras = extras;
     }
 }

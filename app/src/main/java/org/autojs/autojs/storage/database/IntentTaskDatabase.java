@@ -10,7 +10,7 @@ import org.autojs.autojs.timing.IntentTask;
 
 public class IntentTaskDatabase extends Database<IntentTask> {
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
     private static final String NAME = "IntentTaskDatabase";
 
     public IntentTaskDatabase(Context context) {
@@ -27,6 +27,7 @@ public class IntentTaskDatabase extends Database<IntentTask> {
         values.put("category", model.getCategory());
         values.put("data_type", model.getDataType());
         values.put("local", model.isLocal() ? 1 : 0);
+        values.put("extras", model.getExtras());
         return values;
     }
 
@@ -41,6 +42,7 @@ public class IntentTaskDatabase extends Database<IntentTask> {
         task.setLocal(cursor.getInt(5) != 0);
         task.setSourceKind(getString(cursor, "source_kind"));
         task.setProjectRoot(getString(cursor, "project_root"));
+        task.setExtras(getString(cursor, "extras"));
         return task;
     }
 
@@ -65,7 +67,8 @@ public class IntentTaskDatabase extends Database<IntentTask> {
                     "`data_type` TEXT, " +
                     "`local` INT, " +
                     "`source_kind` TEXT, " +
-                    "`project_root` TEXT);");
+                    "`project_root` TEXT, " +
+                    "`extras` TEXT);");
         }
 
         @Override
@@ -77,6 +80,9 @@ public class IntentTaskDatabase extends Database<IntentTask> {
             if (oldVersion < 3) {
                 db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD source_kind TEXT");
                 db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD project_root TEXT");
+            }
+            if (oldVersion < 4) {
+                db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD extras TEXT");
             }
         }
     }

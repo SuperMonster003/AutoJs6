@@ -1,7 +1,8 @@
 # Mail Plugin Protocol V1
 
-Status: final V1 contract (`MailContract.CONTRACT_VERSION` 1), shipped with plugin release
-1.0.0 on 2026-09-20. The host contract module `plugin-api/mail-api` (mail roadmap P1.1) froze the
+Status: V1 contract shipped with plugin release 1.0.0 on 2026-09-20; version 2 (background
+watches and triggers, mail roadmap P8, `MailContract.CONTRACT_VERSION` 2 with
+`MIN_CONTRACT_VERSION` 1) appended on 2026-09-21 for plugin release 1.1.0, see "Version 2" below. The host contract module `plugin-api/mail-api` (mail roadmap P1.1) froze the
 six AIDL interfaces, the Bundle keys, the JSON envelope, the operation names, the error
 vocabulary and the ceilings listed here. Transaction numbers are frozen in declaration order; a
 later contract version may only append methods and optional keys. The host side of this
@@ -126,6 +127,9 @@ dies.
 | `statusJson` | String | plugin | session or watch status (`getStatus`, `onStatus`) |
 | `providersJson` | String | plugin | provider preset table (`listProviders`) |
 | `accountsJson` | String | plugin | saved accounts without secrets (`listSavedAccounts`) |
+| `triggerOptionsJson` | String | host | trigger subscription options (`openTrigger`, `IMailTrigger.update`; version 2) |
+| `triggersJson` | String | plugin | the background watches of the plugin (`listTriggers`; version 2) |
+| `triggerId` | String | plugin | the watch a `MAIL_TRIGGER` wake-up belongs to (version 2) |
 
 Secrets travel only inside the `openSession` bundle. They never appear in any JSON document,
 log line, exception message, `toString()`, crash report or changelog entry on either side.
@@ -369,6 +373,10 @@ cancellation to `CANCELLED` and file problems to `ATTACHMENT_NOT_FOUND` or `IO_F
 | `SESSION_IDLE_TIMEOUT_MS` | 10 min | idle connection teardown inside the plugin |
 | `DEFAULT_CONNECT_TIMEOUT_MS` / `DEFAULT_READ_TIMEOUT_MS` | 15 s / 60 s | socket timeouts |
 | `MAX_ERROR_MESSAGE_BYTES` | 4 KiB | `error.message` |
+| `MAX_TRIGGERS` | 16 | background watches configured in the plugin (version 2) |
+| `MAX_TRIGGER_SUBSCRIBERS` | 4 | `openTrigger` subscriptions per watch (version 2) |
+| `MAX_TRIGGER_RECORDS` | 100 | envelope summaries the plugin keeps per watch (version 2) |
+| `MIN_TRIGGER_INTERVAL_MS` | 3 s | the host launches one "mail arrived" task at most once per interval (version 2) |
 
 Host-side call timeouts (`MailContract.callTimeoutMs`): metadata operations 30 s,
 `messages.get` 120 s, transfers the larger of 5 min and the declared size at 64 KiB/s.
@@ -394,6 +402,9 @@ the documents; a script that meets `LIMIT_EXCEEDED` on a listing page can always
 version may append AIDL methods, add optional JSON fields and add operations; it may not change
 the meaning of an existing field or reorder methods. Plugins declare the host build they need
 through `requiresHostVersion`, which must be at least `MailIds.REQUIRED_HOST_VERSION_CODE`.
+Version 2 (below) is the first such extension: the host keeps accepting version 1 plugins and
+calls the appended methods only when the plugin declares version 2 and the `backgroundWatch`
+feature; a version 1 host never calls them and a version 2 plugin must serve version 1 hosts.
 
 ## Security Boundary
 
@@ -493,6 +504,133 @@ errors and host failures reach the script as `MailError` (`code`, `retryable`, `
 argument guards maps to `INVALID_ARGUMENT`. With `debug: true` the redacted trace lines of the
 progress documents go to `console.verbose`.
 
+## Version 2: Background Watches and Triggers (P8)
+
+Contract version 2 (`MailContract.CONTRACT_VERSION` 2, `TRIGGER_CONTRACT_VERSION` 2,
+`MIN_CONTRACT_VERSION` 1; host commit `be036195a`, plugin release 1.1.0) lets the plugin keep
+watching saved accounts while no script runs and lets the host run a script when a message
+arrives (mail roadmap P8, decision D30). Everything below is appended: the six V1 interfaces
+are unchanged and their transaction numbers are frozen.
+
+### Appended Binder surface
+
+```aidl
+interface IMailPlugin {
+    // ... the seven V1 methods ...
+    IMailTrigger openTrigger(in Bundle options, IMailTriggerCallback callback);   // 8
+    Bundle listTriggers();                                                        // 9
+}
+interface IMailTrigger { Bundle getStatus(); void update(in Bundle options); void stop(); }
+oneway interface IMailTriggerCallback {
+    void onMail(long generation, long seq, in Bundle event);
+    void onStatus(in Bundle status);
+}
+```
+
+| Method | Threading | Nullability and ownership |
+| --- | --- | --- |
+| `openTrigger` | synchronous, no network; the current status is delivered through `onStatus` right after it returns | null means the subscription was refused and the reason arrived (or arrives) through `onStatus` as a `stopped` status with `reason` `refused` and the error in `lastError`: `INVALID_ARGUMENT` for unusable options or an unknown watch, `WATCH_CLOSED` for a disabled watch, `LIMIT_EXCEEDED` beyond `MAX_TRIGGER_SUBSCRIBERS`; a caller that is not the installed same-signer host gets a `SecurityException`. A subscription while no watch runs yet (fresh plugin process) also starts the plugin's foreground service when Android allows it |
+| `listTriggers` | synchronous, no network | JSON under `triggersJson`; guarded like `listSavedAccounts` |
+| `IMailTrigger.getStatus` | synchronous | JSON under `statusJson`, the trigger status document below |
+| `IMailTrigger.update` | synchronous | replaces the subscriber's filter; the options must name the subscription's own watch, otherwise `IllegalArgumentException` |
+| `IMailTrigger.stop` | synchronous | ends the subscription only; the watch keeps running for the plugin's own record list and for the other subscribers. Idempotent; the host's death does the same |
+
+The plugin links to the callback binder and drops the subscription when the host dies. The
+watches themselves are configured on the plugin's settings page (name, saved-account alias,
+folder, mode, poll interval, optional sender and subject filters, enabled switch) and run in
+the plugin's `specialUse` foreground service on the P5 watchers; the host neither creates nor
+removes them through the contract (a script-level API is a later item).
+
+### Trigger options (`triggerOptionsJson`)
+
+```json
+{"triggerId": "alerts", "filter": {"from": ["bank"], "subject": ["invoice", "statement"]}}
+```
+
+`triggerId` names the watch (alias rules: NFC, lower case, 1 to 64 letters, digits, `.`, `_`,
+`-`); `filter` is optional, each group a string or an array of at most 16 entries of at most
+256 characters, trimmed and lower-cased; an entry of `from` matches as a substring of the
+sender's address or display name, an entry of `subject` as a substring of the subject; a group
+matches when one entry matches, a filter when every non-empty group matches. Unknown keys are
+refused with `INVALID_ARGUMENT`. `generation` (Long, Bundle key `generation`) is echoed by
+every `onMail` of the subscription.
+
+### Trigger status (`statusJson` of a trigger)
+
+```json
+{"triggerId": "alerts", "state": "connected", "mode": "idle", "since": 1758400000000, "lastMailAt": 1758400123456}
+{"triggerId": "alerts", "state": "stopped", "reason": "disabled", "since": 1758400000000}
+{"triggerId": "alerts", "state": "failed", "lastError": {"code": "AUTH_FAILED", "message": "...", "retryable": false}, "since": 1758400000000}
+```
+
+`state` is one of `MailContract.TRIGGER_STATES`: `stopped` (with `reason` `disabled`,
+`removed`, `service-stopped` or `refused`), `connecting` (also while reconnecting after an
+error, whose document is `lastError`), `connected` (the folder is open; `mode` is `idle` or
+`poll`) or `failed` (the watcher closed with an error; the plugin restarts it after the P5
+backoff maximum). `since` is when the watch was configured, `lastMailAt` the last delivery.
+
+### Watch list (`triggersJson`)
+
+```json
+{"triggers": [{"triggerId": "alerts", "alias": "work", "address": "me@example.org", "enabled": true, "folder": "INBOX",
+               "mode": "idle", "pollIntervalMs": 60000, "filter": {"from": [], "subject": []}, "since": 1758400000000,
+               "records": 12, "status": {"triggerId": "alerts", "state": "connected", "mode": "idle", "since": 1758400000000}}]}
+```
+
+`address` is the saved account's address when the plugin can read the account, `records` the
+number of envelope summaries the plugin keeps for the watch (at most `MAX_TRIGGER_RECORDS`).
+The host's task editor lists these entries; `MailPluginHost.listTriggers` answers the empty
+list for a plugin below version 2 or without the `backgroundWatch` feature.
+
+### Mail event (`eventJson` of `onMail` and of the wake-up intent)
+
+```json
+{"type": "mail", "triggerId": "alerts", "alias": "work", "address": "me@example.org", "folder": "INBOX",
+ "message": {"uid": 4711, "folder": "INBOX", "subject": "...", "from": {"name": "...", "address": "..."}, "...": "..."},
+ "receivedAt": 1758400123456}
+```
+
+`message` is the P5 envelope (`bodyLoaded` false, never a body); `receivedAt` is the plugin's
+clock when the watcher reported the message. `seq` counts from 1 per subscription; an event
+that does not fit `MAX_ENVELOPE_BYTES` is dropped. The plugin records every delivery in the
+watch's record list before it delivers it (`MailContract.TRIGGER_EVENT_MAIL`).
+
+### Wake-up without a subscriber
+
+While a watch has no live `openTrigger` subscriber the plugin sends every event to the host
+package as the explicit broadcast `MailActions.HOST_TRIGGER_ACTION`
+(`org.autojs.autojs6.action.MAIL_TRIGGER`) with the extras `contractVersion` (2), `triggerId`
+and `eventJson`, delivered with the receiver permission `org.autojs.permission.PLUGIN`, so only
+the same-signer host receives it and only a same-signer package can send it. The plugin looks
+the receiver up first (`queryBroadcastReceivers` on the host package, without
+`FLAG_INCLUDE_STOPPED_PACKAGES`): a host that lacks it (version 1 host) is reported on the
+plugin's watches page and the events stay in the record list. Android does not deliver the
+broadcast to a force-stopped host; a host process that merely died is started by it.
+
+### Host side
+
+`MailTriggerReceiver` (manifest receiver, exported behind `org.autojs.permission.PLUGIN`)
+parses the event (`MailTriggerEvent`), loads the intent tasks of the action and hands them to
+`MailTriggerDispatcher` on the main thread: a delivery already seen (same watch, folder and
+uid among the last 512) launches nothing; each task listens to one watch or to every watch and
+may carry its own filter (`IntentTask.extras`, `MailTriggerTaskExtras`, the same shape and
+semantics as the plugin filter); a task launched less than `MIN_TRIGGER_INTERVAL_MS` ago is not
+launched again at once, the latest event is kept and launched when the interval has passed.
+The launch goes through `ScriptIntents.prepareLaunch` like the other broadcast tasks: the
+wake-up intent is the script's `intent` argument and the event document, converted to plain
+objects, is `engines.myEngine().execArgv.mail`. The task editor offers "On mail arrived" with
+a watch picker fed by `listTriggers` (plus "any watch") and the two filter fields; the task
+list shows the watch id. The dynamic broadcast receivers of the timed-task manager never
+register the trigger action, so it cannot be spoofed by an unprivileged sender.
+
+### Degradation
+
+| Host | Plugin | Behaviour |
+| --- | --- | --- |
+| version 1 | version 2 | the plugin serves the V1 surface unchanged; its watches page reports that the host cannot be woken; no broadcast is sent |
+| version 2 | version 1 | `MailPluginHost.listTriggers` answers `{"triggers": []}` without calling the plugin; the task editor's picker says the plugin offers no background watches; no `openTrigger` is ever issued |
+| version 2 | version 2 without `backgroundWatch` | as above: the feature gate, not the version alone, enables the calls |
+
 ## Open Items
 
 - P1.3: closed on 2026-09-18 with `MailPluginRoundTripTest` on the API 24 emulator and a Redmi
@@ -533,3 +671,13 @@ progress documents go to `console.verbose`.
   the plugin README in ten languages); the host changelog carries the contract, script API and
   watch entries in all ten languages, and the host README has no plugin list to extend. All items
   of this section are closed; the contract stays at version 1 for plugin release 1.0.0.
+- P8: contract version 2 (this document's "Version 2" section) landed in the host on
+  2026-09-21 (`plugin-api/mail-api` at `be036195a`; `MailTriggerReceiver`, `MailTriggerDispatcher`,
+  `MailTriggerTaskExtras`, `IntentTask.extras` with `IntentTaskDatabase` version 4, the
+  "On mail arrived" task of `TimedTaskSettingActivity`, `MailPluginHost.listTriggers`,
+  `Engines.setEngineExecArgv` converting maps and lists) and in the plugin as release 1.1.0
+  (build 59: the trigger store, the watch keeper, the `specialUse` foreground service, the
+  watches page, `MailTriggerBinder`); the plugin repository records the device evidence in
+  `docs/dev/p8-background-watch-evidence.md`. `openTrigger` is used by no host code yet: the
+  task path relies on the wake-up broadcast in both host states, the subscription is kept for
+  a later script-level API.

@@ -1530,6 +1530,13 @@
     <string name="text_lower_than">Lower than</string>
     <string name="text_mail">Mail</string>
     <string name="text_mail_settings">Mail account settings</string>
+    <string name="text_mail_trigger_filter_from">Sender contains (optional, separate entries with commas)</string>
+    <string name="text_mail_trigger_filter_subject">Subject contains (optional, separate entries with commas)</string>
+    <string name="text_mail_trigger_hint">The mail plugin keeps the watch connected in the background and wakes this script for every new message; the script reads the message from engines.myEngine().execArgv.mail</string>
+    <string name="text_mail_trigger_plugin_unavailable">The mail plugin is not installed or does not offer background watches</string>
+    <string name="text_mail_trigger_watch">Background watch</string>
+    <string name="text_mail_trigger_watch_any">Any watch</string>
+    <string name="text_mail_trigger_watch_none">No background watch is configured yet; add one on the Watches page of the mail plugin settings</string>
     <string name="text_main_file_name">Main script file name</string>
     <string name="text_malfunctioning">Malfunctioning</string>
     <string name="text_manage">Manage</string>
@@ -1957,6 +1964,7 @@
     <string name="text_run_on_config_change">On config changed</string>
     <string name="text_run_on_conn_change">On internet connection changed</string>
     <string name="text_run_on_headset_plug">On headset plugged</string>
+    <string name="text_run_on_mail_arrived">On mail arrived (mail plugin background watch)</string>
     <string name="text_run_on_package_install">On package installed</string>
     <string name="text_run_on_package_uninstall">On package uninstalled</string>
     <string name="text_run_on_package_update">On package updated</string>

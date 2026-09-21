@@ -1531,6 +1531,13 @@
     <string name="text_lower_than">低于</string>
     <string name="text_mail">邮件</string>
     <string name="text_mail_settings">邮件账户设置</string>
+    <string name="text_mail_trigger_filter_from">发件人包含 (可选, 多项以逗号分隔)</string>
+    <string name="text_mail_trigger_filter_subject">主题包含 (可选, 多项以逗号分隔)</string>
+    <string name="text_mail_trigger_hint">邮件插件在后台保持守望连接, 每封新邮件到达时唤醒此脚本; 脚本通过 engines.myEngine().execArgv.mail 读取该邮件</string>
+    <string name="text_mail_trigger_plugin_unavailable">邮件插件未安装或不支持后台守望</string>
+    <string name="text_mail_trigger_watch">后台守望</string>
+    <string name="text_mail_trigger_watch_any">任意守望</string>
+    <string name="text_mail_trigger_watch_none">尚未配置后台守望, 请在邮件插件设置的守望页面添加</string>
     <string name="text_main_file_name">主脚本文件名</string>
     <string name="text_malfunctioning">功能故障</string>
     <string name="text_manage">管理</string>
@@ -1958,6 +1965,7 @@
     <string name="text_run_on_config_change">某些设置 (屏幕方向, 地区等) 更改时</string>
     <string name="text_run_on_conn_change">网络连接变化时</string>
     <string name="text_run_on_headset_plug">耳机插拔时</string>
+    <string name="text_run_on_mail_arrived">邮件到达时 (邮件插件后台守望)</string>
     <string name="text_run_on_package_install">新应用安装时</string>
     <string name="text_run_on_package_uninstall">应用卸载时</string>
     <string name="text_run_on_package_update">应用更新时</string>

@@ -1536,6 +1536,13 @@
     <string name="text_lower_than">أقل من</string>
     <string name="text_mail">البريد</string>
     <string name="text_mail_settings">إعدادات حسابات البريد</string>
+    <string name="text_mail_trigger_filter_from">المرسل يحتوي على (اختياري، افصل بين الإدخالات بفواصل)</string>
+    <string name="text_mail_trigger_filter_subject">الموضوع يحتوي على (اختياري، افصل بين الإدخالات بفواصل)</string>
+    <string name="text_mail_trigger_hint">تبقي إضافة البريد المراقبة متصلة في الخلفية وتوقظ هذا السكربت عند كل بريد جديد؛ يقرأ السكربت البريد من engines.myEngine().execArgv.mail</string>
+    <string name="text_mail_trigger_plugin_unavailable">إضافة البريد غير مثبتة أو لا تدعم المراقبة في الخلفية</string>
+    <string name="text_mail_trigger_watch">المراقبة في الخلفية</string>
+    <string name="text_mail_trigger_watch_any">أي مراقبة</string>
+    <string name="text_mail_trigger_watch_none">لم يتم إعداد أي مراقبة في الخلفية بعد؛ أضف واحدة من صفحة المراقبات في إعدادات إضافة البريد</string>
     <string name="text_main_file_name">اسم ملف البرنامج النصي الرئيسي</string>
     <string name="text_malfunctioning">خلل</string>
     <string name="text_manage">يدير</string>
@@ -1963,6 +1970,7 @@
     <string name="text_run_on_config_change">على التكوين تغيرت</string>
     <string name="text_run_on_conn_change">على اتصال الإنترنت تغيرت</string>
     <string name="text_run_on_headset_plug">على سماعات الرأس الموصولة</string>
+    <string name="text_run_on_mail_arrived">عند وصول بريد (المراقبة في الخلفية لإضافة البريد)</string>
     <string name="text_run_on_package_install">على الحزمة المثبتة</string>
     <string name="text_run_on_package_uninstall">على حزمة إلغاء تثبيت</string>
     <string name="text_run_on_package_update">على الحزمة تحديث</string>

@@ -1531,6 +1531,13 @@
     <string name="text_lower_than">低於</string>
     <string name="text_mail">郵件</string>
     <string name="text_mail_settings">郵件帳戶設定</string>
+    <string name="text_mail_trigger_filter_from">寄件者包含 (可選, 多項以逗號分隔)</string>
+    <string name="text_mail_trigger_filter_subject">主旨包含 (可選, 多項以逗號分隔)</string>
+    <string name="text_mail_trigger_hint">郵件外掛程式在背景保持守望連線, 每封新郵件到達時喚醒此指令碼; 指令碼透過 engines.myEngine().execArgv.mail 讀取該郵件</string>
+    <string name="text_mail_trigger_plugin_unavailable">郵件外掛程式未安裝或不支援背景守望</string>
+    <string name="text_mail_trigger_watch">背景守望</string>
+    <string name="text_mail_trigger_watch_any">任意守望</string>
+    <string name="text_mail_trigger_watch_none">尚未設定背景守望, 請在郵件外掛程式設定的守望頁面新增</string>
     <string name="text_main_file_name">主指令碼檔名</string>
     <string name="text_malfunctioning">功能故障</string>
     <string name="text_manage">管理</string>
@@ -1958,6 +1965,7 @@
     <string name="text_run_on_config_change">某些設定 (螢幕方向, 地區等) 更改時</string>
     <string name="text_run_on_conn_change">網路連線變化時</string>
     <string name="text_run_on_headset_plug">耳機插拔時</string>
+    <string name="text_run_on_mail_arrived">郵件到達時 (郵件外掛程式背景守望)</string>
     <string name="text_run_on_package_install">新應用安裝時</string>
     <string name="text_run_on_package_uninstall">應用解除安裝時</string>
     <string name="text_run_on_package_update">應用更新時</string>

@@ -1535,6 +1535,13 @@
     <string name="text_lower_than">より低い</string>
     <string name="text_mail">メール</string>
     <string name="text_mail_settings">メールアカウント設定</string>
+    <string name="text_mail_trigger_filter_from">送信者に含む (任意, 複数はカンマ区切り)</string>
+    <string name="text_mail_trigger_filter_subject">件名に含む (任意, 複数はカンマ区切り)</string>
+    <string name="text_mail_trigger_hint">メールプラグインがバックグラウンドで監視接続を維持し, 新着メールごとにこのスクリプトを起動します. スクリプトは engines.myEngine().execArgv.mail からメールを読み取ります</string>
+    <string name="text_mail_trigger_plugin_unavailable">メールプラグインが未インストールか, バックグラウンド監視に対応していません</string>
+    <string name="text_mail_trigger_watch">バックグラウンド監視</string>
+    <string name="text_mail_trigger_watch_any">すべての監視</string>
+    <string name="text_mail_trigger_watch_none">バックグラウンド監視がまだ設定されていません. メールプラグイン設定の監視ページで追加してください</string>
     <string name="text_main_file_name">メインスクリプトファイル名</string>
     <string name="text_malfunctioning">機能不全</string>
     <string name="text_manage">管理画面</string>
@@ -1962,6 +1969,7 @@
     <string name="text_run_on_config_change">設定変更時</string>
     <string name="text_run_on_conn_change">インターネット接続が変更されたとき</string>
     <string name="text_run_on_headset_plug">ヘッドセットが接続された</string>
+    <string name="text_run_on_mail_arrived">メール到着時 (メールプラグインのバックグラウンド監視)</string>
     <string name="text_run_on_package_install">パッケージがインストールされたとき</string>
     <string name="text_run_on_package_uninstall">オンパッケージアンインストール</string>
     <string name="text_run_on_package_update">パッケージが更新されたとき</string>

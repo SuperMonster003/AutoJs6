@@ -23,7 +23,14 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
+import androidx.lifecycle.lifecycleScope
+import com.afollestad.materialdialogs.MaterialDialog
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout
+import kotlinx.coroutines.launch
+import org.autojs.autojs.core.plugin.mail.MailPluginHost
+import org.autojs.autojs.core.plugin.mail.MailTriggerFilter
+import org.autojs.autojs.core.plugin.mail.MailTriggerTaskExtras
+import org.autojs.autojs.core.plugin.mail.MailTriggerWatchEntry
 import org.autojs.autojs.core.ui.BiMaps
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ExecutionConfig.CREATOR.default
@@ -55,6 +62,7 @@ import org.autojs.autojs6.databinding.ActivityTimedTaskSettingBinding
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
+import org.autojs.plugin.mail.api.MailActions
 import org.joda.time.format.DateTimeFormat
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog as MaterialDatePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog as MaterialTimePickerDialog
@@ -76,6 +84,10 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mRunOnBroadcastRadio: RadioButton
     private lateinit var mRunOnCustomBroadcast: RadioButton
     private lateinit var mCustomBroadcastAction: EditText
+    private lateinit var mRunOnMailArrived: RadioButton
+    private lateinit var mMailTriggerWatch: EditText
+    private lateinit var mMailTriggerFrom: EditText
+    private lateinit var mMailTriggerSubject: EditText
     private lateinit var mBroadcastGroup: RadioGroup
     private lateinit var mDisposableTaskTime: TextView
     private lateinit var mDisposableTaskDate: TextView
@@ -100,6 +112,9 @@ class TimedTaskSettingActivity : BaseActivity() {
 
     private var mTimedTask: TimedTask? = null
     private var mIntentTask: IntentTask? = null
+
+    /** The watch a "mail arrived" task listens to; empty for every watch (mail roadmap P8). zh-CN: "邮件到达" 任务监听的守望; 空表示全部 (邮件路线图 P8). */
+    private var mMailTriggerWatchId: String = ""
     private lateinit var mScriptFile: ScriptFile
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,6 +133,20 @@ class TimedTaskSettingActivity : BaseActivity() {
                 }
             }
         }
+        mRunOnMailArrived = binding.runOnMailArrived
+        mMailTriggerWatch = binding.mailTriggerWatch.apply {
+            setOnClickListener {
+                mRunOnMailArrived.isChecked = true
+                showMailTriggerWatchPicker()
+            }
+        }
+        mMailTriggerFrom = binding.mailTriggerFrom.apply {
+            setUpMailTriggerInput()
+        }
+        mMailTriggerSubject = binding.mailTriggerSubject.apply {
+            setUpMailTriggerInput()
+        }
+        renderMailTriggerWatch()
         mBroadcastGroup = binding.broadcastGroup.apply {
             setUpRadioButtonListeners()
         }
@@ -268,6 +297,48 @@ class TimedTaskSettingActivity : BaseActivity() {
         setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
     }
 
+    private fun EditText.setUpMailTriggerInput() {
+        setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                mRunOnMailArrived.isChecked = true
+            }
+        }
+    }
+
+    private fun renderMailTriggerWatch() {
+        mMailTriggerWatch.setText(mMailTriggerWatchId.ifEmpty { getString(R.string.text_mail_trigger_watch_any) })
+    }
+
+    /**
+     * Offers the plugin's background watches (`IMailPlugin.listTriggers`, contract version 2) plus
+     * "any watch"; a missing plugin or one without the feature is reported, not treated as an error.
+     * zh-CN: 提供插件的后台守望 (`IMailPlugin.listTriggers`, 契约版本 2) 以及 "任意守望"; 插件缺失或不支持时提示, 不视为错误.
+     */
+    private fun showMailTriggerWatchPicker() {
+        lifecycleScope.launch {
+            val entries = runCatching { MailTriggerWatchEntry.parseList(MailPluginHost.listTriggers(this@TimedTaskSettingActivity)) }
+                .onFailure { Log.w(LOG_TAG, "listTriggers failed: ${it.javaClass.simpleName}") }
+                .getOrNull()
+            if (isFinishing || isDestroyed) return@launch
+            if (entries == null) {
+                showToast(this@TimedTaskSettingActivity, R.string.text_mail_trigger_plugin_unavailable, true)
+                return@launch
+            }
+            if (entries.isEmpty()) {
+                showToast(this@TimedTaskSettingActivity, R.string.text_mail_trigger_watch_none, true)
+            }
+            val labels = listOf(getString(R.string.text_mail_trigger_watch_any)) + entries.map { it.label }
+            MaterialDialog.Builder(this@TimedTaskSettingActivity)
+                .title(R.string.text_mail_trigger_watch)
+                .items(labels)
+                .itemsCallback { _, _, which, _ ->
+                    mMailTriggerWatchId = if (which <= 0) "" else entries[which - 1].triggerId
+                    renderMailTriggerWatch()
+                }
+                .show()
+        }
+    }
+
     private fun EditText.setUpCountdownInput() {
         setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -396,6 +467,13 @@ class TimedTaskSettingActivity : BaseActivity() {
             mCustomBroadcastAction.setText(intentTask.action)
         } else {
             (findViewById<View>(buttonId) as RadioButton).isChecked = true
+        }
+        if (intentTask.action == MailActions.HOST_TRIGGER_ACTION) {
+            val extras = MailTriggerTaskExtras.parse(intentTask.extras)
+            mMailTriggerWatchId = extras.triggerId
+            mMailTriggerFrom.setText(extras.filter.from.joinToString(", "))
+            mMailTriggerSubject.setText(extras.filter.subject.joinToString(", "))
+            renderMailTriggerWatch()
         }
     }
 
@@ -719,6 +797,16 @@ class TimedTaskSettingActivity : BaseActivity() {
         } else {
             actionString = ACTIONS[buttonId]
         }
+        val extrasJson = when (buttonId) {
+            R.id.run_on_mail_arrived -> MailTriggerTaskExtras(
+                triggerId = mMailTriggerWatchId,
+                filter = MailTriggerFilter(
+                    from = MailTriggerFilter.split(mMailTriggerFrom.text?.toString()),
+                    subject = MailTriggerFilter.split(mMailTriggerSubject.text?.toString()),
+                ),
+            ).toJson()
+            else -> null
+        }
         val preservedContext = existingLaunchContext()
         val task = try {
             IntentTask().apply {
@@ -733,6 +821,7 @@ class TimedTaskSettingActivity : BaseActivity() {
                 if (actionString == DynamicBroadcastReceivers.ACTION_STARTUP) {
                     isLocal = true
                 }
+                extras = extrasJson
             }
         } catch (error: PythonProjectLaunchException) {
             showToast(this, error.message, true)
@@ -785,6 +874,7 @@ class TimedTaskSettingActivity : BaseActivity() {
             .put(Intent.ACTION_HEADSET_PLUG, R.string.text_run_on_headset_plug)
             .put(Intent.ACTION_CONFIGURATION_CHANGED, R.string.text_run_on_config_change)
             .put(Intent.ACTION_TIME_TICK, R.string.text_run_on_time_tick)
+            .put(MailActions.HOST_TRIGGER_ACTION, R.string.text_run_on_mail_arrived)
             .build()
 
         @Suppress("DEPRECATION")
@@ -804,6 +894,7 @@ class TimedTaskSettingActivity : BaseActivity() {
             .put(R.id.run_on_headset_plug, Intent.ACTION_HEADSET_PLUG)
             .put(R.id.run_on_config_change, Intent.ACTION_CONFIGURATION_CHANGED)
             .put(R.id.run_on_time_tick, Intent.ACTION_TIME_TICK)
+            .put(R.id.run_on_mail_arrived, MailActions.HOST_TRIGGER_ACTION)
             .build()
 
     }
