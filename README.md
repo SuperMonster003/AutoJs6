@@ -211,6 +211,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` mail.watch 方法, 用于监听新邮件并支持断线重连
 * `新增` epub 模块, 用于读取电子书元数据, 目录, 章节文本及封面, 并支持资源导出与全文搜索 (需要 Readium EPUB Reader 插件)
 * `新增` epub.read 方法, 用于打开电子书阅读器并控制阅读位置, 书签及阅读偏好
+* `新增` epub.annotations/annotationsAsync 及书籍对象的同名方法, 用于读取高亮与笔记, 阅读器会话支持监听标注变更 (需要 Readium EPUB Reader 插件 1.1.0+)
 * `新增` device.pageSize 属性 (getter), 用于获取系统内存页大小
 * `新增` device.getMarketName 方法, 用于获取设备的市场名称 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` ui.useAndroidLayout 方法, 用于启用 Android 原生布局控件支持
@@ -259,6 +260,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 代码编辑器支持独立设置页面, 提供主题, 字体, 行号, 自动换行, 代码高亮阈值及日志面板显示等选项
 * `新增` 定时任务支持按月/按年/倒计时任务及重复结束条件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `新增` 项目文件夹支持创建定时任务及广播任务
+* `新增` 广播任务增加 "邮件到达时" 类型, 支持选择后台守望及按发件人和主题筛选, 邮件信息可通过 engines.myEngine().execArgv.mail 获取 (需要 Angus Mail 插件 1.1.0+)
 * `新增` 打包应用配置支持显示或隐藏日志及设置启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 布局分析支持多属性组合选择器复制, 节点树保存与离线分析, 并支持生成 Flow 风格代码
 * `新增` 设置页面增加回收站, 版本历史及紧急草稿的保留策略, 支持按天数, 数量及容量清理
