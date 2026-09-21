@@ -520,8 +520,14 @@ progress documents go to `console.verbose`.
   contract change: the only protocol-visible additions are the `idlePush` preset field (build 36)
   and the mapping of a server that offers no usable mechanism to the existing
   `AUTH_MECHANISM_UNSUPPORTED` code (build 46, Outlook.com `LOGINDISABLED`); the Gmail column ran
-  with a renewed token on 2026-09-20 and the Outlook.com column stops at that code because
-  Microsoft refuses app passwords on IMAP, POP3 and SMTP.
+  with a renewed token on 2026-09-20 and the Outlook.com column stopped at that code because
+  Microsoft refuses app passwords on IMAP, POP3 and SMTP. On 2026-09-21 the Outlook.com column
+  ran with an OAuth 2.0 token from the maintainer's Entra public-client registration (plugin build
+  56): every row passes, IDLE pushes within about 10 s, and the only protocol-visible addition is
+  the preset field `pop3Xoauth2TwoLine` (catalog version 3): Outlook.com takes the POP3 `AUTH
+  XOAUTH2` only in the two-line form, which the plugin now selects for the `outlook` / `office365`
+  presets and the Microsoft hosts. The host reads the catalog leniently (`MailProviderCatalog`,
+  Gson), so no host change is needed.
 - P7: documentation shipped on 2026-09-20 (the `mail` module pages of `AutoJs6-Documentation`,
   `aj6-int-mail.d.ts` in the declarations 4.18.0, the Ace Editor and Offline Docs plugin bundles,
   the plugin README in ten languages); the host changelog carries the contract, script API and
