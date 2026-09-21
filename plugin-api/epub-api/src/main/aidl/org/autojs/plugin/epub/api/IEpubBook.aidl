@@ -4,10 +4,11 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 /**
- * One open book (contract version 1). Calls on one book are serialized by the plugin; different
- * books run in parallel. Every Bundle answer either carries the documented result keys or
- * EpubContract.KEY_ERROR_CODE plus KEY_ERROR_MESSAGE; after close every call answers
- * EpubErrorCodes.SESSION_CLOSED.
+ * One open book (contract versions 1 and 2). Calls on one book are serialized by the plugin;
+ * different books run in parallel. Every Bundle answer either carries the documented result keys
+ * or EpubContract.KEY_ERROR_CODE plus KEY_ERROR_MESSAGE; after close every call answers
+ * EpubErrorCodes.SESSION_CLOSED. Transaction codes follow the declaration order: a method may only
+ * ever be appended.
  */
 interface IEpubBook {
     /** Metadata document as JSON under EpubContract.KEY_METADATA (at most MAX_METADATA_BYTES). */
@@ -46,4 +47,14 @@ interface IEpubBook {
 
     /** Releases the book and its descriptor; idempotent. */
     void close();
+
+    /**
+     * Contract version 2: the reader's highlights and notes of this book as JSON under
+     * EpubContract.KEY_ANNOTATIONS, in reading order, skipping KEY_OFFSET entries and answering at
+     * most KEY_LIMIT of them (default DEFAULT_ANNOTATIONS_LIMIT, at most MAX_ANNOTATIONS_PAGE; a
+     * page is cut early to stay below MAX_ANNOTATIONS_BYTES). The answer carries KEY_OFFSET (echo)
+     * and KEY_HAS_MORE; the next page starts at offset plus the returned length. Hosts that
+     * negotiated version 1 must not call it.
+     */
+    Bundle getAnnotations(in Bundle request);
 }

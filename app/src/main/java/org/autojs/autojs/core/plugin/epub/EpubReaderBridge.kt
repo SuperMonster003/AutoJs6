@@ -7,8 +7,9 @@ import java.util.concurrent.atomic.AtomicLong
  * One reader-session event as the host reads it off the callback Bundle (plugin roadmap P5.3 /
  * P5.4): `type` is one of `EpubContract.EVENTS`; the other fields are present per type (`open`:
  * visible, title, locator, positions; `progress`: locator, progression, title, href; `bookmark`:
- * change and the bookmark document as a one-element `bookmarks` array; `close`: reason;
- * `error`: code and message).
+ * change and the bookmark document as a one-element `bookmarks` array; `highlight` (contract
+ * version 2): change and the annotation document as a one-element `annotations` array; `close`:
+ * reason; `error`: code and message).
  */
 data class EpubReaderEvent(
     val type: String,
@@ -23,6 +24,7 @@ data class EpubReaderEvent(
     val bookmarksJson: String? = null,
     val errorCode: String? = null,
     val errorMessage: String? = null,
+    val annotationsJson: String? = null,
 )
 
 /** Receives the events an [EpubReaderBridge] accepted; the script-side session object (roadmap P6) implements it. */

@@ -33,9 +33,12 @@ class EpubReaderBridgeTest {
         assertEquals(7L, bridge.generation)
         assertTrue(bridge.accept(7L, 2L, event()))
         assertTrue(bridge.accept(7L, 10L, event(EpubContract.EVENT_BOOKMARK)))
-        assertEquals(3L, bridge.deliveredCount)
-        assertEquals(10L, bridge.lastSeq)
-        assertEquals(listOf(EpubContract.EVENT_OPEN, EpubContract.EVENT_PROGRESS, EpubContract.EVENT_BOOKMARK), sink.events.map { it.type })
+        // Contract version 2: `highlight` is a known type, so the bridge passes it like the others.
+        assertTrue(bridge.accept(7L, 11L, EpubReaderEvent(EpubContract.EVENT_HIGHLIGHT, change = EpubContract.CHANGE_ADDED, annotationsJson = "[]")))
+        assertEquals(4L, bridge.deliveredCount)
+        assertEquals(11L, bridge.lastSeq)
+        assertEquals(listOf(EpubContract.EVENT_OPEN, EpubContract.EVENT_PROGRESS, EpubContract.EVENT_BOOKMARK, EpubContract.EVENT_HIGHLIGHT), sink.events.map { it.type })
+        assertEquals("[]", sink.events.last().annotationsJson)
         assertTrue(sink.dropped.isEmpty())
         assertFalse(bridge.isClosed)
     }

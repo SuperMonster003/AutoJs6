@@ -1,10 +1,13 @@
 # EPUB Plugin Protocol V1
 
-Status: final V1 contract (`EpubContract.CONTRACT_VERSION` 1), frozen with host commit
-`261417e90` (plugin roadmap P5.1) and delivered by the Readium EPUB Reader plugin (package
+Status: final V1 contract, frozen with host commit `261417e90` (plugin roadmap P5.1) and
+delivered by the Readium EPUB Reader plugin (package
 `io.github.supermonster003.autojs6.plugin.readium.epub.reader`, plugin id `readium-epub-reader`)
-from build 48 (book extraction, roadmap P5.2) and build 49 (reader sessions, roadmap P5.3). The
-host contract module `plugin-api/epub-api` carries the four AIDL interfaces, the Bundle keys, the
+from build 48 (book extraction, roadmap P5.2) and build 49 (reader sessions, roadmap P5.3), plus
+the additive contract version 2 (`EpubContract.CONTRACT_VERSION` 2, plugin roadmap P9.4, plugin
+1.1.0): `IEpubBook.getAnnotations`, the `annotations` document, the `highlight` event, the
+`updated` change, the `annotations` feature and the version negotiation described under
+Versioning. The host contract module `plugin-api/epub-api` carries the four AIDL interfaces, the Bundle keys, the
 JSON field names, the closed value sets, the error vocabulary and the ceilings listed here;
 `EpubAidlOrderTest` guards the transaction order and the `oneway` marker, `EpubContractTest`
 snapshots the literals. Transaction numbers are frozen in declaration order; a later contract
@@ -78,6 +81,7 @@ IEpubBook
     Bundle search(in Bundle request)
     Bundle getPositions()
     void close()
+    Bundle getAnnotations(in Bundle request)    // contract version 2
 
 IEpubReaderSession
     Bundle getState()
@@ -91,8 +95,9 @@ IEpubReaderCallback (oneway)
     void onEvent(long generation, long seq, in Bundle event)
 ```
 
-Every Bundle written by the host carries `contractVersion` (`KEY_CONTRACT_VERSION`, currently
-`1`), and so does every Bundle answer and event written by the plugin. A Bundle answer either
+Every Bundle written by the host carries `contractVersion` (`KEY_CONTRACT_VERSION`, the
+negotiated version, see Versioning), and so does every Bundle answer and event written by the
+plugin (the version of the request that opened the book or session). A Bundle answer either
 carries its result keys or `errorCode` plus `errorMessage`; a method that cannot answer with a
 Bundle (`openBook`, `openReader`, `openResource`, and the `void` methods) throws across Binder
 with the message `CODE: detail` (`EpubErrorCodes.encode`): `IllegalArgumentException` for
@@ -106,7 +111,7 @@ code (`EpubErrorCodes.decode`); a message that does not start with a known code 
 | Method | Threading | Behaviour |
 | --- | --- | --- |
 | `getInfo` | synchronous | never null; the same `capabilities` bundle as `getCapabilities` |
-| `getCapabilities` | synchronous | `requiresHostVersion` (Long), `epubContractVersion` (Int), `epubFeatures` (String[]), `epubReadiumVersion` (String) |
+| `getCapabilities` | synchronous | `requiresHostVersion` (Long), `epubContractVersion` (Int, the baseline), `epubMaxContractVersion` (Int, optional, the newest version implemented; version 2 plugins), `epubFeatures` (String[]), `epubReadiumVersion` (String) |
 | `openBook` | synchronous, parses the publication (at most `OPEN_TIMEOUT_MS`, else `TIMEOUT`) | the descriptor must be a regular file; `options` at most `MAX_OPTIONS_BYTES` as a parcel; `displayName` is trimmed and cut to 255 characters; at most `MAX_OPEN_BOOKS` books per plugin process (`LIMIT_EXCEEDED`); `NOT_EPUB`, `ENCRYPTED`, `PARSE_FAILED` for what Readium cannot open |
 | `openReader` | synchronous, parses the publication like `openBook` | `callback` is required (`INVALID_ARGUMENT`); the start position (`locator`, `href` or `progression`) and the `preferences` document are validated before the session exists (see Reader Sessions); a new session replaces the previous one of the process |
 | `getMetadata`, `getToc`, `getReadingOrder`, `getPositions` | synchronous; calls on one book are serialized, different books run in parallel | JSON documents under `metadata`, `toc`, `readingOrder`; `toc` and `readingOrder` carry `hasMore` when the entry ceiling cut the array; `positions` is the synthetic page count |
@@ -114,6 +119,7 @@ code (`EpubErrorCodes.decode`); a message that does not start with a known code 
 | `openResource` | returns at once with the read end of a pipe; the plugin streams on a background thread | `href` must be a manifest resource of at most `MAX_HREF_LENGTH` characters without control characters, its length at most `MAX_RESOURCE_BYTES`; the write end is closed with an error when a read fails, so `ParcelFileDescriptor.checkError()` on the host tells a truncated stream from a complete one |
 | `search` | synchronous; a full page is computed before the answer | see Operations |
 | `close` (book) | synchronous; idempotent | later calls answer `SESSION_CLOSED`; a book without a call for `BOOK_IDLE_TIMEOUT_MS` is closed by the plugin's sweeper the same way |
+| `getAnnotations` (version 2) | synchronous; serialized like the other book calls | the reader's highlights and notes of the book as JSON under `annotations`, in reading order, from `offset` (default 0) and at most `limit` entries (0 means `DEFAULT_ANNOTATIONS_LIMIT`, at most `MAX_ANNOTATIONS_PAGE`, `LIMIT_EXCEEDED` above); a page is cut early to stay below `MAX_ANNOTATIONS_BYTES`; the answer echoes `offset` and carries `hasMore`; a host that negotiated version 1 must not call it (the Binder would answer an unknown transaction) |
 | `getState` | synchronous | the session token, `visible`, `positions` and, once the reader reported a locator, `locator`, `progression`, `href`, `index`, `title`; a closed session answers `SESSION_CLOSED` as a Bundle error |
 | `goTo` | validated synchronously, executed on the reader's main thread | at least one of `locator`, `href`, `progression`; the target is checked against the publication before it is accepted; a target that fails later on the reader side produces an `error` event instead |
 | `navigate` | executed on the reader's main thread | `direction` is one of `DIRECTION_*` (`INVALID_ARGUMENT` otherwise); `READER_NOT_VISIBLE` until the reader Activity claimed the session |
@@ -153,7 +159,7 @@ unbinds (`onUnbind`: books are closed, sessions send `close` with reason `host`)
 | `errorCode`, `errorMessage` | String | plugin | failure of a Bundle answer or an `error` event |
 | `event` | String | plugin | event type (`EVENT_*`) |
 | `reason` | String | plugin | `close` reason (`REASON_*`) |
-| `change` | String | plugin | `added` or `removed` (`bookmark` events) |
+| `change` | String | plugin | `added` or `removed` (`bookmark` events); also `updated` (`highlight` events, version 2) |
 | `sessionToken` | String | plugin | the session token (`getState`) |
 | `visible` | Boolean | plugin | whether the reader Activity is started (state, `open` events) |
 | `title` | String | plugin | book title in `open` events; chapter title in `progress` events and state |
@@ -162,6 +168,7 @@ unbinds (`onUnbind`: books are closed, sessions send `close` with reason `host`)
 | `positions` | Int | plugin | synthetic page count (`getPositions`, state, `open` events) |
 | `finish` | Boolean | host | finish the reader Activity when closing a session (default false) |
 | `metadata`, `toc`, `readingOrder`, `results`, `bookmarks` | String | plugin | JSON documents below |
+| `annotations` | String | plugin | the annotations document below (`getAnnotations` answers and `highlight` events; version 2) |
 
 Keys a reader does not know are ignored; the host never relies on a key this table does not
 list. The `openReader` and `openBook` options bundles are measured as parcels and refused above
@@ -236,6 +243,22 @@ be sent back unchanged.
 `createdAt` is UTC milliseconds; `title` (chapter) and `text` (snippet) are absent when the
 reader recorded none. The array is the reader's bookmark list of the book, at most
 `MAX_BOOKMARKS`; a `bookmark` event carries a one-element array with the changed bookmark.
+
+### Annotations (`annotations`, version 2)
+
+```json
+[{"id": 7, "style": "highlight", "color": "#FFEB3B", "note": "look again", "quote": "the old lantern", "title": "Chapter 1", "locator": {"...": "..."}, "createdAt": 1789920631874, "updatedAt": 1789920700000}]
+```
+
+The reader's highlights and notes of the book (plugin roadmap P9), in reading order (by the
+resource's reading-order index, then by the locator's progression, then by creation). `id` is
+the reader's row id, stable for the life of the annotation and never reused; `style` is
+`highlight` or `underline` (`STYLE_*`); `color` is `#RRGGBB`; `note` (at most 4000 characters)
+and `quote` (the selected text, at most 1000 characters) are absent when empty; `title` is the
+chapter title captured at creation, absent when unknown; `locator` is the Readium locator of the
+selection with its `text.highlight`; `createdAt` and `updatedAt` are UTC milliseconds. A book
+holds at most `MAX_ANNOTATIONS`; `getAnnotations` pages through them, and a `highlight` event
+carries a one-element array with the changed annotation.
 
 ### Preferences (`preferences`)
 
@@ -341,11 +364,12 @@ process), `seq` starts at 1 and increases by one per event. Every event bundle c
 | `open` | `visible`, `title` (book), `locator`, `href`, `positions` | once, when the navigator shows its first locator after the claim |
 | `progress` | `locator`, `progression` (total), `title` (chapter, when known), `href` | every locator change, throttled to `PROGRESS_THROTTLE_MS` with a trailing flush |
 | `bookmark` | `change`, `bookmarks` (one-element array) | per bookmark added or removed in the reader; the list at adoption time is the baseline, not an event |
+| `highlight` (version 2) | `change` (`added`, `updated`, `removed`), `annotations` (one-element array) | per highlight or note added, edited (style, colour or note) or removed in the reader; the list at adoption time is the baseline; sent only to hosts that negotiated version 2 |
 | `error` | `errorCode`, `errorMessage` | unknown preference keys (`UNSUPPORTED_PREFERENCE`), a `goTo` target that could not be reached after validation (`RESOURCE_NOT_FOUND`, `INTERNAL`) |
 | `close` | `reason` | exactly once, then nothing: `user` (the user left the reader, its view model was cleared), `host` (session `close` or host unbind), `replaced`, `timeout`, `error` (plugin-side failure) |
 
-An event whose parcel exceeds `MAX_EVENT_BYTES` first loses `locator` and `bookmarks`; if it is
-still too large it is dropped. A `RemoteException` from the callback (the host is gone) ends the
+An event whose parcel exceeds `MAX_EVENT_BYTES` first loses `locator`, `bookmarks` and
+`annotations` (version 2); if it is still too large it is dropped. A `RemoteException` from the callback (the host is gone) ends the
 session silently: no `close` is sent, the reader stays open for the user.
 
 Close semantics (plugin decision D32): the host's `close` without `finish` only ends the session
@@ -410,6 +434,9 @@ Every failure surfaces as `EpubPluginException` carrying an `EpubError(code, mes
 | `MAX_LOCATOR_BYTES` | 16 KiB | a locator sent by the host |
 | `MAX_PREFERENCES_BYTES` | 16 KiB | a preferences document |
 | `MAX_BOOKMARKS` | 500 | the bookmarks document (the reader's own per-book ceiling, plugin decision D13) |
+| `MAX_ANNOTATIONS` | 2000 | highlights and notes of one book (version 2; the reader's own per-book ceiling) |
+| `DEFAULT_ANNOTATIONS_LIMIT` / `MAX_ANNOTATIONS_PAGE` | 100 / 200 | one `getAnnotations` page (version 2) |
+| `MAX_ANNOTATIONS_BYTES` | 512 KiB | one `getAnnotations` page as a document (version 2); a page is cut early with `hasMore` |
 | `MAX_EVENT_BYTES` | 32 KiB | one event bundle as a parcel |
 | `MAX_ERROR_MESSAGE_BYTES` | 4 KiB | `errorMessage` |
 | `READER_CLAIM_TIMEOUT_MS` | 60 s | an unclaimed reader session |
@@ -427,6 +454,20 @@ event types, reasons and preference keys; it may not change the meaning of an ex
 reorder methods or remove a code. Plugins declare the host build they need through
 `requiresHostVersion`, which must be at least `EpubIds.REQUIRED_HOST_VERSION_CODE`.
 
+Negotiation (contract version 2, plugin roadmap P9.4): `epubContractVersion` stays the plugin's
+baseline (the official plugin keeps `1`, so hosts of version 1 keep accepting it), and the
+optional `epubMaxContractVersion` names the newest version the plugin implements. The host
+negotiates `max(base, min(pluginMax, hostMax))` (`EpubPeer.negotiate`) and writes that version
+into every request of the books and sessions it opens with the plugin; the plugin reads the
+version from the `openBook` or `openReader` options and answers that book or session with it (an
+absent or lower version means 1, a higher one is capped at the plugin's newest). A version 2
+peer implements `getAnnotations` and sends `highlight` events; a host that negotiated version 1
+never calls the appended method (`EpubBookClient.annotations` answers `PLUGIN_INCOMPATIBLE`
+locally), and a plugin never sends `highlight` to a version 1 host. `getCapabilities` and
+`getInfo` answers keep carrying the plugin's baseline version. The `annotations` feature of
+`epubFeatures` says that the reader keeps highlights and notes; the host requires both the
+version and the feature.
+
 Mixed versions behave as follows:
 
 - A plugin without the `epub` service (builds before 48) is invisible to `EpubPluginHost`
@@ -442,6 +483,12 @@ Mixed versions behave as follows:
   on the host, unknown event types are dropped as malformed.
 - `tts` is a feature name of the vocabulary but no V1 plugin advertises it: the contract has no
   read-aloud control surface, so a host could not act on it.
+- A version 2 plugin (1.1.0, build 72 or later) with a version 1 host (6.8.0 build 5282):
+  discovery accepts the baseline `1`, the host writes `1` into every request, the plugin answers
+  with `1`, never sends `highlight` and never receives `getAnnotations`; highlights stay a
+  reader-only feature there. A version 1 plugin (1.0.0) with a version 2 host: no
+  `epubMaxContractVersion`, negotiated `1`, `book.annotations()` fails with
+  `PLUGIN_INCOMPATIBLE` before any Binder call.
 
 ## Security Boundary
 
@@ -552,3 +599,13 @@ commit `2c08db6`); the physical devices of the plugin matrix carry no host and w
   `session.positions` is `0` before the first report because Rhino hands boxed numbers to
   scripts as Java objects under the default `javaPrimitiveWrap`.
 - The `requestId` key and the `SESSION_REPLACED` code stay reserved; P6 did not need them.
+- P9.4 (contract version 2): `IEpubBook.getAnnotations` appended, the `annotations` document,
+  the `highlight` event with the `updated` change, the `annotations` feature, the annotation
+  ceilings, `epubMaxContractVersion` and the negotiation above; the host client stamps the
+  negotiated version (`EpubPeer`), `EpubBookClient.annotations` pages the document,
+  `book.annotations()` / `epub.annotations(path)` and the `highlight` payload `{ action, id,
+  style, color, note, quote, title, locator, createdAt, updatedAt }` reach scripts; JVM tests
+  `EpubPeerTest`, the extended `EpubContractTest`, `EpubAidlOrderTest`, `EpubReaderBridgeTest`,
+  `EpubReaderSessionTest` and `EpubObjectsTest`. The plugin side (1.1.0) stages the rebuilt AAR,
+  answers with the negotiated version, implements `getAnnotations` over its Room store and
+  announces `highlight` from the reader's annotation flow.

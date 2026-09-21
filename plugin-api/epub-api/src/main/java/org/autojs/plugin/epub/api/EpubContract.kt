@@ -1,22 +1,39 @@
 package org.autojs.plugin.epub.api
 
 /**
- * Frozen vocabulary of EPUB contract version 1: Bundle keys, JSON field names, closed value
- * sets and the hard ceilings both sides enforce. The JSON documents carried under the
- * [KEY_METADATA], [KEY_TOC], [KEY_READING_ORDER], [KEY_RESULTS], [KEY_BOOKMARKS], [KEY_LOCATOR]
- * and [KEY_PREFERENCES] keys are described in `docs/dev/epub-plugin-protocol-v1.md`.
+ * Frozen vocabulary of the EPUB contract (versions 1 and 2): Bundle keys, JSON field names,
+ * closed value sets and the hard ceilings both sides enforce. The JSON documents carried under
+ * the [KEY_METADATA], [KEY_TOC], [KEY_READING_ORDER], [KEY_RESULTS], [KEY_BOOKMARKS],
+ * [KEY_ANNOTATIONS], [KEY_LOCATOR] and [KEY_PREFERENCES] keys are described in
+ * `docs/dev/epub-plugin-protocol-v1.md`.
+ *
+ * Version 2 (plugin roadmap P9.4) appended `IEpubBook.getAnnotations`, the [KEY_ANNOTATIONS]
+ * document, the [EVENT_HIGHLIGHT] event with the [CHANGE_UPDATED] change, the annotation JSON
+ * fields, the [FEATURE_ANNOTATIONS] feature and the annotation ceilings. A plugin advertises the
+ * newest version it implements through `EpubCapabilityKeys.MAX_CONTRACT_VERSION`; the host writes
+ * the negotiated version (the smaller of its own [MAX_CONTRACT_VERSION] and the plugin's) into
+ * every request, and the plugin answers a book or session with the version its open request
+ * carried. Version 1 peers never see the version 2 method, keys or events.
  */
 object EpubContract {
 
-    const val CONTRACT_VERSION = 1
+    /** The newest version this vocabulary describes. */
+    const val CONTRACT_VERSION = 2
     const val MIN_CONTRACT_VERSION = 1
-    const val MAX_CONTRACT_VERSION = 1
+    const val MAX_CONTRACT_VERSION = 2
+
+    /** The version that appended `getAnnotations` and the [EVENT_HIGHLIGHT] event. */
+    const val CONTRACT_VERSION_ANNOTATIONS = 2
 
     fun supportsContractVersion(version: Int): Boolean = version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
 
     // Bundle keys (roadmap appendix B.1).
 
-    /** Int: contract version of the writer; the host puts it into every bundle it sends. */
+    /**
+     * Int: contract version of the writer. The host puts the negotiated version into every bundle
+     * it sends; a plugin answers with the version of the `openBook` or `openReader` request that
+     * created the book or session (its own [CONTRACT_VERSION] for `getCapabilities`).
+     */
     const val KEY_CONTRACT_VERSION = "contractVersion"
 
     /** String: optional caller-chosen id echoed back in the answer of the same call. */
@@ -31,10 +48,10 @@ object EpubContract {
     /** Int: reading-order index of a resource (requests, state, events). */
     const val KEY_INDEX = "index"
 
-    /** Int: character offset of a `getText` chunk or result offset of a `search` page. */
+    /** Int: character offset of a `getText` chunk, or entry offset of a `search` or `getAnnotations` page. */
     const val KEY_OFFSET = "offset"
 
-    /** Int: number of entries of one `search` page (at most [MAX_SEARCH_RESULTS]). */
+    /** Int: number of entries of one `search` page (at most [MAX_SEARCH_RESULTS]) or `getAnnotations` page (at most [MAX_ANNOTATIONS_PAGE]). */
     const val KEY_LIMIT = "limit"
 
     /** Int: number of characters of one `getText` chunk (at most [MAX_TEXT_CHARS_PER_CALL]). */
@@ -67,7 +84,7 @@ object EpubContract {
     /** String: one of the REASON_* names ([EVENT_CLOSE]). */
     const val KEY_REASON = "reason"
 
-    /** String: [CHANGE_ADDED] or [CHANGE_REMOVED] ([EVENT_BOOKMARK]). */
+    /** String: [CHANGE_ADDED] or [CHANGE_REMOVED] ([EVENT_BOOKMARK]), plus [CHANGE_UPDATED] ([EVENT_HIGHLIGHT]). */
     const val KEY_CHANGE = "change"
 
     /** String: random session token minted by `openReader`, the only extra of the reader launch. */
@@ -106,6 +123,9 @@ object EpubContract {
     /** String: bookmarks as a JSON array (`getBookmarks`). */
     const val KEY_BOOKMARKS = "bookmarks"
 
+    /** String: highlights and notes as a JSON array (`getAnnotations`, [EVENT_HIGHLIGHT]; contract version 2). */
+    const val KEY_ANNOTATIONS = "annotations"
+
     // JSON field names of the documents carried by the keys above (roadmap appendix A).
 
     const val FIELD_HREF = "href"
@@ -137,6 +157,15 @@ object EpubContract {
     const val FIELD_LOCATOR = "locator"
     const val FIELD_CREATED_AT = "createdAt"
 
+    // Annotation document fields (contract version 2).
+
+    const val FIELD_ID = "id"
+    const val FIELD_STYLE = "style"
+    const val FIELD_COLOR = "color"
+    const val FIELD_NOTE = "note"
+    const val FIELD_QUOTE = "quote"
+    const val FIELD_UPDATED_AT = "updatedAt"
+
     // Closed value sets.
 
     const val EVENT_OPEN = "open"
@@ -144,7 +173,10 @@ object EpubContract {
     const val EVENT_BOOKMARK = "bookmark"
     const val EVENT_CLOSE = "close"
     const val EVENT_ERROR = "error"
-    val EVENTS: Set<String> = setOf(EVENT_OPEN, EVENT_PROGRESS, EVENT_BOOKMARK, EVENT_CLOSE, EVENT_ERROR)
+
+    /** Contract version 2: a highlight or note of the session's book was added, updated or removed. */
+    const val EVENT_HIGHLIGHT = "highlight"
+    val EVENTS: Set<String> = setOf(EVENT_OPEN, EVENT_PROGRESS, EVENT_BOOKMARK, EVENT_CLOSE, EVENT_ERROR, EVENT_HIGHLIGHT)
 
     const val REASON_USER = "user"
     const val REASON_HOST = "host"
@@ -155,7 +187,15 @@ object EpubContract {
 
     const val CHANGE_ADDED = "added"
     const val CHANGE_REMOVED = "removed"
-    val CHANGES: Set<String> = setOf(CHANGE_ADDED, CHANGE_REMOVED)
+
+    /** Contract version 2, [EVENT_HIGHLIGHT] only: the style, colour or note of an existing highlight changed. */
+    const val CHANGE_UPDATED = "updated"
+    val CHANGES: Set<String> = setOf(CHANGE_ADDED, CHANGE_REMOVED, CHANGE_UPDATED)
+
+    /** [FIELD_STYLE] of an annotation (contract version 2): a background highlight or an underline. */
+    const val STYLE_HIGHLIGHT = "highlight"
+    const val STYLE_UNDERLINE = "underline"
+    val STYLES: Set<String> = setOf(STYLE_HIGHLIGHT, STYLE_UNDERLINE)
 
     const val DIRECTION_NEXT_PAGE = 1
     const val DIRECTION_PREVIOUS_PAGE = 2
@@ -184,6 +224,9 @@ object EpubContract {
     const val FEATURE_COVER = "cover"
     const val FEATURE_RESOURCE_EXPORT = "resource-export"
     const val FEATURE_MARKDOWN = "markdown"
+
+    /** Contract version 2: the reader keeps highlights and notes, answers `getAnnotations` and sends [EVENT_HIGHLIGHT]. */
+    const val FEATURE_ANNOTATIONS = "annotations"
     val FEATURES: Set<String> = setOf(
         FEATURE_SEARCH,
         FEATURE_TTS,
@@ -191,6 +234,7 @@ object EpubContract {
         FEATURE_COVER,
         FEATURE_RESOURCE_EXPORT,
         FEATURE_MARKDOWN,
+        FEATURE_ANNOTATIONS,
     )
 
     // Preferences a host may set (roadmap appendix A.6); other fields are ignored and reported.
@@ -265,6 +309,20 @@ object EpubContract {
     const val MAX_LOCATOR_BYTES = 16 * 1024
     const val MAX_PREFERENCES_BYTES = 16 * 1024
     const val MAX_BOOKMARKS = 500
+
+    // Annotations (contract version 2).
+
+    /** Highlights and notes of one book (the reader's own per-book ceiling). */
+    const val MAX_ANNOTATIONS = 2000
+
+    /** Entries of one `getAnnotations` page when the request omits [KEY_LIMIT]. */
+    const val DEFAULT_ANNOTATIONS_LIMIT = 100
+
+    /** Largest `getAnnotations` page the host may ask for. */
+    const val MAX_ANNOTATIONS_PAGE = 200
+
+    /** Largest annotations JSON document of one page; a page is cut early (with [KEY_HAS_MORE]) to stay below it. */
+    const val MAX_ANNOTATIONS_BYTES = 512 * 1024
 
     /** Largest event bundle, measured as the parcel size. */
     const val MAX_EVENT_BYTES = 32 * 1024

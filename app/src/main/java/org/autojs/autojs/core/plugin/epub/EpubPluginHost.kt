@@ -30,6 +30,11 @@ import org.autojs.plugin.epub.api.IEpubPlugin
  * The official plugin exports this service next to its Explorer Action service; the plugin
  * center shows the package once, under the identity of its common info service, and the enable
  * and authorization records of that package apply to both services.
+ *
+ * Contract version 2 (plugin roadmap P9.4): the plugin keeps `epubContractVersion` at its
+ * baseline and advertises the newest version it implements through `epubMaxContractVersion`;
+ * [peerOf] negotiates the version every request of a book or session carries, and the clients
+ * refuse the appended calls when the negotiated version does not include them.
  */
 object EpubPluginHost {
 
@@ -78,11 +83,12 @@ object EpubPluginHost {
     suspend fun openBook(context: Context, path: String, displayName: String? = null): EpubBookClient = withContext(Dispatchers.IO) {
         EpubSource.open(path).use { source ->
             val target = selectForCall(context)
+            val peer = peerOf(target)
             val leased = lease(context, target) { proxy ->
-                proxy.openBook(source.descriptor, EpubBundles.openOptions(displayName ?: source.file.name))
+                proxy.openBook(source.descriptor, EpubBundles.openOptions(peer.contractVersion, displayName ?: source.file.name))
                     ?: throw EpubPluginException(EpubErrorMapper.normalize(EpubErrorCodes.INTERNAL, "openBook returned no book"))
             }
-            EpubBookClient(leased)
+            EpubBookClient(leased, peer)
         }
     }
 
@@ -95,10 +101,12 @@ object EpubPluginHost {
     suspend fun openReader(context: Context, path: String, options: EpubReaderOptions = EpubReaderOptions(), sink: EpubReaderSink): EpubReaderClient = withContext(Dispatchers.IO) {
         EpubSource.open(path).use { source ->
             val target = selectForCall(context)
+            val peer = peerOf(target)
             val bridge = EpubReaderBridge(sink)
             val callback = EpubReaderCallbackBinder(bridge)
             val leased = lease(context, target) { proxy ->
                 val bundle = EpubBundles.readerOptions(
+                    version = peer.contractVersion,
                     displayName = options.displayName ?: source.file.name,
                     locatorJson = options.locatorJson,
                     href = options.href,
@@ -112,11 +120,11 @@ object EpubPluginHost {
                 EpubReaderClient.decodeState(EpubBundles.answer(leased.value.state, "getState")).token?.takeIf { it.isNotBlank() }
                     ?: throw EpubPluginException(EpubErrorMapper.normalize(EpubErrorCodes.INTERNAL, "the reader session carries no token"))
             } catch (t: Throwable) {
-                runCatching { leased.value.close(EpubBundles.closeOptions(finish = true)) }
+                runCatching { leased.value.close(EpubBundles.closeOptions(peer.contractVersion, finish = true)) }
                 runCatching { leased.bindingLease.close() }
                 throw if (t is EpubPluginException) t else EpubPluginException(EpubErrorMapper.fromThrowable(t, EpubErrorMapper.Phase.CALL), t)
             }
-            val client = EpubReaderClient(leased, bridge, token)
+            val client = EpubReaderClient(leased, bridge, token, peer)
             try {
                 EpubReaderLauncher.launch(context, target.serviceInfo.packageName, token)
             } catch (t: Throwable) {
@@ -166,9 +174,7 @@ object EpubPluginHost {
         require(it.engine == EpubIds.ENGINE) { "Unexpected EPUB plugin engine: ${it.engine}" }
         require(it.variant == EpubIds.VARIANT_DEFAULT) { "Unexpected EPUB plugin variant: ${it.variant}" }
         val capabilities = requireNotNull(it.capabilities) { "EPUB plugin capabilities are missing" }
-        val contractVersion = PluginCapabilityResolver.coerceLong(
-            @Suppress("DEPRECATION") capabilities.get(EpubCapabilityKeys.CONTRACT_VERSION),
-        )?.toInt() ?: 0
+        val contractVersion = baseContractVersion(capabilities)
         require(EpubContract.supportsContractVersion(contractVersion)) {
             "Unsupported EPUB contract version: $contractVersion"
         }
@@ -177,6 +183,25 @@ object EpubPluginHost {
             "EPUB plugin required host version is missing or invalid"
         }
     }
+
+    /**
+     * The contract version and features agreed with the discovered plugin: its baseline version
+     * (validated at discovery) raised to its `epubMaxContractVersion` but never above the host's
+     * own maximum. A plugin whose info could not be read is treated as a version-1 peer.
+     */
+    internal fun peerOf(target: AidlPluginHost.Discovered): EpubPeer {
+        val capabilities = target.pluginInfo?.capabilities ?: return EpubPeer.LEGACY
+        val base = baseContractVersion(capabilities).takeIf(EpubContract::supportsContractVersion) ?: return EpubPeer.LEGACY
+        val max = PluginCapabilityResolver.coerceLong(
+            @Suppress("DEPRECATION") capabilities.get(EpubCapabilityKeys.MAX_CONTRACT_VERSION),
+        )?.toInt()
+        val features = capabilities.getStringArray(EpubCapabilityKeys.FEATURES)?.filterNotNull()?.toSet().orEmpty()
+        return EpubPeer(EpubPeer.negotiate(base, max), features)
+    }
+
+    private fun baseContractVersion(capabilities: Bundle): Int = PluginCapabilityResolver.coerceLong(
+        @Suppress("DEPRECATION") capabilities.get(EpubCapabilityKeys.CONTRACT_VERSION),
+    )?.toInt() ?: 0
 
     private fun validateService(context: Context, serviceInfo: ServiceInfo) {
         require(serviceInfo.exported && serviceInfo.enabled) {

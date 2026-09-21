@@ -17,7 +17,9 @@ import java.util.concurrent.atomic.AtomicReference
  * The script-visible `EpubReaderSession` (plugin roadmap P6.2, appendix A.4): an `EventEmitter`
  * with the events `open({ locator, title, href, positions })`, `progress({ locator,
  * totalProgression, chapterTitle, href })`, `bookmark({ action, locator, createdAt, title, text
- * })`, `error(EpubError)` and `close({ reason })`, the properties `path`, `locator`, `progress`,
+ * })`, `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt
+ * })` (plugin roadmap P9.4, contract version 2; `action` is `added`, `updated` or `removed`),
+ * `error(EpubError)` and `close({ reason })`, the properties `path`, `locator`, `progress`,
  * `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`, and the
  * methods `goTo(target)`, `next()`, `prev()`, `nextChapter()`, `prevChapter()`,
  * `setPreferences(partial)`, `bookmarks()` and `close(options?)`. Every event reaches the
@@ -27,8 +29,9 @@ import java.util.concurrent.atomic.AtomicReference
  * through the unexposed [Port] bound by the runner, so scripts only see the event and method
  * surface.
  * zh-CN: 脚本可见的 `EpubReaderSession` (插件路线图 P6.2, 附录 A.4): 带事件 `open({ locator, title, href, positions })`, `progress({ locator,
- * totalProgression, chapterTitle, href })`, `bookmark({ action, locator, createdAt, title, text })`, `error(EpubError)` 与 `close({ reason })` 的
- * `EventEmitter`, 属性 `path`, `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`, 方法
+ * totalProgression, chapterTitle, href })`, `bookmark({ action, locator, createdAt, title, text })`, `highlight({ action, id, style, color, note,
+ * quote, title, locator, createdAt, updatedAt })` (插件路线图 P9.4, 契约版本 2; `action` 为 `added`, `updated` 或 `removed`), `error(EpubError)` 与
+ * `close({ reason })` 的 `EventEmitter`, 属性 `path`, `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`, 方法
  * `goTo(target)`, `next()`, `prev()`, `nextChapter()`, `prevChapter()`, `setPreferences(partial)`, `bookmarks()` 与 `close(options?)`. 每个事件经
  * [EpubAsyncDispatcher] 回到打开会话的脚本线程, 分发器同时让脚本活到会话关闭; `close` 是唯一的终结事件. 状态变更来自不对脚本暴露的 [Controller]
  * (同 `MailWatch`), 阅读器调用经运行器绑定的不暴露的 [Port], 脚本只看到事件与方法表面.
@@ -260,6 +263,23 @@ class EpubReaderSession internal constructor(
         return dispatcher.dispatchValues(arrayOf(payload)) { values -> emit(EVENT_BOOKMARK, values[0]) }
     }
 
+    /** Contract version 2: one highlight or note of the book changed in the reader. zh-CN: 契约版本 2: 阅读器里这本书的一条高亮或笔记发生变化. */
+    private fun highlight(action: String, annotation: Any?): Boolean {
+        val source = annotation as? Map<*, *>
+        val payload = LinkedHashMap<String, Any?>()
+        payload[FIELD_ACTION] = action
+        payload[FIELD_ID] = source?.get(EpubContract.FIELD_ID)
+        payload[FIELD_STYLE] = source?.get(EpubContract.FIELD_STYLE)
+        payload[FIELD_COLOR] = source?.get(EpubContract.FIELD_COLOR)
+        payload[FIELD_NOTE] = source?.get(EpubContract.FIELD_NOTE)
+        payload[FIELD_QUOTE] = source?.get(EpubContract.FIELD_QUOTE)
+        payload[FIELD_TITLE] = source?.get(EpubContract.FIELD_TITLE)
+        payload[FIELD_LOCATOR] = source?.get(EpubContract.FIELD_LOCATOR)
+        payload[FIELD_CREATED_AT] = source?.get(EpubContract.FIELD_CREATED_AT)
+        payload[FIELD_UPDATED_AT] = source?.get(EpubContract.FIELD_UPDATED_AT)
+        return dispatcher.dispatchValues(arrayOf(payload)) { values -> emit(EVENT_HIGHLIGHT, values[0]) }
+    }
+
     private fun error(error: EpubError, convert: (EpubError) -> Any?): Boolean =
         dispatcher.dispatchValues(emptyArray()) { emit(EVENT_ERROR, convert(error)) }
 
@@ -355,6 +375,8 @@ class EpubReaderSession internal constructor(
 
         fun bookmark(action: String, bookmark: Any?): Boolean = session.bookmark(action, bookmark)
 
+        fun highlight(action: String, annotation: Any?): Boolean = session.highlight(action, annotation)
+
         fun error(error: EpubError, convert: (EpubError) -> Any? = { it }): Boolean = session.error(error, convert)
 
         fun close(reason: String): Boolean = session.close(reason)
@@ -368,6 +390,7 @@ class EpubReaderSession internal constructor(
         const val EVENT_OPEN = EpubContract.EVENT_OPEN
         const val EVENT_PROGRESS = EpubContract.EVENT_PROGRESS
         const val EVENT_BOOKMARK = EpubContract.EVENT_BOOKMARK
+        const val EVENT_HIGHLIGHT = EpubContract.EVENT_HIGHLIGHT
         const val EVENT_ERROR = EpubContract.EVENT_ERROR
         const val EVENT_CLOSE = EpubContract.EVENT_CLOSE
 
@@ -390,6 +413,14 @@ class EpubReaderSession internal constructor(
         const val FIELD_CREATED_AT = "createdAt"
         const val FIELD_TEXT = "text"
         const val FIELD_REASON = "reason"
+
+        // `highlight` payload (contract version 2). zh-CN: `highlight` 载荷 (契约版本 2).
+        const val FIELD_ID = "id"
+        const val FIELD_STYLE = "style"
+        const val FIELD_COLOR = "color"
+        const val FIELD_NOTE = "note"
+        const val FIELD_QUOTE = "quote"
+        const val FIELD_UPDATED_AT = "updatedAt"
 
         /** `locations.totalProgression` of a plain locator, when present. zh-CN: 普通 locator 的 `locations.totalProgression` (存在时). */
         fun totalProgressionOf(locator: Any?): Double? {

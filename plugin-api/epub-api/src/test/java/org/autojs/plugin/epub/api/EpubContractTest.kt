@@ -28,14 +28,19 @@ class EpubContractTest {
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, EpubCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals("epubContractVersion", EpubCapabilityKeys.CONTRACT_VERSION)
+        assertEquals("epubMaxContractVersion", EpubCapabilityKeys.MAX_CONTRACT_VERSION)
         assertEquals("epubFeatures", EpubCapabilityKeys.FEATURES)
         assertEquals("epubReadiumVersion", EpubCapabilityKeys.READIUM_VERSION)
     }
 
     @Test
     fun contractVersionRangeIncludesItsBoundsAndRejectsNeighbours() {
-        assertEquals(1, EpubContract.CONTRACT_VERSION)
+        assertEquals(2, EpubContract.CONTRACT_VERSION)
+        assertEquals(1, EpubContract.MIN_CONTRACT_VERSION)
+        assertEquals(2, EpubContract.MAX_CONTRACT_VERSION)
+        assertEquals(2, EpubContract.CONTRACT_VERSION_ANNOTATIONS)
         assertTrue(EpubContract.MIN_CONTRACT_VERSION <= EpubContract.MAX_CONTRACT_VERSION)
+        assertTrue(EpubContract.CONTRACT_VERSION_ANNOTATIONS in EpubContract.MIN_CONTRACT_VERSION..EpubContract.MAX_CONTRACT_VERSION)
         assertTrue(EpubContract.supportsContractVersion(EpubContract.MIN_CONTRACT_VERSION))
         assertTrue(EpubContract.supportsContractVersion(EpubContract.CONTRACT_VERSION))
         assertTrue(EpubContract.supportsContractVersion(EpubContract.MAX_CONTRACT_VERSION))
@@ -53,6 +58,8 @@ class EpubContractTest {
                 "query", "locator", "progression", "preferences", "errorCode", "errorMessage", "event", "reason", "change",
                 "sessionToken", "visible", "title", "text", "hasMore", "positions", "finish",
                 "metadata", "toc", "readingOrder", "results", "bookmarks",
+                // Contract version 2.
+                "annotations",
             ).sorted(),
             keys.values.sorted(),
         )
@@ -70,13 +77,21 @@ class EpubContractTest {
         assertEquals("readingProgression", EpubContract.FIELD_READING_PROGRESSION)
         assertEquals("cssSelector", EpubContract.FIELD_CSS_SELECTOR)
         assertEquals("createdAt", EpubContract.FIELD_CREATED_AT)
+        // Contract version 2: the annotation document.
+        assertEquals("id", EpubContract.FIELD_ID)
+        assertEquals("style", EpubContract.FIELD_STYLE)
+        assertEquals("color", EpubContract.FIELD_COLOR)
+        assertEquals("note", EpubContract.FIELD_NOTE)
+        assertEquals("quote", EpubContract.FIELD_QUOTE)
+        assertEquals("updatedAt", EpubContract.FIELD_UPDATED_AT)
     }
 
     @Test
     fun closedValueSetsAreFrozen() {
-        assertEquals(setOf("open", "progress", "bookmark", "close", "error"), EpubContract.EVENTS)
+        assertEquals(setOf("open", "progress", "bookmark", "close", "error", "highlight"), EpubContract.EVENTS)
         assertEquals(setOf("user", "host", "replaced", "timeout", "error"), EpubContract.REASONS)
-        assertEquals(setOf("added", "removed"), EpubContract.CHANGES)
+        assertEquals(setOf("added", "removed", "updated"), EpubContract.CHANGES)
+        assertEquals(setOf("highlight", "underline"), EpubContract.STYLES)
         assertEquals(setOf(1, 2, 3, 4), EpubContract.DIRECTIONS)
         assertEquals(1, EpubContract.DIRECTION_NEXT_PAGE)
         assertEquals(2, EpubContract.DIRECTION_PREVIOUS_PAGE)
@@ -88,7 +103,7 @@ class EpubContractTest {
         assertEquals(setOf("text", "markdown"), EpubContract.FORMATS)
         assertEquals(setOf("reflowable", "fixed"), EpubContract.LAYOUTS)
         assertEquals(setOf("ltr", "rtl", "auto"), EpubContract.READING_PROGRESSIONS)
-        assertEquals(setOf("search", "tts", "reader-session", "cover", "resource-export", "markdown"), EpubContract.FEATURES)
+        assertEquals(setOf("search", "tts", "reader-session", "cover", "resource-export", "markdown", "annotations"), EpubContract.FEATURES)
         assertEquals(
             setOf(
                 "fontSize", "fontFamily", "lineHeight", "pageMargins", "theme", "scroll",
@@ -101,6 +116,8 @@ class EpubContractTest {
         assertEquals(constants("EVENT_").values.toSet(), EpubContract.EVENTS)
         assertEquals(constants("REASON_").values.toSet(), EpubContract.REASONS)
         assertEquals(constants("FEATURE_").values.toSet(), EpubContract.FEATURES)
+        assertEquals(constants("CHANGE_").values.toSet(), EpubContract.CHANGES)
+        assertEquals(constants("STYLE_").values.toSet(), EpubContract.STYLES)
     }
 
     @Test
@@ -116,6 +133,11 @@ class EpubContractTest {
         assertEquals(32_768, EpubContract.MAX_EVENT_BYTES)
         assertEquals(60_000L, EpubContract.READER_CLAIM_TIMEOUT_MS)
         assertEquals(500L, EpubContract.PROGRESS_THROTTLE_MS)
+        // Contract version 2.
+        assertEquals(2000, EpubContract.MAX_ANNOTATIONS)
+        assertEquals(100, EpubContract.DEFAULT_ANNOTATIONS_LIMIT)
+        assertEquals(200, EpubContract.MAX_ANNOTATIONS_PAGE)
+        assertEquals(524_288, EpubContract.MAX_ANNOTATIONS_BYTES)
 
         val ceilings = listOf(
             EpubContract.MAX_OPEN_BOOKS.toLong(),
@@ -136,6 +158,10 @@ class EpubContractTest {
             EpubContract.MAX_LOCATOR_BYTES.toLong(),
             EpubContract.MAX_PREFERENCES_BYTES.toLong(),
             EpubContract.MAX_BOOKMARKS.toLong(),
+            EpubContract.MAX_ANNOTATIONS.toLong(),
+            EpubContract.DEFAULT_ANNOTATIONS_LIMIT.toLong(),
+            EpubContract.MAX_ANNOTATIONS_PAGE.toLong(),
+            EpubContract.MAX_ANNOTATIONS_BYTES.toLong(),
             EpubContract.MAX_EVENT_BYTES.toLong(),
             EpubContract.MAX_ERROR_MESSAGE_BYTES.toLong(),
             EpubContract.READER_CLAIM_TIMEOUT_MS,
@@ -147,6 +173,11 @@ class EpubContractTest {
 
         assertTrue(EpubContract.MIN_QUERY_LENGTH <= EpubContract.MAX_QUERY_LENGTH)
         assertTrue(EpubContract.DEFAULT_SEARCH_LIMIT <= EpubContract.MAX_SEARCH_RESULTS)
+        assertTrue(EpubContract.DEFAULT_ANNOTATIONS_LIMIT <= EpubContract.MAX_ANNOTATIONS_PAGE)
+        assertTrue(EpubContract.MAX_ANNOTATIONS_PAGE <= EpubContract.MAX_ANNOTATIONS)
+        // One annotations page travels as one Bundle answer, like a search page.
+        assertTrue(EpubContract.MAX_ANNOTATIONS_BYTES <= EpubContract.MAX_RESULTS_BYTES)
+        assertTrue(EpubContract.MAX_LOCATOR_BYTES < EpubContract.MAX_ANNOTATIONS_BYTES)
         assertTrue(EpubContract.MAX_LOCATOR_BYTES < EpubContract.MAX_EVENT_BYTES)
         assertTrue(EpubContract.MAX_ERROR_MESSAGE_BYTES < EpubContract.MAX_EVENT_BYTES)
         // A reader launch carries a locator and a preferences document inside one options bundle.

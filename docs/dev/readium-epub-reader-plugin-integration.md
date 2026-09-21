@@ -83,6 +83,14 @@ reader session (`epub.read`) and the three sample scripts under the in-app sampl
 host changelog carries one line per piece (file type, contract module, host client, script API, reader
 control, samples). The plugin's roadmap P8 records the release gate (Temurin build, unit tests, lint,
 the device matrix, the signed release artifact and the four entry paths: file manager, launcher,
-`ACTION_VIEW` and script). Highlights, notes and export (plugin roadmap P9, plugin 1.1.0) are planned
-without a host change; a new `epub` capability would go through the contract's append-only AIDL rule
-(`docs/dev/epub-plugin-protocol-v1.md`).
+`ACTION_VIEW` and script).
+
+Plugin 1.1.0 (roadmap P9: highlights, notes and Markdown export) adds EPUB contract version 2 on
+the host through the contract's append-only rule (`docs/dev/epub-plugin-protocol-v1.md`, P9.4):
+`IEpubBook.getAnnotations`, the `annotations` document, the `highlight` reader-session event and
+the version negotiation over `epubMaxContractVersion`. The `epub` script API gains
+`book.annotations()` / `epub.annotations(path)` and the `highlight` event of `EpubReaderSession`;
+a 1.1.0 plugin keeps working with this host at build 5282 as a version 1 peer (highlights stay
+reader-only there), and a 1.0.0 plugin with a version 2 host answers `book.annotations()` with
+`PLUGIN_INCOMPATIBLE`. The reader-side features (selection actions, decorations, the panel, the
+export, the Room store) need no host change.

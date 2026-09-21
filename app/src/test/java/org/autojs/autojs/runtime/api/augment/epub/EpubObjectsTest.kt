@@ -74,6 +74,12 @@ class EpubObjectsTest {
 
         val bookmarks = """[{"locator":{"href":"OEBPS/c1.xhtml","type":"application/xhtml+xml","locations":{"progression":0.5}},"createdAt":1789920631874,"title":"Chapter 1","text":"First words"}]"""
         assertEquals(bookmarks, stringify(RhinoUtils.toJsValue(scope, EpubScriptValues.list(bookmarks))))
+
+        // Contract version 2: the annotation document of `book.annotations()` and the `highlight` event.
+        val annotations = """[{"id":3,"style":"highlight","color":"#FFEB3B","note":"first\nnote","quote":"The lighthouse keeper","title":"Chapter 1","locator":{"href":"OEBPS/c1.xhtml","type":"application/xhtml+xml","locations":{"progression":0.1},"text":{"highlight":"The lighthouse keeper"}},"createdAt":1789920631874,"updatedAt":1789920631874}]"""
+        val highlights = RhinoUtils.toJsValue(scope, EpubScriptValues.list(annotations))
+        assertEquals(annotations, stringify(highlights))
+        assertEquals("3|#FFEB3B|The lighthouse keeper|0.1", evaluateWith(highlights, "v[0].id + '|' + v[0].color + '|' + v[0].locator.text.highlight + '|' + v[0].locator.locations.progression"))
     }
 
     @Test

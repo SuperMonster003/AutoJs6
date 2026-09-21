@@ -164,6 +164,21 @@ class Epub(
         }
     }
 
+    /** `epub.annotations(path)`: the reader's highlights and notes of the book (plugin roadmap P9.4, contract version 2). zh-CN: `epub.annotations(path)`: 阅读器里这本书的高亮与笔记 (插件路线图 P9.4, 契约版本 2). */
+    @RhinoRuntimeFunctionInterface
+    fun annotations(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsOnlyOne(args) { raw ->
+            EpubCalls.syncOf(scriptRuntime) { withBook(raw) { book -> book.annotations() } }
+        }
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun annotationsAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
+        ensureArgumentsOnlyOne(args) { raw ->
+            EpubCalls.asyncOf(scriptRuntime) { withBook(raw) { book -> book.annotations() } }
+        }
+    }
+
     /** `epub.read(path, options?)`: the reader session whose events keep the script alive until `close`. zh-CN: `epub.read(path, options?)`: 事件让脚本活到 `close` 的阅读器会话. */
     @RhinoRuntimeFunctionInterface
     fun read(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {

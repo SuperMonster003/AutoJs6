@@ -23,9 +23,10 @@ import java.util.concurrent.atomic.AtomicReference
  * on top of [EpubBookClient]: the immutable documents (`metadata`, `toc` as a tree,
  * `readingOrder`, `positions`) are fetched once and cached, text is assembled by
  * [EpubTextAssembler], resources are exported through [EpubOutputSink] or decoded into a
- * `Bitmap` for the cover. Every Binder call runs on the IO dispatcher under the contract's call
- * timeout, so a stopped script cancels the waiting side at once. No Rhino here; the script objects
- * convert the plain values and build the `Image` on the script thread.
+ * `Bitmap` for the cover, and the reader's highlights and notes are read page by page
+ * (`annotations`, contract version 2). Every Binder call runs on the IO dispatcher under the
+ * contract's call timeout, so a stopped script cancels the waiting side at once. No Rhino here;
+ * the script objects convert the plain values and build the `Image` on the script thread.
  * zh-CN: 脚本对象背后一本已打开书籍的操作 (插件路线图 P6.1, 附录 A.3), 基于 [EpubBookClient]: 不变文档 (`metadata`, 树形 `toc`, `readingOrder`,
  * `positions`) 取一次并缓存, 文本由 [EpubTextAssembler] 拼装, 资源经 [EpubOutputSink] 导出或解码为封面 `Bitmap`. 每个 Binder 调用都在 IO 分发器上
  * 并受契约调用超时约束, 因此脚本停止时等待方立即取消. 这里没有 Rhino; 脚本对象在脚本线程上转换普通值并构建 `Image`.
@@ -75,6 +76,27 @@ internal class EpubBookOperations(
 
     suspend fun search(request: EpubScriptArguments.Search): List<Any?> =
         call { EpubScriptValues.list(client.search(request.query, request.offset, request.limit).resultsJson) }
+
+    /**
+     * The reader's highlights and notes of this book in reading order (contract version 2,
+     * appendix A.3): every page of `getAnnotations` is fetched under one call timeout, and the
+     * contract's per-book ceiling bounds the loop even against a plugin that keeps answering
+     * `hasMore`. `PLUGIN_INCOMPATIBLE` from a version-1 plugin.
+     * zh-CN: 阅读器里这本书的高亮与笔记, 按阅读顺序 (契约版本 2, 附录 A.3): `getAnnotations` 的每一页都在一次调用超时内取回,
+     * 契约的单书上限约束循环 (即使插件不断应答 `hasMore`). 版本 1 的插件得到 `PLUGIN_INCOMPATIBLE`.
+     */
+    suspend fun annotations(): List<Any?> = call {
+        val all = ArrayList<Any?>()
+        var offset = 0
+        while (true) {
+            val page = client.annotations(offset = offset, limit = EpubContract.MAX_ANNOTATIONS_PAGE)
+            val entries = EpubScriptValues.list(page.annotationsJson)
+            all.addAll(entries)
+            if (!page.hasMore || entries.isEmpty() || all.size >= EpubContract.MAX_ANNOTATIONS) break
+            offset = page.offset + entries.size
+        }
+        all
+    }
 
     /** The href of the cover resource; `RESOURCE_NOT_FOUND` when the package declares none. zh-CN: 封面资源的 href; 包未声明时为 `RESOURCE_NOT_FOUND`. */
     suspend fun coverHref(): String =

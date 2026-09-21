@@ -15,14 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Drives one plugin reader session for an [EpubReaderSession] (plugin roadmap P6.2): as the
  * [EpubReaderSink] of the host client it turns the accepted events of the bridge into emitter
- * transitions (`open`, `progress`, `bookmark`, `error`, and the terminal `close` with the
- * plugin's reason), as the session's [EpubReaderSession.Port] it forwards `goTo`, `navigate`,
+ * transitions (`open`, `progress`, `bookmark`, `highlight` (contract version 2), `error`, and the
+ * terminal `close` with the plugin's reason), as the session's [EpubReaderSession.Port] it forwards `goTo`, `navigate`,
  * `setPreferences`, `bookmarks` and `close` to the [EpubReaderClient] bound by [attach], and it
  * ends the session for the script's exit without finishing the reader (plugin decision D32). A
  * script that stops draining its events (dispatcher overflow) gets `error(LIMIT_EXCEEDED)` and
  * `close(overflow)`. Pure Kotlin on top of the client, so the JVM tests drive it with events.
  * zh-CN: 为一个 [EpubReaderSession] 驱动一个插件阅读器会话 (插件路线图 P6.2): 作为宿主客户端的 [EpubReaderSink], 把桥接受的事件转成发射器的状态变更
- * (`open`, `progress`, `bookmark`, `error`, 以及带插件原因的终结 `close`); 作为会话的 [EpubReaderSession.Port], 把 `goTo`, `navigate`,
+ * (`open`, `progress`, `bookmark`, `highlight` (契约版本 2), `error`, 以及带插件原因的终结 `close`); 作为会话的 [EpubReaderSession.Port], 把 `goTo`, `navigate`,
  * `setPreferences`, `bookmarks` 与 `close` 转发给 [attach] 绑定的 [EpubReaderClient]; 脚本退出时结束会话而不结束阅读器 (插件决策 D32). 脚本不再消费
  * 事件 (分发器溢出) 时得到 `error(LIMIT_EXCEEDED)` 与 `close(overflow)`. 纯 Kotlin, 基于客户端, JVM 测试用事件驱动.
  */
@@ -68,6 +68,7 @@ internal class EpubReaderSessionRunner(
                 EpubContract.EVENT_OPEN -> controller.open(EpubScriptValues.toPlain(event.locatorJson), event.title, event.href, event.positions)
                 EpubContract.EVENT_PROGRESS -> controller.progress(EpubScriptValues.toPlain(event.locatorJson), event.progression, event.title, event.href)
                 EpubContract.EVENT_BOOKMARK -> controller.bookmark(event.change ?: CHANGE_UNKNOWN, EpubScriptValues.list(event.bookmarksJson).firstOrNull())
+                EpubContract.EVENT_HIGHLIGHT -> controller.highlight(event.change ?: CHANGE_UNKNOWN, EpubScriptValues.list(event.annotationsJson).firstOrNull())
                 EpubContract.EVENT_ERROR -> controller.error(EpubErrorMapper.normalize(event.errorCode, event.errorMessage), convertError)
                 EpubContract.EVENT_CLOSE -> end(event.reason ?: EpubContract.REASON_ERROR)
             }

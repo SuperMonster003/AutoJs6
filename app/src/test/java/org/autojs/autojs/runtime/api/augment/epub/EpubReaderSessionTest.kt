@@ -103,8 +103,8 @@ class EpubReaderSessionTest {
     private fun listener(action: (Array<out Any?>) -> Unit): Callable =
         RhinoUtils.newBaseFunction(scope, "listener", { args -> action(args) }, RhinoUtils.NOT_CONSTRUCTABLE)
 
-    private fun event(type: String, reason: String? = null, change: String? = null, locatorJson: String? = null, progression: Double? = null, title: String? = null, href: String? = null, positions: Int? = null, bookmarksJson: String? = null, errorCode: String? = null, errorMessage: String? = null) =
-        EpubReaderEvent(type, reason, change, locatorJson, progression, title, href, true, positions, bookmarksJson, errorCode, errorMessage)
+    private fun event(type: String, reason: String? = null, change: String? = null, locatorJson: String? = null, progression: Double? = null, title: String? = null, href: String? = null, positions: Int? = null, bookmarksJson: String? = null, errorCode: String? = null, errorMessage: String? = null, annotationsJson: String? = null) =
+        EpubReaderEvent(type, reason, change, locatorJson, progression, title, href, true, positions, bookmarksJson, errorCode, errorMessage, annotationsJson)
 
     /** Listener arguments arrive through the bridges as Rhino wrappers; the tests look at the Java values. */
     private fun unwrap(value: Any?): Any? = (value as? Wrapper)?.unwrap() ?: value
@@ -114,7 +114,7 @@ class EpubReaderSessionTest {
     @Test
     fun eventsArriveInOrderWithTheAppendixPayloadsAndCloseIsTerminal() {
         val h = Harness()
-        h.record(EpubReaderSession.EVENT_OPEN, EpubReaderSession.EVENT_PROGRESS, EpubReaderSession.EVENT_BOOKMARK, EpubReaderSession.EVENT_ERROR, EpubReaderSession.EVENT_CLOSE)
+        h.record(EpubReaderSession.EVENT_OPEN, EpubReaderSession.EVENT_PROGRESS, EpubReaderSession.EVENT_BOOKMARK, EpubReaderSession.EVENT_HIGHLIGHT, EpubReaderSession.EVENT_ERROR, EpubReaderSession.EVENT_CLOSE)
         assertEquals("pending", h.session.state)
         assertFalse(h.session.isOpen)
         assertFalse(h.session.isClosed)
@@ -154,15 +154,42 @@ class EpubReaderSessionTest {
         assertEquals(1789920631874.0, bookmark["createdAt"])
         assertEquals("First words", bookmark["text"])
 
+        // Contract version 2: a highlight of the book changed in the reader.
+        h.runner.onEvent(
+            event(
+                EpubContract.EVENT_HIGHLIGHT,
+                change = EpubContract.CHANGE_UPDATED,
+                annotationsJson = """[{"id":7,"style":"underline","color":"#64B5F6","note":"look again","quote":"the old lantern","title":"The Harbour","locator":{"href":"OEBPS/c1.xhtml","type":"application/xhtml+xml","locations":{"progression":0.25},"text":{"highlight":"the old lantern"}},"createdAt":1789920631874,"updatedAt":1789920700000}]""",
+            ),
+        )
+        val highlight = payload(3, h.events)
+        assertEquals(listOf("action", "id", "style", "color", "note", "quote", "title", "locator", "createdAt", "updatedAt"), highlight.keys.toList())
+        assertEquals("updated", highlight["action"])
+        assertEquals(7, highlight["id"]) // integral ids stay script integers (EpubScriptValues.number)
+        assertEquals("underline", highlight["style"])
+        assertEquals("#64B5F6", highlight["color"])
+        assertEquals("look again", highlight["note"])
+        assertEquals("the old lantern", highlight["quote"])
+        assertEquals("The Harbour", highlight["title"])
+        assertEquals("OEBPS/c1.xhtml", (highlight["locator"] as Map<*, *>)["href"])
+        assertEquals(1789920700000.0, highlight["updatedAt"])
+        // A bare highlight (no note) keeps the key with a null value, like the bookmark payload does.
+        h.runner.onEvent(event(EpubContract.EVENT_HIGHLIGHT, change = EpubContract.CHANGE_REMOVED, annotationsJson = """[{"id":7,"style":"highlight","color":"#FFEB3B","locator":{"href":"OEBPS/c1.xhtml"},"createdAt":1,"updatedAt":2}]"""))
+        val removed = payload(4, h.events)
+        assertEquals("removed", removed["action"])
+        assertTrue(removed.containsKey("note"))
+        assertNull(removed["note"])
+        assertNull(removed["quote"])
+
         h.runner.onEvent(event(EpubContract.EVENT_ERROR, errorCode = EpubErrorCodes.UNSUPPORTED_PREFERENCE, errorMessage = "unsupported preferences: bogus"))
-        val error = unwrap(h.events[3].second[0]) as EpubError
+        val error = unwrap(h.events[5].second[0]) as EpubError
         assertEquals(EpubErrorCodes.UNSUPPORTED_PREFERENCE, error.code)
         assertEquals("unsupported preferences: bogus", error.message)
 
         assertEquals(0, h.terminal.get())
         h.runner.onEvent(event(EpubContract.EVENT_CLOSE, reason = EpubContract.REASON_USER))
-        assertEquals(listOf("open", "progress", "bookmark", "error", "close"), h.events.map { it.first })
-        assertEquals(mapOf("reason" to "user"), payload(4, h.events))
+        assertEquals(listOf("open", "progress", "bookmark", "highlight", "highlight", "error", "close"), h.events.map { it.first })
+        assertEquals(mapOf("reason" to "user"), payload(6, h.events))
         assertEquals("closed", h.session.state)
         assertTrue(h.session.isClosed)
         assertFalse(h.session.isOpen)
@@ -174,8 +201,9 @@ class EpubReaderSessionTest {
         assertEquals(0.1, h.session.progress, 0.0)
 
         h.runner.onEvent(event(EpubContract.EVENT_PROGRESS, href = "OEBPS/c2.xhtml", progression = 0.9))
+        h.runner.onEvent(event(EpubContract.EVENT_HIGHLIGHT, change = EpubContract.CHANGE_ADDED, annotationsJson = "[{\"id\":8}]"))
         h.runner.onEvent(event(EpubContract.EVENT_CLOSE, reason = EpubContract.REASON_HOST))
-        assertEquals(5, h.events.size)
+        assertEquals(7, h.events.size)
         assertEquals(1, h.terminal.get())
         assertTrue(h.session.toString().contains("state: closed") && h.session.toString().contains("reason: user"))
     }

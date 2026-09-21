@@ -9,8 +9,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * Freezes the transaction order of contract version 1: Binder transaction codes follow the
- * declaration order, so a method may only ever be appended, never inserted, removed, or renamed.
+ * Freezes the transaction order of the contract (version 1, and the method version 2 appended):
+ * Binder transaction codes follow the declaration order, so a method may only ever be appended,
+ * never inserted, removed, or renamed.
  */
 class EpubAidlOrderTest {
 
@@ -82,6 +83,8 @@ class EpubAidlOrderTest {
                     "Bundle search(in Bundle request)",
                     "Bundle getPositions()",
                     "void close()",
+                    // Contract version 2 (plugin roadmap P9.4).
+                    "Bundle getAnnotations(in Bundle request)",
                 ),
             ),
             "IEpubReaderSession.aidl" to Declaration(
