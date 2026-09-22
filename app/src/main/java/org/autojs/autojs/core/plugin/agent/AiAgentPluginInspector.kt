@@ -61,7 +61,8 @@ object AiAgentPluginInspector {
             authorized = PluginTrustManager.isAuthorized(context, AiAgentIds.DEFAULT_PACKAGE_NAME),
             trustedSigner = trust.isOfficial || trust.isTrusted,
             signerConfirmed = confirmed,
-            compatible = required <= BuildConfig.VERSION_CODE && services.size == 1 && services.single().enabled,
+            compatible = required in AiAgentIds.REQUIRED_HOST_VERSION_CODE..BuildConfig.VERSION_CODE.toLong()
+                && services.size == 1 && services.single().enabled,
         )
         return AiAgentInspection(AiAgentUiPolicy.availability(facts), required, signer)
     }

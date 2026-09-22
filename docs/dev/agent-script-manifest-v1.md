@@ -6,6 +6,14 @@ plugin's script chooser and confirmation flow remain in P3. The public
 `ai.agent.result` and `ai.agent.context` script methods remain in P5; this
 document does not declare those methods available yet.
 
+The complete Agent host integration declares AutoJs6 6.8.0 / build 5285 as its
+minimum. Registration is consumed through the attached, granted host capability
+broker; it is not a general plugin filesystem API. The drawer and plugin center
+provide connection/management entry points as described in
+[AI Agent protocol V1](ai-agent-protocol-v1.md). The current P0 plugin still needs
+its P2/P3 execution and selection components before users can run these examples
+through an Agent task.
+
 ## Project registration
 
 Put an `agent` object in `project.json`:

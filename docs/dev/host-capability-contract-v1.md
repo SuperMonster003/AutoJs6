@@ -5,6 +5,14 @@ Status: host implementation for AI Agent roadmap P1.1/P1.3. The public module is
 MCP contract V2 and AI Agent contract V1 consume the same data plane. A plugin does
 not need an MCP server, an HTTP connection or a second accessibility service.
 
+The complete P1 AI Agent host integration requires AutoJs6 6.8.0 / build 5285.
+This is the Agent family's minimum, not a new minimum for existing MCP V1 APKs.
+The two shared-interface consumers are the Agent attachment's
+`HostCapabilityBrokerStub(AiAgentGrant)` and MCP V2's `openServerV2` session.
+Legacy MCP V1 uses its existing descriptor through an adapter to the same core.
+The production Agent plugin stages the shared AAR in its original P2.5 step;
+the separate MCP repository controls its own V2 migration.
+
 ## Binder surface
 
 `IHostCapabilityBroker` freezes these transactions in order:
@@ -39,7 +47,9 @@ are denied before dispatch. The response supplies `bridgeResponseJson` and
 `{id, ok: false, error}`. An error contains `name`, `message`, `code`, `category`
 and optional method/capability details. `bridgeErrorMessage` mirrors its message.
 The ten stable error categories in `HostCapabilityContract.ERROR_CATEGORIES` are
-unchanged. Agent control-plane error names are a separate vocabulary.
+`unavailable`, `permission-denied`, `capability-denied`, `provider-failed`,
+`invalid-request`, `resource-limit`, `rate-limited`, `timeout`, `process-dead`
+and `runtime-error`. Agent control-plane error names are a separate vocabulary.
 
 Descriptor responses retain the small success envelope in `bridgeResponseJson`
 and add `bridgePayloadFd`, `bridgePayloadBytes` and `bridgePayloadMime`. A one-shot
@@ -91,3 +101,9 @@ limit relationships and MCP aliases. Host tests cover grants, forbidden methods,
 admission, timeout, destruction, UID rejection and response ownership. MCP V1
 and V2 round trips are tested independently; a V2 module build does not imply
 that the separately installed MCP plugin has migrated to V2.
+
+See [AI Agent protocol V1](ai-agent-protocol-v1.md) for attachment admission and
+user entry points, and [Agent script manifest V1](agent-script-manifest-v1.md)
+for the registered-script methods. Host entry evidence and remaining independent
+conformance-APK checks are recorded in
+[the P1.5 report](evidence/ai-agent-p15-20260923.md).

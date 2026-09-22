@@ -1,10 +1,12 @@
 # AI Agent plugin protocol V1
 
-Status: P1 host foundation. The host now provides registered-script catalog and
-execution bridge methods, plus compact node and screen-text observations. The
-plugin's Agent loop, task workbench and script chooser, the drawer entry and the
-public `ai.agent` script API remain in their original roadmap stages. The contract is
-`plugin-api/ai-agent-api`, package `org.autojs.plugin.ai.agent.api`.
+Status: P1 host foundation, implemented in AutoJs6 6.8.0 / build **5285**. The host
+provides model/capability brokers, registered-script catalog and execution bridge
+methods, compact node and screen-text observations, drawer controls and
+plugin-center management. The plugin's Agent loop, task workbench and script
+chooser, and the public `ai.agent` script API remain in their original roadmap
+stages. The contract is `plugin-api/ai-agent-api`, package
+`org.autojs.plugin.ai.agent.api`. `AiAgentIds.REQUIRED_HOST_VERSION_CODE` is 5285.
 
 ## Identity and discovery
 
@@ -16,10 +18,27 @@ the shared plugin-center discovery surface. ABI support is explicitly empty.
 
 The host selects the exact package and service, checks contract/version metadata,
 enablement, signer authorization and host compatibility, and holds a dedicated
-binding lease. Default enablement is false. User-granted signers require the
+binding lease. Enablement defaults to false without an explicit stored decision;
+the shared official fresh-install authorization policy is unchanged.
+User-granted signers require the
 additional signer confirmation used by the host inspection policy. Provider and
 device brokers belong to one attachment and are revoked together on failure,
 detach or plugin death. A rejected attach is never automatically retried.
+
+Management uses the existing INFO service to validate identity and the declared
+minimum host build. Runtime attachment independently validates the dedicated
+Agent interface and its contract. The current P0 plugin can be listed, enabled
+and launched, but its placeholder Binder does not implement runnable tasks.
+The complete runtime is staged in P2.5. Both service manifests, PluginInfo and
+the host contract must agree on the minimum host build.
+
+`AiAgentConnectionOwner` owns the link for the host process. Drawer instances
+own their dialogs only; disposing a drawer does not close the link. The drawer
+shows attachment state, one running task at most, and the queued task count.
+Its management action opens the plugin's existing explicit launcher (the task
+workbench arrives in P6). Discovery failures show state-specific installation,
+activation, enablement, authorization, signer confirmation or compatibility
+guidance. Confirmation is pinned to the current signing fingerprint set.
 
 ## Frozen Binder surface
 
@@ -106,11 +125,41 @@ status/link notifications are small inline records. No byte limit counts UTF-16
 characters in place of UTF-8 bytes.
 
 Link states are `detached`, `attaching`, `attached`, `host_unavailable`, `failed`.
-Run states and errors are the centralized `RUN_STATES` and `ERROR_CODES` sets.
+The centralized `RUN_STATES` set contains `queued`, `running`, `waiting_input`,
+`waiting_confirmation`, `cancelling`, `completed`, `partial`, `failed`, `blocked`
+and `cancelled`. The last five are terminal; reconnecting does not resume a
+blocked run. Run events are `state`, `progress`, `step`, `input`, `confirmation`,
+`done` and `error`; link events also include `queue_changed` and `preset_changed`.
 Task/run ownership and the JS facade are implemented in P5, not by this host
 foundation. Rebinding after plugin process death restores the connection only;
 the controller reports link loss to observers and never starts or replays a task.
 P5 will connect that notification to task handles.
+
+The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
+
+| Area | Codes |
+| --- | --- |
+| Link and queue | `PLUGIN_UNAVAILABLE`, `LINK_DETACHED`, `HOST_UNAVAILABLE`, `QUEUE_FULL` |
+| Run lookup/interaction | `RUN_NOT_FOUND`, `RUN_NOT_INTERACTIVE` |
+| Tool admission | `TOOL_UNKNOWN`, `TOOL_DISABLED`, `TOOL_ARGUMENTS_INVALID`, `CAPABILITY_DENIED` |
+| Resource admission | `QUOTA_EXCEEDED`, `RATE_LIMITED`, `LIMIT_EXCEEDED` |
+| Model and decision | `TARGET_UNSUPPORTED`, `TARGET_UNAVAILABLE`, `MODEL_FAILED`, `MODEL_TIMEOUT`, `DECISION_UNPARSABLE` |
+| Observation/action | `A11Y_SERVICE_NOT_RUNNING`, `NODE_REF_STALE`, `NODE_NOT_FOUND`, `SCREEN_LOCKED`, `OCR_PLUGIN_REQUIRED` |
+| Script execution | `SCRIPT_NOT_REGISTERED`, `SCRIPT_TIMEOUT`, `SCRIPT_FAILED` |
+| User, budget and protocol | `USER_DENIED`, `USER_TIMEOUT`, `BUDGET_EXCEEDED`, `CANCELLED`, `INVALID_REQUEST`, `UNSUPPORTED_CONTRACT` |
+
+These are Agent control-plane codes, including future runner/JS behavior.
+Capability responses retain the shared broker's lowercase error categories;
+the plugin's tool layer maps those observations into Agent errors. Defining a
+code here does not mean the P0 placeholder implements the associated behavior.
+
+Task protocol ceilings are one running task per link, eight queued tasks,
+4 KiB goal text, 8 KiB supplied context, 200 steps, 300 model calls, 30 minutes
+for attached runs and 60 minutes for detached runs. A step journal is bounded
+to 200 records / 1 MiB. P2 implements run admission and budgets within these
+ceilings; P5 implements detached ownership. Capability grants already limit
+Agent dispatch to two concurrent tool calls. Model limits and transport byte
+limits described above are enforced by the existing host brokers.
 
 ## Model admission
 
@@ -144,9 +193,9 @@ usage. No logging includes goals, messages, schema contents or model output.
 ## Attachment request authentication
 
 The explicit broadcast action is `org.autojs.autojs6.action.AI_AGENT_ATTACH` and
-its package is set to the host. Registration and user guidance land in P1.5.
-When registered, the receiver must require PLUGIN permission; its current
-authentication implementation also validates a PendingIntent under
+its package is set to the host. The exported receiver requires PLUGIN permission
+and routes to the same process-owned connection flow as the drawer.
+Its authentication implementation also validates a PendingIntent under
 `AiAgentActions.EXTRA_ATTACH_IDENTITY`. The plugin creates this immutable token
 in its own package; the host checks `creatorPackage`, `creatorUid`, installed UID
 and official/trusted signer. On API 31 and newer it explicitly rejects a mutable
@@ -155,9 +204,23 @@ flag check. It never sends or retains the token. A plain package
 name extra, or `Binder.getCallingUid()` inside `onReceive`, is not sender proof.
 This token permits the same validation on Android versions before API 34.
 
-The 500 ms foreground fallback remains the D41/P7 compatibility decision. No
-boot receiver or automatic task restart is introduced. The host minimum build is
-provisional until P1.6 closes all host integration work.
+The existing MainActivity also consumes `EXTRA_AI_AGENT_ATTACH` with the same
+identity token and authorization checks. It removes the request extras before
+handling the request so activity recreation does not replay it. The plugin-side
+decision to use this fallback after 500 ms remains the D41/P7 compatibility
+decision. An unavailable background request queues guidance for the resumed host
+UI instead of launching an activity from the broadcast receiver.
+
+Host main-process startup restores a connection when `isNormallyClosed` is false.
+It neither starts nor replays tasks. Following fixed roadmap decisions D15/D16,
+there is no Agent boot receiver; P1.5's conflicting "boot" wording does not add
+an auto-start policy. Plugin package and authorization/enablement changes refresh
+admission and detach an unavailable link.
+
+P1.5 entry and device evidence is recorded in
+[the host entry report](evidence/ai-agent-p15-20260923.md). The independent P7
+conformance APK's combined model/observation/script round trip is still pending;
+the implemented host foundation is not evidence that the whole Agent is usable.
 
 ## P1.4 host observations and registered scripts
 

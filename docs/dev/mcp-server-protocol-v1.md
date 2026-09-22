@@ -460,3 +460,12 @@ This host extension does not migrate a separately installed MCP plugin. That
 repository must stage the matching common/shared/MCP AARs, update its hash lock,
 implement `openServerV2`, and declare version 2 in its own migration session.
 Until then the current version 1 APK remains on the tested legacy path.
+
+AI Agent's complete P1 integration declares host build 5285 (AutoJs6 6.8.0).
+That family-specific requirement does not raise the minimum for existing MCP V1
+plugins or make AI Agent depend on an installed MCP server. Host compact dumps
+and nodeRef handling are now available for a future MCP migration; the current
+MCP plugin's own formatter/reference strategy is unchanged. The host's installed
+V1 startup/stop regression and local V1/V2 transaction-selection checks pass
+alongside the Agent entry tests; see
+[P1.5 evidence](evidence/ai-agent-p15-20260923.md).

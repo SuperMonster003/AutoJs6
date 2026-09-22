@@ -6,6 +6,6 @@ object AiAgentIds {
     const val ENGINE = "ai-agent"
     const val VARIANT_DEFAULT = "default"
     const val DEFAULT_PACKAGE_NAME = "io.github.supermonster003.autojs6.plugin.ai.agent"
-    /** Minimum host build shipping this contract; finalized with the P1.6 protocol publication. */
-    const val REQUIRED_HOST_VERSION_CODE = 5283L
+    /** Minimum host build shipping the P1 contract, brokers, observations and user entry points. */
+    const val REQUIRED_HOST_VERSION_CODE = 5285L
 }
