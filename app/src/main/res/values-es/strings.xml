@@ -1796,6 +1796,49 @@
     <string name="text_plugin_center_settings">Configuracion del centro de plugins</string>
     <string name="text_plugin_details">Detalles del complemento</string>
     <string name="text_plugin_hidden_manage">Gestionar plugins ocultos</string>
+    <string name="text_plugin_install_wizard">Asistente de instalación de plugins</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">Cancelar los restantes</string>
+    <string name="text_plugin_install_wizard_category_accessibility">Servicio de accesibilidad</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">Empaquetado de aplicaciones</string>
+    <string name="text_plugin_install_wizard_category_compiler">Compiladores</string>
+    <string name="text_plugin_install_wizard_category_docs">Documentación</string>
+    <string name="text_plugin_install_wizard_category_editor">Editor de código</string>
+    <string name="text_plugin_install_wizard_category_file_manager">Administrador de archivos</string>
+    <string name="text_plugin_install_wizard_category_image">Imágenes</string>
+    <string name="text_plugin_install_wizard_category_player">Reproductores</string>
+    <string name="text_plugin_install_wizard_category_runtime">Entornos de ejecución de scripts</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">Conversión de texto</string>
+    <string name="text_plugin_install_wizard_category_tools">Herramientas</string>
+    <string name="text_plugin_install_wizard_category_ui">UI</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">Confirma la instalación en el instalador del sistema. El siguiente plugin comenzará automáticamente después</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">Descargando (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">Marca los plugins que necesitas e instálalos en un solo lote. Todos seguirán disponibles en el Centro de plugins</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">Los siguientes plugins pueden no ser compatibles con este dispositivo (ABI o tamaño de página nativo). ¿Continuar de todos modos?\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">Puede no ser compatible con este dispositivo</string>
+    <string name="text_plugin_install_wizard_index_unavailable">No se pudo cargar el índice de plugins: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">El instalador no se inició</string>
+    <string name="text_plugin_install_wizard_install_with_count">Instalar (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">Instalando (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">Espacio de caché insuficiente: se necesitan unos %1$s, disponibles %2$s</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Cargando el índice de plugins...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">El índice no contiene ningún plugin instalable</string>
+    <string name="text_plugin_install_wizard_no_selection">No se ha seleccionado ningún plugin</string>
+    <string name="text_plugin_install_wizard_profile">Perfil</string>
+    <string name="text_plugin_install_wizard_profile_delete">Eliminar perfil</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">¿Eliminar el perfil \"%1$s\"?</string>
+    <string name="text_plugin_install_wizard_profile_deleted">Perfil eliminado</string>
+    <string name="text_plugin_install_wizard_profile_minimal">Mínimo</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">Ya existe un perfil con este nombre</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">Nombre del perfil</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">Cambiar el nombre del perfil...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Guardar la selección como nuevo perfil...</string>
+    <string name="text_plugin_install_wizard_profile_saved">Perfil guardado</string>
+    <string name="text_plugin_install_wizard_profile_standard">Estándar</string>
+    <string name="text_plugin_install_wizard_profile_update">Actualizar este perfil con la selección</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">Cancelados: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">Fallidos: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">Instalados: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">Instalación de plugins finalizada</string>
     <string name="text_plugin_instruction">Instrucciones de uso</string>
     <string name="text_plugin_instruction_auto_mounted_hint">Sugerencia:\n\nEl montaje automático está activado para este plugin. La ruta de montaje es `%1$s`.\n\nPor lo tanto, puedes usar `%2$s` directamente sin llamar explícitamente a `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">Ejemplo de uso del plugin (suponiendo que el plugin tiene un metodo `exec`): </string>
@@ -2055,6 +2098,7 @@
     <string name="text_signature_configuration">Configuración de firma</string>
     <string name="text_signature_scheme">Esquema de firma</string>
     <string name="text_size">Tamaño</string>
+    <string name="text_skip">Omitir</string>
     <string name="text_skip_conflicting">Omitir conflictivos</string>
     <string name="text_snapshot_created">Instantánea creada</string>
     <string name="text_snapshot_label_optional">Etiqueta (opcional)</string>

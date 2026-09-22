@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 21 日.
+数据更新于 2026 年 9 月 22 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/21
+###### 2026/09/22
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
 * `提示` 打包应用的目标 SDK 版本由 29 调整为 37, 共享存储及本地网络访问需按系统要求授权
@@ -178,6 +178,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 终端功能, 支持多会话管理, 后台运行, 快捷按键及终端记录复制/分享 (入口: 主页抽屉/文件管理器目录菜单/项目工具栏)
 * `新增` 终端支持 node/npm/npx/corepack/yarn/pnpm 命令及 npm 镜像源设置 (需要 Node.js Runtime 插件 1.5.0+)
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
+* `新增` 插件安装向导, 用于首次启动时按分类勾选并批量安装官方插件, 内置 "标准" / "最小" / "全部" 配置并支持自定义配置的保存, 重命名及删除 (入口: 主页插件标签页悬浮按钮菜单 / 插件中心 "+" 菜单)
 * `新增` MCP Server 支持脚本管理, 文件读写, 控制台查询, 应用查询, 无障碍操作及截图, 并支持读取内置示例和离线项目文档 (Root 操作需单独授权)
 * `新增` 无障碍服务管理器, 支持服务启停, 缓存清理, 自检, 事件监视及诊断信息复制 (入口: 主页抽屉无障碍服务条目)
 * `新增` 主页抽屉增加屏幕取色工具 (需要屏幕取色插件)
@@ -772,7 +773,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 21 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 22 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

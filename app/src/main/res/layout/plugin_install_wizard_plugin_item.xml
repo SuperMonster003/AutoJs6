@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="24dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="6dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/plugin_install_wizard_item_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_plugin_center_default"
+        app:civ_border_color="@color/plugin_center_item_icon_border"
+        app:civ_border_width="@dimen/plugin_center_item_icon_border_width" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/plugin_install_wizard_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:textColor="@color/text_color_primary"
+            android:textSize="15sp"
+            tools:text="Paddle OCR (PP-OCRv5 Mobile)" />
+
+        <TextView
+            android:id="@+id/plugin_install_wizard_item_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/text_color_secondary"
+            android:textSize="12sp"
+            tools:text="12.3 MB" />
+
+    </LinearLayout>
+
+    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+        android:id="@+id/plugin_install_wizard_item_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false" />
+
+</LinearLayout>

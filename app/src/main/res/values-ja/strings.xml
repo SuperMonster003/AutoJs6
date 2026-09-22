@@ -1797,6 +1797,49 @@
     <string name="text_plugin_center_settings">プラグインセンター設定</string>
     <string name="text_plugin_details">プラグイン詳細</string>
     <string name="text_plugin_hidden_manage">非表示プラグインを管理</string>
+    <string name="text_plugin_install_wizard">プラグインインストールウィザード</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">残りをキャンセル</string>
+    <string name="text_plugin_install_wizard_category_accessibility">アクセシビリティサービス</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">アプリのパッケージ化</string>
+    <string name="text_plugin_install_wizard_category_compiler">コンパイル</string>
+    <string name="text_plugin_install_wizard_category_docs">ドキュメント</string>
+    <string name="text_plugin_install_wizard_category_editor">コードエディタ</string>
+    <string name="text_plugin_install_wizard_category_file_manager">ファイルマネージャー</string>
+    <string name="text_plugin_install_wizard_category_image">画像</string>
+    <string name="text_plugin_install_wizard_category_player">プレーヤー</string>
+    <string name="text_plugin_install_wizard_category_runtime">スクリプトランタイム</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">テキスト変換</string>
+    <string name="text_plugin_install_wizard_category_tools">ツール</string>
+    <string name="text_plugin_install_wizard_category_ui">UI</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">システムのインストーラーでインストールを確認してください. 完了後に次のプラグインが自動的に始まります</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">ダウンロード中 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">必要なプラグインにチェックを入れて一括でインストールします. プラグインは後からでもプラグインセンターから追加できます</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">次のプラグインはこのデバイスと互換性がない可能性があります (ABI またはネイティブページサイズ). 続行しますか?\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">このデバイスと互換性がない可能性があります</string>
+    <string name="text_plugin_install_wizard_index_unavailable">プラグインインデックスを読み込めませんでした: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">インストーラーが開始されませんでした</string>
+    <string name="text_plugin_install_wizard_install_with_count">インストール (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">インストール中 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">キャッシュ領域が不足しています: 約 %1$s が必要, 利用可能 %2$s</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">プラグインインデックスを読み込み中...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">インデックスにインストール可能なプラグインがありません</string>
+    <string name="text_plugin_install_wizard_no_selection">プラグインが選択されていません</string>
+    <string name="text_plugin_install_wizard_profile">プロファイル</string>
+    <string name="text_plugin_install_wizard_profile_delete">プロファイルを削除</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">プロファイル \"%1$s\" を削除しますか?</string>
+    <string name="text_plugin_install_wizard_profile_deleted">プロファイルを削除しました</string>
+    <string name="text_plugin_install_wizard_profile_minimal">最小</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">同じ名前のプロファイルが既に存在します</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">プロファイル名</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">プロファイル名を変更...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">現在の選択を新しいプロファイルとして保存...</string>
+    <string name="text_plugin_install_wizard_profile_saved">プロファイルを保存しました</string>
+    <string name="text_plugin_install_wizard_profile_standard">標準</string>
+    <string name="text_plugin_install_wizard_profile_update">現在の選択でこのプロファイルを更新</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">キャンセル: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">失敗: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">インストール済み: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">プラグインのインストールが完了しました</string>
     <string name="text_plugin_instruction">プラグイン使用説明</string>
     <string name="text_plugin_instruction_auto_mounted_hint">ヒント:\n\n現在, このプラグインでは自動マウントが有効で, マウントパスは `%1$s` です.\n\nそのため, `plugins.load` を明示的に呼び出さなくても `%2$s` を直接使用できます.</string>
     <string name="text_plugin_instruction_example_title">プラグイン使用例 (プラグインに `exec` メソッドがあると仮定): </string>
@@ -2056,6 +2099,7 @@
     <string name="text_signature_configuration">署名設定</string>
     <string name="text_signature_scheme">署名スキーム</string>
     <string name="text_size">サイズ</string>
+    <string name="text_skip">スキップ</string>
     <string name="text_skip_conflicting">競合する項目をスキップ</string>
     <string name="text_snapshot_created">スナップショットを作成しました</string>
     <string name="text_snapshot_label_optional">ラベル (任意)</string>

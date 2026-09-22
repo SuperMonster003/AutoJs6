@@ -50,6 +50,7 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerClosed
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerOpened
+import org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardDialog
 import org.autojs.autojs.ui.main.plugin.PluginFragment
 import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
@@ -200,6 +201,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             AllFilesAccessPermission(this),
             DisplayOverOtherAppsPermission(this),
         ).forEach { it.urgeIfNeeded() }
+
+        // Shown once after a fresh install; the user may skip it and reopen it
+        // later from the Plugins tab fab or the Plugin Center.
+        // zh-CN: 全新安装后仅展示一次; 用户可跳过, 之后可从插件标签页 fab 或插件中心重新打开.
+        PluginInstallWizardDialog.showOnFirstRunIfNeeded(this)
     }
 
     override fun onPostResume() {

@@ -30,6 +30,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
+import org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardDialog
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByThemeColorLuminance
@@ -110,6 +111,10 @@ class PluginCenterActivity : BaseActivity() {
         val center = supportFragmentManager.findFragmentById(R.id.fragment_plugin_center) as? PluginCenterFragment
 
         return when (item.itemId) {
+            R.id.action_plugin_install_wizard -> {
+                PluginInstallWizardDialog.show(this, lifecycleScope)
+                true
+            }
             R.id.action_install_from_official_library -> {
                 launch(this, PluginIndexSource.OFFICIAL)
                 true

@@ -29,17 +29,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public class PluginFloatingActionMenu extends FrameLayout implements View.OnClickListener {
 
+    // Index 0 sits next to the toggle fab; the last index is the farthest from it.
+    // zh-CN: 索引 0 紧邻主 fab, 末尾索引距离最远.
     private static final int[] ICONS = {
             R.drawable.ic_import_from_top,
             R.drawable.ic_download_thicker,
             R.drawable.ic_download_thicker,
-            R.drawable.ic_download_thicker};
+            R.drawable.ic_download_thicker,
+            R.drawable.ic_plugin_install_wizard};
 
     private static final int[] LABELS = {
             R.string.text_install_from_local_file,
             R.string.text_install_from_url,
             R.string.text_install_from_third_party_plugin_library,
-            R.string.text_install_from_official_plugin_library};
+            R.string.text_install_from_official_plugin_library,
+            R.string.text_plugin_install_wizard};
 
     private static final int ANIMATION_INTERVAL = 30;
     private static final int ANIMATION_DURATION = 250;

@@ -13,6 +13,10 @@
         <menu>
 
             <item
+                android:id="@+id/action_plugin_install_wizard"
+                android:title="@string/text_plugin_install_wizard" />
+
+            <item
                 android:id="@+id/action_install_from_official_library"
                 android:title="@string/text_install_from_official_plugin_library" />
 

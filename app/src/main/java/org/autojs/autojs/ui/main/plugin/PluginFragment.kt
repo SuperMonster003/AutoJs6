@@ -25,6 +25,7 @@ import org.autojs.autojs.core.plugin.center.PluginCenterFragment
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
 import org.autojs.autojs.core.plugin.center.PluginInstallActions
 import org.autojs.autojs.core.plugin.center.PluginInstaller
+import org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardDialog
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.QueryEvent
@@ -276,6 +277,9 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onClick(button: FloatingActionButton, pos: Int) {
         val context = requireContext()
         when (pos) {
+            4 -> {
+                PluginInstallWizardDialog.show(requireActivity(), lifecycleScope)
+            }
             3 -> {
                 PluginCenterActivity.launch(context, PluginIndexSource.OFFICIAL)
             }

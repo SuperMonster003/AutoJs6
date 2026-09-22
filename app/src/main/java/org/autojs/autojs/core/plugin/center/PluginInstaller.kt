@@ -183,6 +183,42 @@ object PluginInstaller {
         dialog.setProgress(0)
 
         try {
+            return downloadToCache(context, url, expectedSha256, cancelFlag) { downloaded, total ->
+                withContext(Dispatchers.Main) {
+                    when {
+                        total > 0 -> {
+                            val pct = ((downloaded * 100f) / total).coerceIn(0f, 100f)
+                            dialog.setProgressNumberFormatByBytes(downloaded, total, true)
+                            dialog.setProgress(pct.roundToInt())
+                        }
+                        downloaded == 0L -> dialog.setProgressNumberFormatByBytes(0, total, true)
+                        else -> dialog.setProgress((dialog.currentProgress + 1).coerceAtMost(99))
+                    }
+                }
+            }
+        } finally {
+            dialog.dismiss()
+        }
+    }
+
+    /**
+     * Downloads [url] into the plugin download cache and verifies [expectedSha256] when given.
+     * [onProgress] runs on the IO dispatcher: once right after the connection is established
+     * (0 bytes, total may be -1 when unknown), then at most every 80 ms for a known size and
+     * every 300 ms for an unknown size. Setting [cancelFlag] aborts with [DownloadResult.Cancelled].
+     *
+     * zh-CN: 将 [url] 下载到插件下载缓存并按需校验 [expectedSha256]. [onProgress] 在 IO 调度器上回调:
+     * 连接建立后立即回调一次 (0 字节, 未知大小时 total 为 -1), 之后已知大小最多每 80 ms,
+     * 未知大小最多每 300 ms 回调一次. 置位 [cancelFlag] 以 [DownloadResult.Cancelled] 中止.
+     */
+    internal suspend fun downloadToCache(
+        context: Context,
+        url: String,
+        expectedSha256: String?,
+        cancelFlag: AtomicBoolean,
+        onProgress: suspend (downloaded: Long, total: Long) -> Unit,
+    ): DownloadResult {
+        try {
             val cache = File(context.cacheDir, "plugin_dl").apply { if (!exists()) mkdirs() }
             val name = guessFileName(url)
             val out = File(cache, name)
@@ -197,7 +233,7 @@ object PluginInstaller {
                 if (code !in 200..299) throw HttpStatusException(code, conn.responseMessage ?: "HTTP error")
                 val total = conn.contentLengthLong.takeIf { it > 0 } ?: -1L
 
-                dialog.setProgressNumberFormatByBytes(0, total, true)
+                onProgress(0L, total)
 
                 conn.inputStream.use { input ->
                     val md = MessageDigest.getInstance("SHA-256")
@@ -216,17 +252,10 @@ object PluginInstaller {
                                 val now = System.currentTimeMillis()
 
                                 if (total > 0 && (now - lastUpdateTs > 80)) {
-                                    val pct = ((downloaded * 100f) / total).coerceIn(0f, 100f)
-                                    withContext(Dispatchers.Main) {
-                                        dialog.setProgressNumberFormatByBytes(downloaded, total, true)
-                                        dialog.setProgress(pct.roundToInt())
-                                    }
+                                    onProgress(downloaded, total)
                                     lastUpdateTs = now
                                 } else if (total <= 0 && (now - lastUpdateTs > 300)) {
-                                    withContext(Dispatchers.Main) {
-                                        val cur = dialog.currentProgress
-                                        dialog.setProgress((cur + 1).coerceAtMost(99))
-                                    }
+                                    onProgress(downloaded, total)
                                     lastUpdateTs = now
                                 }
                             }
@@ -243,7 +272,7 @@ object PluginInstaller {
             }
 
             val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", out)
-            return DownloadResult.Success(uri, len, sha256Hex)
+            return DownloadResult.Success(uri, len, sha256Hex, out)
         } catch (_: CancellationException) {
             return DownloadResult.Cancelled
         } catch (he: HttpStatusException) {
@@ -261,8 +290,6 @@ object PluginInstaller {
             return DownloadResult.Failure(R.string.text_failed_to_install, "Security error: ${e.message}")
         } catch (e: Throwable) {
             return DownloadResult.Failure(R.string.text_failed_to_retrieve, e.message ?: e.toString())
-        } finally {
-            dialog.dismiss()
         }
     }
 
@@ -319,7 +346,7 @@ object PluginInstaller {
     private data class ChecksumMismatchException(val expected: String, val actual: String) : RuntimeException("sha256 mismatch")
 
     sealed interface DownloadResult {
-        data class Success(val uri: Uri, val length: Long, val sha256: String) : DownloadResult
+        data class Success(val uri: Uri, val length: Long, val sha256: String, val file: File? = null) : DownloadResult
         data class Failure(val titleRes: Int, val message: String) : DownloadResult
         data object Cancelled : DownloadResult
     }

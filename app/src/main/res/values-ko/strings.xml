@@ -1798,6 +1798,49 @@
     <string name="text_plugin_center_settings">플러그인 센터 설정</string>
     <string name="text_plugin_details">플러그인 상세</string>
     <string name="text_plugin_hidden_manage">숨겨진 플러그인 관리</string>
+    <string name="text_plugin_install_wizard">플러그인 설치 마법사</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">나머지 취소</string>
+    <string name="text_plugin_install_wizard_category_accessibility">접근성 서비스</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">앱 패키징</string>
+    <string name="text_plugin_install_wizard_category_compiler">컴파일</string>
+    <string name="text_plugin_install_wizard_category_docs">문서</string>
+    <string name="text_plugin_install_wizard_category_editor">코드 편집기</string>
+    <string name="text_plugin_install_wizard_category_file_manager">파일 관리자</string>
+    <string name="text_plugin_install_wizard_category_image">이미지</string>
+    <string name="text_plugin_install_wizard_category_player">플레이어</string>
+    <string name="text_plugin_install_wizard_category_runtime">스크립트 런타임</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">텍스트 변환</string>
+    <string name="text_plugin_install_wizard_category_tools">도구</string>
+    <string name="text_plugin_install_wizard_category_ui">UI</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">시스템 설치 화면에서 설치를 확인하세요. 완료되면 다음 플러그인이 자동으로 시작됩니다</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">다운로드 중 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">필요한 플러그인을 선택하여 한 번에 설치합니다. 모든 플러그인은 나중에도 플러그인 센터에서 설치할 수 있습니다</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">다음 플러그인은 이 기기와 호환되지 않을 수 있습니다 (ABI 또는 네이티브 페이지 크기). 계속할까요?\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">이 기기와 호환되지 않을 수 있습니다</string>
+    <string name="text_plugin_install_wizard_index_unavailable">플러그인 인덱스를 불러올 수 없습니다: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">설치 프로그램이 시작되지 않았습니다</string>
+    <string name="text_plugin_install_wizard_install_with_count">설치 (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">설치 중 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">캐시 공간이 부족합니다: 약 %1$s 필요, %2$s 사용 가능</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">플러그인 인덱스를 불러오는 중...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">인덱스에 설치할 수 있는 플러그인이 없습니다</string>
+    <string name="text_plugin_install_wizard_no_selection">선택한 플러그인이 없습니다</string>
+    <string name="text_plugin_install_wizard_profile">프로필</string>
+    <string name="text_plugin_install_wizard_profile_delete">프로필 삭제</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">프로필 \"%1$s\"을(를) 삭제할까요?</string>
+    <string name="text_plugin_install_wizard_profile_deleted">프로필을 삭제했습니다</string>
+    <string name="text_plugin_install_wizard_profile_minimal">최소</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">같은 이름의 프로필이 이미 있습니다</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">프로필 이름</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">프로필 이름 바꾸기...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">현재 선택을 새 프로필로 저장...</string>
+    <string name="text_plugin_install_wizard_profile_saved">프로필을 저장했습니다</string>
+    <string name="text_plugin_install_wizard_profile_standard">표준</string>
+    <string name="text_plugin_install_wizard_profile_update">현재 선택으로 이 프로필 업데이트</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">취소됨: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">실패: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">설치됨: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">플러그인 설치 완료</string>
     <string name="text_plugin_instruction">플러그인 사용 설명</string>
     <string name="text_plugin_instruction_auto_mounted_hint">힌트:\n\n현재 이 플러그인에는 자동 마운트가 활성화되어 있으며, 마운트 경로는 `%1$s`입니다.\n\n따라서 `plugins.load`를 명시적으로 호출하지 않고도 `%2$s`를 바로 사용할 수 있습니다.</string>
     <string name="text_plugin_instruction_example_title">플러그인 사용 예시 (플러그인에 `exec` 메서드가 있다고 가정): </string>
@@ -2057,6 +2100,7 @@
     <string name="text_signature_configuration">서명 설정</string>
     <string name="text_signature_scheme">서명 스킴</string>
     <string name="text_size">크기</string>
+    <string name="text_skip">건너뛰기</string>
     <string name="text_skip_conflicting">충돌 항목 건너뛰기</string>
     <string name="text_snapshot_created">스냅샷을 만들었습니다</string>
     <string name="text_snapshot_label_optional">레이블 (선택 사항)</string>

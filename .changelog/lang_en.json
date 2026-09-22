@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/21",
+      "released_date": "2026/09/22",
       "feature": [
         "Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk",
         "Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports",
@@ -117,6 +117,7 @@
         "Developer options add a default-off R1 switch for experimental remote APK building; disabled state blocks provider discovery and session opening, failures stop the current build without automatic local fallback, existing output remains protected by atomic publication, and process-local diagnostics retain only bounded enum/number fields",
         "Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging",
         "Long-pressing the floating button on the Home Plugins tab opens the Plugin Center",
+        "Plugin install wizard for ticking official plugins by category and installing them in one batch on the first launch, with the built-in \"Standard\" / \"Minimal\" / \"All\" profiles and custom profiles that can be saved, renamed and deleted (entries: the floating button menu of the Home Plugins tab / the \"+\" menu of the Plugin Center)",
         "runtime.loadAar method, for dynamically loading AAR files",
         "Explicit runtime.loadJarWithR8 entry with default-off exact-component selection, same-signature identity pinning, bounded five-artifact R8 transport, isolated cache adoption, and fail-closed behavior without D8/dx fallback",
         "ui.useAndroidLayout supports native Android layout widgets, include/merge, script project res references, and Drawable XML such as shape/selector/layer-list",

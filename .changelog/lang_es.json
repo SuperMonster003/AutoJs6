@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/21",
+      "released_date": "2026/09/22",
       "feature": [
         "Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real",
         "Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar",
@@ -117,6 +117,7 @@
         "Las opciones de desarrollador añaden un interruptor R1 desactivado de forma predeterminada para la compilación remota experimental de APK; el estado desactivado bloquea el descubrimiento del provider y la apertura de sesiones, los fallos detienen la compilación actual sin reserva local automática, la salida existente queda protegida mediante publicación atómica y los diagnósticos del proceso solo conservan campos enum y numéricos limitados",
         "El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones",
         "Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins",
+        "Asistente de instalación de plugins para marcar plugins oficiales por categoría e instalarlos en un solo lote en el primer inicio, con los perfiles integrados \"Estándar\" / \"Mínimo\" / \"Todos\" y perfiles personalizados que se pueden guardar, renombrar y eliminar (entradas: menú del botón flotante de la pestaña Plugins de la página de inicio / menú \"+\" del Centro de plugins)",
         "Método runtime.loadAar, para cargar archivos AAR dinámicamente",
         "Entrada explícita runtime.loadJarWithR8 con selección de componente exacto desactivada de forma predeterminada, fijación de identidad con la misma firma, transporte R8 acotado de cinco artefactos, adopción de caché aislada y cierre seguro sin fallback a D8/dx",
         "ui.useAndroidLayout admite controles de diseño nativos de Android, include/merge, referencias res del proyecto de scripts y archivos Drawable XML como shape/selector/layer-list",

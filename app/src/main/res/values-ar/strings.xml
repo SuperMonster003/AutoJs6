@@ -1798,6 +1798,49 @@
     <string name="text_plugin_center_settings">اعدادات مركز الاضافات</string>
     <string name="text_plugin_details">تفاصيل الملحق</string>
     <string name="text_plugin_hidden_manage">إدارة المكونات الإضافية المخفية</string>
+    <string name="text_plugin_install_wizard">معالج تثبيت الإضافات</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">إلغاء المتبقي</string>
+    <string name="text_plugin_install_wizard_category_accessibility">خدمة إمكانية الوصول</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">تغليف التطبيقات</string>
+    <string name="text_plugin_install_wizard_category_compiler">المترجمات</string>
+    <string name="text_plugin_install_wizard_category_docs">الوثائق</string>
+    <string name="text_plugin_install_wizard_category_editor">محرر الشفرة</string>
+    <string name="text_plugin_install_wizard_category_file_manager">مدير الملفات</string>
+    <string name="text_plugin_install_wizard_category_image">الصور</string>
+    <string name="text_plugin_install_wizard_category_player">المشغّلات</string>
+    <string name="text_plugin_install_wizard_category_runtime">بيئات تشغيل السكربتات</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">تحويل النص</string>
+    <string name="text_plugin_install_wizard_category_tools">أدوات</string>
+    <string name="text_plugin_install_wizard_category_ui">واجهة المستخدم</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">أكّد التثبيت في مثبّت النظام. ستبدأ الإضافة التالية تلقائيًا بعد ذلك</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">جارٍ التنزيل (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">حدد الإضافات التي تحتاجها وثبّتها دفعة واحدة. تبقى كل الإضافات متاحة لاحقًا في مركز الإضافات</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">قد لا تكون الإضافات التالية متوافقة مع هذا الجهاز (ABI أو حجم الصفحة الأصلي). هل تريد المتابعة على أي حال؟\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">قد لا يكون متوافقًا مع هذا الجهاز</string>
+    <string name="text_plugin_install_wizard_index_unavailable">تعذر تحميل فهرس الإضافات: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">لم يبدأ المثبّت</string>
+    <string name="text_plugin_install_wizard_install_with_count">تثبيت (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">جارٍ التثبيت (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">مساحة ذاكرة التخزين المؤقت غير كافية: مطلوب حوالي %1$s، المتاح %2$s</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">جارٍ تحميل فهرس الإضافات...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">لا يحتوي الفهرس على أي إضافة قابلة للتثبيت</string>
+    <string name="text_plugin_install_wizard_no_selection">لم يتم تحديد أي إضافة</string>
+    <string name="text_plugin_install_wizard_profile">الملف الشخصي</string>
+    <string name="text_plugin_install_wizard_profile_delete">حذف الملف الشخصي</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">هل تريد حذف الملف الشخصي \"%1$s\"؟</string>
+    <string name="text_plugin_install_wizard_profile_deleted">تم حذف الملف الشخصي</string>
+    <string name="text_plugin_install_wizard_profile_minimal">الحد الأدنى</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">يوجد ملف شخصي بهذا الاسم بالفعل</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">اسم الملف الشخصي</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">إعادة تسمية الملف الشخصي...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">حفظ التحديد كملف شخصي جديد...</string>
+    <string name="text_plugin_install_wizard_profile_saved">تم حفظ الملف الشخصي</string>
+    <string name="text_plugin_install_wizard_profile_standard">قياسي</string>
+    <string name="text_plugin_install_wizard_profile_update">تحديث هذا الملف الشخصي بالتحديد الحالي</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">تم الإلغاء: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">فشل: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">تم التثبيت: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">اكتمل تثبيت الإضافات</string>
     <string name="text_plugin_instruction">تعليمات استخدام الاضافة</string>
     <string name="text_plugin_instruction_auto_mounted_hint">تلميح:\n\nالتحميل التلقائي مفعّل حاليا لهذا المكون الإضافي, ومسار التحميل هو `%1$s`.\n\nلذلك, يمكنك استخدام `%2$s` مباشرة دون استدعاء `plugins.load` بشكل صريح.</string>
     <string name="text_plugin_instruction_example_title">مثال على استخدام الاضافة (على افتراض ان الاضافة تحتوي على طريقة `exec`): </string>
@@ -2057,6 +2100,7 @@
     <string name="text_signature_configuration">تكوين التوقيع</string>
     <string name="text_signature_scheme">خطة التوقيع</string>
     <string name="text_size">مقاس</string>
+    <string name="text_skip">تخطي</string>
     <string name="text_skip_conflicting">تخطي المتعارضة</string>
     <string name="text_snapshot_created">تم انشاء اللقطة</string>
     <string name="text_snapshot_label_optional">التسمية (اختياري)</string>

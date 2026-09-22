@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 21 일.
+데이터 갱신일: 2026 년 9 월 22 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/21
+###### 2026/09/22
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공
@@ -284,6 +284,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 개발자 옵션에 기본 비활성인 실험적 원격 APK 빌드용 R1 스위치를 추가; 비활성 상태에서는 provider 검색과 세션 열기를 차단하고, 실패 시 자동 로컬 폴백 없이 현재 빌드를 중지하며, 기존 출력은 원자적 게시로 보호하고, 프로세스 내 진단에는 제한된 enum/숫자 필드만 유지
 * `추가` 플러그인 센터에서 APK Builder Template 플러그인 지원, 앱 패키징에 필요한 템플릿을 필요할 때 설치/업데이트 가능
 * `추가` 홈의 플러그인 탭에 있는 플로팅 버튼을 길게 눌러 플러그인 센터를 여는 기능 지원
+* `추가` 플러그인 설치 마법사, 첫 실행 시 공식 플러그인을 분류별로 선택하여 한 번에 설치 가능, 내장 "표준" / "최소" / "전체" 프로필과 저장, 이름 변경, 삭제가 가능한 사용자 지정 프로필 지원 (진입점: 홈 플러그인 탭의 플로팅 버튼 메뉴 / 플러그인 센터의 "+" 메뉴)
 * `추가` runtime.loadAar 메서드, AAR 파일 동적 로드용
 * `추가` 명시적 runtime.loadJarWithR8 진입점에서 기본 비활성화된 정확한 구성 요소 선택, 동일 서명 ID 고정, 제한된 5개 산출물 R8 전송, 격리 캐시 채택 및 D8/dx 폴백 없는 실패 폐쇄 동작 지원
 * `추가` ui.useAndroidLayout에서 Android 네이티브 레이아웃 위젯, include/merge, 스크립트 프로젝트의 res 참조 및 shape/selector/layer-list 등의 Drawable XML 지원
@@ -398,11 +399,13 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Mail 플러그인 계약 모듈 (plugin-api/mail-api): 고정된 AIDL 인터페이스, 전용 바인딩 임대로 계정 세션을 열고 플러그인 프로세스 종료 후 다시 열며 XOAUTH2 토큰 갱신 후 한 번 재시도하고 파이프를 통해 첨부 파일을 디스크로 스트리밍하는 호스트 클라이언트, 그리고 기본 켜짐 상태의 플러그인 센터 등록
 * `추가` Mail 플러그인의 스크립트 API `mail` (Mail 로드맵 P3.1 및 P3.2): 제공업체 프리셋과 XOAUTH2용 `tokenProvider`를 지원하는 `mail.connect(옵션 또는 별칭)`, `test`, `send` (스크립트 경로의 첨부 파일을 읽기 전용 디스크립터로 전달), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 클라이언트 측 폴백 표시가 있는 `search`, `get` / `fetchBody`, 작업 디렉터리로 스트리밍하며 `onProgress`를 지원하는 `download`와 `raw`, `markRead` / `markUnread` / `flag` / `unflag`를 포함한 `setFlags`, `move`, `copy`, `delete`, `expunge`, `append`, `close`를 갖춘 `MailClient` (각 메서드는 스크립트 스레드에서 확정되는 `Async` Promise 형태 제공); 메시지 결과는 `Date` 필드, 출력 가능한 주소, 바인딩된 `load` / `download` 메서드를 갖고, 실패는 `code`와 `retryable`을 가진 `MailError` 객체이며, 전역에는 `mail.providers`, `mail.accounts`, `mail.setDefault`와 모든 클라이언트 메서드의 전달이 있습니다
 * `추가` 메일 플러그인의 스크립트 API `mail.watch` (메일 로드맵 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 와 `mail.watch` 는 `MailWatch` 이미터를 반환하며, 그 `message(message, watch)`, `mode`, `resync`, `error` 와 단 하나의 `close(reason)` 이벤트는 스크립트 스레드에 도착하고 `stop()` 까지 스크립트를 살려 둠; 플러그인은 IMAP IDLE 로 감시하고 (폴링 폴백, POP3 는 UIDL), 호스트는 오래된 generation 과 순서가 어긋난 전달을 버리며, 플러그인 사망은 `PLUGIN_UNAVAILABLE` 로 보고되고 기본적으로 다시 연 세션에서 새 감시와 `resync` 가 뒤따르며, 클라이언트를 닫거나 스크립트를 끝내면 그 감시가 멈춤
+* `추가` 메일 플러그인 계약 버전 2와 백그라운드 감시 (메일 로드맵 P8): 추가된 `IMailPlugin.openTrigger` / `listTriggers` 와 `IMailTrigger` / `IMailTriggerCallback` 인터페이스가 플러그인 자체 포그라운드 서비스에서 계속 실행되는 감시를 구독하고, 새 "메일 도착 시" 인텐트 작업 (`org.autojs.autojs6.action.MAIL_TRIGGER`, 호스트 서명 권한으로 보호되는 리시버가 수신) 이 선택한 감시의 새 메일마다 스크립트를 실행 (보낸 사람과 제목으로 필터 가능, 이벤트 문서는 `engines.myEngine().execArgv.mail`); 중복 전달은 버려지고 연속 도착은 작업당 3 초에 한 번의 실행으로 제한되며 버전 1 플러그인은 새 호출을 받지 않음
 * `추가` EPUB 플러그인 계약 모듈 (plugin-api/epub-api): 책 추출 (메타데이터, 목차, 읽기 순서, 장 텍스트, 리소스, 검색)과 토큰 기반 리더 세션을 위한 고정된 AIDL 인터페이스, `epub` 엔진의 호스트 검색 래퍼, Readium EPUB Reader 패키지의 플러그인 센터 등록 (Explorer Action 서비스와 EPUB 서비스가 하나의 항목을 공유)
 * `추가` EPUB 플러그인 호스트 클라이언트 (core/plugin/epub, 플러그인 로드맵 P5.4): `EpubPluginHost.openBook`은 경로를 검증하고 읽기 전용으로 열어 책 클라이언트 (메타데이터, 목차, 읽기 순서, 일반 텍스트 또는 Markdown의 페이지 단위 장 텍스트, 스풀된 파이프를 통한 리소스 내보내기, 검색, 위치 수)를 사망 알림이 있는 전용 바인딩 임대 위에서 넘겨줍니다. `openReader`는 리더 세션을 열고 일회용 토큰을 읽어 호스트가 직접 플러그인의 리더 Activity를 시작하며 (2단계 실행), 세션 이벤트 (open, progress, bookmark, error, close)를 generation과 순번 검사와 함께 중계하고 goTo, navigate, setPreferences, getBookmarks, getState를 전달합니다. 모든 실패는 계약의 오류 코드로 매핑됩니다
 * `추가` Readium EPUB Reader 플러그인의 스크립트 API `epub` (플러그인 로드맵 P6.1): `epub.open(경로 또는 옵션)`은 `metadata`, `toc` (`{ title, href, children }` 트리), `readingOrder`, `positions`, `text(target?, options?)` (href, 읽기 순서 인덱스, 목차 항목 또는 책 전체를 `offset` / `maxChars`로 페이지 분할, `format`은 text 또는 markdown), `textAll`, `cover` (`Image` 또는 파일), `resource`, `search`, `close`를 갖춘 `EpubBook`을 반환합니다. 편의 계층 `epub.metadata` / `toc` / `readingOrder` / `text` / `cover` / `search`는 호출마다 책을 열고 닫으며, `epub.isAvailable()`은 플러그인을 탐지하고, 각 메서드에는 스크립트 스레드에서 확정되는 `Async` Promise 형태가 있으며, 경로는 스크립트 작업 디렉터리를 따르고 URI를 거부하며, 실패는 `code`를 가진 `EpubError` 객체이고, 플러그인 사용 불가 안내는 현지화되며, 스크립트 종료 시 열어 둔 책을 닫습니다
 * `추가` `epub` 스크립트 API의 리더 제어 (플러그인 로드맵 P6.2): `epub.read(path, options?)`는 Readium EPUB Reader 플러그인의 리더를 열고 `open`, `progress`, `bookmark`, `error`, `close` 이벤트가 스크립트 스레드로 도착하는 `EpubReaderSession` 이벤트 이미터를 반환하며, `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })`와 속성 `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`를 제공합니다. 시작 위치는 `href`, `progression` 또는 `locator`로 지정하고 `preferences`를 덧붙일 수 있으며, 이벤트를 더 이상 소비하지 않는 스크립트는 `error(LIMIT_EXCEEDED)`와 `close(overflow)`를 받고, 스크립트 종료 시 세션은 끝나되 리더는 사용자를 위해 열린 채 남습니다
 * `추가` EPUB 샘플 (플러그인 로드맵 P6.3): 앱 내 샘플에 새 디렉터리 "电子书"와 스크립트 3개를 추가했습니다 (EPUB 元数据与目录: Download 또는 Books 아래 책의 메타데이터, 목차, 읽기 순서와 위치 수; 导出章节文本: 장 또는 전체 텍스트를 일반 텍스트나 Markdown으로 내보내기, 표지 내보내기와 전문 검색; 打开阅读器并监听进度: `open` / `progress` / `bookmark` / `error` / `close` 리스너로 움직이는 리더 세션, 시작 환경설정, 장 넘김, 리더를 사용자에게 남기는 `close()`). 모든 스크립트는 먼저 `epub.isAvailable()`을 확인하고 Readium EPUB Reader 플러그인 설치 방법을 안내합니다
+* `추가` EPUB 계약 버전 2 (하이라이트와 메모, 플러그인 로드맵 P9.4): 추가된 `IEpubBook.getAnnotations` (페이지 단위, 읽기 순서) 와 리더 세션의 `highlight` 이벤트가 리더의 하이라이트와 메모를 `annotations` 문서 (id, style, color, note, quote, 장 제목, locator, createdAt, updatedAt) 로 전달합니다. 호스트는 플러그인의 `epubMaxContractVersion` 으로 버전을 협상하여 모든 요청에 기록하므로 버전 1 플러그인은 새 호출을 받지 않습니다. 스크립트 API `epub` 에 `book.annotations()` 와 `epub.annotations(path)` (`Async` 형태 포함) 가 추가되고, `EpubReaderSession` 은 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 를 발생시킵니다 (`action` 은 added, updated 또는 removed)
 * `수정` 플러그인 센터에서 YOLO 플러그인을 활성화할 때 탐색 핸드셰이크가 이미 활성화된 상태를 요구하여 스위치로 활성화할 수 없던 문제. 탐색은 이제 권한 부여와 정확한 컴포넌트 핸드셰이크만 요구하고, 실행 시 진입점은 계속 저장된 활성화 기록을 요구
 * `수정` adb로 설치한 MCP Server에 저장된 활성화 설정이 없으면 플러그인 센터에서는 활성화, 실행 시에는 비활성화로 판단하던 문제. 양쪽 기본값을 비활성화로 통일하고 사용자가 명시적으로 선택한 상태 유지
 * `수정` 접근성 관리자에서 바인딩되지 않음, 없음 등 짧은 상태 값 아래의 불필요한 빈 줄
@@ -1063,7 +1066,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 21 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 22 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

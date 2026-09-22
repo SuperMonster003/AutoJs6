@@ -1793,6 +1793,49 @@
     <string name="text_plugin_center_settings">插件中心设置</string>
     <string name="text_plugin_details">插件详情</string>
     <string name="text_plugin_hidden_manage">管理隐藏插件</string>
+    <string name="text_plugin_install_wizard">插件安装向导</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">取消剩余</string>
+    <string name="text_plugin_install_wizard_category_accessibility">无障碍服务</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">打包应用</string>
+    <string name="text_plugin_install_wizard_category_compiler">编译</string>
+    <string name="text_plugin_install_wizard_category_docs">文档</string>
+    <string name="text_plugin_install_wizard_category_editor">代码编辑器</string>
+    <string name="text_plugin_install_wizard_category_file_manager">文件管理器</string>
+    <string name="text_plugin_install_wizard_category_image">图像</string>
+    <string name="text_plugin_install_wizard_category_player">播放器</string>
+    <string name="text_plugin_install_wizard_category_runtime">脚本运行时</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">文本转换</string>
+    <string name="text_plugin_install_wizard_category_tools">工具</string>
+    <string name="text_plugin_install_wizard_category_ui">UI</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">请在系统安装界面中确认安装, 完成后将自动开始下一个插件</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">正在下载 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">勾选需要的插件后一次性批量安装, 之后仍可随时在插件中心安装</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">以下插件可能与当前设备不兼容 (ABI 或原生页大小), 是否继续?\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">可能与当前设备不兼容</string>
+    <string name="text_plugin_install_wizard_index_unavailable">插件索引加载失败: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">安装程序未启动</string>
+    <string name="text_plugin_install_wizard_install_with_count">安装 (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">正在安装 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">缓存空间不足: 约需 %1$s, 可用 %2$s</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">正在加载插件索引...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">索引中没有可安装的插件</string>
+    <string name="text_plugin_install_wizard_no_selection">未选择任何插件</string>
+    <string name="text_plugin_install_wizard_profile">配置</string>
+    <string name="text_plugin_install_wizard_profile_delete">删除配置</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">确定删除配置 \"%1$s\"?</string>
+    <string name="text_plugin_install_wizard_profile_deleted">配置已删除</string>
+    <string name="text_plugin_install_wizard_profile_minimal">最小</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">已存在同名配置</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">配置名称</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">重命名配置...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">将当前选择保存为新配置...</string>
+    <string name="text_plugin_install_wizard_profile_saved">配置已保存</string>
+    <string name="text_plugin_install_wizard_profile_standard">标准</string>
+    <string name="text_plugin_install_wizard_profile_update">用当前选择更新此配置</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">已取消: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">失败: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">已安装: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">插件安装完成</string>
     <string name="text_plugin_instruction">插件使用说明</string>
     <string name="text_plugin_instruction_auto_mounted_hint">提示:\n\n当前插件已开启自动挂载, 挂载路径为 `%1$s`.\n\n因此可直接使用 `%2$s` 而无需显式调用 `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">插件使用示例 (假设插件存在一个 `exec` 方法): </string>
@@ -2052,6 +2095,7 @@
     <string name="text_signature_configuration">签名配置</string>
     <string name="text_signature_scheme">签名方案</string>
     <string name="text_size">大小</string>
+    <string name="text_skip">跳过</string>
     <string name="text_skip_conflicting">跳过冲突项</string>
     <string name="text_snapshot_created">快照已创建</string>
     <string name="text_snapshot_label_optional">标签 (可选)</string>

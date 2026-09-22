@@ -1796,6 +1796,49 @@
     <string name="text_plugin_center_settings">Настройки центра плагинов</string>
     <string name="text_plugin_details">Сведения о плагине</string>
     <string name="text_plugin_hidden_manage">Управление скрытыми плагинами</string>
+    <string name="text_plugin_install_wizard">Мастер установки плагинов</string>
+    <string name="text_plugin_install_wizard_cancel_remaining">Отменить остальные</string>
+    <string name="text_plugin_install_wizard_category_accessibility">Служба специальных возможностей</string>
+    <string name="text_plugin_install_wizard_category_apk_builder">Сборка приложений</string>
+    <string name="text_plugin_install_wizard_category_compiler">Компиляторы</string>
+    <string name="text_plugin_install_wizard_category_docs">Документация</string>
+    <string name="text_plugin_install_wizard_category_editor">Редактор кода</string>
+    <string name="text_plugin_install_wizard_category_file_manager">Файловый менеджер</string>
+    <string name="text_plugin_install_wizard_category_image">Изображения</string>
+    <string name="text_plugin_install_wizard_category_player">Плееры</string>
+    <string name="text_plugin_install_wizard_category_runtime">Среды выполнения скриптов</string>
+    <string name="text_plugin_install_wizard_category_text_conversion">Преобразование текста</string>
+    <string name="text_plugin_install_wizard_category_tools">Инструменты</string>
+    <string name="text_plugin_install_wizard_category_ui">UI</string>
+    <string name="text_plugin_install_wizard_confirm_in_system_installer">Подтвердите установку в системном установщике. После этого автоматически начнётся следующий плагин</string>
+    <string name="text_plugin_install_wizard_downloading_with_progress">Загрузка (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_hint">Отметьте нужные плагины и установите их одним пакетом. Все плагины остаются доступными в Центре плагинов</string>
+    <string name="text_plugin_install_wizard_incompatible_confirm">Следующие плагины могут быть несовместимы с этим устройством (ABI или размер нативной страницы). Продолжить?\n\n%1$s</string>
+    <string name="text_plugin_install_wizard_incompatible_hint">Может быть несовместим с этим устройством</string>
+    <string name="text_plugin_install_wizard_index_unavailable">Не удалось загрузить индекс плагинов: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_started">Установщик не запустился</string>
+    <string name="text_plugin_install_wizard_install_with_count">Установить (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_with_progress">Установка (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_insufficient_space">Недостаточно места в кэше: требуется около %1$s, доступно %2$s</string>
+    <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Загрузка индекса плагинов...</string>
+    <string name="text_plugin_install_wizard_no_plugins_available">В индексе нет плагинов, доступных для установки</string>
+    <string name="text_plugin_install_wizard_no_selection">Плагины не выбраны</string>
+    <string name="text_plugin_install_wizard_profile">Профиль</string>
+    <string name="text_plugin_install_wizard_profile_delete">Удалить профиль</string>
+    <string name="text_plugin_install_wizard_profile_delete_confirm">Удалить профиль \"%1$s\"?</string>
+    <string name="text_plugin_install_wizard_profile_deleted">Профиль удалён</string>
+    <string name="text_plugin_install_wizard_profile_minimal">Минимальный</string>
+    <string name="text_plugin_install_wizard_profile_name_exists">Профиль с таким названием уже существует</string>
+    <string name="text_plugin_install_wizard_profile_name_hint">Название профиля</string>
+    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">Переименовать профиль...</string>
+    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Сохранить выбор как новый профиль...</string>
+    <string name="text_plugin_install_wizard_profile_saved">Профиль сохранён</string>
+    <string name="text_plugin_install_wizard_profile_standard">Стандартный</string>
+    <string name="text_plugin_install_wizard_profile_update">Обновить этот профиль текущим выбором</string>
+    <string name="text_plugin_install_wizard_summary_cancelled">Отменено: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_failed">Не удалось: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_installed">Установлено: %1$d</string>
+    <string name="text_plugin_install_wizard_summary_title">Установка плагинов завершена</string>
     <string name="text_plugin_instruction">Инструкция по использованию плагина</string>
     <string name="text_plugin_instruction_auto_mounted_hint">Подсказка:\n\nДля этого плагина уже включено авто-монтирование. Путь монтирования: `%1$s`.\n\nПоэтому вы можете использовать `%2$s` напрямую без явного вызова `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">Пример использования плагина (предполагается, что у плагина есть метод `exec`): </string>
@@ -2055,6 +2098,7 @@
     <string name="text_signature_configuration">Конфигурация подписи</string>
     <string name="text_signature_scheme">Схема подписи</string>
     <string name="text_size">Размер</string>
+    <string name="text_skip">Пропустить</string>
     <string name="text_skip_conflicting">Пропустить конфликтующие</string>
     <string name="text_snapshot_created">Снимок создан</string>
     <string name="text_snapshot_label_optional">Метка (необязательно)</string>

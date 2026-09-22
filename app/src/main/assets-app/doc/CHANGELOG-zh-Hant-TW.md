@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/21
+###### 2026/09/22
 
 * `新增` Android 17 本機網路權限管理, 支援側欄, 設定頁及 VS Code 連線時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別與可複製報告
@@ -122,6 +122,7 @@
 * `新增` 開發者選項新增預設關閉的實驗性遠端 APK 建置 R1 開關; 關閉時阻止 provider 探索與工作階段開啟, 失敗會在不自動本機備援的情況下終止本次建置, 現有產物繼續由原子發佈保護, 程序內診斷僅保留有界的 enum 與數值欄位
 * `新增` 外掛中心支援 APK Builder Template 外掛, 可按需安裝及更新打包應用所需範本
 * `新增` 主頁外掛標籤頁浮動按鈕支援長按進入外掛中心
+* `新增` 外掛安裝精靈, 用於首次啟動時按分類勾選並批次安裝官方外掛, 內建 "標準" / "最小" / "全部" 設定檔並支援自訂設定檔的儲存, 重新命名及刪除 (入口: 主頁外掛標籤頁浮動按鈕選單 / 外掛中心 "+" 選單)
 * `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
 * `新增` 顯式 runtime.loadJarWithR8 入口, 支援預設關閉的精確元件選擇, 同簽章身分固定, 有界五產物 R8 傳輸, 隔離快取採用, 以及無 D8/dx 回退的失敗關閉行為
 * `新增` ui.useAndroidLayout 支援 Android 原生版面配置元件, include/merge, 指令碼專案 res 資源引用及 shape/selector/layer-list 等 Drawable XML
@@ -236,11 +237,13 @@
 * `新增` 郵件外掛契約模組 (plugin-api/mail-api), 含凍結的 AIDL 介面, 以專用綁定租約開啟帳戶工作階段, 在外掛程序死亡後自動重開, XOAUTH2 權杖重新整理後重試一次並經管道串流落盤附件的宿主客戶端, 以及預設啟用的外掛中心註冊
 * `新增` 郵件外掛的指令碼 API `mail` (郵件路線圖 P3.1 與 P3.2): `mail.connect(選項或別名)` 支援服務商預設與 XOAUTH2 的 `tokenProvider`, `MailClient` 提供 `test`, `send` (指令碼路徑的附件經唯讀描述符傳輸), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, 帶用戶端回退標記的 `search`, `get` / `fetchBody`, 串流落盤到工作目錄並支援 `onProgress` 的 `download` 與 `raw`, `setFlags` 及 `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` 與 `close`, 每個方法都有在指令碼執行緒落定的 `Async` Promise 形態; 郵件結果攜帶 `Date` 欄位, 可列印的地址與繫結的 `load` / `download` 方法, 失敗為帶 `code` 與 `retryable` 的 `MailError` 物件, 全域物件上另有 `mail.providers`, `mail.accounts`, `mail.setDefault` 與全部用戶端方法的轉發
 * `新增` 郵件外掛的指令碼 API `mail.watch` (郵件路線圖 P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` 與 `mail.watch` 回傳 `MailWatch` 發射器, 其 `message(message, watch)`, `mode`, `resync`, `error` 與唯一的 `close(reason)` 事件在指令碼執行緒到達並讓指令碼活到 `stop()`; 外掛以 IMAP IDLE 監聽 (可回退輪詢, POP3 按 UIDL), 宿主丟棄過期 generation 與亂序投遞, 外掛死亡回報為 `PLUGIN_UNAVAILABLE` 且預設在重開的工作階段上重新監聽並發出 `resync`, 關閉用戶端或指令碼退出會停止其監聽
+* `新增` 郵件外掛契約版本 2 與背景守望 (郵件路線圖 P8): 追加的 `IMailPlugin.openTrigger` / `listTriggers` 與 `IMailTrigger` / `IMailTriggerCallback` 介面訂閱外掛在自身前景服務中持續執行的守望; 新的 "郵件到達時" 意圖任務 (`org.autojs.autojs6.action.MAIL_TRIGGER`, 由宿主簽章權限保護的接收器接收) 在所選守望的每封新郵件到達時啟動指令碼, 可依寄件者與主旨過濾, 事件文件位於 `engines.myEngine().execArgv.mail`; 重複投遞會被捨棄, 連續到達每任務每 3 秒最多啟動一次; 版本 1 的外掛不會收到新呼叫
 * `新增` EPUB 外掛程式契約模組 (plugin-api/epub-api), 含凍結的 AIDL 介面 (書籍擷取: 元資料, 目錄, 閱讀順序, 章節文字, 資源與搜尋; 以及基於權杖的閱讀器工作階段), `epub` 引擎的宿主探索封裝, 以及 Readium EPUB Reader 套件的外掛程式中心註冊 (其 Explorer Action 服務與 EPUB 服務共用一個條目)
 * `新增` EPUB 外掛程式宿主用戶端 (core/plugin/epub, 外掛程式路線圖 P5.4): `EpubPluginHost.openBook` 校驗路徑, 以唯讀方式開啟並交出書籍用戶端 (元資料, 目錄, 閱讀順序, 純文字或 Markdown 的分頁章節文字, 經暫存管道匯出的資源, 搜尋, 位置數), 執行在帶死亡回呼的專用繫結租約上; `openReader` 開啟閱讀器工作階段, 讀取其一次性權杖並由宿主自己啟動外掛程式的閱讀器 Activity (兩步啟動), 以 generation 與序號校驗橋接工作階段事件 (open, progress, bookmark, error, close), 並轉發 goTo, navigate, setPreferences, getBookmarks 與 getState; 所有失敗都對應為契約錯誤碼
 * `新增` Readium EPUB Reader 外掛程式的指令碼 API `epub` (外掛程式路線圖 P6.1): `epub.open(路徑或選項)` 回傳 `EpubBook`, 提供 `metadata`, `toc` (`{ title, href, children }` 樹), `readingOrder`, `positions`, `text(target?, options?)` (href, 閱讀順序索引, 目錄項或全書, 以 `offset` / `maxChars` 分頁, `format` 為 text 或 markdown), `textAll`, `cover` (`Image` 或檔案), `resource`, `search` 與 `close`; 便捷層 `epub.metadata` / `toc` / `readingOrder` / `text` / `cover` / `search` 每次呼叫自行開啟並關閉書籍, `epub.isAvailable()` 探測外掛程式, 每個方法都有在指令碼執行緒落定的 `Async` Promise 形態, 路徑遵循指令碼工作目錄並拒絕 URI, 失敗為帶 `code` 的 `EpubError` 物件, 外掛程式不可用提示已本地化, 指令碼結束時關閉未關閉的書籍
 * `新增` `epub` 指令碼 API 的閱讀器控制 (外掛程式路線圖 P6.2): `epub.read(path, options?)` 開啟 Readium EPUB Reader 外掛程式的閱讀器並回傳 `EpubReaderSession` 事件發射器, 其 `open`, `progress`, `bookmark`, `error` 與 `close` 事件在指令碼執行緒到達, 提供 `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` 以及屬性 `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; 起始位置來自 `href`, `progression` 或 `locator` 並可附帶 `preferences`, 指令碼不再消費事件時得到 `error(LIMIT_EXCEEDED)` 與 `close(overflow)`, 指令碼結束時結束會話而閱讀器留給使用者繼續閱讀
 * `新增` 電子書範例 (外掛程式路線圖 P6.3): 應用程式內範例程式碼新增 "电子书" 目錄及 3 個指令碼 (EPUB 元数据与目录: 讀取 Download 或 Books 目錄下書籍的中繼資料, 目錄, 閱讀順序與位置數; 导出章节文本: 按章節或整本匯出純文字或 Markdown, 匯出封面並全文搜尋; 打开阅读器并监听进度: 以 `open` / `progress` / `bookmark` / `error` / `close` 監聽器驅動閱讀器工作階段, 設定起始偏好, 翻章並以 `close()` 把閱讀器留給使用者); 每個指令碼先檢查 `epub.isAvailable()` 並說明 Readium EPUB Reader 外掛程式的安裝方式
+* `新增` EPUB 契約版本 2 (螢光標示與筆記, 外掛路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的螢光標示與筆記; 宿主依據外掛的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的外掛不會收到新呼叫; 指令碼 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
 * `修復` 外掛中心啟用 YOLO 外掛時探測交握要求外掛已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確元件交握, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題
