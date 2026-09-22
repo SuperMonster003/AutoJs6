@@ -254,6 +254,23 @@ internal class RemoteFakeAiProviderSession(
 
     private fun runNormal(request: AiProviderRequest, materialized: FakeMaterializedRequest) {
         emitStarted(request)
+        // Explicit fixtures for the host's catalog-validated Agent route. The original hostile
+        // target IDs are intentionally absent from the public catalog and cannot reach this route.
+        if (request.targetId == FakeAiProviderFixture.TARGET_STREAM &&
+            materialized.prompt == "agent-conformance:stall" && request.options.stream) {
+            val sequence = awaitChunkSequence()
+            dispatchCallback {
+                callback.onChunk(AiProviderCodec.encodeTextChunk(
+                    AiProviderChunk(sequence = sequence, textDelta = "agent-conformance:ready"),
+                ))
+            }
+            awaitStop()
+            return
+        }
+        if (request.targetId == FakeAiProviderFixture.TARGET_ECHO && materialized.prompt == "agent-conformance:fail") {
+            finishFailed(AiErrorCode.PROVIDER_FAILED, "Private conformance provider diagnostics")
+            return
+        }
         val toolResult = if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
             val calls = FakeAiProviderEngine.createToolCalls(request)
             machine.openToolTurn(calls.calls.map { it.callId })

@@ -244,7 +244,7 @@
 * `新增` `epub` 腳本 API 的閱讀器控制 (外掛程式路線圖 P6.2): `epub.read(path, options?)` 開啟 Readium EPUB Reader 外掛程式的閱讀器並回傳 `EpubReaderSession` 事件發射器, 其 `open`, `progress`, `bookmark`, `error` 與 `close` 事件在腳本執行緒到達, 提供 `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` 以及屬性 `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; 起始位置來自 `href`, `progression` 或 `locator` 並可附帶 `preferences`, 腳本不再消費事件時得到 `error(LIMIT_EXCEEDED)` 與 `close(overflow)`, 腳本結束時結束會話而閱讀器留給使用者繼續閱讀
 * `新增` 電子書範例 (外掛程式路線圖 P6.3): 應用程式內範例程式碼新增 "电子书" 目錄及 3 個腳本 (EPUB 元数据与目录: 讀取 Download 或 Books 目錄下書籍的元資料, 目錄, 閱讀順序與位置數; 导出章节文本: 按章節或整本匯出純文字或 Markdown, 匯出封面並全文搜尋; 打开阅读器并监听进度: 以 `open` / `progress` / `bookmark` / `error` / `close` 監聽器驅動閱讀器會話, 設定起始偏好, 翻章並以 `close()` 把閱讀器留給使用者); 每個腳本先檢查 `epub.isAvailable()` 並說明 Readium EPUB Reader 外掛程式的安裝方式
 * `新增` EPUB 契約版本 2 (高亮與筆記, 插件路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的高亮與筆記; 宿主依據插件的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的插件不會收到新調用; 腳本 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
-* `新增` AI Agent 插件契約, 為自然語言任務插件提供受授權範圍約束的宿主能力介面
+* `新增` AI Agent 插件契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收
 * `修復` 插件中心啟用 YOLO 插件時探測握手要求插件已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確組件握手, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題
