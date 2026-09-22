@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.host.capability.api.** { *; }
+-dontwarn org.autojs.plugin.host.capability.api.**

@@ -9,7 +9,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * Freezes the transaction order of contract version 1: Binder transaction codes follow the
+ * Freezes the transaction order of contract versions 1 and 2: Binder transaction codes follow the
  * declaration order, so a method may only ever be appended, never inserted, removed, or renamed.
  */
 class McpServerAidlOrderTest {
@@ -68,6 +68,7 @@ class McpServerAidlOrderTest {
                     "PluginInfo getInfo()",
                     "Bundle getCapabilities()",
                     "IMcpServerSession openServer(in Bundle config, IMcpHostCapabilityBroker broker, IMcpServerCallback callback)",
+                    "IMcpServerSession openServerV2(in Bundle config, IHostCapabilityBroker broker, IMcpServerCallback callback)",
                 ),
             ),
             "IMcpServerSession.aidl" to Declaration(

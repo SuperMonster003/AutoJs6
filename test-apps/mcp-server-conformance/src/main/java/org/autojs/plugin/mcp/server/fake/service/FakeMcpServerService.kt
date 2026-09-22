@@ -8,7 +8,10 @@ import android.os.Bundle
 import android.os.IBinder
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.host.capability.api.IHostCapabilityBroker
+import org.autojs.plugin.host.capability.api.IHostCapabilityCallback
 import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityBroker
+import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityCallback
 import org.autojs.plugin.mcp.server.api.IMcpServerCallback
 import org.autojs.plugin.mcp.server.api.IMcpServerPlugin
 import org.autojs.plugin.mcp.server.api.IMcpServerSession
@@ -101,6 +104,26 @@ abstract class FakeMcpServerService : Service() {
             sessions += session
             session.start()
             return session
+        }
+
+        override fun openServerV2(
+            config: Bundle?,
+            broker: IHostCapabilityBroker?,
+            callback: IMcpServerCallback?,
+        ): IMcpServerSession {
+            verifier.enforceAllowedCaller()
+            requireNotNull(broker) { "A shared capability broker is required" }
+            // Exercise the same hostile scenarios through the new shared transport.
+            val adapter = object : IMcpHostCapabilityBroker.Stub() {
+                override fun getBrokerInfo(): Bundle = broker.brokerInfo
+                override fun dispatch(request: Bundle?, response: IMcpHostCapabilityCallback?) {
+                    broker.dispatch(request, response?.let { target -> object : IHostCapabilityCallback.Stub() {
+                        override fun onResponse(result: Bundle?) = target.onResponse(result)
+                    } })
+                }
+                override fun destroy(reason: Bundle?) = broker.destroy(reason)
+            }
+            return openServer(config, adapter, callback)
         }
     }
 

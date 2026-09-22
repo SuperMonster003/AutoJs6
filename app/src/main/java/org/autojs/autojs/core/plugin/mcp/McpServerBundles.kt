@@ -6,8 +6,8 @@ import org.autojs.plugin.mcp.server.api.McpServerContract
 /** Bundle codecs for the pure models in `McpServerConfig.kt`; keys are the contract literals. */
 internal object McpServerBundles {
 
-    fun configToBundle(config: McpServerConfig): Bundle = Bundle().apply {
-        putInt(McpServerContract.KEY_CONTRACT_VERSION, McpServerContract.CONTRACT_VERSION)
+    fun configToBundle(config: McpServerConfig, contractVersion: Int = McpServerContract.MIN_SUPPORTED_CONTRACT_VERSION): Bundle = Bundle().apply {
+        putInt(McpServerContract.KEY_CONTRACT_VERSION, contractVersion)
         putInt(McpServerContract.KEY_SERVER_CONFIG_PORT, config.port)
         putString(McpServerContract.KEY_SERVER_CONFIG_BIND_SCOPE, config.bindScope)
         putString(McpServerContract.KEY_SERVER_CONFIG_PROTOCOL_MODE, config.protocolMode)
@@ -16,7 +16,7 @@ internal object McpServerBundles {
     }
 
     fun reasonBundle(code: String, message: String? = null): Bundle = Bundle().apply {
-        putInt(McpServerContract.KEY_CONTRACT_VERSION, McpServerContract.CONTRACT_VERSION)
+        putInt(McpServerContract.KEY_CONTRACT_VERSION, McpServerContract.MIN_SUPPORTED_CONTRACT_VERSION)
         putString(McpServerContract.KEY_ERROR_CODE, code)
         message?.take(McpServerContract.MAX_ERROR_MESSAGE_BYTES)?.let { putString(McpServerContract.KEY_ERROR_MESSAGE, it) }
     }

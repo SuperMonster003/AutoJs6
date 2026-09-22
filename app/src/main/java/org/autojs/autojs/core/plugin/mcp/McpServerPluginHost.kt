@@ -82,10 +82,28 @@ object McpServerPluginHost {
             require(settingsVersion >= McpServerContract.SETTINGS_VERSION) { "MCP Server settings extension is unavailable" }
         }
         host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
-            checkNotNull(proxy.openServer(McpServerBundles.configToBundle(config), broker, callback)) {
-                "MCP Server returned no session"
-            }
+            openServerWithContract(proxy, config, broker, callback)
         }
+    }
+
+    /** Negotiates from validated metadata; no exception-based probing of a v1 Binder. */
+    internal fun openServerWithContract(
+        proxy: IMcpServerPlugin,
+        config: McpServerConfig,
+        broker: IMcpHostCapabilityBroker,
+        callback: IMcpServerCallback,
+    ): IMcpServerSession {
+        val capabilities = validatePluginInfo(proxy.getInfo()).capabilities
+        val version = PluginCapabilityResolver.coerceLong(
+            @Suppress("DEPRECATION") capabilities?.get(McpServerCapabilityKeys.CONTRACT_VERSION),
+        )!!.toInt()
+        val session = if (version >= 2) {
+            require(broker is McpHostCapabilityBroker) { "MCP v2 requires a host-owned shared capability broker" }
+            proxy.openServerV2(McpServerBundles.configToBundle(config, 2), broker.sharedBroker, callback)
+        } else {
+            proxy.openServer(McpServerBundles.configToBundle(config, 1), broker, callback)
+        }
+        return checkNotNull(session) { "MCP Server returned no session" }
     }
 
     private suspend fun selectOrThrow(context: Context): AidlPluginHost.Discovered {

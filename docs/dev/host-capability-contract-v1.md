@@ -1,0 +1,93 @@
+# Host capability broker contract V1
+
+Status: host implementation for AI Agent roadmap P1.1/P1.3. The public module is
+`plugin-api/host-capability-api`, package `org.autojs.plugin.host.capability.api`.
+MCP contract V2 and AI Agent contract V1 consume the same data plane. A plugin does
+not need an MCP server, an HTTP connection or a second accessibility service.
+
+## Binder surface
+
+`IHostCapabilityBroker` freezes these transactions in order:
+
+1. `Bundle getBrokerInfo()`
+2. `void dispatch(in Bundle request, IHostCapabilityCallback callback)`
+3. `void destroy(in Bundle reason)`
+
+`IHostCapabilityCallback` is oneway and has one transaction, `onResponse(Bundle)`.
+Methods may be called concurrently. Dispatch only admits work on the Binder thread;
+accepted work has a deadline and exactly one terminal response. Pending work is
+released on broker destruction or its request deadline; callback death alone does
+not immediately cancel device operations. A new link gets a new broker.
+
+## Envelopes and ownership
+
+`HostCapabilityContract` is the source of truth for all literal keys and byte caps.
+The `getBrokerInfo()` Bundle includes `contractVersion = 1`, independently of the
+consuming plugin's control-plane version. Legacy-compatible dispatch and response
+Bundles do not require or return this version key. `hostCapabilityBrokerId`,
+`hostCapabilityBrokerVersion`, `hostCapabilityModules` and `bridgeEngineInfo`
+identify the broker. `hostCapabilityModules` contains the modules in this broker's
+grant, rather than every module implemented by the host. All grant fields preserve
+the released MCP names.
+
+Dispatch supplies `bridgeRequestJson`, a Node Bridge request with `id`, `module`,
+`method`, an `args` array, optional `timeoutMs`, and a `permissions` array. Omitted
+`args` and `permissions` default to empty arrays. Capability requests are inline
+only: incoming descriptors are closed and rejected. Requests exceeding the grant
+are denied before dispatch. The response supplies `bridgeResponseJson` and
+`bridgeResponseOk`; the JSON is `{id, ok: true, result}` or
+`{id, ok: false, error}`. An error contains `name`, `message`, `code`, `category`
+and optional method/capability details. `bridgeErrorMessage` mirrors its message.
+The ten stable error categories in `HostCapabilityContract.ERROR_CATEGORIES` are
+unchanged. Agent control-plane error names are a separate vocabulary.
+
+Descriptor responses retain the small success envelope in `bridgeResponseJson`
+and add `bridgePayloadFd`, `bridgePayloadBytes` and `bridgePayloadMime`. A one-shot
+host-cache file is delivered as its raw bytes, with `result.payload.kind` changed
+to `descriptor` and its host path removed. A JSON result larger than 64 KiB is
+also moved to a descriptor: its MIME type is `application/json`, and the envelope's
+`result` becomes `{payload: {kind: "descriptor", mime: "application/json", bytes,
+oneShot: true}}`. The descriptor contains the original result JSON, not another
+`{id, ok, result}` envelope. Clients must decode that JSON to restore the result.
+
+Inline JSON has a hard ceiling of 512 KiB, further narrowed by the grant (the
+current default request grant is 96 KiB); descriptor payloads are capped at 8 MiB.
+The sender closes its local descriptor after Binder transfers it, and the
+receiver closes the transferred descriptor after reading or rejecting it. Size
+checks apply independently on both sides. An FD is not an unlimited payload path.
+
+`grantMethods`, `grantPermissions`, `grantMaxRequestBytes`,
+`grantMaxConcurrentCalls`, `grantAccessibilityQueriesPerSecond`,
+`grantDefaultTimeoutMs`, and `grantMaxTimeoutMs` describe enforced limits.
+`grantJson` contains `methods`, `permissions`, `maxRequestBytes`,
+`maxConcurrentCalls`, `modelCallsPerMinute`, `maxTotalTokens` and
+`maxInputBytesPerRequest`. It does not duplicate the plugin's tool-group catalog;
+the plugin maps granted methods to its own tools. Model quotas are enforced by the
+Agent model broker, not by capability dispatch. Senders may include `reasonJson`
+on destruction; current shared teardown uses legacy `errorMessage`/`errorCode`
+when present for its pending-call failure message, otherwise a generic message.
+Private arguments,
+observations, output, paths and error bodies must not enter ordinary logs.
+
+## Host implementation and compatibility
+
+`HostCapabilityBrokerCore` owns admission, the Node bridge adapter, deadlines,
+response encoding, descriptor delivery and teardown. `HostCapabilityBrokerStub`
+is the shared AIDL adapter. Agent instances pin the attached plugin UID.
+`HostCapabilityGrant` is independent of Android and limits methods, permission
+tokens, bytes, concurrency, accessibility request rate and timeout. Agent model
+limits share this grant: 30 calls/minute, 1,000,000 tokens/link and 128 KiB/request
+by default. Model quota accounting is performed by the Agent model broker.
+
+MCP V1 retains its released `IMcpHostCapabilityBroker` descriptor and transaction
+order. `McpHostCapabilityBroker` is a thin adapter to the same core;
+`McpCapabilityGrant` remains a source alias. The MCP V1 wire names and limits are
+preserved. MCP V2 uses the shared descriptor through `openServerV2`.
+
+## Verification
+
+Contract module tests freeze AIDL order/oneway flags, the unique literal keys,
+limit relationships and MCP aliases. Host tests cover grants, forbidden methods,
+admission, timeout, destruction, UID rejection and response ownership. MCP V1
+and V2 round trips are tested independently; a V2 module build does not imply
+that the separately installed MCP plugin has migrated to V2.

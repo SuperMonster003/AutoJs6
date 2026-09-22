@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.ai.agent.api.** { *; }
+-dontwarn org.autojs.plugin.ai.agent.api.**

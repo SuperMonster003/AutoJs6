@@ -28,5 +28,6 @@ android {
 
 dependencies {
     api(project(":plugin-api:common-plugin-api"))
+    api(project(":plugin-api:host-capability-api"))
     testImplementation("junit:junit:4.13.2")
 }

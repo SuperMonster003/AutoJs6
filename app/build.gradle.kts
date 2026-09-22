@@ -645,6 +645,12 @@ dependencies /* Unclassified */ {
     // zh-CN: APK 签名校验 (apksig + 密钥库读取; 签名器, CertCreator 与 SpongyCastle 留在 modules/apk-signer 供 APK 构建插件使用)
     implementation(project(":modules:apk-verifier"))
 
+    // Plugin API: host capability broker (shared)
+    implementation(project(":plugin-api:host-capability-api"))
+
+    // Plugin API: AI Agent
+    implementation(project(":plugin-api:ai-agent-api"))
+
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))
 

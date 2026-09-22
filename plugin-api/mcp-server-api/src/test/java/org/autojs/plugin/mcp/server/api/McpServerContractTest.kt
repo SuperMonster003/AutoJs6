@@ -2,6 +2,7 @@ package org.autojs.plugin.mcp.server.api
 
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginCapabilityKeys
+import org.autojs.plugin.host.capability.api.HostCapabilityContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -30,7 +31,9 @@ class McpServerContractTest {
 
     @Test
     fun contractVersionRangesIncludeTheirBoundsAndRejectNeighbours() {
-        assertEquals(1, McpServerContract.CONTRACT_VERSION)
+        assertEquals(2, McpServerContract.CONTRACT_VERSION)
+        assertEquals(1, McpServerContract.MIN_SUPPORTED_CONTRACT_VERSION)
+        assertTrue(McpServerContract.supportsContractVersion(1))
         assertTrue(McpServerContract.MIN_CONTRACT_VERSION <= McpServerContract.MAX_CONTRACT_VERSION)
         assertTrue(McpServerContract.supportsContractVersion(McpServerContract.MIN_CONTRACT_VERSION))
         assertTrue(McpServerContract.supportsContractVersion(McpServerContract.CONTRACT_VERSION))
@@ -42,6 +45,23 @@ class McpServerContractTest {
         assertTrue(McpServerContract.supportsHostCapabilityBrokerContractVersion(McpServerContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION))
         assertFalse(McpServerContract.supportsHostCapabilityBrokerContractVersion(0))
         assertFalse(McpServerContract.supportsHostCapabilityBrokerContractVersion(McpServerContract.MAX_HOST_CAPABILITY_BROKER_CONTRACT_VERSION + 1))
+    }
+
+    @Test
+    fun sharedDataPlaneAliasesPreserveEveryReleasedLiteralAndCeiling() {
+        val shared = HostCapabilityContract::class.java.fields.associateBy { it.name }
+        val aliases = McpServerContract::class.java.fields.filter {
+            (it.type.isPrimitive || it.type == String::class.java) &&
+                it.name in shared && it.name !in setOf("CONTRACT_VERSION", "MIN_CONTRACT_VERSION", "MAX_CONTRACT_VERSION")
+        }
+        assertTrue("Shared data plane must include every bridge/grant/broker key", aliases.size >= 40)
+        aliases.forEach { field ->
+            assertEquals(field.name, shared.getValue(field.name).get(null), field.get(null))
+        }
+        McpServerContract::class.java.fields.filter {
+            it.name.startsWith("KEY_BRIDGE_") || it.name.startsWith("KEY_GRANT_") ||
+                it.name.startsWith("KEY_HOST_CAPABILITY_")
+        }.forEach { assertTrue("Missing shared alias: ${it.name}", it.name in shared) }
     }
 
     @Test

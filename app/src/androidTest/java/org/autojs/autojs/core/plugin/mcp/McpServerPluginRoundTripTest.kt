@@ -1,6 +1,9 @@
 package org.autojs.autojs.core.plugin.mcp
 
 import android.content.Context
+import android.os.Binder
+import android.os.Bundle
+import android.os.Parcel
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.delay
@@ -8,6 +11,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.host.capability.api.IHostCapabilityBroker
+import org.autojs.plugin.host.capability.api.IHostCapabilityCallback
+import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityBroker
+import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityCallback
+import org.autojs.plugin.mcp.server.api.IMcpServerCallback
+import org.autojs.plugin.mcp.server.api.IMcpServerPlugin
+import org.autojs.plugin.mcp.server.api.IMcpServerSession
+import org.autojs.plugin.mcp.server.api.McpServerCapabilityKeys
 import org.autojs.plugin.mcp.server.api.McpServerContract
 import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.junit.Assert.assertEquals
@@ -16,6 +28,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Real Binder round trip with the installed MCP Server plugin (roadmap P1 acceptance, completed
@@ -35,6 +49,82 @@ class McpServerPluginRoundTripTest {
 
     private val context: Context
         get() = InstrumentationRegistry.getInstrumentation().targetContext
+
+    @Test
+    fun v1AndV2MetadataSelectTheCorrectTransactionAndEnvelope() {
+        for (version in listOf(1, 2)) {
+            val replies = CopyOnWriteArrayList<Bundle>()
+            val answered = CountDownLatch(1)
+            var selectedVersion = 0
+            var sentConfig: Bundle? = null
+            val session = object : IMcpServerSession.Stub() {
+                override fun getStatus(): Bundle = Bundle()
+                override fun updateConfig(config: Bundle?) = Unit
+                override fun stop(reason: Bundle?) = Unit
+                override fun close() = Unit
+            }
+            val fixture = object : IMcpServerPlugin.Stub() {
+                override fun getInfo(): PluginInfo = PluginInfo().apply {
+                    id = McpServerIds.PLUGIN_ID
+                    engine = McpServerIds.ENGINE
+                    variant = McpServerIds.VARIANT_DEFAULT
+                    capabilities = getCapabilities()
+                }
+                override fun getCapabilities(): Bundle = Bundle().apply {
+                    putInt(McpServerCapabilityKeys.CONTRACT_VERSION, version)
+                    putLong(McpServerCapabilityKeys.REQUIRES_HOST_VERSION, McpServerIds.REQUIRED_HOST_VERSION_CODE)
+                }
+                override fun openServer(config: Bundle?, broker: IMcpHostCapabilityBroker?, callback: IMcpServerCallback?): IMcpServerSession {
+                    selectedVersion = 1
+                    sentConfig = config
+                    assertEquals(1, broker!!.brokerInfo.getInt(McpServerContract.KEY_CONTRACT_VERSION))
+                    broker.dispatch(probeBundle(), object : IMcpHostCapabilityCallback.Stub() {
+                        override fun onResponse(response: Bundle?) { replies += checkNotNull(response); answered.countDown() }
+                    })
+                    return session
+                }
+                override fun openServerV2(config: Bundle?, broker: IHostCapabilityBroker?, callback: IMcpServerCallback?): IMcpServerSession {
+                    selectedVersion = 2
+                    sentConfig = config
+                    assertEquals(1, broker!!.brokerInfo.getInt(McpServerContract.KEY_HOST_CAPABILITY_BROKER_VERSION))
+                    broker.dispatch(probeBundle(), object : IHostCapabilityCallback.Stub() {
+                        override fun onResponse(response: Bundle?) { replies += checkNotNull(response); answered.countDown() }
+                    })
+                    return session
+                }
+            }
+            // Suppress queryLocalInterface so AIDL transaction numbers and parcel layouts are exercised.
+            val wire = object : Binder() {
+                override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean =
+                    fixture.asBinder().transact(code, data, reply, flags)
+            }
+            val proxy = IMcpServerPlugin.Stub.asInterface(wire)
+            val broker = McpHostCapabilityBroker(context, "roundtrip-v$version", McpCapabilityGrant.DEFAULT)
+            try {
+                val opened = McpServerPluginHost.openServerWithContract(proxy, McpServerConfig(), broker,
+                    object : IMcpServerCallback.Stub() {
+                        override fun onStatus(status: Bundle?) = Unit
+                        override fun onEvent(event: Bundle?) = Unit
+                    })
+                assertEquals(version, selectedVersion)
+                assertEquals(version, sentConfig!!.getInt(McpServerContract.KEY_CONTRACT_VERSION))
+                assertTrue(answered.await(5, TimeUnit.SECONDS))
+                assertEquals(1, replies.size)
+                assertTrue(replies.single().getBoolean(McpServerContract.KEY_BRIDGE_RESPONSE_OK))
+                opened.close()
+                // Session methods retain v1 envelope compatibility for both accepted control versions.
+                assertEquals(1, McpServerBundles.configToBundle(McpServerConfig()).getInt(McpServerContract.KEY_CONTRACT_VERSION))
+                assertEquals(1, McpServerBundles.reasonBundle("stop").getInt(McpServerContract.KEY_CONTRACT_VERSION))
+            } finally {
+                broker.destroy(Bundle())
+            }
+        }
+    }
+
+    private fun probeBundle() = Bundle().apply {
+        putString(McpServerContract.KEY_BRIDGE_REQUEST_JSON,
+            """{"id":"version-probe","module":"device","method":"info","args":[],"permissions":["device"],"timeoutMs":5000}""")
+    }
 
     @Test
     fun openServerReachesRunningWithTheHostAttachedAndStopsCleanly(): Unit = runBlocking {

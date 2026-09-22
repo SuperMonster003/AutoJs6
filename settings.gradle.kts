@@ -99,6 +99,8 @@ private val pluginApi = listOf(
     "protocol-wire-api",
     "ai-common-api",
     "ai-provider-api",
+    "host-capability-api",
+    "ai-agent-api",
     "dex-compiler-api",
     "jvm-source-api",
     "editor-api",

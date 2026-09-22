@@ -419,3 +419,44 @@ death recipient fires. The rebind schedule of `McpServerSessionController` is no
 reachable with a foreign package and stays covered by the lifecycle matrix with the
 production plugin; giving the controller a test seam for the fixture is a separate
 decision.
+
+## V2 extension: shared host capability broker
+
+AI Agent roadmap D33 introduces `plugin-api/host-capability-api`. MCP contract V2
+depends on that module and appends one transaction after `getInfo`,
+`getCapabilities`, and `openServer`:
+
+```aidl
+IMcpServerSession openServerV2(in Bundle config,
+    IHostCapabilityBroker broker, IMcpServerCallback callback);
+```
+
+The host accepts MCP contract versions 1 through 2. It reads the plugin's declared
+`mcpServerContractVersion` before selecting the transaction. Version 1 uses
+`openServer` and `IMcpHostCapabilityBroker`; version 2 uses `openServerV2` and
+`IHostCapabilityBroker`. Selection never depends on a failed transaction probe.
+The V1 configuration envelope remains version 1; the V2 open envelope is version
+2. Existing session configuration/reason records remain V1-compatible, and V2
+plugins must continue to accept them. The shared broker data-plane version is 1,
+independent of the MCP control-plane version.
+
+`McpServerContract.KEY_BRIDGE_*`, `KEY_GRANT_*`, broker keys and shared limits are
+compile-time aliases of the shared contract. Their released wire literals and
+limits are unchanged. Both Binder adapters dispatch through the same host core.
+See [Host capability contract V1](host-capability-contract-v1.md) for descriptor
+ownership, grant evaluation, bounds and stable error categories.
+
+Shared broker-info Bundles report data-plane `contractVersion = 1`; bridge requests
+and responses retain their released envelope without requiring that key. In
+particular, the V2 control-plane version is not copied into bridge responses.
+Both adapters retain `bridgeResponseJson` and `bridgeResponseOk` when a response
+uses `bridgePayloadFd`. The current shared core can also move a JSON result larger
+than 64 KiB into an `application/json` descriptor. Its inline `result` is then a
+`payload` metadata object, and the descriptor contains the original result JSON.
+This conversion is shared by V1 and V2; changing the Binder descriptor does not
+change how clients decode that payload.
+
+This host extension does not migrate a separately installed MCP plugin. That
+repository must stage the matching common/shared/MCP AARs, update its hash lock,
+implement `openServerV2`, and declare version 2 in its own migration session.
+Until then the current version 1 APK remains on the tested legacy path.

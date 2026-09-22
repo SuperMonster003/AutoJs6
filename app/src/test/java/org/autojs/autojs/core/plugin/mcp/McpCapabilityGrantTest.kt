@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.mcp
 
+import org.autojs.autojs.core.plugin.hostbroker.HostCapabilityGrant
 import org.autojs.autojs.engine.NodeBridgeModules
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.plugin.mcp.server.api.McpServerContract
@@ -17,8 +18,8 @@ class McpCapabilityGrantTest {
         assertTrue(grant.allowsMethod("package_manager", "listApps"))
         assertTrue(NodeBridgePermissionManifest.SHELL_ROOT in grant.permissions)
         val restricted = grant.copy(permissions = grant.permissions - NodeBridgePermissionManifest.SHELL_ROOT)
-        assertEquals(McpCapabilityGrant.Decision.Allowed, restricted.evaluate("shell", "exec", listOf("shell"), 100))
-        assertTrue(restricted.evaluate("shell", "exec", listOf("shell", "shell.root"), 100) is McpCapabilityGrant.Decision.Denied)
+        assertEquals(HostCapabilityGrant.Decision.Allowed, restricted.evaluate("shell", "exec", listOf("shell"), 100))
+        assertTrue(restricted.evaluate("shell", "exec", listOf("shell", "shell.root"), 100) is HostCapabilityGrant.Decision.Denied)
     }
 
     @Test
@@ -43,29 +44,29 @@ class McpCapabilityGrantTest {
     @Test
     fun evaluateDeniesUnknownMethodsBeforeLookingAtPermissions() {
         val decision = grant.evaluate("rhino", "eval", emptyList(), 10)
-        assertTrue(decision is McpCapabilityGrant.Decision.Denied)
-        assertEquals(McpCapabilityGrant.Reason.METHOD_NOT_GRANTED, (decision as McpCapabilityGrant.Decision.Denied).reason)
+        assertTrue(decision is HostCapabilityGrant.Decision.Denied)
+        assertEquals(HostCapabilityGrant.Reason.METHOD_NOT_GRANTED, (decision as HostCapabilityGrant.Decision.Denied).reason)
         assertEquals(listOf("rhino.eval"), decision.detail)
     }
 
     @Test
     fun evaluateAllowsSubsetPermissionsAndReportsMissingOnes() {
         val allowed = grant.evaluate("accessibility", "click", listOf("accessibility", " ACCESSIBILITY.GESTURE "), 100)
-        assertEquals(McpCapabilityGrant.Decision.Allowed, allowed)
+        assertEquals(HostCapabilityGrant.Decision.Allowed, allowed)
 
         val denied = grant.evaluate("accessibility", "click", listOf("accessibility", "websocket", "ui_overlay"), 100)
-        assertTrue(denied is McpCapabilityGrant.Decision.Denied)
-        denied as McpCapabilityGrant.Decision.Denied
-        assertEquals(McpCapabilityGrant.Reason.PERMISSION_NOT_GRANTED, denied.reason)
+        assertTrue(denied is HostCapabilityGrant.Decision.Denied)
+        denied as HostCapabilityGrant.Decision.Denied
+        assertEquals(HostCapabilityGrant.Reason.PERMISSION_NOT_GRANTED, denied.reason)
         assertEquals(listOf("websocket", "ui_overlay"), denied.detail)
     }
 
     @Test
     fun evaluateRejectsOversizedRequests() {
         val decision = grant.evaluate("files", "write", listOf("files", "files.write"), grant.maxRequestBytes + 1)
-        assertTrue(decision is McpCapabilityGrant.Decision.Denied)
-        assertEquals(McpCapabilityGrant.Reason.REQUEST_TOO_LARGE, (decision as McpCapabilityGrant.Decision.Denied).reason)
-        assertEquals(McpCapabilityGrant.Decision.Allowed, grant.evaluate("files", "write", listOf("files"), grant.maxRequestBytes))
+        assertTrue(decision is HostCapabilityGrant.Decision.Denied)
+        assertEquals(HostCapabilityGrant.Reason.REQUEST_TOO_LARGE, (decision as HostCapabilityGrant.Decision.Denied).reason)
+        assertEquals(HostCapabilityGrant.Decision.Allowed, grant.evaluate("files", "write", listOf("files"), grant.maxRequestBytes))
     }
 
     @Test

@@ -1,7 +1,9 @@
 package org.autojs.plugin.mcp.server.api
 
+import org.autojs.plugin.host.capability.api.HostCapabilityContract
+
 /**
- * Bundle keys, enumerations, and hard ceilings of the MCP Server plugin contract (version 1).
+ * Bundle keys, enumerations, and hard ceilings of the MCP Server plugin contract (version 2; version 1 remains supported).
  *
  * Conventions:
  * - Every Bundle is a snapshot owned by the receiver; senders never mutate a Bundle after handing
@@ -17,14 +19,15 @@ object McpServerContract {
     // ------------------------------------------------------------------ versions
 
     /** Version of the control plane ([IMcpServerPlugin], [IMcpServerSession], [IMcpServerCallback]). */
-    const val CONTRACT_VERSION = 1
-    const val MIN_CONTRACT_VERSION = 1
+    const val CONTRACT_VERSION = 2
+    const val MIN_SUPPORTED_CONTRACT_VERSION = 1
+    const val MIN_CONTRACT_VERSION = MIN_SUPPORTED_CONTRACT_VERSION
     const val MAX_CONTRACT_VERSION = CONTRACT_VERSION
 
     /** Version of the data plane ([IMcpHostCapabilityBroker], [IMcpHostCapabilityCallback]). */
-    const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
-    const val MIN_HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
-    const val MAX_HOST_CAPABILITY_BROKER_CONTRACT_VERSION = HOST_CAPABILITY_BROKER_CONTRACT_VERSION
+    const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = HostCapabilityContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION
+    const val MIN_HOST_CAPABILITY_BROKER_CONTRACT_VERSION = HostCapabilityContract.MIN_HOST_CAPABILITY_BROKER_CONTRACT_VERSION
+    const val MAX_HOST_CAPABILITY_BROKER_CONTRACT_VERSION = HostCapabilityContract.MAX_HOST_CAPABILITY_BROKER_CONTRACT_VERSION
 
     @JvmStatic
     fun supportsContractVersion(version: Int): Boolean =
@@ -35,7 +38,7 @@ object McpServerContract {
         version in MIN_HOST_CAPABILITY_BROKER_CONTRACT_VERSION..MAX_HOST_CAPABILITY_BROKER_CONTRACT_VERSION
 
     /** Int: contract version of the sender, present in config, status, and broker-info Bundles. */
-    const val KEY_CONTRACT_VERSION = "contractVersion"
+    const val KEY_CONTRACT_VERSION = HostCapabilityContract.KEY_CONTRACT_VERSION
 
     // ------------------------------------------------------------------ endpoint defaults
 
@@ -137,10 +140,10 @@ object McpServerContract {
     // ------------------------------------------------------------------ errors and stop / destroy reasons
 
     /** String: an `ERROR_*` or `REASON_*` code. */
-    const val KEY_ERROR_CODE = "errorCode"
+    const val KEY_ERROR_CODE = HostCapabilityContract.KEY_ERROR_CODE
 
     /** String: detail for logs and the drawer, at most [MAX_ERROR_MESSAGE_BYTES]. */
-    const val KEY_ERROR_MESSAGE = "errorMessage"
+    const val KEY_ERROR_MESSAGE = HostCapabilityContract.KEY_ERROR_MESSAGE
 
     const val ERROR_UNSUPPORTED_CONTRACT = "unsupported_contract"
     const val ERROR_INVALID_CONFIG = "invalid_config"
@@ -190,69 +193,69 @@ object McpServerContract {
     // ------------------------------------------------------------------ broker info (getBrokerInfo)
 
     /** String: unique id of the broker instance, one per opened server. */
-    const val KEY_HOST_CAPABILITY_BROKER_ID = "hostCapabilityBrokerId"
+    const val KEY_HOST_CAPABILITY_BROKER_ID = HostCapabilityContract.KEY_HOST_CAPABILITY_BROKER_ID
 
     /** Int: [HOST_CAPABILITY_BROKER_CONTRACT_VERSION] of the host. */
-    const val KEY_HOST_CAPABILITY_BROKER_VERSION = "hostCapabilityBrokerVersion"
+    const val KEY_HOST_CAPABILITY_BROKER_VERSION = HostCapabilityContract.KEY_HOST_CAPABILITY_BROKER_VERSION
 
     /** String array: bridge modules the host can dispatch at all (before the grant). */
-    const val KEY_HOST_CAPABILITY_MODULES = "hostCapabilityModules"
+    const val KEY_HOST_CAPABILITY_MODULES = HostCapabilityContract.KEY_HOST_CAPABILITY_MODULES
 
     /** String: JSON of the host bridge engine info (`engineName = mcp`, host package and version). */
-    const val KEY_BRIDGE_ENGINE_INFO = "bridgeEngineInfo"
+    const val KEY_BRIDGE_ENGINE_INFO = HostCapabilityContract.KEY_BRIDGE_ENGINE_INFO
 
     // ------------------------------------------------------------------ grant (part of the broker info; decision D17)
 
     /** String array of `module.method` entries the session may call; anything else is `capability-denied`. */
-    const val KEY_GRANT_METHODS = "grantMethods"
+    const val KEY_GRANT_METHODS = HostCapabilityContract.KEY_GRANT_METHODS
 
     /** String array of permission tokens; a request's `permissions` must be a subset. */
-    const val KEY_GRANT_PERMISSIONS = "grantPermissions"
+    const val KEY_GRANT_PERMISSIONS = HostCapabilityContract.KEY_GRANT_PERMISSIONS
 
     /** Int: largest [KEY_BRIDGE_REQUEST_JSON] the host accepts, at most [MAX_BRIDGE_INLINE_JSON_BYTES]. */
-    const val KEY_GRANT_MAX_REQUEST_BYTES = "grantMaxRequestBytes"
+    const val KEY_GRANT_MAX_REQUEST_BYTES = HostCapabilityContract.KEY_GRANT_MAX_REQUEST_BYTES
 
     /** Int: dispatches allowed in flight, at most [MAX_CONCURRENT_TOOL_CALLS]. */
-    const val KEY_GRANT_MAX_CONCURRENT_CALLS = "grantMaxConcurrentCalls"
+    const val KEY_GRANT_MAX_CONCURRENT_CALLS = HostCapabilityContract.KEY_GRANT_MAX_CONCURRENT_CALLS
 
     /** Int: accessibility queries per second before `rate-limited`. */
-    const val KEY_GRANT_ACCESSIBILITY_QUERIES_PER_SECOND = "grantAccessibilityQueriesPerSecond"
+    const val KEY_GRANT_ACCESSIBILITY_QUERIES_PER_SECOND = HostCapabilityContract.KEY_GRANT_ACCESSIBILITY_QUERIES_PER_SECOND
 
     /** Long: timeout applied when a request omits `timeoutMs`; at most [DEFAULT_TOOL_TIMEOUT_MS]. */
-    const val KEY_GRANT_DEFAULT_TIMEOUT_MS = "grantDefaultTimeoutMs"
+    const val KEY_GRANT_DEFAULT_TIMEOUT_MS = HostCapabilityContract.KEY_GRANT_DEFAULT_TIMEOUT_MS
 
     /** Long: ceiling for a request's `timeoutMs`; at most [MAX_TOOL_TIMEOUT_MS]. */
-    const val KEY_GRANT_MAX_TIMEOUT_MS = "grantMaxTimeoutMs"
+    const val KEY_GRANT_MAX_TIMEOUT_MS = HostCapabilityContract.KEY_GRANT_MAX_TIMEOUT_MS
 
     // ------------------------------------------------------------------ bridge envelope (dispatch / onResponse)
 
     /** String: `NodeBridgeRequest` JSON (`id`, `module`, `method`, `args`, `timeoutMs`, `permissions`). */
-    const val KEY_BRIDGE_REQUEST_JSON = "bridgeRequestJson"
+    const val KEY_BRIDGE_REQUEST_JSON = HostCapabilityContract.KEY_BRIDGE_REQUEST_JSON
 
     /** String: MCP client name attached for audit logs; optional, at most [MAX_CLIENT_NAME_BYTES]. */
-    const val KEY_BRIDGE_CLIENT_NAME = "bridgeClientName"
+    const val KEY_BRIDGE_CLIENT_NAME = HostCapabilityContract.KEY_BRIDGE_CLIENT_NAME
 
     /** String: `NodeBridgeResponse` JSON (`id`, `ok`, `result` or `error`). */
-    const val KEY_BRIDGE_RESPONSE_JSON = "bridgeResponseJson"
+    const val KEY_BRIDGE_RESPONSE_JSON = HostCapabilityContract.KEY_BRIDGE_RESPONSE_JSON
 
     /** Boolean: mirrors the `ok` field of [KEY_BRIDGE_RESPONSE_JSON]. */
-    const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
+    const val KEY_BRIDGE_RESPONSE_OK = HostCapabilityContract.KEY_BRIDGE_RESPONSE_OK
 
     /** String: the error message when [KEY_BRIDGE_RESPONSE_OK] is false; optional. */
-    const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
+    const val KEY_BRIDGE_ERROR_MESSAGE = HostCapabilityContract.KEY_BRIDGE_ERROR_MESSAGE
 
     /**
      * ParcelFileDescriptor: read side of a payload larger than [MAX_BRIDGE_INLINE_JSON_BYTES]
      * (screenshots, file contents). The receiver owns it and must close it; the JSON result then
      * carries only metadata.
      */
-    const val KEY_BRIDGE_PAYLOAD_FD = "bridgePayloadFd"
+    const val KEY_BRIDGE_PAYLOAD_FD = HostCapabilityContract.KEY_BRIDGE_PAYLOAD_FD
 
     /** Long: byte length of [KEY_BRIDGE_PAYLOAD_FD], at most [MAX_BRIDGE_PAYLOAD_BYTES]. */
-    const val KEY_BRIDGE_PAYLOAD_BYTES = "bridgePayloadBytes"
+    const val KEY_BRIDGE_PAYLOAD_BYTES = HostCapabilityContract.KEY_BRIDGE_PAYLOAD_BYTES
 
     /** String: MIME type of [KEY_BRIDGE_PAYLOAD_FD], for example `image/jpeg`. */
-    const val KEY_BRIDGE_PAYLOAD_MIME = "bridgePayloadMime"
+    const val KEY_BRIDGE_PAYLOAD_MIME = HostCapabilityContract.KEY_BRIDGE_PAYLOAD_MIME
 
     // ------------------------------------------------------------------ hard ceilings (roadmap appendix A.7)
 
@@ -260,40 +263,40 @@ object McpServerContract {
     const val MAX_REQUEST_BODY_BYTES = 1024 * 1024
 
     /** Tool calls executed concurrently per server; further calls wait or fail with `LIMIT_EXCEEDED`. */
-    const val MAX_CONCURRENT_TOOL_CALLS = 4
+    const val MAX_CONCURRENT_TOOL_CALLS = HostCapabilityContract.MAX_CONCURRENT_TOOL_CALLS
 
-    const val DEFAULT_TOOL_TIMEOUT_MS = 30_000L
-    const val MAX_TOOL_TIMEOUT_MS = 300_000L
+    const val DEFAULT_TOOL_TIMEOUT_MS = HostCapabilityContract.DEFAULT_TOOL_TIMEOUT_MS
+    const val MAX_TOOL_TIMEOUT_MS = HostCapabilityContract.MAX_TOOL_TIMEOUT_MS
 
-    const val MAX_DUMP_NODES = 400
-    const val MAX_DUMP_DEPTH = 32
-    const val MAX_DUMP_TEXT_BYTES = 256 * 1024
+    const val MAX_DUMP_NODES = HostCapabilityContract.MAX_DUMP_NODES
+    const val MAX_DUMP_DEPTH = HostCapabilityContract.MAX_DUMP_DEPTH
+    const val MAX_DUMP_TEXT_BYTES = HostCapabilityContract.MAX_DUMP_TEXT_BYTES
 
-    const val MAX_SCREENSHOT_ENCODED_BYTES = 4 * 1024 * 1024
+    const val MAX_SCREENSHOT_ENCODED_BYTES = HostCapabilityContract.MAX_SCREENSHOT_ENCODED_BYTES
 
-    const val MAX_CONSOLE_TAIL_LINES = 500
-    const val MAX_CONSOLE_TAIL_BYTES = 256 * 1024
+    const val MAX_CONSOLE_TAIL_LINES = HostCapabilityContract.MAX_CONSOLE_TAIL_LINES
+    const val MAX_CONSOLE_TAIL_BYTES = HostCapabilityContract.MAX_CONSOLE_TAIL_BYTES
 
-    const val MAX_FILE_READ_BYTES = 1024 * 1024
+    const val MAX_FILE_READ_BYTES = HostCapabilityContract.MAX_FILE_READ_BYTES
 
     /** Bounded by [MAX_REQUEST_BODY_BYTES]: file contents arrive inside the tool-call body. */
-    const val MAX_FILE_WRITE_BYTES = 1024 * 1024
+    const val MAX_FILE_WRITE_BYTES = HostCapabilityContract.MAX_FILE_WRITE_BYTES
 
-    const val MAX_LIST_ENTRIES = 2000
+    const val MAX_LIST_ENTRIES = HostCapabilityContract.MAX_LIST_ENTRIES
 
-    const val MAX_SHELL_OUTPUT_BYTES = 256 * 1024
+    const val MAX_SHELL_OUTPUT_BYTES = HostCapabilityContract.MAX_SHELL_OUTPUT_BYTES
 
     const val MAX_PAIRED_CLIENTS = 32
     const val PAIRING_WINDOW_MS = 60_000L
     const val PAIRING_COOLDOWN_MS = 30_000L
 
     /** Largest JSON string carried inline in a Binder Bundle in either direction; see [KEY_BRIDGE_PAYLOAD_FD]. */
-    const val MAX_BRIDGE_INLINE_JSON_BYTES = 512 * 1024
+    const val MAX_BRIDGE_INLINE_JSON_BYTES = HostCapabilityContract.MAX_BRIDGE_INLINE_JSON_BYTES
 
     /** Largest payload streamed through [KEY_BRIDGE_PAYLOAD_FD]. */
-    const val MAX_BRIDGE_PAYLOAD_BYTES = 8 * 1024 * 1024
+    const val MAX_BRIDGE_PAYLOAD_BYTES = HostCapabilityContract.MAX_BRIDGE_PAYLOAD_BYTES
 
-    const val MAX_ERROR_MESSAGE_BYTES = 4 * 1024
+    const val MAX_ERROR_MESSAGE_BYTES = HostCapabilityContract.MAX_ERROR_MESSAGE_BYTES
     const val MAX_EVENT_TEXT_BYTES = 2 * 1024
-    const val MAX_CLIENT_NAME_BYTES = 256
+    const val MAX_CLIENT_NAME_BYTES = HostCapabilityContract.MAX_CLIENT_NAME_BYTES
 }
