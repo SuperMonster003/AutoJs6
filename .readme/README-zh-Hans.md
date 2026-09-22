@@ -495,6 +495,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 应用内置简体中文及英文发行历史, 其他语言支持在线获取与缓存 (离线时优先使用缓存, 无缓存时显示英文)
 * `优化` Gradle 构建支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本, 并降低启动内存占用及清理编译警告
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
+* `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
+* `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

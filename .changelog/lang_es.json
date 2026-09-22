@@ -624,7 +624,9 @@
         "El motor Rhino ahora omite los metodos Java cuyos tipos de parametros no existen en el sistema en ejecucion (como AppCompatTextView.setTextClassifier en Android 7.x) en lugar de fallar la reflexion de toda la clase; el elemento text del modo UI usa el AppCompatTextView actual en Android 7.x y la biblioteca heredada appcompat 1.0.2 ya no es necesaria",
         "La aplicacion solo incluye el historial de versiones en chino simplificado e ingles; los demas idiomas se descargan y se almacenan en cache, y sin conexion se muestra la copia en cache del idioma actual y, en su defecto, la version en ingles incluida",
         "Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK",
-        "Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android"
+        "Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android",
+        "Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas",
+        "accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados"
       ],
       "dependency": [
         "Android AXML modularizado",

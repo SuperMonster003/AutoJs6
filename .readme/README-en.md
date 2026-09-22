@@ -788,6 +788,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Only the Simplified Chinese and English release histories are bundled in the app; other languages are fetched online and cached, and offline the cached copy of the current language is shown, then the bundled English one
 * `Improvement` PNG bitmaps in the resource directory are converted to lossless WebP (launcher icons excluded) and a handful of unused resources are removed to shrink the APK
 * `Improvement` Reduce Manifest, Java and Kotlin compiler warnings in plugin conformance apps and host tests while preserving native library packaging and Android version compatibility
+* `Improvement` compact output and nodeRef references for accessibility.dump, with node relocation and stale-reference rejection
+* `Improvement` accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

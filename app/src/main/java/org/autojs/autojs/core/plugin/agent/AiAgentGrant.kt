@@ -30,7 +30,7 @@ internal object AiAgentGrant {
             NodeBridgePermissionManifest.KEYS,
             NodeBridgePermissionManifest.FILES_DELETE,
             NodeBridgePermissionManifest.APP_ACTIVITY,
-        ) + setOf("agent", "agent.exec", NodeBridgePermissionManifest.OCR),
+        ) + setOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC, NodeBridgePermissionManifest.OCR),
         maxConcurrentCalls = 2,
         modelCallsPerMinute = 30,
         maxTotalTokens = 1_000_000L,

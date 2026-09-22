@@ -626,6 +626,8 @@
 * `Amélioration` L'application n'embarque que l'historique des versions en chinois simplifie et en anglais ; les autres langues sont recuperees en ligne et mises en cache, et hors ligne la copie en cache de la langue courante est affichee, puis la version anglaise embarquee
 * `Amélioration` Les images PNG du répertoire de ressources sont converties en WebP sans perte (icônes du lanceur exclues) et quelques ressources inutilisées sont supprimées pour réduire la taille de l'APK
 * `Amélioration` Réduction des avertissements Manifest, Java et Kotlin dans les applications de conformité des plugins et les tests de l'hôte, en conservant le conditionnement des bibliothèques natives et la compatibilité Android
+* `Amélioration` Format compact et références nodeRef pour accessibility.dump, avec relocalisation des éléments et rejet des références périmées
+* `Amélioration` accessibility.readScreenText renvoie du texte et des positions en quantité limitée à partir de captures et de plugins OCR autorisés
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

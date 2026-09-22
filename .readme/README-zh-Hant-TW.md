@@ -788,6 +788,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 應用程式僅內建簡體中文與英文兩份版本歷史; 其餘語言線上取得並快取, 離線時依序顯示目前語言的快取副本與內建英文版本
 * `最佳化` 資源目錄中的 PNG 點陣圖無失真轉換為 WebP (啟動器圖示除外), 並移除若干未使用的資源, 縮減安裝檔大小
 * `最佳化` 減少外掛一致性測試應用程式及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫封裝行為及 Android 版本相容性
+* `最佳化` accessibility.dump 的 compact 格式與 nodeRef 節點參照, 支援節點重新定位及失效參照拒絕
+* `最佳化` accessibility.readScreenText 方法, 透過擷取畫面與已授權 OCR 外掛回傳有上限的螢幕文字及位置
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

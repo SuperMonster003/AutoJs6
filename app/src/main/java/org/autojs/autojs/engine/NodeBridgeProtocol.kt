@@ -658,6 +658,7 @@ object NodeBridgeModules {
     const val TOAST = NodeBridgePermissionManifest.TOAST
     const val APP = NodeBridgePermissionManifest.APP
     const val ENGINES = NodeBridgePermissionManifest.ENGINES
+    const val AGENT = NodeBridgePermissionManifest.AGENT
     const val DIALOGS = NodeBridgePermissionManifest.DIALOGS
     const val ACCESSIBILITY = NodeBridgePermissionManifest.ACCESSIBILITY
     const val MEDIA_PROJECTION = "media_projection"
@@ -716,6 +717,7 @@ object NodeBridgeModules {
         "getPackageInfo",
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
+    val agentMethods = setOf("listScripts", "readManifest", "execRegistered")
     val dialogsMethods = setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss")
     val keysMethods = setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog")
     val accessibilityMethods = setOf(
@@ -738,6 +740,7 @@ object NodeBridgeModules {
         "dump",
         "explain",
         "screenshot",
+        "readScreenText",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -804,6 +807,7 @@ object NodeBridgeModules {
         TOAST to toastMethods,
         APP to appMethods,
         ENGINES to enginesMethods,
+        AGENT to agentMethods,
         DIALOGS to dialogsMethods,
         ACCESSIBILITY to accessibilityMethods,
         MEDIA_PROJECTION to mediaProjectionMethods,
@@ -880,6 +884,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val pinyinBackend: NodePinyinBackend = AndroidNodePinyinBackend(context),
     private val pinyin4jBackend: NodePinyin4jBackend = AndroidNodePinyin4jBackend(context),
     private val permissionManifest: NodeBridgePermissionManifest.Manifest? = null,
+    private val agentScriptRoots: List<File> = emptyList(),
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -900,6 +905,10 @@ class AndroidNodeBridgeCapabilityProvider(
         Thread(task, "AutoJs6NodeImage").apply { isDaemon = true }
     }
     private val screenCapture = NodeScreenCaptureSession(appContext, ::onScreenCaptureStopped)
+    private val agentHelpersLock = Any()
+    private var agentHelpersClosed = false
+    private val screenText = lazy { NodeBridgeScreenText(appContext, { screenCapture.capture() }) }
+    private val agentBridge = lazy { NodeBridgeAgentBridge(appContext, engineInfo, agentScriptRoots) }
     private val deviceControls = NodeDeviceControls(appContext)
     private val eventObservers = NodeEventObservers(appContext)
     private val dialogs = NodeDialogs(appContext)
@@ -948,6 +957,45 @@ class AndroidNodeBridgeCapabilityProvider(
     private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
     private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
+
+    /** Host-only configuration; bridge requests cannot widen their own registered-script roots. */
+    internal fun prepareAgentScriptRoots(roots: List<File>): () -> Unit {
+        val bridge = synchronized(agentHelpersLock) {
+            check(!agentHelpersClosed) { "Agent provider scope is closed." }
+            agentBridge.value
+        }
+        val prepared = bridge.prepareRoots(roots)
+        return {
+            synchronized(agentHelpersLock) {
+                check(!agentHelpersClosed) { "Agent provider scope is closed." }
+                prepared()
+            }
+        }
+    }
+
+    /** Lazy creation and teardown share one lock; callbacks and worker shutdown run outside it. */
+    private fun closeAgentHelpers() {
+        val helpers = synchronized(agentHelpersLock) {
+            if (agentHelpersClosed) return
+            agentHelpersClosed = true
+            Pair(if (screenText.isInitialized()) screenText.value else null,
+                if (agentBridge.isInitialized()) agentBridge.value else null)
+        }
+        runCatching { helpers.first?.close() }
+        runCatching { helpers.second?.close() }
+    }
+
+    private fun dispatchAgent(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val bridge = synchronized(agentHelpersLock) { if (agentHelpersClosed) null else agentBridge.value }
+        if (bridge == null) callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Agent provider scope is closed.")))
+        else bridge.dispatch(request, callback)
+    }
+
+    private fun dispatchScreenText(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val bridge = synchronized(agentHelpersLock) { if (agentHelpersClosed) null else screenText.value }
+        if (bridge == null) callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Agent provider scope is closed.")))
+        else bridge.dispatch(request, callback)
+    }
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val brokerAttempt = capabilityBrokerAudit.begin(request)
@@ -1001,6 +1049,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.RHINO && request.method in NodeBridgeModules.rhinoMethods -> dispatchRhino(request, auditedCallback)
             request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
             request.module == NodeBridgeModules.FILES && request.method in NodeBridgeModules.filesMethods -> auditedCallback(filesBridge.dispatch(request))
+            request.module == NodeBridgeModules.AGENT && request.method in NodeBridgeModules.agentMethods -> dispatchAgent(request, auditedCallback)
             request.module == NodeBridgeModules.CONSOLE && request.method in NodeBridgeModules.consoleMethods -> auditedCallback(consoleBridge.dispatch(request))
             else -> auditedCallback(unavailable(request))
         }
@@ -1063,6 +1112,8 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     override fun destroy(reason: NodeBridgeError) {
+        closeAgentHelpers()
+        accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
         imageExecutor.shutdownNow()
         screenCapture.close()
@@ -1670,6 +1721,10 @@ class AndroidNodeBridgeCapabilityProvider(
             dispatchAccessibilityScreenshot(request, callback)
             return
         }
+        if (request.method == "readScreenText") {
+            dispatchScreenText(request, callback)
+            return
+        }
         if (request.method == "ensureEnabled") {
             org.autojs.autojs.core.accessibility.AccessibilityTool(appContext).ensureServiceAsync(
                 level = org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State.OPERATIONAL,
@@ -1719,6 +1774,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 ),
             )
         }
+        accessibilityDiagnostics.nodeRefAction(request)?.let { return it }
         return when (request.method) {
             "back" -> NodeBridgeResponse.success(
                 request.id,

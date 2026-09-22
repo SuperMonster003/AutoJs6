@@ -154,6 +154,9 @@ object NodeBridgeProviderRegistry {
     private const val DIALOGS_PROVIDER = "dialogs"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
+        provider(id = NodeBridgeModules.AGENT, modules = listOf(NodeBridgeModules.AGENT),
+            capabilities = listOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC),
+            packagedSupport = packagedProviderDependent("registered scripts require a readable host-approved working directory; execution is separately permission-gated")),
         provider(id = KEYS_PROVIDER, modules = listOf(NodeBridgeModules.KEYS),
             capabilities = listOf(NodeBridgePermissionManifest.KEYS),
             packagedSupport = packagedProviderDependent("system actions require operational accessibility; Android may decline unsupported actions")),
@@ -410,6 +413,7 @@ object NodeBridgeProviderRegistry {
 
     private fun androidStatus(id: String, context: Context): NodeBridgeProviderStatus = when (id) {
         FETCH_PROVIDER, WEBSOCKET_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        NodeBridgeModules.AGENT -> NodeBridgeProviderStatus.AVAILABLE
         OCR_PROVIDER -> if (queryOcrPluginServiceCount(context.applicationContext, "mlkit-ocr") > 0) {
             NodeBridgeProviderStatus.AVAILABLE
         } else {

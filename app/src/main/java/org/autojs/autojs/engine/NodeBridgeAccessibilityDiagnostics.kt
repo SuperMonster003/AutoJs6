@@ -25,6 +25,9 @@ import org.autojs.autojs.core.automator.bridge.BridgeDumpEntry
 import org.autojs.autojs.core.automator.bridge.BridgeDumpOptions
 import org.autojs.autojs.core.automator.bridge.BridgeNode
 import org.autojs.autojs.core.automator.bridge.BridgeNodeDump
+import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
+import org.autojs.autojs.core.automator.diagnostics.CompactNodeText
+import org.autojs.autojs.core.automator.diagnostics.NodeRefSnapshots
 import org.autojs.autojs.core.automator.diagnostics.DumpFormat
 import org.autojs.autojs.core.automator.diagnostics.DumpOptions
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
@@ -60,6 +63,8 @@ import kotlin.math.roundToInt
 internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val engineCwd: String) {
 
     private val appContext = context.applicationContext
+    private val nodeRefs = NodeRefSnapshots()
+    private val nodeRefActions = BridgeNodeActions(NodeLifecycle.default)
 
     private val encoder: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "AutoJs6BridgeScreenshot").apply { isDaemon = true }
@@ -72,11 +77,36 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         try {
             val result = JSONObject()
                 .put("schema", SCHEMA_DUMP)
-                .put("format", parsed.format.key)
+                .put("format", if (parsed.compact) "compact" else parsed.format.key)
                 .put("window", parsed.window)
                 .put("roots", roots.size)
             putCurrentWindow(result)
-            if (parsed.format == DumpFormat.JSON) {
+            if (parsed.compact) {
+                val collected = CompactNodeText.collect(roots, parsed.maxNodes, parsed.maxDepth, parsed.visibleOnly) {
+                    NodeLifecycle.default.release(it)
+                }
+                var nodes = collected.nodes
+                var truncated = collected.truncated
+                fun render(rows: List<CompactNodeText.Node>, cut: Boolean) = CompactNodeText.render(
+                    result.optString("packageName"), result.optString("activityName"), rows, cut, parsed.maxNodes, parsed.maxDepth,
+                )
+                var text = render(nodes, truncated)
+                if (text.toByteArray(StandardCharsets.UTF_8).size > BridgeAccessibilityLimits.MAX_TEXT_BYTES) {
+                    truncated = true
+                    var lower = 0
+                    var upper = nodes.size
+                    while (lower < upper) {
+                        val middle = (lower + upper + 1) / 2
+                        if (render(nodes.take(middle), true).toByteArray(StandardCharsets.UTF_8).size <= BridgeAccessibilityLimits.MAX_TEXT_BYTES) lower = middle
+                        else upper = middle - 1
+                    }
+                    nodes = nodes.take(lower)
+                    text = render(nodes, true)
+                }
+                val snapshot = nodeRefs.register(nodes, parsed.window, nodeRefWindowKey(roots, result))
+                result.put("nodeCount", nodes.size).put("truncated", truncated)
+                    .put("text", text).put("snapshotId", snapshot.id)
+            } else if (parsed.format == DumpFormat.JSON) {
                 val dump = BridgeNodeDump.dump(roots, BridgeDumpOptions(parsed.maxDepth, parsed.maxNodes, parsed.visibleOnly))
                 val nodes = JSONArray()
                 dump.entries.forEach { nodes.put(entryJson(it)) }
@@ -250,6 +280,66 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
             }
             callback(encode(request, parsed, bitmap, startedAt, "media_projection"))
         }
+    }
+
+    /** Returns null for the existing selector dialect; node references always relocate before acting. */
+    fun nodeRefAction(request: NodeBridgeRequest): NodeBridgeResponse? {
+        if (request.method !in NODE_REF_ACTIONS) return null
+        val args = argsOf(request)
+        val target = args.optJSONObject(0) ?: return null
+        if (!target.has("nodeRef")) return null
+        val reference = try {
+            rejectUnknownKeys(target, setOf("nodeRef", "snapshotId"), "accessibility node reference")
+            val ref = target.opt("nodeRef") as? String ?: return invalid(request, "nodeRef must be a string.")
+            val snapshotId = if (target.has("snapshotId")) {
+                target.opt("snapshotId") as? String ?: return invalid(request, "snapshotId must be a string.")
+            } else null
+            if (ref.length > 16 || (snapshotId?.length ?: 0) > 80) throw NodeRefSnapshots.Stale("malformed reference")
+            nodeRefs.resolve(ref, snapshotId)
+        } catch (error: Exception) {
+            return invalid(request, error)
+        }
+        val roots = collectRoots(reference.snapshot.window)
+        return try {
+            val current = JSONObject().also(::putCurrentWindow)
+            val performed = nodeRefs.relocate(reference, roots, nodeRefWindowKey(roots, current),
+                release = { NodeLifecycle.default.release(it) }) { node ->
+                when (request.method) {
+                    "click" -> nodeRefActions.click(node)
+                    "longClick" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_LONG_CLICK)
+                    "scrollForward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_FORWARD)
+                    "scrollBackward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_BACKWARD)
+                    "setText" -> {
+                        val text = args.opt(1) as? String ?: throw IllegalArgumentException("setText requires a string as its second argument.")
+                        nodeRefActions.setText(node, text)
+                    }
+                    else -> false
+                }
+            }
+            NodeBridgeResponse.success(request.id, performed.toString())
+        } catch (error: IllegalArgumentException) {
+            invalid(request, error)
+        } catch (error: Exception) {
+            providerFailure(request, error)
+        } finally {
+            releaseRoots(roots, reference.snapshot.window)
+        }
+    }
+
+    /** Terminal provider teardown; a late dump cannot repopulate the disposed scope. */
+    fun clearNodeRefs() = nodeRefs.close()
+
+    private fun nodeRefWindowKey(roots: List<UiObject>, current: JSONObject): String {
+        val identities = roots.map {
+            val fingerprint = CompactNodeText.capture(it, 0).fingerprint
+                ?: throw NodeRefSnapshots.Stale("window root identity exceeds the fingerprint limit")
+            "${it.windowId}:$fingerprint"
+        }.sorted()
+        val components = listOf(current.optString("packageName"), current.optString("activityName")) + identities
+        // Length-prefix each component to avoid separator collisions in untrusted accessibility names.
+        val key = components.joinToString("") { "${it.length}:$it" }
+        require(key.length <= NodeRefSnapshots.MAX_WINDOW_KEY_CHARS) { "Window identity exceeds the snapshot limit." }
+        return key
     }
 
     private fun encode(request: NodeBridgeRequest, parsed: ScreenshotArgs, source: Bitmap, startedAt: Long, captureSource: String = "accessibility"): NodeBridgeResponse {
@@ -477,6 +567,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
 
     private class DumpArgs(
         val format: DumpFormat,
+        val compact: Boolean,
         val window: String,
         val maxDepth: Int,
         val maxNodes: Int,
@@ -488,16 +579,19 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
 
             fun parse(json: JSONObject): DumpArgs {
                 rejectUnknownKeys(json, KEYS, "accessibility.dump")
-                val format = DumpFormat.parse(json.optString("format", DumpFormat.TEXT.key))
+                val formatKey = json.optString("format", DumpFormat.TEXT.key)
+                val compact = formatKey.equals("compact", ignoreCase = true)
+                val format = if (compact) DumpFormat.TEXT else DumpFormat.parse(formatKey)
                 val properties = json.optJSONArray("properties")?.let { array ->
                     List(array.length()) { index -> array.optString(index) }.onEach(NodeDump::requireProperty)
                 }?.takeIf { it.isNotEmpty() }
                 return DumpArgs(
                     format = format,
+                    compact = compact,
                     window = windowOf(json, "accessibility.dump"),
                     maxDepth = intOf(json, "maxDepth", BridgeAccessibilityLimits.MAX_DEPTH, 0, BridgeAccessibilityLimits.MAX_DEPTH),
-                    maxNodes = intOf(json, "maxNodes", BridgeAccessibilityLimits.MAX_NODES, 1, BridgeAccessibilityLimits.MAX_NODES),
-                    visibleOnly = booleanOf(json, "visibleOnly", false),
+                    maxNodes = intOf(json, "maxNodes", if (compact) 200 else BridgeAccessibilityLimits.MAX_NODES, 1, BridgeAccessibilityLimits.MAX_NODES),
+                    visibleOnly = booleanOf(json, "visibleOnly", compact),
                     properties = properties,
                 )
             }
@@ -587,6 +681,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     }
 
     companion object {
+        private val NODE_REF_ACTIONS = setOf("click", "longClick", "setText", "scrollForward", "scrollBackward")
         const val SCHEMA_DUMP = "autojs6-bridge-accessibility-dump-v1"
         const val SCHEMA_EXPLAIN = "autojs6-bridge-accessibility-explain-v1"
         const val SCHEMA_SCREENSHOT = "autojs6-bridge-accessibility-screenshot-v1"

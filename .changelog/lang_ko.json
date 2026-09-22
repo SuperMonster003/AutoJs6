@@ -624,7 +624,9 @@
         "Rhino 엔진이 Java 메서드를 탐색할 때 매개변수 타입이 실행 중인 시스템에 존재하지 않는 메서드 (Android 7.x 의 AppCompatTextView.setTextClassifier 등)를 클래스 전체의 reflection 실패 대신 건너뜀; UI 모드 text 요소는 Android 7.x 에서도 현행 AppCompatTextView 를 사용하며 구형 appcompat 1.0.2 라이브러리는 더 이상 필요하지 않음",
         "앱에 내장되는 릴리스 기록을 간체 중국어와 영어로만 제한; 다른 언어는 온라인에서 가져와 캐시하며, 오프라인 시 현재 언어의 캐시본을 표시하고 없으면 내장 영어본을 표시",
         "리소스 디렉터리의 PNG 비트맵을 무손실 WebP로 변환하고 (런처 아이콘 제외) 사용되지 않는 리소스 일부를 제거하여 APK 크기 축소",
-        "네이티브 라이브러리 패키징과 Android 버전 호환성을 유지하면서 플러그인 적합성 테스트 앱 및 호스트 테스트의 Manifest, Java, Kotlin 컴파일 경고 감소"
+        "네이티브 라이브러리 패키징과 Android 버전 호환성을 유지하면서 플러그인 적합성 테스트 앱 및 호스트 테스트의 Manifest, Java, Kotlin 컴파일 경고 감소",
+        "accessibility.dump의 compact 형식과 nodeRef 노드 참조. 노드 재탐색 및 만료된 참조 거부 지원",
+        "accessibility.readScreenText 메서드. 화면 캡처와 승인된 OCR 플러그인을 통해 크기가 제한된 화면 텍스트와 위치 반환"
       ],
       "dependency": [
         "모듈화 Android AXML",

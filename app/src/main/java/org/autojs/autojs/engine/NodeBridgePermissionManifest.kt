@@ -19,6 +19,8 @@ object NodeBridgePermissionManifest {
     const val DIALOGS = "dialogs"
     const val ENGINES = "engines"
     const val ENGINES_EXEC = "engines.exec"
+    const val AGENT = "agent"
+    const val AGENT_EXEC = "agent.exec"
     const val ACCESSIBILITY = "accessibility"
     // M3.2: coordinate gestures are deliberately NOT implied by plain
     // "accessibility" (registry gesturePolicy); scripts must declare this.
@@ -103,6 +105,8 @@ object NodeBridgePermissionManifest {
         DIALOGS,
         ENGINES,
         ENGINES_EXEC,
+        AGENT,
+        AGENT_EXEC,
         ACCESSIBILITY,
         ACCESSIBILITY_GESTURE,
         SCREEN_CAPTURE,
@@ -460,11 +464,16 @@ object NodeBridgePermissionManifest {
                 "execScript", "execScriptFile" -> listOf(ENGINES, ENGINES_EXEC)
                 else -> listOf(ENGINES)
             }
+            NodeBridgeModules.AGENT -> when (method) {
+                "execRegistered" -> listOf(AGENT, AGENT_EXEC, ENGINES, ENGINES_EXEC)
+                else -> listOf(AGENT)
+            }
             NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
             NodeBridgeModules.KEYS -> listOf(KEYS)
             NodeBridgeModules.ACCESSIBILITY -> when (method) {
                 "swipe", "gesture" -> listOf(ACCESSIBILITY, ACCESSIBILITY_GESTURE)
                 "screenshot" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE)
+                "readScreenText" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE, OCR)
                 else -> listOf(ACCESSIBILITY)
             }
             NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)
@@ -602,6 +611,7 @@ object NodeBridgePermissionManifest {
             // MCP roadmap P1.3: writing and deleting workspace files are never implied by "files".
             required == FILES_WRITE ||
             required == FILES_DELETE ||
+            required == AGENT_EXEC ||
             // M3.2: coordinate gestures are never implied by "accessibility".
             required == ACCESSIBILITY_GESTURE
         ) {

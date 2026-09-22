@@ -788,6 +788,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` La aplicacion solo incluye el historial de versiones en chino simplificado e ingles; los demas idiomas se descargan y se almacenan en cache, y sin conexion se muestra la copia en cache del idioma actual y, en su defecto, la version en ingles incluida
 * `Mejora` Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK
 * `Mejora` Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android
+* `Mejora` Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas
+* `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

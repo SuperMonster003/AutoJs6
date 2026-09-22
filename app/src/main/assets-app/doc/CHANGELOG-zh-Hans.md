@@ -333,6 +333,8 @@
 * `优化` 应用内置简体中文及英文发行历史, 其他语言支持在线获取与缓存 (离线时优先使用缓存, 无缓存时显示英文)
 * `优化` Gradle 构建支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本, 并降低启动内存占用及清理编译警告
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
+* `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
+* `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

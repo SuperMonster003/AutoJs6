@@ -105,6 +105,14 @@ class HostCapabilityBrokerCore(
         }.toString())
     }
 
+    internal fun prepareAgentScriptRoots(roots: List<File>): () -> Unit {
+        check(!destroyed.get()) { "Capability broker is destroyed." }
+        check("agent.listScripts" in grant.allowedMethods) { "Agent scripts are outside this grant." }
+        val androidProvider = provider as? AndroidNodeBridgeCapabilityProvider
+            ?: throw IllegalStateException("Registered scripts require the Android capability provider.")
+        return androidProvider.prepareAgentScriptRoots(roots)
+    }
+
     fun dispatch(request: Bundle?, callback: ((Bundle) -> Unit)?) {
         val unexpectedPayload = closeUnexpectedPayload(request)
         if (callback == null) {

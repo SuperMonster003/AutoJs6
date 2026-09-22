@@ -109,7 +109,10 @@ class AiAgentLinkController(
 
     suspend fun updateConfig(configJson: String): Unit = mutex.withLock {
         validateConfig(configJson)
-        checkNotNull(active) { C.ERROR_LINK_DETACHED }.lease.value.updateConfig(config(configJson))
+        val current = checkNotNull(active) { C.ERROR_LINK_DETACHED }
+        val commitRoots = current.brokers.prepareConfig(configJson)
+        current.lease.value.updateConfig(config(configJson))
+        commitRoots()
         desiredConfig = configJson
     }
 
@@ -126,6 +129,7 @@ class AiAgentLinkController(
             check(available()) { C.ERROR_PLUGIN_UNAVAILABLE }
             val pluginUid = uid()
             brokers = brokerFactory("agent-${UUID.randomUUID()}", pluginUid)
+            brokers.prepareConfig(desiredConfig)()
             leased = attachLink(config(desiredConfig), brokers, LinkCallback(generation, pluginUid))
             val death = IBinder.DeathRecipient { scope.launch { died(generation) } }
             leased.value.asBinder().linkToDeath(death, 0)

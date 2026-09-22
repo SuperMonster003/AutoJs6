@@ -624,7 +624,9 @@
         "Rhino 引擎在發現 Java 方法時跳過參數類型在當前系統上不存在的方法 (如 Android 7.x 上的 AppCompatTextView.setTextClassifier), 而非令整個類的反射失敗; UI 模式 text 元素在 Android 7.x 上改用現行 AppCompatTextView, 不再需要舊版 appcompat 1.0.2 庫",
         "應用僅內置簡體中文與英文兩份版本歷史; 其餘語言在線獲取並緩存, 離線時依次顯示當前語言的緩存副本與內置英文版本",
         "資源目錄中的 PNG 位圖無損轉換為 WebP (啟動圖標除外), 並移除若干未使用的資源, 縮減安裝包體積",
-        "減少插件一致性測試應用及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫打包行為及 Android 版本兼容性"
+        "減少插件一致性測試應用及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫打包行為及 Android 版本兼容性",
+        "accessibility.dump 的 compact 格式與 nodeRef 節點引用, 支援節點重新定位及失效引用拒絕",
+        "accessibility.readScreenText 方法, 透過截圖與已授權 OCR 插件回傳有上限的螢幕文字及位置"
       ],
       "dependency": [
         "模塊化 Android AXML",
