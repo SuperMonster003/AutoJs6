@@ -108,7 +108,7 @@ internal object AndroidPackageSessionInstaller {
         if (baseInfo.packageName != packageName || baseInfo.longVersionCodeCompat() != versionCode) {
             throw IOException("Base APK metadata does not match its manifest")
         }
-        if (baseInfo.signerDigests().isEmpty()) {
+        if (baseInfo.signerDigests().isEmpty() && legacyArchiveSignerDigests(packageManager, baseApk.file).isEmpty()) {
             throw IOException("Base APK has no verifiable signer")
         }
 
@@ -159,6 +159,24 @@ internal object AndroidPackageSessionInstaller {
         return signatures.mapTo(linkedSetOf()) { signature ->
             signature.sha256()
         }
+    }
+
+    /**
+     * Android 9-11 may parse an uninstalled V2/V3 archive with GET_SIGNING_CERTIFICATES but
+     * leave signingInfo empty, while the deprecated archive view still exposes the signer.
+     * This is only a platform-visibility check: the session commit remains the authoritative
+     * signature verification.
+     *
+     * zh-CN: Android 9-11 用 GET_SIGNING_CERTIFICATES 解析未安装的 V2/V3 归档时 signingInfo 可能为空,
+     * 而已弃用的归档视图仍能拿到签名者. 这里只做平台可见性检查, 会话提交仍是权威的签名校验.
+     */
+    @Suppress("DEPRECATION")
+    private fun legacyArchiveSignerDigests(packageManager: PackageManager, apkFile: File): Set<String> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return emptySet()
+        val info = runCatching {
+            packageManager.getPackageArchiveInfo(apkFile.absolutePath, PackageManager.GET_SIGNATURES)
+        }.getOrNull() ?: return emptySet()
+        return info.signatures.orEmpty().mapTo(linkedSetOf()) { signature -> signature.sha256() }
     }
 
     private fun android.content.pm.Signature.sha256(): String =

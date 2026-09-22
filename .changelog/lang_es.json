@@ -457,7 +457,8 @@
         "Los scripts enviados por la extensión de VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) se ejecutaban todos como JavaScript de Rhino; ahora se enrutan al motor correspondiente al nombre del archivo",
         "Los diálogos de rechazo del handshake o de fallo de conexión de la extensión de VSCode podían comportarse mal tras destruirse la Activity (cambio de idioma o de modo oscuro); ahora recurren a un aviso",
         "El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el \"Historial\" del diálogo de dirección permanecía vacío",
-        "Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida"
+        "Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida",
+        "El instalador de paquetes integrado podía rechazar APK firmados con V2/V3 en Android 9-11 con \"Base APK has no verifiable signer\" porque el analizador de archivos de la plataforma dejaba vacía la información de firma; ahora se consulta como alternativa la vista de firma de archivo obsoleta"
       ],
       "improvement": [
         "El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado",

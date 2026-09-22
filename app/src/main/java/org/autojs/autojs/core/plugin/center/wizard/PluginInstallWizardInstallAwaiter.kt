@@ -24,11 +24,12 @@ import kotlin.coroutines.resume
  * Completion is detected from three sources:
  * - a terminal [PackageInstallStatusCoordinator] record for the package (success or failure);
  * - the `PACKAGE_ADDED` broadcast for the package (success);
- * - [PackageInstallerActivity] finishing without having created a session (failure).
+ * - [PackageInstallerActivity] finishing without having created a session (failure,
+ *   carrying the message of the error dialog it showed when there was one).
  *
  * zh-CN: 通过 [PackageInstallerActivity] 发起一次安装并挂起, 直到系统给出该包的最终结果.
  * 完成信号来自三处: 协调器中该包的终态记录 (成功或失败), 该包的 `PACKAGE_ADDED` 广播 (成功),
- * 以及安装页面未创建会话即退出 (失败).
+ * 以及安装页面未创建会话即退出 (失败, 若其展示过错误对话框则带上该消息).
  */
 internal object PluginInstallWizardInstallAwaiter {
 
@@ -56,6 +57,7 @@ internal object PluginInstallWizardInstallAwaiter {
         return suspendCancellableCoroutine { continuation ->
             val mainHandler = Handler(Looper.getMainLooper())
             val settled = AtomicBoolean(false)
+            var abortMessage: String? = null
             lateinit var cleanup: () -> Unit
 
             fun settle(result: Result) {
@@ -96,25 +98,29 @@ internal object PluginInstallWizardInstallAwaiter {
                 }
             }
 
+            val abortListener: (String) -> Unit = { message -> abortMessage = message }
+
             val lifecycleCallbacks = object : SimpleActivityLifecycleCallbacks() {
                 override fun onActivityDestroyed(activity: Activity) {
                     if (activity !is PackageInstallerActivity || !activity.isFinishing) return
                     mainHandler.postDelayed({
                         if (settled.get()) return@postDelayed
                         if (!hasNewSession() && !isPackageInstalled(appContext, packageName)) {
-                            settle(Result.Failure(appContext.getString(R.string.text_plugin_install_wizard_install_not_started)))
+                            settle(Result.Failure(abortMessage ?: appContext.getString(R.string.text_plugin_install_wizard_install_not_started)))
                         }
                     }, INSTALLER_EXIT_GRACE_MILLIS)
                 }
             }
 
             PackageInstallStatusCoordinator.addListener(statusListener)
+            PackageInstallerActivity.addAbortListener(abortListener)
             val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply { addDataScheme("package") }
             appContext.registerReceiver(packageReceiver, packageFilter)
             application?.registerActivityLifecycleCallbacks(lifecycleCallbacks)
 
             cleanup = {
                 runCatching { PackageInstallStatusCoordinator.removeListener(statusListener) }
+                runCatching { PackageInstallerActivity.removeAbortListener(abortListener) }
                 runCatching { appContext.unregisterReceiver(packageReceiver) }
                 runCatching { application?.unregisterActivityLifecycleCallbacks(lifecycleCallbacks) }
             }

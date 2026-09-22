@@ -457,7 +457,8 @@
         "Scripts sent by the VSCode extension (TypeScript, Lua, Node.js, Bun, QuickJS, Python) were all executed as Rhino JavaScript; they are now routed to the engine matching the file name",
         "Handshake rejection or connection failure dialogs of the VSCode extension connection could misbehave once the Activity was destroyed (language or dark mode change); they fall back to a toast",
         "Client mode server address history was only written on a failed handshake and never for a successful connection, so the \"History\" of the address dialog stayed empty",
-        "When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI"
+        "When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI",
+        "The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with \"Base APK has no verifiable signer\" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback"
       ],
       "improvement": [
         "Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record",

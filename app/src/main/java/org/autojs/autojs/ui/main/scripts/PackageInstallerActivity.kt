@@ -29,6 +29,7 @@ import java.io.IOException
 import java.security.MessageDigest
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PackageInstallerActivity : BaseActivity() {
@@ -499,6 +500,7 @@ class PackageInstallerActivity : BaseActivity() {
     private fun showErrorAndFinish(message: String) {
         if (isFinishing || isDestroyed) return
         dismissProgress()
+        ABORT_LISTENERS.forEach { listener -> runCatching { listener(message) } }
         MaterialDialog.Builder(this)
             .title(R.string.text_failed)
             .content(message)
@@ -524,6 +526,7 @@ class PackageInstallerActivity : BaseActivity() {
         private const val MAX_EXTERNAL_IMPORT_DURATION_MILLIS = 30L * 60L * 1000L
         private const val STALE_DIRECTORY_AGE_MILLIS = 24L * 60L * 60L * 1000L
         private val OPERATION_ACTIVE = AtomicBoolean(false)
+        private val ABORT_LISTENERS = CopyOnWriteArraySet<(String) -> Unit>()
         private val SUPPORTED_EXTENSIONS = setOf("apk", "apks", "xapk", "apkm", "apkz", "aab")
         private val SUPPORTED_URI_SCHEMES = setOf("content", "file")
         private val SUPPORTED_MIME_TYPES = mapOf(
@@ -535,6 +538,20 @@ class PackageInstallerActivity : BaseActivity() {
             "application/x-aab" to "aab",
             "application/vnd.android.aab" to "aab",
         )
+        /**
+         * Observes installations this page aborts with an error dialog. Only the message is
+         * reported because installations run one at a time.
+         *
+         * zh-CN: 监听本页面以错误对话框中止的安装. 安装串行进行, 因此只上报消息.
+         */
+        internal fun addAbortListener(listener: (String) -> Unit) {
+            ABORT_LISTENERS += listener
+        }
+
+        internal fun removeAbortListener(listener: (String) -> Unit) {
+            ABORT_LISTENERS -= listener
+        }
+
         internal fun supportedMimeType(mimeType: String?): String? = mimeType
             ?.substringBefore(';')
             ?.trim()
