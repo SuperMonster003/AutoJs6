@@ -12,6 +12,16 @@
     <string name="a11y_advanced_protection_on">Activée</string>
     <string name="a11y_advanced_protection_title">Protection avancée</string>
     <string name="a11y_advanced_protection_unknown">Indisponible</string>
+    <string name="ai_agent_state_activation">Activation requise</string>
+    <string name="ai_agent_state_attached">Connecté, en cours: %1$d, en attente: %2$d</string>
+    <string name="ai_agent_state_attaching">Connexion en cours</string>
+    <string name="ai_agent_state_authorization">Autorisation requise</string>
+    <string name="ai_agent_state_detached">Déconnecté</string>
+    <string name="ai_agent_state_disabled">Plugin désactivé</string>
+    <string name="ai_agent_state_failed">Échec de connexion</string>
+    <string name="ai_agent_state_host_unavailable">Hôte indisponible</string>
+    <string name="ai_agent_state_incompatible">Version incompatible</string>
+    <string name="ai_agent_state_not_installed">Plugin non installé</string>
     <string name="apk_builder_build">Construire</string>
     <string name="apk_builder_clean">Nettoyage</string>
     <string name="apk_builder_package">Emballage</string>
@@ -97,6 +107,7 @@
     <string name="description_ace_lsp_file_types_preference">LSP démarre uniquement pour les fichiers dont le nom se termine par un des suffixes sélectionnés. Utiliser les valeurs par défaut restaure les suffixes JavaScript, TypeScript, JSON, Auto.js et Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Affichez ou masquez le repère de marge d\'impression de l\'éditeur Ace. Cette ligne indique la limite de colonne à droite et modifie uniquement l\'affichage du code.</string>
     <string name="description_ace_word_wrap_enabled_preference">Activez le retour à la ligne de l\'éditeur pour les lignes longues. Le contenu du fichier n\'est pas modifié.</string>
+    <string name="description_ai_agent">Connectez le plugin AI Agent à AutoJs6. Ouvrez sa page de tâches avec Gérer. La connexion seule ne lance aucune tâche.</string>
     <string name="description_ai_settings_preference">Ouvrez 3-Stone AI pour gérer les modèles locaux, les services en ligne et la cible par défaut du module global ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">L\'autorisation \"gérer tous les fichiers\" (ou \"accès à tous les fichiers\") permet à AutoJs6 d\'[ créer / lire / modifier / supprimer ] des fichiers directement via des chemins de fichiers classiques dans l\'espace de stockage partagé, afin que les scripts puissent accéder à \"Internal Storage\" et que l\'explorateur de fichiers puisse afficher et gérer les fichiers correctement.\n\nSur les appareils Android 11+, c\'est le principal moyen d\'obtenir un accès lecture/écriture à l\'ensemble du stockage.</string>
     <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote : un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
@@ -666,6 +677,15 @@
     <string name="prompt_ace_editor_plugin_required">Installez ou activez le plugin de l\'éditeur Ace dans le Centre des plugins pour utiliser le moteur Ace.</string>
     <string name="prompt_add_ignored_app_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres de l\'application.</string>
     <string name="prompt_add_ignored_plugin_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres du plugin.</string>
+    <string name="prompt_ai_agent_activate">AI Agent est installé mais Android ne l\'a pas encore activé. Activez-le pour permettre la connexion à AutoJs6.</string>
+    <string name="prompt_ai_agent_application_disabled">Android a désactivé AI Agent. Activez l\'application dans les paramètres système, puis réessayez.</string>
+    <string name="prompt_ai_agent_authorize">Autorisez ce plugin dans le centre de plugins avant de connecter AI Agent.</string>
+    <string name="prompt_ai_agent_enable">Activer le plugin AI Agent et le connecter à AutoJs6?</string>
+    <string name="prompt_ai_agent_failed">Impossible de connecter AI Agent. Vérifiez son état et sa version dans le centre de plugins, puis réessayez.</string>
+    <string name="prompt_ai_agent_incompatible">Ce plugin nécessite AutoJs6 build %1$d ou ultérieur. Installez des versions compatibles d\'AutoJs6 et d\'AI Agent.</string>
+    <string name="prompt_ai_agent_install">Téléchargez AI Agent depuis sa page officielle des versions, puis installez-le et activez-le dans AutoJs6. Si aucune version n\'est disponible, revenez plus tard.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">La page des tâches AI Agent est indisponible. Vérifiez dans le centre de plugins que l\'application est activée et à jour.</string>
+    <string name="prompt_ai_agent_trust">Vous avez autorisé ce plugin manuellement, mais son signataire n\'est ni officiel ni approuvé. Autoriser ce signataire à utiliser les modèles et fonctions de l\'appareil via AutoJs6?</string>
     <string name="prompt_ai_plugin_application_enable_required">3-Stone AI est désactivé par Android. Activez-le dans les paramètres système de l\'application avant d\'ouvrir les paramètres du service IA.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI est désactivé dans le Centre de plugins. Activez-le avant d\'ouvrir les paramètres du service IA.</string>
     <string name="prompt_ai_plugin_install_required">Installez 3-Stone AI depuis le Centre de plugins avant d\'ouvrir les paramètres du service IA.</string>

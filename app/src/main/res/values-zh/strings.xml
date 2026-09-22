@@ -8,6 +8,16 @@
     <string name="a11y_advanced_protection_on">已开启</string>
     <string name="a11y_advanced_protection_title">高级保护</string>
     <string name="a11y_advanced_protection_unknown">无法读取</string>
+    <string name="ai_agent_state_activation">需要激活</string>
+    <string name="ai_agent_state_attached">已连接, 运行中: %1$d, 排队: %2$d</string>
+    <string name="ai_agent_state_attaching">正在连接</string>
+    <string name="ai_agent_state_authorization">需要授权</string>
+    <string name="ai_agent_state_detached">已断开</string>
+    <string name="ai_agent_state_disabled">插件已停用</string>
+    <string name="ai_agent_state_failed">连接失败</string>
+    <string name="ai_agent_state_host_unavailable">宿主不可用</string>
+    <string name="ai_agent_state_incompatible">版本不兼容</string>
+    <string name="ai_agent_state_not_installed">未安装插件</string>
     <string name="apk_builder_build">构建中</string>
     <string name="apk_builder_clean">清理临时文件</string>
     <string name="apk_builder_package">打包中</string>
@@ -93,6 +103,7 @@
     <string name="description_ace_lsp_file_types_preference">LSP 仅会针对文件名符合所选后缀的文件启动. 使用默认值会恢复 JavaScript, TypeScript, JSON, Auto.js 与 Node.js 相关后缀.</string>
     <string name="description_ace_print_margin_enabled_preference">显示或隐藏 Ace 编辑器右侧的打印参考线. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式. 此设置不会修改文件内容.</string>
+    <string name="description_ai_agent">连接 AI Agent 插件与 AutoJs6. 通过管理按钮打开插件任务页. 建立连接本身不会启动任务.</string>
     <string name="description_ai_settings_preference">打开 3-Stone AI, 管理全局 ai 模块使用的本地模型, 在线服务及默认目标.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件访问\") 权限允许 AutoJs6 在共享存储空间中通过常规文件路径直接 [ 创建 / 读取 / 修改 / 删除 ] 文件, 使脚本可以访问 \"内部存储 (Internal Storage)\", 使文件管理器可以正常显示及管理文件.\n\n在 Android 11+ 设备上, 这是实现全盘文件读写能力的主要方式.</string>
     <string name="description_app_language_preference">设置选项用于修改 AutoJs6 应用的文本内容显示语言, 同时包括脚本运行产生的错误消息等.\n\n注: 部分内容可能需要重启应用才能完成语言切换.</string>
@@ -662,6 +673,15 @@
     <string name="prompt_ace_editor_plugin_required">请在插件中心安装或启用 Ace 编辑器插件, 然后再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">确定忽略当前更新版本吗?\n在应用设置中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">确定忽略当前更新版本吗?\n在插件设置中可管理已忽略的所有版本.</string>
+    <string name="prompt_ai_agent_activate">已安装 AI Agent, 但 Android 尚未激活它. 请先激活, 以便 AutoJs6 建立连接.</string>
+    <string name="prompt_ai_agent_application_disabled">Android 已停用 AI Agent. 请在系统设置中启用应用后重试.</string>
+    <string name="prompt_ai_agent_authorize">请先在插件中心授权此插件, 再连接 AI Agent.</string>
+    <string name="prompt_ai_agent_enable">启用 AI Agent 插件并连接到 AutoJs6?</string>
+    <string name="prompt_ai_agent_failed">无法连接 AI Agent. 请在插件中心检查插件状态和版本后重试.</string>
+    <string name="prompt_ai_agent_incompatible">此插件需要 AutoJs6 构建 %1$d 或更高版本. 请安装相互兼容的 AutoJs6 与 AI Agent.</string>
+    <string name="prompt_ai_agent_install">请从 AI Agent 的官方发行页面下载安装包, 安装后在 AutoJs6 中启用. 如果尚无发行版本, 请稍后查看.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">无法打开 AI Agent 任务页. 请在插件中心检查应用是否启用及是否需要更新.</string>
+    <string name="prompt_ai_agent_trust">你已手动授权此插件, 但其签名不在官方或受信列表中. 是否允许此签名使用 AutoJs6 的模型与设备能力?</string>
     <string name="prompt_ai_plugin_application_enable_required">Android 已停用 3-Stone AI. 请先在系统应用设置中启用, 再打开 AI 服务设置.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI 已在插件中心停用. 请先启用, 再打开 AI 服务设置.</string>
     <string name="prompt_ai_plugin_install_required">请先从插件中心安装 3-Stone AI, 再打开 AI 服务设置.</string>

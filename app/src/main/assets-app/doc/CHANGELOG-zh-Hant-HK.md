@@ -246,6 +246,7 @@
 * `新增` EPUB 契約版本 2 (高亮與筆記, 插件路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的高亮與筆記; 宿主依據插件的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的插件不會收到新調用; 腳本 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
 * `新增` AI Agent 插件契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收
 * `新增` Agent 腳本登記與受限執行, 支援 project.json / @agent 頭註解, 參數驗證, 逾時停止及結構化結果回傳
+* `新增` AI Agent 側邊欄入口與插件中心管理, 支援連接狀態, 任務數量, 授權引導及主程式重新啟動後恢復連接
 * `修復` 插件中心啟用 YOLO 插件時探測握手要求插件已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確組件握手, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題

@@ -13,6 +13,16 @@
     <string name="a11y_advanced_protection_on">有効</string>
     <string name="a11y_advanced_protection_title">高度な保護</string>
     <string name="a11y_advanced_protection_unknown">取得不可</string>
+    <string name="ai_agent_state_activation">有効化が必要</string>
+    <string name="ai_agent_state_attached">接続済み, 実行中: %1$d, 待機中: %2$d</string>
+    <string name="ai_agent_state_attaching">接続中</string>
+    <string name="ai_agent_state_authorization">許可が必要</string>
+    <string name="ai_agent_state_detached">未接続</string>
+    <string name="ai_agent_state_disabled">プラグインは無効</string>
+    <string name="ai_agent_state_failed">接続に失敗</string>
+    <string name="ai_agent_state_host_unavailable">ホストを利用不可</string>
+    <string name="ai_agent_state_incompatible">互換性のないバージョン</string>
+    <string name="ai_agent_state_not_installed">プラグイン未インストール</string>
     <string name="apk_builder_build">建築</string>
     <string name="apk_builder_clean">洗浄</string>
     <string name="apk_builder_package">パッケージング</string>
@@ -98,6 +108,7 @@
     <string name="description_ace_lsp_file_types_preference">LSP は, ファイル名が選択した接尾辞のいずれかで終わる場合にのみ起動します. \"デフォルトを使用\" を選ぶと, JavaScript, TypeScript, JSON, Auto.js, Node.js の接尾辞セットに戻ります.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace エディターのプリントマージンガイドを表示または非表示にします. これは右側の列制限線であり, 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_word_wrap_enabled_preference">長い行に対するエディターの折り返しモードを有効にします. ファイルの内容は変更されません.</string>
+    <string name="description_ai_agent">AI Agent プラグインを AutoJs6 に接続します. 管理ボタンからタスク画面を開けます. 接続だけではタスクは開始されません.</string>
     <string name="description_ai_settings_preference">3-Stone AI を開き, グローバル ai モジュールで使用するローカルモデル, オンラインサービス, デフォルトターゲットを管理します.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"すべてのファイルを管理\" (または \"すべてのファイルへのアクセス\") 権限により, AutoJs6 は共有ストレージ上で通常のファイルパスを使って直接 [ 作成 / 読み取り / 変更 / 削除 ] を行えます. これによりスクリプトは \"Internal Storage\" にアクセスでき, ファイルマネージャーもファイルを正常に表示および管理できます.\n\nAndroid 11+ では, フルストレージの読み書きを実現する主要な方法です.</string>
     <string name="description_app_language_preference">この環境設定は, 実行中のスクリプトからの例外メッセージを含む, AutoJs6 の表示言語を変更するためのものです.\n\n注: 言語を期待通りに適用するには, アプリの再起動が必要な場合があります</string>
@@ -667,6 +678,15 @@
     <string name="prompt_ace_editor_plugin_required">Ace エディタープラグインをプラグインセンターでインストールまたは有効化してから, Ace エンジンを使用してください.</string>
     <string name="prompt_add_ignored_app_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, アプリの設定で管理することができます</string>
     <string name="prompt_add_ignored_plugin_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, プラグインの設定で管理することができます</string>
+    <string name="prompt_ai_agent_activate">AI Agent はインストール済みですが, Android でまだ有効化されていません. AutoJs6 に接続するには有効化してください.</string>
+    <string name="prompt_ai_agent_application_disabled">Android で AI Agent が無効になっています. システム設定でアプリを有効にして再試行してください.</string>
+    <string name="prompt_ai_agent_authorize">AI Agent に接続する前に, プラグインセンターでこのプラグインを許可してください.</string>
+    <string name="prompt_ai_agent_enable">AI Agent プラグインを有効にして AutoJs6 に接続しますか?</string>
+    <string name="prompt_ai_agent_failed">AI Agent に接続できません. プラグインセンターで状態とバージョンを確認して再試行してください.</string>
+    <string name="prompt_ai_agent_incompatible">このプラグインには AutoJs6 ビルド %1$d 以降が必要です. 互換性のある AutoJs6 と AI Agent をインストールしてください.</string>
+    <string name="prompt_ai_agent_install">AI Agent の公式リリースページからダウンロードし, インストール後に AutoJs6 で有効にしてください. 未公開の場合は後で確認してください.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">AI Agent のタスク画面を開けません. プラグインセンターでアプリが有効か, 更新が必要かを確認してください.</string>
+    <string name="prompt_ai_agent_trust">このプラグインは手動で許可されていますが, 署名者は公式または信頼済みではありません. この署名者に AutoJs6 のモデルと端末機能の使用を許可しますか?</string>
     <string name="prompt_ai_plugin_application_enable_required">3-Stone AI は Android によって無効化されています. AI サービス設定を開く前に, システムのアプリ設定で有効にしてください.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI はプラグインセンターで無効化されています. AI サービス設定を開く前に有効にしてください.</string>
     <string name="prompt_ai_plugin_install_required">AI サービス設定を開く前に, プラグインセンターから 3-Stone AI をインストールしてください.</string>

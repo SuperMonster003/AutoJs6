@@ -12,6 +12,16 @@
     <string name="a11y_advanced_protection_on">Включена</string>
     <string name="a11y_advanced_protection_title">Расширенная защита</string>
     <string name="a11y_advanced_protection_unknown">Недоступно</string>
+    <string name="ai_agent_state_activation">Требуется активация</string>
+    <string name="ai_agent_state_attached">Подключено, выполняется: %1$d, в очереди: %2$d</string>
+    <string name="ai_agent_state_attaching">Подключение</string>
+    <string name="ai_agent_state_authorization">Требуется разрешение</string>
+    <string name="ai_agent_state_detached">Отключено</string>
+    <string name="ai_agent_state_disabled">Плагин отключен</string>
+    <string name="ai_agent_state_failed">Ошибка подключения</string>
+    <string name="ai_agent_state_host_unavailable">Хост недоступен</string>
+    <string name="ai_agent_state_incompatible">Несовместимая версия</string>
+    <string name="ai_agent_state_not_installed">Плагин не установлен</string>
     <string name="apk_builder_build">Строительство</string>
     <string name="apk_builder_clean">Очистка</string>
     <string name="apk_builder_package">Упаковка</string>
@@ -97,6 +107,7 @@
     <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
     <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
+    <string name="description_ai_agent">Подключите плагин AI Agent к AutoJs6. Кнопка управления открывает страницу задач. Само подключение не запускает задачи.</string>
     <string name="description_ai_settings_preference">Откройте 3-Stone AI для управления локальными моделями, онлайн-сервисами и целью по умолчанию глобального модуля ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
@@ -666,6 +677,15 @@
     <string name="prompt_ace_editor_plugin_required">Установите или включите плагин редактора Ace в Центре плагинов, чтобы использовать движок Ace.</string>
     <string name="prompt_add_ignored_app_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
     <string name="prompt_add_ignored_plugin_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках плагина.</string>
+    <string name="prompt_ai_agent_activate">AI Agent установлен, но еще не активирован Android. Активируйте его для подключения к AutoJs6.</string>
+    <string name="prompt_ai_agent_application_disabled">Android отключил AI Agent. Включите приложение в системных настройках и повторите попытку.</string>
+    <string name="prompt_ai_agent_authorize">Разрешите этот плагин в центре плагинов перед подключением AI Agent.</string>
+    <string name="prompt_ai_agent_enable">Включить плагин AI Agent и подключить его к AutoJs6?</string>
+    <string name="prompt_ai_agent_failed">Не удалось подключить AI Agent. Проверьте его состояние и версию в центре плагинов и повторите попытку.</string>
+    <string name="prompt_ai_agent_incompatible">Плагину требуется AutoJs6 сборки %1$d или новее. Установите совместимые версии AutoJs6 и AI Agent.</string>
+    <string name="prompt_ai_agent_install">Скачайте AI Agent с официальной страницы выпусков, установите и включите его в AutoJs6. Если выпусков пока нет, проверьте позже.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">Страница задач AI Agent недоступна. Проверьте в центре плагинов, включено ли приложение и обновлено ли оно.</string>
+    <string name="prompt_ai_agent_trust">Вы разрешили этот плагин вручную, но его подпись не является официальной или доверенной. Разрешить этой подписи доступ к моделям и функциям устройства AutoJs6?</string>
     <string name="prompt_ai_plugin_application_enable_required">Приложение 3-Stone AI отключено в Android. Включите его в системных настройках приложения, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_enable_required">Плагин 3-Stone AI отключен в Центре плагинов. Включите его, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_install_required">Установите 3-Stone AI из Центра плагинов, прежде чем открывать настройки службы ИИ.</string>

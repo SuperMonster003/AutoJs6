@@ -10,7 +10,7 @@ import org.autojs.plugin.ai.agent.api.AiAgentActions
 import org.autojs.plugin.ai.agent.api.AiAgentIds
 
 /**
- * Registered under the PLUGIN signature permission in P1.5. Intent package extras are not proof
+ * Protected by the PLUGIN permission. Intent package extras are not proof
  * of caller identity, and Binder.getCallingUid() in onReceive identifies the delivery process.
  * The plugin supplies an immutable PendingIntent created in its own UID as an identity token.
  * It is never sent or retained. This also works on Android versions without sentFromUid.
@@ -18,10 +18,19 @@ import org.autojs.plugin.ai.agent.api.AiAgentIds
 class AiAgentAttachRequestReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (!isAuthorizedRequest(context, intent)) return
-        AiAgentLinkController.get(context).requestAttach()
+        AiAgentConnectionOwner.get(context).requestFromPlugin()
     }
 
     companion object {
+        /** The existing main activity is the foreground fallback; it requires the same proof. */
+        fun handleForegroundRequest(context: Context, intent: Intent?) {
+            if (intent?.getBooleanExtra(AiAgentActions.EXTRA_AI_AGENT_ATTACH, false) != true) return
+            val request = Intent(intent).setAction(AiAgentActions.ACTION_ATTACH_REQUEST).setPackage(context.packageName)
+            intent.removeExtra(AiAgentActions.EXTRA_AI_AGENT_ATTACH)
+            intent.removeExtra(AiAgentActions.EXTRA_ATTACH_IDENTITY)
+            if (isAuthorizedRequest(context, request)) AiAgentConnectionOwner.get(context).requestFromPlugin()
+        }
+
         @Suppress("DEPRECATION")
         internal fun isAuthorizedRequest(context: Context, intent: Intent): Boolean = runCatching {
             if (intent.action != AiAgentActions.ACTION_ATTACH_REQUEST || intent.`package` != context.packageName) return false

@@ -19,6 +19,24 @@ data class AiAgentPluginFacts(
 )
 
 object AiAgentUiPolicy {
+    fun checked(state: AiAgentUiState) = state == AiAgentUiState.ATTACHED
+    fun progress(state: AiAgentUiState) = state == AiAgentUiState.ATTACHING
+
+    fun linkState(state: String): AiAgentUiState = when (state) {
+        "attaching" -> AiAgentUiState.ATTACHING
+        "attached" -> AiAgentUiState.ATTACHED
+        "host_unavailable" -> AiAgentUiState.HOST_UNAVAILABLE
+        "failed" -> AiAgentUiState.FAILED
+        else -> AiAgentUiState.DETACHED
+    }
+
+    fun needsGuide(state: AiAgentUiState) = state in setOf(
+        AiAgentUiState.NOT_INSTALLED, AiAgentUiState.APPLICATION_DISABLED,
+        AiAgentUiState.ACTIVATION_REQUIRED, AiAgentUiState.PLUGIN_DISABLED,
+        AiAgentUiState.AUTHORIZATION_REQUIRED, AiAgentUiState.TRUST_CONFIRMATION_REQUIRED,
+        AiAgentUiState.INCOMPATIBLE, AiAgentUiState.FAILED, AiAgentUiState.HOST_UNAVAILABLE,
+    )
+
     fun availability(facts: AiAgentPluginFacts): AiAgentUiState = when {
         !facts.installed -> AiAgentUiState.NOT_INSTALLED
         !facts.applicationEnabled -> AiAgentUiState.APPLICATION_DISABLED

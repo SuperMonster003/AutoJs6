@@ -9,6 +9,16 @@
     <string name="a11y_advanced_protection_on">已開啟</string>
     <string name="a11y_advanced_protection_title">進階保護</string>
     <string name="a11y_advanced_protection_unknown">無法讀取</string>
+    <string name="ai_agent_state_activation">需要啟用</string>
+    <string name="ai_agent_state_attached">已連線, 執行中: %1$d, 排隊: %2$d</string>
+    <string name="ai_agent_state_attaching">正在連線</string>
+    <string name="ai_agent_state_authorization">需要授權</string>
+    <string name="ai_agent_state_detached">已中斷連線</string>
+    <string name="ai_agent_state_disabled">外掛已停用</string>
+    <string name="ai_agent_state_failed">連線失敗</string>
+    <string name="ai_agent_state_host_unavailable">主程式無法使用</string>
+    <string name="ai_agent_state_incompatible">版本不相容</string>
+    <string name="ai_agent_state_not_installed">尚未安裝外掛</string>
     <string name="apk_builder_build">構建中</string>
     <string name="apk_builder_clean">清理臨時檔案</string>
     <string name="apk_builder_package">打包中</string>
@@ -94,6 +104,7 @@
     <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選副檔名的檔案啟動. 使用預設值會還原 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關副檔名.</string>
     <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的列印邊界參考線. 此設定只會改變程式碼的顯示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">為長行啟用編輯器自動換行模式. 此設定不會修改檔案內容.</string>
+    <string name="description_ai_agent">連線 AI Agent 外掛與 AutoJs6. 透過管理按鈕開啟外掛任務頁. 建立連線本身不會啟動任務.</string>
     <string name="description_ai_settings_preference">開啟 3-Stone AI, 管理全域 ai 模組使用的本機模型, 線上服務及預設目標.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有檔案\" (或 \"所有檔案訪問\") 許可權允許 AutoJs6 在共享儲存空間中透過常規檔案路徑直接 [ 建立 / 讀取 / 修改 / 刪除 ] 檔案, 使指令碼可以訪問 \"內部儲存 (Internal Storage)\", 使檔案管理器可以正常顯示及管理檔案.\n\n在 Android 11+ 裝置上, 這是實現全盤檔案讀寫能力的主要方式.</string>
     <string name="description_app_language_preference">設定選項用於修改 AutoJs6 應用的文字內容顯示語言, 同時包括指令碼執行產生的錯誤訊息等.\n\n注: 部分內容可能需要重啟應用才能完成語言切換.</string>
@@ -663,6 +674,15 @@
     <string name="prompt_ace_editor_plugin_required">請在外掛中心安裝或啟用 Ace 編輯器外掛, 然後再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">確定忽略當前更新版本嗎?\n在應用設定中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">確定忽略當前更新版本嗎?\n在外掛設定中可管理已忽略的所有版本.</string>
+    <string name="prompt_ai_agent_activate">已安裝 AI Agent, 但 Android 尚未啟用它. 請先啟用, 以便 AutoJs6 建立連線.</string>
+    <string name="prompt_ai_agent_application_disabled">Android 已停用 AI Agent. 請在系統設定中啟用應用程式後重試.</string>
+    <string name="prompt_ai_agent_authorize">請先在外掛中心授權此外掛, 再連線 AI Agent.</string>
+    <string name="prompt_ai_agent_enable">啟用 AI Agent 外掛並連線至 AutoJs6?</string>
+    <string name="prompt_ai_agent_failed">無法連線 AI Agent. 請在外掛中心檢查外掛狀態和版本後重試.</string>
+    <string name="prompt_ai_agent_incompatible">此外掛需要 AutoJs6 組建 %1$d 或更新版本. 請安裝相容的 AutoJs6 與 AI Agent.</string>
+    <string name="prompt_ai_agent_install">請從 AI Agent 的官方發行頁面下載安裝檔, 安裝後在 AutoJs6 中啟用. 如果尚無發行版本, 請稍後查看.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">無法開啟 AI Agent 任務頁. 請在外掛中心檢查應用程式是否啟用及是否需要更新.</string>
+    <string name="prompt_ai_agent_trust">你已手動授權此外掛, 但其簽署者不在官方或受信任清單中. 是否允許此簽署者使用 AutoJs6 的模型與裝置功能?</string>
     <string name="prompt_ai_plugin_application_enable_required">Android 已停用 3-Stone AI. 請先在系統應用程式設定中啟用, 再開啟 AI 服務設定.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI 已在外掛中心停用. 請先啟用, 再開啟 AI 服務設定.</string>
     <string name="prompt_ai_plugin_install_required">請先從外掛中心安裝 3-Stone AI, 再開啟 AI 服務設定.</string>

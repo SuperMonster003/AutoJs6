@@ -22,6 +22,9 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
+import org.autojs.autojs.core.plugin.agent.AiAgentPluginHost
+import org.autojs.plugin.ai.agent.api.AiAgentActions
+import org.autojs.plugin.ai.agent.api.AiAgentIds
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -201,6 +204,15 @@ class InstalledPluginRepository {
                 }
             }
         }
+        AiAgentActions.SERVICE_ACTION -> {
+            if (packageName != AiAgentIds.DEFAULT_PACKAGE_NAME) {
+                listOf(preferred.copy(error = IllegalArgumentException("Unsupported AI Agent package")))
+            } else {
+                AiAgentPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = AiAgentActions.SERVICE_ACTION)
+                }
+            }
+        }
         MailPluginHost.ACTION_MAIL -> MailPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = MailPluginHost.ACTION_MAIL)
         }
@@ -229,6 +241,11 @@ class InstalledPluginRepository {
                 action = McpServerPluginHost.ACTION_MCP_SERVER,
                 category = McpServerActions.SERVICE_CATEGORY,
                 packageName = McpServerIds.DEFAULT_PACKAGE_NAME,
+            ),
+            ServiceQuery(
+                action = AiAgentActions.SERVICE_ACTION,
+                category = AiAgentActions.SERVICE_CATEGORY,
+                packageName = AiAgentIds.DEFAULT_PACKAGE_NAME,
             ),
             ServiceQuery(
                 action = MailPluginHost.ACTION_MAIL,
@@ -312,7 +329,7 @@ class InstalledPluginRepository {
             icon = null,
             iconSignature = null,
             pluginInfo = null,
-            engine = cachedEntry?.engine,
+            engine = discovery.declaredAgentEngine() ?: cachedEntry?.engine,
             variant = cachedEntry?.variant,
             engineId = cachedEntry?.engineId,
             bindError = discovery.error ?: metadataError,
@@ -425,7 +442,7 @@ class InstalledPluginRepository {
             icon = icon,
             iconSignature = icon?.let { PluginInstalledIconResolver.signatureOf(packageName, versionCode, lastUpdateTime) },
             pluginInfo = pluginInfo,
-            engine = if (hasLiveInfo) pluginInfo.engine else cachedEntry?.engine,
+            engine = if (hasLiveInfo) pluginInfo.engine else discovery.declaredAgentEngine() ?: cachedEntry?.engine,
             variant = if (hasLiveInfo) pluginInfo.variant else cachedEntry?.variant,
             engineId = if (hasLiveInfo) pluginInfo.id else cachedEntry?.engineId,
             bindError = discovery.error,
@@ -435,6 +452,11 @@ class InstalledPluginRepository {
             isStopped = isStopped,
             resolvedMetadata = resolvedMetadata,
         )
+    }
+
+    // The first package-manager-only frame must honor Agent's default-off policy before INFO binds.
+    private fun Discovery.declaredAgentEngine(): String? = AiAgentIds.ENGINE.takeIf {
+        serviceAction == AiAgentActions.SERVICE_ACTION && serviceInfo.packageName == AiAgentIds.DEFAULT_PACKAGE_NAME
     }
 
     private fun persistResolvedMetadata(context: Context, plugins: List<InstalledPlugin>) {

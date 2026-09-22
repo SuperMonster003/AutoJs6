@@ -23,6 +23,9 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
+import org.autojs.autojs.core.plugin.agent.AiAgentPluginHost
+import org.autojs.plugin.ai.agent.api.AiAgentActions
+import org.autojs.plugin.ai.agent.api.AiAgentIds
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -1050,6 +1053,7 @@ class PluginCenterViewModel : ViewModel() {
             OpenCvPluginContract.ENGINE to OpenCvPluginContract.ACTION_RUNTIME,
             ScreenColorPickerContract.ENGINE to ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER,
             McpServerIds.ENGINE to McpServerPluginHost.ACTION_MCP_SERVER,
+            AiAgentIds.ENGINE to AiAgentActions.SERVICE_ACTION,
             MailIds.ENGINE to MailPluginHost.ACTION_MAIL,
             EpubIds.ENGINE to EpubPluginHost.ACTION_EPUB,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,

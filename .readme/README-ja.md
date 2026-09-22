@@ -408,6 +408,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` EPUB コントラクトバージョン 2 (ハイライトとノート, プラグインロードマップ P9.4): 追加された `IEpubBook.getAnnotations` (ページ単位, 読書順) とリーダーセッションの `highlight` イベントが, リーダーのハイライトとノートを `annotations` ドキュメント (id, style, color, note, quote, 章タイトル, locator, createdAt, updatedAt) として運びます. ホストはプラグインの `epubMaxContractVersion` からバージョンを交渉して各リクエストに記し, バージョン 1 のプラグインは新しい呼び出しを受けません. スクリプト API `epub` に `book.annotations()` と `epub.annotations(path)` (`Async` 形式あり) が加わり, `EpubReaderSession` は `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` を発行します (`action` は added, updated, removed)
 * `新機能` AI Agent プラグイン契約とホストプロキシ. デバイス機能へのアクセス制限, モデル呼び出しの割り当て制限, 接続喪失時のリソース解放に対応
 * `新機能` project.json / @agent ヘッダーによる Agent スクリプト登録と範囲を制限した実行. 引数検証, タイムアウト時の停止, 構造化結果の返却に対応
+* `新機能` AI Agent のドロワー入口とプラグインセンター管理. 接続状態, タスク数, 許可の案内, ホスト再起動後の再接続に対応
 * `修正` プラグインセンターから YOLO プラグインを有効化する際, 探査のハンドシェイクが有効化済みの状態を要求していたためスイッチで有効化できなかった問題. 探査は認可と厳密なコンポーネントのハンドシェイクのみを要求し, 実行時の入口は引き続き保存済みの有効化記録を要求
 * `修正` adb でインストールした MCP Server が有効状態の保存設定がない場合にプラグインセンターでは有効, 実行時には無効と判定される問題. 両方の既定値を無効に統一し, ユーザーが明示的に選択した状態を保持
 * `修正` ユーザー補助サービス管理画面で未バインドやなしなどの短い状態値の下に不要な空行が表示される問題

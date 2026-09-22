@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
+import org.autojs.autojs.core.plugin.center.PluginInfoServiceHost
 import org.autojs.plugin.ai.agent.api.AiAgentActions
 import org.autojs.plugin.ai.agent.api.AiAgentCapabilityKeys
 import org.autojs.plugin.ai.agent.api.AiAgentContract
@@ -39,6 +40,20 @@ object AiAgentPluginHost {
     suspend fun probe(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
         require(packageName == AiAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported AI Agent package" }
         host.probe(context, packageName)
+    }
+
+    /** Plugin Center enables the installed package via INFO; attach still validates the runtime. */
+    suspend fun probeMetadata(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
+        require(packageName == AiAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported AI Agent package" }
+        PluginInfoServiceHost.probe(context, packageName).also { info ->
+            require(info.id == AiAgentIds.PLUGIN_ID && info.engine == AiAgentIds.ENGINE && info.variant == AiAgentIds.VARIANT_DEFAULT) {
+                "Unexpected AI Agent identity"
+            }
+            val required = PluginCapabilityResolver.resolveRequiresHostVersion(info.capabilities)
+            require(required != null && required >= AiAgentIds.REQUIRED_HOST_VERSION_CODE && required <= org.autojs.autojs6.BuildConfig.VERSION_CODE) {
+                "Incompatible AI Agent metadata"
+            }
+        }
     }
 
     fun queryServiceCount(context: Context) = queryContractServices(context).size

@@ -246,6 +246,7 @@
 * `新增` EPUB 契約版本 2 (螢光標示與筆記, 外掛路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的螢光標示與筆記; 宿主依據外掛的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的外掛不會收到新呼叫; 指令碼 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
 * `新增` AI Agent 外掛契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收
 * `新增` Agent 指令碼登記與受限執行, 支援 project.json / @agent 標頭註解, 參數驗證, 逾時停止及結構化結果回傳
+* `新增` AI Agent 側邊欄入口與外掛中心管理, 支援連線狀態, 任務數量, 授權引導及主程式重新啟動後恢復連線
 * `修復` 外掛中心啟用 YOLO 外掛時探測交握要求外掛已處於啟用狀態, 導致開關無法啟用的問題; 探測現僅要求授權與精確元件交握, 執行時入口仍要求已儲存的啟用記錄
 * `修復` 透過 adb 安裝 MCP Server 且沒有儲存啟用記錄時, 外掛程式中心顯示已啟用而執行時視為未啟用的問題; 兩者統一為預設關閉並保留使用者明確儲存的開關狀態
 * `修復` 無障礙服務管理員中未綁定, 無等簡短狀態值下方存在多餘空行的問題

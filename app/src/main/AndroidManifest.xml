@@ -58,6 +58,10 @@
             <category android:name="screen-color-picker" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.AI_AGENT" />
+            <category android:name="ai-agent" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.MCP_SERVER" />
             <category android:name="mcp-server" />
         </intent>
@@ -933,6 +937,15 @@
         <receiver
             android:name="org.autojs.autojs.timing.TimedTaskAlarmReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name="org.autojs.autojs.core.plugin.agent.AiAgentAttachRequestReceiver"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+            <intent-filter>
+                <action android:name="org.autojs.autojs6.action.AI_AGENT_ATTACH" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name="org.autojs.autojs.timing.BootCompletedReceiver"

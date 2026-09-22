@@ -28,6 +28,9 @@ import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
+import org.autojs.autojs.core.plugin.agent.AiAgentPluginHost
+import org.autojs.plugin.ai.agent.api.AiAgentActions
+import org.autojs.plugin.ai.agent.api.AiAgentIds
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -234,6 +237,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onSettings(item: PluginCenterItem) {
+                if (item.packageName == AiAgentIds.DEFAULT_PACKAGE_NAME) {
+                    org.autojs.autojs.ui.settings.AiAgentLauncher.launch(contextRef)
+                    return
+                }
                 if (item.packageName == org.autojs.plugin.mcp.server.api.McpServerIds.DEFAULT_PACKAGE_NAME) {
                     org.autojs.autojs.ui.settings.McpServerSettingsLauncher.launch(contextRef)
                     return
@@ -999,6 +1006,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             ExplorerActionPluginHost.ACTION_EXPLORER_ACTION -> ExplorerActionPluginHost.probe(contextRef, item.packageName)
             ScreenColorPickerPluginHost.ACTION_SCREEN_COLOR_PICKER -> ScreenColorPickerPluginHost.probe(contextRef, item.packageName)
             McpServerPluginHost.ACTION_MCP_SERVER -> McpServerPluginHost.probe(contextRef, item.packageName)
+            AiAgentActions.SERVICE_ACTION -> AiAgentPluginHost.probeMetadata(contextRef, item.packageName)
             MailPluginHost.ACTION_MAIL -> MailPluginHost.probe(contextRef, item.packageName)
             EpubPluginHost.ACTION_EPUB -> EpubPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)

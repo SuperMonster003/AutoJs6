@@ -14,6 +14,16 @@
     <string name="a11y_advanced_protection_on">مفعلة</string>
     <string name="a11y_advanced_protection_title">الحماية المتقدمة</string>
     <string name="a11y_advanced_protection_unknown">غير متاح</string>
+    <string name="ai_agent_state_activation">يلزم التفعيل</string>
+    <string name="ai_agent_state_attached">متصل, قيد التشغيل: %1$d, في الانتظار: %2$d</string>
+    <string name="ai_agent_state_attaching">جار الاتصال</string>
+    <string name="ai_agent_state_authorization">يلزم الإذن</string>
+    <string name="ai_agent_state_detached">غير متصل</string>
+    <string name="ai_agent_state_disabled">الإضافة معطلة</string>
+    <string name="ai_agent_state_failed">فشل الاتصال</string>
+    <string name="ai_agent_state_host_unavailable">التطبيق المضيف غير متاح</string>
+    <string name="ai_agent_state_incompatible">إصدار غير متوافق</string>
+    <string name="ai_agent_state_not_installed">الإضافة غير مثبتة</string>
     <string name="apk_builder_build">مبنى</string>
     <string name="apk_builder_clean">تنظيف</string>
     <string name="apk_builder_package">التغليف </string>
@@ -99,6 +109,7 @@
     <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
+    <string name="description_ai_agent">اربط إضافة AI Agent مع AutoJs6. استخدم زر الإدارة لفتح صفحة المهام. الاتصال وحده لا يبدأ أي مهمة.</string>
     <string name="description_ai_settings_preference">افتح 3-Stone AI لإدارة النماذج المحلية والخدمات عبر الإنترنت والهدف الافتراضي الذي تستخدمه وحدة ai العامة.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
@@ -668,6 +679,15 @@
     <string name="prompt_ace_editor_plugin_required">ثبّت اضافة محرر Ace أو فعّلها في مركز الاضافات لاستخدام محرك Ace.</string>
     <string name="prompt_add_ignored_app_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
     <string name="prompt_add_ignored_plugin_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات الإضافة.</string>
+    <string name="prompt_ai_agent_activate">تم تثبيت AI Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
+    <string name="prompt_ai_agent_application_disabled">عطل Android تطبيق AI Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
+    <string name="prompt_ai_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط AI Agent.</string>
+    <string name="prompt_ai_agent_enable">هل تريد تفعيل إضافة AI Agent وربطها مع AutoJs6?</string>
+    <string name="prompt_ai_agent_failed">تعذر الاتصال مع AI Agent. تحقق من حالته وإصداره في مركز الإضافات ثم حاول مجددا.</string>
+    <string name="prompt_ai_agent_incompatible">تتطلب هذه الإضافة AutoJs6 بالبناء %1$d أو أحدث. ثبت إصدارين متوافقين من AutoJs6 و AI Agent.</string>
+    <string name="prompt_ai_agent_install">نزل AI Agent من صفحة إصداراته الرسمية ثم ثبته وفعله في AutoJs6. إذا لم يتوفر إصدار فتحقق لاحقا.</string>
+    <string name="prompt_ai_agent_launcher_unavailable">صفحة مهام AI Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
+    <string name="prompt_ai_agent_trust">منحت هذه الإضافة إذنا يدويا لكن جهة توقيعها ليست رسمية أو موثوقة. هل تسمح لهذه الجهة باستخدام نماذج AutoJs6 وقدرات الجهاز?</string>
     <string name="prompt_ai_plugin_application_enable_required">تم تعطيل 3-Stone AI بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_enable_required">تم تعطيل 3-Stone AI في مركز الإضافات. فعّله قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_install_required">ثبّت 3-Stone AI من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>

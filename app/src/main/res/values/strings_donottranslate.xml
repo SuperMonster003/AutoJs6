@@ -338,6 +338,7 @@
     <string name="symbol_question_mark" translatable="false">\?</string>
     <string name="text_abis" translatable="false">ABIs</string>
     <string name="text_ace_editor_font_unknown_size" translatable="false">-- KiB</string>
+    <string name="text_ai_agent" translatable="false">AI Agent</string>
     <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
     <string name="text_app_name_adm" translatable="false">ADM</string>
     <string name="text_app_name_appops" translatable="false">App Ops</string>
@@ -400,6 +401,7 @@
     <string name="text_should_never_happen" translatable="false">Should never happen</string>
     <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
     <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
+    <string name="url_ai_agent_releases" translatable="false">https://github.com/SuperMonster003/AutoJs6-Plugin-AI-Agent/releases</string>
     <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
     <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
     <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>

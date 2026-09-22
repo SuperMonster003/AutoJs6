@@ -38,7 +38,8 @@ object AiAgentPluginInspector {
             else -> app.enabled
         }
         val serviceNames = pm.queryIntentServices(
-            Intent(AiAgentActions.SERVICE_ACTION).addCategory(AiAgentActions.SERVICE_CATEGORY).setPackage(AiAgentIds.DEFAULT_PACKAGE_NAME),
+            Intent(AiAgentActions.SERVICE_ACTION).addCategory(AiAgentActions.SERVICE_CATEGORY).setPackage(AiAgentIds.DEFAULT_PACKAGE_NAME)
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES),
             PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS,
         ).mapNotNull { it.serviceInfo?.name }.toSet()
         val services = pkg.services.orEmpty().filter { it.name in serviceNames && it.permission == AiAgentActions.PLUGIN_PERMISSION && it.exported }
@@ -60,7 +61,7 @@ object AiAgentPluginInspector {
             authorized = PluginTrustManager.isAuthorized(context, AiAgentIds.DEFAULT_PACKAGE_NAME),
             trustedSigner = trust.isOfficial || trust.isTrusted,
             signerConfirmed = confirmed,
-            compatible = required <= BuildConfig.VERSION_CODE && services.isNotEmpty(),
+            compatible = required <= BuildConfig.VERSION_CODE && services.size == 1 && services.single().enabled,
         )
         return AiAgentInspection(AiAgentUiPolicy.availability(facts), required, signer)
     }

@@ -8,6 +8,16 @@ import org.junit.Test
 class PluginDefaultEnabledPolicyTest {
 
     @Test
+    fun aiAgentUsesTheSameExplicitEnablePolicyAsMcp() {
+        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("ai-agent"))
+        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" AI-AGENT "))
+        for (state in PluginAuthorizedState.entries) {
+            assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("ai-agent", state) ==
+                PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("mcp-server", state))
+        }
+    }
+
+    @Test
     fun mcpServerRequiresExplicitEnablement() {
         assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE))
         assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" MCP-SERVER "))
