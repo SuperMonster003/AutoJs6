@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.core.plugin.center.PluginIconUrlResolver
+import org.autojs.autojs.core.plugin.center.PluginInstalledIconResolver
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
@@ -212,6 +213,11 @@ class PluginInstallWizardAdapter(
         }
 
         private fun loadIcon(iconView: CircleImageView, item: PluginInstallWizardItem) {
+            item.installedIcon?.let { installedIcon ->
+                clearIcon()
+                iconView.setImageDrawable(PluginInstalledIconResolver.forCurrentMode(installedIcon))
+                return
+            }
             val url = item.iconUrl?.takeIf { it.isNotBlank() }
             if (url == null) {
                 clearIcon()

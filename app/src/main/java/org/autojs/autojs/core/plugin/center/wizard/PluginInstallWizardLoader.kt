@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.center.wizard
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +12,7 @@ import org.autojs.autojs.core.plugin.center.PluginCenterProcessLogger
 import org.autojs.autojs.core.plugin.center.PluginIndexEntry
 import org.autojs.autojs.core.plugin.center.PluginIndexRepository
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
+import org.autojs.autojs.core.plugin.center.PluginInstalledIconResolver
 import org.autojs.autojs.core.plugin.center.PluginNativeAlignmentPolicy
 import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.util.AndroidUtils
@@ -31,7 +33,8 @@ object PluginInstallWizardLoader {
     private val indexRepo = PluginIndexRepository()
 
     sealed interface Result {
-        data class Success(val items: List<PluginInstallWizardItem>) : Result
+        /** [warning] carries the online fetch failure when cached entries had to be used instead. */
+        data class Success(val items: List<PluginInstallWizardItem>, val warning: String? = null) : Result
         data class Failure(val message: String) : Result
     }
 
@@ -65,9 +68,10 @@ object PluginInstallWizardLoader {
             isInstalled = { packageName -> packageManager.isPackageInstalled(packageName) },
             deviceAbis = AndroidUtils.deviceFilteredAbiList,
             pageSize = NativePageSize.current(),
+            loadInstalledIcon = { packageName -> packageManager.loadInstalledIcon(appContext, packageName) },
         )
         PluginCenterProcessLogger.i("Plugin install wizard rows built: count=${items.size}.")
-        Result.Success(items)
+        Result.Success(items, warning = failureMessage)
     }
 
     /** True when the cache is empty or misses at least one catalog package. */
@@ -86,6 +90,7 @@ object PluginInstallWizardLoader {
         isInstalled: (String) -> Boolean,
         deviceAbis: Collection<String>,
         pageSize: Long,
+        loadInstalledIcon: (String) -> Drawable? = { null },
     ): List<PluginInstallWizardItem> {
         val entriesByPackage = entries
             .filter { it.source == PluginIndexSource.OFFICIAL }
@@ -102,6 +107,7 @@ object PluginInstallWizardLoader {
                 isInstalled = isInstalled,
                 deviceAbis = deviceAbis,
                 pageSize = pageSize,
+                loadInstalledIcon = loadInstalledIcon,
             )
         }
 
@@ -117,6 +123,7 @@ object PluginInstallWizardLoader {
                     isInstalled = isInstalled,
                     deviceAbis = deviceAbis,
                     pageSize = pageSize,
+                    loadInstalledIcon = loadInstalledIcon,
                 )
             }
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
@@ -133,16 +140,19 @@ object PluginInstallWizardLoader {
         isInstalled: (String) -> Boolean,
         deviceAbis: Collection<String>,
         pageSize: Long,
+        loadInstalledIcon: (String) -> Drawable?,
     ): PluginInstallWizardItem {
         val latestRelease = indexEntry.releases.maxByOrNull { it.versionCode }
         val alignment = latestRelease?.nativePageAlignment ?: indexEntry.nativePageAlignment
+        val installed = isInstalled(indexEntry.packageName)
         return PluginInstallWizardItem(
             packageName = indexEntry.packageName,
             title = indexEntry.title.takeIf { it.isNotBlank() } ?: fallbackTitle,
             category = category,
             inStandard = inStandard,
             inMinimal = inMinimal,
-            isInstalled = isInstalled(indexEntry.packageName),
+            isInstalled = installed,
+            installedIcon = if (installed) loadInstalledIcon(indexEntry.packageName) else null,
             apkUrl = latestRelease?.apkUrl?.takeIf { it.isNotBlank() },
             apkSha256 = latestRelease?.apkSha256,
             apkSizeBytes = latestRelease?.apkSizeBytes,
@@ -158,5 +168,11 @@ object PluginInstallWizardLoader {
         getPackageInfo(packageName, 0)
         true
     }.getOrDefault(false)
+
+    private fun PackageManager.loadInstalledIcon(context: Context, packageName: String): Drawable? = runCatching {
+        @Suppress("DEPRECATION")
+        val appInfo = getApplicationInfo(packageName, 0)
+        PluginInstalledIconResolver.load(context, appInfo)
+    }.getOrNull()
 
 }

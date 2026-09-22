@@ -112,6 +112,11 @@ object PluginInstallWizardDialog {
                             adapter.submit(result.items)
                             applyProfile(currentProfile, persist = false)
                             showList()
+                            result.warning?.let { reason ->
+                                // Cached entries are shown; tell the user the index may be outdated.
+                                // zh-CN: 展示的是缓存条目, 提示用户索引可能已过时.
+                                ViewUtils.showToast(context, context.getString(R.string.error_plugin_index_fetch_failed_with_reason, reason), true)
+                            }
                         }
                     }
                     is PluginInstallWizardLoader.Result.Failure -> {

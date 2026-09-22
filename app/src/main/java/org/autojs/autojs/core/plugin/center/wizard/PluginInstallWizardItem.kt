@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.plugin.center.wizard
 
+import android.graphics.drawable.Drawable
+
 /**
  * One plugin row of the wizard, merged from the built-in catalog, the official
  * plugin index and the installed package state.
@@ -22,6 +24,8 @@ data class PluginInstallWizardItem(
     val isAbiMismatch: Boolean = false,
     /** Native libraries are aligned below the page size of a 16 KB device. */
     val isNativeAlignmentMismatch: Boolean = false,
+    /** Icon of the installed package, prepared off the UI thread; null when not installed. */
+    val installedIcon: Drawable? = null,
 ) {
 
     val hasInstallableApk: Boolean
