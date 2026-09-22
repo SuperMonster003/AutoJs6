@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/22",
+      "released_date": "2026/09/23",
       "feature": [
         "Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk",
         "Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports",
@@ -239,7 +239,8 @@
         "Reader control of the `epub` script API (plugin roadmap P6.2): `epub.read(path, options?)` opens the reader of the Readium EPUB Reader plugin and returns an `EpubReaderSession` event emitter whose `open`, `progress`, `bookmark`, `error` and `close` events arrive on the script thread, with `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` and the properties `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; the start position comes from `href`, `progression` or `locator` with optional `preferences`, a script that stops draining its events gets `error(LIMIT_EXCEEDED)` and `close(overflow)`, and the script's exit ends the session while the reader stays open for the user",
         "EPUB samples (plugin roadmap P6.3): three scripts added to the new in-app sample directory \"电子书\" (EPUB 元数据与目录: metadata, table of contents, reading order and positions of a book found under Download or Books; 导出章节文本: chapter and whole-book text export as plain text or Markdown, cover export and full-text search; 打开阅读器并监听进度: a reader session with `open` / `progress` / `bookmark` / `error` / `close` listeners, start preferences, a chapter turn and `close()` that leaves the reader to the user); every script checks `epub.isAvailable()` first and explains how to install the Readium EPUB Reader plugin",
         "EPUB contract version 2 with highlights and notes (plugin roadmap P9.4): the appended `IEpubBook.getAnnotations` (paged, in reading order) and the `highlight` reader-session event carry the reader's highlights and notes as an `annotations` document (id, style, color, note, quote, chapter title, locator, createdAt, updatedAt); the host negotiates the version from the plugin's `epubMaxContractVersion` and stamps it on every request, so version-1 plugins never see the new call; the `epub` script API gains `book.annotations()` and `epub.annotations(path)` with their `Async` forms, and `EpubReaderSession` emits `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` with `action` added, updated or removed",
-        "AI Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost"
+        "AI Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost",
+        "Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results"
       ],
       "fix": [
         "Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record",

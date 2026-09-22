@@ -4,9 +4,11 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.Parcel
 import android.os.ResultReceiver
 import android.os.SystemClock
 import org.autojs.autojs.AutoJs
@@ -20,7 +22,14 @@ import org.autojs.autojs.script.StringScriptSource
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.Closeable
+import java.util.UUID
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 
@@ -29,8 +38,17 @@ class NodeBridgeEngineDispatchService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_CANCEL_REGISTERED) {
+            registeredExecutions[intent.getStringExtra(EXTRA_REGISTERED_TOKEN).orEmpty()]?.cancel()
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
         val requestJson = intent?.getStringExtra(EXTRA_REQUEST_JSON).orEmpty()
+        if (intent?.action == ACTION_REGISTERED) {
+            startRegistered(intent, receiver, requestJson, startId)
+            return START_NOT_STICKY
+        }
         thread(name = "AutoJs6NodeBridgeEngineDispatch-$startId", isDaemon = true) {
             val response = runCatching {
                 handleRequest(NodeBridgeRequest.fromJson(requestJson))
@@ -48,6 +66,56 @@ class NodeBridgeEngineDispatchService : Service() {
             stopSelf(startId)
         }
         return START_NOT_STICKY
+    }
+
+    private fun startRegistered(intent: Intent, receiver: ResultReceiver?, requestJson: String, startId: Int) {
+        val token = intent.getStringExtra(EXTRA_REGISTERED_TOKEN).orEmpty()
+        val request = runCatching { NodeBridgeRequest.fromJson(requestJson) }.getOrNull()
+        val execution = runCatching {
+            require(request?.module == "agent" && request.method == "execRegistered" && token.isNotBlank())
+            val payload = JSONObject(intent.getStringExtra(EXTRA_REGISTERED_JSON).orEmpty())
+            val cancellation = requireNotNull(intent.getBundleExtra(EXTRA_REGISTERED_CONTROL)?.getBinder("cancel"))
+            AgentRegisteredScriptExecution(
+                launchPath = payload.getString("launchPath"), workingDirectory = payload.getString("workingDirectory"),
+                expectedScriptPath = payload.getString("expectedScriptPath"),
+                parametersJson = payload.getString("parametersJson"), runId = payload.getString("runId"),
+                presetName = payload.optString("presetName").takeIf { it.isNotEmpty() },
+                timeoutMs = minOf(payload.getLong("timeoutMs"), request.timeoutMs),
+                captureConsole = payload.getBoolean("captureConsole"),
+                cancellationRequested = { DispatchCancellation.read(cancellation) },
+            )
+        }.getOrNull()
+        if (request == null || execution == null) {
+            receiver?.send(RESULT_RESPONSE, NodeBridgeResponse.failure(NodeBridgeRequest.recoverId(requestJson).orEmpty(),
+                NodeBridgeError.invalidRequest("Invalid registered-script dispatch", "agent", "execRegistered")).toBundle())
+            stopSelf(startId)
+            return
+        }
+        if (registeredExecutions.size >= MAX_REGISTERED_DISPATCHES || registeredExecutions.putIfAbsent(token, execution) != null) {
+            receiver?.send(RESULT_RESPONSE, NodeBridgeResponse.failure(request.id,
+                NodeBridgeError.resourceLimit("Registered-script execution queue is full", request.module, request.method)).toBundle())
+            stopSelf(startId)
+            return
+        }
+        try {
+            registeredExecutor.execute {
+                try {
+                    val response = runCatching { NodeBridgeResponse.success(request.id, execution.execute().toString()) }
+                        .getOrElse { NodeBridgeResponse.failure(request.id,
+                            NodeBridgeError.providerFailed("Registered-script dispatch failed", request.module, request.method)) }
+                    receiver?.send(RESULT_RESPONSE, response.toBundle())
+                } finally {
+                    registeredExecutions.remove(token, execution)
+                    stopSelf(startId)
+                }
+            }
+        } catch (_: RejectedExecutionException) {
+            registeredExecutions.remove(token, execution)
+            execution.cancel()
+            receiver?.send(RESULT_RESPONSE, NodeBridgeResponse.failure(request.id,
+                NodeBridgeError.resourceLimit("Registered-script execution queue is full", request.module, request.method)).toBundle())
+            stopSelf(startId)
+        }
     }
 
     private fun handleRequest(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -380,11 +448,44 @@ class NodeBridgeEngineDispatchService : Service() {
         }
     }
 
+    /** A one-bit sender-owned token makes cancellation observable before service dispatch starts. */
+    private class DispatchCancellation : Binder() {
+        val cancelled = AtomicBoolean()
+        override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
+            if (code != IBinder.FIRST_CALL_TRANSACTION) return super.onTransact(code, data, reply, flags)
+            data.enforceInterface(DESCRIPTOR)
+            reply?.writeNoException()
+            reply?.writeInt(if (cancelled.get()) 1 else 0)
+            return true
+        }
+
+        companion object {
+            private const val DESCRIPTOR = "org.autojs.autojs.engine.RegisteredScriptCancellation"
+            fun read(binder: IBinder): Boolean {
+                if (binder is DispatchCancellation) return binder.cancelled.get()
+                val data = Parcel.obtain()
+                val reply = Parcel.obtain()
+                return try {
+                    data.writeInterfaceToken(DESCRIPTOR)
+                    if (!binder.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0)) true else {
+                        reply.readException()
+                        reply.readInt() != 0
+                    }
+                } catch (_: Exception) { true } finally { data.recycle(); reply.recycle() }
+            }
+        }
+    }
+
     companion object {
         const val INTERNAL_BASE_CWD = "__autojs6BaseCwd"
         const val INTERNAL_PARENT_SPAWN_DEPTH = "__autojs6ParentSpawnDepth"
 
         private const val ACTION_DISPATCH = "org.autojs.autojs.engine.action.DISPATCH_NODE_BRIDGE_ENGINES"
+        private const val ACTION_REGISTERED = "org.autojs.autojs.engine.action.DISPATCH_REGISTERED_AGENT_SCRIPT"
+        private const val ACTION_CANCEL_REGISTERED = "org.autojs.autojs.engine.action.CANCEL_REGISTERED_AGENT_SCRIPT"
+        private const val EXTRA_REGISTERED_TOKEN = "registered_token"
+        private const val EXTRA_REGISTERED_JSON = "registered_json"
+        private const val EXTRA_REGISTERED_CONTROL = "registered_control"
         private const val EXTRA_REQUEST_JSON = "request_json"
         private const val EXTRA_RESPONSE_JSON = "response_json"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
@@ -395,6 +496,74 @@ class NodeBridgeEngineDispatchService : Service() {
         private const val OUTCOME_RUNNING = "running"
         private const val OUTCOME_SUCCESS = "success"
         private const val OUTCOME_EXCEPTION = "exception"
+        private const val MAX_REGISTERED_DISPATCHES = 8
+        private val registeredExecutions = ConcurrentHashMap<String, AgentRegisteredScriptExecution>()
+        private val registeredExecutor = ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS,
+            ArrayBlockingQueue(MAX_REGISTERED_DISPATCHES),
+            { Thread(it, "AutoJs6AgentRegisteredScript").apply { isDaemon = true } }, ThreadPoolExecutor.AbortPolicy())
+
+        /**
+         * Dispatches a path and scalar parameters already authorized by the host's Agent catalog.
+         * Closing the returned handle cancels only this invocation, including the pre-start race.
+         * Ordinary engines.execScript/File waiting semantics are unchanged.
+         */
+        fun dispatchRegistered(
+            context: Context,
+            request: NodeBridgeRequest,
+            launchPath: String,
+            workingDirectory: String,
+            parametersJson: String,
+            agentRunId: String,
+            presetName: String?,
+            timeoutMs: Long,
+            captureConsole: Boolean,
+            expectedScriptPath: String = launchPath,
+            callback: (NodeBridgeResponse) -> Unit,
+        ): Closeable {
+            val appContext = context.applicationContext
+            val token = UUID.randomUUID().toString()
+            val terminal = AtomicBoolean()
+            val cancelled = AtomicBoolean()
+            val cancellationSignal = DispatchCancellation()
+            val receiver = object : ResultReceiver(Handler(Looper.getMainLooper())) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (!terminal.compareAndSet(false, true)) return
+                    val response = if (resultCode == RESULT_RESPONSE) {
+                        runCatching { NodeBridgeResponse.fromJson(resultData?.getString(EXTRA_RESPONSE_JSON).orEmpty()) }
+                            .getOrElse { request.processDead("Registered-script dispatch returned a malformed response") }
+                    } else request.processDead("Registered-script dispatch returned an unexpected result")
+                    callback(response)
+                }
+            }
+            val payload = JSONObject().put("launchPath", launchPath).put("workingDirectory", workingDirectory)
+                .put("expectedScriptPath", expectedScriptPath)
+                .put("parametersJson", parametersJson).put("runId", agentRunId).put("presetName", presetName.orEmpty())
+                .put("timeoutMs", timeoutMs).put("captureConsole", captureConsole)
+            val intent = Intent(appContext, NodeBridgeEngineDispatchService::class.java).apply {
+                action = ACTION_REGISTERED
+                putExtra(EXTRA_REQUEST_JSON, request.toJson())
+                putExtra(EXTRA_RESULT_RECEIVER, receiver)
+                putExtra(EXTRA_REGISTERED_TOKEN, token)
+                putExtra(EXTRA_REGISTERED_JSON, payload.toString())
+                putExtra(EXTRA_REGISTERED_CONTROL, Bundle().apply { putBinder("cancel", cancellationSignal) })
+            }
+            val started = runCatching { appContext.startService(intent) != null }.getOrDefault(false)
+            if (!started && terminal.compareAndSet(false, true)) {
+                callback(request.processDead("Failed to start registered-script dispatch service"))
+            }
+            return Closeable {
+                if (!terminal.get() && cancelled.compareAndSet(false, true)) {
+                    cancellationSignal.cancelled.set(true)
+                    val local = registeredExecutions[token]
+                    if (local != null) local.cancel() else {
+                        runCatching { appContext.startService(Intent(appContext, NodeBridgeEngineDispatchService::class.java).apply {
+                            action = ACTION_CANCEL_REGISTERED
+                            putExtra(EXTRA_REGISTERED_TOKEN, token)
+                        }) }
+                    }
+                }
+            }
+        }
 
         fun dispatch(context: Context, request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
             val appContext = context.applicationContext

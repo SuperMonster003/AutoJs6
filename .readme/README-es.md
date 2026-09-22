@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/22
+###### 2026/09/23
 
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -407,6 +407,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Ejemplos de EPUB (hoja de ruta del complemento P6.3): tres scripts añadidos al nuevo directorio de ejemplos integrado "电子书" (EPUB 元数据与目录: metadatos, índice, orden de lectura y posiciones de un libro hallado en Download o Books; 导出章节文本: exportación del texto de un capítulo o del libro entero como texto plano o Markdown, exportación de la portada y búsqueda de texto completo; 打开阅读器并监听进度: una sesión del lector con oyentes `open` / `progress` / `bookmark` / `error` / `close`, preferencias iniciales, un cambio de capítulo y `close()` que deja el lector al usuario); cada script comprueba primero `epub.isAvailable()` y explica cómo instalar el complemento Readium EPUB Reader
 * `Nuevo` Versión 2 del contrato EPUB con resaltados y notas (hoja de ruta del plugin P9.4): el `IEpubBook.getAnnotations` anexado (paginado, en orden de lectura) y el evento `highlight` de la sesión del lector llevan los resaltados y notas del lector como un documento `annotations` (id, style, color, note, quote, título del capítulo, locator, createdAt, updatedAt); el host negocia la versión a partir del `epubMaxContractVersion` del plugin y la marca en cada petición, así que los plugins de la versión 1 nunca ven la nueva llamada; la API de script `epub` gana `book.annotations()` y `epub.annotations(path)` con sus formas `Async`, y `EpubReaderSession` emite `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` con `action` added, updated o removed
 * `Nuevo` Contrato e intermediarios del anfitrión para AI Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión
+* `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Corrección` Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado
 * `Corrección` MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario
 * `Corrección` Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno

@@ -22,6 +22,37 @@ public interface ScriptExecution {
 
     int getId();
 
+    /** Null for an ordinary execution. Agent context is host-owned, separate from execArgv. */
+    default AgentScriptExecutionState getAgentContext() {
+        return getConfig().getAgentExecutionState();
+    }
+
+    default String getAgentRunId() {
+        var context = getAgentContext();
+        return context == null ? null : context.getRunId();
+    }
+
+    default String getAgentParametersJson() {
+        var context = getAgentContext();
+        return context == null ? null : context.getParametersJson();
+    }
+
+    default String getAgentPresetName() {
+        var context = getAgentContext();
+        return context == null ? null : context.getPresetName();
+    }
+
+    /** Stores at most 64 KiB of valid JSON, and returns false without an active Agent marker. */
+    default boolean setAgentResult(String json) {
+        var context = getAgentContext();
+        return context != null && context.reportResult(json);
+    }
+
+    default String getAgentResult() {
+        var context = getAgentContext();
+        return context == null ? null : context.getResultJson();
+    }
+
     abstract class AbstractScriptExecution implements ScriptExecution {
 
         private static final AtomicInteger sMaxId = new AtomicInteger(0);

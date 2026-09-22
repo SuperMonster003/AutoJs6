@@ -168,7 +168,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 # v6.8.0
 
-###### 2026/09/22
+###### 2026/09/23
 
 * `추가` 서랍, 설정 및 사용자 조작으로 시작한 VS Code 연결에서 Android 17 로컬 네트워크 권한을 관리하고 실제 targetSdk 에 따라 권한 선언
 * `추가` Android 11 이상 설정에서 여러 앱 프로세스의 최근 시스템 종료 사유, 메모리 제한 식별 및 복사 가능한 보고서를 포함한 프로세스 종료 기록 제공
@@ -407,6 +407,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` EPUB 샘플 (플러그인 로드맵 P6.3): 앱 내 샘플에 새 디렉터리 "电子书"와 스크립트 3개를 추가했습니다 (EPUB 元数据与目录: Download 또는 Books 아래 책의 메타데이터, 목차, 읽기 순서와 위치 수; 导出章节文本: 장 또는 전체 텍스트를 일반 텍스트나 Markdown으로 내보내기, 표지 내보내기와 전문 검색; 打开阅读器并监听进度: `open` / `progress` / `bookmark` / `error` / `close` 리스너로 움직이는 리더 세션, 시작 환경설정, 장 넘김, 리더를 사용자에게 남기는 `close()`). 모든 스크립트는 먼저 `epub.isAvailable()`을 확인하고 Readium EPUB Reader 플러그인 설치 방법을 안내합니다
 * `추가` EPUB 계약 버전 2 (하이라이트와 메모, 플러그인 로드맵 P9.4): 추가된 `IEpubBook.getAnnotations` (페이지 단위, 읽기 순서) 와 리더 세션의 `highlight` 이벤트가 리더의 하이라이트와 메모를 `annotations` 문서 (id, style, color, note, quote, 장 제목, locator, createdAt, updatedAt) 로 전달합니다. 호스트는 플러그인의 `epubMaxContractVersion` 으로 버전을 협상하여 모든 요청에 기록하므로 버전 1 플러그인은 새 호출을 받지 않습니다. 스크립트 API `epub` 에 `book.annotations()` 와 `epub.annotations(path)` (`Async` 형태 포함) 가 추가되고, `EpubReaderSession` 은 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 를 발생시킵니다 (`action` 은 added, updated 또는 removed)
 * `추가` AI Agent 플러그인 계약과 호스트 프록시. 제한된 기기 접근, 모델 호출 할당량 및 연결 손실 시 리소스 정리 지원
+* `추가` project.json / @agent 헤더를 통한 Agent 스크립트 등록 및 범위가 제한된 실행. 인수 검증, 시간 초과 시 중지 및 구조화된 결과 반환 지원
 * `수정` 플러그인 센터에서 YOLO 플러그인을 활성화할 때 탐색 핸드셰이크가 이미 활성화된 상태를 요구하여 스위치로 활성화할 수 없던 문제. 탐색은 이제 권한 부여와 정확한 컴포넌트 핸드셰이크만 요구하고, 실행 시 진입점은 계속 저장된 활성화 기록을 요구
 * `수정` adb로 설치한 MCP Server에 저장된 활성화 설정이 없으면 플러그인 센터에서는 활성화, 실행 시에는 비활성화로 판단하던 문제. 양쪽 기본값을 비활성화로 통일하고 사용자가 명시적으로 선택한 상태 유지
 * `수정` 접근성 관리자에서 바인딩되지 않음, 없음 등 짧은 상태 값 아래의 불필요한 빈 줄

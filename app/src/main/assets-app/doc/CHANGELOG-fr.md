@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/22
+###### 2026/09/23
 
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -245,6 +245,7 @@
 * `Fonctionnalité` Exemples EPUB (feuille de route du plugin P6.3) : trois scripts ajoutés au nouveau répertoire d'exemples intégré "电子书" (EPUB 元数据与目录 : métadonnées, table des matières, ordre de lecture et nombre de positions d'un livre trouvé sous Download ou Books ; 导出章节文本 : export du texte d'un chapitre ou du livre entier en texte brut ou Markdown, export de la couverture et recherche plein texte ; 打开阅读器并监听进度 : une session de lecteur avec les écouteurs `open` / `progress` / `bookmark` / `error` / `close`, des préférences de départ, un changement de chapitre et `close()` qui laisse le lecteur à l'utilisateur) ; chaque script vérifie d'abord `epub.isAvailable()` et explique comment installer le plugin Readium EPUB Reader
 * `Fonctionnalité` Version 2 du contrat EPUB avec surlignages et notes (feuille de route du plugin P9.4): le `IEpubBook.getAnnotations` ajouté (paginé, dans l'ordre de lecture) et l'événement `highlight` de la session du lecteur transportent les surlignages et notes du lecteur sous forme de document `annotations` (id, style, color, note, quote, titre du chapitre, locator, createdAt, updatedAt); l'hôte négocie la version à partir du `epubMaxContractVersion` du plugin et l'inscrit dans chaque requête, si bien que les plugins de version 1 ne voient jamais le nouvel appel; l'API de script `epub` gagne `book.annotations()` et `epub.annotations(path)` avec leurs formes `Async`, et `EpubReaderSession` émet `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` avec `action` added, updated ou removed
 * `Fonctionnalité` Contrat et relais hôte AI Agent avec accès limité aux fonctions de l'appareil, quotas d'appels aux modèles et libération des ressources lors de la perte de connexion
+* `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
 * `Correction` Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun

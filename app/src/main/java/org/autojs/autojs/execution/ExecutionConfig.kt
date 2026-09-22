@@ -20,6 +20,10 @@ data class ExecutionConfig(
 
     private val mArguments = HashMap<String, Any>()
 
+    /** Host-owned execution marker; never accepted from script arguments or parceled as input. */
+    var agentExecutionState: AgentScriptExecutionState? = null
+        internal set
+
     val arguments: HashMap<String, Any>
         get() = mArguments
 

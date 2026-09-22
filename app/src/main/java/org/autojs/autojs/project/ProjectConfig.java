@@ -179,6 +179,11 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     @SerializedName("node")
     private NodeConfig mNodeConfig;
 
+    /** Optional Agent registration; execution validates its strict schema separately. */
+    @Nullable
+    @SerializedName("agent")
+    private AgentManifest mAgent;
+
     @SerializedName("permissions")
     @SerializedNameCompatible(with = {
             @With(value = "permission"),
@@ -687,6 +692,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     @NonNull
     public String getMainScriptFileName() {
         return mMainScriptFileName;
+    }
+
+    @Nullable
+    public AgentManifest getAgent() {
+        return mAgent;
+    }
+
+    public ProjectConfig setAgent(@Nullable AgentManifest agent) {
+        mAgent = agent;
+        return this;
     }
 
     // @Commented by SuperMonster003 on Jan 20, 2025.
