@@ -170,6 +170,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ###### 2026/09/23
 
+* `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` ai.agent.result/context permite informar resultados y contexto de scripts registrados, con cancelación por llamada y ejemplos para contar caracteres del portapapeles y limpiar instaladores antiguos
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real

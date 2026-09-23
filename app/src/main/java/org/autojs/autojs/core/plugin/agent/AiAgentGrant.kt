@@ -7,7 +7,7 @@ import org.autojs.autojs.engine.NodeBridgePermissionManifest
 internal object AiAgentGrant {
 
     val allowedMethods: Set<String> = linkedMapOf(
-        "accessibility" to listOf("isEnabled", "ensureEnabled", "dump", "explain", "screenshot", "readScreenText",
+        "accessibility" to listOf("isEnabled", "ensureEnabled", "dump", "explain", "screenshot", "readScreenText", "inspectNode",
             "findOne", "findAll", "findByText", "click", "longClick", "setText", "scrollForward", "scrollBackward",
             "swipe", "gesture", "back", "home", "recentApps"),
         "keys" to listOf("notifications", "quickSettings"),

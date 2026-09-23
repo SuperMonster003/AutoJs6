@@ -741,6 +741,7 @@ object NodeBridgeModules {
         "explain",
         "screenshot",
         "readScreenText",
+        "inspectNode",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -1804,6 +1805,7 @@ class AndroidNodeBridgeCapabilityProvider(
             "swipe" -> dispatchAccessibilitySwipe(request, service)
             "gesture" -> dispatchAccessibilityGesture(request, service)
             "dump" -> accessibilityDiagnostics.dump(request)
+            "inspectNode" -> accessibilityDiagnostics.inspectNode(request)
             "explain" -> accessibilityDiagnostics.explain(request)
             else -> unavailable(request)
         }

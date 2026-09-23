@@ -86,9 +86,9 @@ class AiAgentPluginRoundTripTest {
         })
     private fun core() = HostCapabilityBrokerCore(context, "agent-plugin-test", AiAgentGrant.default(), sourceName = "ai-agent", engineName = "ai-agent")
     private fun broker(core: HostCapabilityBrokerCore) = HostCapabilityBrokerStub(core, context.packageManager.getApplicationInfo(pluginPackage, 0).uid)
-    private fun start(link: IAiAgentLink, events: IAiAgentRunCallback? = null, goal: String = "conformance"): String {
+    private fun start(link: IAiAgentLink, events: IAiAgentRunCallback? = null, goal: String = "conformance", confirm: String = "default"): String {
         val started = SystemClock.elapsedRealtime()
-        val answer = link.startRun(bundle(C.KEY_RUN_REQUEST_JSON, JSONObject().put("goal", goal).put("options", JSONObject().put("interaction", "script"))), events)
+        val answer = link.startRun(bundle(C.KEY_RUN_REQUEST_JSON, JSONObject().put("goal", goal).put("options", JSONObject().put("interaction", "script").put("confirm", confirm))), events)
         assertTrue("startRun must enqueue within 200 ms", SystemClock.elapsedRealtime() - started < 200)
         return decode(answer).getString("runId")
     }
@@ -445,7 +445,7 @@ class AiAgentPluginRoundTripTest {
         } finally { detach(link); core.destroy(null) }
     }
 
-    @Test fun inputAndForcedActionConfirmationAreDeliveredAndAnswered() = withPlugin { api ->
+    @Test fun inputAndCautiousActionConfirmationAreDeliveredAndAnswered() = withPlugin { api ->
         val core = core()
         val model = ScriptedModel { step, _ -> when (step) {
             0 -> JSONObject().put("kind", "ask").put("ask", JSONObject().put("kind", "choice").put("question", "Choose").put("choices", JSONArray().put("one").put("two")))
@@ -455,7 +455,7 @@ class AiAgentPluginRoundTripTest {
         val link = attach(api, model, broker(core))
         val events = LinkedBlockingQueue<JSONObject>()
         try {
-            val id = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } })
+            val id = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } }, confirm = "cautious")
             for (expected in listOf("input", "confirmation", "done")) {
                 var event: JSONObject
                 do { event = events.poll(15, TimeUnit.SECONDS) ?: throw AssertionError("Missing $expected") } while (event.getString("type") !in setOf("input", "confirmation", "done"))
@@ -465,12 +465,186 @@ class AiAgentPluginRoundTripTest {
                 if (expected == "input") {
                     assertEquals(C.ERROR_INVALID_REQUEST, link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, JSONObject(reply.toString()).put("value", "invalid"))).getString(C.KEY_ERROR_CODE))
                     reply.put("value", "one")
-                } else { assertFalse(event.getBoolean("allowRunScope")); reply.put("allowed", true).put("scope", "once") }
+                } else { assertTrue(event.getBoolean("allowRunScope")); reply.put("allowed", true).put("scope", "once") }
                 assertTrue(decode(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, reply))).getBoolean("accepted"))
             }
             val row = decode(link.getRun(ref(id)))
             assertEquals("completed", row.getString("state"))
             assertFalse(row.getJSONArray("steps").getJSONObject(1).has("error"))
+        } finally { detach(link); core.destroy(null) }
+    }
+
+    private fun withActionFixture(block: (org.autojs.autojs.engine.AgentActionSmokeActivity) -> Unit) {
+        assumeTrue("Private AVD only: -e autojs.agent.actions true", InstrumentationRegistry.getArguments().getString("autojs.agent.actions").toBoolean())
+        val service = "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
+        val previous = shell("settings get secure enabled_accessibility_services").trim().takeUnless { it == "null" }.orEmpty().split(':').filter { it.isNotBlank() }.toSet()
+        val others = previous - service
+        shell(if (others.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services ${others.joinToString(":")}")
+        SystemClock.sleep(400)
+        shell("settings put secure enabled_accessibility_services ${(others + service).joinToString(":")}")
+        shell("settings put secure accessibility_enabled 1")
+        assertTrue(org.autojs.autojs.core.accessibility.AccessibilityService.waitForOperational(10_000))
+        val activity = instrumentation.startActivitySync(Intent(context, org.autojs.autojs.engine.AgentActionSmokeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as org.autojs.autojs.engine.AgentActionSmokeActivity
+        try { instrumentation.waitForIdleSync(); SystemClock.sleep(700); block(activity) }
+        finally {
+            instrumentation.runOnMainSync { activity.finish() }
+            shell(if (previous.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services ${previous.joinToString(":")}")
+        }
+    }
+    private fun actionEvents(link: IAiAgentLink, events: LinkedBlockingQueue<JSONObject>, id: String, onConfirm: (JSONObject) -> Unit = {}): List<JSONObject> {
+        val received = ArrayList<JSONObject>()
+        while (true) {
+            val event = events.poll(30, TimeUnit.SECONDS) ?: throw AssertionError("Missing action event: ${decode(link.getRun(ref(id))).optString("state")}")
+            received += event
+            when (event.getString("type")) {
+                "confirmation" -> {
+                    onConfirm(event)
+                    val reply = JSONObject().put("runId", id).put("requestId", event.getString("requestId")).put("allowed", true).put("scope", "once")
+                    assertTrue(decode(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, reply))).getBoolean("accepted"))
+                }
+                "done", "error" -> return received
+            }
+        }
+    }
+    @Test fun inspectedNodeActionsAppendPasswordsAndStaleConfirmationUseTheRealHost() = withPlugin { api -> withActionFixture { activity ->
+        fun selector(desc: String) = JSONObject().put("selector", JSONObject().put("desc", desc))
+        instrumentation.runOnMainSync { assertTrue("Fixture password node must be marked as password", activity.password.createAccessibilityNodeInfo().isPassword) }
+        val secret = "P42_PRIVATE_INPUT"
+        val core = core()
+        val model = ScriptedModel { step, request ->
+            if (step > 0 && step !in setOf(1, 9, 10)) assertTrue(observation(request).getJSONObject("result").getBoolean("ok"))
+            when (step) {
+                0 -> tool("ui_dump")
+                1 -> {
+                    val dump = observation(request).getJSONObject("result")
+                    val row = dump.getString("text").lineSequence().firstOrNull { it.contains("desc=\"agent_click\"") }
+                        ?: throw AssertionError("Fixture button missing: ${dump.getString("text").lineSequence().first()}")
+                    tool("ui_click", JSONObject().put("nodeRef", row.substringBefore(' ')).put("snapshotId", dump.getString("snapshotId")))
+                }
+                2 -> { assertEquals(1, activity.clicks.get()); tool("ui_long_click", selector("agent_click")) }
+                3 -> { assertEquals(1, activity.longClicks.get()); tool("ui_set_text", selector("agent_input").put("text", "hello")) }
+                4 -> tool("ui_set_text", selector("agent_input").put("text", " world").put("append", true))
+                5 -> { instrumentation.runOnMainSync { assertEquals("hello world", activity.input.text.toString()) }; tool("ui_scroll", selector("agent_scroll").put("direction", "forward").put("times", 2)) }
+                6 -> tool("ui_scroll", selector("agent_scroll").put("direction", "backward"))
+                7 -> tool("ui_set_text", selector("agent_password").put("text", secret))
+                8 -> {
+                    instrumentation.runOnMainSync { assertEquals(secret, activity.password.text.toString()) }
+                    val messages = request.getJSONArray("messages")
+                    val affected = (0 until messages.length()).filter { messages.getJSONObject(it).getString("content").contains(secret) }
+                    assertTrue("Secret present in message indices $affected", affected.isEmpty()); tool("ui_dump")
+                }
+                9 -> {
+                    assertTrue(observation(request).getJSONObject("result").has("sinceLastAction"))
+                    instrumentation.runOnMainSync { activity.button.text = "Pay now" }
+                    SystemClock.sleep(350)
+                    tool("ui_click", selector("agent_click"))
+                }
+                else -> {
+                    assertEquals("NODE_REF_STALE", observation(request).getString("error"))
+                    assertEquals(1, activity.clicks.get()); done()
+                }
+            }
+        }
+        val link = attach(api, model, broker(core), JSONObject().put("grantSummary", JSONObject().put("toolGroups", JSONArray().put("observe").put("act"))))
+        val events = LinkedBlockingQueue<JSONObject>()
+        try {
+            val id = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } })
+            val received = actionEvents(link, events, id) { event ->
+                if (event.optString("tool") == "ui_click") {
+                    assertFalse(event.getBoolean("allowRunScope"))
+                    instrumentation.runOnMainSync { activity.button.text = "Changed after confirmation" }
+                    SystemClock.sleep(350)
+                }
+            }
+            model.failure?.let { throw AssertionError("Node action fixture", it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state"))
+            assertEquals(11, model.calls.get()); assertFalse(received.joinToString().contains(secret))
+        } finally { detach(link); core.destroy(null) }
+    } }
+
+    @Test fun changedChildLabelCannotAuthorizeThePreviouslyInspectedParent() = withPlugin { api -> withActionFixture { activity ->
+        val core = core()
+        val model = ScriptedModel { step, request -> when (step) {
+            0 -> tool("ui_click", JSONObject().put("selector", JSONObject().put("desc", "agent_label")))
+            1 -> {
+                assertTrue(observation(request).getJSONObject("result").getBoolean("ok")); assertEquals(1, activity.parentClicks.get())
+                instrumentation.runOnMainSync { activity.label.text = "Pay now" }; SystemClock.sleep(350)
+                tool("ui_click", JSONObject().put("selector", JSONObject().put("desc", "agent_label")))
+            }
+            else -> {
+                assertEquals("NODE_REF_STALE", observation(request).getString("error"))
+                assertEquals(1, activity.parentClicks.get()); done()
+            }
+        } }
+        val link = attach(api, model, broker(core), JSONObject().put("grantSummary", JSONObject().put("toolGroups", JSONArray().put("observe").put("act"))))
+        val events = LinkedBlockingQueue<JSONObject>(); var confirmations = 0
+        try {
+            val id = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } })
+            actionEvents(link, events, id) { event ->
+                assertFalse(event.getBoolean("allowRunScope"))
+                if (++confirmations == 2) { instrumentation.runOnMainSync { activity.label.text = "Changed after confirmation" }; SystemClock.sleep(350) }
+            }
+            model.failure?.let { throw AssertionError("Ancestor action fixture", it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state")); assertEquals(3, model.calls.get()); assertEquals(2, confirmations)
+        } finally { detach(link); core.destroy(null) }
+    } }
+
+    @Test fun globalClipboardAndGestureActionsRoundTripThroughTheRealHost() = withPlugin { api -> withActionFixture { activity ->
+        var center = intArrayOf(0, 0)
+        instrumentation.runOnMainSync { center = activity.center(activity.surface) }
+        val cases = listOf(
+            tool("clipboard_set", JSONObject().put("text", "P42 clipboard")), tool("clipboard_get"),
+            tool("ui_click_xy", JSONObject().put("x", center[0]).put("y", center[1])),
+            tool("ui_swipe", JSONObject().put("x1", center[0]).put("y1", center[1] + 30).put("x2", center[0]).put("y2", center[1] - 30).put("durationMs", 200)),
+            tool("ui_gesture", JSONObject().put("durationMs", 200).put("points", JSONArray().put(JSONArray().put(center[0]).put(center[1] + 30)).put(JSONArray().put(center[0]).put(center[1] - 30)))),
+            tool("app_launch", JSONObject().put("packageName", "com.android.settings")),
+            tool("app_launch", JSONObject().put("appName", context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo("com.android.settings", 0)).toString())),
+        ) + listOf("notifications", "quick_settings", "recents", "home", "back").map { tool("ui_press_key", JSONObject().put("key", it)) }
+        for (decision in cases) {
+            context.startActivity(Intent(context, org.autojs.autojs.engine.AgentActionSmokeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            SystemClock.sleep(500)
+            val core = core()
+            val model = ScriptedModel { step, request ->
+                if (step == 0) decision else {
+                    val result = observation(request).getJSONObject("result")
+                    assertTrue(decision.toString(), result.getBoolean("ok")); assertTrue(result.has("windowChanged"))
+                    if (decision.getString("tool") == "clipboard_get") assertEquals("P42 clipboard", result.getString("actionResult"))
+                    else { assertTrue(result.has("stability")); assertTrue(result.getJSONObject("stability").getLong("waitedMs") >= 500) }
+                    done()
+                }
+            }
+            val link = attach(api, model, broker(core), JSONObject().put("grantSummary", JSONObject().put("toolGroups", JSONArray().put("observe").put("act").put("gesture"))))
+            val events = LinkedBlockingQueue<JSONObject>()
+            try {
+                val id = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } })
+                val received = actionEvents(link, events, id)
+                model.failure?.let { throw AssertionError("Global action fixture: ${decision.getString("tool")}", it) }
+                assertEquals("completed", decode(link.getRun(ref(id))).getString("state"))
+                if (decision.getString("tool") in setOf("ui_click_xy", "ui_swipe", "ui_gesture")) assertEquals(1, received.count { it.optString("type") == "confirmation" })
+            } finally { detach(link); core.destroy(null) }
+        }
+        assertTrue("Real gesture callbacks", activity.touches.get() >= 3)
+    } }
+
+    @Test fun disabledGestureIsRejectedWithoutAnyCoordinateDispatch() = withPlugin { api ->
+        val core = core(); val delegate = broker(core); val dispatches = AtomicInteger()
+        val counted = object : IHostCapabilityBroker.Stub() {
+            override fun getBrokerInfo() = delegate.brokerInfo
+            override fun destroy(reason: Bundle?) = Unit
+            override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                if (JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!).optString("method") in setOf("swipe", "gesture")) dispatches.incrementAndGet()
+                delegate.dispatch(request, callback)
+            }
+        }
+        val model = ScriptedModel { step, request -> if (step == 0) tool("ui_click_xy", JSONObject().put("x", 1).put("y", 1)) else {
+            assertTrue(request.toString().contains("TOOL_DISABLED")); done()
+        } }
+        val link = attach(api, model, counted)
+        try {
+            val id = start(link)
+            waitUntil("Disabled gesture feedback") { decode(link.getRun(ref(id))).optString("state") in setOf("completed", "failed", "blocked") }
+            model.failure?.let { throw AssertionError(it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state")); assertEquals(0, dispatches.get())
         } finally { detach(link); core.destroy(null) }
     }
 

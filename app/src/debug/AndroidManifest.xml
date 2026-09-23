@@ -30,6 +30,10 @@
             android:name="org.autojs.autojs.engine.NodeAccessibilitySmokeActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity
+            android:name="org.autojs.autojs.engine.AgentActionSmokeActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
     </application>
 
     <queries>

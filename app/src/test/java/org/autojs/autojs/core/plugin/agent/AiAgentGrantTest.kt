@@ -13,7 +13,7 @@ class AiAgentGrantTest {
         val expected = """
             accessibility.isEnabled accessibility.ensureEnabled accessibility.dump accessibility.explain
             accessibility.screenshot accessibility.readScreenText accessibility.findOne accessibility.findAll
-            accessibility.findByText accessibility.click accessibility.longClick accessibility.setText
+            accessibility.findByText accessibility.inspectNode accessibility.click accessibility.longClick accessibility.setText
             accessibility.scrollForward accessibility.scrollBackward accessibility.swipe accessibility.gesture
             accessibility.back accessibility.home accessibility.recentApps
             keys.notifications keys.quickSettings

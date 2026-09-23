@@ -252,6 +252,39 @@ P1.5 entry and device evidence is recorded in
 conformance APK's combined model/observation/script round trip is still pending;
 the implemented host foundation is not evidence that the whole Agent is usable.
 
+## P4.2 inspected actions
+
+Host build 5289 adds accessibility.inspectNode(target, action) for click, longClick,
+setText, scrollForward and scrollBackward. It performs a bounded read-only search
+and resolves the actual eligible recipient, including an ancestor when applicable.
+The result contains a target with nodeRef, snapshotId and an opaque actionToken,
+plus bounded text/desc/packageName and password/enabled/uncertain risk metadata.
+Password text is omitted. Containers and clipped labels are uncertain and require
+individual confirmation in the Agent. Tokens stay inside the execution adapter.
+
+Prepared targets are scoped to one broker provider, limited to eight and expire
+after five minutes. Execution checks the same method, snapshot, window identity,
+unique full node fingerprint, bounds, password flag, enabled flag and action
+eligibility. It acts directly on the inspected recipient without a later ancestor
+fallback. If inspection climbed from a child, its full identity and presence
+inside that recipient are checked too. The token authorizes only the recipient
+reference, not other nodes in the private inspection snapshot. Changed, evicted
+or foreign targets return NODE_REF_STALE.
+
+Prepared setText accepts a third {append:true} options argument. Reading and
+appending happen inside the host after identity validation. Combined text has a
+64 KiB UTF-8 bound. Password append is rejected with CAPABILITY_DENIED because
+accessibility may expose a mask; password replacement remains supported. Existing
+selector/reference actions without a preparation token retain their legacy
+behavior. This is an additive bridge extension, not an AIDL or public JS API change.
+
+Compact dumps also include an opaque windowIdentity digest, so observation clients
+can distinguish windows within one package/activity without receiving the raw
+root identity. The Agent keeps visible snapshot references separate from hidden
+inspection and stabilization dumps. Its operation replies retain ok, actionResult
+and windowChanged (null when unavailable), plus bounded change/stability evidence.
+An acknowledged action alone does not establish that the task goal was achieved.
+
 ## P1.4 host observations and registered scripts
 
 These methods use the shared capability broker's existing request envelope and

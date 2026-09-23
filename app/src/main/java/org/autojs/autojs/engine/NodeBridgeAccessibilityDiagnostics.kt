@@ -26,6 +26,7 @@ import org.autojs.autojs.core.automator.bridge.BridgeDumpOptions
 import org.autojs.autojs.core.automator.bridge.BridgeNode
 import org.autojs.autojs.core.automator.bridge.BridgeNodeDump
 import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
+import org.autojs.autojs.core.automator.bridge.PreparedNodeAction
 import org.autojs.autojs.core.automator.diagnostics.CompactNodeText
 import org.autojs.autojs.core.automator.diagnostics.NodeRefSnapshots
 import org.autojs.autojs.core.automator.diagnostics.DumpFormat
@@ -65,6 +66,8 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     private val appContext = context.applicationContext
     private val nodeRefs = NodeRefSnapshots()
     private val nodeRefActions = BridgeNodeActions(NodeLifecycle.default)
+    private data class PreparedAction(val snapshotId: String, val method: String, val password: Boolean, val enabled: Boolean, val sourceRef: String?, val expires: Long)
+    private val preparedActions = linkedMapOf<String, PreparedAction>()
 
     private val encoder: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "AutoJs6BridgeScreenshot").apply { isDaemon = true }
@@ -106,6 +109,8 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
                 val snapshot = nodeRefs.register(nodes, parsed.window, nodeRefWindowKey(roots, result))
                 result.put("nodeCount", nodes.size).put("truncated", truncated)
                     .put("text", text).put("snapshotId", snapshot.id)
+                    .put("windowIdentity", java.security.MessageDigest.getInstance("SHA-256").digest(snapshot.windowKey.toByteArray(StandardCharsets.UTF_8))
+                        .joinToString("") { "%02x".format(it.toInt() and 255) })
             } else if (parsed.format == DumpFormat.JSON) {
                 val dump = BridgeNodeDump.dump(roots, BridgeDumpOptions(parsed.maxDepth, parsed.maxNodes, parsed.visibleOnly))
                 val nodes = JSONArray()
@@ -282,6 +287,66 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         }
     }
 
+    /** Read-only resolution of the actual action recipient, bound to this provider's snapshot scope. */
+    fun inspectNode(request: NodeBridgeRequest): NodeBridgeResponse {
+        var roots: List<UiObject> = emptyList()
+        var window = WINDOW_ACTIVE
+        return try {
+            val args = argsOf(request)
+            val target = requireNotNull(args.optJSONObject(0))
+            val method = args.optString(1).also { require(it in PreparedNodeAction.methods) }
+            val reference = if (target.has("nodeRef")) nodeRefs.resolve(target.getString("nodeRef"), target.optString("snapshotId").takeIf { it.isNotEmpty() }) else null
+            window = reference?.snapshot?.window ?: WINDOW_ACTIVE
+            roots = collectRoots(window)
+            val current = JSONObject().also(::putCurrentWindow)
+            val windowKey = nodeRefWindowKey(roots, current)
+            fun inspect(source: UiObject): JSONObject {
+                val sourceText = if (source.password()) "" else source.text()
+                val sourceDesc = if (source.password()) "" else source.desc().orEmpty()
+                val ancestors = ArrayList<UiObject>()
+                try {
+                    var node = source
+                    var depth = 0
+                    while (!PreparedNodeAction.accepts(node, method)) {
+                        if (method == "setText" || ++depth > 32) throw NodeRefSnapshots.Stale("no eligible action recipient")
+                        node = node.parent()?.also { ancestors += it } ?: throw NodeRefSnapshots.Stale("no eligible action recipient")
+                    }
+                    val captured = CompactNodeText.capture(node, 0)
+                    if (captured.fingerprint == null) throw NodeRefSnapshots.Stale("action identity exceeds the limit")
+                    val sourceIdentity = if (node === source) null else CompactNodeText.capture(source, 0).also {
+                        if (it.fingerprint == null) throw NodeRefSnapshots.Stale("source identity exceeds the limit")
+                    }
+                    val snapshot = nodeRefs.register(listOfNotNull(captured, sourceIdentity), window, windowKey)
+                    val token = UUID.randomUUID().toString()
+                    synchronized(preparedActions) {
+                        preparedActions[token] = PreparedAction(snapshot.id, method, node.password(), node.enabled(),
+                            if (sourceIdentity == null) null else "#n2", SystemClock.elapsedRealtime() + 300_000)
+                        while (preparedActions.size > NodeRefSnapshots.MAX_SNAPSHOTS) preparedActions.remove(preparedActions.keys.first())
+                    }
+                    val text = if (node.password()) "" else listOf(sourceText, node.text()).distinct().joinToString("\n")
+                    val desc = if (node.password()) "" else listOf(sourceDesc, node.desc().orEmpty()).distinct().joinToString("\n")
+                    val (boundedText, textCut) = capUtf8(text, 4096)
+                    val (boundedDesc, descCut) = capUtf8(desc, 4096)
+                    return JSONObject().put("target", JSONObject().put("nodeRef", "#n1").put("snapshotId", snapshot.id).put("actionToken", token))
+                        .put("text", boundedText).put("desc", boundedDesc).put("packageName", node.packageName().orEmpty())
+                        .put("password", node.password()).put("enabled", node.enabled())
+                        .put("uncertain", textCut || descCut || node.childCount() > 0)
+                } finally { ancestors.forEach { if (it !== source && roots.none { root -> root === it }) NodeLifecycle.default.release(it) } }
+            }
+            val result = if (reference != null) nodeRefs.relocate(reference, roots, windowKey, release = { NodeLifecycle.default.release(it) }, action = ::inspect)
+            else {
+                val filter = NodeBridgeAccessibilityCodec.selectorOf(target).toFilter()
+                val root = roots.firstOrNull() ?: throw NodeRefSnapshots.Stale("no active window")
+                val node = PreparedNodeAction.find(root, { filter.filter(it) }, { NodeLifecycle.default.release(it) })
+                    ?: throw IllegalArgumentException("NODE_NOT_FOUND: No matching node.")
+                try { inspect(node) } finally { if (roots.none { it === node }) NodeLifecycle.default.release(node) }
+            }
+            NodeBridgeResponse.success(request.id, result.toString())
+        } catch (error: IllegalArgumentException) { invalid(request, error) }
+        catch (error: Exception) { providerFailure(request, error) }
+        finally { releaseRoots(roots, window) }
+    }
+
     /** Returns null for the existing selector dialect; node references always relocate before acting. */
     fun nodeRefAction(request: NodeBridgeRequest): NodeBridgeResponse? {
         if (request.method !in NODE_REF_ACTIONS) return null
@@ -289,7 +354,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         val target = args.optJSONObject(0) ?: return null
         if (!target.has("nodeRef")) return null
         val reference = try {
-            rejectUnknownKeys(target, setOf("nodeRef", "snapshotId"), "accessibility node reference")
+            rejectUnknownKeys(target, setOf("nodeRef", "snapshotId", "actionToken"), "accessibility node reference")
             val ref = target.opt("nodeRef") as? String ?: return invalid(request, "nodeRef must be a string.")
             val snapshotId = if (target.has("snapshotId")) {
                 target.opt("snapshotId") as? String ?: return invalid(request, "snapshotId must be a string.")
@@ -302,18 +367,49 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         val roots = collectRoots(reference.snapshot.window)
         return try {
             val current = JSONObject().also(::putCurrentWindow)
-            val performed = nodeRefs.relocate(reference, roots, nodeRefWindowKey(roots, current),
+            val binding = if (target.has("actionToken")) synchronized(preparedActions) {
+                preparedActions[target.getString("actionToken")]?.takeIf {
+                    target.getString("nodeRef") == "#n1" && it.snapshotId == reference.snapshot.id &&
+                        it.method == request.method && it.expires >= SystemClock.elapsedRealtime()
+                } ?: throw NodeRefSnapshots.Stale("prepared action expired or mismatched")
+            } else null
+            val windowKey = nodeRefWindowKey(roots, current)
+            val performed = nodeRefs.relocate(reference, roots, windowKey,
                 release = { NodeLifecycle.default.release(it) }) { node ->
-                when (request.method) {
-                    "click" -> nodeRefActions.click(node)
-                    "longClick" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_LONG_CLICK)
-                    "scrollForward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_FORWARD)
-                    "scrollBackward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_BACKWARD)
-                    "setText" -> {
-                        val text = args.opt(1) as? String ?: throw IllegalArgumentException("setText requires a string as its second argument.")
-                        nodeRefActions.setText(node, text)
+                if (binding != null) {
+                    PreparedNodeAction.validate(node, binding.method, binding.password, binding.enabled)
+                    // The inspected label must still belong to this recipient after confirmation.
+                    binding.sourceRef?.let { sourceRef ->
+                        nodeRefs.relocate(nodeRefs.resolve(sourceRef, binding.snapshotId), listOf(node), windowKey,
+                            release = { NodeLifecycle.default.release(it) }) { true }
                     }
-                    else -> false
+                    if (!node.enabled()) false
+                    else if (request.method == "setText") {
+                        val input = args.opt(1) as? String ?: throw IllegalArgumentException("setText requires text.")
+                        val append = args.optJSONObject(2)?.let { options ->
+                            rejectUnknownKeys(options, setOf("append"), "prepared setText")
+                            booleanOf(options, "append", false)
+                        } ?: false
+                        nodeRefActions.setText(node, PreparedNodeAction.text(node.text(), input, append, node.password()))
+                    } else node.performAction(when (request.method) {
+                        "click" -> BridgeNodeActions.ACTION_CLICK
+                        "longClick" -> BridgeNodeActions.ACTION_LONG_CLICK
+                        "scrollForward" -> BridgeNodeActions.ACTION_SCROLL_FORWARD
+                        else -> BridgeNodeActions.ACTION_SCROLL_BACKWARD
+                    })
+                } else {
+                    require(args.optJSONObject(2)?.optBoolean("append") != true) { "CAPABILITY_DENIED: Append requires an inspected target." }
+                    when (request.method) {
+                        "click" -> nodeRefActions.click(node)
+                        "longClick" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_LONG_CLICK)
+                        "scrollForward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_FORWARD)
+                        "scrollBackward" -> nodeRefActions.perform(node, BridgeNodeActions.ACTION_SCROLL_BACKWARD)
+                        "setText" -> {
+                            val text = args.opt(1) as? String ?: throw IllegalArgumentException("setText requires a string as its second argument.")
+                            nodeRefActions.setText(node, text)
+                        }
+                        else -> false
+                    }
                 }
             }
             NodeBridgeResponse.success(request.id, performed.toString())
@@ -327,7 +423,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     }
 
     /** Terminal provider teardown; a late dump cannot repopulate the disposed scope. */
-    fun clearNodeRefs() = nodeRefs.close()
+    fun clearNodeRefs() { nodeRefs.close(); synchronized(preparedActions) { preparedActions.clear() } }
 
     private fun nodeRefWindowKey(roots: List<UiObject>, current: JSONObject): String {
         val identities = roots.map {

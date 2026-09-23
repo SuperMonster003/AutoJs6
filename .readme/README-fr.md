@@ -170,6 +170,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 ###### 2026/09/23
 
+* `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` ai.agent.result/context fournit les résultats et le contexte des scripts enregistrés, avec annulation par appel et exemples de comptage du presse-papiers et de nettoyage des anciens installateurs téléchargés
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
