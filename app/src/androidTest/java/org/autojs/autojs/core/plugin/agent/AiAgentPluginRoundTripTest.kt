@@ -25,7 +25,7 @@ class AiAgentPluginRoundTripTest {
         assertNull(bundle.getString(C.KEY_ERROR_CODE)); return JSONObject(bundle.getString(key)!!)
     }
     private fun tool(name: String, args: JSONObject = JSONObject()) = JSONObject().put("kind", "tool").put("tool", name).put("arguments", args)
-    private fun done() = JSONObject().put("kind", "done").put("done", JSONObject().put("status", "completed").put("summary", "Verified by test").put("evidence", JSONArray().put("Observed final state")))
+    private fun done(orderStatus: String? = null) = JSONObject().put("kind", "done").put("done", JSONObject().put("status", "completed").put("summary", "Verified by test").put("evidence", JSONArray().put("Observed final state")).apply { orderStatus?.let { put("orderStatus", it) } })
     private fun ref(id: String) = bundle(C.KEY_RUN_REF_JSON, JSONObject().put("runId", id))
     private fun waitUntil(message: String, timeoutMs: Long = 15_000, condition: () -> Boolean) {
         val deadline = SystemClock.elapsedRealtime() + timeoutMs
@@ -541,7 +541,7 @@ class AiAgentPluginRoundTripTest {
                 }
                 else -> {
                     assertEquals("NODE_REF_STALE", observation(request).getString("error"))
-                    assertEquals(1, activity.clicks.get()); done()
+                    assertEquals(1, activity.clicks.get()); done(orderStatus = "none")
                 }
             }
         }
@@ -573,7 +573,7 @@ class AiAgentPluginRoundTripTest {
             }
             else -> {
                 assertEquals("NODE_REF_STALE", observation(request).getString("error"))
-                assertEquals(1, activity.parentClicks.get()); done()
+                assertEquals(1, activity.parentClicks.get()); done(orderStatus = "none")
             }
         } }
         val link = attach(api, model, broker(core), JSONObject().put("grantSummary", JSONObject().put("toolGroups", JSONArray().put("observe").put("act"))))
