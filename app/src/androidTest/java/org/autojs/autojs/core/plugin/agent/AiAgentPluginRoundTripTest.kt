@@ -79,8 +79,8 @@ class AiAgentPluginRoundTripTest {
         override fun cancel(reference: Bundle?) { cancelled.incrementAndGet() }
         override fun destroy(reason: Bundle?) = Unit
     }
-    private fun attach(api: IAiAgentPlugin, model: IAiAgentModelBroker, broker: IHostCapabilityBroker): IAiAgentLink =
-        api.attach(bundle(C.KEY_LINK_CONFIG_JSON, JSONObject()), model, broker, object : IAiAgentLinkCallback.Stub() {
+    private fun attach(api: IAiAgentPlugin, model: IAiAgentModelBroker, broker: IHostCapabilityBroker, config: JSONObject = JSONObject()): IAiAgentLink =
+        api.attach(bundle(C.KEY_LINK_CONFIG_JSON, config), model, broker, object : IAiAgentLinkCallback.Stub() {
             override fun onStatus(status: Bundle?) = Unit
             override fun onEvent(event: Bundle?) = Unit
         })
@@ -93,6 +93,91 @@ class AiAgentPluginRoundTripTest {
         return decode(answer).getString("runId")
     }
     private fun detach(link: IAiAgentLink) = link.detach(bundle(H.KEY_REASON_JSON, JSONObject().put("reason", "test-finished")))
+
+    @Test fun registeredScriptsAreRankedQueriedCachedRefreshedAndScopedThroughTheRealHost() = withPlugin { api ->
+        val oldWork = org.autojs.autojs.util.WorkingDirectoryUtils.path
+        val root = java.io.File(Environment.getExternalStorageDirectory(), "AgentP31Catalog-${System.nanoTime()}")
+        val work = java.io.File(root, "work"); val extra = java.io.File(root, "extra")
+        assertTrue(work.mkdirs()); assertTrue(extra.mkdirs())
+        val extraRoots = listOf(extra) + (1..31).map { java.io.File(root, "extra-$it").apply { assertTrue(mkdirs()) } }
+        fun script(id: String, description: String) = java.io.File(extra, "$id.js").writeText(
+            "/**\n * @agent\n * @description $description\n * @risk readonly\n */\nthrow new Error('SCRIPT_SOURCE_MUST_NOT_APPEAR');")
+        try {
+            org.autojs.autojs.util.WorkingDirectoryUtils.path = work.path
+            repeat(29) { script("entry-${it.toString().padStart(2, '0')}", if (it == 28) "uniquearchive" else "unrelated utility") }
+            script("coffee", "星巴克拿铁咖啡")
+            val catalogCalls = AtomicInteger()
+            val core = core(); core.prepareAgentScriptRoots(extraRoots)()
+            val delegate = broker(core)
+            val counted = object : IHostCapabilityBroker.Stub() {
+                override fun getBrokerInfo() = delegate.brokerInfo
+                override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                    val call = JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!)
+                    if (call.optString("module") == "agent" && call.optString("method") == "listScripts") catalogCalls.incrementAndGet()
+                    delegate.dispatch(request, callback)
+                }
+                override fun destroy(reason: Bundle?) = delegate.destroy(reason)
+            }
+            fun scripts(request: JSONObject): JSONObject {
+                val content = request.getJSONArray("messages").getJSONObject(0).getString("content")
+                assertFalse(content.contains("SCRIPT_SOURCE_MUST_NOT_APPEAR")); assertFalse(content.contains(extra.path))
+                return JSONObject(content.lineSequence().last { it.startsWith('{') })
+            }
+            val model = ScriptedModel { step, request ->
+                when (step) {
+                    0 -> {
+                        val data = scripts(request)
+                        assertEquals(24, data.getJSONArray("scripts").length())
+                        assertEquals("coffee", data.getJSONArray("scripts").getJSONObject(0).getString("id"))
+                        assertEquals(30, data.getInt("total")); assertEquals(1, catalogCalls.get())
+                        tool("script_catalog", JSONObject().put("query", "uniquearchive"))
+                    }
+                    1 -> {
+                        val messages = request.getJSONArray("messages")
+                        val observation = (messages.length() - 1 downTo 0).mapNotNull { index ->
+                            val content = messages.getJSONObject(index).getString("content")
+                            runCatching { JSONObject(content.substring(content.indexOf('{'))) }.getOrNull()
+                        }.first { it.optString("section") == "observation" && it.optJSONObject("data")?.has("result") == true }
+                            .getJSONObject("data").getJSONObject("result")
+                        assertEquals(1, observation.getJSONArray("scripts").length())
+                        assertEquals("entry-28", observation.getJSONArray("scripts").getJSONObject(0).getString("id"))
+                        assertEquals("Query must reuse the link cache", 1, catalogCalls.get())
+                        script("fresh", "newfreshmarker")
+                        done()
+                    }
+                    2 -> {
+                        assertEquals("fresh", scripts(request).getJSONArray("scripts").getJSONObject(0).getString("id"))
+                        assertEquals(2, catalogCalls.get()); done()
+                    }
+                    3 -> {
+                        assertEquals(0, scripts(request).getJSONArray("scripts").length())
+                        assertEquals(3, catalogCalls.get()); done()
+                    }
+                    else -> throw AssertionError("Unexpected model call $step")
+                }
+            }
+            val link = attach(api, model, counted, JSONObject().put("scriptRoots", JSONArray(extraRoots.map { it.path })))
+            try {
+                val first = start(link, goal = "请找星巴克拿铁咖啡")
+                fun completed(id: String) {
+                    waitUntil("Catalog run reaches a terminal state") { decode(link.getRun(ref(id))).optString("state") in setOf("completed", "failed", "blocked") }
+                    model.failure?.let { throw AssertionError("Script catalog fixture failed", it) }
+                    val row = decode(link.getRun(ref(id)))
+                    assertEquals(row.toString(), "completed", row.getString("state"))
+                    val steps = row.getJSONArray("steps")
+                    for (i in 0 until steps.length()) assertFalse(steps.getJSONObject(i).has("error"))
+                }
+                completed(first)
+                completed(start(link, goal = "newfreshmarker"))
+                val scoped = decode(link.startRun(bundle(C.KEY_RUN_REQUEST_JSON, JSONObject().put("goal", "work only")
+                    .put("options", JSONObject().put("interaction", "script").put("scriptRoots", JSONArray()))), null)).getString("runId")
+                completed(scoped)
+                assertEquals(4, model.calls.get())
+                assertEquals(C.ERROR_INVALID_REQUEST, link.startRun(bundle(C.KEY_RUN_REQUEST_JSON, JSONObject().put("goal", "denied")
+                    .put("options", JSONObject().put("scriptRoots", JSONArray().put(root.path)))), null).getString(C.KEY_ERROR_CODE))
+            } finally { detach(link); core.destroy(null) }
+        } finally { org.autojs.autojs.util.WorkingDirectoryUtils.path = oldWork; root.deleteRecursively() }
+    }
 
     @Test fun realHostIdentityRunsDeviceInfoAndPreservesPrivateStepsAfterCallbackFailure() = withPlugin { api ->
         assertEquals(C.CONTRACT_VERSION, api.capabilities.getInt(AiAgentCapabilityKeys.CONTRACT_VERSION))

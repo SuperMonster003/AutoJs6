@@ -247,6 +247,7 @@
 * `Nuevo` Contrato e intermediarios del anfitrión para AI Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Acceso a AI Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión
+* `Nuevo` El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
 * `Corrección` Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado
 * `Corrección` MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario
 * `Corrección` Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno

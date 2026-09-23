@@ -1,12 +1,13 @@
 # AI Agent plugin protocol V1
 
-Status: P1 host foundation, implemented in AutoJs6 6.8.0 / build **5285**. The host
+Status: host foundation and P3.1 catalog settings, implemented in AutoJs6 6.8.0 / build **5286**. The host
 provides model/capability brokers, registered-script catalog and execution bridge
 methods, compact node and screen-text observations, drawer controls and
-plugin-center management. The plugin's Agent loop, task workbench and script
-chooser, and the public `ai.agent` script API remain in their original roadmap
-stages. The contract is `plugin-api/ai-agent-api`, package
-`org.autojs.plugin.ai.agent.api`. `AiAgentIds.REQUIRED_HOST_VERSION_CODE` is 5285.
+plugin-center management. The plugin implements the Agent loop, task controls
+and registered-script presentation. Script parameter completion/execution,
+the task workbench and the public `ai.agent` script API remain in their original
+roadmap stages. The contract is `plugin-api/ai-agent-api`, package
+`org.autojs.plugin.ai.agent.api`. `AiAgentIds.REQUIRED_HOST_VERSION_CODE` is 5286.
 
 ## Identity and discovery
 
@@ -27,9 +28,8 @@ detach or plugin death. A rejected attach is never automatically retried.
 
 Management uses the existing INFO service to validate identity and the declared
 minimum host build. Runtime attachment independently validates the dedicated
-Agent interface and its contract. The current P0 plugin can be listed, enabled
-and launched, but its placeholder Binder does not implement runnable tasks.
-The complete runtime is staged in P2.5. Both service manifests, PluginInfo and
+Agent interface and its contract. P2.5 connected task controls and the runner
+to the real host brokers. Both service manifests, PluginInfo and
 the host contract must agree on the minimum host build.
 
 `AiAgentConnectionOwner` owns the link for the host process. Drawer instances
@@ -66,7 +66,7 @@ The public constants and KDoc in `AiAgentContract` freeze the complete vocabular
 | Key | JSON contents |
 | --- | --- |
 | linkConfigJson | hostLabel, locale, scriptRoots, grantSummary |
-| statusJson | state, attachedAt, runningRunId, queuedCount, pluginVersion, lastErrorCode |
+| statusJson | state, attachedAt, runningRunId, queuedCount, pluginVersion, lastErrorCode, scriptRoots |
 | runRequestJson | goal/options/origin, or a list query |
 | runEventJson | runId, type, sequence and event-specific fields; also link events |
 | runResponseJson | acknowledgement/query result or runId/requestId/value/allowed/scope |
@@ -151,7 +151,7 @@ The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
 These are Agent control-plane codes, including future runner/JS behavior.
 Capability responses retain the shared broker's lowercase error categories;
 the plugin's tool layer maps those observations into Agent errors. Defining a
-code here does not mean the P0 placeholder implements the associated behavior.
+code here does not mean every future execution adapter is already implemented.
 
 Task protocol ceilings are one running task per link, eight queued tasks,
 4 KiB goal text, 8 KiB supplied context, 200 steps, 300 model calls, 30 minutes
@@ -221,6 +221,31 @@ It neither starts nor replays tasks. Following fixed roadmap decisions D15/D16,
 there is no Agent boot receiver; P1.5's conflicting "boot" wording does not add
 an auto-start policy. Plugin package and authorization/enablement changes refresh
 admission and detach an unavailable link.
+
+Since build 5286, either authenticated attachment entry may include the existing
+`AiAgentContract.KEY_LINK_CONFIG_JSON` extra with exactly `{scriptRoots:[...]}`.
+This is a proposal from plugin settings, not a grant: unknown/duplicate fields,
+duplicate paths, relative paths, traversal and oversized input are rejected.
+There are at most 32 extra roots, 1024 UTF-8 bytes per path and 8 KiB per proposal.
+The host independently checks canonical containment, visibility and existence.
+On an attached link it merges only roots into the last accepted configuration,
+preserving the host's locale and `grantSummary`, and prepares the capability
+broker's catalog before asking the plugin to accept the change. Only a successful
+update commits the roots and persists the proposal for reconnection. Invalid
+roots preserve the accepted configuration. Accepted changes cancel current and
+queued plugin tasks and invalidate its catalog cache; no task is resumed.
+The plugin's status reports the accepted `scriptRoots`, allowing the launcher to
+distinguish a connected link from a rejected or still-pending settings change.
+Task `options.scriptRoots` defaults to that set and may only select a subset;
+an explicit empty array selects the working directory alone. The plugin queries
+the broker with `roots:[".", ...selectedExtraRoots]` (at most 33 selectors).
+
+The plugin refreshes the catalog at task start and uses a 60-second link cache
+for `script_catalog` searches. Deterministic keyword ranking presents at most
+24 records, further reduced as whole records to fit the model's context budget.
+Metadata is data, not task instructions. Descriptions and parameter summaries
+are bounded, duplicate IDs are omitted as ambiguous, and source text is never
+sent to the plugin. P3.2/P3.3 retain parameter admission and script invocation.
 
 P1.5 entry and device evidence is recorded in
 [the host entry report](evidence/ai-agent-p15-20260923.md). The independent P7

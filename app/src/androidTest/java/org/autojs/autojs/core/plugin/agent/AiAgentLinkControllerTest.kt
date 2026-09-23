@@ -173,6 +173,29 @@ class AiAgentLinkControllerTest {
         assertTrue(modelAvailable(fixture.calls.last().brokers))
     }
 
+    @Test
+    fun rootSettingsPreserveHostRestrictionsAndRejectedPluginUpdatesAreNotCommitted() = withFixture { fixture ->
+        val root = java.io.File(android.os.Environment.getExternalStorageDirectory(), "AgentP31Controller-${System.nanoTime()}")
+        assertTrue(root.mkdirs())
+        try {
+            fixture.controller.attach("""{"locale":"zh","grantSummary":{"toolGroups":["script"],"methods":["agent.listScripts"]}}""")
+            val link = fixture.calls.single().link
+            val config = org.json.JSONObject().put("scriptRoots", org.json.JSONArray().put(root.path)).toString()
+            fixture.controller.updateScriptRoots(config)
+            val accepted = JsonParser.parseString(link.configurations.single()).asJsonObject
+            assertEquals("zh", accepted.get("locale").asString)
+            assertEquals("[\"script\"]", accepted.getAsJsonObject("grantSummary").get("toolGroups").toString())
+            assertEquals("[\"agent.listScripts\"]", accepted.getAsJsonObject("grantSummary").get("methods").toString())
+            link.failUpdate = true
+            assertTrue(runCatching { fixture.controller.updateScriptRoots("{\"scriptRoots\":[]}") }.isFailure)
+            link.failUpdate = false
+            fixture.controller.updateScriptRoots(config)
+            assertEquals("The unchanged accepted roots remain the controller's source of truth", 1, link.configurations.size)
+            fixture.controller.updateScriptRoots("{\"scriptRoots\":[]}")
+            assertEquals(2, link.configurations.size)
+        } finally { root.deleteRecursively() }
+    }
+
     private fun withFixture(
         expectedUid: Int = Process.myUid(),
         failAttach: Boolean = false,
@@ -221,6 +244,8 @@ class AiAgentLinkControllerTest {
         val binder = DeathBinder()
         var detachCount = 0
         var startRunCount = 0
+        var failUpdate = false
+        val configurations = mutableListOf<String>()
         override fun asBinder(): IBinder = binder
         override fun getStatus() = Bundle()
         override fun startRun(request: Bundle?, callback: IAiAgentRunCallback?): Bundle {
@@ -232,7 +257,10 @@ class AiAgentLinkControllerTest {
         override fun listRuns(query: Bundle?) = Bundle()
         override fun getRun(ref: Bundle?) = Bundle()
         override fun listPresets(query: Bundle?) = Bundle()
-        override fun updateConfig(config: Bundle?) = Unit
+        override fun updateConfig(config: Bundle?) {
+            check(!failUpdate) { "Fixture rejects the configuration" }
+            configurations.add(config!!.getString(C.KEY_LINK_CONFIG_JSON)!!)
+        }
         override fun detach(reason: Bundle?) { detachCount++ }
     }
 

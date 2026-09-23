@@ -8,6 +8,7 @@ import android.os.Build
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.ai.agent.api.AiAgentActions
 import org.autojs.plugin.ai.agent.api.AiAgentIds
+import org.autojs.plugin.ai.agent.api.AiAgentContract
 
 /**
  * Protected by the PLUGIN permission. Intent package extras are not proof
@@ -18,7 +19,7 @@ import org.autojs.plugin.ai.agent.api.AiAgentIds
 class AiAgentAttachRequestReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (!isAuthorizedRequest(context, intent)) return
-        AiAgentConnectionOwner.get(context).requestFromPlugin()
+        deliver(context, intent)
     }
 
     companion object {
@@ -28,7 +29,16 @@ class AiAgentAttachRequestReceiver : BroadcastReceiver() {
             val request = Intent(intent).setAction(AiAgentActions.ACTION_ATTACH_REQUEST).setPackage(context.packageName)
             intent.removeExtra(AiAgentActions.EXTRA_AI_AGENT_ATTACH)
             intent.removeExtra(AiAgentActions.EXTRA_ATTACH_IDENTITY)
-            if (isAuthorizedRequest(context, request)) AiAgentConnectionOwner.get(context).requestFromPlugin()
+            intent.removeExtra(AiAgentContract.KEY_LINK_CONFIG_JSON)
+            if (isAuthorizedRequest(context, request)) deliver(context, request)
+        }
+
+        private fun deliver(context: Context, intent: Intent) {
+            val configuration = if (intent.hasExtra(AiAgentContract.KEY_LINK_CONFIG_JSON)) {
+                runCatching { AiAgentScriptRoots.configuration(requireNotNull(intent.getStringExtra(AiAgentContract.KEY_LINK_CONFIG_JSON))) }
+                    .getOrNull() ?: return
+            } else null
+            AiAgentConnectionOwner.get(context).requestFromPlugin(configuration)
         }
 
         @Suppress("DEPRECATION")

@@ -62,6 +62,29 @@ class AiAgentConnectionOwnerTest {
         assertFalse(f.owner.consumeGuide(guide))
     }
 
+    @Test fun approvedRootsPersistAcrossReattachWhileRejectedChangesPreserveTheLink() = fixture { f ->
+        val root = java.io.File(android.os.Environment.getExternalStorageDirectory(), "AgentP31Owner-${System.nanoTime()}")
+        assertTrue(root.mkdirs())
+        try {
+            val config = AiAgentScriptRoots.configuration(org.json.JSONObject().put("scriptRoots", org.json.JSONArray().put(root.path)).toString())
+            assertEquals(AiAgentUiState.ATTACHED, f.owner.connect(configuration = config).await().state)
+            assertEquals(config, f.savedRoots)
+            assertEquals(config, f.configurations.last())
+            val invalid = """{"scriptRoots":["/data"]}"""
+            assertEquals(AiAgentUiState.FAILED, f.owner.connect(configuration = invalid).await().state)
+            assertEquals("attached", f.controller.status.value.state)
+            assertEquals(config, f.savedRoots)
+            assertEquals(1, f.configurations.size)
+            f.controller.detach()
+            assertEquals(AiAgentUiState.ATTACHED, f.owner.connect().await().state)
+            assertEquals(config, f.configurations.last())
+            assertEquals(AiAgentUiState.ATTACHED, f.owner.connect(configuration = "{\"scriptRoots\":[]}").await().state)
+            assertEquals("{\"scriptRoots\":[]}", f.savedRoots)
+            assertEquals("{\"scriptRoots\":[]}", f.configurations.last())
+            assertEquals(0, f.runs.get())
+        } finally { root.deleteRecursively() }
+    }
+
     private fun fixture(block: suspend (Fixture) -> Unit) = runBlocking {
         val previous = Pref.getBoolean(AiAgentLinkController.NORMALLY_CLOSED_KEY, true)
         val f = Fixture()
@@ -79,9 +102,12 @@ class AiAgentConnectionOwnerTest {
         val attaches = AtomicInteger()
         val closed = AtomicInteger()
         val runs = AtomicInteger()
+        val configurations = java.util.concurrent.CopyOnWriteArrayList<String>()
+        var savedRoots = "{}"
         @Volatile var inspection = AiAgentInspection(AiAgentUiState.AVAILABLE)
         val controller = AiAgentLinkController(context, scope = scope, available = { true }, uid = { Process.myUid() },
-            attachLink = { _, _, _ ->
+            attachLink = { config, _, _ ->
+                configurations.add(config.getString(org.autojs.plugin.ai.agent.api.AiAgentContract.KEY_LINK_CONFIG_JSON)!!)
                 attaches.incrementAndGet()
                 AidlPluginHost.LeasedCall(object : IAiAgentLink.Stub() {
                     override fun getStatus() = Bundle()
@@ -91,10 +117,11 @@ class AiAgentConnectionOwnerTest {
                     override fun listRuns(query: Bundle?) = Bundle()
                     override fun getRun(ref: Bundle?) = Bundle()
                     override fun listPresets(query: Bundle?) = Bundle()
-                    override fun updateConfig(config: Bundle?) = Unit
+                    override fun updateConfig(config: Bundle?) { configurations.add(config!!.getString(org.autojs.plugin.ai.agent.api.AiAgentContract.KEY_LINK_CONFIG_JSON)!!) }
                     override fun detach(reason: Bundle?) = Unit
                 }, Closeable { closed.incrementAndGet() })
             })
-        val owner = AiAgentConnectionOwner(context, controller, scope, { inspection }, observePluginChanges = false)
+        val owner = AiAgentConnectionOwner(context, controller, scope, { inspection }, observePluginChanges = false,
+            readRootConfiguration = { savedRoots }, saveRootConfiguration = { savedRoots = it })
     }
 }

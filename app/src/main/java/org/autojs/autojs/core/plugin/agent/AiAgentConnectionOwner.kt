@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.plugin.ai.agent.api.AiAgentIds
+import org.autojs.autojs.core.pref.Pref
 
 data class AiAgentToolState(val state: AiAgentUiState, val status: AiAgentLinkStatus = AiAgentLinkStatus())
 
@@ -21,6 +22,8 @@ class AiAgentConnectionOwner internal constructor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     private val inspectPlugin: () -> AiAgentInspection = { AiAgentPluginInspector.inspect(context.applicationContext) },
     observePluginChanges: Boolean = true,
+    private val readRootConfiguration: () -> String = { Pref.getString(ROOT_CONFIGURATION_KEY, "{}") },
+    private val saveRootConfiguration: (String) -> Unit = { Pref.putString(ROOT_CONFIGURATION_KEY, it) },
 ) {
     private val context = context.applicationContext
     private val operation = Mutex()
@@ -31,6 +34,7 @@ class AiAgentConnectionOwner internal constructor(
         AiAgentToolState(if (available == AiAgentUiState.AVAILABLE) AiAgentUiPolicy.linkState(status.state) else available, status)
     }.stateIn(scope, SharingStarted.Eagerly, AiAgentToolState(AiAgentUiState.DETACHED))
     private var connectJob: Deferred<AiAgentInspection>? = null
+    private var connectingConfiguration: String? = null
     private var refreshJob: Job? = null
     var isNormallyClosed: Boolean
         get() = controller.isNormallyClosed
@@ -64,16 +68,21 @@ class AiAgentConnectionOwner internal constructor(
         scope.launch { if (!isNormallyClosed) connect(automatic = true).await() }
     }
 
-    fun requestFromPlugin() {
+    fun requestFromPlugin(configuration: String? = null) {
         scope.launch {
-            val inspection = connect(automatic = false).await()
+            val inspection = connect(automatic = false, configuration = configuration).await()
             if (AiAgentUiPolicy.needsGuide(inspection.state)) mutableGuide.value = inspection
         }
     }
 
     /** Called on the main thread, including through the receiver and drawer facade. */
-    fun connect(automatic: Boolean = false): Deferred<AiAgentInspection> {
-        connectJob?.takeIf { it.isActive }?.let { return it }
+    fun connect(automatic: Boolean = false, configuration: String? = null): Deferred<AiAgentInspection> {
+        val normalized = configuration?.let(AiAgentScriptRoots::configuration)
+        connectJob?.takeIf { it.isActive }?.let {
+            if (normalized == null || normalized == connectingConfiguration) return it
+            it.cancel()
+        }
+        connectingConfiguration = normalized
         return scope.async {
             operation.withLock {
                 if (automatic && isNormallyClosed) return@withLock AiAgentInspection(AiAgentUiState.DETACHED)
@@ -82,9 +91,17 @@ class AiAgentConnectionOwner internal constructor(
                 val inspection = inspect()
                 availability.value = inspection.state
                 if (inspection.state != AiAgentUiState.AVAILABLE) return@withLock inspection
-                if (controller.status.value.state == "attached") return@withLock inspection.copy(state = AiAgentUiState.ATTACHED)
                 try {
-                    withContext(Dispatchers.IO) { controller.attach() }
+                    withContext(Dispatchers.IO) {
+                        if (controller.status.value.state == "attached") {
+                            if (normalized != null) controller.updateScriptRoots(normalized)
+                        } else {
+                            val settings = normalized ?: runCatching { AiAgentScriptRoots.configuration(readRootConfiguration()) }.getOrDefault("{}")
+                            controller.attach(settings)
+                        }
+                        // Persist only a configuration the host validated and the plugin accepted.
+                        if (normalized != null) saveRootConfiguration(normalized)
+                    }
                     inspection.copy(state = AiAgentUiState.ATTACHED)
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -130,6 +147,7 @@ class AiAgentConnectionOwner internal constructor(
     }
 
     companion object {
+        internal const val ROOT_CONFIGURATION_KEY = "ai_agent_script_root_configuration"
         @Volatile private var instance: AiAgentConnectionOwner? = null
         fun get(context: Context): AiAgentConnectionOwner = instance ?: synchronized(this) {
             instance ?: AiAgentConnectionOwner(context).also { instance = it }

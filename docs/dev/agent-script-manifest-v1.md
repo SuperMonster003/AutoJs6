@@ -2,17 +2,18 @@
 
 This is the host registration format for AI Agent roadmap P1.4. It provides a
 bounded catalog and argument admission for scripts that explicitly opt in. The
-plugin's script chooser and confirmation flow remain in P3. The public
+plugin now ranks and presents registered scripts in P3.1. Parameter completion,
+confirmation and invocation remain in P3.2/P3.3. The public
 `ai.agent.result` and `ai.agent.context` script methods remain in P5; this
 document does not declare those methods available yet.
 
-The complete Agent host integration declares AutoJs6 6.8.0 / build 5285 as its
+The current Agent host integration declares AutoJs6 6.8.0 / build 5286 as its
 minimum. Registration is consumed through the attached, granted host capability
 broker; it is not a general plugin filesystem API. The drawer and plugin center
 provide connection/management entry points as described in
-[AI Agent protocol V1](ai-agent-protocol-v1.md). The current P0 plugin still needs
-its P2/P3 execution and selection components before users can run these examples
-through an Agent task.
+[AI Agent protocol V1](ai-agent-protocol-v1.md). The task runner can query and
+present this catalog; its script invocation adapter remains pending before
+users can run these examples through an Agent task.
 
 ## Project registration
 
@@ -158,6 +159,14 @@ serialized objects must fit within 16 KiB of UTF-8 JSON. This returns a new obje
 and does not mutate the caller's arguments or cached schema.
 
 ## Catalog roots, records and caching
+
+The plugin launcher provides a script-directory settings page. Enter one absolute
+path per line, at most 32 extra roots. The authenticated attachment request proposes
+them to the host, which validates and saves the accepted configuration. Settings
+changes cancel plugin tasks and invalidate its cache. Task `options.scriptRoots`
+may select a subset; an empty array retains only the host working directory and
+its `agent/` subtree. The model's `script_catalog` arguments accept only a query,
+never root paths. Minimum host build 5286 supports this configuration flow.
 
 `AgentScriptCatalog` receives the working directory, user-visible storage roots
 and host-approved additional roots. Per-request `roots` can only narrow that

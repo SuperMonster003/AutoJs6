@@ -108,6 +108,19 @@ class AiAgentLinkController(
     }
 
     suspend fun updateConfig(configJson: String): Unit = mutex.withLock {
+        updateConfigLocked(configJson)
+    }
+
+    /** Preserve the host's grant and locale when applying the plugin's root-only settings. */
+    suspend fun updateScriptRoots(configJson: String): Unit = mutex.withLock {
+        val roots = JsonParser.parseString(AiAgentScriptRoots.configuration(configJson)).asJsonObject.get("scriptRoots")
+        val next = JsonParser.parseString(desiredConfig).asJsonObject.apply { add("scriptRoots", roots) }
+        val previous = JsonParser.parseString(desiredConfig).asJsonObject.get("scriptRoots") ?: com.google.gson.JsonArray()
+        if (previous == roots) return@withLock
+        updateConfigLocked(next.toString())
+    }
+
+    private fun updateConfigLocked(configJson: String) {
         validateConfig(configJson)
         val current = checkNotNull(active) { C.ERROR_LINK_DETACHED }
         val commitRoots = current.brokers.prepareConfig(configJson)

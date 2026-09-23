@@ -53,7 +53,8 @@ internal class NodeBridgeAgentBridge(
                     require(args.length() <= 1)
                     val options = if (args.length() == 0) JSONObject() else args.getJSONObject(0)
                     val roots = options.opt("roots")?.takeUnless { it == JSONObject.NULL }?.let { raw ->
-                        require(raw is JSONArray && raw.length() <= 32)
+                        // One working-directory selector plus up to 32 configured extra roots.
+                        require(raw is JSONArray && raw.length() <= 33)
                         (0 until raw.length()).map { index -> raw.get(index).also { require(it is String) } as String }
                     }
                     val query = optionalString(options, "query")

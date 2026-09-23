@@ -247,6 +247,7 @@
 * `Feature` AI Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart
+* `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
 * `Fix` Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record
 * `Fix` MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices
 * `Fix` Unnecessary blank lines below short accessibility manager status values such as Unbound and None
