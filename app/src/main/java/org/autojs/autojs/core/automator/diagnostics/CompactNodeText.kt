@@ -75,7 +75,10 @@ object CompactNodeText {
     }
 
     fun capture(node: UiNode<*>, depth: Int): Node {
-        val identity = listOf(node.packageName().orEmpty(), node.className().orEmpty(), node.id().orEmpty(), node.text(), node.desc().orEmpty())
+        // Capabilities distinguish actionable containers from identically sized passive wrappers.
+        // Transient checked/focused/selected/enabled state is validated separately when required.
+        val identity = listOf(node.packageName().orEmpty(), node.className().orEmpty(), node.id().orEmpty(), node.text(), node.desc().orEmpty(),
+            node.clickable().toString(), node.longClickable().toString(), node.checkable().toString(), node.scrollable().toString(), node.editable().toString())
         val digest = if (identity.any { it.length > MAX_IDENTITY_CHARS }) null else {
             val hash = MessageDigest.getInstance("SHA-256")
             identity.forEach { value ->

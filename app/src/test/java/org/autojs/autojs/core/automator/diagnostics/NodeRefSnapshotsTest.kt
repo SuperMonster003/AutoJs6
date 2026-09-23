@@ -73,6 +73,35 @@ class NodeRefSnapshotsTest {
         assertEquals(listOf(root.find("nested")), released)
     }
 
+    @Test fun actionableContainerDoesNotAliasPassiveWrappersWithIdenticalBounds() {
+        val store = NodeRefSnapshots()
+        val root = node("").apply { className = "ViewGroup"; clickable = true }
+        repeat(3) { index -> root.child("passive$index") { packageName = "app"; className = "ViewGroup"; bounds(0, 0, 100, 100) } }
+        store.register(listOf(CompactNodeText.capture(root, 0)), "active", "app/window1")
+        assertTrue(store.relocate(store.resolve("#n1"), listOf(root), "app/window1") { it === root })
+        root.find("passive0").clickable = true
+        var acted = false
+        stale { store.relocate(store.resolve("#n1"), listOf(root), "app/window1") { acted = true } }
+        assertFalse(acted)
+    }
+
+    @Test fun changedCapabilitiesCannotRetargetAnOtherwiseIdenticalNode() {
+        for (change in listOf<(FakeUiNode) -> Unit>({ it.clickable = true }, { it.longClickable = true },
+            { it.checkable = true }, { it.scrollable = true }, { it.editable = true })) {
+            val store = NodeRefSnapshots(); register(store, "button")
+            val replacement = node("button").also(change)
+            var acted = false
+            stale { store.relocate(store.resolve("#n1"), listOf(replacement), "app/window1") { acted = true } }
+            assertFalse(acted)
+        }
+    }
+
+    @Test fun transientSelectionStateDoesNotChangeNodeIdentity() {
+        val store = NodeRefSnapshots(); register(store, "button")
+        val current = node("button").apply { checked = true; focused = true; selected = true }
+        assertTrue(store.relocate(store.resolve("#n1"), listOf(current), "app/window1") { it === current })
+    }
+
     @Test fun aSmallerReplacementInsideTheOldBoundsCannotReceiveTheAction() {
         val store = NodeRefSnapshots()
         register(store, "button")
