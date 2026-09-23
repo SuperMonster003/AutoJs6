@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <service
+            android:name="org.autojs.autojs.core.plugin.agent.AgentCallbackDeathService"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":agent_callback_death" />
         <activity
             android:name="org.autojs.autojs.ui.pager.ScrollControllableViewPagerTestActivity"
             android:exported="false"
