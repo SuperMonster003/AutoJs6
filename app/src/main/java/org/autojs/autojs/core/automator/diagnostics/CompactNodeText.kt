@@ -17,8 +17,9 @@ object CompactNodeText {
         fun permits(candidate: Bounds): Boolean {
             val dx = minOf(48L, maxOf(0L, right.toLong() - left) / 2)
             val dy = minOf(48L, maxOf(0L, bottom.toLong() - top) / 2)
-            return candidate.left.toLong() >= left.toLong() - dx && candidate.right.toLong() <= right.toLong() + dx &&
-                candidate.top.toLong() >= top.toLong() - dy && candidate.bottom.toLong() <= bottom.toLong() + dy
+            // Bound every edge's movement; containment alone aliases smaller anonymous descendants.
+            return kotlin.math.abs(candidate.left.toLong() - left) <= dx && kotlin.math.abs(candidate.right.toLong() - right) <= dx &&
+                kotlin.math.abs(candidate.top.toLong() - top) <= dy && kotlin.math.abs(candidate.bottom.toLong() - bottom) <= dy
         }
     }
 

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/23",
+      "released_date": "2026/09/24",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -248,6 +248,7 @@
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [
+        "Node relocation no longer confuses smaller nested containers with the original action target",
         "Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record",
         "MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices",
         "Unnecessary blank lines below short accessibility manager status values such as Unbound and None",

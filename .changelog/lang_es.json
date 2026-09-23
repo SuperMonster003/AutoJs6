@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/23",
+      "released_date": "2026/09/24",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -248,6 +248,7 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
+        "La relocalizacion de nodos ya no confunde contenedores anidados menores con el objetivo original",
         "Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado",
         "MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario",
         "Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno",

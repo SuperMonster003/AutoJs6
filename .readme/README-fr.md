@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/09/23
+###### 2026/09/24
 
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -413,6 +413,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` La relocalisation des noeuds ne confond plus les petits conteneurs imbriques avec la cible originale
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
 * `Correction` Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun

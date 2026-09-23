@@ -60,6 +60,28 @@ class NodeRefSnapshotsTest {
         stale { store.relocate(store.resolve("#n1"), listOf(otherApp), "app/window1") { true } }
     }
 
+    @Test fun anonymousContainerDoesNotAliasItsSmallerDescendants() {
+        val store = NodeRefSnapshots()
+        val root = FakeUiNode.root {
+            packageName = "app"; className = "FrameLayout"; bounds(0, 746, 1800, 991)
+            child("nested") { packageName = "app"; className = "FrameLayout"; bounds(183, 771, 623, 825) }
+        }
+        store.register(listOf(CompactNodeText.capture(root, 0)), "active", "app/window1")
+        val released = ArrayList<FakeUiNode>()
+        val matched = store.relocate(store.resolve("#n1"), listOf(root), "app/window1", release = { released += it }) { it }
+        assertTrue(matched === root)
+        assertEquals(listOf(root.find("nested")), released)
+    }
+
+    @Test fun aSmallerReplacementInsideTheOldBoundsCannotReceiveTheAction() {
+        val store = NodeRefSnapshots()
+        register(store, "button")
+        val replacement = node("button").apply { bounds(49, 49, 51, 51) }
+        var acted = false
+        stale { store.relocate(store.resolve("#n1"), listOf(replacement), "app/window1") { acted = true } }
+        assertFalse(acted)
+    }
+
     @Test fun ambiguousFingerprintsFailClosedAndAllBorrowedChildrenAreReleased() {
         val store = NodeRefSnapshots()
         register(store, "button")
