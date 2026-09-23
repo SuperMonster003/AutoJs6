@@ -627,7 +627,8 @@
         "리소스 디렉터리의 PNG 비트맵을 무손실 WebP로 변환하고 (런처 아이콘 제외) 사용되지 않는 리소스 일부를 제거하여 APK 크기 축소",
         "네이티브 라이브러리 패키징과 Android 버전 호환성을 유지하면서 플러그인 적합성 테스트 앱 및 호스트 테스트의 Manifest, Java, Kotlin 컴파일 경고 감소",
         "accessibility.dump의 compact 형식과 nodeRef 노드 참조. 노드 재탐색 및 만료된 참조 거부 지원",
-        "accessibility.readScreenText 메서드. 화면 캡처와 승인된 OCR 플러그인을 통해 크기가 제한된 화면 텍스트와 위치 반환"
+        "accessibility.readScreenText 메서드. 화면 캡처와 승인된 OCR 플러그인을 통해 크기가 제한된 화면 텍스트와 위치 반환",
+        "AI Agent 권한으로 알림 창과 빠른 설정을 열 수 있으며 그 외 허용되지 않은 키 동작은 계속 거부"
       ],
       "dependency": [
         "모듈화 Android AXML",

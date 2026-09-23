@@ -10,6 +10,7 @@ internal object AiAgentGrant {
         "accessibility" to listOf("isEnabled", "ensureEnabled", "dump", "explain", "screenshot", "readScreenText",
             "findOne", "findAll", "findByText", "click", "longClick", "setText", "scrollForward", "scrollBackward",
             "swipe", "gesture", "back", "home", "recentApps"),
+        "keys" to listOf("notifications", "quickSettings"),
         "agent" to listOf("listScripts", "readManifest", "execRegistered"),
         "engines" to listOf("execScript", "execScriptFile", "list", "stop", "stopAll"),
         "console" to listOf("tail"),
@@ -27,7 +28,6 @@ internal object AiAgentGrant {
     fun default(): HostCapabilityGrant = HostCapabilityGrant(
         allowedMethods = allowedMethods,
         permissions = HostCapabilityGrant.DEFAULT_PERMISSIONS - setOf(
-            NodeBridgePermissionManifest.KEYS,
             NodeBridgePermissionManifest.FILES_DELETE,
             NodeBridgePermissionManifest.APP_ACTIVITY,
         ) + setOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC, NodeBridgePermissionManifest.OCR),

@@ -161,6 +161,11 @@ ceilings; P5 implements detached ownership. Capability grants already limit
 Agent dispatch to two concurrent tool calls. Model limits and transport byte
 limits described above are enforced by the existing host brokers.
 
+The Agent grant includes `keys.notifications` and `keys.quickSettings`, matching
+the notification-panel values of `ui_press_key`. The `keys` permission token does
+not enable other methods: `lockScreen`, `powerDialog`, `takeScreenshot` and
+`splitScreen` remain outside the method allowlist.
+
 ## Model admission
 
 The production broker currently selects the official 3-Stone AI component through

@@ -627,7 +627,8 @@
         "PNG bitmaps in the resource directory are converted to lossless WebP (launcher icons excluded) and a handful of unused resources are removed to shrink the APK",
         "Reduce Manifest, Java and Kotlin compiler warnings in plugin conformance apps and host tests while preserving native library packaging and Android version compatibility",
         "compact output and nodeRef references for accessibility.dump, with node relocation and stale-reference rejection",
-        "accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins"
+        "accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins",
+        "AI Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied"
       ],
       "dependency": [
         "Modularized Android AXML",

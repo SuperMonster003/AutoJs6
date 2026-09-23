@@ -498,6 +498,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
 * `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
 * `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
+* `优化` AI Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

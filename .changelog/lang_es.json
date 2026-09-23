@@ -627,7 +627,8 @@
         "Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK",
         "Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android",
         "Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas",
-        "accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados"
+        "accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados",
+        "Los permisos de AI Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas"
       ],
       "dependency": [
         "Android AXML modularizado",

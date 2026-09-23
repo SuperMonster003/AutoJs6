@@ -629,6 +629,7 @@
 * `Amélioration` Réduction des avertissements Manifest, Java et Kotlin dans les applications de conformité des plugins et les tests de l'hôte, en conservant le conditionnement des bibliothèques natives et la compatibilité Android
 * `Amélioration` Format compact et références nodeRef pour accessibility.dump, avec relocalisation des éléments et rejet des références périmées
 * `Amélioration` accessibility.readScreenText renvoie du texte et des positions en quantité limitée à partir de captures et de plugins OCR autorisés
+* `Amélioration` Les autorisations AI Agent permettent les notifications et les réglages rapides; les autres actions de touches non autorisées restent refusées
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

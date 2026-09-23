@@ -791,6 +791,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` プラグイン適合性テストアプリとホストテストの Manifest, Java, Kotlin コンパイル警告を削減し, ネイティブライブラリのパッケージングと Android バージョン互換性を維持
 * `改善` accessibility.dump の compact 形式と nodeRef ノード参照. ノードの再特定と無効な参照の拒否に対応
 * `改善` accessibility.readScreenText メソッド. スクリーンショットと許可済み OCR プラグインを使用し, 上限付きの画面テキストと位置を返却
+* `改善` AI Agent の権限で通知パネルとクイック設定を開けるようにし, その他の未許可キー操作は引き続き拒否
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -791,6 +791,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Reduce Manifest, Java and Kotlin compiler warnings in plugin conformance apps and host tests while preserving native library packaging and Android version compatibility
 * `Improvement` compact output and nodeRef references for accessibility.dump, with node relocation and stale-reference rejection
 * `Improvement` accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins
+* `Improvement` AI Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

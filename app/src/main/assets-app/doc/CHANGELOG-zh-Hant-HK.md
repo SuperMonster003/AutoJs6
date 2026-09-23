@@ -629,6 +629,7 @@
 * `優化` 減少插件一致性測試應用及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫打包行為及 Android 版本兼容性
 * `優化` accessibility.dump 的 compact 格式與 nodeRef 節點引用, 支援節點重新定位及失效引用拒絕
 * `優化` accessibility.readScreenText 方法, 透過截圖與已授權 OCR 插件回傳有上限的螢幕文字及位置
+* `優化` AI Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

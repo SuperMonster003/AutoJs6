@@ -791,6 +791,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 네이티브 라이브러리 패키징과 Android 버전 호환성을 유지하면서 플러그인 적합성 테스트 앱 및 호스트 테스트의 Manifest, Java, Kotlin 컴파일 경고 감소
 * `개선` accessibility.dump의 compact 형식과 nodeRef 노드 참조. 노드 재탐색 및 만료된 참조 거부 지원
 * `개선` accessibility.readScreenText 메서드. 화면 캡처와 승인된 OCR 플러그인을 통해 크기가 제한된 화면 텍스트와 위치 반환
+* `개선` AI Agent 권한으로 알림 창과 빠른 설정을 열 수 있으며 그 외 허용되지 않은 키 동작은 계속 거부
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

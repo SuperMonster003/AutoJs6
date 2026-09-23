@@ -791,6 +791,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android
 * `Mejora` Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas
 * `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
+* `Mejora` Los permisos de AI Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

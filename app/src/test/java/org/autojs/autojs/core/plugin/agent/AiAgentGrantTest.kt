@@ -16,6 +16,7 @@ class AiAgentGrantTest {
             accessibility.findByText accessibility.click accessibility.longClick accessibility.setText
             accessibility.scrollForward accessibility.scrollBackward accessibility.swipe accessibility.gesture
             accessibility.back accessibility.home accessibility.recentApps
+            keys.notifications keys.quickSettings
             agent.listScripts agent.readManifest agent.execRegistered
             engines.execScript engines.execScriptFile engines.list engines.stop engines.stopAll console.tail
             files.list files.stat files.read files.write
@@ -34,12 +35,19 @@ class AiAgentGrantTest {
 
     @Test fun unrelatedCapabilitiesCannotBeEnabledByPluginPreferences() {
         listOf("files.delete", "rhino.run", "java.invoke", "websocket.connect", "fetch.fetch",
-            "ui.overlay", "input_observer.observe", "events.on").forEach { method ->
+            "ui.overlay", "input_observer.observe", "events.on", "keys.lockScreen", "keys.powerDialog",
+            "keys.takeScreenshot", "keys.splitScreen").forEach { method ->
             val result = grant.evaluate(method.substringBefore('.'), method.substringAfter('.'), emptyList(), 1)
             assertTrue(method, result is HostCapabilityGrant.Decision.Denied)
             assertEquals(HostCapabilityGrant.Reason.METHOD_NOT_GRANTED, (result as HostCapabilityGrant.Decision.Denied).reason)
         }
         assertFalse("files.delete" in grant.permissions)
         assertTrue(grant.evaluate("files", "read", listOf("java_interop"), 1) is HostCapabilityGrant.Decision.Denied)
+    }
+
+    @Test fun onlyTheTwoPanelActionsReceiveTheKeysCapability() {
+        for (method in listOf("notifications", "quickSettings")) {
+            assertTrue(grant.evaluate("keys", method, listOf("keys"), 1) is HostCapabilityGrant.Decision.Allowed)
+        }
     }
 }
