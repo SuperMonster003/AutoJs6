@@ -416,8 +416,9 @@ internal class TypeScriptRhinoCommonJsRequire(
 
     override fun call(
         cx: Context,
+        nt: Any?,
         scope: VarScope,
-        thisObj: Scriptable?,
+        thisObj: Any?,
         args: Array<out Any?>,
     ): Any? {
         val specifier = args.firstOrNull() as? String
@@ -425,11 +426,11 @@ internal class TypeScriptRhinoCommonJsRequire(
         val resolved = specifier?.let { request ->
             runtimeProject()?.resolveCommonJsDependency(request, moduleScope?.uri)
         }
-        if (resolved == null) return super.call(cx, scope, thisObj, args)
+        if (resolved == null) return super.call(cx, nt, scope, thisObj, args)
         val rewritten = Array<Any?>(args.size) { index ->
             if (index == 0) resolved.toURI().toString() else args[index]
         }
-        return super.call(cx, scope, thisObj, rewritten)
+        return super.call(cx, nt, scope, thisObj, rewritten)
     }
 }
 

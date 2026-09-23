@@ -29,12 +29,13 @@ class SetIntervalExtTest {
 
     @Test
     fun listenerIsInvokedWithOrdinaryCallThisValue() {
-        var actualThis: Scriptable? = null
+        var actualThis: Any? = null
         val listener = object : BaseFunction() {
             override fun call(
                 cx: Context?,
+                nt: Any?,
                 scope: VarScope?,
-                thisObj: Scriptable?,
+                thisObj: Any?,
                 args: Array<out Any?>,
             ): Any {
                 actualThis = thisObj

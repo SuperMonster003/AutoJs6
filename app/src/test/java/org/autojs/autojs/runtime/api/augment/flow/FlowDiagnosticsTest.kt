@@ -43,7 +43,7 @@ class FlowDiagnosticsTest {
         val scheduler = FlowScheduler(worker, script, bindings, { 0 }, {})
         var tail: FlowNode? = null
         ScriptableObject.putProperty(scope, "append", object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
                 val name = Context.toString(args[0])
                 val step = FlowStep.Tool(name, null) { value, _ ->
                     if (name == "smartClickBounds") throw error

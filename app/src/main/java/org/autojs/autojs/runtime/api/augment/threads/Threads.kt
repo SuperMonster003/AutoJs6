@@ -88,8 +88,9 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> object : BaseFunction() {
                     override fun call(
                         cx: Context,
+                        nt: Any?,
                         scope: VarScope,
-                        thisObj: Scriptable,
+                        thisObj: Any?,
                         args: Array<out Any?>,
                     ): Any? = func.call(cx, scope, thisObj, args)
                 }.also { initNewBaseFunction(scriptRuntime.topLevelScope, it) }

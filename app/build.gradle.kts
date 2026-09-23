@@ -476,15 +476,24 @@ ksp {
 
 // The local Rhino build is a fat jar that bundles JLine (org.jline.**, native terminal helpers including
 // Windows DLLs) for Rhino's interactive shell. The host only uses ShellContextFactory and the debugger
-// API, so the packaged runtime jar is derived without JLine; the original jar stays untouched.
+// API and interpreter. Exclude the JVM-only optimizer (MethodHandle bytecode requires API 26)
+// and JFR instrumentation as well, so the runtime remains compatible with minSdk 24.
 // zh-CN: 本地 Rhino 构建是打包了 JLine (org.jline.**, 含 Windows DLL 的原生终端助手) 的 fat jar, JLine 只供
-// Rhino 交互式 shell 使用. 宿主只用到 ShellContextFactory 与调试器 API, 因此打包的运行时 jar 从原 jar 派生并去掉 JLine,
-// 原 jar 保持不变.
+// Rhino 交互式 shell 使用. 宿主使用 ShellContextFactory, 调试器与解释器; 派生运行时 jar 去掉 JLine,
+// JVM 专用优化编译器与 JFR 监测类, 保持 minSdk 24 兼容性. 完整原始 jar 供编译与桌面 JVM 使用.
 val rhinoJar = file("$rootDir/libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar")
+val rhinoRuntimeExcludes = listOf(
+    "org/jline/**", "META-INF/maven/org.jline/**", "META-INF/native-image/**", "META-INF/services/org/jline/**",
+    "org/mozilla/javascript/optimizer/**",
+) + listOf(
+    "JFREmitter", "ClassCompileEvent", "InterpreterCompileEvent", "ObjectsInitEvent",
+    "ParseEvent", "SafeObjectsInitEvent", "ScriptExecEvent", "TestEvent",
+).map { "org/mozilla/javascript/$it*.class" }
 val slimRhinoJar = tasks.register<Jar>("slimRhinoJar") {
-    description = "Derives the Rhino runtime jar without the JLine shell console."
+    description = "Derives the Android Rhino interpreter jar without JVM-only components."
+    inputs.property("runtimeExcludes", rhinoRuntimeExcludes)
     from(zipTree(rhinoJar)) {
-        exclude("org/jline/**", "META-INF/maven/org.jline/**", "META-INF/native-image/**", "META-INF/services/org/jline/**")
+        exclude(rhinoRuntimeExcludes)
     }
     includeEmptyDirs = false
     archiveFileName.set(rhinoJar.name.removeSuffix(".jar") + "-slim.jar")
@@ -601,8 +610,8 @@ dependencies /* Unclassified */ {
 
     // Rhino
     // Compile against the full jar (IDE resolution, test compilation) but package and run the derived jar
-    // without the JLine shell console (see slimRhinoJar above).
-    // zh-CN: 编译使用完整 jar (IDE 解析, 测试编译), 打包与运行使用去掉 JLine shell 控制台的派生 jar (见上方 slimRhinoJar).
+    // without the JVM-only console, optimizer, and JFR components (see slimRhinoJar above).
+    // zh-CN: 编译使用完整 jar (IDE 解析, 测试编译), 打包与运行使用去掉 JVM 专用组件的派生 jar (见上方 slimRhinoJar).
     compileOnly(files(rhinoJar))
     runtimeOnly(files(slimRhinoJar.map { it.archiveFile }))
 

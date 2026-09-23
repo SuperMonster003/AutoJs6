@@ -11,7 +11,6 @@ import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.script.ScriptSource;
-import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
@@ -19,6 +18,7 @@ import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Kit;
 import org.mozilla.javascript.NativeCall;
 import org.mozilla.javascript.ScriptRuntime;
+import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.SecurityUtilities;
@@ -676,6 +676,15 @@ public class Dim {
      */
     private Object getObjectPropertyImpl(Context cx, Object object,
                                          Object id) {
+        if (object instanceof VarScope scope) {
+            if ("__parent__".equals(id)) {
+                return scope.getParentScope();
+            }
+            Object value = id instanceof String name
+                    ? ScriptableObject.getProperty(scope, name)
+                    : scope.get((Integer) id, scope);
+            return value == Scriptable.NOT_FOUND ? Undefined.instance : value;
+        }
         Scriptable scriptable = (Scriptable) object;
         Object result;
         if (id instanceof String name) {
@@ -704,6 +713,16 @@ public class Dim {
      * Returns an array of the property names on the given script object.
      */
     private Object[] getObjectIdsImpl(Context cx, Object object) {
+        if (object instanceof VarScope scope) {
+            Object[] ids = scope.getIds();
+            if (scope.getParentScope() == null) {
+                return ids;
+            }
+            Object[] withParent = new Object[ids.length + 1];
+            withParent[0] = "__parent__";
+            System.arraycopy(ids, 0, withParent, 1, ids.length);
+            return withParent;
+        }
         if (!(object instanceof Scriptable scriptable) || object == Undefined.instance) {
             return Context.emptyArgs;
         }
@@ -893,9 +912,8 @@ public class Dim {
         cx.setOptimizationLevel(-1);
         cx.setGeneratingDebug(false);
         try {
-            Callable script = (Callable) cx.compileString(expr, "", 0, null);
-            Object result = script.call(cx, frame.scope, frame.thisObj,
-                    ScriptRuntime.emptyArgs);
+            Script script = cx.compileString(expr, "", 0, null);
+            Object result = script.exec(cx, frame.scope, frame.thisObj);
             if (result == Undefined.instance) {
                 resultString = "";
             } else {
@@ -1173,12 +1191,12 @@ public class Dim {
         /**
          * The scope.
          */
-        private Scriptable scope;
+        private VarScope scope;
 
         /**
          * The 'this' object.
          */
-        private Scriptable thisObj;
+        private Object thisObj;
 
         /**
          * Information about the function.
@@ -1209,8 +1227,9 @@ public class Dim {
         /**
          * Called when the stack frame is entered.
          */
-        public void onEnter(Context cx, Scriptable scope,
-                            Scriptable thisObj, Object[] args) {
+        @Override
+        public void onEnter(Context cx, VarScope scope,
+                            Object thisObj, Object[] args) {
             contextData.pushFrame(this);
             this.scope = scope;
             this.thisObj = thisObj;

@@ -98,7 +98,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         override fun getFunctionName() = WIDGET_KEY
 
-        override fun construct(cx: Context?, scope: VarScope, args: Array<out Any?>) = createObject(cx, scope).also {
+        override fun construct(cx: Context?, nt: Any?, scope: VarScope, args: Array<out Any?>) = createObject(cx, scope).also {
             require(it is NativeObject) {
                 "Bad implementation of call as constructor, name=${getFunctionName()} in ${javaClass.name}"
             }
@@ -876,7 +876,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
          */
         private fun evalInContext(expression: String, ctx: Scriptable): Any? {
             val iife = object : BaseFunction() {
-                override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
+                override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
                     return cx.evaluateString(scope, expression, "<eval>", 1, null)
                 }
             }

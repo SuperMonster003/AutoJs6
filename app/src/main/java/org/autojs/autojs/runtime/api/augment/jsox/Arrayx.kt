@@ -364,7 +364,7 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         }
 
         private fun toCompareFunctionAsc(selector: Callable) = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any>): Int {
                 val (a, b) = args
                 val sA = selector.call(cx, scope, thisObj, arrayOf(a))
                 val sB = selector.call(cx, scope, thisObj, arrayOf(b))
@@ -373,14 +373,14 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         }
 
         private fun toCompareFunctionAsc() = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any>): Int {
                 val (a, b) = args
                 return compareAsc(a, b)
             }
         }
 
         private fun toCompareFunctionDesc(selector: Callable) = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any>): Int {
                 val (a, b) = args
                 val sA = selector.call(cx, scope, thisObj, arrayOf(a))
                 val sB = selector.call(cx, scope, thisObj, arrayOf(b))
@@ -389,14 +389,14 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         }
 
         private fun toCompareFunctionDesc() = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any>): Int {
                 val (a, b) = args
                 return compareDesc(a, b)
             }
         }
 
         private fun toCompareFunctionRandom() = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any>): Int {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any>): Int {
                 val (a, b) = args
                 return compareRandom(a, b)
             }

@@ -446,7 +446,7 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
 
         override fun getFunctionName(): String = name
 
-        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
+        override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
             // Not through the JavaScript toString of thisObj: on the prototype itself that is this very method.
             // zh-CN: 不经 thisObj 的 JavaScript toString: 在原型自身上那就是本方法.
             val self = thisObj as? FlowNativeObject ?: throw RhinoScriptRuntime.typeError("Flow.prototype.$name called on ${describe(thisObj)}, not a Flow")
@@ -469,9 +469,9 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
 
         override fun getFunctionName(): String = "Flow"
 
-        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any = guarded { body(args) }
+        override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any = guarded { body(args) }
 
-        override fun construct(cx: Context, scope: VarScope, args: Array<out Any?>): Scriptable = guarded { body(args) }
+        override fun construct(cx: Context, nt: Any?, scope: VarScope, args: Array<out Any?>): Scriptable = guarded { body(args) }
 
     }
 

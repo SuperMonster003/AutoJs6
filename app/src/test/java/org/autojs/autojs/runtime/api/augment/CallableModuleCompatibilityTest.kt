@@ -270,7 +270,7 @@ class CallableModuleCompatibilityTest {
         assertEquals("proxy-value", scope.get("syncValue", scope))
 
         var callableScope: VarScope? = null
-        var callableThis: Scriptable? = null
+        var callableThis: Any? = null
         val plainCallable = Callable { _, callScope, thisObj, args ->
             callableScope = callScope
             callableThis = thisObj

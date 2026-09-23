@@ -26,7 +26,7 @@ internal class SetIntervalExt(
     var timeout: Double = if (timeout > 0) timeout else DEFAULT_TIMEOUT
 
     fun execute(): Double = scriptRuntime.timers.setTimeout(object : BaseFunction() {
-        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any {
             val that = Context.javaToJS(this@SetIntervalExt, scope) as Scriptable
             callListener(listener, cx, scope)
             when {
@@ -39,7 +39,7 @@ internal class SetIntervalExt(
 
     private fun isTimedOut(scope: VarScope): Boolean {
         val f = timeoutCondition ?: object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Boolean {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Boolean {
                 return System.currentTimeMillis() - initTimestamp > timeout
             }
         }

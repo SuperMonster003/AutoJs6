@@ -128,7 +128,7 @@ open class JavaProxyObject<T : Any>(
         // zh-CN: 绑定函数, 让 this 始终为底层 Java wrapper.
         if (v !is Function) return v
         return object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
                 return v.call(cx, scope, base, args)
             }
         }

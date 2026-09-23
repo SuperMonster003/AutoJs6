@@ -809,7 +809,7 @@ object Util : Augmentable() {
 
     internal class RegularFunction(private val func: Callable) : BaseFunction() {
 
-        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any {
             return func.call(cx, scope, null, args)
         }
 

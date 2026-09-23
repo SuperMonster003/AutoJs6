@@ -447,7 +447,7 @@ object RhinoUtils {
         SerializableCallable { _, _, _, _ -> UNDEFINED }
 
     private fun defaultConstructorTarget(target: SerializableCallable): SerializableConstructable =
-        SerializableConstructable { cx, scope, args ->
+        SerializableConstructable { cx, nt, scope, args ->
             when (val result = target.call(cx, scope, Undefined.SCRIPTABLE_UNDEFINED, args)) {
                 is Scriptable -> result
                 else -> NativeObject()
@@ -458,10 +458,10 @@ object RhinoUtils {
         funcName: String?,
         constructFunc: ((args: Array<out Any?>) -> Any?)?,
         fallbackTarget: SerializableCallable,
-    ): SerializableConstructable = SerializableConstructable { cx, scope, args ->
+    ): SerializableConstructable = SerializableConstructable { cx, nt, scope, args ->
         val result = if (constructFunc == null) DEFAULT_CONSTRUCTOR else constructFunc.invoke(args)
         when (result) {
-            DEFAULT_CONSTRUCTOR -> defaultConstructorTarget(fallbackTarget).construct(cx, scope, args)
+            DEFAULT_CONSTRUCTOR -> defaultConstructorTarget(fallbackTarget).construct(cx, nt, scope, args)
             is Int -> throw IllegalArgumentException("Unknown flag $result for constructor function ${funcName ?: "anonymous"}")
             is Scriptable -> result
             else -> throw IllegalArgumentException(
@@ -1342,7 +1342,7 @@ object RhinoUtils {
 
         internal fun callFunc(callFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return when (callFunc) {
-                null -> super.call(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
+                null -> super.call(cx, Undefined.instance, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
                 else -> callFunc.invoke(args)
             }
         }
@@ -1350,7 +1350,7 @@ object RhinoUtils {
         internal fun constructFunc(constructFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             val niceScope = scope ?: parentScope ?: cx?.getOrCreateStandardObjects() ?: standardObjects
             return when (constructFunc) {
-                null -> super.construct(cx, niceScope, args)
+                null -> super.construct(cx, this, niceScope, args)
                 else -> when (val result = constructFunc.invoke(args)) {
                     is Int -> constructFlag(result, cx, scope, args)
                     else -> result.also {
@@ -1364,13 +1364,13 @@ object RhinoUtils {
         }
 
         internal fun callFlag(flag: Int, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? = when (flag) {
-            DEFAULT_CALLER -> super.call(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
+            DEFAULT_CALLER -> super.call(cx, Undefined.instance, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
             NOT_CALLABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked as a function")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument callFunc of RhinoUtils.newBaseFunction")
         }
 
         internal fun constructFlag(flag: Int, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable = when (flag) {
-            DEFAULT_CONSTRUCTOR -> super.construct(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, args)
+            DEFAULT_CONSTRUCTOR -> super.construct(cx, this, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, args)
             NOT_CONSTRUCTABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked with \"new\" operator")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument constructFunc of RhinoUtils.newBaseFunction")
         }

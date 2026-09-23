@@ -90,7 +90,7 @@ internal fun extendBuildInObjectInternal(scriptRuntime: ScriptRuntime, augmentab
 
             override fun getFunctionName() = funcName
 
-            override fun call(cx: Context?, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>) = runCatching {
+            override fun call(cx: Context?, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>) = runCatching {
                 extensibleProtoClass
                     .getMethod(funcName, ScriptRuntime::class.java, Scriptable::class.java, Array<Any>::class.java)
                     .invoke(null, scriptRuntime, thisObj, args)
@@ -100,7 +100,7 @@ internal fun extendBuildInObjectInternal(scriptRuntime: ScriptRuntime, augmentab
                 scriptRuntime.exit(e)
             }
 
-            override fun construct(cx: Context?, scope: VarScope, args: Array<out Any?>): Scriptable {
+            override fun construct(cx: Context?, nt: Any?, scope: VarScope, args: Array<out Any?>): Scriptable {
                 throw RuntimeException("Function $funcName is unable to be invoked with \"new\" operator")
             }
         }.apply { RhinoUtils.initNewBaseFunction(scriptRuntime.topLevelScope, this) }

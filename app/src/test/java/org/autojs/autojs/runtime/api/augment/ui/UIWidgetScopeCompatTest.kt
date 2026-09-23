@@ -38,7 +38,7 @@ class UIWidgetScopeCompatTest {
     fun renderInternalCanCallDetachedWidgetRenderFunction() {
         val widget = RhinoUtils.newNativeObject()
         val renderFunction = object : BaseFunction() {
-            override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+            override fun call(cx: Context?, nt: Any?, scope: VarScope?, thisObj: Any?, args: Array<out Any?>): Any {
                 assertSame(realm, scope)
                 assertSame(widget, thisObj)
                 return "<text />"
@@ -56,7 +56,7 @@ class UIWidgetScopeCompatTest {
         val attrValue = RhinoUtils.newNativeObject()
         var called = false
         val setterFunction = object : BaseFunction() {
-            override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
+            override fun call(cx: Context?, nt: Any?, scope: VarScope?, thisObj: Any?, args: Array<out Any?>): Any? {
                 assertSame(realm, scope)
                 assertSame(attrValue, thisObj)
                 assertEquals("text", args[1])
@@ -81,7 +81,7 @@ class UIWidgetScopeCompatTest {
         val attrsObject = RhinoUtils.newNativeObject()
         val attrValue = RhinoUtils.newNativeObject()
         val getterFunction = object : BaseFunction() {
-            override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+            override fun call(cx: Context?, nt: Any?, scope: VarScope?, thisObj: Any?, args: Array<out Any?>): Any {
                 assertSame(realm, scope)
                 assertSame(attrValue, thisObj)
                 assertEquals("text", args[1])
@@ -102,7 +102,7 @@ class UIWidgetScopeCompatTest {
         val attrsObject = RhinoUtils.newNativeObject()
         var called = false
         val applierFunction = object : BaseFunction() {
-            override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
+            override fun call(cx: Context?, nt: Any?, scope: VarScope?, thisObj: Any?, args: Array<out Any?>): Any? {
                 assertSame(realm, scope)
                 assertSame(widget, thisObj)
                 assertEquals("text", args[1])

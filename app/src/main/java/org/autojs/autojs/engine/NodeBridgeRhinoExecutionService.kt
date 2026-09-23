@@ -546,7 +546,7 @@ class NodeBridgeRhinoExecutionService : Service() {
                     prototype = ScriptableObject.getFunctionPrototype(scope)
                 }
 
-                override fun call(cx: RhinoContext?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>?): Any {
+                override fun call(cx: RhinoContext?, nt: Any?, scope: VarScope?, thisObj: Any?, args: Array<out Any?>?): Any {
                     record(level, args.orEmpty())
                     return Undefined.instance
                 }

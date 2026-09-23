@@ -295,12 +295,12 @@ class RhinoUtilsSemanticsTest {
     fun scriptableHashHelpersUseTheObjectAsReceiver() {
         val receiver = RhinoUtils.newObject(scope)
         val getClassFn = object : BaseFunction() {
-            override fun call(cx: Context?, scope: org.mozilla.javascript.VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+            override fun call(cx: Context?, nt: Any?, scope: org.mozilla.javascript.VarScope?, thisObj: Any?, args: Array<out Any?>): Any {
                 return if (thisObj === receiver) UiObjectCollection::class.java else Any::class.java
             }
         }.also { RhinoUtils.initNewBaseFunction(scope, it) }
         val hashCodeFn = object : BaseFunction() {
-            override fun call(cx: Context?, scope: org.mozilla.javascript.VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+            override fun call(cx: Context?, nt: Any?, scope: org.mozilla.javascript.VarScope?, thisObj: Any?, args: Array<out Any?>): Any {
                 return if (thisObj === receiver) 73 else -1
             }
         }.also { RhinoUtils.initNewBaseFunction(scope, it) }

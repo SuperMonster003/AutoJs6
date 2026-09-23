@@ -58,7 +58,7 @@ class ProxyJavaObjectCompatibilityTest {
     @Test
     fun proxyGetterMayReturnNull() {
         val getter = object : BaseFunction() {
-            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? = null
+            override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? = null
         }
         val proxyDescriptor = NativeObject().apply {
             put(ProxyObject.PROXY_GETTER_KEY, this, getter)

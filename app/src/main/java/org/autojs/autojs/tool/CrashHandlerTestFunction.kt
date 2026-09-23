@@ -13,8 +13,9 @@ class CrashHandlerTestFunction : BaseFunction() {
 
     override fun call(
         cx: Context?,
+        nt: Any?,
         scope: VarScope?,
-        thisObj: Scriptable?,
+        thisObj: Any?,
         args: Array<out Any>?,
     ): Undefined {
         val msg = if (!args.isNullOrEmpty()) Context.toString(args[0]) else "CrashHandler test"
