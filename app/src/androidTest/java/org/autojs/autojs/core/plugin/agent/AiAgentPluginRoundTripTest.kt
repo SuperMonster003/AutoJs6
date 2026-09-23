@@ -179,6 +179,148 @@ class AiAgentPluginRoundTripTest {
         } finally { org.autojs.autojs.util.WorkingDirectoryUtils.path = oldWork; root.deleteRecursively() }
     }
 
+    private fun observation(request: JSONObject): JSONObject {
+        val messages = request.getJSONArray("messages")
+        return (messages.length() - 1 downTo 0).mapNotNull { index ->
+            val content = messages.getJSONObject(index).getString("content")
+            runCatching { JSONObject(content.substring(content.indexOf('{'))) }.getOrNull()
+        }.first { it.optString("section") == "observation" }.getJSONObject("data")
+    }
+
+    private fun withExecutionRoot(action: (java.io.File) -> Unit) {
+        val oldWork = org.autojs.autojs.util.WorkingDirectoryUtils.path
+        val root = java.io.File(Environment.getExternalStorageDirectory(), "AgentP33-${System.nanoTime()}").apply { check(mkdirs()) }
+        try { org.autojs.autojs.util.WorkingDirectoryUtils.path = root.path; action(root) }
+        finally { org.autojs.autojs.util.WorkingDirectoryUtils.path = oldWork; root.deleteRecursively() }
+    }
+
+    @Test fun singleFileScriptAsksConfirmsAndReportsResultThroughTheRealHost() = registeredExecutionRoundTrip(false)
+    @Test fun projectCleanupAsksConfirmsAndReportsResultThroughTheRealHost() = registeredExecutionRoundTrip(true)
+
+    private fun registeredExecutionRoundTrip(project: Boolean) = withPlugin { api -> withExecutionRoot { root ->
+        val downloads = java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "AgentP33-${System.nanoTime()}").apply { check(mkdirs()) }
+        val oldApk = java.io.File(downloads, "old.apk").apply { writeText("fixture") }
+        // Legacy emulated storage can reject utime even for a writable file. Verify its actual age.
+        val aged = oldApk.setLastModified(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(40))
+        val expectedRemoved = if (aged) 1 else 0
+        assertEquals(aged, oldApk.lastModified() < System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30))
+        val keep = java.io.File(downloads, "keep.txt").apply { writeText("keep") }
+        val fresh = java.io.File(downloads, "fresh.apk").apply { writeText("fresh") }
+        val id: String
+        val path: java.io.File
+        if (project) {
+            path = java.io.File(root, "cleanup").apply { check(mkdirs()) }
+            for (name in listOf("project.json", "main.js")) context.assets.open("sample/agent/清理下载目录旧安装包/$name").use { input -> java.io.File(path, name).outputStream().use(input::copyTo) }
+            id = "clean-download-installers"
+        } else {
+            path = java.io.File(root, "count.js").apply { writeText("""/**
+                * @agent
+                * @description Count the requested fixture items
+                * @param {integer} count Item count
+                * @risk normal
+                * @confirm before-run
+                * @timeout 10000
+                */
+                let c = ai.agent.context();
+                c.parameters.count = 999;
+                if (ai.agent.context().parameters.count !== engines.myEngine().execArgv.count) throw Error('context leaked mutation');
+                for (let i = 0; i < 65; i++) console.log('line-' + i + ' token=fixture-secret');
+                ai.agent.result({count: engines.myEngine().execArgv.count, runId: ai.agent.context().runId});
+            """.trimIndent()) }
+            id = "count"
+        }
+        val parameters = if (project) JSONObject().put("days", 30).put("directory", downloads.path).put("dryRun", false) else JSONObject().put("count", 7)
+        val core = core()
+        val model = ScriptedModel { step, request -> when (step) {
+            0 -> tool("script_run", JSONObject().put("id", id).put("parameters", JSONObject()))
+            1 -> {
+                assertTrue(observation(request).toString().contains("SCRIPT_PARAMETERS_MISSING"))
+                JSONObject().put("kind", "ask").put("ask", JSONObject().put("kind", "text").put("question", if (project) "保留最近多少天?" else "统计多少项?"))
+            }
+            2 -> tool("script_run", JSONObject().put("id", id).put("parameters", parameters))
+            3 -> {
+                val result = observation(request).getJSONObject("result")
+                assertEquals(result.toString(), "success", result.getString("outcome"))
+                assertTrue(result.getBoolean("resultReported")); assertTrue(result.getJSONArray("consoleTail").length() <= 40)
+                assertFalse(result.toString().contains("fixture-secret"))
+                if (project) assertEquals(expectedRemoved, result.getJSONObject("result").getInt("removed"))
+                else assertEquals(7, result.getJSONObject("result").getInt("count"))
+                done()
+            }
+            else -> throw AssertionError("Unexpected execution turn $step")
+        } }
+        val link = attach(api, model, broker(core)); val events = LinkedBlockingQueue<JSONObject>()
+        try {
+            val run = start(link, object : IAiAgentRunCallback.Stub() { override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) } },
+                if (project) "请帮我清理测试下载目录中的旧安装包" else "请调用登记脚本统计测试项数")
+            for (expected in listOf("input", "confirmation", "done")) {
+                var event: JSONObject
+                do { event = events.poll(25, TimeUnit.SECONDS) ?: throw AssertionError("Missing $expected; model error: ${model.failure}") } while (event.getString("type") !in setOf("input", "confirmation", "done"))
+                model.failure?.let { throw AssertionError("Registered script model fixture failed", it) }
+                assertEquals(event.toString(), expected, event.getString("type"))
+                if (expected != "done") {
+                    if (project) assertTrue("Execution must wait for confirmation", oldApk.exists())
+                    val reply = JSONObject().put("runId", run).put("requestId", event.getString("requestId"))
+                    if (expected == "input") reply.put("value", if (project) "30" else "7")
+                    else reply.put("allowed", true).put("scope", "once")
+                    assertTrue(decode(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, reply))).getBoolean("accepted"))
+                }
+            }
+            val row = decode(link.getRun(ref(run)))
+            assertEquals(row.toString(), "completed", row.getString("state"))
+            val script = row.getJSONObject("result").getJSONObject("script")
+            assertEquals(id, script.getString("id")); assertEquals(path.canonicalPath, script.getString("path"))
+            assertTrue(script.getInt("executionId") >= 0)
+            if (project) { assertEquals(expectedRemoved, script.getJSONObject("result").getInt("removed")); assertEquals(!aged, oldApk.exists()) }
+            else assertEquals(run, script.getJSONObject("result").getString("runId"))
+            assertTrue(keep.exists()); assertTrue(fresh.exists()); assertEquals(4, model.calls.get())
+        } finally { detach(link); core.destroy(null); downloads.deleteRecursively() }
+    } }
+
+    @Test fun registeredScriptTimeoutStopsTheActualEngineAndReturnsFeedback() = stoppingExecutionRoundTrip(false)
+    @Test fun cancellingAnAgentTaskStopsItsRunningRegisteredScript() = stoppingExecutionRoundTrip(true)
+
+    private fun stoppingExecutionRoundTrip(cancel: Boolean) = withPlugin { api -> withExecutionRoot { root ->
+        val ready = java.io.File(root, "ready.txt")
+        java.io.File(root, "stall.js").writeText("""/**
+            * @agent
+            * @description Wait for cancellation
+            * @risk readonly
+            * @confirm never
+            * @timeout ${if (cancel) 15000 else 5000}
+            */
+            files.write(${JSONObject.quote(ready.path)}, String(engines.myEngine().id));
+            while (true) sleep(20);
+        """.trimIndent())
+        val core = core(); val model = ScriptedModel { step, request ->
+            if (step == 0) tool("script_run", JSONObject().put("id", "stall").put("parameters", JSONObject()))
+            else { assertFalse(cancel); assertTrue(observation(request).toString().contains("SCRIPT_TIMEOUT")); done() }
+        }
+        val stops = AtomicInteger(); val delegate = broker(core)
+        val counted = object : IHostCapabilityBroker.Stub() {
+            override fun getBrokerInfo() = delegate.brokerInfo
+            override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                val call = JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!)
+                if (call.optString("module") == "engines" && call.optString("method") == "stop") stops.incrementAndGet()
+                delegate.dispatch(request, callback)
+            }
+            override fun destroy(reason: Bundle?) = delegate.destroy(reason)
+        }
+        val link = attach(api, model, counted)
+        try {
+            val run = start(link, goal = if (cancel) "运行等待脚本, 然后停止任务" else "运行等待脚本并检查超时")
+            waitUntil("Script acknowledges startup", 10000) { ready.exists() && ready.length() > 0 }
+            val engineId = ready.readText().toInt()
+            if (cancel) link.cancelRun(ref(run))
+            waitUntil("Task terminates", 20000) { decode(link.getRun(ref(run))).optString("state") in setOf("completed", "cancelled", "failed", "blocked") }
+            model.failure?.let { throw AssertionError("Timeout fixture failed", it) }
+            assertEquals(if (cancel) "cancelled" else "completed", decode(link.getRun(ref(run))).getString("state"))
+            waitUntil("Owned engine is stopped") { org.autojs.autojs.AutoJs.instance.scriptEngineService.engines.none { it.id == engineId } }
+            assertEquals(1, stops.get())
+            assertEquals(if (cancel) 1 else 2, model.calls.get())
+        } finally { detach(link); core.destroy(null) }
+    } }
+
     @Test fun realHostIdentityRunsDeviceInfoAndPreservesPrivateStepsAfterCallbackFailure() = withPlugin { api ->
         assertEquals(C.CONTRACT_VERSION, api.capabilities.getInt(AiAgentCapabilityKeys.CONTRACT_VERSION))
         val core = core()

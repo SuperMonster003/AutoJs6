@@ -128,6 +128,7 @@ internal class AgentRegisteredScriptExecution(
                     else -> JSONObject.NULL
                 })
                 .put("result", agentState.getResultJson()?.let(NodeBridgeJson::parseJsonValue) ?: JSONObject.NULL)
+                .put("resultReported", agentState.getResultJson() != null)
         }
         val tail = JSONArray()
         if (captureConsole) {

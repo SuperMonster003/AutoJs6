@@ -1201,6 +1201,10 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchEngines(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (request.method == "stop" && runCatching { JSONArray(request.argsJson).opt(0) is JSONObject }.getOrDefault(false)) {
+            dispatchAgent(request, callback)
+            return
+        }
         if (request.method == "execScript" || request.method == "execScriptFile") {
             NodeBridgeEngineDispatchService.dispatch(
                 appContext,

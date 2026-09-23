@@ -8,6 +8,7 @@
 
 ###### 2026/09/23
 
+* `Feature` ai.agent.result/context report registered-script results and execution context, with invocation-scoped cancellation and samples for clipboard character counts and old download installer cleanup
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
 * `Feature` MCP Server drawer switch with installation, activation, enablement, authorization, and compatibility guidance; notification Stop synchronization; saved plugin settings retained on reconnect; permission-checked settings entry from the drawer and Plugin Center. Restores a previously enabled server when AutoJs6 opens, unless the user stopped it while the host was absent; no boot startup.

@@ -221,15 +221,17 @@ catalog validation failures map to `invalid-request`. Malformed bridge options
 rejected before catalog parsing also use `invalid-request`, with a generic
 diagnostic rather than a catalog code.
 
-## Execution arguments and future result reporting
+## Execution arguments and result reporting
 
 The validated arguments are supplied to the host execution layer so scripts can
 read `engines.myEngine().execArgv`. Risk and confirmation metadata is retained
 for the plugin's confirmation gate; registration alone does not grant additional
 device capabilities.
 
-P1.4 provides the host execution result slot and result retrieval. The P5 augment
-will connect `ai.agent.result(value)` (up to 64 KiB JSON) and
-`ai.agent.context().parameters` to that infrastructure. Until the public reporter
-is connected, scripts without another supported reporter produce a null
-structured result, leaving outcome and captured console output for the caller.
+P1.4 provides the host execution result slot and P3.3 connects `ai.agent.result(value)`
+(up to 64 KiB UTF-8 JSON) and `ai.agent.context().parameters` in host build 5287.
+`resultReported` distinguishes an explicitly reported JSON null from no report.
+The last accepted report wins until completion. Outside registered execution,
+`context()` returns null and `result()` returns false with a console warning.
+Task creation and control APIs remain P5 work. See `agent-script-execution-testing.md`
+for the invocation stop token, confirmed-manifest check and real-device test commands.

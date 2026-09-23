@@ -10,6 +10,7 @@
         "文件日志改用内置实现, 保留已文档化的配置选项及部分 PatternLayout 格式, 其他 Log4j API 不再提供"
       ],
       "feature": [
+        "ai.agent.result/context 支持登记脚本结果上报与执行上下文, 配合按调用停止及剪贴板字数统计和下载目录旧安装包清理示例",
         "终端功能, 支持多会话管理, 后台运行, 快捷按键及终端记录复制/分享 (入口: 主页抽屉/文件管理器目录菜单/项目工具栏)",
         "终端支持 node/npm/npx/corepack/yarn/pnpm 命令及 npm 镜像源设置 (需要 Node.js Runtime 插件 1.5.0+)",
         "MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)",

@@ -24,6 +24,7 @@ internal class NodeBridgeAgentBridge(
     private val lock = Any()
     private var closed = false
     private val executions = LinkedHashSet<Invocation>()
+    private val invocations = AgentInvocationRegistry(android.os.SystemClock::elapsedRealtime)
     @Volatile private var catalog: AgentScriptCatalog? = null
     @Volatile private var configuredRoots = roots.toList()
 
@@ -47,6 +48,15 @@ internal class NodeBridgeAgentBridge(
         try {
             synchronized(lock) { check(!closed) { "Agent bridge is closed." } }
             val args = JSONArray(request.argsJson)
+            if (request.module == "engines" && request.method == "stop") {
+                require(args.length() == 1)
+                val options = args.getJSONObject(0)
+                require(options.length() == 1)
+                val id = options.getString("agentInvocationId")
+                invocations.stop(id)
+                reply(NodeBridgeResponse.success(request.id, JSONObject().put("agentInvocationId", id).put("stopped", true).toString()))
+                return
+            }
             val scripts = currentCatalog()
             when (request.method) {
                 "listScripts" -> {
@@ -70,7 +80,17 @@ internal class NodeBridgeAgentBridge(
                 "execRegistered" -> {
                     require(args.length() in 2..3 && args.get(0) is String && args.get(1) is JSONObject)
                     val options = if (args.length() == 3) args.getJSONObject(2) else JSONObject()
+                    val invocationId = optionalString(options, "agentInvocationId")
+                    if (invocationId != null && !invocations.claim(invocationId)) {
+                        throw AgentManifestException("CANCELLED", "Registered invocation is already closed")
+                    }
                     val invocation = scripts.resolveForExecution(args.getString(0), JsonParser.parseString(args.getJSONObject(1).toString()).asJsonObject)
+                    options.opt("expectedManifest")?.let { expected ->
+                        require(expected is JSONObject)
+                        if (JsonParser.parseString(expected.toString()) != invocation.entry.toJsonObject()) {
+                            throw AgentManifestException("SCRIPT_NOT_REGISTERED", "Registration changed after confirmation")
+                        }
+                    }
                     if (invocation.arguments.toString().toByteArray(Charsets.UTF_8).size > AgentScriptExecutionState.MAX_PARAMETERS_BYTES) {
                         throw AgentManifestException("LIMIT_EXCEEDED", "Registered-script arguments exceed the limit.")
                     }
@@ -93,6 +113,7 @@ internal class NodeBridgeAgentBridge(
                             expectedScriptPath = invocation.scriptFile.path,
                         ) { response ->
                             pending.completed.set(true)
+                            invocationId?.let(invocations::finish)
                             synchronized(lock) { executions.remove(pending) }
                             reply(response)
                         }
@@ -102,6 +123,7 @@ internal class NodeBridgeAgentBridge(
                     }
                     synchronized(lock) {
                         pending.handle = handle
+                        invocationId?.let { invocations.attach(it, handle) }
                         if (closed && !pending.completed.get()) handle.close()
                     }
                 }
@@ -126,6 +148,7 @@ internal class NodeBridgeAgentBridge(
     override fun close() {
         val pending = synchronized(lock) { closed = true; executions.toList().also { executions.clear() } }
         pending.forEach { if (!it.completed.get()) runCatching { it.handle?.close() } }
+        invocations.close()
         catalog = null
     }
 

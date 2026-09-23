@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/09/23",
       "feature": [
+        "ai.agent.result/context permite informar resultados y contexto de scripts registrados, con cancelación por llamada y ejemplos para contar caracteres del portapapeles y limpiar instaladores antiguos",
         "Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real",
         "Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar",
         "Interruptor MCP Server con guías de instalación, activación, autorización y compatibilidad; sincronización con Detener en la notificación; ajustes conservados al reconectar; acceso verificado a la misma página desde el panel y el Centro de complementos. Restaura el servidor al abrir AutoJs6 salvo que el usuario lo detuviera sin el anfitrión; no arranca con el dispositivo.",

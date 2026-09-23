@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-/** P1.4 execution-layer checks. The future public ai.agent.result/context augment is not used. */
+/** Registered execution and the public execution-side ai.agent result/context channel. */
 class AgentRegisteredScriptExecutionTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
@@ -23,11 +23,10 @@ class AgentRegisteredScriptExecutionTest {
     @Test fun realRegisteredScriptReceivesDefaultsAndReportsStructuredResultThroughHostSlot() = withFixture { root, provider ->
         val script = File(root, "report.js").apply { writeText(header("@param {integer} [days=7] Age") + """
             var engine = engines.myEngine();
-            var bridge = Packages.org.autojs.autojs.execution.AgentScriptExecutionState;
-            var context = JSON.parse(String(bridge.contextJson(engine)));
+            var context = ai.agent.context();
             console.log("agent-result-fixture");
-            if (!bridge.report(engine, JSON.stringify({ days: engine.execArgv.days, runId: context.runId,
-                  contextDays: context.parameters.days, preset: context.presetName }))) throw Error("result rejected");
+            if (!ai.agent.result({ days: engine.execArgv.days, runId: context.runId,
+                  contextDays: context.parameters.days, preset: context.presetName })) throw Error("result rejected");
         """.trimIndent()) }
         val manifest = invoke(provider, request("readManifest", JSONArray().put(script.path))).await()
         assertTrue("The registered fixture was rejected: ${manifest.error?.message}", manifest.ok)
@@ -40,6 +39,7 @@ class AgentRegisteredScriptExecutionTest {
         val result = JSONObject(response.resultJson)
         assertTrue(result.getBoolean("finished"))
         assertEquals("success", result.getString("outcome"))
+        assertTrue(result.getBoolean("resultReported"))
         val reported = result.getJSONObject("result")
         assertEquals(7, reported.getInt("days"))
         assertEquals(7, reported.getInt("contextDays"))
@@ -56,6 +56,7 @@ class AgentRegisteredScriptExecutionTest {
         val result = JSONObject(response.resultJson)
         assertEquals("success", result.getString("outcome"))
         assertTrue(result.isNull("result"))
+        assertFalse(result.getBoolean("resultReported"))
         assertTrue(result.getJSONArray("consoleTail").toString().contains("agent-console-fallback"))
         assertEquals("global-window", result.getString("consoleCaptureMode"))
         awaitEngineRemoved(result.getInt("executionId"))
@@ -149,6 +150,49 @@ class AgentRegisteredScriptExecutionTest {
             assertTrue(result.isNull("executionId"))
             assertTrue(result.getJSONObject("error").getString("message").contains("authorized entry"))
         }
+    }
+
+    @Test fun explicitNullResultAndLastReportAreDistinguishableFromNoReport() = withFixture { root, provider ->
+        val script = File(root, "null.js").apply { writeText(header() + "ai.agent.result({old: true}); ai.agent.result(null);") }
+        val response = invoke(provider, exec(script)).await()
+        assertTrue(response.error?.message, response.ok)
+        val result = JSONObject(response.resultJson)
+        assertEquals("success", result.getString("outcome"))
+        assertTrue(result.getBoolean("resultReported")); assertTrue(result.isNull("result"))
+        awaitEngineRemoved(result.getInt("executionId"))
+    }
+
+    @Test fun stopTokenArrivingBeforeExecPreventsEvaluation() = withFixture { root, provider ->
+        val id = UUID.randomUUID().toString()
+        val marker = File(root, "token-marker.txt")
+        val script = File(root, "token-cancel.js").apply { writeText(header() + "files.write(" + JSONObject.quote(marker.path) + ", 'bad');") }
+        val stop = request("stop", JSONArray().put(JSONObject().put("agentInvocationId", id))).copy(module = "engines")
+        assertTrue(invoke(provider, stop).await().ok)
+        val response = invoke(provider, exec(script, options = JSONObject().put("agentInvocationId", id))).await()
+        assertFalse(response.ok); assertTrue(response.error?.message?.contains("CANCELLED") == true)
+        assertFalse(marker.exists())
+    }
+
+    @Test fun changedManifestAfterConfirmationCannotStartScript() = withFixture { root, provider ->
+        val marker = File(root, "changed-marker.txt")
+        val script = File(root, "changed.js").apply { writeText(header() + "files.write(" + JSONObject.quote(marker.path) + ", 'bad');") }
+        val original = invoke(provider, request("readManifest", JSONArray().put(script.path))).await()
+        assertTrue(original.ok)
+        script.appendText("\n// changed after inspection\n")
+        check(script.setLastModified(script.lastModified() + 2000))
+        val result = invoke(provider, exec(script, options = JSONObject().put("expectedManifest", JSONObject(original.resultJson)))).await()
+        assertFalse(result.ok); assertTrue(result.error?.message?.contains("SCRIPT_NOT_REGISTERED") == true)
+        assertFalse(marker.exists())
+    }
+
+    @Test fun agentSamplesAreVisibleThroughThePublicSampleCatalog() = withFixture { _, provider ->
+        val request = NodeBridgeRequest(UUID.randomUUID().toString(), "app", "listSamples",
+            JSONArray().put("agent").put(JSONObject().put("recursive", true)).toString(), 5000, listOf("app.query"))
+        val response = invoke(provider, request).await()
+        assertTrue(response.error?.message, response.ok)
+        val result = JSONObject(response.resultJson).toString()
+        assertTrue(result.contains("统计剪贴板字数.js"))
+        assertTrue(result.contains("清理下载目录旧安装包")); assertTrue(result.contains("project.json")); assertTrue(result.contains("main.js"))
     }
 
     private fun stalledScript(root: File, name: String) = File(root, name).apply {

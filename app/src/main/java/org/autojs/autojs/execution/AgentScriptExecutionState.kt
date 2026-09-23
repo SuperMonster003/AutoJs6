@@ -55,7 +55,7 @@ class AgentScriptExecutionState(
         const val MAX_PARAMETERS_BYTES = AiAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES
         private val RUN_ID = Regex("^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$")
 
-        /** Execution-layer hook. Public ai.agent.result/context are wired separately in P5. */
+        /** Execution-layer hook also used by the public ai.agent.result/context helpers. */
         @JvmStatic
         fun report(engine: ScriptEngine<*>, json: String): Boolean = fromEngine(engine)?.reportResult(json) ?: false
 

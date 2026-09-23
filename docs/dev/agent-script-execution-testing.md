@@ -1,11 +1,11 @@
-# Registered-script execution checks (AI Agent P1.4)
+# Registered-script execution checks (AI Agent P1.4 / P3.3)
 
 `AgentRegisteredScriptExecutionTest` exercises the host `AndroidNodeBridgeCapabilityProvider`
 `agent` module through catalog discovery, manifest/default-argument validation, main-process
 service dispatch, a real script engine, completion and result serialization. Test scripts report
-JSON through `AgentScriptExecutionState.report(engine, json)` and read their context through
-`AgentScriptExecutionState.contextJson(engine)`. These are execution-layer hooks used by the
-device fixture; the public JavaScript `ai.agent.result/context` APIs remain P5 work.
+JSON through the public `ai.agent.result(value)` helper and read independent context snapshots
+through `ai.agent.context()`. P3.3 connects only these execution-side helpers; task creation and
+the `AgentRun` interface remain P5 work.
 
 The host passes scalar parameters through the existing `execArgv`. Its separate
 `ExecutionConfig.agentExecutionState` carries the run ID, parameter snapshot, preset name and
@@ -23,6 +23,25 @@ The device checks cover:
 - A synchronous response consumer throwing without receiving a second response.
 - Cancellation requested before the main-process service can evaluate script source.
 - A project launch factory resolving a different entry than the already authorized file.
+- Explicitly reporting null, distinguished from no report by `resultReported`.
+- An invocation stop arriving before exec, and changed registration after confirmation.
+- Both Agent samples visible through `app.listSamples`.
+
+Since host build 5287, `agent.execRegistered(path, parameters, options)` accepts a lowercase UUID
+`agentInvocationId` and an optional `expectedManifest` catalog snapshot. A differing current
+registration is rejected with `SCRIPT_NOT_REGISTERED`. The shared broker accepts
+`engines.stop({agentInvocationId})` on the same link; its bounded registry remembers early stops
+for 310 seconds, including the maximum 300-second execution deadline. It cannot address another
+link's invocation. Numeric execution-ID stop calls keep their existing behavior. No AIDL
+transaction or contract version changes are needed, but the plugin requires host build 5287.
+
+`AiAgentPluginRoundTripTest`, enabled with `-e autojs.agent.plugin true`, also exercises the real
+installed plugin with a scripted model: missing parameter feedback, a question, per-call
+confirmation, file/project execution, model `done`, the retained script result, timeout and
+task cancellation. The cleanup project deletes only the fixture's own old installer and keeps
+other/new files. API 24 emulated storage may reject mtime changes; that case verifies retention
+of the still-new installer, while API 37 verifies actual old-file deletion. These are E1 checks,
+not an online-model or physical-device E4 acceptance.
 
 The cancellation handle marks an internal Binder token immediately. Both service execution and
 the script's `onStart` gate observe it, so cancellation is retained while the start Intent is

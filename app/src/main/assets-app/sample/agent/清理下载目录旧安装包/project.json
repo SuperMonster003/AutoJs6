@@ -1,0 +1,25 @@
+{
+    "name": "清理下载目录旧安装包",
+    "main": "main.js",
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "agent": {
+        "id": "clean-download-installers",
+        "description": "清理下载目录中超过指定天数的 APK, APKS 与 XAPK 安装包. 默认仅预览, 不递归子目录.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "days": { "type": "integer", "minimum": 1, "maximum": 3650, "description": "保留最近多少天的安装包" },
+                "directory": { "type": "string", "description": "下载目录或其子目录, 省略时使用系统下载目录" },
+                "dryRun": { "type": "boolean", "default": true, "description": "true 仅预览, false 执行删除" }
+            },
+            "required": [ "days" ],
+            "additionalProperties": false
+        },
+        "risk": "sensitive",
+        "confirm": "before-run",
+        "timeoutMs": 60000,
+        "examples": [ "请预览下载目录中的旧安装包", "删除下载目录里超过 30 天的安装包" ],
+        "tags": [ "downloads", "cleanup" ]
+    }
+}
