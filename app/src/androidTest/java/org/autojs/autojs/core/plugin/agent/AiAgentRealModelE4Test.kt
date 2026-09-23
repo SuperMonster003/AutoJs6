@@ -44,6 +44,43 @@ class AiAgentRealModelE4Test {
     private val pluginPackage = "io.github.supermonster003.autojs6.plugin.ai.agent"
     private val terminalStates = setOf("completed", "partial", "failed", "blocked", "cancelled")
 
+    /** Read-only shape evidence: distinguish hidden branches from genuinely oversized visible trees. */
+    @Suppress("DEPRECATION")
+    @Test fun accessibilityTreeShape() {
+        optIn()
+        instrumentation.runOnMainSync { AutoJs.instance.infoProvider }
+        rebindConfiguredAccessibility()
+        val root = checkNotNull(org.autojs.autojs.core.accessibility.AccessibilityService.instance?.rootInActiveWindow)
+        var visited = 0
+        var maxDepth = 0
+        var visiblePathMaxDepth = 0
+        var visiblePathNodes = 0
+        var branchesBelow32 = 0
+        var visibleBranchesBelow32 = 0
+        var cut = false
+        fun walk(node: android.view.accessibility.AccessibilityNodeInfo, depth: Int, parentVisible: Boolean) {
+            if (visited++ >= 4000) { cut = true; return }
+            maxDepth = maxOf(maxDepth, depth)
+            val visible = parentVisible && node.isVisibleToUser
+            if (visible) { visiblePathNodes++; visiblePathMaxDepth = maxOf(visiblePathMaxDepth, depth) }
+            if (depth == 32 && node.childCount > 0) {
+                branchesBelow32++
+                if (visible) visibleBranchesBelow32++
+            }
+            if (depth >= 64) { if (node.childCount > 0) cut = true; return }
+            for (index in 0 until node.childCount) {
+                if (visited >= 4000) { cut = true; break }
+                val child = node.getChild(index) ?: continue
+                try { walk(child, depth + 1, visible) } finally { child.recycle() }
+            }
+        }
+        try { walk(root, 0, true) } finally { root.recycle() }
+        write(File(context.filesDir, "agent-e4/tree-shape").apply { mkdirs() }, "shape-${System.currentTimeMillis()}.json",
+            JSONObject().put("visited", visited).put("maxDepth", maxDepth).put("visiblePathNodes", visiblePathNodes)
+                .put("visiblePathMaxDepth", visiblePathMaxDepth).put("branchesBelow32", branchesBelow32)
+                .put("visibleBranchesBelow32", visibleBranchesBelow32).put("truncated", cut))
+    }
+
     @Test fun publicCatalog() {
         optIn()
         val directory = File(context.filesDir, "agent-e4/catalog").apply { mkdirs() }
@@ -265,11 +302,17 @@ class AiAgentRealModelE4Test {
         private val lock = Any()
         override fun getBrokerInfo() = delegate.brokerInfo
         override fun dispatch(request: Bundle?, callback: IHostCapabilityCallback?) {
+            val observeQuery = runCatching {
+                val call = JSONObject(request?.getString(H.KEY_BRIDGE_REQUEST_JSON).orEmpty())
+                call.optString("module") == "accessibility" && call.optString("method") in setOf("findOne", "findAll")
+            }.getOrDefault(false)
             delegate.dispatch(request, object : IHostCapabilityCallback.Stub() {
                 override fun onResponse(response: Bundle) {
                     response.getString(H.KEY_BRIDGE_RESPONSE_JSON)?.let { json ->
                         if (JSONObject(json).has("error")) {
                             synchronized(lock) { File(directory, "capability-errors.jsonl").appendText(json + "\n") }
+                        } else if (observeQuery) {
+                            synchronized(lock) { File(directory, "node-queries.jsonl").appendText(json + "\n") }
                         }
                     }
                     callback?.onResponse(response)

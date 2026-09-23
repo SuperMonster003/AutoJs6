@@ -248,7 +248,7 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
-        "La relocalizacion de nodos ya no confunde contenedores anidados menores con el objetivo original",
+        "Las acciones sobre nodos admiten interfaces profundamente anidadas sin confundir contenedores hijos menores con el objetivo original",
         "Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado",
         "MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario",
         "Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno",

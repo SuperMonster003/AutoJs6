@@ -251,7 +251,7 @@
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
-* `Correction` La relocalisation des noeuds ne confond plus les petits conteneurs imbriques avec la cible originale
+* `Correction` Les actions sur les noeuds prennent en charge les interfaces profondes sans confondre les petits conteneurs enfants avec la cible initiale
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
 * `Correction` Lignes vides superflues sous les états courts du gestionnaire accessibilité, tels que Non lié et Aucun

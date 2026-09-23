@@ -82,6 +82,28 @@ class NodeRefSnapshotsTest {
         assertFalse(acted)
     }
 
+    @Test fun deepAppContainersCanRelocateWithoutChangingTheDumpLimit() {
+        val store = NodeRefSnapshots()
+        register(store, "button")
+        val root = FakeUiNode.root {}
+        var nested = root
+        repeat(45) { nested = nested.child("level$it") }
+        nested.child("target") { packageName = "app"; className = "Button"; text = "button"; bounds(0, 0, 100, 100) }
+        assertEquals("target", store.relocate(store.resolve("#n1"), listOf(root), "app/window1") { it.name })
+        assertTrue(CompactNodeText.collect(listOf(root)).truncated)
+    }
+
+    @Test fun excessiveDepthStillFailsEvenIfAnEarlierTargetMatched() {
+        val store = NodeRefSnapshots()
+        register(store, "button")
+        val root = node("button")
+        var nested = root
+        repeat(NodeRefSnapshots.MAX_ACTION_TREE_DEPTH + 1) { nested = nested.child("level$it") }
+        var acted = false
+        stale { store.relocate(store.resolve("#n1"), listOf(root), "app/window1") { acted = true } }
+        assertFalse(acted)
+    }
+
     @Test fun ambiguousFingerprintsFailClosedAndAllBorrowedChildrenAreReleased() {
         val store = NodeRefSnapshots()
         register(store, "button")

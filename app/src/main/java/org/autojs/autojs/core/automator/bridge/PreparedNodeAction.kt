@@ -10,7 +10,7 @@ object PreparedNodeAction {
         var visited = 0
         var selected: N? = null
         fun walk(node: N, depth: Int) {
-            if (++visited > 2000 || depth > 32) throw NodeRefSnapshots.Stale("inspection exceeded the tree budget")
+            if (++visited > 2000 || depth > NodeRefSnapshots.MAX_ACTION_TREE_DEPTH) throw NodeRefSnapshots.Stale("inspection exceeded the tree budget")
             if (!node.visibleToUser()) return
             if (matches(node)) { selected = node; return }
             for (index in 0 until node.childCount().coerceAtLeast(0)) {

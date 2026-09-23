@@ -413,7 +413,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart
 * `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
-* `Fix` Node relocation no longer confuses smaller nested containers with the original action target
+* `Fix` Node actions handle deeply nested screens without confusing smaller child containers with the original target
 * `Fix` Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record
 * `Fix` MCP Server installed via adb could appear enabled in Plugin Center while runtime checks treated it as disabled when no enable preference was saved; both now default to disabled and preserve explicit user choices
 * `Fix` Unnecessary blank lines below short accessibility manager status values such as Unbound and None

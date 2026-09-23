@@ -57,7 +57,7 @@ class NodeRefSnapshots(private val capacity: Int = MAX_SNAPSHOTS) : AutoCloseabl
                 matches++
                 if (matches == 1) selected = node
             }
-            if (depth >= BridgeAccessibilityLimits.MAX_DEPTH) {
+            if (depth >= MAX_ACTION_TREE_DEPTH) {
                 if (node.childCount() > 0) budgetExceeded = true
                 return
             }
@@ -91,6 +91,9 @@ class NodeRefSnapshots(private val capacity: Int = MAX_SNAPSHOTS) : AutoCloseabl
     companion object {
         const val MAX_SNAPSHOTS = AiAgentContract.MAX_SNAPSHOTS_PER_LINK
         const val MAX_WINDOW_KEY_CHARS = 2048
+        // Action lookup must inspect beyond the display dump's 32-level formatting limit.
+        // The independent 2000-node visit cap and tool deadline still bound the work.
+        const val MAX_ACTION_TREE_DEPTH = 64
         private val REF = Regex("(?:#?n)?([1-9][0-9]{0,3})")
     }
 }

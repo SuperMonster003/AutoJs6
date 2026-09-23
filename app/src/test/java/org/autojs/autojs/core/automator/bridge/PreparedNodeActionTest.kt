@@ -16,6 +16,15 @@ class PreparedNodeActionTest {
         val root = FakeUiNode.root { repeat(2100) { child("n$it") } }
         assertThrows(NodeRefSnapshots.Stale::class.java) { PreparedNodeAction.find(root, { false }, {}) }
     }
+    @Test fun inspectionFindsDeepTargetsButRetainsAHardDepthBound() {
+        val root = FakeUiNode.root {}
+        var nested = root
+        repeat(45) { nested = nested.child("level$it") }
+        nested.child("target")
+        assertEquals("target", PreparedNodeAction.find(root, { it.name == "target" }, {})?.name)
+        repeat(21) { nested = nested.child("deeper$it") }
+        assertThrows(NodeRefSnapshots.Stale::class.java) { PreparedNodeAction.find(root, { false }, {}) }
+    }
     @Test fun actionEligibilityDoesNotFallBackToUnrelatedCapabilities() {
         val node = FakeUiNode.root { clickable = true }
         assertTrue(PreparedNodeAction.accepts(node, "click"))
