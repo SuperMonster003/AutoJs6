@@ -8,6 +8,7 @@
 
 ###### 2026/09/23
 
+* `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` ai.agent.result/context fournit les résultats et le contexte des scripts enregistrés, avec annulation par appel et exemples de comptage du presse-papiers et de nettoyage des anciens installateurs téléchargés
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables

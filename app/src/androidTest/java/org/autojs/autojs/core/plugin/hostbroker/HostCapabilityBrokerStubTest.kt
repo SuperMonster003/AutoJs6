@@ -22,6 +22,27 @@ import java.util.concurrent.TimeUnit
 class HostCapabilityBrokerStubTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
+    @Test fun optionalOcrDiscoveryTracksAvailabilityAndNeverWidensTheGrant() {
+        var installed = false
+        val permissions = setOf("accessibility", "screen_capture", "ocr")
+        fun create(grant: HostCapabilityGrant) = HostCapabilityBrokerCore(context, "optional-test", grant,
+            providerFactory = { _, _ -> object : NodeBridgeCapabilityProvider {
+                override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) = error("Discovery must not dispatch")
+            } }, ocrAvailable = { installed })
+        for (granted in listOf(true, false)) {
+            val core = create(HostCapabilityGrant(setOf("accessibility.readScreenText"), if (granted) permissions else permissions - "ocr"))
+            try {
+                installed = false
+                assertTrue(core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)!!.isEmpty())
+                installed = true
+                assertEquals(granted, core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)!!.contains("accessibility.readScreenText"))
+                assertEquals(setOf("accessibility.readScreenText"), core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_GRANT_METHODS)!!.toSet())
+                core.destroy(null)
+                assertTrue(core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)!!.isEmpty())
+            } finally { core.destroy(null) }
+        }
+    }
+
     @Test fun malformedDeniedAndDestroyedRequestsGetOneTerminalReply() {
         val core = core { request -> NodeBridgeResponse.success(request.id, "true") }
         val broker = HostCapabilityBrokerStub(core, Process.myUid())

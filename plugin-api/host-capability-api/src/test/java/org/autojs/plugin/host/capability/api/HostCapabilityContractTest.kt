@@ -27,6 +27,7 @@ class HostCapabilityContractTest {
         assertEquals("bridgePayloadFd", HostCapabilityContract.KEY_BRIDGE_PAYLOAD_FD)
         assertEquals("hostCapabilityBrokerVersion", HostCapabilityContract.KEY_HOST_CAPABILITY_BROKER_VERSION)
         assertEquals("grantJson", HostCapabilityContract.KEY_GRANT_JSON)
+        assertEquals("availableOptionalMethods", HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)
         assertEquals("reasonJson", HostCapabilityContract.KEY_REASON_JSON)
     }
 

@@ -35,6 +35,10 @@ object HostCapabilityContract {
     const val KEY_HOST_CAPABILITY_BROKER_VERSION = "hostCapabilityBrokerVersion"
     /** Required String array: bridge modules admitted by this broker's grant. */
     const val KEY_HOST_CAPABILITY_MODULES = "hostCapabilityModules"
+    /** Optional String array: currently available plugin-dependent methods (currently accessibility.readScreenText).
+     * Missing means none advertised. This is a discovery snapshot, not a grant; every call still checks permissions.
+     * Hosts discover without binding plugins or capturing the screen. Clients refresh at task start. */
+    const val KEY_AVAILABLE_OPTIONAL_METHODS = "availableOptionalMethods"
     /** Required String: bridge engine info JSON, including engine name and host version. */
     const val KEY_BRIDGE_ENGINE_INFO = "bridgeEngineInfo"
 

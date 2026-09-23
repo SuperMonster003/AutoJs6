@@ -8,6 +8,7 @@
 
 ###### 2026/09/23
 
+* `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` ai.agent.result/context permite informar resultados y contexto de scripts registrados, con cancelación por llamada y ejemplos para contar caracteres del portapapeles y limpiar instaladores antiguos
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar

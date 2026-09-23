@@ -94,6 +94,88 @@ class AiAgentPluginRoundTripTest {
     }
     private fun detach(link: IAiAgentLink) = link.detach(bundle(H.KEY_REASON_JSON, JSONObject().put("reason", "test-finished")))
 
+    @Test fun absentOcrIsHiddenFromTheRealPluginModel() = optionalOcrRoundTrip(false)
+    @Test fun availableOcrIsAdmittedAndMergedByTheRealPlugin() = optionalOcrRoundTrip(true)
+    private fun optionalOcrRoundTrip(available: Boolean) = withPlugin { api ->
+        val core = core(); val delegate = broker(core); val calls = AtomicInteger()
+        val capabilities = object : IHostCapabilityBroker.Stub() {
+            override fun getBrokerInfo() = delegate.brokerInfo.apply {
+                putStringArray(H.KEY_AVAILABLE_OPTIONAL_METHODS, if (available) arrayOf("accessibility.readScreenText") else emptyArray())
+            }
+            override fun destroy(reason: Bundle?) = delegate.destroy(reason)
+            override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                val value = JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!)
+                if (value.optString("method") != "readScreenText") { delegate.dispatch(request, callback); return }
+                assertTrue(available); calls.incrementAndGet()
+                fun word(text: String, x: Int) = JSONObject().put("text", text).put("confidence", 0.9)
+                    .put("bounds", JSONObject().put("left", x).put("top", 5).put("right", x + 20).put("bottom", 15))
+                val result = JSONArray().put(word("Hello", 10)).put(word("screen", 35))
+                callback.onResponse(Bundle().apply {
+                    putBoolean(H.KEY_BRIDGE_RESPONSE_OK, true)
+                    putString(H.KEY_BRIDGE_RESPONSE_JSON, JSONObject().put("id", value.getString("id")).put("ok", true).put("result", result).toString())
+                })
+            }
+        }
+        val model = ScriptedModel { step, request ->
+            if (step == 0) {
+                assertEquals(available, request.getJSONArray("messages").getJSONObject(0).getString("content").contains("ocr_screen"))
+                if (available) tool("ocr_screen") else done()
+            } else {
+                val lines = observation(request).getJSONObject("result").getJSONArray("lines")
+                assertEquals(1, lines.length()); assertEquals("Hello screen", lines.getJSONObject(0).getString("text"))
+                assertEquals(55, lines.getJSONObject(0).getJSONObject("bounds").getInt("right")); done()
+            }
+        }
+        val link = attach(api, model, capabilities)
+        try {
+            val id = start(link)
+            waitUntil("OCR discovery run finishes") { decode(link.getRun(ref(id))).optString("state") in setOf("completed", "failed", "blocked") }
+            model.failure?.let { throw AssertionError("OCR fixture failed", it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state")); assertEquals(if (available) 1 else 0, calls.get())
+        } finally { detach(link); core.destroy(null) }
+    }
+
+    @Test fun readOnlyScreenObservationsRoundTripThroughRealAccessibility() = withPlugin { api ->
+        assumeTrue("Private AVD only: -e autojs.agent.observe true", InstrumentationRegistry.getArguments().getString("autojs.agent.observe").toBoolean())
+        val service = "org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
+        val previous = shell("settings get secure enabled_accessibility_services").trim().takeUnless { it == "null" }.orEmpty().split(':').filter { it.isNotBlank() }.toSet()
+        val others = previous - service
+        shell(if (others.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services ${others.joinToString(":")}")
+        SystemClock.sleep(400)
+        shell("settings put secure enabled_accessibility_services ${(others + service).joinToString(":")}")
+        shell("settings put secure accessibility_enabled 1")
+        assertTrue(org.autojs.autojs.core.accessibility.AccessibilityService.waitForOperational(10_000))
+        context.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        SystemClock.sleep(1000)
+        var snapshot: String? = null
+        val core = core()
+        val model = ScriptedModel { step, request ->
+            val result = if (step == 0) null else observation(request).getJSONObject("result")
+            when (step) {
+                0 -> tool("app_current")
+                1 -> { assertEquals("com.android.settings", result!!.getString("packageName")); tool("ui_dump") }
+                2 -> { snapshot = result!!.getString("snapshotId"); assertTrue(result.getInt("nodeCount") > 0); assertTrue(result.getJSONObject("changes").getBoolean("baseline")); tool("ui_dump") }
+                3 -> { assertEquals(snapshot, result!!.getJSONObject("changes").getString("previousSnapshotId")); assertFalse(result.getJSONObject("changes").getBoolean("baseline")); tool("ui_find", JSONObject().put("selector", JSONObject().put("className", "android.widget.TextView")).put("limit", 3)) }
+                4 -> { assertTrue(result!!.getJSONArray("nodes").length() in 1..3); tool("ui_wait_for", JSONObject().put("selector", JSONObject().put("className", "android.widget.TextView")).put("state", "appear")) }
+                5 -> { assertTrue(result!!.getBoolean("matched")); tool("ui_wait_for", JSONObject().put("selector", JSONObject().put("text", "AUTOJS6_P41_NO_SUCH_NODE")).put("state", "disappear")) }
+                6 -> { assertTrue(result!!.getBoolean("matched")); tool("screen_state") }
+                7 -> { assertTrue(result!!.getBoolean("screenOn")); tool("device_info") }
+                8 -> { assertTrue(result!!.length() > 0); tool("console_tail") }
+                else -> { assertEquals("global-window", result!!.getString("consoleCaptureMode")); assertTrue(result.has("lines")); done() }
+            }
+        }
+        val link = attach(api, model, broker(core))
+        try {
+            val id = start(link)
+            waitUntil("Read-only screen workflow finishes") { decode(link.getRun(ref(id))).optString("state") in setOf("completed", "failed", "blocked") }
+            model.failure?.let { throw AssertionError("Observation fixture failed", it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state")); assertEquals(10, model.calls.get())
+        } finally {
+            detach(link); core.destroy(null)
+            shell(if (previous.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services ${previous.joinToString(":")}")
+        }
+    }
+
     @Test fun registeredScriptsAreRankedQueriedCachedRefreshedAndScopedThroughTheRealHost() = withPlugin { api ->
         val oldWork = org.autojs.autojs.util.WorkingDirectoryUtils.path
         val root = java.io.File(Environment.getExternalStorageDirectory(), "AgentP31Catalog-${System.nanoTime()}")

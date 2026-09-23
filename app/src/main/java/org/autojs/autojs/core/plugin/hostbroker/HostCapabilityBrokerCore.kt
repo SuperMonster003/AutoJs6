@@ -15,6 +15,7 @@ import org.autojs.autojs.engine.NodeBridgeLimits
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeRequest
 import org.autojs.autojs.engine.NodeBridgeResponse
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.plugin.host.capability.api.HostCapabilityContract
 import org.json.JSONArray
@@ -40,6 +41,7 @@ class HostCapabilityBrokerCore(
     private val label: String = "host",
     grantSource: String = "host-grant",
     providerFactory: ((Context, NodeBridgeEngineInfo) -> NodeBridgeCapabilityProvider)? = null,
+    private val ocrAvailable: (Context) -> Boolean = { OcrPluginHost.availableEngines(it).isNotEmpty() },
 ) {
 
     private val appContext = context.applicationContext
@@ -87,6 +89,11 @@ class HostCapabilityBrokerCore(
         putString(HostCapabilityContract.KEY_HOST_CAPABILITY_BROKER_ID, id)
         putString(HostCapabilityContract.KEY_BRIDGE_ENGINE_INFO, engineInfo.toJson())
         putStringArray(HostCapabilityContract.KEY_HOST_CAPABILITY_MODULES, grant.modules.toTypedArray())
+        putStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS, if (!destroyed.get() &&
+            "accessibility.readScreenText" in grant.allowedMethods &&
+            grant.permissions.containsAll(listOf("accessibility", "screen_capture", "ocr")) &&
+            runCatching { ocrAvailable(appContext) }.getOrDefault(false)
+        ) arrayOf("accessibility.readScreenText") else emptyArray())
         putStringArray(HostCapabilityContract.KEY_GRANT_METHODS, grant.allowedMethods.toTypedArray())
         putStringArray(HostCapabilityContract.KEY_GRANT_PERMISSIONS, grant.permissions.toTypedArray())
         putInt(HostCapabilityContract.KEY_GRANT_MAX_REQUEST_BYTES, grant.maxRequestBytes)
