@@ -300,7 +300,9 @@ class MailWatchRunnerTest {
         fatal.open()
         fatal.opener.failures += MailPluginException(MailErrorMapper.normalize(MailErrorCodes.PLUGIN_UNAVAILABLE, "uninstalled", retryable = false))
         fatal.opener.die()
-        await("the close event") { fatal.runner.isFinished }
+        // The runner marks itself finished before dispatching close to the observer.
+        await("the close event") { fatal.types().contains("close") }
+        assertTrue(fatal.runner.isFinished)
         assertEquals(listOf("error", "error", "close"), fatal.types())
         assertEquals(MailWatch.REASON_ERROR, fatal.events[2].second)
         assertEquals(1, fatal.runner.openCount)
