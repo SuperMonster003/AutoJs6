@@ -61,7 +61,15 @@ import kotlin.math.roundToInt
  *
  * Created by SuperMonster003 on Sep 8, 2026.
  */
-internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val engineCwd: String) {
+internal class NodeBridgeAccessibilityDiagnostics(
+    context: Context,
+    private val engineCwd: String,
+    private val latestComponent: () -> Pair<String, String> = {
+        val provider = runCatching { AutoJs.instance.infoProvider }.getOrNull()
+        runCatching { provider?.latestPackage }.getOrNull().orEmpty() to
+            runCatching { provider?.latestActivity }.getOrNull().orEmpty()
+    },
+) {
 
     private val appContext = context.applicationContext
     private val nodeRefs = NodeRefSnapshots()
@@ -83,7 +91,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
                 .put("format", if (parsed.compact) "compact" else parsed.format.key)
                 .put("window", parsed.window)
                 .put("roots", roots.size)
-            putCurrentWindow(result)
+            putCurrentWindow(result, roots)
             if (parsed.compact) {
                 val collected = CompactNodeText.collect(roots, parsed.maxNodes, parsed.maxDepth, parsed.visibleOnly) {
                     NodeLifecycle.default.release(it)
@@ -106,7 +114,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
                     nodes = nodes.take(lower)
                     text = render(nodes, true)
                 }
-                val snapshot = nodeRefs.register(nodes, parsed.window, nodeRefWindowKey(roots, result))
+                val snapshot = nodeRefs.register(nodes, parsed.window, nodeRefWindowKey(roots))
                 result.put("nodeCount", nodes.size).put("truncated", truncated)
                     .put("text", text).put("snapshotId", snapshot.id)
                     .put("windowIdentity", java.security.MessageDigest.getInstance("SHA-256").digest(snapshot.windowKey.toByteArray(StandardCharsets.UTF_8))
@@ -179,7 +187,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
                 .put("matches", nodesJson(explanation.matches))
                 .put("nearMisses", nodesJson(explanation.nearMisses))
                 .put("text", text)
-            putCurrentWindow(result)
+            putCurrentWindow(result, roots)
             releaseNodes(explanation.matches + explanation.nearMisses, roots)
             return NodeBridgeResponse.success(request.id, result.toString())
         } catch (error: Throwable) {
@@ -210,8 +218,8 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     fun currentWindow(request: NodeBridgeRequest): NodeBridgeResponse {
         return try {
             val result = JSONObject().put("schema", SCHEMA_WINDOW)
-            putCurrentWindow(result)
             val operational = AutoJsAccessibilityService.instance != null && AutoJsAccessibilityService.registry.isOperational
+            putCurrentWindow(result, if (operational) collectRoots(WINDOW_ACTIVE) else null)
             val windows = JSONArray()
             if (operational) {
                 WindowRootProvider.default.windows().forEach { window -> windows.put(windowJson(window)) }
@@ -298,8 +306,7 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
             val reference = if (target.has("nodeRef")) nodeRefs.resolve(target.getString("nodeRef"), target.optString("snapshotId").takeIf { it.isNotEmpty() }) else null
             window = reference?.snapshot?.window ?: WINDOW_ACTIVE
             roots = collectRoots(window)
-            val current = JSONObject().also(::putCurrentWindow)
-            val windowKey = nodeRefWindowKey(roots, current)
+            val windowKey = nodeRefWindowKey(roots)
             fun inspect(source: UiObject): JSONObject {
                 val sourceText = if (source.password()) "" else source.text()
                 val sourceDesc = if (source.password()) "" else source.desc().orEmpty()
@@ -366,14 +373,13 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         }
         val roots = collectRoots(reference.snapshot.window)
         return try {
-            val current = JSONObject().also(::putCurrentWindow)
             val binding = if (target.has("actionToken")) synchronized(preparedActions) {
                 preparedActions[target.getString("actionToken")]?.takeIf {
                     target.getString("nodeRef") == "#n1" && it.snapshotId == reference.snapshot.id &&
                         it.method == request.method && it.expires >= SystemClock.elapsedRealtime()
                 } ?: throw NodeRefSnapshots.Stale("prepared action expired or mismatched")
             } else null
-            val windowKey = nodeRefWindowKey(roots, current)
+            val windowKey = nodeRefWindowKey(roots)
             val performed = nodeRefs.relocate(reference, roots, windowKey,
                 release = { NodeLifecycle.default.release(it) }) { node ->
                 if (binding != null) {
@@ -425,15 +431,17 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
     /** Terminal provider teardown; a late dump cannot repopulate the disposed scope. */
     fun clearNodeRefs() { nodeRefs.close(); synchronized(preparedActions) { preparedActions.clear() } }
 
-    private fun nodeRefWindowKey(roots: List<UiObject>, current: JSONObject): String {
+    private fun nodeRefWindowKey(roots: List<UiObject>): String {
         val identities = roots.map {
             val fingerprint = CompactNodeText.capture(it, 0).fingerprint
                 ?: throw NodeRefSnapshots.Stale("window root identity exceeds the fingerprint limit")
             "${it.windowId}:$fingerprint"
         }.sorted()
-        val components = listOf(current.optString("packageName"), current.optString("activityName")) + identities
+        // Event/usage-stat activity names may lag behind a dismissed confirmation window.
+        // Bind to the actual window IDs and root fingerprints (including their packages).
+        // Node identity, bounds, uniqueness and prepared action checks still apply separately.
         // Length-prefix each component to avoid separator collisions in untrusted accessibility names.
-        val key = components.joinToString("") { "${it.length}:$it" }
+        val key = identities.joinToString("") { "${it.length}:$it" }
         require(key.length <= NodeRefSnapshots.MAX_WINDOW_KEY_CHARS) { "Window identity exceeds the snapshot limit." }
         return key
     }
@@ -572,11 +580,13 @@ internal class NodeBridgeAccessibilityDiagnostics(context: Context, private val 
         }
     }
 
-    private fun putCurrentWindow(json: JSONObject) {
-        val provider = runCatching { AutoJs.instance.infoProvider }.getOrNull()
+    private fun putCurrentWindow(json: JSONObject, roots: List<UiObject>? = null) {
+        val (latestPackage, latestActivity) = latestComponent()
+        val rootPackage = roots?.map { it.packageName().orEmpty() }?.distinct()?.singleOrNull()
+        val packageName = rootPackage ?: latestPackage
         json
-            .put("packageName", runCatching { provider?.latestPackage }.getOrNull().orEmpty())
-            .put("activityName", runCatching { provider?.latestActivity }.getOrNull().orEmpty())
+            .put("packageName", packageName)
+            .put("activityName", latestActivity.takeIf { packageName == latestPackage }.orEmpty())
     }
 
     private fun windowJson(window: AccessibilityWindowInfo): JSONObject {

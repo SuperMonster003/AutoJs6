@@ -1,7 +1,9 @@
 package org.autojs.autojs.engine
 
 import android.content.Intent
+import android.app.Dialog
 import android.os.SystemClock
+import android.widget.TextView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.json.JSONArray
@@ -20,6 +22,63 @@ import java.util.concurrent.atomic.AtomicReference
 class NodeBridgeCompactNodeRefTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val sequence = AtomicInteger()
+
+    @Test fun preparedActionUsesActualWindowDespiteStaleComponentMetadata() {
+        assumeTrue(InstrumentationRegistry.getArguments().getString("autojs.agent.accessibility").toBoolean())
+        assertTrue(AccessibilityService.waitForOperational(10_000L))
+        NodeAccessibilitySmokeActivity.reset()
+        val activity = instrumentation.startActivitySync(
+            Intent(instrumentation.targetContext, NodeAccessibilitySmokeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        ) as NodeAccessibilitySmokeActivity
+        var component = "test.stale.confirmation" to "test.stale.confirmation.Activity"
+        val diagnostics = NodeBridgeAccessibilityDiagnostics(instrumentation.targetContext, "") { component }
+        var dialog: Dialog? = null
+        fun request(method: String, args: JSONArray) = NodeBridgeRequest("window-${sequence.incrementAndGet()}",
+            "accessibility", method, args.toString(), 5_000L, listOf("accessibility"))
+        fun dump() = diagnostics.dump(request("dump", JSONArray().put(JSONObject().put("format", "compact"))))
+        fun prepare(): JSONObject {
+            val snapshot = awaitFixtureDump(::dump)
+            val inspected = diagnostics.inspectNode(request("inspectNode", JSONArray().put(target(snapshot, "python_selector_button")).put("click")))
+            assertTrue(inspected.error?.message.orEmpty(), inspected.ok)
+            return JSONObject(checkNotNull(inspected.resultJson)).getJSONObject("target")
+        }
+        try {
+            instrumentation.waitForIdleSync()
+            val initial = awaitFixtureDump(::dump)
+            assertEquals(instrumentation.targetContext.packageName, initial.getString("packageName"))
+            assertEquals("", initial.getString("activityName"))
+            val target = prepare()
+            // The event cache catches up after confirmation, while the actual window stays put.
+            component = instrumentation.targetContext.packageName to activity.javaClass.name
+            val refreshed = awaitFixtureDump(::dump)
+            assertEquals(initial.getString("windowIdentity"), refreshed.getString("windowIdentity"))
+            val clicked = diagnostics.nodeRefAction(request("click", JSONArray().put(target)))!!
+            assertTrue(clicked.error?.message.orEmpty(), clicked.ok)
+            assertEquals("true", clicked.resultJson)
+            assertTrue(NodeAccessibilitySmokeActivity.awaitClick(3_000L))
+
+            val second = prepare()
+            instrumentation.runOnMainSync {
+                dialog = Dialog(activity).apply {
+                    setContentView(TextView(activity).apply { text = "node-window-confirmation-fixture" })
+                    show()
+                }
+            }
+            val deadline = SystemClock.uptimeMillis() + 5_000L
+            var changed = false
+            do {
+                val response = dump()
+                changed = response.ok && response.resultJson.orEmpty().contains("node-window-confirmation-fixture")
+                if (!changed) SystemClock.sleep(100)
+            } while (!changed && SystemClock.uptimeMillis() < deadline)
+            assertTrue("The competing window must be visible before attempting the old target.", changed)
+            assertStale(diagnostics.nodeRefAction(request("click", JSONArray().put(second)))!!)
+            assertEquals(1, NodeAccessibilitySmokeActivity.clickedCount())
+        } finally {
+            diagnostics.clearNodeRefs()
+            instrumentation.runOnMainSync { dialog?.dismiss(); activity.finish() }
+        }
+    }
 
     @Test fun compactDumpRelocatesActionsAndRejectsForeignSnapshots() {
         assumeTrue("Enable this real-UI test with -e autojs.agent.accessibility true",
@@ -68,11 +127,15 @@ class NodeBridgeCompactNodeRefTest {
         }
     }
 
-    private fun awaitFixtureDump(provider: AndroidNodeBridgeCapabilityProvider): JSONObject {
+    private fun awaitFixtureDump(provider: AndroidNodeBridgeCapabilityProvider): JSONObject = awaitFixtureDump {
+        dispatch(provider, "dump", JSONArray().put(JSONObject().put("format", "compact")))
+    }
+
+    private fun awaitFixtureDump(dump: () -> NodeBridgeResponse): JSONObject {
         val deadline = SystemClock.uptimeMillis() + 10_000L
         var last: NodeBridgeResponse? = null
         do {
-            last = dispatch(provider, "dump", JSONArray().put(JSONObject().put("format", "compact")))
+            last = dump()
             if (last.ok) {
                 val dump = JSONObject(checkNotNull(last.resultJson))
                 if (dump.optString("text").contains("id=python_selector_button") &&

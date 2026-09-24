@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/24
+###### 2026/09/25
 
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -251,6 +251,7 @@
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` Agent rejetant a tort des references de noeuds et affichant un ancien nom d'application apres la fermeture de la fenetre de confirmation
 * `Correction` Les actions sur les noeuds prennent en charge les interfaces profondes et distinguent les limites et capacités des conteneurs pour identifier une cible
 * `Correction` L'activation du plugin YOLO depuis le centre des plugins échouait car la poignée de main de sondage exigeait que le plugin soit déjà activé; le sondage n'exige plus que l'autorisation et la poignée de main du composant exact, tandis que les points d'entrée à l'exécution exigent toujours l'enregistrement d'activation sauvegardé
 * `Correction` MCP Server installé via adb pouvait apparaître activé dans le centre des plugins mais être considéré comme désactivé à l'exécution en l'absence de préférence enregistrée; les deux utilisent désormais l'état désactivé par défaut et conservent les choix explicites de l'utilisateur
