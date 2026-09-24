@@ -248,6 +248,7 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
+        "El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro",
         "Agent rechazaba referencias de nodos validas y mostraba un nombre de aplicacion desactualizado al cerrar la ventana de confirmacion",
         "Las acciones sobre nodos admiten interfaces profundamente anidadas y distinguen límites y capacidades de acción de los contenedores al identificar un objetivo",
         "Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado",

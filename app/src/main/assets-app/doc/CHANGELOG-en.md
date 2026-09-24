@@ -251,6 +251,7 @@
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart
 * `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
+* `Fix` Plugin capability brokers writing toast text into host logs when toast logging was requested
 * `Fix` Agent falsely rejecting node references and reporting an outdated app name after an action confirmation window closes
 * `Fix` Node actions handle deeply nested screens and distinguish container bounds and action capabilities when identifying a target
 * `Fix` Enabling the YOLO plugin from Plugin Center failed because its probe handshake required the plugin to be enabled already; the probe now requires only authorization and the exact-component handshake, while runtime entry points still require the saved enable record

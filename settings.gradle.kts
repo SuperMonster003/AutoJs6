@@ -135,6 +135,7 @@ private val plugins = listOf(
 )
 
 private val pluginConformanceTestApps = listOf(
+    "ai-agent-conformance",
     "ai-provider-conformance",
     "dex-compiler-conformance",
     "lua-runtime-conformance",

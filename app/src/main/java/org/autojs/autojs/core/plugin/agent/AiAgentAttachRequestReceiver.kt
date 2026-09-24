@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.ai.agent.api.AiAgentActions
 import org.autojs.plugin.ai.agent.api.AiAgentIds
@@ -18,11 +19,16 @@ import org.autojs.plugin.ai.agent.api.AiAgentContract
  */
 class AiAgentAttachRequestReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (!isAuthorizedRequest(context, intent)) return
+        if (!isAuthorizedRequest(context, intent)) {
+            // Neither extras nor parser exceptions belong in the host log.
+            Log.i(TAG, "Attach request rejected: identity not authorized")
+            return
+        }
         deliver(context, intent)
     }
 
     companion object {
+        private const val TAG = "AiAgentAttach"
         /** The existing main activity is the foreground fallback; it requires the same proof. */
         fun handleForegroundRequest(context: Context, intent: Intent?) {
             if (intent?.getBooleanExtra(AiAgentActions.EXTRA_AI_AGENT_ATTACH, false) != true) return

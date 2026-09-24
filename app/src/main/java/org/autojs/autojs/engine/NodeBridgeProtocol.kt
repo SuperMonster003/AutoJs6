@@ -4983,7 +4983,14 @@ class AndroidNodeBridgeCapabilityProvider(
         val shouldLog = options?.optBoolean("log", false) ?: false
         dispatchOnMain(request, callback) {
             if (shouldLog) {
-                Log.i(TAG, "toast.showToast message=$message duration=${if (isLong) "long" else "short"}")
+                // Plugin requests may contain observations or model output. A caller's log flag
+                // cannot opt those bodies into host logs. Direct scripts keep explicit logging.
+                val detail = if (engineInfo.backend == "plugin") {
+                    "messageBytes=${message.toByteArray(Charsets.UTF_8).size}"
+                } else {
+                    "message=$message"
+                }
+                Log.i(TAG, "toast.showToast $detail duration=${if (isLong) "long" else "short"}")
             }
             InrtToastVisibilityGuard.holdForToast(isLong)
             ScriptToast.enqueueToast(appContext, "nodejs@${engineInfo.id}", message, isLong)

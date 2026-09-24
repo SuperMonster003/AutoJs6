@@ -36,3 +36,14 @@ API level and result in the Agent roadmap only after running it.
 The existing provider runner exposes `AiPluginAskFailure` without backend response bodies. Thus
 the Agent can forward its stable enum but cannot distinguish an HTTP schema rejection from other
 `PROVIDER_FAILED` errors until the upstream provider error contract is extended.
+
+## Agent caller grant matrix
+
+`AiAgentGrantConformanceTest` uses the independent
+[`ai-agent-conformance` APK](../../test-apps/ai-agent-conformance/README.md) as
+the actual caller. Unlike the provider integration tests above, it injects
+deterministic catalog/generation runners into the production model broker, so
+input, call-count and token limits can be reached without a real Provider,
+account or network. Both request and callback Binder transactions cross UIDs.
+The suite also verifies capability grants, all eight broker UID guards, host
+log exclusion of private bodies and non-Agent attach broadcasts.

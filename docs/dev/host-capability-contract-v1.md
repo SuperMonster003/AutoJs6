@@ -78,6 +78,10 @@ on destruction; current shared teardown uses legacy `errorMessage`/`errorCode`
 when present for its pending-call failure message, otherwise a generic message.
 Private arguments,
 observations, output, paths and error bodies must not enter ordinary logs.
+In particular, a plugin request for `toast.showToast` with `log: true` records
+only the UTF-8 byte count and duration. The displayed toast is unchanged.
+Direct Node.js script calls retain their explicit text-logging behavior; the
+restriction applies to the host-owned `backend=plugin` bridge context.
 
 ## Host implementation and compatibility
 
@@ -107,3 +111,8 @@ user entry points, and [Agent script manifest V1](agent-script-manifest-v1.md)
 for the registered-script methods. Host entry evidence and remaining independent
 conformance-APK checks are recorded in
 [the P1.5 report](evidence/ai-agent-p15-20260923.md).
+The P7 grant matrix has a dedicated foreign-UID driver in
+[`test-apps:ai-agent-conformance`](../../test-apps/ai-agent-conformance/README.md).
+It uses the real host Binder stubs and Android query limiter, with deterministic
+provider runners for model quota tests. This suite is separate from the remaining
+full Agent attach/run/death scenarios and the plugin-side fake host APK.
