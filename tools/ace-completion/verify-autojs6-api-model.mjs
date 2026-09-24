@@ -33,6 +33,9 @@ const requiredDeclarationMembers = {
   threads: "start",
   engines: "myEngine",
   toast: "dismissAll",
+  Agent: "run",
+  AgentRun: "confirm",
+  AgentAssistant: "run",
 };
 const requiredDeclarationSignatures = {
   "app.launch": "launch(app: App.Preset | App.Alias | App.PackageName): boolean;",

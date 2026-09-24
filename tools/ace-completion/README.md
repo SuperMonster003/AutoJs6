@@ -19,6 +19,16 @@ This directory owns the generated ACE completion artifacts for AutoJs6.
 
 ## Commands
 
+For the extracted Ace Editor plugin, first set the asset checkout in PowerShell:
+
+```powershell
+$env:AUTOJS6_ACE_EDITOR_ROOT = 'D:\idea-projects\AutoJs6-Plugin-Ace-Editor'
+```
+
+This redirects asset imports, generated bundles and completion checks to the
+plugin. Source indices and reports remain in this host repository. When the
+variable is omitted, the tools retain the historical in-host asset paths.
+
 ```text
 node tools/ace-completion/import-autojs6-dts.mjs "<path-to-AutoJs6-TypeScript-Declarations>"
 node tools/ace-completion/generate-autojs6-indices-from-dts.mjs

@@ -113,6 +113,8 @@ class AiService private constructor(
     )
 
     private val closed = AtomicBoolean(false)
+    private val agentDelegate = lazy { AiAgentService(scriptRuntime) }
+    internal val agent: AiAgentService get() = agentDelegate.value
     private val activePluginSessions = ConcurrentHashMap.newKeySet<AiSessionNativeObject>()
     private val pluginAskRuntimeDelegate = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         pluginAskRuntimeFactory()
@@ -172,6 +174,7 @@ class AiService private constructor(
     fun close() {
         if (!closed.compareAndSet(false, true)) return
         try {
+            if (agentDelegate.isInitialized()) agentDelegate.value.close()
             if (pluginAskRuntimeDelegate.isInitialized()) pluginAskRuntimeDelegate.value.close()
             if (pluginStreamRuntimeDelegate.isInitialized()) pluginStreamRuntimeDelegate.value.close()
             if (pluginSessionRuntimeDelegate.isInitialized()) pluginSessionRuntimeDelegate.value.close()

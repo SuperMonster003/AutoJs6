@@ -5,12 +5,13 @@ import path from "node:path";
 import vm from "node:vm";
 import {
   GENERATED_INDEX_PATH,
+  EDITOR_PROJECT_ROOT,
   PROJECT_ROOT,
   relativeToRoot,
 } from "./indices-utils.mjs";
 
 const COMPLETER_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -21,7 +22,7 @@ const COMPLETER_PATH = path.join(
   "autojs6_completer.js",
 );
 const BRIDGE_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -32,7 +33,7 @@ const BRIDGE_PATH = path.join(
   "autojs6_ace_bridge.js",
 );
 const CSS_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -42,7 +43,9 @@ const CSS_PATH = path.join(
   "autojs6",
   "autojs6.css",
 );
-const ACE_BRIDGE_KT_PATH = path.join(
+const ACE_BRIDGE_KT_PATH = process.env.AUTOJS6_ACE_EDITOR_ROOT ? path.join(
+  EDITOR_PROJECT_ROOT, "app/src/main/java/io/github/supermonster003/autojs6/plugin/ace/editor/core/AceBridge.kt",
+) : path.join(
   PROJECT_ROOT,
   "app",
   "src",
@@ -58,7 +61,7 @@ const ACE_BRIDGE_KT_PATH = path.join(
   "AceBridge.kt",
 );
 const LANGUAGE_TOOLS_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -69,7 +72,7 @@ const LANGUAGE_TOOLS_PATH = path.join(
   "ext-language_tools.js",
 );
 const FALLBACK_INDEX_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -475,6 +478,11 @@ assertSignatureHelp(completer, "app.autojs.setRootMode('root', ", {
 });
 
 const fallbackCompleter = createFallbackCompleter();
+assertIncludes(valuesFor(completer, "ai.agent.", ""), ["run", "create", "get", "list", "catalog", "presets", "status", "result", "context"], "Agent module");
+assertIncludes(valuesFor(completer, "AgentRun.", ""), ["id", "state", "on", "once", "off", "respond", "confirm", "cancel", "join", "result"], "Agent handle members");
+for (const name of ["Agent", "AgentRun", "AgentAssistant"]) {
+  if (completer.getGlobalNames().includes(name)) throw new Error(`Instance type leaked as a global: ${name}`);
+}
 assertIncludes(valuesFor(fallbackCompleter, "app.la", "la"), ["launch", "launchApp"], "fallback app.la");
 
 const missingIndicesCompleter = createMissingIndicesCompleter();

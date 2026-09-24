@@ -49,6 +49,7 @@ internal class ScriptAsyncDispatcher private constructor(
     private val terminal = AtomicBoolean(false)
     private val deliverySuppressed = AtomicBoolean(false)
     private val waitReleased = AtomicBoolean(false)
+    private val originThread = Thread.currentThread()
 
     @GuardedBy("queueLock")
     private var drainScheduled = false
@@ -76,14 +77,14 @@ internal class ScriptAsyncDispatcher private constructor(
         )
     }
 
-    constructor(scriptRuntime: ScriptRuntime) : this(
+    constructor(scriptRuntime: ScriptRuntime, keepAlive: Boolean = true) : this(
         valueMapper = { value ->
             RhinoUtils.toJsValue(scriptRuntime.topLevelScope, value)
         },
         drainMicrotasks = {
             Context.getCurrentContext()?.processMicrotasks()
         },
-        releaseWait = captureWaitRelease(scriptRuntime),
+        releaseWait = if (keepAlive) captureWaitRelease(scriptRuntime) else ({}),
         timer = scriptRuntime.timers.timerForCurrentThread ?: scriptRuntime.timers.mainTimer,
         scope = scriptRuntime.topLevelScope,
         testScheduler = null,
@@ -114,6 +115,12 @@ internal class ScriptAsyncDispatcher private constructor(
 
     val isTerminal: Boolean
         get() = terminal.get()
+
+    /** A synchronous Agent join may pump its own events, never another thread's Rhino queue. */
+    internal fun drainOnOriginatingThread() {
+        check(Thread.currentThread() === originThread) { "Script callbacks belong to their originating thread" }
+        drain()
+    }
 
     /**
      * Delivers a non-terminal value list on the originating JavaScript thread.

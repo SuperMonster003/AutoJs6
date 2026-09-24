@@ -16,6 +16,22 @@ import java.util.concurrent.atomic.AtomicReference
 
 class AiAsyncDispatcherTest {
 
+    @Test fun blockingJoinCanDrainOnlyItsOriginatingLane() {
+        val scheduled = ArrayDeque<() -> Unit>()
+        val delivered = mutableListOf<String>()
+        val released = AtomicInteger()
+        val dispatcher = AiAsyncDispatcher({ it }, scheduled::addLast, { released.incrementAndGet() })
+        dispatcher.dispatchValues(arrayOf("input")) { delivered += it[0] as String }
+        val wrong = AtomicReference<Throwable>()
+        Thread { try { dispatcher.drainOnOriginatingThread() } catch (e: Throwable) { wrong.set(e) } }.apply { start(); join() }
+        assertTrue(wrong.get() is IllegalStateException); assertTrue(delivered.isEmpty())
+        dispatcher.drainOnOriginatingThread()
+        dispatcher.terminalValues(arrayOf("done")) { delivered += it[0] as String }
+        dispatcher.drainOnOriginatingThread()
+        while (scheduled.isNotEmpty()) scheduled.removeFirst().invoke()
+        assertEquals(listOf("input", "done"), delivered); assertEquals(1, released.get())
+    }
+
     @Test
     fun valuesAreConvertedAndDeliveredOnlyByCapturedScheduler() {
         val scheduled = ArrayDeque<() -> Unit>()

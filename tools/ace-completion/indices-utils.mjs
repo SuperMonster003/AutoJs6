@@ -4,9 +4,13 @@ import { fileURLToPath } from "node:url";
 
 export const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
+// The editor assets now live in a separate plugin checkout. Keep legacy host layouts usable.
+export const EDITOR_PROJECT_ROOT = process.env.AUTOJS6_ACE_EDITOR_ROOT
+  ? path.resolve(process.env.AUTOJS6_ACE_EDITOR_ROOT)
+  : PROJECT_ROOT;
 export const SOURCE_PATH = path.join(SCRIPT_DIR, "autojs6_indices.source.json");
 export const GENERATED_INDEX_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -17,7 +21,7 @@ export const GENERATED_INDEX_PATH = path.join(
   "autojs6_indices.js",
 );
 export const GENERATED_DTS_PATH = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -29,7 +33,7 @@ export const GENERATED_DTS_PATH = path.join(
   "lib.autojs6.d.ts",
 );
 export const BUNDLED_TYPES_ROOT = path.join(
-  PROJECT_ROOT,
+  EDITOR_PROJECT_ROOT,
   "app",
   "src",
   "main",
@@ -251,7 +255,7 @@ export function buildRuntimeIndices(source) {
         score: member.score,
       };
     });
-    globals.push({
+    if (!moduleSpec.instanceOnly) globals.push({
       name: moduleName,
       type: "module",
       doc: moduleSpec.doc,
@@ -290,6 +294,7 @@ export function buildRuntimeIndices(source) {
   }
 
   return {
+    instanceOnlyModules: Object.keys(source.modules).filter((name) => source.modules[name].instanceOnly),
     version: source.version,
     globals: dedupeEntries(globals),
     modules,
@@ -340,6 +345,7 @@ export function renderDts(source) {
   lines.push("");
 
   for (const moduleName of Object.keys(source.modules)) {
+    if (source.modules[moduleName].instanceOnly) continue;
     lines.push(`declare const ${moduleName}: AutoJs6.${interfaceName(moduleName)};`);
   }
   const globalMemberDeclarations = collectGlobalMemberDeclarations(source);

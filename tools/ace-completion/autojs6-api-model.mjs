@@ -249,6 +249,18 @@ function parseInternalTypes(text, filteredEntries) {
       const existing = types.get(declaration.name) || [];
       types.set(declaration.name, mergeMembers(existing, declaration.members));
     }
+    // Agent handles are nested types, not global module objects. Keep their members
+    // available for property aliases without inventing executable global names.
+    const ai = /\bnamespace\s+Ai\s*\{/.exec(namespaceBody);
+    if (ai) {
+      const start = namespaceBody.indexOf("{", ai.index);
+      const end = findMatchingBrace(namespaceBody, start);
+      for (const declaration of parseTopLevelTypeDeclarations(namespaceBody.slice(start + 1, end), filteredEntries)) {
+        if (["Agent", "AgentRun", "AgentAssistant"].includes(declaration.name)) {
+          types.set(`Ai.${declaration.name}`, declaration.members);
+        }
+      }
+    }
     namespaceRegex.lastIndex = closeBrace + 1;
   }
   return types;
@@ -420,6 +432,11 @@ function buildDeclarationModules(internalTypes, moduleBindings, filteredEntries)
       members,
     });
   }
+  for (const name of ["Agent", "AgentRun", "AgentAssistant"]) {
+    const members = internalTypes.get(`Ai.${name}`);
+    if (members?.length) modules.push({ name, typeName: name, instanceOnly: true,
+      doc: `Internal.Ai.${name} instance members`, members });
+  }
   return modules.sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -429,6 +446,7 @@ function mergeSourceModules(baseModules, declarationModules) {
   for (const [moduleName, moduleSpec] of Object.entries(baseModules || {})) {
     modules.set(moduleName, {
       doc: moduleSpec.doc || moduleDoc(moduleName, ""),
+      ...(moduleSpec.instanceOnly ? { instanceOnly: true } : {}),
       score: moduleSpec.score,
       members: mergeMembers([], moduleSpec.members || []),
     });
@@ -438,6 +456,7 @@ function mergeSourceModules(baseModules, declarationModules) {
     const existing = modules.get(moduleSpec.name);
     modules.set(moduleSpec.name, {
       doc: existing && existing.doc || moduleSpec.doc || moduleDoc(moduleSpec.name, moduleSpec.typeName),
+      ...(moduleSpec.instanceOnly ? { instanceOnly: true } : {}),
       score: existing && existing.score,
       members: mergeMembers(moduleSpec.members, existing && existing.members || []),
     });

@@ -13,9 +13,183 @@
         }
       ]
     },
+    "Agent": {
+      "doc": "Internal.Ai.Agent instance members",
+      "instanceOnly": true,
+      "members": [
+        {
+          "name": "run",
+          "kind": "function",
+          "doc": "run(goal: string, options?: AgentRunOptions): AgentRun;",
+          "signature": "run(goal: string, options?: AgentRunOptions): AgentRun;"
+        },
+        {
+          "name": "create",
+          "kind": "function",
+          "doc": "create(options: AgentRunOptions): AgentAssistant;",
+          "signature": "create(options: AgentRunOptions): AgentAssistant;"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(id: string): AgentRun | null;",
+          "signature": "get(id: string): AgentRun | null;"
+        },
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(filter?: AgentListFilter): Promise<AgentRunSummary[]>;",
+          "signature": "list(filter?: AgentListFilter): Promise<AgentRunSummary[]>;"
+        },
+        {
+          "name": "catalog",
+          "kind": "function",
+          "doc": "catalog(query?: string): Promise<AgentScriptEntry[]>;",
+          "signature": "catalog(query?: string): Promise<AgentScriptEntry[]>;"
+        },
+        {
+          "name": "presets",
+          "kind": "function",
+          "doc": "presets(): Promise<string[]>;",
+          "signature": "presets(): Promise<string[]>;"
+        },
+        {
+          "name": "status",
+          "kind": "function",
+          "doc": "status(): AgentLinkStatus;",
+          "signature": "status(): AgentLinkStatus;"
+        },
+        {
+          "name": "result",
+          "kind": "function",
+          "doc": "result(value: JsonValue): boolean;",
+          "signature": "result(value: JsonValue): boolean;"
+        },
+        {
+          "name": "context",
+          "kind": "function",
+          "doc": "context(): AgentExecutionContext | null;",
+          "signature": "context(): AgentExecutionContext | null;"
+        }
+      ]
+    },
+    "AgentAssistant": {
+      "doc": "Internal.Ai.AgentAssistant instance members",
+      "instanceOnly": true,
+      "members": [
+        {
+          "name": "options",
+          "kind": "variable",
+          "doc": "options: AgentRunOptions;",
+          "signature": "options: AgentRunOptions;"
+        },
+        {
+          "name": "run",
+          "kind": "function",
+          "doc": "run(goal: string, overrides?: AgentRunOptions): AgentRun;",
+          "signature": "run(goal: string, overrides?: AgentRunOptions): AgentRun;"
+        }
+      ]
+    },
+    "AgentRun": {
+      "doc": "Internal.Ai.AgentRun instance members",
+      "instanceOnly": true,
+      "members": [
+        {
+          "name": "id",
+          "kind": "variable",
+          "doc": "id: string;",
+          "signature": "id: string;"
+        },
+        {
+          "name": "state",
+          "kind": "variable",
+          "doc": "state: AgentState;",
+          "signature": "state: AgentState;"
+        },
+        {
+          "name": "goal",
+          "kind": "variable",
+          "doc": "goal: string;",
+          "signature": "goal: string;"
+        },
+        {
+          "name": "startedAt",
+          "kind": "variable",
+          "doc": "startedAt: number;",
+          "signature": "startedAt: number;"
+        },
+        {
+          "name": "detached",
+          "kind": "variable",
+          "doc": "detached: boolean;",
+          "signature": "detached: boolean;"
+        },
+        {
+          "name": "error",
+          "kind": "variable",
+          "doc": "error: AgentError | null;",
+          "signature": "error: AgentError | null;"
+        },
+        {
+          "name": "result",
+          "kind": "variable",
+          "doc": "result: Promise<AgentResult>;",
+          "signature": "result: Promise<AgentResult>;"
+        },
+        {
+          "name": "on",
+          "kind": "function",
+          "doc": "on<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;",
+          "signature": "on<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;"
+        },
+        {
+          "name": "off",
+          "kind": "function",
+          "doc": "off<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;",
+          "signature": "off<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;"
+        },
+        {
+          "name": "once",
+          "kind": "function",
+          "doc": "once<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;",
+          "signature": "once<K extends keyof AgentEventMap>(event: K, listener: (event: AgentEventMap[K]) => void): this;"
+        },
+        {
+          "name": "respond",
+          "kind": "function",
+          "doc": "respond(requestId: string, value: string | boolean): boolean;",
+          "signature": "respond(requestId: string, value: string | boolean): boolean;"
+        },
+        {
+          "name": "confirm",
+          "kind": "function",
+          "doc": "confirm(requestId: string, allowed: boolean, scope?: 'once' | 'run'): boolean;",
+          "signature": "confirm(requestId: string, allowed: boolean, scope?: 'once' | 'run'): boolean;"
+        },
+        {
+          "name": "cancel",
+          "kind": "function",
+          "doc": "cancel(reason?: string): this;",
+          "signature": "cancel(reason?: string): this;"
+        },
+        {
+          "name": "join",
+          "kind": "function",
+          "doc": "join(timeoutMs?: number): AgentResult;",
+          "signature": "join(timeoutMs?: number): AgentResult;"
+        }
+      ]
+    },
     "ai": {
       "doc": "AutoJs6 Ai API",
       "members": [
+        {
+          "name": "agent",
+          "kind": "variable",
+          "doc": "agent: Ai.Agent;",
+          "signature": "agent: Ai.Agent;"
+        },
         {
           "name": "ask",
           "kind": "function",

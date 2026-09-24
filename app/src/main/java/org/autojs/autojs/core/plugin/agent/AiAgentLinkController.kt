@@ -69,6 +69,18 @@ class AiAgentLinkController(
     private var rebindJob: Job? = null
     private var desiredConfig = "{}"
     val status = mutableStatus.asStateFlow()
+    private val scriptListeners = java.util.concurrent.CopyOnWriteArraySet<(String) -> Unit>()
+    internal val scriptRuns by lazy { AiAgentRunRegistry(this, uid) }
+
+    internal fun observeLoss(listener: (String) -> Unit): java.io.Closeable {
+        scriptListeners.add(listener)
+        return java.io.Closeable { scriptListeners.remove(listener) }
+    }
+
+    private fun notifyLoss(code: String) {
+        runCatching { listener.onLinkLost(code) }
+        scriptListeners.forEach { runCatching { it(code) } }
+    }
 
     /** Broadcast delivery only schedules work; binding never blocks the receiver's main thread. */
     fun requestAttach() {
@@ -104,7 +116,7 @@ class AiAgentLinkController(
             release(it, code)
         }
         publish(AiAgentLinkStatus())
-        runCatching { listener.onLinkLost(C.ERROR_LINK_DETACHED) }
+        notifyLoss(C.ERROR_LINK_DETACHED)
     }
 
     suspend fun updateConfig(configJson: String): Unit = mutex.withLock {
@@ -162,7 +174,7 @@ class AiAgentLinkController(
         val current = active?.takeIf { it.generation == generation } ?: return@withLock
         active = null
         release(current, "plugin-died")
-        runCatching { listener.onLinkLost(C.ERROR_PLUGIN_UNAVAILABLE) }
+        notifyLoss(C.ERROR_PLUGIN_UNAVAILABLE)
         val delayMs = policy.died(generation, runCatching { available() }.getOrDefault(false))
         publish(AiAgentLinkStatus("failed", errorCode = C.ERROR_PLUGIN_UNAVAILABLE))
         if (delayMs != null) {
@@ -212,7 +224,7 @@ class AiAgentLinkController(
                             policy.failed(generation)
                             active?.let { release(it, "plugin-detached") }
                             active = null
-                            runCatching { listener.onLinkLost(if (parsed.state == "host_unavailable") C.ERROR_HOST_UNAVAILABLE else C.ERROR_LINK_DETACHED) }
+                            notifyLoss(if (parsed.state == "host_unavailable") C.ERROR_HOST_UNAVAILABLE else C.ERROR_LINK_DETACHED)
                         }
                     }
                 }
