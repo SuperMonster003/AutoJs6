@@ -413,6 +413,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Acceso a AI Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión
 * `Nuevo` El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
+* `Corrección` La lectura de la apariencia por plugins oficiales durante el arranque podía bloquear la inicialización de preferencias antes de disponer del contexto
+* `Corrección` AI Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED
 * `Corrección` El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro
 * `Corrección` Agent rechazaba referencias de nodos validas y mostraba un nombre de aplicacion desactualizado al cerrar la ventana de confirmacion
 * `Corrección` Las acciones sobre nodos admiten interfaces profundamente anidadas y distinguen límites y capacidades de acción de los contenedores al identificar un objetivo

@@ -130,10 +130,20 @@ The centralized `RUN_STATES` set contains `queued`, `running`, `waiting_input`,
 and `cancelled`. The last five are terminal; reconnecting does not resume a
 blocked run. Run events are `state`, `progress`, `step`, `input`, `confirmation`,
 `done` and `error`; link events also include `queue_changed` and `preset_changed`.
-Task/run ownership and the JS facade are implemented in P5, not by this host
-foundation. Rebinding after plugin process death restores the connection only;
-the controller reports link loss to observers and never starts or replays a task.
-P5 will connect that notification to task handles.
+The host owns JS handles and fails outstanding handles with `PLUGIN_UNAVAILABLE`
+when the plugin process dies. Rebinding restores only the connection and never
+starts or replays a task. The plugin records unfinished persisted tasks as
+`failed` with the historical interruption reason `process-died`; an already
+terminal record, including `blocked` after host death, keeps its original result.
+No queue or pending confirmation is restored after plugin process death.
+
+For host-owned Agent brokers, screen observations and actions require an
+interactive, unlocked device. The host rejects accessibility screen operations,
+application launches and notification/quick-settings actions with a stable
+`SCREEN_LOCKED` diagnostic while the screen is off or the keyguard is showing.
+The plugin returns that observation to the model and does not discard it during
+the pre-action screen sample. Read-only screen-state and device-info calls remain
+available. This does not change direct Node.js scripts or other plugin families.
 
 The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
 

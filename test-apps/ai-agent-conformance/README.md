@@ -28,3 +28,17 @@ adb -s SERIAL shell am instrument -w -r -e autojs.aiAgent.grant.conformance.enab
 Use an isolated emulator. The log test displays a toast containing a randomly generated test marker. No screen taps, real model selection, network changes, orders or payments are required. Tests unbind the driver and destroy host brokers. The driver APK must be signed like the test host, as with the other repository conformance APKs.
 
 This first fixture increment covers the original P7 host grant matrix. The original P7 full fake Agent attach/startRun/hostile-callback scenarios and plugin-side fake host APK, and P1.3's pending cross-process attach/detach/death evidence, remain open. Passing this suite does not close those roadmap items, the six-device matrix or an E4 task acceptance.
+
+## Production-plugin lifecycle checks
+
+The host instrumentation also tests the installed production Agent with deterministic model replies. These tests do not require this driver APK. Select the lifecycle methods from `AiAgentPluginRoundTripTest`, plus `AiAgentPublicApiTest#pluginProcessDeathFailsEveryHostOwnedHandle`, using `-e autojs.agent.plugin true -e autojs.agent.lifecycle true -e autojs.agent.actions true`. Use only a private, unlocked, unsecured AVD. The lifecycle opt-in verifies the device identity before injecting process death or exercising the keyguard.
+
+The real host-death case needs an external driver because killing the host also ends its instrumentation. Install the host debug/instrumentation APKs and production Agent debug APK, then run from the repository root:
+
+```text
+python test-apps/ai-agent-conformance/run_host_death.py --adb PATH_TO_ADB --serial emulator-5586 --output build/p7-lifecycle-host-death
+```
+
+The driver waits for a durable checkpoint containing one running and two queued tasks, verifies the host PID, and sends SIGKILL to that host process only. The setup instrumentation is expected to abort. The plugin must survive and persist three `blocked / HOST_UNAVAILABLE` results. A second instrumentation process then verifies an empty queue, no task foreground service, no model replay, and successful completion of an explicitly requested new task. Only a passing second phase counts as acceptance. Logs stay in the specified local output directory; no private task bodies are printed.
+
+The other lifecycle cases use real plugin Binder death, a separate callback process, duplicate late replies after cancellation, real screen-off/keyguard state and real foreground-window changes. These are lifecycle checks of the production plugin; they do not implement the still-pending full fake Agent/fake host conformance item.

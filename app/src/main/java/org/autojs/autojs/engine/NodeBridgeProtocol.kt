@@ -1013,6 +1013,21 @@ class AndroidNodeBridgeCapabilityProvider(
             auditedCallback(NodeBridgeResponse.failure(request.id, auditFailure))
             return
         }
+        // Agent observations and actions must not treat the lock screen as the target app.
+        // These identities come from the host-owned broker, never from request parameters.
+        val agentScreenCall = engineInfo.backend == "plugin" && engineInfo.engineName == "ai-agent" && when (request.module) {
+            NodeBridgeModules.ACCESSIBILITY -> request.method !in setOf("isEnabled", "ensureEnabled")
+            NodeBridgeModules.APP -> request.method in setOf("launchApp", "launchPackage")
+            NodeBridgeModules.KEYS -> request.method in setOf("notifications", "quickSettings")
+            else -> false
+        }
+        if (agentScreenCall && (!appContext.getSystemService(android.os.PowerManager::class.java).isInteractive ||
+                appContext.getSystemService(android.app.KeyguardManager::class.java).isKeyguardLocked)) {
+            auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(
+                "SCREEN_LOCKED: Unlock the device before continuing screen operations.", request.module, request.method,
+                category = NodeBridgeErrorCategory.CAPABILITY_DENIED)))
+            return
+        }
         when {
             request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, auditedCallback)
             request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, auditedCallback)

@@ -12,12 +12,13 @@ import android.os.Looper;
 public class GlobalAppContext {
 
     @SuppressLint("StaticFieldLeak")
-    private static Context sApplicationContext;
-    private static Handler sHandler;
+    private static volatile Context sApplicationContext;
+    private static volatile Handler sHandler;
 
     public static void set(Application app) {
         sHandler = new Handler(Looper.getMainLooper());
-        sApplicationContext = app.getApplicationContext();
+        // LoadedApk may not yet expose getApplicationContext() during attachBaseContext.
+        sApplicationContext = app;
     }
 
     public static Context get() {

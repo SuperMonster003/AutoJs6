@@ -413,6 +413,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` La lecture de l'apparence par un plugin officiel pendant le démarrage pouvait faire échouer les préférences avant la disponibilité du contexte
+* `Correction` AI Agent poursuivait les observations et actions sur un écran éteint ou verrouillé au lieu de renvoyer SCREEN_LOCKED
 * `Correction` Texte des toasts écrit dans les journaux de l'hôte à la demande des plugins via le relais de capacités
 * `Correction` Agent rejetant a tort des references de noeuds et affichant un ancien nom d'application apres la fermeture de la fenetre de confirmation
 * `Correction` Les actions sur les noeuds prennent en charge les interfaces profondes et distinguent les limites et capacités des conteneurs pour identifier une cible

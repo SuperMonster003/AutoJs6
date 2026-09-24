@@ -86,6 +86,24 @@ class AiAgentPublicApiTest {
             work.deleteRecursively()
         }
     }
+    @Test fun pluginProcessDeathFailsEveryHostOwnedHandle() {
+        assumeTrue(InstrumentationRegistry.getArguments().getString("autojs.agent.lifecycle").toBoolean())
+        assertTrue("Private AVD only", Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk"))
+        val model = Model { _, _ -> null }
+        withPlugin(model) { controller, _ ->
+            val handles = (0..2).map { controller.scriptRuns.start("Lifecycle fixture", com.google.gson.JsonObject()) }
+            waitFor("First model call") { model.calls.get() == 1 }
+            instrumentation.uiAutomation.executeShellCommand("am force-stop $pkg").use {
+                ParcelFileDescriptor.AutoCloseInputStream(it).use { input -> input.readBytes() }
+            }
+            waitFor("All host handles fail") { handles.all { it.settled } }
+            handles.forEach { handle ->
+                assertEquals("failed", handle.state); assertNull(handle.result)
+                assertEquals(C.ERROR_PLUGIN_UNAVAILABLE, handle.failure!!["code"].asString)
+            }
+            assertEquals(1, model.calls.get())
+        }
+    }
     private class Running(val execution: ScriptExecution, val finished: CountDownLatch, val failure: AtomicReference<Throwable?>) {
         fun await() {
             assertTrue("Public script body finishes",finished.await(30,TimeUnit.SECONDS))

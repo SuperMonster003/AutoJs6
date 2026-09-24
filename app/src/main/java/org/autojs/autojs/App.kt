@@ -101,9 +101,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        GlobalAppContext.set(this)
-        instance = WeakReference(this)
-
         when {
             ":crash_report".matchesProcessNameSuffix() -> {
                 ThemeColorManager.init()
@@ -152,6 +149,10 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        // Providers are published before Application.onCreate and can already receive
+        // plugin appearance requests. Publish context references before that boundary.
+        instance = WeakReference(this)
+        GlobalAppContext.set(this)
         Log.d("Shizuku", "${App::class.java.simpleName} attachBaseContext | Process=${getProcessNameCompat()}")
     }
 
@@ -428,7 +429,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
         private const val TYPESCRIPT_COMPILER_STARTUP_KEEPALIVE_MILLIS = 60_000L
         private const val MAINTENANCE_SCHEDULING_DELAY_MILLIS = 2_500L
 
-        private lateinit var instance: WeakReference<App>
+        @Volatile private lateinit var instance: WeakReference<App>
 
         val app: App
             get() = instance.get()!!

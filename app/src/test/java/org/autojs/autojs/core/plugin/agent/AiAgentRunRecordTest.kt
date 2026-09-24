@@ -46,10 +46,13 @@ class AiAgentRunRecordTest {
         assertThrows(IllegalStateException::class.java) { r.pendingRequest("q1", "input") }
     }
     @Test fun snapshotNormalizesInterruptedHistoryWithoutPretendingItResumed() {
-        val r=record(); r.snapshot(JsonObject().apply {
-            addProperty("runId", r.id); addProperty("state", "blocked"); addProperty("sequence", 8)
-            add("result", JsonObject().apply { addProperty("status", "blocked"); addProperty("error", "HOST_UNAVAILABLE") })
-        })
-        assertEquals("blocked", r.state); assertEquals("HOST_UNAVAILABLE", r.result!!.getAsJsonObject("error")["code"].asString)
+        for ((state, code) in listOf("blocked" to "HOST_UNAVAILABLE", "failed" to "process-died")) {
+            val r=record(); r.snapshot(JsonObject().apply {
+                addProperty("runId", r.id); addProperty("state", state); addProperty("sequence", 8)
+                add("result", JsonObject().apply { addProperty("status", state); addProperty("error", code) })
+            })
+            assertEquals(state, r.state); assertEquals(code, r.result!!.getAsJsonObject("error")["code"].asString)
+            assertTrue(r.settled); assertNull(r.failure)
+        }
     }
 }

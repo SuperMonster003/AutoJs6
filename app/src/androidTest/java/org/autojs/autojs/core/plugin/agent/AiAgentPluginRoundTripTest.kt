@@ -49,7 +49,7 @@ class AiAgentPluginRoundTripTest {
         val cancelled = AtomicInteger()
         @Volatile var pending: Pair<String, IAiAgentModelCallback>? = null
         @Volatile var failure: Throwable? = null
-        fun finishPending() { pending?.let { (id, callback) -> send(callback, id, "completed", 2, JSONObject().put("text", done().toString()).put("targetId", "conformance:scripted").put("finishReason", 0)) } }
+        fun finishPending(value: JSONObject = done()) { pending?.let { (id, callback) -> send(callback, id, "completed", 2, JSONObject().put("text", value.toString()).put("targetId", "conformance:scripted").put("finishReason", 0)) } }
         override fun getBrokerInfo() = bundle(C.KEY_MODEL_BROKER_INFO_JSON, JSONObject().put("available", true).put("providerId", "conformance")
             .put("maximumInputBytes", 131072).put("maximumOutputBytes", 65536).put("maximumResponseSchemaBytes", 16384)).apply {
             putString(H.KEY_GRANT_JSON, JSONObject().put("maxInputBytesPerRequest", 131072).put("maxTotalTokens", 1000000).put("consumedTokens", 0).toString())
@@ -752,6 +752,193 @@ class AiAgentPluginRoundTripTest {
         } finally { detach(link); core.destroy(null); shell("svc wifi ${if (initial) "enable" else "disable"}") }
     }
 
+    private fun lifecycleOptIn() {
+        assumeTrue("Private unlocked AVD only: -e autojs.agent.lifecycle true",
+            InstrumentationRegistry.getArguments().getString("autojs.agent.lifecycle").toBoolean())
+        assertTrue("Do not run destructive lifecycle cases on real devices", Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk"))
+    }
+    private fun awaitDurableRuns(ids: List<String>) {
+        ids.forEach { id -> waitUntil("Task journal durable") {
+            runCatching { JSONObject(shell("run-as $pluginPackage cat files/runs/$id.json")).getJSONObject("run").getString("runId") == id }.getOrDefault(false)
+        } }
+    }
+    private fun assertIdle(link: IAiAgentLink) {
+        waitUntil("No queued task or task foreground service") {
+            val status = decode(link.status, C.KEY_STATUS_JSON)
+            status.getInt("queuedCount") == 0 && status.isNull("runningRunId") &&
+                !shell("dumpsys activity services $pluginPackage").contains("AiAgentTaskForegroundService")
+        }
+    }
+    @Test fun cancellationDuringModelToolAndConfirmationFencesLateBinderReplies() = withPlugin { api ->
+        for (phase in listOf("model", "tool", "confirmation")) {
+            val core = core(); val delegate = broker(core)
+            val toolCalls = AtomicInteger()
+            val heldTool = java.util.concurrent.atomic.AtomicReference<Pair<String, IHostCapabilityCallback>?>()
+            val capabilities = object : IHostCapabilityBroker.Stub() {
+                override fun getBrokerInfo() = delegate.brokerInfo
+                override fun destroy(reason: Bundle?) = delegate.destroy(reason)
+                override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                    val call = JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!)
+                    when ("${call.getString("module")}.${call.getString("method")}") {
+                        "device.info" -> { toolCalls.incrementAndGet(); heldTool.set(call.getString("id") to callback) }
+                        "clipboard.setText" -> { toolCalls.incrementAndGet(); throw AssertionError("Cancelled confirmation must not write clipboard") }
+                        else -> delegate.dispatch(request, callback)
+                    }
+                }
+            }
+            val model = ScriptedModel { step, _ -> if (step != 0 || phase == "model") null else
+                if (phase == "tool") tool("device_info") else tool("clipboard_set", JSONObject().put("text", "cancelled fixture")) }
+            val events = CopyOnWriteArrayList<JSONObject>()
+            val link = attach(api, model, capabilities)
+            try {
+                val id = start(link, object : IAiAgentRunCallback.Stub() {
+                    override fun onRunEvent(event: Bundle) { events.add(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) }
+                }, confirm = "cautious")
+                waitUntil("$phase reached") { when (phase) {
+                    "tool" -> heldTool.get() != null
+                    "confirmation" -> events.any { it.optString("type") == "confirmation" }
+                    else -> model.calls.get() == 1
+                } }
+                link.cancelRun(ref(id)); link.cancelRun(ref(id))
+                waitUntil("Cancellation settled once") { events.count { it.optString("type") == "done" } == 1 }
+                val settled = decode(link.getRun(ref(id))).toString()
+                assertEquals("cancelled", JSONObject(settled).getString("state"))
+                assertFalse(JSONObject(settled).has("pending"))
+                repeat(2) {
+                    model.finishPending(tool("device_info"))
+                    heldTool.get()?.let { (requestId, callback) -> callback.onResponse(Bundle().apply {
+                        putBoolean(H.KEY_BRIDGE_RESPONSE_OK, true)
+                        putString(H.KEY_BRIDGE_RESPONSE_JSON, JSONObject().put("id", requestId).put("ok", true).put("result", JSONObject().put("fixture", true)).toString())
+                    }) }
+                }
+                if (phase == "confirmation") {
+                    val pending = events.first { it.optString("type") == "confirmation" }
+                    assertNotNull(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, JSONObject().put("runId", id)
+                        .put("requestId", pending.getString("requestId")).put("allowed", true).put("scope", "once"))).getString(C.KEY_ERROR_CODE))
+                }
+                assertIdle(link)
+                SystemClock.sleep(150) // Give already-sent oneway late replies a chance to cross Binder.
+                assertEquals(settled, decode(link.getRun(ref(id))).toString())
+                assertEquals(1, events.count { it.optString("type") == "done" })
+                assertEquals(1, model.calls.get()); assertEquals(if (phase == "tool") 1 else 0, toolCalls.get())
+                if (phase == "model") waitUntil("Model cancellation reached broker") { model.cancelled.get() == 1 }
+                model.failure?.let { throw AssertionError("Cancellation fixture", it) }
+            } finally { detach(link); core.destroy(null) }
+        }
+    }
+
+    @Test fun screenOffAndKeyguardReturnObservationsAndRequireAnExplicitAnswerAfterUnlock() = withPlugin { api ->
+        lifecycleOptIn()
+        val keyguard = context.getSystemService(android.app.KeyguardManager::class.java)
+        val power = context.getSystemService(PowerManager::class.java)
+        assertFalse("No credential changes or secure-device unlocks", keyguard.isDeviceSecure)
+        val disabled = shell("locksettings get-disabled").trim().also { assertTrue(it in setOf("true", "false")) }
+        try { withActionFixture {
+            for (locked in listOf(false, true)) {
+                shell("locksettings set-disabled false"); shell("input keyevent 223")
+                waitUntil("Screen off") { !power.isInteractive }
+                if (locked) { shell("input keyevent 224"); waitUntil("Screen on with keyguard") { power.isInteractive && keyguard.isKeyguardLocked } }
+                val core = core()
+                val model = ScriptedModel { step, request -> when (step) {
+                    0 -> tool("ui_dump")
+                    1 -> { assertTrue(observation(request).toString().contains("SCREEN_LOCKED")); tool("app_launch", JSONObject().put("packageName", "com.android.settings")) }
+                    2 -> { assertTrue(observation(request).toString().contains("SCREEN_LOCKED")); JSONObject().put("kind", "ask").put("ask", JSONObject().put("kind", "confirm").put("question", "Unlock fixture, then continue?")) }
+                    3 -> tool("ui_dump")
+                    else -> { assertTrue(observation(request).getJSONObject("result").getInt("nodeCount") > 0); done() }
+                } }
+                val link = attach(api, model, broker(core))
+                try {
+                    val id = start(link)
+                    waitUntil("Locked observation reaches an input request") { decode(link.getRun(ref(id))).getString("state") == "waiting_input" }
+                    model.failure?.let { throw AssertionError("Locked fixture", it) }
+                    val pending = decode(link.getRun(ref(id))).getJSONObject("pending")
+                    assertEquals(3, model.calls.get())
+                    shell("input keyevent 224"); shell("wm dismiss-keyguard")
+                    waitUntil("Unlocked") { power.isInteractive && !keyguard.isKeyguardLocked }
+                    assertEquals("waiting_input", decode(link.getRun(ref(id))).getString("state"))
+                    decode(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, JSONObject().put("runId", id).put("requestId", pending.getString("requestId")).put("value", true))))
+                    waitUntil("Fresh observation completes after response") { decode(link.getRun(ref(id))).getString("state") in setOf("completed", "failed") }
+                    model.failure?.let { throw AssertionError("Unlocked fixture", it) }
+                    assertEquals("completed", decode(link.getRun(ref(id))).getString("state")); assertEquals(5, model.calls.get())
+                } finally { detach(link); core.destroy(null) }
+            }
+        } } finally { shell("input keyevent 224"); shell("wm dismiss-keyguard"); shell("locksettings set-disabled $disabled") }
+    }
+
+    @Test fun userWindowSwitchCanBeAnsweredByLaunchingTheTargetAgain() = windowSwitchRoundTrip(true)
+    @Test fun userWindowSwitchCanBeAnsweredByAskingBeforeContinuing() = windowSwitchRoundTrip(false)
+    private fun windowSwitchRoundTrip(relaunch: Boolean) = withPlugin { api -> withActionFixture {
+        val core = core()
+        val model = ScriptedModel { step, request -> when (step) {
+            0 -> tool("ui_dump")
+            1 -> {
+                assertTrue(observation(request).getJSONObject("result").getJSONObject("changes").getBoolean("baseline"))
+                context.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                waitUntil("User has switched foreground app") { org.autojs.autojs.core.accessibility.AccessibilityService.instance?.rootInActiveWindow?.packageName?.toString() == "com.android.settings" }
+                tool("ui_dump")
+            }
+            2 -> {
+                assertTrue(observation(request).getJSONObject("result").getJSONObject("changes").getBoolean("windowChanged"))
+                if (relaunch) tool("app_launch", JSONObject().put("packageName", context.packageName))
+                else JSONObject().put("kind", "ask").put("ask", JSONObject().put("kind", "confirm").put("question", "The foreground app changed. Continue?"))
+            }
+            3 -> if (relaunch) { assertTrue(observation(request).getJSONObject("result").getBoolean("ok")); tool("app_current") } else done()
+            else -> { assertEquals(context.packageName, observation(request).getJSONObject("result").getString("packageName")); done() }
+        } }
+        val link = attach(api, model, broker(core))
+        try {
+            val id = start(link)
+            if (!relaunch) {
+                waitUntil("Model asks about changed window") { decode(link.getRun(ref(id))).getString("state") in setOf("waiting_input", "failed") }
+                model.failure?.let { throw AssertionError("Window fixture", it) }
+                val row = decode(link.getRun(ref(id))); assertEquals("waiting_input", row.getString("state"))
+                assertEquals("com.android.settings", org.autojs.autojs.core.accessibility.AccessibilityService.instance?.rootInActiveWindow?.packageName?.toString())
+                decode(link.respond(bundle(C.KEY_RUN_RESPONSE_JSON, JSONObject().put("runId", id).put("requestId", row.getJSONObject("pending").getString("requestId")).put("value", true))))
+            }
+            waitUntil("Window decision completes") { decode(link.getRun(ref(id))).getString("state") in setOf("completed", "failed") }
+            model.failure?.let { throw AssertionError("Window fixture", it) }
+            assertEquals("completed", decode(link.getRun(ref(id))).getString("state"))
+            assertEquals(if (relaunch) 5 else 4, model.calls.get())
+        } finally { detach(link); core.destroy(null) }
+    } }
+
+    /** External driver intentionally kills the host after the durable checkpoint, then runs verifyHostDeathCheckpoint. */
+    @Test fun prepareHostDeathCheckpoint() = withPlugin { api ->
+        assumeTrue(InstrumentationRegistry.getArguments().getString("autojs.agent.hostDeathPhase") == "prepare")
+        lifecycleOptIn()
+        val core = core(); val model = ScriptedModel { _, _ -> null }; val link = attach(api, model, broker(core))
+        try {
+            val ids = (0..2).map { start(link) }
+            waitUntil("Model in flight") { model.calls.get() == 1 }; awaitDurableRuns(ids)
+            java.io.File(context.cacheDir, "agent-p7-host-death.json").writeText(JSONObject().put("hostPid", Process.myPid()).put("ids", JSONArray(ids)).toString())
+            instrumentation.sendStatus(0, Bundle().apply { putString("stream", "P7_HOST_DEATH_READY\n") })
+            // The driver kills this process; a timeout is an explicit setup failure.
+            val deadline = SystemClock.elapsedRealtime() + 60_000
+            while (SystemClock.elapsedRealtime() < deadline) SystemClock.sleep(100)
+            fail("External driver did not kill the host")
+        } finally { detach(link); core.destroy(null) }
+    }
+    @Test fun verifyHostDeathCheckpoint() = withPlugin { api ->
+        assumeTrue(InstrumentationRegistry.getArguments().getString("autojs.agent.hostDeathPhase") == "verify")
+        lifecycleOptIn()
+        val file = java.io.File(context.cacheDir, "agent-p7-host-death.json")
+        val checkpoint = JSONObject(file.readText()); assertNotEquals(Process.myPid(), checkpoint.getInt("hostPid"))
+        val rows = checkpoint.getJSONArray("ids"); val ids = (0 until rows.length()).map(rows::getString)
+        val core = core(); val model = ScriptedModel { _, _ -> done() }; val link = attach(api, model, broker(core))
+        try {
+            waitUntil("Host death history is blocked") { ids.all { decode(link.getRun(ref(it))).getString("state") == "blocked" } }
+            ids.forEach { id ->
+                val row = decode(link.getRun(ref(id))); assertFalse(row.has("pending"))
+                assertEquals("HOST_UNAVAILABLE", row.getJSONObject("result").getJSONObject("error").getString("code"))
+            }
+            assertIdle(link); assertEquals(0, model.calls.get())
+            val fresh = start(link)
+            waitUntil("Explicit new task succeeds after host restart") { decode(link.getRun(ref(fresh))).getString("state") == "completed" }
+            assertEquals(1, model.calls.get())
+            assertTrue(file.delete())
+        } finally { detach(link); core.destroy(null) }
+    }
+
     private fun <T> withDeathService(kind: String = "run", action: (IBinder) -> T): T {
         val ready = CountDownLatch(1); var binder: IBinder? = null
         val connection = object : ServiceConnection {
@@ -776,19 +963,32 @@ class AiAgentPluginRoundTripTest {
         } finally { detach(link); core.destroy(null) }
     } }
 
-    @Test fun pluginProcessRecreationKeepsBlockedHistoryWithoutResuming() = withPlugin { api ->
+    @Test fun pluginProcessRecreationFailsInterruptedHistoryAndClearsTheQueue() = withPlugin { api ->
+        lifecycleOptIn()
         val core = core(); val model = ScriptedModel { _, _ -> null }; val link = attach(api, model, broker(core))
-        val id = start(link)
+        val ids = (0..2).map { start(link) }
         waitUntil("Task active") { model.calls.get() == 1 }
-        // Allow the bounded asynchronous private journal to reach disk before simulating process loss.
-        SystemClock.sleep(300)
-        shell("am force-stop $pluginPackage")
+        awaitDurableRuns(ids)
+        val oldPid = shell("pidof $pluginPackage:agent").trim().also { assertTrue(it.matches(Regex("[0-9]+"))) }
+        val died = CountDownLatch(1); link.asBinder().linkToDeath({ died.countDown() }, 0)
+        // SIGKILL simulates abrupt process loss without marking the whole package force-stopped.
+        shell("run-as $pluginPackage kill -9 $oldPid")
+        assertTrue("Real plugin Binder death", died.await(10, TimeUnit.SECONDS))
         core.destroy(null)
         withPlugin { nextApi ->
             val nextCore = core(); val nextModel = ScriptedModel { _, _ -> done() }; val nextLink = attach(nextApi, nextModel, broker(nextCore))
             try {
-                waitUntil("Restored task is blocked") { runCatching { decode(nextLink.getRun(ref(id))).getString("state") == "blocked" }.getOrDefault(false) }
+                waitUntil("Interrupted tasks recovered") { ids.all { runCatching { decode(nextLink.getRun(ref(it))).getString("state") == "failed" }.getOrDefault(false) } }
+                assertNotEquals(oldPid, shell("pidof $pluginPackage:agent").trim())
+                ids.forEach { id ->
+                    val row = decode(nextLink.getRun(ref(id)))
+                    assertEquals("process-died", row.getJSONObject("result").getString("error")); assertFalse(row.has("pending"))
+                }
+                assertIdle(nextLink)
                 assertEquals(0, nextModel.calls.get())
+                val fresh = start(nextLink)
+                waitUntil("Only an explicit new task runs") { decode(nextLink.getRun(ref(fresh))).getString("state") == "completed" }
+                assertEquals(1, nextModel.calls.get())
             } finally { detach(nextLink); nextCore.destroy(null) }
         }
     }

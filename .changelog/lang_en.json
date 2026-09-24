@@ -248,6 +248,8 @@
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [
+        "Official plugins requesting host appearance during host startup could crash preference initialization before the application context was ready",
+        "AI Agent screen observations and actions could continue while the screen was off or locked instead of returning SCREEN_LOCKED",
         "Plugin capability brokers writing toast text into host logs when toast logging was requested",
         "Agent falsely rejecting node references and reporting an outdated app name after an action confirmation window closes",
         "Node actions handle deeply nested screens and distinguish container bounds and action capabilities when identifying a target",

@@ -248,6 +248,8 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
+        "La lectura de la apariencia por plugins oficiales durante el arranque podía bloquear la inicialización de preferencias antes de disponer del contexto",
+        "AI Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED",
         "El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro",
         "Agent rechazaba referencias de nodos validas y mostraba un nombre de aplicacion desactualizado al cerrar la ventana de confirmacion",
         "Las acciones sobre nodos admiten interfaces profundamente anidadas y distinguen límites y capacidades de acción de los contenedores al identificar un objetivo",
