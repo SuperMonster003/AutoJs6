@@ -759,6 +759,61 @@ class AiAgentPluginRoundTripTest {
         assertTrue("Do not run destructive lifecycle cases on real devices", Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk"))
     }
 
+    @Test fun foregroundServiceCoversQueuedWorkAndStopsAfterTheLastCompletion() = withPlugin { api ->
+        val core = core(); val model = ScriptedModel { _, _ -> null }; val link = attach(api, model, broker(core))
+        try {
+            assertIdle(link)
+            val ids = (0..2).map { start(link) }
+            waitUntil("One active and two queued") { model.calls.get() == 1 && decode(link.status, C.KEY_STATUS_JSON).getInt("queuedCount") == 2 }
+            ids.forEachIndexed { index, id ->
+                waitUntil("Queued task becomes active") { model.calls.get() == index + 1 }
+                assertTrue(shell("dumpsys activity services $pluginPackage").contains("isForeground=true"))
+                model.finishPending()
+                waitUntil("Task completed") { decode(link.getRun(ref(id))).getString("state") == "completed" }
+            }
+            assertIdle(link)
+            assertEquals(3, model.calls.get())
+        } finally { detach(link); core.destroy(null) }
+    }
+
+    @Test fun idleUnboundPluginCanBeReclaimedAndAttachedWithoutReplayingHistory() {
+        lifecycleOptIn()
+        var previousId = ""; var previousPid = ""
+        withPlugin { api ->
+            val core = core(); val model = ScriptedModel { _, _ -> done() }; val link = attach(api, model, broker(core))
+            try {
+                previousId = start(link)
+                waitUntil("Idle history complete") { decode(link.getRun(ref(previousId))).getString("state") == "completed" }
+                waitUntil("Completed journal durable") {
+                    runCatching { JSONObject(shell("run-as $pluginPackage cat files/runs/$previousId.json")).getJSONObject("run").getString("state") == "completed" }.getOrDefault(false)
+                }
+                assertIdle(link)
+                previousPid = shell("pidof $pluginPackage:agent").trim()
+                assertTrue(previousPid.matches(Regex("[0-9]+")))
+            } finally { detach(link); core.destroy(null) }
+        }
+        shell("input keyevent KEYCODE_HOME")
+        // Unlike force-stop or SIGKILL, am kill only reclaims processes Android considers safe.
+        waitUntil("Unbound idle process is reclaimable") {
+            shell("am kill $pluginPackage")
+            shell("pidof $pluginPackage:agent").trim().isEmpty()
+        }
+        withPlugin { api ->
+            val core = core(); val model = ScriptedModel { _, _ -> done() }; val link = attach(api, model, broker(core))
+            try {
+                assertNotEquals(previousPid, shell("pidof $pluginPackage:agent").trim())
+                waitUntil("Asynchronous history load completes") {
+                    val row = link.getRun(ref(previousId))
+                    row.getString(C.KEY_ERROR_CODE) == null && decode(row).getString("state") == "completed"
+                }
+                assertIdle(link); assertEquals(0, model.calls.get())
+                val fresh = start(link)
+                waitUntil("Explicit task after reclamation") { decode(link.getRun(ref(fresh))).getString("state") == "completed" }
+                assertEquals(1, model.calls.get()); assertIdle(link)
+            } finally { detach(link); core.destroy(null) }
+        }
+    }
+
     /** Includes both Binder directions, real accessibility traversal and plugin context preparation. */
     @Test fun performanceBaselineForTwoHundredNodesAndOneTaskMemory() {
         assumeTrue("Opt in with -e autojs.agent.performance true", InstrumentationRegistry.getArguments().getString("autojs.agent.performance").toBoolean())
