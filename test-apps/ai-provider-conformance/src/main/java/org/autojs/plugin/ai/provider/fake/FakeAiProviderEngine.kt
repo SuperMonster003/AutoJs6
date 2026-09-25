@@ -24,7 +24,26 @@ data class FakeAiGenerationPlan(
 object FakeAiProviderEngine {
     const val TOOL_CALL_ID = "fake-call-1"
 
-    fun createToolCalls(request: AiProviderRequest): AiToolCallBatch {
+    private fun agentScenario(materialized: FakeMaterializedRequest?): String? =
+        listOf("batch", "invalid", "deny", "cancel").firstOrNull {
+            materialized?.prompt?.contains("agent-conformance:native-$it") == true
+        }
+
+    fun createToolCalls(request: AiProviderRequest, materialized: FakeMaterializedRequest? = null): AiToolCallBatch {
+        if (request.targetId == FakeAiProviderFixture.TARGET_AGENT_TOOLS) {
+            val scenario = requireNotNull(agentScenario(materialized)) { "Unknown Agent fixture" }
+            val names = if (scenario in setOf("deny", "cancel")) listOf("clipboard_set")
+                else listOf("device_info", "screen_state")
+            return AiToolCallBatch(names.mapIndexed { index, name ->
+                require(request.tools.any { it.name == name })
+                val arguments = when {
+                    name == "clipboard_set" -> """{"text":"Must never be written"}"""
+                    scenario == "invalid" && index == 1 -> """{"unknown":true}"""
+                    else -> "{}"
+                }
+                AiToolCall("agent-call-${index + 1}", name, jsonPayload(arguments))
+            })
+        }
         val tool = request.tools.firstOrNull() ?: throw IllegalArgumentException("Fake tools model requires a tool")
         return AiToolCallBatch(
             listOf(
@@ -42,7 +61,11 @@ object FakeAiProviderEngine {
         materialized: FakeMaterializedRequest,
         toolResult: String? = null,
     ): FakeAiGenerationPlan {
-        val raw = if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
+        val agentTools = request.targetId == FakeAiProviderFixture.TARGET_AGENT_TOOLS && agentScenario(materialized) != null
+        val raw = if (agentTools) {
+            requireNotNull(toolResult) { "Agent tool results must return before completion" }
+            """{"kind":"done","done":{"status":"completed","summary":"Provider received Agent tool results","evidence":["Same Provider session resumed"]}}"""
+        } else if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
             "tool:${requireNotNull(toolResult) { "Fake tool result is unavailable" }}"
         } else {
             materialized.prompt.ifEmpty { "fake" }
@@ -73,7 +96,10 @@ object FakeAiProviderEngine {
             }
         } ?: Long.MAX_VALUE
         val visibleOutputLimit = minOf(byteOutputLimit.toLong(), tokenOutputLimit).toInt()
-        val output = if (request.options.responseMimeType == AiProviderMimeType.JSON) {
+        val output = if (agentTools) {
+            require(AiValidation.utf8Size(raw) <= visibleOutputLimit)
+            raw
+        } else if (request.options.responseMimeType == AiProviderMimeType.JSON) {
             boundedJson(raw, visibleOutputLimit)
         } else {
             truncateUtf8(raw, visibleOutputLimit)

@@ -271,8 +271,8 @@ internal class RemoteFakeAiProviderSession(
             finishFailed(AiErrorCode.PROVIDER_FAILED, "Private conformance provider diagnostics")
             return
         }
-        val toolResult = if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
-            val calls = FakeAiProviderEngine.createToolCalls(request)
+        val toolResult = if (request.targetId in setOf(FakeAiProviderFixture.TARGET_TOOLS, FakeAiProviderFixture.TARGET_AGENT_TOOLS)) {
+            val calls = FakeAiProviderEngine.createToolCalls(request, materialized)
             machine.openToolTurn(calls.calls.map { it.callId })
             dispatchCallback {
                 callback.onToolCalls(AiProviderCodec.encodeToolCallBatch(calls), emptyArray())

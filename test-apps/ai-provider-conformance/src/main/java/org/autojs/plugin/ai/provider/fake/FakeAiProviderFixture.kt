@@ -36,6 +36,7 @@ object FakeAiProviderFixture {
     const val TARGET_STREAM = "local:stream"
     const val TARGET_REASONING = "local:reasoning"
     const val TARGET_TOOLS = "local:tools"
+    const val TARGET_AGENT_TOOLS = "profile:agent-tools"
     const val TARGET_REMOTE = "profile:remote"
     const val TARGET_HYBRID = "profile:hybrid"
     const val TARGET_UNCONFIGURED = "profile:unconfigured"
@@ -66,7 +67,7 @@ object FakeAiProviderFixture {
         maximumToolDefinitions = 16,
         maximumContextBytes = 256L * 1024L,
         maximumOutputBytes = 48L * 1024L,
-        maximumToolRounds = 4,
+        maximumToolRounds = 16,
         maximumOutstandingToolCalls = 8,
         maximumRequestDescriptors = 16,
         maximumSessionDescriptors = 32,
@@ -137,6 +138,13 @@ object FakeAiProviderFixture {
             capabilities = listOf(AiProviderCapabilityId.STREAMING),
             configured = false,
         ),
+        remoteTarget(
+            targetId = TARGET_AGENT_TOOLS,
+            modelId = MODEL_TOOLS,
+            name = "Fake Agent tools (no network)",
+            locality = AiDataLocality.REMOTE,
+            capabilities = listOf(AiProviderCapabilityId.STREAMING, AiProviderCapabilityId.TOOLS, AiProviderCapabilityId.USAGE),
+        ),
     )
 
     fun requireSupportedRequest(request: AiProviderRequest) {
@@ -150,7 +158,7 @@ object FakeAiProviderFixture {
         require(target.configured && target.available) { "Fake target is not available" }
         val required = requiredCapabilities(request)
         require(required.all { it in target.capabilityIds }) { "Fake target does not support the request" }
-        if (request.targetId == TARGET_TOOLS) {
+        if (request.targetId in setOf(TARGET_TOOLS, TARGET_AGENT_TOOLS)) {
             require(request.tools.isNotEmpty()) { "Fake tools target requires a tool definition" }
             require(request.options.maximumToolRounds > 0) { "Fake tools target requires a tool round" }
         } else {

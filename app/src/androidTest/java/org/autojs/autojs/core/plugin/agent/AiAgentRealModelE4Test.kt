@@ -107,6 +107,8 @@ class AiAgentRealModelE4Test {
         optIn()
         val configFile = File(control, "config.json")
         val config = JSONObject(configFile.readText())
+        val modelPath = config.optString("modelPath", "auto")
+        require(modelPath in setOf("auto", "json"))
         val caseId = config.getString("caseId")
         require(caseId.matches(Regex("[a-z0-9][a-z0-9_-]{0,63}")))
         val directory = File(context.filesDir, "agent-e4/$caseId")
@@ -172,7 +174,7 @@ class AiAgentRealModelE4Test {
             config.optString("context").takeIf { it.isNotBlank() }?.let { options.put("context", it) }
             link = checkNotNull(api).attach(envelope(C.KEY_LINK_CONFIG_JSON, JSONObject().put("locale", "zh-CN")
                 .put("scriptRoots", JSONArray()).put("grantSummary", JSONObject().put("toolGroups", groups))),
-                traceModel(brokers.modelBroker, directory), traceCapabilities(brokers.capabilityBroker, directory), object : IAiAgentLinkCallback.Stub() {
+                traceModel(brokers.modelBroker, directory, modelPath), traceCapabilities(brokers.capabilityBroker, directory), object : IAiAgentLinkCallback.Stub() {
                     override fun onStatus(status: Bundle?) = Unit
                     override fun onEvent(event: Bundle?) = Unit
                 })
@@ -181,7 +183,7 @@ class AiAgentRealModelE4Test {
                     override fun onRunEvent(event: Bundle) { events.offer(JSONObject(event.getString(C.KEY_RUN_EVENT_JSON)!!)) }
                 })).getString("runId")
             write(directory, "started.json", JSONObject().put("caseId", caseId).put("runId", runId)
-                .put("startedAt", System.currentTimeMillis()).put("target", config.getString("target")))
+                .put("startedAt", System.currentTimeMillis()).put("target", config.getString("target")).put("modelPath", modelPath))
             val deadline = started + (config.optJSONObject("budget")?.optLong("maxDurationMs", 600_000) ?: 600_000) + 30_000
             var lastSnapshot = 0L
             while (SystemClock.elapsedRealtime() < deadline) {
@@ -278,16 +280,28 @@ class AiAgentRealModelE4Test {
         return try { root.packageName?.toString() } finally { root.recycle() }
     }
     /** Observe only model replies, inside private opt-in evidence; credentials remain in the Provider. */
-    private fun traceModel(delegate: IAiAgentModelBroker, directory: File) = object : IAiAgentModelBroker.Stub() {
-        override fun submitToolResults(request: Bundle?) = delegate.submitToolResults(request)
+    private fun traceModel(delegate: IAiAgentModelBroker, directory: File, modelPath: String) = object : IAiAgentModelBroker.Stub() {
+        override fun submitToolResults(request: Bundle?) {
+            synchronized(lock) { File(directory, "model-continuations.jsonl").appendText(
+                JSONObject().put("elapsedRealtime", SystemClock.elapsedRealtime()).toString() + "\n") }
+            delegate.submitToolResults(request)
+        }
         private val lock = Any()
-        override fun getBrokerInfo() = delegate.brokerInfo
+        override fun getBrokerInfo() = Bundle(delegate.brokerInfo).apply {
+            // Opt-in instrumentation only: emulate pre-extension negotiation with the SAME target,
+            // host, plugin and grants. Never alter generation payloads or production preferences.
+            if (modelPath == "json") getString(C.KEY_MODEL_BROKER_INFO_JSON)?.let { json ->
+                putString(C.KEY_MODEL_BROKER_INFO_JSON, JSONObject(json).apply {
+                    remove(C.MODEL_INFO_TOOL_CALLING_VERSION)
+                }.toString())
+            }
+        }
         override fun listTargets(request: Bundle?, callback: IAiAgentModelCallback?) = delegate.listTargets(request, callback)
         override fun generate(request: Bundle?, callback: IAiAgentModelCallback?) {
             delegate.generate(request, object : IAiAgentModelCallback.Stub() {
                 override fun onEvent(event: Bundle) {
                     event.getString(C.KEY_MODEL_EVENT_JSON)?.let { json ->
-                        if (JSONObject(json).optString("type") in setOf("completed", "failed", "cancelled", "usage")) {
+                        if (JSONObject(json).optString("type") in setOf("started", "tool_calls", "completed", "failed", "cancelled", "usage")) {
                             synchronized(lock) { File(directory, "model-events.jsonl").appendText(json + "\n") }
                         }
                     }

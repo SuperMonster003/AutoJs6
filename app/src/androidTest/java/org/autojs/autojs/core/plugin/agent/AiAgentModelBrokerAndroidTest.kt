@@ -41,7 +41,7 @@ class AiAgentModelBrokerAndroidTest {
             assertTrue(calls["calls"].asJsonArray.single().asJsonObject["arguments"].asJsonObject["fixture"].asBoolean)
             broker.submitToolResults(request(resultsFor(calls)))
             val terminal = events.awaitTerminal()
-            assertEquals("completed", terminal["type"].asString)
+            assertEquals(terminal.toString(), "completed", terminal["type"].asString)
             assertEquals("tool:observed", terminal["text"].asString)
             assertEquals(1, events.types().count { it == "started" })
             events.assertSequence()
@@ -432,7 +432,8 @@ class AiAgentModelBrokerAndroidTest {
             if (value["type"].asString in TERMINAL) terminal.countDown()
         }
         fun awaitTools(): JsonObject {
-            assertTrue("Model broker did not request tools: ${types()}", tools.await(15, TimeUnit.SECONDS))
+            val received = tools.await(15, TimeUnit.SECONDS)
+            assertTrue("Model broker did not request tools: $values", received)
             return values.last { it["type"].asString == "tool_calls" }
         }
         fun awaitTerminal(): JsonObject {

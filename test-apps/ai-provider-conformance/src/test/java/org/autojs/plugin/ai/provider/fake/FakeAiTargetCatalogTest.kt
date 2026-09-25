@@ -34,6 +34,7 @@ class FakeAiTargetCatalogTest {
                 FakeAiProviderFixture.TARGET_REMOTE,
                 FakeAiProviderFixture.TARGET_HYBRID,
                 FakeAiProviderFixture.TARGET_UNCONFIGURED,
+                FakeAiProviderFixture.TARGET_AGENT_TOOLS,
             ),
             FakeAiProviderFixture.publicTargets.map { it.targetId },
         )
@@ -118,6 +119,7 @@ class FakeAiTargetCatalogTest {
                 FakeAiProviderFixture.TARGET_REMOTE,
                 FakeAiProviderFixture.TARGET_HYBRID,
                 FakeAiProviderFixture.TARGET_UNCONFIGURED,
+                FakeAiProviderFixture.TARGET_AGENT_TOOLS,
             ),
             second.targets.map { it.targetId },
         )

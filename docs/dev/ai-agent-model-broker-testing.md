@@ -85,3 +85,46 @@ input, call-count and token limits can be reached without a real Provider,
 account or network. Both request and callback Binder transactions cross UIDs.
 The suite also verifies capability grants, all eight broker UID guards, host
 log exclusion of private bodies and non-Agent attach broadcasts.
+
+## P9.1 real Agent plus fake Provider
+
+`AiAgentNativeProviderRoundTripTest` binds the installed, independently built
+Agent plugin from the actual host UID. Its model broker is the production
+`AiAgentModelBroker`, using the separate same-test-signer fake Provider; device
+observations use the production capability broker. Four cases verify a two-call
+native batch, whole-batch argument rejection before dispatch, refused clipboard
+confirmation without a write, and cancellation while the Provider waits for
+confirmation. Request/round/call IDs, same-session continuation, two model-call
+admissions and native journal entries are asserted. No network is used.
+
+Build the real host, its androidTest APK and the fake Provider from an isolated
+checkout with a test signer. Use an independently test-signed Agent APK (the R8
+release is supported by this external host instrumentation). Never sign a fake
+Provider with a production key or install it on a physical device. Run:
+
+```powershell
+py test-apps/ai-agent-conformance/run_native_provider_matrix.py --adb <adb.exe> --serial <emulator-serial> --output <new-private-evidence-directory>
+```
+
+The driver accepts only a disposable `AI_Agent_Conformance_*` AVD containing the
+real host and runs each of the four integration and fourteen model-broker cases
+in a fresh host instrumentation process. Some deadline/hostile cases can fuse
+the Provider for the life of the host process. Keeping healthy cases in that
+process creates order-dependent `RATE_LIMITED / FUSED` failures; do not disable
+or reset production fuse checks to make a combined run pass. Logs are retained
+per case and a zero adb exit code alone is never treated as success.
+
+On 2026-09-25, these 18 cases passed on API 24 x86 and API 37.1 x86_64 / 16 KiB
+using the actual R8 Agent build 82. API 24 also passed a combined invocation in
+15.912 s. API 37's combined invocations exposed the process-fuse interaction;
+its final per-case matrix passed 18/18. Those earlier failures remain in private
+evidence, separately from successful execution. This is deterministic contract
+evidence, not a successful cloud Wi-Fi or calculator task.
+
+`AiAgentRealModelE4Test` also accepts an opt-in evidence configuration field
+`modelPath: "json"`. It hides only native-extension negotiation from that test
+link, allowing the same installed host, Agent, Provider, target, tool grants,
+goal and budgets to exercise JSON decisions. `"auto"` keeps production
+negotiation. Production settings and public JS APIs have no new mode switch.
+Native tool events and continuation timestamps are retained in the private E4
+evidence alongside outcomes; failed tasks must not be counted as successes.
