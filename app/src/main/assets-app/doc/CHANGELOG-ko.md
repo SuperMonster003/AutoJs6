@@ -249,7 +249,7 @@
 * `추가` EPUB 계약 버전 2 (하이라이트와 메모, 플러그인 로드맵 P9.4): 추가된 `IEpubBook.getAnnotations` (페이지 단위, 읽기 순서) 와 리더 세션의 `highlight` 이벤트가 리더의 하이라이트와 메모를 `annotations` 문서 (id, style, color, note, quote, 장 제목, locator, createdAt, updatedAt) 로 전달합니다. 호스트는 플러그인의 `epubMaxContractVersion` 으로 버전을 협상하여 모든 요청에 기록하므로 버전 1 플러그인은 새 호출을 받지 않습니다. 스크립트 API `epub` 에 `book.annotations()` 와 `epub.annotations(path)` (`Async` 형태 포함) 가 추가되고, `EpubReaderSession` 은 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 를 발생시킵니다 (`action` 은 added, updated 또는 removed)
 * `추가` AI Agent 플러그인 계약과 호스트 프록시. 제한된 기기 접근, 모델 호출 할당량 및 연결 손실 시 리소스 정리 지원
 * `추가` project.json / @agent 헤더를 통한 Agent 스크립트 등록 및 범위가 제한된 실행. 인수 검증, 시간 초과 시 중지 및 구조화된 결과 반환 지원
-* `추가` AI Agent 서랍 메뉴 및 플러그인 센터 관리. 연결 상태, 작업 수, 승인 안내 및 호스트 재시작 후 연결 복원 지원
+* `추가` AI Agent 서랍 메뉴 및 플러그인 센터 관리. 연결 상태, 작업 수, 승인 안내 및 호스트 재시작 후 연결 복원 지원; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
 * `추가` AI Agent 플러그인에서 추가 스크립트 폴더를 설정하면 호스트가 범위를 검증하고 저장하여 재연결 시 복원하며, 유효하지 않은 폴더는 승인된 설정을 변경하지 않음
 * `수정` Android 7/8.0에서 플러그인 파일 스냅샷, Node.js 패키지 설치, TypeScript 프로젝트 파일 작업 및 터미널 환경 확인의 호환성 문제
 * `수정` Shizuku 권한 요청 리스너가 소멸 후에도 등록된 상태로 남는 문제

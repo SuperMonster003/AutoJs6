@@ -78,7 +78,7 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(44, PluginInstallWizardCatalog.entries.size)
+        assertEquals(45, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
@@ -86,6 +86,11 @@ class PluginInstallWizardCatalogTest {
         val entry = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.opencv")
         assertEquals(PluginInstallWizardCategory.IMAGE, entry?.category)
         assertTrue(entry?.inStandard == true)
+        val agent = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.ai.agent")
+        assertEquals(PluginInstallWizardCategory.TOOLS, agent?.category)
+        assertEquals("AI Agent", agent?.fallbackTitle)
+        assertEquals(false, agent?.inStandard)
+        assertEquals(false, agent?.inMinimal)
         assertFalse(PluginInstallWizardCatalog.contains("com.example.unknown"))
     }
 

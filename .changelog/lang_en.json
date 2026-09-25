@@ -244,7 +244,7 @@
         "EPUB contract version 2 with highlights and notes (plugin roadmap P9.4): the appended `IEpubBook.getAnnotations` (paged, in reading order) and the `highlight` reader-session event carry the reader's highlights and notes as an `annotations` document (id, style, color, note, quote, chapter title, locator, createdAt, updatedAt); the host negotiates the version from the plugin's `epubMaxContractVersion` and stamps it on every request, so version-1 plugins never see the new call; the `epub` script API gains `book.annotations()` and `epub.annotations(path)` with their `Async` forms, and `EpubReaderSession` emits `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` with `action` added, updated or removed",
         "AI Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost",
         "Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results",
-        "AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart",
+        "AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart; optional Tools entry in the installation wizard when a published APK is present in the official index",
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [

@@ -1,13 +1,19 @@
 # AI Agent plugin protocol V1
 
-Status: host foundation and P3.1 catalog settings, implemented in AutoJs6 6.8.0 / build **5286**. The host
-provides model/capability brokers, registered-script catalog and execution bridge
-methods, compact node and screen-text observations, drawer controls and
-plugin-center management. The plugin implements the Agent loop, task controls
-and registered-script presentation. Script parameter completion/execution,
-the task workbench and the public `ai.agent` script API remain in their original
-roadmap stages. The contract is `plugin-api/ai-agent-api`, package
-`org.autojs.plugin.ai.agent.api`. `AiAgentIds.REQUIRED_HOST_VERSION_CODE` is 5286.
+Status: **versioned V1**. The host provides model/capability brokers, registered
+script discovery/execution, screen observations/actions, drawer controls and
+Plugin Center management. The plugin implements the Agent loop, parameter
+completion, confirmations, task workbench, history, presets, memory and system
+entry points. This status does not declare plugin 1.0.0 published; the plugin
+roadmap retains its separate release gates.
+
+The contract is `plugin-api/ai-agent-api`, package
+`org.autojs.plugin.ai.agent.api`. The base contract constant
+`AiAgentIds.REQUIRED_HOST_VERSION_CODE` remains **5286**. The current plugin's
+INFO/runtime metadata requires AutoJs6 6.8.0 / build **5289**, for inspected
+actions bound to execution. Complete public task APIs require build **5293**;
+registered-script `result`/`context` first appeared in build 5287. Consumers must
+check both installed metadata and the feature they intend to use.
 
 ## Identity and discovery
 
@@ -29,14 +35,14 @@ detach or plugin death. A rejected attach is never automatically retried.
 Management uses the existing INFO service to validate identity and the declared
 minimum host build. Runtime attachment independently validates the dedicated
 Agent interface and its contract. P2.5 connected task controls and the runner
-to the real host brokers. Both service manifests, PluginInfo and
-the host contract must agree on the minimum host build.
+to the real host brokers. Both plugin service manifests and PluginInfo must agree
+on the packaged plugin's minimum host build; it may exceed the base V1 floor.
 
 `AiAgentConnectionOwner` owns the link for the host process. Drawer instances
 own their dialogs only; disposing a drawer does not close the link. The drawer
 shows attachment state, one running task at most, and the queued task count.
-Its management action opens the plugin's existing explicit launcher (the task
-workbench arrives in P6). Discovery failures show state-specific installation,
+Its management action opens the plugin's task workbench. Discovery failures show
+state-specific installation,
 activation, enablement, authorization, signer confirmation or compatibility
 guidance. Confirmation is pinned to the current signing fingerprint set.
 
@@ -158,10 +164,10 @@ The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
 | Script execution | `SCRIPT_NOT_REGISTERED`, `SCRIPT_TIMEOUT`, `SCRIPT_FAILED` |
 | User, budget and protocol | `USER_DENIED`, `USER_TIMEOUT`, `BUDGET_EXCEEDED`, `CANCELLED`, `INVALID_REQUEST`, `UNSUPPORTED_CONTRACT` |
 
-These are Agent control-plane codes, including future runner/JS behavior.
+These are Agent control-plane codes used by the runner and public JS handles.
 Capability responses retain the shared broker's lowercase error categories;
 the plugin's tool layer maps those observations into Agent errors. Defining a
-code here does not mean every future execution adapter is already implemented.
+code here does not grant a capability or imply support for a future tool.
 
 Task protocol ceilings are one running task per link, eight queued tasks,
 4 KiB goal text, 8 KiB supplied context, 200 steps, 300 model calls, 30 minutes
@@ -221,9 +227,9 @@ This token permits the same validation on Android versions before API 34.
 
 The existing MainActivity also consumes `EXTRA_AI_AGENT_ATTACH` with the same
 identity token and authorization checks. It removes the request extras before
-handling the request so activity recreation does not replay it. The plugin-side
-decision to use this fallback after 500 ms remains the D41/P7 compatibility
-decision. An unavailable background request queues guidance for the resumed host
+handling the request so activity recreation does not replay it. The plugin uses
+this fallback after 500 ms if the background attachment is not available, as
+specified by D41. An unavailable request queues guidance for the resumed host
 UI instead of launching an activity from the broadcast receiver.
 
 Host main-process startup restores a connection when `isNormallyClosed` is false.
@@ -255,12 +261,46 @@ for `script_catalog` searches. Deterministic keyword ranking presents at most
 24 records, further reduced as whole records to fit the model's context budget.
 Metadata is data, not task instructions. Descriptions and parameter summaries
 are bounded, duplicate IDs are omitted as ambiguous, and source text is never
-sent to the plugin. P3.2/P3.3 retain parameter admission and script invocation.
+sent to the plugin. The plugin validates/defaults parameters, asks for missing
+values and confirms invocation; the host rechecks the manifest and arguments at
+execution admission.
 
-P1.5 entry and device evidence is recorded in
-[the host entry report](evidence/ai-agent-p15-20260923.md). The independent P7
-conformance APK's combined model/observation/script round trip is still pending;
-the implemented host foundation is not evidence that the whole Agent is usable.
+Entry evidence is recorded in [the host entry report](evidence/ai-agent-p15-20260923.md)
+and the [six-device attachment report](evidence/ai-agent-p7-compatibility-20260925.md).
+Independent peer, grant and reciprocal fake-host cases are documented in
+[P7 conformance](evidence/ai-agent-p7-conformance-20260925.md). Model and script
+execution have their own [broker](ai-agent-model-broker-testing.md) and
+[script](agent-script-execution-testing.md) tests. Deterministic conformance is
+separate from real-model task success and the final release gate.
+
+## Public JavaScript API
+
+Build 5293 connects `ai.agent.run`, `create`, `get`, `list` and `status` to the
+plugin-owned loop; `catalog`, `result` and `context` expose the host registration
+and result channel. A run returns an AgentRun handle with progress/input/
+confirmation events, a result promise and cancellation. A fulfilled result may
+be completed, partial, failed, blocked or cancelled; callers must inspect status.
+`interaction: "plugin"` delegates answers/approval to the plugin UI, while
+`"script"` requires an owning script to respond. Observing a run does not grant
+ownership. Detached execution changes script-lifetime cancellation, not host
+permissions or confirmation rules, and never enables restart recovery.
+
+The maintained API and type documentation are in
+[AutoJs6 Documentation](https://github.com/SuperMonster003/AutoJs6-Documentation/blob/master/api/ai.md).
+Bundled `sample/ai/agent-*.js` files demonstrate basic, interactive and detached
+task control. Registered-script examples are under `sample/agent/`.
+
+## Installation catalog and release index
+
+The host installation wizard categorizes AI Agent under Tools using the exact
+official package. It is optional in both built-in profiles. Drawer and Plugin
+Center discovery/enablement are unchanged.
+
+Download entries come from the separate AutoJs6-Official-Plugins-Index repository.
+Its generator admits published releases with APK assets and validates the required
+repository inventory. Add AI Agent to that inventory and regenerate after the
+first APK release is published. Before publication, the wizard omits the missing
+download entry; no placeholder release URL or fabricated version/hash is used.
 
 ## P4.2 inspected actions
 
@@ -298,8 +338,8 @@ An acknowledged action alone does not establish that the task goal was achieved.
 ## P1.4 host observations and registered scripts
 
 These methods use the shared capability broker's existing request envelope and
-JSON-array `args`. They do not add an AIDL transaction or a public `ai.agent`
-augment; the latter remains P5.
+JSON-array `args`. They do not add an AIDL transaction. The public `ai.agent`
+augment described above delegates to these host-backed paths.
 
 - `accessibility.dump([{format:"compact", maxNodes:200, maxDepth:32,
   visibleOnly:true}])` returns the existing dump metadata plus `text`,
@@ -340,8 +380,8 @@ The host validates the complete replacement before applying it. Failed plugin
 configuration updates leave the prior roots intact. Configuration is a complete
 snapshot: omitting `scriptRoots` clears the additional roots, including after a
 later reattachment. Per-request `roots` only
-narrow the working directory and these configured roots. Run-scoped configuration
-will use this host boundary when the P3/P5 callers are integrated.
+narrow the working directory and these configured roots. Preset and task-scoped
+configuration use this same host boundary and cannot widen the approved roots.
 
 Registered execution accepts `timeoutMs`, `captureConsole`, `agentRunId` and
 `presetName` in its third options argument. A missing run ID is generated by the
@@ -349,6 +389,5 @@ host. The effective execution timeout is bounded by the manifest, the requested
 timeout and the enclosing request deadline, reserving up to 750 ms for dispatch
 and stop cleanup. Very short enclosing deadlines can still return the broker's
 timeout before a structured outcome is delivered. Link destruction cancels its
-active invocation handles. The public result/context API and its JS-level
-acceptance test are intentionally left for P5; P1.4 device tests exercise the
-same execution state through an internal Java hook.
+active invocation handles. Public result/context calls report into this execution
+state; the script-execution report linked above covers the JS-level path.

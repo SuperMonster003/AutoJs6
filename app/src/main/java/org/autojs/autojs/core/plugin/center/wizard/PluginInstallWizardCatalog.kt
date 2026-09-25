@@ -124,6 +124,7 @@ object PluginInstallWizardCatalog {
         entry(official("audioplayer"), "Three Terra Player", PLAYER),
 
         // Tools.
+        entry(official("ai.agent"), "AI Agent", TOOLS),
         entry(official("angus.mail"), "Angus Mail", TOOLS),
         entry(official("mcp.server"), "MCP Server", TOOLS, standard = true),
         entry(official("threestoneai"), "Three Stone AI", TOOLS, standard = true),

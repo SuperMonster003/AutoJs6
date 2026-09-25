@@ -1,19 +1,17 @@
 # Agent script manifest V1
 
-This is the host registration format for AI Agent roadmap P1.4. It provides a
-bounded catalog and argument admission for scripts that explicitly opt in. The
-plugin now ranks and presents registered scripts in P3.1. Parameter completion,
-confirmation and invocation remain in P3.2/P3.3. The public
-`ai.agent.result` and `ai.agent.context` script methods remain in P5; this
-document does not declare those methods available yet.
+Status: **versioned V1**. This is the host registration format for scripts that
+explicitly opt in to AI Agent. The bounded catalog, parameter validation/defaults,
+missing-value questions, confirmation, invocation and structured result channel
+are implemented. Public `ai.agent.result` and `ai.agent.context` are available
+from host build 5287; task creation/control requires build 5293.
 
-The current Agent host integration declares AutoJs6 6.8.0 / build 5286 as its
-minimum. Registration is consumed through the attached, granted host capability
-broker; it is not a general plugin filesystem API. The drawer and plugin center
-provide connection/management entry points as described in
-[AI Agent protocol V1](ai-agent-protocol-v1.md). The task runner can query and
-present this catalog; its script invocation adapter remains pending before
-users can run these examples through an Agent task.
+The current plugin requires AutoJs6 6.8.0 / build 5289 for its inspected screen
+actions; the base V1 contract retains its historical 5286 floor. Use build 5293+
+for the complete task API. Registration is consumed through the attached, granted
+host capability broker, not a general plugin filesystem API. Connection and
+management are described in [AI Agent protocol V1](ai-agent-protocol-v1.md).
+Versioned protocol status does not declare that plugin release gates have passed.
 
 ## Project registration
 
@@ -64,7 +62,7 @@ The registration fields are:
 | `id` | Optional explicit lowercase kebab-case identifier. The default normalizes the directory name; a name with no ASCII letters/digits uses a stable `script-` hash suffix. |
 | `description` | Required nonblank string. |
 | `parameters` | Optional object schema using the subset below; defaults to an empty closed object. |
-| `result` | Optional JSON object describing the result. It is descriptive metadata, not a validator for the future result-reporting API. |
+| `result` | Optional JSON object describing the result. It is descriptive metadata, not a validator for the result-reporting API. |
 | `risk` | `readonly`, `normal` (default), or `sensitive`. |
 | `confirm` | `never` (default) or `before-run`; sensitive scripts are normalized to `before-run`. |
 | `timeoutMs` | Integer from 1 through 300,000; default 60,000. |
@@ -233,5 +231,9 @@ P1.4 provides the host execution result slot and P3.3 connects `ai.agent.result(
 `resultReported` distinguishes an explicitly reported JSON null from no report.
 The last accepted report wins until completion. Outside registered execution,
 `context()` returns null and `result()` returns false with a console warning.
-Task creation and control APIs remain P5 work. See `agent-script-execution-testing.md`
-for the invocation stop token, confirmed-manifest check and real-device test commands.
+Task creation and control are available through `ai.agent` from build 5293.
+See [execution tests](agent-script-execution-testing.md) for the invocation stop
+token, confirmed-manifest check and real-device commands, and the maintained
+[public API](https://github.com/SuperMonster003/AutoJs6-Documentation/blob/master/api/ai.md)
+for task handles and result semantics. A risk declaration describes a reviewed
+script; it does not sandbox JavaScript or grant extra host capabilities.
