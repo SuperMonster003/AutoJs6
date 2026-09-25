@@ -69,6 +69,45 @@ class AiAgentModelBrokerAndroidTest {
         }
     }
 
+    @Test fun fileAndPipePayloadsCompleteAndPreserveTheFileOffset() {
+        requireFake()
+        broker().use { broker ->
+            for (pipePayload in listOf(false, true)) {
+                val value = generate("local:echo", "Payload fixture " + "x".repeat(40_000), structured = true)
+                val bytes = value.toString().toByteArray(Charsets.UTF_8)
+                val file = java.io.File.createTempFile("agent-payload-", ".json", context.cacheDir)
+                var writer: Thread? = null
+                val pipe = if (pipePayload) ParcelFileDescriptor.createPipe() else null
+                try {
+                    val descriptor = if (pipe != null) pipe[0] else {
+                        file.outputStream().use { it.write(byteArrayOf(0, 1, 2)); it.write(bytes) }
+                        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).also {
+                            android.system.Os.lseek(it.fileDescriptor, 3, android.system.OsConstants.SEEK_SET)
+                        }
+                    }
+                    val events = Events()
+                    broker.generate(Bundle().apply {
+                        putInt(AiAgentContract.KEY_CONTRACT_VERSION, 1)
+                        putParcelable(AiAgentContract.KEY_PAYLOAD_FD, descriptor)
+                        putString(AiAgentContract.KEY_MODEL_REF_JSON, """{"requestId":"${value["requestId"].asString}"}""")
+                    }, events)
+                    if (pipe != null) writer = Thread {
+                        runCatching { ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { it.write(bytes) } }
+                    }.apply { isDaemon = true; start() }
+                    val terminal = events.awaitTerminal()
+                    assertEquals("completed", terminal["type"].asString)
+                    assertTrue(JsonParser.parseString(terminal["text"].asString).isJsonObject)
+                    assertTrue(runCatching { descriptor.fd }.isFailure)
+                    events.assertSequence()
+                } finally {
+                    pipe?.forEach { runCatching { it.close() } }
+                    writer?.join(2_000)
+                    file.delete()
+                }
+            }
+        }
+    }
+
     @Test fun stalledProviderTimesOutWithoutLeakingDiagnostics() {
         requireFake()
         broker().use { broker ->

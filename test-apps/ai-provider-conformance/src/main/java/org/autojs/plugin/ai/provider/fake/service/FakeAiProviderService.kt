@@ -46,7 +46,9 @@ class FakeAiProviderService : Service() {
 
     override fun onDestroy() {
         activeSession.set(null)
-        sessions.toList().forEach(RemoteFakeAiProviderSession::serviceDestroyed)
+        // Iterate the concurrent set directly: toList's single-element shortcut can
+        // race a completed session removing itself between size and iterator.next().
+        sessions.forEach(RemoteFakeAiProviderSession::serviceDestroyed)
         sessions.clear()
         worker.shutdownNow()
         timeoutScheduler.shutdownNow()

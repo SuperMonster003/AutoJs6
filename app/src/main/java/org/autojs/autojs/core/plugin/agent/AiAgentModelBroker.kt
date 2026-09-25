@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.agent
 
 import android.content.Context
 import android.os.Binder
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
@@ -27,6 +28,7 @@ import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.core.plugin.ai.AndroidAiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.ThreeStoneAiOfficialPlugin
 import org.autojs.autojs.core.plugin.hostbroker.HostCapabilityGrant
+import org.autojs.autojs.util.OsConstantsCompat
 import org.autojs.plugin.ai.agent.api.AiAgentContract
 import org.autojs.plugin.ai.agent.api.IAiAgentModelBroker
 import org.autojs.plugin.ai.agent.api.IAiAgentModelCallback
@@ -490,28 +492,46 @@ internal class AiAgentModelBroker(
             requireNotNull(descriptor).use { input ->
                 // A sender can keep a pipe open forever. Nonblocking reads plus a bounded poll
                 // let deadline/death cleanup release the link worker even for a hostile pipe.
-                val fd = input.fileDescriptor
-                Os.fcntlInt(fd, OsConstants.F_SETFL, Os.fcntlInt(fd, OsConstants.F_GETFL, 0) or OsConstants.O_NONBLOCK)
-                val poll = StructPollfd().apply { this.fd = fd; events = OsConstants.POLLIN.toShort() }
-                val buffer = ByteArray(8192)
-                while (true) {
-                    if (cancelled()) throw AiAgentModelException(AiAgentContract.ERROR_CANCELLED)
-                    if (Os.poll(arrayOf(poll), 100) == 0) continue
-                    val count = try { Os.read(fd, buffer, 0, buffer.size) } catch (failure: ErrnoException) {
-                        if (failure.errno == OsConstants.EAGAIN || failure.errno == OsConstants.EINTR) continue
-                        throw failure
+                val reopened = synchronized(this) {
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        val fd = input.fileDescriptor
+                        Os.fcntlInt(fd, OsConstants.F_SETFL, Os.fcntlInt(fd, OsConstants.F_GETFL, 0) or OsConstants.O_NONBLOCK)
+                        null
+                    } else {
+                        // fcntlInt is not a public API before 30. Reopen our accepted file/pipe
+                        // with O_NONBLOCK, without hidden APIs or changing the sender's flags.
+                        // Serialize with cancellation so the numeric fd cannot be reused here.
+                        val offset = try { Os.lseek(input.fileDescriptor, 0, OsConstants.SEEK_CUR) }
+                        catch (failure: ErrnoException) { if (failure.errno == OsConstants.ESPIPE) null else throw failure }
+                        Os.open("/proc/self/fd/${input.fd}", OsConstants.O_RDONLY or OsConstants.O_NONBLOCK or OsConstantsCompat.O_CLOEXEC, 0).also { fd ->
+                            try { if (offset != null) Os.lseek(fd, offset, OsConstants.SEEK_SET) }
+                            catch (failure: Exception) { Os.close(fd); throw failure }
+                        }
                     }
-                    if (count == 0) break
-                    if (count > AiAgentContract.MAX_MODEL_REQUEST_PAYLOAD_BYTES - output.size()) {
-                        throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
-                    }
-                    output.write(buffer, 0, count)
                 }
+                val fd = reopened ?: input.fileDescriptor
+                try {
+                    val poll = StructPollfd().apply { this.fd = fd; events = OsConstants.POLLIN.toShort() }
+                    val buffer = ByteArray(8192)
+                    while (true) {
+                        if (cancelled()) throw AiAgentModelException(AiAgentContract.ERROR_CANCELLED)
+                        if (Os.poll(arrayOf(poll), 100) == 0) continue
+                        val count = try { Os.read(fd, buffer, 0, buffer.size) } catch (failure: ErrnoException) {
+                            if (failure.errno == OsConstants.EAGAIN || failure.errno == OsConstants.EINTR) continue
+                            throw failure
+                        }
+                        if (count == 0) break
+                        if (count > AiAgentContract.MAX_MODEL_REQUEST_PAYLOAD_BYTES - output.size()) {
+                            throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
+                        }
+                        output.write(buffer, 0, count)
+                    }
+                } finally { if (reopened != null) Os.close(reopened) }
             }
             return Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(output.toByteArray())).toString()
         }
-        override fun close() { runCatching { descriptor?.close() } }
+        override fun close() { synchronized(this) { runCatching { descriptor?.close() } } }
     }
 
     companion object {
