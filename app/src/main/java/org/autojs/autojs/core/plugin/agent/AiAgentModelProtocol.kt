@@ -6,10 +6,14 @@ import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
 import org.autojs.autojs.core.plugin.ai.AiPluginMessage
 import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
+import org.autojs.autojs.core.plugin.ai.AiPluginToolResult
+import org.autojs.plugin.ai.common.api.AiPayloadReference
 import org.autojs.plugin.ai.agent.api.AiAgentContract
 import org.autojs.plugin.ai.common.api.AiValidation
 import org.autojs.plugin.ai.provider.api.AiJsonSyntaxValidator
 import org.autojs.plugin.ai.provider.api.AiProviderLimits
+import org.autojs.plugin.ai.provider.api.AiProviderMimeType
+import org.autojs.plugin.ai.provider.api.AiToolDefinition
 import java.util.ArrayDeque
 
 /** Only stable host-owned codes cross the Agent boundary; parser/provider text never does. */
@@ -24,11 +28,19 @@ internal class AiAgentModelRequest(
     val temperature: Double?,
     val stream: Boolean,
     val timeoutMs: Long,
+    val tools: List<AiToolDefinition> = emptyList(),
+    val maximumToolRounds: Int = 0,
 ) {
     val inputBytes: Long = messages.sumOf { it.contentBytes.toLong() } +
-        (responseSchemaJson?.toByteArray(Charsets.UTF_8)?.size ?: 0)
+        (responseSchemaJson?.toByteArray(Charsets.UTF_8)?.size ?: 0) +
+        tools.sumOf { it.inputSchema.declaredLengthBytes + AiValidation.utf8Size(it.description) + AiValidation.utf8Size(it.name) }
 
     override fun toString() = "AiAgentModelRequest(messageCount=${messages.size}, inputBytes=$inputBytes)"
+}
+
+internal class AiAgentModelToolResults(val requestId: String, val round: Int, val results: List<AiPluginToolResult>) {
+    val inputBytes = results.sumOf { AiValidation.utf8Size(it.output).toLong() }
+    override fun toString() = "AiAgentModelToolResults(round=$round, count=${results.size}, inputBytes=$inputBytes)"
 }
 
 internal object AiAgentModelRequests {
@@ -36,15 +48,30 @@ internal object AiAgentModelRequests {
     private val REQUEST_ID = Regex("^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$")
     private val FIELDS = setOf(
         "requestId", "targetId", "messages", "structuredJson", "responseSchema",
-        "maximumOutputTokens", "temperature", "stream", "timeoutMs", "tools", "imageRefs",
+        "maximumOutputTokens", "temperature", "stream", "timeoutMs", "tools", "maximumToolRounds", "imageRefs",
     )
 
     fun decode(json: String, maximumInputBytes: Int): AiAgentModelRequest = sanitized {
         val value = parseObject(json)
         require(value.keySet().all { it in FIELDS })
-        if (listOf("tools", "imageRefs").any { value.has(it) && !value[it].isJsonNull }) {
+        if (value.has("imageRefs") && !value["imageRefs"].isJsonNull) {
             throw AiAgentModelException(AiAgentContract.ERROR_TARGET_UNSUPPORTED)
         }
+        val tools = value["tools"]?.takeUnless { it.isJsonNull }?.let { entries ->
+            require(entries.isJsonArray && entries.asJsonArray.size() in 1..AiProviderLimits.MAX_TOOL_DEFINITIONS)
+            entries.asJsonArray.map { entry ->
+                require(entry.isJsonObject)
+                val tool = entry.asJsonObject
+                require(tool.keySet() == setOf("name", "description", "inputSchema"))
+                require(tool["inputSchema"].isJsonObject)
+                val schema = tool["inputSchema"].toString().toByteArray(Charsets.UTF_8)
+                AiToolDefinition(tool.string("name"), tool.string("description"), AiPayloadReference(
+                    AiProviderMimeType.JSON, schema.size.toLong(), inlineBytes = schema, charset = "utf-8"))
+            }.also { require(it.map { tool -> tool.name }.distinct().size == it.size) }
+        } ?: emptyList()
+        val toolRounds = value.optionalLong("maximumToolRounds") ?: 0
+        require(toolRounds in 0..AiAgentContract.MAX_MODEL_TOOL_ROUNDS)
+        require((tools.isEmpty() && toolRounds == 0L) || (tools.isNotEmpty() && toolRounds > 0))
         val id = requestId(value)
         val target = value.string("targetId")
         require(AiValidation.TARGET_ID.matches(target))
@@ -83,9 +110,33 @@ internal object AiAgentModelRequests {
         val timeout = value.optionalLong("timeoutMs") ?: DEFAULT_TIMEOUT_MS
         require(timeout in AiProviderLimits.MIN_TIMEOUT_MILLIS..AiProviderLimits.MAX_TIMEOUT_MILLIS)
         AiAgentModelRequest(id, target, messages, schema, outputTokens, temperature,
-            value.boolean("stream", false), timeout).also {
+            value.boolean("stream", false), timeout, tools, toolRounds.toInt()).also {
             if (it.inputBytes > maximumInputBytes) throw AiAgentModelException(AiAgentContract.ERROR_QUOTA_EXCEEDED)
         }
+    }
+
+    fun toolResults(json: String): AiAgentModelToolResults = sanitized {
+        if (AiValidation.utf8Size(json) > AiAgentContract.MAX_MODEL_TOOL_RESULTS_BYTES) {
+            throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
+        }
+        val value = parseObject(json)
+        require(value.keySet() == setOf("requestId", "round", "results"))
+        val round = requireNotNull(value.optionalLong("round"))
+        require(round in 1..AiAgentContract.MAX_MODEL_TOOL_ROUNDS)
+        val entries = value["results"].also { require(it.isJsonArray) }.asJsonArray
+        require(entries.size() in 1..AiProviderLimits.MAX_OUTSTANDING_TOOL_CALLS)
+        val results = entries.map { entry ->
+            require(entry.isJsonObject)
+            val result = entry.asJsonObject
+            require(result.keySet().all { it in setOf("callId", "output", "isError") })
+            val output = result.string("output")
+            if (AiValidation.utf8Size(output) > AiAgentContract.MAX_MODEL_TOOL_RESULT_BYTES) {
+                throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
+            }
+            AiPluginToolResult(result.string("callId"), output, result.boolean("isError", false)).also { it.toProtocol() }
+        }
+        require(results.map { it.callId }.distinct().size == results.size)
+        AiAgentModelToolResults(requestId(value), round.toInt(), results)
     }
 
     fun catalog(json: String): Pair<String, Long> = sanitized {
@@ -170,15 +221,23 @@ internal class AiAgentModelQuota(
     /** Returns false if reported provider usage exceeded the remaining link budget. */
     @Synchronized
     fun settle(id: String, usage: AiPluginUsage?, inputBytes: Long, outputBytes: Long): Boolean {
-        if (reservations.remove(id) == null) return true
+        return settleCumulative(id, usage, inputBytes, outputBytes, 0).first
+    }
+
+    /** Native tool continuations report cumulative usage; replace the previous charge, never add it twice. */
+    @Synchronized
+    fun settleCumulative(id: String, usage: AiPluginUsage?, inputBytes: Long, outputBytes: Long,
+                         previouslyCharged: Long, releaseReservation: Boolean = true): Pair<Boolean, Long> {
+        if (releaseReservation && reservations.remove(id) == null) return true to previouslyCharged
         val charged = usage?.totalTokens ?: if (usage?.inputTokens != null && usage.outputTokens != null) {
             saturatingAdd(usage.inputTokens, usage.outputTokens)
         } else {
             saturatingAdd(usage?.inputTokens ?: estimateTokens(inputBytes),
                 usage?.outputTokens ?: estimateTokens(outputBytes))
         }
-        consumed = saturatingAdd(consumed, charged)
-        return consumed <= maximumTokens
+        require(previouslyCharged in 0..consumed)
+        consumed = saturatingAdd(consumed - previouslyCharged, charged)
+        return (consumed <= maximumTokens) to charged
     }
 
     @Synchronized fun consumedTokens(): Long = consumed

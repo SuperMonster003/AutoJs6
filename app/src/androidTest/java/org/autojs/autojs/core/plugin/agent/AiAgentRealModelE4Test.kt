@@ -279,6 +279,7 @@ class AiAgentRealModelE4Test {
     }
     /** Observe only model replies, inside private opt-in evidence; credentials remain in the Provider. */
     private fun traceModel(delegate: IAiAgentModelBroker, directory: File) = object : IAiAgentModelBroker.Stub() {
+        override fun submitToolResults(request: Bundle?) = delegate.submitToolResults(request)
         private val lock = Any()
         override fun getBrokerInfo() = delegate.brokerInfo
         override fun listTargets(request: Bundle?, callback: IAiAgentModelCallback?) = delegate.listTargets(request, callback)

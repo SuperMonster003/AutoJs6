@@ -12,6 +12,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderBackendProfile
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId
 import org.autojs.plugin.ai.provider.api.AiProviderLimits
 import org.autojs.plugin.ai.provider.api.AiProviderMimeType
+import org.autojs.plugin.ai.provider.api.AiToolDefinition
 import java.io.Closeable
 
 internal enum class AiPluginMessageRole(val protocolValue: Int) {
@@ -90,13 +91,21 @@ internal class AiPluginAskRequest(
     val responseSchemaJson: String? = null,
     val backendProfile: String? = null,
     val includeReasoning: Boolean = false,
+    tools: List<AiToolDefinition> = emptyList(),
+    val maximumToolRounds: Int = 0,
 ) {
+    val tools = tools.toList()
     val messages: List<AiPluginMessage> = messages.toList()
-    val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() }
+    val inputBytes: Long = this.messages.sumOf { it.contentBytes.toLong() } +
+        this.tools.sumOf { it.inputSchema.declaredLengthBytes + AiValidation.utf8Size(it.description) + AiValidation.utf8Size(it.name) }
     val responseSchemaBytes: Int? = responseSchemaJson?.let(AiValidation::utf8Size)
     val structuredJson: Boolean = responseSchemaJson != null
 
     init {
+        require(this.tools.size <= AiProviderLimits.MAX_TOOL_DEFINITIONS)
+        require(this.tools.map { it.name }.distinct().size == this.tools.size)
+        require(maximumToolRounds in 0..AiProviderLimits.MAX_TOOL_ROUNDS)
+        require((this.tools.isEmpty() && maximumToolRounds == 0) || (this.tools.isNotEmpty() && maximumToolRounds > 0))
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
         targetId?.let { require(AiValidation.TARGET_ID.matches(it)) { "Invalid target ID" } }
         require(this.messages.size in 1..AiProviderLimits.MAX_MESSAGES) {
@@ -152,7 +161,8 @@ internal class AiPluginAskRequest(
             "maximumOutputBytes=$maximumOutputBytes, maximumOutputTokens=$maximumOutputTokens, " +
             "temperature=$temperature, topK=$topK, topP=$topP, " +
             "backendProfile=$backendProfile, includeReasoning=$includeReasoning, " +
-            "structuredJson=$structuredJson, responseSchemaBytes=$responseSchemaBytes)"
+            "structuredJson=$structuredJson, responseSchemaBytes=$responseSchemaBytes, " +
+            "toolCount=${tools.size}, maximumToolRounds=$maximumToolRounds)"
 
     internal companion object {
         const val DEFAULT_MAXIMUM_OUTPUT_BYTES = 64L * 1024L
@@ -172,7 +182,7 @@ internal fun AiPluginAskRequest.toGenerationOptions(
     reportUsage = true,
     maximumOutputBytes = maximumOutputBytes,
     maximumOutputTokens = maximumOutputTokens,
-    maximumToolRounds = 0,
+    maximumToolRounds = maximumToolRounds,
     timeoutMillis = timeoutMillis,
     responseMimeType = if (structuredJson) AiProviderMimeType.JSON else AiProviderMimeType.PLAIN,
     responseSchema = responseSchemaJson?.let { schema ->
@@ -192,6 +202,7 @@ internal fun AiPluginAskRequest.toGenerationOptions(
         if (includeReasoning && AiProviderCapabilityId.REASONING !in this) {
             add(AiProviderCapabilityId.REASONING)
         }
+        if (tools.isNotEmpty() && AiProviderCapabilityId.TOOLS !in this) add(AiProviderCapabilityId.TOOLS)
     },
     temperature = temperature,
     topK = topK,
@@ -240,6 +251,8 @@ internal sealed class AiPluginAskOutcome {
 
 internal interface AiPluginAskHandle : Closeable {
     fun cancel(): Boolean
+    /** Returns promptly; results are validated and submitted on the session control lane. */
+    fun submitToolResults(results: List<AiPluginToolResult>): Boolean = false
 }
 
 internal fun interface AiPluginAskRunner {
@@ -272,6 +285,11 @@ internal sealed class AiPluginStreamEvent {
     }
 
     data class Usage(val usage: AiPluginUsage) : AiPluginStreamEvent()
+
+    class ToolCalls(calls: List<AiPluginToolCall>) : AiPluginStreamEvent() {
+        val calls = calls.toList()
+        override fun toString() = "ToolCalls(callCount=${calls.size})"
+    }
 
     class Completed(
         val text: String,

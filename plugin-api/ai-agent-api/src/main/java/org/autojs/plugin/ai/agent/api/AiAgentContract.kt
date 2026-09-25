@@ -121,6 +121,13 @@ object AiAgentContract {
     const val MODEL_EVENT_STARTED = "started"
     const val MODEL_EVENT_CHUNK = "chunk"
     const val MODEL_EVENT_USAGE = "usage"
+    const val MODEL_EVENT_TOOL_CALLS = "tool_calls"
+    /** Optional broker extension; contract V1 and the original five transactions stay compatible. */
+    const val MODEL_TOOL_CALLING_VERSION = 1
+    const val MODEL_INFO_TOOL_CALLING_VERSION = "toolCallingVersion"
+    const val MAX_MODEL_TOOL_ROUNDS = 16
+    const val MAX_MODEL_TOOL_RESULT_BYTES = 64 * 1024
+    const val MAX_MODEL_TOOL_RESULTS_BYTES = 128 * 1024
     const val MODEL_EVENT_COMPLETED = "completed"
     const val MODEL_EVENT_FAILED = "failed"
     const val MODEL_EVENT_CANCELLED = "cancelled"

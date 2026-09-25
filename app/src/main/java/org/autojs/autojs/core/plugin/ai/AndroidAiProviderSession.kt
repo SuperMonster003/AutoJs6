@@ -332,6 +332,15 @@ internal class AndroidAiProviderSession(
         private val onSessionBinderDeath: () -> Unit,
         private val controlLock: Any,
     ) : AiProviderSessionRemote {
+        override fun submitToolResults(envelope: ByteArray) {
+            withObservedOperation {
+                synchronized(controlLock) {
+                    check(!closed.get()) { "AI remote session is closed" }
+                    transactControl { session.submitToolResults(envelope, emptyArray()) }
+                }
+            }
+        }
+
         override fun grantCredits(count: Int) {
             check(count > 0) { "local AI session credits must be positive" }
             withObservedOperation {

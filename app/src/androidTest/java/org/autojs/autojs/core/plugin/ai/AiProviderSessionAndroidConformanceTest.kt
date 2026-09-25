@@ -726,6 +726,7 @@ class AiProviderSessionAndroidConformanceTest {
             is AiProviderSessionEvent.Started,
             is AiProviderSessionEvent.Chunk,
             is AiProviderSessionEvent.Usage,
+            is AiProviderSessionEvent.ToolCalls,
             -> false
         }
     }

@@ -4,8 +4,8 @@ Status: **versioned V1**. The host provides model/capability brokers, registered
 script discovery/execution, screen observations/actions, drawer controls and
 Plugin Center management. The plugin implements the Agent loop, parameter
 completion, confirmations, task workbench, history, presets, memory and system
-entry points. This status does not declare plugin 1.0.0 published; the plugin
-roadmap retains its separate release gates.
+entry points. Plugin 1.0.0 is published. The additive native-tool broker extension
+below is P9.1 host support; Provider and Agent adoption have separate roadmap gates.
 
 The contract is `plugin-api/ai-agent-api`, package
 `org.autojs.plugin.ai.agent.api`. The base contract constant
@@ -14,6 +14,9 @@ INFO/runtime metadata requires AutoJs6 6.8.0 / build **5289**, for inspected
 actions bound to execution. Complete public task APIs require build **5293**;
 registered-script `result`/`context` first appeared in build 5287. Consumers must
 check both installed metadata and the feature they intend to use.
+Native model tool continuations require host build **5297** and the broker's
+explicit `toolCallingVersion: 1` advertisement; a version number alone is not
+feature negotiation. The original 1.0.0 structured JSON path remains available.
 
 ## Identity and discovery
 
@@ -54,7 +57,7 @@ guidance. Confirmation is pinned to the current signing fingerprint set.
 | IAiAgentLink | getStatus, startRun, respond, cancelRun, listRuns, getRun, listPresets, updateConfig, detach |
 | IAiAgentLinkCallback (oneway) | onStatus, onEvent |
 | IAiAgentRunCallback (oneway) | onRunEvent |
-| IAiAgentModelBroker | getBrokerInfo, listTargets, generate, cancel, destroy |
+| IAiAgentModelBroker | getBrokerInfo, listTargets, generate, cancel, destroy, submitToolResults (optional extension) |
 | IAiAgentModelCallback (oneway) | onEvent |
 
 `attach(config, modelBroker, capabilityBroker, callback)` returns the link. The
@@ -77,7 +80,7 @@ The public constants and KDoc in `AiAgentContract` freeze the complete vocabular
 | runEventJson | runId, type, sequence and event-specific fields; also link events |
 | runResponseJson | acknowledgement/query result or runId/requestId/value/allowed/scope |
 | runRefJson | runId and optional reason |
-| modelRequestJson | requestId, targetId, messages, structuredJson, responseSchema, maximumOutputTokens, temperature, stream, timeoutMs |
+| modelRequestJson | generation: requestId, targetId, messages, structuredJson, responseSchema, maximumOutputTokens, temperature, stream, timeoutMs; native extension adds tools/maximumToolRounds, or requestId/round/results for submission |
 | modelEventJson | requestId, type, sequence and event-specific fields |
 | modelRefJson | requestId and optional reason |
 | modelBrokerInfoJson | available, providerId and public request/output/schema limits |
@@ -108,8 +111,59 @@ Each admitted request with a live callback has
 `started`, zero or more `chunk` events (streaming), optional `usage`, then exactly
 one `completed`, `failed` or `cancelled`. Sequences increase per request. The host
 does not expose credentials, private profile fields or raw Provider error bodies.
-Unsupported native tool or image inputs are rejected. The structured JSON loop
-uses the existing ask/stream runners and does not enable native tool rounds.
+Image inputs remain unsupported. Requests without tools keep the original
+ask/stream behavior and do not enable native tool rounds. Public script `ai.ask`
+and `ai.stream` options do not expose this internal model-broker extension.
+
+### Native model tool extension
+
+Read `modelBrokerInfoJson.toolCallingVersion` before using the appended transaction
+or supplying tool definitions. A missing value means unsupported. Version 1 of
+this extension retains Agent contract V1 and the original five transaction codes.
+The selected catalog target must also advertise the Provider `tools` capability.
+Streaming remains optional and separately negotiated.
+
+`tools` is a nonempty array of `{name, description, inputSchema}` definitions;
+schemas are JSON objects. Names are unique and obey the Provider stable-ID rules.
+`maximumToolRounds` is required with tools, accepts 1-16, and is zero/absent
+without tools. Provider negotiation may impose smaller limits. The input grant
+also counts UTF-8 tool names/descriptions and serialized schemas.
+
+After `started`, a generation can emit `tool_calls` with a positive sequential
+`round` and `calls: [{callId, name, arguments}]`. Arguments are materialized JSON,
+including bounded Provider descriptor payloads. Tool names must have been declared
+in the request. One batch is outstanding at a time; Provider replayed IDs, an
+extra round, chunks during a pending batch or premature completion terminate the
+session. The host only transports these calls; the Agent must apply its existing
+validation, confirmation and journaling before executing any device action.
+
+Submit the complete batch to `submitToolResults` using `modelRequestJson`:
+
+```json
+{
+  "requestId": "native-1",
+  "round": 1,
+  "results": [{"callId": "call-1", "output": "Observed result", "isError": false}]
+}
+```
+
+Each result has a string output and optional boolean `isError`. IDs must exactly
+match the pending batch, without duplicates; round numbers must match. Outputs
+are capped at 64 KiB each, and the complete submission at 128 KiB of UTF-8 JSON.
+These limits are also advertised as `maximumToolResultBytes` and
+`maximumToolResultBatchBytes`; `maximumToolRounds` advertises 16. Submissions may
+use the existing correlated `payloadFd` transport. A stopped/incomplete pipe does
+not block cancellation or the original generation deadline. Only one submission
+may be queued per outstanding batch. A stale ID with no live generation is ignored.
+
+Results continue the original generation, callback and event sequence. There is
+one terminal event. Cancellation, deadline, callback death and link teardown
+remain active while awaiting results. Each continuation rechecks the input grant,
+reserves tokens and consumes another entry in the link's model-call rate limit.
+Usage events are cumulative and may repeat across native rounds. Reported usage
+replaces prior byte estimates, including reports arriving after `tool_calls`,
+instead of charging a cumulative count again for each round. The original
+one-shot usage behavior is unchanged.
 
 For model generation requests and model callback events, `payloadFd` is the
 exclusive alternative to their inline JSON key. It contains the complete request

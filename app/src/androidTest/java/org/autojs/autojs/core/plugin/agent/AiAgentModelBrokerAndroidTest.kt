@@ -27,6 +27,123 @@ class AiAgentModelBrokerAndroidTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
 
+    @Test fun nativeToolsRoundTripOnTheOriginalRequestWithAndWithoutStreaming() {
+        requireFake()
+        for (stream in listOf(false, true)) broker().use { broker ->
+            assertEquals(1, JsonParser.parseString(broker.brokerInfo.getString(AiAgentContract.KEY_MODEL_BROKER_INFO_JSON))
+                .asJsonObject[AiAgentContract.MODEL_INFO_TOOL_CALLING_VERSION].asInt)
+            val input = nativeRequest(stream)
+            val events = Events()
+            broker.generate(request(input), events)
+            val calls = events.awaitTools()
+            assertEquals(input["requestId"], calls["requestId"])
+            assertEquals(1, calls["round"].asInt)
+            assertTrue(calls["calls"].asJsonArray.single().asJsonObject["arguments"].asJsonObject["fixture"].asBoolean)
+            broker.submitToolResults(request(resultsFor(calls)))
+            val terminal = events.awaitTerminal()
+            assertEquals("completed", terminal["type"].asString)
+            assertEquals("tool:observed", terminal["text"].asString)
+            assertEquals(1, events.types().count { it == "started" })
+            events.assertSequence()
+        }
+    }
+
+    @Test fun pendingNativeToolsCanBeCancelledAndRejectStaleRoundOrWrongCallIds() {
+        requireFake()
+        for (scenario in listOf("cancel", "wrong-round", "wrong-id")) broker().use { broker ->
+            val input = nativeRequest(false)
+            val events = Events()
+            broker.generate(request(input), events)
+            val calls = events.awaitTools()
+            if (scenario == "cancel") broker.cancel(Bundle().apply {
+                putInt(AiAgentContract.KEY_CONTRACT_VERSION, 1)
+                putString(AiAgentContract.KEY_MODEL_REF_JSON, """{"requestId":"${input["requestId"].asString}"}""")
+            }) else broker.submitToolResults(request(resultsFor(calls).apply {
+                if (scenario == "wrong-round") addProperty("round", 2)
+                else getAsJsonArray("results")[0].asJsonObject.addProperty("callId", "wrong")
+            }))
+            val terminal = events.awaitTerminal()
+            assertEquals(if (scenario == "cancel") "cancelled" else "failed", terminal["type"].asString)
+            assertEquals(if (scenario == "cancel") AiAgentContract.ERROR_CANCELLED else AiAgentContract.ERROR_INVALID_REQUEST,
+                terminal["code"].asString)
+            events.assertSequence()
+        }
+    }
+
+    @Test fun nativeContinuationCannotBypassTheLinkModelCallQuota() {
+        requireFake()
+        broker(grant().copy(modelCallsPerMinute = 1)).use { broker ->
+            val events = Events()
+            broker.generate(request(nativeRequest(false)), events)
+            broker.submitToolResults(request(resultsFor(events.awaitTools())))
+            val terminal = events.awaitTerminal()
+            assertEquals("failed", terminal["type"].asString)
+            assertEquals(AiAgentContract.ERROR_QUOTA_EXCEEDED, terminal["code"].asString)
+        }
+    }
+
+    @Test fun nativeToolsKeepTheGenerationDeadlineWhileWaitingForResults() {
+        requireFake()
+        broker().use { broker ->
+            val events = Events()
+            broker.generate(request(nativeRequest(false).apply { addProperty("timeoutMs", 5000) }), events)
+            events.awaitTools()
+            val terminal = events.awaitTerminal()
+            assertEquals("failed", terminal["type"].asString)
+            assertEquals(AiAgentContract.ERROR_MODEL_TIMEOUT, terminal["code"].asString)
+        }
+    }
+
+    @Test fun nativeResultDescriptorsRetainCorrelationAndCanBeCancelledWhileUnread() {
+        requireFake()
+        for (mode in listOf("valid", "mismatch", "stalled")) broker().use { broker ->
+            val input = nativeRequest(false)
+            val events = Events()
+            broker.generate(request(input), events)
+            val calls = events.awaitTools()
+            val value = resultsFor(calls)
+            if (mode == "mismatch") value.addProperty("requestId", "another-request")
+            val pipe = ParcelFileDescriptor.createPipe()
+            try {
+                broker.submitToolResults(Bundle().apply {
+                    putInt(AiAgentContract.KEY_CONTRACT_VERSION, 1)
+                    putString(AiAgentContract.KEY_MODEL_REF_JSON, """{"requestId":"${input["requestId"].asString}"}""")
+                    putParcelable(AiAgentContract.KEY_PAYLOAD_FD, pipe[0])
+                })
+                if (mode == "stalled") {
+                    android.system.Os.write(pipe[1].fileDescriptor, ByteArray(128 * 1024) { 32 }, 0, 128 * 1024)
+                    val before = SystemClock.elapsedRealtime()
+                    broker.cancel(Bundle().apply {
+                        putInt(AiAgentContract.KEY_CONTRACT_VERSION, 1)
+                        putString(AiAgentContract.KEY_MODEL_REF_JSON, """{"requestId":"${input["requestId"].asString}"}""")
+                    })
+                    assertEquals("cancelled", events.awaitTerminal()["type"].asString)
+                    assertTrue(SystemClock.elapsedRealtime() - before < 2000)
+                } else {
+                    ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { it.write(value.toString().toByteArray(Charsets.UTF_8)) }
+                    val terminal = events.awaitTerminal()
+                    assertEquals(if (mode == "valid") "completed" else "failed", terminal["type"].asString)
+                    if (mode == "mismatch") assertEquals(AiAgentContract.ERROR_INVALID_REQUEST, terminal["code"].asString)
+                }
+                assertTrue(runCatching { pipe[0].fd }.isFailure)
+                events.assertSequence()
+            } finally { pipe.forEach { runCatching { it.close() } } }
+        }
+    }
+
+    private fun nativeRequest(stream: Boolean) = generate("local:tools", "synthetic tool fixture", stream = stream).apply {
+        addProperty("maximumToolRounds", 2)
+        addProperty("maximumOutputTokens", 1024)
+        add("tools", JsonParser.parseString("""[{"name":"ui_read","description":"Read synthetic state","inputSchema":{"type":"object"}}]"""))
+    }
+
+    private fun resultsFor(calls: JsonObject) = JsonObject().apply {
+        add("requestId", calls["requestId"]); add("round", calls["round"])
+        add("results", com.google.gson.JsonArray().apply { calls["calls"].asJsonArray.forEach { call -> add(JsonObject().apply {
+            add("callId", call.asJsonObject["callId"]); addProperty("output", "observed")
+        }) } })
+    }
+
     @Test fun catalogContainsOnlyPublicFieldsAndStructuredGenerateRoundTrips() {
         requireFake()
         broker().use { broker ->
@@ -268,7 +385,7 @@ class AiAgentModelBrokerAndroidTest {
         }
     }
 
-    private fun broker() = AiAgentModelBroker(context, Process.myUid(), grant(),
+    private fun broker(grant: HostCapabilityGrant = grant()) = AiAgentModelBroker(context, Process.myUid(), grant,
         AiProviderComponent(FAKE_PACKAGE, "$FAKE_PACKAGE.service.FakeAiProviderService"), "fake.local")
     private fun grant() = HostCapabilityGrant(emptySet(), emptySet())
 
@@ -300,6 +417,7 @@ class AiAgentModelBrokerAndroidTest {
     private class Events : IAiAgentModelCallback.Stub() {
         val values = CopyOnWriteArrayList<JsonObject>()
         val ready = CountDownLatch(1)
+        private val tools = CountDownLatch(1)
         private val terminal = CountDownLatch(1)
         override fun onEvent(event: Bundle?) {
             requireNotNull(event)
@@ -310,7 +428,12 @@ class AiAgentModelBrokerAndroidTest {
             val value = JsonParser.parseString(text).asJsonObject
             values += value
             if (value["type"].asString == "chunk") ready.countDown()
+            if (value["type"].asString == "tool_calls") tools.countDown()
             if (value["type"].asString in TERMINAL) terminal.countDown()
+        }
+        fun awaitTools(): JsonObject {
+            assertTrue("Model broker did not request tools: ${types()}", tools.await(15, TimeUnit.SECONDS))
+            return values.last { it["type"].asString == "tool_calls" }
         }
         fun awaitTerminal(): JsonObject {
             assertTrue("Model broker did not terminate", terminal.await(20, TimeUnit.SECONDS))

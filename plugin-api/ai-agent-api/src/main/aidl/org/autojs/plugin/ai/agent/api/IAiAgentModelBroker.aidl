@@ -26,4 +26,11 @@ interface IAiAgentModelBroker {
     void cancel(in Bundle ref);
     /** Cancels calls and releases the link broker; reason uses HostCapabilityContract.KEY_REASON_JSON. */
     void destroy(in Bundle reason);
+    /**
+     * Additive toolCallingVersion 1 extension. Call only after getBrokerInfo advertises it.
+     * KEY_MODEL_REQUEST_JSON contains requestId, round and the exact pending tool results.
+     * Completion/failure continues on the original generate callback. No new generation is opened.
+     * The same payload descriptor ownership and requestId correlation rules as generate apply.
+     */
+    void submitToolResults(in Bundle request);
 }

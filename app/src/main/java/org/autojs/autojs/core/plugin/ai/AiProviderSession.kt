@@ -12,6 +12,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderLimits
 import org.autojs.plugin.ai.provider.api.AiProviderQuotaPolicy
 import org.autojs.plugin.ai.provider.api.AiProviderRequest
 import org.autojs.plugin.ai.provider.api.AiProviderSessionPolicy
+import org.autojs.plugin.ai.provider.api.AiToolResultBatch
 import java.io.Closeable
 import java.util.ArrayDeque
 import java.util.Collections
@@ -48,6 +49,7 @@ internal interface AiProviderSessionDescriptorLease : Closeable {
 internal interface AiProviderSessionRemote : Closeable {
     fun grantCredits(count: Int)
     fun cancel()
+    fun submitToolResults(envelope: ByteArray) { throw UnsupportedOperationException() }
 }
 
 internal interface AiProviderSessionCallbackIngress {
@@ -124,6 +126,9 @@ internal sealed class AiProviderSessionEvent {
         override fun toString(): String = "Chunk($chunk)"
     }
     data class Usage(val usage: AiUsage) : AiProviderSessionEvent()
+    class ToolCalls(val calls: List<AiPluginToolCall>) : AiProviderSessionEvent() {
+        override fun toString() = "ToolCalls(callCount=${calls.size})"
+    }
     data class Completed(
         val result: AiProviderCompletionQuotaSnapshot,
         val finishReason: Int,
@@ -218,6 +223,7 @@ internal class AiProviderSessionPolicy(
     private var terminalRemoteTeardownPending = false
     private var activeDataDeliveries = 0
     private var activeRemoteOperations = 0
+    private var waitingForToolResults = false
     private var activeCallbackCleanups = 0
     private var activeRemoteClosures = 0
     private var fatalCleanupInProgress = false
@@ -289,6 +295,36 @@ internal class AiProviderSessionPolicy(
 
     fun binderDied(): Boolean = terminateExternal(AiProviderSessionEvent.BinderDied, cancelRemote = false)
 
+    /** A single bounded submission may be queued for the currently published batch. */
+    fun submitToolResults(results: AiToolResultBatch): Boolean {
+        val encoded = try {
+            AiProviderQuotaPolicy.validateToolResults(results, 0, 0)
+            AiProviderCodec.encodeToolResultBatch(results).also {
+                require(it.size <= AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES)
+            }
+        } catch (_: Exception) { return false }
+        synchronized(lock) {
+            if (!waitingForToolResults || terminalEvent != null || state != State.COMMITTED) return false
+            waitingForToolResults = false
+        }
+        try {
+            serializedControlExecutor.execute {
+                val active = synchronized(lock) {
+                    if (terminalEvent != null || state != State.COMMITTED) return@execute
+                    activeRemoteOperations += 1
+                    checkNotNull(remote)
+                }
+                try {
+                    checkNotNull(sessionPolicy).submitToolResults(results)
+                    active.submitToolResults(encoded)
+                } catch (_: Throwable) {
+                    terminateOnLane(AiProviderSessionEvent.Rejected(AiProviderSessionFailure.REMOTE_CONTROL_FAILED), true)
+                } finally { releaseRemoteOperation() }
+            }
+        } catch (_: RuntimeException) { executorRejected(); return false }
+        return true
+    }
+
     override fun close() {
         cancel()
     }
@@ -299,9 +335,6 @@ internal class AiProviderSessionPolicy(
             request.providerId != pinned.providerId || request.targetId != plan.targetId ||
             request.options.maximumOutputBytes > plan.effectiveMaximumOutputBytes
         ) return AiProviderSessionFailure.PLAN_REQUEST_MISMATCH
-        if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0 ||
-            AiProviderCapabilityId.TOOLS in request.options.requiredCapabilityIds
-        ) return AiProviderSessionFailure.TOOLS_UNSUPPORTED
         if (request.options.persistentSession) {
             return AiProviderSessionFailure.REQUEST_INVALID
         }
@@ -309,6 +342,7 @@ internal class AiProviderSessionPolicy(
             if (request.options.stream) add(AiProviderCapabilityId.STREAMING)
             if (request.options.includeReasoning) add(AiProviderCapabilityId.REASONING)
             if (request.options.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
+            if (request.tools.isNotEmpty() || request.options.maximumToolRounds > 0) add(AiProviderCapabilityId.TOOLS)
             if (request.options.reportUsage) {
                 add(AiProviderCapabilityId.USAGE)
             }
@@ -326,7 +360,7 @@ internal class AiProviderSessionPolicy(
         }
         preparedRequestDescriptorCount = descriptorCount
         sessionPolicy = AiProviderSessionPolicy(
-            maximumToolRounds = 0,
+            maximumToolRounds = request.options.maximumToolRounds,
             maximumOutstandingToolCalls = pinned.negotiatedCapabilities.maximumOutstandingToolCalls,
             maximumOutputBytes = plan.effectiveMaximumOutputBytes,
             expectedRequest = request,
@@ -876,7 +910,7 @@ internal class AiProviderSessionPolicy(
                     if (kind == CallbackKind.CHUNK) ingressChunkCredits -= 1
                     if (kind == CallbackKind.STARTED) startedIngressClaimed = true
                     if (kind == CallbackKind.COMPLETED || kind == CallbackKind.FAILED ||
-                        kind == CallbackKind.CANCELLED || kind == CallbackKind.TOOL_CALLS
+                        kind == CallbackKind.CANCELLED
                     ) {
                         terminalIngressClaimed = true
                     }
@@ -986,14 +1020,18 @@ internal class AiProviderSessionPolicy(
                     terminateOnLane(AiProviderSessionEvent.Cancelled, cancelRemote = false)
                 }
                 CallbackKind.TOOL_CALLS -> {
-                    checkNotNull(callback.descriptors)
-                    AiProviderCodec.decodeToolCallBatch(checkNotNull(callback.envelope))
-                    terminateOnLane(
-                        AiProviderSessionEvent.Rejected(
-                            AiProviderSessionFailure.TOOLS_UNSUPPORTED,
-                        ),
-                        cancelRemote = true,
-                    )
+                    val descriptors = checkNotNull(callback.descriptors)
+                    val batch = AiProviderCodec.decodeToolCallBatch(checkNotNull(callback.envelope))
+                    if (request.tools.isEmpty()) {
+                        terminateOnLane(AiProviderSessionEvent.Rejected(AiProviderSessionFailure.TOOLS_UNSUPPORTED), true)
+                        return
+                    }
+                    val verified = AiProviderQuotaPolicy.validateToolCalls(request, batch, descriptors.count,
+                        maximumSessionDescriptors(), descriptors::readDeclaredBytes)
+                    checkNotNull(sessionPolicy).onToolCalls(batch)
+                    val calls = batch.calls.map { AiPluginToolCall(it.callId, it.name, verified.argumentsJsonByCallId.getValue(it.callId)) }
+                    synchronized(lock) { waitingForToolResults = true }
+                    deliverIfActive(AiProviderSessionEvent.ToolCalls(calls))
                 }
             }
         } catch (_: Throwable) {

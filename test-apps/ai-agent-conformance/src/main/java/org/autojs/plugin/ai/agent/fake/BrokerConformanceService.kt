@@ -68,7 +68,7 @@ class BrokerConformanceService : Service() {
             enforceHost()
             val broker = IAiAgentModelBroker.Stub.asInterface(brokerBinder)
             val callback = IAiAgentModelCallback.Stub.asInterface(callbackBinder)
-            require(operation in setOf("listTargets", "generate", "cancel"))
+            require(operation in setOf("listTargets", "generate", "cancel", "submitToolResults"))
             worker.execute {
                 val remoteCallback = object : IAiAgentModelCallback.Stub() {
                     override fun onEvent(event: Bundle) { callback.onEvent(event) }
@@ -77,6 +77,7 @@ class BrokerConformanceService : Service() {
                     "listTargets" -> broker.listTargets(request, remoteCallback)
                     "generate" -> broker.generate(request, remoteCallback)
                     "cancel" -> broker.cancel(request)
+                    "submitToolResults" -> broker.submitToolResults(request)
                 }
             }
         }
@@ -98,6 +99,7 @@ class BrokerConformanceService : Service() {
                     check("model.generate") { model.generate(Bundle(), null) }
                     check("model.cancel") { model.cancel(Bundle()) }
                     check("model.destroy") { model.destroy(Bundle()) }
+                    check("model.submitToolResults") { model.submitToolResults(Bundle()) }
                 }
             }.get(10, TimeUnit.SECONDS)
         }

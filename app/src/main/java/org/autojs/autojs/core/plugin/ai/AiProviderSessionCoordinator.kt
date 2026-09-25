@@ -160,6 +160,7 @@ internal sealed class AiProviderSessionRunEvent {
 
 internal interface AiProviderSessionRunHandle : Closeable {
     fun cancel(): Boolean
+    fun submitToolResults(results: org.autojs.plugin.ai.provider.api.AiToolResultBatch): Boolean = false
 }
 
 /** Process-lifetime, single-active admission and per-component fuse state. */
@@ -269,6 +270,7 @@ internal class AiProviderSessionCoordinator(
         fun start(): AiProviderSessionRunHandle {
             val handle = object : AiProviderSessionRunHandle {
                 override fun cancel(): Boolean = cancelRun()
+                override fun submitToolResults(results: org.autojs.plugin.ai.provider.api.AiToolResultBatch) = policy.submitToolResults(results)
 
                 override fun close() {
                     cancel()
@@ -1030,6 +1032,7 @@ private fun AiProviderSessionEvent.isSessionTerminal(): Boolean = when (this) {
     is AiProviderSessionEvent.Started,
     is AiProviderSessionEvent.Chunk,
     is AiProviderSessionEvent.Usage,
+    is AiProviderSessionEvent.ToolCalls,
     -> false
     AiProviderSessionEvent.Disabled,
     is AiProviderSessionEvent.Completed,

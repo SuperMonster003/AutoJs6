@@ -24,6 +24,8 @@ import org.autojs.autojs.core.plugin.ai.AiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginTargetSummary
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
+import org.autojs.autojs.core.plugin.ai.AiPluginToolCall
+import org.autojs.autojs.core.plugin.ai.AiPluginToolRunner
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.core.plugin.ai.AndroidAiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.ThreeStoneAiOfficialPlugin
@@ -64,6 +66,7 @@ internal class AiAgentModelBroker(
     private val askRunner: AiPluginAskRunner = AndroidAiPluginAskRunner.create(context),
     private val streamRunner: AiPluginStreamRunner = AndroidAiPluginAskRunner.createStream(context),
     private val catalogRunner: AiPluginCatalogRunner = AndroidAiPluginAskRunner.createCatalog(context),
+    private val toolRunner: AiPluginToolRunner = AndroidAiPluginAskRunner.createTools(context),
 ) : IAiAgentModelBroker.Stub(), Closeable {
     private val applicationContext = context.applicationContext
     private val closed = AtomicBoolean()
@@ -87,6 +90,10 @@ internal class AiAgentModelBroker(
                 addProperty("maximumInputBytes", grant.maxInputBytesPerRequest)
                 addProperty("maximumOutputBytes", AiAgentContract.MAX_MODEL_OUTPUT_BYTES)
                 addProperty("maximumResponseSchemaBytes", AiAgentContract.MAX_RESPONSE_SCHEMA_BYTES)
+                addProperty(AiAgentContract.MODEL_INFO_TOOL_CALLING_VERSION, AiAgentContract.MODEL_TOOL_CALLING_VERSION)
+                addProperty("maximumToolRounds", AiAgentContract.MAX_MODEL_TOOL_ROUNDS)
+                addProperty("maximumToolResultBytes", AiAgentContract.MAX_MODEL_TOOL_RESULT_BYTES)
+                addProperty("maximumToolResultBatchBytes", AiAgentContract.MAX_MODEL_TOOL_RESULTS_BYTES)
             }
             putString(AiAgentContract.KEY_MODEL_BROKER_INFO_JSON, info.toString())
             putString(HostCapabilityContract.KEY_GRANT_JSON, JsonObject().apply {
@@ -101,6 +108,15 @@ internal class AiAgentModelBroker(
     override fun listTargets(request: Bundle?, callback: IAiAgentModelCallback?) = submit(request, callback, catalogOnly = true)
 
     override fun generate(request: Bundle?, callback: IAiAgentModelCallback?) = submit(request, callback, catalogOnly = false)
+
+    override fun submitToolResults(request: Bundle?) {
+        try { enforceCaller() } catch (failure: Exception) { closeBundleDescriptor(request); throw failure }
+        val payload = takePayload(request, AiAgentContract.KEY_MODEL_REQUEST_JSON, allowDescriptor = true)
+        val id = payload.correlationId ?: payload.inline?.let(AiAgentModelRequests::recoverId).orEmpty()
+        val operation = operations.keys.singleOrNull { it.requestId == id }
+        if (operation == null || !operation.claimToolSubmission()) { payload.close(); operation?.fail(AiAgentContract.ERROR_INVALID_REQUEST); return }
+        operation.submitTools(payload)
+    }
 
     override fun cancel(ref: Bundle?) {
         try { enforceCaller() } catch (failure: Exception) { closeBundleDescriptor(ref); throw failure }
@@ -191,6 +207,16 @@ internal class AiAgentModelBroker(
         private var usage: AiPluginUsage? = null
         private var outputBytes = 0L
         private var chunkSequence = 0L
+        private var toolRound = 0
+        private var pendingToolIds = emptySet<String>()
+        private var toolSubmissionClaimed = false
+        private var toolOutputBytes = 0L
+        private var toolResultBytes = 0L
+        private var cumulativeInputBytes = 0L
+        private var chargedTokens = 0L
+        private var contextLimit = 0L
+        private var usageUpdated = false
+        private var submittedPayload: Payload? = null
         private val deathRecipient = IBinder.DeathRecipient { abandon() }
 
         fun isFinished(): Boolean = synchronized(lock) { finished }
@@ -281,7 +307,8 @@ internal class AiAgentModelBroker(
                 return fail(AiAgentContract.ERROR_TARGET_UNAVAILABLE)
             }
             if ((decoded.responseSchemaJson != null && AiProviderCapabilityId.STRUCTURED_JSON !in target.capabilityIds) ||
-                (decoded.stream && AiProviderCapabilityId.STREAMING !in target.capabilityIds)) {
+                (decoded.stream && AiProviderCapabilityId.STREAMING !in target.capabilityIds) ||
+                (decoded.tools.isNotEmpty() && AiProviderCapabilityId.TOOLS !in target.capabilityIds)) {
                 return fail(AiAgentContract.ERROR_TARGET_UNSUPPORTED)
             }
             if (decoded.inputBytes > target.maximumContextBytes) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
@@ -290,26 +317,32 @@ internal class AiAgentModelBroker(
                     remainingTimeout(decoded.timeoutMs),
                     maximumOutputBytes = minOf(AiAgentContract.MAX_MODEL_OUTPUT_BYTES.toLong(), target.maximumOutputBytes),
                     maximumOutputTokens = decoded.maximumOutputTokens, temperature = decoded.temperature,
-                    responseSchemaJson = decoded.responseSchemaJson)
+                    responseSchemaJson = decoded.responseSchemaJson, tools = decoded.tools,
+                    maximumToolRounds = decoded.maximumToolRounds)
             } catch (_: Exception) { return fail(AiAgentContract.ERROR_INVALID_REQUEST) }
             synchronized(lock) {
                 if (finished) return
                 reservation = quota.reserve(requestId, decoded.inputBytes, decoded.maximumOutputTokens)
                 if (!reservation) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+                cumulativeInputBytes = decoded.inputBytes
+                contextLimit = minOf(target.maximumContextBytes, grant.maxInputBytesPerRequest.toLong())
             }
             synchronized(lock) {
                 if (finished) return
                 try {
-                    if (decoded.stream) {
-                        install(streamRunner.startStream(actualRequest) { providerEvent -> enqueue(this) {
+                    if (decoded.stream || decoded.tools.isNotEmpty()) {
+                        val listener: (AiPluginStreamEvent) -> Unit = { providerEvent -> enqueue(this) {
                             when (providerEvent) {
                                 is AiPluginStreamEvent.Opened -> Unit
                                 is AiPluginStreamEvent.Chunk -> chunk(providerEvent.text)
-                                is AiPluginStreamEvent.Usage -> synchronized(lock) { if (!finished) usage = providerEvent.usage }
+                                is AiPluginStreamEvent.Usage -> updateUsage(providerEvent.usage)
+                                is AiPluginStreamEvent.ToolCalls -> toolCalls(providerEvent.calls)
                                 is AiPluginStreamEvent.Completed -> complete(providerEvent.text, providerEvent.usage, providerEvent.finishReason)
                                 is AiPluginStreamEvent.Failed -> fail(providerEvent.failure.agentModelError(), providerEvent.failure.name)
                             }
-                        } })
+                        } }
+                        install(if (decoded.tools.isNotEmpty()) toolRunner.startTools(actualRequest, decoded.stream, listener)
+                            else streamRunner.startStream(actualRequest, listener))
                     } else {
                         install(askRunner.start(actualRequest) { outcome -> enqueue(this) {
                             when (outcome) {
@@ -324,6 +357,84 @@ internal class AiAgentModelBroker(
 
         private fun remainingTimeout(timeout: Long): Long =
             (timeout - (SystemClock.elapsedRealtime() - startedAt)).coerceAtLeast(1_000)
+
+        private fun updateUsage(next: AiPluginUsage): Unit = synchronized(lock) {
+            if (finished) return
+            usage = next
+            usageUpdated = true
+            // A Provider may report this round's usage after publishing its calls.
+            if (!reservation && pendingToolIds.isNotEmpty()) {
+                val settled = quota.settleCumulative(requestId, next, cumulativeInputBytes,
+                    outputBytes + toolOutputBytes, chargedTokens, releaseReservation = false)
+                chargedTokens = settled.second
+                if (!settled.first) fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+            }
+            if (!finished && request?.tools?.isNotEmpty() == true) {
+                emit(AiAgentContract.MODEL_EVENT_USAGE, JsonObject().apply { add("usage", usageJson(next)) })
+            }
+        }
+
+        private fun toolCalls(calls: List<AiPluginToolCall>): Unit = synchronized(lock) {
+            if (finished) return
+            val decoded = request ?: return fail(AiAgentContract.ERROR_INVALID_REQUEST)
+            if (calls.isEmpty() || calls.size > org.autojs.plugin.ai.provider.api.AiProviderLimits.MAX_OUTSTANDING_TOOL_CALLS ||
+                calls.map { it.callId }.distinct().size != calls.size || pendingToolIds.isNotEmpty() ||
+                toolRound >= decoded.maximumToolRounds || calls.any { call -> decoded.tools.none { it.name == call.name } }) {
+                return fail(AiAgentContract.ERROR_INVALID_REQUEST)
+            }
+            toolOutputBytes += calls.sumOf { it.argumentsJson.toByteArray(Charsets.UTF_8).size.toLong() }
+            if (!settle()) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+            toolRound += 1
+            pendingToolIds = calls.mapTo(linkedSetOf()) { it.callId }
+            toolSubmissionClaimed = false
+            emit(AiAgentContract.MODEL_EVENT_TOOL_CALLS, JsonObject().apply {
+                addProperty("round", toolRound)
+                add("calls", JsonArray().apply { calls.forEach { call -> add(JsonObject().apply {
+                    addProperty("callId", call.callId); addProperty("name", call.name)
+                    add("arguments", com.google.gson.JsonParser.parseString(call.argumentsJson))
+                }) } })
+                usage?.let { add("usage", usageJson(it)) }
+            })
+        }
+
+        fun claimToolSubmission(): Boolean = synchronized(lock) {
+            if (finished || pendingToolIds.isEmpty() || toolSubmissionClaimed) false
+            else { toolSubmissionClaimed = true; true }
+        }
+
+        fun submitTools(incoming: Payload) {
+            synchronized(lock) {
+                if (finished) { incoming.close(); return }
+                submittedPayload = incoming
+            }
+            try { worker.execute {
+                try {
+                    val submitted = AiAgentModelRequests.toolResults(incoming.read(::isFinished))
+                    synchronized(lock) {
+                        if (finished) return@execute
+                        if (submitted.requestId != requestId || submitted.round != toolRound ||
+                            submitted.results.map { it.callId }.toSet() != pendingToolIds) {
+                            return@execute fail(AiAgentContract.ERROR_INVALID_REQUEST)
+                        }
+                        val decoded = checkNotNull(request)
+                        toolResultBytes += submitted.inputBytes
+                        val inputBytes = decoded.inputBytes + outputBytes + toolOutputBytes + toolResultBytes
+                        if (inputBytes > contextLimit) return@execute fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+                        reservation = quota.reserve(requestId, inputBytes, decoded.maximumOutputTokens)
+                        if (!reservation) return@execute fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+                        cumulativeInputBytes += inputBytes
+                        usageUpdated = false
+                        if (handle?.submitToolResults(submitted.results) != true) return@execute fail(AiAgentContract.ERROR_INVALID_REQUEST)
+                        pendingToolIds = emptySet()
+                    }
+                } catch (failure: AiAgentModelException) { fail(failure.code)
+                } catch (_: Exception) { fail(AiAgentContract.ERROR_INVALID_REQUEST)
+                } finally {
+                    incoming.close()
+                    synchronized(lock) { if (submittedPayload === incoming) submittedPayload = null }
+                }
+            } } catch (_: RejectedExecutionException) { incoming.close(); fail(AiAgentContract.ERROR_RATE_LIMITED) }
+        }
 
         private fun install(next: AiPluginAskHandle): Unit = synchronized(lock) {
             if (finished) { next.cancel(); next.close() } else {
@@ -346,15 +457,12 @@ internal class AiAgentModelBroker(
             if (finished) return
             outputBytes = text.toByteArray(Charsets.UTF_8).size.toLong()
             usage = providerUsage
+            usageUpdated = true
+            if (pendingToolIds.isNotEmpty()) return fail(AiAgentContract.ERROR_INVALID_REQUEST)
             if (outputBytes > AiAgentContract.MAX_MODEL_OUTPUT_BYTES) return fail(AiAgentContract.ERROR_LIMIT_EXCEEDED)
             if (!settle()) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
             emit(AiAgentContract.MODEL_EVENT_USAGE, JsonObject().apply {
-                add("usage", JsonObject().apply {
-                    providerUsage.inputTokens?.let { addProperty("inputTokens", it) }
-                    providerUsage.outputTokens?.let { addProperty("outputTokens", it) }
-                    providerUsage.totalTokens?.let { addProperty("totalTokens", it) }
-                    providerUsage.durationMillis?.let { addProperty("durationMs", it) }
-                })
+                add("usage", usageJson(providerUsage))
             })
             finish(AiAgentContract.MODEL_EVENT_COMPLETED, JsonObject().apply {
                 addProperty("text", text)
@@ -384,7 +492,10 @@ internal class AiAgentModelBroker(
         private fun settle(): Boolean {
             if (!reservation) return true
             reservation = false
-            return quota.settle(requestId, usage, request?.inputBytes ?: 0, outputBytes)
+            val result = quota.settleCumulative(requestId, if (usageUpdated) usage else null,
+                cumulativeInputBytes, outputBytes + toolOutputBytes, chargedTokens)
+            chargedTokens = result.second
+            return result.first
         }
 
         private fun emitStarted() {
@@ -421,6 +532,8 @@ internal class AiAgentModelBroker(
 
         private fun cleanup() {
             payload.close()
+            submittedPayload?.close()
+            submittedPayload = null
             deadline?.cancel(false)
             deadline = null
             handle?.let { runCatching { it.cancel() }; runCatching { it.close() } }
@@ -429,6 +542,13 @@ internal class AiAgentModelBroker(
             watching = false
             operations.remove(this)
         }
+    }
+
+    private fun usageJson(usage: AiPluginUsage) = JsonObject().apply {
+        usage.inputTokens?.let { addProperty("inputTokens", it) }
+        usage.outputTokens?.let { addProperty("outputTokens", it) }
+        usage.totalTokens?.let { addProperty("totalTokens", it) }
+        usage.durationMillis?.let { addProperty("durationMs", it) }
     }
 
     private fun eventBundle(json: JsonObject): Bundle {

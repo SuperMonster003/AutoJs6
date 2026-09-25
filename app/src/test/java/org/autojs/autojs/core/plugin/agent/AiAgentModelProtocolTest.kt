@@ -62,10 +62,55 @@ class AiAgentModelProtocolTest {
         assertNull(failure.cause)
     }
 
-    @Test fun capabilityExtensionsAreExplicitlyUnsupportedInVersionOne() {
-        listOf("tools", "imageRefs").forEach { key ->
+    @Test fun imagesRemainUnsupportedAndToolDefinitionsRequireAnExplicitRoundLimit() {
+        listOf("imageRefs").forEach { key ->
             rejected(valid().apply { add(key, JsonParser.parseString("[]")) }.toString(), AiAgentContract.ERROR_TARGET_UNSUPPORTED)
         }
+        rejected(valid().apply { add("tools", JsonParser.parseString("[]")) }.toString())
+        val toolRequest = valid().apply {
+            add("tools", JsonParser.parseString("""[{"name":"ui_read","description":"Private description","inputSchema":{"type":"object"}}]"""))
+            addProperty("maximumToolRounds", 16)
+        }
+        val decoded = decode(toolRequest.toString())
+        assertEquals(16, decoded.maximumToolRounds)
+        assertEquals("ui_read", decoded.tools.single().name)
+        assertTrue(decoded.inputBytes > decode(valid().toString()).inputBytes)
+        assertFalse(decoded.toString().contains("Private"))
+        listOf(0, 17, -1).forEach { rounds -> rejected(toolRequest.deepCopy().apply { addProperty("maximumToolRounds", rounds) }.toString()) }
+        rejected(toolRequest.deepCopy().apply { remove("maximumToolRounds") }.toString())
+        rejected(toolRequest.deepCopy().apply { getAsJsonArray("tools").add(getAsJsonArray("tools")[0].deepCopy()) }.toString())
+        rejected(toolRequest.deepCopy().apply { addProperty("maximumToolRounds", 1.5) }.toString())
+    }
+
+    @Test fun toolResultEnvelopesAreBoundedTypedAndContentFreeInDiagnostics() {
+        val value = """{"requestId":"r","round":1,"results":[{"callId":"call-1","output":"private-output","isError":true}]}"""
+        val decoded = AiAgentModelRequests.toolResults(value)
+        assertEquals("r", decoded.requestId)
+        assertTrue(decoded.results.single().isError)
+        assertFalse(decoded.toString().contains("private"))
+        assertFalse(decoded.results.single().toString().contains("private"))
+        listOf(value.replace("\"round\":1", "\"round\":0"), value.replace("true", "\"true\""),
+            value.replace("\"private-output\"", "{}"), value.replace("call-1", "call\\n1"),
+            value.replace("private-output", "x".repeat(65537))).forEach { invalid ->
+            assertThrows(AiAgentModelException::class.java) { AiAgentModelRequests.toolResults(invalid) }
+        }
+    }
+
+    @Test fun nativeRoundUsageReplacesEstimatesAndChargesEveryContinuationAgainstRateLimit() {
+        val quota = AiAgentModelQuota(3, 1000) { 0 }
+        assertTrue(quota.reserve("native", 100, 10))
+        val first = quota.settleCumulative("native", null, 100, 10, 0)
+        assertEquals(44L, first.second)
+        val lateUsage = quota.settleCumulative("native", AiPluginUsage(10, 5, 15, null), 100, 10,
+            first.second, releaseReservation = false)
+        assertEquals(15L, quota.consumedTokens())
+        assertTrue(quota.reserve("native", 120, 10))
+        val second = quota.settleCumulative("native", AiPluginUsage(20, 10, 30, null), 220, 20, lateUsage.second)
+        assertEquals(30L, quota.consumedTokens())
+        assertTrue(quota.reserve("native", 140, 10))
+        assertTrue(quota.settleCumulative("native", AiPluginUsage(30, 15, 45, null), 360, 30, second.second).first)
+        assertEquals(45L, quota.consumedTokens())
+        assertFalse(quota.reserve("native", 1, 1))
     }
 
     @Test fun inputAndSchemaByteLimitsRejectBeforeProviderInvocation() {

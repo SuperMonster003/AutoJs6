@@ -23,6 +23,9 @@ import org.autojs.plugin.ai.provider.api.AiProviderProtocol
 import org.autojs.plugin.ai.provider.api.AiProviderRequest
 import org.autojs.plugin.ai.provider.api.AiToolCall
 import org.autojs.plugin.ai.provider.api.AiToolCallBatch
+import org.autojs.plugin.ai.provider.api.AiToolDefinition
+import org.autojs.plugin.ai.provider.api.AiToolResult
+import org.autojs.plugin.ai.provider.api.AiToolResultBatch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
@@ -1815,9 +1818,72 @@ class AiProviderSessionTest {
         }
     }
 
-    private fun activeHarness(stream: Boolean): ActiveHarness {
+    @Test
+    fun nativeToolsMaterializeDescriptorsAndResumeOnlyWithTheMatchingBatch() {
+        val active = activeHarness(stream = false, toolRounds = 2)
+        val owned = RecordingDescriptorLease(1) { _, _ -> "{\"private\":true}".toByteArray() }
+        val incoming = RecordingIncomingDescriptors(1, owned)
+        active.dispatch.callback.onToolCalls(PROVIDER_UID, AiProviderCodec.encodeToolCallBatch(AiToolCallBatch(
+            listOf(AiToolCall("call-1", "lookup", descriptorJsonPayload(0, 16))))), incoming)
+        active.harness.drain()
+        val calls = active.harness.events.last() as AiProviderSessionEvent.ToolCalls
+        assertEquals("{\"private\":true}", calls.calls.single().argumentsJson)
+        assertFalse(calls.toString().contains("private"))
+        assertEquals(1, owned.readCount.get())
+        assertEquals(1, owned.closeCount.get())
+        val results = AiToolResultBatch(listOf(AiToolResult("call-1", textPayload("result"))))
+        assertTrue(active.harness.policy.submitToolResults(results))
+        assertFalse(active.harness.policy.submitToolResults(results))
+        active.harness.drain()
+        assertEquals(1, active.remote.toolResults.size)
+        assertEquals(results, AiProviderCodec.decodeToolResultBatch(active.remote.toolResults.single()))
+        active.dispatch.callback.onCompleted(PROVIDER_UID, completionEnvelope(textPayload("done")),
+            RecordingIncomingDescriptors(0, RecordingDescriptorLease(0)))
+        active.harness.drain()
+        assertTrue(active.harness.events.last() is AiProviderSessionEvent.Completed)
+    }
+
+    @Test
+    fun nativeToolsRejectWrongResultsReplayAndCompletionBeforeResults() {
+        for (invalid in listOf("wrong-result", "replayed-call", "early-completion", "extra-round")) {
+            val active = activeHarness(stream = false, toolRounds = if (invalid == "extra-round") 1 else 2)
+            fun emitCall(id: String) {
+                active.dispatch.callback.onToolCalls(PROVIDER_UID, AiProviderCodec.encodeToolCallBatch(AiToolCallBatch(
+                    listOf(AiToolCall(id, "lookup", jsonPayload("{}"))))), RecordingIncomingDescriptors(0, RecordingDescriptorLease(0)))
+                active.harness.drain()
+            }
+            emitCall("call-1")
+            if (invalid == "early-completion") {
+                active.dispatch.callback.onCompleted(PROVIDER_UID, completionEnvelope(textPayload("done")),
+                    RecordingIncomingDescriptors(0, RecordingDescriptorLease(0)))
+            } else {
+                assertTrue(active.harness.policy.submitToolResults(AiToolResultBatch(listOf(
+                    AiToolResult(if (invalid == "wrong-result") "wrong" else "call-1", textPayload("result"))))))
+                active.harness.drain()
+                if (invalid != "wrong-result") emitCall(if (invalid == "extra-round") "call-2" else "call-1")
+            }
+            active.harness.drain()
+            assertTrue(active.harness.events.last() is AiProviderSessionEvent.Rejected)
+            assertEquals(1, active.remote.cancelCount.get())
+        }
+    }
+
+    @Test
+    fun cancellationDiscardsQueuedToolResultsBeforeRemoteSubmission() {
+        val active = activeHarness(stream = false, toolRounds = 1)
+        active.dispatch.callback.onToolCalls(PROVIDER_UID, AiProviderCodec.encodeToolCallBatch(AiToolCallBatch(
+            listOf(AiToolCall("call-1", "lookup", jsonPayload("{}"))))), RecordingIncomingDescriptors(0, RecordingDescriptorLease(0)))
+        active.harness.drain()
+        assertTrue(active.harness.policy.submitToolResults(AiToolResultBatch(listOf(AiToolResult("call-1", textPayload("result"))))))
+        assertTrue(active.harness.policy.cancel())
+        active.harness.drain()
+        assertTrue(active.remote.toolResults.isEmpty())
+        assertEquals(AiProviderSessionEvent.Cancelled, active.harness.events.last())
+    }
+
+    private fun activeHarness(stream: Boolean, toolRounds: Int = 0): ActiveHarness {
         val lane = ManualExecutor()
-        val request = request(stream = stream)
+        val request = request(stream = stream, toolRounds = toolRounds)
         val harness = harness(request = request, lane = lane)
         val dispatch = harness.policy.beginOpen() as AiProviderSessionOpenDecision.Dispatch
         dispatch.callback.onStarted(PROVIDER_UID, startedEnvelope(request))
@@ -1888,6 +1954,7 @@ class AiProviderSessionTest {
         reportUsage: Boolean = false,
         maximumOutputTokens: Long? = null,
         payload: AiPayloadReference = textPayload("hello"),
+        toolRounds: Int = 0,
     ) = AiProviderRequest(
         requestId = "request-session",
         protocolVersion = AiProviderProtocol.PROTOCOL_V2,
@@ -1906,9 +1973,10 @@ class AiProviderSessionTest {
             reportUsage = reportUsage,
             maximumOutputBytes = 4_096,
             maximumOutputTokens = maximumOutputTokens,
-            maximumToolRounds = 0,
+            maximumToolRounds = toolRounds,
             timeoutMillis = 30_000,
         ),
+        tools = if (toolRounds > 0) listOf(AiToolDefinition("lookup", "Lookup", jsonPayload("{\"type\":\"object\"}"))) else emptyList(),
     )
 
     private fun startedEnvelope(request: AiProviderRequest): ByteArray = AiProviderCodec.encodeSessionStarted(
@@ -1920,7 +1988,7 @@ class AiProviderSessionTest {
             targetId = request.targetId,
             firstChunkSequence = 0,
             effectiveMaximumOutputBytes = request.options.maximumOutputBytes,
-            effectiveMaximumToolRounds = 0,
+            effectiveMaximumToolRounds = request.options.maximumToolRounds,
         ),
     )
 
@@ -2275,6 +2343,7 @@ class AiProviderSessionTest {
         private val onClose: () -> Unit = {},
     ) : AiProviderSessionRemote {
         val creditGrants: MutableList<Int> = Collections.synchronizedList(mutableListOf())
+        val toolResults: MutableList<ByteArray> = Collections.synchronizedList(mutableListOf())
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 
@@ -2282,6 +2351,8 @@ class AiProviderSessionTest {
             creditGrants += count
             onGrant(count)
         }
+
+        override fun submitToolResults(envelope: ByteArray) { toolResults += envelope.copyOf() }
 
         override fun cancel() {
             cancelCount.incrementAndGet()

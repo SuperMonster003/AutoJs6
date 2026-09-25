@@ -138,6 +138,7 @@ internal class AiPluginStreamRuntime(
                 is AiPluginStreamEvent.Usage -> dispatchNonTerminal {
                     controller.usage(event.usage.toPluginPublicValue())
                 }
+                is AiPluginStreamEvent.ToolCalls -> failLocally()
                 is AiPluginStreamEvent.Completed -> finishNaturally {
                     controller.complete(completion(event))
                 }

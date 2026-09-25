@@ -142,7 +142,7 @@ class AiAgentGrantConformanceTest {
         val wrongCapability = HostCapabilityBrokerStub(core, Process.myUid())
         val model = model(grant(), expectedUid = Process.myUid())
         val results = driver.probeUnauthorized(wrongCapability, model.broker)
-        assertEquals(8, results.size())
+        assertEquals(9, results.size())
         results.keySet().forEach { assertTrue(it, results.getBoolean(it)) }
         assertFalse(core.isDestroyed)
         assertTrue(JSONObject(model.broker.brokerInfo.getString(C.KEY_MODEL_BROKER_INFO_JSON)!!).getBoolean("available"))
@@ -158,6 +158,39 @@ class AiAgentGrantConformanceTest {
         assertEquals("completed", generate(bounded, "at-limit", "界界").getString("type"))
         assertEquals(C.ERROR_QUOTA_EXCEEDED, generate(bounded, "rate", "ok").getString("code"))
         assertEquals(1, bounded.calls.get())
+    }
+
+    @Test fun appendedToolResultTransactionResumesAnAuthorizedForeignUidGeneration() {
+        val fixture = model(grant(), nativeTools = true)
+        val events = CopyOnWriteArrayList<JSONObject>()
+        val pending = CountDownLatch(1)
+        val terminal = CountDownLatch(1)
+        val callback = object : IAiAgentModelCallback.Stub() {
+            override fun onEvent(event: Bundle) {
+                assertEquals(fixtureUid, Binder.getCallingUid())
+                val value = JSONObject(event.getString(C.KEY_MODEL_EVENT_JSON)!!)
+                events += value
+                if (value.getString("type") == C.MODEL_EVENT_TOOL_CALLS) pending.countDown()
+                if (value.getString("type") in setOf("failed", "completed", "cancelled")) terminal.countDown()
+            }
+        }
+        fun payload(json: String) = Bundle().apply {
+            putInt(C.KEY_CONTRACT_VERSION, C.CONTRACT_VERSION)
+            putString(C.KEY_MODEL_REQUEST_JSON, json)
+        }
+        driver.model(fixture.broker, "generate", payload("""{"requestId":"native-binder","targetId":"local:fixture","messages":[{"role":"user","content":"synthetic"}],"maximumOutputTokens":100,"maximumToolRounds":1,"tools":[{"name":"ui_read","description":"Read fixture","inputSchema":{"type":"object"}}]}"""), callback)
+        assertTrue("Native call did not cross the callback Binder", pending.await(10, TimeUnit.SECONDS))
+        val call = events.single { it.getString("type") == C.MODEL_EVENT_TOOL_CALLS }
+        assertEquals("native-call", call.getJSONArray("calls").getJSONObject(0).getString("callId"))
+        assertEquals(1, call.getInt("round"))
+        driver.model(fixture.broker, "submitToolResults", payload("""{"requestId":"native-binder","round":1,"results":[{"callId":"native-call","output":"observed"}]}"""), callback)
+        assertTrue("Native result did not resume the original callback", terminal.await(10, TimeUnit.SECONDS))
+        assertEquals(listOf("started", "tool_calls", "usage", "completed"), events.map { it.getString("type") })
+        assertEquals((1..events.size).toList(), events.map { it.getInt("sequence") })
+        assertTrue(events.all { it.getString("requestId") == "native-binder" })
+        assertEquals("native-result:observed", events.last().getString("text"))
+        assertEquals(2, fixture.calls.get())
+        assertEquals(1, fixture.catalogs.get())
     }
 
     @Test fun tokenReservationsAndSettlementCannotExceedTheLinkGrant() {
@@ -247,12 +280,14 @@ class AiAgentGrantConformanceTest {
         fun bridge(): NodeBridgeResponse = NodeBridgeResponse.fromJson(await().getString(H.KEY_BRIDGE_RESPONSE_JSON)!!)
     }
     private class ModelFixture(val broker: AiAgentModelBroker, val calls: AtomicInteger, val catalogs: AtomicInteger)
-    private fun model(grant: HostCapabilityGrant, usage: Long = 1, expectedUid: Int = fixtureUid): ModelFixture {
+    private fun model(grant: HostCapabilityGrant, usage: Long = 1, expectedUid: Int = fixtureUid,
+                      nativeTools: Boolean = false): ModelFixture {
         val calls = AtomicInteger()
         val catalogs = AtomicInteger()
         val component = AiProviderComponent(FIXTURE, "$FIXTURE.NotARealProvider")
         val target = AiPluginTargetSummary("local:fixture", "fake.agent", null, "fixture", "Fixture",
-            emptyList(), 0, 0, AiTargetAvailability.AVAILABLE, true, true, 1024 * 1024, 64 * 1024,
+            if (nativeTools) listOf(org.autojs.plugin.ai.provider.api.AiProviderCapabilityId.TOOLS) else emptyList(),
+            0, 0, AiTargetAvailability.AVAILABLE, true, true, 1024 * 1024, 64 * 1024,
             emptyList(), emptyList(), emptyList())
         fun handle() = object : AiPluginAskHandle { override fun cancel() = true; override fun close() = Unit }
         val broker = AiAgentModelBroker(context, expectedUid, grant, component, "fake.agent",
@@ -266,6 +301,20 @@ class AiAgentGrantConformanceTest {
                 catalogs.incrementAndGet()
                 callback(AiPluginCatalogOutcome.Completed(AiPluginCatalog(component, "fake.agent", "1", target.targetId, listOf(target))))
                 handle()
+            }, toolRunner = AiPluginToolRunner { _, _, callback ->
+                check(nativeTools)
+                calls.incrementAndGet()
+                callback(AiPluginStreamEvent.ToolCalls(listOf(AiPluginToolCall("native-call", "ui_read", "{}"))))
+                object : AiPluginAskHandle {
+                    override fun cancel() = true
+                    override fun close() = Unit
+                    override fun submitToolResults(results: List<AiPluginToolResult>): Boolean {
+                        calls.incrementAndGet()
+                        callback(AiPluginStreamEvent.Completed("native-result:${results.single().output}", "",
+                            AiPluginUsage(null, null, 2, null), 0, target))
+                        return true
+                    }
+                }
             })
         cleanup += { broker.close() }
         return ModelFixture(broker, calls, catalogs)

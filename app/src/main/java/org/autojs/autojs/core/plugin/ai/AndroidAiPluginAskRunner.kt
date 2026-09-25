@@ -80,9 +80,13 @@ internal fun aiProviderPluginCapabilityRequirement(
         if (persistentSession) add(AiProviderCapabilityId.PERSISTENT_SESSION)
         if (request.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
         if (request.includeReasoning) add(AiProviderCapabilityId.REASONING)
+        if (request.tools.isNotEmpty()) add(AiProviderCapabilityId.TOOLS)
     },
     minimumMessages = request.messages.size,
     minimumContentParts = request.messages.size,
+    minimumToolDefinitions = request.tools.size,
+    minimumToolRounds = request.maximumToolRounds,
+    minimumOutstandingToolCalls = if (request.tools.isNotEmpty()) 1 else 0,
     minimumContextBytes = request.inputBytes,
     minimumOutputBytes = 1L,
     minimumRequestDescriptors = 0,
@@ -91,7 +95,7 @@ internal fun aiProviderPluginCapabilityRequirement(
         add(AiProviderMimeType.PLAIN)
         if (request.structuredJson) add(AiProviderMimeType.JSON)
     },
-    requiredSchemaMimeTypes = if (request.structuredJson) {
+    requiredSchemaMimeTypes = if (request.structuredJson || request.tools.isNotEmpty()) {
         setOf(AiProviderMimeType.JSON)
     } else {
         emptySet()
@@ -105,6 +109,7 @@ internal fun aiProviderPluginCapabilityRequirement(
 internal class AndroidAiPluginAskRunner private constructor(
     private val applicationContext: Context,
 ) : AiPluginAskRunner,
+    AiPluginToolRunner,
     AiPluginStreamRunner,
     AiPluginCatalogRunner,
     AiPluginSessionRunner {
@@ -118,6 +123,9 @@ internal class AndroidAiPluginAskRunner private constructor(
         request: AiPluginAskRequest,
         onEvent: (AiPluginStreamEvent) -> Unit,
     ): AiPluginAskHandle = processBackend(applicationContext).startStream(request, onEvent)
+
+    override fun startTools(request: AiPluginAskRequest, stream: Boolean, onEvent: (AiPluginStreamEvent) -> Unit) =
+        processBackend(applicationContext).startTools(request, stream, onEvent)
 
     override fun listCatalog(
         request: AiPluginCatalogRequest,
@@ -135,6 +143,8 @@ internal class AndroidAiPluginAskRunner private constructor(
 
         fun createStream(context: Context): AiPluginStreamRunner =
             AndroidAiPluginAskRunner(context.applicationContext)
+
+        fun createTools(context: Context): AiPluginToolRunner = AndroidAiPluginAskRunner(context.applicationContext)
 
         fun createCatalog(context: Context): AiPluginCatalogRunner =
             AndroidAiPluginAskRunner(context.applicationContext)
@@ -162,6 +172,7 @@ internal class AndroidAiPluginAskRunner private constructor(
 private class ProcessAiPluginAskRunner(
     private val applicationContext: Context,
 ) : AiPluginAskRunner,
+    AiPluginToolRunner,
     AiPluginStreamRunner,
     AiPluginCatalogRunner,
     AiPluginSessionRunner {
@@ -253,6 +264,15 @@ private class ProcessAiPluginAskRunner(
             onOutcome = null,
             onStreamEvent = onEvent,
         ).also(Attempt::start)
+    }
+
+    override fun startTools(request: AiPluginAskRequest, stream: Boolean, onEvent: (AiPluginStreamEvent) -> Unit): AiPluginAskHandle {
+        require(request.tools.isNotEmpty())
+        if (!admission.compareAndSet(false, true)) {
+            deliver { onEvent(AiPluginStreamEvent.Failed(AiPluginAskFailure.BUSY)) }
+            return CompletedAiPluginAskHandle
+        }
+        return Attempt(this, request, stream, null, onEvent).also(Attempt::start)
     }
 
     override fun listCatalog(
@@ -354,6 +374,10 @@ private class ProcessAiPluginAskRunner(
         private var deadlineHandle: Closeable? = null
 
         fun start() {
+            if (request.tools.isNotEmpty() && (onStreamEvent == null || onSessionOpen != null)) {
+                fail(AiPluginAskFailure.INVALID_REQUEST)
+                return
+            }
             val deadline = try {
                 backend.schedule(request.timeoutMillis) {
                     fail(AiPluginAskFailure.TIMED_OUT)
@@ -372,6 +396,12 @@ private class ProcessAiPluginAskRunner(
 
         override fun cancel(): Boolean =
             fail(AiPluginAskFailure.CANCELLED)
+
+        override fun submitToolResults(results: List<AiPluginToolResult>): Boolean {
+            val batch = try { results.toProtocolToolResults() } catch (_: Exception) { return false }
+            val session = synchronized(lock) { if (terminal) null else stageHandle as? AiProviderSessionRunHandle }
+            return session?.submitToolResults(batch) ?: false
+        }
 
         override fun close() {
             cancel()
@@ -639,6 +669,7 @@ private class ProcessAiPluginAskRunner(
                     providerId = request.providerId,
                     targetId = plan.targetId,
                     messages = protocolMessages,
+                    tools = request.tools,
                     options = request.toGenerationOptions(
                         stream = streaming,
                         maximumOutputBytes = outputLimit,
@@ -687,7 +718,7 @@ private class ProcessAiPluginAskRunner(
                     AiProviderSessionEvent.Disabled ->
                         terminalSession(AiPluginAskFailure.INTERNAL_FAILURE)
                     is AiProviderSessionEvent.Started -> {
-                        if (streaming) {
+                        if (onStreamEvent != null) {
                             publish(AiPluginStreamEvent.Opened(requireNotNull(resolvedTarget)))
                         }
                     }
@@ -705,8 +736,9 @@ private class ProcessAiPluginAskRunner(
                     }
                     is AiProviderSessionEvent.Usage -> {
                         val usage = transcript.usage.toPluginUsage()
-                        if (streaming) publish(AiPluginStreamEvent.Usage(usage))
+                        if (onStreamEvent != null) publish(AiPluginStreamEvent.Usage(usage))
                     }
+                    is AiProviderSessionEvent.ToolCalls -> publish(AiPluginStreamEvent.ToolCalls(transcript.calls))
                     is AiProviderSessionEvent.Completed -> {
                         val usage = transcript.result.finalUsage?.toPluginUsage()
                         if (usage == null) {
@@ -739,7 +771,7 @@ private class ProcessAiPluginAskRunner(
         }
 
         private fun publish(event: AiPluginStreamEvent) {
-            if (!streaming || !isActive()) return
+            if (onStreamEvent == null || !isActive()) return
             checkNotNull(onStreamEvent).invoke(event)
         }
 
@@ -817,7 +849,7 @@ private class ProcessAiPluginAskRunner(
                     }
                     runCatching { checkNotNull(onCatalog).invoke(catalogOutcome) }
                 }
-                streaming -> {
+                onStreamEvent != null -> {
                     val event = when (outcome) {
                         is AiPluginAskOutcome.Completed ->
                             AiPluginStreamEvent.Completed(

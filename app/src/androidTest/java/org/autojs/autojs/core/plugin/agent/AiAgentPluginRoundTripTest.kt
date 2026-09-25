@@ -79,6 +79,7 @@ class AiAgentPluginRoundTripTest {
         }
         override fun cancel(reference: Bundle?) { cancelled.incrementAndGet() }
         override fun destroy(reason: Bundle?) = Unit
+        override fun submitToolResults(request: Bundle?) { error("Scripted JSON model does not advertise tool calling") }
     }
     private fun attach(api: IAiAgentPlugin, model: IAiAgentModelBroker, broker: IHostCapabilityBroker, config: JSONObject = JSONObject()): IAiAgentLink =
         api.attach(bundle(C.KEY_LINK_CONFIG_JSON, config), model, broker, object : IAiAgentLinkCallback.Stub() {

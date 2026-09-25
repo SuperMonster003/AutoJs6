@@ -105,6 +105,7 @@ class AiAgentAidlOrderTest {
                     "void generate(in Bundle request, IAiAgentModelCallback callback)",
                     "void cancel(in Bundle ref)",
                     "void destroy(in Bundle reason)",
+                    "void submitToolResults(in Bundle request)",
                 ),
             ),
             "IAiAgentModelCallback.aidl" to Declaration(

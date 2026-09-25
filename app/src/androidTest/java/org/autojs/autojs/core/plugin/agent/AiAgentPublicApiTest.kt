@@ -55,6 +55,7 @@ class AiAgentPublicApiTest {
         fun finish(value: JSONObject = done()) { held?.let { (id,cb) -> event(cb,id,"completed",2,JSONObject().put("text",value.toString()).put("targetId","conformance:scripted").put("finishReason",0)) } }
         override fun cancel(reference: Bundle?) { cancellations.incrementAndGet() }
         override fun destroy(reason: Bundle?) = Unit
+        override fun submitToolResults(request: Bundle?) { error("Scripted JSON model does not advertise tool calling") }
     }
     private fun withPlugin(model: Model, action: (AiAgentLinkController, File) -> Unit) {
         assumeTrue("Opt in: -e autojs.agent.plugin true", InstrumentationRegistry.getArguments().getString("autojs.agent.plugin").toBoolean())
