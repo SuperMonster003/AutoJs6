@@ -9,4 +9,6 @@ interface IBrokerConformanceDriver {
     void model(IBinder broker, String operation, in Bundle request, IBinder callback);
     Bundle probeUnauthorized(IBinder capability, IBinder model);
     void sendAttach(String identityMode, String marker, IBinder completion);
+    IBinder getPlugin();
+    Bundle control(String operation, int generation, in Bundle payload);
 }

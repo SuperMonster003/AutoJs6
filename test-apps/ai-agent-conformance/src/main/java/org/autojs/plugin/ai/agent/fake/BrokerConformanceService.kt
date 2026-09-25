@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 /** No permissions for device actions or network. Only the same-signer host can drive this APK. */
 class BrokerConformanceService : Service() {
     private val worker = Executors.newSingleThreadExecutor()
+    private val fakeAgent = FakeAgentEndpoint(::enforceHost)
     private fun enforceHost() {
         val packages = packageManager.getPackagesForUid(Binder.getCallingUid()).orEmpty()
         if (HOST !in packages || packageManager.checkSignatures(packageName, HOST) != PackageManager.SIGNATURE_MATCH) {
@@ -36,6 +37,12 @@ class BrokerConformanceService : Service() {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     private val binder = object : IBrokerConformanceDriver.Stub() {
+        override fun getPlugin(): IBinder { enforceHost(); return fakeAgent }
+        override fun control(operation: String, generation: Int, payload: Bundle): Bundle {
+            enforceHost()
+            // Do not inherit the host UID through a nested synchronous Binder transaction.
+            return worker.submit<Bundle> { fakeAgent.control(operation, generation, payload) }.get(5, TimeUnit.SECONDS)
+        }
         override fun getIdentity(): Bundle {
             enforceHost()
             return Bundle().apply {
@@ -120,7 +127,7 @@ class BrokerConformanceService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder = binder
-    override fun onDestroy() { worker.shutdownNow(); super.onDestroy() }
+    override fun onDestroy() { fakeAgent.close(); worker.shutdownNow(); super.onDestroy() }
 
     companion object { private const val HOST = "org.autojs.autojs6" }
 }

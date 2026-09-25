@@ -27,7 +27,15 @@ adb -s SERIAL shell am instrument -w -r -e autojs.aiAgent.grant.conformance.enab
 
 Use an isolated emulator. The log test displays a toast containing a randomly generated test marker. No screen taps, real model selection, network changes, orders or payments are required. Tests unbind the driver and destroy host brokers. The driver APK must be signed like the test host, as with the other repository conformance APKs.
 
-This first fixture increment covers the original P7 host grant matrix. The original P7 full fake Agent attach/startRun/hostile-callback scenarios and plugin-side fake host APK, and P1.3's pending cross-process attach/detach/death evidence, remain open. Passing this suite does not close those roadmap items, the six-device matrix or an E4 task acceptance.
+The driver also exposes a minimal fake IAiAgentPlugin/IAiAgentLink through `getPlugin`. Test-only `control` operations send deliberately faulty callbacks or terminate only this fixture process. The production host still pins discovery to the real plugin; instrumentation supplies this fixture's transport and UID to the real controller/registry without changing the production authorization policy.
+
+`AiAgentPeerConformanceTest` covers early startRun echo, malformed/oversized/version-mismatched link and run callbacks, run-ID/sequence/terminal fencing, retired generations, real transferred-descriptor closure and actual plugin-process death/rebinding without replay. Each controller binding owns a real unbind lease. Run with:
+
+```text
+adb -s SERIAL shell am instrument -w -r -e autojs.aiAgent.peer.conformance.enabled true -e class org.autojs.autojs.core.plugin.agent.AiAgentPeerConformanceTest org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+The reciprocal independent fake host is in the Agent repository's `test-apps:fake-host`, with its own instrumentation and guarded installation runner. It uses the real host package identity and must run only in a disposable AVD with separate data. See `docs/dev/evidence/ai-agent-p7-conformance-20260925.md` for this item's evidence and remaining gates. The six-device matrix and E4 acceptance are separate.
 
 ## Production-plugin lifecycle checks
 
@@ -41,7 +49,7 @@ python test-apps/ai-agent-conformance/run_host_death.py --adb PATH_TO_ADB --seri
 
 The driver waits for a durable checkpoint containing one running and two queued tasks, verifies the host PID, and sends SIGKILL to that host process only. The setup instrumentation is expected to abort. The plugin must survive and persist three `blocked / HOST_UNAVAILABLE` results. A second instrumentation process then verifies an empty queue, no task foreground service, no model replay, and successful completion of an explicitly requested new task. Only a passing second phase counts as acceptance. Logs stay in the specified local output directory; no private task bodies are printed.
 
-The other lifecycle cases use real plugin Binder death, a separate callback process, duplicate late replies after cancellation, real screen-off/keyguard state and real foreground-window changes. These are lifecycle checks of the production plugin; they do not implement the still-pending full fake Agent/fake host conformance item.
+The other lifecycle cases use real plugin Binder death, a separate callback process, duplicate late replies after cancellation, real screen-off/keyguard state and real foreground-window changes. These production-plugin checks complement the independent fake Agent/fake host suites above.
 
 ## Production-plugin performance baseline
 
