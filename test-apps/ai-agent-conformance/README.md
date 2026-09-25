@@ -42,3 +42,17 @@ python test-apps/ai-agent-conformance/run_host_death.py --adb PATH_TO_ADB --seri
 The driver waits for a durable checkpoint containing one running and two queued tasks, verifies the host PID, and sends SIGKILL to that host process only. The setup instrumentation is expected to abort. The plugin must survive and persist three `blocked / HOST_UNAVAILABLE` results. A second instrumentation process then verifies an empty queue, no task foreground service, no model replay, and successful completion of an explicitly requested new task. Only a passing second phase counts as acceptance. Logs stay in the specified local output directory; no private task bodies are printed.
 
 The other lifecycle cases use real plugin Binder death, a separate callback process, duplicate late replies after cancellation, real screen-off/keyguard state and real foreground-window changes. These are lifecycle checks of the production plugin; they do not implement the still-pending full fake Agent/fake host conformance item.
+
+## Production-plugin performance baseline
+
+The installed production plugin can also run the original P7 200-node baseline using the existing debug action surface. No conformance driver APK, Provider model or network is required:
+
+```text
+adb -s emulator-5586 shell am instrument -w -r -e autojs.agent.plugin true -e autojs.agent.actions true -e autojs.agent.performance true -e class org.autojs.autojs.core.plugin.agent.AiAgentPluginRoundTripTest#performanceBaselineForTwoHundredNodesAndOneTaskMemory org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Use a private, unlocked AVD with the host debug/test APKs and current Agent APK installed. The test verifies the emulator identity, force-stops the Agent before binding, temporarily enables host accessibility, and creates a grid of 200 real text controls. Every observation updates all controls; the production tool returns exactly 200 accessibility nodes, including structural nodes, and the next model request must contain the current frame's first cell. The normal query grant remains active.
+
+One task makes 35 `ui_dump` calls: one first-use sample, four further warmups, then 30 measured calls. Timing begins immediately before the fixed model decision is delivered and ends at the next model request, including both Binder directions, host traversal, plugin observation processing and context compilation. Host dispatch is also timed separately. Fixture updates, 120 ms query pacing and memory probes are outside the interval. The fixed model performs no inference and explicitly reports zero token usage. Warm p95 must be below 300 ms; the first-use sample and maximum are always reported separately, without a hard real-time claim.
+
+The same fresh plugin process is checked throughout. Private `/proc` counters provide baseline/final RSS and the kernel process high-water RSS; `dumpsys meminfo` samples PSS before the task, at model boundaries every five dumps, and after completion. PSS is a sampled peak, while high-water RSS includes process startup, loaded history and task services. This is not an attribution of all host/model memory to the task. The test restores accessibility services and finishes its fixture; preserve and restore the AVD's surrounding settings when running the suite manually.

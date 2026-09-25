@@ -44,7 +44,7 @@ class AiAgentPluginRoundTripTest {
         try { assertTrue("Plugin bind", latch.await(15, TimeUnit.SECONDS)); action(checkNotNull(api)) }
         finally { context.unbindService(connection) }
     }
-    private inner class ScriptedModel(private val decision: (Int, JSONObject) -> JSONObject?) : IAiAgentModelBroker.Stub() {
+    private inner class ScriptedModel(private val zeroUsage: Boolean = false, private val decision: (Int, JSONObject) -> JSONObject?) : IAiAgentModelBroker.Stub() {
         val calls = AtomicInteger()
         val cancelled = AtomicInteger()
         @Volatile var pending: Pair<String, IAiAgentModelCallback>? = null
@@ -74,7 +74,8 @@ class AiAgentPluginRoundTripTest {
             val text = try { decision(calls.getAndIncrement(), value) } catch (error: Throwable) {
                 failure = error; send(callback, id, "failed", 2, JSONObject().put("code", C.ERROR_MODEL_FAILED)); return
             } ?: return
-            send(callback, id, "completed", 2, JSONObject().put("text", text.toString()).put("targetId", "conformance:scripted").put("finishReason", 0))
+            if (zeroUsage) send(callback, id, "usage", 2, JSONObject().put("usage", JSONObject().put("inputTokens", 0).put("outputTokens", 0).put("totalTokens", 0)))
+            send(callback, id, "completed", if (zeroUsage) 3 else 2, JSONObject().put("text", text.toString()).put("targetId", "conformance:scripted").put("finishReason", 0))
         }
         override fun cancel(reference: Bundle?) { cancelled.incrementAndGet() }
         override fun destroy(reason: Bundle?) = Unit
@@ -756,6 +757,117 @@ class AiAgentPluginRoundTripTest {
         assumeTrue("Private unlocked AVD only: -e autojs.agent.lifecycle true",
             InstrumentationRegistry.getArguments().getString("autojs.agent.lifecycle").toBoolean())
         assertTrue("Do not run destructive lifecycle cases on real devices", Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk"))
+    }
+
+    /** Includes both Binder directions, real accessibility traversal and plugin context preparation. */
+    @Test fun performanceBaselineForTwoHundredNodesAndOneTaskMemory() {
+        assumeTrue("Opt in with -e autojs.agent.performance true", InstrumentationRegistry.getArguments().getString("autojs.agent.performance").toBoolean())
+        assertTrue("Private AVD only", Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk"))
+        shell("am force-stop $pluginPackage")
+        withPlugin { api -> withActionFixture { activity ->
+            val cells = mutableListOf<android.widget.TextView>()
+            instrumentation.runOnMainSync {
+                val grid = android.widget.LinearLayout(activity).apply {
+                    orientation = android.widget.LinearLayout.VERTICAL
+                    setPadding(0, 100, 0, 100)
+                }
+                repeat(20) { row ->
+                    val line = android.widget.LinearLayout(activity)
+                    repeat(10) { column ->
+                        val cell = android.widget.TextView(activity).apply {
+                            text = "Cell ${row * 10 + column}"; textSize = 9f
+                            importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                        }
+                        cells += cell
+                        line.addView(cell, android.widget.LinearLayout.LayoutParams(0, -1, 1f))
+                    }
+                    grid.addView(line, android.widget.LinearLayout.LayoutParams(-1, 0, 1f))
+                }
+                activity.setContentView(grid)
+            }
+            instrumentation.waitForIdleSync(); SystemClock.sleep(500)
+            val pid = shell("pidof $pluginPackage:agent").trim().toInt()
+            fun memory(): JSONObject {
+                val status = shell("run-as $pluginPackage cat /proc/$pid/status")
+                fun kb(name: String): Long = Regex("(?m)^$name:\\s+(\\d+)\\s+kB").find(status)?.groupValues?.get(1)?.toLong()
+                    ?: throw AssertionError("Missing process memory metric $name")
+                val info = shell("dumpsys meminfo $pid")
+                val pss = Regex("TOTAL PSS:\\s+(\\d+)").find(info)?.groupValues?.get(1)?.toLong()
+                    ?: Regex("(?m)^\\s*TOTAL\\s+(\\d+)").find(info)?.groupValues?.get(1)?.toLong()
+                    ?: throw AssertionError("Missing PSS")
+                return JSONObject().put("rssKb", kb("VmRSS")).put("hwmKb", kb("VmHWM")).put("pssKb", pss)
+            }
+            val baselineMemory = memory()
+            val memorySamples = mutableListOf(baselineMemory)
+            val roundTrips = mutableListOf<Double>()
+            val hostTimes = java.util.Collections.synchronizedList(mutableListOf<Double>())
+            val core = core(); val delegate = broker(core)
+            val callbackFailure = java.util.concurrent.atomic.AtomicReference<Throwable?>()
+            val measuredBroker = object : IHostCapabilityBroker.Stub() {
+                override fun getBrokerInfo() = delegate.brokerInfo
+                override fun destroy(reason: Bundle?) = delegate.destroy(reason)
+                override fun dispatch(request: Bundle, callback: IHostCapabilityCallback) {
+                    val value = JSONObject(request.getString(H.KEY_BRIDGE_REQUEST_JSON)!!)
+                    if (value.optString("module") != "accessibility" || value.optString("method") != "dump") { delegate.dispatch(request, callback); return }
+                    val began = SystemClock.elapsedRealtimeNanos()
+                    delegate.dispatch(request, object : IHostCapabilityCallback.Stub() {
+                        override fun onResponse(response: Bundle) {
+                            hostTimes.add((SystemClock.elapsedRealtimeNanos() - began) / 1e6)
+                            try {
+                                assertTrue(response.getBoolean(H.KEY_BRIDGE_RESPONSE_OK))
+                                val result = JSONObject(response.getString(H.KEY_BRIDGE_RESPONSE_JSON)!!).getJSONObject("result")
+                                assertEquals(200, result.getInt("nodeCount"))
+                                assertEquals(context.packageName, result.getString("packageName"))
+                            } catch (failure: Throwable) { callbackFailure.set(failure) }
+                            callback.onResponse(response)
+                        }
+                    })
+                }
+            }
+            var began = 0L
+            val totalDumps = 35 // One cold sample, four further warmups, thirty measured steps.
+            val model = ScriptedModel(zeroUsage = true) { step, request ->
+                if (step > 0) {
+                    roundTrips += (SystemClock.elapsedRealtimeNanos() - began) / 1e6
+                    callbackFailure.get()?.let { throw AssertionError("Real host dump", it) }
+                    val current = observation(request).getJSONObject("result")
+                    assertEquals(200, current.getInt("nodeCount"))
+                    assertTrue("Dump must observe this frame", current.getString("text").contains("Cell ${step - 1}_0"))
+                }
+                if (step % 5 == 0) memorySamples += memory()
+                if (step == totalDumps) done() else {
+                    // Pacing and fixture mutation are outside the measured interval. Keep the
+                    // production query grant and let Android deliver content-change events.
+                    instrumentation.runOnMainSync { cells.forEachIndexed { index, cell -> cell.text = "Cell ${step}_$index" } }
+                    SystemClock.sleep(120)
+                    began = SystemClock.elapsedRealtimeNanos()
+                    tool("ui_dump", JSONObject().put("maxNodes", 200))
+                }
+            }
+            val link = attach(api, model, measuredBroker)
+            try {
+                val id = decode(link.startRun(bundle(C.KEY_RUN_REQUEST_JSON, JSONObject().put("goal", "Read the fixture cells repeatedly and report completion")
+                    .put("options", JSONObject().put("interaction", "script"))), null)).getString("runId")
+                waitUntil("Performance task terminates", 180_000) { decode(link.getRun(ref(id))).optString("state") in setOf("completed", "failed", "blocked") }
+                model.failure?.let { throw AssertionError("Performance fixture", it) }
+                callbackFailure.get()?.let { throw AssertionError("Real host dump", it) }
+                assertEquals("completed", decode(link.getRun(ref(id))).getString("state"))
+                assertEquals(totalDumps, roundTrips.size); assertEquals(totalDumps, hostTimes.size)
+                assertEquals(pid.toString(), shell("pidof $pluginPackage:agent").trim())
+                memorySamples += memory()
+                fun timings(values: List<Double>): JSONObject {
+                    val samples = values.drop(5).sorted()
+                    return JSONObject().put("coldMs", values.first()).put("samples", samples.size)
+                        .put("meanMs", samples.average()).put("p50Ms", samples[14]).put("p95Ms", samples[28]).put("maxMs", samples.last())
+                }
+                val report = JSONObject().put("nodeCount", 200).put("roundTrip", timings(roundTrips)).put("hostDispatch", timings(hostTimes))
+                    .put("memory", JSONObject().put("baseline", baselineMemory).put("final", memorySamples.last())
+                        .put("samples", memorySamples.size).put("sampledPeakPssKb", memorySamples.maxOf { it.getLong("pssKb") })
+                        .put("processPeakRssKb", memorySamples.maxOf { it.getLong("hwmKb") }))
+                instrumentation.sendStatus(0, Bundle().apply { putString("stream", "P7_PERFORMANCE $report\n") })
+                assertTrue("Warm p95 must stay below 300 ms: $report", report.getJSONObject("roundTrip").getDouble("p95Ms") < 300)
+            } finally { detach(link); core.destroy(null) }
+        } }
     }
     private fun awaitDurableRuns(ids: List<String>) {
         ids.forEach { id -> waitUntil("Task journal durable") {
